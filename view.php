@@ -167,5 +167,6 @@ if ($show_information) {
 echo "<span class=\"left\">project supported by<br/><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/bmukk.png\" width=\"63\" height=\"24\" alt=\"bmukk\" /></span>";
 echo "<span class=\"right\">programmed by<br/><a href=\"http://www.exabis.at/\"><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/exabis.png\" width=\"89\" height=\"40\" alt=\"exabis\"/></a></span>";
 echo "<div class=\"block_eportfolio_clear\" />";
+echo "</div>";
 
 echo $OUTPUT->footer($course);

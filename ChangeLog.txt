@@ -1,9 +1,5 @@
 Exabis E-Portfolio ChangeLog
 
-2012-01-12 4.0.4
-* prepared module for digital european language portfolio, soon to be published
-* small changes
-
 2011-12-09 4.0.3
 * changed settings.php-problem for Moodle 2.2
 

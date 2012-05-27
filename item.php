@@ -368,14 +368,18 @@ if ($comp) {
         if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
             if ($post->type == 'file') {
 
-                //$post = file_postupdate_standard_editor($post, 'intro', array('subdirs'=>false), $context, 'exaport', 'intro', $post->id);
+				$context = get_context_instance(CONTEXT_SYSTEM);
+				file_save_draft_area_files($post->attachment, $context->id, 'block_exaport', 'attachment',
+                   $post->id, null);
+
+				   //$post = file_postupdate_standard_editor($post, 'intro', array('subdirs'=>false), $context, 'exaport', 'intro', $post->id);
                 //$post = file_postupdate_standard_filemanager($post, 'attachment', array('accepted_types' => '*'), $context, 'exaport', 'attachment', $post->id);
                 // store the updated value values
                 //$DB->update_record('block_exaportitem', $post);
 
 
 
-                $dir = block_exaport_file_area_name($post);
+                // $dir = block_exaport_file_area_name($post);
 
                 //$file = $blogeditform->get_data();
                 //$blogeditform->save_file($file,'D:\xamppaktuell\xampp\moodledata\filedir');

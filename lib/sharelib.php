@@ -24,13 +24,14 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-function block_exaport_get_external_view_url(stdClass $view)
+function block_exaport_get_external_view_url(stdClass $view,$userid=-1)
 {
 	global $CFG, $USER;
-	return $CFG->wwwroot.'/blocks/exaport/shared_view.php?access=hash/'.$USER->id.'-'.$view->hash;
+	if ($userid==-1) $userid=$USER->id; //bei epop wird userid mitgegeben, sonst aus global USER holen
+	return $CFG->wwwroot.'/blocks/exaport/shared_view.php?access=hash/'.$userid.'-'.$view->hash;
 }
 
-function block_exaport_get_user_from_access($access)
+function block_exaport_get_user_from_access($access,$epopaccess=false)
 {
 	global $CFG, $USER, $DB;
 
@@ -62,7 +63,7 @@ function block_exaport_get_user_from_access($access)
 		// guest not allowed
 		// require exaport:use -> guest hasn't this right
 		$context = get_context_instance(CONTEXT_SYSTEM);
-		require_capability('block/exaport:use', $context);
+		if ($epopaccess==false)	require_capability('block/exaport:use', $context);
 
 		$userid = $accessPath[1];
 		
@@ -161,8 +162,30 @@ function block_exaport_get_view_from_access($access)
 
 	return $view;
 }
+function block_exaport_get_item_epop($id,$user){
+	global $DB;
+	$sql="SELECT i.* FROM {block_exaportitem} i WHERE id='".$id."' AND userid='".$user->id."'";		
+	//echo $sql;die;			 
+	if (!$item=$DB->get_record_sql($sql)){
+		return false;
+	}else{
+		return $item;
+	}
+}
 
-function block_exaport_get_item($itemid, $access)
+function block_exaport_epop_checkhash($userhash){
+	global $DB;
+	
+	$sql="SELECT u.* FROM {user} u INNER JOIN {block_exaportuser} eu ON eu.user_id=u.id WHERE eu.user_hash_long='".$userhash."'";					 
+//echo $sql;die;
+	if (!$user=$DB->get_record_sql($sql)){
+		return false;
+	}else{
+		return $user;
+	}
+}
+
+function block_exaport_get_item($itemid, $access,$epopaccess=false)
 {
 	global $CFG, $USER, $DB;
 
@@ -210,7 +233,8 @@ function block_exaport_get_item($itemid, $access)
 	} elseif (preg_match('!^portfolio/(.+)$!', $access, $matches)) {
 		// in user portfolio mode
 
-		if (!$user = block_exaport_get_user_from_access($matches[1])) {
+		if (!$user = block_exaport_get_user_from_access($matches[1],$epopaccess)) {
+			
 			return;
 		}
 

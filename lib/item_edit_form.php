@@ -91,8 +91,9 @@ class block_exaport_item_edit_form extends moodleform {
                 //$mform->addElement('filemanager', 'attachment', get_string('file', 'block_exaport'), null,
                 //    array('subdirs' => true, 'maxfiles' => 50 ));
 
-                $mform->addElement('filepicker', 'attachment', get_string('file', 'block_exaport'), null, null);
-            } else {
+                // $mform->addElement('filepicker', 'attachment', get_string('file', 'block_exaport'), null, null);
+				$mform->addElement('filemanager', 'attachment', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1));
+			} else {
                 // filename for assignment import
                 $mform->addElement('hidden', 'filename');
                 $mform->setType('filename', PARAM_TEXT);

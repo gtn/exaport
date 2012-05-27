@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/eportfolio/db" VERSION="20120110" COMMENT="XMLDB file for Exabis E-Portfolio"
+<XMLDB PATH="blocks/eportfolio/db" VERSION="20120518" COMMENT="XMLDB file for Exabis E-Portfolio"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -12,7 +12,9 @@
         <FIELD NAME="persinfo_timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="description" NEXT="persinfo_externaccess"/>
         <FIELD NAME="persinfo_externaccess" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="persinfo_timemodified" NEXT="itemsort"/>
         <FIELD NAME="itemsort" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" PREVIOUS="persinfo_externaccess" NEXT="user_hash"/>
-        <FIELD NAME="user_hash" TYPE="char" LENGTH="8" NOTNULL="true" SEQUENCE="false" PREVIOUS="itemsort"/>
+        <FIELD NAME="user_hash" TYPE="char" LENGTH="8" NOTNULL="true" SEQUENCE="false" PREVIOUS="itemsort" NEXT="user_hash_long"/>
+        <FIELD NAME="user_hash_long" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" PREVIOUS="user_hash" NEXT="oezinstall"/>
+        <FIELD NAME="oezinstall" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="user_hash_long"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="user_id"/>
@@ -26,7 +28,9 @@
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="user id" PREVIOUS="pid" NEXT="name"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="name" PREVIOUS="userid" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="time modified" PREVIOUS="name" NEXT="courseid"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="isoez"/>
+        <FIELD NAME="isoez" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="description"/>
+        <FIELD NAME="description" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" COMMENT="oez" PREVIOUS="isoez"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="primary key for bookmark categories" NEXT="userid"/>
@@ -50,7 +54,11 @@
         <FIELD NAME="shareall" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="externaccess"/>
         <FIELD NAME="externaccess" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shareall" NEXT="externcomment"/>
         <FIELD NAME="externcomment" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="externaccess" NEXT="sortorder"/>
-        <FIELD NAME="sortorder" TYPE="int" LENGTH="11" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="externcomment"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="11" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="externcomment" NEXT="isoez"/>
+        <FIELD NAME="isoez" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="sortorder" NEXT="fileurl"/>
+        <FIELD NAME="fileurl" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="isoez" NEXT="beispiel_url"/>
+        <FIELD NAME="beispiel_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="fileurl" NEXT="exampid"/>
+        <FIELD NAME="exampid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="if oez, exampleid of source example from exacomp" PREVIOUS="beispiel_url"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="userid"/>

@@ -1,0 +1,22 @@
+<?php
+$active_version = empty($CFG->block_exaport_active_version) ? 3 : $CFG->block_exaport_active_version;
+$feature_copy_to_course = !empty($CFG->block_exaport_feature_copy_to_course);
+
+?>
+<table cellpadding="9" cellspacing="0" align="center">
+<tr>
+    <td><input type="radio" name="block_exaport_active_version" value="3" <?php if($active_version != 2) echo 'checked="checked"'; ?> /></td>
+    <td><?php echo get_string('config_version_3', 'block_exaport') ?></td>
+<tr></tr>
+	<td><input type="radio" name="block_exaport_active_version" value="2" <?php if($active_version == 2) echo 'checked="checked"'; ?> /></td>
+    <td><?php echo get_string('config_version_2', 'block_exaport') ?></td>
+</tr><tr>
+    <td>&nbsp;</td>
+<tr></tr>
+	<td><input type="checkbox" name="block_exaport_feature_copy_to_course" value="1" <?php if($feature_copy_to_course) echo 'checked="checked"'; ?> /></td>
+    <td><?php echo get_string('config_feature_copy_to_course', 'block_exaport') ?></td>
+</tr>
+<tr>
+    <td colspan="3" align="center"><input type="submit" value="<?php print_string('savechanges') ?>" /></td>
+</tr>
+</table>

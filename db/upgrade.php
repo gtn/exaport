@@ -53,6 +53,27 @@ function xmldb_block_exaport_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field4_wert)) {$dbman->add_field($table, $field4_wert);}
 
     }
+	
+    if ($oldversion < 2012051801) {
+		// update wrong filearea storage
+		
+		// update files
+		$fs = get_file_storage();
+
+		foreach ($files = $DB->get_records('block_exaportitem', array('type'=>'file')) as $file) {
+			if ($file->attachment && preg_match('!^[0-9]+$!', $file->attachment)) {
+				// numeral attachment = filestorage id
+				
+				$sql = "UPDATE {files} SET component='block_exaport', filearea='item_file', itemid='".$file->id."' WHERE component='user' AND filearea='draft' AND itemid='".$file->attachment."'";
+				$DB->execute($sql);
+				
+				$update = new stdClass();
+				$update->id         = $file->id;
+				$update->attachment = '';
+				$DB->update_record('block_exaportitem', $update);
+			}
+		}
+	}
 		 
     return $result;
 }

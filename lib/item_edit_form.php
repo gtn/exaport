@@ -86,13 +86,7 @@ class block_exaport_item_edit_form extends moodleform {
             $mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client');
         } elseif ($type == 'file') {
             if ($this->_customdata['action'] == 'add') {
-                //$this->set_upload_manager(new upload_manager('attachment', true, false, $this->_customdata['course'], false, 0, true, true, false));
-                //$mform->addElement('file', 'attachment', get_string("file", "block_exaport"));
-                //$mform->addElement('filemanager', 'attachment', get_string('file', 'block_exaport'), null,
-                //    array('subdirs' => true, 'maxfiles' => 50 ));
-
-                // $mform->addElement('filepicker', 'attachment', get_string('file', 'block_exaport'), null, null);
-				$mform->addElement('filemanager', 'attachment', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1));
+				$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1));
 			} else {
                 // filename for assignment import
                 $mform->addElement('hidden', 'filename');

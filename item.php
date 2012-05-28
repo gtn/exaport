@@ -260,14 +260,21 @@ switch ($action) {
         if ($type == 'link') {
             $post->url = $existing->url;
         } elseif ($type == 'file') {
-            $post->attachment = $existing->attachment;
-
-            $ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $post->userid . "&itemid=" . $post->id . "&att=" . $post->attachment;
-
-            $extra_content = "<div class='block_eportfolio_center'>\n";
-            $extra_content = $OUTPUT->box("<a target='_blank' href='" . $ffurl . "'>" . $post->name . "</a>");
-            //$extra_content .= print_box(block_exaport_print_file($ffurl, $post->attachment, $post->name), 'generalbox', '', true);
-            $extra_content .= "</div>";
+			if ($file = block_exaport_get_item_file($post)) {
+				$ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $post->userid . "&itemid=" . $post->id;
+				
+				$extra_content = "<div class='block_eportfolio_center'>\n";
+				if ($file->is_valid_image()) {    // Image attachments don't get printed as links
+					$extra_content .= "<img src=\"$ffurl\" alt=\"" . format_string($post->name) . "\" />";
+				} else {
+					$extra_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
+				}
+				$extra_content .= "</div>";
+			}
+			
+			if (!$extra_content) {
+				$extra_content = 'File not found';
+			}
         }
 
         break;
@@ -318,7 +325,7 @@ if ($comp) {
 <?php
     }
     $editform->set_data($post);
-    echo $extra_content;
+	echo $OUTPUT->box($extra_content);
     $editform->display();
 
     echo $OUTPUT->footer($course);
@@ -367,31 +374,9 @@ if ($comp) {
         // Insert the new blog entry.
         if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
             if ($post->type == 'file') {
-
-				$context = get_context_instance(CONTEXT_SYSTEM);
-				file_save_draft_area_files($post->attachment, $context->id, 'block_exaport', 'attachment',
-                   $post->id, null);
-
-				   //$post = file_postupdate_standard_editor($post, 'intro', array('subdirs'=>false), $context, 'exaport', 'intro', $post->id);
-                //$post = file_postupdate_standard_filemanager($post, 'attachment', array('accepted_types' => '*'), $context, 'exaport', 'attachment', $post->id);
-                // store the updated value values
-                //$DB->update_record('block_exaportitem', $post);
-
-
-
-                // $dir = block_exaport_file_area_name($post);
-
-                //$file = $blogeditform->get_data();
-                //$blogeditform->save_file($file,'D:\xamppaktuell\xampp\moodledata\filedir');
-                //$blogeditform->save_file($file,$dir);
-                //print_r($file);
-
-                /* $newfilename = $blogeditform->get_new_filename();
-                  echo 'FILENAME: '.$newfilename;
-
-                  if ($blogeditform->save_file($blogeditform->get_new_filename(), $dir) && ($newfilename = $blogeditform->get_new_filename())) {
-                  set_field("block_exaportitem", "attachment", $newfilename, "id", $post->id);
-                  } */
+				// save uploaded file in user filearea
+				$context = get_context_instance(CONTEXT_USER, $USER->id);
+				file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, null);
             }
             $comps = $post->compids;
             if ($comps) {

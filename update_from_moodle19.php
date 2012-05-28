@@ -160,44 +160,51 @@ try {
 	
 	$tables = array(
 		// old => new
-		'block_exabeporcate' => 'block_exaportcate',
-		'block_exabeporitem' => 'block_exaportitem',
-		'block_exabeporitemcomm' => 'block_exaportitemcomm',
-		'block_exabeporitemshar' => 'block_exaportitemshar',
-		'block_exabeporview' =>
-			array('block_exaportview',
-				'INSERT INTO {block_exaportview} (id, userid, name, description, timemodified, shareall, externaccess, externcomment, hash)
-				SELECT id, userid, name, description, timemodified, shareall, externaccess, externcomment, hash FROM {block_exabeporview}'
-			),
-		'block_exabeporuser' => 'block_exaportuser',
-		'block_exabeporviewblock' => 'block_exaportviewblock',
-		'block_exabeporviewshar' => 'block_exaportviewshar',
+		// we use full sql queries here, so if we update the tables (add columns, we don't have to update this upgrade script!
+		'block_exabeporcate' => array(
+			'block_exaportcate',
+			'id, pid, userid, name, timemodified, courseid'),
+		'block_exabeporitem' => array(
+			'block_exaportitem',
+			'id, userid, type, categoryid, name, url, intro, attachment, timemodified, courseid, shareall, externaccess, externcomment, sortorder'),
+		'block_exabeporitemcomm' => array(
+			'block_exaportitemcomm',
+			'id, itemid, userid, entry, timemodified'),
+		'block_exabeporitemshar' => array(
+			'block_exaportitemshar',
+			'id, itemid, userid, original, courseid'),
+		'block_exabeporuser' => array(
+			'block_exaportuser',
+			'id, user_id, description, persinfo_timemodified, persinfo_externaccess, itemsort, user_hash'),
+		'block_exabeporview' => array(
+			'block_exaportview',
+			'id, userid, name, description, timemodified, shareall, externaccess, externcomment, hash'),
+		'block_exabeporviewblock' => array(
+			'block_exaportviewblock',
+			'id, viewid, positionx, positiony, type, itemid, text'),
+		'block_exabeporviewshar' => array(
+			'block_exaportviewshar',
+			'id, viewid, userid'),
 	);
 	
 	foreach ($tables as $oldTable=>$options) {
-		if (is_array($options)) {
-			$newTable = $options[0];
-			$sql = $options[1];
-		} else {
-			$newTable = $options;
-			$sql = 'INSERT INTO  {'.$newTable.'} SELECT * FROM {'.$oldTable.'}';
-		}
+		$newTable = $options[0];
+		$columns = $options[1];
 		
 		echo "now table ".$newTable.": ";
-		$num = $DB->get_field_sql('SELECT * FROM {'.$newTable.'}');
+		$num = $DB->get_field_sql('SELECT COUNT(*) FROM {'.$newTable.'}');
 		if ($num) {
 			echo "<span style='color: red'>table already filled</span><br />\n";
 		} else {
-			
-			$num = $DB->execute($sql);
+			$sql = 'INSERT INTO {'.$newTable.'} ('.$columns.') SELECT '.$columns.' FROM {'.$oldTable.'}';
+			$DB->execute($sql);
 			echo "OK!<br />\n";
 		}
 	}
 	
 	// update files
 	$fs = get_file_storage();
-	$context = get_context_instance(CONTEXT_SYSTEM);
-	
+
 	foreach ($files = $DB->get_records('block_exaportitem', array('type'=>'file')) as $file) {
 		if ($file->attachment && !preg_match('!^[0-9]+$!', $file->attachment)) {
 			// import if it's not already a number (number means it is a file id and not a name)
@@ -210,18 +217,19 @@ try {
 		 
 			// Prepare file record object
 			$fileinfo = array(
-				'contextid' => $context->id, // ID of context
+				'contextid' => get_context_instance(CONTEXT_USER, $file->userid)->id,    // ID of context
 				'component' => 'block_exaport', // usually = table name
-				'filearea' => 'attachment',     // usually = table name
+				'filearea' => 'item_file',     // usually = table name
 				'itemid' => $file->id,          // usually = ID of row in table
-				'filepath' => '/',           // any path beginning and ending in /
-				'filename' => $file->attachment); // any filename
+				'filepath' => '/',              // any path beginning and ending in /
+				'filename' => $file->attachment,
+				'userid' => $file->userid);
  
 			$ret = $fs->create_file_from_pathname($fileinfo, $filepath);
 			
 			$update = new stdClass();
 			$update->id         = $file->id;
-			$update->attachment = $file->id;
+			$update->attachment = '';
 			$DB->update_record('block_exaportitem', $update);
 
 			echo "file imported: ".$filepath."<br />\n";
@@ -234,6 +242,7 @@ try {
 	echo "upgrade done<br />\n";
 	
 } catch(Exception $e) {
+	var_dump($e);
 	die($e->getMessage());
 	$transaction->rollback($e);
 }

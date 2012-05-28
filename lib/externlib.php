@@ -53,18 +53,19 @@ function block_exaport_print_extern_item($item, $access) {
 		}
 	}
 	elseif ($item->type == 'file') {
-        if ($item->attachment) {
-            $type = mimeinfo("type", $item->attachment);
+		if ($file = block_exaport_get_item_file($item)) {
+			$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id);
             
-			$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id."&att=".$itemid = optional_param('att', 0, PARAM_INT));
-            
-            if (in_array($type, array('image/gif', 'image/jpeg', 'image/png'))) {    // Image attachments don't get printed as links
+            if ($file->is_valid_image()) {    // Image attachments don't get printed as links
                 $box_content .= "<img src=\"$ffurl\" alt=\"" . format_string($item->name) . "\" />";
             } else {
             	//echo $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $link));
 				$box_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
             }
         }
+		if (!$box_content) {
+			$box_content = 'File not found';
+		}
 	}
 
 	$box_content .= $item->intro;

@@ -33,6 +33,19 @@ function block_exaport_get_item_file($item) {
 	return reset($fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, null, false));
 }
 
+function block_exaport_require_login($courseid) {
+	require_login($courseid);
+	require_capability('block/exaport:use', get_context_instance(CONTEXT_SYSTEM));
+
+	if (empty($CFG->block_exaport_allow_loginas)) {
+		// login as not allowed => check
+		global $USER;
+		if (isset($USER->realuser)) {
+			print_error("loginasmode", "block_exaport");
+		}
+	}
+}
+
 function block_exaport_setup_default_categories() {
 	global $DB, $USER;
 	
@@ -576,16 +589,8 @@ function block_exaport_check_competence_interaction() {
     global $DB;
 	$dbman = $DB->get_manager();
 
-    $interaction = $DB->get_record('config', array("name" => "block_enable_interaction_competences"));
-    if ($interaction->value == 1)
-        $comp = true;
-    else
-        $comp=false;
     try {
-        if ($dbman->table_exists('block_exacompdescriptors') && $comp)
-            return true;
-        else
-            return false;
+        return (!empty($CFG->block_exaport_enable_interaction_competences) && $dbman->table_exists('block_exacompdescriptors'));
     } catch(dml_read_exception $e) {
         return false;
     }

@@ -39,10 +39,9 @@ $type_plural = block_exaport_get_plural_item_type($type);
 $strbookmarks = get_string("mybookmarks", "block_exaport");
 $strheadline = get_string("bookmarks".$type_plural, "block_exaport");
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+block_exaport_require_login($courseid);
 
-require_login($courseid);
-require_capability('block/exaport:use', $context);
+$context = get_context_instance(CONTEXT_SYSTEM);
 
 $conditions = array("id" => $courseid);
 if (! $course = $DB->get_record("course", $conditions) ) {

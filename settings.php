@@ -5,8 +5,11 @@ defined('MOODLE_INTERNAL') || die;
 if ($ADMIN->fulltree) {
 
     
-    //Zusammenspiel exabis ePortfolio - exabis Competences
-    $settings->add(new admin_setting_configcheckbox('block_enable_interaction_competences', get_string('settings_interaktion_exacomp_head', 'block_exaport'),
+    $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas', get_string('settings_allow_loginas_head', 'block_exaport'),
+                       get_string('settings_allow_loginas_body', 'block_exaport'), 0, 1, 0));
+
+	//Zusammenspiel exabis ePortfolio - exabis Competences
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_interaction_competences', get_string('settings_interaktion_exacomp_head', 'block_exaport'),
                        get_string('settings_interaktion_exacomp_body', 'block_exaport'), 0, 1, 0));
     
    

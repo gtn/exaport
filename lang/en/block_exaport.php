@@ -292,5 +292,7 @@ $string['teachercomps'] = 'Here you can assess whether your students have acquir
 $string['competences'] = 'competencies';
 $string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - exabis competencies';
 $string['settings_interaktion_exacomp_body'] = 'Interaction with block exabis competencies, in case it is installed';
+$string['settings_allow_loginas_head'] = 'Allow login as';
+$string['settings_allow_loginas_body'] = '';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';

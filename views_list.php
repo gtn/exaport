@@ -35,19 +35,13 @@ $strbookmarks = get_string("mybookmarks", "block_exaport");
 $strheadline = get_string("bookmarks".$type_plural, "block_exaport");
 */
 
-require_login($courseid);
+block_exaport_require_login($courseid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
-require_capability('block/exaport:use', $context);
 $url = '/blocks/exabis_competences/views_list.php';
 $PAGE->set_url($url);
 
 if (!$COURSE) {
    print_error("invalidcourseid","block_exaport");
-}
-
-if (isset($USER->realuser)) {
-	error("You can't access portfolios in 'Login As'-Mode.");
 }
 
 block_exaport_print_header("views");

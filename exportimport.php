@@ -28,11 +28,9 @@ require_once dirname(__FILE__).'/inc.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
+block_exaport_require_login($courseid);
+
 $context = get_context_instance(CONTEXT_SYSTEM);
-
-require_login($courseid);
-require_capability('block/exaport:use', $context);
-
 $url = '/blocks/exabis_competences/exportimport.php';
 $PAGE->set_url($url);
 
@@ -44,11 +42,6 @@ if (! $course = $DB->get_record("course", $conditions) ) {
 
 block_exaport_print_header("exportimport");
 			 
-if (isset($USER->realuser)) {
-	error("You can't access portfolios in 'Login As'-Mode.");
-}
-
-
 echo "<br />";
 
 echo "<div class='block_eportfolio_center'>";

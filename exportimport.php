@@ -51,7 +51,6 @@ $OUTPUT->box( text_to_html(get_string("explainexport","block_exaport")));
 
 if (has_capability('block/exaport:export', $context)) {
 	echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/export.png\" height=\"16\" width=\"16\" alt='".get_string("export", "block_exaport")."' /> <a title=\"" . get_string("export","block_exaport") . "\" href=\"{$CFG->wwwroot}/blocks/exaport/export_scorm.php?courseid=".$courseid."\">".get_string("export","block_exaport")."</a></p>";
-	//echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/export.png\" height=\"16\" width=\"16\" alt='".get_string("exportepx", "block_exaport")."' /> <a title=\"" . get_string("exportepx","block_exaport") . "\" href=\"{$CFG->wwwroot}/blocks/exaport/export_epx.php?courseid=".$courseid."\">".get_string("exportepx","block_exaport")."</a></p>";
 }
 
 if (has_capability('block/exaport:export', $context)) {

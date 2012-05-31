@@ -53,36 +53,9 @@ block_exaport_print_header("exportimportexport");
 if (!defined('FILE_APPEND')) {
     define('FILE_APPEND', 1);
 }
-if (!function_exists('file_put_contents')) {
-
-    function file_put_contents($n, $d, $flag = false) {
-        $mode = ($flag == FILE_APPEND || strtoupper($flag) == 'FILE_APPEND') ? 'a' : 'w';
-        $f = @fopen($n, $mode);
-        if ($f === false) {
-            return 0;
-        } else {
-            if (is_array($d))
-                $d = implode($d);
-            $bytes_written = fwrite($f, $d);
-            fclose($f);
-            return $bytes_written;
-        }
-    }
-
-}
 
 function spch($text) {
     return htmlentities($text, ENT_QUOTES, "UTF-8");
-}
-
-function get_hash($itemid) {
-    global $DB;
-
-    if ($file_record = $DB->get_record_sql("select min(id), pathnamehash from {files} where itemid={$itemid} AND filename!='.' GROUP BY id, pathnamehash")) {
-        return $file_record->pathnamehash;
-    } else {
-        return false;
-    }
 }
 
 function spch_text($text) {
@@ -171,17 +144,15 @@ function get_category_items($categoryid, $viewid=null, $type=null) {
     return $DB->get_records_sql($itemQuery);
 }
 
-function get_category_files($categoryid, $viewid=null, $type='file') {
+function get_category_files($categoryid, $viewid=null) {
     global $USER, $CFG, $DB;
 
-    $itemQuery = "select i.*, f.filename AS filename, f.id, f.itemid" .
+    $itemQuery = "select i.*" .
             " FROM {block_exaportitem} AS i" .
             ($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
-            " JOIN {files} AS f ON f.itemid = i.attachment" .
-            " where i.userid = $USER->id" .
-            ($type ? " and i.type='$type'" : '') .
+            " WHERE i.userid = $USER->id" .
+            " AND type='file'" .
             " and i.categoryid = $categoryid" .
-			" and f.filename != '.' " .
             " order by i.name desc";
 
     return $DB->get_records_sql($itemQuery);
@@ -238,32 +209,27 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
         }
     }
 
-    $files = get_category_files($id, $viewid, 'file');
+    $files = get_category_files($id, $viewid);
     //!!
     if ($files) {
         $fs = get_file_storage();
         $hasItems = true;
+
         foreach ($files as $file) {
             unset($filecontent);
             unset($filename);
 
+			$fsFile = block_exaport_get_item_file($file);
+			if (!$fsFile) continue;
+
             $i = 0;
-            $content_filename = $file->filename;
-            if (is_file($exportpath . $export_dir . $content_filename) || is_dir($exportpath . $export_dir . $content_filename) || is_link($exportpath . $export_dir . $content_filename)) {
-                do {
-                    $i++;
-                    $content_filename = $i . $file->filename;
-                } while (is_file($exportpath . $export_dir . $content_filename) || is_dir($exportpath . $export_dir . $content_filename) || is_link($exportpath . $export_dir . $content_filename));
-            }
+            $content_filename = $fsFile->get_filename();
+			while (is_file($exportpath . $export_dir . $content_filename) || is_dir($exportpath . $export_dir . $content_filename) || is_link($exportpath . $export_dir . $content_filename)) {
+				$i++;
+				$content_filename = $i . '-' . $fsFile->get_filename();
+			}
 
-            if ($file->attachment != '') {
-                $hash = get_hash($file->attachment);
-
-                $att = $fs->get_file_by_hash($hash);
-                $test = $att->copy_content_to($exportpath . $export_dir . $content_filename);
-
-                //copy($CFG->dataroot . "/" . block_exaport_file_area_name($file) . "/" . $file->attachment, $exportpath.$export_dir.$content_filename);
-            }
+			$fsFile->copy_content_to($exportpath . $export_dir . $content_filename);
 
             $filecontent = '';
             $filecontent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
@@ -277,8 +243,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             $filecontent .= '  <h1 id="header">' . spch($file->name) . '</h1>' . "\n";
             $filecontent .= '  <div id="url"><a href="' . spch($content_filename) . '"><!--###BOOKMARK_FILE_URL###-->' . spch($content_filename) . '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
             $filecontent .= '  <div id="description"><!--###BOOKMARK_FILE_DESC###-->' . spch_text($file->intro) . '<!--###BOOKMARK_FILE_DESC###--></div>' . "\n";
-            $item = $DB->get_record('block_exaportitem',array("userid"=>$USER->id,"attachment"=>$file->itemid));
-            $filecontent .= add_comments('block_exaportitemcomm', $item->id);
+            $filecontent .= add_comments('block_exaportitemcomm', $file->id);
             $filecontent .= '</body>' . "\n";
             $filecontent .= '</html>' . "\n";
 

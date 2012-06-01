@@ -230,15 +230,15 @@ function import_structure($unzip_dir, $structures, $course, $i = 0, $previd=NULL
 }
 
 function block_exaport_clean_title($title) {
-    return clean_param(addslashes($title), PARAM_TEXT);
+    return clean_param($title, PARAM_TEXT);
 }
 
 function block_exaport_clean_url($url) {
-    return clean_param(addslashes($url), PARAM_URL);
+    return clean_param($url, PARAM_URL);
 }
 
 function block_exaport_clean_text($text) {
-    return addslashes($text);
+    return $text;
 }
 
 function block_exaport_clean_path($text) {

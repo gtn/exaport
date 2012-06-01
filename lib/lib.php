@@ -28,10 +28,21 @@
 require_once $CFG->libdir . '/filelib.php';
 global $DB;
 
+/*** FILE FUNCTIONS **********************************************************************/
+
 function block_exaport_get_item_file($item) {
 	$fs = get_file_storage();
 	return reset($fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, null, false));
 }
+
+function block_exaport_file_remove($item) {
+	$fs = get_file_storage();
+	foreach ($fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, null, true /* include dirs */) as $file) {
+		$file->delete();
+	}
+}
+
+/*** GENERAL FUNCTIONS **********************************************************************/
 
 function block_exaport_require_login($courseid) {
 	require_login($courseid);
@@ -90,204 +101,7 @@ function block_exaport_feature_enabled($feature) {
     die('wrong feature');
 }
 
-// Creates a directory file name, suitable for make_upload_directory()
-function block_exaport_file_area_name($entry) {
-    return 'exaport/files/' . $entry->userid . '/' . $entry->id;
-}
-
-function block_exaport_file_area($entry) {
-    return make_upload_directory(block_exaport_file_area_name($entry));
-}
-
-/**
- * Remove the item directory (for the attachment) incl. contents if present
- * @param object $entry the entry object
- * return nothing. no idea what remove_dir returns :>
- */
-function block_exaport_file_remove($entry) {
-    global $CFG;
-    return remove_dir($CFG->dataroot . '/' . block_exaport_file_area_name($entry));
-}
-
-// Deletes all the user files in the attachments area for a entry
-// EXCEPT for any file named $exception
-function block_exaport_delete_old_attachments($id, $entry, $exception="") {
-
-    if ($basedir = block_exaport_file_area($entry)) {
-        if ($files = get_directory_list($basedir)) {
-            foreach ($files as $file) {
-                if ($file != $exception) {
-                    unlink("$basedir/$file");
-                }
-            }
-        }
-        if (!$exception) {  // Delete directory as well, if empty
-            @rmdir("$basedir");
-        }
-    }
-}
-
-// not needed at all - at least at the moment
-//function block_exaport_empty_directory($basedir) {
-//	if ($files = get_directory_list($basedir)) {
-//        foreach ($files as $file) {
-//            unlink("$basedir/$file");
-//        }
-//    }
-//}
-
-function block_exaport_copy_attachments($entry, $newentry) {
-/// Given a entry object that is being copied to bookmarkid,
-/// this function checks that entry
-/// for attachments, and if any are found, these are
-/// copied to the new bookmark directory.
-
-    global $CFG;
-
-    $return = true;
-
-    if ($entries = $DB->get_records_select("bookmark", "id = '{$entry->id}' AND attachment <> ''")) {
-        foreach ($entries as $curentry) {
-            $oldentry = new stdClass();
-            $oldentry->id = $entry->id;
-            $oldentry->userid = $entry->userid;
-            $oldentry->name = $entry->name;
-            $oldentry->category = $curentry->category;
-            $oldentry->intro = $entry->intro;
-            $oldentry->url = $entry->url;
-            $oldentrydir = "$CFG->dataroot/" . block_exaport_file_area_name($oldentry);
-            if (is_dir($oldentrydir)) {
-
-                $newentrydir = block_exaport_file_area($newentry);
-                if (!copy("$oldentrydir/$newentry->attachment", "$newentrydir/$newentry->attachment")) {
-                    $return = false;
-                }
-            }
-        }
-    }
-    return $return;
-}
-
-function block_exaport_move_attachments($entry, $bookmarkid, $id) {
-/// Given a entry object that is being moved to bookmarkid,
-/// this function checks that entry
-/// for attachments, and if any are found, these are
-/// moved to the new bookmark directory.
-
-    global $CFG;
-
-    $return = true;
-
-    if ($entries = $DB->get_records_select("bookmark", "id = '$entry->id' AND attachment <> ''")) {
-        foreach ($entries as $entry) {
-            $oldentry = new stdClass();
-            $newentry = new stdClass();
-            $oldentry->id = $entry->id;
-            $oldentry->name = $entry->name;
-            $oldentry->userid = $entry->userid;
-            $oldentry->category = $curentry->category;
-            $oldentry->intro = $entry->intro;
-            $oldentry->url = $entry->url;
-            $oldentrydir = "$CFG->dataroot/" . block_exaport_file_area_name($oldentry);
-            if (is_dir($oldentrydir)) {
-                $newentry = $oldentry;
-                $newentry->bookmarkid = $bookmarkid;
-                $newentrydir = "$CFG->dataroot/" . block_exaport_file_area_name($newentry);
-                if (!@rename($oldentrydir, $newentrydir)) {
-                    $return = false;
-                }
-            }
-        }
-    }
-    return $return;
-}
-
-function block_exaport_add_attachment($entry, $newfile, $id) {
-// $entry is a full entry record, including course and bookmark
-// $newfile is a full upload array from $_FILES
-// If successful, this function returns the name of the file
-
-    global $CFG;
-
-    if (empty($newfile['name'])) {
-        return "";
-    }
-
-    $newfile_name = clean_filename($newfile['name']);
-
-    if (valid_uploaded_file($newfile)) {
-        if (!$newfile_name) {
-            notify("This file had a wierd filename and couldn't be uploaded");
-        } else if (!$dir = block_exaport_file_area($entry)) {
-            notify("Attachment could not be stored");
-            $newfile_name = "";
-        } else {
-            if (move_uploaded_file($newfile['tmp_name'], "$dir/$newfile_name")) {
-                chmod("$dir/$newfile_name", $CFG->directorypermissions);
-                block_exaport_delete_old_attachments($entry, $newfile_name);
-            } else {
-                notify("An error happened while saving the file on the server");
-                $newfile_name = "";
-            }
-        }
-    } else {
-        $newfile_name = "";
-    }
-
-    return $newfile_name;
-}
-
-function block_exaport_print_attachments($id, $entry, $return=NULL, $align="left") {
-// if return=html, then return a html string.
-// if return=text, then return a text-only string.
-// otherwise, print HTML for non-images, and return image HTML
-//     if attachment is an image, $align set its aligment.
-    global $CFG;
-
-    $newentry = $entry;
-
-    $filearea = block_exaport_file_area_name($newentry);
-
-    $imagereturn = "";
-    $output = "";
-
-    if ($basedir = block_exaport_file_area($newentry)) {
-        if ($files = get_directory_list($basedir)) {
-            $strattachment = get_string("attachment", "block_exaport");
-            $strpopupwindow = get_string("popupwindow");
-            foreach ($files as $file) {
-                $icon = mimeinfo("icon", $file);
-                if ($CFG->slasharguments) {
-                    $ffurl = "file.php/$filearea/$file";
-                } else {
-                    $ffurl = "file.php?file=/$filearea/$file";
-                }
-                $image = "<img border=0 src=\"$CFG->wwwroot/files/pix/$icon\" height=16 width=16 alt=\"$strpopupwindow\">";
-
-                if ($return == "html") {
-                    $output .= "<a target=_image href=\"$CFG->wwwroot/$ffurl\">$image</a> ";
-                    $output .= "<a target=_image href=\"$CFG->wwwroot/$ffurl\">$file</a><br />";
-                } else if ($return == "text") {
-                    $output .= "$strattachment $file:\n$CFG->wwwroot/$ffurl\n";
-                } else {
-                    if ($icon == "image.gif") {    // Image attachments don't get printed as links
-                        $imagereturn .= "<br /><img src=\"$CFG->wwwroot/$ffurl\" align=$align>";
-                    } else {
-                        link_to_popup_window("/$ffurl", "attachment", $image, 500, 500, $strattachment);
-                        echo "<a target=_image href=\"$CFG->wwwroot/$ffurl\">$file</a>";
-                        echo "<br />";
-                    }
-                }
-            }
-        }
-    }
-
-    if ($return) {
-        return $output;
-    }
-
-    return $imagereturn;
-}
+/*** OTHER FUNCTIONS **********************************************************************/
 
 function block_exaport_has_categories($userid) {
     global $CFG, $DB;
@@ -746,89 +560,3 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
         $DB->insert_record("block_exaportuser", $newuserpreferences);
     }
 }
-
-/**
- * moodle 1.8 compatibility:
- * backporting build_navigation, because it didn't exist in before 1.9
- */
-if (!function_exists('build_navigation')) {
-
-    function build_navigation($extranavlinks, $cm = null) {
-        global $CFG, $COURSE;
-
-        if (is_string($extranavlinks)) {
-            if ($extranavlinks == '') {
-                $extranavlinks = array();
-            } else {
-                $extranavlinks = array(array('name' => $extranavlinks, 'link' => '', 'type' => 'title'));
-            }
-        }
-
-        $navlinks = array();
-
-        // Course name, if appropriate.
-        if (isset($COURSE) && $COURSE->id != SITEID) {
-            $navlinks[] = array(
-                'name' => format_string($COURSE->shortname),
-                'link' => "$CFG->wwwroot/course/view.php?id=$COURSE->id",
-                'type' => 'course');
-        }
-
-        //Merge in extra navigation links
-        $navlinks = array_merge($navlinks, $extranavlinks);
-
-        // Work out whether we should be showing the activity (e.g. Forums) link.
-        // Note: build_navigation() is called from many places --
-        // install & upgrade for example -- where we cannot count on the
-        // roles infrastructure to be defined. Hence the $CFG->rolesactive check.
-        if (!isset($CFG->hideactivitytypenavlink)) {
-            $CFG->hideactivitytypenavlink = 0;
-        }
-        if ($CFG->hideactivitytypenavlink == 2) {
-            $hideactivitylink = true;
-        } else if ($CFG->hideactivitytypenavlink == 1 && $CFG->rolesactive &&
-                !empty($COURSE->id) && $COURSE->id != SITEID) {
-            if (!isset($COURSE->context)) {
-                $COURSE->context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
-            }
-            $hideactivitylink = !has_capability('moodle/course:manageactivities', $COURSE->context);
-        } else {
-            $hideactivitylink = false;
-        }
-
-        //Construct an unordered list from $navlinks
-        //Accessibility: heading hidden from visual browsers by default.
-        $navigation = '';
-        $lastindex = count($navlinks) - 1;
-        $i = -1; // Used to count the times, so we know when we get to the last item.
-        $first = true;
-
-        foreach ($navlinks as $navlink) {
-            $i++;
-            $last = ($i == $lastindex);
-            if (!is_array($navlink)) {
-                continue;
-            }
-            if (!empty($navlink['type']) && $navlink['type'] == 'activity' && !$last && $hideactivitylink) {
-                continue;
-            }
-
-            if (!$first) {
-                $navigation .= " -> ";
-            }
-            if ((!empty($navlink['link'])) && !$last) {
-                $navigation .= "<a onclick=\"this.target='$CFG->framename'\" href=\"{$navlink['link']}\">";
-            }
-            $navigation .= "{$navlink['name']}";
-            if ((!empty($navlink['link'])) && !$last) {
-                $navigation .= "</a>";
-            }
-
-            $first = false;
-        }
-
-        return $navigation;
-    }
-
-}
-

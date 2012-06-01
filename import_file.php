@@ -295,37 +295,25 @@ function insert_entry($unzip_dir, $url, $title, $category, $course) {
                 //$new->url          = str_replace($CFG->wwwroot, "", $_SERVER["HTTP_REFERER"]);
 
                 if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
-                    $destination = block_exaport_file_area_name($new);
-                    if (make_upload_directory($destination, false)) {
-                        $destination = $CFG->dataroot . '/' . $destination;
-                        $destination_name = handle_filename_collision($destination, $linkedFileName);
+					$fs = get_file_storage();
 
+					// Prepare file record object
+					$fileinfo = array(
+						'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,    // ID of context
+						'component' => 'block_exaport', // usually = table name
+						'filearea' => 'item_file',     // usually = table name
+						'itemid' => $new->id,          // usually = ID of row in table
+						'filepath' => '/',              // any path beginning and ending in /
+						'filename' => $linkedFileName,
+						'userid' => $USER->id);
 
-                        $context = get_context_instance(CONTEXT_USER);
-                        $fs = get_file_storage();
-                        $file_record = array('contextid'=>$context->id, 'component'=>'user', 'filearea'=>'exaport_import',
-                                'itemid'=>0, 'filepath'=>'/', 'filename'=>$destination_name,
-                                'timecreated'=>time(), 'timemodified'=>time());
-
-                        //eindeutige itemid generieren
-                        try {
-                            if ($newfile = $fs->create_file_from_pathname($file_record, $linkedFilePath)) {
-                                $DB->set_field("files","itemid",$newfile->get_id(),array("id"=>$newfile->get_id()));
-                                $DB->set_field("block_exaportitem", "attachment", $newfile->get_id(), array("id"=>$new->id));
-                            } else {
-                                $DB->delete_records("block_exaportitem",array("id"=>$new->id));
-                                notify(get_string("couldntcopyfile", "block_exaport", $title));
-                            }
-                        } catch(stored_file_creation_exception $e) {
-                            //File existiert bereits
-                            $existing_file = $DB->get_records("files",array('filename'=>$destination_name));
-                            $DB->set_field("block_exaportitem", "attachment", $existing_file[0]->itemid, array("id"=>$new->id));
-                            //$DB->delete_records("block_exaportitem",array("id"=>$new->id));
-                        }
-                    } else {
-                        notify(get_string("couldntcreatedirectory", "block_exaport", $title));
-                    }
-                    get_comments($content, $new->id, 'block_exaportitemcomm');
+					//eindeutige itemid generieren
+					if (!$ret = $fs->create_file_from_pathname($fileinfo, $linkedFilePath)) {
+						$DB->delete_records("block_exaportitem",array("id"=>$new->id));
+						notify(get_string("couldntcopyfile", "block_exaport", $title));
+					} else {
+						get_comments($content, $new->id, 'block_exaportitemcomm');
+					}
                 } else {
                     notify(get_string("couldntinsert", "block_exaport", $title));
                 }

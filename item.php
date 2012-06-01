@@ -401,8 +401,10 @@ if ($comp) {
     function block_exaport_do_delete($post, $returnurl, $courseid) {
 
         global $DB, $USER;
-        // falls file mit dem item verkn�pft ist, l�schen
+
+        // try to delete the item file
         block_exaport_file_remove($post);
+
         $conditions = array("id" => $post->id);
         $status = $DB->delete_records('block_exaportitem', $conditions);
 		

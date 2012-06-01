@@ -75,6 +75,7 @@ if ($sharecourseid) {
 	$dir = make_upload_directory($sharecourseid.'/students');
 
 	$filenameNew = clean_filename($USER->lastname.'_'.$USER->firstname).'_'.$item->attachment;
+	die('todo: block_exaport_file_area_name');
 	copy($CFG->dataroot . "/" . block_exaport_file_area_name($item) . "/" . $item->attachment,
 		$dir.'/'.$filenameNew);
 	

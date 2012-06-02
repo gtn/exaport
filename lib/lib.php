@@ -45,6 +45,8 @@ function block_exaport_file_remove($item) {
 /*** GENERAL FUNCTIONS **********************************************************************/
 
 function block_exaport_require_login($courseid) {
+	global $CFG;
+
 	require_login($courseid);
 	require_capability('block/exaport:use', get_context_instance(CONTEXT_SYSTEM));
 

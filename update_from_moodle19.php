@@ -4,7 +4,23 @@ require dirname(__FILE__) . '/inc.php';
 
 require_login();
 
-// TODO check admin!
+// check admin!
+$context = get_context_instance(CONTEXT_USER, $USER->id);
+require_capability('moodle/site:config', $context);
+
+
+$confirm = optional_param('confirm', 0, PARAM_INT);
+if (!$confirm) {
+	?>
+	Do you really want to delete all the data of exaport for moodle 2.0 and<br />reimport the data from exabis_eportfolio for moodle 1.9?<br />
+	<a href="<?php echo $_SERVER['PHP_SELF'] ?>?confirm=1&sesskey=<?php echo sesskey() ?>">YES</a>
+	<?php
+	exit;
+}
+
+if (!confirm_sesskey()) {
+    print_error("badsessionkey", "block_exaport");
+}
 
 // test database
 /*
@@ -157,6 +173,7 @@ echo "upgrading<br />\n";
 
 try {
 	$transaction = $DB->start_delegated_transaction();
+	$dbman = $DB->get_manager();
 	
 	$tables = array(
 		// old => new
@@ -192,14 +209,23 @@ try {
 		$columns = $options[1];
 		
 		echo "now table ".$newTable.": ";
+
+		// truncate
+		$DB->delete_records($newTable);
+		
 		$num = $DB->get_field_sql('SELECT COUNT(*) FROM {'.$newTable.'}');
 		if ($num) {
 			echo "<span style='color: red'>table already filled</span><br />\n";
-		} else {
-			$sql = 'INSERT INTO {'.$newTable.'} ('.$columns.') SELECT '.$columns.' FROM {'.$oldTable.'}';
-			$DB->execute($sql);
-			echo "OK!<br />\n";
+			continue;
 		}
+		
+		if (!$dbman->table_exists($oldTable.'s')) {
+			throw new Exception('table '.$oldTable.' does not exist');
+		}
+		
+		$sql = 'INSERT INTO {'.$newTable.'} ('.$columns.') SELECT '.$columns.' FROM {'.$oldTable.'}';
+		$DB->execute($sql);
+		echo "OK!<br />\n";
 	}
 	
 	// update files
@@ -225,6 +251,10 @@ try {
 				'filename' => $file->attachment,
 				'userid' => $file->userid);
  
+			// delete all old files
+			block_exaport_file_remove($file);
+			
+			// insert new file
 			$ret = $fs->create_file_from_pathname($fileinfo, $filepath);
 			
 			$update = new stdClass();
@@ -239,11 +269,9 @@ try {
 	// Assuming the both inserts work, we get to the following line.
 	$transaction->allow_commit();
 	
-	echo "upgrade done<br />\n";
+	echo "<h1>all data imported successfully</h1>\n";
 	
 } catch(Exception $e) {
-	var_dump($e);
-	die($e->getMessage());
 	$transaction->rollback($e);
 }
 

@@ -402,7 +402,7 @@ function block_exaport_get_user_preferences($userid = null) {
 }
 
 function block_exaport_check_competence_interaction() {
-    global $DB;
+    global $DB, $CFG;
 	$dbman = $DB->get_manager();
 
     try {

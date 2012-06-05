@@ -51,10 +51,6 @@ $url = '/blocks/exabis_competences/view_items.php';
 $PAGE->set_url($url);
 block_exaport_print_header("bookmarks".$type_plural);
 
-if (isset($USER->realuser)) {
-	error("You can't access portfolios in 'Login As'-Mode.");
-}
-
 block_exaport_setup_default_categories();
 
 echo "<div class='box generalbox'>";

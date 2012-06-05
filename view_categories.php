@@ -50,10 +50,6 @@ $url = '/blocks/exabis_competences/view_categories.php';
 $PAGE->set_url($url);
 block_exaport_print_header("categories");
 
-if (isset($USER->realuser)) {
-	error("You can't access portfolios in 'Login As'-Mode.");
-}
-
 echo '<div class="block_eportfolio_center">';
 
 echo "<br />";

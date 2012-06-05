@@ -219,7 +219,7 @@ try {
 			continue;
 		}
 		
-		if (!$dbman->table_exists($oldTable.'s')) {
+		if (!$dbman->table_exists($oldTable)) {
 			throw new Exception('table '.$oldTable.' does not exist');
 		}
 		

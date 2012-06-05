@@ -53,7 +53,7 @@ function block_exaport_require_login($courseid) {
 	if (empty($CFG->block_exaport_allow_loginas)) {
 		// login as not allowed => check
 		global $USER;
-		if (isset($USER->realuser)) {
+		if (!empty($USER->realuser)) {
 			print_error("loginasmode", "block_exaport");
 		}
 	}

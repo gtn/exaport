@@ -95,15 +95,10 @@ class block_exaport_item_edit_form extends moodleform {
             }
         }
 
-        //$mform->addElement('editor', 'intro', get_string("intro", "block_exaport"), array('rows' => 25));
-        $mform->addElement('editor', 'intro', get_string('intro', 'block_exaport'), null,
-                    array('maxfiles' => EDITOR_UNLIMITED_FILES));
-        $mform->setType('intro', PARAM_TEXT);
-        //$mform->setHelpButton('intro', array('writing', 'richtext'), false, 'editorhelpbutton');
+        $mform->addElement('editor', 'intro_editor', get_string('intro', 'block_exaport'), null, $this->_customdata['textfieldoptions']);
+        $mform->setType('intro_editor', PARAM_RAW);
         if ($type == 'note')
-            $mform->addRule('intro', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
-
-        //$mform->addElement('format', 'format', get_string('format'));
+            $mform->addRule('intro_editor', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
 
         $this->add_action_buttons();
     }

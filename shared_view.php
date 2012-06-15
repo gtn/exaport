@@ -177,7 +177,8 @@ for ($column_i = 1; $column_i<=2; $column_i++) {
                                 echo '<img align="right" src="'.$CFG->wwwroot.'/blocks/exaport/pix/application_view_tile.png" alt="competences">';
                         }
                         echo '</span>';
-			echo '<span class="view-item-text">'.$item->intro.'</span>';
+			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
+			echo '<span class="view-item-text">'.$intro.'</span>';
 			echo '<span class="view-item-link">'.block_exaport_get_string('show').'</span>';
 			echo '</a>';
 		} elseif ($block->type == 'personal_information') {

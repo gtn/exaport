@@ -68,7 +68,8 @@ function block_exaport_print_extern_item($item, $access) {
 		}
 	}
 
-	$box_content .= $item->intro;
+	$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
+	$box_content .= $intro;
 
 	echo $OUTPUT->box($box_content);
 }

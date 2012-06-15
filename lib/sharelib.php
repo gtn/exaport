@@ -185,7 +185,7 @@ function block_exaport_epop_checkhash($userhash){
 	}
 }
 
-function block_exaport_get_item($itemid, $access,$epopaccess=false)
+function block_exaport_get_item($itemid, $access, $epopaccess=false)
 {
 	global $CFG, $USER, $DB;
 

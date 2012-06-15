@@ -167,7 +167,8 @@ if ($items) {
 
 		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=".$type."&att=".$item->attachment)."\">" . $item->name . "</a>";
 		if ($item->intro) {
-			$table->data[$item_i]['name'] .= "<table width=\"98%\"><tr><td>".format_text($item->intro, FORMAT_HTML)."</td></tr></table>";
+			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+			$table->data[$item_i]['name'] .= "<table width=\"98%\"><tr><td>".format_text($intro, FORMAT_HTML)."</td></tr></table>";
 		}
 
 		$table->data[$item_i]['date'] = userdate($item->timemodified);

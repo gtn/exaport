@@ -37,9 +37,10 @@ function block_exaport_get_item_file($item) {
 
 function block_exaport_file_remove($item) {
 	$fs = get_file_storage();
-	foreach ($fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, null, true /* include dirs */) as $file) {
-		$file->delete();
-	}
+	// associated file (if it's a file item)
+	$fs->delete_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id);
+	// item content (intro) inside the html editor
+	$fs->delete_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', $item->id);
 }
 
 /*** GENERAL FUNCTIONS **********************************************************************/

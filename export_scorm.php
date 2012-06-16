@@ -151,7 +151,7 @@ function get_category_files($categoryid, $viewid=null) {
             " FROM {block_exaportitem} AS i" .
             ($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
             " WHERE i.userid = $USER->id" .
-            " AND type='file'" .
+            " AND i.type='file'" .
             " and i.categoryid = $categoryid" .
             " order by i.name desc";
 

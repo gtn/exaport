@@ -1,4 +1,10 @@
 Exabis E-Portfolio ChangeLog
+2012-06-01 4.0.5
+updated-script for data-transfer from previous versions included (thanks to eThink eduacation for the support!)
+
+2012-06-01 4.0.4
+* corrected draft-file-area-storage-problem2012-05-31 4.0.3.
+* implemented ePOP-functionality for smartphone-app
 
 2011-12-09 4.0.3
 * changed settings.php-problem for Moodle 2.2

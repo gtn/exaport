@@ -53,7 +53,8 @@ $PAGE->set_url($url);
 if(!$print)block_exaport_print_header("bookmarks".$type_plural);
 else {
 	?>
-	<title>Alle Eintr&auml;ge</title>
+	<html><head>
+		<title>Alle Eintr&auml;ge</title>
 <link href="http://localhost:8888/moodle/theme/image.php/standard/theme/1341490079/favicon" rel="shortcut icon">
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 <meta content="moodle, Alle Eintr&auml;ge" name="keywords">
@@ -62,6 +63,7 @@ else {
 <link href="printversion.css" type="text/css" rel="stylesheet">
 <?php 
 	echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet">';	
+echo '</head><body>';
 }
 block_exaport_setup_default_categories();
 
@@ -288,3 +290,4 @@ document.getElementById("intro_button").firstChild.nodeValue = "Weiterlesen..";
 }
 </script>';
 if(!$print) echo $OUTPUT->footer($course);
+else echo '</body></html>';

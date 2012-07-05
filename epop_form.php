@@ -71,7 +71,21 @@ der Pfad: <input type="text" size="100" value="/mod/questionnaire/view.php?id=18
  		<br><span class="title">key:</span> <input type="text" name="key" value="4c7c15b4ac31e83bcbdd804f36159">
  		<br><span class="title">action:</span> <input type="text" name="action" value="getCompetences">
  		<br><span class="title">itemid:</span> <input type="text" name="item_id" value="210">
+ 		<br><span class="title">subjectid:</span> <input type="text" name="subjectid" value="">
  		<br><input type="submit" value="get competencies" class="submitbtn">
+</form>
+
+<h3>getTopics</h3>
+<form action="http://gtn02.gtn-solutions.com/moodle20/blocks/exaport/epop.php" method="post" enctype="multipart/form-data">
+ 		<br><span class="title">key:</span> <input type="text" name="key" value="4c7c15b4ac31e83bcbdd804f36159">
+ 		<br><span class="title">action:</span> <input type="text" name="action" value="getTopics">
+ 		<br><input type="submit" value="get Topics" class="submitbtn">
+</form>
+<h3>getSubjects</h3>
+<form action="http://gtn02.gtn-solutions.com/moodle20/blocks/exaport/epop.php" method="post" enctype="multipart/form-data">
+ 		<br><span class="title">key:</span> <input type="text" name="key" value="4c7c15b4ac31e83bcbdd804f36159">
+ 		<br><span class="title">action:</span> <input type="text" name="action" value="getSubjects">
+ 		<br><input type="submit" value="get Subjects" class="submitbtn">
 </form>
 
 <h3>getExamples</h3>
@@ -184,6 +198,13 @@ der Pfad: <input type="text" size="100" value="/mod/questionnaire/view.php?id=18
  		<br><span class="title">itemid:</span> <input type="text" name="id" value="10">
  		
  		<br><input type="submit" value="Özeps eigene Datei löschen" class="submitbtn">
+</form>
+
+<h3>alle meine Özeps items löschen</h3>
+<form action="http://gtn02.gtn-solutions.com/moodle20/blocks/exaport/epop.php" method="post" enctype="multipart/form-data">
+ 		<br><span class="title">key:</span> <input type="text" name="key" value="4c7c15b4ac31e83bcbdd804f36159">
+ 		<br><span class="title">action:</span> <input type="text" name="action" value="delete_all_oezeps">
+ 		<br><input type="submit" value="Özeps alle meine einträge löschen" class="submitbtn">
 </form>
  </body>
 </html>

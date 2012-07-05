@@ -27,6 +27,7 @@ if ($action=="login"){
 					if (empty($user_hash->user_hash_long)) {$uhash=block_exaport_update_userhash($user_hash->id);}
 					else $uhash=$user_hash->user_hash_long;
 					if ($user_hash->oezinstall==0) block_exaport_installoez($user->id);
+					else block_exaport_installoez($user->id,true);
 				}
 		};
 		echo "key=".$uhash;
@@ -51,7 +52,7 @@ if ($action=="login"){
 	else{
 		$parent_cat = optional_param('parent_cat', 0, PARAM_INT);
 		$catname = optional_param('name', ' ', PARAM_TEXT);
-		if ($newid = $DB->insert_record('block_exaportcate', array("pid"=>$parent_cat,"userid"=>$user->id,"name"=>$catname,"timemodified"=>time()))) {
+		if ($newid = $DB->insert_record('block_exaportcate', array("pid"=>$parent_cat,"userid"=>$user->id,"name"=>$catname,"subjid"=>0,"topicid"=>0,"timemodified"=>time()))) {
 			echo $newid;
 		}else{
 			echo "-1";
@@ -200,19 +201,24 @@ else if ($action=="get_items_for_view"){
 	if (!$user) echo "invalid hash";
 	else{
 		$itemid = optional_param('id', 0, PARAM_INT);
-		$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
-					WHERE i.attachment<>0 AND i.id=".$itemid;
-
-		$res = $DB->get_records_sql($sql);
-					foreach($res as $rs){
-						//echo $rs->pathnamehash;
-						if (!empty($rs))	{
-							if (delete_file($rs->pathnamehash)){
-								$DB->update_record('block_exaportitem', array("id"=>$itemid,"attachment"=>""));
-							}
-						}
-					}
+		block_exaport_delete_oezepsitemfile($itemid);
 		block_exaport_delete_competences($itemid,$user->id);
+	}
+}else if ($action=="delete_all_oezeps"){
+	$user=checkhash();
+	if (!$user) echo "invalid hash";
+	else{
+		$sql="SELECT * FROM {block_exaportitem} WHERE isoez=1 AND userid=".$user->id;
+		$items = $DB->get_records_sql($sql);
+		foreach ($items as $item){
+			block_exaport_delete_oezepsitemfile($item->id);
+			block_exaport_delete_competences($item->id,$user->id);
+		}
+		$DB->delete_records('block_exaportitem', array("isoez" => 1,"userid"=>$user->id));
+		echo "delete userid".$user->id;
+		$DB->delete_records('block_exaportcate', array("isoez" => 1,"userid"=>$user->id));
+		$sql="UPDATE {block_exaportuser} SET oezinstall=0 WHERE user_id=".$user->id;
+		$DB->execute($sql);
 	}
 }else if ($action=="getViews"){
 	$user=checkhash();
@@ -271,12 +277,42 @@ else if ($action=="get_items_for_view"){
 		
 	}
 	
+}else if ($action=="getTopics"){
+	$sql = "SELECT t.title,t.id FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+	$sql.= " GROUP BY t.title,t.id";
+	$topics = $DB->get_records_sql($sql);
+	header ("Content-Type:text/xml");
+	$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
+	$inhalt.='<result>'."\r\n";
+			foreach($topics as $topic){
+				$inhalt.="<topic name='".$topic->title."'  id='".$topic->id."'>";
+					$inhalt.="</topic>"."\r\n";
+			}
+	$inhalt.='</result> '."\r\n";
+	echo $inhalt;
+}else if ($action=="getSubjects"){
+	$sql = "SELECT s.title,s.id FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+	$sql.= " GROUP BY s.title,s.id";
+	$subjects = $DB->get_records_sql($sql);
+	header ("Content-Type:text/xml");
+	$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
+	$inhalt.='<result>'."\r\n";
+			foreach($subjects as $subject){
+				$inhalt.="<subject name='".$subject->title."'  id='".$subject->id."'>";
+					$inhalt.="</subject>"."\r\n";
+			}
+	$inhalt.='</result> '."\r\n";
+	echo $inhalt;
 }else if ($action=="getCompetences" || $action=="getExamples"){
 	$user=checkhash();
 	if (!$user) echo "invalid hash";
 	else{
+		if ($action=="getExamples"){
+						block_exaport_installoez($user->id,true);
+		}
 		if(block_exaport_check_competence_interaction()) {
 			$itemid=optional_param('item_id', 0, PARAM_INT);
+			$subjectid=optional_param('subjectid', 0, PARAM_INT);
 			$clist=",";
 			if ($itemid>0){
 				$compok=$DB->get_records("block_exacompdescractiv_mm", array("activityid"=>$itemid));
@@ -285,6 +321,11 @@ else if ($action=="get_items_for_view"){
 				}
 			}
 	    $sql = "SELECT d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+	    if ($subjectid>0 && $action=="getCompetences"){
+	    	$sql.=" AND s.id=".$subjectid;
+	    }
+	    
+	    
 	    $descriptors = $DB->get_records_sql($sql);
 			header ("Content-Type:text/xml");
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
@@ -310,6 +351,8 @@ else if ($action=="get_items_for_view"){
 			echo $inhalt;
 			
 			
+		}else{
+			echo "no interaction";
 		}
 	}
 	
@@ -391,7 +434,7 @@ else if ($action=="get_items_for_view"){
 		if(block_exacomp_checkfiles()){
 			$fs = get_file_storage();
 			$totalsize = 0;
-			$context = get_context_instance(CONTEXT_USER);
+			$context = get_context_instance(CONTEXT_USER,$user->id);
 			
 			foreach ($_FILES as $fieldname=>$uploaded_file) {
 		    // check upload errors
@@ -442,7 +485,7 @@ else if ($action=="get_items_for_view"){
 			//$fs = get_file_storage();
 			
 			$usedspace = 0;
-			$privatefiles = $fs->get_area_files($context->id, 'block_exaport', 'attachment', false, 'id', false);
+			$privatefiles = $fs->get_area_files($context->id, 'block_exaport', 'item_file', false, 'id', false);
 			foreach ($privatefiles as $file) {
 			    $usedspace += $file->get_filesize();
 			}
@@ -461,7 +504,7 @@ else if ($action=="get_items_for_view"){
 		    $file_record->component = 'block_exaport';
 		    $file_record->contextid = $context->id;
 		    $file_record->userid    = $user->id;
-		    $file_record->filearea  = 'attachment';
+		    $file_record->filearea  = 'item_file';
 		    $file_record->filename = $file->filename;
 		    $file_record->filepath  = $filepath;
 		    $file_record->itemid    = 0;
@@ -747,29 +790,32 @@ function write_xml_items($conditions,$view_id=0){
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<result>'."\r\n";
 			foreach($items as $item){
-				
-				$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'"';
-				if ($view_id>0){
-					if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
-					else $inhalt.=' selected="false"';
+				if ($view_id>0 && $item->isoez==1 && $item->attachment==""){
+					//$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'" isoez="'.$item->isoez.'" url="'.$item->attachment.'"></item>';
+				}else{
+					$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'"';
+					if ($view_id>0){
+						if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
+						else $inhalt.=' selected="false"';
+					}
+					if ($item->attachment!="") {
+						$progress=1;
+						$userhash = optional_param('key', 0, PARAM_ALPHANUM);
+						$fileurl=$CFG->wwwroot.'/blocks/exaport/portfoliofile.php?access=portfolio/id/'.$item->userid.'&itemid='.$item->id.'&att='.$item->id.'&hv='.$userhash;
+					}
+					else{ 
+						$fileurl="";
+						$progress=0;
+					}
+					$inhalt.=' catid="'.$item->categoryid.'" type="'.$item->type.'" url="'.$item->url.'" progress="'.$progress.'" isOezepsItem="'.block_exaport_numtobool($item->isoez).'">'."\r\n";
+					$inhalt.='<description><![CDATA['.$item->intro.']]></description>'."\r\n";
+					$inhalt.='<fileUrl><![CDATA['.block_exaport_ers_null($fileurl).']]></fileUrl>'."\r\n";
+					$inhalt.='<beispiel_url>';
+					if ($item->isoez==1) $inhalt.=oezepsbereinigung(block_exaport_ers_null($item->beispiel_url));
+					else $inhalt.=block_exaport_ers_null($item->beispiel_url);
+					$inhalt.='</beispiel_url>'."\r\n";
+					$inhalt.='</item>'."\r\n";
 				}
-				if ($item->attachment!="") {
-					$progress=1;
-					$userhash = optional_param('key', 0, PARAM_ALPHANUM);
-					$fileurl=$CFG->wwwroot.'/blocks/exaport/portfoliofile.php?access=portfolio/id/'.$item->userid.'&itemid='.$item->id.'&att='.$item->id.'&hv='.$userhash;
-				}
-				else{ 
-					$fileurl="";
-					$progress=0;
-				}
-				$inhalt.=' catid="'.$item->categoryid.'" type="'.$item->type.'" url="'.$item->url.'" progress="'.$progress.'" isOezepsItem="'.block_exaport_numtobool($item->isoez).'">'."\r\n";
-				$inhalt.='<description><![CDATA['.$item->intro.']]></description>'."\r\n";
-				$inhalt.='<fileUrl><![CDATA['.block_exaport_ers_null($fileurl).']]></fileUrl>'."\r\n";
-				$inhalt.='<beispiel_url>';
-				if ($item->isoez==1) $inhalt.=oezepsbereinigung(block_exaport_ers_null($item->beispiel_url));
-				else $inhalt.=block_exaport_ers_null($item->beispiel_url);
-				$inhalt.='</beispiel_url>'."\r\n";
-				$inhalt.='</item>'."\r\n";
 			}
 			$inhalt.='</result> '."\r\n";
 			echo $inhalt;
@@ -882,31 +928,75 @@ function block_exaport_get_subcategories($catid,$catlist,$userid){
 	
 	return $catlist;
 }
-function block_exaport_installoez($userid){
+function block_exaport_delete_oezepsitemfile($itemid){
+			global $DB;
+			$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
+					WHERE i.attachment<>0 AND i.id=".$itemid;
+
+			$res = $DB->get_records_sql($sql);
+					foreach($res as $rs){
+						//echo $rs->pathnamehash;
+						if (!empty($rs))	{
+							if (delete_file($rs->pathnamehash)){
+								$DB->update_record('block_exaportitem', array("id"=>$itemid,"attachment"=>""));
+							}
+						}
+					}
+		}
+		
+function block_exaport_installoez($userid,$isupdate=false){
 	global $DB;
-	
+	$where="";
+	if ($isupdate==true){
+		$sql="SELECT group_concat(cast(exampid as char)) as ids FROM {block_exaportitem} where isoez=1 AND userid=".$userid;
+		$rse = $DB->get_record_sql($sql);
+		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}
+	}
 	$sql="SELECT DISTINCT concat(top.id,examp.id) as id, subj.title as kat1,subj.id as subjid, top.title as kat2,top.id as topid,top.description as topdescription, examp.title as item,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
 	INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 	INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
 	INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
 	INNER JOIN {block_exacompdescrexamp_mm} emm ON emm.descrid=descr.id
-	INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid
-	WHERE st.isoez=1 ORDER BY subjid,topid";
+	INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid";
+	$sql.=" WHERE st.isoez=1".$where." ";
+	$sql.=" ORDER BY subjid,topid";
 
 	$row = $DB->get_records_sql($sql);
 	$subjid=-1;$topid=-1;
 	$beispiel_url="";
-	foreach($row as $rs){
-		if ($subjid!=$rs->subjid){ $newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>0,"userid"=>$userid,"name"=>$rs->kat1,"timemodified"=>time(),"course"=>0,"isoez"=>"1"));$subjid=$rs->subjid;}
-		if ($topid!=$rs->topid){$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$rs->kat2,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription));$topid=$rs->topid;}
-		if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
-		if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
-
-		if ($rs->completefile!="") $fileUrl=$rs->completefile;
-		$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"file","categoryid"=>$newtopid,"name"=>$rs->item,"url"=>"","intro"=>"exampdescription","attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid));
+	if ($isupdate==false){
+		foreach($row as $rs){
+			if ($subjid!=$rs->subjid){ $newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>0,"userid"=>$userid,"name"=>$rs->kat1,"timemodified"=>time(),"course"=>0,"isoez"=>"1","subjid"=>$rs->subjid,"topicid"=>0));$subjid=$rs->subjid;}
+			if ($topid!=$rs->topid){$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$rs->kat2,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"subjid"=>$rs->subjid,"topicid"=>$rs->topid));$topid=$rs->topid;}
+			if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
+			if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
+	
+			if ($rs->completefile!="") $fileUrl=$rs->completefile;
+			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"file","categoryid"=>$newtopid,"name"=>$rs->item,"url"=>"","intro"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid));
+		}
+		$sql="UPDATE {block_exaportuser} SET oezinstall=1 WHERE user_id=".$userid;
+		$DB->execute($sql);
+	}else{
+		foreach($row as $rs){
+			$sql="SELECT * FROM {block_exaportcate} WHERE topicid=".$rs->topid." LIMIT 0,1";
+			$rs2 = $DB->get_record_sql($sql);
+			if (!empty($rs2)){$newtopid=$rs2->id;}
+			else{
+				$sql="SELECT * FROM {block_exaportcate} WHERE subjid=".$rs->subjid." LIMIT 0,1";
+				$rs3 = $DB->get_record_sql($sql);
+				if (!empty($rs3)){$newsubjid=$rs3->id;}
+				else{
+					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>0,"userid"=>$userid,"name"=>$rs->kat1,"timemodified"=>time(),"course"=>0,"isoez"=>"1","subjid"=>$rs->subjid,"topicid"=>0));
+				}
+				$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$rs->kat2,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"subjid"=>$rs->subjid,"topicid"=>$rs->topid));
+			}
+			if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
+			if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
+	
+			if ($rs->completefile!="") $fileUrl=$rs->completefile;
+			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"file","categoryid"=>$newtopid,"name"=>$rs->item,"url"=>"","intro"=>"exampdescription","attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid));
+		}
 	}
-	$sql="UPDATE {block_exaportuser} SET oezinstall=1 WHERE user_id=".$userid;
-	$DB->execute($sql);
 
 }
 

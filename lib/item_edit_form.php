@@ -95,6 +95,16 @@ class block_exaport_item_edit_form extends moodleform {
             }
         }
 
+        if (block_exaport_course_has_desp()) {
+        	$sql = "SELECT lang.id,lang.name FROM {block_desp_lang} lang WHERE id IN(SELECT langid FROM {block_desp_check_lang} WHERE userid=?) OR id IN (SELECT langid FROM {block_desp_lanhistories} WHERE userid=?) ORDER BY lang.name";
+        	$languages = $DB->get_records_sql_menu($sql, array($USER->id, $USER->id));
+        
+        	$languages[0]='';
+        	asort($languages);
+        	$mform->addElement('select', 'langid', get_string("desp_language", "block_exaport"), $languages);
+        	$mform->setType('langid', PARAM_INT);
+        }
+        
         $mform->addElement('editor', 'intro_editor', get_string('intro', 'block_exaport'), null, $this->_customdata['textfieldoptions']);
         $mform->setType('intro_editor', PARAM_RAW);
         if ($type == 'note')

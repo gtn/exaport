@@ -204,6 +204,7 @@ $string['incorrectlinksid'] = 'Falsche Links-Post Id';
 $string['incorrectnoteid'] = 'Falsche Notizen Id';
 $string['unknownaction'] = 'Unbekannte Aktion';
 $string['filenotfound'] = 'Datei nicht gefunden';
+$string['noentry'] = 'Kein Eintrag';
 $string['wrongfileid'] = 'Falsche Datei Id';
 $string['wrongfilepostid'] = 'Falsche Datei-Post Id';
 $string['wrongnoteid'] = 'Falsche Notiz Id';

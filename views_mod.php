@@ -283,6 +283,8 @@ if ($editform->is_cancelled()) {
 
 	// add blocks
 	$blocks = json_decode(stripslashes($formView->blocks));
+	if(!$blocks)
+		print_error("noentry","block_exaport");
 	foreach ($blocks as $block) {
 		$block->viewid = $dbView->id;
 		$DB->insert_record('block_exaportviewblock', $block);

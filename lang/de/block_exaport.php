@@ -102,6 +102,7 @@ $string['nobookmarksall'] = '(bisher gibt es noch keine Einträge)';
 $string['nobookmarkslink'] = '(bisher gibt es noch keine Links)';
 $string['nobookmarksfile'] = '(bisher gibt es noch keine Dateien)';
 $string['nobookmarksnote'] = '(bisher gibt es noch keine Notizen)';
+$string['noentry'] = 'Kein Eintrag';
 $string['note'] = 'Notiz';
 $string['notetitle'] = 'Notiz';
 $string['sharedbookmarks'] = 'ver&ouml;ffentlichte Portfolios';

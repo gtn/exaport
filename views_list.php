@@ -158,9 +158,9 @@ if (!$views) {
 		}
 
 		$icons = '';
-		$icons .= '<a href="'.s(dirname($_SERVER['PHP_SELF']).'/views_mod.php?courseid='.$courseid.'&id='.$view->id.'&sesskey='.sesskey().'&action=edit').'"><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
+		$icons .= '<a title="Editieren" href="'.s(dirname($_SERVER['PHP_SELF']).'/views_mod.php?courseid='.$courseid.'&id='.$view->id.'&sesskey='.sesskey().'&action=edit').'"><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
 	
-		$icons .= '<a href="'.s(dirname($_SERVER['PHP_SELF']).'/views_mod.php?courseid='.$courseid.'&id='.$view->id.'&sesskey='.sesskey().'&action=delete&confirm=1').'"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" class="iconsmall" alt="'		. get_string("delete"). '"/></a> ';
+		$icons .= '<a title="Lšschen" href="'.s(dirname($_SERVER['PHP_SELF']).'/views_mod.php?courseid='.$courseid.'&id='.$view->id.'&sesskey='.sesskey().'&action=delete&confirm=1').'"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" class="iconsmall" alt="'		. get_string("delete"). '"/></a> ';
 
 		$table->data[$view_i]['icons'] = $icons;
 	}

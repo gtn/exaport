@@ -101,6 +101,7 @@ $string['nobookmarksall'] = '(no items yet)';
 $string['nobookmarkslink'] = '(no links yet)';
 $string['nobookmarksfile'] = '(no files yet)';
 $string['nobookmarksnote'] = '(no notes yet)';
+$string['noentry'] = 'No entry';
 $string['note'] = 'Note';
 $string['notetitle'] = 'Note';
 $string['sharedbookmarks'] = 'Shared Portfolios';

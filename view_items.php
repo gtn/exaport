@@ -30,6 +30,7 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 
 $type = optional_param('type', 'all', PARAM_ALPHA);
+$print = optional_param('print', false, PARAM_BOOL);
 $type = block_exaport_check_item_type($type, true);
 
 // Needed for Translations
@@ -47,10 +48,21 @@ $conditions = array("id" => $courseid);
 if (! $course = $DB->get_record("course", $conditions) ) {
 	error("That's an invalid course id");
 }
-$url = '/blocks/exabis_competences/view_items.php';
+$url = '/blocks/exaport/view_items.php';
 $PAGE->set_url($url);
-block_exaport_print_header("bookmarks".$type_plural);
-
+if(!$print)block_exaport_print_header("bookmarks".$type_plural);
+else {
+	?>
+	<title>Alle Eintr&auml;ge</title>
+<link href="http://localhost:8888/moodle/theme/image.php/standard/theme/1341490079/favicon" rel="shortcut icon">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<meta content="moodle, Alle Eintr&auml;ge" name="keywords">
+<link href="<?php echo $CFG->wwwroot;?>/theme/styles.php/standard/1341490079/all" type="text/css" rel="stylesheet">
+<link href="<?php echo $CFG->wwwroot;?>/theme/yui_combo.php?3.5.1/build/cssreset/reset.css&3.5.1/build/cssfonts/fonts.css&3.5.1/build/cssgrids/grids.css&3.5.1/build/cssbase/base.css" type="text/css" rel="stylesheet">
+<link href="printversion.css" type="text/css" rel="stylesheet">
+<?php 
+	echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet">';	
+}
 block_exaport_setup_default_categories();
 
 echo "<div class='box generalbox'>";
@@ -168,7 +180,7 @@ if ($items) {
 		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=".$type."&att=".$item->attachment)."\">" . $item->name . "</a>";
 		if ($item->intro) {
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
-			$table->data[$item_i]['name'] .= (strlen($intro)<=20) ? "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>" :
+			$table->data[$item_i]['name'] .= (strlen($intro)<=20 || $print) ? "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>" :
 			'<div>'.substr($intro, 0,20).'..
 			<br />
 			<a id="intro_button" href="javascript:anzeigen()">Weiterlesen..</a>
@@ -237,6 +249,7 @@ if ($items) {
 	echo block_exaport_get_string("nobookmarks".$type,"block_exaport");
 }
 
+if(!$print) {
 echo "<div class='block_eportfolio_center'>";
 
 echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
@@ -244,7 +257,6 @@ echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" me
 <input type=\"hidden\" name=\"action\" value=\"add\"/>
 <input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
 <input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-
 if ($type != 'all')
 {
 	echo '<input type="hidden" name="type" value="'.$type.'" />';
@@ -259,11 +271,11 @@ else
 	echo '</select>';
 	echo "<input type=\"submit\" value=\"" . get_string("new", "block_exaport"). "\"/>";
 }
-
 echo "</fieldset>
 </form>";
-
+echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>Druckansicht</a>";
 echo "</div>";
+}
 echo '<script type="text/javascript">
 function anzeigen() {
 if (document.getElementById("mehr_text").style.visibility == "hidden") {
@@ -275,4 +287,4 @@ document.getElementById("intro_button").firstChild.nodeValue = "Weiterlesen..";
 }
 }
 </script>';
-echo $OUTPUT->footer($course);
+if(!$print) echo $OUTPUT->footer($course);

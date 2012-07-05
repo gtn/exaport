@@ -74,6 +74,19 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			}
 		}
 	}
+	
+	if ($oldversion < 2012070501) {
+		// update wrong filearea storage
+		
+		// update files
+		$fs = get_file_storage();
+		$table = new xmldb_table('block_exaportuser');
+    $field_wert = new xmldb_field('user_hash_long');
+		 if (!$dbman->field_exists($table, $field_wert)) {
+            $dbman->add_field($table, $field_wert);
+            $field_wert->set_attributes(XMLDB_TYPE_TEXT, 'medium', null, null, null, null, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated  
+        }
+	}
 		 
     return $result;
 }

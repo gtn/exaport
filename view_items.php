@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
-*  Copyright notice
+ *  Copyright notice
 *
 *  (c) 2006 exabis internet solutions <info@exabis.at>
 *  All rights reserved
@@ -98,7 +98,7 @@ $query = "select i.*, ic.name AS cname, ic2.name AS cname_parent, c.fullname As 
 $items = $DB->get_records_sql($query);
 
 if ($items) {
-	
+
 	$table = new html_table();
 	$table->width = "100%";
 
@@ -106,21 +106,21 @@ if ($items) {
 	$table->size = array();
 
 	$table->head['category'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;type=$type&amp;sort=".
-						($sortkey == 'category' ? $newsort : 'category' ) ."'>" . get_string("category", "block_exaport") . "</a>";
+			($sortkey == 'category' ? $newsort : 'category' ) ."'>" . get_string("category", "block_exaport") . "</a>";
 	$table->size['category'] = "14";
 
 	if ($type == 'all') {
 		$table->head['type'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;type=$type&amp;sort=".
-						($sortkey == 'type' ? $newsort : 'type') ."'>" . get_string("type", "block_exaport") . "</a>";
+				($sortkey == 'type' ? $newsort : 'type') ."'>" . get_string("type", "block_exaport") . "</a>";
 		$table->size['type'] = "14";
 	}
 
 	$table->head['name'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;type=$type&amp;sort=".
-						($sortkey == 'name' ? $newsort : 'name') ."'>" . get_string("name", "block_exaport") . "</a>";
+			($sortkey == 'name' ? $newsort : 'name') ."'>" . get_string("name", "block_exaport") . "</a>";
 	$table->size['name'] = "30";
 
 	$table->head['date'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;type=$type&amp;sort=".
-						($sortkey == 'date' ? $newsort : 'date.desc') ."'>" . get_string("date", "block_exaport") . "</a>";
+			($sortkey == 'date' ? $newsort : 'date.desc') ."'>" . get_string("date", "block_exaport") . "</a>";
 	$table->size['date'] = "20";
 
 	$table->head[] = get_string("course","block_exaport");
@@ -132,7 +132,7 @@ if ($items) {
 	$table->head[] = '';
 	$table->size[] = "10";
 
-	// add arrow to heading if available 
+	// add arrow to heading if available
 	if (isset($table->head[$sortkey]))
 		$table->head[$sortkey] .= "<img src=\"pix/$sorticon\" alt='".get_string("updownarrow", "block_exaport")."' />";
 
@@ -168,7 +168,13 @@ if ($items) {
 		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=".$type."&att=".$item->attachment)."\">" . $item->name . "</a>";
 		if ($item->intro) {
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
-			$table->data[$item_i]['name'] .= "<table width=\"98%\"><tr><td>".format_text($intro, FORMAT_HTML)."</td></tr></table>";
+			$table->data[$item_i]['name'] .= (strlen($intro)<=20) ? "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>" :
+			'<div>'.substr($intro, 0,20).'..
+			<br />
+			<a id="intro_button" href="javascript:anzeigen()">Weiterlesen..</a>
+			</div>
+			<div id="mehr_text" style="visibility:hidden;">
+			'.substr($intro, 20).'</div>';
 		}
 
 		$table->data[$item_i]['date'] = userdate($item->timemodified);
@@ -177,35 +183,35 @@ if ($items) {
 
 		$icons = '';
 		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=edit&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
-	
+
 		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=delete&amp;confirm=1&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" class="iconsmall" alt="' . get_string("delete"). '"/></a> ';
 
 		/*
-		if ($parsedsort[0] == 'sortorder') {
-			if ($item_i > 0) {
-				$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movetop&backtype='.$type.'" title="'.get_string("movetop", "block_exaport").'"><img src="pix/movetop.gif" class="iconsmall" alt="'.get_string("movetop", "block_exaport").'"/></a> ';
-				$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=moveup&backtype='.$type.'" title="'.get_string("moveup").'"><img src="'.$CFG->wwwroot.'/pix/t/up.gif" class="iconsmall" alt="'.get_string("moveup").'"/></a> ';
-			} else {
-				$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
-				$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
-			}
+		 if ($parsedsort[0] == 'sortorder') {
+		if ($item_i > 0) {
+		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movetop&backtype='.$type.'" title="'.get_string("movetop", "block_exaport").'"><img src="pix/movetop.gif" class="iconsmall" alt="'.get_string("movetop", "block_exaport").'"/></a> ';
+		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=moveup&backtype='.$type.'" title="'.get_string("moveup").'"><img src="'.$CFG->wwwroot.'/pix/t/up.gif" class="iconsmall" alt="'.get_string("moveup").'"/></a> ';
+		} else {
+		$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
+		$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
+		}
 
-			if ($item_i+1 < $itemscnt) {
-				$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movedown&backtype='.$type.'" title="'.get_string("movedown").'"><img src="'.$CFG->wwwroot.'/pix/t/down.gif" class="iconsmall" alt="'.get_string("movedown").'"/></a> ';
-				$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movebottom&backtype='.$type.'" title="'.get_string("movebottom", "block_exaport").'"><img src="pix/movebottom.gif" class="iconsmall" alt="'.get_string("movebottom", "block_exaport").'"/></a> ';
-			}
-			else {
-				$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
-				$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
-			}
+		if ($item_i+1 < $itemscnt) {
+		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movedown&backtype='.$type.'" title="'.get_string("movedown").'"><img src="'.$CFG->wwwroot.'/pix/t/down.gif" class="iconsmall" alt="'.get_string("movedown").'"/></a> ';
+		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movebottom&backtype='.$type.'" title="'.get_string("movebottom", "block_exaport").'"><img src="pix/movebottom.gif" class="iconsmall" alt="'.get_string("movebottom", "block_exaport").'"/></a> ';
+		}
+		else {
+		$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
+		$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
+		}
 		}
 		*/
 
 		if (block_exaport_feature_enabled('share_item')) {
 			if (has_capability('block/exaport:shareintern', $context)) {
 				if( ($item->shareall == 1) ||
-					($item->externaccess == 1) ||
-				   (($item->shareall == 0) && (count_records('block_exaportitemshar', 'itemid', $item->id, 'original', $USER->id) > 0))) {
+						($item->externaccess == 1) ||
+						(($item->shareall == 0) && (count_records('block_exaportitemshar', 'itemid', $item->id, 'original', $USER->id) > 0))) {
 					$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/share_item.php?courseid='.$courseid.'&amp;itemid='.$item->id.'&backtype='.$type.'">'.get_string("strunshare", "block_exaport").'</a> ';
 				}
 				else {
@@ -213,7 +219,7 @@ if ($items) {
 				}
 			}
 		}
-		
+
 		// copy files to course
 		if ($item->type == 'file' && block_exaport_feature_enabled('copy_to_course'))
 			$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/copy_item_to_course.php?courseid='.$courseid.'&amp;itemid='.$item->id.'&backtype='.$type.'">'.get_string("copyitemtocourse", "block_exaport").'</a> ';
@@ -222,11 +228,11 @@ if ($items) {
 	}
 
 	/*
-	if ($parsedsort[0] != 'sortorder')
+	 if ($parsedsort[0] != 'sortorder')
 		echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&amp;&type='.$type.'&amp;sort=sortorder">'.get_string("userdefinedsort", "block_exaport").'</a>';
 	*/
-        $output = html_writer::table($table);
-        echo $output;
+	$output = html_writer::table($table);
+	echo $output;
 } else {
 	echo block_exaport_get_string("nobookmarks".$type,"block_exaport");
 }
@@ -234,10 +240,10 @@ if ($items) {
 echo "<div class='block_eportfolio_center'>";
 
 echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
-		<fieldset>
-		  <input type=\"hidden\" name=\"action\" value=\"add\"/>
-		  <input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
-		  <input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
+<fieldset>
+<input type=\"hidden\" name=\"action\" value=\"add\"/>
+<input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
+<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
 
 if ($type != 'all')
 {
@@ -255,8 +261,18 @@ else
 }
 
 echo "</fieldset>
-	  </form>";
+</form>";
 
 echo "</div>";
-
+echo '<script type="text/javascript">
+function anzeigen() {
+if (document.getElementById("mehr_text").style.visibility == "hidden") {
+document.getElementById("mehr_text").style.visibility = "visible";
+document.getElementById("intro_button").firstChild.nodeValue = "Ausblenden..";
+} else {
+document.getElementById("mehr_text").style.visibility = "hidden";
+document.getElementById("intro_button").firstChild.nodeValue = "Weiterlesen..";
+}
+}
+</script>';
 echo $OUTPUT->footer($course);

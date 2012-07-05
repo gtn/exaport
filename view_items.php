@@ -53,16 +53,18 @@ $PAGE->set_url($url);
 if(!$print)block_exaport_print_header("bookmarks".$type_plural);
 else {
 	?>
-	<html><head>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+		<head>
 		<title>Alle Eintr&auml;ge</title>
-<link href="http://localhost:8888/moodle/theme/image.php/standard/theme/1341490079/favicon" rel="shortcut icon">
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-<meta content="moodle, Alle Eintr&auml;ge" name="keywords">
-<link href="<?php echo $CFG->wwwroot;?>/theme/styles.php/standard/1341490079/all" type="text/css" rel="stylesheet">
-<link href="<?php echo $CFG->wwwroot;?>/theme/yui_combo.php?3.5.1/build/cssreset/reset.css&3.5.1/build/cssfonts/fonts.css&3.5.1/build/cssgrids/grids.css&3.5.1/build/cssbase/base.css" type="text/css" rel="stylesheet">
-<link href="printversion.css" type="text/css" rel="stylesheet">
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="moodle, Alle Eintr&auml;ge" name="keywords" />
+<link href="<?php echo $CFG->wwwroot;?>/theme/styles.php/standard/1341490079/all" type="text/css" rel="stylesheet" />
+<link href="<?php echo $CFG->wwwroot;?>/theme/yui_combo.php?3.5.1/build/cssreset/reset.css&3.5.1/build/cssfonts/fonts.css&3.5.1/build/cssgrids/grids.css&3.5.1/build/cssbase/base.css" type="text/css" rel="stylesheet" />
+<link href="printversion.css" type="text/css" rel="stylesheet" />
 <?php 
-	echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet">';	
+	echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet" />';	
 echo '</head><body>';
 }
 block_exaport_setup_default_categories();

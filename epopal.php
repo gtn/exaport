@@ -2,7 +2,7 @@
 require_once dirname(__FILE__) . '/inc.php';
 $url = optional_param('url', 0, PARAM_URL);
 $url=str_replace("http://","",$url); //sicherheit, nur interne links
-echo $url;die;
+//echo $url;die;
 if ((!isloggedin() || isguestuser()) && $_GET["url"]!=""){
 	//redirect(get_login_url());
 	$formsub=true;

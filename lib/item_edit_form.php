@@ -81,7 +81,7 @@ class block_exaport_item_edit_form extends moodleform {
         $this->category_select_setup();
 
         if ($type == 'link') {
-            $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
+            $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="http://"');
             $mform->setType('url', PARAM_TEXT);
             $mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client');
         } elseif ($type == 'file') {

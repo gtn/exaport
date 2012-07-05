@@ -244,7 +244,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
     print_tabs(array($tabs, $tabs_sub), $currenttab, null, $activetabsubs);
 
-	if (block_exaport_course_has_desp()) {
+	if (block_exaport_course_has_desp() && (strpos($currenttab,'bookmarks') === 0) ) {
 		?>
 		   <div id="messageboxses1" style="background: url('pix/message_ses1.gif') no-repeat left top; ">
 				<div id="messagetxtses1">

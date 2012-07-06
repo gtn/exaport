@@ -352,7 +352,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 	$post->introformat = FORMAT_HTML;
 	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
 
-	if($post->type == 'link')
+	if(isset($post->url))
 		$post->url = (strpos($post->url,'http://') === 0) ? $post->url : "http://".$post->url;
 	
 	if ($DB->update_record('block_exaportitem', $post)) {

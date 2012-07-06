@@ -258,6 +258,7 @@ switch ($action) {
 		$post->courseid = $courseid;
 		$post->type = $existing->type;
 		$post->compids = $existing->compids;
+		$post->langid = $existing->langid;
 
 		$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
 

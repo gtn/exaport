@@ -126,7 +126,7 @@ if ($item->allowComments) {
             case 'add':
                 echo "</div>";
                 block_exaport_do_add_comment($item, $fromform, $commentseditform);
-                redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
+                //redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
                 break;
         }
     }

@@ -31,6 +31,4 @@ class block_exaport_personal_information_form extends moodleform {
 		 $this->add_action_buttons();
 	}
 
-	function validation($data) {
-	}
 }

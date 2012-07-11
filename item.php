@@ -90,8 +90,7 @@ if ($existing && $comp) {
 	}
 	if (!$competences)
 		$existing->compids = null;
-} else
-	$existing->compids = null;
+}
 $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&type=" . $backtype;
 
 // delete item

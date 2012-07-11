@@ -32,7 +32,7 @@ global $DB;
 
 function block_exaport_get_item_file($item) {
 	$fs = get_file_storage();
-	return reset($fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, null, false));
+	return reset($fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id));
 }
 
 function block_exaport_file_remove($item) {

@@ -3,13 +3,13 @@ function xmldb_block_exaport_upgrade($oldversion) {
 	global $DB,$CFG;
 	$dbman = $DB->get_manager();
 	$result=true;
-	 
+
 
 	/// Add a new column newcol to the mdl_question_myqtype
 
-	 
+
 	if ($oldversion < 2012051801) {
-		 
+			
 		$table = new xmldb_table('block_exaportuser');
 		$field_wert = new xmldb_field('user_hash_long');
 		$field_wert2 = new xmldb_field('oezinstall');
@@ -83,11 +83,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		}
 	}
 
-	if ($oldversion < 2012070501) {
+	if ($oldversion < 2012071701) {
 		// update wrong filearea storage
 
 		// update files
-		
+
 		$table = new xmldb_table('block_exaportitem');
 		$field_wert = new xmldb_field('langid');
 		if (!$dbman->field_exists($table, $field_wert)) {
@@ -97,15 +97,19 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		$table = new xmldb_table('block_exaportcate');
 		$field_wert = new xmldb_field('subjid');
 		$field_wert2 = new xmldb_field('topicid');
+		$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, true, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
 		if (!$dbman->field_exists($table, $field_wert)) {
-			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, null, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
 			$dbman->add_field($table, $field_wert);
-		}
+		} else
+			$dbman->change_field_notnull($table, $field_wert);
+
+		$field_wert2->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, true, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
 		if (!$dbman->field_exists($table, $field_wert2)) {
-			$field_wert2->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, null, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
 			$dbman->add_field($table, $field_wert2);
-		}
+		} else
+			$dbman->change_field_notnull($table, $field_wert2);
 	}
+
 
 	return $result;
 }

@@ -147,7 +147,7 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform->updateAttributes(array('class'=>''));
 		
 		$mform->addElement('hidden', 'items');
-        $mform->addElement('hidden', 'action');
+    $mform->addElement('hidden', 'action');
 		$mform->addElement('hidden', 'courseid');
 		$mform->addElement('hidden', 'viewid');
 

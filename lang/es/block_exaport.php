@@ -271,3 +271,4 @@ $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - 
 $string['settings_interaktion_exacomp_body'] = 'interaction with block exabis competencies, if installed.';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(Sin marcas yet)';
+$string['steckbrief'] = 'Profile';

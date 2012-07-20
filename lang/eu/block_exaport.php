@@ -277,3 +277,4 @@ $stringNotUsed['nobookmarksexternal'] = '(oraindik ez dago kanpoko estekarik)';
 $stringNotUsed['bookmarksexternal'] = 'Kanpoko estekak';
 $stringNotUsed['deleteextconfirm'] = 'Esteka hau ezabatu nahi duzula ziur al zaude?';
 $stringNotUsed['externallink'] = 'Kanpoko esteka';
+$string['steckbrief'] = 'Profile';

@@ -249,15 +249,10 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 		?>
 		   <div id="messageboxses1" style="background: url('pix/message_ses1.gif') no-repeat left top; ">
 				<div id="messagetxtses1">
-					Hallo, hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Das finde ich sehr spannend. Ich kann genau sehen, wie viel ich schon gelernt habe.
+					Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.
 				</div>
 			</div>
-			<div id="messageboxslp3" style="background: url('pix/message_lp.gif') no-repeat left top;margin-left: 20px;">
 			
-				<div id="messagetxtslp3">
-					Du kannst das auch tun.
-				</div>
-			</div>
 			<br /><br />
 		<?php
 	}

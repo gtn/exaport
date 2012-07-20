@@ -273,3 +273,5 @@ $string['settings_interaktion_exacomp_body'] = 'interaction with block exabis co
 $stringNotUsed['nobookmarks'] = '(zatím žádné záložky)';
 $stringNotUsed['nobookmarksexternal'] = '(zatím žádné externí odkazy)';
 $stringNotUsed['externallink'] = 'Externí odkaz';
+
+$string['steckbrief'] = 'Profile';

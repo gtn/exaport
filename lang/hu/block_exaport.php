@@ -274,3 +274,4 @@ $stringNotUsed['nobookmarks'] = '(nincsenek könyvjelzők)';
 $stringNotUsed['nobookmarksexternal'] = '(nincsenek külső hivatkozások)';
 $stringNotUsed['bookmarksexternal'] = 'Külső linkek';
 $stringNotUsed['externallink'] = 'Külső hivatkozás';
+$string['steckbrief'] = 'Profile';

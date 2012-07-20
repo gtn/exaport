@@ -70,7 +70,9 @@ echo '</head><body>';
 block_exaport_setup_default_categories();
 
 echo "<div class='box generalbox'>";
-echo $OUTPUT->box( text_to_html(get_string("explaining".$type,"block_exaport")) , "center");
+if (block_exaport_course_has_desp()) $pref="desp_";
+else $pref="";
+echo $OUTPUT->box( text_to_html(get_string($pref."explaining".$type,"block_exaport")) , "center");
 echo "</div>";
 
 $userpreferences = block_exaport_get_user_preferences();

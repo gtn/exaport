@@ -277,7 +277,7 @@ $string['desp_mybookmarks'] = 'Mein Dossier';
 $string['desp_bookmarks'] = 'Mein Dossier';
 $string['desp_explainingall'] = 'Alle Einträge im Dossier';
 $string['desp_sharedbookmarks'] = 'ver&ouml;ffentlichte Dossiers';
-
+$string['steckbrief'] = 'Steckbrief';
 // Config
 $string['config_version_3'] = 'Neue E-Portfolio Ansicht: Inklusive Views usw.';
 $string['config_version_2'] = 'Alte E-Portfolio Ansicht';

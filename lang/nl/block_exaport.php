@@ -277,3 +277,4 @@ $stringNotUsed['nobookmarksexternal'] = '(nog geen externe links)';
 $stringNotUsed['bookmarksexternal'] = 'Externe links';
 $stringNotUsed['deleteextconfirm'] = 'Wil je deze link echt verwijderen?';
 $stringNotUsed['externallink'] = 'Externe link';
+$string['steckbrief'] = 'Profile';

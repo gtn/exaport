@@ -277,3 +277,4 @@ $string['settings_interaktion_exacomp_body'] = 'interaction with block exabis co
 $stringNotUsed['nobookmarks'] = '(Δεν έχουν προστεθεί ακόμα σελιδοδείκτες)';
 $stringNotUsed['nobookmarksexternal'] = '(Δεν έχουν προστεθεί ακόμα εξωτερικοί σύνδεσμοι)';
 $stringNotUsed['externallink'] = 'Εξωτερικός σύνδεσμος';
+$string['steckbrief'] = 'Profile';

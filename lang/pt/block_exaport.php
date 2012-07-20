@@ -277,3 +277,4 @@ $stringNotUsed['nobookmarksexternal'] = '(ainda sem liga&ccedil;&otilde;es exter
 $stringNotUsed['bookmarksexternal'] = 'Liga&ccedil;&otilde;es externas';
 $stringNotUsed['deleteextconfirm'] = 'Quer realmente apagar esta liga&ccedil;&atilde;o?';
 $stringNotUsed['externallink'] = 'Liga&ccedil;&atilde;o externa';
+$string['steckbrief'] = 'Profile';

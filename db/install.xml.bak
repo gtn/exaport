@@ -31,8 +31,8 @@
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="isoez"/>
         <FIELD NAME="isoez" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="description"/>
         <FIELD NAME="description" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" COMMENT="oez" PREVIOUS="isoez" NEXT="subjid"/>
-        <FIELD NAME="subjid" TYPE="int" LENGTH="20" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="subject id" PREVIOUS="description" NEXT="topicid"/>
-        <FIELD NAME="topicid" TYPE="int" LENGTH="20" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="topic id" PREVIOUS="subjid"/>
+        <FIELD NAME="subjid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="subject id" PREVIOUS="description" NEXT="topicid"/>
+        <FIELD NAME="topicid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="topic id" PREVIOUS="subjid"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="primary key for bookmark categories" NEXT="userid"/>

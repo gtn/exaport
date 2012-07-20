@@ -65,7 +65,7 @@ $string['bookmarkdeletedexternal'] = 'Externer Link gel&ouml;scht.';
 $string['bookmarkdeletedfile'] = 'Datei gel&ouml;scht.';
 $string['bookmarkdeletednote'] = 'Notiz gel&ouml;scht.';
 $string['categories'] = 'Kategorien';
-$string['explaincategories'] = '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier k&ouml;nnen Sie die Kategorien einsehen und bearbeiten.';
+$string['explaincategories'] = '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier kannst du die Kategorien einsehen und bearbeiten.';
 $string['category'] = 'Kategorie';
 $string['categoryhead'] = 'Bezeichnung der Kategorie';
 $string['categorysaved'] = 'Kategorie hinzugef&uuml;gt.';

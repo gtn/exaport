@@ -134,9 +134,9 @@ if (!$views) {
 			$table->data[$view_i]['accessoptions'] .= '<div>'.get_string("internalaccess", "block_exaport").':</div><div style="padding-left: 10px;">'.get_string("internalaccessall", "block_exaport").'</div>';
 		} else {
 			// read users
-			$query = "select ".$DB->sql_fullname()." AS name".
-				" from {user} u".
-				" JOIN {block_exaportviewshar} vshar WHERE u.id=vshar.userid AND vshar.viewid='".$view->id."'".
+			$query = "SELECT ".$DB->sql_fullname()." AS name".
+				" FROM {user} u,".
+				" {block_exaportviewshar} vshar WHERE u.id=vshar.userid AND vshar.viewid='".$view->id."'".
 				" ORDER BY name";
 			$users = $DB->get_records_sql($query);
 			

@@ -83,10 +83,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		}
 	}
 
-	if ($oldversion < 2012072400) {
-		// update wrong filearea storage
-
-		// update files
+	if ($oldversion < 2012072401) {
 
 		$table = new xmldb_table('block_exaportitem');
 		$field_wert = new xmldb_field('langid');
@@ -94,12 +91,12 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		if (!$dbman->field_exists($table, $field_wert)) {
 			$dbman->add_field($table, $field_wert);
 		} else {
+			$dbman->change_field_notnull($table, $field_wert);
 			$dbman->change_field_default($table, $field_wert);
 		}
 		$table = new xmldb_table('block_exaportcate');
 		$field_wert = new xmldb_field('subjid');
-		$field_wert2 = new xmldb_field('topicid');
-		$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, true, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
+		$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, null, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
 		if (!$dbman->field_exists($table, $field_wert)) {
 			$dbman->add_field($table, $field_wert);
 		} else {
@@ -107,7 +104,8 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			$dbman->change_field_default($table, $field_wert);
 		}
 
-		$field_wert2->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, true, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
+		$field_wert2 = new xmldb_field('topicid');
+		$field_wert2->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, null, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
 		if (!$dbman->field_exists($table, $field_wert2)) {
 			$dbman->add_field($table, $field_wert2);
 		} else {

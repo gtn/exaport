@@ -28,7 +28,7 @@ class block_exaport extends block_list {
 
 	function init() {
         $this->title = get_string('blocktitle', 'block_exaport');
-        $this->version = 2012072301;
+        $this->version = 2012072400;
     }
 
     function instance_allow_multiple() {

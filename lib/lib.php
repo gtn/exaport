@@ -70,10 +70,10 @@ function block_exaport_setup_default_categories() {
 		$categories[0]["title"] = "Erzählungen, Rollenspielszenen, Gedichte, Collagen";
 		$categories[1]["title"] = "Lebenslauf";
 		$categories[2]["title"] = "Berichte über Theateraufführungen, Ausstellungen";
-		$categories[3]["title"] = "Berichte über Projekte (eventuell auch mit ausländischen Schulpartnern), Projektreflexionen";
+		$categories[3]["title"] = "Berichte über Projekte, Projektreflexionen";
 		$categories[4]["title"] = "Audio- und Videoclips";
-		$categories[5]["title"] = "Arbeiten, die sich auf Begegnungen mit Sprachen und Kulturen, Sprachferien oder Reisen in andere Länder beziehen";
-		$categories[6]["title"] = "Überlegungen zu deinem Sprachenlernen (Reflexionen)";
+		$categories[5]["title"] = "Begegnungen durch Reisen in andere Länder";
+		$categories[6]["title"] = "Überlegungen zu deinem Sprachenlernen";
 		$categories[7]["title"] = "Zeugnisse";
 		$categories[8]["title"] = "Zertifikate";
 		$categories[9]["title"] = "Bestätigungen";

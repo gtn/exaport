@@ -206,9 +206,9 @@ if ($action=="login"){
 		header ("Content-Type:text/xml");
 	  $view = $DB->get_record("block_exaportview",  array("id"=>$view_id));
 	  $inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
-		$inhalt.='<result>'."\r\n";
-		$inhalt.= block_exaport_getshares($view,$user->id,false,"selected");
-		$inhalt.='</result> '."\r\n";
+		//$inhalt.='<result>'."\r\n";
+		$inhalt.= block_exaport_getshares($view,$user->id,false,"selected",true);
+		//$inhalt.='</result> '."\r\n";
 		echo $inhalt;
 	}
 }else if ($action=="get_Extern_Link"){
@@ -753,15 +753,15 @@ function exaport_get_shareable_users(){
 		}
 	return $tusers;
 }
-function block_exaport_getshares($view,$usrid,$sharetag=true,$strshared="viewShared"){
+function block_exaport_getshares($view,$usrid,$sharetag=true,$strshared="viewShared",$viewusers=false){
 	global $DB;
 	$inhalt="";
 	if ($sharetag) $inhalt="<shares>"."\r\n";
-	if ($view->externaccess==1){
+	if ($view->externaccess==1 && $viewusers==false){
 		$url = block_exaport_get_external_view_url($view,$usrid);
 		$inhalt.="	<extern>".$url."</extern>"."\r\n";
 	}
-	$inhalt.="	<intern>"."\r\n";
+	if ($viewusers==false) $inhalt.="	<intern>"."\r\n";
 	$inhalt.="		<users>"."\r\n";
 	$tusers=array();
 
@@ -787,7 +787,7 @@ function block_exaport_getshares($view,$usrid,$sharetag=true,$strshared="viewSha
 	}
 	
 	$inhalt.='		</users>'."\r\n";
-	$inhalt.='	</intern>'."\r\n";
+	if ($viewusers==false) $inhalt.='	</intern>'."\r\n";
 	if ($sharetag) $inhalt.="	</shares>"."\r\n";
 	return $inhalt;
 }
@@ -1046,7 +1046,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 			if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
 	
 			if ($rs->completefile!="") $fileUrl=$rs->completefile;
-			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"file","categoryid"=>$newtopid,"name"=>$rs->item,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid));
+			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$rs->item,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid));
 		}
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1 WHERE user_id=".$userid;
 		$DB->execute($sql);
@@ -1068,7 +1068,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 			if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
 	
 			if ($rs->completefile!="") $fileUrl=$rs->completefile;
-			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"file","categoryid"=>$newtopid,"name"=>$rs->item,"url"=>"","intro"=>"exampdescription","attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid));
+			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"file","categoryid"=>$newtopid,"name"=>$rs->item,"url"=>"","intro"=>"","attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid));
 		}
 	}
 

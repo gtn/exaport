@@ -882,7 +882,7 @@ function write_xml_items($conditions,$view_id=0){
 					else $inhalt.=block_exaport_ers_null($item->beispiel_url);
 					$inhalt.='</beispiel_url>'."\r\n";
 					$inhalt.='<beispiel_description>'.cdatawrap($item->beispiel_angabe).'</beispiel_description>'."\r\n";
-					if($item->beispiel_url=="")$inhalt.='<texteingabe>true</texteingabe>'."\r\n";
+					if($fileurl=="")$inhalt.='<texteingabe>true</texteingabe>'."\r\n";
 					else $inhalt.='<texteingabe>false</texteingabe>'."\r\n";
 					$inhalt.='</item>'."\r\n";
 				}

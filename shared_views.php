@@ -69,9 +69,9 @@ $views = $DB->get_records_sql(
                 "SELECT v.*, u.firstname, u.lastname, u.picture" .
                 " FROM {user} AS u" .
                 " JOIN {block_exaportview} v ON u.id=v.userid" .
-                " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid={$USER->id}" .
+                " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?" .
                 " WHERE (v.shareall=1 OR vshar.userid IS NOT NULL)" .
-                " $sql_sort");
+                " $sql_sort", array($USER->id));
 
 function exaport_search_views($views, $column, $value) {
     $viewsFound = array();

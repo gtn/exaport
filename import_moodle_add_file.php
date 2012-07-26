@@ -239,7 +239,7 @@ function check_assignment_file($assignmentid, $file) {
     if (!$assignment = $DB->get_record_sql('SELECT s.id, a.id AS aid, s.assignment, a.course AS courseid
                                     FROM {assignment_submissions} s
                                     JOIN {assignment} a ON s.assignment=a.id
-                                    WHERE s.userid=\'' . $USER->id . '\' AND s.id=\'' . $assignmentid . '\'')) {
+                                    WHERE s.userid=? AND s.id=?', array($USER->id, $assignmentid))) {
 
         print_error("invalidassignmentid", "block_exaport");
     }

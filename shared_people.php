@@ -56,9 +56,9 @@ echo "<br />";
 $all_shared_users = $DB->get_records_sql(
 "SELECT u.id, u.picture, u.firstname, u.lastname, COUNT(i.id) AS detail_count FROM {user} AS u".
 " JOIN {block_exaportitem} i ON u.id=i.userid".
-" LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid={$USER->id}".
+" LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid=?".
 " WHERE ((i.shareall=1 AND ishar.userid IS NULL) OR (i.shareall=0 AND ishar.userid IS NOT NULL))".
-" GROUP BY u.id");
+" GROUP BY u.id", array($USER->id));
 
 $detailLink = 'shared_portfolio.php';
 

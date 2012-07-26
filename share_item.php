@@ -61,7 +61,7 @@ $bookmark = $DB->get_record_sql("select b.*, bc.name AS cname, bc2.name AS cname
 							 " from {block_exaportitem} b join {block_exaportcate} bc on b.categoryid = bc.id".
 							 " left join {block_exaportcate} bc2 on bc.pid = bc2.id".
 							 " left join {course} c on b.courseid = c.id".
-							 " where b.userid = '{$USER->id}' and b.id='".$itemid."'");
+							 " where b.userid = ? and b.id=?", array($USER->id, $itemid));
 
 if(!$bookmark) {
 	print_error("bookmarknotfound","block_exaport", 'view.php?courseid=' . $courseid);	 

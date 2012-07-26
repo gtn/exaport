@@ -100,20 +100,25 @@ block_exaport_set_user_preferences(array('itemsort'=>$sort));
 
 $sql_sort = block_exaport_item_sort_to_sql($parsedsort);
 
+$condition = array($USER->id);
+
 if ($type == 'all')
 	$sql_type_where = '';
-else
-	$sql_type_where = " AND i.type='".$type."'";
-
+else{
+	//$sql_type_where = " AND i.type='".$type."'";
+	$sql_type_where = " AND i.type=?";
+	$condition = array($USER->id, $type);
+}
+	
 $query = "select i.*, ic.name AS cname, ic2.name AS cname_parent, c.fullname As coursename, COUNT(com.id) As comments".
 	 " from {block_exaportitem} i".
 	 " join {block_exaportcate} ic on i.categoryid = ic.id".
 	 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 	 " left join {course} c on i.courseid = c.id".
 	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-	 " where i.userid = $USER->id $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename $sql_sort";
+	 " where i.userid = ? $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename $sql_sort";
 
-$items = $DB->get_records_sql($query);
+$items = $DB->get_records_sql($query, $condition);
 
 if ($items) {
 

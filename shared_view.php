@@ -118,9 +118,9 @@ $portfolioUser = $DB->get_record("block_exaportuser", $conditions);
 $query = "select b.*". // , i.*, i.id as itemid".
 	 " FROM {block_exaportviewblock} b".
 	 // " LEFT JOIN {$CFG->prefix}block_exaportitem i ON b.type='item' AND b.itemid=i.id".
-	 " WHERE b.viewid = ".$view->id." ORDER BY b.positionx, b.positiony";
+	 " WHERE b.viewid = ? ORDER BY b.positionx, b.positiony";
 
-$blocks = $DB->get_records_sql($query);
+$blocks = $DB->get_records_sql($query, array($view->id));
 
 // read columns
 $columns = array();

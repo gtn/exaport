@@ -125,9 +125,9 @@ if (in_array($action, array('moveup', 'movetop', 'movedown', 'movebottom'))) {
 	// check ordering
 	$query = "select i.id, i.type, i.sortorder" .
 			" from {block_exaportitem} i" .
-			" where i.userid = $USER->id ORDER BY IF(sortorder>0,sortorder,99999)";
+			" where i.userid = ? ORDER BY IF(sortorder>0,sortorder,99999)";
 
-	$items = $DB->get_records_sql($query);
+	$items = $DB->get_records_sql($query, array($USER->id));
 
 	// fix sort order if needed
 	$i = 0;
@@ -181,8 +181,8 @@ if (in_array($action, array('moveup', 'movetop', 'movedown', 'movebottom'))) {
 
 	// update sorting other items that are between the 2
 	$query = "update {block_exaportitem} i set sortorder=sortorder+" . $change_sort_others .
-	" where i.userid = $USER->id AND sortorder >= " . min($sort_to_item->sortorder, $existing->sortorder) . " AND sortorder <= " . max($sort_to_item->sortorder, $existing->sortorder);
-	execute($query);
+	" where i.userid = ? AND sortorder >= ? AND sortorder <= ?";
+	execute($query, array($USER->id, min($sort_to_item->sortorder, $existing->sortorder), max($sort_to_item->sortorder, $existing->sortorder)));
 
 	// update sortorder of moved item
 	$r = new object();

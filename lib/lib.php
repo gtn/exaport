@@ -144,7 +144,7 @@ function block_exaport_feature_enabled($feature) {
 
 function block_exaport_has_categories($userid) {
     global $CFG, $DB;
-    if ($DB->count_records_sql("SELECT COUNT(*) FROM {block_exaportcate} WHERE userid='$userid' AND pid=0") > 0) {
+    if ($DB->count_records_sql("SELECT COUNT(*) FROM {block_exaportcate} WHERE userid=? AND pid=0", array($userid)) > 0) {
         return true;
     } else {
         return false;
@@ -457,8 +457,8 @@ function block_exaport_check_item_competences($item) {
 function block_exaport_build_comp_table($item, $role="teacher") {
     global $DB;
 
-    $sql = "SELECT d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompdescractiv_mm} da WHERE d.id=da.descrid AND da.activitytype=2000 AND da.activityid=" . $item->id;
-    $descriptors = $DB->get_records_sql($sql);
+    $sql = "SELECT d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompdescractiv_mm} da WHERE d.id=da.descrid AND da.activitytype=2000 AND da.activityid=?";
+    $descriptors = $DB->get_records_sql($sql, array($item->id));
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
                 <tr><td><h2>" . $item->name . "</h2></td></tr>";
     

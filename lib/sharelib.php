@@ -145,11 +145,11 @@ function block_exaport_get_view_from_access($access)
 		//$viewid = $hash[1];
 		
 		$view = $DB->get_record_sql("SELECT v.* FROM {block_exaportview} v".
-							" LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid='".$USER->id."'".
-							" WHERE v.userid='".$userid."' AND v.id='".$viewid."' AND".
-							" ((v.userid='".$USER->id."')". // myself
+							" LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?".
+							" WHERE v.userid=? AND v.id=? AND".
+							" ((v.userid=?)". // myself
 							"  OR (v.shareall=1)". // shared all
-							"  OR (v.shareall=0 AND vshar.userid IS NOT NULL))"); // shared for me
+							"  OR (v.shareall=0 AND vshar.userid IS NOT NULL))", array($USER->id, $userid, $viewid, $USER->id)); // shared for me
 
 		if (!$view) {
 			// view not found
@@ -164,9 +164,9 @@ function block_exaport_get_view_from_access($access)
 }
 function block_exaport_get_item_epop($id,$user){
 	global $DB;
-	$sql="SELECT i.* FROM {block_exaportitem} i WHERE id='".$id."' AND userid='".$user->id."'";		
+	$sql="SELECT i.* FROM {block_exaportitem} i WHERE id=? AND userid=?";		
 	//echo $sql;die;			 
-	if (!$item=$DB->get_record_sql($sql)){
+	if (!$item=$DB->get_record_sql($sql, array($id, $userid->id))){
 		return false;
 	}else{
 		return $item;
@@ -176,9 +176,9 @@ function block_exaport_get_item_epop($id,$user){
 function block_exaport_epop_checkhash($userhash){
 	global $DB;
 	
-	$sql="SELECT u.* FROM {user} u INNER JOIN {block_exaportuser} eu ON eu.user_id=u.id WHERE eu.user_hash_long='".$userhash."'";					 
+	$sql="SELECT u.* FROM {user} u INNER JOIN {block_exaportuser} eu ON eu.user_id=u.id WHERE eu.user_hash_long=?";					 
 //echo $sql;die;
-	if (!$user=$DB->get_record_sql($sql)){
+	if (!$user=$DB->get_record_sql($sql, array($userhash))){
 		return false;
 	}else{
 		return $user;
@@ -199,14 +199,14 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 			print_error("viewnotfound", "block_exaport");
 		}
 		//Parameter richtig?!
-		$conditions = array("viewid" => $view->id, "type" => 'item', "itemid" => $itemid);
+		//$conditions = array("viewid" => $view->id, "type" => 'item', "itemid" => $itemid);
 
                 $sql = "SELECT b.* FROM {block_exaportviewblock} b".
-								" WHERE b.viewid=".$view->id." AND".
-								" b.itemid=".$itemid." AND".
+								" WHERE b.viewid=? AND".
+								" b.itemid=? AND".
 								" b.type = 'item'";
                 
-		$viewblock = $DB->get_record_sql($sql); // nobody, but me
+		$viewblock = $DB->get_record_sql($sql, array($view->id, $itemid)); // nobody, but me
 		if(!$viewblock) {						
 			// item not linked to view -> no rights
                 }
@@ -248,11 +248,11 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 			// intern
 
 			$item = $DB->get_record_sql("SELECT i.* FROM {block_exaportitem} i".
-								" LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid={$USER->id}".
-								" WHERE i.id='".$itemid."' AND".
-								" ((i.userid='".$USER->id."')". // myself
+								" LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid=?".
+								" WHERE i.id=? AND".
+								" ((i.userid=?)". // myself
 								"  OR (i.shareall=1 AND ishar.userid IS NULL)". // all and ishar not set?
-								"  OR (i.shareall=0 AND ishar.userid IS NOT NULL))"); // nobody, but me
+								"  OR (i.shareall=0 AND ishar.userid IS NOT NULL))", array($USER->id, $itemid, $USER->id)); // nobody, but me
 
 			if (!$item) {
 				// item not found

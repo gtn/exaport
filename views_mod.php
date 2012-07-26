@@ -103,10 +103,10 @@ $query = "select i.id, i.name, i.type, ic.name AS cname, ic2.name AS cname_paren
 	 " join {block_exaportcate} ic on i.categoryid = ic.id".
 	 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-	 " where i.userid= ".$USER->id.
+	 " where i.userid=?".
 	 " GROUP BY i.id, i.name, i.type, ic.name, ic2.name".
 	 " ORDER BY i.name";
-$portfolioItems = $DB->get_records_sql($query);
+$portfolioItems = $DB->get_records_sql($query, array($USER->id));
 if (!$portfolioItems) {
 	$portfolioItems = array();
 }
@@ -336,9 +336,9 @@ switch ($action) {
 if ($view) {
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
-		 " where b.viewid = ".$view->id." ORDER BY b.positionx, b.positiony";
+		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
-	$blocks = $DB->get_records_sql($query);
+	$blocks = $DB->get_records_sql($query, array($view->id));
 	$postView->blocks = json_encode($blocks);
 }
 

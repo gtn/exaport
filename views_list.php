@@ -48,7 +48,6 @@ block_exaport_print_header("views");
 
 echo "<div class='block_eportfolio_center'>";
 echo $OUTPUT->box( text_to_html(get_string("explainingviews","block_exaport")));
-
 echo "</div>";
 
 
@@ -71,14 +70,14 @@ if ($parsedsort[1] == "desc") {
 }
 $sorticon = $parsedsort[1].'.gif';
 //viewsort
-block_exaport_set_user_preferences(array('itemsort'=>$sort));
+//block_exaport_set_user_preferences(array('itemsort'=>$sort));
 
 $query = "select v.*".
 	 " from {block_exaportview} v".
-	 " where v.userid = $USER->id".
+	 " where v.userid = ?".
 	 block_exaport_view_sort_to_sql($parsedsort);
 
-$views = $DB->get_records_sql($query);
+$views = $DB->get_records_sql($query, array($USER->id));
 
 if (!$views) {
 	echo get_string("noviews", "block_exaport");
@@ -136,9 +135,9 @@ if (!$views) {
 			// read users
 			$query = "SELECT ".$DB->sql_fullname()." AS name".
 				" FROM {user} u,".
-				" {block_exaportviewshar} vshar WHERE u.id=vshar.userid AND vshar.viewid='".$view->id."'".
+				" {block_exaportviewshar} vshar WHERE u.id=vshar.userid AND vshar.viewid=?".
 				" ORDER BY name";
-			$users = $DB->get_records_sql($query);
+			$users = $DB->get_records_sql($query, array($view->id));
 			
 			if ($users) {
 				foreach ($users as &$user) {

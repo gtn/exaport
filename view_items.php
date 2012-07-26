@@ -194,7 +194,7 @@ if ($items) {
 			$table->data[$item_i]['name'] .= (strlen($intro)<=20 || $print) ? "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>" :
 			'<div>'.substr($intro, 0,20).'..
 			<br />
-			<a id="intro_button" href="javascript:anzeigen()">Weiterlesen..</a>
+			<a id="intro_button" href="javascript:anzeigen()">[weiterlesen..]</a>
 			</div>
 			<div id="mehr_text" style="visibility:hidden;">
 			'.substr($intro, 20).'</div>';
@@ -294,7 +294,7 @@ document.getElementById("mehr_text").style.visibility = "visible";
 document.getElementById("intro_button").firstChild.nodeValue = "Ausblenden..";
 } else {
 document.getElementById("mehr_text").style.visibility = "hidden";
-document.getElementById("intro_button").firstChild.nodeValue = "Weiterlesen..";
+document.getElementById("intro_button").firstChild.nodeValue = "[weiterlesen..]";
 }
 }
 </script>';

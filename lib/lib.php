@@ -390,12 +390,21 @@ function block_exaport_parse_view_sort($sort, $for_shared = false) {
 }
 
 function block_exaport_view_sort_to_sql($sort) {
-    $sort = block_exaport_parse_view_sort($sort);
+   	global $CFG;
+	$sort = block_exaport_parse_view_sort($sort);
 
     $column = $sort[0];
     $order = $sort[1];
-
-    $sql_sort = "v." . $column . " " . $order . ", v.timemodified DESC";
+    
+    if((strcmp($column, "name")==0) && (strcmp($CFG->dbtype, "sqlsrv")==0)){
+		$sql_sort = "cast(v.".$column." AS varchar(max)) ".$order.", v.timemodified DESC";
+	}
+	else if((strcmp($column, "timemodified")==0) && (strcmp($CFG->dbtype, "sqlsrv")==0)){
+		$sql_sort = "v.timemodified DESC";
+	}
+	else{
+		$sql_sort = "v." . $column . " " . $order . ", v.timemodified DESC";
+	}
 
     return ' order by ' . $sql_sort;
 }

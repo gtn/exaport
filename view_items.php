@@ -110,14 +110,36 @@ else{
 	$condition = array($USER->id, $type);
 }
 	
-$query = "select i.*, ic.name AS cname, ic2.name AS cname_parent, c.fullname As coursename, COUNT(com.id) As comments".
+if(strcmp("sqlsrv", $CFG->dbtype)==0){
+	
+	$query = "SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(INTRO as text) intro, 
+			i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment,
+			i.sortorder, i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, 
+			cast(BEISPIEL as text)beispiel_angabe,
+			i.cname, i.cname_parent, i.coursename,comments FROM(
+			SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar) INTRO, 
+			i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder, 
+			i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, cast(i.beispiel_angabe AS varchar) BEISPIEL,
+			ic.name AS cname, ic2.name AS cname_parent, c.fullname AS coursename, COUNT( com.id ) AS comments
+			FROM {block_exaportitem} i 
+			JOIN {block_exaportcate} ic ON i.categoryid = ic.id 
+			LEFT JOIN {block_exaportcate} ic2 ON ic.pid=ic2.id 
+			LEFT JOIN {course} c ON i.courseid = c.id 
+			LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
+			WHERE i.userid=? $sql_type_where GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar), 
+			i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
+			i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, CAST(i.beispiel_angabe AS varchar), ic.name,
+			ic2.name,c.fullname )i $sql_sort ";
+}
+else{
+	$query = "select i.*, ic.name AS cname, ic2.name AS cname_parent, c.fullname As coursename, COUNT(com.id) As comments".
 	 " from {block_exaportitem} i".
 	 " join {block_exaportcate} ic on i.categoryid = ic.id".
 	 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 	 " left join {course} c on i.courseid = c.id".
 	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
 	 " where i.userid = ? $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename $sql_sort";
-
+}
 $items = $DB->get_records_sql($query, $condition);
 
 if ($items) {

@@ -27,7 +27,7 @@
 
 require_once dirname(__FILE__) . '/inc.php';
 require_once dirname(__FILE__) . '/lib/minixml.inc.php';
-global $DB;
+global $DB, $CFG;
 
 
 $courseid = optional_param("courseid", 0, PARAM_INT);
@@ -133,28 +133,48 @@ function add_comments($table, $bookmarkid) {
 function get_category_items($categoryid, $viewid=null, $type=null) {
     global $USER, $CFG, $DB;
 
-    $itemQuery = "select i.*" .
-            " FROM {block_exaportitem} AS i" .
-            ($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
-            " where i.userid = $USER->id" .
-            ($type ? " and i.type='$type'" : '') .
-            " and i.categoryid = $categoryid" .
-            " order by i.name desc";
-
+    if(strcmp($CFG->dbtype, "sqlsrv")==0){
+    	$itemQuery = "select i.*" .
+    			" FROM {block_exaportitem} AS i" .
+    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar)='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
+    			" where i.userid = $USER->id" .
+    			($type ? " and i.type='$type'" : '') .
+    			" and i.categoryid = $categoryid" .
+    			" order by i.name desc";
+    }else{
+    	$itemQuery = "select i.*" .
+    			" FROM {block_exaportitem} AS i" .
+        		($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
+        		" where i.userid = $USER->id" .
+         		($type ? " and i.type='$type'" : '') .
+            	" and i.categoryid = $categoryid" .
+            	" order by i.name desc";
+    }
+    
     return $DB->get_records_sql($itemQuery);
 }
 
 function get_category_files($categoryid, $viewid=null) {
     global $USER, $CFG, $DB;
 
-    $itemQuery = "select i.*" .
+    if(strcmp($CFG->dbtype, "sqlsrv")==0){
+    	$itemQuery = "select i.*" .
+    			" FROM {block_exaportitem} AS i" .
+    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar)='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
+    			" WHERE i.userid = $USER->id" .
+    			" AND i.type='file'" .
+    			" and i.categoryid = $categoryid" .
+    			" order by i.name desc";
+    }
+    else{
+    	$itemQuery = "select i.*" .
             " FROM {block_exaportitem} AS i" .
             ($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
             " WHERE i.userid = $USER->id" .
             " AND i.type='file'" .
             " and i.categoryid = $categoryid" .
             " order by i.name desc";
-
+    }
     return $DB->get_records_sql($itemQuery);
 }
 
@@ -530,7 +550,9 @@ if ($confirm) {
 echo "<br />";
 echo '<div class="block_eportfolio_center">';
 
-$views = $DB->get_records('block_exaportview', array('userid' => $USER->id), 'name');
+
+if(strcmp($CFG->dbtype, "sqlsrv")==0) $views = $DB->get_records('block_exaportview', array('userid' => $USER->id), 'cast(name AS varchar(max))');
+else $views = $DB->get_records('block_exaportview', array('userid' => $USER->id), 'name');
 
 echo $OUTPUT->box_start();
 

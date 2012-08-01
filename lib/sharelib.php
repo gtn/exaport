@@ -200,12 +200,19 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 		}
 		//Parameter richtig?!
 		//$conditions = array("viewid" => $view->id, "type" => 'item', "itemid" => $itemid);
-
-                $sql = "SELECT b.* FROM {block_exaportviewblock} b".
-								" WHERE b.viewid=? AND".
-								" b.itemid=? AND".
-								" b.type = 'item'";
-                
+		if(strcmp($CFG->dbtype, "sqlsrv")==0){
+			$sql = "SELECT b.* FROM {block_exaportviewblock} b".
+					" WHERE b.viewid=? AND".
+					" b.itemid=? AND".
+					" CAST(b.type AS varchar) = 'item'";
+		}
+        else{
+        	$sql = "SELECT b.* FROM {block_exaportviewblock} b".
+          			" WHERE b.viewid=? AND".
+          			" b.itemid=? AND".
+          			" b.type = 'item'";
+        }
+								     
 		$viewblock = $DB->get_record_sql($sql, array($view->id, $itemid)); // nobody, but me
 		if(!$viewblock) {						
 			// item not linked to view -> no rights

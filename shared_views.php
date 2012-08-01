@@ -28,7 +28,7 @@
 require_once dirname(__FILE__) . '/inc.php';
 require_once dirname(__FILE__) . '/lib/sharelib.php';
 
-global $OUTPUT;
+global $OUTPUT, $CFG;
 
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
@@ -51,10 +51,19 @@ $parsedsort = block_exaport_parse_sort($sort, array('course', 'user', 'view', 't
 if ($parsedsort[0] == 'timemodified') {
     $sql_sort = " ORDER BY v.timemodified DESC, v.name, u.lastname, u.firstname";
     $parsedsort[1] = 'desc';
+    if(strcmp($CFG->dbtype, "sqlsrv")==0){
+    	$sql_sort = " ORDER BY v.timemodified DESC, cast(v.name AS varchar(max)), u.lastname, u.firstname";
+    }
 } elseif ($parsedsort[0] == 'view') {
     $sql_sort = " ORDER BY v.name, u.lastname, u.firstname";
+    if(strcmp($CFG->dbtype, "sqlsrv")==0){
+    	$sql_sort = " ORDER BY cast(v.name AS varchar(max)), u.lastname, u.firstname";
+    }
 } else {
     $sql_sort = " ORDER BY u.lastname, u.firstname, v.name";
+    if(strcmp($CFG->dbtype, "sqlsrv")==0){
+    	$sql_sort = " ORDER BY u.lastname, u.firstname, cast(v.name AS varchar(max))";
+    }
 }
 
 

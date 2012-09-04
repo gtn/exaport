@@ -24,7 +24,7 @@ der Pfad: <input type="text" size="100" value="/mod/questionnaire/view.php?id=18
  	<h3>login</h3>
  	<form action="http://gtn02.gtn-solutions.com/moodle20/blocks/exaport/epop.php" method="post" >
  		<br><span class="title">username:</span> <input type="text" name="username" value="dietmar"> (id=7)
- 		<br><span class="title">passwort: </span><input type="password" name="password" value="<?php echo md5("Hansi123!")?>">
+ 		<br><span class="title">passwort: </span><input type="password" name="password" value="">
  		<br><span class="title">action: </span><input type="text" name="action" value="login">
  		<br><input type="submit" value="Authentifizieren" class="submitbtn">
  	</form>

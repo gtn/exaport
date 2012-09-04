@@ -1,25 +1,35 @@
 <?php
  require_once dirname(__FILE__) . '/inc.php';
  require_once dirname(__FILE__) . '/lib/lib.php';
+ //require_once dirname(__FILE__) . '/lib/moodlelib.php';
  require_once dirname(__FILE__) . '/lib/sharelib.php';
- global $DB,$USER,$COURSE;
+ global $DB,$USER,$COURSE,$CFG;
  
 $action = optional_param('action', 0, PARAM_ALPHANUMEXT);  //100
 
 if ($action=="login"){
 		
 	$uname = optional_param('username', 0, PARAM_USERNAME);  //100
-	$pword = optional_param('password', 0, PARAM_ALPHANUM);	//32
+	$pword = optional_param('password', 0, PARAM_TEXT);	//32
 	
 	if ($uname!="0" && $pword!="0"){
 		$uname=kuerzen($uname,100);
 		$pword=kuerzen($pword,50);
 		
-		$conditions = array("username" => $uname,"password" => $pword,"suspended"=>0,"deleted"=>0);
+		$conditions = array("username" => $uname,"password" => $pword);
 		if (!$user = $DB->get_record("user", $conditions)){
-			$uhash=0;
+			$condition = array("username" => $uname);
+			if ($user = $DB->get_record("user", $condition)){
+				$validiert=validate_internal_user_password($user,$pword);
+			}else{
+				$validiert=false;
+			}
 		}else{
-			if ($user->auth=='nologin' || $user->firstaccess==0) $uhash=0;
+			$validiert=true;//alte version bei der die passwörter verschlüsselt geschickt werden
+		}
+		
+		if ($validiert==true){
+			if ($user->auth=='nologin' || $user->firstaccess==0 || $user->suspended!=0 || $user->deleted!=0) $uhash=0;
 			else{
 				if (!$user_hash = $DB->get_record("block_exaportuser", array("user_id"=>$user->id))){
 					$uhash=block_exaport_create_exaportuser($user->id);
@@ -30,7 +40,9 @@ if ($action=="login"){
 					else block_exaport_installoez($user->id,true);
 				}
 			}
-		};
+		}else{
+			$uhash=0;
+		}
 		echo "key=".$uhash;
 	}else{
 		echo "key=0";

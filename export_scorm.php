@@ -136,7 +136,7 @@ function get_category_items($categoryid, $viewid=null, $type=null) {
     if(strcmp($CFG->dbtype, "sqlsrv")==0){
     	$itemQuery = "select i.*" .
     			" FROM {block_exaportitem} AS i" .
-    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar)='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
+    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
     			" where i.userid = $USER->id" .
     			($type ? " and i.type='$type'" : '') .
     			" and i.categoryid = $categoryid" .
@@ -160,7 +160,7 @@ function get_category_files($categoryid, $viewid=null) {
     if(strcmp($CFG->dbtype, "sqlsrv")==0){
     	$itemQuery = "select i.*" .
     			" FROM {block_exaportitem} AS i" .
-    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar)='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
+    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=" . $viewid . " AND vb.itemid=i.id" : '') .
     			" WHERE i.userid = $USER->id" .
     			" AND i.type='file'" .
     			" and i.categoryid = $categoryid" .

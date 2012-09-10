@@ -871,7 +871,7 @@ function write_xml_items($conditions,$view_id=0){
 				if ($view_id>0 && $item->isoez==1 && $item->attachment==""){
 					//$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'" isoez="'.$item->isoez.'" url="'.$item->attachment.'"></item>';
 				}else{
-					$inhalt.='<item name="'.$item->name.'" id="'.$item->id.'"';
+					$inhalt.='<item id="'.$item->id.'"';
 					if ($view_id>0){
 						if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
 						else $inhalt.=' selected="false"';
@@ -1036,7 +1036,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 	global $DB;
 	$where="";
 	if ($isupdate==true){
-		$sql="SELECT group_concat(cast(exampid as char)) as ids FROM {block_exaportitem} where isoez=1 AND userid=".$userid;
+		$sql="SELECT group_concat(cast(exampid as char(11))) as ids FROM {block_exaportitem} where isoez=1 AND userid=".$userid;
 		$rse = $DB->get_record_sql($sql);
 		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}
 	}

@@ -871,7 +871,7 @@ function write_xml_items($conditions,$view_id=0){
 				if ($view_id>0 && $item->isoez==1 && $item->attachment==""){
 					//$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'" isoez="'.$item->isoez.'" url="'.$item->attachment.'"></item>';
 				}else{
-					$inhalt.='<item id="'.$item->id.'"';
+					$inhalt.='<item name="'.$item->name.'" id="'.$item->id.'"';
 					if ($view_id>0){
 						if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
 						else $inhalt.=' selected="false"';
@@ -880,6 +880,7 @@ function write_xml_items($conditions,$view_id=0){
 						$progress=1;
 						$userhash = optional_param('key', 0, PARAM_ALPHANUM);
 						$fileurl=$CFG->wwwroot.'/blocks/exaport/portfoliofile.php?access=portfolio/id/'.$item->userid.'&itemid='.$item->id.'&att='.$item->id.'&hv='.$userhash;
+						//$fileurl=$CFG->wwwroot.'/blocks/exaport/portfoliofile.php?access=portfolio/id/'.$item->userid.'&itemid='.$item->id;
 					}
 					else{ 
 						$fileurl="";
@@ -895,8 +896,11 @@ function write_xml_items($conditions,$view_id=0){
 					else $inhalt.=block_exaport_ers_null($item->beispiel_url);
 					$inhalt.='</beispiel_url>'."\r\n";
 					$inhalt.='<beispiel_description>'.cdatawrap($item->beispiel_angabe).'</beispiel_description>'."\r\n";
-					if($item->beispiel_url=="")$inhalt.='<texteingabe>true</texteingabe>'."\r\n";
-					else $inhalt.='<texteingabe>false</texteingabe>'."\r\n";
+					if(strpos($item->name,"Neun")===false){$inhalt.='<texteingabe>false</texteingabe>'."\r\n";}
+					else{
+						$inhalt.='<texteingabe>true</texteingabe>'."\r\n";
+					}
+					//else $inhalt.='<texteingabe>false</texteingabe>'."\r\n";
 					$inhalt.='</item>'."\r\n";
 				}
 			}

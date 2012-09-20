@@ -165,7 +165,7 @@ function block_exaport_get_view_from_access($access)
 function block_exaport_get_item_epop($id,$user){
 	global $DB;
 	$sql="SELECT i.* FROM {block_exaportitem} i WHERE id=? AND userid=?";		
-	//echo $sql;die;			 
+	//echo $sql." ".$id." ".;die;			 
 	if (!$item=$DB->get_record_sql($sql, array($id, $user->id))){
 		return false;
 	}else{

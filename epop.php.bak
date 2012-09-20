@@ -927,7 +927,7 @@ function write_xml_categories($conditions,$catid,$userid){
 			foreach($categories as $categorie){
 				
 				$numsubcats=get_number_subcats($categorie->id);
-				$inhalt.='<categorie catid="'.$categorie->id.'" numsubcats="'.$numsubcats.'" progress="'.block_exaport_get_progress($categorie->id,$catid,$userid).'" isOezepsItem="'.block_exaport_numtobool($categorie->isoez).'">'."\r\n";
+				$inhalt.='<categorie name="'.$categorie->name.'" catid="'.$categorie->id.'" numsubcats="'.$numsubcats.'" progress="'.block_exaport_get_progress($categorie->id,$catid,$userid).'" isOezepsItem="'.block_exaport_numtobool($categorie->isoez).'">'."\r\n";
 				$inhalt.='<name>'.cdatawrap($categorie->name).'</name>'."\r\n";
 				$inhalt.='<description>'.cdatawrap($categorie->description).'</description>'."\r\n";
 				$inhalt.='</categorie>'."\r\n";

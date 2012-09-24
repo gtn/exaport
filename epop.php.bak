@@ -155,8 +155,8 @@ if ($action=="login"){
 	if (!$user) echo "invalid hash";
 	else{
 		
-		$title = optional_param('title', ' ', PARAM_TEXT);
-		$description = optional_param('description', '', PARAM_TEXT);
+		$title = optional_param('title', 0, PARAM_TEXT);
+		$description = optional_param('description', 0, PARAM_TEXT);
 		$view_id = optional_param('view_id', ' ', PARAM_INT);
 		if ($view = $DB->get_record("block_exaportview",  array("id"=>$view_id))){
 			$DB->update_record('block_exaportview', array("id"=>$view_id,"name"=>$title,"description"=>$description,"timemodified"=>time()));

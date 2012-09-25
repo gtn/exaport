@@ -865,14 +865,14 @@ function write_xml_items($conditions,$view_id=0){
 		//print_r($vitemar);die;
 	}
 
-				
-	if ($items = $DB->get_records("block_exaportitem", $conditions, " isoez DESC")){
+		
+	if ($items = $DB->get_records("block_exaportitem", $conditions, " isoez DESC,name")){
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<result>'."\r\n";
 			foreach($items as $item){
-				if ($view_id>0 && $item->isoez==1 && $item->attachment==""){
+				//if ($view_id>0 && $item->isoez==1 && $item->attachment==""){
 					//$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'" isoez="'.$item->isoez.'" url="'.$item->attachment.'"></item>';
-				}else{
+				//}else{
 					$inhalt.='<item name="'.$item->name.'" id="'.$item->id.'"';
 					if ($view_id>0){
 						if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
@@ -904,7 +904,7 @@ function write_xml_items($conditions,$view_id=0){
 					}
 					//else $inhalt.='<texteingabe>false</texteingabe>'."\r\n";
 					$inhalt.='</item>'."\r\n";
-				}
+				//}
 			}
 			$inhalt.='</result> '."\r\n";
 			echo $inhalt;
@@ -922,14 +922,24 @@ function write_xml_categories($conditions,$catid,$userid){
 		echo $key."-".$value."<br>";
 	}
 	print_r($conditions);*/
-	
+	$sozkomparr=array();
 		if ($categories = $DB->get_records("block_exaportcate", $conditions," isoez DESC")){
+			if ($sozkomp = $DB->get_record("block_exacompschooltypes", array("title"=>"Soziale Kompetenzen"))){
+				if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$sozkomp->id))){
+					foreach ($sozsubjs as $k=>$v){
+						$sozkomparr[$v->id]=1;
+					}
+				}
+			}
+			//print_r($sozkomparr);die;
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<result>'."\r\n";
 			foreach($categories as $categorie){
 				
 				$numsubcats=get_number_subcats($categorie->id);
-				$inhalt.='<categorie catid="'.$categorie->id.'" numsubcats="'.$numsubcats.'" progress="'.block_exaport_get_progress($categorie->id,$catid,$userid).'" isOezepsItem="'.block_exaport_numtobool($categorie->isoez).'">'."\r\n";
+				$inhalt.='<categorie catid="'.$categorie->id.'" numsubcats="'.$numsubcats.'" progress="'.block_exaport_get_progress($categorie->id,$catid,$userid).'" isOezepsItem="'.block_exaport_numtobool($categorie->isoez).'"';
+				if (!empty($sozkomparr[$categorie->subjid])) $inhalt.=' isSozialeKompetenz="true"';
+				$inhalt.='>'."\r\n";
 				$inhalt.='<name>'.cdatawrap($categorie->name).'</name>'."\r\n";
 				$inhalt.='<description>'.cdatawrap($categorie->description).'</description>'."\r\n";
 				$inhalt.='</categorie>'."\r\n";

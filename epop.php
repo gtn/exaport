@@ -456,6 +456,7 @@ else if ($action=="get_items_for_view"){
 		$filepath="/";
 		$title = addslashes(optional_param('title', '', PARAM_TEXT));
 		$description = addslashes(optional_param('description', '', PARAM_TEXT));
+		//$description = sauber($_POST["description"]);
 		$itemid=optional_param('itemid', 0, PARAM_INT);
 		if ($itemid>0){
 				$itemrs=$DB->get_record("block_exaportitem",array("id"=>$itemid));
@@ -873,6 +874,17 @@ function write_xml_items($conditions,$view_id=0){
 				//if ($view_id>0 && $item->isoez==1 && $item->attachment==""){
 					//$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'" isoez="'.$item->isoez.'" url="'.$item->attachment.'"></item>';
 				//}else{
+				
+				/*itemauswahl für view: nur gelöste aufgaben/items anzeigen*/
+				if ($view_id>0){
+					if($item->attachment!="" || $item->intro!="") $showitem=true;
+					else $showitem=false;
+				}else{
+					$showitem=true;
+				}
+				/*itemauswahl für view ende*/
+				
+				if($showitem==true){
 					$inhalt.='<item name="'.$item->name.'" id="'.$item->id.'"';
 					if ($view_id>0){
 						if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
@@ -905,6 +917,7 @@ function write_xml_items($conditions,$view_id=0){
 					//else $inhalt.='<texteingabe>false</texteingabe>'."\r\n";
 					$inhalt.='</item>'."\r\n";
 				//}
+				}
 			}
 			$inhalt.='</result> '."\r\n";
 			echo $inhalt;
@@ -1046,6 +1059,13 @@ function block_exaport_delete_oezepsitemfile($itemid){
 		}
 function cdatawrap($wert){
 	if (!empty($wert) && $wert!=" ") $wert='<![CDATA['.$wert.']]>';
+	return $wert;
+}
+function sauber($wert){
+	$wert=strip_tags($wert,"<br><b><p><i><h1><h2>");
+	$wert=str_replace("'","",$wert);
+	//$wert=htmlspecialchars($wert,ENT_COMPAT);
+	$wert=addslashes($wert);
 	return $wert;
 }
 function block_exaport_installoez($userid,$isupdate=false){

@@ -910,11 +910,7 @@ function write_xml_items($conditions,$view_id=0){
 					else $inhalt.=block_exaport_ers_null($item->beispiel_url);
 					$inhalt.='</beispiel_url>'."\r\n";
 					$inhalt.='<beispiel_description>'.cdatawrap($item->beispiel_angabe).'</beispiel_description>'."\r\n";
-					if(strpos($item->name,"Neun")===false){$inhalt.='<texteingabe>false</texteingabe>'."\r\n";}
-					else{
-						$inhalt.='<texteingabe>true</texteingabe>'."\r\n";
-					}
-					//else $inhalt.='<texteingabe>false</texteingabe>'."\r\n";
+					$inhalt.='<texteingabe>'.block_exaport_numtobool($item->iseditable).'</texteingabe>'."\r\n";
 					$inhalt.='</item>'."\r\n";
 				//}
 				}
@@ -935,23 +931,37 @@ function write_xml_categories($conditions,$catid,$userid){
 		echo $key."-".$value."<br>";
 	}
 	print_r($conditions);*/
-	$sozkomparr=array();
+	$catkomparr=array();
 		if ($categories = $DB->get_records("block_exaportcate", $conditions," isoez DESC")){
 			if ($sozkomp = $DB->get_record("block_exacompschooltypes", array("title"=>"Soziale Kompetenzen"))){
 				if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$sozkomp->id))){
 					foreach ($sozsubjs as $k=>$v){
-						$sozkomparr[$v->id]=1;
+						$catkomparr[$v->id]="sozial";
 					}
 				}
-			}
-			//print_r($sozkomparr);die;
+			}        
+			if ($sozkomp = $DB->get_record("block_exacompschooltypes", array("title"=>"Personale Kompetenzen"))){
+				if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$sozkomp->id))){
+					foreach ($sozsubjs as $k=>$v){
+						$catkomparr[$v->id]="personal";
+					}
+				}
+			} 
+			if ($sozkomp = $DB->get_record("block_exacompschooltypes", array("title"=>"Digitale Kompetenzen"))){
+				if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$sozkomp->id))){
+					foreach ($sozsubjs as $k=>$v){
+						$catkomparr[$v->id]="digital";
+					}
+				}
+			} 
+			//print_r($catkomparr);die;
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<result>'."\r\n";
 			foreach($categories as $categorie){
 				
 				$numsubcats=get_number_subcats($categorie->id);
 				$inhalt.='<categorie catid="'.$categorie->id.'" numsubcats="'.$numsubcats.'" progress="'.block_exaport_get_progress($categorie->id,$catid,$userid).'" isOezepsItem="'.block_exaport_numtobool($categorie->isoez).'"';
-				if (!empty($sozkomparr[$categorie->subjid])) $inhalt.=' isSozialeKompetenz="true"';
+				if (!empty($catkomparr[$categorie->subjid])) $inhalt.=' competence_category="'.$catkomparr[$categorie->subjid].'"';
 				$inhalt.='>'."\r\n";
 				$inhalt.='<name>'.cdatawrap($categorie->name).'</name>'."\r\n";
 				$inhalt.='<description>'.cdatawrap($categorie->description).'</description>'."\r\n";
@@ -1076,7 +1086,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		$rse = $DB->get_record_sql($sql);
 		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}
 	}
-	$sql="SELECT DISTINCT concat(top.id,examp.id) as id, subj.title as kat1, subj.titleshort as kat1s,subj.id as subjid, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
+	$sql="SELECT DISTINCT concat(top.id,examp.id) as id, subj.title as kat1, subj.titleshort as kat1s,subj.id as subjid, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
 	INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 	INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
 	INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
@@ -1106,7 +1116,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 			if ($rs->completefile!="") $fileUrl=$rs->completefile;
 			if (!empty($rs->items)) $items=$rs->items;
 			else $items=$rs->item;
-			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid));
+			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable));
 		}
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1 WHERE user_id=".$userid;
 		$DB->execute($sql);

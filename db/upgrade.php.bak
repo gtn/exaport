@@ -148,12 +148,22 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		if (!$dbman->field_exists($table, $field_wert)) {
 			$dbman->add_field($table, $field_wert);
 		}
-		$field_wert = new xmldb_field('sourceid');
-		$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, null, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
+
+		$field_wert2 = new xmldb_field('topicid');
+		$field_wert2->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, null, null, 0, null); // [XMLDB_ENUM, null,] Moodle 2.x deprecated
+		if (!$dbman->field_exists($table, $field_wert2)) {
+			$dbman->add_field($table, $field_wert2);
+		} else {
+			$dbman->change_field_notnull($table, $field_wert2);
+			$dbman->change_field_default($table, $field_wert2);
+		}
+			
+		$table = new xmldb_table('block_exaportitem');
+		$field_wert = new xmldb_field('beispiel_angabe');
 		if (!$dbman->field_exists($table, $field_wert)) {
+			$field_wert->set_attributes(XMLDB_TYPE_TEXT, 'medium', null, null, null, null, null); // [XMLDB_ENUM, null,] Moodle 2.x deprec
 			$dbman->add_field($table, $field_wert);
 		}
-	
 	}
 
 	return $result;

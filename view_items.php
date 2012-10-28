@@ -214,9 +214,9 @@ if ($items) {
 		if ($item->intro) {
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
 			$table->data[$item_i]['name'] .= (strlen($intro)<=20 || $print) ? "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>" :
-			'<div>'.substr($intro, 0,20).'..
+			'<div>'.substr($intro, 0,20).'...
 			<br />
-			<a id="intro_button" href="javascript:anzeigen()">[weiterlesen..]</a>
+			<a id="intro_button" href="javascript:anzeigen()">['.get_string('more').'...]</a>
 			</div>
 			<div id="mehr_text" style="visibility:hidden;">
 			'.substr($intro, 20).'</div>';
@@ -313,10 +313,10 @@ echo '<script type="text/javascript">
 function anzeigen() {
 if (document.getElementById("mehr_text").style.visibility == "hidden") {
 document.getElementById("mehr_text").style.visibility = "visible";
-document.getElementById("intro_button").firstChild.nodeValue = "Ausblenden..";
+document.getElementById("intro_button").firstChild.nodeValue = "['.strtolower(get_string('hide')).'...]";
 } else {
 document.getElementById("mehr_text").style.visibility = "hidden";
-document.getElementById("intro_button").firstChild.nodeValue = "[weiterlesen..]";
+document.getElementById("intro_button").firstChild.nodeValue = "['.get_string('more').'...]";
 }
 }
 </script>';

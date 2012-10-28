@@ -37,7 +37,7 @@ $aid = optional_param('assignmentid', 0, PARAM_INT);
 $cm = get_coursemodule_from_instance('assignment', $aid);
 
 $post = new stdClass();
-$checked_file = new stdClass();
+$checked_file = null;
 $action = 'add';
 
 if (!confirm_sesskey()) {
@@ -103,7 +103,7 @@ if ($action == 'delete') {
 
 require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
-if (($checked_file != '') && ($action == 'add')) {
+if ($action == 'add') {
     $existing->action = $action;
     $existing->courseid = $courseid;
     $existing->type = 'file';
@@ -111,8 +111,7 @@ if (($checked_file != '') && ($action == 'add')) {
     $existing->name = "";
     $existing->categoryid = "";
     $existing->intro = "";
-    //$existing->fullpath     = $checked_file->fullpath;
-    $existing->filename = $checked_file->filename;
+    $existing->filename = $checked_file->get_filename();
     $existing->submission = $assignmentid;
     $existing->activityid = $cm->id;
 }
@@ -150,7 +149,7 @@ switch ($action) {
         $post->action = $action;
         $post->courseid = $courseid;
         $post->submissionid = $assignmentid;
-        $post->filename = $checked_file->filename;
+        $post->filename = $checked_file->get_filename();
         $strAction = get_string('new');
         $post->activityid = $cm->id;
         break;
@@ -166,14 +165,14 @@ if (!$cm = get_coursemodule_from_instance('assignment', $aid)) {
 $filecontext = get_context_instance(CONTEXT_MODULE, $cm->id);
 
 echo "<div class='block_eportfolio_center'>\n";
-echo $OUTPUT->box(block_exaport_print_file(file_encode_url($CFG->wwwroot . '/pluginfile.php', '/' . $filecontext->id . '/mod_assignment/submission/' . $assignmentid . '/' . $filename), $checked_file->filename, $checked_file->filename));
+echo $OUTPUT->box(block_exaport_print_file(file_encode_url($CFG->wwwroot . '/pluginfile.php', '/' . $filecontext->id . '/mod_assignment/submission/' . $assignmentid . '/' . $filename), $checked_file->get_filename(), $checked_file->get_filename()));
 echo "</div>";
 
 $exteditform->set_data($post);
 $exteditform->display();
 
 echo $OUTPUT->footer($course);
-die;
+exit;
 
 /**
  * Update a file in the database
@@ -199,13 +198,30 @@ function do_add($post, $blogeditform, $returnurl, $courseid, $checked_file) {
 
     $post->userid = $USER->id;
     $post->timemodified = time();
-    $post->course = $courseid;
+    $post->courseid = $courseid;
+	$post->intro = '';
     $post->type = 'file';
-    $post->attachment = $checked_file->itemid;
-    $post->intro = $post->intro['text'];
+    $post->attachment = $checked_file->get_itemid();
 
     // Insert the new blog entry.
     $post->id = $DB->insert_record('block_exaportitem', $post);
+
+	$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+	$post->introformat = FORMAT_HTML;
+	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+
+	$filerecord = new stdClass();
+	$context = get_context_instance(CONTEXT_USER, $USER->id);
+	$filerecord->contextid = $context->id;
+	$filerecord->component = 'block_exaport';
+	$filerecord->filearea  = 'item_file';
+	$filerecord->itemid    = $post->id;
+
+	$fs = get_file_storage();
+	$fs->create_file_from_storedfile($filerecord, $checked_file);
+
+    // Insert the new blog entry.
+	$DB->update_record('block_exaportitem', $post);
 
     if(block_exaport_check_competence_interaction()) {    
 
@@ -255,27 +271,10 @@ function check_assignment_file($assignmentid, $file) {
         foreach ($files as $actFile) {
 
             if ($actFile->get_filename() == $file) {
-                $fileinfo->filename = $file;
-                $fileinfo->itemid = $actFile->get_itemid();
-
-                return $fileinfo;
+				return $actFile;
             }
         }
     }
-    else
-        echo'nope';
-    return false;
-    $basedir = block_exaport_moodleimport_file_area_name($USER->id, $assignment->assignment, $assignment->courseid);
 
-    if ($files = get_directory_list($CFG->dataroot . '/' . $basedir)) {
-        foreach ($files as $key => $actFile) {
-            if ($actFile == $file) {
-                $fileinfo->filename = $file;
-                $fileinfo->basedir = $basedir;
-                $fileinfo->fullpath = $basedir . '/' . $actFile;
-                return $fileinfo;
-            }
-        }
-    }
-    return false;
+    return null;
 }

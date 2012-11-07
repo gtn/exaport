@@ -230,11 +230,11 @@ der Pfad: <input type="text" size="100" value="/mod/questionnaire/view.php?id=18
  		<br><input type="submit" value="Özeps eigene Datei löschen" class="submitbtn">
 </form>
 
-<h3>get_courseid</h3>
+<h3>alle meine Özeps items löschen</h3>
 <form action="epop.php" method="post" enctype="multipart/form-data">
  		<br><span class="title">key:</span> <input type="text" name="key" value="">
- 		<br><span class="title">action:</span> <input type="text" name="action" value="get_courseid">
- 		<br><input type="submit" value="get_courseid" class="submitbtn">
+ 		<br><span class="title">action:</span> <input type="text" name="action" value="delete_all_oezeps">
+ 		<br><input type="submit" value="Özeps alle meine einträge löschen" class="submitbtn">
 </form>
  </body>
 </html>

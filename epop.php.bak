@@ -925,9 +925,9 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 						if ($item->intro!="") $progress=1;
 						else $progress=0;
 					}
-					//if ($competence_category!=""){
+					if ($competence_category!=""){
 						$inhalt.=' competence_category="'.$competence_category.'"';
-					//}
+					}
 					$inhalt.=' catid="'.$item->categoryid.'" type="'.$item->type.'" url="'.$item->url.'" progress="'.$progress.'" isOezepsItem="'.block_exaport_numtobool($item->isoez).'">'."\r\n";
 					$inhalt.='<name>'.cdatawrap($item->name).'</name>'."\r\n";
 					$inhalt.='<description>'.cdatawrap($item->intro).'</description>'."\r\n";

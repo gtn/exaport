@@ -105,7 +105,7 @@ if ($action=="login"){
 	else{
 		$selected_user = optional_param('selected_user', 0, PARAM_ALPHANUMEXT);
 		$shareall=optional_param('shareall', 0, PARAM_INT);
-		$externaccess=optional_param('externaccess', 1, PARAM_INT);
+		$externaccess=optional_param('externaccess', 0, PARAM_INT);
 		$view_id = optional_param('view_id', ' ', PARAM_INT);
 		$user=explode("_",$selected_user);
 		$DB->delete_records("block_exaportviewshar",array("viewid"=>$view_id));

@@ -365,34 +365,43 @@ else if ($action=="get_items_for_view"){
 	}
 	
 }else if ($action=="getTopics"){
-	$sql = "SELECT t.title,t.id FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
-	$sql.= " GROUP BY t.title,t.id";
-	$topics = $DB->get_records_sql($sql);
-	header ("Content-Type:text/xml");
-	$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
-	$inhalt.='<result>'."\r\n";
-			foreach($topics as $topic){
-				$inhalt.="<topic name='".$topic->title."'  id='".$topic->id."'>";
-					$inhalt.="</topic>"."\r\n";
-			}
-	$inhalt.='</result> '."\r\n";
-	echo $inhalt;
+	$user=checkhash();
+	if (!$user) echo "invalid hash";
+	else{
+		$sql = "SELECT t.title,t.id FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		$sql.= " GROUP BY t.title,t.id";
+		$topics = $DB->get_records_sql($sql);
+		header ("Content-Type:text/xml");
+		$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
+		$inhalt.='<result>'."\r\n";
+				foreach($topics as $topic){
+					$inhalt.="<topic name='".$topic->title."'  id='".$topic->id."'>";
+						$inhalt.="</topic>"."\r\n";
+				}
+		$inhalt.='</result> '."\r\n";
+		echo $inhalt;
+	}
 }else if ($action=="getSubjects"){
-	$sql = "SELECT s.title,s.id FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
-	$sql.= " GROUP BY s.title,s.id";
-	$subjects = $DB->get_records_sql($sql);
-	header ("Content-Type:text/xml");
-	$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
-	$inhalt.='<result>'."\r\n";
-			foreach($subjects as $subject){
-				$inhalt.="<subject name='".$subject->title."'  id='".$subject->id."'";
-				if (block_exaport_competence_selected($subject->id)) $inhalt.=" competence_selected='true'";
-				else $inhalt.=" competence_selected='false'";
-				$inhalt.=">";
-					$inhalt.="</subject>"."\r\n";
-			}
-	$inhalt.='</result> '."\r\n";
-	echo $inhalt;
+	$user=checkhash();
+	if (!$user) echo "invalid hash";
+	else{
+		$itemid=optional_param('itemid', 0, PARAM_INT);
+		$sql = "SELECT s.title,s.id FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		$sql.= " GROUP BY s.title,s.id";
+		$subjects = $DB->get_records_sql($sql);
+		header ("Content-Type:text/xml");
+		$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
+		$inhalt.='<result>'."\r\n";
+				foreach($subjects as $subject){
+					$inhalt.="<subject name='".$subject->title."'  id='".$subject->id."'";
+					if (block_exaport_competence_selected($subject->id,$user->id,$itemid)) $inhalt.=" competence_selected='true'";
+					else $inhalt.=" competence_selected='false'";
+					$inhalt.=">";
+						$inhalt.="</subject>"."\r\n";
+				}
+		$inhalt.='</result> '."\r\n";
+		echo $inhalt;
+	}
 }else if ($action=="getCompetences" || $action=="getExamples"){
 	$user=checkhash();
 	if (!$user) echo "invalid hash";
@@ -1107,15 +1116,20 @@ function sauber($wert){
 	$wert=addslashes($wert);
 	return $wert;
 }
-function block_exaport_competence_selected($subjid){
+function block_exaport_competence_selected($subjid,$userid,$itemid){
 	global $DB;
 	$sql="SELECT descr.id,dmm.id FROM {block_exacompsubjects} subj 
 		INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 		INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
 		INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
 		INNER JOIN {block_exacompdescractiv_mm} dmm ON dmm.descrid=descr.id
-		WHERE subj.id=".$subjid;
+		INNER JOIN {block_exaportitem} item ON item.id=dmm.activityid AND activitytype=2000
+		WHERE subj.id=".$subjid." AND item.userid=".$userid;
+		if ($itemid>0){
+			$sql.=" AND dmm.activityid=".$itemid;
+		}
 		//echo $sql;
+		//
 		if ($res=$DB->get_records_sql($sql)) return true;
 		else return false;
 }

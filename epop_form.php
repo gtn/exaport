@@ -107,6 +107,7 @@ der Pfad: <input type="text" size="100" value="/mod/questionnaire/view.php?id=18
 <form action="epop.php" method="post" enctype="multipart/form-data">
  		<br><span class="title">key:</span> <input type="text" name="key" value="">
  		<br><span class="title">action:</span> <input type="text" name="action" value="getSubjects">
+ 		<br><span class="title">itemid:</span> <input type="text" name="itemid" value="0">
  		<br><input type="submit" value="get Subjects" class="submitbtn">
 </form>
 

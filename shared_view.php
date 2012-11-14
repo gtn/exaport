@@ -111,8 +111,8 @@ $conditions = array("id" => $USER->id);
 if (!$user = $DB->get_record("user", $conditions)) {
 	print_error("nouserforid", "block_exaport");
 }
-$conditions = array("id" => $USER->id);
-$portfolioUser = $DB->get_record("block_exaportuser", $conditions);
+
+$portfolioUser = block_exaport_get_user_preferences();
 
 // read blocks
 $query = "select b.*". // , i.*, i.id as itemid".

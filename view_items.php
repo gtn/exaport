@@ -306,7 +306,7 @@ else
 }
 echo "</fieldset>
 </form>";
-echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>Druckansicht</a>";
+echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>".get_string('printerfriendly', 'group')."</a>";
 echo "</div>";
 }
 echo '<script type="text/javascript">

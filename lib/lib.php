@@ -173,7 +173,6 @@ function block_exaport_course_has_desp() {
 	
 	if (isset($COURSE->has_desp))
 		return $COURSE->has_desp;
-	
 	// desp block installed?
 	if (!is_dir(dirname(__FILE__).'/../../desp'))
 		return $COURSE->has_desp = false;

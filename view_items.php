@@ -213,13 +213,27 @@ if ($items) {
 		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=".$type."&att=".$item->attachment)."\">" . $item->name . "</a>";
 		if ($item->intro) {
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
-			$table->data[$item_i]['name'] .= (strlen($intro)<=20 || $print) ? "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>" :
-			'<div>'.substr($intro, 0,20).'...
-			<br />
-			<a id="intro_button" href="javascript:anzeigen()">['.get_string('more').'...]</a>
-			</div>
-			<div id="mehr_text" style="visibility:hidden;">
-			'.substr($intro, 20).'</div>';
+			
+			$shortIntro = substr(trim(strip_tags($intro)), 0, 20);
+			
+			if (!$intro) {
+				// no intro
+			} elseif ($print) {
+				// show whole intro for printing
+				$table->data[$item_i]['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>";
+			} elseif ($shortIntro == $intro) {
+				// very short one
+				$table->data[$item_i]['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>";
+			} else {
+				// display show/hide buttons
+				$table->data[$item_i]['name'] .= 
+				'<div><div id="short-preview-'.$item_i.'"><div>'.$shortIntro.'...</div>
+				<a href="javascript:long_preview_show('.$item_i.')">['.get_string('more').'...]</a>
+				</div>
+				<div id="long-preview-'.$item_i.'" style="display: none;"><div>'.$intro.'</div>
+				<a href="javascript:long_preview_hide('.$item_i.')">['.strtolower(get_string('hide')).'...]</a>
+				</div>';
+			}
 		}
 
 		$table->data[$item_i]['date'] = userdate($item->timemodified);
@@ -310,15 +324,15 @@ echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&pri
 echo "</div>";
 }
 echo '<script type="text/javascript">
-function anzeigen() {
-if (document.getElementById("mehr_text").style.visibility == "hidden") {
-document.getElementById("mehr_text").style.visibility = "visible";
-document.getElementById("intro_button").firstChild.nodeValue = "['.strtolower(get_string('hide')).'...]";
-} else {
-document.getElementById("mehr_text").style.visibility = "hidden";
-document.getElementById("intro_button").firstChild.nodeValue = "['.get_string('more').'...]";
+function long_preview_show(i) {
+	document.getElementById("short-preview-" + i).style.display = "none";
+	document.getElementById("long-preview-" + i).style.display = "block";
 }
+function long_preview_hide(i) {
+	document.getElementById("short-preview-" + i).style.display = "block";
+	document.getElementById("long-preview-" + i).style.display = "none";
 }
+
 </script>';
 if(!$print) echo $OUTPUT->footer($course);
 else echo '</body></html>';

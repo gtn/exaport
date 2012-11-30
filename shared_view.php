@@ -37,6 +37,54 @@ $url = '/blocks/exabis_competences/shared_view.php';
 $PAGE->set_url($url);
 $context = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_context($context);
+
+if (!$view = block_exaport_get_view_from_access($access)) {
+	print_error("viewnotfound", "block_exaport");
+}
+
+$conditions = array("id" => $view->userid);
+if (!$user = $DB->get_record("user", $conditions)) {
+	print_error("nouserforid", "block_exaport");
+}
+
+$portfolioUser = block_exaport_get_user_preferences($user->id);
+
+// read blocks
+$query = "select b.*". // , i.*, i.id as itemid".
+	 " FROM {block_exaportviewblock} b".
+	 // " LEFT JOIN {$CFG->prefix}block_exaportitem i ON b.type='item' AND b.itemid=i.id".
+	 " WHERE b.viewid = ? ORDER BY b.positionx, b.positiony";
+
+$blocks = $DB->get_records_sql($query, array($view->id));
+
+// read columns
+$columns = array();
+foreach ($blocks as $block) {
+	if (!isset($columns[$block->positionx]))
+		$columns[$block->positionx] = array();
+
+	if ($block->type == 'item') {
+		$conditions = array("id" => $block->itemid);
+		if ($item = $DB->get_record("block_exaportitem", $conditions)) {
+			$block->item = $item;
+		} else {
+			$block->type = 'text';
+		}
+	}
+	$columns[$block->positionx][] = $block;
+}
+
+
+
+
+$CFG->stylesheets[] = dirname($_SERVER['PHP_SELF']).'/css/shared_view.css';
+
+if ($view->access->request == 'intern') {
+	block_exaport_print_header("views");
+} else {
+	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+}
+
 echo '
 <style type="text/css">
 
@@ -103,52 +151,6 @@ echo '
 }
 </style>';
 
-if (!$view = block_exaport_get_view_from_access($access)) {
-	print_error("viewnotfound", "block_exaport");
-}
-
-$conditions = array("id" => $USER->id);
-if (!$user = $DB->get_record("user", $conditions)) {
-	print_error("nouserforid", "block_exaport");
-}
-
-$portfolioUser = block_exaport_get_user_preferences();
-
-// read blocks
-$query = "select b.*". // , i.*, i.id as itemid".
-	 " FROM {block_exaportviewblock} b".
-	 // " LEFT JOIN {$CFG->prefix}block_exaportitem i ON b.type='item' AND b.itemid=i.id".
-	 " WHERE b.viewid = ? ORDER BY b.positionx, b.positiony";
-
-$blocks = $DB->get_records_sql($query, array($view->id));
-
-// read columns
-$columns = array();
-foreach ($blocks as $block) {
-	if (!isset($columns[$block->positionx]))
-		$columns[$block->positionx] = array();
-
-	if ($block->type == 'item') {
-		$conditions = array("id" => $block->itemid);
-		if ($item = $DB->get_record("block_exaportitem", $conditions)) {
-			$block->item = $item;
-		} else {
-			$block->type = 'text';
-		}
-	}
-	$columns[$block->positionx][] = $block;
-}
-
-
-
-
-$CFG->stylesheets[] = dirname($_SERVER['PHP_SELF']).'/css/shared_view.css';
-
-if ($view->access->request == 'intern') {
-	block_exaport_print_header("views");
-} else {
-	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
-}
 
 $comp = block_exaport_check_competence_interaction();
 

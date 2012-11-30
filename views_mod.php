@@ -342,6 +342,8 @@ if ($view) {
 	$postView->blocks = json_encode($blocks);
 }
 
+block_exaport_print_header('views');
+
 echo '<script type="text/javascript">'."\n";
 include 'javascript/jquery.js';
 include 'javascript/jquery.ui.js';
@@ -510,7 +512,6 @@ echo '
 }
 
 </style>';
-block_exaport_print_header('views');
 
 $editform->set_data($postView);
 $form = $editform->toArray();

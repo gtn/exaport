@@ -16,31 +16,75 @@ require_once dirname(__FILE__).'/lib/sharelib.php';
 //                                                     itemid
 //                                                       file name
 function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
-    global $CFG, $DB;
+    global $USER, $CFG, $DB;
 
 	// always require login, at least guest
 	require_login();
-
-	$filename = array_pop($args);
-	$id = array_pop($args);
-	if (array_pop($args) != 'itemid') print_error('wrong params');
 	
-	// other params together are the access string
-	$access = join('/', $args);
-	
-	// item exists?
-	$item = block_exaport_get_item($id, $access);
-	if (!$item) print_error('Item not found');
+	if ($filearea == 'item_content') {
+		$filename = array_pop($args);
+		$id = array_pop($args);
+		if (array_pop($args) != 'itemid') print_error('wrong params');
+		
+		// other params together are the access string
+		$access = join('/', $args);
+		
+		// item exists?
+		$item = block_exaport_get_item($id, $access);
+		if (!$item) print_error('Item not found');
 
-	// get file
-	$fs = get_file_storage();
-	$file = $fs->get_file(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
+		// get file
+		$fs = get_file_storage();
+		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
-	// serve file
-	if ($file) {
-		send_stored_file($file);
+		// serve file
+		if ($file) {
+			send_stored_file($file);
+		} else {
+			return false;
+		}
+	} elseif ($filearea == 'personal_information_view') {
+		$filename = array_pop($args);
+		
+		// other params together are the access string
+		$access = join('/', $args);
+
+		if (!$view = block_exaport_get_view_from_access($access)) {
+			print_error("viewnotfound", "block_exaport");
+		}
+		
+		// view has personal information?
+		$sql = "SELECT b.* FROM {block_exaportviewblock} b".
+				" WHERE b.viewid=? AND".
+				" b.type='personal_information'";
+		if (!$DB->record_exists_sql($sql, array($view->id)))
+			return false;
+								 
+		// get file
+		$fs = get_file_storage();
+		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $view->userid)->id, 'block_exaport', 'personal_information', $view->userid, '/', $filename);
+
+		// serve file
+		if ($file) {
+			send_stored_file($file);
+		} else {
+			return false;
+		}
+	} elseif ($filearea == 'personal_information_self') {
+		$filename = join('/', $args);
+		
+		// get file
+		$fs = get_file_storage();
+		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/', $filename);
+
+		// serve file
+		if ($file) {
+			send_stored_file($file);
+		} else {
+			return false;
+		}
 	} else {
-		return false;
+		die('wrong file area');
 	}
 }
 

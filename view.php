@@ -59,7 +59,6 @@ if (block_exaport_feature_enabled('share_item')) {
 
 echo "<br />";
 
-$description = '';
 $show_information = true;
 
 $userpreferences = block_exaport_get_user_preferences();
@@ -71,6 +70,8 @@ echo $OUTPUT->box(text_to_html(get_string("explainpersonal", "block_exaport")), 
 
 echo "</div>";
 
+$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+
 if ($edit) {
     if (!confirm_sesskey()) {
         print_error("badsessionkey", "block_exaport");
@@ -81,13 +82,8 @@ if ($edit) {
     if ($informationform->is_cancelled()) {
         
     } else if ($fromform = $informationform->get_data()) {
-        //trusttext_after_edit($newentry->description, $context);
-
-        $messagetext = $fromform->description['text'];
-        // format of content
-        $messageformat = $fromform->description['format'];
-
-        block_exaport_set_user_preferences(array('description' => $messagetext, 'persinfo_timemodified' => time()));
+		$fromform = file_postupdate_standard_editor($fromform, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'personal_information', $USER->id);
+        block_exaport_set_user_preferences(array('description' => $fromform->description, 'persinfo_timemodified' => time()));
 
         // read new data from the database
         $userpreferences = block_exaport_get_user_preferences();
@@ -96,15 +92,16 @@ if ($edit) {
         echo $OUTPUT->box(get_string("descriptionsaved", "block_exaport"), 'center', '40%', '#ccffbb');
     } else {
         $show_information = false;
-//        $informationform->set_data(array('courseid' => $courseid,
-//            'description' => $description,
-//            'cataction' => 'save',
-//            'edit' => 1));
+
         $data = new stdClass();
         $data->courseid = $courseid;
-        $data->description['text'] = $description;
+        $data->description = $description;
+		$data->descriptionformat = FORMAT_HTML;
         $data->cataction = 'save';
         $data->edit = 1;
+		
+		$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'personal_information', $USER->id);
+		
         $informationform->set_data($data);
         $informationform->display();
     }
@@ -129,6 +126,7 @@ if ($show_information) {
 
     echo '</td><td class="content">' . "\n";
 
+	$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information_self');
     echo $description;
 
     echo '</td></tr></table>' . "\n\n";

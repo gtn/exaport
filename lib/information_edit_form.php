@@ -13,7 +13,7 @@ class block_exaport_personal_information_form extends moodleform {
 //		$mform->setType('description', PARAM_RAW);
 //		$mform->addRule('description', get_string('required'), 'required', null, 'client');
 
-                $mform->addElement('editor', 'description', get_string('steckbrief', 'block_exaport'), null,
+                $mform->addElement('editor', 'description_editor', get_string('steckbrief', 'block_exaport'), null,
                     array('maxfiles' => EDITOR_UNLIMITED_FILES));
                 
 		$mform->addElement('hidden', 'cataction');

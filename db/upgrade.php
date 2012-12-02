@@ -155,6 +155,48 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		}
 	
 	}
+	
+	if ($oldversion < 2012120301) {
+		// update wrong filearea storage in personal information
+
+		// update files
+		$fs = get_file_storage();
+
+		function block_exaport_wrong_personal_information_upgrade_2012120301($matches) {
+			// http://test665.ethinkeducation.com/pluginfile.php/5743/block_exaport/personal_information_self/7-eleven-brand.svg.png
+			// http://test665.ethinkeducation.com/draftfile.php/66/user/draft/596724312/Rachel.jpg
+			
+			$context = get_context_instance(CONTEXT_USER, $GLOBALS['test_for_userid']);
+			if ($context->id != $matches['contextid']) return;
+			
+			$fs = get_file_storage();
+			$file = $fs->get_area_files($matches['contextid'], 'user', 'draft', $matches['draftid'], null, false);
+			$file = reset($file);
+			if (!$file) return;
+			
+			$fs->create_file_from_storedfile(array(
+				'contextid' => $matches['contextid'],
+				'component' => 'block_exaport',
+				'filearea' => 'personal_information',
+				'itemid' => $GLOBALS['test_for_userid'],
+				'filename' => $file->get_filename()
+			), $file);
+			
+			return '@@PLUGINFILE@@/';
+		}
+		
+		foreach ($DB->get_records_select('block_exaportuser', "description LIKE '%draftfile%'") as $personalInfo) {
+		
+			$GLOBALS['test_for_userid'] = $personalInfo->user_id;
+
+			$description = preg_replace_callback("!".preg_quote($CFG->wwwroot)."/draftfile.php/(?<contextid>[0-9]+)/user/draft/(?<draftid>[0-9]+)/!", "block_exaport_wrong_personal_information_upgrade_2012120301", $personalInfo->description);
+			
+			$update = new stdClass();
+			$update->id         = $personalInfo->id;
+			$update->description = $description;
+			$DB->update_record('block_exaportuser', $update);
+		}
+	}
 
 	return $result;
 }

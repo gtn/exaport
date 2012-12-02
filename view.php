@@ -126,7 +126,7 @@ if ($show_information) {
 
     echo '</td><td class="content">' . "\n";
 
-	$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information_self');
+	$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information_self', null);
     echo $description;
 
     echo '</td></tr></table>' . "\n\n";

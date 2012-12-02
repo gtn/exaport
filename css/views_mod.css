@@ -1,4 +1,3 @@
-
 .clear {
 	display: block;
 	height: 1px;
@@ -34,7 +33,7 @@
 }
 
 .view-group-header {
-	background: url(../../../theme/standardwhite/gradient.jpg);
+	background: url(../../../theme/formal_white/pix/gradient_h.jpg);
 }
 .view-group-header div {
 	padding: 6px 5px 3px 28px;
@@ -85,10 +84,6 @@
 	max-height: 300px;
 	overflow: auto;
 }
-#portfolioExtras ul {
-	max-height: 300px;
-	overflow: auto;
-}
 .portfolioOptions {
 	list-style: none;
 	margin: 0;
@@ -129,6 +124,7 @@
 	position: relative;
 	min-width: 300px;
 	margin: 10px;
+	list-style-type: none;
 }
 
 .portfolioDesignBlocks li .header {

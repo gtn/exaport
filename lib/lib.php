@@ -280,15 +280,17 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
     print_tabs(array($tabs, $tabs_sub), $currenttab, null, $activetabsubs);
 
 	if (block_exaport_course_has_desp() && (strpos($currenttab,'bookmarks') === 0) ) {
-		?>
-		   <div id="messageboxses1" style="background: url('pix/message_ses1.gif') no-repeat left top; ">
-				<div id="messagetxtses1">
-					Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.
+		if (file_exists("pix/message_ses1.gif")){//desp manderl nicht bei allen anzeigen
+			?>
+			   <div id="messageboxses1" style="background: url('pix/message_ses1.gif') no-repeat left top; ">
+					<div id="messagetxtses1">
+						<?php echo get_string("desp_einleitung", "block_exaport"); ?>
+					</div>
 				</div>
-			</div>
-			
-			<br /><br />
-		<?php
+				
+				<br /><br />
+			<?php
+		}
 	}
 	
 }

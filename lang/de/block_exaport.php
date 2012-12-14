@@ -297,6 +297,8 @@ $string['contactcomps'] = 'Alle schließen';
 $string['studentcomps'] = 'Hier kannst du einschätzen, ob folgende Kompetenzen durch Dein Artefakt erreicht wurden.';
 $string['teachercomps'] = 'Hier können Sie beurteilen, ob der Schüler folgende Kompetenzen durch sein Artefakt erreicht hat.';
 $string['competences'] = 'Kompetenzen';
+$string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.';
+
 //settings
 $string['settings_interaktion_exacomp_head'] = 'Interaktion exabis ePortfolio - exabis competencies';
 $string['settings_interaktion_exacomp_body'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';

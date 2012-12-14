@@ -291,6 +291,7 @@ $string['contactcomps'] = 'Contract all';
 $string['studentcomps'] = 'Here you can self-assess whether you have acquired the competency with your artefact.';
 $string['teachercomps'] = 'Here you can assess whether your students have acquired the competency with this artefact.';
 $string['competences'] = 'competencies';
+$string['desp_einleitung'] = 'Here is nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.';
 $string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - exabis competencies';
 $string['settings_interaktion_exacomp_body'] = 'Interaction with block exabis competencies, in case it is installed';
 $string['settings_allow_loginas_head'] = 'Allow login as';

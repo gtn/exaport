@@ -179,7 +179,7 @@ function block_exaport_course_has_desp() {
 	
 	$context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
 	
-	return $COURSE->has_desp = $DB->record_exists('block_instances', array('blockname'=>'desp', 'parentcontextid'=>$context->id));
+	return $COURSE->has_desp = $DB->record_exists('block_instances', array('blockname'=>'digitales_esp', 'parentcontextid'=>$context->id));
 }
 
 /**

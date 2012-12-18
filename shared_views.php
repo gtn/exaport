@@ -33,7 +33,7 @@ global $OUTPUT, $CFG;
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
 $access = optional_param('access', 0, PARAM_TEXT);
-
+$u= required_param('u',0, PARAM_INT);
 require_login($courseid);
 
 $context = get_context_instance(CONTEXT_SYSTEM);
@@ -73,13 +73,15 @@ block_exaport_print_header("sharedbookmarks");
 $strheader = get_string("sharedbookmarks", "block_exaport");
 
 echo "<div class='block_eportfolio_center'>\n";
-
+if ($u>0){
+$whre=" AND u.id=".$u;}
+else $whre="";
 $views = $DB->get_records_sql(
                 "SELECT v.*, u.firstname, u.lastname, u.picture" .
                 " FROM {user} AS u" .
                 " JOIN {block_exaportview} v ON u.id=v.userid" .
                 " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?" .
-                " WHERE (v.shareall=1 OR vshar.userid IS NOT NULL)" .
+                " WHERE (v.shareall=1 OR vshar.userid IS NOT NULL)".$whre .
                 " $sql_sort", array($USER->id));
 
 function exaport_search_views($views, $column, $value) {

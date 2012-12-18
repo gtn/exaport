@@ -159,7 +159,8 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform->setType('description', PARAM_TEXT);
 
 		if (block_exaport_course_has_desp()) {
-			$sql = "SELECT lang.id,lang.name FROM {block_desp_lang} lang WHERE id IN(SELECT langid FROM {block_desp_check_lang} WHERE userid=?) OR id IN (SELECT langid FROM {block_desp_lanhistories} WHERE userid=?) ORDER BY lang.name";
+			$langcode=get_string("langcode","block_desp");
+			$sql = "SELECT lang.id,lang.".$langcode." as name FROM {block_desp_lang} lang WHERE id IN(SELECT langid FROM {block_desp_check_lang} WHERE userid=?) OR id IN (SELECT langid FROM {block_desp_lanhistories} WHERE userid=?) ORDER BY lang.name";
 			$languages = $DB->get_records_sql_menu($sql, array($USER->id, $USER->id));
 
 			$languages[0]='';

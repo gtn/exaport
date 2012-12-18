@@ -53,18 +53,22 @@ $PAGE->set_url($url);
 if(!$print)block_exaport_print_header("bookmarks".$type_plural);
 else {
 	?>
-	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-		<head>
-		<title>Alle Eintr&auml;ge</title>
+<head>
+<title>Alle Eintr&auml;ge</title>
 
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <meta content="moodle, Alle Eintr&auml;ge" name="keywords" />
-<link href="<?php echo $CFG->wwwroot;?>/theme/styles.php/standard/1341490079/all" type="text/css" rel="stylesheet" />
-<link href="<?php echo $CFG->wwwroot;?>/theme/yui_combo.php?3.5.1/build/cssreset/reset.css&3.5.1/build/cssfonts/fonts.css&3.5.1/build/cssgrids/grids.css&3.5.1/build/cssbase/base.css" type="text/css" rel="stylesheet" />
+<link
+	href="<?php echo $CFG->wwwroot;?>/theme/styles.php/standard/1341490079/all"
+	type="text/css" rel="stylesheet" />
+<link
+	href="<?php echo $CFG->wwwroot;?>/theme/yui_combo.php?3.5.1/build/cssreset/reset.css&3.5.1/build/cssfonts/fonts.css&3.5.1/build/cssgrids/grids.css&3.5.1/build/cssbase/base.css"
+	type="text/css" rel="stylesheet" />
 <link href="printversion.css" type="text/css" rel="stylesheet" />
 <?php 
-	echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet" />';	
+echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet" />';
 echo '</head><body>';
 }
 block_exaport_setup_default_categories();
@@ -109,36 +113,36 @@ else{
 	$sql_type_where = " AND i.type=?";
 	$condition = array($USER->id, $type);
 }
-	
+
 if(strcmp("sqlsrv", $CFG->dbtype)==0){
-	
-	$query = "SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(INTRO as text) intro, 
-			i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment,
-			i.sortorder, i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, 
-			cast(BEISPIEL as text)beispiel_angabe,
-			i.cname, i.cname_parent, i.coursename,comments FROM(
-			SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar) INTRO, 
-			i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder, 
-			i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, cast(i.beispiel_angabe AS varchar) BEISPIEL,
-			ic.name AS cname, ic2.name AS cname_parent, c.fullname AS coursename, COUNT( com.id ) AS comments
-			FROM {block_exaportitem} i 
-			JOIN {block_exaportcate} ic ON i.categoryid = ic.id 
-			LEFT JOIN {block_exaportcate} ic2 ON ic.pid=ic2.id 
-			LEFT JOIN {course} c ON i.courseid = c.id 
-			LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
-			WHERE i.userid=? $sql_type_where GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar), 
-			i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
-			i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, CAST(i.beispiel_angabe AS varchar), ic.name,
-			ic2.name,c.fullname )i $sql_sort ";
+
+	$query = "SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(INTRO as text) intro,
+	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment,
+	i.sortorder, i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid,
+	cast(BEISPIEL as text)beispiel_angabe,
+	i.cname, i.cname_parent, i.coursename,comments FROM(
+	SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar) INTRO,
+	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
+	i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, cast(i.beispiel_angabe AS varchar) BEISPIEL,
+	ic.name AS cname, ic2.name AS cname_parent, c.fullname AS coursename, COUNT( com.id ) AS comments
+	FROM {block_exaportitem} i
+	JOIN {block_exaportcate} ic ON i.categoryid = ic.id
+	LEFT JOIN {block_exaportcate} ic2 ON ic.pid=ic2.id
+	LEFT JOIN {course} c ON i.courseid = c.id
+	LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
+	WHERE i.userid=? $sql_type_where GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar),
+	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
+	i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, CAST(i.beispiel_angabe AS varchar), ic.name,
+	ic2.name,c.fullname )i $sql_sort ";
 }
 else{
 	$query = "select i.*, ic.name AS cname, ic2.name AS cname_parent, c.fullname As coursename, COUNT(com.id) As comments".
-	 " from {block_exaportitem} i".
-	 " join {block_exaportcate} ic on i.categoryid = ic.id".
-	 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-	 " left join {course} c on i.courseid = c.id".
-	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-	 " where i.userid = ? $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename $sql_sort";
+			" from {block_exaportitem} i".
+			" join {block_exaportcate} ic on i.categoryid = ic.id".
+			" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+			" left join {course} c on i.courseid = c.id".
+			" left join {block_exaportitemcomm} com on com.itemid = i.id".
+			" where i.userid = ? $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename $sql_sort";
 }
 $items = $DB->get_records_sql($query, $condition);
 
@@ -213,9 +217,12 @@ if ($items) {
 		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=".$type."&att=".$item->attachment)."\">" . $item->name . "</a>";
 		if ($item->intro) {
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
-			
+
 			$shortIntro = substr(trim(strip_tags($intro)), 0, 20);
-			
+			if(preg_match_all('#(?:<iframe[^>]*)(?:(?:/>)|(?:>.*?</iframe>))#i', $intro, $matches)) {
+				$shortIntro = $matches[0][0];
+			}
+
 			if (!$intro) {
 				// no intro
 			} elseif ($print) {
@@ -226,7 +233,7 @@ if ($items) {
 				$table->data[$item_i]['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>";
 			} else {
 				// display show/hide buttons
-				$table->data[$item_i]['name'] .= 
+				$table->data[$item_i]['name'] .=
 				'<div><div id="short-preview-'.$item_i.'"><div>'.$shortIntro.'...</div>
 				<a href="javascript:long_preview_show('.$item_i.')">['.get_string('more').'...]</a>
 				</div>
@@ -297,40 +304,40 @@ if ($items) {
 }
 
 if(!$print) {
-echo "<div class='block_eportfolio_center'>";
+	echo "<div class='block_eportfolio_center'>";
 
-echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
-<fieldset>
-<input type=\"hidden\" name=\"action\" value=\"add\"/>
-<input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
-<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-if ($type != 'all')
-{
-	echo '<input type="hidden" name="type" value="'.$type.'" />';
-	echo "<input type=\"submit\" value=\"" . get_string("new".$type, "block_exaport"). "\"/>";
-}
-else
-{
-	echo '<select name="type">';
-	echo '<option value="link">'.get_string("link", "block_exaport")."</option>";
-	echo '<option value="file">'.get_string("file", "block_exaport")."</option>";
-	echo '<option value="note">'.get_string("note", "block_exaport")."</option>";
-	echo '</select>';
-	echo "<input type=\"submit\" value=\"" . get_string("new", "block_exaport"). "\"/>";
-}
-echo "</fieldset>
-</form>";
-echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>".get_string('printerfriendly', 'group')."</a>";
-echo "</div>";
+	echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
+	<fieldset>
+	<input type=\"hidden\" name=\"action\" value=\"add\"/>
+	<input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
+	<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
+	if ($type != 'all')
+	{
+		echo '<input type="hidden" name="type" value="'.$type.'" />';
+		echo "<input type=\"submit\" value=\"" . get_string("new".$type, "block_exaport"). "\"/>";
+	}
+	else
+	{
+		echo '<select name="type">';
+		echo '<option value="link">'.get_string("link", "block_exaport")."</option>";
+		echo '<option value="file">'.get_string("file", "block_exaport")."</option>";
+		echo '<option value="note">'.get_string("note", "block_exaport")."</option>";
+		echo '</select>';
+		echo "<input type=\"submit\" value=\"" . get_string("new", "block_exaport"). "\"/>";
+	}
+	echo "</fieldset>
+	</form>";
+	echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>".get_string('printerfriendly', 'group')."</a>";
+	echo "</div>";
 }
 echo '<script type="text/javascript">
 function long_preview_show(i) {
-	document.getElementById("short-preview-" + i).style.display = "none";
-	document.getElementById("long-preview-" + i).style.display = "block";
+document.getElementById("short-preview-" + i).style.display = "none";
+document.getElementById("long-preview-" + i).style.display = "block";
 }
 function long_preview_hide(i) {
-	document.getElementById("short-preview-" + i).style.display = "block";
-	document.getElementById("long-preview-" + i).style.display = "none";
+document.getElementById("short-preview-" + i).style.display = "block";
+document.getElementById("long-preview-" + i).style.display = "none";
 }
 
 </script>';

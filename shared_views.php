@@ -33,7 +33,7 @@ global $OUTPUT, $CFG;
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
 $access = optional_param('access', 0, PARAM_TEXT);
-$u= required_param('u',0, PARAM_INT);
+$u= optional_param('u',0, PARAM_INT);
 require_login($courseid);
 
 $context = get_context_instance(CONTEXT_SYSTEM);

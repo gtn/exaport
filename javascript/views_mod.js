@@ -208,7 +208,7 @@ $(function(){
 	});
 
 
-	ExabisEportfolio.load_userlist();
+	ExabisEportfolio.load_userlist('views_mod');
 
 
 	// sharing

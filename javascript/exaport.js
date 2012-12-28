@@ -33,7 +33,7 @@
 		},
 
 		userlist_loaded: false,
-		load_userlist: function()
+		load_userlist: function(type)
 		{
 			if (this.userlist_loaded) {
 				return;
@@ -55,13 +55,21 @@
 
 						if (!$.empty(course.users)) {
 							html += "<table width=\"70%\">";
-							html += "<tr><th align=\"center\">&nbsp;</th><th align=\"left\">"+$E.translate('name')+"</th><th align=\"right\">"+$E.translate('role')+"</th></tr>";
+							html += "<tr><th align=\"center\">&nbsp;</th>";
+							if (type == 'views_mod') html += "<th align=\"center\">&nbsp;</th>";
+							html += "<th align=\"left\">"+$E.translate('name')+"</th><th align=\"right\">"+$E.translate('role')+"</th></tr>";
 
 							$.each(course.users, function(tmp, user){
-								html += '<tr><td align=\"center\" width="30" style="padding-right: 20px;">';
-								html += '<input type="checkbox" name="shareusers['+user.id+']" value="'+user.id+'"' +
+								html += '<tr><td align=\"center\" width="50">';
+								html += '<input class="shareusers" type="checkbox" name="shareusers['+user.id+']" value="'+user.id+'"' +
 									(typeof sharedUsers[user.id] != 'undefined' ? ' checked' : '') +
 									' />';
+								if (type == 'views_mod') {
+									html += "<br />share";
+									html += '</td><td align=\"center\" width="50" style="padding-right: 20px;">';
+									html += '<input class="notifyusers" type="checkbox" name="notifyusers['+user.id+']" value="'+user.id+'" />';
+									html += "<br />notify";
+								}
 								html += "</td><td align=\"left\">" + user.name + "</td><td align=\"right\">" + user.rolename + "</td></tr>";
 							});
 
@@ -81,6 +89,15 @@
 					// check/uncheck this user in other courses
 					$('#sharing-userlist :checkbox[name="'+this.name+'"]').attr('checked', this.checked);
 				});
+				$('#sharing-userlist .shareusers:checkbox').click(function(){
+					// enable/disable notifyuser, according to shared users checkbox
+					var $notifyboxes = $('#sharing-userlist :checkbox[name="'+this.name.replace('shareusers', 'notifyusers')+'"]');
+
+					$notifyboxes.attr('disabled', !this.checked);
+					if (!this.checked) {
+						$notifyboxes.attr('checked', false);
+					}
+				}).triggerHandler('click');
 			});
 		}
 	});

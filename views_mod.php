@@ -304,6 +304,31 @@ if ($editform->is_cancelled()) {
 			$shareItem->userid = $shareuser;
 			$DB->insert_record("block_exaportviewshar", $shareItem);
 		}
+
+		// message users, if they have shared
+		$notifyusers = optional_param('notifyusers', '', PARAM_RAW);
+		if ($notifyusers) {
+			foreach ($notifyusers as $notifyuser) {
+				// only notify if he also is shared
+				if (isset($shareusers[$notifyuser])) {
+					// notify
+					$notificationdata = new stdClass();
+					$notificationdata->component        = 'block_exaport';
+					$notificationdata->name             = 'sharing';
+					$notificationdata->userfrom         = $USER;
+					$notificationdata->userto           = $DB->get_record('user', array('id' => $notifyuser));
+					// TODO: subject + message text
+					$notificationdata->subject          = 'I shared a exabis eportfolio view with you';
+					$notificationdata->fullmessage      = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid=1&access=id/'.$USER->id.'-'.$dbView->id;
+					$notificationdata->fullmessageformat = FORMAT_PLAIN;
+					$notificationdata->fullmessagehtml  = '';
+					$notificationdata->smallmessage     = '';
+					$notificationdata->notification     = 1;
+
+					$mailresult = message_send($notificationdata);
+				}
+			}
+		}
 	}
 
 	redirect($returnurl);

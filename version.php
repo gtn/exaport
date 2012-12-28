@@ -26,10 +26,9 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-$exaport_version = 2012122100;   // The current version is a date (YYYYMMDDXX)
-$plugin->version = 2012122100;
+defined('MOODLE_INTERNAL') || die();
 
-$exaport_release = "4.0 branch";  // User-friendly version number
+$plugin->version = 2012122800;
 $plugin->maturity  = MATURITY_BETA;
 $plugin->release  = "4.0.4";
 $plugin->requires = 2011033005.06;

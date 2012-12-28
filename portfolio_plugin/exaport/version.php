@@ -1,2 +1,2 @@
 <?php
-require dirname(__FILE__).'/../../blocks/exaport/lib/portfolio_plugin'.substr(__FILE__, strpos(__FILE__, 'exaport')+7);
+require substr(__FILE__, 0, strpos(__FILE__, 'exaport')).'/../blocks/exaport/lib/portfolio_plugin'.substr(__FILE__, strpos(__FILE__, 'exaport')+7);

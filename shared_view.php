@@ -80,7 +80,7 @@ foreach ($blocks as $block) {
 $CFG->stylesheets[] = dirname($_SERVER['PHP_SELF']).'/css/shared_view.css';
 
 if ($view->access->request == 'intern') {
-	block_exaport_print_header("views");
+	block_exaport_print_header("sharedbookmarks");
 } else {
 	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
 }

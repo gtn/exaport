@@ -33,7 +33,8 @@ global $OUTPUT, $CFG;
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
 $access = optional_param('access', 0, PARAM_TEXT);
-$u= optional_param('u',0, PARAM_INT);
+// TODO: for what is the u parameter?
+$u = optional_param('u',0, PARAM_INT);
 require_login($courseid);
 
 $context = get_context_instance(CONTEXT_SYSTEM);
@@ -41,6 +42,7 @@ require_capability('block/exaport:use', $context);
 
 $url = '/blocks/exabis_competences/shared_views.php';
 $PAGE->set_url($url);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
@@ -110,6 +112,79 @@ function exaport_print_views($views, $parsedsort) {
     echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;sort=timemodified\"" .
     ($sort == 'timemodified' ? ' style="font-weight: bold;"' : '') . ">" . get_string('date', 'block_exaport') . "</a> ";
     echo '</div>';
+
+	if ($sort == 'user') {
+		// group by user
+		$viewsByUser = array();
+		
+		foreach ($views as $view) {
+			if (!isset($viewsByUser[$view->userid])) {
+				$viewsByUser[$view->userid] = array(
+					'user' => $DB->get_record('user', array("id" => $view->userid)),
+					'views' => array()
+				);
+			}
+			
+			$viewsByUser[$view->userid]['views'][] = $view;
+		}
+		
+		?>
+			<style>
+				.view-group {
+					padding-bottom: 15px;
+				}
+				.view-group .view-group-content {
+					display: none;
+				}
+				.view-group-open .view-group-content {
+					display: block;
+				}
+				.view-group-header {
+					border: 1px solid #333;
+				}
+				.view-group-header span {
+					text-decoration: underline;
+					cursor: pointer;
+				}
+				.view-group-content {
+					padding: 10px 0 15px 0;
+				}
+				.view-group-view {
+					padding: 5px 0;
+				}
+			</style>
+			<script type="text/javascript">
+			//<![CDATA[
+				jQuery(function($){
+					$('.view-group-header span').on('click', function(){
+						$(this).parents('.view-group').toggleClass('view-group-open');
+					});
+				});
+			//]]>
+			</script>
+		<?php
+
+		foreach ($viewsByUser as $item) {
+			$curuser = $item['user'];
+			
+			echo '<div class="view-group">';
+			echo '<div class="view-group-header">';
+			echo $OUTPUT->user_picture($curuser, array("courseid" => $courseid)).' <span>'.fullname($curuser).' ('.count($item['views']).')</span>';
+			echo '</div>';
+
+			echo '<div class="view-group-content">';
+			foreach ($item['views'] as $view) {
+				echo '<div class="view-group-view">';
+				echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/{$view->userid}-{$view->id}\">" .
+				format_string($view->name) . "</a> ".userdate($view->timemodified);
+				echo '</div>';
+			}
+			echo '</div>';
+
+			echo '</div>';
+		}
+		return;
+	}
 
     $table = new html_table();
     $table->width = "100%";

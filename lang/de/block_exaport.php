@@ -43,7 +43,7 @@ $string['exaport:allowposts'] = 'Allow posting';
 $string['modulename'] = 'Exabis E-Portfolio';
 $string['blockname'] = 'Exabis E-Portfolio';
 $string['new'] = 'Neu';
-$string['add'] = 'Hinzufügen';
+$string['add'] = 'Hinzuf&uuml;gen';
 $string['addbookmark'] = 'Bookmark hinzuf&uuml;gen';
 $string['addcategory'] = 'Kategorie hinzuf&uuml;gen';
 $string['attachment'] = 'Anhang';
@@ -98,7 +98,7 @@ $string['newlink'] = 'Neuen externen Link hinzuf&uuml;gen';
 $string['newfile'] = 'Neue Datei hinzuf&uuml;gen';
 $string['newnote'] = 'Neue Notiz hinzuf&uuml;gen';
 $string['nocategories'] = '(bisher gibt es noch keine Kategorien)';
-$string['nobookmarksall'] = '(bisher gibt es noch keine Einträge)';
+$string['nobookmarksall'] = '(bisher gibt es noch keine Eintr&auml;ge)';
 $string['nobookmarkslink'] = '(bisher gibt es noch keine Links)';
 $string['nobookmarksfile'] = '(bisher gibt es noch keine Dateien)';
 $string['nobookmarksnote'] = '(bisher gibt es noch keine Notizen)';
@@ -116,10 +116,10 @@ $string['url'] = 'URL';
 $string['maincategory'] = 'Hauptkategorie';
 $string['subcategory'] = 'Unterkategorie';
 $string['accessoptions'] = 'Zugriffsoptionen';
-$string['shareallexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern';
+$string['shareallexceptthose'] = 'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern';
 $string['sharenoneexceptthose'] = 'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer';
-$string['internalaccessall'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span>';
-$string['internalaccessusers'] = 'Zugriff nur für folgende Benutzer';
+$string['internalaccessall'] = 'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>alle</span>';
+$string['internalaccessusers'] = 'Zugriff nur f&uuml;r folgende Benutzer';
 $string['externaccess'] = 'externer E-Portfolio-Link';
 $string['showallusers'] = 'Zeige Benutzer aller meiner Kurse';
 $string['showcourseusers'] = 'Zeige nur Benutzer des aktuellen Kurses';
@@ -130,8 +130,8 @@ $string['deletecategroyconfirm'] = 'Wollen Sie die Kategorie wirklich l&ouml;sch
 $string['name'] = 'Name';
 $string['role'] = 'Rolle';
 $string['nousersfound'] = 'Keine Benutzer gefunden';
-$string['delete'] = 'Löschen';
-$string['add'] = 'Hinzufügen';
+$string['delete'] = 'L&ouml;schen';
+$string['add'] = 'Hinzuf&uuml;gen';
 $string['edit'] = 'Editieren';
 
 // export/import
@@ -141,7 +141,7 @@ $string['createexport'] = 'SCORM-Datei erstellen';
 $string['clicktodownloadscorm'] = 'Folgenden Button dr&uuml;cken, um SCORM-Datei herunterzuladen:';
 $string['download'] = 'Herunterladen';
 $string['endedit'] = 'Editieren beenden';
-$string['change'] = 'Ändern';
+$string['change'] = '&auml;ndern';
 $string['explainpersonal'] = '<span class=\'block_eportfolio_bold\'>Pers&ouml;nliche Informationen</span>';
 $string['personal'] = 'Informationen';
 $string['descriptionsaved'] = 'Beschreibung gespeichert';
@@ -150,7 +150,7 @@ $string['exportimport'] = 'Export/Import';
 $string['explainimport'] = 'hier k&ouml;nnen Sie SCORM-Dateien ins Portfolio importieren. Wenn Marker gefunden werden, die darauf hinweisen, dass diese SCORM-Datei zuvor aus dem Portfolio-Modul exportiert wurde, so wird versucht, die Stuktur entsprechend zu importieren.';
 $string['makeimport'] = 'Import';
 $string['add_this_file'] = 'Diese Datei hinzuf&uuml;gen';
-$string['bookmarksall'] = 'Alle Einträge';
+$string['bookmarksall'] = 'Alle Eintr&auml;ge';
 $string['bookmarkslinks'] = 'Links';
 $string['bookmarksfiles'] = 'Dateien';
 $string['bookmarksnotes'] = 'Notizen';
@@ -232,12 +232,12 @@ $string['nouserforaccess'] = NULL;
 $string['export'] = 'Export SCORM-Datei';
 $string['exportepx'] = 'Export EPX-Datei';
 $string['createepxexport'] = 'EPX-Datei erstellen';
-$string['exportviewselect'] = 'Um alle Einträge einer bestimmten View zu exportieren, bitte diese hier wählen';
+$string['exportviewselect'] = 'Um alle Eintr&auml;ge einer bestimmten View zu exportieren, bitte diese hier w&auml;hlen';
 
 // 
 $string['type'] = 'Typ';
 $string['share'] = 'Share';
-$string['explainingall'] = 'Alle Einträge im Portfolio';
+$string['explainingall'] = 'Alle Eintr&auml;ge im Portfolio';
 
 // Item sorting
 $string['userdefinedsort'] = 'Eigene Sortierung vornehmen';
@@ -255,14 +255,14 @@ $string['viewinformation'] = 'View Informationen';
 $string['viewtitle'] = 'Titel';
 $string['viewdescription'] = 'Beschreibung';
 $string['viewdesign'] = 'View Darstellung';
-$string['viewitems'] = 'Deine Einträge';
+$string['viewitems'] = 'Deine Eintr&auml;ge';
 $string['viewitem'] = 'Eintrag';
-$string['view_specialitems'] = 'Spezielle Einträge';
+$string['view_specialitems'] = 'Spezielle Eintr&auml;ge';
 $string['view_specialitem_headline'] = 'Kopfzeile';
 $string['view_specialitem_text'] = 'Text';
 $string['view_specialitem_headline_defaulttext'] = 'Kopfzeile hier eingeben';
 $string['view_specialitem_text_defaulttext'] = 'Text hier eingeben';
-$string['view_sharing'] = 'Veröffentlichen';
+$string['view_sharing'] = 'Ver&ouml;ffentlichen';
 $string['viewand'] = 'und';
 $string['view_sharing_noaccess'] = 'Kein Zugriff';
 $string['show'] = 'Anzeigen';
@@ -272,30 +272,30 @@ $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter de
 $string['copyitemtocourse'] = 'In Kurs kopieren';
 
 // Desp
-$string['back_to_desp'] = 'zurück zum d-ESP';
+$string['back_to_desp'] = 'zur&uuml;ck zum d-ESP';
 $string['desp_mybookmarks'] = 'Mein Dossier';
 $string['desp_bookmarks'] = 'Mein Dossier';
-$string['desp_explainingall'] = 'Alle Einträge im Dossier';
+$string['desp_explainingall'] = 'Alle Eintr&auml;ge im Dossier';
 $string['desp_sharedbookmarks'] = 'ver&ouml;ffentlichte Dossiers';
 $string['steckbrief'] = 'Steckbrief';
 // Config
 $string['config_version_3'] = 'Neue E-Portfolio Ansicht: Inklusive Views usw.';
 $string['config_version_2'] = 'Alte E-Portfolio Ansicht';
-$string['config_feature_copy_to_course'] = 'Schüler dürfen Dateien in den Kurs kopieren';
+$string['config_feature_copy_to_course'] = 'Sch&uuml;ler d&uuml;rfen Dateien in den Kurs kopieren';
 $string['version_5.2.0_needed'] = NULL;
 
 // Competences
 $string['competenceinteraction'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
-$string['opencomps'] = 'Kompetenzen auswählen';
-$string['selectcomps'] = 'Wähle hier die Kompetenzen, die zu Deinem Upload passen!';
-$string['expandcomps'] = 'Alle öffnen';
-$string['contactcomps'] = 'Alle schließen';
-$string['opencomps'] = 'Kompetenzen auswählen';
-$string['selectcomps'] = 'Wähle hier die Kompetenzen, die zu Deinem Upload passen!';
-$string['expandcomps'] = 'Alle öffnen';
-$string['contactcomps'] = 'Alle schließen';
-$string['studentcomps'] = 'Hier kannst du einschätzen, ob folgende Kompetenzen durch Dein Artefakt erreicht wurden.';
-$string['teachercomps'] = 'Hier können Sie beurteilen, ob der Schüler folgende Kompetenzen durch sein Artefakt erreicht hat.';
+$string['opencomps'] = 'Kompetenzen ausw&auml;hlen';
+$string['selectcomps'] = 'W&auml;hle hier die Kompetenzen, die zu Deinem Upload passen!';
+$string['expandcomps'] = 'Alle &ouml;ffnen';
+$string['contactcomps'] = 'Alle schlie&szlig;en';
+$string['opencomps'] = 'Kompetenzen ausw&auml;hlen';
+$string['selectcomps'] = 'W&auml;hle hier die Kompetenzen, die zu Deinem Upload passen!';
+$string['expandcomps'] = 'Alle &ouml;ffnen';
+$string['contactcomps'] = 'Alle schlie&szlig;en';
+$string['studentcomps'] = 'Hier kannst du einsch&auml;tzen, ob folgende Kompetenzen durch Dein Artefakt erreicht wurden.';
+$string['teachercomps'] = 'Hier k&ouml;nnen Sie beurteilen, ob der Sch&uuml;ler folgende Kompetenzen durch sein Artefakt erreicht hat.';
 $string['competences'] = 'Kompetenzen';
 $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.';
 

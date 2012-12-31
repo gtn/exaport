@@ -318,7 +318,7 @@ if ($editform->is_cancelled()) {
 					$notificationdata->userfrom         = $USER;
 					$notificationdata->userto           = $DB->get_record('user', array('id' => $notifyuser));
 					// TODO: subject + message text
-					$notificationdata->subject          = 'I shared a exabis eportfolio view with you';
+					$notificationdata->subject          = 'I shared an eportfolio view with you';
 					$notificationdata->fullmessage      = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid=1&access=id/'.$USER->id.'-'.$dbView->id;
 					$notificationdata->fullmessageformat = FORMAT_PLAIN;
 					$notificationdata->fullmessagehtml  = '';

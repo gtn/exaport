@@ -1,2 +1,9 @@
 <?php
-require substr(__FILE__, 0, strpos(__FILE__, 'exaport')).'/../blocks/exaport/lib/portfolio_plugin'.substr(__FILE__, strpos(__FILE__, 'exaport')+7);
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+if (!file_exists($CFG->dirroot . '/blocks/exaport/lib/portfolio_plugin/'.basename(__FILE__))) {
+	die('Exabis Eportfolio not installed');
+}
+
+require($CFG->dirroot . '/blocks/exaport/lib/portfolio_plugin/'.basename(__FILE__));

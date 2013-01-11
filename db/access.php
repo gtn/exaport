@@ -32,27 +32,21 @@
 
 
 $capabilities = array(
-
     'block/exaport:use' => array(
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'legacy' => array(
             'user' => CAP_ALLOW
         )
     ),
-
     'block/exaport:export' => array(
-
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,
         'legacy' => array(
             'user' => CAP_ALLOW
         )
     ),
-    
     'block/exaport:import' => array(
-
         'riskbitmask' => RISK_SPAM | RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
@@ -60,7 +54,6 @@ $capabilities = array(
             'user' => CAP_ALLOW
         )
     ),
-    
     'block/exaport:importfrommoodle' => array(
 
         'captype' => 'write',
@@ -69,7 +62,6 @@ $capabilities = array(
             'user' => CAP_ALLOW
         )
     ),
-    
     'block/exaport:shareintern' => array(
 
         'captype' => 'write',
@@ -78,7 +70,6 @@ $capabilities = array(
             'user' => CAP_ALLOW
         )
     ),
-    
     'block/exaport:shareextern' => array(
 
         'riskbitmask' => RISK_SPAM,
@@ -88,9 +79,7 @@ $capabilities = array(
             'user' => CAP_ALLOW
         )
     ),
-    
     'block/exaport:allowposts' => array(
-    
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,

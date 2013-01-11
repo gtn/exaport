@@ -39,6 +39,7 @@ $string['exaport:importfrommoodle'] = 'Importera från Moodle';
 $string['exaport:shareintern'] = 'Intern delning portfolioinlägg';
 $string['exaport:shareextern'] = 'Extern delning av portfolioinlägg';
 $string['exaport:allowposts'] = 'Tillåt postning';
+$string['exaport:competences'] = 'Allow competences';
 $string['modulename'] = 'E-Portfolio';
 $string['blockname'] = 'Exabis E-Portfolio';
 $string['new'] = 'Ny';

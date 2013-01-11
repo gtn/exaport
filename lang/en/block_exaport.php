@@ -40,6 +40,7 @@ $string['exaport:importfrommoodle'] = 'Import from Moodle';
 $string['exaport:shareintern'] = 'Internal sharing of portfolio-entries';
 $string['exaport:shareextern'] = 'External sharing of portfolio-entries';
 $string['exaport:allowposts'] = 'Allow posting';
+$string['exaport:competences'] = 'Allow competences';
 $string['modulename'] = 'Exabis E-Portfolio';
 $string['blockname'] = 'Exabis E-Portfolio';
 $string['new'] = 'New';

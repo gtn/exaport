@@ -39,6 +39,7 @@ $string['exaport:importfrommoodle'] = 'Moodle-tik inportatu';
 $string['exaport:shareintern'] = 'Paper-zorroen barruko partekatzea';
 $string['exaport:shareextern'] = 'Paper-zorroen kanpoko partekatzea';
 $string['exaport:allowposts'] = 'Mezuak baimendu';
+$string['exaport:competences'] = 'Allow competences';
 $string['modulename'] = 'Exabis Paper-zorroa';
 $string['blockname'] = 'Exabis Paper-zorroak';
 $string['new'] = 'Berria';

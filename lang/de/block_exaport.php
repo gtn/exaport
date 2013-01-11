@@ -40,6 +40,7 @@ $string['exaport:importfrommoodle'] = 'Import from Moodle';
 $string['exaport:shareintern'] = 'Internal sharing of portfolio-entries';
 $string['exaport:shareextern'] = 'External sharing of portfolio-entries';
 $string['exaport:allowposts'] = 'Allow posting';
+$string['exaport:competences'] = 'Allow competences';
 $string['modulename'] = 'Exabis E-Portfolio';
 $string['blockname'] = 'Exabis E-Portfolio';
 $string['new'] = 'Neu';
@@ -270,7 +271,7 @@ $string['show'] = 'Anzeigen';
 // Copy to course
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';
 $string['copyitemtocourse'] = 'In Kurs kopieren';
-
+$string['desp_language'] = 'Desp Sprache';
 // Desp
 $string['back_to_desp'] = 'zur&uuml;ck zum d-ESP';
 $string['desp_mybookmarks'] = 'Mein Dossier';

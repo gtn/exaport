@@ -39,6 +39,7 @@ $string['exaport:importfrommoodle'] = 'Importálás a Moodle rendszerből';
 $string['exaport:shareintern'] = 'A portfólió elemeinek külső megosztása';
 $string['exaport:shareextern'] = 'A portfólió elemeinek belső megosztása';
 $string['exaport:allowposts'] = 'Hozzászólás megengedése';
+$string['exaport:competences'] = 'Allow competences';
 $string['modulename'] = 'Exabis E-Portfolio';
 $string['blockname'] = 'Exabis E-Portfolio';
 $string['new'] = 'Új';

@@ -45,7 +45,7 @@ $context = get_context_instance(CONTEXT_SYSTEM);
 require_login($courseid);
 require_capability('block/exaport:use', $context);
 
-$url = '/blocks/exabis_competences/item.php';
+$url = '/blocks/exaport/item.php';
 $PAGE->set_url($url);
 
 $conditions = array("id" => $courseid);
@@ -288,23 +288,18 @@ switch ($action) {
 		print_error("unknownaction", "block_exaport");
 }
 
+$comp = block_exaport_check_competence_interaction();
+
+if ($comp) {
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+	$PAGE->requires->js('/blocks/exaport/javascript/colorbox/jquery.colorbox.js', true);
+	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
+	$PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
+	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
+	$PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
+}
 
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
-echo '<link media="screen" rel="stylesheet" href="css/colorbox.css" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
-<script src="javascript/colorbox/jquery.colorbox.js"></script>
-<script type="text/javascript" src="javascript/simpletreemenu.js"></script>
-<link rel="stylesheet" type="text/css" href="javascript/simpletree.css" />';
-?>
-<script>
-    $(document).ready(function(){
-        $(".competences").colorbox({width:"75%", height:"75%", inline:true, href:"#inline_comp_tree"});
-    });
-</script>
-
-
-<?php
-$comp = block_exaport_check_competence_interaction();
 
 if ($comp) {
 	echo '<fieldset id="general" style="border: 1px solid;">';
@@ -324,17 +319,20 @@ if ($comp) {
 		</a>
 
 		<?php echo block_exaport_build_comp_tree(); ?>
-
-
-		<script type="text/javascript">
-            ddtreemenu.createTree("comptree", true)
-        </script>
 	</div>
 </div>
 
-
+<script type="text/javascript">
+//<![CDATA[
+	jQueryExaport(function($){
+		$(".competences").colorbox({width:"75%", height:"75%", inline:true, href:"#inline_comp_tree"});
+		ddtreemenu.createTree("comptree", true);
+	});
+//]]>
+</script>
 <?php
 }
+
 $editform->set_data($post);
 echo $OUTPUT->box($extra_content);
 $editform->display();

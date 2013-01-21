@@ -330,7 +330,10 @@ if(!$print) {
 	echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>".get_string('printerfriendly', 'group')."</a>";
 	echo "</div>";
 }
-echo '<script type="text/javascript">
+
+?>
+<script type="text/javascript">
+//<![CDATA[
 function long_preview_show(i) {
 document.getElementById("short-preview-" + i).style.display = "none";
 document.getElementById("long-preview-" + i).style.display = "block";
@@ -339,7 +342,9 @@ function long_preview_hide(i) {
 document.getElementById("short-preview-" + i).style.display = "block";
 document.getElementById("long-preview-" + i).style.display = "none";
 }
+//]]>
+</script>
+<?php
 
-</script>';
 if(!$print) echo $OUTPUT->footer($course);
 else echo '</body></html>';

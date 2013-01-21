@@ -371,8 +371,8 @@ if ($view) {
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.ui.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
 $PAGE->requires->css('/blocks/exaport/css/views_mod.css');
 
 block_exaport_print_header('views');
@@ -398,14 +398,15 @@ foreach ($translations as $key => &$value) {
 }
 unset($value);
 
-echo '<script type="text/javascript">'."\n";
-echo '//<![CDATA['."\n";
-echo 'var portfolioItems = '.json_encode($portfolioItems).';'."\n";
-echo 'var sharedUsers = '.json_encode($sharedUsers).';'."\n";
-echo 'ExabisEportfolio.setTranslations('.json_encode($translations).');'."\n";
-echo '//]]>'."\n";
-echo '</script>';
-
+?>
+<script type="text/javascript">
+//<![CDATA[
+	var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
+	var sharedUsers = <?php echo json_encode($sharedUsers); ?>;
+	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
+//]]>
+</script>
+<?php
 
 echo $form['javascript'];
 echo '<form'.$form['attributes'].'><div id="view-mod">';

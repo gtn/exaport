@@ -116,11 +116,11 @@ if (!$sharedUsers) {
 }
 
 
-require_js($CFG->wwwroot.'/blocks/exaport/js/jquery.js');
-require_js($CFG->wwwroot.'/blocks/exaport/js/jquery.ui.js');
-require_js($CFG->wwwroot.'/blocks/exaport/js/jquery.json.js');
-require_js($CFG->wwwroot.'/blocks/exaport/js/exaport.js');
-require_js($CFG->wwwroot.'/blocks/exaport/js/share_item.js');
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.ui.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/share_item.js', true);
 
 $url = '/blocks/exabis_competences/share_item.php';
 $PAGE->set_url($url);
@@ -136,12 +136,16 @@ foreach ($translations as $key => &$value) {
 }
 unset($value);
 
-echo '<script>'."\n";
-echo 'var sharedUsers = '.json_encode($sharedUsers).';'."\n";
-echo 'ExabisEportfolio.setTranslations('.json_encode($translations).');'."\n";
-echo '</script>';
+?>
+<script type="text/javascript">
+//<![CDATA[
+	var sharedUsers = <?php echo json_encode($sharedUsers); ?>;
+	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
+//]]>
+</script>
+<?php
 
-$extern_link = get_extern_access($USER->id);
+$extern_link = exaport_get_extern_access($USER->id);
 
 $table = new stdClass();
 $table->head  = array (get_string("category","block_exaport"), get_string("name", "block_exaport"), get_string("date","block_exaport"), get_string("course","block_exaport"));
@@ -153,7 +157,7 @@ print_table($table);
 
 print_simple_box( text_to_html(get_string("explainingshare".$bookmark->type, "block_exaport")) , "center");
 
-print_js();
+exaport_print_js();
 
 echo "<form action=\"".$_SERVER['PHP_SELF']."\" method=\"post\" id=\"listing\">";
 echo '<fieldset><legend>'.get_string("accessoptions", "block_exaport").'</legend>';

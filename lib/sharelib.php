@@ -365,12 +365,12 @@ function exaport_get_shareable_courses_with_users($type) {
 	return $courses;
 }
 
-function get_extern_access($userid) {
+function exaport_get_extern_access($userid) {
 	$userpreferences = block_exaport_get_user_preferences($userid);
    	return "extern.php?id={$userpreferences->user_hash}";
 }
 
-function print_js() {
+function exaport_print_js() {
     echo "<script type=\"text/javascript\">\n";
     echo "<!--\n";
     echo "function SetAllCheckBoxes(FormName, FieldName, CheckValue)\n";

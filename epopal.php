@@ -40,7 +40,9 @@ if ($formsub)
 </form>
 </div>
 <script type="text/javascript">
+//<![CDATA[
 	document.form.submit();
+//]]>
 </script>
 <?php
 }

@@ -1,5 +1,5 @@
 
-$(function(){
+jQueryExaport(function($){
 
 	//$('.view-group-header').click(function(){
 	$('.view-data, .view-sharing').find('.view-group-header').css('cursor', 'pointer').click(function(){

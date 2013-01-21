@@ -1,5 +1,7 @@
 
-(function(){
+window.jQueryExaport = jQuery.noConflict(true);
+
+(function($){
 	$.empty = function(obj) {
 		if (!obj) {
 			return true;
@@ -107,5 +109,5 @@
 			$E.courseid = RegExp.$1;
 		}
 	});
-
-})();
+	
+})(jQueryExaport);

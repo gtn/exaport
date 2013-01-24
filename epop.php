@@ -48,7 +48,6 @@ if ($action=="login"){
 		echo "key=0";
 	}
 }else if ($action=="child_categories"){
-	
 	$catid = optional_param('catid', 0, PARAM_INT); 
 	$user=checkhash();
 	if (!$user) echo "invalid hash";
@@ -59,8 +58,8 @@ if ($action=="login"){
 			$competence_category="";
 			if(block_exaport_check_competence_interaction()){
 				$sql="SELECT st.title FROM {block_exaportcate} cat INNER JOIN {block_exacompsubjects} s ON s.id=cat.subjid INNER JOIN {block_exacompschooltypes} st ON st.id=s.stid ";
-				$sql.="WHERE cat.id=".$catid;
-				if ($schoolt=$DB->get_record_sql($sql)){
+				$sql.="WHERE cat.id=?";
+				if ($schoolt=$DB->get_record_sql($sql,array($catid))){
 					if ($schoolt->title=="Soziale Kompetenzen") $competence_category="sozial";
 					elseif ($schoolt->title=="Personale Kompetenzen") $competence_category="personal";
 					elseif ($schoolt->title=="Digitale Kompetenzen") $competence_category="digital";
@@ -73,8 +72,8 @@ if ($action=="login"){
 	$user=checkhash();
 	if (!$user) echo "invalid hash";
 	else{
-		$sql="SELECT id FROM {block_exaportitem} WHERE userid=".$user->id." ORDER BY timemodified DESC LIMIT 0,1";
-		if ($rs = $DB->get_record_sql($sql)) echo $rs->id;
+		$sql="SELECT id FROM {block_exaportitem} WHERE userid=? ORDER BY timemodified DESC LIMIT 0,1";
+		if ($rs = $DB->get_record_sql($sql,array($user->id))) echo $rs->id;
 		else echo "0"; 
 	}
 }else if ($action=="get_courseid"){
@@ -82,9 +81,9 @@ if ($action=="login"){
 	if (!$user) echo "invalid hash";
 	else{
 		$sql="SELECT c.id FROM {course} c INNER JOIN {enrol} e on e.courseid=c.id INNER JOIN {user_enrolments} ue ON ue.enrolid=e.id";
-		$sql.=" WHERE c.visible=1 AND ue.userid=".$user->id;
+		$sql.=" WHERE c.visible=1 AND ue.userid=?";
 		$sql.=" ORDER BY ue.timemodified DESC LIMIT 0,1";
-		if ($rs = $DB->get_record_sql($sql)) echo $rs->id;
+		if ($rs = $DB->get_record_sql($sql,array($user->id))) echo $rs->id;
 		else echo "0"; 
 	}
 }else if ($action=="newCat"){
@@ -210,16 +209,18 @@ if ($action=="login"){
 		$itemid = optional_param('itemid', ' ', PARAM_INT);
 		$result = $DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $itemid));
 		$result = $DB->delete_records('block_exacompdescuser_mm', array("activityid" => $itemid));
-		$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.attachment=f.itemid
-		WHERE i.id=".$itemid;
-		
-		$rs = $DB->get_record_sql($sql);
-		delete_file($rs->pathnamehash);
-
+		$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
+		WHERE i.id=?";
+		if($resu = $DB->get_records_sql($sql,array($itemid))){
+			foreach ($resu as $rs){
+				delete_file($rs->pathnamehash);
+			}
+		}
 		$result = $DB->delete_records('block_exaportviewblock', array("itemid" => $itemid));
 		$result = $DB->delete_records('block_exaportitemshar', array("itemid" => $itemid));
 		$result = $DB->delete_records('block_exaportitemcomm', array("itemid" => $itemid));
 		$result = $DB->delete_records('block_exaportitem', array("id" => $itemid));
+	
 	}
 }else if ($action=="delete_view"){
 	$user=checkhash();
@@ -290,8 +291,8 @@ else if ($action=="get_items_for_view"){
 	$user=checkhash();
 	if (!$user) echo "invalid hash";
 	else{
-		$sql="SELECT * FROM {block_exaportitem} WHERE isoez=1 AND userid=".$user->id;
-		$items = $DB->get_records_sql($sql);
+		$sql="SELECT * FROM {block_exaportitem} WHERE isoez=1 AND userid=?";
+		$items = $DB->get_records_sql($sql,array($user->id));
 		foreach ($items as $item){
 			block_exaport_delete_oezepsitemfile($item->id);
 			block_exaport_delete_competences($item->id,$user->id);
@@ -307,19 +308,19 @@ else if ($action=="get_items_for_view"){
 	if (!$user) echo "invalid hash";
 	else{
 	    $sql = "SELECT vi.id as viid, i.id as itemid,v.id,v.name,v.description,v.externaccess,v.shareall,v.hash,i.name as itemname,i.categoryid as catid,i.type, i.url,i.intro FROM ";
-	    $sql.=" {block_exaportview} v LEFT JOIN {block_exaportviewblock} vi ON v.id=vi.viewid INNER JOIN {block_exaportitem} i ON i.id=vi.itemid WHERE v.userid=".$user->id;
+	    $sql.=" {block_exaportview} v LEFT JOIN {block_exaportviewblock} vi ON v.id=vi.viewid INNER JOIN {block_exaportitem} i ON i.id=vi.itemid WHERE v.userid=?";
 	  	
-	  	$sql= "SELECT * FROM {block_exaportview} WHERE userid=".$user->id;
+	  	$sql= "SELECT * FROM {block_exaportview} WHERE userid=?";
 	  
-	    $views = $DB->get_records_sql($sql);
+	    $views = $DB->get_records_sql($sql,array($user->id));
 			header ("Content-Type:text/xml");
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<views>'."\r\n";
 			foreach($views as $view){
 				$inhalt.="<view name='".$view->name."'  id='".$view->id."' description='".$view->description."'>";
 						$sql= "SELECT vi.id as viid, i.id as itemid,i.name as itemname,i.categoryid as catid,i.type, i.url,i.intro FROM ";
-						$sql.=" {block_exaportviewblock} vi INNER JOIN {block_exaportitem} i ON i.id=vi.itemid WHERE vi.viewid=".$view->id;
-	  				$items = $DB->get_records_sql($sql);
+						$sql.=" {block_exaportviewblock} vi INNER JOIN {block_exaportitem} i ON i.id=vi.itemid WHERE vi.viewid=?";
+	  				$items = $DB->get_records_sql($sql,array($view->id));
 	  				foreach ($items as $item){
 	  					$inhalt.="<item name='".$item->itemname."'  id='".$item->itemid."' catid='".$item->catid."' url='".$item->url."' type='".$item->type."' intro=''>";
 	  					$inhalt.=$item->intro;
@@ -495,8 +496,8 @@ else if ($action=="get_items_for_view"){
 				if (!empty($itemrs)){
 					if ($itemrs->isoez==1){ //normale items können files nicht aktualisiert werden, da muss das ganze item gelöscht werden
 						$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
-						WHERE i.attachment<>0 AND i.id=".$itemid;
-						$res = $DB->get_records_sql($sql);
+						WHERE i.attachment<>0 AND i.id=?";
+						$res = $DB->get_records_sql($sql,array($itemid));
 						foreach($res as $rs){
 							//echo $rs->pathnamehash;
 							if (!empty($rs))	{
@@ -713,9 +714,9 @@ function block_exaport_get_oezcompetencies($exampid){
 function getExamples($descrid){
 	global $DB;
 	$inhalt='';
-	$sql = "SELECT examp.* FROM {block_exacompexamples} examp INNER JOIN {block_exacompdescrexamp_mm} mm ON examp.id=mm.exampid WHERE examp.externalurl<>'' AND mm.descrid=".$descrid;
+	$sql = "SELECT examp.* FROM {block_exacompexamples} examp INNER JOIN {block_exacompdescrexamp_mm} mm ON examp.id=mm.exampid WHERE examp.externalurl<>'' AND mm.descrid=?";
 
-  $examples = $DB->get_records_sql($sql);
+  $examples = $DB->get_records_sql($sql,array($descrid));
   foreach ($examples as $example){
   	$inhalt.='
   		<example name="'.$example->title.'" description="'.$example->description.'" id="'.$example->id.'"
@@ -820,9 +821,9 @@ function block_exaport_getshares($view,$usrid,$sharetag=true,$strshared="viewSha
 		}
 	}else{
 		$sql = "SELECT u.firstname,u.lastname,u.id FROM ";
-		$sql.=" {block_exaportviewshar} s INNER JOIN {user} u ON s.userid=u.id WHERE s.viewid=".$view->id;
+		$sql.=" {block_exaportviewshar} s INNER JOIN {user} u ON s.userid=u.id WHERE s.viewid=?";
 		//echo $sql;
-	  $users = $DB->get_records_sql($sql);
+	  $users = $DB->get_records_sql($sql,array($view->id));
 	  foreach ($users as $user){
 	  	$tusers2[$user->id]=$user->lastname." ".$user->firstname;
 	  }
@@ -1038,12 +1039,15 @@ function block_exacomp_checkfiles(){
 function checkhash(){
 	global $DB;global $USER;
 	$userhash = optional_param('key', 0, PARAM_ALPHANUM);
-	$sql="SELECT u.* FROM {user} u INNER JOIN {block_exaportuser} eu ON eu.user_id=u.id WHERE eu.user_hash_long='".$userhash."'";					 
-	if (!$user=$DB->get_record_sql($sql)){
-		return false;
-	}else{
-		$USER=$user;
-		return $user;
+	if (empty($userhash) or $userhash==0) return false;
+	else{
+		$sql="SELECT u.* FROM {user} u INNER JOIN {block_exaportuser} eu ON eu.user_id=u.id WHERE eu.user_hash_long=?";					 
+		if (!$user=$DB->get_record_sql($sql,array($userhash))){
+			return false;
+		}else{
+			$USER=$user;
+			return $user;
+		}
 	}
 }
 
@@ -1081,9 +1085,9 @@ function block_exaport_get_progress($catid,$catidparent,$userid){
 function block_exaport_get_subcategories($catid,$catlist,$userid){
 	global $DB;
 	$catlist.=",".$catid;
-	$sql="SELECT id FROM {block_exaportcate} WHERE pid=".$catid." AND userid=".$userid;
+	$sql="SELECT id FROM {block_exaportcate} WHERE pid=? AND userid=?";
 
-	$cats=$DB->get_records_sql($sql);
+	$cats=$DB->get_records_sql($sql,array($catid,$userid));
 	foreach ($cats as $cat){
 		$catlist.=",".$cat->id;
 	}
@@ -1093,9 +1097,9 @@ function block_exaport_get_subcategories($catid,$catlist,$userid){
 function block_exaport_delete_oezepsitemfile($itemid){
 			global $DB;
 			$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
-					WHERE i.attachment<>0 AND i.id=".$itemid;
+					WHERE i.attachment<>0 AND i.id=?";
 
-			$res = $DB->get_records_sql($sql);
+			$res = $DB->get_records_sql($sql,array($itemid));
 					foreach($res as $rs){
 						//echo $rs->pathnamehash;
 						if (!empty($rs))	{
@@ -1137,8 +1141,8 @@ function block_exaport_installoez($userid,$isupdate=false){
 	global $DB;
 	$where="";
 	if ($isupdate==true){
-		$sql="SELECT group_concat(cast(exampid as char(11))) as ids FROM {block_exaportitem} where isoez=1 AND userid=".$userid;
-		$rse = $DB->get_record_sql($sql);
+		$sql="SELECT group_concat(cast(exampid as char(11))) as ids FROM {block_exaportitem} where isoez=1 AND userid=?";
+		$rse = $DB->get_record_sql($sql,array($userid));
 		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}
 	}
 	$sql="SELECT DISTINCT concat(top.id,examp.id) as id, subj.title as kat1, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
@@ -1177,12 +1181,12 @@ function block_exaport_installoez($userid,$isupdate=false){
 		$DB->execute($sql);
 	}else{
 		foreach($row as $rs){
-			$sql="SELECT * FROM {block_exaportcate} WHERE topicid=".$rs->topid." LIMIT 0,1";
-			$rs2 = $DB->get_record_sql($sql);
+			$sql="SELECT * FROM {block_exaportcate} WHERE topicid=? LIMIT 0,1";
+			$rs2 = $DB->get_record_sql($sql,array($rs->topid));
 			if (!empty($rs2)){$newtopid=$rs2->id;}
 			else{
-				$sql="SELECT * FROM {block_exaportcate} WHERE subjid=".$rs->subjid." LIMIT 0,1";
-				$rs3 = $DB->get_record_sql($sql);
+				$sql="SELECT * FROM {block_exaportcate} WHERE subjid=? LIMIT 0,1";
+				$rs3 = $DB->get_record_sql($sql,array($rs->subjid));
 				if (!empty($rs3)){$newsubjid=$rs3->id;}
 				else{
 					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>0,"userid"=>$userid,"name"=>$rs->kat1,"timemodified"=>time(),"course"=>0,"isoez"=>"1","subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid));

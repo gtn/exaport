@@ -518,7 +518,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	*/
 	function &getElementByPath($path)
 	{
-		$names = split ("/", $path);
+		$names = explode ("/", $path);
 		
 		$element = $this;
 		foreach ($names as $elementName)

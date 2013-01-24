@@ -363,7 +363,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 		$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id));
 		$comps = $post->compids;
 		if ($comps) {
-			$comps = split(",", $comps);
+			$comps = explode(",", $comps);
 			$course = $DB->get_record('course', array("id" => $courseid));
 
 			foreach ($comps as $comp) {
@@ -402,7 +402,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 		}
 		$comps = $post->compids;
 		if ($comps) {
-			$comps = split(",", $comps);
+			$comps = explode(",", $comps);
 			$course = $DB->get_record('course', array("id" => $courseid));
 
 			foreach ($comps as $comp) {

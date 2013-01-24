@@ -55,7 +55,8 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }
 
 if (!block_exaport_has_categories($USER->id)) {
-	print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
+	echo get_string("nocategories", "block_exaport"); 
+	//print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
 }
 
 

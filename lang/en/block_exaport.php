@@ -278,6 +278,9 @@ $string['desp_mybookmarks'] = 'My Dossier';
 $string['desp_bookmarks'] = 'My Dossier';
 $string['desp_explainingall'] = 'All entries in the dossier';
 $string['desp_sharedbookmarks'] = 'published dossiers';
+$string['desp_explainingnote'] = 'Notes. These notes may be shared with all authorized course members.';
+$string['desp_explaininglink'] = 'Links.  These links may be shared with all authorized course members.';
+$string['desp_explainingfile'] = 'Files. These files may be shared with all authorized course members.';
 $string['steckbrief'] = 'Profile';
 // Config
 $string['config_version_3'] = 'New E-Portfolio layout: including views, etc.';

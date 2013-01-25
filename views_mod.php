@@ -283,7 +283,7 @@ if ($editform->is_cancelled()) {
 	$DB->delete_records('block_exaportviewblock', array('viewid'=>$dbView->id));
 
 	// add blocks
-	$blocks = json_decode(stripslashes(mysql_real_escape_string($formView->blocks)));
+	$blocks = json_decode($formView->blocks);
 	if(!$blocks)
 		print_error("noentry","block_exaport");
 	foreach ($blocks as $block) {

@@ -1612,7 +1612,7 @@ class MiniXMLElementDocType extends MiniXMLElement {
 		$this->MiniXMLElement('DOCTYPE');
 		$this->dtattr = $attr;
 	}
-	function toString ($depth)
+	function toString ($depth=0)
 	{
 		if ($depth == MINIXML_NOWHITESPACES)
 		{

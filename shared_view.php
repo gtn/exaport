@@ -185,7 +185,7 @@ for ($column_i = 1; $column_i<=2; $column_i++) {
 			echo '</a>';
 		} elseif ($block->type == 'personal_information') {
 			if(isset($portfolioUser->description)) {
-				$description = file_rewrite_pluginfile_urls($portfolioUser->description, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'personal_information_view', $access);
+				$description = file_rewrite_pluginfile_urls($portfolioUser->description, 'pluginfile.php', get_context_instance(CONTEXT_USER, $view->userid)->id, 'block_exaport', 'personal_information_view', $access);
 				echo '<div class="view-personal-information">'.$description.'</div>';
 			}
 		} elseif ($block->type == 'headline') {

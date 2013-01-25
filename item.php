@@ -55,7 +55,9 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }
 
 if (!block_exaport_has_categories($USER->id)) {
+	block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
 	echo get_string("nocategories", "block_exaport"); 
+	echo $OUTPUT->footer();die;
 	//print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
 }
 

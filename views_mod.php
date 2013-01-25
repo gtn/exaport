@@ -335,7 +335,7 @@ if ($editform->is_cancelled()) {
 }
 
 // gui setup
-$postView = $view;
+$postView = ($view ? $view : new stdClass());
 $postView->action       = $action;
 $postView->courseid     = $courseid;
 

@@ -280,17 +280,19 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
     print_tabs(array($tabs, $tabs_sub), $currenttab, null, $activetabsubs);
 
 	if (block_exaport_course_has_desp() && (strpos($currenttab,'bookmarks') === 0) ) {
-		if (file_exists("pix/message_ses1.gif")){//desp manderl nicht bei allen anzeigen
-			?>
-			   <div id="messageboxses1" style="background: url('pix/message_ses1.gif') no-repeat left top; ">
+		
+		
+			
+			   echo '<div id="messageboxses1"';
+			    if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
+			    echo '>
 					<div id="messagetxtses1">
-						<?php echo get_string("desp_einleitung", "block_exaport"); ?>
+						'.get_string("desp_einleitung", "block_exaport").'
 					</div>
 				</div>
 				
-				<br /><br />
-			<?php
-		}
+				<br /><br />';
+		
 	}
 	
 }

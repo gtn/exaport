@@ -96,7 +96,24 @@ $capabilities = array(
             'teacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         )
-    )
+    ), 
+    'block/exaport:myaddinstance' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+        'user' => CAP_ALLOW
+        ),
+        'clonepermissionsfrom' => 'moodle/my:manageblocks'
+    ),
+    'block/exaport:addinstance' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ),
+        'clonepermissionsfrom' => 'moodle/site:manageblocks'
+    ),
 );
 
 ?>

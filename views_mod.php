@@ -31,7 +31,14 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
 $confirm = optional_param("confirm", "", PARAM_BOOL);
 $id = optional_param('id', 0, PARAM_INT);
-$shareusers = optional_param('shareusers', '', PARAM_RAW); // array of integer
+
+//if (function_exists("clean_param_array")) $shareusers=clean_param_array($_POST["shareusers"],PARAM_SEQUENCE,true);
+//else 
+if (!empty($_POST["shareusers"])){
+	$shareusers=$_POST["shareusers"];
+	if (function_exists("clean_param_array")) $shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
+}else{$shareusers="";}
+
 
 if (!confirm_sesskey()) {
 	print_error("badsessionkey","block_exaport");    	

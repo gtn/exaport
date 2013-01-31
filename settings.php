@@ -10,7 +10,7 @@ if ($ADMIN->fulltree) {
 
 	//Zusammenspiel exabis ePortfolio - exabis Competences
     $settings->add(new admin_setting_configcheckbox('block_exaport_enable_interaction_competences', get_string('settings_interaktion_exacomp_head', 'block_exaport'),
-                       get_string('settings_interaktion_exacomp_body', 'block_exaport'), 0, 1, 0));
+                       get_string('settings_interaktion_exacomp_body', 'block_exaport'), 1, 1, 0));
     
    
 

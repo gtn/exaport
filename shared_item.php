@@ -73,7 +73,26 @@ if (!$user = $DB->get_record("user", $conditions)) {
 $url = '/blocks/exabis_competences/shared_item.php';
 $PAGE->set_url($url);
 
+if ($item->allowComments) {
+    require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
+    $commentseditform = new block_exaport_comment_edit_form();
 
+    if ($commentseditform->is_cancelled()
+        );
+    else if ($commentseditform->no_submit_button_pressed()
+        );
+    else if ($fromform = $commentseditform->get_data()) {
+        switch ($action) {
+            case 'add':
+                block_exaport_do_add_comment($item, $fromform, $commentseditform);
+                //redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
+                $prms='access='.$access.'&itemid='.$itemid;
+                if (!empty($backtype)) $prms.='backtype='.$backtype;
+                redirect($CFG->wwwroot.'/blocks/exaport/shared_item.php?'.$prms);
+                break;
+        }
+    }
+}
 
 if ($item->access->page == 'view') {
     if ($item->access->request == 'intern') {
@@ -111,25 +130,6 @@ echo "<div class='block_eportfolio_center'>\n";
 block_exaport_print_extern_item($item, $access);
 
 if ($item->allowComments) {
-    
-
-    require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
-    $commentseditform = new block_exaport_comment_edit_form();
-
-
-    if ($commentseditform->is_cancelled()
-        );
-    else if ($commentseditform->no_submit_button_pressed()
-        );
-    else if ($fromform = $commentseditform->get_data()) {
-        switch ($action) {
-            case 'add':
-                echo "</div>";
-                block_exaport_do_add_comment($item, $fromform, $commentseditform);
-                //redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
-                break;
-        }
-    }
     $newcomment = new stdClass();
     $newcomment->action = 'add';
     $newcomment->courseid = $COURSE->id;

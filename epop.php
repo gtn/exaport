@@ -1039,7 +1039,7 @@ function block_exacomp_checkfiles(){
 function checkhash(){
 	global $DB;global $USER;
 	$userhash = optional_param('key', 0, PARAM_ALPHANUM);
-	if (empty($userhash) or $userhash==0) return false;
+	if (empty($userhash) or $userhash=="0") return false;
 	else{
 		$sql="SELECT u.* FROM {user} u INNER JOIN {block_exaportuser} eu ON eu.user_id=u.id WHERE eu.user_hash_long=?";					 
 		if (!$user=$DB->get_record_sql($sql,array($userhash))){

@@ -427,6 +427,7 @@
 
                 var comps=document.getElementsByName("compids")[0].value;
 				var comptitles="";
+				var subold="";
 //                comps = comps.split(",");
 //                alert(comps[0]);
                 for(var i=0; i < document.treeform.desc.length; i++){
@@ -440,9 +441,16 @@
                         oc = true;
 
                     if(oc) {
-                        document.treeform.desc[i].checked = true;
-						comptitles += document.treeform.desc[i].getAttribute('alt') + '<br/>';
-					}
+                      document.treeform.desc[i].checked = true;
+                      subid=document.treeform.desc[i].getAttribute('class');
+                      if (subid!=subold){
+                      	subold=subid;
+                      	subtitl=document.getElementById('gegenst'+subid).getAttribute('alt');
+                      	comptitles +='<h3>' + subtitl + '</h3>';
+                      }
+                      
+											comptitles +='<span>' + document.treeform.desc[i].getAttribute('alt') + '</span><br/>';
+										}
                 }
 				document.getElementById("comptitles").innerHTML = comptitles;
 				
@@ -863,13 +871,20 @@
 					trigger(event_closed, settings.onClosed);
 				}, 1);
 			});
-                        var comps="";
-						var comptitles="";
+              var comps="";
+							var comptitles="";
+							var subold="";
                         for(var i=0; i < document.treeform.desc.length; i++){
-                            if(document.treeform.desc[i].checked) {
-                                comps += document.treeform.desc[i].value + ',';
-								comptitles += document.treeform.desc[i].getAttribute('alt') + '<br/>';
-							}
+                           if(document.treeform.desc[i].checked) {
+                            comps += document.treeform.desc[i].value + ',';
+                            subid=document.treeform.desc[i].getAttribute('class');
+			                      if (subid!=subold){
+			                      	subold=subid;
+			                      	subtitl=document.getElementById('gegenst'+subid).getAttribute('alt');
+			                      	comptitles +='<h3>' + subtitl + '</h3>';
+			                      }
+														comptitles += '<span>' +document.treeform.desc[i].getAttribute('alt') + '</span><br/>';
+													}
                         }
                         document.getElementsByName("compids")[0].value = comps;
 						document.getElementById("comptitles").innerHTML = comptitles;

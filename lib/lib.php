@@ -540,7 +540,7 @@ function block_exaport_get_competences($item, $role=1) {
 }
 function block_exaport_build_comp_tree() {
     global $DB;
-    $sql = "SELECT d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id";
+    $sql = "SELECT d.id, d.title, t.title as topic, s.title as subject,s.id as subjid FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id";
     $descriptors = $DB->get_records_sql($sql);
     $tree = '<form name="treeform"><ul id="comptree" class="treeview">';
     $subject = "";
@@ -554,7 +554,7 @@ function block_exaport_build_comp_tree() {
             $subject = $descriptor->subject;
             if (!$newsub
                 )$tree.='</ul></li></ul></li>';
-            $tree.='<li>' . $subject;
+            $tree.='<li id="gegenst'.$descriptor->subjid.'" alt="'.$subject.'">' . $subject;
             $tree.='<ul>';
 
             $newsub = false;
@@ -568,7 +568,7 @@ function block_exaport_build_comp_tree() {
             $tree.='<ul>';
             $newtop = false;
         }
-        $tree.='<li><input type="checkbox" name="desc" value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
+        $tree.='<li><input class="'.$descriptor->subjid.'" type="checkbox" name="desc" value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
 
         $index++;
     }

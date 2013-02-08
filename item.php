@@ -353,7 +353,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
 
 	if(isset($post->url))
-		$post->url = (strpos($post->url,'http://') === 0) ? $post->url : "http://".$post->url;
+		if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
 	
 	if ($DB->update_record('block_exaportitem', $post)) {
 		add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
@@ -390,8 +390,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 	$post->intro = '';
 	
 	if($post->type == 'link')
-		$post->url = (strpos($post->url,'http://') === 0) ? $post->url : "http://".$post->url;
-
+		if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
 	// Insert the new blog entry.
 	if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
 		$post->introformat = FORMAT_HTML;

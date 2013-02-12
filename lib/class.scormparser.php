@@ -114,7 +114,7 @@ class SCORMParser {
         $tree = array();
         
         // Check if file exists and extract path from filename
-        if(ereg("^(.*)imsmanifest.xml$", $scormfile, $regs) && is_file($scormfile)) {
+        if(preg_match('/^(.*)imsmanifest.xml$/', $scormfile, $regs) && is_file($scormfile)) {
             $this->dir = $regs[1];
             $imsfile = $regs[0];
         }

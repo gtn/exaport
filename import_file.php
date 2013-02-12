@@ -48,30 +48,29 @@ if (!$course = $DB->get_record("course", $conditions)) {
 
 $url = '/blocks/exaport/import_file.php';
 $PAGE->set_url($url);
-block_exaport_print_header("exportimportimport");
-
-//$exteditform = new block_exaport_import_scorm_form();
 
 $strimport = get_string("import", "block_exaport");
-
-$exteditform = new block_exaport_scorm_upload_form(null, null);
-
-
 $imported = false;
 $returnurl = $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $courseid;
 
-////////
+$exteditform = new block_exaport_scorm_upload_form(null, null);
 if ($exteditform->is_cancelled()) {
     redirect($returnurl);
 } else if ($exteditform->no_submit_button_pressed()) {
     die("nosubmitbutton");
     //no_submit_button_actions($exteditform, $sitecontext);
-} else if ($fromform = $exteditform->get_data()) {
+}
+
+block_exaport_print_header("exportimportimport");
+
+
+////////
+if ($fromform = $exteditform->get_data()) {
     $imported = true;
     $dir = make_upload_directory(import_file_area_name());
     $zipcontent = $exteditform->get_file_content('attachment');
     if (file_put_contents($dir."/".$exteditform->get_new_filename('attachment'), $zipcontent) && $newfilename = $exteditform->get_new_filename('attachment')) {
-        if (ereg("^(.*).zip$", $newfilename, $regs)) {
+        if (preg_match('/^(.*).zip$/', $newfilename, $regs)) {
             if ($scormdir = make_upload_directory(import_file_area_name())) {
                 $unzip_dir = $scormdir . '/' . $regs[1];
 

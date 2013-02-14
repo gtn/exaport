@@ -576,7 +576,22 @@ function block_exaport_build_comp_tree() {
 
     return $tree;
 }
-
+function block_exaport_assignmentversion(){
+	global $DB;
+	$modassign=new stdClass();
+	if($DB->record_exists('modules', array('name'=>'assign', 'visible'=>1))){
+		$modassign->new=1;
+		$modassign->title="assign";
+		$modassign->filearea="submission_files";
+		$modassign->component="assignsubmission_file";
+	}else{
+		$modassign->new=0;
+		$modassign->title="assignment";
+		$modassign->filearea="submission";
+		$modassign->component='mod_assignment';
+	};
+	return $modassign;
+}
 function block_exaport_set_user_preferences($userid, $preferences = null) {
     global $DB;
 

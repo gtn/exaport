@@ -24,10 +24,11 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  * ************************************************************* */
-
+global $DB, $OUTPUT,$CFG;
 require_once dirname(__FILE__) . '/inc.php';
 require_once($CFG->dirroot . '/mod/assignment/lib.php');
-global $DB, $OUTPUT;
+require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
+
 
 $output="";
 $courseid = optional_param("courseid", 0, PARAM_INT);
@@ -46,14 +47,23 @@ $url = '/blocks/exabis_competences/import_moodle.php';
 $PAGE->set_url($url);
 block_exaport_print_header("exportimportmoodleimport");
 
-$assignments = $DB->get_records_sql("SELECT s.id, a.id AS aid, s.assignment, s.timemodified, a.name, a.course, a.assignmenttype, c.fullname AS coursename
+$modassign=block_exaport_assignmentversion();
+if ($modassign->new==1){
+	$assignments = $DB->get_records_sql("SELECT s.id, a.id AS aid, s.assignment, s.timemodified, a.name, a.course, c.fullname AS coursename
+								FROM {assignsubmission_file} sf
+								INNER JOIN {assign_submission} s ON sf.submission=s.id
+								INNER JOIN {assign} a ON s.assignment=a.id
+								LEFT JOIN {course} c on a.course = c.id
+								WHERE s.userid='{$USER->id}'");
+}else{
+	$assignments = $DB->get_records_sql("SELECT s.id, a.id AS aid, s.assignment, s.timemodified, a.name, a.course, a.assignmenttype, c.fullname AS coursename
 								FROM {assignment_submissions} s
 								JOIN {assignment} a ON s.assignment=a.id
 								LEFT JOIN {course} c on a.course = c.id
 								WHERE s.userid='{$USER->id}'");
-
+}
 $table = new html_table();
-$table->head = array(get_string("modulename", "assignment"), get_string("time"), get_string("file"), get_string("course", "block_exaport"), get_string("action"));
+$table->head = array(get_string("modulename", $modassign->title), get_string("time"), get_string("file"), get_string("course", "block_exaport"), get_string("action"));
 $table->align = array("LEFT", "LEFT", "LEFT", "LEFT", "RIGHT");
 $table->size = array("20%", "20%", "25%", "20%", "15%");
 $table->width = "85%";
@@ -61,13 +71,13 @@ $table->data = array();
 
 if ($assignments) {
     foreach ($assignments as $assignment) {
-        if (!$cm = get_coursemodule_from_instance('assignment', $assignment->aid)) {
+        if (!$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid)) {
             print_error('invalidcoursemodule');
         }
         $course = $DB->get_record('course', array("id" => $courseid));
         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
         $fs = get_file_storage();
-        $files = $fs->get_area_files($context->id, 'mod_assignment', 'submission', $assignment->id);
+        $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->id);
 //
 //
 //        foreach ($files as $f) {
@@ -80,8 +90,8 @@ if ($assignments) {
 
         unset($icons);
         $icons = '';
-
         foreach ($files as $file) {
+
             $icon =  new pix_icon(file_mimetype_icon($file->get_mimetype()),'');
 
             $filename = $file->get_filename();
@@ -93,7 +103,7 @@ if ($assignments) {
             $icons .= '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid . '&amp;submissionid=' . $assignment->id . '&amp;filename=' . $filename . '&amp;sesskey=' . sesskey() . '&activityid='.$cm->id.'&assignmentid='.$assignment->aid.'">' .
                     get_string("add_this_file", "block_exaport") . '</a>';
 
-            $table->data[] = array($assignment->name, userdate($assignment->timemodified), '<img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.gif" class="icon" alt="' . $icon->pix . '" />' .
+            $table->data[] = array($assignment->name, userdate($assignment->timemodified), '<img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.png" class="icon" alt="' . $icon->pix . '" />' .
                 '<a href="' . $link . '" >' . $filename . '</a><br />', $assignment->coursename, $icons);
         
         }

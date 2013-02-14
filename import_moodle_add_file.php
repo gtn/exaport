@@ -24,9 +24,10 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  * ************************************************************* */
-
+global $DB,$CFG;
 require_once dirname(__FILE__) . '/inc.php';
-global $DB;
+require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
+
 
 $id = optional_param('id', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -34,7 +35,9 @@ $confirm = optional_param('confirm', '', PARAM_BOOL);
 $filename = optional_param('filename', '', PARAM_FILE);
 $assignmentid = optional_param('submissionid', 0, PARAM_INT);
 $aid = optional_param('assignmentid', 0, PARAM_INT);
-$cm = get_coursemodule_from_instance('assignment', $aid);
+
+$modassign=block_exaport_assignmentversion();
+$cm = get_coursemodule_from_instance($modassign->title, $aid);
 
 $post = new stdClass();
 $checked_file = null;
@@ -64,7 +67,8 @@ if ($assignmentid == 0) {
     error("No assignment given!");
 }
 
-if (!($checked_file = check_assignment_file($assignmentid, $filename))) {
+
+if (!($checked_file = check_assignment_file($assignmentid, $filename,$modassign))) {
     print_error("invalidfileatthisassignment", "block_exaport");
 }
 
@@ -104,6 +108,7 @@ if ($action == 'delete') {
 require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
 if ($action == 'add') {
+	if ($existing==false) $existing=new stdClass();
     $existing->action = $action;
     $existing->courseid = $courseid;
     $existing->type = 'file';
@@ -113,10 +118,11 @@ if ($action == 'add') {
     $existing->intro = "";
     $existing->filename = $checked_file->get_filename();
     $existing->submission = $assignmentid;
-    $existing->activityid = $cm->id;
+    if (!empty($cm->id)) $existing->activityid = $cm->id;
+    else $existing->activityid =-1;
 }
 
-$exteditform = new block_exaport_item_edit_form(null, Array('existing' => $existing, 'type' => 'file', 'action' => 'edit'));
+$exteditform = new block_exaport_item_edit_form(null, Array('existing' => $existing, 'type' => 'file', 'action' => 'edit','assignmentid'=>$aid));
 
 
 if ($exteditform->is_cancelled()) {
@@ -159,7 +165,8 @@ switch ($action) {
 
 block_exaport_print_header("bookmarksfiles");
 
-if (!$cm = get_coursemodule_from_instance('assignment', $aid)) {
+
+if (!$cm = get_coursemodule_from_instance($modassign->title, $aid)) {
     print_error('invalidcoursemodule');
 }
 $filecontext = get_context_instance(CONTEXT_MODULE, $cm->id);
@@ -208,6 +215,7 @@ function do_add($post, $blogeditform, $returnurl, $courseid, $checked_file) {
 
 	$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
 	$post->introformat = FORMAT_HTML;
+	
 	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
 
 	$filerecord = new stdClass();
@@ -248,25 +256,36 @@ function do_delete($post, $returnurl, $courseid) {
     }
 }
 
-function check_assignment_file($assignmentid, $file) {
+function check_assignment_file($assignmentid, $file,$modassign) {
     global $CFG, $USER, $DB;
     $fileinfo = new stdClass();
+		if ($modassign->new==1){
+			if (!$assignment = $DB->get_record_sql('SELECT s.id, a.id AS aid, s.assignment, a.course AS courseid
+	              FROM {assignsubmission_file} sf
+								INNER JOIN {assign_submission} s ON sf.submission=s.id
+								INNER JOIN {assign} a ON s.assignment=a.id
+	              WHERE s.userid=? AND s.id=?', array($USER->id, $assignmentid))) {
+	
+	        print_error("invalidassignmentid", "block_exaport");
+	    }
+								
+		}else{
+	    if (!$assignment = $DB->get_record_sql('SELECT s.id, a.id AS aid, s.assignment, a.course AS courseid
+	                                    FROM {assignment_submissions} s
+	                                    JOIN {assignment} a ON s.assignment=a.id
+	                                    WHERE s.userid=? AND s.id=?', array($USER->id, $assignmentid))) {
+	
+	        print_error("invalidassignmentid", "block_exaport");
+	    }
+	  }
 
-    if (!$assignment = $DB->get_record_sql('SELECT s.id, a.id AS aid, s.assignment, a.course AS courseid
-                                    FROM {assignment_submissions} s
-                                    JOIN {assignment} a ON s.assignment=a.id
-                                    WHERE s.userid=? AND s.id=?', array($USER->id, $assignmentid))) {
-
-        print_error("invalidassignmentid", "block_exaport");
-    }
-
-    if (!$cm = get_coursemodule_from_instance('assignment', $assignment->aid)) {
+    if (!$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid)) {
         print_error('invalidcoursemodule');
     }
 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $fs = get_file_storage();
-    $files = $fs->get_area_files($context->id, 'mod_assignment', 'submission', $assignment->id);
+    $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->id);
     if ($files) {
         foreach ($files as $actFile) {
 

@@ -86,8 +86,8 @@ class block_exaport_item_edit_form extends moodleform {
             $mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client');
         } elseif ($type == 'file') {
             if ($this->_customdata['action'] == 'add') {
-				$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1));
-			} else {
+						$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1));
+						} else {
                 // filename for assignment import
                 $mform->addElement('hidden', 'filename');
                 $mform->setType('filename', PARAM_TEXT);
@@ -109,6 +109,9 @@ class block_exaport_item_edit_form extends moodleform {
         	$mform->setType('langid', PARAM_INT);
         }
         
+        if (!isset($this->_customdata['textfieldoptions'])) {
+        	$this->_customdata['textfieldoptions'] = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+        }
         $mform->addElement('editor', 'intro_editor', get_string('intro', 'block_exaport'), null, $this->_customdata['textfieldoptions']);
         $mform->setType('intro_editor', PARAM_RAW);
         if ($type == 'note')

@@ -17,11 +17,19 @@
 			$sql.=" WHERE c.visible=1 AND ue.userid=".$user->id;
 			$sql.=" ORDER BY ue.timemodified DESC LIMIT 0,1";
 			if ($rs = $DB->get_record_sql($sql)){*/
-					
+
 				if ((!isloggedin())){
 					complete_user_login($user);
 				}
+				
+				//flo, hier einen kurs suchen, in dem exabis eportfolio installiert ist, und auf die view_items seite gehen
+				//wenn kein kurs, dann diesen redirect belassen
+				//wenn eportfolio nicht in einem kurs installiert ist, dorthin verlinken
+				
 				redirect($CFG->wwwroot);
+				
+				
+				
 				/*
 				$courses=enrol_get_my_courses();
 				if (!empty($courses) && is_array($courses)){

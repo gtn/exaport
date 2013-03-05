@@ -115,16 +115,15 @@ else{
 }
 
 if(strcmp("sqlsrv", $CFG->dbtype)==0){
-
 	$query = "SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(INTRO as text) intro,
 	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment,
 	i.sortorder, i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid,
 	cast(BEISPIEL as text)beispiel_angabe,
-	i.cname, i.cname_parent, i.coursename,comments FROM(
+	i.cname, i.cname_parent, i.catid, i.coursename,comments FROM(
 	SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar) INTRO,
 	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
 	i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, cast(i.beispiel_angabe AS varchar) BEISPIEL,
-	ic.name AS cname, ic2.name AS cname_parent, c.fullname AS coursename, COUNT( com.id ) AS comments
+	ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, c.fullname AS coursename, COUNT( com.id ) AS comments
 	FROM {block_exaportitem} i
 	JOIN {block_exaportcate} ic ON i.categoryid = ic.id
 	LEFT JOIN {block_exaportcate} ic2 ON ic.pid=ic2.id
@@ -136,13 +135,15 @@ if(strcmp("sqlsrv", $CFG->dbtype)==0){
 	ic2.name,c.fullname )i $sql_sort ";
 }
 else{
-	$query = "select i.*, ic.name AS cname, ic2.name AS cname_parent, c.fullname As coursename, COUNT(com.id) As comments".
+	$query = "select i.*, ic.name AS cname, ic2.name AS cname_parent, ic.id AS catid, c.fullname As coursename, COUNT(com.id) As comments".
 			" from {block_exaportitem} i".
 			" join {block_exaportcate} ic on i.categoryid = ic.id".
 			" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 			" left join {course} c on i.courseid = c.id".
 			" left join {block_exaportitemcomm} com on com.itemid = i.id".
-			" where i.userid = ? $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename $sql_sort";
+			" where i.userid = ? $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename,".
+			"i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,". 
+			"i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable, ic.id $sql_sort";
 }
 $items = $DB->get_records_sql($query, $condition);
 
@@ -193,7 +194,7 @@ if ($items) {
 	$itemscnt = count($items);
 	foreach ($items as $item) {
 		$item_i++;
-
+//if ($item_i==50) {break;}
 		$table->data[$item_i] = array();
 
 		// set category
@@ -201,7 +202,23 @@ if ($items) {
 			$category = format_string($item->cname);
 		}
 		else {
-			$category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
+			$catid= $item->catid;
+			$catname = $item->cname;
+			$category = "";
+			$category = format_string($item->cname);
+			//recursives abfragen des kategorienpfades, zu langsam!
+			/*do{
+				$conditions = array("userid" => $USER->id, "id" => $catid);
+				$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
+				foreach($cats as $cat){
+					if($category == "")
+						$category =format_string($cat->name);
+					else
+						$category =format_string($cat->name)." &rArr; ".$category;
+					$catid = $cat->pid;
+				}
+			
+			}while ($cat->pid != 0);*/
 		}
 		if (($sortkey == "category") && ($lastcat == $category)) {
 			$category = "";
@@ -297,6 +314,12 @@ if ($items) {
 	 if ($parsedsort[0] != 'sortorder')
 		echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&amp;&type='.$type.'&amp;sort=sortorder">'.get_string("userdefinedsort", "block_exaport").'</a>';
 	*/
+/*	if ($item_i==100){
+	$output = html_writer::table($table);
+	echo $output;
+echo $query;die;
+}*/
+
 	$output = html_writer::table($table);
 	echo $output;
 } else {

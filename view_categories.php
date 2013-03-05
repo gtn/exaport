@@ -189,7 +189,6 @@ if($cataction) {
 }
 
 //$categoriesform = new eportfolio_new_categorie_form();
-
 if($edit == 1) {
 	if (!confirm_sesskey()) {
 		error('Bad Session Key');
@@ -200,46 +199,10 @@ if($edit == 1) {
 	if ( $outer_categories ) {
 		
 		echo '<tr><td class="block_eportfolio_bold">'.get_string("maincategory","block_exaport").'</td><td class="block_eportfolio_bold">'.get_string("subcategory","block_exaport").'</td></tr>';
-		foreach ($outer_categories as $curcategory ) {
-			$params = array('userid'=>$USER->id, 'pid'=>$curcategory->id);
-
-			$count_inner_categories = $DB->count_records_select("block_exaportcate", "userid = ? AND pid = ?", $params);
-			$conditions = array("userid" => $USER->id, "pid" => $curcategory->id);
-			$inner_categories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?",$conditions, "name asc");
-			echo '<tr>';
-			echo '<td valign="top">';
-			echo format_string($curcategory->name);
-			echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?cataction=edit&amp;sesskey=' . sesskey() . '&amp;catconfirm=1&amp;courseid='.$courseid.'&amp;editid='.$curcategory->id.'&amp;edit=1"><img src="'.$CFG->wwwroot.'/pix/i/edit.gif" width="16" height="16" alt="'.get_string("edit").'" /></a>';
-				
-			if($count_inner_categories == 0) {
-				echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?cataction=delete&amp;sesskey=' . sesskey() . '&amp;catconfirm=1&amp;courseid='.$courseid.'&amp;delid='.$curcategory->id.'&amp;edit=1"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" width="11" height="11" alt="'.get_string("delete").'" /></a>';
-			}
-			echo '</td>';
-			echo '<td valign="top">';
-			if($inner_categories) {
-				foreach ($inner_categories as $innercurcategory ) {
-					echo format_string($innercurcategory->name);
-					echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?cataction=edit&amp;sesskey=' . sesskey() . '&amp;catconfirm=1&amp;courseid='.$courseid.'&amp;editid='.$innercurcategory->id.'&amp;edit=1"><img src="'.$CFG->wwwroot.'/pix/i/edit.gif" width="16" height="16" alt="'.get_string("edit").'" /></a>';
-					echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?cataction=delete&amp;sesskey=' . sesskey() . '&amp;catconfirm=1&amp;courseid='.$courseid.'&amp;delid='.$innercurcategory->id.'&amp;edit=1"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" width="11" height="11" alt="'.get_string("delete").'" /></a>';
-					echo '<br />';
-				}
-			}
-			
-			echo '<form method="post" action="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?courseid='.$courseid.'&amp;edit=1">';
-			echo '<fieldset>';
-			echo '<input type="text" name="name" />';
-			echo '<input type="hidden" name="pid" value="' . $curcategory->id . '" />';
-			echo '<input type="hidden" name="courseid" value="'. $courseid .'" />';
-			echo '<input type="hidden" name="cataction" value="add" />';
-			echo '<input type="submit" name="Submit" value="'.get_string("new") .'" />';
-			echo '<input type="hidden" name="catconfirm" value="1" />';
-			echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
-			echo '</fieldset>';
-			echo '</form>';
-			echo '</td>';
-			echo '</tr>';
-		}
+		echo '<tr>';
+		rekedit($outer_categories, $courseid, 1, 0);
 	}
+	echo '</tr>';
 	echo '<tr>';
 	echo '<td valign="top">'; 
 	
@@ -269,19 +232,8 @@ else {
 	$owncats=$DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name ASC");
 	if ($owncats) {
 		echo "<ul>";
-		foreach ($owncats as $owncat) {
-			echo '<li>' . format_string($owncat->name);
-			$conditions = array("userid" => $USER->id, "pid" => $owncat->id);
-			$innerowncats=$DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?",$conditions, "name ASC");
-			  if($innerowncats) {
-				echo "<ul>";
-				foreach ($innerowncats as $innerowncat) {
-				  echo '<li>' . format_string($innerowncat->name) . '</li>';
-				}
-				echo "</ul>";
-			  }
-			  echo "</li>";
-		}
+		
+		rekview($owncats);
 		echo "</ul>";
 	}
 
@@ -299,3 +251,70 @@ else {
 }
 
 echo $OUTPUT->footer($course);
+
+function rekedit($outer_categories, $courseid, $first, $level){
+	global $USER, $DB, $CFG;
+	$firstinner = 1;
+	
+	foreach ($outer_categories as $curcategory ) {
+		if($firstinner==0 & $first!=1){
+			for($i=0; $i<$level; $i++){
+				echo '<td valign="top"></td>';
+			}
+		}
+		$params = array('userid'=>$USER->id, 'pid'=>$curcategory->id);
+
+		$count_inner_categories = $DB->count_records_select("block_exaportcate", "userid = ? AND pid = ?", $params);
+		$conditions = array("userid" => $USER->id, "pid" => $curcategory->id);
+		$inner_categories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?",$conditions, "name asc");
+		
+		echo '<td valign="top">';
+		echo format_string($curcategory->name);
+		echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?cataction=edit&amp;sesskey=' . sesskey() . '&amp;catconfirm=1&amp;courseid='.$courseid.'&amp;editid='.$curcategory->id.'&amp;edit=1"><img src="'.$CFG->wwwroot.'/pix/i/edit.gif" width="16" height="16" alt="'.get_string("edit").'" /></a>';
+				
+		if($count_inner_categories == 0) {
+			echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?cataction=delete&amp;sesskey=' . sesskey() . '&amp;catconfirm=1&amp;courseid='.$courseid.'&amp;delid='.$curcategory->id.'&amp;edit=1"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" width="11" height="11" alt="'.get_string("delete").'" /></a>';
+		}
+		echo '</td>';
+		
+		if($inner_categories) {
+			rekedit($inner_categories, $courseid, 0, $level+1);
+			for($i=0; $i<=$level; $i++)
+				echo '<td valign="top"></td>';
+		}
+		echo '<td valign="top">';
+		echo '<form method="post" action="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?courseid='.$courseid.'&amp;edit=1">';
+		echo '<fieldset>';
+		echo '<input type="text" name="name"/>';
+		echo '<input type="hidden" name="pid" value="' . $curcategory->id . '" />';
+		echo '<input type="hidden" name="courseid" value="'. $courseid .'" />';
+		echo '<input type="hidden" name="cataction" value="add" />';
+		echo '<input type="submit" name="Submit" value="'.get_string("new") .'" />';
+		echo '<input type="hidden" name="catconfirm" value="1" />';
+		echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+		echo '</fieldset>';
+		echo '</form>';
+		echo '</td>';
+		echo '</tr>';
+		echo '<tr>';
+		$firstinner = 0;
+	}
+	
+}
+
+function rekview($owncats){
+	global $DB, $USER;
+	foreach ($owncats as $owncat) {
+		echo '<li>' . format_string($owncat->name);
+		
+		$conditions = array("userid" => $USER->id, "pid" => $owncat->id);
+		$innerowncats=$DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?",$conditions, "name ASC");
+		
+		if($innerowncats) {
+			echo "<ul>";
+			rekview($innerowncats);
+			echo "</ul>";
+		}
+		echo "</li>";
+	}
+}

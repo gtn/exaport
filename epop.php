@@ -29,10 +29,11 @@ if ($action=="login"){
 		}
 		
 		if ($validiert==true){
-			if ($user->auth=='nologin' || $user->firstaccess==0 || $user->suspended!=0 || $user->deleted!=0) $uhash=0;
+			if ($user->auth=='nologin' || $user->suspended!=0 || $user->deleted!=0) $uhash=0;
 			else{
 				if (!$user_hash = $DB->get_record("block_exaportuser", array("user_id"=>$user->id))){
 					$uhash=block_exaport_create_exaportuser($user->id);
+					block_exaport_installoez($user->id);
 				}else{
 					if (empty($user_hash->user_hash_long)) {$uhash=block_exaport_update_userhash($user_hash->id);}
 					else $uhash=$user_hash->user_hash_long;
@@ -1153,7 +1154,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 	INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid";
 	$sql.=" WHERE st.isoez=1".$where." ";
 	$sql.=" ORDER BY subjid,topid";
-
+//echo $sql;
 	$row = $DB->get_records_sql($sql);
 	$subjid=-1;$topid=-1;
 	$beispiel_url="";

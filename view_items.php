@@ -194,7 +194,7 @@ if ($items) {
 	$itemscnt = count($items);
 	foreach ($items as $item) {
 		$item_i++;
-//if ($item_i==50) {break;}
+
 		$table->data[$item_i] = array();
 
 		// set category
@@ -204,9 +204,9 @@ if ($items) {
 		else {
 			$catid= $item->catid;
 			$catname = $item->cname;
-			$category = "";
 			$category = format_string($item->cname);
 			//recursives abfragen des kategorienpfades, zu langsam!
+
 			/*do{
 				$conditions = array("userid" => $USER->id, "id" => $catid);
 				$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
@@ -216,7 +216,7 @@ if ($items) {
 					else
 						$category =format_string($cat->name)." &rArr; ".$category;
 					$catid = $cat->pid;
-				}
+			}
 			
 			}while ($cat->pid != 0);*/
 		}
@@ -314,12 +314,6 @@ if ($items) {
 	 if ($parsedsort[0] != 'sortorder')
 		echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&amp;&type='.$type.'&amp;sort=sortorder">'.get_string("userdefinedsort", "block_exaport").'</a>';
 	*/
-/*	if ($item_i==100){
-	$output = html_writer::table($table);
-	echo $output;
-echo $query;die;
-}*/
-
 	$output = html_writer::table($table);
 	echo $output;
 } else {

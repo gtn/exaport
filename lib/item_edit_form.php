@@ -130,21 +130,26 @@ class block_exaport_item_edit_form extends moodleform {
         $outercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
         $categories = array();
         if ($outercategories) {
-            foreach ($outercategories as $curcategory) {
-                $categories[$curcategory->id] = format_string($curcategory->name);
-
-                $conditions = array("userid" => $USER->id, "pid" => $curcategory->id);
-                $inner_categories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
-                if ($inner_categories) {
-                    foreach ($inner_categories as $inner_curcategory) {
-                        $categories[$inner_curcategory->id] = format_string($curcategory->name) . '&rArr; ' . format_string($inner_curcategory->name);
-                    }
-                }
-            }
+           $categories = rek_category_select_setup($outercategories, " ", $categories);
         } else {
             $categories[0] = get_string("nocategories", "block_exaport");
         }
         $categorysselect->loadArray($categories);
     }
-
+	
 }
+
+function rek_category_select_setup($outercategories, $entryname, $categories){
+		global $DB, $USER;
+		 foreach ($outercategories as $curcategory) {
+                $categories[$curcategory->id] = $entryname.format_string($curcategory->name);
+				$name = $entryname.format_string($curcategory->name);
+
+                $conditions = array("userid" => $USER->id, "pid" => $curcategory->id);
+                $inner_categories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
+                if ($inner_categories) {
+                    $categories = rek_category_select_setup($inner_categories, $name.' &rArr; ', $categories);
+                }
+         }
+		 return $categories;
+	}

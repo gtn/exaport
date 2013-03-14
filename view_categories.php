@@ -189,6 +189,7 @@ if($cataction) {
 }
 
 //$categoriesform = new eportfolio_new_categorie_form();
+
 if($edit == 1) {
 	if (!confirm_sesskey()) {
 		error('Bad Session Key');
@@ -285,7 +286,7 @@ function rekedit($outer_categories, $courseid, $first, $level){
 		echo '<td valign="top">';
 		echo '<form method="post" action="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?courseid='.$courseid.'&amp;edit=1">';
 		echo '<fieldset>';
-		echo '<input type="text" name="name"/>';
+		echo '<input type="text" name="name" value ="Subkategorie von '.$curcategory->name.'"/>';
 		echo '<input type="hidden" name="pid" value="' . $curcategory->id . '" />';
 		echo '<input type="hidden" name="courseid" value="'. $courseid .'" />';
 		echo '<input type="hidden" name="cataction" value="add" />';

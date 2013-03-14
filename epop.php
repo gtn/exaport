@@ -20,7 +20,8 @@ if ($action=="login"){
 		if (!$user = $DB->get_record("user", $conditions)){
 			$condition = array("username" => $uname);
 			if ($user = $DB->get_record("user", $condition)){
-				$validiert=validate_internal_user_password($user,$pword);
+				//$validiert=validate_internal_user_password($user,$pword);
+				$validiert=authenticate_user_login($uname,$pword); 
 			}else{
 				$validiert=false;
 			}
@@ -29,16 +30,19 @@ if ($action=="login"){
 		}
 		
 		if ($validiert==true){
-			if ($user->auth=='nologin' || $user->suspended!=0 || $user->deleted!=0) $uhash=0;
+			if ($user->auth=='nologin' || $user->confirmed==0 || $user->suspended!=0 || $user->deleted!=0) $uhash=0;
 			else{
 				if (!$user_hash = $DB->get_record("block_exaportuser", array("user_id"=>$user->id))){
-					$uhash=block_exaport_create_exaportuser($user->id);
-					block_exaport_installoez($user->id);
+					if ($uhash=block_exaport_create_exaportuser($user->id)){
+						block_exaport_installoez($user->id);
+					}
 				}else{
 					if (empty($user_hash->user_hash_long)) {$uhash=block_exaport_update_userhash($user_hash->id);}
 					else $uhash=$user_hash->user_hash_long;
 					if ($user_hash->oezinstall==0) block_exaport_installoez($user->id);
-					else block_exaport_installoez($user->id,true);
+					else {
+						if (block_exaport_checkIfUpdate($user->id))	block_exaport_installoez($user->id,true);
+					}
 				}
 			}
 		}else{
@@ -409,7 +413,7 @@ else if ($action=="get_items_for_view"){
 	if (!$user) echo "invalid hash";
 	else{
 		if ($action=="getExamples"){
-						block_exaport_installoez($user->id,true);
+			if (block_exaport_checkIfUpdate($user->id))	block_exaport_installoez($user->id,true);
 		}
 		if(block_exaport_check_competence_interaction()) {
 			$itemid=optional_param('itemid', 0, PARAM_INT);
@@ -1138,37 +1142,97 @@ function block_exaport_competence_selected($subjid,$userid,$itemid){
 		if ($res=$DB->get_records_sql($sql)) return true;
 		else return false;
 }
+function block_exaport_checkIfUpdate($userid){
+		//$conditions = array("username" => $uname,"password" => $pword);
+		//if (!$user = $DB->get_record("user", $conditions)){
+		global $DB;
+		$sql="SELECT * FROM {block_exacompsettings} WHERE course=0 AND activities='importxml'";
+		if ($modsetting = $DB->get_record_sql($sql)){
+			if ($usersetting = $DB->get_record("block_exaportuser",array("user_id"=>$userid))){
+				if (!empty($usersetting->import_oez_tstamp)){
+					if ($usersetting->import_oez_tstamp >= $modsetting->tstamp)	return false;
+					else return true;
+				}else return true;
+			}else return true;
+		}else return true;
+}
+
 function block_exaport_installoez($userid,$isupdate=false){
 	global $DB;
-	$where="";
-	if ($isupdate==true){
-		$sql="SELECT group_concat(cast(exampid as char(11))) as ids FROM {block_exaportitem} where isoez=1 AND userid=?";
-		$rse = $DB->get_record_sql($sql,array($userid));
-		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}
+	$where="";$catold=array();
+	if (!$kont = $DB->get_records("block_exaportcate", array("userid"=>$userid,"isoez"=>2))){
+		$newkontid=$DB->insert_record('block_exaportcate', array("name"=>"Eigener Kontinent","userid"=>$userid,"pid"=>0,"timemodified"=>time(),"courseid"=>0,"description"=>"Eigener Kontinent","isoez"=>2,"stid"=>0,"subjid"=>0,"topicid"=>0,"source"=>0,"sourceid"=>0,"sourcemod"=>0));
+		$sql="UPDATE {block_exaportcate} SET pid=".$newkontid." WHERE pid=0 AND isoez=0 AND userid=".$userid;
+		$DB->execute($sql);
 	}
-	$sql="SELECT DISTINCT concat(top.id,examp.id) as id, subj.title as kat1, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
+		
+	if ($isupdate==true){
+		//exacomp: timestamp hinterlegen, wann update
+		//nur wenn neue daten, dann update
+		//zuerst export_cate in array schreiben mit stid#subjid#topid, um abfragen zu sparen
+		//dann neue daten durchlaufen, wenn neu dann insert, wenn vorhanden dann title und parentid prüfen und bei bedarf update, für löschen merker machen
+		//echo $userid;die;
+		if ($cats = $DB->get_records("block_exaportcate", array("userid"=>$userid))){
+			
+			foreach($cats as $cat){
+				$catold[$cat->source."#".$cat->sourceid."#".$cat->sourcemod]=array("name"=>$cat->name,"pid"=>$cat->pid,"id"=>$cat->id);
+			}
+		} 
+		
+		/*$sql="SELECT group_concat(cast(exampid as char(11))) as ids FROM {block_exaportitem} where isoez=1 AND userid=?";
+		$rse = $DB->get_record_sql($sql,array($userid));
+		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}*/
+	}
+	$sql="SELECT DISTINCT concat(top.id,examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid 
+	FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
 	INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 	INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
 	INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
 	INNER JOIN {block_exacompdescrexamp_mm} emm ON emm.descrid=descr.id
 	INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid";
 	$sql.=" WHERE st.isoez=1".$where." ";
-	$sql.=" ORDER BY subjid,topid";
-//echo $sql;
+	$sql.=" ORDER BY st.id,subj.id,top.id";
+//echo $sql;die;
 	$row = $DB->get_records_sql($sql);
-	$subjid=-1;$topid=-1;
+	$stid=-1;$subjid=-1;$topid=-1;
 	$beispiel_url="";
-	if ($isupdate==false){
+	//if ($isupdate==false){
 		foreach($row as $rs){
+			if ($stid!=$rs->stid){
+				$keyst=$rs->stsource."#".$rs->stsourceid."#3";
+				$jetzn=time();
+				if (array_key_exists($keyst,$catold)){
+					$newstid=$catold[$keyst]["id"];
+					$DB->update_record('block_exaportcate', array("id"=>$newstid,"name"=>$rs->kat0,"stid"=>$rs->stid,"timemodified"=>$jetzn));
+				}else{
+					
+					$datas=array("pid"=>0,"stid"=>$rs->stid,"sourcemod"=>"3","userid"=>$userid,"name"=>$rs->kat0,"timemodified"=>$jetzn,"course"=>"0","isoez"=>"1","subjid"=>0,"topicid"=>0,"source"=>$rs->stsource,"sourceid"=>$rs->stsourceid);
+					$newstid=$DB->insert_record('block_exaportcate', $datas);$stid=$rs->stid;
+				}
+			}
 			if ($subjid!=$rs->subjid){ 
+				$keysub=$rs->subsource."#".$rs->subsourceid."#5"; 
 				if (!empty($rs->kat1s)) $kat1s=$rs->kat1s;
 				else $kat1s=$rs->kat1;
-				$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>0,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","subjid"=>$rs->subjid,"topicid"=>0));$subjid=$rs->subjid;
+				if (array_key_exists($keysub,$catold)){
+					$newsubjid=$catold[$keysub]["id"];
+					$DB->update_record('block_exaportcate', array("id"=>$newsubjid,"name"=>$kat1s,"pid"=>$newstid,"timemodified"=>time(),"stid"=>$stid,"subjid"=>$rs->subjid));
+				}else{
+					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5));$subjid=$rs->subjid;
+				}
 			}
 			if ($topid!=$rs->topid){
+				$keytop=$rs->topsource."#".$rs->topsourceid."#7";
+				
 				if (!empty($rs->kat2s)) $kat2s=$rs->kat2s;
 				else $kat2s=$rs->kat2;
-				$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"subjid"=>$rs->subjid,"topicid"=>$rs->topid));$topid=$rs->topid;
+				//echo $keytop;print_r($catold);die;
+				if (array_key_exists($keytop,$catold)){
+					$newtopid=$catold[$keytop]["id"];
+					$DB->update_record('block_exaportcate', array("id"=>$newtopid,"name"=>$kat2s,"pid"=>$newsubjid,"timemodified"=>time(),"description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid));
+				}else{
+					$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid,"source"=>$rs->topsource,"sourceid"=>$rs->topsourceid,"sourcemod"=>7));$topid=$rs->topid;
+				}
 			}
 			if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
 			if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
@@ -1176,11 +1240,22 @@ function block_exaport_installoez($userid,$isupdate=false){
 			if ($rs->completefile!="") $fileUrl=$rs->completefile;
 			if (!empty($rs->items)) $items=$rs->items;
 			else $items=$rs->item;
-			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable));
+			$iteminsert=true;
+			if ($isupdate==true){
+				if ($itemrs = $DB->get_records("block_exaportitem",array("isoez"=>1,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"userid"=>$userid,"categoryid"=>$newtopid))){  //kategoryId mitnehmen, weil ein item kopiert und auf verschiedene kategorien zugeordnet werden kann. beim update soll dann nur das jeweilige item aktualisiert werden, sonst ist categorie falsch
+					$iteminsert=false;
+					foreach($itemrs as $item){
+						$DB->update_record('block_exaportitem', array("id"=>$item->id,"userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid));
+					}
+				}
+			}
+			if ($iteminsert==true) $DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid));
 		}
-		$sql="UPDATE {block_exaportuser} SET oezinstall=1 WHERE user_id=".$userid;
+		$sql="UPDATE {block_exaportuser} SET oezinstall=1,import_oez_tstamp=".time()." WHERE user_id=".$userid;
 		$DB->execute($sql);
-	}else{
+		echo "install oder update gmacht";
+
+	/*}else{
 		foreach($row as $rs){
 			$sql="SELECT * FROM {block_exaportcate} WHERE topicid=? LIMIT 0,1";
 			$rs2 = $DB->get_record_sql($sql,array($rs->topid));
@@ -1200,7 +1275,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 			if ($rs->completefile!="") $fileUrl=$rs->completefile;
 			$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"file","categoryid"=>$newtopid,"name"=>$rs->item,"url"=>"","intro"=>"","attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"source"=>$rs->source,"sourceid"=>$rs->sourceid));
 		}
-	}
+	}*/
 
 }
 

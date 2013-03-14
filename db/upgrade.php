@@ -197,6 +197,30 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			$DB->update_record('block_exaportuser', $update);
 		}
 	}
+	if ($oldversion < 2013031400) {
+			$table = new xmldb_table('block_exaportuser');
+			$field = new xmldb_field('import_oez_tstamp', XMLDB_TYPE_INTEGER, 20, XMLDB_UNSIGNED, null, null, 0, null);
+			if (!$dbman->field_exists($table, $field)) {
+				$dbman->add_field($table, $field);
+			} 
+			$table = new xmldb_table('block_exaportcate');
+			$field = new xmldb_field('parent_ids', XMLDB_TYPE_CHAR, '30', null, null, null, null, null);
+			if (!$dbman->field_exists($table, $field)) {
+				$dbman->add_field($table, $field);
+			} 
+			$field = new xmldb_field('parent_titles', XMLDB_TYPE_TEXT, 'medium', null, null, null, null, null);
+			if (!$dbman->field_exists($table, $field)) {
+				$dbman->add_field($table, $field);
+			}
+			$field = new xmldb_field('stid', XMLDB_TYPE_INTEGER, 20, XMLDB_UNSIGNED, null, null, 0, null);
+			if (!$dbman->field_exists($table, $field)) {
+				$dbman->add_field($table, $field);
+			}
+			$field = new xmldb_field('sourcemod', XMLDB_TYPE_INTEGER, 1, XMLDB_UNSIGNED, null, null, 0, null);
+			if (!$dbman->field_exists($table, $field)) {
+				$dbman->add_field($table, $field);
+			}
+	}
 
 	return $result;
 }

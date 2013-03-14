@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/eportfolio/db" VERSION="20121016" COMMENT="XMLDB file for Exabis E-Portfolio"
+<XMLDB PATH="blocks/eportfolio/db" VERSION="20130314" COMMENT="XMLDB file for Exabis E-Portfolio"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -14,7 +14,8 @@
         <FIELD NAME="itemsort" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" PREVIOUS="persinfo_externaccess" NEXT="user_hash"/>
         <FIELD NAME="user_hash" TYPE="char" LENGTH="8" NOTNULL="true" SEQUENCE="false" PREVIOUS="itemsort" NEXT="user_hash_long"/>
         <FIELD NAME="user_hash_long" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" PREVIOUS="user_hash" NEXT="oezinstall"/>
-        <FIELD NAME="oezinstall" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="user_hash_long"/>
+        <FIELD NAME="oezinstall" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="user_hash_long" NEXT="import_oez_tstamp"/>
+        <FIELD NAME="import_oez_tstamp" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" COMMENT="last time oez update/import" PREVIOUS="oezinstall"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="user_id"/>
@@ -34,7 +35,11 @@
         <FIELD NAME="subjid" TYPE="int" LENGTH="20" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" COMMENT="subject id" PREVIOUS="description" NEXT="topicid"/>
         <FIELD NAME="topicid" TYPE="int" LENGTH="20" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" COMMENT="topic id" PREVIOUS="subjid" NEXT="source"/>
         <FIELD NAME="source" TYPE="int" LENGTH="11" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="topicid" NEXT="sourceid"/>
-        <FIELD NAME="sourceid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="source"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="source" NEXT="parent_ids"/>
+        <FIELD NAME="parent_ids" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent category ids" PREVIOUS="sourceid" NEXT="parent_titles"/>
+        <FIELD NAME="parent_titles" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent categories, names" PREVIOUS="parent_ids" NEXT="stid"/>
+        <FIELD NAME="stid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="schooltypeid" PREVIOUS="parent_titles" NEXT="sourcemod"/>
+        <FIELD NAME="sourcemod" TYPE="int" LENGTH="1" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="modus of category exacomp schooltype=3, subject=5, topic=7" PREVIOUS="stid"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="primary key for bookmark categories" NEXT="userid"/>

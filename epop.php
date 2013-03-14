@@ -1003,7 +1003,8 @@ function write_xml_categories($conditions,$catid,$userid){
 			foreach($categories as $categorie){
 				
 				$numsubcats=get_number_subcats($categorie->id);
-				$inhalt.='<categorie catid="'.$categorie->id.'" numsubcats="'.$numsubcats.'" progress="'.block_exaport_get_progress($categorie->id,$catid,$userid).'" isOezepsItem="'.block_exaport_numtobool($categorie->isoez).'"';
+				$prog=block_exaport_get_progress($categorie->id,$catid,$userid);
+				$inhalt.='<categorie catid="'.$categorie->id.'" numsubcats="'.$numsubcats.'" progress="'.$prog->progress.'" numItems="'.$prog->anzahl.'" isOezepsItem="'.block_exaport_numtobool($categorie->isoez).'"';
 				if (!empty($catkomparr[$categorie->subjid])) $inhalt.=' competence_category="'.$catkomparr[$categorie->subjid].'"';
 				else $inhalt.=' competence_category=""';
 				$inhalt.='>'."\r\n";
@@ -1075,17 +1076,27 @@ function block_exaport_unique_hash(){
 }
 function block_exaport_get_progress($catid,$catidparent,$userid){
 	global $DB;
-	
+	$result=new stdClass();
+	$result->progress=0;$result->anzahl=0;
 	$catlist=block_exaport_get_subcategories($catid,$catidparent,$userid);
 	$catlist = preg_replace("/^,/", "", $catlist);
-	     
+	
+	if ($catidparent==0){//kontinent, eine ebene tiefer graben
+		$catarr=explode(",",$catlist);$catlistt="";
+		foreach($catarr as $catl){
+			$catlistt.=block_exaport_get_subcategories($catl,"",$userid);
+		}
+		$catlist = preg_replace("/^,/", "", $catlistt);
+	}  
 	$sql="SELECT count(id) as alle,sum(IF(attachment<>'' or intro<>'',1,0)) as mitfile FROM {block_exaportitem} WHERE isoez=1 AND categoryid IN (".$catlist.")";
-//echo $sql;
+
 	if ($rs=$DB->get_record_sql($sql)){
 		if ($rs->alle>0){
-			return ($rs->mitfile/$rs->alle);
-		}else return 0;
-	}else return 0;
+			$result->progress = ($rs->mitfile/$rs->alle);
+			$result->anzahl = $rs->alle;
+		}
+	}
+	return $result;
 }
 function block_exaport_get_subcategories($catid,$catlist,$userid){
 	global $DB;

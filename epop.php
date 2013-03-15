@@ -1265,7 +1265,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		}
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1,import_oez_tstamp=".time()." WHERE user_id=".$userid;
 		$DB->execute($sql);
-		echo "install oder update gmacht";
+
 
 	/*}else{
 		foreach($row as $rs){

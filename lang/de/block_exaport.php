@@ -33,7 +33,9 @@ $string['translation:email'] = 'ariepl.work@gmail.com';
 // Main
 $string['blocktitle'] = 'Exabis E-Portfolio';
 $string['pluginname'] = 'Exabis E-Portfolio';
-$string['exaport:use'] = 'Use allowed';
+$string['exaport:use'] = 'Nutzung';
+$string['exaport:addinstance'] = 'Exabis E-Portfolio auf Kursseite anlegen';
+$string['exaport:myaddinstance'] = 'Exabis E-Portfolio auf Startseite anlegen';
 $string['exaport:export'] = 'Export of SCORM-Files';
 $string['exaport:import'] = 'Import of SCORM-Files';
 $string['exaport:importfrommoodle'] = 'Import from Moodle';

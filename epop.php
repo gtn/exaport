@@ -97,7 +97,7 @@ if ($action=="login"){
 	else{
 		$parent_cat = optional_param('parent_cat', 0, PARAM_INT);
 		$catname = optional_param('name', ' ', PARAM_TEXT);
-		if ($newid = $DB->insert_record('block_exaportcate', array("pid"=>$parent_cat,"userid"=>$user->id,"name"=>$catname,"subjid"=>0,"topicid"=>0,"timemodified"=>time()))) {
+		if ($newid = $DB->insert_record('block_exaportcate', array("pid"=>$parent_cat,"userid"=>$user->id,"name"=>$catname,"subjid"=>0,"topicid"=>0,"stid"=>0,"isoez"=>0,"source"=>0,"sourceid"=>0,"sourcemod"=>0,"timemodified"=>time()))) {
 			echo $newid;
 		}else{
 			echo "-1";

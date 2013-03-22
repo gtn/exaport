@@ -1,6 +1,6 @@
 Exabis E-Portfolio ChangeLog
 2013-03-22 4.0.5
-implemented multiple categories, new views-concept (mahara-style)
+implemented multiple categories, new views-concept (mahara-style), access for smartphone-app epop (www.epop.at)
 
 2012-06-01 4.0.5
 updated-script for data-transfer from previous versions included (thanks to eThink eduacation for the support!)

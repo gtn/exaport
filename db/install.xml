@@ -122,7 +122,7 @@
         <FIELD NAME="externaccess" TYPE="int" LENGTH="3" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="shareall" NEXT="externcomment"/>
         <FIELD NAME="externcomment" TYPE="int" LENGTH="3" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="externaccess" NEXT="hash"/>
         <FIELD NAME="hash" TYPE="char" LENGTH="8" NOTNULL="false" SEQUENCE="false" PREVIOUS="externcomment" NEXT="langid"/>
-        <FIELD NAME="langid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" COMMENT="desp language id" PREVIOUS="hash"/>
+        <FIELD NAME="langid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" COMMENT="desp language id" PREVIOUS="hash" NEXT="layout"/>
 				<FIELD NAME="layout" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" DEFAULT="2" PREVIOUS="langid"/>        
       </FIELDS>
       <KEYS>

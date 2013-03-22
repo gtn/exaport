@@ -123,6 +123,7 @@
         <FIELD NAME="externcomment" TYPE="int" LENGTH="3" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="externaccess" NEXT="hash"/>
         <FIELD NAME="hash" TYPE="char" LENGTH="8" NOTNULL="false" SEQUENCE="false" PREVIOUS="externcomment" NEXT="langid"/>
         <FIELD NAME="langid" TYPE="int" LENGTH="20" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" COMMENT="desp language id" PREVIOUS="hash"/>
+				<FIELD NAME="layout" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" DEFAULT="2" PREVIOUS="langid"/>        
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="userid"/>
@@ -140,7 +141,12 @@
         <FIELD NAME="positiony" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="positionx" NEXT="type"/>
         <FIELD NAME="type" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="positiony" NEXT="itemid"/>
         <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="type" NEXT="text"/>
-        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="itemid"/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="itemid" NEXT="block_title"/>
+        <FIELD NAME="block_title" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="text" NEXT="firstname"/>
+        <FIELD NAME="firstname" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="block_title" NEXT="lastname"/>
+        <FIELD NAME="lastname" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="firstname" NEXT="email"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="lastname" NEXT="picture"/>
+        <FIELD NAME="picture" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" PREVIOUS="email"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="view"/>

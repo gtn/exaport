@@ -197,6 +197,44 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			$DB->update_record('block_exaportuser', $update);
 		}
 	}
+	if ($oldversion < 2013020101) {
+
+		$table = new xmldb_table('block_exaportview');
+		$field_wert = new xmldb_field('layout');
+		$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 2); //  Moodle 2.x deprecated
+		if (!$dbman->field_exists($table, $field_wert)) {
+			$dbman->add_field($table, $field_wert);
+		} 
+
+		$table = new xmldb_table('block_exaportviewblock');
+		$field_wert = new xmldb_field('block_title');
+		$field_wert->set_attributes(XMLDB_TYPE_TEXT, 'big', null, null, 0, null, null); //  Moodle 2.x deprecated
+		if (!$dbman->field_exists($table, $field_wert)) {
+			$dbman->add_field($table, $field_wert);
+		} 
+		$field_wert = new xmldb_field('firstname');
+		$field_wert->set_attributes(XMLDB_TYPE_CHAR, '150', null, null, 0, null, null); //  Moodle 2.x deprecated
+		if (!$dbman->field_exists($table, $field_wert)) {
+			$dbman->add_field($table, $field_wert);
+		} 
+		$field_wert = new xmldb_field('lastname');
+		$field_wert->set_attributes(XMLDB_TYPE_CHAR, '150', null, null, 0, null, null); //  Moodle 2.x deprecated
+		if (!$dbman->field_exists($table, $field_wert)) {
+			$dbman->add_field($table, $field_wert);
+		} 
+		$field_wert = new xmldb_field('email');
+		$field_wert->set_attributes(XMLDB_TYPE_CHAR, '150', null, null, 0, null, null); //  Moodle 2.x deprecated
+		if (!$dbman->field_exists($table, $field_wert)) {
+			$dbman->add_field($table, $field_wert);
+		} 
+		$field_wert = new xmldb_field('picture');
+		$field_wert->set_attributes(XMLDB_TYPE_CHAR, '250', null, null, 0, null, null); //  Moodle 2.x deprecated
+		if (!$dbman->field_exists($table, $field_wert)) {
+			$dbman->add_field($table, $field_wert);
+		} 
+	/**/
+	}
+
 	if ($oldversion < 2013031400) {
 			$table = new xmldb_table('block_exaportuser');
 			$field = new xmldb_field('import_oez_tstamp', XMLDB_TYPE_INTEGER, 20, XMLDB_UNSIGNED, null, null, 0, null);

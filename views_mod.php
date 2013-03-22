@@ -563,7 +563,8 @@ unset($value);
 //]]>
 </script>
 <?php
-
+if (!isset($view->layout)) 
+	$view->layout = 2;
 echo "<!--[if IE]> <style> #link_thumbnail{ zoom: 0.2; } </style> <![endif]--> ";
 switch ($type) {
 	case 'content' :
@@ -615,8 +616,7 @@ $cols_layout = array (
 );
 
 // default layout
-if (!isset($view->layout)) 
-	$view->layout = 2;
+
 
 echo '<div class="view-middle">';
 

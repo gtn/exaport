@@ -81,7 +81,7 @@ if ($edit) {
 
     if ($informationform->is_cancelled()) {
         
-    } else if ($fromform = $informationform->get_data()) {
+    } else if ($fromform = $informationform->get_data()) { 
 		$fromform = file_postupdate_standard_editor($fromform, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'personal_information', $USER->id);
         block_exaport_set_user_preferences(array('description' => $fromform->description, 'persinfo_timemodified' => time()));
 
@@ -90,7 +90,7 @@ if ($edit) {
         $description = $userpreferences->description;
 
         echo $OUTPUT->box(get_string("descriptionsaved", "block_exaport"), 'center', '40%', '#ccffbb');
-    } else {
+    } else {                                               
         $show_information = false;
 
         $data = new stdClass();
@@ -101,7 +101,6 @@ if ($edit) {
         $data->edit = 1;
 		
 		$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'personal_information', $USER->id);
-		
         $informationform->set_data($data);
         $informationform->display();
     }

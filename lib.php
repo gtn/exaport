@@ -21,7 +21,29 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 	// always require login, at least guest
 	require_login();
 	
-	if ($filearea == 'item_content') {
+	if ($filearea == 'item_file') {
+		$filename = array_pop($args);
+		$id = array_pop($args);
+		if (array_pop($args) != 'itemid') print_error('wrong params');
+		
+		// other params together are the access string
+		$access = join('/', $args);
+		
+		// item exists?
+		$item = block_exaport_get_item($id, $access);
+		if (!$item) print_error('Item not found');
+
+		// get file
+		$fs = get_file_storage();
+		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
+
+		// serve file
+		if ($file) {
+			send_stored_file($file);
+		} else {
+			return false;
+		}
+	} elseif ($filearea == 'item_content') {
 		$filename = array_pop($args);
 		$id = array_pop($args);
 		if (array_pop($args) != 'itemid') print_error('wrong params');

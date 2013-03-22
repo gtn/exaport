@@ -4,7 +4,7 @@ require_once dirname(__FILE__).'/lib/sharelib.php';
 
 $item_id = optional_param('item_id', -1, PARAM_INT);
 
-require_login($courseid);
+//require_login(0, true);
 
 if ($item_id > 0) { 
 	$query = "select type, id, userid, url".
@@ -37,15 +37,16 @@ switch($type) {
 			$str = @file_get_contents($url);
 			$output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $str, $matches);
 			$first_img = $matches[1][0];
-//			echo $first_img."<br>";
-			if (strpos($first_img,'http')===false)
-				$first_img = $url."/".$first_img;
-			$headers = get_headers($first_img, 1);
-//			print_r($headers);
-			$type = $headers["Content-Type"];
-			header("Content-type: ".$type);
-			echo @file_get_contents($first_img);
-//			echo $type;
+			if ($output>0) {
+				if (strpos($first_img,'http')===false)
+					$first_img = $url."/".$first_img;
+			}
+			else 
+				$first_img = $CFG->wwwroot.'/blocks/exaport/pix/item_link_default.png';					
+				$headers = get_headers($first_img, 1);
+				$type = $headers["Content-Type"];
+				header("Content-type: ".$type);
+				echo @file_get_contents($first_img);
 			break;
 	default: break;
 };

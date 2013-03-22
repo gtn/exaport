@@ -1,0 +1,70 @@
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    filter:alpha(opacity=50);
+    -moz-opacity:0.5;
+    -khtml-opacity: 0.5;
+    opacity: 0.5;
+    z-index: 2000;
+}
+
+.block{
+  display: none;
+  border: 7px solid #eee;
+  z-index: 2001;
+  background: #fff;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+ }
+
+.portfolioElement.ui-draggable{
+	cursor: move;
+}
+
+.block-controls {
+    display: inline;
+    float: right;
+    margin-left: 10px;
+}
+
+.block-controls a {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    cursor: pointer;
+    height: 16px;
+    margin: 0 0 0 1px;
+    padding: 0;
+    width: 16px;
+}	
+
+#block_form .block-header h4 {
+    border-bottom: 2px solid #D1D1D1;
+    font-size: 1.3333em !important;
+    margin: 0 5px;
+    padding-bottom: 3px;
+    color: #1E6297;
+}
+ 
+#block_form th {
+    text-align: left;
+}
+
+#block_form .submit {
+    background: url("images/btn-bkgd.gif") repeat-x scroll left top #2D5308;
+    font-weight: bold;
+    border-color: #51732F;
+    color: #FFFFFF !important;
+    border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+    font-size: 1em;
+    line-height: 1.3333em;
+    margin: 5px 10px 0 0;
+    padding: 3px 3px 2px;
+    text-decoration: none;
+}

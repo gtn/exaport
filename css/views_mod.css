@@ -13,7 +13,7 @@
 
 #view-mod textarea {
 	width: 95%;
-	height: 100px !important;
+	height: 200px !important;
 	font-family: Verdana;
 	font-size: 12px;
 }
@@ -21,6 +21,7 @@
 .view-group {
 	border: 1px solid #ddd;
 	margin-bottom: 10px;
+	width: 98%;
 }
 
 #view-options {
@@ -28,8 +29,8 @@
 	float: left;
 }
 #view-preview {
-	margin-left: 310px;
 	border: 1px solid #ddd;
+	overflow: auto;
 }
 
 .view-group-header {
@@ -122,7 +123,7 @@
 	background: #fff;
 	border: 1px solid #ddd;
 	position: relative;
-	min-width: 300px;
+/*	min-width: 300px;*/
 	margin: 10px;
 	list-style-type: none;
 }
@@ -133,6 +134,7 @@
 }
 .portfolioDesignBlocks li .body {
 	padding: 4px 8px;
+	overflow: hidden;
 }
 .portfolioDesignBlocks li .delete {
 	position: absolute;
@@ -143,9 +145,29 @@
 	height: 26px;
 	cursor: pointer;
 }
-.portfolioDesignBlocks li .delete span {
+.portfolioDesignBlocks li .edit {
+	position: absolute;
+	right: 30px;
+	top: 0;
+	background: url(../pix/edit.png) center center no-repeat;
+	width: 26px;
+	height: 26px;
+	cursor: pointer;
+}
+.portfolioDesignBlocks li .delete span, .portfolioDesignBlocks li .edit span,  .portfolioDesignBlocks li .unsaved span {
 	display: none;
 }
+
+.portfolioDesignBlocks li .unsaved {
+	position: absolute;
+	right: 30px;
+	top: 0;
+	background: url('../pix/unsaved.png') no-repeat center center;
+	width: 26px;
+	height: 26px;
+	cursor: pointer;
+}
+
 .portfolioDesignBlocks li.block-placeholder {
 	border: 3px dotted #ddd;
 	visibility: show;
@@ -154,3 +176,152 @@
 .portfolioDesignBlocks li .default-text {
 	color: #999;
 }
+
+/* PORTFOLIO ELEMENTS */
+#blocktype-list {
+    clear: left;
+    font-size: .9167em;
+    padding: 0 20px;
+}
+
+#blocktype-list ul {
+    list-style-type: none;
+    margin: 0;
+}
+#blocktype-list li {
+    display: table-cell;
+    vertical-align: top;
+    padding: 10px 5px 5px 5px;
+    margin: 0 0 5px 0;
+    width: 100px;
+    line-height: 1.4em;
+    white-space: normal;
+}
+.ie7 #blocktype-list li {
+    z-index: 100;
+    display: inline;
+    float: left;
+}
+#blocktype-list .blocktype-radio {
+    border: none;
+    cursor: default; /* ie fix */
+}
+#blocktype-list .blocktype h4 {
+    margin: 3px 0;
+}
+
+.js-hidden {
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+}
+
+.select_layout {
+	text-align: center;
+	margin: 0px auto;
+}
+
+.cb {
+    clear: both;
+    border-color: -moz-use-text-color -moz-use-text-color #D1D1D1;
+    border-style: none none dotted;
+    border-width: 0 0 1px;
+}
+
+.select_layout .fl {
+    margin: 0 20px 20px 0;
+    text-align: center;
+    width: 150px;
+}
+.fl {
+    float: left;
+}
+
+.table_share, .table_share table {
+	width: 100%
+}
+
+/* layouts */
+.table_layout {
+	width: 100%;
+	border:0;
+	padding:0;
+	border-collapse:collapse;	
+}
+.table_layout td {
+	vertical-align: top;
+	padding:0;
+}
+
+.layout1 td {
+	width: 100%;
+}
+.layout2 td {
+	width: 50%;
+}
+.layout3 .td1 {
+	width: 67%;
+}
+.layout4 .td1 {
+	width: 33%;
+}
+.layout5 td {
+	width: 33%;
+}
+.layout6 .td1, .layout6 .td3 {
+	width: 25%;
+}
+.layout7 .td1, .layout7 .td3 {
+	width: 15%;
+}
+.layout8 td {
+	width: 25%;
+}
+.layout9 .td1, .layout9 .td4 {
+	width: 20%;
+}
+.layout9 .td2, .layout9 .td3 {
+	width: 30%;
+}
+.layout10 td {
+	width: 20%;
+}
+
+#block_form {
+	overflow: visible;
+	position: absolute;
+}
+
+.view-middle {
+	width: 99%;
+}
+
+.item_info .picture {
+	height: 100px;
+}
+
+#link_thumbnail {
+    margin-bottom: -625px;
+    margin-right: -825px;
+    width: 1024px;
+    height: 768px;
+    border: solid 5px #cccccc;
+    -moz-transform: scale(0.2);
+    -moz-transform-origin: 0 0;
+    -o-transform: scale(0.2);
+    -o-transform-origin: 0 0;
+    -webkit-transform: scale(0.2);
+    -webkit-transform-origin: 0 0;
+}
+
+#page-content #region-main .region-content {
+	width: 100%;
+}
+#page-content #region-main {
+	width:100%;
+}
+table.mceLayout {
+    width: 430px!important;
+}
+
+

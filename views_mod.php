@@ -356,7 +356,8 @@ if ($editform->is_cancelled()) {
 					$DB->insert_record("block_exaportviewshar", $shareItem);
 				};
 				// message users, if they have shared
-				$notifyusers = optional_param('notifyusers', '', PARAM_RAW);
+				//$notifyusers = optional_param('notifyusers', '', PARAM_RAW);
+				$notifyusers = $_POST['notifyusers'];
 				if ($notifyusers) {
 					foreach ($notifyusers as $notifyuser) {
 						// only notify if he also is shared

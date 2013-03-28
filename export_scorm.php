@@ -335,6 +335,40 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
     return $hasItems;
 }
 
+function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i){	
+	global $DB, $USER;
+	$return = false;
+	//$i = 0;
+	foreach ($owncats as $owncat) {
+        //unset($item);
+		$i++;
+		
+		$item = & $parsedDoc->createElement('item');
+		$item->attribute('identifier', sprintf('B%04d', $i));
+		$item->attribute('isvisible', 'true');
+		$itemtitle = & $item->createChild('title');
+		$itemtitle->text($owncat->name);
+
+		// get everything inside this category:
+		$mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, 'data/', $identifier, $ridentifier, $viewid);
+
+		$innerowncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$owncat->id'", null, "name ASC");
+		if ($innerowncats) {
+			$identifier++;
+			$mainNotEmpty = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i);
+		}
+
+		if ($mainNotEmpty) {
+			// if the main category is not empty, append it to the xml-file
+			$organization->appendChild($item);
+			$ridentifier++;
+			$identifier++;
+			$return = true;
+		}
+	}
+	return $return;
+}
+
 if ($confirm) {
     if (!confirm_sesskey()) {
         error('Bad Session Key');
@@ -457,48 +491,7 @@ if ($confirm) {
     $owncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid=0", null, "name ASC");
     $i = 0;
     if ($owncats) {
-        foreach ($owncats as $owncat) {
-            unset($item);
-            $i++;
-
-            $item = & $parsedDoc->createElement('item');
-            $item->attribute('identifier', sprintf('B%04d', $i));
-            $item->attribute('isvisible', 'true');
-            $itemtitle = & $item->createChild('title');
-            $itemtitle->text($owncat->name);
-
-            // get everything inside this category:
-            $mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, 'data/', $identifier, $ridentifier, $viewid);
-
-            $innerowncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$owncat->id'", null, "name ASC");
-            if ($innerowncats) {
-                foreach ($innerowncats as $innerowncat) {
-                    unset($subitem);
-                    $i++;
-
-                    $subitem = & $parsedDoc->createElement('item');
-                    $subitem->attribute('identifier', sprintf('B%04d', $i));
-                    $subitem->attribute('isvisible', 'true');
-                    $subitemtitle = & $subitem->createChild('title');
-                    $subitemtitle->text($innerowncat->name);
-
-                    $subNotEmpty = get_category_content($subitem, $resources, $innerowncat->id, $innerowncat->name, $exportdir, 'data/', $identifier, $ridentifier, $viewid);
-
-                    if ($subNotEmpty) {
-                        // if the subcategory is not empty:
-                        //	-> append it to the maincategory
-                        //  -> set the main category as not empty
-                        $item->appendChild($subitem);
-                        $mainNotEmpty = true;
-                    }
-                }
-            }
-
-            if ($mainNotEmpty) {
-                // if the main category is not empty, append it to the xml-file
-                $organization->appendChild($item);
-            }
-        }
+        rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i);
     }
 
     // if there's need for metadata, put it in:

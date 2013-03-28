@@ -355,7 +355,8 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 		$innerowncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$owncat->id'", null, "name ASC");
 		if ($innerowncats) {
 			$identifier++;
-			$mainNotEmpty = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i);
+			$value = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i);
+			if($value) $mainNotEmpty = $value;
 		}
 
 		if ($mainNotEmpty) {

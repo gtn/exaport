@@ -67,13 +67,13 @@ class block_exaport extends block_list {
         $this->content->footer = '';
         
 		$this->content->items[]='<a title="' . get_string('mybookmarkstitle', 'block_exaport') . '" href="' . $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id . '">' . get_string('mybookmarks', 'block_exaport') . '</a>';
-		$this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/categories.png" height="16" width="23" alt="'.get_string("mybookmarks", "block_exaport").'" />';
+		$this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/my_portfolio.png" height="16" width="23" alt="'.get_string("mybookmarks", "block_exaport").'" />';
 		
 		$this->content->items[]='<a title="' . get_string('sharedbookmarks', 'block_exaport') . '" href="' . $CFG->wwwroot . '/blocks/exaport/shared_people.php?courseid=' . $COURSE->id . '">' . get_string('sharedbookmarks', 'block_exaport') . '</a>';
-	    $this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/publishedportfolios.png" height="16" width="23" alt="'.get_string("sharedbookmarks", "block_exaport").'" />';
+	    $this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/shared_portfolios.png" height="16" width="23" alt="'.get_string("sharedbookmarks", "block_exaport").'" />';
 		
 		$this->content->items[]='<a title="' . get_string('export', 'block_exaport') . '" href="' . $CFG->wwwroot . '/blocks/exaport/export_scorm.php?courseid=' . $COURSE->id . '">' . get_string('export', 'block_exaport') . '</a>';
-		$this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/export.png" height="16" width="23" alt="'.get_string("export", "block_exaport").'" />';
+		$this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/export_scorm.png" height="16" width="23" alt="'.get_string("export", "block_exaport").'" />';
 
         return $this->content;
     }

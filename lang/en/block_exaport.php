@@ -295,6 +295,7 @@ $string['items'] = "Items";
 $string['fieldstoshow'] = "Fields to show";
 $string['listofartefacts'] = "List of artefacts";
 $string['addButton'] = "Add";
+$string['saveButton'] = "Save";
 $string['cancelButton'] = "Cancel";
 $string['blocktitle2'] = "Block title";
 $string['blockcontent'] = "Block content";

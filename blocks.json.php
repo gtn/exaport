@@ -8,10 +8,9 @@ require_once $CFG->libdir.'/editor/tinymce/lib.php';
 $tinymce = new tinymce_texteditor();
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
-$action = optional_param("action", "", PARAM_ALPHA);
-$confirm = optional_param("confirm", "", PARAM_BOOL);
-$id = optional_param('id', 0, PARAM_INT);
-$shareusers = optional_param('shareusers', '', PARAM_RAW); // array of integer
+$action = optional_param("action", "add", PARAM_ALPHA);
+
+define('SUBMIT_BUTTON_TEXT', get_string($action == 'add' ? 'addButton' : 'saveButton', 'block_exaport'));
 
 $url = '/blocks/exabis_competences/blocks.json.php';
 $PAGE->set_url($url);
@@ -88,8 +87,8 @@ global $DB, $USER;
 	};				
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
-	$content .= '<input type="button" value="'.get_string('addButton', 'block_exaport').'" id="add_list" name="submit_block" class="submit" onclick=\'additem('.$id.');\'>';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'delitem()\'>';		
+	$content .= '<input type="button" value="'.SUBMIT_BUTTON_TEXT.'" id="add_list" name="submit_block" class="submit" onclick=\'exaportViewEdit.addItem('.$id.');\'>';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'exaportViewEdit.delItem()\'>';		
 	$content .= '</td></tr>';
 	$content .= '</table>';	
 	$content .= add_scripts();
@@ -105,7 +104,7 @@ function get_form_text($id, $block_data=array()) {
 	$content .= '<label for="block_title">'.get_string('blocktitle2','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';
-	$content .= '<input type="text" name="block_title" value="'.($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
+	$content .= '<input type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
 	$content .= '</td></tr>';	
 	$content .= '<tr><th>';
 	$content .= '<label for="text">'.get_string('blockcontent','block_exaport').'</label>';
@@ -114,8 +113,8 @@ function get_form_text($id, $block_data=array()) {
 	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="block_text" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.($block_data->text?$block_data->text:"").'</textarea>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';
-	$content .= '<input type="button" value="'.get_string('addButton', 'block_exaport').'" id="add_text" name="submit_block" class="submit" onclick=\'addtext('.$id.');\'>';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'delitem()\'>';		
+	$content .= '<input type="button" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" onclick=\'exaportViewEdit.addText('.$id.');\'>';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'exaportViewEdit.cancelAddEdit()\'>';		
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '<script>
@@ -141,11 +140,11 @@ function get_form_headline($id, $block_data=array()) {
 	$content .= '<label for="headline">'.get_string('view_specialitem_headline', 'block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
-	$content .= '<input name="headline" id="headline" type="text" value="'.($block_data->text?$block_data->text:"").'" default-text="'.get_string('view_specialitem_headline_defaulttext', 'block_exaport').'" /></div>';
+	$content .= '<input name="headline" id="headline" type="text" value="'.s($block_data->text?$block_data->text:"").'" default-text="'.get_string('view_specialitem_headline_defaulttext', 'block_exaport').'" /></div>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
-	$content .= '<input type="button" value="'.get_string('addButton', 'block_exaport').'" id="add_text" name="submit_block" class="submit" onclick=\'addheadline('.$id.');\'>';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'delitem()\'>';		
+	$content .= '<input type="button" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" onclick=\'exaportViewEdit.addHeadline('.$id.');\'>';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'exaportViewEdit.cancelAddEdit()\'>';		
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '<script>
@@ -178,7 +177,7 @@ if ($USER->picture) {
 	$content .= '<label for="block_title">'.get_string('blocktitle2', 'block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';
-	$content .= '<input type="text" name="block_title" value="'.$block_data->block_title.'" id="block_title">';
+	$content .= '<input type="text" name="block_title" value="'.s($block_data->block_title).'" id="block_title">';
 	$content .= '</td></tr>';
 	$content .= '<tr><th>';
 	$content .= '<label>'.get_string('fieldstoshow','block_exaport').'</label>';
@@ -217,8 +216,8 @@ if ($USER->picture) {
 	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="block_intro" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.($block_data->text?$block_data->text:"").'</textarea>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';
-	$content .= '<input type="button" value="'.get_string('addButton','block_exaport').'" id="add_text" name="submit_block" class="submit" onclick=\'addpersonalinfo('.$id.');\'>';
-	$content .= '<input type="button" value="'.get_string('cancelButton','block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'delitem()\'>';		
+	$content .= '<input type="button" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" onclick=\'exaportViewEdit.addPersonalInfo('.$id.');\'>';
+	$content .= '<input type="button" value="'.get_string('cancelButton','block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'exaportViewEdit.cancelAddEdit()\'>';		
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '<script>
@@ -276,6 +275,9 @@ return $content;
 }
 
 function add_scripts() {
+	// not needed? daniel.
+	
+	/*
 $content .= '
 <script type="text/javascript">
 	jQueryExaport("a.delete").click(function() {
@@ -283,6 +285,5 @@ $content .= '
 });
 </script>';
 return $content;
+	*/
 }
-
-?>

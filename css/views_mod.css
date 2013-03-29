@@ -324,4 +324,6 @@ table.mceLayout {
     width: 430px!important;
 }
 
-
+input.submit {
+	cursor: pointer;
+}

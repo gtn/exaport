@@ -1,110 +1,120 @@
 
-	function additem(id) {
-		if (id != -1) 
-			newItem = lastclicked;	
-		var i = 0;
-		jQueryExaport('#item_list option:selected').each(function () {
-			i = i+1;
-			if (i>1) {
-				var clone = jQueryExaport(newItem).clone();
-				newItem.after(clone);
-				newItem = clone;
-//				newItem = $(newItem).attr("itemid",$(this).val());				
-				};
+var exaportViewEdit = {};
+
+jQueryExaport(function($){
+
+	var newItem = null, lastclicked = null;
+	
+	var overlay = $('<div id="overlay" />').css({"opacity": "0.5"}).hide().appendTo(document.body);
+
+	$.extend(exaportViewEdit, {
+		
+		addItem: function(id) {
+			if (id != -1) 
+				newItem = lastclicked;	
+			var i = 0;
+			$('#item_list option:selected').each(function () {
+				i = i+1;
+				if (i>1) {
+					var clone = $(newItem).clone();
+					newItem.after(clone);
+					newItem = clone;
+					};
+				data = {};
+				data.type = 'item';
+				data.itemid = $(this).val();
+				newItem.data('portfolio', data);			
+				generateItem('update', $(newItem));
+			});
+			$('#block_form').hide();
+			overlay.hide();
+			newItem=null;
+		},
+		
+		cancelAddEdit: function() {
+			$('#block_form').hide();
+			overlay.hide();
+			if (newItem) $(newItem).remove();
+			updateBlockData();
+		},
+		
+		addText: function(id) {
+			if (id != -1) 
+				newItem = lastclicked;
 			data = {};
-			data.type = 'item';
-			data.itemid = jQueryExaport(this).val();
+			data.type = 'text';
+			data.id = id;
+			data.block_title = $('#block_title').val();			
+			data.text = tinymce.get('block_text').getContent();
+	//		data.text = $('#id_text').val();
+			newItem.data('portfolio', data);
+			generateItem('update', $(newItem));
+			$('#block_form').hide();
+			overlay.hide();
+			newItem=null;
+		},
+
+		addHeadline: function(id) {
+			if (id != -1) 
+				newItem = lastclicked;	
+			data = {};
+			data.text = $('#headline').val();
+			data.type = 'headline';
+			data.id = id;
+			newItem.data('portfolio', data);		
+			generateItem('update', $(newItem));	
+			$('#block_form').hide();
+			overlay.hide();
+			newItem=null;		
+		},
+
+		addPersonalInfo: function(id) {
+			if (id != -1) 
+				newItem = lastclicked;		
+			data = {};
+			data.type = 'personal_information';
+			data.id = id;	
+			data.block_title = $('#block_title').val();			
+			if ($('#firstname').attr('checked')=='checked')
+				data.firstname = $('#firstname').val();
+			if ($('#lastname').attr('checked')=='checked')
+				data.lastname = $('#lastname').val();
+			data.picture = $('form input[name=picture]:checked').val();
+			data.email = $('form input[name=email]:checked').val();
+			data.text = tinyMCE.get('block_intro').getContent();
 			newItem.data('portfolio', data);			
-			generateItem('update', jQueryExaport(newItem));
-		});
-		jQueryExaport('#block_form').hide();
-		jQueryExaport('#overlay').remove();
-		newItem=null;
-	}
+			generateItem('update', $(newItem));	
+			$('#block_form').hide();
+			overlay.hide();
+			newItem=null;		
+		}
+	});
 	
-	function delitem () {
-		jQueryExaport('#block_form').hide();
-		jQueryExaport('#overlay').remove();
-		if (newItem) jQueryExaport(newItem).remove();
-		updateBlockData();
-	}
-	
-	function addtext (id) {
-		if (id != -1) 
-			newItem = lastclicked;
-		data = {};
-		data.type = 'text';
-		data.id = id;
-		data.block_title = jQueryExaport('#block_title').val();			
-		data.text = tinymce.get('block_text').getContent();
-//		data.text = jQueryExaport('#id_text').val();
-		newItem.data('portfolio', data);
-		generateItem('update', jQueryExaport(newItem));
-		jQueryExaport('#block_form').hide();
-		jQueryExaport('#overlay').remove();	
-		newItem=null;
-	}
-
-	function addheadline(id) {
-		if (id != -1) 
-			newItem = lastclicked;	
-		data = {};
-		data.text = jQueryExaport('#headline').val();
-		data.type = 'headline';
-		data.id = id;
-		newItem.data('portfolio', data);		
-		generateItem('update', jQueryExaport(newItem));	
-		jQueryExaport('#block_form').hide();
-		jQueryExaport('#overlay').remove();
-		newItem=null;		
-	}	
-
-	function addpersonalinfo(id) {
-		if (id != -1) 
-			newItem = lastclicked;		
-		data = {};
-		data.type = 'personal_information';
-		data.id = id;	
-		data.block_title = jQueryExaport('#block_title').val();			
-		if (jQueryExaport('#firstname').attr('checked')=='checked')
-			data.firstname = jQueryExaport('#firstname').val();
-		if (jQueryExaport('#lastname').attr('checked')=='checked')
-			data.lastname = jQueryExaport('#lastname').val();
-		data.picture = jQueryExaport('form input[name=picture]:checked').val();
-		data.email = jQueryExaport('form input[name=email]:checked').val();
-		data.text = tinyMCE.get('block_intro').getContent();
-		newItem.data('portfolio', data);			
-		generateItem('update', jQueryExaport(newItem));	
-		jQueryExaport('#block_form').hide();
-		jQueryExaport('#overlay').remove();
-		newItem=null;		
-	}	
-
 	
 	function updateBlockData()
 	{
 		var blocks = [];
-		jQueryExaport('.portfolioDesignBlocks').each(function(positionx){
-			jQueryExaport(this).find('li:visible').not('.block-placeholder').each(function(positiony){
-				blocks.push(jQueryExaport.extend(jQueryExaport(this).data('portfolio'), {
+		$('.portfolioDesignBlocks').each(function(positionx){
+			$(this).find('li:visible').not('.block-placeholder').each(function(positiony){
+				blocks.push($.extend($(this).data('portfolio'), {
 					positionx: positionx+1,
 					positiony: positiony+1
 				}));
 			});
 		});
 
-		jQueryExaport('form :input[name=blocks]').val(jQueryExaport.toJSON(blocks));
+		$('form :input[name=blocks]').val($.toJSON(blocks));
 //console.log($.toJSON(blocks));
 	}
 
-function generateItem(type, data)
+	function generateItem(type, data)
 	{	
 		var $item;
 		if (type == 'new') {
-			$item = jQueryExaport('<li></li>');
+			$item = $('<li></li>');
 			$item.data('portfolio', data);
 		} else { 						
-			$item = jQueryExaport(data);
+			$item = $(data);
 			//console.log($item.data('portfolio'));
 			data = $item.data('portfolio');
 			if (!data) { 
@@ -213,12 +223,12 @@ function generateItem(type, data)
 		$item.find('div#id_holder').append(data.id);		
 		
 		if (type == 'new')
-			jQueryExaport('<a class="edit" title="Edit"><span>Edit</span></a>').appendTo($item).click(editItemClick);
+			$('<a class="edit" title="Edit"><span>Edit</span></a>').appendTo($item).click(editItemClick);
 		else 
 			$item.append('<a class="unsaved" title="This block was not saved"><span>Unsaved</span></a>'); 
-		jQueryExaport('<a class="delete" title="'+$E.translate('delete')+'"><span>'+$E.translate('delete')+'</span></a>').appendTo($item).click(deleteItemClick);
+		$('<a class="delete" title="'+$E.translate('delete')+'"><span>'+$E.translate('delete')+'</span></a>').appendTo($item).click(deleteItemClick);
 		$item.find(':input').change(function(){
-			$item.data('portfolio').text = jQueryExaport(this).val(); 			
+			$item.data('portfolio').text = $(this).val(); 			
 		}); /**/
 		updateBlockData();
 
@@ -227,43 +237,45 @@ function generateItem(type, data)
 	
 	function deleteItemClick()
 	{
-		jQueryExaport(this).parents('.item').remove();
+		$(this).parents('.item').remove();
 		resetElementStates();
 		updateBlockData();
 	}	
 	
 	function editItemClick()
 	{
-		var item_id = jQueryExaport(this).parent().find("#id_holder").html();
-		var data = {};
-		data['item_id'] = item_id;
-		overlay = jQueryExaport('<div id="overlay"> </div>');
-		overlay.appendTo(document.body)	
-		lastclicked = jQueryExaport(this).parent();
-		jQueryExaport.ajax({
-				url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
-				type: 'POST',
-				data: data,
-				success: function(res) {
-					var data = JSON.parse (res);
-	//					alert(res);
-					jQueryExaport('#container').html(data.html);				
-					jQueryExaport('#block_form').show();
-					jQueryExaport("#overlay").css('cursor', 'default');
-				}			
-			});
+		var item_id = $(this).parent().find("#id_holder").html();
+
+		overlay.show();
+		lastclicked = $(this).parent();
+		
+		$.ajax({
+			url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
+			type: 'POST',
+			data: {
+				item_id: item_id,
+				action: 'edit'
+			},
+			success: function(res) {
+				var data = JSON.parse(res);
+
+				$('#container').html(data.html);				
+				$('#block_form').show();
+				$("#overlay").css('cursor', 'default');
+
+				// focus first element
+				$('#container').find('input:visible:first').focus();
+			}
+		});
 	}		
 	
 	function resetElementStates()
 	{
-		jQueryExaport('.portfolioOptions li').removeClass('selected');
-		jQueryExaport('.portfolioDesignBlocks li').each(function(){
-			jQueryExaport('.portfolioOptions li[itemid='+jQueryExaport(this).data('portfolio').itemid+']').addClass('selected');
+		$('.portfolioOptions li').removeClass('selected');
+		$('.portfolioDesignBlocks li').each(function(){
+			$('.portfolioOptions li[itemid='+$(this).data('portfolio').itemid+']').addClass('selected');
 		});
 	}	
-
-
-jQueryExaport(function($){	
 
 	//$('.view-group-header').click(function(){
 	$('.view-data, .view-sharing').find('.view-group-header').css('cursor', 'pointer').click(function(){
@@ -325,33 +337,20 @@ jQueryExaport(function($){
 			// get ajax only for item from the top block
 			var uiattr = $(ui.item[0]).closest('ul').prop("className");
 			if (uiattr.search("portfolioDesignBlocks")==-1) {
-				overlay = $('<div id="overlay"> </div>');
-				overlay.appendTo(document.body)
-				$("#overlay").css({"opacity": "0.5"});
-				$("#overlay").css('cursor', 'wait');
-//			generateItem('update', ui.item);
-				var json_data = {};
-				$.extend(json_data, {'type_block':ui.item.attr('block-type')});
-/*				if (ui.item.attr('block-type')=="item")
-					$.extend(json_data, {'type_block':'item'});
-				else if (ui.item.attr('block-type')=="personal_information")
-					$.extend(json_data, {'type_block':'personal_information'});				
-				else if (ui.item.attr('block-type')=="headline")
-					$.extend(json_data, {'type_block':'headline'});				
-				else if (ui.item.attr('block-type')=="text")
-					$.extend(json_data, {'type_block':'text'});			/**/					
-					
+				overlay.show();
+
 				$.ajax({
 					url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
 					type: 'POST',
-					data: json_data,
+					data: {
+						type_block: ui.item.attr('block-type'),
+						action: 'add'
+					},
 					success: function(res) {
 						var data = JSON.parse (res);
-	//					alert(res);
 						$('#container').html(data.html);				
 						$('#block_form').show();
-						$("#overlay").css('cursor', 'default');
-					}			
+					}
 				});
 				updateBlockData();
 			}

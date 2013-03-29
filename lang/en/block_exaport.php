@@ -318,7 +318,7 @@ $string['cofigureblock'] = "Configure Block";
 $string['selectitems'] = "Select items";
 
 // Desp
-$string['back_to_desp'] = 'back to d-ESP';
+$string['back_to_desp'] = 'back to language portfolio';
 $string['desp_pluginname'] = 'Dossier';
 $string['desp_mybookmarks'] = 'My Dossier';
 $string['desp_bookmarks'] = 'My Dossier';

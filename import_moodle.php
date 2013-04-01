@@ -26,7 +26,6 @@
  * ************************************************************* */
 global $DB, $OUTPUT,$CFG;
 require_once dirname(__FILE__) . '/inc.php';
-require_once($CFG->dirroot . '/mod/assignment/lib.php');
 require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 
 

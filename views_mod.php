@@ -175,7 +175,7 @@ class block_exaport_view_edit_form extends moodleform {
 	function definition() {
 		global $CFG, $USER, $DB;
 		$mform =& $this->_form;
-		$mform->updateAttributes(array('class'=>''));
+		$mform->updateAttributes(array('class'=>'', 'id'=>'view_edit_form'));
 
 		$mform->addElement('hidden', 'items');
 		$mform->addElement('hidden', 'action');
@@ -342,6 +342,16 @@ if ($editform->is_cancelled()) {
 				$block->viewid = $dbView->id;
 				$DB->insert_record('block_exaportviewblock', $block);
 			};
+			
+			if (optional_param('ajax', 0, PARAM_INT)) {
+				$ret = new stdClass;
+				$ret->ok = true;
+				$ret->blocks = json_encode(get_view_blocks($dbView));
+				
+				echo json_encode($ret);
+				exit;
+			}
+			
 			break;
 		case 'share':
 			// delete all shared users
@@ -412,15 +422,18 @@ switch ($action) {
 		print_error("unknownaction", "block_exaport");	                	            
 }
 
-
-
-if ($view) {
+function get_view_blocks($view) {
+	global $DB;
+	
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
 		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
-	$blocks = $DB->get_records_sql($query, array($view->id));
-	$postView->blocks = json_encode($blocks);
+	return $DB->get_records_sql($query, array($view->id));
+}
+
+if ($view) {
+	$postView->blocks = json_encode(get_view_blocks($view));
 }
 
 require_once $CFG->libdir.'/editor/tinymce/lib.php';
@@ -470,7 +483,6 @@ unset($value);
 ?>
 <script type="text/javascript">
 //<![CDATA[
-	var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
 	var sharedUsers = <?php echo json_encode($sharedUsers); ?>;
 	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 //]]>
@@ -480,7 +492,16 @@ unset($value);
 echo "<!--[if IE]> <style> #link_thumbnail{ zoom: 0.2; } </style> <![endif]--> ";
 switch ($type) {
 	case 'content' :
-	// view data form
+		?>
+		<script type="text/javascript">
+		//<![CDATA[
+			var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
+			jQueryExaport(exaportViewEdit.initContentEdit);
+		//]]>
+		</script>
+		<?php
+	
+		// view data form
 echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');
 echo '<ul>
     <li class="portfolioElement" title="'.get_string('personalinformation', 'block_exaport').'" block-type="personal_information">
@@ -700,15 +721,13 @@ if ($type!='title') {
 
 echo '<div id="block_form" class="block" style="position: absolute; top: 10px; left: 30%; width: 510px;">
         <div class="block-controls">                
-            <a class="delete" title="delete"  href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
+            <a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
         </div>
         <div class="block-header">
             <h4>'.get_string('cofigureblock','block_exaport').'</h4>
         </div>
         <div class="block-content">
-        	<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform">
-				<div id="container"></div>
-	        </form>
+			<div id="container"></div>
 		</div>
 	</div>
 	<script type="text/javascript"> // for valid html and move block to body parent

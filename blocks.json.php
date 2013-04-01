@@ -57,8 +57,8 @@ foreach ($data as $key=>$value) {
 
 /**/
 function get_form_items($id, $block_data=array()) {
-global $DB, $USER;
-	$content = "";
+	global $DB, $USER;
+	
 	$query = "select i.id, i.name, i.type, ic.name AS cname, ic2.name AS cname_parent, COUNT(com.id) As comments".
 		" from {block_exaportitem} i".
 		" join {block_exaportcate} ic on i.categoryid = ic.id".
@@ -69,13 +69,15 @@ global $DB, $USER;
 		" ORDER BY i.name";
 	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
 
+	$content  = "";
+    $content .= '<form enctype="multipart/form-data" id="blockform" method="post" class="pieform" onsubmit="exaportViewEdit.addItem('.$id.'); return false;">';
 	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';	
 	$content .= '<table style="width: 100%;">';
 	$content .= '<tr><th>';
 	$content .= '<label for="list">'.get_string('listofartefacts','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
-//	print_r($portfolioItems);
+
 	if (!$portfolioItems) {
 //		$content .=  '<div style="padding: 5px;">'.get_string('nobookmarksall', 'block_exaport').'</div>';
 	} else {		
@@ -87,17 +89,20 @@ global $DB, $USER;
 	};				
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
-	$content .= '<input type="button" value="'.SUBMIT_BUTTON_TEXT.'" id="add_list" name="submit_block" class="submit" onclick=\'exaportViewEdit.addItem('.$id.');\'>';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'exaportViewEdit.delItem()\'>';		
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';	
-	$content .= add_scripts();
+	$content .= '</form>';
+
 	return $content;
 };
 
 function get_form_text($id, $block_data=array()) {
 	global $CFG, $tinymce, $PAGE;
-	$content = "";
+	
+	$content  = "";
+    $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onclick="exaportViewEdit.addText('.$id.'); return false;">';
 	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';		
 	$content .= '<table style="width: 100%;">';
 	$content .= '<tr><th>';
@@ -113,27 +118,20 @@ function get_form_text($id, $block_data=array()) {
 	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="block_text" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.($block_data->text?$block_data->text:"").'</textarea>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';
-	$content .= '<input type="button" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" onclick=\'exaportViewEdit.addText('.$id.');\'>';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'exaportViewEdit.cancelAddEdit()\'>';		
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
-	$content .= '<script>
-	// disable form submit on enter press
-	jQueryExaport("form :input").keypress(function(e){
-			if ( e.which == 13 ) {
-				return false;
-			}
-	});
-	</script>
-	';
+	$content .= '</form>';
+
 	$content .= tinyMCE_enable_script('block_text');
-	$content .= add_scripts();
 
 	return $content;
 }
 
 function get_form_headline($id, $block_data=array()) {
-	$content = "";
+	$content  = "";
+    $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onsubmit="exaportViewEdit.addHeadline('.$id.'); return false;">';
 	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';			
 	$content .= '<table style="width: 100%;">';
 	$content .= '<tr><th>';	
@@ -143,25 +141,17 @@ function get_form_headline($id, $block_data=array()) {
 	$content .= '<input name="headline" id="headline" type="text" value="'.s($block_data->text?$block_data->text:"").'" default-text="'.get_string('view_specialitem_headline_defaulttext', 'block_exaport').'" /></div>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
-	$content .= '<input type="button" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" onclick=\'exaportViewEdit.addHeadline('.$id.');\'>';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'exaportViewEdit.cancelAddEdit()\'>';		
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
-	$content .= '<script>
-	// disable form submit on enter press
-	jQueryExaport("form :input").keypress(function(e){
-			if ( e.which == 13 ) {
-				addheadline('.$id.');
-				return false;
-			}
-	});	</script>';
-	$content .= add_scripts();
+	$content .= '</form>';
+
 	return $content;
 }
 
 function get_form_personalinfo($id, $block_data=array()) {
 global $OUTPUT, $DB, $USER, $PAGE;
-	$content = "";
 
 if ($USER->picture) {
 	$user_picture = new user_picture($USER);
@@ -171,6 +161,8 @@ if ($USER->picture) {
 	$picture_src_small = $user_picture->get_url($PAGE);
 };
 
+	$content  = "";
+    $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onsubmit="exaportViewEdit.addPersonalInfo('.$id.'); return false;">';
 	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';			
 	$content .= '<table style="width: 100%;">';
 	$content .= '<tr><th>';
@@ -216,20 +208,12 @@ if ($USER->picture) {
 	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="block_intro" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.($block_data->text?$block_data->text:"").'</textarea>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';
-	$content .= '<input type="button" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" onclick=\'exaportViewEdit.addPersonalInfo('.$id.');\'>';
-	$content .= '<input type="button" value="'.get_string('cancelButton','block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick=\'exaportViewEdit.cancelAddEdit()\'>';		
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
-	$content .= '<script>
-	// disable form submit on enter press
-	jQueryExaport("form :input").keypress(function(e){
-			if ( e.which == 13 ) {
-				return false;
-			}
-	});	
-	</script>';
+
 	$content .= tinyMCE_enable_script('block_intro');
-	$content .= add_scripts();
 	
 	return $content;
 }
@@ -272,18 +256,4 @@ else {
 	</script>'; /**/
 };
 return $content;
-}
-
-function add_scripts() {
-	// not needed? daniel.
-	
-	/*
-$content .= '
-<script type="text/javascript">
-	jQueryExaport("a.delete").click(function() {
-		delitem();
-});
-</script>';
-return $content;
-	*/
 }

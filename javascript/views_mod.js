@@ -1,11 +1,11 @@
 
 var exaportViewEdit = {};
 
-jQueryExaport(function($){
+(function($){
 
 	var newItem = null, lastclicked = null;
 	
-	var overlay = $('<div id="overlay" />').css({"opacity": "0.5"}).hide().appendTo(document.body);
+	var overlay = null;
 
 	$.extend(exaportViewEdit, {
 		
@@ -29,6 +29,8 @@ jQueryExaport(function($){
 			$('#block_form').hide();
 			overlay.hide();
 			newItem=null;
+			
+			saveBlockData();
 		},
 		
 		cancelAddEdit: function() {
@@ -52,6 +54,8 @@ jQueryExaport(function($){
 			$('#block_form').hide();
 			overlay.hide();
 			newItem=null;
+			
+			saveBlockData();
 		},
 
 		addHeadline: function(id) {
@@ -65,7 +69,9 @@ jQueryExaport(function($){
 			generateItem('update', $(newItem));	
 			$('#block_form').hide();
 			overlay.hide();
-			newItem=null;		
+			newItem=null;
+			
+			saveBlockData();
 		},
 
 		addPersonalInfo: function(id) {
@@ -86,10 +92,109 @@ jQueryExaport(function($){
 			generateItem('update', $(newItem));	
 			$('#block_form').hide();
 			overlay.hide();
-			newItem=null;		
+			newItem=null;
+
+			saveBlockData();
+		},
+		
+		resetViewContent: function(){
+			// load stored blocks
+			var blocks = $('form :input[name=blocks]').val();
+			if (blocks) {
+				blocks = $.parseJSON(blocks);
+			}
+			if (!blocks) {
+				// start with headline
+				blocks = [{
+					type: 'headline'
+				}];
+			}
+
+			var portfolioDesignBlocks = $('.portfolioDesignBlocks');
+			portfolioDesignBlocks.empty();
+			$.each(blocks, function(){
+				generateItem('new', this).appendTo(
+					// wenn vorhanden zur richtigen spalte hinzufügen, sonst immer zur 1ten
+					(this.positionx && portfolioDesignBlocks[this.positionx-1]) ? portfolioDesignBlocks[this.positionx-1] : portfolioDesignBlocks[0]
+				);
+			});
+			resetElementStates();
+			updateBlockData();
+		},
+
+		initContentEdit: function(){
+		
+			exaportViewEdit.resetViewContent();
+
+			$(".portfolioDesignBlocks").sortable({ 
+				beforeStop: function (event, ui) { 
+					newItem = ui.item;
+				},	
+				receive: function(e, ui){
+					// get ajax only for item from the top block
+					var uiattr = $(ui.item[0]).closest('ul').prop("className");
+					if (uiattr.search("portfolioDesignBlocks")==-1) {
+						overlay.show();
+
+						$.ajax({
+							url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
+							type: 'POST',
+							data: {
+								type_block: ui.item.attr('block-type'),
+								action: 'add'
+							},
+							success: function(res) {
+								var data = JSON.parse (res);
+								$('#container').html(data.html);				
+								$('#block_form').show();
+
+								// focus first element
+								$('#container').find('input:visible:first').focus();
+							}
+						});
+						updateBlockData();
+					}
+				},
+				update: function(e, ui){
+					updateBlockData();
+				},
+				handle: '.header',
+				placeholder: "block-placeholder",
+				forcePlaceholderSize: true,
+				connectWith: ['.portfolioDesignBlocks'],
+			});
+			$(".portfolioOptions").sortable({ 
+				connectWith: ['.portfolioDesignBlocks'],
+				placeholder: "block-placeholder",
+				forcePlaceholderSize: true,
+				stop: function(e, ui){    
+					// listenelemente zurücksetzen
+					resetElements();
+				}
+				/*
+				remove: function(e, ui){
+					console.log(ui);
+					console.log(ui.element.html());
+					// ui.item.after(ui.placeholder.clone().css('visibility', ''));
+					console.log('remove');
+				}
+				*/
+			});
+			$(".portfolioElement").draggable({ 
+				connectToSortable: '.portfolioDesignBlocks',
+				placeholder: ".block-placeholder",
+				forcePlaceholderSize: true,
+				helper: "clone",
+				stop: function(e, ui){    
+				}		
+			});
+
 		}
 	});
 	
+	$(function(){
+		overlay = $('<div id="overlay" />').css({"opacity": "0.5"}).hide().appendTo(document.body);
+	});
 	
 	function updateBlockData()
 	{
@@ -105,6 +210,24 @@ jQueryExaport(function($){
 
 		$('form :input[name=blocks]').val($.toJSON(blocks));
 //console.log($.toJSON(blocks));
+	}
+	
+	function saveBlockData() {
+		overlay.show();
+
+		var data = $('form#view_edit_form').serializeArray();
+		data.push({name: 'ajax', value: 1});
+		$.ajax({
+			url: document.location.href,
+			type: 'POST',
+			data: data,
+			success: function(res) {
+				var data = JSON.parse(res);
+				$('form :input[name=blocks]').val(data.blocks);
+				exaportViewEdit.resetViewContent();
+				overlay.hide();
+			}
+		});
 	}
 
 	function generateItem(type, data)
@@ -277,25 +400,8 @@ jQueryExaport(function($){
 		});
 	}	
 
-	//$('.view-group-header').click(function(){
-	$('.view-data, .view-sharing').find('.view-group-header').css('cursor', 'pointer').click(function(){
-		$(this).parents('.view-group').toggleClass('view-group-open');
-	});
-
-	
-
-	function viewNameChange()
-	{
-		$('#view-name').html(this.value);
-	}
-	$('form :input[name=name]').change(viewNameChange).keyup(viewNameChange).keyup();
-
-
 
 	var originalOptions = [];
-	$(".portfolioOptions").each(function(i){
-		originalOptions[i] = $(this).html();
-	});
 	function resetElements()
 	{
 		// listenelemente zurücksetzen
@@ -305,96 +411,15 @@ jQueryExaport(function($){
 		resetElementStates();
 	}
 
-
-	// load stored blocks
-	var blocks = $('form :input[name=blocks]').val();
-	if (blocks) {
-		blocks = $.parseJSON(blocks);
-	}
-	if (!blocks) {
-		// start with headline
-		blocks = [{
-			type: 'headline'
-		}];
-	}
-//console.log(blocks);
-	// generate blocks into html
-	var portfolioDesignBlocks = $('.portfolioDesignBlocks');
-	$.each(blocks, function(){
-		generateItem('new', this).appendTo(
-			// wenn vorhanden zur richtigen spalte hinzufügen, sonst immer zur 1ten
-			(this.positionx && portfolioDesignBlocks[this.positionx-1]) ? portfolioDesignBlocks[this.positionx-1] : portfolioDesignBlocks[0]
-		);
-	});
-	resetElementStates();
-	updateBlockData();
-	
-	$(".portfolioDesignBlocks").sortable({ 
-		beforeStop: function (event, ui) { 
-			newItem = ui.item;
-		},	
-		receive: function(e, ui){
-			// get ajax only for item from the top block
-			var uiattr = $(ui.item[0]).closest('ul').prop("className");
-			if (uiattr.search("portfolioDesignBlocks")==-1) {
-				overlay.show();
-
-				$.ajax({
-					url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
-					type: 'POST',
-					data: {
-						type_block: ui.item.attr('block-type'),
-						action: 'add'
-					},
-					success: function(res) {
-						var data = JSON.parse (res);
-						$('#container').html(data.html);				
-						$('#block_form').show();
-					}
-				});
-				updateBlockData();
-			}
-		},
-		update: function(e, ui){
-			updateBlockData();
-		},
-		handle: '.header',
-		placeholder: "block-placeholder",
-		forcePlaceholderSize: true,
-		connectWith: ['.portfolioDesignBlocks'],
-	});
-	$(".portfolioOptions").sortable({ 
-		connectWith: ['.portfolioDesignBlocks'],
-		placeholder: "block-placeholder",
-		forcePlaceholderSize: true,
-		stop: function(e, ui){    
-			// listenelemente zurücksetzen
-			resetElements();
-		}
-		/*
-		remove: function(e, ui){
-			console.log(ui);
-			console.log(ui.element.html());
-			// ui.item.after(ui.placeholder.clone().css('visibility', ''));
-			console.log('remove');
-		}
-		*/
+	$(function(){
+		$(".portfolioOptions").each(function(i){
+			originalOptions[i] = $(this).html();
+		});
 	});
 
-
-	$(".portfolioElement").draggable({ 
-		connectToSortable: '.portfolioDesignBlocks',
-		placeholder: ".block-placeholder",
-		forcePlaceholderSize: true,
-		helper: "clone",
-//		revert: "invalid",
-		stop: function(e, ui){    
-		}		
+	$(function(){
+		ExabisEportfolio.load_userlist('views_mod');
 	});
-//	$(".portfolioElement").disableSelection();
-
-	ExabisEportfolio.load_userlist('views_mod');
-
 
 	// sharing
 	function update_sharing()
@@ -432,8 +457,11 @@ jQueryExaport(function($){
 		}
 		$('#view-share-text').html(share_text);
 	}
-	// changing the checkboxes / radiobuttons update the sharing text, visible options, etc.
-	$('.view-sharing input[type=checkbox], .view-sharing input[type=radio]').click(update_sharing);
-	update_sharing();
+	
+	$(function(){
+		// changing the checkboxes / radiobuttons update the sharing text, visible options, etc.
+		$('.view-sharing input[type=checkbox], .view-sharing input[type=radio]').click(update_sharing);
+		update_sharing();
+	});
 
-});
+})(jQueryExaport);

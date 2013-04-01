@@ -6,28 +6,23 @@ $item_id = optional_param('item_id', -1, PARAM_INT);
 
 //require_login(0, true);
 
+$item = null;
 if ($item_id > 0) { 
-	$query = "select type, id, userid, url".
-		" from {block_exaportitem}".
-		" where id=?";
-	$item = $DB->get_record_sql($query, array($item_id));	
-	$type = $item->type;
-};
+	$item = $DB->get_record('block_exaportitem', array('id'=>$item_id, 'userid'=>$USER->id));
+}
 
-switch($type) {
+switch($item->type) {
 	case "file": 
 			// thumbnail of file
-			if ($img = $DB->get_record('files', array('contextid'=>get_context_instance(CONTEXT_USER, $item->userid)->id, 'component'=>'block_exaport', 'filearea'=>'item_file', 'itemid'=>$item->id), 'id, filename')) {
-				// get file
-				$fs = get_file_storage();
-				$file = $fs->get_file(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, '/', $img->filename);	
-				// serve file
-				if ($file) {
-					send_stored_file($file);
-				} else {
-					return false;
-				}			
-			};/**/			
+			$file = block_exaport_get_item_file($item);
+			
+			// serve file
+			if ($file) {
+				send_stored_file($file);
+			} else {
+				return false;
+			}			
+
 			break;
 	case "link" :
 			$url = $item->url;

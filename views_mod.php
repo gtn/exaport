@@ -122,7 +122,7 @@ $query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS
 	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
 	 " left join {files} files on (files.itemid = i.id and files.userid = i.userid)".
 	 " where i.userid=?".
-	 " GROUP BY i.id, i.name, i.type, ic.name, ic2.name".
+	 " GROUP BY i.id, i.name, i.type, i.type, ic.id, ic.name, ic2.name, files.mimetype".
 	 " ORDER BY i.name";
 $portfolioItems = $DB->get_records_sql($query, array($USER->id));
 if (!$portfolioItems) {

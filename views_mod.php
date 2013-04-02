@@ -593,6 +593,8 @@ break;
 		break;
 // --------------------		
 	case 'layout' :
+		if (!isset($view->layout)) 
+		$view->layout = 2;
 			echo '
 			<p>'.get_string('chooselayout','block_exaport').'</p>
 			<div class="select_layout">

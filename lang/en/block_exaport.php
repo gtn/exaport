@@ -309,7 +309,7 @@ $string['nomail'] = "no email";
 $string['noemails'] = "no email adress available";
 $string['aboutme'] = "About me";
 $string['notify'] = "notify";
-
+$string['sharejs'] = 'share';
 
 // Copy to course
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';

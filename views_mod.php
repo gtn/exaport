@@ -584,9 +584,6 @@ break;
 				$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, $context, 'block_exaport', 'veiw', $view->id);
 			$editform ->set_data($data);
 		
-				if (block_exaport_course_has_desp()) {
-					echo '<div class="fitem"><div class="fitemtitle"><label>'.get_string('desp_language', 'block_exaport').'</label></div><div class="felement ftext">'.$form['elements_by_name']['langid']['html'].'</div></div>';
-				};
 			$editform->display();				
 			echo '</fieldset>';
 			echo '</div>';

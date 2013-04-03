@@ -139,7 +139,6 @@ function block_exaport_print_file($url, $filename, $alttext) {
 }
 
 function block_exaport_course_has_desp() {
-	return true;
 	global $COURSE, $DB;
 	
 	if (isset($COURSE->has_desp))

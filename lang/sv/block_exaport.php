@@ -279,3 +279,7 @@ $stringNotUsed['externallink'] = 'Extern länk';
 $stringNotUsed['newexternal'] = 'Lägg till ny extern länk';
 $stringNotUsed['nobookmarksexternal'] = '(inga externa länkar ännu)';
 $string['steckbrief'] = 'Profile';
+
+$string['notify'] = 'notify';
+$string['share'] = 'share';
+$string['sharejs'] = 'share';

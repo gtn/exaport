@@ -67,10 +67,10 @@ window.jQueryExaport = jQuery.noConflict(true);
 									(typeof sharedUsers[user.id] != 'undefined' ? ' checked' : '') +
 									' />';
 								if (type == 'views_mod') {
-									html += "<br />share";
+									html += "<br />"+$E.translate('sharejs');
 									html += '</td><td align=\"center\" width="50" style="padding-right: 20px;">';
 									html += '<input class="notifyusers" type="checkbox" name="notifyusers['+user.id+']" value="'+user.id+'" />';
-									html += "<br />notify";
+									html += "<br />"+$E.translate('notify');
 								}
 								html += "</td><td align=\"left\">" + user.name + "</td><td align=\"right\">" + user.rolename + "</td></tr>";
 							});

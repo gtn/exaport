@@ -122,7 +122,7 @@ $query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS
 	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
 	 " left join {files} files on (files.itemid = i.id and files.userid = i.userid)".
 	 " where i.userid=?".
-	 " GROUP BY i.id, i.name, i.type, ic.name, ic2.name".
+	 " GROUP BY i.id, i.name, i.type, i.type, ic.id, ic.name, ic2.name, files.mimetype".
 	 " ORDER BY i.name";
 $portfolioItems = $DB->get_records_sql($query, array($USER->id));
 if (!$portfolioItems) {
@@ -470,7 +470,7 @@ $translations = array(
 	'viewitem', 'comments', 'category', 'type',
 	'delete', 'viewand',
 	'file', 'note', 'link',
-	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 
+	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',
 );
 
 
@@ -584,15 +584,14 @@ break;
 				$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, $context, 'block_exaport', 'veiw', $view->id);
 			$editform ->set_data($data);
 		
-				if (block_exaport_course_has_desp()) {
-					echo '<div class="fitem"><div class="fitemtitle"><label>'.get_string('desp_language', 'block_exaport').'</label></div><div class="felement ftext">'.$form['elements_by_name']['langid']['html'].'</div></div>';
-				};
 			$editform->display();				
 			echo '</fieldset>';
 			echo '</div>';
 		break;
 // --------------------		
 	case 'layout' :
+		if (!isset($view->layout)) 
+		$view->layout = 2;
 			echo '
 			<p>'.get_string('chooselayout','block_exaport').'</p>
 			<div class="select_layout">

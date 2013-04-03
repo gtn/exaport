@@ -321,3 +321,7 @@ $string['cofigureblock'] = "Configure Block";
 $string['selectitems'] = "Select items";
 $string['exaport:addinstance'] = 'add Exabis E-Portfolio to the course';
 $string['exaport:myaddinstance'] = 'add Exabis E-Portfolio on My home';
+
+$string['notify'] = 'notify';
+$string['share'] = 'share';
+$string['sharejs'] = 'share';

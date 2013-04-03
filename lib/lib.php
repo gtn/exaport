@@ -64,62 +64,32 @@ function block_exaport_require_login($courseid) {
 function block_exaport_setup_default_categories() {
 	global $DB, $USER;
     
-	if (block_exaport_course_has_desp() && !$DB->record_exists('block_exaportcate', array('userid'=>$USER->id))) {
+	if (block_exaport_course_has_desp() && !$DB->record_exists('block_exaportcate', array('userid'=>$USER->id))
+		&& !empty($CFG->block_exaport_enable_interaction_competences)) {
 		
-		$categories = array();
-		$categories[0]["title"] = "Erzählungen, Rollenspielszenen, Gedichte, Collagen";
-		$categories[1]["title"] = "Lebenslauf";
-		$categories[2]["title"] = "Berichte über Theateraufführungen, Ausstellungen";
-		$categories[3]["title"] = "Berichte über Projekte, Projektreflexionen";
-		$categories[4]["title"] = "Audio- und Videoclips";
-		$categories[5]["title"] = "Begegnungen durch Reisen in andere Länder";
-		$categories[6]["title"] = "Überlegungen zu deinem Sprachenlernen";
-		$categories[7]["title"] = "Zeugnisse";
-		$categories[8]["title"] = "Zertifikate";
-		$categories[9]["title"] = "Bestätigungen";
-		$categories[10]["title"] = "Hören";
-		$categories[10]["subtitle"][] = "Einzelarbeit";
-		$categories[10]["subtitle"][] = "Partnerarbeit";
-		$categories[10]["subtitle"][] = "Gruppenarbeit";
-		$categories[11]["title"] = "Lesen";
-		$categories[11]["subtitle"][] = "Einzelarbeit";
-		$categories[11]["subtitle"][]="Partnerarbeit";
-		$categories[11]["subtitle"][]="Gruppenarbeit";
-		$categories[12]["title"] = "An Gesprächen teilnehmen";
-		$categories[12]["subtitle"][]="Einzelarbeit";
-		$categories[12]["subtitle"][]="Partnerarbeit";
-		$categories[12]["subtitle"][]="Gruppenarbeit";
-		$categories[14]["title"]="Zusammenhängend sprechen";
-		$categories[14]["subtitle"][]="Einzelarbeit";
-		$categories[14]["subtitle"][]="Partnerarbeit";
-		$categories[14]["subtitle"][]="Gruppenarbeit";
-		$categories[15]["title"]="Schreiben";
-		$categories[15]["subtitle"][]="Einzelarbeit";
-		$categories[15]["subtitle"][]="Partnerarbeit";
-		$categories[15]["subtitle"][]="Gruppenarbeit";
-
+		$categories = trim(get_string("desp_categories", "block_exaport"));
+		if (!$categories) return;
+		
+		$categories = explode("\n", $categories);
+		$categories = array_map('trim', $categories);
+		
 		$newentry = new stdClass();
 		$newentry->timemodified = time();
 		$newentry->userid = $USER->id;
 		$newentry->pid = 0;
 
-		foreach ($categories as $catkey=>$category) {
-			foreach ($category as $key=>$cat2){
-				if ($key=="title"){
-					$newentry->name = $cat2;
-					$newentry->pid=0;
-					$newid=$DB->insert_record("block_exaportcate", $newentry);
-				}elseif ($key=="subtitle"){
-					foreach ($cat2 as $subtitle){
-						$newentry->name = $subtitle;
-						$newentry->pid=$newid;
-						$DB->insert_record("block_exaportcate", $newentry);	
-					}
-				}
+		$lastMainId = null;
+		foreach ($categories as $category) {
+			if ($category[0] == '-' && $lastMainId) {
+				// subcategory
+				$newentry->name = trim($category, '-');
+				$newentry->pid = $lastMainId;
+				$DB->insert_record("block_exaportcate", $newentry);	
+			} else {
+				$newentry->name = $category;
+				$newentry->pid = 0;
+				$lastMainId = $DB->insert_record("block_exaportcate", $newentry);
 			}
-			/*$newentry->name = $category;
-			$DB->insert_record("block_exaportcate", $newentry);
-			*/
 		}
 	}
 }
@@ -169,6 +139,7 @@ function block_exaport_print_file($url, $filename, $alttext) {
 }
 
 function block_exaport_course_has_desp() {
+	return true;
 	global $COURSE, $DB;
 	
 	if (isset($COURSE->has_desp))

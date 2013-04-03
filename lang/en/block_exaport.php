@@ -329,6 +329,39 @@ $string['desp_explainingnote'] = 'Notes. These notes may be shared with all auth
 $string['desp_explaininglink'] = 'Links.  These links may be shared with all authorized course members.';
 $string['desp_explainingfile'] = 'Files. These files may be shared with all authorized course members.';
 $string['steckbrief'] = 'Profile';
+$string['desp_categories'] = '
+	Erzählungen, Rollenspielszenen, Gedichte, Collagen
+	Lebenslauf
+	Berichte über Theateraufführungen, Ausstellungen
+	Berichte über Projekte, Projektreflexionen
+	Audio- und Videoclips
+	Begegnungen durch Reisen in andere Länder
+	Überlegungen zu deinem Sprachenlernen
+	Zeugnisse
+	Zertifikate
+	Bestätigungen
+	Hören
+	Einzelarbeit
+	Partnerarbeit
+	Gruppenarbeit
+	Lesen
+	Einzelarbeit
+	 - Partnerarbeit
+	 - Gruppenarbeit
+	An Gesprächen teilnehmen
+	 - Einzelarbeit
+	 - Partnerarbeit
+	 - Gruppenarbeit
+	Zusammenhängend sprechen
+	 - Einzelarbeit
+	 - Partnerarbeit
+	 - Gruppenarbeit
+	Schreiben
+	 - Einzelarbeit
+	 - Gruppenarbeit
+	 - Partnerarbeit
+';
+
 // Config
 $string['config_version_3'] = 'New E-Portfolio layout: including views, etc.';
 $string['config_version_2'] = 'Old E-Portfolio layout';
@@ -347,5 +380,7 @@ $string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - 
 $string['settings_interaktion_exacomp_body'] = 'Interaction with block exabis competencies, in case it is installed';
 $string['settings_allow_loginas_head'] = 'Allow login as';
 $string['settings_allow_loginas_body'] = '';
+$string['settings_create_desp_categories_head'] = 'Create Desp Categories';
+$string['settings_create_desp_categories_body'] = '';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';

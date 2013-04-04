@@ -161,6 +161,16 @@ if ($USER->picture) {
 	$picture_src_small = $user_picture->get_url($PAGE);
 };
 
+	if ($block_data->text) {
+		$text = $block_data->text;
+	} else {
+		$text = block_exaport_get_user_preferences()->description;
+
+        $draftid_editor = file_get_submitted_draft_itemid('text');
+		$text = file_prepare_draft_area($draftid_editor, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information',
+                                       $USER->id, array('subdirs'=>true), $text);
+	}
+
 	$content  = "";
     $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onsubmit="exaportViewEdit.addPersonalInfo('.$id.'); return false;">';
 	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';			
@@ -205,7 +215,7 @@ if ($USER->picture) {
 	$content .= '<label for="text">'.get_string('aboutme','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
-	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="block_intro" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.($block_data->text?$block_data->text:"").'</textarea>';
+	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="block_intro" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.s($text).'</textarea>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';

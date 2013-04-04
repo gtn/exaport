@@ -102,7 +102,7 @@ function get_form_text($id, $block_data=array()) {
 	global $CFG, $tinymce, $PAGE;
 	
 	$content  = "";
-    $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onclick="exaportViewEdit.addText('.$id.'); return false;">';
+    $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onsubmit="exaportViewEdit.addText('.$id.'); return false;">';
 	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';		
 	$content .= '<table style="width: 100%;">';
 	$content .= '<tr><th>';

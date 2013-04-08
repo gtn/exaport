@@ -924,7 +924,7 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 				/*itemauswahl für view ende*/
 				
 				if($showitem==true){
-					$inhalt.='<item name="'.$item->name.'" id="'.$item->id.'"';
+					$inhalt.='<item id="'.$item->id.'"';
 					if ($view_id>0){
 						if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
 						else $inhalt.=' selected="false"';
@@ -1171,12 +1171,12 @@ function block_exaport_checkIfUpdate($userid){
 function block_exaport_installoez($userid,$isupdate=false){
 	global $DB;
 	$where="";$catold=array();
-	/*
+	
 	if (!$kont = $DB->get_records("block_exaportcate", array("userid"=>$userid,"isoez"=>2))){
 		$newkontid=$DB->insert_record('block_exaportcate', array("name"=>"Eigener Kontinent","userid"=>$userid,"pid"=>0,"timemodified"=>time(),"courseid"=>0,"description"=>"Eigener Kontinent","isoez"=>2,"stid"=>0,"subjid"=>0,"topicid"=>0,"source"=>0,"sourceid"=>0,"sourcemod"=>0));
 		$sql="UPDATE {block_exaportcate} SET pid=".$newkontid." WHERE pid=0 AND isoez=0 AND userid=".$userid;
 		$DB->execute($sql);
-	}*/
+	}
 		
 	if ($isupdate==true){
 		//exacomp: timestamp hinterlegen, wann update

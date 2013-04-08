@@ -364,6 +364,7 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 			$organization->appendChild($item);
 			$ridentifier++;
 			$identifier++;
+			$i++;
 			$return = true;
 		}
 	}

@@ -9,6 +9,7 @@ $user=checkhash();
 $gotologin=false;
 if (!$user) $gotologin=true;
 else{
+	
 	if ($user->auth=='nologin' || $user->firstaccess==0 || $user->suspended!=0 || $user->deleted!=0){
 		$gotologin=true;
 	}else{
@@ -23,17 +24,18 @@ else{
 		foreach($mycourses as $mycourse) {
 			$mycoursecontext = get_context_instance(CONTEXT_COURSE, $mycourse->id);
 			if($DB->record_exists('block_instances', array('blockname'=>'exaport', 'parentcontextid'=>$mycoursecontext->id))) {
-				redirect($CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$mycourse->id);
+				redirect($CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$mycourse->id);die;
 			}
 		}
 		unset($mycourses);
 		unset($mycoursecontext);
 		
-		redirect($CFG->wwwroot);
+		redirect($CFG->wwwroot);die;
 	}
 }
 if ($gotologin==true){
-	redirect(get_login_url());
+	$logurl=get_login_url();
+	redirect($CFG->wwwroot);die;
 }
 
 function checkhash(){

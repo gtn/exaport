@@ -322,13 +322,16 @@ else if ($action=="get_items_for_view"){
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<views>'."\r\n";
 			foreach($views as $view){
-				$inhalt.="<view name='".$view->name."'  id='".$view->id."' description='".$view->description."'>";
+				$inhalt.="<view  id='".$view->id."'>";
+						$inhalt.='<name>'.cdatawrap($view->name).'</name>'."\r\n";
+						$inhalt.='<description>'.cdatawrap($view->description).'</description>'."\r\n";
 						$sql= "SELECT vi.id as viid, i.id as itemid,i.name as itemname,i.categoryid as catid,i.type, i.url,i.intro FROM ";
 						$sql.=" {block_exaportviewblock} vi INNER JOIN {block_exaportitem} i ON i.id=vi.itemid WHERE vi.viewid=?";
 	  				$items = $DB->get_records_sql($sql,array($view->id));
 	  				foreach ($items as $item){
-	  					$inhalt.="<item name='".$item->itemname."'  id='".$item->itemid."' catid='".$item->catid."' url='".$item->url."' type='".$item->type."' intro=''>";
-	  					$inhalt.=$item->intro;
+	  					$inhalt.="<item  id='".$item->itemid."' catid='".$item->catid."' url='".$item->url."' type='".$item->type."'>";
+	  					$inhalt.='<name>'.cdatawrap($item->itemname).'</name>'."\r\n";
+	  					$inhalt.=cdatawrap($item->intro);
 	  					$inhalt.="</item>"."\r\n";
 	  				}
 	  				
@@ -381,8 +384,9 @@ else if ($action=="get_items_for_view"){
 		$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 		$inhalt.='<result>'."\r\n";
 				foreach($topics as $topic){
-					$inhalt.="<topic name='".$topic->title."'  id='".$topic->id."'>";
-						$inhalt.="</topic>"."\r\n";
+					$inhalt.="<topic id='".$topic->id."'>"."\r\n";
+					$inhalt.="<name>".cdatawrap($topic->title)."</name>"."\r\n";
+					$inhalt.="</topic>"."\r\n";
 				}
 		$inhalt.='</result> '."\r\n";
 		echo $inhalt;
@@ -399,10 +403,11 @@ else if ($action=="get_items_for_view"){
 		$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 		$inhalt.='<result>'."\r\n";
 				foreach($subjects as $subject){
-					$inhalt.="<subject name='".$subject->title."'  id='".$subject->id."'";
+					$inhalt.="<subject  id='".$subject->id."'";
 					if (block_exaport_competence_selected($subject->id,$user->id,$itemid)) $inhalt.=" competence_selected='true'";
 					else $inhalt.=" competence_selected='false'";
-					$inhalt.=">";
+					$inhalt.=">"."\r\n";
+					$inhalt.="<name>".cdatawrap($subject->title)."</name>"."\r\n";
 						$inhalt.="</subject>"."\r\n";
 				}
 		$inhalt.='</result> '."\r\n";
@@ -440,15 +445,16 @@ else if ($action=="get_items_for_view"){
 				if ($action=="getExamples"){
 						$bsp=getExamples($descriptor->id);
 				}else{
-						$bsp=$descriptor->id;
+						$bsp="<id>".$descriptor->id."</id>"."\r\n";
 				}
 				if ($bsp!=""){
-					$inhalt.="<competences name='".$descriptor->title."'  id='".$descriptor->id."' ";
+					$inhalt.="<competences id='".$descriptor->id."' ";
 
 					if(strpos($clist,",".$descriptor->id.",")===false) $inhalt.=" selected='false'";
 					else $inhalt.=" selected='true'";
 					$inhalt.=">";
 					$inhalt.=$bsp;
+					$inhalt.="<name>".cdatawrap($descriptor->title)."</name>"."\r\n";
 					$inhalt.="</competences>"."\r\n";
 				}
 			}
@@ -724,13 +730,22 @@ function getExamples($descrid){
   $examples = $DB->get_records_sql($sql,array($descrid));
   foreach ($examples as $example){
   	$inhalt.='
-  		<example name="'.$example->title.'" description="'.$example->description.'" id="'.$example->id.'"
-    		task="'.$example->task.'" solution="'.$example->solution.'" attachement="'.$example->attachement.'"
-    		completefile="'.$example->completefile.'" externalurl="'.oezepsbereinigung($example->externalurl).'" externalsolution="'.$example->externalsolution.'"
-				externaltask="'.$example->externaltask.'"';
+  		<example id="'.$example->id.'"';
 		if (isoezeps($example->externalurl)) $inhalt.=' oezeps="1"';
 		else $inhalt.=' oezeps="0"';
-		$inhalt.='></example>'."\r\n";
+		$inhalt.='>'."\r\n";
+		$inhalt.="<name>".cdatawrap($example->title)."</name>"."\r\n";
+		
+		$inhalt.="<description>".cdatawrap($example->description)."</description>"."\r\n";
+		$inhalt.="<task>".cdatawrap($example->task)."</task>"."\r\n";
+		$inhalt.="<solution>".cdatawrap($example->solution)."</solution>"."\r\n";
+		$inhalt.="<attachement>".cdatawrap($example->attachement)."</attachement>"."\r\n";
+		$inhalt.="<completefile>".cdatawrap($example->completefile)."</completefile>"."\r\n";
+		$inhalt.="<externalurl>".cdatawrap(oezepsbereinigung($example->externalurl))."</externalurl>"."\r\n";
+		$inhalt.="<externalsolution>".cdatawrap($example->externalsolution)."</externalsolution>"."\r\n";
+		$inhalt.="<externaltask>".cdatawrap($example->externaltask)."</externaltask>"."\r\n";
+		
+		$inhalt.="</example>"."\r\n";
   }
   return $inhalt;
 }
@@ -822,7 +837,9 @@ function block_exaport_getshares($view,$usrid,$sharetag=true,$strshared="viewSha
 	$tusers=exaport_get_shareable_users();
 	if($view->shareall==1){
 		foreach($tusers as $k=>$v){
-			$inhalt.='<user name="'.$v.'" id="'.$k.'" '.$strshared.'="true" ></user>'."\r\n";
+			$inhalt.='<user name="'.$v.'" id="'.$k.'" '.$strshared.'="true" >'."\r\n";
+			$inhalt.='<name>'.cdatawrap($v).'</name>'."\r\n";
+			$inhalt.='</user>'."\r\n";
 		}
 	}else{
 		$sql = "SELECT u.firstname,u.lastname,u.id FROM ";
@@ -836,7 +853,9 @@ function block_exaport_getshares($view,$usrid,$sharetag=true,$strshared="viewSha
 			$inhalt.='<user name="'.$v.'" id="'.$k.'" ';
 			if (!empty($tusers2[$k])) $inhalt.=$strshared.'="true"';
 			else $inhalt.=$strshared.'="false"';
-			$inhalt.='></user>'."\r\n";
+			$inhalt.='>'."\r\n";
+			$inhalt.='<name>'.cdatawrap($v).'</name>'."\r\n";
+			$inhalt.='</user>'."\r\n";
 		}
 	}
 	
@@ -851,8 +870,9 @@ function block_exacomp_write_xml_user($tusers){
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<users>'."\r\n";
 			foreach($tusers as $k => $v){
-				
-				$inhalt.='<user id="'.$k.'" name="'.$v.'"></user>'."\r\n";
+				$inhalt.='<user id="'.$k.'">'."\r\n";
+				$inhalt.='<name>'.cdatawrap($v).'</name>'."\r\n";
+				$inhalt.='</user>'."\r\n";
 			}
 			$inhalt.='</users> '."\r\n";
 			echo $inhalt;
@@ -943,9 +963,10 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 					//if ($competence_category!=""){
 						$inhalt.=' competence_category="'.$competence_category.'"';
 					//}
-					$inhalt.=' catid="'.$item->categoryid.'" type="'.$item->type.'" url="'.$item->url.'" progress="'.$progress.'" isOezepsItem="'.block_exaport_numtobool($item->isoez).'">'."\r\n";
+					$inhalt.=' catid="'.$item->categoryid.'" type="'.$item->type.'" progress="'.$progress.'" isOezepsItem="'.block_exaport_numtobool($item->isoez).'">'."\r\n";
 					$inhalt.='<name>'.cdatawrap($item->name).'</name>'."\r\n";
 					$inhalt.='<description>'.cdatawrap($item->intro).'</description>'."\r\n";
+					$inhalt.='<url>'.cdatawrap($item->url).'</url>'."\r\n";
 					$inhalt.='<fileUrl>'.cdatawrap(block_exaport_ers_null($fileurl)).'</fileUrl>'."\r\n";
 					$inhalt.='<beispiel_url>';
 					if ($item->isoez==1) $inhalt.=oezepsbereinigung(block_exaport_ers_null($item->beispiel_url));

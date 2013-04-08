@@ -96,6 +96,9 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 	echo '<td class="view-column td'.$i.'">';
 	if (isset($columns[$i]))
 	foreach ($columns[$i] as $block) {
+		if ($block->text)
+			$block->text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $access);
+
 		if ($block->type == 'item') {
 			$item = $block->item; 
 			$target = '_blank';

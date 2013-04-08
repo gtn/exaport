@@ -418,7 +418,60 @@ $postView = ($view ? $view : new stdClass());
 $postView->action       = $action;
 $postView->courseid     = $courseid;
 $postView->draft_itemid = null;
+
 file_prepare_draft_area($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+
+// we need to copy additional files from the personal information to the views editor, just in case if the personal information is added
+copy_personal_information_draft_files($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);
+function copy_personal_information_draft_files($targetDraftitemid, $contextid, $component, $filearea, $itemid, array $options=null, $text=null) {
+	global $USER;
+	
+	// copy from filelib.php
+    $usercontext = context_user::instance($USER->id);
+    $fs = get_file_storage();
+
+	$file_record = array('contextid'=>$usercontext->id, 'component'=>'user', 'filearea'=>'draft', 'itemid'=>$targetDraftitemid);
+	if (!is_null($itemid) and $files = $fs->get_area_files($contextid, $component, $filearea, $itemid)) {
+		foreach ($files as $file) {
+			if ($file->is_directory() and $file->get_filepath() === '/') {
+				// we need a way to mark the age of each draft area,
+				// by not copying the root dir we force it to be created automatically with current timestamp
+				continue;
+			}
+			if (!$options['subdirs'] and ($file->is_directory() or $file->get_filepath() !== '/')) {
+				continue;
+			}
+
+			var_dump($file->get_filename());
+			if ($tmp = $fs->get_file($file_record['contextid'], $file_record['component'], $file_record['filearea'],
+					$file_record['itemid'], $file->get_filepath(), $file->get_filename())) {
+				var_dump($tmp);
+				continue;
+			}
+
+			$draftfile = $fs->create_file_from_storedfile($file_record, $file);
+			// XXX: This is a hack for file manager (MDL-28666)
+			// File manager needs to know the original file information before copying
+			// to draft area, so we append these information in mdl_files.source field
+			// {@link file_storage::search_references()}
+			// {@link file_storage::search_references_count()}
+			$sourcefield = $file->get_source();
+			$newsourcefield = new stdClass;
+			$newsourcefield->source = $sourcefield;
+			$original = new stdClass;
+			$original->contextid = $contextid;
+			$original->component = $component;
+			$original->filearea  = $filearea;
+			$original->itemid    = $itemid;
+			$original->filename  = $file->get_filename();
+			$original->filepath  = $file->get_filepath();
+			$newsourcefield->original = file_storage::pack_reference($original);
+			$draftfile->set_source(serialize($newsourcefield));
+			// End of file manager hack
+		}
+	}
+}
+
 $postView->viewid = $view->id;
 
 switch ($action) {

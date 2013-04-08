@@ -924,7 +924,7 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 				/*itemauswahl für view ende*/
 				
 				if($showitem==true){
-					$inhalt.='<item name="'.$item->name.'" id="'.$item->id.'"';
+					$inhalt.='<item id="'.$item->id.'"';
 					if ($view_id>0){
 						if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
 						else $inhalt.=' selected="false"';

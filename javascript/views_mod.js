@@ -141,7 +141,10 @@ var exaportViewEdit = {};
 							type: 'POST',
 							data: {
 								type_block: ui.item.attr('block-type'),
-								action: 'add'
+								action: 'add',
+								'viewid': $('form :input[name=viewid]').val(),
+								'text[itemid]': $('form :input[name=draft_itemid]').val(),
+								sesskey: $('form :input[name=sesskey]').val()
 							},
 							success: function(res) {
 								var data = JSON.parse (res);
@@ -313,13 +316,13 @@ var exaportViewEdit = {};
 				$item.find('div.picture').append('<img src="'+data.picture+'">');
 			$item.find('div.name').append(data.firstname); $item.find('div.name').append(' '); $item.find('div.name').append(data.lastname);
 			$item.find('div.email').append(data.email);
-			$item.find('div.body').append(data.text);
+			$item.find('div.body').append(data.print_text);
 		} else if (data.type == 'headline') {
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
 				'<div class="header">'+$E.translate('view_specialitem_headline')+': <div class="body"></div></div>'
 			);
-			$item.find('div.body').append(data.text);
+			$item.find('div.body').append(data.print_text);
 		} else {		
 			data.type = 'text';
 			$item.html(
@@ -328,7 +331,7 @@ var exaportViewEdit = {};
 				'<div class="body"><p class="text" '+$E.translate('view_specialitem_text_defaulttext')+'"></p></body>'
 			);
 			$item.find('div.header').append($E.translate('view_specialitem_text')+": "+data.block_title);
-			$item.find('div.body').append(data.text);
+			$item.find('div.body').append(data.print_text);
 		}
 
 		// insert default texts
@@ -381,7 +384,10 @@ var exaportViewEdit = {};
 			type: 'POST',
 			data: {
 				item_id: item_id,
-				action: 'edit'
+				action: 'edit',
+				'viewid': $('form :input[name=viewid]').val(),
+				'text[itemid]': $('form :input[name=draft_itemid]').val(),
+				sesskey: $('form :input[name=sesskey]').val()
 			},
 			success: function(res) {
 				var data = JSON.parse(res);

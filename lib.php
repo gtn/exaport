@@ -65,6 +65,26 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 		} else {
 			return false;
 		}
+	} elseif ($filearea == 'view_content') {
+		$filename = array_pop($args);
+
+		// other params together are the access string
+		$access = join('/', $args);
+
+		if (!$view = block_exaport_get_view_from_access($access)) {
+			print_error("viewnotfound", "block_exaport");
+		}
+
+		// get file
+		$fs = get_file_storage();
+		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
+
+		// serve file
+		if ($file) {
+			send_stored_file($file);
+		} else {
+			return false;
+		}
 	} elseif ($filearea == 'personal_information_view') {
 		$filename = array_pop($args);
 		

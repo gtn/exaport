@@ -179,6 +179,7 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform->updateAttributes(array('class'=>'', 'id'=>'view_edit_form'));
 
 		$mform->addElement('hidden', 'items');
+		$mform->addElement('hidden', 'draft_itemid');
 		$mform->addElement('hidden', 'action');
 		$mform->addElement('hidden', 'courseid');
 		$mform->addElement('hidden', 'viewid');
@@ -336,18 +337,26 @@ if ($editform->is_cancelled()) {
 			// delete all blocks
 			$DB->delete_records('block_exaportviewblock', array('viewid'=>$dbView->id));
 			// add blocks
-			$blocks = json_decode($formView->blocks);
+			
+			$blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, 
+								array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id)), 
+								$formView->blocks);
+								
+			$blocks = json_decode($blocks);
+			
 			if(!$blocks)
 				print_error("noentry","block_exaport");
+			
 			foreach ($blocks as $block) {
 				$block->viewid = $dbView->id;
-				$DB->insert_record('block_exaportviewblock', $block);
-			};
+
+				$block->id = $DB->insert_record('block_exaportviewblock', $block);
+			}
 			
 			if (optional_param('ajax', 0, PARAM_INT)) {
 				$ret = new stdClass;
 				$ret->ok = true;
-				$ret->blocks = json_encode(get_view_blocks($dbView));
+				$ret->blocks = json_encode(get_view_blocks($view));
 				
 				echo json_encode($ret);
 				exit;
@@ -402,10 +411,15 @@ if ($editform->is_cancelled()) {
 	$returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&sesskey='.sesskey().'&action=edit';
 	redirect($returnurl);
 }
+
 // gui setup
 $postView = ($view ? $view : new stdClass());
 $postView->action       = $action;
 $postView->courseid     = $courseid;
+$postView->draft_itemid = null;
+file_prepare_draft_area($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+$postView->viewid = $view->id;
+
 switch ($action) {
 	case 'add':
 		$postView->internaccess = 0;
@@ -424,13 +438,19 @@ switch ($action) {
 }
 
 function get_view_blocks($view) {
-	global $DB;
+	global $DB, $USER;
 	
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
 		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
-	return $DB->get_records_sql($query, array($view->id));
+	$blocks = $DB->get_records_sql($query, array($view->id));
+	
+	foreach ($blocks as $block) {
+		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);
+	}
+
+	return $blocks;
 }
 
 if ($view) {

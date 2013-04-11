@@ -10,7 +10,7 @@ $gotologin=false;
 if (!$user) $gotologin=true;
 else{
 	
-	if ($user->auth=='nologin' || $user->firstaccess==0 || $user->suspended!=0 || $user->deleted!=0){
+	if ($user->auth=='nologin' || $user->suspended!=0 || $user->deleted!=0){
 		$gotologin=true;
 	}else{
 			

@@ -299,11 +299,22 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			
 			$table = new xmldb_table('block_exaportview');
 			$field_wert = new xmldb_field('layout');
-			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null,null); //  Moodle 2.x deprecated
+			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, 2,null); //  Moodle 2.x deprecated
 			if (!$dbman->field_exists($table, $field_wert)) {
 				$dbman->add_field($table, $field_wert);
-			} 
+			}
 					
+		}
+		
+		if ($oldversion < 2013041201) {
+			$table = new xmldb_table('block_exaportview');
+			$field_wert = new xmldb_field('layout');
+			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, 2,null); //  Moodle 2.x deprecated
+			if (!$dbman->field_exists($table, $field_wert)) {
+				$dbman->add_field($table, $field_wert);
+			}else{
+				$dbman->change_field_default($table, $field_wert);
+			}
 		}
 
 	return $result;

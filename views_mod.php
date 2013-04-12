@@ -305,7 +305,7 @@ if ($editform->is_cancelled()) {
 		case 'add':
 
 			$dbView->userid = $USER->id;
-
+			if (empty($dbView->layout))  $dbView->layout=2;
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
 				add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {

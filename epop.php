@@ -741,7 +741,7 @@ function getExamples($descrid){
 		$inhalt.="<solution>".cdatawrap($example->solution)."</solution>"."\r\n";
 		$inhalt.="<attachement>".cdatawrap($example->attachement)."</attachement>"."\r\n";
 		$inhalt.="<completefile>".cdatawrap($example->completefile)."</completefile>"."\r\n";
-		$inhalt.="<externalurl>".cdatawrap(oezepsbereinigung($example->externalurl))."</externalurl>"."\r\n";
+		$inhalt.="<externalurl>".cdatawrap(oezepsbereinigung($example->externalurl,1))."</externalurl>"."\r\n";
 		$inhalt.="<externalsolution>".cdatawrap($example->externalsolution)."</externalsolution>"."\r\n";
 		$inhalt.="<externaltask>".cdatawrap($example->externaltask)."</externaltask>"."\r\n";
 		
@@ -784,13 +784,15 @@ print_r($array);*/
  
 }
 
-function oezepsbereinigung($url){
+function oezepsbereinigung($url,$nuroezeps=1){
 
 	$url=str_replace("http://www.oezeps.at/moodle","",$url);
 	$url=str_replace("http://oezeps.at/moodle","",$url);
 	$url=str_replace("http://www.oezeps.at","",$url);
 	$url=str_replace("http://oezeps.at","",$url);
-	
+	if ($nuroezeps==0){
+		$url=str_replace("http://www.digikomp.at","http://www.digikomp.at/blocks/exaport/epopal.php?url=",$url);
+	}
 	return $url;
 }
 function block_exaport_delete_competences($itemid,$userid){
@@ -969,7 +971,7 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 					$inhalt.='<url>'.cdatawrap($item->url).'</url>'."\r\n";
 					$inhalt.='<fileUrl>'.cdatawrap(block_exaport_ers_null($fileurl)).'</fileUrl>'."\r\n";
 					$inhalt.='<beispiel_url>';
-					if ($item->isoez==1) $inhalt.=oezepsbereinigung(block_exaport_ers_null($item->beispiel_url));
+					if ($item->isoez==1) $inhalt.=oezepsbereinigung(block_exaport_ers_null($item->beispiel_url),0);
 					else $inhalt.=block_exaport_ers_null($item->beispiel_url);
 					$inhalt.='</beispiel_url>'."\r\n";
 					$inhalt.='<beispiel_description>'.cdatawrap($item->beispiel_angabe).'</beispiel_description>'."\r\n";

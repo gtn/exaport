@@ -21,6 +21,8 @@ else{
 		//if user is enrolled to a course with exaport, redirect to it
 		//else redirect to moodle root
 		$mycourses=enrol_get_my_courses();
+		$mycourses[] = $DB->get_record('course',array('id'=>1));
+		
 		foreach($mycourses as $mycourse) {
 			$mycoursecontext = get_context_instance(CONTEXT_COURSE, $mycourse->id);
 			if($DB->record_exists('block_instances', array('blockname'=>'exaport', 'parentcontextid'=>$mycoursecontext->id))) {

@@ -262,11 +262,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		if ($oldversion < 2013041101) {
 
 			$table = new xmldb_table('block_exaportview');
-			$field_wert = new xmldb_field('layout');
-			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0,null); //  Moodle 2.x deprecated
-			if (!$dbman->field_exists($table, $field_wert)) {
-				$dbman->add_field($table, $field_wert);
-			} 
+		
 			$field_wert = new xmldb_field('langid');
 			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '20', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0,null); //  Moodle 2.x deprecated
 			if (!$dbman->field_exists($table, $field_wert)) {
@@ -297,6 +293,13 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			} 
 			$field_wert = new xmldb_field('picture');
 			$field_wert->set_attributes(XMLDB_TYPE_CHAR, '250', null, null, null, null, null); //  Moodle 2.x deprecated
+			if (!$dbman->field_exists($table, $field_wert)) {
+				$dbman->add_field($table, $field_wert);
+			} 
+			
+			$table = new xmldb_table('block_exaportview');
+			$field_wert = new xmldb_field('layout');
+			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 2,null); //  Moodle 2.x deprecated
 			if (!$dbman->field_exists($table, $field_wert)) {
 				$dbman->add_field($table, $field_wert);
 			} 

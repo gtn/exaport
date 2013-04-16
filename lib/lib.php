@@ -62,12 +62,13 @@ function block_exaport_require_login($courseid) {
 }
 
 function block_exaport_setup_default_categories() {
-	global $DB, $USER;
+	global $DB, $USER,$CFG;
     
 	if (block_exaport_course_has_desp() && !$DB->record_exists('block_exaportcate', array('userid'=>$USER->id))
-		&& !empty($CFG->block_exaport_enable_interaction_competences)) {
+		&& !empty($CFG->block_exaport_create_desp_categories)) {
 		
 		$categories = trim(get_string("desp_categories", "block_exaport"));
+		
 		if (!$categories) return;
 		
 		$categories = explode("\n", $categories);

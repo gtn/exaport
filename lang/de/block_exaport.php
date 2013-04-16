@@ -284,6 +284,38 @@ $string['desp_explainingnote'] = '<span class=\'block_eportfolio_bold\'>Notizen:
 $string['desp_explaininglink'] = '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['desp_explainingfile'] = '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['steckbrief'] = 'Steckbrief';
+$string['desp_categories'] = '
+	Erzählungen, Rollenspielszenen, Gedichte, Collagen
+	Lebenslauf
+	Berichte über Theateraufführungen, Ausstellungen
+	Berichte über Projekte, Projektreflexionen
+	Audio- und Videoclips
+	Begegnungen durch Reisen in andere Länder
+	Überlegungen zu deinem Sprachenlernen
+	Zeugnisse
+	Zertifikate
+	Bestätigungen
+	Hören
+	Einzelarbeit
+	Partnerarbeit
+	Gruppenarbeit
+	Lesen
+	Einzelarbeit
+	 - Partnerarbeit
+	 - Gruppenarbeit
+	An Gesprächen teilnehmen
+	 - Einzelarbeit
+	 - Partnerarbeit
+	 - Gruppenarbeit
+	Zusammenhängend sprechen
+	 - Einzelarbeit
+	 - Partnerarbeit
+	 - Gruppenarbeit
+	Schreiben
+	 - Einzelarbeit
+	 - Gruppenarbeit
+	 - Partnerarbeit
+';
 // Config
 $string['config_version_3'] = 'Neue E-Portfolio Ansicht: Inklusive Views usw.';
 $string['config_version_2'] = 'Alte E-Portfolio Ansicht';

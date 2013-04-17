@@ -330,36 +330,36 @@ $string['desp_explaininglink'] = 'Links.  These links may be shared with all aut
 $string['desp_explainingfile'] = 'Files. These files may be shared with all authorized course members.';
 $string['steckbrief'] = 'Profile';
 $string['desp_categories'] = '
-	Erzählungen, Rollenspielszenen, Gedichte, Collagen
-	Lebenslauf
-	Berichte über Theateraufführungen, Ausstellungen
-	Berichte über Projekte, Projektreflexionen
-	Audio- und Videoclips
-	Begegnungen durch Reisen in andere Länder
-	Überlegungen zu deinem Sprachenlernen
-	Zeugnisse
-	Zertifikate
-	Bestätigungen
-	Hören
-	Einzelarbeit
-	Partnerarbeit
-	Gruppenarbeit
-	Lesen
-	Einzelarbeit
-	 - Partnerarbeit
-	 - Gruppenarbeit
-	An Gesprächen teilnehmen
-	 - Einzelarbeit
-	 - Partnerarbeit
-	 - Gruppenarbeit
-	Zusammenhängend sprechen
-	 - Einzelarbeit
-	 - Partnerarbeit
-	 - Gruppenarbeit
-	Schreiben
-	 - Einzelarbeit
-	 - Gruppenarbeit
-	 - Partnerarbeit
+	stories, roleplays, essays, collagen
+	curriculum vitae
+	reviews of theatre productions, exhibitions
+	project reports and reflections
+	audio- and videoclips
+	encounters with other nationalities
+	thoughts about your language skills
+	report cards
+	certificates
+	acknowledgements
+	listening
+	 - individual work
+	 - partner work
+	 - group work
+	reading
+	 - individual work
+	 - partner work
+	 - group work
+	participating in conversations
+	 - individual work
+	 - partner work
+	 - group work
+	speaking fluently
+	 - individual work
+	 - partner work
+	 - group work
+	writing
+	 - individual work
+	 - partner work
+	 - group work
 ';
 
 // Config

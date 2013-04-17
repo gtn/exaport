@@ -305,7 +305,7 @@ if ($editform->is_cancelled()) {
 		case 'add':
 
 			$dbView->userid = $USER->id;
-			if (empty($dbView->layout))  $dbView->layout=2;
+			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
 				add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
@@ -319,6 +319,7 @@ if ($editform->is_cancelled()) {
 			}
 
 			$dbView->id = $view->id;
+			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($DB->update_record('block_exaportview', $dbView)) {
 				add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
 			} else {
@@ -419,7 +420,7 @@ $postView->action       = $action;
 $postView->courseid     = $courseid;
 $postView->draft_itemid = null;
 
-file_prepare_draft_area($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+file_prepare_draft_area($postView->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
 
 // we need to copy additional files from the personal information to the views editor, just in case if the personal information is added
 copy_personal_information_draft_files($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);
@@ -615,7 +616,7 @@ $cols_layout = array (
 );
 
 // default layout
-if (!isset($view->layout)) 
+if (!isset($view->layout) || $view->layout==0) 
 	$view->layout = 2;
 
 echo '<div class="view-middle">';
@@ -665,7 +666,7 @@ break;
 		break;
 // --------------------		
 	case 'layout' :
-		if (!isset($view->layout)) 
+		if (!isset($view->layout) || $view->layout==0) 
 		$view->layout = 2;
 			echo '
 			<p>'.get_string('chooselayout','block_exaport').'</p>

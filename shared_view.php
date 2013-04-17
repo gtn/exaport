@@ -90,6 +90,8 @@ $comp = block_exaport_check_competence_interaction();
 $cols_layout = array (
 	"1" => 1, 	"2" => 2,	"3" => 2,	"4" => 2,	"5" => 3,	"6" => 3,	"7" => 3,	"8" => 4,	"9" => 4,	"10" => 5
 );
+if (!isset($view->layout) || $view->layout==0) 
+	$view->layout = 2;
 echo '<div id="view">';
 echo '<table class="table_layout layout'.$view->layout.'"><tr>';
 for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {

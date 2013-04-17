@@ -71,6 +71,7 @@ else {
 echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet" />';
 echo '</head><body>';
 }
+
 block_exaport_setup_default_categories();
 
 echo "<div class='box generalbox'>";

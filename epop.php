@@ -189,7 +189,7 @@ if ($action=="login"){
 			$hash = substr(md5(microtime()), 3, 8);
         } while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
         
-			if ($newid = $DB->insert_record('block_exaportview', array("name"=>$title,"userid"=>$user->id,"description"=>$description,"timemodified"=>time(),"shareall"=>0,"externaccess"=>0,"externcomment"=>0,"langid"=>0,"hash"=>$hash))) {
+			if ($newid = $DB->insert_record('block_exaportview', array("name"=>$title,"userid"=>$user->id,"description"=>$description,"timemodified"=>time(),"shareall"=>0,"externaccess"=>0,"externcomment"=>0,"langid"=>0,"hash"=>$hash,"layout"=>"2"))) {
 				echo $newid;
 			}else{
 				echo "-1";

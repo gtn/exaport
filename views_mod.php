@@ -260,7 +260,7 @@ class block_exaport_view_edit_form extends moodleform {
     }
 }
 
-$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>$context);
+$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id)->id);
 
 $editform = new block_exaport_view_edit_form($_SERVER['REQUEST_URI'], array('view' => $view, 'course' => $COURSE->id, 'action'=> $action, 'type'=>$type));
 
@@ -270,10 +270,10 @@ if ($editform->is_cancelled()) {
 	die("nosubmitbutton");
 	//no_submit_button_actions($editform, $sitecontext);
 } else if ($formView = $editform->get_data()) {
-
+	
 	if ($type=='title' or $action=='add') {
-		if (!$view) {$view = new stdClass(); $view->id = -1;};			
-		$formView = file_postupdate_standard_editor($formView, 'description', $textfieldoptions, $context, 'block_exaport', 'view', $view->id);
+		//if (!$view) {$view = new stdClass(); $view->id = -1;};			
+		$formView = file_postupdate_standard_editor($formView, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'view', $view->id);
 	}
 
 	$dbView = $formView;
@@ -332,6 +332,7 @@ if ($editform->is_cancelled()) {
 			print_error("unknownaction", "block_exaport");
 			exit;
 	}
+	
 
 // processing for blocks and shares	
 	switch ($type) {
@@ -358,6 +359,7 @@ if ($editform->is_cancelled()) {
 			if (optional_param('ajax', 0, PARAM_INT)) {
 				$ret = new stdClass;
 				$ret->ok = true;
+				file_prepare_draft_area($view->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
 				$ret->blocks = json_encode(get_view_blocks($view));
 				
 				echo json_encode($ret);
@@ -497,10 +499,10 @@ function get_view_blocks($view) {
 		 " from {block_exaportviewblock} b".
 		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
-	$blocks = $DB->get_records_sql($query, array($view->id));
-	
+	$blocks = $DB->get_records_sql($query, array($view->id));	
 	foreach ($blocks as $block) {
-		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);
+		//$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);		
+		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $view->draft_itemid);		
 	}
 
 	return $blocks;
@@ -516,11 +518,11 @@ $tinymce = new tinymce_texteditor();
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.ui.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-$PAGE->requires->js('/lib/editor/tinymce/tiny_mce/'.$tinymce->version.'/tiny_mce.js', true);
+//$PAGE->requires->js('/lib/editor/tinymce/module.js', true);
+//$PAGE->requires->js('/lib/editor/tinymce/tiny_mce/'.$tinymce->version.'/tiny_mce.js', true);
 //$PAGE->requires->js('/lib/editor/tinymce/plugins/moodlemedia/tinymce/editor_plugin.js', true);
 //$PAGE->requires->js('/lib/editor/tinymce/plugins/moodlenolink/tinymce/editor_plugin.js', true);
 //$PAGE->requires->js('/lib/editor/tinymce/plugins/dragmath/tinymce/editor_plugin.js', true);
-$PAGE->requires->js('/lib/editor/tinymce/module.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
 $PAGE->requires->css('/blocks/exaport/css/views_mod.css');
@@ -541,7 +543,7 @@ if ($type<>'title') {// for delete php notes
 $translations = array(
 	'name', 'role', 'nousersfound',
 	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_text_defaulttext',
-	'viewitem', 'comments', 'category', 'type', 'personalinformation',
+	'viewitem', 'comments', 'category', 'type','personalinformation',
 	'delete', 'viewand',
 	'file', 'note', 'link',
 	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',
@@ -563,6 +565,7 @@ unset($value);
 </script>
 <?php
 
+$rev = theme_get_revision();
 echo "<!--[if IE]> <style> #link_thumbnail{ zoom: 0.2; } </style> <![endif]--> ";
 switch ($type) {
 	case 'content' :
@@ -571,10 +574,11 @@ switch ($type) {
 		//<![CDATA[
 			var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
 			jQueryExaport(exaportViewEdit.initContentEdit);
+			M.yui.add_module({"editor_tinymce":{"name":"editor_tinymce","fullpath":"<?php echo $CFG->wwwroot;?>/lib/javascript.php/<?php echo $rev;?>/lib/editor/tinymce/module.js","requires":[]}});
 		//]]>
 		</script>
+		<script type="text/javascript" src="<?php echo $CFG->wwwroot;?>/lib/editor/tinymce/tiny_mce/<?php echo $tinymce->version;?>/tiny_mce.js"></script>			
 		<?php
-	
 		// view data form
 echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');
 echo '<ul>
@@ -652,10 +656,16 @@ break;
 				$data->description = $view->description;
 				$data->descriptionformat = FORMAT_HTML;
 			};
+			if ($data->description) {
+				$draftid_editor = file_get_submitted_draft_itemid('description');
+				$currenttext = file_prepare_draft_area($draftid_editor, get_context_instance(CONTEXT_USER, $USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true), $data->description);	
+				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));								
+				$data->description_editor = array('text'=>$data->description, 'format'=>$data->descriptionformat, 'itemid'=>$draftid_editor);
+			};
 			$data->cataction = 'save';
 			$data->edit = 1;
-			if (isset($view))
-				$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, $context, 'block_exaport', 'veiw', $view->id);
+//			if (isset($view))
+				//$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, $context, 'block_exaport', 'veiw', $view->id);
 			$editform ->set_data($data);
 		
 			$editform->display();				

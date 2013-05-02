@@ -23,7 +23,7 @@
 *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *  GNU General Public License for more details.
 *
-*  This copyright notice MUST APPEAR in all copies of the script!!!Experimental
+*  This copyright notice MUST APPEAR in all copies of the script!!!Experimental Online
 ***************************************************************/
 
 defined('MOODLE_INTERNAL') || die();

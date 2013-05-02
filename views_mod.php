@@ -72,9 +72,10 @@ if ($id) {
 		print_error("wrongviewid", "block_exaport");
 	}
 } else {
-	$view  = null;
-/*	$view = new stdClass();
-	$view->id = -1;
+	//$view  = null;
+	$view = new stdClass();
+	$view->id = null;
+	/*
 	// generate view hash
 	do {
 		$hash = substr(md5(microtime()), 3, 8);
@@ -424,6 +425,7 @@ $postView->draft_itemid = null;
 
 file_prepare_draft_area($postView->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
 
+
 // we need to copy additional files from the personal information to the views editor, just in case if the personal information is added
 copy_personal_information_draft_files($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);
 function copy_personal_information_draft_files($targetDraftitemid, $contextid, $component, $filearea, $itemid, array $options=null, $text=null) {
@@ -652,6 +654,7 @@ break;
 
 			$data = new stdClass();
 			$data->courseid = $courseid;
+			$data->description="";
 			if (isset($view) and $view->id>0) {
 				$data->description = $view->description;
 				$data->descriptionformat = FORMAT_HTML;

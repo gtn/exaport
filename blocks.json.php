@@ -80,8 +80,9 @@ function get_form_items($id, $block_data=array()) {
 
 	if (!$portfolioItems) {
 //		$content .=  '<div style="padding: 5px;">'.get_string('nobookmarksall', 'block_exaport').'</div>';
-	} else {		
-		$content .= '<select multiple=multiple name="list" id="item_list" style="width: 100%;">';
+	} else {
+		$height = min(400, (max(count($portfolioItems), 2)+2) * 18);
+		$content .= '<select multiple=multiple name="list" id="item_list" style="width: 100%; height: '.$height.'px">';
 		foreach ($portfolioItems as $item) {
 			$content .= '<option value="'.$item->id.'" itemid="'.$item->id.'" '.($block_data->itemid==$item->id?'selected="selected"':'').'>'.$item->name.'</option>';
 		};

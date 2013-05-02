@@ -443,10 +443,8 @@ function copy_personal_information_draft_files($targetDraftitemid, $contextid, $
 				continue;
 			}
 
-			var_dump($file->get_filename());
 			if ($tmp = $fs->get_file($file_record['contextid'], $file_record['component'], $file_record['filearea'],
 					$file_record['itemid'], $file->get_filepath(), $file->get_filename())) {
-				var_dump($tmp);
 				continue;
 			}
 
@@ -543,7 +541,7 @@ if ($type<>'title') {// for delete php notes
 $translations = array(
 	'name', 'role', 'nousersfound',
 	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_text_defaulttext',
-	'viewitem', 'comments', 'category', 'type',
+	'viewitem', 'comments', 'category', 'type', 'personalinformation',
 	'delete', 'viewand',
 	'file', 'note', 'link',
 	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',

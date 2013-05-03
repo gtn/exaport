@@ -28,13 +28,11 @@
 	display: block;
 	cursor: pointer;
 	overflow: hidden;
+	color: #000;
+	text-decoration: none;
 }
 #view .view-item:hover {
 	background: #eee;
-}
-#view .view-item, #view .view-item * {
-	color: #000;
-	text-decoration: none;
 }
 #view .view-item-header {
 	background: url(../pix/bookmarksnotes.png) 0 2px no-repeat;
@@ -61,6 +59,10 @@
 #view .view-item:hover .view-item-link {
 	text-decoration: underline;
 }
+#view .view-item-image {
+	float:right; position: relative;
+}
+
 /* layouts */
 .table_layout {
 	width: 100%;

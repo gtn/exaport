@@ -77,6 +77,8 @@ foreach ($blocks as $block) {
 
 
 
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
 
 if ($view->access->request == 'intern') {
@@ -84,6 +86,25 @@ if ($view->access->request == 'intern') {
 } else {
 	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
 }
+
+?>
+<script type="text/javascript">
+//<![CDATA[
+	jQueryExaport(function($){
+		$('.view-item').click(function(event){
+			if ($(event.target).is('a')) {
+				// ignore if link was clicked
+				return;
+			}
+			
+			var link = $(this).find('.view-item-link a');
+			if (link.length)
+				document.location.href = link.attr('href');
+		});
+	});
+//]]>
+</script>
+<?php
 
 $comp = block_exaport_check_competence_interaction();
 
@@ -103,14 +124,12 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 
 		if ($block->type == 'item') {
 			$item = $block->item; 
-			$target = '_blank';
+
 			if($comp)
 				$has_competences = block_exaport_check_item_competences($item);
-			if ($item->type=="link") {
-				$href = s($item->url);
-			}
-			else 
-				$href = s('shared_item.php?access=view/'.$access.'&itemid='.$item->id.'&att='.$item->attachment);			
+			
+			$href = 'shared_item.php?access=view/'.$access.'&itemid='.$item->id.'&att='.$item->attachment;
+			
 			echo '<div class="view-item view-item-type-'.$item->type.'">';
 			// thumbnail of item
 			if ($item->type=="file") {
@@ -119,14 +138,10 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				if ($img = $DB->get_record_select('files', $select, null, 'id, filename, mimetype')) {
 					if (strpos($img->mimetype, "image")!==false) {					
 						$img_src = $CFG->wwwroot . "/pluginfile.php/" . get_context_instance(CONTEXT_USER, $item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $img->filename;
-						echo '<div class="view-item-image" style="float:right; position: relative;"><a href="'.$href.'"><img height="100" src="'.$img_src.'" alt=""/></a></div>';							
+						echo '<div class="view-item-image"><img height="100" src="'.$img_src.'" alt=""/></div>';
 					};
 				};		
 			}
-			elseif ($item->type=="link") {
-				//echo '<div class="picture" style="float:right; position: relative;"><iframe id="link_thumbnail" src="'.$item->url.'" scrolling="no"></iframe></div>';
-				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'" alt=""/></a></div>';
-			};
 			echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
                         // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer
                         if($comp && has_capability('block/exaport:competences', $context)) {
@@ -135,8 +150,13 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
                         }
                         echo '</div>';
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
-			echo '<div class="view-item-text">'.$item->url.'<br />'.$intro.'</div>';
-			echo '<div class="view-item-link"><a href="'.$href.'">'.block_exaport_get_string('show').'</a></div>';
+			echo '<div class="view-item-text">';
+			if ($item->url) {
+				// link
+				echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
+			}
+			echo $intro.'</div>';
+			echo '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
 			echo '</div>';
 		} elseif ($block->type == 'personal_information') {
 			echo '<div class="header">'.$block->block_title.'</div>';		

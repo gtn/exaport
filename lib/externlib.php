@@ -44,12 +44,8 @@ function block_exaport_print_extern_item($item, $access) {
 	$box_content = '';
 
 	if ($item->type == 'link') {
-		$link = clean_param($item->url, PARAM_RAW);
-		$link_js = str_replace('http://', '', $link);
-		echo 'link: '.$link;
-		if ($link) {
-			$box_content .= '<p><a target="_blank" href="'.$link.'">' . $link . '</a></p>';
-			//$box_content .= '<p><a href="#" onclick="window.open(\'http://' . addslashes_js($link_js) . '\',\'validate\',\'width=620,height=450,scrollbars=yes,status=yes,resizable=yes,menubar=yes,location=yes\');return true;">' . $link . '</a></p>';
+		if ($item->url) {
+			$box_content .= '<p><a target="_blank" href="'.s($item->url).'">' . str_replace('http://', '', $item->url) . '</a></p>';
 		}
 	}
 	elseif ($item->type == 'file') {

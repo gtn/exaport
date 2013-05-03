@@ -294,7 +294,7 @@ var exaportViewEdit = {};
 				$E.translate('comments')+': '+itemData.comments+'<br />' +
 				'</div></div>'
 			);
-			if ((itemData.type == 'link') || ((itemData.type == 'file') && (itemData.mimetype.indexOf('image') + 1)))
+			if (((itemData.type == 'file') && (itemData.mimetype.indexOf('image') + 1)))
 				$item.find('div.picture').append('<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">');
 /*			else if (itemData.type == 'link') {
 				$item.find('div.picture').css('height','160px');
@@ -304,7 +304,7 @@ var exaportViewEdit = {};
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
 				'<div class="personal_info" style="overflow: hidden;">' +
-				'<div class="header">Persönliche Info: </div>' +
+				'<div class="header">' + $E.translate('personalinformation') +'</div>' +
 				'<div class="picture" style="float:right; position: relative;"></div>' +
 				'<div class="name"></div>' +
 				'<div class="email"></div>' +
@@ -320,7 +320,7 @@ var exaportViewEdit = {};
 		} else if (data.type == 'headline') {
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
-				'<div class="header">'+$E.translate('view_specialitem_headline')+': <div class="body"></div></div>'
+				'<div class="header">'+$E.translate('view_specialitem_headline')+'<div class="body"></div></div>'
 			);
 			$item.find('div.body').append(data.print_text);
 		} else {		
@@ -330,7 +330,7 @@ var exaportViewEdit = {};
 				'<div class="header"></div>' +
 				'<div class="body"><p class="text" '+$E.translate('view_specialitem_text_defaulttext')+'"></p></body>'
 			);
-			$item.find('div.header').append($E.translate('view_specialitem_text')+": "+data.block_title);
+			$item.find('div.header').append($E.translate('view_specialitem_text')+($.trim(data.block_title).length?': '+data.block_title:''));
 			$item.find('div.body').append(data.print_text);
 		}
 

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /***************************************************************
 *  Copyright notice
 *
@@ -68,7 +68,7 @@ $string['bookmarkdeletedexternal'] = 'Externer Link gel&ouml;scht.';
 $string['bookmarkdeletedfile'] = 'Datei gel&ouml;scht.';
 $string['bookmarkdeletednote'] = 'Notiz gel&ouml;scht.';
 $string['categories'] = 'Kategorien';
-$string['explaincategories'] = '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier kannst du die Kategorien einsehen und bearbeiten.';
+$string['explaincategories'] = '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier können Sie die Kategorien einsehen und bearbeiten.';
 $string['category'] = 'Kategorie';
 $string['categoryhead'] = 'Bezeichnung der Kategorie';
 $string['categorysaved'] = 'Kategorie hinzugef&uuml;gt.';
@@ -365,9 +365,9 @@ $string['viewlayout7'] = "Mittlere Spalte viel breiter";
 $string['viewlayout8'] = "Gleiche Breite";
 $string['viewlayout9'] = "Mittlere Spalte breiter";
 $string['viewlayout10'] = "Gleiche Breite";
-$string['personalinformation'] = "Pers&ounliche Information";
+$string['personalinformation'] = "Persönliche Information";
 $string['headertext'] = "Kopfzeile";
-$string['items'] = "Elemente";
+$string['items'] = "Artefakte";
 $string['fieldstoshow'] = "Anzuzeigende Felder";
 $string['listofartefacts'] = "W&aumlhle ein Element aus";
 $string['addButton'] = "Hinzufügen";

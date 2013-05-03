@@ -102,6 +102,33 @@ $sorticon = $parsedsort[1].'.gif';
 
 block_exaport_set_user_preferences(array('itemsort'=>$sort));
 
+if (!$print) {
+	echo "<div class='block_eportfolio_center'>";
+
+	echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
+	<fieldset>
+	<input type=\"hidden\" name=\"action\" value=\"add\"/>
+	<input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
+	<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
+	if ($type != 'all')
+	{
+		echo '<input type="hidden" name="type" value="'.$type.'" />';
+		echo "<input type=\"submit\" value=\"" . get_string("new".$type, "block_exaport"). "\"/>";
+	}
+	else
+	{
+		echo '<select name="type">';
+		echo '<option value="link">'.get_string("link", "block_exaport")."</option>";
+		echo '<option value="file">'.get_string("file", "block_exaport")."</option>";
+		echo '<option value="note">'.get_string("note", "block_exaport")."</option>";
+		echo '</select>';
+		echo "<input type=\"submit\" value=\"" . get_string("new", "block_exaport"). "\"/>";
+	}
+	echo "</fieldset>
+	</form>";
+	echo "</div>";
+}
+
 
 $sql_sort = block_exaport_item_sort_to_sql($parsedsort);
 
@@ -323,28 +350,6 @@ if ($items) {
 
 if(!$print) {
 	echo "<div class='block_eportfolio_center'>";
-
-	echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
-	<fieldset>
-	<input type=\"hidden\" name=\"action\" value=\"add\"/>
-	<input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
-	<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-	if ($type != 'all')
-	{
-		echo '<input type="hidden" name="type" value="'.$type.'" />';
-		echo "<input type=\"submit\" value=\"" . get_string("new".$type, "block_exaport"). "\"/>";
-	}
-	else
-	{
-		echo '<select name="type">';
-		echo '<option value="link">'.get_string("link", "block_exaport")."</option>";
-		echo '<option value="file">'.get_string("file", "block_exaport")."</option>";
-		echo '<option value="note">'.get_string("note", "block_exaport")."</option>";
-		echo '</select>';
-		echo "<input type=\"submit\" value=\"" . get_string("new", "block_exaport"). "\"/>";
-	}
-	echo "</fieldset>
-	</form>";
 	echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>".get_string('printerfriendly', 'group')."</a>";
 	echo "</div>";
 }

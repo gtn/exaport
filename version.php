@@ -23,12 +23,12 @@
 *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *  GNU General Public License for more details.
 *
-*  This copyright notice MUST APPEAR in all copies of the script!!!Experimental Online
+*  This copyright notice MUST APPEAR in all copies of the script!!!
 ***************************************************************/
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version = 2013042301;
 $plugin->maturity  = MATURITY_BETA;
-$plugin->release  = "4.0.6.experimental";
+$plugin->release  = "4.0.5";
 $plugin->requires = 2011033005.06;

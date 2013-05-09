@@ -520,17 +520,12 @@ $tinymce = new tinymce_texteditor();
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.ui.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-//$PAGE->requires->js('/lib/editor/tinymce/module.js', true);
-//$PAGE->requires->js('/lib/editor/tinymce/tiny_mce/'.$tinymce->version.'/tiny_mce.js', true);
-//$PAGE->requires->js('/lib/editor/tinymce/plugins/moodlemedia/tinymce/editor_plugin.js', true);
-//$PAGE->requires->js('/lib/editor/tinymce/plugins/moodlenolink/tinymce/editor_plugin.js', true);
-//$PAGE->requires->js('/lib/editor/tinymce/plugins/dragmath/tinymce/editor_plugin.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
 $PAGE->requires->css('/blocks/exaport/css/views_mod.css');
 $PAGE->requires->css('/blocks/exaport/css/blocks.css');
 
-block_exaport_print_header('views');
+block_exaport_print_header('views', $type);
 
 $editform->set_data($postView);
 if ($type<>'title') {// for delete php notes 

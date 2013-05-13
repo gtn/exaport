@@ -538,8 +538,9 @@ else if ($action=="get_items_for_view"){
 		
 		$new->courseid = $COURSE->id;
 		$new->categoryid = optional_param('catid', 0, PARAM_INT);
-		$new->url = optional_param('url', "", PARAM_URL);
+		
 		}
+		$new->url = optional_param('url', "", PARAM_URL);
 		$new->intro = $description;
 		$new->timemodified = time();
 		//$comp=optional_param('competences', 0, PARAM_ALPHANUMEXT);
@@ -547,6 +548,8 @@ else if ($action=="get_items_for_view"){
 		if ($itemrs->isoez!=1 && $itemid==0){
 			if ($new->url!="") $new->type = 'link';
 			else $new->type = 'note';
+		}else if ($itemrs->isoez==1 && $itemid!=0){
+			if ($new->url!="") $new->type = 'link';
 		}
 		
 		if(block_exacomp_checkfiles()){
@@ -637,7 +640,7 @@ else if ($action=="get_items_for_view"){
 		    	$file_record->filename=get_unique_filename($fs, $file_record,$file_record->filename);
 		    	//print_r($file_record);die;
 		       // $file_record->filename = $file->filename."_01";
-		    $new->type = 'file';
+		    if($new->type != 'link') $new->type = 'file';
 		           
 		           
 		           //print_r($new); 
@@ -647,6 +650,7 @@ else if ($action=="get_items_for_view"){
 		           	 print_r($newarr);	
 		           $newarr2=array("id"=>$itemid,"userid"=>"7","courseid"=>0,"categoryid"=>0,"name"=>$new->name);
 		           		print_r($newarr2);	*/
+
 		           		$DB->update_record('block_exaportitem', $new);
 		           		if ($itemrs->isoez!=1){
 		           			//nicht mehr beim upload dabei

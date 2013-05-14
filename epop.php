@@ -539,8 +539,12 @@ else if ($action=="get_items_for_view"){
 		$new->courseid = $COURSE->id;
 		$new->categoryid = optional_param('catid', 0, PARAM_INT);
 		
-		}
+		} 
 		$new->url = optional_param('url', "", PARAM_URL);
+		if (!empty($new->url)) {
+			$new->url=str_replace("http://","",$new->url);
+			$new->url="http://".$new->url;
+		}
 		$new->intro = $description;
 		$new->timemodified = time();
 		//$comp=optional_param('competences', 0, PARAM_ALPHANUMEXT);

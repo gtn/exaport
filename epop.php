@@ -548,8 +548,9 @@ else if ($action=="get_items_for_view"){
 		} 
 		$new->url = optional_param('url', "", PARAM_URL);
 		if (!empty($new->url)) {
-			$new->url=str_replace("http://","",$new->url);
-			$new->url="http://".$new->url;
+			if (!preg_match('/^(http|https|ftp):\/\//i', $new->url)) {
+				$new->url="http://".$new->url;
+			}
 		}
 		$new->intro = $description;
 		$new->timemodified = time();

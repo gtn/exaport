@@ -26,6 +26,7 @@
 
 require_once dirname(__FILE__).'/inc.php';
 require_once dirname(__FILE__).'/lib/sharelib.php';
+require_once dirname(__FILE__).'/blockmediafunc.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
@@ -348,11 +349,19 @@ if ($editform->is_cancelled()) {
 								
 			$blocks = json_decode($blocks);
 			
+		
 			if(!$blocks)
 				print_error("noentry","block_exaport");
 			
 			foreach ($blocks as $block) {
 				$block->viewid = $dbView->id;
+
+				// media process
+				if (($block->type=='media') and ($block->contentmedia!=='')) {
+					if (!$block->width) $block->width = 100;
+					if (!$block->height) $block->height = 100;
+					$block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
+					};
 
 				$block->id = $DB->insert_record('block_exaportviewblock', $block);
 			}
@@ -539,7 +548,7 @@ if ($type<>'title') {// for delete php notes
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_text_defaulttext',
+	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_text_defaulttext',
 	'viewitem', 'comments', 'category', 'type','personalinformation',
 	'delete', 'viewand',
 	'file', 'note', 'link',
@@ -607,6 +616,14 @@ echo '<ul>
             <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
         </div>
     </li>	
+    <li class="portfolioElement" title="'.get_string('media', 'block_exaport').'" block-type="media">
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" />
+            <h4 class="blocktype-title js-hidden">'.get_string('media', 'block_exaport').'</h4>
+            <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
+        </div>
+    </li>	
+	
 </ul>';
 echo '</div>';
 

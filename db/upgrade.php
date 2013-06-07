@@ -317,6 +317,26 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			}
 		}
 
+		if ($oldversion < 2013060101) {
+			$table = new xmldb_table('block_exaportviewblock');
+			$field_wert = new xmldb_field('contentmedia');
+			$field_wert->set_attributes(XMLDB_TYPE_TEXT, 'big', null, null, null, null, null); //  Moodle 2.x deprecated
+			if (!$dbman->field_exists($table, $field_wert)) {
+				$dbman->add_field($table, $field_wert);
+			} 
+			$field_wert = new xmldb_field('width');
+			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0,null); //  Moodle 2.x deprecated
+			if (!$dbman->field_exists($table, $field_wert)) {
+				$dbman->add_field($table, $field_wert);
+			} 
+			$field_wert = new xmldb_field('height');
+			$field_wert->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0,null); //  Moodle 2.x deprecated
+			if (!$dbman->field_exists($table, $field_wert)) {
+				$dbman->add_field($table, $field_wert);
+			} 
+		}
+
+
 	return $result;
 }
 

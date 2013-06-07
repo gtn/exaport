@@ -283,3 +283,10 @@ $string['steckbrief'] = 'Profile';
 $string['notify'] = 'notify';
 $string['share'] = 'share';
 $string['sharejs'] = 'share';
+
+$string['view_specialitem_media'] = 'Media';
+$string['media'] = "Media";
+$string['mediacontent'] = 'URL or embed code *';
+$string['height'] = 'Height';
+$string['width'] = 'Width';
+$string['media_allowed_notes'] = 'URLs from the following sites are allowed:';

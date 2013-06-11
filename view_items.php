@@ -157,7 +157,7 @@ if(strcmp("sqlsrv", $CFG->dbtype)==0){
 	LEFT JOIN {block_exaportcate} ic2 ON ic.pid=ic2.id
 	LEFT JOIN {course} c ON i.courseid = c.id
 	LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
-	WHERE i.userid=? $sql_type_where GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar),
+	WHERE i.userid=? $sql_type_where  AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>''))) GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar),
 	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
 	i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, CAST(i.beispiel_angabe AS varchar), ic.name,
 	ic2.name,c.fullname )i $sql_sort ";
@@ -169,7 +169,7 @@ else{
 			" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 			" left join {course} c on i.courseid = c.id".
 			" left join {block_exaportitemcomm} com on com.itemid = i.id".
-			" where i.userid = ? $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename,".
+			" where i.userid = ? $sql_type_where AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>''))) group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename,".
 			"i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,". 
 			"i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable, ic.id $sql_sort";
 }

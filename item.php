@@ -265,9 +265,9 @@ switch ($action) {
 		$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
 
 		$strAction = get_string('edit');
-
+		$post->url = $existing->url;
 		if ($type == 'link') {
-			$post->url = $existing->url;
+			
 		} elseif ($type == 'file') {
 			if ($file = block_exaport_get_item_file($post)) {
 				$ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $post->userid . "&itemid=" . $post->id;
@@ -352,9 +352,10 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 	$post->introformat = FORMAT_HTML;
 	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
 
-	if(isset($post->url))
-		if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
-	
+	if(!empty($post->url)){
+		if ($post->url=='http://') $post->url="";
+		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
+	}
 	if ($DB->update_record('block_exaportitem', $post)) {
 		add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
 	} else {
@@ -389,8 +390,10 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 	$post->courseid = $courseid;
 	$post->intro = '';
 	
-	if($post->type == 'link')
-		if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
+	if(!empty($post->url)){
+		if ($post->url=='http://') $post->url="";
+		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
+	}
 	// Insert the new blog entry.
 	if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
 		$post->introformat = FORMAT_HTML;

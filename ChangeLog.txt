@@ -1,4 +1,7 @@
 Exabis E-Portfolio ChangeLog
+2013-05-03 4.0.5
+link items can be commented in views, size for pop up for artefact selection increases dynamically
+
 2013-03-22 4.0.5
 implemented multiple categories, new views-concept (mahara-style), access for smartphone-app epop (www.epop.at)
 

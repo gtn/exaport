@@ -25,7 +25,7 @@ $id = optional_param('item_id', -1, PARAM_INT);
 
 $block_data = new stdClass();
 if ($id != -1) {
-	$query = "select type, itemid, text, block_title, firstname, lastname, email, picture".
+	$query = "select type, itemid, text, block_title, firstname, lastname, email, picture, contentmedia, width, height ".
 		" from {block_exaportviewblock}".
 		" where id=?";
 	$block_data = $DB->get_record_sql($query, array($id));	
@@ -41,6 +41,8 @@ switch($type) {
 	case 'text': $message["html"] = get_form_text($id, $block_data);
 		break;		
 	case 'headline': $message["html"] = get_form_headline($id, $block_data);
+		break;		
+	case 'media': $message["html"] = get_form_media($id, $block_data);
 		break;		
 	default: break;
 }
@@ -240,6 +242,59 @@ if ($USER->picture) {
 	
 	return $content;
 }
+
+
+function get_form_media($id, $block_data=array()) {
+	global $CFG, $PAGE, $USER;
+	
+	$content  = "";
+    $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onsubmit="exaportViewEdit.addMedia('.$id.'); return false;">';
+	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';		
+	$content .= '<table style="width: 100%;">';
+	$content .= '<tr><th>';
+	$content .= '<label for="block_title">'.get_string('blocktitle2','block_exaport').'</label>';
+	$content .= '</th></tr>';
+	$content .= '<tr><td>';
+	$content .= '<input type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
+	$content .= '</td></tr>';	
+	$content .= '<tr><th>';
+	$content .= '<label for="mediacontent">'.get_string('mediacontent','block_exaport').'</label>';
+	$content .= '</th></tr>';
+	$content .= '<tr><td>';	
+	$content .= '<textarea tabindex="1" style="height: 100px; width: 100%;" name="mediacontent" id="block_media" cols="10" rows="15" aria-hidden="true">'.$block_data->contentmedia.'</textarea>';
+	$content .= '</td></tr>';		
+	$content .= '<tr><th>';
+	$content .= get_string('media_allowed_notes','block_exaport');
+	$content .= '<br><ul class="inlinelist" style="list-style-type: none;">
+  <li><a target="_blank" href="http://www.glogster.com/"><img title="Glogster" alt="Glogster" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/glogster.png"></a></li>
+  <li><a target="_blank" href="http://video.google.com/"><img title="Google Video" alt="Google Video" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/googlevideo.png"></a></li>
+  <li><a target="_blank" href="http://www.prezi.com/"><img title="Prezi" alt="Prezi" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/prezi.png"></a></li>
+  <li><a target="_blank" href="http://scivee.tv/"><img title="SciVee" alt="SciVee" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/scivee.png"></a></li>
+  <li><a target="_blank" href="http://slideshare.net/"><img title="SlideShare" alt="SlideShare" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/slideshare.png"></a></li>
+  <li><a target="_blank" href="http://www.teachertube.com/"><img title="TeacherTube" alt="TeacherTube" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/teachertube.png"></a></li>
+  <li><a target="_blank" href="http://vimeo.com/"><img title="Vimeo" alt="Vimeo" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/vimeo.png"></a></li>
+  <li><a target="_blank" href="http://www.voicethread.com/"><img title="VoiceThread" alt="VoiceThread" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/voicethread.png"></a></li>
+  <li><a target="_blank" href="http://www.voki.com/"><img title="Voki" alt="Voki" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/voki.png"></a></li>
+  <li><a target="_blank" href="http://wikieducator.org/"><img title="WikiEducator" alt="WikiEducator" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/wikieducator.png"></a></li>
+  <li><a target="_blank" href="http://youtube.com/"><img title="YouTube" alt="YouTube" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/youtube.png"></a></li>
+
+	</ul>	';
+	$content .= '</th></tr>';	
+	$content .= '<tr><th>';
+	$content .= '<label for="width">'.get_string('width','block_exaport').'</label>';	
+	$content .= ' <input type="text" name="width" value="'.s($block_data->width?$block_data->width:"0").'" id="block_width">';		
+	$content .= '&nbsp;&nbsp;&nbsp;<label for="height">'.get_string('height','block_exaport').'</label>';	
+	$content .= ' <input type="text" name="height" value="'.s($block_data->height?$block_data->height:"0").'" id="block_height">';			
+	$content .= '</td></tr>';			
+	$content .= '<tr><td>';
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_media" name="submit_block" class="submit" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+	$content .= '</td></tr>';
+	$content .= '</table>';
+	$content .= '</form>';
+	return $content;
+}
+
 
 function tinyMCE_enable_script($element_id) {
 	global $CFG, $PAGE;

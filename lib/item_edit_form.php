@@ -79,11 +79,20 @@ class block_exaport_item_edit_form extends moodleform {
         $mform->addRule('categoryid', get_string("categorynotempty", "block_exaport"), 'required', null, 'client');
         $mform->setDefault('categoryid', 0);
         $this->category_select_setup();
-
+        
+				
         if ($type == 'link') {
-            $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="http://"');
-            $mform->setType('url', PARAM_TEXT);
-            $mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client');
+        	$mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="http://"');
+        	$mform->setType('url', PARAM_TEXT);
+        	$mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client'); 	
+        }else{
+        	$mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
+        	$mform->setType('url', PARAM_TEXT);
+        }
+
+        
+        if ($type == 'link') {
+            
         } elseif ($type == 'file') {
             if ($this->_customdata['action'] == 'add') {
 						$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1));

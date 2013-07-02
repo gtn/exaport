@@ -43,12 +43,10 @@ function block_exaport_print_extern_item($item, $access) {
 
 	$box_content = '';
 
-	if ($item->type == 'link') {
-		if ($item->url) {
-			$box_content .= '<p><a target="_blank" href="'.s($item->url).'">' . str_replace('http://', '', $item->url) . '</a></p>';
-		}
-	}
-	elseif ($item->type == 'file') {
+	
+		
+	
+	if ($item->type == 'file') {
 		if ($file = block_exaport_get_item_file($item)) {
 			$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id);
             
@@ -65,6 +63,9 @@ function block_exaport_print_extern_item($item, $access) {
 	}
 
 	$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
+	if ($item->url) {
+			$box_content .= '<p><a target="_blank" href="'.s($item->url).'">' . str_replace('http://', '', $item->url) . '</a></p>';
+		}
 	$box_content .= $intro;
 
 	echo $OUTPUT->box($box_content);

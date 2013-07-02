@@ -181,6 +181,12 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform =& $this->_form;
 		$mform->updateAttributes(array('class'=>'', 'id'=>'view_edit_form'));
 
+		$mform->setType('items', PARAM_RAW);
+		$mform->setType('draft_itemid', PARAM_TEXT);
+		$mform->setType('action', PARAM_TEXT);
+		$mform->setType('courseid', PARAM_INT);
+		$mform->setType('viewid', PARAM_INT);
+		$mform->setType('name', PARAM_TEXT);
 		$mform->addElement('hidden', 'items');
 		$mform->addElement('hidden', 'draft_itemid');
 		$mform->addElement('hidden', 'action');
@@ -433,7 +439,6 @@ $postView->courseid     = $courseid;
 $postView->draft_itemid = null;
 
 file_prepare_draft_area($postView->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
-
 
 // we need to copy additional files from the personal information to the views editor, just in case if the personal information is added
 copy_personal_information_draft_files($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);

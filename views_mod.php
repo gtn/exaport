@@ -554,7 +554,7 @@ if ($type<>'title') {// for delete php notes
 $translations = array(
 	'name', 'role', 'nousersfound',
 	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_text_defaulttext',
-	'viewitem', 'comments', 'category', 'type','personalinformation',
+	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',
 	'file', 'note', 'link',
 	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',

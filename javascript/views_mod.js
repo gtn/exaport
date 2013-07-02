@@ -302,6 +302,8 @@ var exaportViewEdit = {};
 			data.type = 'item';
 
 			var itemData = portfolioItems[data.itemid];
+			var ilink=itemData.link
+			if (ilink!="")  ilink=$E.translate('link') + ': ' + ilink + '<br />';
 			
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +	
@@ -309,7 +311,7 @@ var exaportViewEdit = {};
 				'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
 				'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"></div>' +
 				'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
-				$E.translate('category')+': '+itemData.category+'<br />' +
+				$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
 				$E.translate('comments')+': '+itemData.comments+'<br />' +
 				'</div></div>'
 			);

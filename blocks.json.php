@@ -66,7 +66,7 @@ function get_form_items($id, $block_data=array()) {
 		" join {block_exaportcate} ic on i.categoryid = ic.id".
 		" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 		" left join {block_exaportitemcomm} com on com.itemid = i.id".
-		" where i.userid=?".
+		" where i.userid=? AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))".
 		" GROUP BY i.id, i.name, i.type, ic.name, ic2.name".
 		" ORDER BY i.name";
 	$portfolioItems = $DB->get_records_sql($query, array($USER->id));

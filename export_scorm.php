@@ -451,6 +451,9 @@ if ($confirm) {
     if ($userdescriptions) {
         foreach ($userdescriptions as $userdescription) {
             $description = $userdescription->description;
+			if(strncmp($description, "<img", strlen("<img"))){
+				$description=str_replace("@@PLUGINFILE@@/", "", $description);
+			}
         }
     }
 
@@ -496,6 +499,26 @@ if ($confirm) {
         rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i);
     }
 
+	//save images, from personal information
+	$fs = get_file_storage();
+	$areafiles = $fs->get_area_files(get_context_instance(CONTEXT_USER, $USER->id)->id,'block_exaport', 'personal_information');
+	foreach ($areafiles as $areafile){
+		if (!$areafile) continue;
+		
+		if(strcmp($areafile->get_filename(),".")!=0){
+			$i = 0;
+            $content_filename = $areafile->get_filename();
+			while (is_file($exportdir ."data/". $content_filename)|| is_dir($exportdir ."data/". $content_filename) || is_link($exportdir ."data/". $content_filename)) {
+				$i++;
+				$content_filename = $i . '-' . $areafile->get_filename();
+			}
+			
+			$areafile->copy_content_to($exportdir ."data/". $content_filename);
+		
+		}
+	
+	}
+	
     // if there's need for metadata, put it in:
     //$metadata =& $organization->createChild('metadata');
     //$schema =& $metadata->createChild('schema');

@@ -33,8 +33,7 @@ global $DB;
 function block_exaport_get_item_file($item) {
 	$fs = get_file_storage();
 	$areafiles = $fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, 'itemid');
-	if(strcmp(reset($areafiles)->get_filename(),".")==0)
-		return next($areafiles);
+
 	return reset($areafiles);
 }
 

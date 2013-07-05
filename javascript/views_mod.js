@@ -97,6 +97,25 @@ var exaportViewEdit = {};
 			saveBlockData();
 		},
 		
+		addMedia: function(id) {
+			if (id != -1) 
+				newItem = lastclicked;	
+			data = {};
+			data.block_title = $('#block_title').val();
+			data.type = 'media';
+			data.contentmedia = $('#block_media').val();
+			data.width = $('#block_width').val();
+			data.height = $('#block_height').val();			
+			data.id = id;
+			newItem.data('portfolio', data);		
+			generateItem('update', $(newItem));	
+			$('#block_form').hide();
+			overlay.hide();
+			newItem=null;
+			
+			saveBlockData();
+		},		
+		
 		resetViewContent: function(){
 			// load stored blocks
 			var blocks = $('form :input[name=blocks]').val();
@@ -283,6 +302,8 @@ var exaportViewEdit = {};
 			data.type = 'item';
 
 			var itemData = portfolioItems[data.itemid];
+			var ilink=itemData.link
+			if (ilink!="")  ilink=$E.translate('link') + ': ' + ilink + '<br />';
 			
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +	
@@ -290,11 +311,11 @@ var exaportViewEdit = {};
 				'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
 				'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"></div>' +
 				'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
-				$E.translate('category')+': '+itemData.category+'<br />' +
+				$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
 				$E.translate('comments')+': '+itemData.comments+'<br />' +
 				'</div></div>'
 			);
-			if (((itemData.type == 'file') && (itemData.mimetype.indexOf('image') + 1)))
+			if ((itemData.type == 'link') || ((itemData.type == 'file') && (itemData.mimetype.indexOf('image') + 1)))
 				$item.find('div.picture').append('<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">');
 /*			else if (itemData.type == 'link') {
 				$item.find('div.picture').css('height','160px');
@@ -323,12 +344,19 @@ var exaportViewEdit = {};
 				'<div class="header">'+$E.translate('view_specialitem_headline')+'<div class="body"></div></div>'
 			);
 			$item.find('div.body').append(data.print_text);
+		} else if (data.type == 'media') {
+			$item.html(
+				'<div id="id_holder" style="display:none;"></div>' +
+				'<div class="header"></div><div class="body"></div>'
+			);
+			$item.find('div.header').append($E.translate('view_specialitem_media')+($.trim(data.block_title).length?': '+data.block_title:''));
+			$item.find('div.body').append(data.contentmedia);
 		} else {		
 			data.type = 'text';
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
 				'<div class="header"></div>' +
-				'<div class="body"><p class="text" '+$E.translate('view_specialitem_text_defaulttext')+'"></p></body>'
+				'<div class="body"><p class="text" '+$E.translate('view_specialitem_text_defaulttext')+'"></p></div>'
 			);
 			$item.find('div.header').append($E.translate('view_specialitem_text')+($.trim(data.block_title).length?': '+data.block_title:''));
 			$item.find('div.body').append(data.print_text);

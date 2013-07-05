@@ -390,3 +390,10 @@ $string['exaport:addinstance'] = 'Exabis E-Portfolio zum Kurs hinzuf&uumlgen';
 $string['exaport:myaddinstance'] = 'Exabis E-Portfolie zur Startseite hinzuf&uumlgen';
 
 $string['sharejs'] = 'teilen';
+
+$string['view_specialitem_media'] = 'Media';
+$string['media'] = "Media";
+$string['mediacontent'] = 'URL or embed code *';
+$string['height'] = 'Height';
+$string['width'] = 'Width';
+$string['media_allowed_notes'] = 'URLs from the following sites are allowed:';

@@ -146,7 +146,10 @@
         <FIELD NAME="firstname" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="block_title" NEXT="lastname"/>
         <FIELD NAME="lastname" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="firstname" NEXT="email"/>
         <FIELD NAME="email" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="lastname" NEXT="picture"/>
-        <FIELD NAME="picture" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" PREVIOUS="email"/>
+        <FIELD NAME="picture" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" PREVIOUS="email" NEXT="contentmedia"/>
+        <FIELD NAME="contentmedia" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="picture" NEXT="width"/>
+        <FIELD NAME="width" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="contentmedia" NEXT="height"/>
+        <FIELD NAME="height" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="width"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="view"/>

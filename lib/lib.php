@@ -33,6 +33,8 @@ global $DB;
 function block_exaport_get_item_file($item) {
 	$fs = get_file_storage();
 	$areafiles = $fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, 'itemid');
+	if(strcmp(reset($areafiles)->get_filename(),".")==0)
+		return next($areafiles);
 	return reset($areafiles);
 }
 
@@ -200,10 +202,12 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
     if (strpos($item_identifier, 'views') === 0) {
 		$id = optional_param('id', 0, PARAM_INT);
 		if ($id>0) {
-			$tabs_sub['viewtitle'] = new tabobject('viewtitle', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'),get_string("viewtitle", "block_exaport"), '', true);		
-			$tabs_sub['viewlayout'] = new tabobject('viewlayout', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'),get_string("viewlayout", "block_exaport"), '', true);
-			$tabs_sub['viewcontent'] = new tabobject('viewcontent', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'),get_string("viewcontent", "block_exaport"), '', true);
-			$tabs_sub['viewshare'] = new tabobject('viewshare', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
+			$activetabsubs[] = $sub_item_identifier;
+			
+			$tabs_sub[] = new tabobject('title', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'),get_string("viewtitle", "block_exaport"), '', true);		
+			$tabs_sub[] = new tabobject('layout', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'),get_string("viewlayout", "block_exaport"), '', true);
+			$tabs_sub[] = new tabobject('content', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'),get_string("viewcontent", "block_exaport"), '', true);
+			$tabs_sub[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
 			};
 	} elseif (strpos($item_identifier, 'bookmarks') === 0) {
         $activetabsubs[] = $item_identifier;

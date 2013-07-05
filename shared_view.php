@@ -142,6 +142,9 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 					};
 				};		
 			}
+			elseif ($item->type=="link") {				
+				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'" alt=""/></a></div>';
+			};			
 			echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
                         // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer
                         if($comp && has_capability('block/exaport:competences', $context)) {
@@ -182,6 +185,13 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			echo '</div>';
 		} elseif ($block->type == 'headline') {
 			echo '<div class="header view-header">'.nl2br($block->text).'</div>';
+		} elseif ($block->type == 'media') {
+			echo '<div class="header view-header">'.nl2br($block->block_title).'</div>';		
+			echo '<div class="view-media">';
+			if (!empty($block->contentmedia))
+				echo $block->contentmedia;
+			echo '</div>';
+
 		} else {
 			// text
 			echo '<div class="header">'.$block->block_title.'</div>';

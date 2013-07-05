@@ -262,6 +262,7 @@ $string['view_specialitems'] = 'Special Items';
 $string['view_specialitem_headline'] = 'Headline';
 $string['view_specialitem_personal'] = 'Personal information';
 $string['view_specialitem_text'] = 'Text';
+$string['view_specialitem_media'] = 'Media';
 $string['view_specialitem_headline_defaulttext'] = 'Enter Headline Here';
 $string['view_specialitem_text_defaulttext'] = 'Enter Text Here';
 $string['view_sharing'] = 'Sharing';
@@ -292,6 +293,7 @@ $string['viewlayout10'] = "Equal widths";
 $string['personalinformation'] = "Personal Information";
 $string['headertext'] = "Headertext";
 $string['items'] = "Items";
+$string['media'] = "Media";
 $string['fieldstoshow'] = "Fields to show";
 $string['listofartefacts'] = "List of Artefacts";
 $string['addButton'] = "Add";
@@ -310,6 +312,10 @@ $string['noemails'] = "no email adress available";
 $string['aboutme'] = "About me";
 $string['notify'] = "notify";
 $string['sharejs'] = 'share';
+$string['mediacontent'] = 'URL or embed code *';
+$string['height'] = 'Height';
+$string['width'] = 'Width';
+$string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
 
 // Copy to course
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';

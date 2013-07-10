@@ -178,7 +178,7 @@ function get_category_files($categoryid, $viewid=null) {
     return $DB->get_records_sql($itemQuery);
 }
 
-function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath, $export_dir, $identifier, &$ridentifier, $viewid) {
+function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath, $export_dir, &$identifier, &$ridentifier, $viewid) {
     global $USER, $CFG, $COURSE, $DB;
 
     $bookmarks = get_category_items($id, $viewid, 'link');
@@ -354,7 +354,6 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 
 		$innerowncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$owncat->id'", null, "name ASC");
 		if ($innerowncats) {
-			$identifier++;
 			$value = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i);
 			if($value) $mainNotEmpty = $value;
 		}

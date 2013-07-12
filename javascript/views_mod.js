@@ -97,25 +97,6 @@ var exaportViewEdit = {};
 			saveBlockData();
 		},
 		
-		addMedia: function(id) {
-			if (id != -1) 
-				newItem = lastclicked;	
-			data = {};
-			data.block_title = $('#block_title').val();
-			data.type = 'media';
-			data.contentmedia = $('#block_media').val();
-			data.width = $('#block_width').val();
-			data.height = $('#block_height').val();			
-			data.id = id;
-			newItem.data('portfolio', data);		
-			generateItem('update', $(newItem));	
-			$('#block_form').hide();
-			overlay.hide();
-			newItem=null;
-			
-			saveBlockData();
-		},		
-		
 		resetViewContent: function(){
 			// load stored blocks
 			var blocks = $('form :input[name=blocks]').val();
@@ -160,10 +141,7 @@ var exaportViewEdit = {};
 							type: 'POST',
 							data: {
 								type_block: ui.item.attr('block-type'),
-								action: 'add',
-								'viewid': $('form :input[name=viewid]').val(),
-								'text[itemid]': $('form :input[name=draft_itemid]').val(),
-								sesskey: $('form :input[name=sesskey]').val()
+								action: 'add'
 							},
 							success: function(res) {
 								var data = JSON.parse (res);
@@ -302,19 +280,35 @@ var exaportViewEdit = {};
 			data.type = 'item';
 
 			var itemData = portfolioItems[data.itemid];
-			var ilink=itemData.link
-			if (ilink!="")  ilink=$E.translate('link') + ': ' + ilink + '<br />';
+			//begin
+			if(itemData.competences){
+				$item.html(
+					'<div id="id_holder" style="display:none;"></div>' +	
+					'<div class="item_info" style="overflow: hidden;">' +
+					'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
+					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"></div>' +
+					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
+					$E.translate('category')+': '+itemData.category+'<br />' +
+					$E.translate('comments')+': '+itemData.comments+'<br />' +
+					'<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/pix/t/grades.gif" class="iconsmall" alt="'+'competences'+'" /></a>'+
+					'</div></div>'
+				);
+			}
 			
-			$item.html(
-				'<div id="id_holder" style="display:none;"></div>' +	
-				'<div class="item_info" style="overflow: hidden;">' +
-				'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
-				'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"></div>' +
-				'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
-				$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
-				$E.translate('comments')+': '+itemData.comments+'<br />' +
-				'</div></div>'
-			);
+			else{
+			//end
+				$item.html(
+					'<div id="id_holder" style="display:none;"></div>' +	
+					'<div class="item_info" style="overflow: hidden;">' +
+					'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
+					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"></div>' +
+					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
+					$E.translate('category')+': '+itemData.category+'<br />' +
+					$E.translate('comments')+': '+itemData.comments+'<br />' +
+					'</div></div>'
+				);
+			}
+			
 			if ((itemData.type == 'link') || ((itemData.type == 'file') && (itemData.mimetype.indexOf('image') + 1)))
 				$item.find('div.picture').append('<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">');
 /*			else if (itemData.type == 'link') {
@@ -325,7 +319,7 @@ var exaportViewEdit = {};
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
 				'<div class="personal_info" style="overflow: hidden;">' +
-				'<div class="header">' + $E.translate('personalinformation') +'</div>' +
+				'<div class="header">Persönliche Info: </div>' +
 				'<div class="picture" style="float:right; position: relative;"></div>' +
 				'<div class="name"></div>' +
 				'<div class="email"></div>' +
@@ -337,29 +331,22 @@ var exaportViewEdit = {};
 				$item.find('div.picture').append('<img src="'+data.picture+'">');
 			$item.find('div.name').append(data.firstname); $item.find('div.name').append(' '); $item.find('div.name').append(data.lastname);
 			$item.find('div.email').append(data.email);
-			$item.find('div.body').append(data.print_text);
+			$item.find('div.body').append(data.text);
 		} else if (data.type == 'headline') {
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
-				'<div class="header">'+$E.translate('view_specialitem_headline')+'<div class="body"></div></div>'
+				'<div class="header">'+$E.translate('view_specialitem_headline')+': <div class="body"></div></div>'
 			);
-			$item.find('div.body').append(data.print_text);
-		} else if (data.type == 'media') {
-			$item.html(
-				'<div id="id_holder" style="display:none;"></div>' +
-				'<div class="header"></div><div class="body"></div>'
-			);
-			$item.find('div.header').append($E.translate('view_specialitem_media')+($.trim(data.block_title).length?': '+data.block_title:''));
-			$item.find('div.body').append(data.contentmedia);
+			$item.find('div.body').append(data.text);
 		} else {		
 			data.type = 'text';
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
 				'<div class="header"></div>' +
-				'<div class="body"><p class="text" '+$E.translate('view_specialitem_text_defaulttext')+'"></p></div>'
+				'<div class="body"><p class="text" '+$E.translate('view_specialitem_text_defaulttext')+'"></p></body>'
 			);
-			$item.find('div.header').append($E.translate('view_specialitem_text')+($.trim(data.block_title).length?': '+data.block_title:''));
-			$item.find('div.body').append(data.print_text);
+			$item.find('div.header').append($E.translate('view_specialitem_text')+": "+data.block_title);
+			$item.find('div.body').append(data.text);
 		}
 
 		// insert default texts
@@ -412,10 +399,7 @@ var exaportViewEdit = {};
 			type: 'POST',
 			data: {
 				item_id: item_id,
-				action: 'edit',
-				'viewid': $('form :input[name=viewid]').val(),
-				'text[itemid]': $('form :input[name=draft_itemid]').val(),
-				sesskey: $('form :input[name=sesskey]').val()
+				action: 'edit'
 			},
 			success: function(res) {
 				var data = JSON.parse(res);

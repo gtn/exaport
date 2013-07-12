@@ -26,7 +26,6 @@
 
 require_once dirname(__FILE__).'/inc.php';
 require_once dirname(__FILE__).'/lib/sharelib.php';
-require_once dirname(__FILE__).'/blockmediafunc.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
@@ -35,7 +34,7 @@ $id = optional_param('id', 0, PARAM_INT);
 $type = optional_param('type', 'content', PARAM_ALPHA);
 if ($action=="add")
 	$type="title";
-
+	
 //if (function_exists("clean_param_array")) $shareusers=clean_param_array($_POST["shareusers"],PARAM_SEQUENCE,true);
 //else 
 if (!empty($_POST["shareusers"])){
@@ -73,10 +72,9 @@ if ($id) {
 		print_error("wrongviewid", "block_exaport");
 	}
 } else {
-	//$view  = null;
-	$view = new stdClass();
-	$view->id = null;
-	/*
+	$view  = null;
+/*	$view = new stdClass();
+	$view->id = -1;
 	// generate view hash
 	do {
 		$hash = substr(md5(microtime()), 3, 8);
@@ -116,7 +114,6 @@ if ($action == 'delete') {
 		die;
 	}
 }
-
 $query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments, files.mimetype as mimetype".
 	 " from {block_exaportitem} i".
 	 " join {block_exaportcate} ic on i.categoryid = ic.id".
@@ -127,8 +124,10 @@ $query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS
 	 " where i.userid=?".
 	 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, files.mimetype".
 	 " ORDER BY i.name";
+
 	 //echo $query;
 $portfolioItems = $DB->get_records_sql($query, array($USER->id));
+
 if (!$portfolioItems) {
 	$portfolioItems = array();
 }
@@ -150,14 +149,38 @@ foreach ($portfolioItems as &$item) {
 					else
 						$item->category =format_string($cat->name)." &rArr; ".$item->category;
 					$catid = $cat->pid;
-			}
+				}
 			
-			}while ($cat->pid != 0);}
+			}while ($cat->pid != 0);
+	}
+	
+	//get competences of the item
+	//begin
+	$item->userid = $USER->id;
+	$array = block_exaport_get_competences($item, 0);
+	
+	if(count($array)>0){
+		$competences = "";
+		foreach($array as $element){
+			$conditions = array("id" => $element->descid);
+			$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+			if($competencesdb != null){
+				$competences .= $competencesdb->title.'<br>';
+			}
+		}
+		$competences = str_replace("\r", "", $competences);
+		$competences = str_replace("\n", "", $competences);
+	
+		$item->competences = $competences;
+	}
+	
+	unset($item->userid);
+	//end
 	unset($item->cname);
 	unset($item->cname_parent);
 }
 unset($item);
-
 
 if ($view) {
 	$conditions = array("viewid" => $view->id);
@@ -181,14 +204,7 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform =& $this->_form;
 		$mform->updateAttributes(array('class'=>'', 'id'=>'view_edit_form'));
 
-		$mform->setType('items', PARAM_RAW);
-		$mform->setType('draft_itemid', PARAM_TEXT);
-		$mform->setType('action', PARAM_TEXT);
-		$mform->setType('courseid', PARAM_INT);
-		$mform->setType('viewid', PARAM_INT);
-		$mform->setType('name', PARAM_TEXT);
 		$mform->addElement('hidden', 'items');
-		$mform->addElement('hidden', 'draft_itemid');
 		$mform->addElement('hidden', 'action');
 		$mform->addElement('hidden', 'courseid');
 		$mform->addElement('hidden', 'viewid');
@@ -268,7 +284,7 @@ class block_exaport_view_edit_form extends moodleform {
     }
 }
 
-$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id)->id);
+$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>$context);
 
 $editform = new block_exaport_view_edit_form($_SERVER['REQUEST_URI'], array('view' => $view, 'course' => $COURSE->id, 'action'=> $action, 'type'=>$type));
 
@@ -278,10 +294,10 @@ if ($editform->is_cancelled()) {
 	die("nosubmitbutton");
 	//no_submit_button_actions($editform, $sitecontext);
 } else if ($formView = $editform->get_data()) {
-	
+
 	if ($type=='title' or $action=='add') {
-		//if (!$view) {$view = new stdClass(); $view->id = -1;};			
-		$formView = file_postupdate_standard_editor($formView, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'view', $view->id);
+		if (!$view) {$view = new stdClass(); $view->id = -1;};			
+		$formView = file_postupdate_standard_editor($formView, 'description', $textfieldoptions, $context, 'block_exaport', 'view', $view->id);
 	}
 
 	$dbView = $formView;
@@ -313,7 +329,7 @@ if ($editform->is_cancelled()) {
 		case 'add':
 
 			$dbView->userid = $USER->id;
-			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
+
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
 				add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
@@ -327,7 +343,6 @@ if ($editform->is_cancelled()) {
 			}
 
 			$dbView->id = $view->id;
-			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($DB->update_record('block_exaportview', $dbView)) {
 				add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
 			} else {
@@ -340,7 +355,6 @@ if ($editform->is_cancelled()) {
 			print_error("unknownaction", "block_exaport");
 			exit;
 	}
-	
 
 // processing for blocks and shares	
 	switch ($type) {
@@ -348,35 +362,18 @@ if ($editform->is_cancelled()) {
 			// delete all blocks
 			$DB->delete_records('block_exaportviewblock', array('viewid'=>$dbView->id));
 			// add blocks
-			
-			$blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, 
-								array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id)), 
-								$formView->blocks);
-								
-			$blocks = json_decode($blocks);
-			
-		
+			$blocks = json_decode($formView->blocks);
 			if(!$blocks)
 				print_error("noentry","block_exaport");
-			
 			foreach ($blocks as $block) {
 				$block->viewid = $dbView->id;
-
-				// media process
-				if (($block->type=='media') and ($block->contentmedia!=='')) {
-					if (!$block->width) $block->width = 100;
-					if (!$block->height) $block->height = 100;
-					$block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
-					};
-
-				$block->id = $DB->insert_record('block_exaportviewblock', $block);
-			}
+				$DB->insert_record('block_exaportviewblock', $block);
+			};
 			
 			if (optional_param('ajax', 0, PARAM_INT)) {
 				$ret = new stdClass;
 				$ret->ok = true;
-				file_prepare_draft_area($view->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
-				$ret->blocks = json_encode(get_view_blocks($view));
+				$ret->blocks = json_encode(get_view_blocks($dbView));
 				
 				echo json_encode($ret);
 				exit;
@@ -431,66 +428,10 @@ if ($editform->is_cancelled()) {
 	$returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&sesskey='.sesskey().'&action=edit';
 	redirect($returnurl);
 }
-
 // gui setup
 $postView = ($view ? $view : new stdClass());
 $postView->action       = $action;
 $postView->courseid     = $courseid;
-$postView->draft_itemid = null;
-
-file_prepare_draft_area($postView->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
-
-// we need to copy additional files from the personal information to the views editor, just in case if the personal information is added
-copy_personal_information_draft_files($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);
-function copy_personal_information_draft_files($targetDraftitemid, $contextid, $component, $filearea, $itemid, array $options=null, $text=null) {
-	global $USER;
-	
-	// copy from filelib.php
-    $usercontext = context_user::instance($USER->id);
-    $fs = get_file_storage();
-
-	$file_record = array('contextid'=>$usercontext->id, 'component'=>'user', 'filearea'=>'draft', 'itemid'=>$targetDraftitemid);
-	if (!is_null($itemid) and $files = $fs->get_area_files($contextid, $component, $filearea, $itemid)) {
-		foreach ($files as $file) {
-			if ($file->is_directory() and $file->get_filepath() === '/') {
-				// we need a way to mark the age of each draft area,
-				// by not copying the root dir we force it to be created automatically with current timestamp
-				continue;
-			}
-			if (!$options['subdirs'] and ($file->is_directory() or $file->get_filepath() !== '/')) {
-				continue;
-			}
-
-			if ($tmp = $fs->get_file($file_record['contextid'], $file_record['component'], $file_record['filearea'],
-					$file_record['itemid'], $file->get_filepath(), $file->get_filename())) {
-				continue;
-			}
-
-			$draftfile = $fs->create_file_from_storedfile($file_record, $file);
-			// XXX: This is a hack for file manager (MDL-28666)
-			// File manager needs to know the original file information before copying
-			// to draft area, so we append these information in mdl_files.source field
-			// {@link file_storage::search_references()}
-			// {@link file_storage::search_references_count()}
-			$sourcefield = $file->get_source();
-			$newsourcefield = new stdClass;
-			$newsourcefield->source = $sourcefield;
-			$original = new stdClass;
-			$original->contextid = $contextid;
-			$original->component = $component;
-			$original->filearea  = $filearea;
-			$original->itemid    = $itemid;
-			$original->filename  = $file->get_filename();
-			$original->filepath  = $file->get_filepath();
-			$newsourcefield->original = file_storage::pack_reference($original);
-			$draftfile->set_source(serialize($newsourcefield));
-			// End of file manager hack
-		}
-	}
-}
-
-$postView->viewid = $view->id;
-
 switch ($action) {
 	case 'add':
 		$postView->internaccess = 0;
@@ -509,19 +450,13 @@ switch ($action) {
 }
 
 function get_view_blocks($view) {
-	global $DB, $USER;
+	global $DB;
 	
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
 		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
-	$blocks = $DB->get_records_sql($query, array($view->id));	
-	foreach ($blocks as $block) {
-		//$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);		
-		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $view->draft_itemid);		
-	}
-
-	return $blocks;
+	return $DB->get_records_sql($query, array($view->id));
 }
 
 if ($view) {
@@ -534,12 +469,17 @@ $tinymce = new tinymce_texteditor();
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.ui.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+$PAGE->requires->js('/lib/editor/tinymce/tiny_mce/'.$tinymce->version.'/tiny_mce.js', true);
+//$PAGE->requires->js('/lib/editor/tinymce/plugins/moodlemedia/tinymce/editor_plugin.js', true);
+//$PAGE->requires->js('/lib/editor/tinymce/plugins/moodlenolink/tinymce/editor_plugin.js', true);
+//$PAGE->requires->js('/lib/editor/tinymce/plugins/dragmath/tinymce/editor_plugin.js', true);
+$PAGE->requires->js('/lib/editor/tinymce/module.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
 $PAGE->requires->css('/blocks/exaport/css/views_mod.css');
 $PAGE->requires->css('/blocks/exaport/css/blocks.css');
 
-block_exaport_print_header('views', $type);
+block_exaport_print_header('views');
 
 $editform->set_data($postView);
 if ($type<>'title') {// for delete php notes 
@@ -553,8 +493,8 @@ if ($type<>'title') {// for delete php notes
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_text_defaulttext',
-	'viewitem', 'comments', 'category','link', 'type','personalinformation',
+	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_text_defaulttext',
+	'viewitem', 'comments', 'category', 'type',
 	'delete', 'viewand',
 	'file', 'note', 'link',
 	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',
@@ -576,7 +516,6 @@ unset($value);
 </script>
 <?php
 
-$rev = theme_get_revision();
 echo "<!--[if IE]> <style> #link_thumbnail{ zoom: 0.2; } </style> <![endif]--> ";
 switch ($type) {
 	case 'content' :
@@ -585,11 +524,10 @@ switch ($type) {
 		//<![CDATA[
 			var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
 			jQueryExaport(exaportViewEdit.initContentEdit);
-			M.yui.add_module({"editor_tinymce":{"name":"editor_tinymce","fullpath":"<?php echo $CFG->wwwroot;?>/lib/javascript.php/<?php echo $rev;?>/lib/editor/tinymce/module.js","requires":[]}});
 		//]]>
 		</script>
-		<script type="text/javascript" src="<?php echo $CFG->wwwroot;?>/lib/editor/tinymce/tiny_mce/<?php echo $tinymce->version;?>/tiny_mce.js"></script>			
 		<?php
+	
 		// view data form
 echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');
 echo '<ul>
@@ -621,14 +559,6 @@ echo '<ul>
             <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
         </div>
     </li>	
-    <li class="portfolioElement" title="'.get_string('media', 'block_exaport').'" block-type="media">
-        <div class="blocktype" style="position: relative;">
-            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('media', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
-        </div>
-    </li>	
-	
 </ul>';
 echo '</div>';
 
@@ -637,7 +567,7 @@ $cols_layout = array (
 );
 
 // default layout
-if (!isset($view->layout) || $view->layout==0) 
+if (!isset($view->layout)) 
 	$view->layout = 2;
 
 echo '<div class="view-middle">';
@@ -671,21 +601,14 @@ break;
 
 			$data = new stdClass();
 			$data->courseid = $courseid;
-			$data->description="";
 			if (isset($view) and $view->id>0) {
 				$data->description = $view->description;
 				$data->descriptionformat = FORMAT_HTML;
 			};
-			if ($data->description) {
-				$draftid_editor = file_get_submitted_draft_itemid('description');
-				$currenttext = file_prepare_draft_area($draftid_editor, get_context_instance(CONTEXT_USER, $USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true), $data->description);	
-				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));								
-				$data->description_editor = array('text'=>$data->description, 'format'=>$data->descriptionformat, 'itemid'=>$draftid_editor);
-			};
 			$data->cataction = 'save';
 			$data->edit = 1;
-//			if (isset($view))
-				//$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, $context, 'block_exaport', 'veiw', $view->id);
+			if (isset($view))
+				$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, $context, 'block_exaport', 'veiw', $view->id);
 			$editform ->set_data($data);
 		
 			$editform->display();				
@@ -694,7 +617,7 @@ break;
 		break;
 // --------------------		
 	case 'layout' :
-		if (!isset($view->layout) || $view->layout==0) 
+		if (!isset($view->layout)) 
 		$view->layout = 2;
 			echo '
 			<p>'.get_string('chooselayout','block_exaport').'</p>

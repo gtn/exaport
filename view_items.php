@@ -25,6 +25,16 @@
 ***************************************************************/
 
 require_once dirname(__FILE__).'/inc.php';
+require_once($CFG->dirroot . "/lib/datalib.php");
+if (file_exists($CFG->dirroot . "/lib/gradelib.php")){
+		require_once($CFG->dirroot . "/lib/gradelib.php");
+		if (function_exists("grade_get_grades")) $gradelib=true;
+		else $gradelib=false;
+}else{
+	$gradelib=false;
+}
+
+
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
@@ -35,7 +45,6 @@ $type = block_exaport_check_item_type($type, true);
 
 // Needed for Translations
 $type_plural = block_exaport_get_plural_item_type($type);
-
 
 $strbookmarks = get_string("mybookmarks", "block_exaport");
 $strheadline = get_string("bookmarks".$type_plural, "block_exaport");
@@ -71,7 +80,6 @@ else {
 echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet" />';
 echo '</head><body>';
 }
-
 block_exaport_setup_default_categories();
 
 echo "<div class='box generalbox'>";
@@ -102,33 +110,6 @@ $sorticon = $parsedsort[1].'.gif';
 
 block_exaport_set_user_preferences(array('itemsort'=>$sort));
 
-if (!$print) {
-	echo "<div class='block_eportfolio_center'>";
-
-	echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
-	<fieldset>
-	<input type=\"hidden\" name=\"action\" value=\"add\"/>
-	<input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
-	<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-	if ($type != 'all')
-	{
-		echo '<input type="hidden" name="type" value="'.$type.'" />';
-		echo "<input type=\"submit\" value=\"" . get_string("new".$type, "block_exaport"). "\"/>";
-	}
-	else
-	{
-		echo '<select name="type">';
-		echo '<option value="link">'.get_string("link", "block_exaport")."</option>";
-		echo '<option value="file">'.get_string("file", "block_exaport")."</option>";
-		echo '<option value="note">'.get_string("note", "block_exaport")."</option>";
-		echo '</select>';
-		echo "<input type=\"submit\" value=\"" . get_string("new", "block_exaport"). "\"/>";
-	}
-	echo "</fieldset>
-	</form>";
-	echo "</div>";
-}
-
 
 $sql_sort = block_exaport_item_sort_to_sql($parsedsort);
 
@@ -157,7 +138,7 @@ if(strcmp("sqlsrv", $CFG->dbtype)==0){
 	LEFT JOIN {block_exaportcate} ic2 ON ic.pid=ic2.id
 	LEFT JOIN {course} c ON i.courseid = c.id
 	LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
-	WHERE i.userid=? $sql_type_where  AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>''))) GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar),
+	WHERE i.userid=? $sql_type_where GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar),
 	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
 	i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, CAST(i.beispiel_angabe AS varchar), ic.name,
 	ic2.name,c.fullname )i $sql_sort ";
@@ -169,7 +150,7 @@ else{
 			" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 			" left join {course} c on i.courseid = c.id".
 			" left join {block_exaportitemcomm} com on com.itemid = i.id".
-			" where i.userid = ? $sql_type_where AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>''))) group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename,".
+			" where i.userid = ? $sql_type_where group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename,".
 			"i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,". 
 			"i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable, ic.id $sql_sort";
 }
@@ -206,7 +187,7 @@ if ($items) {
 
 	$table->head[] = get_string("comments","block_exaport");
 	$table->size[] = "8";
-
+	
 	$table->head[] = '';
 	$table->size[] = "10";
 
@@ -234,8 +215,8 @@ if ($items) {
 			$catname = $item->cname;
 			$category = format_string($item->cname);
 			//recursives abfragen des kategorienpfades, zu langsam!
-
-			/*do{
+			//Kees Koopman!!
+			do{
 				$conditions = array("userid" => $USER->id, "id" => $catid);
 				$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
 				foreach($cats as $cat){
@@ -246,7 +227,7 @@ if ($items) {
 					$catid = $cat->pid;
 			}
 			
-			}while ($cat->pid != 0);*/
+			}while ($cat->pid != 0);
 		}
 		if (($sortkey == "category") && ($lastcat == $category)) {
 			$category = "";
@@ -291,8 +272,30 @@ if ($items) {
 		$table->data[$item_i]['date'] = userdate($item->timemodified);
 		$table->data[$item_i]['course'] = $item->coursename;
 		$table->data[$item_i]['comments'] = $item->comments;
-
+		
+		$array = block_exaport_get_competences($item, 0);
+		
 		$icons = '';
+		
+		//if item is assoziated with competences display them
+		//begin
+		if(count($array)>0){
+			$competences = "";
+			foreach($array as $element){
+		
+				$conditions = array("id" => $element->descid);
+				$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+				if($competencesdb != null){
+					$competences .= $competencesdb->title.'<br>';
+				}
+			}
+			$competences = str_replace("\r", "", $competences);
+			$competences = str_replace("\n", "", $competences);
+			
+			$icons .= '<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/pix/t/grades.gif" class="iconsmall" alt="'.'competences'.'" /></a>';
+		}
+		//end
 		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=edit&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
 
 		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=delete&amp;confirm=1&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" class="iconsmall" alt="' . get_string("delete"). '"/></a> ';
@@ -350,6 +353,28 @@ if ($items) {
 
 if(!$print) {
 	echo "<div class='block_eportfolio_center'>";
+
+	echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
+	<fieldset>
+	<input type=\"hidden\" name=\"action\" value=\"add\"/>
+	<input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
+	<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
+	if ($type != 'all')
+	{
+		echo '<input type="hidden" name="type" value="'.$type.'" />';
+		echo "<input type=\"submit\" value=\"" . get_string("new".$type, "block_exaport"). "\"/>";
+	}
+	else
+	{
+		echo '<select name="type">';
+		echo '<option value="link">'.get_string("link", "block_exaport")."</option>";
+		echo '<option value="file">'.get_string("file", "block_exaport")."</option>";
+		echo '<option value="note">'.get_string("note", "block_exaport")."</option>";
+		echo '</select>';
+		echo "<input type=\"submit\" value=\"" . get_string("new", "block_exaport"). "\"/>";
+	}
+	echo "</fieldset>
+	</form>";
 	echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>".get_string('printerfriendly', 'group')."</a>";
 	echo "</div>";
 }

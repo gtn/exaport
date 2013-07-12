@@ -177,6 +177,9 @@ class SCORMParser {
                 
                 if(isset($organization['identifier']))
                     $element['data']['identifier'] = $organization['identifier'];
+					
+				if(isset($organization["data"]["ID"]))
+					$element['data']['id'] = $organization["data"]["ID"];
 
                 if(isset($organization["data"]["IDENTIFIERREF"])) { // if the IDENTIFIERREF is set...
                     if(isset($resources[$organization["data"]["IDENTIFIERREF"]]["info"]["HREF"])) { // ... and the resource exists

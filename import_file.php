@@ -313,7 +313,8 @@ function import_structure($unzip_dir, $structures, $course, $i = 0, &$xml=NULL, 
                     }
                 } else {
                     if ($DB->count_records_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid='$previd'") == 0) {
-                        $newentry->name = block_exaport_clean_title($structure["data"]["title"]);
+                        $newentry = new stdClass();
+						$newentry->name = block_exaport_clean_title($structure["data"]["title"]);
                         $newentry->timemodified = time();
                         $newentry->course = $COURSE->id;
                         $newentry->userid = $USER->id;
@@ -352,6 +353,14 @@ foreach($xml->items->item as $item){
 			$newentry->activitytype = 2000;
 			$newentry->wert = 0;
 			$DB->insert_record("block_exacompdescuser_mm", $newentry);
+			
+			$newentry2 = new stdClass();
+			$newentry2->descrid = $desc->id;
+			$newentry2->activityid = $newid;
+			$newentry2->activitytype = 2000;
+			$newentry2->activitytitle = $title;
+			$newentry2->coursetitle = $COURSE->shortname;
+			$DB->insert_record("block_exacompdescractiv_mm", $newentry2);
 		}
 	}
 }
@@ -396,7 +405,7 @@ function insert_entry($unzip_dir, $url, $title, $category, $course, &$xml=NULL, 
 
             if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
 				if(isset($xml) && isset($id)){	
-					import_item_competences($new->id, $id, $xml, $unzip_dir);
+					import_item_competences($new->id, $id, $xml, $unzip_dir, $new->name);
 				}
                 get_comments($content, $new->id, 'block_exaportitemcomm');
             } else {
@@ -428,7 +437,7 @@ function insert_entry($unzip_dir, $url, $title, $category, $course, &$xml=NULL, 
 
                 if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
 					if(isset($xml) && isset($id)){
-						import_item_competences($new->id, $id, $xml, $unzip_dir);
+						import_item_competences($new->id, $id, $xml, $unzip_dir, $new->name);
 					}
 					$fs = get_file_storage();
 
@@ -472,7 +481,7 @@ function insert_entry($unzip_dir, $url, $title, $category, $course, &$xml=NULL, 
 
             if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
 				if(isset($xml) && isset($id)){	
-					import_item_competences($new->id, $id, $xml, $unzip_dir);
+					import_item_competences($new->id, $id, $xml, $unzip_dir, $new->name);
 				}
                 get_comments($content, $new->id, 'block_exaportitemcomm');
             } else {

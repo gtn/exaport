@@ -293,6 +293,29 @@ if ($items) {
 		$table->data[$item_i]['comments'] = $item->comments;
 
 		$icons = '';
+		
+		$array = block_exaport_get_competences($item, 0);
+		
+		//if item is assoziated with competences display them
+		//begin
+		if(count($array)>0){
+			$competences = "";
+			foreach($array as $element){
+		
+				$conditions = array("id" => $element->descid);
+				$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+				if($competencesdb != null){
+					$competences .= $competencesdb->title.'<br>';
+				}
+			}
+			$competences = str_replace("\r", "", $competences);
+			$competences = str_replace("\n", "", $competences);
+			
+			$icons .= '<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/application_view_title.png" class="iconsmall" alt="'.'competences'.'" /></a>';
+		}
+		//end
+		
 		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=edit&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
 
 		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=delete&amp;confirm=1&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" class="iconsmall" alt="' . get_string("delete"). '"/></a> ';

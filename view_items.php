@@ -313,7 +313,9 @@ if ($items) {
 				}
 				$competences = str_replace("\r", "", $competences);
 				$competences = str_replace("\n", "", $competences);
-			
+				$competences = str_replace("\"", "&quot;", $competences);
+				$competences = str_replace("'", "&prime;", $competences);
+				
 				$icons .= '<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/pix/t/grades.gif" class="iconsmall" alt="'.'competences'.'" /></a>';
 			}
 		}

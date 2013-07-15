@@ -343,7 +343,6 @@ foreach($xml->items->item as $item){
 		foreach($item->comp as $comp){
 			$compid = (int) $comp->attributes()->identifier[0];
 			$desc = $DB->get_record('block_exacompdescriptors', array("sourceid"=>$compid));
-			var_dump($desc->id);
 			$newentry = new stdClass();
 			$newentry->activityid = $newid;
 			$newentry->descid = $desc->id;

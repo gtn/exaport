@@ -314,7 +314,7 @@ if ($items) {
 				$competences = str_replace("\r", "", $competences);
 				$competences = str_replace("\n", "", $competences);
 			
-				$icons .= '<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/application_view_title.png" class="iconsmall" alt="'.'competences'.'" /></a>';
+				$icons .= '<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/pix/t/grades.gif" class="iconsmall" alt="'.'competences'.'" /></a>';
 			}
 		}
 		

@@ -228,9 +228,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             $filecontent .= '  <div id="url"><a href="' . spch($bookmark->url) . '"><!--###BOOKMARK_EXT_URL###-->' . spch($bookmark->url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
             $filecontent .= '  <div id="description"><!--###BOOKMARK_EXT_DESC###-->' . spch_text($bookmark->intro) . '<!--###BOOKMARK_EXT_DESC###--></div>' . "\n";
             $filecontent .= add_comments('block_exaportitemcomm', $bookmark->id);
-			//begin
-		    if($bookmark->competences) $filecontent .= '<br /> <div id="competences">'.$bookmark->competences.'<div>';
-			//end
+		    if(isset($bookmark->competences)) $filecontent .= '<br /> <div id="competences">'.$bookmark->competences.'<div>';
 			$filecontent .= '</body>' . "\n";
             $filecontent .= '</html>' . "\n";
 
@@ -316,7 +314,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             $filecontent .= '  <div id="url"><a href="' . spch($content_filename) . '"><!--###BOOKMARK_FILE_URL###-->' . spch($content_filename) . '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
             $filecontent .= '  <div id="description"><!--###BOOKMARK_FILE_DESC###-->' . spch_text($file->intro) . '<!--###BOOKMARK_FILE_DESC###--></div>' . "\n";
             $filecontent .= add_comments('block_exaportitemcomm', $file->id);
-            if($file->competences) $filecontent .= '<br /> <div id="competences">'.$file->competences.'<div>';
+            if(isset($file->competences)) $filecontent .= '<br /> <div id="competences">'.$file->competences.'<div>';
    		    $filecontent .= '</body>' . "\n";
             $filecontent .= '</html>' . "\n";
 
@@ -385,7 +383,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             $filecontent .= '  <h1 id="header">' . spch($note->name) . '</h1>' . "\n";
             $filecontent .= '  <div id="description"><!--###BOOKMARK_NOTE_DESC###-->' . spch_text($note->intro) . '<!--###BOOKMARK_NOTE_DESC###--></div>' . "\n";
             $filecontent .= add_comments('block_exaportitemcomm', $note->id);
-            if($note->competences) $filecontent .= '<br /> <div id="competences">'.$note->competences.'<div>';
+            if(isset($note->competences)) $filecontent .= '<br /> <div id="competences">'.$note->competences.'<div>';
 			$filecontent .= '</body>' . "\n";
             $filecontent .= '</html>' . "\n";
 

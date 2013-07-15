@@ -314,7 +314,7 @@ var exaportViewEdit = {};
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />'+ ilink + 
 					$E.translate('comments')+': '+itemData.comments+'<br />' +
-					'<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/blocks/exaport/pix/application_view_title.png" class="iconsmall" alt="'+'competences'+'" /></a>'+
+					'<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/pix/t/grades.gif" class="iconsmall" alt="'+'competences'+'" /></a>'+
 					'</div></div>'
 				);
 			}else{

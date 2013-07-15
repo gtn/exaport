@@ -156,28 +156,30 @@ foreach ($portfolioItems as &$item) {
 	}
 	
 	//get competences of the item
-	//begin
 	$item->userid = $USER->id;
-	$array = block_exaport_get_competences($item, 0);
 	
-	if(count($array)>0){
-		$competences = "";
-		foreach($array as $element){
-			$conditions = array("id" => $element->descid);
-			$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+	$comp = block_exaport_check_competence_interaction();
+	if($comp){
+		$array = block_exaport_get_competences($item, 0);
+	
+		if(count($array)>0){
+			$competences = "";
+			foreach($array as $element){
+				$conditions = array("id" => $element->descid);
+				$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
-			if($competencesdb != null){
-				$competences .= $competencesdb->title.'<br>';
+				if($competencesdb != null){
+					$competences .= $competencesdb->title.'<br>';
+				}
 			}
-		}
-		$competences = str_replace("\r", "", $competences);
-		$competences = str_replace("\n", "", $competences);
+			$competences = str_replace("\r", "", $competences);
+			$competences = str_replace("\n", "", $competences);
 	
-		$item->competences = $competences;
+			$item->competences = $competences;
+		}
 	}
 	
 	unset($item->userid);
-	//end
 	
 	unset($item->cname);
 	unset($item->cname_parent);

@@ -294,27 +294,29 @@ if ($items) {
 
 		$icons = '';
 		
-		$array = block_exaport_get_competences($item, 0);
+		$comp = block_exaport_check_competence_interaction();
 		
-		//if item is assoziated with competences display them
-		//begin
-		if(count($array)>0){
-			$competences = "";
-			foreach($array as $element){
+		if($comp){
+			$array = block_exaport_get_competences($item, 0);
 		
-				$conditions = array("id" => $element->descid);
-				$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+			//if item is assoziated with competences display them
+			if(count($array)>0){
+				$competences = "";
+				foreach($array as $element){
+		
+					$conditions = array("id" => $element->descid);
+					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
-				if($competencesdb != null){
-					$competences .= $competencesdb->title.'<br>';
+					if($competencesdb != null){
+						$competences .= $competencesdb->title.'<br>';
+					}
 				}
-			}
-			$competences = str_replace("\r", "", $competences);
-			$competences = str_replace("\n", "", $competences);
+				$competences = str_replace("\r", "", $competences);
+				$competences = str_replace("\n", "", $competences);
 			
-			$icons .= '<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/application_view_title.png" class="iconsmall" alt="'.'competences'.'" /></a>';
+				$icons .= '<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/application_view_title.png" class="iconsmall" alt="'.'competences'.'" /></a>';
+			}
 		}
-		//end
 		
 		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=edit&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
 

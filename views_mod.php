@@ -174,7 +174,9 @@ foreach ($portfolioItems as &$item) {
 			}
 			$competences = str_replace("\r", "", $competences);
 			$competences = str_replace("\n", "", $competences);
-	
+			$competences = str_replace("\"", "&quot;", $competences);
+			$competences = str_replace("'", "&prime;", $competences);		
+				
 			$item->competences = $competences;
 		}
 	}

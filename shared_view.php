@@ -142,6 +142,8 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 					}
 					$competences = str_replace("\r", "", $competences);
 					$competences = str_replace("\n", "", $competences);
+					$competences = str_replace("\"", "&quot;", $competences);
+					$competences = str_replace("'", "&prime;", $competences);	
 	
 					$item->competences = $competences;
 				}

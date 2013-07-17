@@ -26,6 +26,10 @@
  * ************************************************************* */
 
 require_once $CFG->libdir . '/filelib.php';
+
+if(block_exaport_check_competence_interaction())
+	require_once $CFG->dirroot . '/blocks/exacomp/lib/div.php';
+	
 global $DB;
 
 /*** FILE FUNCTIONS **********************************************************************/
@@ -522,9 +526,23 @@ function block_exaport_get_competences($item, $role=1) {
     return $DB->get_records('block_exacompdescuser_mm',array("userid"=>$item->userid,"role"=>$role,"activitytype"=>2000,"activityid"=>$item->id));
 }
 function block_exaport_build_comp_tree() {
-    global $DB;
-    $sql = "SELECT d.id, d.title, t.title as topic, s.title as subject,s.id as subjid FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id";
-    $descriptors = $DB->get_records_sql($sql);
+    global $DB, $USER;
+	
+	$courses = $DB->get_records('course', array());
+	
+	$descriptors = array();
+	foreach($courses as $course){
+		$context = context_course::instance($course->id);
+		if(is_enrolled($context, $USER)){
+			$alldescr = block_exacomp_get_descritors_list($course->id);
+			foreach($alldescr as $descr){
+				if(!in_array($descr, $descriptors)){
+					$descriptors[] = $descr;
+				}
+			}
+		}
+	}
+	
     $tree = '<form name="treeform"><ul id="comptree" class="treeview">';
     $subject = "";
     $topic = "";
@@ -537,7 +555,7 @@ function block_exaport_build_comp_tree() {
             $subject = $descriptor->subject;
             if (!$newsub
                 )$tree.='</ul></li></ul></li>';
-            $tree.='<li id="gegenst'.$descriptor->subjid.'" alt="'.$subject.'">' . $subject;
+            $tree.='<li id="gegenst'.$descriptor->subjectid.'" alt="'.$subject.'">' . $subject;
             $tree.='<ul>';
 
             $newsub = false;
@@ -551,7 +569,7 @@ function block_exaport_build_comp_tree() {
             $tree.='<ul>';
             $newtop = false;
         }
-        $tree.='<li><input class="'.$descriptor->subjid.'" type="checkbox" name="desc" value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
+        $tree.='<li><input class="'.$descriptor->subjectid.'" type="checkbox" name="desc" value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
 
         $index++;
     }

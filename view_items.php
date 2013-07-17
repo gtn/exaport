@@ -28,29 +28,22 @@ require_once dirname(__FILE__).'/inc.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
-
-$type = optional_param('type', 'all', PARAM_ALPHA);
+$categoryid = optional_param('categoryid', 0, PARAM_INT);
 $print = optional_param('print', false, PARAM_BOOL);
-$type = block_exaport_check_item_type($type, true);
-
-// Needed for Translations
-$type_plural = block_exaport_get_plural_item_type($type);
-
-
-$strbookmarks = get_string("mybookmarks", "block_exaport");
-$strheadline = get_string("bookmarks".$type_plural, "block_exaport");
 
 block_exaport_require_login($courseid);
 
 $context = get_context_instance(CONTEXT_SYSTEM);
 
-$conditions = array("id" => $courseid);
-if (! $course = $DB->get_record("course", $conditions) ) {
+if (! $course = $DB->get_record("course", array("id" => $courseid)) ) {
 	error("That's an invalid course id");
 }
+
 $url = '/blocks/exaport/view_items.php';
 $PAGE->set_url($url);
-if(!$print)block_exaport_print_header("bookmarks".$type_plural);
+
+if (!$print)
+	block_exaport_print_header("bookmarks");
 else {
 	?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -72,12 +65,10 @@ echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" re
 echo '</head><body>';
 }
 
-block_exaport_setup_default_categories();
-
 echo "<div class='box generalbox'>";
 if (block_exaport_course_has_desp()) $pref="desp_";
 else $pref="";
-echo $OUTPUT->box( text_to_html(get_string($pref."explaining".$type,"block_exaport")) , "center");
+echo $OUTPUT->box( text_to_html(get_string($pref."explaining","block_exaport")) , "center");
 echo "</div>";
 
 $userpreferences = block_exaport_get_user_preferences();
@@ -100,82 +91,119 @@ if ($parsedsort[1] == "desc") {
 $sorticon = $parsedsort[1].'.gif';
 
 
-block_exaport_set_user_preferences(array('itemsort'=>$sort));
+
+block_exaport_setup_default_categories();
+
+// read all categories
+$categories = $DB->get_records_sql('
+	SELECT c.id, c.name, c.pid, COUNT(i.id) AS item_cnt
+	FROM {block_exaportcate} c
+	LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id
+	WHERE c.userid = ?
+	GROUP BY c.id
+	ORDER BY c.name ASC
+', array($USER->id));
+
+// build a tree according to parent
+$categoriesByParent = array();
+foreach ($categories as $category) {
+	if (!isset($categoriesByParent[$category->pid])) $categoriesByParent[$category->pid] = array();
+	$categoriesByParent[$category->pid][] = $category;
+}
+
+// the main root category
+$rootCategory = (object) array(
+	'id' => 0,
+	'pid' => -999,
+	'name' => 'root',
+	'item_cnt' => 'todo'
+);
+$categories[0] = $rootCategory;
+
+// what's the current category? invalid / no category = root
+if (isset($categories[$categoryid])) {
+	$currentCategory = $categories[$categoryid];
+} else {
+	$currentCategory = $rootCategory;
+}
+
+// what's the parent category?
+if (isset($categories[$currentCategory->pid])) {
+	$parentCategory = $categories[$currentCategory->pid];
+} else {
+	$parentCategory = null;
+}
+
+// what's the display layout: tiles / details?
+$layout = optional_param('layout', '', PARAM_TEXT);
+if (!$layout && isset($userpreferences->view_items_layout)) $layout = $userpreferences->view_items_layout;
+if ($layout != 'details') $layout = 'tiles'; // default = tiles
+
+// save user preferences
+block_exaport_set_user_preferences(array('itemsort'=>$sort, 'view_items_layout'=>$layout));
+
+echo todo_string('current_category').': ';
+echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid=\'+this.value;">';
+echo '<option value="">'.$rootCategory->name.'</option>';
+function block_exaport_print_category_select($categoriesByParent, $currentCategoryid, $pid=0, $parentText='') {
+	if (!isset($categoriesByParent[$pid])) return;
+
+	foreach ($categoriesByParent[$pid] as $category) {
+		echo '<option value="'.$category->id.'"'.($currentCategoryid == $category->id?' selected="selected"':'').'>';
+		echo $parentText.$category->name;
+		if ($category->item_cnt) echo ' ('.$category->item_cnt.')';
+		echo '</option>';
+		block_exaport_print_category_select($categoriesByParent, $currentCategoryid,
+			$category->id, $category->name.' &rArr; ');
+	}
+}
+block_exaport_print_category_select($categoriesByParent, $currentCategory->id);
+echo '</select>';
+
+echo '<br />';
+echo todo_string('layout').': ';
+echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$categoryid.'&layout=tiles"
+	'.($layout == 'tiles'?' style="font-weight: bold;"':'').'>'.
+	todo_string("tiles", "block_exaport")."</a> ";
+echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$categoryid.'&layout=details"
+	'.($layout == 'details'?' style="font-weight: bold;"':'').'>'.
+	todo_string("details", "block_exaport")."</a> ";
+
+echo '<br />';
+echo todo_string('new').': ';
+echo 'Folder ';
+echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=link">'.
+	get_string("link", "block_exaport")."</a> ";
+echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=file">'.
+	get_string("file", "block_exaport")."</a> ";
+echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=note">'.
+	get_string("note", "block_exaport")."</a> ";
 
 if (!$print) {
 	echo "<div class='block_eportfolio_center'>";
-
-	echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/item.php?backtype=$type\" method=\"post\">
-	<fieldset>
-	<input type=\"hidden\" name=\"action\" value=\"add\"/>
-	<input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>
-	<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-	if ($type != 'all')
-	{
-		echo '<input type="hidden" name="type" value="'.$type.'" />';
-		echo "<input type=\"submit\" value=\"" . get_string("new".$type, "block_exaport"). "\"/>";
-	}
-	else
-	{
-		echo '<select name="type">';
-		echo '<option value="link">'.get_string("link", "block_exaport")."</option>";
-		echo '<option value="file">'.get_string("file", "block_exaport")."</option>";
-		echo '<option value="note">'.get_string("note", "block_exaport")."</option>";
-		echo '</select>';
-		echo "<input type=\"submit\" value=\"" . get_string("new", "block_exaport"). "\"/>";
-	}
-	echo "</fieldset>
-	</form>";
-	echo "</div>";
 }
 
 
 $sql_sort = block_exaport_item_sort_to_sql($parsedsort);
 
-$condition = array($USER->id);
+$condition = array($USER->id, $currentCategory->id);
 
-if ($type == 'all')
-	$sql_type_where = '';
-else{
-	//$sql_type_where = " AND i.type='".$type."'";
-	$sql_type_where = " AND i.type=?";
-	$condition = array($USER->id, $type);
-}
+$items = $DB->get_records_sql("
+		SELECT i.*, COUNT(com.id) As comments -- , c.fullname As coursename
+		FROM {block_exaportitem} i
+		-- LEFT JOIN {course} c on i.courseid = c.id
+		LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+		WHERE i.userid = ? AND i.categoryid=?
+		-- sql_type_where
+			AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))
+		GROUP BY i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
+		i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable
+		$sql_sort
+		-- coursename, 
+	", $condition);
 
-if(strcmp("sqlsrv", $CFG->dbtype)==0){
-	$query = "SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(INTRO as text) intro,
-	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment,
-	i.sortorder, i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid,
-	cast(BEISPIEL as text)beispiel_angabe,
-	i.cname, i.cname_parent, i.catid, i.coursename,comments FROM(
-	SELECT i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar) INTRO,
-	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
-	i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, cast(i.beispiel_angabe AS varchar) BEISPIEL,
-	ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, c.fullname AS coursename, COUNT( com.id ) AS comments
-	FROM {block_exaportitem} i
-	JOIN {block_exaportcate} ic ON i.categoryid = ic.id
-	LEFT JOIN {block_exaportcate} ic2 ON ic.pid=ic2.id
-	LEFT JOIN {course} c ON i.courseid = c.id
-	LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
-	WHERE i.userid=? $sql_type_where  AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>''))) GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, cast(i.intro AS varchar),
-	i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
-	i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, CAST(i.beispiel_angabe AS varchar), ic.name,
-	ic2.name,c.fullname )i $sql_sort ";
-}
-else{
-	$query = "select i.*, ic.name AS cname, ic2.name AS cname_parent, ic.id AS catid, c.fullname As coursename, COUNT(com.id) As comments".
-			" from {block_exaportitem} i".
-			" join {block_exaportcate} ic on i.categoryid = ic.id".
-			" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-			" left join {course} c on i.courseid = c.id".
-			" left join {block_exaportitemcomm} com on com.itemid = i.id".
-			" where i.userid = ? $sql_type_where AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>''))) group by i.id, i.name, i.intro, i.timemodified, cname, cname_parent, coursename,".
-			"i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,". 
-			"i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable, ic.id $sql_sort";
-}
-$items = $DB->get_records_sql($query, $condition);
-
-if ($items) {
+if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCategory) {
+	// show output only if we have items, or we have subcategories, or we are in a subcategory
 
 	$table = new html_table();
 	$table->width = "100%";
@@ -183,26 +211,20 @@ if ($items) {
 	$table->head = array();
 	$table->size = array();
 
-	$table->head['category'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;type=$type&amp;sort=".
-			($sortkey == 'category' ? $newsort : 'category' ) ."'>" . get_string("category", "block_exaport") . "</a>";
-	$table->size['category'] = "14";
+	$table->head['type'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;categoryid=$categoryid&amp;sort=".
+			($sortkey == 'type' ? $newsort : 'type') ."'>" . get_string("type", "block_exaport") . "</a>";
+	$table->size['type'] = "14";
 
-	if ($type == 'all') {
-		$table->head['type'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;type=$type&amp;sort=".
-				($sortkey == 'type' ? $newsort : 'type') ."'>" . get_string("type", "block_exaport") . "</a>";
-		$table->size['type'] = "14";
-	}
-
-	$table->head['name'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;type=$type&amp;sort=".
+	$table->head['name'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;categoryid=$categoryid&amp;sort=".
 			($sortkey == 'name' ? $newsort : 'name') ."'>" . get_string("name", "block_exaport") . "</a>";
 	$table->size['name'] = "30";
 
-	$table->head['date'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;type=$type&amp;sort=".
+	$table->head['date'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&amp;categoryid=$categoryid&amp;sort=".
 			($sortkey == 'date' ? $newsort : 'date.desc') ."'>" . get_string("date", "block_exaport") . "</a>";
 	$table->size['date'] = "20";
 
-	$table->head[] = get_string("course","block_exaport");
-	$table->size[] = "14";
+	// $table->head[] = get_string("course","block_exaport");
+	// $table->size[] = "14";
 
 	$table->head[] = get_string("comments","block_exaport");
 	$table->size[] = "8";
@@ -217,47 +239,35 @@ if ($items) {
 
 	$table->data = Array();
 	$lastcat = "";
-
+	
 	$item_i = -1;
+
+	if ($parentCategory) {
+		// if isn't parent category, show link to go to parent category
+		$item_i++;
+		$table->data[$item_i] = array();
+		$table->data[$item_i]['type'] = 'folder';
+		$table->data[$item_i]['name'] = 
+			'<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$parentCategory->id.'">parent: '.$parentCategory->name.'</a>';
+	}
+	
+	if (!empty($categoriesByParent[$currentCategory->id])) {
+		foreach ($categoriesByParent[$currentCategory->id] as $category) {
+			$item_i++;
+			$table->data[$item_i] = array();
+			$table->data[$item_i]['type'] = 'folder';
+			$table->data[$item_i]['name'] = 
+				'<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id.'">'.$category->name.'</a>';
+		}
+	}
+
 	$itemscnt = count($items);
 	foreach ($items as $item) {
 		$item_i++;
 
 		$table->data[$item_i] = array();
 
-		// set category
-		if(is_null($item->cname_parent)) {
-			$category = format_string($item->cname);
-		}
-		else {
-			$catid= $item->catid;
-			$catname = $item->cname;
-			$category = format_string($item->cname);
-			//recursives abfragen des kategorienpfades, zu langsam!
-
-			/*do{
-				$conditions = array("userid" => $USER->id, "id" => $catid);
-				$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
-				foreach($cats as $cat){
-					if($category == "")
-						$category =format_string($cat->name);
-					else
-						$category =format_string($cat->name)." &rArr; ".$category;
-					$catid = $cat->pid;
-			}
-			
-			}while ($cat->pid != 0);*/
-		}
-		if (($sortkey == "category") && ($lastcat == $category)) {
-			$category = "";
-		} else {
-			$lastcat = $category;
-		}
-		$table->data[$item_i]['category'] = $category;
-
-		if ($type == 'all') {
-			$table->data[$item_i]['type'] = get_string($item->type, "block_exaport");
-		}
+		$table->data[$item_i]['type'] = get_string($item->type, "block_exaport");
 
 		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=".$type."&att=".$item->attachment)."\">" . $item->name . "</a>";
 		if ($item->intro) {
@@ -289,7 +299,7 @@ if ($items) {
 		}
 
 		$table->data[$item_i]['date'] = userdate($item->timemodified);
-		$table->data[$item_i]['course'] = $item->coursename;
+		// $table->data[$item_i]['course'] = $item->coursename;
 		$table->data[$item_i]['comments'] = $item->comments;
 
 		$icons = '';
@@ -324,27 +334,6 @@ if ($items) {
 
 		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=delete&amp;confirm=1&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" class="iconsmall" alt="' . get_string("delete"). '"/></a> ';
 
-		/*
-		 if ($parsedsort[0] == 'sortorder') {
-		if ($item_i > 0) {
-		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movetop&backtype='.$type.'" title="'.get_string("movetop", "block_exaport").'"><img src="pix/movetop.gif" class="iconsmall" alt="'.get_string("movetop", "block_exaport").'"/></a> ';
-		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=moveup&backtype='.$type.'" title="'.get_string("moveup").'"><img src="'.$CFG->wwwroot.'/pix/t/up.gif" class="iconsmall" alt="'.get_string("moveup").'"/></a> ';
-		} else {
-		$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
-		$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
-		}
-
-		if ($item_i+1 < $itemscnt) {
-		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movedown&backtype='.$type.'" title="'.get_string("movedown").'"><img src="'.$CFG->wwwroot.'/pix/t/down.gif" class="iconsmall" alt="'.get_string("movedown").'"/></a> ';
-		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=movebottom&backtype='.$type.'" title="'.get_string("movebottom", "block_exaport").'"><img src="pix/movebottom.gif" class="iconsmall" alt="'.get_string("movebottom", "block_exaport").'"/></a> ';
-		}
-		else {
-		$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
-		$icons .= '<img src="'.$CFG->wwwroot.'/pix/spacer.gif" class="iconsmall" alt="" /> ';
-		}
-		}
-		*/
-
 		if (block_exaport_feature_enabled('share_item')) {
 			if (has_capability('block/exaport:shareintern', $context)) {
 				if( ($item->shareall == 1) ||
@@ -365,36 +354,27 @@ if ($items) {
 		$table->data[$item_i]['icons'] = $icons;
 	}
 
-	/*
-	 if ($parsedsort[0] != 'sortorder')
-		echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&amp;&type='.$type.'&amp;sort=sortorder">'.get_string("userdefinedsort", "block_exaport").'</a>';
-	*/
-	$output = html_writer::table($table);
-	echo $output;
+	if ($layout == 'details') {
+		echo html_writer::table($table);
+	} else {
+		foreach ($table->data as $item) {
+			echo '<div>'.$item['name'].'</div>';
+		}
+	}
 } else {
 	echo block_exaport_get_string("nobookmarks".$type,"block_exaport");
 }
 
+// deactivate for now
+/*
 if(!$print) {
 	echo "<div class='block_eportfolio_center'>";
 	echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>".get_string('printerfriendly', 'group')."</a>";
 	echo "</div>";
 }
+*/
 
-?>
-<script type="text/javascript">
-//<![CDATA[
-function long_preview_show(i) {
-document.getElementById("short-preview-" + i).style.display = "none";
-document.getElementById("long-preview-" + i).style.display = "block";
-}
-function long_preview_hide(i) {
-document.getElementById("short-preview-" + i).style.display = "block";
-document.getElementById("long-preview-" + i).style.display = "none";
-}
-//]]>
-</script>
-<?php
-
-if(!$print) echo $OUTPUT->footer($course);
-else echo '</body></html>';
+if (!$print) 
+	echo $OUTPUT->footer($course);
+else
+	echo '</body></html>';

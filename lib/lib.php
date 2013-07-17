@@ -170,9 +170,27 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
         echo 'noch nicht unterst�tzt';
     }
 
-    global $CFG, $COURSE;
+    global $CFG, $COURSE, $PAGE;
 
-    $strbookmarks = block_exaport_get_string("mybookmarks");
+	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+
+	$PAGE->requires->js('/blocks/exaport/javascript/colorbox/jquery.colorbox.js', true);
+	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
+
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
+	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
+
+
+
+	$scriptName = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
+	if (file_exists($CFG->dirroot.'/blocks/exaport/css/'.$scriptName.'.css'))
+		$PAGE->requires->css('/blocks/exaport/css/'.$scriptName.'.css');
+	if (file_exists($CFG->dirroot.'/blocks/exaport/javascript/'.$scriptName.'.js'))
+		$PAGE->requires->js('/blocks/exaport/javascript/'.$scriptName.'.js', true);
+
+	$strbookmarks = block_exaport_get_string("mybookmarks");
 
     // navigationspfad
     $navlinks = array();
@@ -190,7 +208,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	}
 
     $tabs[] = new tabobject('personal', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("personal", "block_exaport"), '', true);
-    $tabs[] = new tabobject('categories', $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $COURSE->id, get_string("categories", "block_exaport"), '', true);
+    // $tabs[] = new tabobject('categories', $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $COURSE->id, get_string("categories", "block_exaport"), '', true);
     $tabs[] = new tabobject('bookmarks', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("bookmarks"), '', true);
     if (block_exaport_feature_enabled('views')) {
         $tabs[] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
@@ -216,22 +234,6 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	} elseif (strpos($item_identifier, 'bookmarks') === 0) {
         $activetabsubs[] = $item_identifier;
         $currenttab = 'bookmarks';
-
-        // untermen� tabs hinzuf�gen
-        $tabs_sub['bookmarksall'] = new tabobject('bookmarksall', s($CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id),
-                        get_string("bookmarksall", "block_exaport"), '', true);
-        $tabs_sub['bookmarkslinks'] = new tabobject('bookmarkslinks', s($CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id . '&type=link'),
-                        get_string("bookmarkslinks", "block_exaport"), '', true);
-        $tabs_sub['bookmarksfiles'] = new tabobject('bookmarksfiles', s($CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id . '&type=file'),
-                        get_string("bookmarksfiles", "block_exaport"), '', true);
-        $tabs_sub['bookmarksnotes'] = new tabobject('bookmarksnotes', s($CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id . '&type=note'),
-                        get_string("bookmarksnotes", "block_exaport"), '', true);
-
-        if ($sub_item_identifier) {
-            $navlinks[] = array('name' => get_string($item_identifier, "block_exaport"), 'link' => $tabs_sub[$item_identifier]->link, 'type' => 'misc');
-
-            $nav_item_identifier = $sub_item_identifier;
-        }
     } elseif (strpos($item_identifier, 'exportimport') === 0) {
         $currenttab = 'exportimport';
 
@@ -293,8 +295,15 @@ function block_exaport_get_string($string) {
 	if ($manager->string_exists($string, "block_exaport"))
 		return $manager->get_string($string, 'block_exaport');
 
-	return $manager->get_string($string);
+	return $manager->get_string($string);	
+}
+function todo_string($string) {
+	$manager = get_string_manager();
 	
+	if ($manager->string_exists($string, "block_exaport"))
+		return $manager->get_string($string, 'block_exaport');
+
+	return '[['.$string.']]';	
 }
 
 function block_exaport_print_footer() {
@@ -607,9 +616,7 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
     if (is_object($preferences)) {
         $newuserpreferences = $preferences;
     } elseif (is_array($preferences)) {
-        foreach ($preferences as $key => $value) {
-            $newuserpreferences->$key = $value;
-        }
+		$newuserpreferences = (object) $preferences;
     } else {
         echo 'error #fjklfdsjkl';
     }

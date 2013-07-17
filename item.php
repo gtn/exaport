@@ -243,6 +243,7 @@ switch ($action) {
 	case 'add':
 		$post->action = $action;
 		$post->courseid = $courseid;
+		$post->categoryid = optional_param('categoryid', 0, PARAM_INT);
 
 		$strAction = get_string('new');
 
@@ -294,11 +295,7 @@ switch ($action) {
 $comp = block_exaport_check_competence_interaction();
 
 if ($comp) {
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-	$PAGE->requires->js('/blocks/exaport/javascript/colorbox/jquery.colorbox.js', true);
-	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 	$PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
-	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
 	$PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
 }
 

@@ -77,10 +77,6 @@ foreach ($blocks as $block) {
 
 
 
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
-$PAGE->requires->css('/blocks/exaport/css/shared_view.css');
-
 if ($view->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");
 } else {

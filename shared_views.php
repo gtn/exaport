@@ -42,8 +42,6 @@ require_capability('block/exaport:use', $context);
 
 $url = '/blocks/exabis_competences/shared_views.php';
 $PAGE->set_url($url);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {

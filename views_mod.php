@@ -562,7 +562,7 @@ require_once $CFG->libdir.'/editor/tinymce/lib.php';
 $tinymce = new tinymce_texteditor();
 
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.ui.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);

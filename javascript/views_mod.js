@@ -106,6 +106,7 @@ var exaportViewEdit = {};
 			data.contentmedia = $('#block_media').val();
 			data.width = $('#block_width').val();
 			data.height = $('#block_height').val();			
+			data.create_as_note = $('input[name=create_as_note]:checked').length ? 1 : 0;
 			data.id = id;
 			newItem.data('portfolio', data);		
 			generateItem('update', $(newItem));	
@@ -298,10 +299,10 @@ var exaportViewEdit = {};
 		*/
 		var header_content = '';
 
-		if (data.itemid && portfolioItems[data.itemid]) {  
+		if (data.itemid && data.item) {  
 			data.type = 'item';
 
-			var itemData = portfolioItems[data.itemid];
+			var itemData = data.item;
 			var ilink=itemData.link
 			if (ilink!="")  ilink=$E.translate('link') + ': ' + ilink + '<br />';
 			

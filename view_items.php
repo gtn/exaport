@@ -269,7 +269,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 
 		$table->data[$item_i]['type'] = get_string($item->type, "block_exaport");
 
-		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=".$type."&att=".$item->attachment)."\">" . $item->name . "</a>";
+		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=&att=".$item->attachment)."\">" . $item->name . "</a>";
 		if ($item->intro) {
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
 
@@ -330,26 +330,26 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 			}
 		}
 		
-		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=edit&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
+		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=edit&amp;backtype="><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
 
-		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=delete&amp;confirm=1&amp;backtype='.$type.'"><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" class="iconsmall" alt="' . get_string("delete"). '"/></a> ';
+		$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&amp;id='.$item->id.'&amp;sesskey='.sesskey().'&amp;action=delete&amp;confirm=1&amp;backtype="><img src="'.$CFG->wwwroot.'/pix/t/delete.gif" class="iconsmall" alt="' . get_string("delete"). '"/></a> ';
 
 		if (block_exaport_feature_enabled('share_item')) {
 			if (has_capability('block/exaport:shareintern', $context)) {
 				if( ($item->shareall == 1) ||
 						($item->externaccess == 1) ||
 						(($item->shareall == 0) && (count_records('block_exaportitemshar', 'itemid', $item->id, 'original', $USER->id) > 0))) {
-					$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/share_item.php?courseid='.$courseid.'&amp;itemid='.$item->id.'&backtype='.$type.'">'.get_string("strunshare", "block_exaport").'</a> ';
+					$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/share_item.php?courseid='.$courseid.'&amp;itemid='.$item->id.'&backtype=">'.get_string("strunshare", "block_exaport").'</a> ';
 				}
 				else {
-					$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/share_item.php?courseid='.$courseid.'&amp;itemid='.$item->id.'&backtype='.$type.'">'.get_string("strshare", "block_exaport").'</a> ';
+					$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/share_item.php?courseid='.$courseid.'&amp;itemid='.$item->id.'&backtype=">'.get_string("strshare", "block_exaport").'</a> ';
 				}
 			}
 		}
 
 		// copy files to course
 		if ($item->type == 'file' && block_exaport_feature_enabled('copy_to_course'))
-			$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/copy_item_to_course.php?courseid='.$courseid.'&amp;itemid='.$item->id.'&backtype='.$type.'">'.get_string("copyitemtocourse", "block_exaport").'</a> ';
+			$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/copy_item_to_course.php?courseid='.$courseid.'&amp;itemid='.$item->id.'&backtype=">'.get_string("copyitemtocourse", "block_exaport").'</a> ';
 
 		$table->data[$item_i]['icons'] = $icons;
 	}

@@ -175,11 +175,11 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
 
-	$PAGE->requires->js('/blocks/exaport/javascript/colorbox/jquery.colorbox.js', true);
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
 	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
 
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
 	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
 

@@ -119,7 +119,7 @@ if ($action == 'delete') {
 
 $query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments, files.mimetype as mimetype".
 	 " from {block_exaportitem} i".
-	 " join {block_exaportcate} ic on i.categoryid = ic.id".
+	 " left join {block_exaportcate} ic on i.categoryid = ic.id".
 	 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
 	 " left join {files} files on (files.itemid = i.id and files.filearea='item_file' AND ".
@@ -393,12 +393,31 @@ if ($editform->is_cancelled()) {
 				$block->viewid = $dbView->id;
 
 				// media process
-				if (($block->type=='media') and ($block->contentmedia!=='')) {
-					if (!$block->width) $block->width = 100;
-					if (!$block->height) $block->height = 100;
-					$block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
-					};
+				if ($block->type=='media') {
+					if (!empty($block->contentmedia)) {
+						if (!$block->width) $block->width = 360 else $block->width = (int) $block->width;
+						if (!$block->height) $block->height = 240 else $block->height = (int) $block->height;
+						$block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
+					}
+					
+					if (!empty($block->create_as_note)) {
+						$newItem = new stdClass;
+						$newItem->name = $block->block_title;
+						$newItem->type = 'note';
+						$newItem->categoryid = 0;
+						$newItem->userid = $USER->id;
+						$newItem->intro = $block->contentmedia;
+						$newItem->timemodified = time();
 
+						$block->itemid = $DB->insert_record('block_exaportitem', $newItem);
+						$block->type = 'item';
+						$block->block_title = '';
+						$block->contentmedia = '';
+						$block->width = 0;
+						$block->height = 0;
+					}
+				}
+				
 				$block->id = $DB->insert_record('block_exaportviewblock', $block);
 			}
 			
@@ -541,12 +560,27 @@ switch ($action) {
 function get_view_blocks($view) {
 	global $DB, $USER;
 	
+	$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments, files.mimetype as mimetype".
+		 " from {block_exaportitem} i".
+		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
+		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
+		 " left join {files} files on (files.itemid = i.id and files.filearea='item_file' AND ".
+		 " files.filesize>0 AND files.userid = i.userid)".
+		 " where i.userid=?".
+		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, files.mimetype".
+		 " ORDER BY i.name";
+		 //echo $query;
+	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
+
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
 		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
 	$blocks = $DB->get_records_sql($query, array($view->id));	
 	foreach ($blocks as $block) {
+		if (($block->type == 'item') && isset($portfolioItems[$block->itemid]))
+			$block->item = $portfolioItems[$block->itemid];
 		//$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);		
 		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $view->draft_itemid);		
 	}
@@ -561,12 +595,6 @@ if ($view) {
 require_once $CFG->libdir.'/editor/tinymce/lib.php';
 $tinymce = new tinymce_texteditor();
 
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
-$PAGE->requires->css('/blocks/exaport/css/views_mod.css');
 $PAGE->requires->css('/blocks/exaport/css/blocks.css');
 
 block_exaport_print_header('views', $type);
@@ -613,7 +641,6 @@ switch ($type) {
 		?>
 		<script type="text/javascript">
 		//<![CDATA[
-			var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
 			jQueryExaport(exaportViewEdit.initContentEdit);
 			M.yui.add_module({"editor_tinymce":{"name":"editor_tinymce","fullpath":"<?php echo $CFG->wwwroot;?>/lib/javascript.php/<?php echo $rev;?>/lib/editor/tinymce/module.js","requires":[]}});
 		//]]>

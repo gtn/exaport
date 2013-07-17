@@ -61,13 +61,11 @@ foreach ($data as $key=>$value) {
 function get_form_items($id, $block_data=array()) {
 	global $DB, $USER;
 	
-	$query = "select i.id, i.name, i.type, ic.name AS cname, ic2.name AS cname_parent, COUNT(com.id) As comments".
+	$query = "select i.id, i.name, i.type, COUNT(com.id) As comments".
 		" from {block_exaportitem} i".
-		" join {block_exaportcate} ic on i.categoryid = ic.id".
-		" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 		" left join {block_exaportitemcomm} com on com.itemid = i.id".
 		" where i.userid=? AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))".
-		" GROUP BY i.id, i.name, i.type, ic.name, ic2.name".
+		" GROUP BY i.id, i.name, i.type".
 		" ORDER BY i.name";
 	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
 
@@ -82,14 +80,14 @@ function get_form_items($id, $block_data=array()) {
 
 	if (!$portfolioItems) {
 //		$content .=  '<div style="padding: 5px;">'.get_string('nobookmarksall', 'block_exaport').'</div>';
-	} else {		
+	} else {
 		$height = min(400, (max(count($portfolioItems), 2)+2) * 18);
 		$content .= '<select multiple=multiple name="list" id="item_list" style="width: 100%; height: '.$height.'px">';
 		foreach ($portfolioItems as $item) {
 			$content .= '<option value="'.$item->id.'" itemid="'.$item->id.'" '.($block_data->itemid==$item->id?'selected="selected"':'').'>'.$item->name.'</option>';
 		};
 		$content .= '</select><br>';
-	};				
+	}
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
@@ -245,7 +243,7 @@ if ($USER->picture) {
 
 
 function get_form_media($id, $block_data=array()) {
-	global $CFG, $PAGE, $USER;
+	global $CFG, $PAGE, $USER, $action;
 	
 	$content  = "";
     $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onsubmit="exaportViewEdit.addMedia('.$id.'); return false;">';
@@ -255,7 +253,7 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '<label for="block_title">'.get_string('blocktitle2','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';
-	$content .= '<input type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
+	$content .= '<input tabindex="1" type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
 	$content .= '</td></tr>';	
 	$content .= '<tr><th>';
 	$content .= '<label for="mediacontent">'.get_string('mediacontent','block_exaport').'</label>';
@@ -281,10 +279,14 @@ function get_form_media($id, $block_data=array()) {
 	</ul>	';
 	$content .= '</th></tr>';	
 	$content .= '<tr><th>';
+	$content .= '<input type="checkbox" tabindex="1" name="create_as_note" id="create_as_note" value="1"'.($action=='add'?' checked="checked"':'').' /> ';
+	$content .= '<label for="create_as_note">'.todo_string('create_as_note').'</label>';
+	$content .= '</td></tr>';	
+	$content .= '<tr><th>';
 	$content .= '<label for="width">'.get_string('width','block_exaport').'</label>';	
-	$content .= ' <input type="text" name="width" value="'.s($block_data->width?$block_data->width:"0").'" id="block_width">';		
+	$content .= ' <input type="text" tabindex="1" name="width" value="'.s($block_data->width?$block_data->width:"").'" id="block_width">';		
 	$content .= '&nbsp;&nbsp;&nbsp;<label for="height">'.get_string('height','block_exaport').'</label>';	
-	$content .= ' <input type="text" name="height" value="'.s($block_data->height?$block_data->height:"0").'" id="block_height">';			
+	$content .= ' <input type="text" tabindex="1" name="height" value="'.s($block_data->height?$block_data->height:"").'" id="block_height">';			
 	$content .= '</td></tr>';			
 	$content .= '<tr><td>';
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_media" name="submit_block" class="submit" />';

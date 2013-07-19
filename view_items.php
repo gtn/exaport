@@ -123,16 +123,18 @@ block_exaport_set_user_preferences(array('itemsort'=>$sort, 'view_items_layout'=
 echo todo_string('current_category').': ';
 echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid=\'+this.value;">';
 echo '<option value="">'.$rootCategory->name.'</option>';
-function block_exaport_print_category_select($categoriesByParent, $currentCategoryid, $pid=0, $parentText='') {
+function block_exaport_print_category_select($categoriesByParent, $currentCategoryid, $pid=0, $level=0) {
 	if (!isset($categoriesByParent[$pid])) return;
 
 	foreach ($categoriesByParent[$pid] as $category) {
 		echo '<option value="'.$category->id.'"'.($currentCategoryid == $category->id?' selected="selected"':'').'>';
-		echo $parentText.$category->name;
+		if ($level)
+			echo str_repeat('&nbsp;', 4*$level).' &rarr;&nbsp; ';
+		echo $category->name;
 		if ($category->item_cnt) echo ' ('.$category->item_cnt.')';
 		echo '</option>';
 		block_exaport_print_category_select($categoriesByParent, $currentCategoryid,
-			$category->id, $category->name.' &rArr; ');
+			$category->id, $level+1);
 	}
 }
 block_exaport_print_category_select($categoriesByParent, $currentCategory->id);

@@ -29,7 +29,6 @@ require_once dirname(__FILE__).'/inc.php';
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
-$print = optional_param('print', false, PARAM_BOOL);
 
 block_exaport_require_login($courseid);
 
@@ -42,28 +41,7 @@ if (! $course = $DB->get_record("course", array("id" => $courseid)) ) {
 $url = '/blocks/exaport/view_items.php';
 $PAGE->set_url($url);
 
-if (!$print)
-	block_exaport_print_header("bookmarks");
-else {
-	?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-<head>
-<title>Alle Eintr&auml;ge</title>
-
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta content="moodle, Alle Eintr&auml;ge" name="keywords" />
-<link
-	href="<?php echo $CFG->wwwroot;?>/theme/styles.php/standard/1341490079/all"
-	type="text/css" rel="stylesheet" />
-<link
-	href="<?php echo $CFG->wwwroot;?>/theme/yui_combo.php?3.5.1/build/cssreset/reset.css&3.5.1/build/cssfonts/fonts.css&3.5.1/build/cssgrids/grids.css&3.5.1/build/cssbase/base.css"
-	type="text/css" rel="stylesheet" />
-<link href="printversion.css" type="text/css" rel="stylesheet" />
-<?php 
-echo '<link href="'.$CFG->wwwroot.'blocks/exaport/styles.css" type="text/css" rel="stylesheet" />';
-echo '</head><body>';
-}
+block_exaport_print_header("bookmarks");
 
 echo "<div class='box generalbox'>";
 if (block_exaport_course_has_desp()) $pref="desp_";
@@ -179,9 +157,7 @@ echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$
 echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=note">'.
 	get_string("note", "block_exaport")."</a> ";
 
-if (!$print) {
-	echo "<div class='block_eportfolio_center'>";
-}
+echo "<div class='block_eportfolio_center'>";
 
 
 $sql_sort = block_exaport_item_sort_to_sql($parsedsort);
@@ -189,17 +165,14 @@ $sql_sort = block_exaport_item_sort_to_sql($parsedsort);
 $condition = array($USER->id, $currentCategory->id);
 
 $items = $DB->get_records_sql("
-		SELECT i.*, COUNT(com.id) As comments -- , c.fullname As coursename
+		SELECT i.*, COUNT(com.id) As comments
 		FROM {block_exaportitem} i
-		-- LEFT JOIN {course} c on i.courseid = c.id
 		LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
 		WHERE i.userid = ? AND i.categoryid=?
-		-- sql_type_where
 			AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))
 		GROUP BY i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
 		i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable
 		$sql_sort
-		-- coursename, 
 	", $condition);
 
 if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCategory) {
@@ -280,9 +253,6 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 
 			if (!$intro) {
 				// no intro
-			} elseif ($print) {
-				// show whole intro for printing
-				$table->data[$item_i]['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>";
 			} elseif ($shortIntro == $intro) {
 				// very short one
 				$table->data[$item_i]['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">".format_text($intro, FORMAT_HTML)."</td></tr></table>";
@@ -365,16 +335,8 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 	echo block_exaport_get_string("nobookmarks".$type,"block_exaport");
 }
 
-// deactivate for now
-/*
-if(!$print) {
-	echo "<div class='block_eportfolio_center'>";
-	echo "<a target='_blank' href='".$CFG->wwwroot.$url."?courseid=".$courseid."&print=true'>".get_string('printerfriendly', 'group')."</a>";
-	echo "</div>";
-}
-*/
+echo "<div class='block_eportfolio_center'>";
+echo "<a target='_blank' href='".$CFG->wwwroot."/blocks/exaport/view_items_print.php?courseid=".$courseid."'>".get_string('printerfriendly', 'group')."</a>";
+echo "</div>";
 
-if (!$print) 
-	echo $OUTPUT->footer($course);
-else
-	echo '</body></html>';
+echo $OUTPUT->footer();

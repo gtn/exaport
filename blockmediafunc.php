@@ -20,11 +20,16 @@
 			),
 
 			// prezi
+			array(
+                'match' => '#^https?://(www\.)?prezi\.com/embed/([a-zA-Z0-9\-_+]*).*#',
+                'url'   => $httpstr . '://prezi.com/embed/$2',
+            ),
             array(
-                'match' => '#https?://prezi.com/([a-zA-Z0-9\-_]+)/.*#',
+                'match' => '#https?://prezi\.com/([a-zA-Z0-9\-_]+)/.*#',
                 'url'   => $httpstr . '://prezi.com/bin/preziloader.swf?prezi_id=$1',
-            ),			
+            ),
 			
+//<iframe src="http://prezi.com/embed/ni85rq0jgn3s/?bgcolor=ffffff&amp;lock_to_path=1&amp;autoplay=0&amp;autohide_ctrls=0&amp;features=undefined&amp;disabled_features=undefined" width="550" height="400" frameBorder="0"></iframe>			
 			// scivee   
 			array(
 				'match' => '#^http://(www\.)?scivee\.tv/node/([0-9]+).*#',

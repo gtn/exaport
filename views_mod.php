@@ -884,7 +884,7 @@ echo '<div id="block_form" class="block" style="position: absolute; top: 10px; l
             <a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
         </div>
         <div class="block-header">
-            <h4>'.get_string('cofigureblock','block_exaport').'</h4>
+            <h4 id="block_form_title">'.get_string('cofigureblock','block_exaport').'</h4>
         </div>
         <div class="block-content">
 			<div id="container"></div>

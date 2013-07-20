@@ -323,6 +323,11 @@ $string['copyitemtocourse'] = 'Copy to course';
 $string['desp_language'] = 'Desp Language';
 $string['cofigureblock'] = "Configure Block";
 $string['selectitems'] = "Select items";
+$string['cofigureblock_text'] = "Choose text";
+$string['cofigureblock_header'] = "Choose headline";
+$string['cofigureblock_item'] = "Choose item";
+$string['cofigureblock_media'] = "Choose media";
+$string['cofigureblock_personalinfo'] = "Choose personal info";
 
 // Desp
 $string['back_to_desp'] = 'back to language portfolio';

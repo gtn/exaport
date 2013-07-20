@@ -95,6 +95,8 @@ function get_form_items($id, $block_data=array()) {
 	$content .= '</td></tr>';
 	$content .= '</table>';	
 	$content .= '</form>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_item','block_exaport').'")</script>';	
 
 	return $content;
 };
@@ -132,6 +134,8 @@ function get_form_text($id, $block_data=array()) {
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_text','block_exaport').'")</script>';
 
 	$content .= tinyMCE_enable_script('block_text');
 
@@ -155,6 +159,8 @@ function get_form_headline($id, $block_data=array()) {
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_header','block_exaport').'")</script>';
 
 	return $content;
 }
@@ -235,6 +241,8 @@ if ($USER->picture) {
 	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_personalinfo','block_exaport').'")</script>';
 
 	$content .= tinyMCE_enable_script('block_intro');
 	
@@ -294,6 +302,8 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_media','block_exaport').'")</script>';	
 	return $content;
 }
 

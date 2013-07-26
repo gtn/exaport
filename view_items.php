@@ -151,7 +151,8 @@ echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$cours
 
 echo '<br />';
 echo todo_string('new').': ';
-echo 'Folder ';
+echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?action=add&courseid='.$courseid.'&pid='.$categoryid.'">'.
+	get_string("category", "block_exaport")."</a> ";
 echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=link">'.
 	get_string("link", "block_exaport")."</a> ";
 echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=file">'.
@@ -233,6 +234,11 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 			$table->data[$item_i]['type'] = 'folder';
 			$table->data[$item_i]['name'] = 
 				'<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id.'">'.$category->name.'</a>';
+
+			$table->data[$item_i][] = null;
+			$table->data[$item_i][] = null;
+			$table->data[$item_i]['icons'] = 
+				'<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit"><img src="'.$CFG->wwwroot.'/pix/t/edit.gif" class="iconsmall" alt="'.get_string("edit").'" /></a> ';
 		}
 	}
 

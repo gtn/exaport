@@ -34,6 +34,7 @@ $confirm = optional_param("confirm", "", PARAM_BOOL);
 $backtype = optional_param('backtype', 'all', PARAM_ALPHA);
 $compids = optional_param('compids', '', PARAM_TEXT);
 $backtype = block_exaport_check_item_type($backtype, true);
+$categoryid = optional_param('categoryid', 0, PARAM_INT);
 
 if (!confirm_sesskey()) {
 	print_error("badsessionkey", "block_exaport");
@@ -94,7 +95,7 @@ if ($existing && $comp) {
 	if (!$competences)
 		$existing->compids = null;
 }
-$returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&type=" . $backtype;
+$returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&categoryid=" . $categoryid;
 
 // delete item
 if ($action == 'delete') {
@@ -105,8 +106,8 @@ if ($action == 'delete') {
 		block_exaport_do_delete($existing, $returnurl, $courseid);
 		redirect($returnurl);
 	} else {
-		$optionsyes = array('id' => $id, 'action' => 'delete', 'confirm' => 1, 'backtype' => $backtype, 'sesskey' => sesskey(), 'courseid' => $courseid);
-		$optionsno = array('userid' => $existing->userid, 'courseid' => $courseid, 'type' => $backtype);
+		$optionsyes = array('id' => $id, 'action' => 'delete', 'confirm' => 1, 'backtype' => $backtype, 'categoryid' => $categoryid, 'sesskey' => sesskey(), 'courseid' => $courseid);
+		$optionsno = array('userid' => $existing->userid, 'courseid' => $courseid, 'type' => $backtype, 'categoryid' => $categoryid);
 
 		block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
 		// ev. noch eintrag anzeigen!!!
@@ -243,7 +244,7 @@ switch ($action) {
 	case 'add':
 		$post->action = $action;
 		$post->courseid = $courseid;
-		$post->categoryid = optional_param('categoryid', 0, PARAM_INT);
+		$post->categoryid = $categoryid;
 
 		$strAction = get_string('new');
 

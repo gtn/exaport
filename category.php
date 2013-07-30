@@ -11,6 +11,47 @@ block_exaport_setup_default_categories();
 $url = '/blocks/exaport/category.php?courseid='.$courseid;
 $PAGE->set_url($url);
 
+if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
+	$id = optional_param('id', 0, PARAM_INT);
+	
+	$category = $DB->get_record("block_exaportcate", array('id'=>$id));
+	if (!$category) die(todo_string('category_not_found'));
+	
+	if (optional_param('confirm', 0, PARAM_INT)) {
+		if (!$DB->delete_records('block_exaportcate', array('id'=>$id,"userid"=>$USER->id)))
+		{
+			$message = "Could not delete your record";
+		}
+		else
+		{
+			$conditions = array("categoryid" => $id);
+			if ($entries = $DB->get_records_select('block_exaportitem', null, $conditions, '', 'id')) {
+				foreach ($entries as $entry) {
+					$DB->delete_records('block_exaportitemshar', array('itemid'=>$entry->id));
+				}
+			}
+			$DB->delete_records('block_exaportitem', array('categoryid'=>$delid));
+			
+			add_to_log($courseid, "bookmark", "delete category", "", $newentry->id);
+			$message = get_string("categorydeleted","block_exaport");
+		}
+	}
+
+	$optionsyes = array('action'=>'delete', 'courseid' => $courseid, 'confirm'=>1, 'sesskey'=>sesskey(), 'id'=>$id);
+	$optionsno = array('courseid'=>$courseid, 'categoryid'=>$category->pid);
+	
+	$strbookmarks = get_string("mybookmarks", "block_exaport");
+	$strcat = get_string("categories", "block_exaport");
+
+	block_exaport_print_header("categories");
+	
+	echo '<br />';
+	echo $OUTPUT->confirm(get_string("deletecategroyconfirm", "block_exaport"), new moodle_url('category.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
+	
+	$OUTPUT->footer();
+
+	exit;
+}
 
 
 require_once("$CFG->libdir/formslib.php");

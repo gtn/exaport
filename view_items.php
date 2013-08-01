@@ -396,8 +396,8 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 			<div class="excomdos_tile">
 				<div class="excomdos_tilehead">
 					<span class="excomdos_tileinfo">
-						File
-						<br><?php echo userdate($item->timemodified); ?>
+						<?php echo get_string($item->type, "block_exaport"); ?>
+						<br><span class="excomdos_tileinfo_time"><?php echo userdate($item->timemodified); ?></span>
 					</span>
 					<span class="excomdos_tileedit">
 						<?php 
@@ -410,7 +410,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 					</span>
 			</div>
 			<div class="excomdos_tileimage">
-				<a href="<?php echo $url; ?>"><img src="pix/bild.jpg"></a>
+				<a href="<?php echo $url; ?>"><img src="<?php echo $CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id; ?>" /></a>
 			</div>
 			<div class="exomdos_tiletitle">
 				<a href="<?php echo $url; ?>"><?php echo $item->name; ?></a>

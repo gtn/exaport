@@ -105,26 +105,35 @@ box-shadow:         0px 0px 5px rgba(50, 50, 50, 0.21);
 .excomdos_cont .excomdos_tileimage {
 	padding-bottom: 0.2em;
 	height: 7.361em;
+	width: 12.5em;
 	text-align: center;
-
 }
 
 .excomdos_cont .excomdos_tilehead {
 	font-size: 0.9rem;
-	padding-bottom: 3em;
+	padding-bottom: 0.3em;
+	position: relative;
 }
 
 .excomdos_cont .excomdos_tileimage img {
-	width:12.5em;
+	max-width: 12.5em;
+	max-height: 7.361em;
 }
 
 
 .excomdos_cont .excomdos_tilehead .excomdos_tileinfo {
-	float:left;
+}
+.excomdos_cont .excomdos_tilehead .excomdos_tileinfo_time {
+	font-size: 70%;
+	display: block;
+	overflow: hidden;
 }
 
 .excomdos_cont .excomdos_tilehead .excomdos_tileedit {
-	float:right;
+	display: block;
+	position: absolute;
+	right: 0;
+	top: 0;
 }
 
 

@@ -90,12 +90,7 @@ foreach ($categories as $category) {
 }
 
 // the main root category
-$rootCategory = (object) array(
-	'id' => 0,
-	'pid' => -999,
-	'name' => 'root',
-	'item_cnt' => 'todo'
-);
+$rootCategory = block_exaport_get_root_category();
 $categories[0] = $rootCategory;
 
 // what's the current category? invalid / no category = root

@@ -629,3 +629,12 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
         $DB->insert_record("block_exaportuser", $newuserpreferences);
     }
 }
+
+function block_exaport_get_root_category() {
+	return (object) array(
+		'id' => 0,
+		'pid' => -999,
+		'name' => todo_string('root'),
+		'item_cnt' => 'todo'
+	);
+}

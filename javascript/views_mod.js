@@ -299,8 +299,12 @@ var exaportViewEdit = {};
 		*/
 		var header_content = '';
 
+		if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
+			data.item = portfolioItems[data.itemid];
+		}
 		if (data.itemid && data.item) {  
 			data.type = 'item';
+			console.log(data.item);
 
 			var itemData = data.item;
 			var ilink=itemData.link
@@ -311,7 +315,9 @@ var exaportViewEdit = {};
 					'<div id="id_holder" style="display:none;"></div>' +	
 					'<div class="item_info" style="overflow: hidden;">' +
 					'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
-					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"></div>' +
+					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">' +
+					'<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">' +
+					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />'+ ilink + 
 					$E.translate('comments')+': '+itemData.comments+'<br />' +
@@ -323,20 +329,15 @@ var exaportViewEdit = {};
 					'<div id="id_holder" style="display:none;"></div>' +	
 					'<div class="item_info" style="overflow: hidden;">' +
 					'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
-					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"></div>' +
+					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">' +
+					'<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">' +
+					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
 					$E.translate('comments')+': '+itemData.comments+'<br />' +
 					'</div></div>'
 				);
 			}
-			
-			if ((itemData.type == 'link') || ((itemData.type == 'file') && (itemData.mimetype.indexOf('image') + 1)))
-				$item.find('div.picture').append('<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">');
-/*			else if (itemData.type == 'link') {
-				$item.find('div.picture').css('height','160px');
-				$item.find('div.picture').append('<iframe id="link_thumbnail" src="'+itemData.link+'" scrolling="no"></iframe>');
-				}; /**/
 		} else if (data.type == 'personal_information') {
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +

@@ -117,15 +117,13 @@ if ($action == 'delete') {
 	}
 }
 
-$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments, files.mimetype as mimetype".
+$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments".
 	 " from {block_exaportitem} i".
 	 " left join {block_exaportcate} ic on i.categoryid = ic.id".
 	 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-	 " left join {files} files on (files.itemid = i.id and files.filearea='item_file' AND ".
-	 " files.filesize>0 AND files.userid = i.userid)".
 	 " where i.userid=?".
-	 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, files.mimetype".
+	 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name".
 	 " ORDER BY i.name";
 	 //echo $query;
 $portfolioItems = $DB->get_records_sql($query, array($USER->id));
@@ -134,7 +132,10 @@ if (!$portfolioItems) {
 }
 
 foreach ($portfolioItems as &$item) {
-	if (null == $item->cname_parent) {
+	if (null == $item->cname) {
+		$item->category = format_string(block_exaport_get_root_category()->name);
+		$item->catid = 0;
+	} elseif (null == $item->cname_parent) {
 		$item->category = format_string($item->cname);
 	} else {
 		//$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
@@ -425,7 +426,7 @@ if ($editform->is_cancelled()) {
 				$ret = new stdClass;
 				$ret->ok = true;
 				file_prepare_draft_area($view->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
-				$ret->blocks = json_encode(get_view_blocks($view));
+				$ret->blocks = json_encode(get_view_blocks($view, $portfolioItems));
 				
 				echo json_encode($ret);
 				exit;
@@ -557,22 +558,9 @@ switch ($action) {
 		print_error("unknownaction", "block_exaport");	                	            
 }
 
-function get_view_blocks($view) {
+function get_view_blocks($view, $portfolioItems) {
 	global $DB, $USER;
 	
-	$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments, files.mimetype as mimetype".
-		 " from {block_exaportitem} i".
-		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
-		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-		 " left join {files} files on (files.itemid = i.id and files.filearea='item_file' AND ".
-		 " files.filesize>0 AND files.userid = i.userid)".
-		 " where i.userid=?".
-		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, files.mimetype".
-		 " ORDER BY i.name";
-		 //echo $query;
-	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
-
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
 		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
@@ -589,7 +577,7 @@ function get_view_blocks($view) {
 }
 
 if ($view) {
-	$postView->blocks = json_encode(get_view_blocks($view));
+	$postView->blocks = json_encode(get_view_blocks($view, $portfolioItems));
 }
 
 require_once $CFG->libdir.'/editor/tinymce/lib.php';
@@ -628,6 +616,7 @@ unset($value);
 ?>
 <script type="text/javascript">
 //<![CDATA[
+	var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
 	var sharedUsers = <?php echo json_encode($sharedUsers); ?>;
 	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 //]]>

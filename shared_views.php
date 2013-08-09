@@ -241,7 +241,7 @@ function exaport_print_views($views, $parsedsort) {
         }
     }
 
-    $sorticon = $parsedsort[1] . '.gif';
+    $sorticon = $parsedsort[1] . '.png';
     $table->head[$parsedsort[0]] .= " <img src=\"pix/$sorticon\" alt='" . get_string("updownarrow", "block_exaport") . "' />";
 
     $output = html_writer::table($table);

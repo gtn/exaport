@@ -30,10 +30,11 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 					$DB->delete_records('block_exaportitemshar', array('itemid'=>$entry->id));
 				}
 			}
-			$DB->delete_records('block_exaportitem', array('categoryid'=>$delid));
+			$DB->delete_records('block_exaportitem', array('categoryid'=>$id));
 			
-			add_to_log($courseid, "bookmark", "delete category", "", $newentry->id);
-			$message = get_string("categorydeleted","block_exaport");
+			add_to_log($courseid, "bookmark", "delete category", "", $category->id);
+			
+			redirect('view_items.php?courseid='.$courseid.'&categoryid='.$category->pid);
 		}
 	}
 
@@ -43,7 +44,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 	$strbookmarks = get_string("mybookmarks", "block_exaport");
 	$strcat = get_string("categories", "block_exaport");
 
-	block_exaport_print_header("categories");
+	block_exaport_print_header("bookmarks");
 	
 	echo '<br />';
 	echo $OUTPUT->confirm(get_string("deletecategroyconfirm", "block_exaport"), new moodle_url('category.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
@@ -83,7 +84,7 @@ $mform = new simplehtml_form();
 
 //Form processing and displaying is done here
 if ($mform->is_cancelled()) {
-	redirect('/blocks/exaport/view_items.php?courseid='.$courseid);
+	redirect('view_items.php?courseid='.$courseid.'&categoryid='.optional_param('pid', 0, PARAM_INT));
 } else if ($newEntry = $mform->get_data()) {
 	$newEntry->userid = $USER->id;
 	

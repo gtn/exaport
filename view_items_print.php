@@ -77,7 +77,7 @@ if ($parsedsort[1] == "desc") {
 } else {
 	$newsort = $sortkey.".desc";
 }
-$sorticon = $parsedsort[1].'.gif';
+$sorticon = $parsedsort[1].'.png';
 
 
 block_exaport_set_user_preferences(array('itemsort'=>$sort));

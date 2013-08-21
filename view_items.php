@@ -117,7 +117,7 @@ block_exaport_set_user_preferences(array('itemsort'=>$sort, 'view_items_layout'=
 
 echo '<div class="excomdos_cont">';
 
-echo todo_string('current_category').': ';
+echo block_exaport_get_string('current_category').': ';
 echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid=\'+this.value;">';
 echo '<option value="">';
 echo $rootCategory->name;
@@ -155,13 +155,13 @@ echo '</div>';
 echo '<div class="excomdos_changeview"><p>';
 			//<span>Zoom:</span>
 			//<span><img src="tilezoomin.png" alt="Zoom in" /><img src="tilezoomout.png" alt="Zoom out" class="excomdos_padlf" /></span>
-echo '<span>'.todo_string('change layout').':</span>';
+echo '<span>'.block_exaport_get_string('change_layout').':</span>';
 if ($layout == 'tiles') {
 	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$categoryid.'&layout=details">'.
-	'<img src="pix/view_list.png" alt="Tile View" /><br />'.todo_string("details", "block_exaport")."</a></span>";
+	'<img src="pix/view_list.png" alt="Tile View" /><br />'.block_exaport_get_string("details")."</a></span>";
 } else {
 	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$categoryid.'&layout=tiles">'.
-	'<img src="pix/view_tile.png" alt="Tile View" /><br />'.todo_string("tiles", "block_exaport")."</a></span>";
+	'<img src="pix/view_tile.png" alt="Tile View" /><br />'.block_exaport_get_string("tiles")."</a></span>";
 }
 
 echo '<span><a target="_blank" href="'.$CFG->wwwroot.'/blocks/exaport/view_items_print.php?courseid='.$courseid.'">'.
@@ -221,7 +221,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 			// if isn't parent category, show link to go to parent category
 			$item_i++;
 			$table->data[$item_i] = array();
-			$table->data[$item_i]['type'] = '<img src="pix/folder_32.png" alt="'.todo_string('category').'">';
+			$table->data[$item_i]['type'] = '<img src="pix/folder_32.png" alt="'.block_exaport_get_string('category').'">';
 			
 			$table->data[$item_i]['name'] = 
 				'<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$parentCategory->id.'">parent: '.$parentCategory->name.'</a>';
@@ -233,7 +233,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 			foreach ($categoriesByParent[$currentCategory->id] as $category) {
 				$item_i++;
 				$table->data[$item_i] = array();
-				$table->data[$item_i]['type'] = '<img src="pix/folder_32.png" alt="'.todo_string('category').'">';
+				$table->data[$item_i]['type'] = '<img src="pix/folder_32.png" alt="'.block_exaport_get_string('category').'">';
 				$table->data[$item_i]['name'] = 
 					'<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id.'">'.$category->name.'</a>';
 
@@ -349,7 +349,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 			<div class="excomdos_tile">
 				<div class="excomdos_tilehead">
 					<span class="excomdos_tileinfo">
-						<?php echo todo_string('category_up'); ?>
+						<?php echo block_exaport_get_string('category_up'); ?>
 						<br>
 					</span>
 			</div>
@@ -370,7 +370,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 				<div class="excomdos_tile">
 					<div class="excomdos_tilehead">
 						<span class="excomdos_tileinfo">
-							<?php echo todo_string('category'); ?>
+							<?php echo block_exaport_get_string('category'); ?>
 						</span>
 						<span class="excomdos_tileedit">
 							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>

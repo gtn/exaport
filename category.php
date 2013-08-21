@@ -15,7 +15,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 	$id = optional_param('id', 0, PARAM_INT);
 	
 	$category = $DB->get_record("block_exaportcate", array('id'=>$id));
-	if (!$category) die(todo_string('category_not_found'));
+	if (!$category) die(block_exaport_get_string('category_not_found'));
 	
 	if (optional_param('confirm', 0, PARAM_INT)) {
 		if (!$DB->delete_records('block_exaportcate', array('id'=>$id,"userid"=>$USER->id)))
@@ -69,7 +69,7 @@ class simplehtml_form extends moodleform {
         $mform->addElement('hidden', 'courseid');
 
         $mform->addElement('text', 'name', get_string('name'));
-        $mform->addRule('name', todo_string('not empty'), 'required', null, 'client');
+        $mform->addRule('name', block_exaport_get_string('titlenotemtpy'), 'required', null, 'client');
 
         $this->add_action_buttons();
     }

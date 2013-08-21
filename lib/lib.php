@@ -635,7 +635,7 @@ function block_exaport_get_root_category() {
 	return (object) array(
 		'id' => 0,
 		'pid' => -999,
-		'name' => todo_string('root'),
+		'name' => block_exaport_get_string('root_category'),
 		'item_cnt' => $DB->get_field_sql('
 			SELECT COUNT(i.id) AS item_cnt
 			FROM {block_exaportitem} i

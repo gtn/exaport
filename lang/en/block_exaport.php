@@ -393,5 +393,16 @@ $string['settings_allow_loginas_head'] = 'Allow login as';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
+
+$string['create_as_note'] = 'Create as Note';
+$string['category_not_found'] = 'Category not found';
+$string['root_category'] = 'Root Category';
+$string['current_category'] = 'Current Category';
+$string['change_layout'] = 'Change Layout';
+$string['details'] = 'Details';
+$string['tiles'] = 'Tiles';
+$string['category'] = 'Category';
+$string['category_up'] = 'Category Up';
+
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';

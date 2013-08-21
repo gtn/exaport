@@ -288,7 +288,7 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '</th></tr>';	
 	$content .= '<tr><th>';
 	$content .= '<input type="checkbox" tabindex="1" name="create_as_note" id="create_as_note" value="1"'.($action=='add'?' checked="checked"':'').' /> ';
-	$content .= '<label for="create_as_note">'.todo_string('create_as_note').'</label>';
+	$content .= '<label for="create_as_note">'.block_exaport_get_string('create_as_note').'</label>';
 	$content .= '</td></tr>';	
 	$content .= '<tr><th>';
 	$content .= '<label for="width">'.get_string('width','block_exaport').'</label>';	

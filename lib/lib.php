@@ -631,10 +631,16 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
 }
 
 function block_exaport_get_root_category() {
+	global $DB, $USER;
 	return (object) array(
 		'id' => 0,
 		'pid' => -999,
 		'name' => todo_string('root'),
-		'item_cnt' => 'todo'
+		'item_cnt' => $DB->get_field_sql('
+			SELECT COUNT(i.id) AS item_cnt
+			FROM {block_exaportitem} i
+			WHERE i.userid = ? AND i.categoryid = 0
+		', array($USER->id))
+
 	);
 }

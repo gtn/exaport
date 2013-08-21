@@ -55,14 +55,6 @@ if (!$course = $DB->get_record("course", $conditions)) {
 	print_error("invalidcourseid", "block_exaport");
 }
 
-if (!block_exaport_has_categories($USER->id)) {
-	block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
-	echo get_string("nocategories", "block_exaport"); 
-	echo $OUTPUT->footer();die;
-	//print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
-}
-
-
 $id = optional_param('id', 0, PARAM_INT);
 if ($id) {
 	$conditions = array("id" => $id, "userid" => $USER->id);

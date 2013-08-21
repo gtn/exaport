@@ -137,11 +137,11 @@ class block_exaport_item_edit_form extends moodleform {
 
         $conditions = array("userid" => $USER->id, "pid" => 0);
         $outercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
-        $categories = array();
+        $categories = array(
+			0 => block_exaport_get_root_category()->name
+		);
         if ($outercategories) {
-           $categories = rek_category_select_setup($outercategories, " ", $categories);
-        } else {
-            $categories[0] = get_string("nocategories", "block_exaport");
+           $categories = $categories + rek_category_select_setup($outercategories, " ", $categories);
         }
         $categorysselect->loadArray($categories);
     }

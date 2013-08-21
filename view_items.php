@@ -119,7 +119,10 @@ echo '<div class="excomdos_cont">';
 
 echo todo_string('current_category').': ';
 echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid=\'+this.value;">';
-echo '<option value="">'.$rootCategory->name.'</option>';
+echo '<option value="">';
+echo $rootCategory->name;
+if ($rootCategory->item_cnt) echo ' ('.$rootCategory->item_cnt.')';
+echo '</option>';
 function block_exaport_print_category_select($categoriesByParent, $currentCategoryid, $pid=0, $level=0) {
 	if (!isset($categoriesByParent[$pid])) return;
 
@@ -417,7 +420,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 		echo '</div>';
 	}
 } else {
-	echo block_exaport_get_string("nobookmarks".$type,"block_exaport");
+	echo block_exaport_get_string("nobookmarksall", "block_exaport");
 }
 
 echo "</div>";

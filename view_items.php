@@ -346,7 +346,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 		if ($parentCategory) {
 			$url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$parentCategory->id;
 			?>
-			<div class="excomdos_tile">
+			<div class="excomdos_tile excomdos_tile_category id-<?php echo $parentCategory->id; ?>">
 				<div class="excomdos_tilehead">
 					<span class="excomdos_tileinfo">
 						<?php echo block_exaport_get_string('category_up'); ?>
@@ -367,7 +367,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 			foreach ($categoriesByParent[$currentCategory->id] as $category) {
 				$url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id;
 				?>
-				<div class="excomdos_tile">
+				<div class="excomdos_tile excomdos_tile_category id-<?php echo $category->id; ?>">
 					<div class="excomdos_tilehead">
 						<span class="excomdos_tileinfo">
 							<?php echo block_exaport_get_string('category'); ?>
@@ -391,7 +391,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 		foreach ($items as $item) {
 			$url = $CFG->wwwroot.'/blocks/exaport/shared_item.php?courseid='.$courseid.'&access=portfolio/id/'.$USER->id.'&itemid='.$item->id;
 			?>
-			<div class="excomdos_tile">
+			<div class="excomdos_tile excomdos_tile_item id-<?php echo $item->id; ?>">
 				<div class="excomdos_tilehead">
 					<span class="excomdos_tileinfo">
 						<?php echo get_string($item->type, "block_exaport"); ?>

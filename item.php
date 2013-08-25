@@ -112,86 +112,20 @@ if ($action == 'delete') {
 	}
 }
 
-if (in_array($action, array('moveup', 'movetop', 'movedown', 'movebottom'))) {
-
+if ($action == 'movetocategory') {
 	if (!$existing) {
 		print_error("bookmarknotfound", "block_exaport");
 	}
+	confirm_sesskey();
+	
+	$DB->update_record('block_exaportitem', (object)array(
+		'id' => $existing->id,
+		'categoryid' => required_param('categoryid', PARAM_INT)
+	));
 
-	// check ordering
-	$query = "select i.id, i.type, i.sortorder" .
-			" from {block_exaportitem} i" .
-			" where i.userid = ? ORDER BY IF(sortorder>0,sortorder,99999)";
-
-	$items = $DB->get_records_sql($query, array($USER->id));
-
-	// fix sort order if needed
-	$i = 0;
-	foreach ($items as $item) {
-		$i++;
-		if ($item->sortorder != $i) {
-			$r = new object();
-			$r->id = $item->id;
-			$r->sortorder = $i;
-			update_record('block_exaportitem', $r);
-
-			$item->sortorder = $i;
-		}
-
-		if ($item->id == $existing->id) {
-			$existing->sortorder = $item->sortorder;
-		}
-	}
-
-
-	$sort_to_item = false;
-
-	if (in_array($action, array('movetop', 'movebottom'))) {
-		if ($action == 'movebottom')
-			$sort_to_item = end($items);
-		else
-			$sort_to_item = reset($items);
-	} else {
-		// on moving down search array backwards
-		if ($action == 'movedown')
-			$items = array_reverse($items);
-
-		foreach ($items as $item) {
-			if ($item->id == $existing->id)
-				break;
-
-			if (($backtype != $existing->type) || ($item->type == $existing->type))
-				$sort_to_item = $item;
-		}
-	}
-
-	if (!$sort_to_item) {
-		print_error("bookmarknotfound", "block_exaport");
-	}
-
-
-	if ($sort_to_item->sortorder > $existing->sortorder)
-		$change_sort_others = -1;
-	else
-		$change_sort_others = 1;
-
-	// update sorting other items that are between the 2
-	$query = "update {block_exaportitem} i set sortorder=sortorder+" . $change_sort_others .
-	" where i.userid = ? AND sortorder >= ? AND sortorder <= ?";
-	execute($query, array($USER->id, min($sort_to_item->sortorder, $existing->sortorder), max($sort_to_item->sortorder, $existing->sortorder)));
-
-	// update sortorder of moved item
-	$r = new object();
-	$r->id = $existing->id;
-	$r->sortorder = $sort_to_item->sortorder;
-	update_record('block_exaportitem', $r);
-
-	redirect($returnurl);
+	echo 'ok';
 	exit;
 }
-
-
-require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
 

@@ -132,6 +132,9 @@ if ($action == 'movetocategory') {
 	exit;
 }
 
+
+require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
+
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
 
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action));

@@ -11,10 +11,37 @@ block_exaport_setup_default_categories();
 $url = '/blocks/exaport/category.php?courseid='.$courseid;
 $PAGE->set_url($url);
 
-if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
-	$id = optional_param('id', 0, PARAM_INT);
+if (optional_param('action', '', PARAM_ALPHA) == 'movetocategory') {
+	confirm_sesskey();
+
+	$category = $DB->get_record("block_exaportcate", array(
+		'id' => required_param('id', PARAM_INT),
+		'userid' => $USER->id
+	));
+	if (!$category) {
+		die(block_exaport_get_string('category_not_found'));
+	}
+
+	if (!$targetCategory = block_exaport_get_category(required_param('categoryid', PARAM_INT))) {
+		die('target category not found');
+	}
 	
-	$category = $DB->get_record("block_exaportcate", array('id'=>$id));
+	$DB->update_record('block_exaportcate', (object)array(
+		'id' => $category->id,
+		'pid' => $targetCategory->id
+	));
+
+	echo 'ok';
+	exit;
+}
+
+if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
+	$id = required_param('id', PARAM_INT);
+	
+	$category = $DB->get_record("block_exaportcate", array(
+		'id' => $id,
+		'userid' => $USER->id
+	));
 	if (!$category) die(block_exaport_get_string('category_not_found'));
 	
 	if (optional_param('confirm', 0, PARAM_INT)) {

@@ -121,7 +121,7 @@ echo block_exaport_get_string('current_category').': ';
 echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid=\'+this.value;">';
 echo '<option value="">';
 echo $rootCategory->name;
-if ($rootCategory->item_cnt) echo ' ('.$rootCategory->item_cnt.')';
+if ($rootCategory->item_cnt) echo ' ('.$rootCategory->item_cnt.' '.block_exaport_get_string($rootCategory->item_cnt == 1?'item':'items').')';
 echo '</option>';
 function block_exaport_print_category_select($categoriesByParent, $currentCategoryid, $pid=0, $level=0) {
 	if (!isset($categoriesByParent[$pid])) return;
@@ -131,7 +131,7 @@ function block_exaport_print_category_select($categoriesByParent, $currentCatego
 		if ($level)
 			echo str_repeat('&nbsp;', 4*$level).' &rarr;&nbsp; ';
 		echo $category->name;
-		if ($category->item_cnt) echo ' ('.$category->item_cnt.')';
+		if ($category->item_cnt) echo ' ('.$category->item_cnt.' '.block_exaport_get_string($category->item_cnt == 1?'item':'items').')';
 		echo '</option>';
 		block_exaport_print_category_select($categoriesByParent, $currentCategoryid,
 			$category->id, $level+1);

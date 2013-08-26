@@ -9,7 +9,7 @@ document.getElementById("long-preview-" + i).style.display = "none";
 }
 
 jQueryExaport(function($){
-	$(".excomdos_tiletable .excomdos_tile_item").draggable({
+	$(".excomdos_tiletable .excomdos_tile").draggable({
 		scroll: true, // scroll when dragging
 		helper: "clone",
 		start: function( event, ui ) { // when dragging
@@ -22,8 +22,11 @@ jQueryExaport(function($){
 		activeClass: "ui-state-active",
 		hoverClass: "ui-state-hover",
 		drop: function( event, ui ) {
+			// dropping a category or an item
+			var moveCat = ui.draggable.is('.excomdos_tile_category');
+
 			$.ajax({
-				url: M.cfg.wwwroot + '/blocks/exaport/item.php',
+				url: M.cfg.wwwroot + '/blocks/exaport/' + (moveCat ? 'category.php' : 'item.php'),
 				type: 'POST',
 				data: {
 					action: 'movetocategory',

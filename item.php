@@ -113,14 +113,19 @@ if ($action == 'delete') {
 }
 
 if ($action == 'movetocategory') {
-	if (!$existing) {
-		print_error("bookmarknotfound", "block_exaport");
-	}
 	confirm_sesskey();
+
+	if (!$existing) {
+		die(block_exaport_get_string('bookmarknotfound'));
+	}
 	
+	if (!$targetCategory = block_exaport_get_category(required_param('categoryid', PARAM_INT))) {
+		die('target category not found');
+	}
+
 	$DB->update_record('block_exaportitem', (object)array(
 		'id' => $existing->id,
-		'categoryid' => required_param('categoryid', PARAM_INT)
+		'categoryid' => $targetCategory->id
 	));
 
 	echo 'ok';

@@ -630,6 +630,18 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
     }
 }
 
+function block_exaport_get_category($id) {
+	global $USER, $DB;
+	
+	if ($id == 0)
+		return block_exaport_get_root_category();
+		
+	return $DB->get_record("block_exaportcate", array(
+		'id' => $id,
+		'userid' => $USER->id
+	));
+}
+
 function block_exaport_get_root_category() {
 	global $DB, $USER;
 	return (object) array(

@@ -292,6 +292,7 @@ $string['viewlayout9'] = "Larger centre columns";
 $string['viewlayout10'] = "Equal widths";
 $string['personalinformation'] = "Personal Information";
 $string['headertext'] = "Headertext";
+$string['item'] = "Item";
 $string['items'] = "Items";
 $string['media'] = "Media";
 $string['fieldstoshow'] = "Fields to show";

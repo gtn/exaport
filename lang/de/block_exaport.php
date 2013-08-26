@@ -367,6 +367,7 @@ $string['viewlayout9'] = "Mittlere Spalte breiter";
 $string['viewlayout10'] = "Gleiche Breite";
 $string['personalinformation'] = "Persönliche Information";
 $string['headertext'] = "Kopfzeile";
+$string['item'] = "Artefakt";
 $string['items'] = "Artefakte";
 $string['fieldstoshow'] = "Anzuzeigende Felder";
 $string['listofartefacts'] = "W&aumlhle ein Element aus";

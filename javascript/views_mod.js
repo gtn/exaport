@@ -291,6 +291,7 @@ var exaportViewEdit = {};
 			success: function(res) {
 				var data = JSON.parse(res);
 				$('form :input[name=blocks]').val(data.blocks);
+				console.log('success');
 				exaportViewEdit.resetViewContent();
 				overlay.hide();
 			}
@@ -343,12 +344,15 @@ var exaportViewEdit = {};
 		*/
 		var header_content = '';
 
+		console.log('item');
+		console.log(data);
 		if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
 			data.item = portfolioItems[data.itemid];
 		}
+		console.log(data);
 		if (data.itemid && data.item) {  
 			data.type = 'item';
-			// console.log(data.item);
+			console.log(data);
 
 			var itemData = data.item;
 			var ilink=itemData.link

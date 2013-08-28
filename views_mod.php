@@ -117,77 +117,6 @@ if ($action == 'delete') {
 	}
 }
 
-$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments".
-	 " from {block_exaportitem} i".
-	 " left join {block_exaportcate} ic on i.categoryid = ic.id".
-	 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-	 " where i.userid=?".
-	 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name".
-	 " ORDER BY i.name";
-	 //echo $query;
-$portfolioItems = $DB->get_records_sql($query, array($USER->id));
-if (!$portfolioItems) {
-	$portfolioItems = array();
-}
-
-foreach ($portfolioItems as &$item) {
-	if (null == $item->cname) {
-		$item->category = format_string(block_exaport_get_root_category()->name);
-		$item->catid = 0;
-	} elseif (null == $item->cname_parent) {
-		$item->category = format_string($item->cname);
-	} else {
-		//$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
-		$catid= $item->catid;
-			$catname = $item->cname;
-			$item->category = "";
-			do{
-				$conditions = array("userid" => $USER->id, "id" => $catid);
-				$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
-				foreach($cats as $cat){
-					if($item->category == "")
-						$item->category =format_string($cat->name);
-					else
-						$item->category =format_string($cat->name)." &rArr; ".$item->category;
-					$catid = $cat->pid;
-			}
-			
-			}while ($cat->pid != 0);
-	}
-	
-	//get competences of the item
-	$item->userid = $USER->id;
-	
-	$comp = block_exaport_check_competence_interaction();
-	if($comp){
-		$array = block_exaport_get_competences($item, 0);
-	
-		if(count($array)>0){
-			$competences = "";
-			foreach($array as $element){
-				$conditions = array("id" => $element->descid);
-				$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
-
-				if($competencesdb != null){
-					$competences .= $competencesdb->title.'<br>';
-				}
-			}
-			$competences = str_replace("\r", "", $competences);
-			$competences = str_replace("\n", "", $competences);
-			$competences = str_replace("\"", "&quot;", $competences);
-			$competences = str_replace("'", "&prime;", $competences);		
-				
-			$item->competences = $competences;
-		}
-	}
-	
-	unset($item->userid);
-	
-	unset($item->cname);
-	unset($item->cname_parent);
-}
-unset($item);
 
 
 if ($view) {
@@ -426,7 +355,7 @@ if ($editform->is_cancelled()) {
 				$ret = new stdClass;
 				$ret->ok = true;
 				file_prepare_draft_area($view->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
-				$ret->blocks = json_encode(get_view_blocks($view, $portfolioItems));
+				$ret->blocks = json_encode(block_exaport_get_view_blocks($view));
 				
 				echo json_encode($ret);
 				exit;
@@ -558,8 +487,10 @@ switch ($action) {
 		print_error("unknownaction", "block_exaport");	                	            
 }
 
-function get_view_blocks($view, $portfolioItems) {
+function block_exaport_get_view_blocks($view) {
 	global $DB, $USER;
+	
+	$portfolioItems = block_exaport_get_portfolio_items();
 	
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
@@ -576,8 +507,85 @@ function get_view_blocks($view, $portfolioItems) {
 	return $blocks;
 }
 
+function block_exaport_get_portfolio_items() {
+	global $DB, $USER;
+	
+	$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments".
+		 " from {block_exaportitem} i".
+		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
+		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
+		 " where i.userid=?".
+		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name".
+		 " ORDER BY i.name";
+		 //echo $query;
+	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
+	if (!$portfolioItems) {
+		$portfolioItems = array();
+	}
+
+	foreach ($portfolioItems as &$item) {
+		if (null == $item->cname) {
+			$item->category = format_string(block_exaport_get_root_category()->name);
+			$item->catid = 0;
+		} elseif (null == $item->cname_parent) {
+			$item->category = format_string($item->cname);
+		} else {
+			//$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
+			$catid= $item->catid;
+				$catname = $item->cname;
+				$item->category = "";
+				do{
+					$conditions = array("userid" => $USER->id, "id" => $catid);
+					$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
+					foreach($cats as $cat){
+						if($item->category == "")
+							$item->category =format_string($cat->name);
+						else
+							$item->category =format_string($cat->name)." &rArr; ".$item->category;
+						$catid = $cat->pid;
+				}
+				
+				}while ($cat->pid != 0);
+		}
+		
+		//get competences of the item
+		$item->userid = $USER->id;
+		
+		$comp = block_exaport_check_competence_interaction();
+		if($comp){
+			$array = block_exaport_get_competences($item, 0);
+		
+			if(count($array)>0){
+				$competences = "";
+				foreach($array as $element){
+					$conditions = array("id" => $element->descid);
+					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+					if($competencesdb != null){
+						$competences .= $competencesdb->title.'<br>';
+					}
+				}
+				$competences = str_replace("\r", "", $competences);
+				$competences = str_replace("\n", "", $competences);
+				$competences = str_replace("\"", "&quot;", $competences);
+				$competences = str_replace("'", "&prime;", $competences);		
+					
+				$item->competences = $competences;
+			}
+		}
+		
+		unset($item->userid);
+		
+		unset($item->cname);
+		unset($item->cname_parent);
+	}
+	
+	return $portfolioItems;
+}
+
 if ($view) {
-	$postView->blocks = json_encode(get_view_blocks($view, $portfolioItems));
+	$postView->blocks = json_encode(block_exaport_get_view_blocks($view));
 }
 
 require_once $CFG->libdir.'/editor/tinymce/lib.php';
@@ -616,7 +624,7 @@ unset($value);
 ?>
 <script type="text/javascript">
 //<![CDATA[
-	var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
+	var portfolioItems = <?php echo json_encode(block_exaport_get_portfolio_items()); ?>;
 	var sharedUsers = <?php echo json_encode($sharedUsers); ?>;
 	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 //]]>

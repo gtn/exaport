@@ -325,11 +325,7 @@ $string['version_5.2.0_needed'] = NULL;
 // Competences
 $string['competenceinteraction'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
 $string['opencomps'] = 'Kompetenzen ausw&auml;hlen';
-$string['selectcomps'] = 'W&auml;hle hier die Kompetenzen, die zu Deinem Upload passen!';
-$string['expandcomps'] = 'Alle &ouml;ffnen';
-$string['contactcomps'] = 'Alle schlie&szlig;en';
-$string['opencomps'] = 'Kompetenzen ausw&auml;hlen';
-$string['selectcomps'] = 'W&auml;hle hier die Kompetenzen, die zu Deinem Upload passen!';
+$string['selectcomps'] = 'W&auml;hle hier die Kompetenzen, die zu deinem Upload passen!';
 $string['expandcomps'] = 'Alle &ouml;ffnen';
 $string['contactcomps'] = 'Alle schlie&szlig;en';
 $string['studentcomps'] = 'Hier kannst du einsch&auml;tzen, ob folgende Kompetenzen durch Dein Artefakt erreicht wurden.';
@@ -398,3 +394,13 @@ $string['mediacontent'] = 'URL or embed code *';
 $string['height'] = 'Height';
 $string['width'] = 'Width';
 $string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
+
+$string['create_as_note'] = 'Als Artefakt hinzufügen';
+$string['category_not_found'] = 'Kategorie nicht gefunden';
+$string['root_category'] = 'Hauptkategorie';
+$string['current_category'] = 'Aktuelle Kategorie';
+$string['change_layout'] = 'Darstellung wechseln';
+$string['details'] = 'Details';
+$string['tiles'] = 'Kacheln';
+$string['category'] = 'Kategorie';
+$string['category_up'] = 'übergeordnete Kategorie';

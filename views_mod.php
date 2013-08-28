@@ -396,8 +396,8 @@ if ($editform->is_cancelled()) {
 				// media process
 				if ($block->type=='media') {
 					if (!empty($block->contentmedia)) {
-						if (!$block->width) $block->width = 360; else $block->width = (int) $block->width;
-						if (!$block->height) $block->height = 240; else $block->height = (int) $block->height;
+						if (empty($block->width)) $block->width = 360; else $block->width = (int) $block->width;
+						if (empty($block->height)) $block->height = 240; else $block->height = (int) $block->height;
 						$block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
 					}
 					

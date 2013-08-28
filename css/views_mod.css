@@ -327,3 +327,13 @@ table.mceLayout {
 input.submit {
 	cursor: pointer;
 }
+
+.not-empty-check {
+	color: red;
+	display: none;
+	padding: 5px;
+}
+
+input[name=block_title], input[name=headline] {
+	width: 95%
+}

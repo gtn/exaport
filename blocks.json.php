@@ -152,6 +152,7 @@ function get_form_headline($id, $block_data=array()) {
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
 	$content .= '<input name="headline" id="headline" type="text" value="'.s($block_data->text?$block_data->text:"").'" default-text="'.get_string('view_specialitem_headline_defaulttext', 'block_exaport').'" /></div>';
+	$content .= '<div for="headline" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
@@ -262,6 +263,7 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';
 	$content .= '<input tabindex="1" type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
+	$content .= '<div for="block_title" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
 	$content .= '</td></tr>';	
 	$content .= '<tr><th>';
 	$content .= '<label for="mediacontent">'.get_string('mediacontent','block_exaport').'</label>';
@@ -289,7 +291,7 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '<tr><th>';
 	$content .= '<input type="checkbox" tabindex="1" name="create_as_note" id="create_as_note" value="1"'.($action=='add'?' checked="checked"':'').' /> ';
 	$content .= '<label for="create_as_note">'.block_exaport_get_string('create_as_note').'</label>';
-	$content .= '</td></tr>';	
+	$content .= '</td></tr>';
 	$content .= '<tr><th>';
 	$content .= '<label for="width">'.get_string('width','block_exaport').'</label>';	
 	$content .= ' <input type="text" tabindex="1" name="width" value="'.s($block_data->width?$block_data->width:"").'" id="block_width">';		

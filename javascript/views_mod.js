@@ -8,8 +8,40 @@ var exaportViewEdit = {};
 	var overlay = null;
 
 	$.extend(exaportViewEdit, {
+	
+		checkFields: function() {
+			var ok = true;
+			
+			$('#container').find('.not-empty-check').each(function(){
+				var input = $('#container').find('input[name='+$(this).attr('for')+']');
+				
+				if (input.length == 0) {
+					// input not found, ignore
+					$(this).hide();
+					return;
+				}
+				
+				if (input.val().length) {
+					// has value
+					$(this).hide();
+					return;
+				}
+				
+				// show error
+				$(this).show();
+				input.focus();
+				ok = false;
+				return false;
+			});
+
+			// all checks ok
+			return ok;
+		},
 		
 		addItem: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;	
 			var i = 0;
@@ -41,6 +73,9 @@ var exaportViewEdit = {};
 		},
 		
 		addText: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;
 			data = {};
@@ -59,6 +94,9 @@ var exaportViewEdit = {};
 		},
 
 		addHeadline: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;	
 			data = {};
@@ -75,6 +113,9 @@ var exaportViewEdit = {};
 		},
 
 		addPersonalInfo: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;		
 			data = {};
@@ -98,6 +139,9 @@ var exaportViewEdit = {};
 		},
 		
 		addMedia: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;	
 			data = {};
@@ -304,7 +348,7 @@ var exaportViewEdit = {};
 		}
 		if (data.itemid && data.item) {  
 			data.type = 'item';
-			console.log(data.item);
+			// console.log(data.item);
 
 			var itemData = data.item;
 			var ilink=itemData.link

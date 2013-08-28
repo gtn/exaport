@@ -357,7 +357,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 				<a href="<?php echo $url; ?>"><img src="pix/folder_tile.png"></a>
 			</div>
 			<div class="exomdos_tiletitle">
-				<a href="<?php echo $url; ?>">... <?php echo $parentCategory->name; ?></a>
+				<a href="<?php echo $url; ?>"><?php echo $parentCategory->name; ?></a>
 			</div>
 			</div>
 			<?php

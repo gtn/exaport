@@ -278,7 +278,7 @@ $string['desp_language'] = 'Desp Sprache';
 $string['back_to_desp'] = 'zur&uuml;ck zum d-ESP';
 $string['desp_mybookmarks'] = 'Mein Dossier';
 $string['desp_bookmarks'] = 'Mein Dossier';
-$string['desp_explaining'] = 'Alle Eintr&auml;ge im Dossier';
+$string['desp_explaining'] = 'Meine Artefakte';
 $string['desp_sharedbookmarks'] = 'ver&ouml;ffentlichte Dossiers';
 $string['desp_explainingnote'] = '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['desp_explaininglink'] = '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';

@@ -118,15 +118,23 @@ class block_exaport_item_edit_form extends moodleform {
         	$mform->setType('langid', PARAM_INT);
         }
         
-        if (!isset($this->_customdata['textfieldoptions'])) {
-        	$this->_customdata['textfieldoptions'] = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
-        }
-        $mform->addElement('editor', 'intro_editor', get_string('intro', 'block_exaport'), null, $this->_customdata['textfieldoptions']);
-        $mform->setType('intro_editor', PARAM_RAW);
-        if ($type == 'note')
-            $mform->addRule('intro_editor', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
-
-        $this->add_action_buttons();
+		if ($this->_customdata['useTextarea']) {
+			// it has iframe, show textfield, no editor
+			$mform->addElement('textarea', 'intro', get_string('intro', 'block_exaport'), 'rows="20" cols="50" style="width: 95%"');
+			$mform->setType('intro', PARAM_RAW);
+			if ($type == 'note')
+				$mform->addRule('intro', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
+		} else {
+			if (!isset($this->_customdata['textfieldoptions'])) {
+				$this->_customdata['textfieldoptions'] = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+			}
+			$mform->addElement('editor', 'intro_editor', get_string('intro', 'block_exaport'), null, $this->_customdata['textfieldoptions']);
+			$mform->setType('intro_editor', PARAM_RAW);
+			if ($type == 'note')
+				$mform->addRule('intro_editor', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
+		}
+		
+		$this->add_action_buttons();
     }
 
     function category_select_setup() {

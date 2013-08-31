@@ -137,7 +137,11 @@ require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
 
-$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action));
+$useTextarea = false;
+if ($existing && $existing->intro && preg_match('!<iframe!i', $existing->intro))
+	$useTextarea = true;
+
+$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'useTextarea'=>$useTextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action));
 
 if ($editform->is_cancelled()) {
 	redirect($returnurl);
@@ -150,7 +154,7 @@ if ($editform->is_cancelled()) {
 			$fromform->type = $type;
 			$fromform->compids = $compids;
 
-			block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions);
+			block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $useTextarea);
 			break;
 
 		case 'edit':
@@ -158,7 +162,7 @@ if ($editform->is_cancelled()) {
 				print_error("bookmarknotfound", "block_exaport");
 			}
 
-			block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions);
+			block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $useTextarea);
 			break;
 
 		default:
@@ -198,7 +202,8 @@ switch ($action) {
 		$post->compids = isset($existing->compids) ? $existing->compids : '';
 		$post->langid = $existing->langid;
 
-		$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+		if (!$useTextarea)
+			$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
 
 		$strAction = get_string('edit');
 		$post->url = $existing->url;
@@ -277,13 +282,15 @@ echo $OUTPUT->footer($course);
 /**
  * Update item in the database
  */
-function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions) {
+function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $useTextarea) {
 	global $CFG, $USER, $DB;
 
 	$post->timemodified = time();
-	$post->introformat = FORMAT_HTML;
-	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
-
+	if (!$useTextarea) {
+		$post->introformat = FORMAT_HTML;
+		$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+	}
+	
 	if(!empty($post->url)){
 		if ($post->url=='http://') $post->url="";
 		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
@@ -314,13 +321,14 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 /**
  * Write a new item into database
  */
-function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $textfieldoptions) {
+function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $useTextarea) {
 	global $CFG, $USER, $DB;
 
 	$post->userid = $USER->id;
 	$post->timemodified = time();
 	$post->courseid = $courseid;
-	$post->intro = '';
+	if (!$useTextarea)
+		$post->intro = '';
 	
 	if(!empty($post->url)){
 		if ($post->url=='http://') $post->url="";
@@ -328,9 +336,11 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 	}
 	// Insert the new blog entry.
 	if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
-		$post->introformat = FORMAT_HTML;
-		$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
-		$DB->update_record('block_exaportitem', $post);
+		if (!$useTextarea) {
+			$post->introformat = FORMAT_HTML;
+			$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+			$DB->update_record('block_exaportitem', $post);
+		}
 
 		if ($post->type == 'file') {
 			// save uploaded file in user filearea

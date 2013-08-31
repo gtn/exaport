@@ -124,7 +124,7 @@ $string['showcourseusers'] = 'Csak a kurzus felhasználóinak mutatása';
 $string['sharedpersons'] = 'Megosztott Portfólióval rendelkező felhasználók mutatása';
 $string['moodleimport'] = 'Importálás Moodle feladatokból';
 $string['nomoodleimportyet'] = 'Semmilyen feladat hozzárendelése nincsen!';
-$string['deletecategroyconfirm'] = 'Biztos, hogy törölni akarja ezt a kategóriát? Az összes bejegyzés a kategóriában törlődni fog!';
+$string['deletecategoryconfirm'] = 'Biztos, hogy törölni akarja ezt a kategóriát? Az összes bejegyzés a kategóriában törlődni fog!';
 $string['name'] = 'Név';
 
 // export/import

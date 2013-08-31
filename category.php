@@ -45,19 +45,35 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 	if (!$category) die(block_exaport_get_string('category_not_found'));
 	
 	if (optional_param('confirm', 0, PARAM_INT)) {
-		if (!$DB->delete_records('block_exaportcate', array('id'=>$id,"userid"=>$USER->id)))
+		function block_exaport_recursive_delete_category($id) {
+			global $DB;
+
+			// delete subcategories
+			if ($entries = $DB->get_records('block_exaportcate', array("pid" => $id))) {
+				foreach ($entries as $entry) {
+					block_exaport_recursive_delete_category($entry->id);
+				}
+			}
+			$DB->delete_records('block_exaportcate', array('pid'=>$id));
+
+			// delete itemsharing
+			if ($entries = $DB->get_records('block_exaportitem', array("categoryid" => $id))) {
+				foreach ($entries as $entry) {
+					$DB->delete_records('block_exaportitemshar', array('itemid'=>$entry->id));
+				}
+			}
+			
+			// delete items
+			$DB->delete_records('block_exaportitem', array('categoryid'=>$id));
+		}
+		block_exaport_recursive_delete_category($category->id);
+		
+		if (!$DB->delete_records('block_exaportcate', array('id'=>$category->id)))
 		{
 			$message = "Could not delete your record";
 		}
 		else
 		{
-			$conditions = array("categoryid" => $id);
-			if ($entries = $DB->get_records_select('block_exaportitem', null, $conditions, '', 'id')) {
-				foreach ($entries as $entry) {
-					$DB->delete_records('block_exaportitemshar', array('itemid'=>$entry->id));
-				}
-			}
-			$DB->delete_records('block_exaportitem', array('categoryid'=>$id));
 			
 			add_to_log($courseid, "bookmark", "delete category", "", $category->id);
 			
@@ -74,7 +90,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 	block_exaport_print_header("bookmarks");
 	
 	echo '<br />';
-	echo $OUTPUT->confirm(get_string("deletecategroyconfirm", "block_exaport"), new moodle_url('category.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
+	echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport", $category), new moodle_url('category.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
 	
 	$OUTPUT->footer();
 

@@ -124,7 +124,7 @@ $string['showcourseusers'] = 'Ukázat pouze účastníky kurzu';
 $string['sharedpersons'] = 'Osoby se sdíleným Portfoliem';
 $string['moodleimport'] = 'Import z Moodle-postupů';
 $string['nomoodleimportyet'] = 'V tuto chvíli nemáte žádný návrh v žádném z postupů!';
-$string['deletecategroyconfirm'] = 'Opravdu chcete smazat tuto kategorii? Všechny složky v této kategorii bude smazáno!';
+$string['deletecategoryconfirm'] = 'Opravdu chcete smazat tuto kategorii? Všechny složky v této kategorii bude smazáno!';
 $string['name'] = 'Název';
 
 // export/import

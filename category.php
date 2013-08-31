@@ -45,6 +45,8 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 	if (!$category) die(block_exaport_get_string('category_not_found'));
 	
 	if (optional_param('confirm', 0, PARAM_INT)) {
+		confirm_sesskey();
+		
 		function block_exaport_recursive_delete_category($id) {
 			global $DB;
 
@@ -82,7 +84,10 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 	}
 
 	$optionsyes = array('action'=>'delete', 'courseid' => $courseid, 'confirm'=>1, 'sesskey'=>sesskey(), 'id'=>$id);
-	$optionsno = array('courseid'=>$courseid, 'categoryid'=>$category->pid);
+	$optionsno = array(
+		'courseid'=>$courseid, 
+		'categoryid' => optional_param('back', '', PARAM_TEXT)=='same' ? $category->id : $category->pid
+	);
 	
 	$strbookmarks = get_string("mybookmarks", "block_exaport");
 	$strcat = get_string("categories", "block_exaport");
@@ -110,6 +115,7 @@ class simplehtml_form extends moodleform {
         $mform->addElement('hidden', 'id');
         $mform->addElement('hidden', 'pid');
         $mform->addElement('hidden', 'courseid');
+        $mform->addElement('hidden', 'back');
 
         $mform->addElement('text', 'name', get_string('name'));
         $mform->addRule('name', block_exaport_get_string('titlenotemtpy'), 'required', null, 'client');
@@ -127,17 +133,19 @@ $mform = new simplehtml_form();
 
 //Form processing and displaying is done here
 if ($mform->is_cancelled()) {
-	redirect('view_items.php?courseid='.$courseid.'&categoryid='.optional_param('pid', 0, PARAM_INT));
+	redirect('view_items.php?courseid='.$courseid.'&categoryid='.
+		(optional_param('back', '', PARAM_TEXT)=='same' ? optional_param('id', 0, PARAM_INT) : optional_param('pid', 0, PARAM_INT)));
 } else if ($newEntry = $mform->get_data()) {
 	$newEntry->userid = $USER->id;
 	
 	if ($newEntry->id) {
 		$DB->update_record("block_exaportcate", $newEntry);
 	} else {
-		$DB->insert_record("block_exaportcate", $newEntry);
+		$newEntry->id = $DB->insert_record("block_exaportcate", $newEntry);
 	}
 
-	redirect('view_items.php?courseid='.$courseid.'&categoryid='.$newEntry->pid);
+	redirect('view_items.php?courseid='.$courseid.'&categoryid='.
+		($newEntry->back=='same' ? $newEntry->id : $newEntry->pid));
 } else {
 	block_exaport_print_header("bookmarks");
 	
@@ -152,6 +160,7 @@ if ($mform->is_cancelled()) {
 	if (!$category) $category = new stdClass;
 	
 	$category->courseid = $courseid;
+	$category->back = optional_param('back', '', PARAM_TEXT);
 	if (empty($category->pid)) $category->pid = optional_param('pid', 0, PARAM_INT);
 
 	$mform->set_data($category);

@@ -117,7 +117,7 @@ block_exaport_set_user_preferences(array('itemsort'=>$sort, 'view_items_layout'=
 
 echo '<div class="excomdos_cont">';
 
-echo block_exaport_get_string('current_category').': ';
+echo block_exaport_get_string('categories').': ';
 echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid=\'+this.value;">';
 echo '<option value="">';
 echo $rootCategory->name;
@@ -169,6 +169,12 @@ echo '<span><a target="_blank" href="'.$CFG->wwwroot.'/blocks/exaport/view_items
 
 echo '</p></div></div>';
 		
+echo '<div class="excomdos_cat">';
+echo block_exaport_get_string('current_category').': ';
+echo '<b>'.$currentCategory->name.'</b> ';
+echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=edit&back=same"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
+echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=delete&back=same"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
+echo '</div>';
 
 $sql_sort = block_exaport_item_sort_to_sql($parsedsort);
 
@@ -241,7 +247,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 				$table->data[$item_i]['icons'] = 
 					'<span class="excomdos_listicons">'.
 					'<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
-					'<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&sesskey='.sesskey().'&action=delete"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'.
+					'<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'.
 					'</span>';
 			}
 		}
@@ -374,7 +380,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 						</span>
 						<span class="excomdos_tileedit">
 							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
-							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&sesskey='.sesskey().'&action=delete'; ?>"><img src="pix/del.png" alt="file"></a>
+							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete'; ?>"><img src="pix/del.png" alt="file"></a>
 						</span>
 				</div>
 				<div class="excomdos_tileimage">

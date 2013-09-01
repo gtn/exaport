@@ -76,7 +76,7 @@ block_exaport_setup_default_categories();
 $categories = $DB->get_records_sql('
 	SELECT c.id, c.name, c.pid, COUNT(i.id) AS item_cnt
 	FROM {block_exaportcate} c
-	LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id
+	LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
 	WHERE c.userid = ?
 	GROUP BY c.id
 	ORDER BY c.name ASC
@@ -185,7 +185,7 @@ $items = $DB->get_records_sql("
 		FROM {block_exaportitem} i
 		LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
 		WHERE i.userid = ? AND i.categoryid=?
-			AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))
+			AND ".block_exaport_get_item_where()."
 		GROUP BY i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
 		i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable
 		$sql_sort

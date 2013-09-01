@@ -95,7 +95,7 @@ $items = $DB->get_records_sql("
 	LEFT JOIN {block_exaportcate} ic on i.categoryid = ic.id
 	LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
 	WHERE i.userid = ?
-		AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))
+		AND ".block_exaport_get_item_where()."
 	GROUP BY i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
 	i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable
 	$sql_sort

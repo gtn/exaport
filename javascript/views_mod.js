@@ -45,7 +45,7 @@ var exaportViewEdit = {};
 			if (id != -1) 
 				newItem = lastclicked;	
 			var i = 0;
-			$('#item_list option:selected').each(function () {
+			$('#container input[name="add_items[]"]:checked').each(function () {
 				i = i+1;
 				if (i>1) {
 					var clone = $(newItem).clone();
@@ -255,7 +255,27 @@ var exaportViewEdit = {};
 				stop: function(e, ui){    
 				}		
 			});
+		},
 
+		setPopupTitle: function(title){
+			$("#block_form_title").html(title);
+		},
+
+		initAddItems: function(title){
+			$('#add-items-list .add-item').click(function(e){
+				var $input = $(this).find('input');
+				
+				if (!$(event.target).is(':input')) {
+					// toggle checkbox (if the user clicked the div and not the checkbox)
+					$input.prop('checked', !$input.prop('checked'));
+				}
+				
+				if ($input.prop('checked')) {
+					$(this).addClass('checked');
+				} else {
+					$(this).removeClass('checked');
+				}
+			});
 		}
 	});
 	
@@ -291,7 +311,6 @@ var exaportViewEdit = {};
 			success: function(res) {
 				var data = JSON.parse(res);
 				$('form :input[name=blocks]').val(data.blocks);
-				console.log('success');
 				exaportViewEdit.resetViewContent();
 				overlay.hide();
 			}
@@ -344,15 +363,11 @@ var exaportViewEdit = {};
 		*/
 		var header_content = '';
 
-		console.log('item');
-		console.log(data);
 		if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
 			data.item = portfolioItems[data.itemid];
 		}
-		console.log(data);
 		if (data.itemid && data.item) {  
 			data.type = 'item';
-			console.log(data);
 
 			var itemData = data.item;
 			var ilink=itemData.link

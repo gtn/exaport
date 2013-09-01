@@ -630,6 +630,11 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
     }
 }
 
+function block_exaport_get_item_where() {
+	// extra where for epop
+	return "(i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))";
+}
+
 function block_exaport_get_category($id) {
 	global $USER, $DB;
 	
@@ -651,7 +656,7 @@ function block_exaport_get_root_category() {
 		'item_cnt' => $DB->get_field_sql('
 			SELECT COUNT(i.id) AS item_cnt
 			FROM {block_exaportitem} i
-			WHERE i.userid = ? AND i.categoryid = 0
+			WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
 		', array($USER->id))
 
 	);

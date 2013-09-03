@@ -34,6 +34,7 @@ $confirm = optional_param("confirm", "", PARAM_BOOL);
 $backtype = optional_param('backtype', 'all', PARAM_ALPHA);
 $compids = optional_param('compids', '', PARAM_TEXT);
 $backtype = block_exaport_check_item_type($backtype, true);
+$categoryid = optional_param('categoryid', 0, PARAM_INT);
 
 if (!confirm_sesskey()) {
 	print_error("badsessionkey", "block_exaport");
@@ -53,14 +54,6 @@ $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
 	print_error("invalidcourseid", "block_exaport");
 }
-
-if (!block_exaport_has_categories($USER->id)) {
-	block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
-	echo get_string("nocategories", "block_exaport"); 
-	echo $OUTPUT->footer();die;
-	//print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
-}
-
 
 $id = optional_param('id', 0, PARAM_INT);
 if ($id) {
@@ -94,7 +87,7 @@ if ($existing && $comp) {
 	if (!$competences)
 		$existing->compids = null;
 }
-$returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&type=" . $backtype;
+$returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&categoryid=" . $categoryid;
 
 // delete item
 if ($action == 'delete') {
@@ -105,8 +98,8 @@ if ($action == 'delete') {
 		block_exaport_do_delete($existing, $returnurl, $courseid);
 		redirect($returnurl);
 	} else {
-		$optionsyes = array('id' => $id, 'action' => 'delete', 'confirm' => 1, 'backtype' => $backtype, 'sesskey' => sesskey(), 'courseid' => $courseid);
-		$optionsno = array('userid' => $existing->userid, 'courseid' => $courseid, 'type' => $backtype);
+		$optionsyes = array('id' => $id, 'action' => 'delete', 'confirm' => 1, 'backtype' => $backtype, 'categoryid' => $categoryid, 'sesskey' => sesskey(), 'courseid' => $courseid);
+		$optionsno = array('userid' => $existing->userid, 'courseid' => $courseid, 'type' => $backtype, 'categoryid' => $categoryid);
 
 		block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
 		// ev. noch eintrag anzeigen!!!
@@ -119,81 +112,23 @@ if ($action == 'delete') {
 	}
 }
 
-if (in_array($action, array('moveup', 'movetop', 'movedown', 'movebottom'))) {
+if ($action == 'movetocategory') {
+	confirm_sesskey();
 
 	if (!$existing) {
-		print_error("bookmarknotfound", "block_exaport");
+		die(block_exaport_get_string('bookmarknotfound'));
+	}
+	
+	if (!$targetCategory = block_exaport_get_category(required_param('categoryid', PARAM_INT))) {
+		die('target category not found');
 	}
 
-	// check ordering
-	$query = "select i.id, i.type, i.sortorder" .
-			" from {block_exaportitem} i" .
-			" where i.userid = ? ORDER BY IF(sortorder>0,sortorder,99999)";
+	$DB->update_record('block_exaportitem', (object)array(
+		'id' => $existing->id,
+		'categoryid' => $targetCategory->id
+	));
 
-	$items = $DB->get_records_sql($query, array($USER->id));
-
-	// fix sort order if needed
-	$i = 0;
-	foreach ($items as $item) {
-		$i++;
-		if ($item->sortorder != $i) {
-			$r = new object();
-			$r->id = $item->id;
-			$r->sortorder = $i;
-			update_record('block_exaportitem', $r);
-
-			$item->sortorder = $i;
-		}
-
-		if ($item->id == $existing->id) {
-			$existing->sortorder = $item->sortorder;
-		}
-	}
-
-
-	$sort_to_item = false;
-
-	if (in_array($action, array('movetop', 'movebottom'))) {
-		if ($action == 'movebottom')
-			$sort_to_item = end($items);
-		else
-			$sort_to_item = reset($items);
-	} else {
-		// on moving down search array backwards
-		if ($action == 'movedown')
-			$items = array_reverse($items);
-
-		foreach ($items as $item) {
-			if ($item->id == $existing->id)
-				break;
-
-			if (($backtype != $existing->type) || ($item->type == $existing->type))
-				$sort_to_item = $item;
-		}
-	}
-
-	if (!$sort_to_item) {
-		print_error("bookmarknotfound", "block_exaport");
-	}
-
-
-	if ($sort_to_item->sortorder > $existing->sortorder)
-		$change_sort_others = -1;
-	else
-		$change_sort_others = 1;
-
-	// update sorting other items that are between the 2
-	$query = "update {block_exaportitem} i set sortorder=sortorder+" . $change_sort_others .
-	" where i.userid = ? AND sortorder >= ? AND sortorder <= ?";
-	execute($query, array($USER->id, min($sort_to_item->sortorder, $existing->sortorder), max($sort_to_item->sortorder, $existing->sortorder)));
-
-	// update sortorder of moved item
-	$r = new object();
-	$r->id = $existing->id;
-	$r->sortorder = $sort_to_item->sortorder;
-	update_record('block_exaportitem', $r);
-
-	redirect($returnurl);
+	echo 'ok';
 	exit;
 }
 
@@ -202,7 +137,11 @@ require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
 
-$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action));
+$useTextarea = false;
+if ($existing && $existing->intro && preg_match('!<iframe!i', $existing->intro))
+	$useTextarea = true;
+
+$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'useTextarea'=>$useTextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action));
 
 if ($editform->is_cancelled()) {
 	redirect($returnurl);
@@ -215,7 +154,7 @@ if ($editform->is_cancelled()) {
 			$fromform->type = $type;
 			$fromform->compids = $compids;
 
-			block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions);
+			block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $useTextarea);
 			break;
 
 		case 'edit':
@@ -223,7 +162,7 @@ if ($editform->is_cancelled()) {
 				print_error("bookmarknotfound", "block_exaport");
 			}
 
-			block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions);
+			block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $useTextarea);
 			break;
 
 		default:
@@ -243,6 +182,7 @@ switch ($action) {
 	case 'add':
 		$post->action = $action;
 		$post->courseid = $courseid;
+		$post->categoryid = $categoryid;
 
 		$strAction = get_string('new');
 
@@ -262,7 +202,8 @@ switch ($action) {
 		$post->compids = isset($existing->compids) ? $existing->compids : '';
 		$post->langid = $existing->langid;
 
-		$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+		if (!$useTextarea)
+			$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
 
 		$strAction = get_string('edit');
 		$post->url = $existing->url;
@@ -294,11 +235,7 @@ switch ($action) {
 $comp = block_exaport_check_competence_interaction();
 
 if ($comp) {
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-	$PAGE->requires->js('/blocks/exaport/javascript/colorbox/jquery.colorbox.js', true);
-	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 	$PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
-	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
 	$PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
 }
 
@@ -345,13 +282,15 @@ echo $OUTPUT->footer($course);
 /**
  * Update item in the database
  */
-function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions) {
+function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $useTextarea) {
 	global $CFG, $USER, $DB;
 
 	$post->timemodified = time();
-	$post->introformat = FORMAT_HTML;
-	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
-
+	if (!$useTextarea) {
+		$post->introformat = FORMAT_HTML;
+		$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+	}
+	
 	if(!empty($post->url)){
 		if ($post->url=='http://') $post->url="";
 		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
@@ -382,13 +321,14 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 /**
  * Write a new item into database
  */
-function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $textfieldoptions) {
+function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $useTextarea) {
 	global $CFG, $USER, $DB;
 
 	$post->userid = $USER->id;
 	$post->timemodified = time();
 	$post->courseid = $courseid;
-	$post->intro = '';
+	if (!$useTextarea)
+		$post->intro = '';
 	
 	if(!empty($post->url)){
 		if ($post->url=='http://') $post->url="";
@@ -396,9 +336,11 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 	}
 	// Insert the new blog entry.
 	if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
-		$post->introformat = FORMAT_HTML;
-		$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
-		$DB->update_record('block_exaportitem', $post);
+		if (!$useTextarea) {
+			$post->introformat = FORMAT_HTML;
+			$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+			$DB->update_record('block_exaportitem', $post);
+		}
 
 		if ($post->type == 'file') {
 			// save uploaded file in user filearea

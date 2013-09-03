@@ -124,7 +124,7 @@ $string['showcourseusers'] = 'Mostrar somente os utilizadores do curso';
 $string['sharedpersons'] = 'Pessoas com Portef&oacute;lios partilhados';
 $string['moodleimport'] = 'Importar dos trabalhos do Moodle';
 $string['nomoodleimportyet'] = 'Actualmente n&atilde;o tem nenhuma submiss&atilde;o de trabalhos!';
-$string['deletecategroyconfirm'] = 'De certeza que quer apagar esta categoria? Todas as entradas nesta categoria ser&atilde;o apagadas!';
+$string['deletecategoryconfirm'] = 'De certeza que quer apagar esta categoria? Todas as entradas nesta categoria ser&atilde;o apagadas!';
 $string['name'] = 'Nome';
 
 // export/import

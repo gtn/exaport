@@ -8,12 +8,44 @@ var exaportViewEdit = {};
 	var overlay = null;
 
 	$.extend(exaportViewEdit, {
+	
+		checkFields: function() {
+			var ok = true;
+			
+			$('#container').find('.not-empty-check').each(function(){
+				var input = $('#container').find('input[name='+$(this).attr('for')+']');
+				
+				if (input.length == 0) {
+					// input not found, ignore
+					$(this).hide();
+					return;
+				}
+				
+				if (input.val().length) {
+					// has value
+					$(this).hide();
+					return;
+				}
+				
+				// show error
+				$(this).show();
+				input.focus();
+				ok = false;
+				return false;
+			});
+
+			// all checks ok
+			return ok;
+		},
 		
 		addItem: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;	
 			var i = 0;
-			$('#item_list option:selected').each(function () {
+			$('#container input[name="add_items[]"]:checked').each(function () {
 				i = i+1;
 				if (i>1) {
 					var clone = $(newItem).clone();
@@ -41,6 +73,9 @@ var exaportViewEdit = {};
 		},
 		
 		addText: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;
 			data = {};
@@ -59,6 +94,9 @@ var exaportViewEdit = {};
 		},
 
 		addHeadline: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;	
 			data = {};
@@ -75,6 +113,9 @@ var exaportViewEdit = {};
 		},
 
 		addPersonalInfo: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;		
 			data = {};
@@ -98,6 +139,9 @@ var exaportViewEdit = {};
 		},
 		
 		addMedia: function(id) {
+
+			if (!this.checkFields()) return;
+
 			if (id != -1) 
 				newItem = lastclicked;	
 			data = {};
@@ -106,6 +150,7 @@ var exaportViewEdit = {};
 			data.contentmedia = $('#block_media').val();
 			data.width = $('#block_width').val();
 			data.height = $('#block_height').val();			
+			data.create_as_note = $('input[name=create_as_note]:checked').length ? 1 : 0;
 			data.id = id;
 			newItem.data('portfolio', data);		
 			generateItem('update', $(newItem));	
@@ -210,7 +255,27 @@ var exaportViewEdit = {};
 				stop: function(e, ui){    
 				}		
 			});
+		},
 
+		setPopupTitle: function(title){
+			$("#block_form_title").html(title);
+		},
+
+		initAddItems: function(title){
+			$('#add-items-list .add-item').click(function(e){
+				var $input = $(this).find('input');
+				
+				if (!$(event.target).is(':input')) {
+					// toggle checkbox (if the user clicked the div and not the checkbox)
+					$input.prop('checked', !$input.prop('checked'));
+				}
+				
+				if ($input.prop('checked')) {
+					$(this).addClass('checked');
+				} else {
+					$(this).removeClass('checked');
+				}
+			});
 		}
 	});
 	
@@ -298,29 +363,44 @@ var exaportViewEdit = {};
 		*/
 		var header_content = '';
 
-		if (data.itemid && portfolioItems[data.itemid]) {  
+		if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
+			data.item = portfolioItems[data.itemid];
+		}
+		if (data.itemid && data.item) {  
 			data.type = 'item';
 
-			var itemData = portfolioItems[data.itemid];
+			var itemData = data.item;
 			var ilink=itemData.link
 			if (ilink!="")  ilink=$E.translate('link') + ': ' + ilink + '<br />';
 			
-			$item.html(
-				'<div id="id_holder" style="display:none;"></div>' +	
-				'<div class="item_info" style="overflow: hidden;">' +
-				'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
-				'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"></div>' +
-				'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
-				$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
-				$E.translate('comments')+': '+itemData.comments+'<br />' +
-				'</div></div>'
-			);
-			if ((itemData.type == 'link') || ((itemData.type == 'file') && (itemData.mimetype.indexOf('image') + 1)))
-				$item.find('div.picture').append('<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">');
-/*			else if (itemData.type == 'link') {
-				$item.find('div.picture').css('height','160px');
-				$item.find('div.picture').append('<iframe id="link_thumbnail" src="'+itemData.link+'" scrolling="no"></iframe>');
-				}; /**/
+			if(itemData.competences){
+				$item.html(
+					'<div id="id_holder" style="display:none;"></div>' +	
+					'<div class="item_info" style="overflow: hidden;">' +
+					'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
+					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">' +
+					'<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">' +
+					'</div>' +
+					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
+					$E.translate('category')+': '+itemData.category+'<br />'+ ilink + 
+					$E.translate('comments')+': '+itemData.comments+'<br />' +
+					'<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/pix/t/grades.gif" class="iconsmall" alt="'+'competences'+'" /></a>'+
+					'</div></div>'
+				);
+			}else{
+				$item.html(
+					'<div id="id_holder" style="display:none;"></div>' +	
+					'<div class="item_info" style="overflow: hidden;">' +
+					'<div class="header">'+$E.translate('viewitem')+': '+itemData.name+'</div>' +
+					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">' +
+					'<img style="max-width: 100%; max-height: 100%;" src="'+M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id='+itemData.id+'">' +
+					'</div>' +
+					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
+					$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
+					$E.translate('comments')+': '+itemData.comments+'<br />' +
+					'</div></div>'
+				);
+			}
 		} else if (data.type == 'personal_information') {
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +

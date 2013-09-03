@@ -124,7 +124,7 @@ $string['showcourseusers'] = 'Visa endast användare i kursen';
 $string['sharedpersons'] = 'Personer med utdelade portfolios';
 $string['moodleimport'] = 'Importera från Moodleuppgifter';
 $string['nomoodleimportyet'] = 'För tillfället har du inga inlämnade uppgifter!';
-$string['deletecategroyconfirm'] = 'Vill du verkligen ta bort denna kategori? Alla inlägg i denna kategori kommer att tas bort!';
+$string['deletecategoryconfirm'] = 'Vill du verkligen ta bort denna kategori? Alla inlägg i denna kategori kommer att tas bort!';
 $string['name'] = 'Namn';
 
 // export/import

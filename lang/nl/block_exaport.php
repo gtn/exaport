@@ -124,7 +124,7 @@ $string['showcourseusers'] = 'Toon alleen de gebruikers van de cursus';
 $string['sharedpersons'] = 'Personen met gedeelde Portfolios';
 $string['moodleimport'] = 'Importeer uit Moodle-opdrachten';
 $string['nomoodleimportyet'] = 'Op dit ogenblik heb je bij geen enkele opdracht iets ingeleverd!';
-$string['deletecategroyconfirm'] = 'Wil je deze categorie echt verwijderen? Alle inhoud in deze categorie zal verwijderd worden!';
+$string['deletecategoryconfirm'] = 'Wil je deze categorie echt verwijderen? Alle inhoud in deze categorie zal verwijderd worden!';
 $string['name'] = 'Naam';
 
 // export/import

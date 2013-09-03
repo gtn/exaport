@@ -127,7 +127,7 @@ $string['showcourseusers'] = 'Εμφάνισε μόνο τους χρήστες 
 $string['sharedpersons'] = 'Χρήστες με διαμοιραζόμενα Portfolios';
 $string['moodleimport'] = 'Εισαγωγή εργασιών του Moodle';
 $string['nomoodleimportyet'] = 'Μέχρι στιγμής δεν έχει γίνει υποβολή εργασιών';
-$string['deletecategroyconfirm'] = 'Θέλετε οπωσδήποτε να διαγράψετε αυτήν την κατηγορία; Όλες οι εγγραφές της κατηγορίας θα διαγραφούν! ';
+$string['deletecategoryconfirm'] = 'Θέλετε οπωσδήποτε να διαγράψετε αυτήν την κατηγορία; Όλες οι εγγραφές της κατηγορίας θα διαγραφούν! ';
 $string['name'] = 'Όνομα';
 
 // export/import

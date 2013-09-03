@@ -124,7 +124,7 @@ $string['showcourseusers'] = 'Mostrar solo usuarios del curso';
 $string['sharedpersons'] = 'Personas con portafolios compartidos';
 $string['moodleimport'] = 'Importar desde Roles Moodle';
 $string['nomoodleimportyet'] = 'Por el momento no tiene presentación en cualquier asignación';
-$string['deletecategroyconfirm'] = 'Estas realmente seguro de borrar esta Categoria? Todas las entradas de esta categoria serán borradas!';
+$string['deletecategoryconfirm'] = 'Estas realmente seguro de borrar esta Categoria? Todas las entradas de esta categoria serán borradas!';
 $string['name'] = 'Nombre';
 
 // export/import

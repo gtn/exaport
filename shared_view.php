@@ -77,10 +77,6 @@ foreach ($blocks as $block) {
 
 
 
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
-$PAGE->requires->css('/blocks/exaport/css/shared_view.css');
-
 if ($view->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");
 } else {
@@ -125,8 +121,30 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 		if ($block->type == 'item') {
 			$item = $block->item; 
 
-			if($comp)
+			if($comp){
 				$has_competences = block_exaport_check_item_competences($item);
+			
+				if($has_competences){
+					$array = block_exaport_get_competences($item, 0);
+	
+					$competences = "";
+					foreach($array as $element){
+						$conditions = array("id" => $element->descid);
+						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+						if($competencesdb != null){
+							$competences .= $competencesdb->title.'<br>';
+						}
+					}
+					$competences = str_replace("\r", "", $competences);
+					$competences = str_replace("\n", "", $competences);
+					$competences = str_replace("\"", "&quot;", $competences);
+					$competences = str_replace("'", "&prime;", $competences);	
+	
+					$item->competences = $competences;
+				}
+				
+			}
 			
 			$href = 'shared_item.php?access=view/'.$access.'&itemid='.$item->id.'&att='.$item->attachment;
 			
@@ -159,6 +177,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
 			}
 			echo $intro.'</div>';
+			if($has_competences) echo '<div class="view-item-competences"><script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/pix/t/grades.gif" class="iconsmall" alt="'.'competences'.'" /></a></div>';
 			echo '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
 			echo '</div>';
 		} elseif ($block->type == 'personal_information') {

@@ -10,40 +10,54 @@ $item = null;
 if ($item_id > 0) { 
 	$item = $DB->get_record('block_exaportitem', array('id'=>$item_id, 'userid'=>$USER->id));
 }
+if (empty($item)) die('item not found');
 
-switch($item->type) {
+switch ($item->type) {
 	case "file": 
-			// thumbnail of file
-			$file = block_exaport_get_item_file($item);
-			
-			// serve file
-			if ($file) {
-				send_stored_file($file);
-			} else {
-				return false;
-			}			
+		// thumbnail of file
+		$file = block_exaport_get_item_file($item);
+		
+		// serve file
+		if ($file && $file->is_valid_image()) {
+			send_stored_file($file);
+			exit;
+		}
 
-			break;
-	case "link" :
-			$url = $item->url;
-			if (strpos($url,'http')===false)
-				$url = 'http://'.$url;
-//			$url = @urlencode($url);
-			$str = @file_get_contents($url);
-			$output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $str, $matches);
-			$first_img = $matches[1][0];
-			if ($output>0) {
-				if (strpos($first_img,'http')===false)
+		header('Location: pix/file_tile.png');
+		break;
+
+	case "link":
+		$url = $item->url;
+		if (strpos($url,'http')===false)
+			$url = 'http://'.$url;
+
+		$str = file_get_contents($url);
+		if ($str && preg_match('/<img\s.*src=[\'"]([^\'"]+)[\'"]/im', $str, $matches)) {
+			$first_img = $matches[1];
+			if (strpos($first_img,'http')===false) {
+				if ($first_img[0] == '/') {
+					// google.com		+ /imgage.png
+					// google.com/sub	+ /imgage.png
+					$first_img = preg_replace('!([^:/])/.*$!m', '$1', $url).$first_img;
+				} else {
+					// google.com		+ imgage.png
 					$first_img = $url."/".$first_img;
+				}
 			}
-			else 
-				$first_img = $CFG->wwwroot.'/blocks/exaport/pix/item_link_default.png';					
-				$headers = get_headers($first_img, 1);
-				$type = $headers["Content-Type"];
-				header("Content-type: ".$type);
-				echo @file_get_contents($first_img);
-			break;
-	default: break;
-};
+			
+			$headers = get_headers($first_img, 1);
+			$type = $headers["Content-Type"];
+			header("Content-type: ".$type);
+			echo @file_get_contents($first_img);
+			exit;
+		}
 
-?>
+		header('Location: pix/link_tile.png');
+		break;
+
+	case "note":
+		header('Location: pix/note_tile.png');
+		break;
+	default:
+		die('wrong type');
+}

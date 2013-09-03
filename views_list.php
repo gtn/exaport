@@ -68,7 +68,7 @@ if ($parsedsort[1] == "desc") {
 } else {
 	$newsort = $sortkey.".desc";
 }
-$sorticon = $parsedsort[1].'.gif';
+$sorticon = $parsedsort[1].'.png';
 //viewsort
 //block_exaport_set_user_preferences(array('itemsort'=>$sort));
 
@@ -110,7 +110,7 @@ if (!$views) {
 
 	// add arrow to heading if available 
 	if (isset($table->head[$sortkey]))
-		$table->head[$sortkey] .= "<img src=\"pix/$sorticon\" alt='".get_string("updownarrow", "block_exaport")."' />";
+		$table->head[$sortkey] = "<img src=\"pix/$sorticon\" alt='".get_string("updownarrow", "block_exaport")."' /> ".$table->head[$sortkey];
 
 	$table->data = Array();
 	$lastcat = "";

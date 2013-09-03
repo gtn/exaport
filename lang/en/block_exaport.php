@@ -128,7 +128,7 @@ $string['showcourseusers'] = 'Show only users of the course';
 $string['sharedpersons'] = 'Persons with shared Portfolios';
 $string['moodleimport'] = 'Import from Moodle-assignments';
 $string['nomoodleimportyet'] = 'At the moment you have no submission at any assignment!';
-$string['deletecategroyconfirm'] = 'Do you really want to delete this category? All entries in this category will be deleted!';
+$string['deletecategoryconfirm'] = 'Do you really want to delete the category "{$a->name}"? All entries in this category and all subcategories will be deleted!';
 $string['name'] = 'Name';
 $string['role'] = 'Role';
 $string['nousersfound'] = 'No users found';
@@ -292,6 +292,7 @@ $string['viewlayout9'] = "Larger centre columns";
 $string['viewlayout10'] = "Equal widths";
 $string['personalinformation'] = "Personal Information";
 $string['headertext'] = "Headertext";
+$string['item'] = "Item";
 $string['items'] = "Items";
 $string['media'] = "Media";
 $string['fieldstoshow'] = "Fields to show";
@@ -323,13 +324,18 @@ $string['copyitemtocourse'] = 'Copy to course';
 $string['desp_language'] = 'Desp Language';
 $string['cofigureblock'] = "Configure Block";
 $string['selectitems'] = "Select items";
+$string['cofigureblock_text'] = "Choose text";
+$string['cofigureblock_header'] = "Choose headline";
+$string['cofigureblock_item'] = "Choose item";
+$string['cofigureblock_media'] = "Choose media";
+$string['cofigureblock_personalinfo'] = "Choose personal info";
 
 // Desp
 $string['back_to_desp'] = 'back to language portfolio';
 $string['desp_pluginname'] = 'Dossier';
 $string['desp_mybookmarks'] = 'My Dossier';
 $string['desp_bookmarks'] = 'My Dossier';
-$string['desp_explainingall'] = 'All entries in the dossier';
+$string['desp_explaining'] = 'My Artefacts';
 $string['desp_sharedbookmarks'] = 'published dossiers';
 $string['desp_explainingnote'] = 'Notes. These notes may be shared with all authorized course members.';
 $string['desp_explaininglink'] = 'Links.  These links may be shared with all authorized course members.';
@@ -388,5 +394,16 @@ $string['settings_allow_loginas_head'] = 'Allow login as';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
+
+$string['create_as_note'] = 'Create as Artefact';
+$string['category_not_found'] = 'Category not found';
+$string['root_category'] = 'Root Category';
+$string['current_category'] = 'Current Category';
+$string['change_layout'] = 'Change Layout';
+$string['details'] = 'Details';
+$string['tiles'] = 'Tiles';
+$string['category'] = 'Category';
+$string['category_up'] = 'back to Parent Category';
+
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';

@@ -28,7 +28,7 @@ require_once dirname(__FILE__) . '/inc.php';
 require_once dirname(__FILE__) . '/lib/sharelib.php';
 require_once dirname(__FILE__) . '/lib/externlib.php';
 
-global $DB;
+global $DB, $SESSION;
 $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
@@ -161,11 +161,15 @@ if ($item->access->page == 'view') {
 
 
 if (block_exaport_check_competence_interaction ()) {
+//begin
     $has_competences = block_exaport_check_item_competences($item);
-    if ($has_competences && has_capability('block/exaport:competences', $context)) {
-        echo get_string("teachercomps","block_exaport");
+    //if ($has_competences && has_capability('block/exaport:competences', $context)) {
+	if($has_competences){
+		//für alle rollen? Keine interaktion?
+		//echo get_string("teachercomps","block_exaport");
         block_exaport_build_comp_table($item);
     }
+	//end
 } else
     $has_competences = false;
 if ($backlink) {

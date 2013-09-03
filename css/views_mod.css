@@ -327,3 +327,40 @@ table.mceLayout {
 input.submit {
 	cursor: pointer;
 }
+
+.not-empty-check {
+	color: red;
+	display: none;
+	padding: 5px;
+}
+
+input[name=block_title], input[name=headline] {
+	width: 95%
+}
+
+#add-items-list {
+	max-height: 400px;
+	overflow: auto;
+}
+#add-items-list .add-item {
+	cursor: pointer;
+	padding: 3px;
+	margin: 1px;
+}
+#add-items-list .add-item:hover {
+	padding: 2px;
+	border: 1px solid black;
+}
+#add-items-list .add-item.checked {
+	padding: 2px;
+	border: 1px solid #00C000;
+	background: #DEFEDE;
+}
+#add-items-list .add-item-category {
+	padding: 3px;
+	margin: 20px 1px 6px 1px;
+	font-weight: bold;
+}
+#add-items-list .add-item-sub {
+	margin-left: 30px;
+}

@@ -61,16 +61,44 @@ foreach ($data as $key=>$value) {
 function get_form_items($id, $block_data=array()) {
 	global $DB, $USER;
 	
-	$query = "select i.id, i.name, i.type, ic.name AS cname, ic2.name AS cname_parent, COUNT(com.id) As comments".
-		" from {block_exaportitem} i".
-		" join {block_exaportcate} ic on i.categoryid = ic.id".
-		" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-		" left join {block_exaportitemcomm} com on com.itemid = i.id".
-		" where i.userid=? AND (i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))".
-		" GROUP BY i.id, i.name, i.type, ic.name, ic2.name".
-		" ORDER BY i.name";
-	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
+	// read all categories
+	$categories = $DB->get_records_sql('
+		SELECT c.id, c.name, c.pid, COUNT(i.id) AS item_cnt
+		FROM {block_exaportcate} c
+		LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
+		WHERE c.userid = ?
+		GROUP BY c.id
+		ORDER BY c.name ASC
+	', array($USER->id));
 
+	// build a tree according to parent
+	$categoriesByParent = array();
+	foreach ($categories as $category) {
+		if (!isset($categoriesByParent[$category->pid])) $categoriesByParent[$category->pid] = array();
+		$categoriesByParent[$category->pid][] = $category;
+	}
+
+	// the main root category
+	$rootCategory = block_exaport_get_root_category();
+	$categories[0] = $rootCategory;
+
+	$items = $DB->get_records_sql("
+			SELECT i.id, i.name, i.type, i.categoryid, COUNT(com.id) As comments
+			FROM {block_exaportitem} i
+			LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+			WHERE i.userid = ? AND ".block_exaport_get_item_where()."
+			GROUP BY i.id, i.name, i.type, i.categoryid
+			ORDER BY i.name
+		", array($USER->id));
+	
+	$itemsByCategory = array();
+	// save items to category
+	foreach ($items as $item) {
+		if (empty($itemsByCategory[$item->categoryid]))
+			$itemsByCategory[$item->categoryid] = array();
+		$itemsByCategory[$item->categoryid][] = $item;
+	}
+	
 	$content  = "";
     $content .= '<form enctype="multipart/form-data" id="blockform" method="post" class="pieform" onsubmit="exaportViewEdit.addItem('.$id.'); return false;">';
 	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';	
@@ -80,16 +108,58 @@ function get_form_items($id, $block_data=array()) {
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
 
-	if (!$portfolioItems) {
-//		$content .=  '<div style="padding: 5px;">'.get_string('nobookmarksall', 'block_exaport').'</div>';
-	} else {		
-		$height = min(400, (max(count($portfolioItems), 2)+2) * 18);
-		$content .= '<select multiple=multiple name="list" id="item_list" style="width: 100%; height: '.$height.'px">';
-		foreach ($portfolioItems as $item) {
-			$content .= '<option value="'.$item->id.'" itemid="'.$item->id.'" '.($block_data->itemid==$item->id?'selected="selected"':'').'>'.$item->name.'</option>';
-		};
-		$content .= '</select><br>';
-	};				
+	function block_exaport_blocks_json_print_categories_recursive($category, $categoriesByParent, $itemsByCategory) {
+	
+		$subContent = '';
+		
+		foreach ($categoriesByParent[$category->id] as $subCategory) {
+			$subContent .= block_exaport_blocks_json_print_categories_recursive($subCategory, $categoriesByParent, $itemsByCategory);
+		}
+
+		if (!$subContent && empty($itemsByCategory[$category->id])) {
+			// no subcontent and no items
+			return '';
+		}
+		
+		$content = '';
+		
+		if (($category->id > 0) && ($category->pid > 0)) $content .= '<div class="add-item-sub">';
+		
+		$content .= '<div class="add-item-category">'.$category->name.'</div>';
+	
+		if (!empty($itemsByCategory[$category->id])) {
+			foreach ($itemsByCategory[$category->id] as $item) {
+				$content .= '<div class="add-item">';
+				$content .= '<input type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
+				$content .= $item->name;
+				$content .= '</div>';
+			}
+		}
+		
+		$content .= $subContent;
+		
+		if (($category->id > 0) && ($category->pid > 0)) $content .= '</div>';
+
+		return $content;
+	}
+	
+	ob_start();
+	?>
+	<div id="add-items-list">
+		<?php
+			echo block_exaport_blocks_json_print_categories_recursive($rootCategory, $categoriesByParent, $itemsByCategory);
+		?>
+	</div>
+	<script type="text/javascript">
+	//<![CDATA[
+		exaportViewEdit.setPopupTitle(<?php echo json_encode(get_string('cofigureblock_item','block_exaport')); ?>);
+		exaportViewEdit.initAddItems();
+	//]]>
+	</script>
+	<?php
+	$content .= ob_get_clean();
+
+
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
@@ -134,6 +204,8 @@ function get_form_text($id, $block_data=array()) {
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_text','block_exaport').'")</script>';
 
 	$content .= tinyMCE_enable_script('block_text');
 
@@ -150,6 +222,7 @@ function get_form_headline($id, $block_data=array()) {
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
 	$content .= '<input name="headline" id="headline" type="text" value="'.s($block_data->text?$block_data->text:"").'" default-text="'.get_string('view_specialitem_headline_defaulttext', 'block_exaport').'" /></div>';
+	$content .= '<div for="headline" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
@@ -157,6 +230,8 @@ function get_form_headline($id, $block_data=array()) {
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_header','block_exaport').'")</script>';
 
 	return $content;
 }
@@ -237,6 +312,8 @@ if ($USER->picture) {
 	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_personalinfo','block_exaport').'")</script>';
 
 	$content .= tinyMCE_enable_script('block_intro');
 	
@@ -245,7 +322,7 @@ if ($USER->picture) {
 
 
 function get_form_media($id, $block_data=array()) {
-	global $CFG, $PAGE, $USER;
+	global $CFG, $PAGE, $USER, $action;
 	
 	$content  = "";
     $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" onsubmit="exaportViewEdit.addMedia('.$id.'); return false;">';
@@ -255,7 +332,8 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '<label for="block_title">'.get_string('blocktitle2','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';
-	$content .= '<input type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
+	$content .= '<input tabindex="1" type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
+	$content .= '<div for="block_title" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
 	$content .= '</td></tr>';	
 	$content .= '<tr><th>';
 	$content .= '<label for="mediacontent">'.get_string('mediacontent','block_exaport').'</label>';
@@ -281,10 +359,14 @@ function get_form_media($id, $block_data=array()) {
 	</ul>	';
 	$content .= '</th></tr>';	
 	$content .= '<tr><th>';
+	$content .= '<input type="checkbox" tabindex="1" name="create_as_note" id="create_as_note" value="1"'.($action=='add'?' checked="checked"':'').' /> ';
+	$content .= '<label for="create_as_note">'.block_exaport_get_string('create_as_note').'</label>';
+	$content .= '</td></tr>';
+	$content .= '<tr><th>';
 	$content .= '<label for="width">'.get_string('width','block_exaport').'</label>';	
-	$content .= ' <input type="text" name="width" value="'.s($block_data->width?$block_data->width:"0").'" id="block_width">';		
+	$content .= ' <input type="text" tabindex="1" name="width" value="'.s($block_data->width?$block_data->width:"").'" id="block_width">';		
 	$content .= '&nbsp;&nbsp;&nbsp;<label for="height">'.get_string('height','block_exaport').'</label>';	
-	$content .= ' <input type="text" name="height" value="'.s($block_data->height?$block_data->height:"0").'" id="block_height">';			
+	$content .= ' <input type="text" tabindex="1" name="height" value="'.s($block_data->height?$block_data->height:"").'" id="block_height">';			
 	$content .= '</td></tr>';			
 	$content .= '<tr><td>';
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_media" name="submit_block" class="submit" />';
@@ -292,6 +374,8 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
+	// change the title of block
+	$content .= '<script type="text/javascript">jQueryExaport("#block_form_title").html("'.get_string('cofigureblock_media','block_exaport').'")</script>';	
 	return $content;
 }
 

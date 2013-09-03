@@ -150,7 +150,7 @@ if($cataction) {
 					$strcat = get_string("categories", "block_exaport");
 
 					echo '<br />';
-                                        echo $OUTPUT->confirm(get_string("deletecategroyconfirm", "block_exaport"), new moodle_url('view_categories.php', $optionsyes), new moodle_url('view_categories.php', $optionsno));
+                                        echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport"), new moodle_url('view_categories.php', $optionsyes), new moodle_url('view_categories.php', $optionsno));
                                         $OUTPUT->footer();
 					die;
 				}

@@ -116,12 +116,6 @@ if (!$sharedUsers) {
 }
 
 
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.ui.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/share_item.js', true);
-
 $url = '/blocks/exabis_competences/share_item.php';
 $PAGE->set_url($url);
 block_exaport_print_header("bookmarks".block_exaport_get_plural_item_type($backtype), "share");

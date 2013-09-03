@@ -124,7 +124,7 @@ $string['showcourseusers'] = 'Ikastaro honetako erabiltzaileak soilik erakutsi';
 $string['sharedpersons'] = 'Partekatutako Paper-zorroak dituzten pertsonak';
 $string['moodleimport'] = 'Moodle-zereginetatik inportatu';
 $string['nomoodleimportyet'] = 'Oraingoz ez duzu bidalketarik zure zereginetan!';
-$string['deletecategroyconfirm'] = 'Kategoria hau benetan ezabatu nahi al duzu? Kategoria honetako sarrera guztiak ezabatu egingo dira!';
+$string['deletecategoryconfirm'] = 'Kategoria hau benetan ezabatu nahi al duzu? Kategoria honetako sarrera guztiak ezabatu egingo dira!';
 $string['name'] = 'Izena';
 
 // export/import

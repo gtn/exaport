@@ -117,46 +117,6 @@ if ($action == 'delete') {
 	}
 }
 
-$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments, files.mimetype as mimetype".
-	 " from {block_exaportitem} i".
-	 " join {block_exaportcate} ic on i.categoryid = ic.id".
-	 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-	 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-	 " left join {files} files on (files.itemid = i.id and files.filearea='item_file' AND ".
-	 " files.filesize>0 AND files.userid = i.userid)".
-	 " where i.userid=?".
-	 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, files.mimetype".
-	 " ORDER BY i.name";
-	 //echo $query;
-$portfolioItems = $DB->get_records_sql($query, array($USER->id));
-if (!$portfolioItems) {
-	$portfolioItems = array();
-}
-
-foreach ($portfolioItems as &$item) {
-	if (null == $item->cname_parent) {
-		$item->category = format_string($item->cname);
-	} else {
-		//$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
-		$catid= $item->catid;
-			$catname = $item->cname;
-			$item->category = "";
-			do{
-				$conditions = array("userid" => $USER->id, "id" => $catid);
-				$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
-				foreach($cats as $cat){
-					if($item->category == "")
-						$item->category =format_string($cat->name);
-					else
-						$item->category =format_string($cat->name)." &rArr; ".$item->category;
-					$catid = $cat->pid;
-			}
-			
-			}while ($cat->pid != 0);}
-	unset($item->cname);
-	unset($item->cname_parent);
-}
-unset($item);
 
 
 if ($view) {
@@ -363,12 +323,31 @@ if ($editform->is_cancelled()) {
 				$block->viewid = $dbView->id;
 
 				// media process
-				if (($block->type=='media') and ($block->contentmedia!=='')) {
-					if (!$block->width) $block->width = 100;
-					if (!$block->height) $block->height = 100;
-					$block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
-					};
+				if ($block->type=='media') {
+					if (!empty($block->contentmedia)) {
+						if (empty($block->width)) $block->width = 360; else $block->width = (int) $block->width;
+						if (empty($block->height)) $block->height = 240; else $block->height = (int) $block->height;
+						$block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
+					}
+					
+					if (!empty($block->create_as_note)) {
+						$newItem = new stdClass;
+						$newItem->name = $block->block_title;
+						$newItem->type = 'note';
+						$newItem->categoryid = 0;
+						$newItem->userid = $USER->id;
+						$newItem->intro = $block->contentmedia;
+						$newItem->timemodified = time();
 
+						$block->itemid = $DB->insert_record('block_exaportitem', $newItem);
+						$block->type = 'item';
+						$block->block_title = '';
+						$block->contentmedia = '';
+						$block->width = 0;
+						$block->height = 0;
+					}
+				}
+				
 				$block->id = $DB->insert_record('block_exaportviewblock', $block);
 			}
 			
@@ -376,7 +355,7 @@ if ($editform->is_cancelled()) {
 				$ret = new stdClass;
 				$ret->ok = true;
 				file_prepare_draft_area($view->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
-				$ret->blocks = json_encode(get_view_blocks($view));
+				$ret->blocks = json_encode(block_exaport_get_view_blocks($view));
 				
 				echo json_encode($ret);
 				exit;
@@ -508,8 +487,10 @@ switch ($action) {
 		print_error("unknownaction", "block_exaport");	                	            
 }
 
-function get_view_blocks($view) {
+function block_exaport_get_view_blocks($view) {
 	global $DB, $USER;
+	
+	$portfolioItems = block_exaport_get_portfolio_items();
 	
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
@@ -517,6 +498,8 @@ function get_view_blocks($view) {
 
 	$blocks = $DB->get_records_sql($query, array($view->id));	
 	foreach ($blocks as $block) {
+		if (($block->type == 'item') && isset($portfolioItems[$block->itemid]))
+			$block->item = $portfolioItems[$block->itemid];
 		//$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);		
 		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $view->draft_itemid);		
 	}
@@ -524,19 +507,90 @@ function get_view_blocks($view) {
 	return $blocks;
 }
 
+function block_exaport_get_portfolio_items() {
+	global $DB, $USER;
+	
+	$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments".
+		 " from {block_exaportitem} i".
+		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
+		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
+		 " where i.userid=?".
+		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name".
+		 " ORDER BY i.name";
+		 //echo $query;
+	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
+	if (!$portfolioItems) {
+		$portfolioItems = array();
+	}
+
+	foreach ($portfolioItems as &$item) {
+		if (null == $item->cname) {
+			$item->category = format_string(block_exaport_get_root_category()->name);
+			$item->catid = 0;
+		} elseif (null == $item->cname_parent) {
+			$item->category = format_string($item->cname);
+		} else {
+			//$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
+			$catid= $item->catid;
+				$catname = $item->cname;
+				$item->category = "";
+				do{
+					$conditions = array("userid" => $USER->id, "id" => $catid);
+					$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
+					foreach($cats as $cat){
+						if($item->category == "")
+							$item->category =format_string($cat->name);
+						else
+							$item->category =format_string($cat->name)." &rArr; ".$item->category;
+						$catid = $cat->pid;
+				}
+				
+				}while ($cat->pid != 0);
+		}
+		
+		//get competences of the item
+		$item->userid = $USER->id;
+		
+		$comp = block_exaport_check_competence_interaction();
+		if($comp){
+			$array = block_exaport_get_competences($item, 0);
+		
+			if(count($array)>0){
+				$competences = "";
+				foreach($array as $element){
+					$conditions = array("id" => $element->descid);
+					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+					if($competencesdb != null){
+						$competences .= $competencesdb->title.'<br>';
+					}
+				}
+				$competences = str_replace("\r", "", $competences);
+				$competences = str_replace("\n", "", $competences);
+				$competences = str_replace("\"", "&quot;", $competences);
+				$competences = str_replace("'", "&prime;", $competences);		
+					
+				$item->competences = $competences;
+			}
+		}
+		
+		unset($item->userid);
+		
+		unset($item->cname);
+		unset($item->cname_parent);
+	}
+	
+	return $portfolioItems;
+}
+
 if ($view) {
-	$postView->blocks = json_encode(get_view_blocks($view));
+	$postView->blocks = json_encode(block_exaport_get_view_blocks($view));
 }
 
 require_once $CFG->libdir.'/editor/tinymce/lib.php';
 $tinymce = new tinymce_texteditor();
 
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.ui.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
-$PAGE->requires->css('/blocks/exaport/css/views_mod.css');
 $PAGE->requires->css('/blocks/exaport/css/blocks.css');
 
 block_exaport_print_header('views', $type);
@@ -570,6 +624,7 @@ unset($value);
 ?>
 <script type="text/javascript">
 //<![CDATA[
+	var portfolioItems = <?php echo json_encode(block_exaport_get_portfolio_items()); ?>;
 	var sharedUsers = <?php echo json_encode($sharedUsers); ?>;
 	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 //]]>
@@ -583,7 +638,6 @@ switch ($type) {
 		?>
 		<script type="text/javascript">
 		//<![CDATA[
-			var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
 			jQueryExaport(exaportViewEdit.initContentEdit);
 			M.yui.add_module({"editor_tinymce":{"name":"editor_tinymce","fullpath":"<?php echo $CFG->wwwroot;?>/lib/javascript.php/<?php echo $rev;?>/lib/editor/tinymce/module.js","requires":[]}});
 		//]]>
@@ -827,7 +881,7 @@ echo '<div id="block_form" class="block" style="position: absolute; top: 10px; l
             <a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
         </div>
         <div class="block-header">
-            <h4>'.get_string('cofigureblock','block_exaport').'</h4>
+            <h4 id="block_form_title">'.get_string('cofigureblock','block_exaport').'</h4>
         </div>
         <div class="block-content">
 			<div id="container"></div>

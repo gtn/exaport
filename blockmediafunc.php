@@ -20,10 +20,14 @@
 			),
 
 			// prezi
+			array(
+                'match' => '#^https?://(www\.)?prezi\.com/embed/([a-zA-Z0-9\-_+\?/=\&;]*).*#',
+                'url'   => $httpstr . '://prezi.com/embed/$2',
+            ),
             array(
-                'match' => '#https?://prezi.com/([a-zA-Z0-9\-_]+)/.*#',
-                'url'   => $httpstr . '://prezi.com/bin/preziloader.swf?prezi_id=$1',
-            ),			
+                'match' => '#https?://prezi\.com/([a-zA-Z0-9\-_]+)/.*#',
+                'url'   => $httpstr . '://prezi.com/embed/$1/?bgcolor=ffffff&amp;lock_to_path=0&amp;autoplay=0&amp;autohide_ctrls=0&amp;features=undefined&amp;disabled_features=undefined',
+            ),
 			
 			// scivee   
 			array(

@@ -83,11 +83,12 @@ function create_ressource(&$resources, $ridentifier, $filename) {
     return true;
 }
 
-function &create_item(&$pitem, $identifier, $titletext, $residentifier = '') {
+function &create_item(&$pitem, $identifier, $titletext, $residentifier = '', $id=null) {
     // at an external ressource no file is needed inside resource
     $item = & $pitem->createChild('item');
     $item->attribute('identifier', $identifier);
     $item->attribute('isvisible', 'true');
+	if($id)$item->attribute('id', $id);
     if ($residentifier != '') {
         $item->attribute('identifierref', $residentifier);
     }
@@ -178,16 +179,39 @@ function get_category_files($categoryid, $viewid=null) {
     return $DB->get_records_sql($itemQuery);
 }
 
-function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath, $export_dir, $identifier, &$ridentifier, $viewid) {
+function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath, $export_dir, &$identifier, &$ridentifier, $viewid, &$itemscomp) {
     global $USER, $CFG, $COURSE, $DB;
 
     $bookmarks = get_category_items($id, $viewid, 'link');
-
+	
     $hasItems = false;
 
     if ($bookmarks) {
         $hasItems = true;
         foreach ($bookmarks as $bookmark) {
+			//begin
+			$array = block_exaport_get_competences($bookmark, 0);
+			
+			if(count($array)>0){
+				$competences = "";
+				$competencesids = array();
+				foreach($array as $element){
+			
+					$conditions = array("id" => $element->descid);
+					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+					if($competencesdb != null){
+						$competences .= $competencesdb->title.'<br />';
+						array_push($competencesids, $competencesdb->sourceid);
+					}
+				}
+				$competences = str_replace("\r", "", $competences);
+				$competences = str_replace("\n", "", $competences);
+				$bookmark->competences = $competences;
+				
+				$itemscomp[$bookmark->id] = $competencesids;
+				
+			}
+			//end
             unset($filecontent);
             unset($filename);
 
@@ -204,7 +228,8 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             $filecontent .= '  <div id="url"><a href="' . spch($bookmark->url) . '"><!--###BOOKMARK_EXT_URL###-->' . spch($bookmark->url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
             $filecontent .= '  <div id="description"><!--###BOOKMARK_EXT_DESC###-->' . spch_text($bookmark->intro) . '<!--###BOOKMARK_EXT_DESC###--></div>' . "\n";
             $filecontent .= add_comments('block_exaportitemcomm', $bookmark->id);
-            $filecontent .= '</body>' . "\n";
+		    if(isset($bookmark->competences)) $filecontent .= '<br /> <div id="competences">'.$bookmark->competences.'<div>';
+			$filecontent .= '</body>' . "\n";
             $filecontent .= '</html>' . "\n";
 
             $filename = clean_param($bookmark->name, PARAM_ALPHANUM);
@@ -223,8 +248,9 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 
             file_put_contents($exportpath . $filepath, $filecontent);
             create_ressource($resources, 'RES-' . $ridentifier, $filepath);
-            create_item($xmlElement, 'ITEM-' . $identifier, $bookmark->name, 'RES-' . $ridentifier);
-            $identifier++;
+            create_item($xmlElement, 'ITEM-' . $identifier, $bookmark->name, 'RES-' . $ridentifier, $bookmark->id);
+		
+		    $identifier++;
             $ridentifier++;
         }
     }
@@ -236,6 +262,30 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
         $hasItems = true;
 
         foreach ($files as $file) {
+		
+			$array = block_exaport_get_competences($file, 0);
+			
+			if(count($array)>0){
+				$competences = "";
+				$competencesids = array();
+				foreach($array as $element){
+			
+					$conditions = array("id" => $element->descid);
+					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+					if($competencesdb != null){
+						$competences .= $competencesdb->title.'<br />';
+						array_push($competencesids, $competencesdb->sourceid);
+					}
+				}
+				$competences = str_replace("\r", "", $competences);
+				$competences = str_replace("\n", "", $competences);
+				
+				$file->competences = $competences;
+				$itemscomp[$file->id] = $competencesids;
+			
+			}
+			
             unset($filecontent);
             unset($filename);
 
@@ -264,7 +314,8 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             $filecontent .= '  <div id="url"><a href="' . spch($content_filename) . '"><!--###BOOKMARK_FILE_URL###-->' . spch($content_filename) . '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
             $filecontent .= '  <div id="description"><!--###BOOKMARK_FILE_DESC###-->' . spch_text($file->intro) . '<!--###BOOKMARK_FILE_DESC###--></div>' . "\n";
             $filecontent .= add_comments('block_exaportitemcomm', $file->id);
-            $filecontent .= '</body>' . "\n";
+            if(isset($file->competences)) $filecontent .= '<br /> <div id="competences">'.$file->competences.'<div>';
+   		    $filecontent .= '</body>' . "\n";
             $filecontent .= '</html>' . "\n";
 
             $filename = clean_param($file->name, PARAM_ALPHANUM);
@@ -282,8 +333,9 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             }
             file_put_contents($exportpath . $filepath, $filecontent);
             create_ressource($resources, 'RES-' . $ridentifier, $filepath);
-            create_item($xmlElement, 'ITEM-' . $identifier, $file->name, 'RES-' . $ridentifier);
-            $identifier++;
+            create_item($xmlElement, 'ITEM-' . $identifier, $file->name, 'RES-' . $ridentifier, $file->id);
+            
+			$identifier++;
             $ridentifier++;
         }
     }
@@ -293,6 +345,29 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
     if ($notes) {
         $hasItems = true;
         foreach ($notes as $note) {
+			$array = block_exaport_get_competences($note, 0);
+			
+			if(count($array)>0){
+				$competences = "";
+				$competencesids = array();
+				foreach($array as $element){
+			
+					$conditions = array("id" => $element->descid);
+					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+					if($competencesdb != null){
+						$competences .= $competencesdb->title.'<br />';
+						array_push($competencesids, $competencesdb->sourceid);
+					}
+				}
+				$competences = str_replace("\r", "", $competences);
+				$competences = str_replace("\n", "", $competences);
+				
+				$note->competences = $competences;
+				$itemscomp[$note->id]=$competencesids;
+
+			}
+			
             unset($filecontent);
             unset($filename);
 
@@ -308,7 +383,8 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             $filecontent .= '  <h1 id="header">' . spch($note->name) . '</h1>' . "\n";
             $filecontent .= '  <div id="description"><!--###BOOKMARK_NOTE_DESC###-->' . spch_text($note->intro) . '<!--###BOOKMARK_NOTE_DESC###--></div>' . "\n";
             $filecontent .= add_comments('block_exaportitemcomm', $note->id);
-            $filecontent .= '</body>' . "\n";
+            if(isset($note->competences)) $filecontent .= '<br /> <div id="competences">'.$note->competences.'<div>';
+			$filecontent .= '</body>' . "\n";
             $filecontent .= '</html>' . "\n";
 
             $filename = clean_param($note->name, PARAM_ALPHANUM);
@@ -326,7 +402,8 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
             }
             file_put_contents($exportpath . $filepath, $filecontent);
             create_ressource($resources, 'RES-' . $ridentifier, $filepath);
-            create_item($xmlElement, 'ITEM-' . $identifier, $note->name, 'RES-' . $ridentifier);
+            create_item($xmlElement, 'ITEM-' . $identifier, $note->name, 'RES-' . $ridentifier, $note->id);
+			
             $identifier++;
             $ridentifier++;
         }
@@ -335,7 +412,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
     return $hasItems;
 }
 
-function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i){	
+function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i, &$itemscomp){	
 	global $DB, $USER;
 	$return = false;
 	//$i = 0;
@@ -350,12 +427,11 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 		$itemtitle->text($owncat->name);
 
 		// get everything inside this category:
-		$mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, 'data/', $identifier, $ridentifier, $viewid);
+		$mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, 'data/', $identifier, $ridentifier, $viewid, $itemscomp);
 
 		$innerowncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$owncat->id'", null, "name ASC");
 		if ($innerowncats) {
-			$identifier++;
-			$value = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i);
+			$value = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i, $itemscomp);
 			if($value) $mainNotEmpty = $value;
 		}
 
@@ -369,6 +445,43 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 		}
 	}
 	return $return;
+}
+
+function createXMLcomps($itemscomp, $exportdir){
+global $USER;
+	$parsedDoc = new MiniXMLDoc();
+
+    $xmlRoot = & $parsedDoc->getRoot();
+
+    // Root-Element MANIFEST
+    $manifest = & $xmlRoot->createChild('manifest');
+    $manifest->attribute('identifier', $USER->username . 'Export');
+    $manifest->attribute('version', '1.1');
+    $manifest->attribute('xmlns', 'http://www.imsproject.org/xsd/imscp_rootv1p1p2');
+    $manifest->attribute('xmlns:adlcp', 'http://www.adlnet.org/xsd/adlcp_rootv1p2');
+    $manifest->attribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+    $manifest->attribute('xsi:schemaLocation', 'http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd
+					  http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd
+					  http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd');
+
+    $items = & $manifest->createChild('items');
+    $items->attribute('default', 'DATA');
+
+	foreach($itemscomp as $key => $values){
+    
+		$item= & $items->createChild('item');
+		$item->attribute('identifier',$key);
+
+		foreach($values as $value){
+			$comp = & $item->createChild('comp');
+			$comp->attribute('identifier',$value);
+		}
+	}
+	
+	if(file_put_contents($exportdir . 'itemscomp.xml', $parsedDoc->toString(MINIXML_NOWHITESPACES)) === false) {
+        error("Writing itemscomp.xml failed!");
+        exit();
+	}
 }
 
 if ($confirm) {
@@ -452,7 +565,7 @@ if ($confirm) {
         foreach ($userdescriptions as $userdescription) {
             $description = $userdescription->description;
 			if(strncmp($description, "<img", strlen("<img"))){
-				$description=str_replace("@@PLUGINFILE@@/", "", $description);
+				$description=str_replace("@@PLUGINFILE@@/", "personal/", $description);
 			}
         }
     }
@@ -488,6 +601,7 @@ if ($confirm) {
     file_put_contents($exportdir . $filepath, $filecontent);
     create_ressource($resources, 'RES-' . $ridentifier, $filepath);
     create_item($desc_organization, 'ITEM-' . $identifier, fullname($USER, $USER->id), 'RES-' . $ridentifier);
+
     $identifier++;
     $ridentifier++;
 
@@ -495,8 +609,13 @@ if ($confirm) {
     //echo "<h3>" . get_string("categories","block_exaport") . "</h3>";
     $owncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid=0", null, "name ASC");
     $i = 0;
-    if ($owncats) {
-        rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i);
+	
+	//begin
+	$itemscomp = array();
+	//end
+    
+	if ($owncats) {
+        rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i, $itemscomp);
     }
 	
 	//save files, from personal information
@@ -506,17 +625,27 @@ if ($confirm) {
 		if (!$areafile) continue;
 		
 		if(strcmp($areafile->get_filename(),".")!=0){
+		
+			if(!is_dir($exportdir."data/personal/"))
+				mkdir($exportdir."data/personal/");
+			
 			$i = 0;
             $content_filename = $areafile->get_filename();
-			while (is_file($exportdir ."data/". $content_filename)|| is_dir($exportdir ."data/". $content_filename) || is_link($exportdir ."data/". $content_filename)) {
+			while (is_file($exportdir ."data/personal/". $content_filename)|| is_dir($exportdir ."data/personal/". $content_filename) || is_link($exportdir ."data/personal/". $content_filename)) {
 				$i++;
 				$content_filename = $i . '-' . $areafile->get_filename();
 			}
 			
-			$areafile->copy_content_to($exportdir ."data/". $content_filename);
+			$areafile->copy_content_to($exportdir ."data/personal/". $content_filename);
 		}
 	
 	}
+	
+	//begin
+	createXMLcomps($itemscomp, $exportdir);
+	$sourcefiles[] = $exportdir . "itemscomp.xml";
+	//end
+	
     // if there's need for metadata, put it in:
     //$metadata =& $organization->createChild('metadata');
     //$schema =& $metadata->createChild('schema');

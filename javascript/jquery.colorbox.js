@@ -425,6 +425,7 @@
 		});
 
 
+			if (document.getElementsByName("compids").length) {
                 var comps=document.getElementsByName("compids")[0].value;
 				var comptitles="";
 				var subold="";
@@ -453,7 +454,7 @@
 										}
                 }
 				document.getElementById("comptitles").innerHTML = comptitles;
-				
+			}
 	};
 	
 	publicMethod.remove = function () {
@@ -871,6 +872,8 @@
 					trigger(event_closed, settings.onClosed);
 				}, 1);
 			});
+			
+			if (document.getElementsByName("compids").length) {
               var comps="";
 							var comptitles="";
 							var subold="";
@@ -889,6 +892,7 @@
                         document.getElementsByName("compids")[0].value = comps;
 						document.getElementById("comptitles").innerHTML = comptitles;
                         //document.getElementById("id_compids").value = comps;
+			}
 		}
 	};
 

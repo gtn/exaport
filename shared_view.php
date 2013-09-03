@@ -177,7 +177,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
 			}
 			echo $intro.'</div>';
-			if($has_competences) echo '<div class="view-item-competences"><script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/pix/t/grades.gif" class="iconsmall" alt="'.'competences'.'" /></a></div>';
+			if($has_competences) echo '<div class="view-item-competences"><script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/pix/t/grades.gif" class="iconsmall" alt="'.'competences'.'" /></a></div>';
 			echo '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
 			echo '</div>';
 		} elseif ($block->type == 'personal_information') {

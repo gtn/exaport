@@ -72,7 +72,7 @@ window.jQueryExaport = jQuery.noConflict(true);
 									html += '<input class="notifyusers" type="checkbox" name="notifyusers['+user.id+']" value="'+user.id+'" />';
 									html += "<br />"+$E.translate('notify');
 								}
-								html += "</td><td align=\"left\">" + user.name + "</td><td align=\"right\">" + user.rolename + "</td></tr>";
+								html += "</td><td align=\"center\">" + user.name + "</td><td align=\"center\">" + user.rolename + "</td></tr>";
 							});
 
 							html += "</table>";

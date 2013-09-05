@@ -119,7 +119,8 @@ block_exaport_set_user_preferences(array('itemsort'=>$sort, 'view_items_layout'=
 
 echo '<div class="excomdos_cont">';
 
-echo block_exaport_get_string('categories').': ';
+//echo block_exaport_get_string('categories').': ';
+echo get_string("categories","block_exaport").": ";
 echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid=\'+this.value;">';
 echo '<option value="">';
 echo $rootCategory->name;

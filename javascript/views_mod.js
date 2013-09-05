@@ -405,7 +405,7 @@ var exaportViewEdit = {};
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
 				'<div class="personal_info" style="overflow: hidden;">' +
-				'<div class="header">' + $E.translate('personalinformation') +'</div>' +
+				'<div class="header">' + $E.translate('personalinformation') +': '+'</div>' +
 				'<div class="picture" style="float:right; position: relative;"></div>' +
 				'<div class="name"></div>' +
 				'<div class="email"></div>' +

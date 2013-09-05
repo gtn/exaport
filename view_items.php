@@ -58,7 +58,7 @@ if (!$sort && $userpreferences && isset($userpreferences->itemsort)) {
 }
 
 // check sorting
-$parsedsort = block_exaport_parse_item_sort($sort);
+$parsedsort = block_exaport_parse_item_sort($sort, false);
 $sort = $parsedsort[0].'.'.$parsedsort[1];
 
 $sortkey = $parsedsort[0];
@@ -181,7 +181,7 @@ if ($currentCategory->id > 0) {
 }
 echo '</div>';
 
-$sql_sort = block_exaport_item_sort_to_sql($parsedsort);
+$sql_sort = block_exaport_item_sort_to_sql($parsedsort, false);
 
 $condition = array($USER->id, $currentCategory->id);
 

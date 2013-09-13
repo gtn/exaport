@@ -262,7 +262,7 @@ var exaportViewEdit = {};
 		},
 
 		initAddItems: function(title){
-			$('#add-items-list .add-item').click(function(e){
+			$('#add-items-list .add-item').click(function(event){
 				var $input = $(this).find('input');
 				
 				if (!$(event.target).is(':input')) {

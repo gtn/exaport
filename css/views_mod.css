@@ -347,6 +347,9 @@ input[name=block_title], input[name=headline] {
 	padding: 3px;
 	margin: 1px;
 }
+#add-items-list .add-item * {
+	cursor: pointer;
+}
 #add-items-list .add-item:hover {
 	padding: 2px;
 	border: 1px solid black;

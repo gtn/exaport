@@ -182,7 +182,7 @@ if ($currentCategory->id > 0) {
 echo '</div>';
 
 $sql_sort = block_exaport_item_sort_to_sql($parsedsort, false);
-echo $sql_sort;
+//echo $sql_sort;
 
 $condition = array($USER->id, $currentCategory->id);
 

@@ -405,6 +405,9 @@ $string['tiles'] = 'Rajoles';
 $string['category'] = 'Categoria';
 $string['category_up'] = 'tornar a la categoria mare';
 
+$string['supported'] = 'project supported by';
+$string['developed'] = 'developed by';
+
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';
 

@@ -405,5 +405,8 @@ $string['tiles'] = 'Tiles';
 $string['category'] = 'Category';
 $string['category_up'] = 'back to Parent Category';
 
+$string['supported'] = 'project supported by';
+$string['developed'] = 'developed by';
+
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';

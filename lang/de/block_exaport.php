@@ -274,6 +274,14 @@ $string['show'] = 'Anzeigen';
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';
 $string['copyitemtocourse'] = 'In Kurs kopieren';
 $string['desp_language'] = 'Desp Sprache';
+$string['cofigureblock'] = "Blockkonfiguration";
+$string['selectitems'] = "Artefakte ausw&auml;hlen";
+$string['cofigureblock_text'] = "Text";
+$string['cofigureblock_header'] = "Konfiguration der Kopfzeile";
+$string['cofigureblock_item'] = "Auswahl der Artefakte";
+$string['cofigureblock_media'] = "Medieneintrag";
+$string['cofigureblock_personalinfo'] = "Pers&ouml;nliche Information";
+
 // Desp
 $string['back_to_desp'] = 'zur&uuml;ck zum d-ESP';
 $string['desp_mybookmarks'] = 'Mein Dossier';
@@ -388,12 +396,12 @@ $string['exaport:myaddinstance'] = 'Exabis E-Portfolie zur Startseite hinzuf&uum
 
 $string['sharejs'] = 'teilen';
 
-$string['view_specialitem_media'] = 'Media';
-$string['media'] = "Media";
-$string['mediacontent'] = 'URL or embed code *';
-$string['height'] = 'Height';
-$string['width'] = 'Width';
-$string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
+$string['view_specialitem_media'] = 'Medieneintrag';
+$string['media'] = "Medieneintrag";
+$string['mediacontent'] = 'URL oder eingebetteter Code*';
+$string['height'] = 'H&ouml;he';
+$string['width'] = 'Breite';
+$string['media_allowed_notes'] = 'URLs der folgenden Seiten sind erlaubt:';
 
 $string['create_as_note'] = 'Als Artefakt hinzufügen';
 $string['category_not_found'] = 'Kategorie nicht gefunden';
@@ -404,3 +412,6 @@ $string['details'] = 'Details';
 $string['tiles'] = 'Kacheln';
 $string['category'] = 'Kategorie';
 $string['category_up'] = 'übergeordnete Kategorie';
+
+$string['supported'] = 'Projekt wurde unterstützt von';
+$string['developed'] = 'entwickelt von';

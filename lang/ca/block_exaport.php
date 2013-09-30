@@ -324,11 +324,11 @@ $string['copyitemtocourse'] = 'Copia al curs';
 $string['desp_language'] = 'Idioma Portafoli Digital Europeu';
 $string['cofigureblock'] = "Configurar bloc";
 $string['selectitems'] = "Seleccionar items";
-$string['cofigureblock_text'] = "Choose text";
-$string['cofigureblock_header'] = "Choose headline";
-$string['cofigureblock_item'] = "Choose item";
-$string['cofigureblock_media'] = "Choose media";
-$string['cofigureblock_personalinfo'] = "Choose personal info";
+$string['cofigureblock_text'] = "tria text";
+$string['cofigureblock_header'] = "tria títol";
+$string['cofigureblock_item'] = "tria item";
+$string['cofigureblock_media'] = "tria recurs";
+$string['cofigureblock_personalinfo'] = "tria informació personal";
 
 // Desp
 $string['back_to_desp'] = 'torna a la llengua del portafoli';
@@ -341,38 +341,38 @@ $string['desp_explainingnote'] = 'Notes. Aquestes notes es poden compartir amb e
 $string['desp_explaininglink'] = 'Enllaços. Aquests enllaços es poden compartir amb els membres del curs autoritzats.';
 $string['desp_explainingfile'] = 'Arxius. Aquests arxius es poden compartir amb els membres del curs autoritzats.';
 $string['steckbrief'] = 'Perfil';
-$string['desp_categories'] = '
+$string['desp_categories'] = "
 	Històries, jocs de rol, assaigs, collages
-	curriculum vitae
-	reviews of theatre productions, exhibitions
-	project reports and reflections
-	audio- and videoclips
-	encounters with other nationalities
-	thoughts about your language skills
-	report cards
-	certificates
-	acknowledgements
-	listening
-	 - individual work
-	 - partner work
-	 - group work
-	reading
-	 - individual work
-	 - partner work
-	 - group work
-	participating in conversations
-	 - individual work
-	 - partner work
-	 - group work
-	speaking fluently
-	 - individual work
-	 - partner work
-	 - group work
-	writing
-	 - individual work
-	 - partner work
-	 - group work
-';
+ 	currículum
+ 	crítiques de produccions teatrals, exposicions
+ 	memòries de projecte i reflexions
+ 	clips d'àudio i de vídeo
+ 	trobades amb altres nacionalitats
+ 	opinions sobre les teves habilitats lingüístiques
+ 	targetes per informar
+ 	certificats
+ 	agraïments
+ 	comprensió oral
+  	 - treball individual
+  	 - treball en parella
+  	 - treball en grup
+ 	comprensió escrita
+  	 - treball individual
+  	 - treball en parella
+  	 - treball en grup
+ 	participació en converses
+  	 - treball individual
+  	 - treball en parella
+  	 - treball en grup
+ 	expressió oral fluida
+  	 - treball individual
+  	 - treball en parella
+  	 - treball en grup
+ 	expressió escrita
+  	 - treball individual
+  	 - treball en parella
+  	 - treball en grup
+";
 
 // Config
 $string['config_version_3'] = 'Nova distribució del portafoli digital: inclou vistes, etc.';
@@ -395,15 +395,15 @@ $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Crear categories Idioma Portafoli Digital Europeu';
 $string['settings_create_desp_categories_body'] = '';
 
-$string['create_as_note'] = 'Create as Artefact';
-$string['category_not_found'] = 'Category not found';
-$string['root_category'] = 'Root Category';
-$string['current_category'] = 'Current Category';
-$string['change_layout'] = 'Change Layout';
+$string['create_as_note'] = 'crea com a objecte';
+$string['category_not_found'] = "no s'ha trobat la categoria";
+$string['root_category'] = 'Categoria arrel';
+$string['current_category'] = 'Categoria actual';
+$string['change_layout'] = "Canvia l'aparença";
 $string['details'] = 'Detalls';
-$string['tiles'] = 'Tiles';
-$string['category'] = 'Category';
-$string['category_up'] = 'back to Parent Category';
+$string['tiles'] = 'Rajoles';
+$string['category'] = 'Categoria';
+$string['category_up'] = 'tornar a la categoria mare';
 
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';

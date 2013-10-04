@@ -238,7 +238,6 @@ if ($editform->is_cancelled()) {
 	die("nosubmitbutton");
 	//no_submit_button_actions($editform, $sitecontext);
 } else if ($formView = $editform->get_data()) {
-	
 	if ($type=='title' or $action=='add') {
 		//if (!$view) {$view = new stdClass(); $view->id = -1;};			
 		$formView = file_postupdate_standard_editor($formView, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'view', $view->id);
@@ -287,7 +286,12 @@ if ($editform->is_cancelled()) {
 			}
 
 			$dbView->id = $view->id;
-			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
+			if (empty($dbView->layout)  || $dbView->layout==0) {
+				if (empty($view->layout) || $view->layout==0)  
+					$dbView->layout=2;
+				else 
+					$dbView->layout=$view->layout;
+			};
 			if ($DB->update_record('block_exaportview', $dbView)) {
 				add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
 			} else {
@@ -344,7 +348,7 @@ if ($editform->is_cancelled()) {
 						$block->block_title = '';
 						$block->contentmedia = '';
 						$block->width = 0;
-						$block->height = 0;
+						$block->height = 0;/**/
 					}
 				}
 				
@@ -510,7 +514,7 @@ function block_exaport_get_view_blocks($view) {
 function block_exaport_get_portfolio_items() {
 	global $DB, $USER;
 	
-	$query = "select i.id, i.name, i.type, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments".
+	$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments".
 		 " from {block_exaportitem} i".
 		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
 		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".

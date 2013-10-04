@@ -189,28 +189,31 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
     if ($bookmarks) {
         $hasItems = true;
         foreach ($bookmarks as $bookmark) {
-			//begin
-			$array = block_exaport_get_competences($bookmark, 0);
 			
-			if(count($array)>0){
-				$competences = "";
-				$competencesids = array();
-				foreach($array as $element){
-			
-					$conditions = array("id" => $element->descid);
-					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
-					if($competencesdb != null){
-						$competences .= $competencesdb->title.'<br />';
-						array_push($competencesids, $competencesdb->sourceid);
+        	if(block_exaport_check_competence_interaction()){
+	        	//begin
+				$array = block_exaport_get_competences($bookmark, 0);
+				
+				if(count($array)>0){
+					$competences = "";
+					$competencesids = array();
+					foreach($array as $element){
+				
+						$conditions = array("id" => $element->descid);
+						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+						if($competencesdb != null){
+							$competences .= $competencesdb->title.'<br />';
+							array_push($competencesids, $competencesdb->sourceid);
+						}
 					}
+					$competences = str_replace("\r", "", $competences);
+					$competences = str_replace("\n", "", $competences);
+					$bookmark->competences = $competences;
+					
+					$itemscomp[$bookmark->id] = $competencesids;
+					
 				}
-				$competences = str_replace("\r", "", $competences);
-				$competences = str_replace("\n", "", $competences);
-				$bookmark->competences = $competences;
-				
-				$itemscomp[$bookmark->id] = $competencesids;
-				
-			}
+        	}
 			//end
             unset($filecontent);
             unset($filename);
@@ -262,30 +265,30 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
         $hasItems = true;
 
         foreach ($files as $file) {
-		
-			$array = block_exaport_get_competences($file, 0);
+        	if(block_exaport_check_competence_interaction()){
+				$array = block_exaport_get_competences($file, 0);
 			
-			if(count($array)>0){
-				$competences = "";
-				$competencesids = array();
-				foreach($array as $element){
-			
-					$conditions = array("id" => $element->descid);
-					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
-
-					if($competencesdb != null){
-						$competences .= $competencesdb->title.'<br />';
-						array_push($competencesids, $competencesdb->sourceid);
-					}
-				}
-				$competences = str_replace("\r", "", $competences);
-				$competences = str_replace("\n", "", $competences);
+				if(count($array)>0){
+					$competences = "";
+					$competencesids = array();
+					foreach($array as $element){
 				
-				$file->competences = $competences;
-				$itemscomp[$file->id] = $competencesids;
-			
-			}
-			
+						$conditions = array("id" => $element->descid);
+						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+	
+						if($competencesdb != null){
+							$competences .= $competencesdb->title.'<br />';
+							array_push($competencesids, $competencesdb->sourceid);
+						}
+					}
+					$competences = str_replace("\r", "", $competences);
+					$competences = str_replace("\n", "", $competences);
+					
+					$file->competences = $competences;
+					$itemscomp[$file->id] = $competencesids;
+				
+				}
+        	}
             unset($filecontent);
             unset($filename);
 
@@ -345,29 +348,30 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
     if ($notes) {
         $hasItems = true;
         foreach ($notes as $note) {
-			$array = block_exaport_get_competences($note, 0);
-			
-			if(count($array)>0){
-				$competences = "";
-				$competencesids = array();
-				foreach($array as $element){
-			
-					$conditions = array("id" => $element->descid);
-					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
-
-					if($competencesdb != null){
-						$competences .= $competencesdb->title.'<br />';
-						array_push($competencesids, $competencesdb->sourceid);
-					}
-				}
-				$competences = str_replace("\r", "", $competences);
-				$competences = str_replace("\n", "", $competences);
+        	if(block_exaport_check_competence_interaction()){
+				$array = block_exaport_get_competences($note, 0);
 				
-				$note->competences = $competences;
-				$itemscomp[$note->id]=$competencesids;
-
-			}
-			
+				if(count($array)>0){
+					$competences = "";
+					$competencesids = array();
+					foreach($array as $element){
+				
+						$conditions = array("id" => $element->descid);
+						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+	
+						if($competencesdb != null){
+							$competences .= $competencesdb->title.'<br />';
+							array_push($competencesids, $competencesdb->sourceid);
+						}
+					}
+					$competences = str_replace("\r", "", $competences);
+					$competences = str_replace("\n", "", $competences);
+					
+					$note->competences = $competences;
+					$itemscomp[$note->id]=$competencesids;
+	
+				}
+        	}
             unset($filecontent);
             unset($filename);
 

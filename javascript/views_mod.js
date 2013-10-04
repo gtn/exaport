@@ -262,7 +262,7 @@ var exaportViewEdit = {};
 		},
 
 		initAddItems: function(title){
-			$('#add-items-list .add-item').click(function(e){
+			$('#add-items-list .add-item').click(function(event){
 				var $input = $(this).find('input');
 				
 				if (!$(event.target).is(':input')) {
@@ -383,8 +383,8 @@ var exaportViewEdit = {};
 					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />'+ ilink + 
-					$E.translate('comments')+': '+itemData.comments+'<br />' +
-					'<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/pix/t/grades.gif" class="iconsmall" alt="'+'competences'+'" /></a>'+
+					$E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
+					'<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/pix/t/grades.gif" class="iconsmall" alt="'+'competences'+'" /></a>'+
 					'</div></div>'
 				);
 			}else{
@@ -397,7 +397,7 @@ var exaportViewEdit = {};
 					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
-					$E.translate('comments')+': '+itemData.comments+'<br />' +
+					$E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
 					'</div></div>'
 				);
 			}
@@ -405,7 +405,7 @@ var exaportViewEdit = {};
 			$item.html(
 				'<div id="id_holder" style="display:none;"></div>' +
 				'<div class="personal_info" style="overflow: hidden;">' +
-				'<div class="header">' + $E.translate('personalinformation') +'</div>' +
+				'<div class="header">' + $E.translate('personalinformation') +': '+'</div>' +
 				'<div class="picture" style="float:right; position: relative;"></div>' +
 				'<div class="name"></div>' +
 				'<div class="email"></div>' +

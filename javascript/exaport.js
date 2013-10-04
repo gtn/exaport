@@ -69,10 +69,10 @@ window.jQueryExaport = jQuery.noConflict(true);
 								if (type == 'views_mod') {
 									html += "<br />"+$E.translate('sharejs');
 									html += '</td><td align=\"center\" width="50" style="padding-right: 20px;">';
-									html += '<input class="notifyusers" type="checkbox" name="notifyusers['+user.id+']" value="'+user.id+'" />';
+									html += '<input class="notifyusers" type="checkbox" disabled="disabled" name="notifyusers['+user.id+']" value="'+user.id+'" />';
 									html += "<br />"+$E.translate('notify');
 								}
-								html += "</td><td align=\"left\">" + user.name + "</td><td align=\"right\">" + user.rolename + "</td></tr>";
+								html += "</td><td align=\"center\">" + user.name + "</td><td align=\"center\">" + user.rolename + "</td></tr>";
 							});
 
 							html += "</table>";

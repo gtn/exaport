@@ -67,7 +67,7 @@ if (!$sort && $userpreferences && isset($userpreferences->itemsort)) {
 }
 
 // check sorting
-$parsedsort = block_exaport_parse_item_sort($sort);
+$parsedsort = block_exaport_parse_item_sort($sort, true);
 $sort = $parsedsort[0].'.'.$parsedsort[1];
 
 $sortkey = $parsedsort[0];
@@ -84,7 +84,7 @@ block_exaport_set_user_preferences(array('itemsort'=>$sort));
 
 
 
-$sql_sort = block_exaport_item_sort_to_sql($parsedsort);
+$sql_sort = block_exaport_item_sort_to_sql($parsedsort, true);
 
 $condition = array($USER->id);
 

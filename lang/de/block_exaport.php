@@ -412,3 +412,6 @@ $string['details'] = 'Details';
 $string['tiles'] = 'Kacheln';
 $string['category'] = 'Kategorie';
 $string['category_up'] = 'übergeordnete Kategorie';
+
+$string['supported'] = 'Projekt wurde unterstützt von';
+$string['developed'] = 'entwickelt von';

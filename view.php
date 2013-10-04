@@ -154,8 +154,8 @@ if ($show_information) {
     echo '</div>';
 }
 
-echo "<span class=\"left\">project supported by<br/><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/bmukk.png\" width=\"63\" height=\"24\" alt=\"bmukk\" /></span>";
-echo "<span class=\"right\">developed by<br/><a href=\"http://www.gtn-solutions.com/\"><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/gtn.png\" width=\"89\" height=\"40\" alt=\"gtn-solutions\"/></a></span>";
+echo "<span class=\"left\">".get_string("supported", "block_exaport")."<br/><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/bmukk.png\" width=\"63\" height=\"24\" alt=\"bmukk\" /></span>";
+echo "<span class=\"right\">".get_string("developed", "block_exaport")."<br/><a href=\"http://www.gtn-solutions.com/\"><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/gtn.png\" width=\"89\" height=\"40\" alt=\"gtn-solutions\"/></a></span>";
 echo "<div class=\"block_eportfolio_clear\" />";
 echo "</div>";
 

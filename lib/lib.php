@@ -363,12 +363,15 @@ function block_exaport_parse_sort($sort, array $allowedSorts, array $defaultSort
     return array($column, $order);
 }
 
-function block_exaport_parse_item_sort($sort) {
-    return block_exaport_parse_sort($sort, array('date', 'name', 'category', 'type'), array('date', 'desc'));
+function block_exaport_parse_item_sort($sort, $catsortallowed) {
+	if($catsortallowed)
+		return block_exaport_parse_sort($sort, array('date', 'name', 'category', 'type'), array('date', 'desc'));
+
+	return block_exaport_parse_sort($sort, array('date', 'name', 'type'), array('date', 'desc'));
 }
 
-function block_exaport_item_sort_to_sql($sort) {
-    $sort = block_exaport_parse_item_sort($sort);
+function block_exaport_item_sort_to_sql($sort, $catsortallowed) {
+    $sort = block_exaport_parse_item_sort($sort, $catsortallowed);
 
     $column = $sort[0];
     $order = $sort[1];

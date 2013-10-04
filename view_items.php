@@ -43,6 +43,8 @@ $PAGE->set_url($url);
 
 block_exaport_print_header("bookmarks");
 
+echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
+
 echo "<div class='box generalbox'>";
 if (block_exaport_course_has_desp()) $pref="desp_";
 else $pref="";
@@ -56,7 +58,7 @@ if (!$sort && $userpreferences && isset($userpreferences->itemsort)) {
 }
 
 // check sorting
-$parsedsort = block_exaport_parse_item_sort($sort);
+$parsedsort = block_exaport_parse_item_sort($sort, false);
 $sort = $parsedsort[0].'.'.$parsedsort[1];
 
 $sortkey = $parsedsort[0];
@@ -117,7 +119,8 @@ block_exaport_set_user_preferences(array('itemsort'=>$sort, 'view_items_layout'=
 
 echo '<div class="excomdos_cont">';
 
-echo block_exaport_get_string('categories').': ';
+//echo block_exaport_get_string('categories').': ';
+echo get_string("categories","block_exaport").": ";
 echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid=\'+this.value;">';
 echo '<option value="">';
 echo $rootCategory->name;
@@ -165,18 +168,21 @@ if ($layout == 'tiles') {
 }
 
 echo '<span><a target="_blank" href="'.$CFG->wwwroot.'/blocks/exaport/view_items_print.php?courseid='.$courseid.'">'.
-'<img src="pix/view_tile.png" alt="Tile View" /><br />'.get_string("printerfriendly", "group")."</a></span>";
+'<img src="pix/view_print.png" alt="Tile View" /><br />'.get_string("printerfriendly", "group")."</a></span>";
 
 echo '</p></div></div>';
 		
 echo '<div class="excomdos_cat">';
 echo block_exaport_get_string('current_category').': ';
 echo '<b>'.$currentCategory->name.'</b> ';
-echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=edit&back=same"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
-echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=delete&back=same"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
+if ($currentCategory->id > 0) {
+	echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=edit&back=same"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
+	echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=delete&back=same"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
+}
 echo '</div>';
 
-$sql_sort = block_exaport_item_sort_to_sql($parsedsort);
+$sql_sort = block_exaport_item_sort_to_sql($parsedsort, false);
+//echo $sql_sort;
 
 $condition = array($USER->id, $currentCategory->id);
 
@@ -246,8 +252,8 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 				$table->data[$item_i][] = null;
 				$table->data[$item_i]['icons'] = 
 					'<span class="excomdos_listicons">'.
-					'<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
-					'<a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'.
+					' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
+					' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'.
 					'</span>';
 			}
 		}
@@ -294,31 +300,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 				$icons .= '<span class="excomdos_listcomments">'.$item->comments.'<img src="pix/comments.png" alt="file"></span>';
 			}
 			
-			$comp = block_exaport_check_competence_interaction();
-			
-			if($comp){
-				$array = block_exaport_get_competences($item, 0);
-			
-				//if item is assoziated with competences display them
-				if(count($array)>0){
-					$competences = "";
-					foreach($array as $element){
-			
-						$conditions = array("id" => $element->descid);
-						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
-
-						if($competencesdb != null){
-							$competences .= $competencesdb->title.'<br>';
-						}
-					}
-					$competences = str_replace("\r", "", $competences);
-					$competences = str_replace("\n", "", $competences);
-					$competences = str_replace("\"", "&quot;", $competences);
-					$competences = str_replace("'", "&prime;", $competences);
-					
-					$icons .= '<script type="text/javascript" src="lib/wz_tooltip.js"></script><a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/pix/t/grades.gif" class="iconsmall" alt="'.'competences'.'" /></a>';
-				}
-			}
+			$icons .= block_exaport_get_item_comp_icon($item);
 			
 			if (block_exaport_feature_enabled('share_item')) {
 				if (has_capability('block/exaport:shareintern', $context)) {
@@ -335,10 +317,10 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 
 			// copy files to course
 			if ($item->type == 'file' && block_exaport_feature_enabled('copy_to_course'))
-				$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/copy_item_to_course.php?courseid='.$courseid.'&itemid='.$item->id.'&backtype=">'.get_string("copyitemtocourse", "block_exaport").'</a>';
+				$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/copy_item_to_course.php?courseid='.$courseid.'&itemid='.$item->id.'&backtype=">'.get_string("copyitemtocourse", "block_exaport").'</a>';
 
-			$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit&backtype="><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
-			$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid.'"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
+			$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit&backtype="><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
+			$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid.'"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
 			
 			$icons = '<span class="excomdos_listicons">'.$icons.'</span>';
 
@@ -408,6 +390,8 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 							if ($item->comments > 0) {
 								echo '<span class="excomdos_listcomments">'.$item->comments.'<img src="pix/comments.png" alt="file"></span>';
 							}
+
+							echo block_exaport_get_item_comp_icon($item);
 						?>
 						<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
 						<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid; ?>"><img src="pix/del.png" alt="file"></a>
@@ -432,3 +416,34 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 echo "</div>";
 
 echo $OUTPUT->footer();
+
+
+function block_exaport_get_item_comp_icon($item) {
+	global $DB;
+	
+	if (!block_exaport_check_competence_interaction())
+		return;
+	
+	$array = block_exaport_get_competences($item, 0);
+
+	if(!count($array))
+		return;
+		
+	// if item is assoziated with competences display them
+	$competences = "";
+	foreach($array as $element){
+
+		$conditions = array("id" => $element->descid);
+		$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+
+		if($competencesdb != null){
+			$competences .= $competencesdb->title.'<br>';
+		}
+	}
+	$competences = str_replace("\r", "", $competences);
+	$competences = str_replace("\n", "", $competences);
+	$competences = str_replace("\"", "&quot;", $competences);
+	$competences = str_replace("'", "&prime;", $competences);
+	
+	return '<a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="pix/comp.png" alt="'.'competences'.'" /></a>';
+}

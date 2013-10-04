@@ -43,8 +43,8 @@ if ($user->access->request == 'intern') {
 	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
 }
 
-$parsedsort = block_exaport_parse_item_sort($userpreferences->itemsort);
-$order_by = block_exaport_item_sort_to_sql($parsedsort);
+$parsedsort = block_exaport_parse_item_sort($userpreferences->itemsort, false);
+$order_by = block_exaport_item_sort_to_sql($parsedsort, false);
 
 if ($user->access->request == 'extern') {
 	$extraTable = "";

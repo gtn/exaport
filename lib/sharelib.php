@@ -356,7 +356,7 @@ function exaport_get_shareable_courses_with_users($type) {
 	}
 
 	// move active course to first position
-	if (isset($courses[$COURSE->id])) {
+	if (isset($courses[$COURSE->id]) && ($type != 'shared_views')) {
 		$course = $courses[$COURSE->id];
 		unset($courses[$COURSE->id]);
 		$courses = array_merge(array($course['id']=>$course), $courses);

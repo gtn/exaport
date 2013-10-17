@@ -51,6 +51,7 @@ if ($action=="login"){
 		}else{
 			$uhash=0;
 		}
+		if (empty($uhash)) $uhash=0;
 		echo "key=".$uhash;
 	}else{
 		echo "key=0";

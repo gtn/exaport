@@ -195,8 +195,10 @@ class block_exaport_view_edit_form extends moodleform {
 							$mform->addElement('checkbox', 'externcomment');
 							$mform->setType('externcomment', PARAM_INT);
 							
-							$mform->addElement('text', 'shareall');
-							$mform->setType('shareall', PARAM_INT);							
+							if (block_exaport_shareall_enabled()) {
+								$mform->addElement('text', 'shareall');
+								$mform->setType('shareall', PARAM_INT);							
+							}
 						break;
 			default: break;
 		};		
@@ -260,7 +262,7 @@ if ($editform->is_cancelled()) {
 		if (empty($dbView->internaccess)) {
 			$dbView->internaccess = 0;
 		}
-		if (!$dbView->internaccess || empty($dbView->shareall)) {
+		if block_exaport_shareall_enabled() || !$dbView->internaccess || empty($dbView->shareall)) {
 			$dbView->shareall = 0;
 		}
 		if (empty($dbView->externcomment)) {
@@ -380,8 +382,8 @@ if ($editform->is_cancelled()) {
 				};
 				// message users, if they have shared
 				//$notifyusers = optional_param('notifyusers', '', PARAM_RAW);
-				$notifyusers = $_POST['notifyusers'];
-				if ($notifyusers) {
+				if (isset($_POST['notifyusers'])) {
+					$notifyusers = $_POST['notifyusers'];
 					foreach ($notifyusers as $notifyuser) {
 						// only notify if he also is shared
 						if (isset($shareusers[$notifyuser])) {
@@ -477,7 +479,7 @@ $postView->viewid = $view->id;
 switch ($action) {
 	case 'add':
 		$postView->internaccess = 0;
-		$postView->shareall = 1;
+		$postView->shareall = 0;
 
 		$strAction = get_string('new');
 		break;
@@ -856,9 +858,11 @@ break;
 					echo '</td><td>'.get_string("internalaccess", "block_exaport").'</td></tr>';
 					echo '<tr id="internaccess-settings"><td></td><td>';
 						echo '<div style="padding: 4px 0;"><table>';
-							echo '<tr><td style="padding-right: 10px; width: 10px">';
-							echo '<input type="radio" name="shareall" value="1"'.($postView->shareall?' checked="checked"':'').' />';
-							echo '</td><td>'.get_string("internalaccessall", "block_exaport").'</td></tr>';
+							if (block_exaport_shareall_enabled()) {
+								echo '<tr><td style="padding-right: 10px; width: 10px">';
+								echo '<input type="radio" name="shareall" value="1"'.($postView->shareall?' checked="checked"':'').' />';
+								echo '</td><td>'.get_string("internalaccessall", "block_exaport").'</td></tr>';
+							}
 							echo '<tr><td style="padding-right: 10px">';
 							echo '<input type="radio" name="shareall" value="0"'.(!$postView->shareall?' checked="checked"':'').'/>';
 							echo '</td><td>'.get_string("internalaccessusers", "block_exaport").'</td></tr>';

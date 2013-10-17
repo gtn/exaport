@@ -78,12 +78,16 @@ if ($u>0){
 $whre=" AND u.id=".$u;}
 else $whre="";
 $views = $DB->get_records_sql(
-                "SELECT v.*, u.firstname, u.lastname, u.picture" .
+                "SELECT v.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT vshar_total.userid) AS cnt_shared_users " .
                 " FROM {user} AS u" .
                 " JOIN {block_exaportview} v ON u.id=v.userid" .
                 " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?" .
-                " WHERE (v.shareall=1 OR vshar.userid IS NOT NULL)".$whre .
-                " $sql_sort", array($USER->id));
+                " LEFT JOIN {block_exaportviewshar} vshar_total ON v.id=vshar_total.viewid" .
+                " WHERE (".(block_exaport_shareall_enabled()?'v.shareall=1 OR':'')." vshar.userid IS NOT NULL) ". // only show shared all, if enabled
+				" AND v.userid!=? ". // don't show my own views
+				$whre .
+				" GROUP BY v.id".
+                " $sql_sort", array($USER->id, $USER->id));
 
 function exaport_search_views($views, $column, $value) {
     $viewsFound = array();
@@ -181,15 +185,20 @@ function exaport_print_views($views, $parsedsort) {
 				
 				$table = new html_table();
 				$table->width = "100%";
-				$table->size = array('50%', '50%');
-				$table->head = array('view' => get_string('view', 'block_exaport'), 'timemodified' => get_string("date", "block_exaport"));
+				$table->size = array('50%', '25%', '25%');
+				$table->head = array(
+					'view' => block_exaport_get_string('view'),
+					'timemodified' => block_exaport_get_string("date"),
+					'sharedwith' => block_exaport_get_string("sharedwith")
+				);
 				$table->data = array();
 
 				foreach ($item['views'] as $view) {
 					$table->data[] = array(
 						"<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/{$view->userid}-{$view->id}\">" .
 						format_string($view->name) . "</a>",
-						userdate($view->timemodified)
+						userdate($view->timemodified),
+						block_exaport_get_shared_with_text($view)
 					);
 				}
 
@@ -208,8 +217,14 @@ function exaport_print_views($views, $parsedsort) {
 		} else {
 			$table = new html_table();
 			$table->width = "100%";
-			$table->size = array('1%', '33%', '33%', '33%');
-			$table->head = array('userpic' => '', 'user' => get_string('user'), 'view' => get_string('view', 'block_exaport'), 'timemodified' => get_string("date", "block_exaport"));
+			$table->size = array('1%', '25%', '25%', '25%', '24%');
+			$table->head = array(
+				'userpic' => '',
+				'user' => get_string('user'),
+				'view' => block_exaport_get_string('view'),
+				'timemodified' => block_exaport_get_string("date"),
+				'sharedwith' => block_exaport_get_string("sharedwith"),
+			);
 			$table->data = array();
 
 			foreach ($mainViewGroup as $view) {
@@ -219,7 +234,8 @@ function exaport_print_views($views, $parsedsort) {
 					fullname($view),
 					"<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/{$view->userid}-{$view->id}\">" .
 					format_string($view->name) . "</a>",
-					userdate($view->timemodified)
+					userdate($view->timemodified),
+					block_exaport_get_shared_with_text($view)
 				);
 			}
 
@@ -244,3 +260,13 @@ echo "<br /><br />";
 echo "</div>";
 
 echo $OUTPUT->footer($course);
+
+
+function block_exaport_get_shared_with_text($view) {
+	if ($view->shareall)
+		return block_exaport_get_string('sharedwith_shareall');
+	elseif ($view->cnt_shared_users > 1)
+		return block_exaport_get_string('sharedwith_meand', $view->cnt_shared_users-1);
+	else
+		return block_exaport_get_string('sharedwith_onlyme');
+}

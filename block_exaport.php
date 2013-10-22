@@ -66,7 +66,7 @@ class block_exaport extends block_list {
         $this->content->icons = array();
         $this->content->footer = '';
         
-		$this->content->items[]='<a title="' . get_string('mybookmarkstitle', 'block_exaport') . '" href="' . $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id . '">' . get_string('mybookmarks', 'block_exaport') . '</a>';
+		$this->content->items[]='<a title="' . get_string('mybookmarkstitle', 'block_exaport') . '" href="' . $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id . '">' . get_string('mybookmarks', 'block_exaport') . '</a>';
 		$this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/my_portfolio.png" height="16" width="23" alt="'.get_string("mybookmarks", "block_exaport").'" />';
 		
 		$this->content->items[]='<a title="' . get_string('sharedbookmarks', 'block_exaport') . '" href="' . $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id . '">' . get_string('sharedbookmarks', 'block_exaport') . '</a>';

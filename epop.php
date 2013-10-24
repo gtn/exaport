@@ -51,6 +51,7 @@ if ($action=="login"){
 		}else{
 			$uhash=0;
 		}
+		if (empty($uhash)) $uhash=0;
 		echo "key=".$uhash;
 	}else{
 		echo "key=0";
@@ -770,7 +771,7 @@ function getExamples($descrid){
 		$inhalt.="<solution>".cdatawrap($example->solution)."</solution>"."\r\n";
 		$inhalt.="<attachement>".cdatawrap($example->attachement)."</attachement>"."\r\n";
 		$inhalt.="<completefile>".cdatawrap($example->completefile)."</completefile>"."\r\n";
-		$inhalt.="<externalurl>".cdatawrap(oezepsbereinigung($example->externalurl,1))."</externalurl>"."\r\n";
+		$inhalt.="<externalurl>".cdatawrap(create_autologin_moodle_example_link($example->externalurl))."</externalurl>"."\r\n";
 		$inhalt.="<externalsolution>".cdatawrap($example->externalsolution)."</externalsolution>"."\r\n";
 		$inhalt.="<externaltask>".cdatawrap($example->externaltask)."</externaltask>"."\r\n";
 		
@@ -824,6 +825,15 @@ function oezepsbereinigung($url,$nuroezeps=1){
 	}
 	return $url;
 }
+
+function create_autologin_moodle_example_link($url){
+
+	$url=str_replace("oezeps.at/moodle","oezeps.at/moodle/blocks/exaport/epopal.php?url=",$url);
+	$url=str_replace("digikomp.at","digikomp.at/blocks/exaport/epopal.php?url=",$url);
+
+	return $url;
+}
+
 function block_exaport_delete_competences($itemid,$userid){
 	global $DB;
 	$result = $DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $itemid));
@@ -1002,7 +1012,7 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 					$inhalt.='<url>'.cdatawrap($item->url).'</url>'."\r\n";
 					$inhalt.='<fileUrl>'.cdatawrap(block_exaport_ers_null($fileurl)).'</fileUrl>'."\r\n";
 					$inhalt.='<beispiel_url>';
-					if ($item->isoez==1) $inhalt.=oezepsbereinigung(block_exaport_ers_null($item->beispiel_url),0);
+					if ($item->isoez==1) $inhalt.=create_autologin_moodle_example_link(block_exaport_ers_null($item->beispiel_url));
 					else $inhalt.=block_exaport_ers_null($item->beispiel_url);
 					$inhalt.='</beispiel_url>'."\r\n";
 					$inhalt.='<beispiel_description>'.cdatawrap($item->beispiel_angabe).'</beispiel_description>'."\r\n";

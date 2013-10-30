@@ -16,7 +16,7 @@ if ($action=="login"){
 	if ($uname!="0" && $pword!="0"){
 		$uname=kuerzen($uname,100);
 		$pword=kuerzen($pword,50);
-		
+		$uhash=0;
 		$conditions = array("username" => $uname,"password" => $pword);
 		if (!$user = $DB->get_record("user", $conditions)){
 			$condition = array("username" => $uname);
@@ -43,7 +43,6 @@ if ($action=="login"){
 					if ($user_hash->oezinstall==0) block_exaport_installoez($user->id);
 					else {
 						if (block_exaport_checkIfUpdate($user->id))	{
-							echo "zeit zum update";
 							block_exaport_installoez($user->id,true);
 						}
 					}

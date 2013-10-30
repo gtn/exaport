@@ -16,7 +16,7 @@ if ($action=="login"){
 	if ($uname!="0" && $pword!="0"){
 		$uname=kuerzen($uname,100);
 		$pword=kuerzen($pword,50);
-		
+		$uhash=0;
 		$conditions = array("username" => $uname,"password" => $pword);
 		if (!$user = $DB->get_record("user", $conditions)){
 			$condition = array("username" => $uname);
@@ -43,7 +43,6 @@ if ($action=="login"){
 					if ($user_hash->oezinstall==0) block_exaport_installoez($user->id);
 					else {
 						if (block_exaport_checkIfUpdate($user->id))	{
-							echo "zeit zum update";
 							block_exaport_installoez($user->id,true);
 						}
 					}
@@ -1041,7 +1040,17 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 					$inhalt.='<name>'.cdatawrap($item->name).'</name>'."\r\n";
 					$inhalt.='<description>'.cdatawrap($item->intro).'</description>'."\r\n";
 					$inhalt.='<url>'.cdatawrap($item->url).'</url>'."\r\n";
-					$inhalt.='<fileUrl>'.cdatawrap(block_exaport_ers_null($fileurl)).'</fileUrl>'."\r\n";
+					$isPicture="false";
+					if (!empty($fileurl)){
+							if ($dateien = $DB->get_records("files",  array("component"=>"block_exaport","itemid"=>$item->id))){
+								foreach($dateien as $datei){
+									if ($datei->filesize>0){
+										if (preg_match('/.+\/(jpeg|jpg|gif)$/', $datei->mimetype)) $isPicture="true";
+									}
+								}
+							}
+					}
+					$inhalt.='<fileUrl isPicture="'.$isPicture.'">'.cdatawrap(block_exaport_ers_null($fileurl)).'</fileUrl>'."\r\n";
 					$inhalt.='<beispiel_url>';
 					if ($item->isoez==1) $inhalt.=create_autologin_moodle_example_link(block_exaport_ers_null($item->beispiel_url));
 					else $inhalt.=block_exaport_ers_null($item->beispiel_url);

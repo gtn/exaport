@@ -349,7 +349,21 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         // eportfolio savepoint reached
-        upgrade_block_savepoint(true, 2013071700, 'exaport');
+       
+    }
+    
+    if ($oldversion < 2013102205) {
+
+        // Define field view_items_layout to be added to block_exaportuser
+        $table = new xmldb_table('block_exaportitem');
+        $field = new xmldb_field('example_url');
+				$field->set_attributes(XMLDB_TYPE_CHAR, '255',null, null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // eportfolio savepoint reached
+        upgrade_block_savepoint(true, 2013102205, 'exaport');
     }
 
 	return $result;

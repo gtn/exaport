@@ -129,7 +129,7 @@ if (!$views) {
 		$table->data[$view_i]['timemodified'] = userdate($view->timemodified);
 
 		$table->data[$view_i]['accessoptions'] = '';
-		if ($view->shareall) {
+		if ($view->shareall && block_exaport_shareall_enabled()) {
 			$table->data[$view_i]['accessoptions'] .= '<div>'.get_string("internalaccess", "block_exaport").':</div><div style="padding-left: 10px;">'.get_string("internalaccessall", "block_exaport").'</div>';
 		} else {
 			// read users

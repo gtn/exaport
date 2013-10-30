@@ -67,6 +67,11 @@ function block_exaport_require_login($courseid) {
 	}
 }
 
+function block_exaport_shareall_enabled() {
+	global $CFG;
+	return empty($CFG->block_exaport_disable_shareall);
+}
+
 function block_exaport_setup_default_categories() {
 	global $DB, $USER,$CFG;
     
@@ -101,19 +106,14 @@ function block_exaport_setup_default_categories() {
 	}
 }
 
-function block_exaport_get_active_version() {
-    global $CFG, $DB;
-    return empty($CFG->block_exaport_active_version) ? 3 : $CFG->block_exaport_active_version;
-}
-
 function block_exaport_feature_enabled($feature) {
     global $CFG;
     if ($feature == 'views')
-        return block_exaport_get_active_version() >= 3;
+        return true;
     if ($feature == 'share_item')
-        return block_exaport_get_active_version() < 3;
+        return false;
     if ($feature == 'copy_to_course')
-        return!empty($CFG->block_exaport_feature_copy_to_course);
+        return !empty($CFG->block_exaport_feature_copy_to_course);
     die('wrong feature');
 }
 
@@ -210,11 +210,9 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
     $tabs[] = new tabobject('personal', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("personal", "block_exaport"), '', true);
     // $tabs[] = new tabobject('categories', $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $COURSE->id, get_string("categories", "block_exaport"), '', true);
     $tabs[] = new tabobject('bookmarks', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("bookmarks"), '', true);
-    if (block_exaport_feature_enabled('views')) {
-        $tabs[] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
-    }
+	$tabs[] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
     $tabs[] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
-    $tabs[] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_people.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
+    $tabs[] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
 
     // tabs f�r das untermen�
     $tabs_sub = array();
@@ -286,16 +284,16 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	
 }
 
-function block_exaport_get_string($string) {
+function block_exaport_get_string($string, $param=null) {
 	$manager = get_string_manager();
 	
 	if (block_exaport_course_has_desp() && $manager->string_exists('desp_'.$string, 'block_exaport'))
-		return $manager->get_string('desp_'.$string, 'block_exaport');
+		return $manager->get_string('desp_'.$string, 'block_exaport', $param);
 
 	if ($manager->string_exists($string, "block_exaport"))
-		return $manager->get_string($string, 'block_exaport');
+		return $manager->get_string($string, 'block_exaport', $param);
 
-	return $manager->get_string($string);	
+	return $manager->get_string($string, '', $param);	
 }
 function todo_string($string) {
 	$manager = get_string_manager();

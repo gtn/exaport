@@ -318,6 +318,11 @@ $string['height'] = 'Height';
 $string['width'] = 'Width';
 $string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
 
+$string['sharedwith'] = 'Shared with';
+$string['sharedwith_meand'] = 'Shared with me and {$a} other users';
+$string['sharedwith_onlyme'] = 'Shared only with me';
+$string['sharedwith_shareall'] = 'Shared with all users';
+
 // Copy to course
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';
 $string['copyitemtocourse'] = 'Copy to course';
@@ -394,6 +399,10 @@ $string['settings_allow_loginas_head'] = 'Allow login as';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
+$string['settings_disable_shareall_head'] = 'Disable sharing with all users';
+$string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
+
+$string['delete_all_shareall'] = 'Delete all shareall?';
 
 $string['create_as_note'] = 'Create as Artefact';
 $string['category_not_found'] = 'Category not found';

@@ -1,0 +1,69 @@
+
+.view-group {
+	margin-bottom: 25px;
+}
+.view-group .view-group-content {
+	display: none;
+}
+.view-group-open .view-group-content {
+	display: block;
+}
+.view-group-header {
+	text-align: left;
+	padding: 5px;
+	cursor: pointer;
+}
+.view-group-pic img {
+	vertical-align: middle;
+}
+.view-group-title {
+	padding-left: 30px;
+	background: url('../pix/group_closed.png') no-repeat 15px 5px;
+}
+.view-group-open .view-group-title {
+	background-image: url('../pix/group_open.png');
+}
+
+
+.excomdos_listtable {
+	width: 100%;
+	border: 1px solid #E3DFD4;
+	border-collapse: collapse;
+}
+
+.excomdos_listtable td, .excomdos_listtable thead th {
+	padding: 0.5em;
+	border: 1px solid #cacaca;
+    border-collapse: collapse;
+    vertical-align: top;
+}
+
+.excomdos_listtable thead th {
+	background-color: #E6E6E6;
+	font-size: 0.9rem;
+}
+
+
+.excomdos_listtable tr:nth-child(2n+2) {
+  background-color: #f9f9f9;
+}
+
+.excomdos_listtable tr td {
+	vertical-align: middle;
+}
+
+.excomdos_listtable tr td.excomdos_listlastcol {
+	word-wrap: break-word;.
+	max-width: 300px;
+	min-width: 200px;
+	 overflow: hidden;
+	 width: 2em;
+}
+
+.excomdos_subcollast {
+	border-left: none;
+}
+
+.excomdos_listtable .excomdos_listcomments {
+	padding-right: 1em;
+}

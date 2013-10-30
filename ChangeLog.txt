@@ -1,4 +1,9 @@
 Exabis E-Portfolio ChangeLog
+2013-10-09 4.1
+new my portfolio area - no more categories, tiles, print-version
+new shared views
+better integration of external content in views (can be added as artefacts)
+
 2013-05-03 4.0.5
 link items can be commented in views, size for pop up for artefact selection increases dynamically
 

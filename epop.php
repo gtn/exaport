@@ -703,16 +703,17 @@ else if ($action=="get_items_for_view"){
 		           		print_r($newarr2);	*/
 									if ($action!="updatePic"){
 			           		$DB->update_record('block_exaportitem', $new);
-			           		if ($itemrs->isoez!=1){
-			           			//nicht mehr beim upload dabei
-				           		//block_exaport_delete_competences($itemid,$user->id);
-					           	//block_exaport_save_competences($competences,$new,$user->id,$new->name);
-					          }else{
-						          block_exaport_delete_competences($itemid,$user->id);
-						          $competencesoez=block_exaport_get_oezcompetencies($itemrs->exampid);
-						          block_exaport_save_competences($competencesoez,$new,$user->id,$itemrs->name);
-					          }
+			           	}
+			           	if ($itemrs->isoez!=1){
+			           		//nicht mehr beim upload dabei
+				           	//block_exaport_delete_competences($itemid,$user->id);
+					           //block_exaport_save_competences($competences,$new,$user->id,$new->name);
+					        }else{
+						         block_exaport_delete_competences($itemid,$user->id);
+						         $competencesoez=block_exaport_get_oezcompetencies($itemrs->exampid);
+						         block_exaport_save_competences($competencesoez,$new,$user->id,$itemrs->name);
 					        }
+					        
 		           }else{
 			           if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
 			           	//block_exaport_save_competences($competences,$new,$user->id,$new->name);
@@ -855,6 +856,7 @@ function oezepsbereinigung($url,$nuroezeps=1){
 	}
 	return $url;
 }
+
 function create_autologin_moodle_example_link($url){
 
 	$url=str_replace("oezeps.at/moodle","oezeps.at/moodle/blocks/exaport/epopal.php?url=",$url);
@@ -1044,7 +1046,7 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 							if ($dateien = $DB->get_records("files",  array("component"=>"block_exaport","itemid"=>$item->id))){
 								foreach($dateien as $datei){
 									if ($datei->filesize>0){
-										if (preg_match('/.+\/(jpeg|jpg|gif)$/', $datei->mimetype)) $isPicture="true";
+										if (preg_match('/.+\/(jpeg|jpg|gif|png)$/', $datei->mimetype)) $isPicture="true";
 									}
 								}
 							}

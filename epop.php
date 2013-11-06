@@ -730,7 +730,7 @@ else if ($action=="get_items_for_view"){
 							//$new->attachment = $newfile->get_id();  
 							$attachm=$newfile->get_id();
 							echo "ID=".$attachm;
-		          $new2=$DB->update_record('block_exaportitem', array("id"=>$new->id,"attachment"=>$attachm));
+		          $new2=$DB->update_record('block_exaportitem', array("id"=>$new->id,"attachment"=>$attachm,"type"=>"file"));
 		        }else{
 		        	
 		        };

@@ -328,3 +328,4 @@ $string['mediacontent'] = 'URL or embed code *';
 $string['height'] = 'Height';
 $string['width'] = 'Width';
 $string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
+$string['i_shared'] = 'I shared an eportfolio view with you';

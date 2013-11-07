@@ -80,6 +80,10 @@ else {
 //get competences from item if editing
 $comp = block_exaport_check_competence_interaction();
 if ($existing && $comp) {
+	
+	// initialize with empty string
+	if (empty($existing->compids)) $existing->compids = '';
+	
 	$competences = $DB->get_records('block_exacompdescractiv_mm', array("activityid" => $existing->id, "activitytype" => 2000));
 	foreach ($competences as $competence) {
 		$existing->compids .= $competence->descrid . ',';

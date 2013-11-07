@@ -107,11 +107,7 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	min-height: 20px;
-	/*
-	width: 50%;
-	float: left;
-	*/
+	min-height: 200px;
 }
 .portfolioDesignBlocks-left li {
 	margin-left: 0;
@@ -131,6 +127,12 @@
 .portfolioDesignBlocks li .header {
 	cursor: move;
 	padding: 4px 20px 4px 8px;
+}
+.portfolioDesignBlocks li .name {
+	padding: 4px 8px;
+}
+.portfolioDesignBlocks li .email {
+	padding: 4px 8px;
 }
 .portfolioDesignBlocks li .body {
 	padding: 4px 8px;
@@ -171,7 +173,7 @@
 .portfolioDesignBlocks li.block-placeholder {
 	border: 3px dotted #ddd;
 	visibility: show;
-	min-height: 20px;
+	min-height: 60px;
 }
 .portfolioDesignBlocks li .default-text {
 	color: #999;

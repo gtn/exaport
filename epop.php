@@ -1053,8 +1053,8 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 					}
 					$inhalt.='<fileUrl isPicture="'.$isPicture.'">'.cdatawrap(block_exaport_ers_null($fileurl)).'</fileUrl>'."\r\n";
 					$inhalt.='<beispiel_url>';
-					if ($item->isoez==1) $inhalt.=create_autologin_moodle_example_link(block_exaport_ers_null($item->beispiel_url));
-					else $inhalt.=block_exaport_ers_null($item->beispiel_url);
+					if ($item->isoez==1) $inhalt.=cdatawrap(create_autologin_moodle_example_link(block_exaport_ers_null($item->beispiel_url)));
+					else $inhalt.=cdatawrap(block_exaport_ers_null($item->beispiel_url));
 					$inhalt.='</beispiel_url>'."\r\n";
 					$inhalt.='<beispiel_description>'.cdatawrap($item->beispiel_angabe).'</beispiel_description>'."\r\n";
 					$texteingabe=0;$bildbearbeiten=0;
@@ -1086,24 +1086,30 @@ function write_xml_categories($conditions,$catid,$userid){
 	print_r($conditions);*/
 	$catkomparr=array();
 		if ($categories = $DB->get_records("block_exaportcate", $conditions," isoez DESC")){
-			if ($sozkomp = $DB->get_record("block_exacompschooltypes", array("title"=>"Soziale Kompetenzen"))){
-				if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$sozkomp->id))){
-					foreach ($sozsubjs as $k=>$v){
-						$catkomparr[$v->id]="sozial";
+			if ($sozkomp = $DB->get_records("block_exacompschooltypes", array("title"=>"Soziale Kompetenzen"))){
+				foreach ($sozkomp as $ks){
+					if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$ks->id))){
+						foreach ($sozsubjs as $k=>$v){
+							$catkomparr[$v->id]="sozial";
+						}
 					}
 				}
 			}        
-			if ($sozkomp = $DB->get_record("block_exacompschooltypes", array("title"=>"Personale Kompetenzen"))){
-				if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$sozkomp->id))){
-					foreach ($sozsubjs as $k=>$v){
-						$catkomparr[$v->id]="personal";
+			if ($sozkomp = $DB->get_records("block_exacompschooltypes", array("title"=>"Personale Kompetenzen"))){
+				foreach ($sozkomp as $ks){
+					if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$ks->id))){
+						foreach ($sozsubjs as $k=>$v){
+							$catkomparr[$v->id]="personal";
+						}
 					}
 				}
 			} 
-			if ($sozkomp = $DB->get_record("block_exacompschooltypes", array("title"=>"Digitale Kompetenzen"))){
-				if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$sozkomp->id))){
-					foreach ($sozsubjs as $k=>$v){
-						$catkomparr[$v->id]="digital";
+			if ($sozkomp = $DB->get_records("block_exacompschooltypes", array("title"=>"Digitale Kompetenzen"))){
+				foreach ($sozkomp as $ks){
+					if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$ks->id))){
+						foreach ($sozsubjs as $k=>$v){
+							$catkomparr[$v->id]="digital";
+						}
 					}
 				}
 			} 

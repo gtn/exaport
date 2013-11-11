@@ -46,23 +46,26 @@ if ($user->access->request == 'intern') {
 $parsedsort = block_exaport_parse_item_sort($userpreferences->itemsort, false);
 $order_by = block_exaport_item_sort_to_sql($parsedsort, false);
 
+$conditions = array();
 if ($user->access->request == 'extern') {
 	$extraTable = "";
 	$extraWhere = "i.externaccess=1";
 } else {
-	$extraTable = "LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid={$USER->id}";
+	$extraTable = "LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid=?";
 	$extraWhere  = " ((i.shareall=1 AND ishar.userid IS NULL)";
 	$extraWhere .= "  OR (i.shareall=0 AND ishar.userid IS NOT NULL))";
+	$conditions[] = $USER->Id;
 }
 
+$conditions[] = $user->id;
 $items = $DB->get_records_sql(
 	"SELECT i.id, i.type, i.url, i.name, i.intro, i.attachment, i.timemodified, ic.name AS cname, ic2.name AS cname_parent
 	FROM {block_exaportitem} i
 	JOIN {block_exaportcate} ic ON i.categoryid = ic.id
 	$extraTable
 	LEFT JOIN {block_exaportcate} ic2 on ic.pid = ic2.id
-	WHERE i.userid='{$user->id}' AND $extraWhere
-	$order_by");
+	WHERE i.userid=? AND $extraWhere
+	$order_by", $conditions);
 
 if (!$items) {
 	print_error("nobookmarksall", "block_exaport");

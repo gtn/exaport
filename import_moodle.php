@@ -53,13 +53,13 @@ if ($modassign->new==1){
 								INNER JOIN {assign_submission} s ON sf.submission=s.id
 								INNER JOIN {assign} a ON s.assignment=a.id
 								LEFT JOIN {course} c on a.course = c.id
-								WHERE s.userid='{$USER->id}'");
+								WHERE s.userid=?", array($USER->id));
 }else{
 	$assignments = $DB->get_records_sql("SELECT s.id, a.id AS aid, s.assignment, s.timemodified, a.name, a.course, a.assignmenttype, c.fullname AS coursename
 								FROM {assignment_submissions} s
 								JOIN {assignment} a ON s.assignment=a.id
 								LEFT JOIN {course} c on a.course = c.id
-								WHERE s.userid='{$USER->id}'");
+								WHERE s.userid=", array($USER->id));
 }
 $table = new html_table();
 $table->head = array(get_string("modulename", $modassign->title), get_string("time"), get_string("file"), get_string("course", "block_exaport"), get_string("action"));

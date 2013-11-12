@@ -618,6 +618,7 @@ $translations = array(
 	'delete', 'viewand',
 	'file', 'note', 'link',
 	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',
+	'checkall',
 );
 
 

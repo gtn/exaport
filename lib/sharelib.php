@@ -363,6 +363,63 @@ function exaport_get_shareable_courses_with_users($type) {
 		unset($courses[$COURSE->id]);
 		$courses = array_merge(array($course['id']=>$course), $courses);
 	}
+	
+	// test courses
+	/*
+	$courses[] = array(
+		'id' => 1004,
+		'fullname' => 'test 4',
+		'users' => array(
+			array(
+				'id' => 100001,
+				'name' => 'non existing 100001',
+				'rolename' => ''
+			),
+			array(
+				'id' => 100002,
+				'name' => 'non existing 100002',
+				'rolename' => ''
+			),
+			array(
+				'id' => 100003,
+				'name' => 'non existing 100003',
+				'rolename' => ''
+			),
+		)
+	);
+	$courses[] = array(
+		'id' => 1005,
+		'fullname' => 'test 5',
+		'users' => array(
+			array(
+				'id' => 100001,
+				'name' => 'non existing 100001',
+				'rolename' => ''
+			),
+		)
+	);
+	$courses[] = array(
+		'id' => 1006,
+		'fullname' => 'test 6',
+		'users' => array(
+			array(
+				'id' => 100005,
+				'name' => 'non existing 100005',
+				'rolename' => ''
+			),
+			array(
+				'id' => 100001,
+				'name' => 'non existing 100001',
+				'rolename' => ''
+			),
+			array(
+				'id' => 100006,
+				'name' => 'non existing 100006',
+				'rolename' => ''
+			),
+		)
+	);
+	*/
 
 	return $courses;
 }

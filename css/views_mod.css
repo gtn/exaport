@@ -369,3 +369,19 @@ input[name=block_title], input[name=headline] {
 #add-items-list .add-item-sub {
 	margin-left: 30px;
 }
+
+.course-group-title {
+	cursor: pointer;
+	padding-left: 30px;
+	background: url('../pix/group_closed.png') no-repeat 15px 5px;
+}
+.course-group-open .course-group-title {
+	background-image: url('../pix/group_open.png');
+}
+.course-group-content {
+	display: none;
+}
+.course-group-open .course-group-content {
+	display: block;
+}
+

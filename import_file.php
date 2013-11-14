@@ -107,11 +107,12 @@ if ($fromform = $exteditform->get_data()) {
                                         }
                                         break;
                                     case "PORTFOLIO": 
-										if(isset($xml)){
-											import_structure($unzip_dir, $organization["items"], $course, 0, $xml);
-										}
-										else import_structure($unzip_dir, $organization["items"], $course);
-                                        break;
+					if(isset($organization["items"])){
+						if(isset($xml)){
+							import_structure($unzip_dir, $organization["items"], $course, 0, $xml);
+						} else import_structure($unzip_dir, $organization["items"], $course);
+                                        }
+					break;
                                     default: import_files($unzip_dir, $organization["items"]);
                                         break;
                                 }

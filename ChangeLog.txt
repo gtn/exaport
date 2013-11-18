@@ -1,4 +1,8 @@
 Exabis E-Portfolio ChangeLog
+2013-16-11 4.1
+Thank you to Silvia Alcaraz-Domínguez from Universitat de Barcelona (Faculty of Pedagogy) for translating the module to Catalan
+Usability-enhancements - grouping of published views
+
 2013-10-09 4.1
 new my portfolio area - no more categories, tiles, print-version
 new shared views

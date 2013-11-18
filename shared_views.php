@@ -156,7 +156,7 @@ function exaport_print_views($views, $parsedsort) {
 		}
 
 		// header
-		echo '<h2>'.$mainViewGroupId.'</h2>';
+		echo '<h2>'.get_string($mainViewGroupId,'block_exaport').'</h2>';
 		
 		if (empty($mainViewGroup)) {
 			// print for this course only

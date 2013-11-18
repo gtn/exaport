@@ -269,6 +269,9 @@ $string['view_sharing'] = 'Sharing';
 $string['viewand'] = 'and';
 $string['view_sharing_noaccess'] = 'No Access';
 $string['show'] = "Show";
+$string['thiscourse'] = 'This course';
+$string['othercourses'] = 'other courses';
+
 $string['createpage'] = 'Drag and drop content blocks from the tabs below to create your page.';
 $string['chooselayout'] = 'Select how you would like the columns in your page to be laid out.';
 $string['viewtitle'] = "Title and description";

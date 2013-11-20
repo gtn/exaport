@@ -269,6 +269,8 @@ $string['view_sharing'] = 'Ver&ouml;ffentlichen';
 $string['viewand'] = 'und';
 $string['view_sharing_noaccess'] = 'Kein Zugriff';
 $string['show'] = 'Anzeigen';
+$string['thiscourse'] = 'Aktueller Kurs';
+$string['othercourses'] = 'Andere Kurse';
 
 // Copy to course
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/exaport/db" VERSION="20130717" COMMENT="XMLDB file for Exabis E-Portfolio"
+<XMLDB PATH="blocks/exaport/db" VERSION="20131118" COMMENT="XMLDB file for Exabis E-Portfolio"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -40,7 +40,8 @@
         <FIELD NAME="parent_ids" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent category ids" PREVIOUS="sourceid" NEXT="parent_titles"/>
         <FIELD NAME="parent_titles" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent categories, names" PREVIOUS="parent_ids" NEXT="stid"/>
         <FIELD NAME="stid" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="schooltypeid" PREVIOUS="parent_titles" NEXT="sourcemod"/>
-        <FIELD NAME="sourcemod" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="modus of category exacomp schooltype=3, subject=5, topic=7" PREVIOUS="stid"/>
+        <FIELD NAME="sourcemod" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="modus of category exacomp schooltype=3, subject=5, topic=7" PREVIOUS="stid" NEXT="name_short"/>
+        <FIELD NAME="name_short" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="sourcemod"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="primary key for bookmark categories" NEXT="userid"/>
@@ -74,7 +75,7 @@
         <FIELD NAME="source" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" PREVIOUS="beispiel_angabe" NEXT="sourceid"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" PREVIOUS="source" NEXT="iseditable"/>
         <FIELD NAME="iseditable" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" PREVIOUS="sourceid" NEXT="example_url"/>
-        <FIELD NAME="example_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="iseditable" />
+        <FIELD NAME="example_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="iseditable"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="userid"/>

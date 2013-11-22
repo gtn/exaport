@@ -135,6 +135,7 @@ $string['nousersfound'] = 'No users found';
 $string['delete'] = 'Delete';
 $string['add'] = 'Add';
 $string['edit'] = 'Edit';
+$string['checkall'] = 'Check all';
 
 // export/import
 $string['import'] = 'Import';

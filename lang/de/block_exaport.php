@@ -136,6 +136,7 @@ $string['nousersfound'] = 'Keine Benutzer gefunden';
 $string['delete'] = 'L&ouml;schen';
 $string['add'] = 'Hinzuf&uuml;gen';
 $string['edit'] = 'Editieren';
+$string['checkall'] = 'Alle auswählen';
 
 // export/import
 $string['import'] = 'Import';

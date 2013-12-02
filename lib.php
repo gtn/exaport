@@ -35,7 +35,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 
 		// get file
 		$fs = get_file_storage();
-		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
+		$file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
 		// serve file
 		if ($file) {
@@ -57,7 +57,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 
 		// get file
 		$fs = get_file_storage();
-		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
+		$file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
 		// serve file
 		if ($file) {
@@ -77,7 +77,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 
 		// get file
 		$fs = get_file_storage();
-		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
+		$file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
 
 		// serve file
 		if ($file) {
@@ -104,7 +104,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 								 
 		// get file
 		$fs = get_file_storage();
-		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $view->userid)->id, 'block_exaport', 'personal_information', $view->userid, '/', $filename);
+		$file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', 'personal_information', $view->userid, '/', $filename);
 
 		// serve file
 		if ($file) {
@@ -117,7 +117,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 		
 		// get file
 		$fs = get_file_storage();
-		$file = $fs->get_file(get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/', $filename);
+		$file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/', $filename);
 
 		// serve file
 		if ($file) {

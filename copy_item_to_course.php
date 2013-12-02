@@ -35,7 +35,7 @@ $sharecourseid = optional_param('sharecourseid', '', PARAM_INT); // array of int
 $backtype = optional_param('backtype', 'all', PARAM_ALPHA);
 $backtype = block_exaport_check_item_type($backtype, true);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 require_login($courseid);
 require_capability('block/exaport:use', $context);

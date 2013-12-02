@@ -37,7 +37,7 @@ $type_plural = block_exaport_get_plural_item_type($type);
 
 block_exaport_require_login($courseid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 $conditions = array("id" => $courseid);
 if (! $course = $DB->get_record("course", $conditions) ) {
@@ -155,7 +155,7 @@ foreach ($items as $item) {
 	
 	$table->data[$item_i]['name'] = $item->name;
 	if ($item->intro) {
-		$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+		$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
 
 		if (!$intro) {
 			// no intro

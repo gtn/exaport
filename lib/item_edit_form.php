@@ -126,7 +126,7 @@ class block_exaport_item_edit_form extends moodleform {
 				$mform->addRule('intro', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
 		} else {
 			if (!isset($this->_customdata['textfieldoptions'])) {
-				$this->_customdata['textfieldoptions'] = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+				$this->_customdata['textfieldoptions'] = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
 			}
 			$mform->addElement('editor', 'intro_editor', get_string('intro', 'block_exaport'), null, $this->_customdata['textfieldoptions']);
 			$mform->setType('intro_editor', PARAM_RAW);

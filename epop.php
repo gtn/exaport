@@ -606,7 +606,8 @@ else if ($action=="get_items_for_view"){
 			
 			$fs = get_file_storage();
 			$totalsize = 0;
-			$context = get_context_instance(CONTEXT_USER,$user->id);
+			//$context = get_context_instance(CONTEXT_USER,$user->id);
+			$context = context_user::instance($user->id);
 			
 			foreach ($_FILES as $fieldname=>$uploaded_file) {
 		    // check upload errors

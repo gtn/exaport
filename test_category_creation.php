@@ -11,7 +11,7 @@ echo 'course id: '.$COURSE->id."<br />\n";
 if (!is_dir(dirname(__FILE__).'/../desp'))
 	die ('no desp installed');
 
-$context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+$context = context_course::instance($COURSE->id);
 if (!$DB->record_exists('block_instances', array('blockname'=>'desp', 'parentcontextid'=>$context->id)))
 	die('no desp in course!');
 

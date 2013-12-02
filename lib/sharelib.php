@@ -62,7 +62,7 @@ function block_exaport_get_user_from_access($access,$epopaccess=false)
 	} elseif ($accessPath[0] == 'id') {
 		// guest not allowed
 		// require exaport:use -> guest hasn't this right
-		$context = get_context_instance(CONTEXT_SYSTEM);
+		$context = context_system::instance();
 		if ($epopaccess==false)	require_capability('block/exaport:use', $context);
 
 		$userid = $accessPath[1];
@@ -130,7 +130,7 @@ function block_exaport_get_view_from_access($access)
 	} elseif ($accessPath[0] == 'id') {
 		// guest not allowed
 		// require exaport:use -> guest hasn't this right
-		$context = get_context_instance(CONTEXT_SYSTEM);
+		$context = context_system::instance();
 		require_capability('block/exaport:use', $context);
 
 		$hash = $accessPath[1];
@@ -332,7 +332,7 @@ function exaport_get_shareable_courses_with_users($type) {
 		);
 		//print_r($course);
 		
-		$context = get_context_instance(CONTEXT_COURSE, $dbCourse->id);
+		$context = context_course::instance($dbCourse->id);
 		$roles = get_roles_used_in_context($context);
 		//print_r($roles);
 		

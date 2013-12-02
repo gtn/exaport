@@ -64,7 +64,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
 			if ($item->id = $DB->insert_record('block_exaportitem', $item)) {
 			
 				$filerecord = new stdClass();
-				$filerecord->contextid = get_context_instance(CONTEXT_USER, $USER->id)->id;
+				$filerecord->contextid = context_user::instance($USER->id)->id;
 				$filerecord->component = 'block_exaport';
 				$filerecord->filearea  = 'item_file';
 				$filerecord->itemid    = $item->id;

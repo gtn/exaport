@@ -14,7 +14,7 @@ define('SUBMIT_BUTTON_TEXT', get_string($action == 'add' ? 'addButton' : 'saveBu
 
 $url = '/blocks/exabis_competences/blocks.json.php';
 $PAGE->set_url($url);
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 $PAGE->set_context($context);
 
 require_login($courseid);
@@ -177,7 +177,7 @@ function get_form_text($id, $block_data=array()) {
     $draftid_editor = file_get_submitted_draft_itemid('text');
 	if ($block_data->text) {
 		$text = $block_data->text;
-		$text = file_rewrite_pluginfile_urls($text, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));
+		$text = file_rewrite_pluginfile_urls($text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));
 	} else {
 		$text = '';
 	}
@@ -252,12 +252,12 @@ if ($USER->picture) {
 	if ($block_data->text) {
 		$text = $block_data->text;
 
-		$text = file_prepare_draft_area($draftid_editor, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content',
+		$text = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, 'block_exaport', 'view_content',
                                        required_param('viewid', PARAM_INT), array('subdirs'=>true), $text);
 	} else {
 		$text = block_exaport_get_user_preferences()->description;
 
-		$text = file_prepare_draft_area($draftid_editor, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information',
+		$text = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, 'block_exaport', 'personal_information',
                                        $USER->id, array('subdirs'=>true), $text);
 	}
 	$content  = "";

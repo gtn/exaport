@@ -166,7 +166,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			// http://test665.ethinkeducation.com/pluginfile.php/5743/block_exaport/personal_information_self/7-eleven-brand.svg.png
 			// http://test665.ethinkeducation.com/draftfile.php/66/user/draft/596724312/Rachel.jpg
 			
-			$context = get_context_instance(CONTEXT_USER, $GLOBALS['test_for_userid']);
+			$context = context_user::instance($GLOBALS['test_for_userid']);
 			if ($context->id != $matches['contextid']) return;
 			
 			$fs = get_file_storage();

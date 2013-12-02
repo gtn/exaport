@@ -39,7 +39,7 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 
 require_login($courseid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 require_capability('block/exaport:use', $context);
 $conditions = array("id" => $courseid);
@@ -201,7 +201,8 @@ function import_user_image($unzip_dir, $url){
 
 			// Prepare file record object
 			$fileinfo = array(
-				'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,    // ID of context
+				//'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,    // ID of context
+				'contextid' => context_user::instance($USER->id)->id,
 				'component' => 'block_exaport', // usually = table name
 				'filearea' => 'personal_information',     // usually = table name
 				'itemid' => $new->id,          // usually = ID of row in table
@@ -213,7 +214,7 @@ function import_user_image($unzip_dir, $url){
 			$fs->create_file_from_pathname($fileinfo, $linkedFilePath);
 		
 				
-			$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+			$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
 			$userpreferences = block_exaport_get_user_preferences($USER->id);
 			$description = $userpreferences->description;
 			$informationform = new block_exaport_personal_information_form();
@@ -225,10 +226,11 @@ function import_user_image($unzip_dir, $url){
 			$data->cataction = 'save';
 			$data->edit = 1;
 		
-			$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'personal_information', $USER->id);
+			$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'personal_information', $USER->id);
 			
 			$array = $data->description_editor;
-			file_prepare_draft_area($array["itemid"], get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $new->id);
+			//file_prepare_draft_area($array["itemid"], get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $new->id);
+			file_prepare_draft_area($array["itemid"], context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $new->id);
 			//var_dump(file_get_draft_area_info($array["itemid"]));
 			
 			//file_prepare_draft_area($data->itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $new->id);
@@ -444,7 +446,8 @@ function insert_entry($unzip_dir, $url, $title, $category, $course, &$xml=NULL, 
 
 					// Prepare file record object
 					$fileinfo = array(
-						'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,    // ID of context
+						//'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,    // ID of context
+						'contextid' => context_user::instance($USER->id)->id,
 						'component' => 'block_exaport', // usually = table name
 						'filearea' => 'item_file',     // usually = table name
 						'itemid' => $new->id,          // usually = ID of row in table

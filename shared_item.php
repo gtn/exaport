@@ -36,7 +36,7 @@ $commentid = optional_param('commentid', 0, PARAM_INT);
 $deletecomment = optional_param('deletecomment', 0, PARAM_INT);
 $backtype = optional_param('backtype', 0, PARAM_TEXT);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 $PAGE->set_context($context);
 require_login(0, true);
 

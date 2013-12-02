@@ -47,7 +47,7 @@ if (!confirm_sesskey()) {
     print_error("badsessionkey", "block_exaport");
 }
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 $url = '/blocks/exabis_competences/import_moodle_add_file.php';
 $PAGE->set_url($url);
 
@@ -169,7 +169,7 @@ block_exaport_print_header("bookmarksfiles");
 if (!$cm = get_coursemodule_from_instance($modassign->title, $aid)) {
     print_error('invalidcoursemodule');
 }
-$filecontext = get_context_instance(CONTEXT_MODULE, $cm->id);
+$filecontext = context_module::instance($cm->id);
 
 echo "<div class='block_eportfolio_center'>\n";
 echo $OUTPUT->box(block_exaport_print_file(file_encode_url($CFG->wwwroot . '/pluginfile.php', '/' . $filecontext->id . '/mod_assignment/submission/' . $assignmentid . '/' . $filename), $checked_file->get_filename(), $checked_file->get_filename()));
@@ -213,13 +213,13 @@ function do_add($post, $blogeditform, $returnurl, $courseid, $checked_file) {
     // Insert the new blog entry.
     $post->id = $DB->insert_record('block_exaportitem', $post);
 
-	$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+	$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
 	$post->introformat = FORMAT_HTML;
 	
-	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'item_content', $post->id);
 
 	$filerecord = new stdClass();
-	$context = get_context_instance(CONTEXT_USER, $USER->id);
+	$context = context_user::instance($USER->id);
 	$filerecord->contextid = $context->id;
 	$filerecord->component = 'block_exaport';
 	$filerecord->filearea  = 'item_file';
@@ -283,7 +283,8 @@ function check_assignment_file($assignmentid, $file,$modassign) {
         print_error('invalidcoursemodule');
     }
 
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    //$context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
     $fs = get_file_storage();
     $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->id);
     if ($files) {

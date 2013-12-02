@@ -38,7 +38,7 @@ function block_exaport_get_item_file($item) {
 	$fs = get_file_storage();
 	
 	// list all files, excluding directories!
-	$areafiles = $fs->get_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id, 'itemid', false);
+	$areafiles = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id, 'itemid', false);
 	
 	// file found?
 	if (empty($areafiles))
@@ -51,9 +51,9 @@ function block_exaport_get_item_file($item) {
 function block_exaport_file_remove($item) {
 	$fs = get_file_storage();
 	// associated file (if it's a file item)
-	$fs->delete_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_file', $item->id);
+	$fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id);
 	// item content (intro) inside the html editor
-	$fs->delete_area_files(get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', $item->id);
+	$fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content', $item->id);
 }
 
 /*** GENERAL FUNCTIONS **********************************************************************/
@@ -62,7 +62,7 @@ function block_exaport_require_login($courseid) {
 	global $CFG;
 
 	require_login($courseid);
-	require_capability('block/exaport:use', get_context_instance(CONTEXT_SYSTEM));
+	require_capability('block/exaport:use', context_system::instance());
 
 	if (empty($CFG->block_exaport_allow_loginas)) {
 		// login as not allowed => check
@@ -160,7 +160,7 @@ function block_exaport_course_has_desp() {
 	if (!is_dir(dirname(__FILE__).'/../../desp'))
 		return $COURSE->has_desp = false;
 	
-	$context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+	$context = context_course::instance($COURSE->id);
 	
 	return $COURSE->has_desp = $DB->record_exists('block_instances', array('blockname'=>'desp', 'parentcontextid'=>$context->id));
 }
@@ -258,16 +258,24 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
         $item_name = get_string($nav_item_identifier);
     $navlinks[] = array('name' => $item_name, 'link' => null, 'type' => 'misc');
 
-    $navigation = build_navigation($navlinks);
-    print_header_simple($item_name, get_string(block_exaport_course_has_desp()?"desp_pluginname":'pluginname', "block_exaport"), $navigation, "", "", true);
+    //$navigation = build_navigation($navlinks);
+	foreach($navlinks as $navlink){
+		$PAGE->navbar->add($navlink["name"], $navlink["link"]);
+	}
 	
+	$PAGE->set_title($item_name);
+   	$PAGE->set_heading(get_string(block_exaport_course_has_desp()?"desp_pluginname":'pluginname', "block_exaport"));
+ 
+     // header
+    global $OUTPUT;
+    
+  	echo $OUTPUT->header();
+   
 	if (block_exaport_course_has_desp()) {
 		// include the desp css
 		echo '<link href="'.$CFG->wwwroot.'/blocks/desp/styles.css" rel="stylesheet" type="text/css" />';
 	}
-	
-    // header
-    global $OUTPUT;
+
     $OUTPUT->heading("<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/" . $icon . ".png\" width=\"16\" height=\"16\" alt='icon-$item_identifier' /> " . $strbookmarks . ': ' . $item_name);
 
     print_tabs(array($tabs, $tabs_sub), $currenttab, null, $activetabsubs);
@@ -285,7 +293,6 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 				</div>
 				
 				<br /><br />';
-		
 	}
 	
 }

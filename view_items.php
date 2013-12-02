@@ -32,7 +32,7 @@ $categoryid = optional_param('categoryid', 0, PARAM_INT);
 
 block_exaport_require_login($courseid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 if (! $course = $DB->get_record("course", array("id" => $courseid)) ) {
 	error("That's an invalid course id");
@@ -268,7 +268,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 
 			$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=&att=".$item->attachment)."\">" . $item->name . "</a>";
 			if ($item->intro) {
-				$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+				$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
 
 				$shortIntro = substr(trim(strip_tags($intro)), 0, 20);
 				if(preg_match_all('#(?:<iframe[^>]*)(?:(?:/>)|(?:>.*?</iframe>))#i', $intro, $matches)) {

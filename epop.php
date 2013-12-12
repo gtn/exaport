@@ -433,7 +433,7 @@ else if ($action=="get_items_for_view"){
 					$clist.=$v->descrid.",";
 				}
 			}
-	    $sql = "SELECT dt.id as dtid, d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+	    $sql = "SELECT dt.id as dtid, d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 	    if ($subjectid>0 && $action=="getCompetences"){
 	    	$sql.=" AND s.id=".$subjectid;
 	    }

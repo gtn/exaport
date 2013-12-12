@@ -5,7 +5,7 @@ require dirname(__FILE__) . '/inc.php';
 require_login();
 
 // check admin!
-$context = get_context_instance(CONTEXT_USER, $USER->id);
+$context = context_user::instance($USER->id);
 require_capability('moodle/site:config', $context);
 
 
@@ -243,7 +243,7 @@ try {
 		 
 			// Prepare file record object
 			$fileinfo = array(
-				'contextid' => get_context_instance(CONTEXT_USER, $file->userid)->id,    // ID of context
+				'contextid' => context_user::instance($file->userid)->id,    // ID of context
 				'component' => 'block_exaport', // usually = table name
 				'filearea' => 'item_file',     // usually = table name
 				'itemid' => $file->id,          // usually = ID of row in table

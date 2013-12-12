@@ -36,7 +36,7 @@ $viewid = optional_param("viewid", 0, PARAM_INT);
 $identifier = 1000000; // Item identifier
 $ridentifier = 1000000; // Ressource identifier
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 require_login($courseid);
 require_capability('block/exaport:use', $context);
@@ -631,7 +631,7 @@ if ($confirm) {
 	
 	//save files, from personal information
 	$fs = get_file_storage();
-	$areafiles = $fs->get_area_files(get_context_instance(CONTEXT_USER, $USER->id)->id,'block_exaport', 'personal_information');
+	$areafiles = $fs->get_area_files(context_user::instance($USER->id)->id,'block_exaport', 'personal_information');
 	foreach ($areafiles as $areafile){
 		if (!$areafile) continue;
 		

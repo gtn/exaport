@@ -53,7 +53,7 @@ $PAGE->set_url($url);
 
 require_login($courseid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 require_capability('block/exaport:use', $context);
 
 
@@ -230,7 +230,7 @@ class block_exaport_view_edit_form extends moodleform {
     }
 }
 
-$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id)->id);
+$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id)->id);
 
 $editform = new block_exaport_view_edit_form($_SERVER['REQUEST_URI'], array('view' => $view, 'course' => $COURSE->id, 'action'=> $action, 'type'=>$type));
 
@@ -242,7 +242,7 @@ if ($editform->is_cancelled()) {
 } else if ($formView = $editform->get_data()) {
 	if ($type=='title' or $action=='add') {
 		//if (!$view) {$view = new stdClass(); $view->id = -1;};			
-		$formView = file_postupdate_standard_editor($formView, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'view', $view->id);
+		$formView = file_postupdate_standard_editor($formView, 'description', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'view', $view->id);
 	}
 
 	$dbView = $formView;
@@ -315,8 +315,8 @@ if ($editform->is_cancelled()) {
 			$DB->delete_records('block_exaportviewblock', array('viewid'=>$dbView->id));
 			// add blocks
 			
-			$blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, 
-								array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id)), 
+			$blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, 
+								array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id)), 
 								$formView->blocks);
 								
 			$blocks = json_decode($blocks);
@@ -360,7 +360,7 @@ if ($editform->is_cancelled()) {
 			if (optional_param('ajax', 0, PARAM_INT)) {
 				$ret = new stdClass;
 				$ret->ok = true;
-				file_prepare_draft_area($view->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+				file_prepare_draft_area($view->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
 				$ret->blocks = json_encode(block_exaport_get_view_blocks($view));
 				
 				echo json_encode($ret);
@@ -423,10 +423,10 @@ $postView->action       = $action;
 $postView->courseid     = $courseid;
 $postView->draft_itemid = null;
 
-file_prepare_draft_area($postView->draft_itemid,get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+file_prepare_draft_area($postView->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
 
 // we need to copy additional files from the personal information to the views editor, just in case if the personal information is added
-copy_personal_information_draft_files($postView->draft_itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);
+copy_personal_information_draft_files($postView->draft_itemid, context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);
 function copy_personal_information_draft_files($targetDraftitemid, $contextid, $component, $filearea, $itemid, array $options=null, $text=null) {
 	global $USER;
 	
@@ -507,7 +507,7 @@ function block_exaport_get_view_blocks($view) {
 		if (($block->type == 'item') && isset($portfolioItems[$block->itemid]))
 			$block->item = $portfolioItems[$block->itemid];
 		//$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);		
-		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $view->draft_itemid);		
+		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);		
 	}
 
 	return $blocks;
@@ -739,8 +739,8 @@ break;
 			};
 			if ($data->description) {
 				$draftid_editor = file_get_submitted_draft_itemid('description');
-				$currenttext = file_prepare_draft_area($draftid_editor, get_context_instance(CONTEXT_USER, $USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true), $data->description);	
-				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));								
+				$currenttext = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true), $data->description);	
+				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));								
 				$data->description_editor = array('text'=>$data->description, 'format'=>$data->descriptionformat, 'itemid'=>$draftid_editor);
 			};
 			$data->cataction = 'save';

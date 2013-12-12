@@ -32,7 +32,7 @@ require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 $output="";
 $courseid = optional_param("courseid", 0, PARAM_INT);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 require_login($courseid);
 require_capability('block/exaport:use', $context);
@@ -74,7 +74,8 @@ if ($assignments) {
             print_error('invalidcoursemodule');
         }
         $course = $DB->get_record('course', array("id" => $courseid));
-        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        //$context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        $context = context_module::instance($cm->id);
         $fs = get_file_storage();
         $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->id);
 //

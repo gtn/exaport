@@ -433,7 +433,7 @@ else if ($action=="get_items_for_view"){
 					$clist.=$v->descrid.",";
 				}
 			}
-	    $sql = "SELECT dt.id as dtid, d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+	    $sql = "SELECT dt.id as dtid, d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 	    if ($subjectid>0 && $action=="getCompetences"){
 	    	$sql.=" AND s.id=".$subjectid;
 	    }
@@ -606,7 +606,8 @@ else if ($action=="get_items_for_view"){
 			
 			$fs = get_file_storage();
 			$totalsize = 0;
-			$context = get_context_instance(CONTEXT_USER,$user->id);
+			//$context = get_context_instance(CONTEXT_USER,$user->id);
+			$context = context_user::instance($user->id);
 			
 			foreach ($_FILES as $fieldname=>$uploaded_file) {
 		    // check upload errors
@@ -722,18 +723,41 @@ else if ($action=="get_items_for_view"){
 			           	//echo "saved2=false";
 			           }
 			         }
-		    		$file_record->itemid=$new->id;
-		    		
-		        if ($newfile = $fs->create_file_from_pathname($file_record, $file->filepath)){
-		        	 //$DB->set_field("files","itemid",$newfile->get_id(),array("id"=>$newfile->get_id()));
-		            
-							//$new->attachment = $newfile->get_id();  
-							$attachm=$newfile->get_id();
-							echo "ID=".$attachm;
-		          $new2=$DB->update_record('block_exaportitem', array("id"=>$new->id,"attachment"=>$attachm,"type"=>"file"));
+					 
+		    	 if ($tempfile = $fs->create_file_from_pathname($file_record, $file->filepath)){
+		        	 
+		            if(strcmp(mimeinfo('type', $file->filename), "image/jpeg") == 0){
+						$imageinfo = $tempfile->get_imageinfo();
+						
+						$file_record_img = new stdClass;
+						$file_record_img->component = 'block_exaport';
+						$file_record_img->contextid = $context->id;
+						$file_record_img->userid    = $user->id;
+						$file_record_img->filearea  = 'item_file';
+						$file_record_img->filename = $file->filename;
+						$file_record_img->filepath  = $filepath;
+						$file_record_img->itemid    = $new->id;
+						$file_record_img->license   = $CFG->sitedefaultlicense;
+						$file_record_img->author    = $user->lastname." ".$user->firstname;
+						$file_record_img->source    = '';
+						$newfile = $fs->convert_image($file_record_img, $tempfile->get_id(),  $imageinfo['width']/2, $imageinfo['height']/2);
+						
+						if($tempfile)
+							$tempfile->delete();
+					}else{
+						$file_record->itemid=$new->id;
+						$newfile = $fs->create_file_from_pathname($file_record, $file->filepath);
+						if($tempfile)
+							$tempfile->delete();
+					}
+					
+					$attachm=$newfile->get_id();
+					echo "ID=".$attachm;
+		          $new2=$DB->update_record('block_exaportitem', array("id"=>$new->id,"attachment"=>$attachm));
 		        }else{
 		        	
 		        };
+		       
 		                      
 		        $results[] = $file_record;
 		    
@@ -861,6 +885,7 @@ function create_autologin_moodle_example_link($url){
 
 	$url=str_replace("oezeps.at/moodle","oezeps.at/moodle/blocks/exaport/epopal.php?url=",$url);
 	$url=str_replace("digikomp.at","digikomp.at/blocks/exaport/epopal.php?url=",$url);
+	$url=str_replace("www2.edumoodle.at/epop","www2.edumoodle.at/epop/blocks/exaport/epopal.php?url=",$url);
 
 	return $url;
 }

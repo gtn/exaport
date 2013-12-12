@@ -41,7 +41,7 @@ if (!confirm_sesskey()) {
 }
 
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 require_login($courseid);
 require_capability('block/exaport:use', $context);
@@ -139,7 +139,7 @@ if ($action == 'movetocategory') {
 
 require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
-$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
 
 $useTextarea = false;
 if ($existing && $existing->intro && preg_match('!<iframe!i', $existing->intro))
@@ -207,7 +207,7 @@ switch ($action) {
 		$post->langid = $existing->langid;
 
 		if (!$useTextarea)
-			$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+			$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'item_content', $post->id);
 
 		$strAction = get_string('edit');
 		$post->url = $existing->url;
@@ -292,7 +292,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 	$post->timemodified = time();
 	if (!$useTextarea) {
 		$post->introformat = FORMAT_HTML;
-		$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+		$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'item_content', $post->id);
 	}
 	
 	if(!empty($post->url)){
@@ -342,13 +342,13 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 	if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
 		if (!$useTextarea) {
 			$post->introformat = FORMAT_HTML;
-			$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'item_content', $post->id);
+			$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'item_content', $post->id);
 			$DB->update_record('block_exaportitem', $post);
 		}
 
 		if ($post->type == 'file') {
 			// save uploaded file in user filearea
-			$context = get_context_instance(CONTEXT_USER, $USER->id);
+			$context = context_user::instance($USER->id);
 			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, null);
 		}
 		$comps = $post->compids;

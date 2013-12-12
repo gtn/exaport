@@ -37,7 +37,7 @@ $access = optional_param('access', 0, PARAM_TEXT);
 $u = optional_param('u',0, PARAM_INT);
 require_login($courseid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 require_capability('block/exaport:use', $context);
 
 $url = '/blocks/exabis_competences/shared_views.php';

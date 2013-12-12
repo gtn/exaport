@@ -35,7 +35,7 @@ require_login(0, true);
 
 $url = '/blocks/exabis_competences/shared_view.php';
 $PAGE->set_url($url);
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 $PAGE->set_context($context);
 
 
@@ -117,7 +117,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 	if (isset($columns[$i]))
 	foreach ($columns[$i] as $block) {
 		if ($block->text)
-			$block->text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', $access);
+			$block->text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $access);
 
 		if ($block->type == 'item') {
 			$item = $block->item; 
@@ -152,11 +152,11 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			echo '<div class="view-item view-item-type-'.$item->type.'">';
 			// thumbnail of item
 			if ($item->type=="file") {
-				$select = "contextid='".get_context_instance(CONTEXT_USER, $item->userid)->id."' AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";	
+				$select = "contextid='".context_user::instance($item->userid)->id."' AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";	
 //				if ($img = $DB->get_record('files', array('contextid'=>get_context_instance(CONTEXT_USER, $item->userid)->id, 'component'=>'block_exaport', 'filearea'=>'item_file', 'itemid'=>$item->id, 'filesize'=>'>0'), 'id, filename, mimetype')) {
 				if ($img = $DB->get_record_select('files', $select, null, 'id, filename, mimetype')) {
 					if (strpos($img->mimetype, "image")!==false) {					
-						$img_src = $CFG->wwwroot . "/pluginfile.php/" . get_context_instance(CONTEXT_USER, $item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $img->filename;
+						$img_src = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $img->filename;
 						echo '<div class="view-item-image"><img height="100" src="'.$img_src.'" alt=""/></div>';
 					};
 				};		
@@ -171,14 +171,14 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
                                 echo '<img align="right" src="'.$CFG->wwwroot.'/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
                         }
                         echo '</div>';
-			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', get_context_instance(CONTEXT_USER, $item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
+			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
 			echo '<div class="view-item-text">';
 			if ($item->url) {
 				// link
 				echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
 			}
 			echo $intro.'</div>';
-			if($has_competences) echo '<div class="view-item-competences"><script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/pix/t/grades.gif" class="iconsmall" alt="'.'competences'.'" /></a></div>';
+			if($has_competences) echo '<div class="view-item-competences"><script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/comp.png" class="iconsmall" alt="'.'competences'.'" /></a></div>';
 			echo '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
 			echo '</div>';
 		} elseif ($block->type == 'personal_information') {

@@ -35,7 +35,7 @@ $edit = optional_param('edit', 0, PARAM_BOOL);
 
 block_exaport_require_login($courseid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
@@ -70,7 +70,7 @@ echo $OUTPUT->box(text_to_html(get_string("explainpersonal", "block_exaport")), 
 
 echo "</div>";
 
-$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>get_context_instance(CONTEXT_USER, $USER->id));
+$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
 
 if ($edit) {
     if (!confirm_sesskey()) {
@@ -82,7 +82,7 @@ if ($edit) {
     if ($informationform->is_cancelled()) {
         
     } else if ($fromform = $informationform->get_data()) { 
-		$fromform = file_postupdate_standard_editor($fromform, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'personal_information', $USER->id);
+		$fromform = file_postupdate_standard_editor($fromform, 'description', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'personal_information', $USER->id);
         block_exaport_set_user_preferences(array('description' => $fromform->description, 'persinfo_timemodified' => time()));
 
         // read new data from the database
@@ -100,7 +100,7 @@ if ($edit) {
         $data->cataction = 'save';
         $data->edit = 1;
 		
-		$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, get_context_instance(CONTEXT_USER, $USER->id), 'block_exaport', 'personal_information', $USER->id);
+		$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'personal_information', $USER->id);
         $informationform->set_data($data);
         $informationform->display();
     }
@@ -125,7 +125,7 @@ if ($show_information) {
 
     echo '</td><td class="content">' . "\n";
 
-	$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information_self', null);
+	$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'personal_information_self', null);
     echo $description;
 
     echo '</td></tr></table>' . "\n\n";

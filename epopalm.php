@@ -24,7 +24,9 @@ else{
 		$mycourses[] = $DB->get_record('course',array('id'=>1));
 		
 		foreach($mycourses as $mycourse) {
-			$mycoursecontext = get_context_instance(CONTEXT_COURSE, $mycourse->id);
+			//$mycoursecontext = get_context_instance(CONTEXT_COURSE, $mycourse->id);
+			$mycoursecontext = context_course::instance($mycourse->id);
+			
 			if($DB->record_exists('block_instances', array('blockname'=>'exaport', 'parentcontextid'=>$mycoursecontext->id))) {
 				redirect($CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$mycourse->id);die;
 			}

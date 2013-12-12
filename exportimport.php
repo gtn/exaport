@@ -30,7 +30,7 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 
 block_exaport_require_login($courseid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 $url = '/blocks/exabis_competences/exportimport.php';
 $PAGE->set_url($url);
 

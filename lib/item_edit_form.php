@@ -118,7 +118,7 @@ class block_exaport_item_edit_form extends moodleform {
         	$mform->setType('langid', PARAM_INT);
         }
         
-		if ($this->_customdata['useTextarea']) {
+		if (isset($this->_customdata['useTextarea']) && $this->_customdata['useTextarea']) {
 			// it has iframe, show textfield, no editor
 			$mform->addElement('textarea', 'intro', get_string('intro', 'block_exaport'), 'rows="20" cols="50" style="width: 95%"');
 			$mform->setType('intro', PARAM_RAW);

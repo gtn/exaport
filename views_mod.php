@@ -829,6 +829,8 @@ break;
 			echo '<div class="">';
 				echo '<div style="padding: 18px 22px"><table class="table_share">';
 			
+				if (has_capability('block/exaport:shareextern', context_system::instance())) {
+
 					echo '<tr><td style="padding-right: 10px; width: 10px">';
 					echo $form['elements_by_name']['externaccess']['html'];
 					echo '</td><td>'.get_string("externalaccess", "block_exaport").'</td></tr>';
@@ -853,7 +855,9 @@ break;
 					}
 				
 					echo '<tr><td style="height: 10px"></td></tr>';
+				}
 		
+				if (has_capability('block/exaport:shareintern', context_system::instance())) {
 					echo '<tr><td style="padding-right: 10px">';
 					echo $form['elements_by_name']['internaccess']['html'];
 					echo '</td><td>'.get_string("internalaccess", "block_exaport").'</td></tr>';
@@ -870,6 +874,7 @@ break;
 							echo '<tr id="internaccess-users"><td></td><td id="sharing-userlist">userlist</td></tr>';
 						echo '</table></div>';
 					echo '</td></tr>';
+				}
 		
 				echo '</table></div>';
 			echo '</div>';

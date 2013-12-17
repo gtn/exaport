@@ -116,8 +116,6 @@ function block_exaport_feature_enabled($feature) {
     global $CFG;
     if ($feature == 'views')
         return true;
-    if ($feature == 'share_item')
-        return false;
     if ($feature == 'copy_to_course')
         return !empty($CFG->block_exaport_feature_copy_to_course);
     die('wrong feature');
@@ -233,8 +231,10 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 			$tabs_sub[] = new tabobject('title', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'),get_string("viewtitle", "block_exaport"), '', true);		
 			$tabs_sub[] = new tabobject('layout', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'),get_string("viewlayout", "block_exaport"), '', true);
 			$tabs_sub[] = new tabobject('content', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'),get_string("viewcontent", "block_exaport"), '', true);
-			$tabs_sub[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
-			};
+			if (has_capability('block/exaport:shareextern', context_system::instance()) && has_capability('block/exaport:shareintern', context_system::instance())) {
+				$tabs_sub[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
+			}
+		}
 	} elseif (strpos($item_identifier, 'bookmarks') === 0) {
         $activetabsubs[] = $item_identifier;
         $currenttab = 'bookmarks';

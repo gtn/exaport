@@ -232,8 +232,7 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 		// comments allowed?
 		if ($item->access->request == 'extern') {
 			$item->allowComments = false;
-			$item->showComments = $view->externcomment;
-			// TODO: comments anhand view einstellung zeigen
+			$item->showComments = block_exaport_external_comments_enabled() && $view->externcomment;
 		} else {
 			$item->allowComments = true;
 			$item->showComments = true;

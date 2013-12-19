@@ -840,11 +840,13 @@ break;
 						// only when editing a view, the external link will work!
 						echo '<tr id="externaccess-settings"><td></td><td>';
 							echo '<div style="padding: 4px;"><a href="'.$url.'">'.$url.'</a></div>';
-							echo '<div style="padding: 4px 0;"><table>';
+							if (block_exaport_external_comments_enabled()) {
+								echo '<div style="padding: 4px 0;"><table>';
 								echo '<tr><td style="padding-right: 10px; width: 10px">';
 								echo '<input type="checkbox" name="externcomment" value="1"'.($postView->externcomment?' checked="checked"':'').' />';
 								echo '</td><td>'.get_string("externcomment", "block_exaport").'</td></tr>';
-							echo '</table></div>';
+								echo '</table></div>';
+							}
 							/*
 							echo '<table>';
 							echo '<tr><td>'.$form['elements_by_name']['externcomment']['html'];

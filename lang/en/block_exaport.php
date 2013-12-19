@@ -405,6 +405,8 @@ $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
 $string['settings_disable_shareall_head'] = 'Disable sharing with all users';
 $string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
+$string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
+$string['settings_disable_external_comments_body'] = '';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
 

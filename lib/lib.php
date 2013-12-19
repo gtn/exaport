@@ -78,6 +78,11 @@ function block_exaport_shareall_enabled() {
 	return empty($CFG->block_exaport_disable_shareall);
 }
 
+function block_exaport_external_comments_enabled() {
+	global $CFG;
+	return empty($CFG->block_exaport_disable_external_comments);
+}
+
 function block_exaport_setup_default_categories() {
 	global $DB, $USER,$CFG;
     

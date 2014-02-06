@@ -348,7 +348,7 @@ function exaport_get_shareable_courses_with_users($type) {
 				$course['users'][$user->id] = array(
 					'id' => $user->id,
 					'name' => fullname($user),
-					'rolename' => $role->name
+					'rolename' => $role->name ? $role->name : $role->shortname
 				);
 			}
 		}

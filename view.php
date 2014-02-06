@@ -80,7 +80,7 @@ if ($edit) {
         $userpreferences = block_exaport_get_user_preferences();
         $description = $userpreferences->description;
 
-        echo $OUTPUT->box(get_string("descriptionsaved", "block_exaport"), 'center', '40%', '#ccffbb');
+        echo $OUTPUT->box(get_string("descriptionsaved", "block_exaport"), 'center');
     } else {                                               
         $show_information = false;
 

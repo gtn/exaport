@@ -67,7 +67,7 @@ if ($access && $id) {
 	$item = block_exaport_get_item($id, $access, $epopaccess);}
 	
 	if (!$item) print_error('Item not found');
-	if ($item->type != 'file') print_error('Item not a file');
+	//if ($item->type != 'file') print_error('Item not a file');
 
 	if ($file = block_exaport_get_item_file($item)) {
 		send_stored_file($file);

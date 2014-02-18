@@ -484,7 +484,7 @@ function block_exaport_check_item_competences($item) {
 function block_exaport_build_comp_table($item, $role="teacher") {
     global $DB;
 
-    $sql = "SELECT d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompdescractiv_mm} da WHERE d.id=da.descrid AND da.activitytype=2000 AND da.activityid=?";
+    $sql = "SELECT CONCAT(da.id,'_',d.id) as uniquid,d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompdescractiv_mm} da WHERE d.id=da.descrid AND da.activitytype=2000 AND da.activityid=?";
     $descriptors = $DB->get_records_sql($sql, array($item->id));
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
                 <tr><td><h2>" . $item->name . "</h2></td></tr>";

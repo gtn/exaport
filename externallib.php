@@ -30,12 +30,11 @@ class block_exaport_external extends external_api {
 		$params = self::validate_parameters(self::get_childcategories_parameters(), array('pid'=>$pid));
 		
 		$conditions=array("pid"=>$pid,"userid"=>$USER->id);
-		$categories = $DB->get_records_sql('
-				SELECT c.id, c.name
-				FROM {block_exaportcate} c
-				ORDER BY c.name
-				', $conditions);
-				
+		$sql= 'SELECT c.id, c.name
+				FROM mdl_block_exaportcate c
+				ORDER BY c.name';
+		$categories = $DB->get_records_sql($sql, $conditions);
+			//echo 	$sql;
 		if ($categories){
 			return $categories;
 		}else{
@@ -62,3 +61,5 @@ class block_exaport_external extends external_api {
 
 
 }
+
+?>

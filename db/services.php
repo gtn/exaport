@@ -2,7 +2,7 @@
 $services = array(
 		'exaportservices' => array(                        //the name of the web service
 				'functions' => array (
-						'block_exaport_get_items',
+						'block_exaport_get_childcategories',
 						),
 				'restrictedusers' =>0,                      //if enabled, the Moodle administrator must link some user to this service
 				//into the administration
@@ -20,3 +20,4 @@ $functions = array(
 				'type'        => 'read',                  //database rights of the web service function (read, write)
 		),
 );
+?>

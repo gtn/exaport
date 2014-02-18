@@ -19,9 +19,11 @@ $params->pid = 38;
 
 
 
-
+$restformat="";
 
 $serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
+require_once('./curl.php');
+$curl = new curl;
 $resp = $curl->post($serverurl . $restformat, $params);
 print_r($resp);
 

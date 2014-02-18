@@ -86,7 +86,7 @@ $views = $DB->get_records_sql(
                 " WHERE (".(block_exaport_shareall_enabled()?'v.shareall=1 OR':'')." vshar.userid IS NOT NULL) ". // only show shared all, if enabled
 				" AND v.userid!=? ". // don't show my own views
 				$whre .
-				" GROUP BY v.id".
+				" GROUP BY v.id, u.firstname, u.lastname, u.picture".
                 " $sql_sort", array($USER->id, $USER->id));
 
 function exaport_search_views($views, $column, $value) {

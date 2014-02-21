@@ -182,7 +182,248 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
+	
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function get_views_parameters() {
+		return new external_function_parameters(
+				array()
+		);
+	
+	}
+	
+	/**
+	 * Get views
+	 * @return array of e-Portfolio views
+	 */
+	public static function get_views() {
+		global $CFG,$DB,$USER;
+	
+		$conditions=array("userid"=>$USER->id);
+		$views = $DB->get_records("block_exaportview", $conditions);
+	
+		$results = array();
+	
+		foreach($views as $view) {
+			$result = new stdClass();
+			$result->id = $view->id;
+			$result->name = $view->name;
+			$result->description = $view->description;
+			$results[] = $result;
+		}
 
+		return $results;
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_multiple_structure
+	 */
+	public static function get_views_returns() {
+		return new external_multiple_structure(
+				new external_single_structure(
+						array(
+								'id' => new external_value(PARAM_INT, 'id of view'),
+								'name' => new external_value(PARAM_TEXT, 'title of view'),
+								'description' => new external_value(PARAM_RAW, 'description of view')
+						)
+				)
+		);
+	}
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function get_view_parameters() {
+		return new external_function_parameters(
+				array('id' => new external_value(PARAM_INT, 'view id'))
+		);
+	}
+	
+	/**
+	 * Get view
+	 * @param int id
+	 * @return detailed view including list of items
+	 */
+	public static function get_view($id) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::get_view_parameters(), array('id'=>$id));
+		
+		$conditions=array("id"=>$id);
+		$view = $DB->get_record("block_exaportview", $conditions);
+	
+		$result->id = $view->id;
+		$result->name = $view->name;
+		$result->description = $view->description;
+		
+		$conditions = array("viewid"=>$id);
+		$items = $DB->get_records("block_exaportviewblock", $conditions);
+		
+		$result->items = array();
+		foreach($items as $item) {
+			if($item->type == "item"){
+				$conditions = array("id"=>$item->itemid);
+				$itemdb = $DB->get_record("block_exaportitem", $conditions);
+			
+				$resultitem = new stdClass();
+				$resultitem->id = $itemdb->id;
+				$resultitem->name = $itemdb->name;
+				$resultitem->type = $itemdb->type;
+				$result->items[] = $resultitem;
+			}
+		}
+	
+		return $result;
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_single_structure
+	 */
+	public static function get_view_returns() {
+		return new external_single_structure(
+				array(
+					'id' => new external_value(PARAM_INT, 'id of view'),
+					'name' => new external_value(PARAM_TEXT, 'title of view'),
+					'description' => new external_value(PARAM_RAW, 'description of view'),
+					'items'=> new external_multiple_structure(
+								new external_single_structure(
+									array(
+										'id' => new external_value(PARAM_INT, 'id of item'),
+										'name' => new external_value(PARAM_TEXT, 'title of item'),
+										'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)')
+									)
+								)
+							)
+				)
+		);
+	}
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function add_view_parameters() {
+		return new external_function_parameters(
+				array(
+					'name' => new external_value(PARAM_TEXT, 'view title'),
+					'description' => new external_value(PARAM_TEXT, 'description')
+				)
+		);
+	}
+	
+	/**
+	 * Add view
+	 * @param String name, String description
+	 * @return success
+	 */
+	public static function add_view($name,$description) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::add_view_parameters(), array('name'=>$name,'description'=>$description));
+	
+		$viewid = $DB->insert_record("block_exaportview", array('userid'=>$USER->id,'name'=>$name,'description'=>$description, 'timemodified'=>time()));
+	
+		return array("success"=>true);
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_single_structure
+	 */
+	public static function add_view_returns() {
+		return new external_single_structure(
+				array(
+						'success' => new external_value(PARAM_BOOL, 'status')
+				)
+		);
+	}
+	
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function update_view_parameters() {
+		return new external_function_parameters(
+				array(
+						'id' => new external_value(PARAM_INT, 'view id'),
+						'name' => new external_value(PARAM_TEXT, 'view title'),
+						'description' => new external_value(PARAM_TEXT, 'description')
+				)
+		);
+	}
+	
+	/**
+	 * Update view
+	 * @param int id, String name, String description
+	 * @return success
+	 */
+	public static function update_view($id, $name,$description) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::update_view_parameters(), array('id'=>$id,'name'=>$name,'description'=>$description));
+	
+		$record = new stdClass();
+		$record->id = $id;
+		$record->name = $name;
+		$record->description = $description;
+		$DB->update_record("block_exaportview", $record);
+		
+		return array("success"=>true);
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_single_structure
+	 */
+	public static function update_view_returns() {
+		return new external_single_structure(
+				array(
+						'success' => new external_value(PARAM_BOOL, 'status')
+				)
+		);
+	}
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function delete_view_parameters() {
+		return new external_function_parameters(
+				array(
+						'id' => new external_value(PARAM_INT, 'view id')
+				)
+		);
+	}
+	
+	/**
+	 * Delete view
+	 * @param int id
+	 * @return success
+	 */
+	public static function delete_view($id) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::delete_view_parameters(), array('id'=>$id));
+	
+		$DB->delete_records("block_exaportview", array("id"=>$id));
+	
+		return array("success"=>true);
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_single_structure
+	 */
+	public static function delete_view_returns() {
+		return new external_single_structure(
+				array(
+						'success' => new external_value(PARAM_BOOL, 'status')
+				)
+		);
+	}
+	
 }
 
 ?>

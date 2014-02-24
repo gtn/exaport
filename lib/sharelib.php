@@ -336,7 +336,7 @@ function exaport_get_shareable_courses_with_users($type) {
 		//print_r($roles);
 		
 		foreach ($roles as $role) {
-			$users = get_role_users($role->id, $context, false, 'u.id, u.firstname, u.lastname, u.picture');
+			$users = get_role_users($role->id, $context, false, user_picture::fields('u'));
 			if (!$users) {
 				continue;
 			}

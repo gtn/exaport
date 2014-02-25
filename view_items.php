@@ -302,19 +302,6 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 			
 			$icons .= block_exaport_get_item_comp_icon($item);
 			
-			if (block_exaport_feature_enabled('share_item')) {
-				if (has_capability('block/exaport:shareintern', $context)) {
-					if( ($item->shareall == 1) ||
-							($item->externaccess == 1) ||
-							(($item->shareall == 0) && (count_records('block_exaportitemshar', 'itemid', $item->id, 'original', $USER->id) > 0))) {
-						$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/share_item.php?courseid='.$courseid.'&itemid='.$item->id.'&backtype=">'.get_string("strunshare", "block_exaport").'</a>';
-					}
-					else {
-						$icons .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/share_item.php?courseid='.$courseid.'&itemid='.$item->id.'&backtype=">'.get_string("strshare", "block_exaport").'</a>';
-					}
-				}
-			}
-
 			// copy files to course
 			if ($item->type == 'file' && block_exaport_feature_enabled('copy_to_course'))
 				$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/copy_item_to_course.php?courseid='.$courseid.'&itemid='.$item->id.'&backtype=">'.get_string("copyitemtocourse", "block_exaport").'</a>';

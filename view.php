@@ -48,15 +48,6 @@ $url = '/blocks/exaport/view.php';
 $PAGE->set_url($url);
 block_exaport_print_header("personal");
 
-if (block_exaport_feature_enabled('share_item')) {
-    if (has_capability('block/exaport:shareextern', $context)) {
-        $extern_link = exaport_get_extern_access($USER->id);
-        //print_simple_box( get_string("externaccess", "block_exaport") . ': <a  onclick="this.target=\'extlink\'; return openpopup(\'/blocks/exaport/'.$extern_link.'\',\'extlink\',\'resizable=1,scrollbars=1,directories=1,location=1,menubar=1,toolbar=1,status=1,width=620,height=450\');" href="'.$CFG->wwwroot.'/blocks/exaport/'.$extern_link.'">'.$CFG->wwwroot.'/blocks/exaport/'.$extern_link.'</a>','center');
-        global $OUTPUT; // If necessary.
-        echo $OUTPUT->box(get_string("externaccess", "block_exaport") . ': <a  onclick="this.target=\'extlink\'; return openpopup(\'/blocks/exaport/' . $extern_link . '\',\'extlink\',\'resizable=1,scrollbars=1,directories=1,location=1,menubar=1,toolbar=1,status=1,width=620,height=450\');" href="' . $CFG->wwwroot . '/blocks/exaport/' . $extern_link . '">' . $CFG->wwwroot . '/blocks/exaport/' . $extern_link . '</a>', 'center');
-    }
-}
-
 echo "<br />";
 
 $show_information = true;
@@ -89,7 +80,7 @@ if ($edit) {
         $userpreferences = block_exaport_get_user_preferences();
         $description = $userpreferences->description;
 
-        echo $OUTPUT->box(get_string("descriptionsaved", "block_exaport"), 'center', '40%', '#ccffbb');
+        echo $OUTPUT->box(get_string("descriptionsaved", "block_exaport"), 'center');
     } else {                                               
         $show_information = false;
 
@@ -137,17 +128,6 @@ if ($show_information) {
     echo '<input type="hidden" name="edit" value="1" />';
     echo '<input type="submit" value="' . get_string("edit") . '" />';
     echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
-
-    /*
-      if (has_capability('block/exaport:shareextern', $context)) {
-      echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/share_persinfo.php?courseid='.$courseid.'">';
-      if ($userpreferences->persinfo_externaccess)
-      echo get_string("strunshare", "block_exaport");
-      else
-      echo get_string("strshare", "block_exaport");
-      echo '</a>';
-      }
-     */
 
     echo '</fieldset>';
     echo '</form>';

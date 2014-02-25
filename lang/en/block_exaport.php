@@ -39,8 +39,8 @@ $string['exaport:myaddinstance'] = 'add Exabis E-Portfolio on My home';
 $string['exaport:export'] = 'Export of SCORM-Files';
 $string['exaport:import'] = 'Import of SCORM-Files';
 $string['exaport:importfrommoodle'] = 'Import from Moodle';
-$string['exaport:shareintern'] = 'Internal sharing of portfolio-entries';
-$string['exaport:shareextern'] = 'External sharing of portfolio-entries';
+$string['exaport:shareintern'] = 'Internal sharing of views';
+$string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
 $string['modulename'] = 'Exabis E-Portfolio';
@@ -405,6 +405,8 @@ $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
 $string['settings_disable_shareall_head'] = 'Disable sharing with all users';
 $string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
+$string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
+$string['settings_disable_external_comments_body'] = '';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
 

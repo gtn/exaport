@@ -232,8 +232,7 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 		// comments allowed?
 		if ($item->access->request == 'extern') {
 			$item->allowComments = false;
-			$item->showComments = $view->externcomment;
-			// TODO: comments anhand view einstellung zeigen
+			$item->showComments = block_exaport_external_comments_enabled() && $view->externcomment;
 		} else {
 			$item->allowComments = true;
 			$item->showComments = true;
@@ -337,7 +336,7 @@ function exaport_get_shareable_courses_with_users($type) {
 		//print_r($roles);
 		
 		foreach ($roles as $role) {
-			$users = get_role_users($role->id, $context, false, 'u.id, u.firstname, u.lastname, u.picture');
+			$users = get_role_users($role->id, $context, false, user_picture::fields('u'));
 			if (!$users) {
 				continue;
 			}
@@ -349,7 +348,7 @@ function exaport_get_shareable_courses_with_users($type) {
 				$course['users'][$user->id] = array(
 					'id' => $user->id,
 					'name' => fullname($user),
-					'rolename' => $role->name
+					'rolename' => $role->name ? $role->name : $role->shortname
 				);
 			}
 		}

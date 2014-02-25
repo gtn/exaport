@@ -829,6 +829,8 @@ break;
 			echo '<div class="">';
 				echo '<div style="padding: 18px 22px"><table class="table_share">';
 			
+				if (has_capability('block/exaport:shareextern', context_system::instance())) {
+
 					echo '<tr><td style="padding-right: 10px; width: 10px">';
 					echo $form['elements_by_name']['externaccess']['html'];
 					echo '</td><td>'.get_string("externalaccess", "block_exaport").'</td></tr>';
@@ -838,11 +840,13 @@ break;
 						// only when editing a view, the external link will work!
 						echo '<tr id="externaccess-settings"><td></td><td>';
 							echo '<div style="padding: 4px;"><a href="'.$url.'">'.$url.'</a></div>';
-							echo '<div style="padding: 4px 0;"><table>';
+							if (block_exaport_external_comments_enabled()) {
+								echo '<div style="padding: 4px 0;"><table>';
 								echo '<tr><td style="padding-right: 10px; width: 10px">';
 								echo '<input type="checkbox" name="externcomment" value="1"'.($postView->externcomment?' checked="checked"':'').' />';
 								echo '</td><td>'.get_string("externcomment", "block_exaport").'</td></tr>';
-							echo '</table></div>';
+								echo '</table></div>';
+							}
 							/*
 							echo '<table>';
 							echo '<tr><td>'.$form['elements_by_name']['externcomment']['html'];
@@ -853,7 +857,9 @@ break;
 					}
 				
 					echo '<tr><td style="height: 10px"></td></tr>';
+				}
 		
+				if (has_capability('block/exaport:shareintern', context_system::instance())) {
 					echo '<tr><td style="padding-right: 10px">';
 					echo $form['elements_by_name']['internaccess']['html'];
 					echo '</td><td>'.get_string("internalaccess", "block_exaport").'</td></tr>';
@@ -870,6 +876,7 @@ break;
 							echo '<tr id="internaccess-users"><td></td><td id="sharing-userlist">userlist</td></tr>';
 						echo '</table></div>';
 					echo '</td></tr>';
+				}
 		
 				echo '</table></div>';
 			echo '</div>';

@@ -78,6 +78,11 @@ function block_exaport_shareall_enabled() {
 	return empty($CFG->block_exaport_disable_shareall);
 }
 
+function block_exaport_external_comments_enabled() {
+	global $CFG;
+	return empty($CFG->block_exaport_disable_external_comments);
+}
+
 function block_exaport_setup_default_categories() {
 	global $DB, $USER,$CFG;
     
@@ -116,8 +121,6 @@ function block_exaport_feature_enabled($feature) {
     global $CFG;
     if ($feature == 'views')
         return true;
-    if ($feature == 'share_item')
-        return false;
     if ($feature == 'copy_to_course')
         return !empty($CFG->block_exaport_feature_copy_to_course);
     die('wrong feature');
@@ -233,8 +236,10 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 			$tabs_sub[] = new tabobject('title', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'),get_string("viewtitle", "block_exaport"), '', true);		
 			$tabs_sub[] = new tabobject('layout', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'),get_string("viewlayout", "block_exaport"), '', true);
 			$tabs_sub[] = new tabobject('content', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'),get_string("viewcontent", "block_exaport"), '', true);
-			$tabs_sub[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
-			};
+			if (has_capability('block/exaport:shareextern', context_system::instance()) && has_capability('block/exaport:shareintern', context_system::instance())) {
+				$tabs_sub[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
+			}
+		}
 	} elseif (strpos($item_identifier, 'bookmarks') === 0) {
         $activetabsubs[] = $item_identifier;
         $currenttab = 'bookmarks';
@@ -285,7 +290,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 		
 			
 			   echo '<div id="messageboxses1"';
-			    if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
+			    //if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
 			    echo '>
 					<div id="messagetxtses1">
 						'.get_string("desp_einleitung", "block_exaport").'
@@ -479,7 +484,7 @@ function block_exaport_check_item_competences($item) {
 function block_exaport_build_comp_table($item, $role="teacher") {
     global $DB;
 
-    $sql = "SELECT d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompdescractiv_mm} da WHERE d.id=da.descrid AND da.activitytype=2000 AND da.activityid=?";
+    $sql = "SELECT CONCAT(da.id,'_',d.id) as uniquid,d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompdescractiv_mm} da WHERE d.id=da.descrid AND da.activitytype=2000 AND da.activityid=?";
     $descriptors = $DB->get_records_sql($sql, array($item->id));
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
                 <tr><td><h2>" . $item->name . "</h2></td></tr>";

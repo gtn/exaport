@@ -4,11 +4,11 @@ $services = array(
 				'functions' => array (
 						'block_exaport_get_items',
 						'block_exaport_get_item',
-						'block_exaport_add_item',/*,
-						'block_exaport_update_item',
+						'block_exaport_add_item',
+						'block_exaport_update_item', //test für fileupload fehlt noch!!
 						'block_exaport_delete_item',
 						'block_exaport_list_competencies',
-						'block_exaport_set_item_competence',*/
+						'block_exaport_set_item_competence',
 						'block_exaport_get_views',
 						'block_exaport_get_view',
 						'block_exaport_add_view',
@@ -50,6 +50,34 @@ $functions = array(
 				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
 				'description' => 'Adds a new item to the users portfolio',    //human readable description of the web service function
 				'type'        => 'write'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_update_item' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'update_item',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'Edit an item from the users portfolio',    //human readable description of the web service function
+				'type'        => 'write'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_delete_item' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'delete_item',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'Delete an item from the users portfolio',    //human readable description of the web service function
+				'type'        => 'write'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_list_competencies' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'list_competencies',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'List all available competencies',    //human readable description of the web service function
+				'type'        => 'read'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_set_item_competence'=> array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'set_item_competence',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'assign a competence to an item',    //human readable description of the web service function
+				'type'        => 'read'                  //database rights of the web service function (read, write)
 		),
 		'block_exaport_get_views' => array(         //web service function name
 				'classname'   => 'block_exaport_external',  //class containing the external function

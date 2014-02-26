@@ -151,6 +151,7 @@ require_once('./curl.php');
 $curl = new curl;
 $resp = $curl->post($serverurl . $restformat, $params);
 print_r($resp);*/
+/*
 $functionname = 'block_exaport_view_grant_internal_access';
 $params = new stdClass();
 $params->viewid = 3;
@@ -176,15 +177,16 @@ echo "
 
 
 ";
-
-$functionname = 'block_exaport_add_item';
+*/
+/*
+$functionname = 'block_exaport_update_item';
 $params = new stdClass();
-$params->title = "ws testnotiz";
+$params->id = 2;
+$params->title = "ws testlinkänderung";
 $params->categoryid = 0;
-$params->url = "";
-$params->intro = "";
-$params->url = "";
-$params->type = "note";
+$params->url = "www.iwas.com";
+$params->intro = "das ist das intro";
+$params->type = "link";
 $params->filename = "";
 
 $restformat="";
@@ -200,6 +202,37 @@ echo "
 
 
 ";
+*/
+/*$functionname = 'block_exaport_list_competencies';
+$params = new stdClass();
+$restformat="";
+$serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
+require_once('./curl.php');
+$curl = new curl;
+$resp = $curl->post($serverurl . $restformat);
+print_r($resp);
+*/
+$functionname = 'block_exaport_set_item_competence';
+$params = new stdClass();
+$params->itemid = 5;
+$params->descriptorid = 1018;
+$params->val = 1;
+$restformat="";
+$serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
+require_once('./curl.php');
+$curl = new curl;
+$resp = $curl->post($serverurl . $restformat, $params);
+print_r($resp);
+/*$functionname = 'block_exaport_delete_item';
+$params = new stdClass();
+$params->id = 6;
+$restformat="";
+$serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
+require_once('./curl.php');
+$curl = new curl;
+$resp = $curl->post($serverurl . $restformat, $params);
+print_r($resp);
+/*
 // BEFORE ADDING FILE ITEM THE UPLOADFILE.PHP Script needs to be called!!
 
 $functionname = 'block_exaport_add_item';
@@ -219,7 +252,7 @@ $curl = new curl;
 $resp = $curl->post($serverurl . $restformat, $params);
 print_r($resp);
 
-*/
+
 /*
 $functionname = 'block_exaport_get_item';
 $params = new stdClass();

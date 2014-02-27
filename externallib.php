@@ -187,6 +187,248 @@ class block_exaport_external extends external_api {
 	 * Returns description of method parameters
 	 * @return external_function_parameters
 	 */
+	public static function update_item_parameters() {
+		return new external_function_parameters(
+				array(	'id' => new external_value(PARAM_INT, 'item id'),
+						'title' => new external_value(PARAM_TEXT, 'item title'),
+						'categoryid' => new external_value(PARAM_INT, 'categoryid'),
+						'url' => new external_value(PARAM_URL, 'url'),
+						'intro' => new external_value(PARAM_TEXT, 'introduction'),
+						'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
+						'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'))
+		);
+	
+	}
+	
+	/**
+	 * Update item
+	 * @param int itemid
+	 * @return array of course subjects
+	 */
+	public static function update_item($id, $title,$categoryid,$url,$intro,$filename,$type) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::update_item_parameters(), array('id'=>$id,'title'=>$title,'categoryid'=>$categoryid,'url'=>$url,'intro'=>$intro,'filename'=>$filename,'type'=>$type));
+	
+		$record = new stdClass();
+		$record->id = $id;
+		$record->name = $title;
+		$record->categoryid = $categoryid;
+		$record->url = $url;
+		$record->intro = $intro;
+		$record->type = $type;
+		
+		$DB->update_record("block_exaportitem", $record);
+		//NICHT AUSGETESTET
+		//if a file is added we need to copy the file from the user/private filearea to block_exaport/item_file with the itemid from above
+		if($type == "file") {
+			$context = context_user::instance($USER->id);
+			$fs = get_file_storage();
+			$old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
+	
+			$file_record = array('contextid'=>$context->id, 'component'=>'block_exaport', 'filearea'=>'item_file',
+					'itemid'=>$itemid, 'filepath'=>'/', 'filename'=>$old->get_filename(),
+					'timecreated'=>time(), 'timemodified'=>time());
+			$fs->create_file_from_storedfile($file_record, $old->get_id());
+		}
+	
+		return array("success"=>true);
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_single_structure
+	 */
+	public static function update_item_returns() {
+		return new external_single_structure(
+				array(
+						'success' => new external_value(PARAM_BOOL, 'status')
+				)
+		);
+	}
+	
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function delete_item_parameters() {
+		return new external_function_parameters(
+			array(	'id' => new external_value(PARAM_INT, 'item id'))
+		);
+	}
+	
+	/**
+	 * Delete item
+	 * @param int itemid
+	 * @return array of course subjects
+	 */
+	public static function delete_item($id) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::delete_item_parameters(), array('id'=>$id));
+	
+		$DB->delete_records("block_exaportitem", array('id'=>$id));
+		
+		return array("success"=>true);
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_single_structure
+	 */
+	public static function delete_item_returns() {
+		return new external_single_structure(
+				array(
+						'success' => new external_value(PARAM_BOOL, 'status')
+				)
+		);
+	}
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function list_competencies_parameters() {
+		return new external_function_parameters(
+				array()
+		);
+	
+	}
+	
+	/**
+	 * Get views
+	 * @return array of e-Portfolio views
+	 */
+	public static function list_competencies() {
+		global $CFG,$DB,$USER;
+
+		$courses = $DB->get_records('course', array());
+		
+		$descriptors = array();
+		foreach($courses as $course){
+			$context = context_course::instance($course->id);
+			if(is_enrolled($context, $USER)){
+				$query = "SELECT t.id as topdescrid, d.id,d.title,tp.title as topic,tp.id as topicid, s.title as subject,s.id as subjectid,d.niveauid FROM {block_exacompdescriptors} d, {block_exacompcoutopi_mm} c, {block_exacompdescrtopic_mm} t, {block_exacomptopics} tp, {block_exacompsubjects} s
+						WHERE d.id=t.descrid AND t.topicid = c.topicid AND t.topicid=tp.id AND tp.subjid = s.id AND c.courseid = ?";
+		
+				$query.= " ORDER BY s.title,tp.title,d.sorting";
+				$alldescr = $DB->get_records_sql($query, array($course->id));
+				if (!$alldescr) {
+					$alldescr = array();
+				}
+				foreach($alldescr as $descr){
+					$descriptors[] = $descr;
+				}
+			}
+		}
+		
+		$competencies = array();
+		foreach ($descriptors as $descriptor){
+			if(!array_key_exists ($descriptor->subjectid, $competencies)){
+				$competencies[$descriptor->subjectid] = new stdClass();
+				$competencies[$descriptor->subjectid]->id = $descriptor->subjectid;
+				$competencies[$descriptor->subjectid]->name = $descriptor->subject;
+				$competencies[$descriptor->subjectid]->topics = array();
+			}
+		
+			if(!array_key_exists ($descriptor->topicid, $competencies[$descriptor->subjectid]->topics)){
+				$competencies[$descriptor->subjectid]->topics[$descriptor->topicid] = new stdClass();
+				$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->id = $descriptor->topicid;
+				$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->name = $descriptor->topic;
+				$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->descriptors = array();
+			}
+		
+			$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->descriptors[$descriptor->id] = new stdClass();
+			$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->descriptors[$descriptor->id]->id = $descriptor->id;
+			$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->descriptors[$descriptor->id]->name = $descriptor->title;
+		}
+		
+    	return $competencies;
+		
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_multiple_structure
+	 */
+	public static function list_competencies_returns() {
+		return new external_multiple_structure(
+				new external_single_structure(
+						array(
+								'id' => new external_value(PARAM_INT, 'id of subject'),
+								'name' => new external_value(PARAM_TEXT, 'title of subject'),
+								'topics' => new external_multiple_structure(
+											new external_single_structure(
+												array(
+													'id' => new external_value(PARAM_INT, 'id of topic'),
+													'name' => new external_value(PARAM_TEXT, 'title of topic'),
+													'descriptors' => new external_multiple_structure(
+																		new external_single_structure(
+																			array(
+																				'id' => new external_value(PARAM_INT, 'id of descriptor'),
+																				'name'=> new external_value(PARAM_TEXT, 'name of descriptor')	
+																			)
+																		)
+																	)
+												)
+											)
+										)
+						)
+				)
+		);
+	}	
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function set_item_competence_parameters() {
+		return new external_function_parameters(
+				array(	'itemid' => new external_value(PARAM_INT, 'item id'),
+						'descriptorid' => new external_value(PARAM_INT, 'descriptor id'),
+						'val' => new external_value(PARAM_INT, '1 to assign, 0 to unassign')
+				)		
+		);
+	
+	}
+	
+	/**
+	 * Add a descriptor to an item
+	 * @param int itemid, descriptorid, val
+	 * @return array of course subjects
+	 */
+	public static function set_item_competence($itemid,$descriptorid, $val) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::set_item_competence_parameters(), array('itemid'=>$itemid,'descriptorid'=>$descriptorid, 'val'=>$val));
+		
+		if($val == 1){
+			$item = $DB->get_record("block_exaportitem", array("id"=>$itemid));
+			$course = $DB->get_record("course", array("id"=>$item->courseid));
+			$DB->insert_record("block_exacompdescractiv_mm", array('descrid'=>$descriptorid, 'activityid'=>$itemid, 'activitytype'=>2000, 'activitytitle'=>$item->name, 'coursetitle'=>$course->shortname));
+			$DB->insert_record('block_exacompdescuser_mm', array("descid" => $descriptorid, "activityid" => $itemid, "activitytype" => 2000, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
+		}else if($val == 0){
+			$DB->delete_records("block_exacompdescractiv_mm", array('descrid'=>$descriptorid, 'activityid'=>$itemid, 'activitytype'=>2000));
+			$DB->delete_records("block_exacompdescuser_mm", array("descid"=>$descriptorid, 'activityid'=>$itemid, 'activitytype'=>2000));
+		}
+		
+		return array("success"=>true);
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_single_structure
+	 */
+	public static function set_item_competence_returns() {
+		return new external_single_structure(
+				array(
+						'success' => new external_value(PARAM_BOOL, 'status')
+				)
+		);
+	}
+	
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
 	public static function get_views_parameters() {
 		return new external_function_parameters(
 				array()

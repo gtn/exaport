@@ -729,37 +729,37 @@ else if ($action=="get_items_for_view"){
 			           }
 			         }
 					 
-		    	 if ($tempfile = $fs->create_file_from_pathname($file_record, $file->filepath)){
+		    	if ($tempfile = $fs->create_file_from_pathname($file_record, $file->filepath)){
 		        	 
-		            if(strcmp(mimeinfo('type', $file->filename), "image/jpeg") == 0){
-						$imageinfo = $tempfile->get_imageinfo();
-						
-						$file_record_img = new stdClass;
-						$file_record_img->component = 'block_exaport';
-						$file_record_img->contextid = $context->id;
-						$file_record_img->userid    = $user->id;
-						$file_record_img->filearea  = 'item_file';
-						$file_record_img->filename = $file->filename;
-						$file_record_img->filepath  = $filepath;
-						$file_record_img->itemid    = $new->id;
-						$file_record_img->license   = $CFG->sitedefaultlicense;
-						$file_record_img->author    = $user->lastname." ".$user->firstname;
-						$file_record_img->source    = '';
-						$newfile = $fs->convert_image($file_record_img, $tempfile->get_id(),  $imageinfo['width']/2, $imageinfo['height']/2);
-						
-						if($tempfile)
-							$tempfile->delete();
-					}else{
-						$file_record->itemid=$new->id;
-						$newfile = $fs->create_file_from_pathname($file_record, $file->filepath);
-						if($tempfile)
-							$tempfile->delete();
-					}
+		        if(strcmp(mimeinfo('type', $file->filename), "image/jpeg") == 0){
+								$imageinfo = $tempfile->get_imageinfo();
+								
+								$file_record_img = new stdClass;
+								$file_record_img->component = 'block_exaport';
+								$file_record_img->contextid = $context->id;
+								$file_record_img->userid    = $user->id;
+								$file_record_img->filearea  = 'item_file';
+								$file_record_img->filename = $file->filename;
+								$file_record_img->filepath  = $filepath;
+								$file_record_img->itemid    = $new->id;
+								$file_record_img->license   = $CFG->sitedefaultlicense;
+								$file_record_img->author    = $user->lastname." ".$user->firstname;
+								$file_record_img->source    = '';
+								$newfile = $fs->convert_image($file_record_img, $tempfile->get_id(),  $imageinfo['width']/2, $imageinfo['height']/2);
+								
+								if($tempfile)
+									$tempfile->delete();
+						}else{
+							$file_record->itemid=$new->id;
+							$newfile = $fs->create_file_from_pathname($file_record, $file->filepath);
+							if($tempfile)
+								$tempfile->delete();
+						}
 					
-					$attachm=$newfile->get_id();
-					echo "ID=".$attachm;
+						$attachm=$newfile->get_id();
+						echo "ID=".$attachm;
 		          $new2=$DB->update_record('block_exaportitem', array("id"=>$new->id,"attachment"=>$attachm));
-		        }else{
+		      }else{
 		        	
 		        };
 		       

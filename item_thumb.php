@@ -32,6 +32,7 @@ switch ($item->type) {
 			$url = 'http://'.$url;
 
 		$str = file_get_contents($url);
+
 		if ($str && preg_match('/<img\s.*src=[\'"]([^\'"]+)[\'"]/im', $str, $matches)) {
 			$first_img = $matches[1];
 			if (strpos($first_img,'http')===false) {
@@ -47,8 +48,16 @@ switch ($item->type) {
 			
 			$headers = get_headers($first_img, 1);
 			$type = $headers["Content-Type"];
+			
+			$imgstr=@file_get_contents($first_img);
+			//echo strlen($imgstr);
+			if (strlen($imgstr)<50){
+				header('Location: pix/link_tile.png');
+				break;
+			}
 			header("Content-type: ".$type);
-			echo @file_get_contents($first_img);
+			echo $imgstr;
+			
 			exit;
 		}
 

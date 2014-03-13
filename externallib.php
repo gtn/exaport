@@ -38,11 +38,12 @@ class block_exaport_external extends external_api {
 			$result->id = $category->id;
 			$result->name = $category->name;
 			$result->type = "category";
+			$result->parent = $category->pid;
 
 			$results[] = $result;
 		}
 
-		$items = $DB->get_records("block_exaportitem", array("userid" => $USER->id,"categoryid" => $level),'','id,name,type');
+		$items = $DB->get_records("block_exaportitem", array("userid" => $USER->id,"categoryid" => $level),'','id,name,type, 0 as parent');
 		$results = array_merge($results,$items);
 
 		return $results;
@@ -58,7 +59,8 @@ class block_exaport_external extends external_api {
 						array(
 								'id' => new external_value(PARAM_INT, 'id of item'),
 								'name' => new external_value(PARAM_TEXT, 'title of item'),
-								'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)')
+								'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
+								'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned')	
 						)
 				)
 		);

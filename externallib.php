@@ -60,7 +60,7 @@ class block_exaport_external extends external_api {
 								'id' => new external_value(PARAM_INT, 'id of item'),
 								'name' => new external_value(PARAM_TEXT, 'title of item'),
 								'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
-								'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned')	
+								'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned')
 						)
 				)
 		);
@@ -146,7 +146,7 @@ class block_exaport_external extends external_api {
 		);
 
 	}
-	
+
 	/**
 	 * Add item
 	 * @param int itemid
@@ -154,26 +154,32 @@ class block_exaport_external extends external_api {
 	 */
 	public static function add_item($title,$categoryid,$url,$intro,$filename,$type) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::add_item_parameters(), array('title'=>$title,'categoryid'=>$categoryid,'url'=>$url,'intro'=>$intro,'filename'=>$filename,'type'=>$type));
-	
+
 		$itemid = $DB->insert_record("block_exaportitem", array('userid'=>$USER->id,'name'=>$title,'categoryid'=>$categoryid,'url'=>$url,'intro'=>$intro,'type'=>$type,'timemodified'=>time()));
-		
-		//if a file is added we need to copy the file from the user/private filearea to block_exaport/item_file with the itemid from above	
+
+		//if a file is added we need to copy the file from the user/private filearea to block_exaport/item_file with the itemid from above
 		if($type == "file") {
 			$context = context_user::instance($USER->id);
 			$fs = get_file_storage();
-			$old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
-		
-			$file_record = array('contextid'=>$context->id, 'component'=>'block_exaport', 'filearea'=>'item_file',
-					'itemid'=>$itemid, 'filepath'=>'/', 'filename'=>$old->get_filename(),
-					'timecreated'=>time(), 'timemodified'=>time());
-			$fs->create_file_from_storedfile($file_record, $old->get_id());
+			try {
+				$old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
+
+				if($old) {
+					$file_record = array('contextid'=>$context->id, 'component'=>'block_exaport', 'filearea'=>'item_file',
+							'itemid'=>$itemid, 'filepath'=>'/', 'filename'=>$old->get_filename(),
+							'timecreated'=>time(), 'timemodified'=>time());
+					$fs->create_file_from_storedfile($file_record, $old->get_id());
+				}
+			} catch (Exception $e) {
+				//some problem with the file occured
+			}
 		}
-		
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -185,7 +191,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Returns description of method parameters
 	 * @return external_function_parameters
@@ -199,9 +205,9 @@ class block_exaport_external extends external_api {
 						'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
 						'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'))
 		);
-	
+
 	}
-	
+
 	/**
 	 * Update item
 	 * @param int itemid
@@ -209,9 +215,9 @@ class block_exaport_external extends external_api {
 	 */
 	public static function update_item($id, $title,$categoryid,$url,$intro,$filename,$type) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::update_item_parameters(), array('id'=>$id,'title'=>$title,'categoryid'=>$categoryid,'url'=>$url,'intro'=>$intro,'filename'=>$filename,'type'=>$type));
-	
+
 		$record = new stdClass();
 		$record->id = $id;
 		$record->name = $title;
@@ -219,25 +225,30 @@ class block_exaport_external extends external_api {
 		$record->url = $url;
 		$record->intro = $intro;
 		$record->type = $type;
-		
+
 		block_exaport_file_remove($DB->get_record("block_exaportitem",array("id"=>$id)));
 		$DB->update_record("block_exaportitem", $record);
-		
+
 		//if a file is added we need to copy the file from the user/private filearea to block_exaport/item_file with the itemid from above
 		if($type == "file") {
 			$context = context_user::instance($USER->id);
 			$fs = get_file_storage();
-			$old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
-	
-			$file_record = array('contextid'=>$context->id, 'component'=>'block_exaport', 'filearea'=>'item_file',
-					'itemid'=>$id, 'filepath'=>'/', 'filename'=>$old->get_filename(),
-					'timecreated'=>time(), 'timemodified'=>time());
-			$fs->create_file_from_storedfile($file_record, $old->get_id());
+			try {
+				$old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
+					
+				if($old) {
+					$file_record = array('contextid'=>$context->id, 'component'=>'block_exaport', 'filearea'=>'item_file',
+							'itemid'=>$id, 'filepath'=>'/', 'filename'=>$old->get_filename(),
+							'timecreated'=>time(), 'timemodified'=>time());
+					$fs->create_file_from_storedfile($file_record, $old->get_id());
+				}
+			} catch (Exception $e) {
+			}
 		}
-	
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -249,17 +260,17 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Returns description of method parameters
 	 * @return external_function_parameters
 	 */
 	public static function delete_item_parameters() {
 		return new external_function_parameters(
-			array(	'id' => new external_value(PARAM_INT, 'item id'))
+				array(	'id' => new external_value(PARAM_INT, 'item id'))
 		);
 	}
-	
+
 	/**
 	 * Delete item
 	 * @param int itemid
@@ -267,22 +278,22 @@ class block_exaport_external extends external_api {
 	 */
 	public static function delete_item($id) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::delete_item_parameters(), array('id'=>$id));
-	
+
 		block_exaport_file_remove($DB->get_record("block_exaportitem",array("id"=>$id)));
-		
+
 		$DB->delete_records("block_exaportitem", array('id'=>$id));
-		
+
 		$interaction = block_exaport_check_competence_interaction();
 		if ($interaction) {
 			$DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $id, "activitytype" => 2000));
 			$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $id, "activitytype" => 2000, "reviewerid" => $USER->id));
 		}
-		
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -302,9 +313,9 @@ class block_exaport_external extends external_api {
 		return new external_function_parameters(
 				array()
 		);
-	
+
 	}
-	
+
 	/**
 	 * Get views
 	 * @return array of e-Portfolio views
@@ -313,14 +324,14 @@ class block_exaport_external extends external_api {
 		global $CFG,$DB,$USER;
 
 		$courses = $DB->get_records('course', array());
-		
+
 		$descriptors = array();
 		foreach($courses as $course){
 			$context = context_course::instance($course->id);
 			if(is_enrolled($context, $USER)){
 				$query = "SELECT t.id as topdescrid, d.id,d.title,tp.title as topic,tp.id as topicid, s.title as subject,s.id as subjectid,d.niveauid FROM {block_exacompdescriptors} d, {block_exacompcoutopi_mm} c, {block_exacompdescrtopic_mm} t, {block_exacomptopics} tp, {block_exacompsubjects} s
-						WHERE d.id=t.descrid AND t.topicid = c.topicid AND t.topicid=tp.id AND tp.subjid = s.id AND c.courseid = ?";
-		
+				WHERE d.id=t.descrid AND t.topicid = c.topicid AND t.topicid=tp.id AND tp.subjid = s.id AND c.courseid = ?";
+
 				$query.= " ORDER BY s.title,tp.title,d.sorting";
 				$alldescr = $DB->get_records_sql($query, array($course->id));
 				if (!$alldescr) {
@@ -331,7 +342,7 @@ class block_exaport_external extends external_api {
 				}
 			}
 		}
-		
+
 		$competencies = array();
 		foreach ($descriptors as $descriptor){
 			if(!array_key_exists ($descriptor->subjectid, $competencies)){
@@ -340,23 +351,23 @@ class block_exaport_external extends external_api {
 				$competencies[$descriptor->subjectid]->name = $descriptor->subject;
 				$competencies[$descriptor->subjectid]->topics = array();
 			}
-		
+
 			if(!array_key_exists ($descriptor->topicid, $competencies[$descriptor->subjectid]->topics)){
 				$competencies[$descriptor->subjectid]->topics[$descriptor->topicid] = new stdClass();
 				$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->id = $descriptor->topicid;
 				$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->name = $descriptor->topic;
 				$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->descriptors = array();
 			}
-		
+
 			$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->descriptors[$descriptor->id] = new stdClass();
 			$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->descriptors[$descriptor->id]->id = $descriptor->id;
 			$competencies[$descriptor->subjectid]->topics[$descriptor->topicid]->descriptors[$descriptor->id]->name = $descriptor->title;
 		}
-		
-    	return $competencies;
-		
+
+		return $competencies;
+
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_multiple_structure
@@ -368,25 +379,25 @@ class block_exaport_external extends external_api {
 								'id' => new external_value(PARAM_INT, 'id of subject'),
 								'name' => new external_value(PARAM_TEXT, 'title of subject'),
 								'topics' => new external_multiple_structure(
-											new external_single_structure(
+										new external_single_structure(
 												array(
-													'id' => new external_value(PARAM_INT, 'id of topic'),
-													'name' => new external_value(PARAM_TEXT, 'title of topic'),
-													'descriptors' => new external_multiple_structure(
-																		new external_single_structure(
-																			array(
+														'id' => new external_value(PARAM_INT, 'id of topic'),
+														'name' => new external_value(PARAM_TEXT, 'title of topic'),
+														'descriptors' => new external_multiple_structure(
+																new external_single_structure(
+																		array(
 																				'id' => new external_value(PARAM_INT, 'id of descriptor'),
-																				'name'=> new external_value(PARAM_TEXT, 'name of descriptor')	
-																			)
+																				'name'=> new external_value(PARAM_TEXT, 'name of descriptor')
 																		)
-																	)
+																)
+														)
 												)
-											)
 										)
+								)
 						)
 				)
 		);
-	}	
+	}
 	/**
 	 * Returns description of method parameters
 	 * @return external_function_parameters
@@ -396,11 +407,11 @@ class block_exaport_external extends external_api {
 				array(	'itemid' => new external_value(PARAM_INT, 'item id'),
 						'descriptorid' => new external_value(PARAM_INT, 'descriptor id'),
 						'val' => new external_value(PARAM_INT, '1 to assign, 0 to unassign')
-				)		
+				)
 		);
-	
+
 	}
-	
+
 	/**
 	 * Add a descriptor to an item
 	 * @param int itemid, descriptorid, val
@@ -408,9 +419,9 @@ class block_exaport_external extends external_api {
 	 */
 	public static function set_item_competence($itemid,$descriptorid, $val) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::set_item_competence_parameters(), array('itemid'=>$itemid,'descriptorid'=>$descriptorid, 'val'=>$val));
-		
+
 		if($val == 1){
 			$item = $DB->get_record("block_exaportitem", array("id"=>$itemid));
 			$course = $DB->get_record("course", array("id"=>$item->courseid));
@@ -420,10 +431,10 @@ class block_exaport_external extends external_api {
 			$DB->delete_records("block_exacompdescractiv_mm", array('descrid'=>$descriptorid, 'activityid'=>$itemid, 'activitytype'=>2000));
 			$DB->delete_records("block_exacompdescuser_mm", array("descid"=>$descriptorid, 'activityid'=>$itemid, 'activitytype'=>2000));
 		}
-		
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -435,7 +446,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Returns description of method parameters
 	 * @return external_function_parameters
@@ -444,21 +455,21 @@ class block_exaport_external extends external_api {
 		return new external_function_parameters(
 				array()
 		);
-	
+
 	}
-	
+
 	/**
 	 * Get views
 	 * @return array of e-Portfolio views
 	 */
 	public static function get_views() {
 		global $CFG,$DB,$USER;
-	
+
 		$conditions=array("userid"=>$USER->id);
 		$views = $DB->get_records("block_exaportview", $conditions);
-	
+
 		$results = array();
-	
+
 		foreach($views as $view) {
 			$result = new stdClass();
 			$result->id = $view->id;
@@ -469,7 +480,7 @@ class block_exaport_external extends external_api {
 
 		return $results;
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_multiple_structure
@@ -494,7 +505,7 @@ class block_exaport_external extends external_api {
 				array('id' => new external_value(PARAM_INT, 'view id'))
 		);
 	}
-	
+
 	/**
 	 * Get view
 	 * @param int id
@@ -502,25 +513,25 @@ class block_exaport_external extends external_api {
 	 */
 	public static function get_view($id) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::get_view_parameters(), array('id'=>$id));
-		
+
 		$conditions=array("id"=>$id);
 		$view = $DB->get_record("block_exaportview", $conditions);
-	
+
 		$result->id = $view->id;
 		$result->name = $view->name;
 		$result->description = $view->description;
-		
+
 		$conditions = array("viewid"=>$id);
 		$items = $DB->get_records("block_exaportviewblock", $conditions);
-		
+
 		$result->items = array();
 		foreach($items as $item) {
 			if($item->type == "item"){
 				$conditions = array("id"=>$item->itemid);
 				$itemdb = $DB->get_record("block_exaportitem", $conditions);
-			
+					
 				$resultitem = new stdClass();
 				$resultitem->id = $itemdb->id;
 				$resultitem->name = $itemdb->name;
@@ -528,10 +539,10 @@ class block_exaport_external extends external_api {
 				$result->items[] = $resultitem;
 			}
 		}
-	
+
 		return $result;
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -539,18 +550,18 @@ class block_exaport_external extends external_api {
 	public static function get_view_returns() {
 		return new external_single_structure(
 				array(
-					'id' => new external_value(PARAM_INT, 'id of view'),
-					'name' => new external_value(PARAM_TEXT, 'title of view'),
-					'description' => new external_value(PARAM_RAW, 'description of view'),
-					'items'=> new external_multiple_structure(
+						'id' => new external_value(PARAM_INT, 'id of view'),
+						'name' => new external_value(PARAM_TEXT, 'title of view'),
+						'description' => new external_value(PARAM_RAW, 'description of view'),
+						'items'=> new external_multiple_structure(
 								new external_single_structure(
-									array(
-										'id' => new external_value(PARAM_INT, 'id of item'),
-										'name' => new external_value(PARAM_TEXT, 'title of item'),
-										'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)')
-									)
+										array(
+												'id' => new external_value(PARAM_INT, 'id of item'),
+												'name' => new external_value(PARAM_TEXT, 'title of item'),
+												'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)')
+										)
 								)
-							)
+						)
 				)
 		);
 	}
@@ -561,12 +572,12 @@ class block_exaport_external extends external_api {
 	public static function add_view_parameters() {
 		return new external_function_parameters(
 				array(
-					'name' => new external_value(PARAM_TEXT, 'view title'),
-					'description' => new external_value(PARAM_TEXT, 'description')
+						'name' => new external_value(PARAM_TEXT, 'view title'),
+						'description' => new external_value(PARAM_TEXT, 'description')
 				)
 		);
 	}
-	
+
 	/**
 	 * Add view
 	 * @param String name, String description
@@ -574,14 +585,14 @@ class block_exaport_external extends external_api {
 	 */
 	public static function add_view($name,$description) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::add_view_parameters(), array('name'=>$name,'description'=>$description));
-	
+
 		$viewid = $DB->insert_record("block_exaportview", array('userid'=>$USER->id,'name'=>$name,'description'=>$description, 'timemodified'=>time()));
-	
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -593,7 +604,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Returns description of method parameters
 	 * @return external_function_parameters
@@ -607,7 +618,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Update view
 	 * @param int id, String name, String description
@@ -615,18 +626,18 @@ class block_exaport_external extends external_api {
 	 */
 	public static function update_view($id, $name,$description) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::update_view_parameters(), array('id'=>$id,'name'=>$name,'description'=>$description));
-	
+
 		$record = new stdClass();
 		$record->id = $id;
 		$record->name = $name;
 		$record->description = $description;
 		$DB->update_record("block_exaportview", $record);
-		
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -649,7 +660,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Delete view
 	 * @param int id
@@ -657,14 +668,14 @@ class block_exaport_external extends external_api {
 	 */
 	public static function delete_view($id) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::delete_view_parameters(), array('id'=>$id));
-	
+
 		$DB->delete_records("block_exaportview", array("id"=>$id));
-	
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -686,19 +697,19 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Get all items
 	 * @return all items available
 	 */
 	public static function get_all_items() {
 		global $CFG,$DB,$USER;
-		
+
 		$categories = $DB->get_records("block_exaportcate", array("userid"=>$USER->id));
-	
+
 		$itemstree = array();
 		$maincategory = $DB->get_records("block_exaportitem", array("userid"=>$USER->id, "categoryid"=>0));
-	
+
 		$itemstree[0] = new stdClass();
 		$items_temp = array();
 		foreach($maincategory as $item){
@@ -712,7 +723,7 @@ class block_exaport_external extends external_api {
 		$itemstree[0]->items = $items_temp;
 		foreach($categories as $category){
 			$categoryitems = $DB->get_records("block_exaportitem", array("userid"=>$USER->id, "categoryid"=>$category->id));
-	
+
 			$itemstree[$category->id] = new stdClass();
 			$items_temp = array();
 			foreach($categoryitems as $item){
@@ -725,10 +736,10 @@ class block_exaport_external extends external_api {
 			}
 			$itemstree[$category->id]->items = $items_temp;
 		}
-	
+
 		return $itemstree;
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_multiple_structure
@@ -740,13 +751,13 @@ class block_exaport_external extends external_api {
 								'id' => new external_value(PARAM_INT, 'id of category'),
 								'name' => new external_value(PARAM_TEXT, 'title of category'),
 								'items' => new external_multiple_structure(
-											new external_single_structure(
+										new external_single_structure(
 												array(
-													'id' => new external_value(PARAM_INT, 'id of item'),
-													'name' => new external_value(PARAM_TEXT, 'name of item')
+														'id' => new external_value(PARAM_INT, 'id of item'),
+														'name' => new external_value(PARAM_TEXT, 'name of item')
 												)
-											)
 										)
+								)
 						)
 				)
 		);
@@ -763,7 +774,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Add item to view
 	 * @param int viewid, itemid
@@ -771,18 +782,18 @@ class block_exaport_external extends external_api {
 	 */
 	public static function add_view_item($viewid, $itemid) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::add_view_item_parameters(), array('viewid'=>$viewid, 'itemid'=>$itemid));
-		
+
 		$query = "SELECT MAX(positiony) from {block_exaportviewblock} WHERE viewid=?";
 		$max = $DB->get_field_sql($query, array($viewid));
 		$ycoord = intval($max)+1;
-		
+
 		$blockid = $DB->insert_record("block_exaportviewblock", array("viewid"=>$viewid, "itemid"=>$itemid, "positionx"=>1, "positiony"=>$ycoord, "type"=>"item"));
-		
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -806,7 +817,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Remove item from view
 	 * @param int viewid, itemid
@@ -814,16 +825,16 @@ class block_exaport_external extends external_api {
 	 */
 	public static function delete_view_item($viewid, $itemid) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::delete_view_item_parameters(), array('viewid'=>$viewid, 'itemid'=>$itemid));
 		$query = "SELECT MAX(positiony) from {block_exaportviewblock} WHERE viewid=? AND itemid=?";
 		$max = $DB->get_field_sql($query, array($viewid, $itemid));
 		$ycoord = intval($max);
 		$DB->delete_records("block_exaportviewblock", array("viewid"=>$viewid, "itemid"=>$itemid, "positiony"=>$ycoord));
-	
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -847,31 +858,31 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Grant external acces to view
-	 * @param int id, val 
+	 * @param int id, val
 	 * @return success
 	 */
 	public static function view_grant_external_access($id, $val) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::view_grant_external_access_parameters(), array('id'=>$id, 'val'=>$val));
-		
+
 		$record = new stdClass();
 		$record->id = $id;
-		
+
 		if($val == 0)
 			$record->externaccess = 0;
-		else 
+		else
 			$record->externaccess = 1;
-		
+
 		$record->externcomment = 0;
 		$DB->update_record("block_exaportview", $record);
-		
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -892,16 +903,16 @@ class block_exaport_external extends external_api {
 				array()
 		);
 	}
-	
+
 	/**
 	 * Get all available users for sharing view
 	 * @return all items available
 	 */
 	public static function view_get_available_users() {
 		global $CFG,$DB,$USER;
-	
+
 		$mycourses = enrol_get_users_courses($USER->id, true);
-		
+
 		$usersincontext = array();
 		foreach($mycourses as $course){
 			$enrolledusers = get_enrolled_users(context_course::instance($course->id));
@@ -911,7 +922,7 @@ class block_exaport_external extends external_api {
 				}
 			}
 		}
-		
+
 		$users = array();
 		foreach($usersincontext as $user){
 			$user_temp = new stdClass();
@@ -920,10 +931,10 @@ class block_exaport_external extends external_api {
 			$user_temp->lastname = $user->lastname;
 			$users[] = $user_temp;
 		}
-		
+
 		return $users;
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_multiple_structure
@@ -951,7 +962,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Grant internal acces to view to all users
 	 * @param int id, val
@@ -959,23 +970,23 @@ class block_exaport_external extends external_api {
 	 */
 	public static function view_grant_internal_access_all($id, $val) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::view_grant_internal_access_all_parameters(), array('id'=>$id, 'val'=>$val));
-	
+
 		$record = new stdClass();
 		$record->id = $id;
-	
+
 		if($val == 0)
 			$record->shareall = 0;
 		else
 			$record->shareall = 1;
-	
+
 		$record->externcomment = 0;
 		$DB->update_record("block_exaportview", $record);
-	
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure
@@ -1000,7 +1011,7 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
-	
+
 	/**
 	 * Grant internal acces to view to one user
 	 * @param int viewid, userid, val
@@ -1008,17 +1019,17 @@ class block_exaport_external extends external_api {
 	 */
 	public static function view_grant_internal_access($viewid, $userid, $val) {
 		global $CFG,$DB,$USER;
-	
+
 		$params = self::validate_parameters(self::view_grant_internal_access_parameters(), array('viewid'=>$viewid, 'userid'=>$userid, 'val'=>$val));
-	
+
 		if($val == 1)
 			$blockid = $DB->insert_record("block_exaportviewshar", array("viewid"=>$viewid, "userid"=>$userid));
 		if($val == 0)
 			$DB->delete_records("block_exaportviewshar", array("viewid"=>$viewid, "userid"=>$userid));
-	
+
 		return array("success"=>true);
 	}
-	
+
 	/**
 	 * Returns desription of method return values
 	 * @return external_single_structure

@@ -98,6 +98,7 @@ class block_exaport_external extends external_api {
 		$item->file = "";
 		$item->isimage = false;
 		$item->filename = "";
+		$item->intro = strip_tags($item->intro);
 
 		if ($item->type == 'file') {
 			if ($file = block_exaport_get_item_file($item)) {

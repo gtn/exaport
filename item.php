@@ -371,7 +371,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 /**
  * Delete item from database
  */
-function block_exaport_do_delete($post, $returnurl, $courseid) {
+function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
 	global $DB, $USER;
 

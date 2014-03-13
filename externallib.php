@@ -193,7 +193,6 @@ class block_exaport_external extends external_api {
 		return new external_function_parameters(
 				array(	'id' => new external_value(PARAM_INT, 'item id'),
 						'title' => new external_value(PARAM_TEXT, 'item title'),
-						'categoryid' => new external_value(PARAM_INT, 'categoryid'),
 						'url' => new external_value(PARAM_URL, 'url'),
 						'intro' => new external_value(PARAM_TEXT, 'introduction'),
 						'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
@@ -220,8 +219,9 @@ class block_exaport_external extends external_api {
 		$record->intro = $intro;
 		$record->type = $type;
 		
+		block_exaport_file_remove($DB->get_record("block_exaportitem",array("id"=>$id)));
 		$DB->update_record("block_exaportitem", $record);
-		//NICHT AUSGETESTET
+		
 		//if a file is added we need to copy the file from the user/private filearea to block_exaport/item_file with the itemid from above
 		if($type == "file") {
 			$context = context_user::instance($USER->id);
@@ -229,7 +229,7 @@ class block_exaport_external extends external_api {
 			$old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
 	
 			$file_record = array('contextid'=>$context->id, 'component'=>'block_exaport', 'filearea'=>'item_file',
-					'itemid'=>$itemid, 'filepath'=>'/', 'filename'=>$old->get_filename(),
+					'itemid'=>$id, 'filepath'=>'/', 'filename'=>$old->get_filename(),
 					'timecreated'=>time(), 'timemodified'=>time());
 			$fs->create_file_from_storedfile($file_record, $old->get_id());
 		}
@@ -269,7 +269,15 @@ class block_exaport_external extends external_api {
 	
 		$params = self::validate_parameters(self::delete_item_parameters(), array('id'=>$id));
 	
+		block_exaport_file_remove($DB->get_record("block_exaportitem",array("id"=>$id)));
+		
 		$DB->delete_records("block_exaportitem", array('id'=>$id));
+		
+		$interaction = block_exaport_check_competence_interaction();
+		if ($interaction) {
+			$DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $id, "activitytype" => 2000));
+			$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $id, "activitytype" => 2000, "reviewerid" => $USER->id));
+		}
 		
 		return array("success"=>true);
 	}

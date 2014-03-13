@@ -1155,7 +1155,7 @@ function write_xml_categories($conditions,$catid,$userid){
 				else $inhalt.=' competence_category=""';
 				$inhalt.='>'."\r\n";
 				$inhalt.='<name>'.cdatawrap($categorie->name).'</name>'."\r\n";
-				$inhalt.='<description>'.cdatawrap($categorie->description).'</description>'."\r\n";
+				$inhalt.='<description>'.cdatawrap(htmlwrap($categorie->description,$categorie->name)).'</description>'."\r\n";
 				$inhalt.='</categorie>'."\r\n";
 			}
 			$inhalt.='</result> '."\r\n";
@@ -1281,6 +1281,10 @@ function cdatawrap($wert){
 	if (!empty($wert) && $wert!=" ") $wert='<![CDATA['.$wert.']]>';
 	return $wert;
 }
+function htmlwrap($wert,$title="E-Pop"){
+	if (!empty($wert) && $wert!=" ") $wert='<!doctype html><html><head><meta charset="utf-8"><title>'.$title.'</title></head><body><div>'.$wert.'</div></body></html>';
+	return $wert;
+}
 function sauber($wert){
 	$wert=strip_tags($wert,"<br><b><p><i><h1><h2>");
 	$wert=str_replace("'","",$wert);
@@ -1347,7 +1351,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		$rse = $DB->get_record_sql($sql,array($userid));
 		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}*/
 	}
-	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid 
+	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid 
 	FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
 	INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 	INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
@@ -1367,10 +1371,11 @@ function block_exaport_installoez($userid,$isupdate=false){
 				$jetzn=time();
 				if (array_key_exists($keyst,$catold)){
 					$newstid=$catold[$keyst]["id"];
-					$DB->update_record('block_exaportcate', array("id"=>$newstid,"name"=>$rs->kat0,"stid"=>$rs->stid,"timemodified"=>$jetzn));
+					//echo $rs->stid."--------------".$rs->stdescription."@";
+					$DB->update_record('block_exaportcate', array("id"=>$newstid,"name"=>$rs->kat0,"stid"=>$rs->stid,"timemodified"=>$jetzn,"description"=>$rs->stdescription));
 				}else{
 					
-					$datas=array("pid"=>0,"stid"=>$rs->stid,"sourcemod"=>"3","userid"=>$userid,"name"=>$rs->kat0,"timemodified"=>$jetzn,"course"=>"0","isoez"=>"1","subjid"=>0,"topicid"=>0,"source"=>$rs->stsource,"sourceid"=>$rs->stsourceid);
+					$datas=array("pid"=>0,"stid"=>$rs->stid,"sourcemod"=>"3","userid"=>$userid,"name"=>$rs->kat0,"timemodified"=>$jetzn,"course"=>"0","isoez"=>"1","subjid"=>0,"topicid"=>0,"source"=>$rs->stsource,"sourceid"=>$rs->stsourceid,"description"=>$rs->stdescription);
 					$newstid=$DB->insert_record('block_exaportcate', $datas);$stid=$rs->stid;
 				}
 			}
@@ -1380,9 +1385,9 @@ function block_exaport_installoez($userid,$isupdate=false){
 				else $kat1s=$rs->kat1;
 				if (array_key_exists($keysub,$catold)){
 					$newsubjid=$catold[$keysub]["id"];
-					$DB->update_record('block_exaportcate', array("id"=>$newsubjid,"name"=>$kat1s,"pid"=>$newstid,"timemodified"=>time(),"stid"=>$stid,"subjid"=>$rs->subjid));
+					$DB->update_record('block_exaportcate', array("id"=>$newsubjid,"name"=>$kat1s,"pid"=>$newstid,"timemodified"=>time(),"stid"=>$stid,"subjid"=>$rs->subjid,"description"=>$rs->subjdescription));
 				}else{
-					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5));$subjid=$rs->subjid;
+					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5,"description"=>$rs->subjdescription));$subjid=$rs->subjid;
 				}
 			}
 			if ($topid!=$rs->topid){

@@ -1048,54 +1048,55 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 				/*itemauswahl für view ende*/
 				
 				if($showitem==true){
-					$inhalt.='<item id="'.$item->id.'"';
-					if ($view_id>0){
-						if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
-						else $inhalt.=' selected="false"';
-					}
-					if ($item->attachment!="") {
-						$progress=1;
-						$userhash = optional_param('key', 0, PARAM_ALPHANUM);
-						$fileurl=$CFG->wwwroot.'/blocks/exaport/portfoliofile.php?access=portfolio/id/'.$item->userid.'&itemid='.$item->id.'&att='.$item->id.'&hv='.$userhash;
-						//$fileurl=$CFG->wwwroot.'/blocks/exaport/portfoliofile.php?access=portfolio/id/'.$item->userid.'&itemid='.$item->id;
-					}
-					else{ 
-						$fileurl="";
-						if (!empty($item->intro)|| !empty($item->url)) $progress=1;
-						else $progress=0;
-					}
-					//if ($competence_category!=""){
-						$inhalt.=' competence_category="'.$competence_category.'"';
-					//}
-					$inhalt.=' catid="'.$item->categoryid.'" type="'.$item->type.'" progress="'.$progress.'" isOezepsItem="'.block_exaport_numtobool($item->isoez).'">'."\r\n";
-					$inhalt.='<name>'.cdatawrap($item->name).'</name>'."\r\n";
-					$inhalt.='<description>'.cdatawrap($item->intro).'</description>'."\r\n";
-					$inhalt.='<url>'.cdatawrap($item->url).'</url>'."\r\n";
-					$isPicture="false";
-					if (!empty($fileurl)){
-							if ($dateien = $DB->get_records("files",  array("component"=>"block_exaport","itemid"=>$item->id))){
-								foreach($dateien as $datei){
-									if ($datei->filesize>0){
-										if (preg_match('/.+\/(jpeg|jpg|gif|png)$/', $datei->mimetype)) $isPicture="true";
+					if(empty($item->parentid) || $item->parentid==0 || block_exaport_parent_is_solved($item->parentid,$item->userid)){
+						$inhalt.='<item id="'.$item->id.'"';
+						if ($view_id>0){
+							if (!empty($vitemar[$item->id])) $inhalt.=' selected="true"';
+							else $inhalt.=' selected="false"';
+						}
+						if ($item->attachment!="") {
+							$progress=1;
+							$userhash = optional_param('key', 0, PARAM_ALPHANUM);
+							$fileurl=$CFG->wwwroot.'/blocks/exaport/portfoliofile.php?access=portfolio/id/'.$item->userid.'&itemid='.$item->id.'&att='.$item->id.'&hv='.$userhash;
+							//$fileurl=$CFG->wwwroot.'/blocks/exaport/portfoliofile.php?access=portfolio/id/'.$item->userid.'&itemid='.$item->id;
+						}
+						else{ 
+							$fileurl="";
+							if (!empty($item->intro)|| !empty($item->url)) $progress=1;
+							else $progress=0;
+						}
+						//if ($competence_category!=""){
+							$inhalt.=' competence_category="'.$competence_category.'"';
+						//}
+						$inhalt.=' catid="'.$item->categoryid.'" type="'.$item->type.'" progress="'.$progress.'" isOezepsItem="'.block_exaport_numtobool($item->isoez).'">'."\r\n";
+						$inhalt.='<name>'.cdatawrap($item->name).'</name>'."\r\n";
+						$inhalt.='<description>'.cdatawrap($item->intro).'</description>'."\r\n";
+						$inhalt.='<url>'.cdatawrap($item->url).'</url>'."\r\n";
+						$isPicture="false";
+						if (!empty($fileurl)){
+								if ($dateien = $DB->get_records("files",  array("component"=>"block_exaport","itemid"=>$item->id))){
+									foreach($dateien as $datei){
+										if ($datei->filesize>0){
+											if (preg_match('/.+\/(jpeg|jpg|gif|png)$/', $datei->mimetype)) $isPicture="true";
+										}
 									}
 								}
-							}
+						}
+						$inhalt.='<fileUrl isPicture="'.$isPicture.'">'.cdatawrap(block_exaport_ers_null($fileurl)).'</fileUrl>'."\r\n";
+						$inhalt.='<beispiel_url>';
+						if ($item->isoez==1) $inhalt.=cdatawrap(create_autologin_moodle_example_link(block_exaport_ers_null($item->beispiel_url)));
+						else $inhalt.=cdatawrap(block_exaport_ers_null($item->beispiel_url));
+						$inhalt.='</beispiel_url>'."\r\n";
+						$inhalt.='<beispiel_description>'.cdatawrap($item->beispiel_angabe).'</beispiel_description>'."\r\n";
+						$texteingabe=0;$bildbearbeiten=0;
+						if ($item->iseditable==1 && !empty($item->example_url)) $bildbearbeiten=1;
+						else if ($item->iseditable==1) $texteingabe=1;
+				
+						$inhalt.='<texteingabe>'.block_exaport_numtobool($texteingabe).'</texteingabe>'."\r\n";
+						$inhalt.='<bildbearbeiten>'.block_exaport_numtobool($bildbearbeiten).'</bildbearbeiten>'."\r\n";
+						$inhalt.='<originalbild>'.cdatawrap($item->example_url).'</originalbild>'."\r\n";
+						$inhalt.='</item>'."\r\n";
 					}
-					$inhalt.='<fileUrl isPicture="'.$isPicture.'">'.cdatawrap(block_exaport_ers_null($fileurl)).'</fileUrl>'."\r\n";
-					$inhalt.='<beispiel_url>';
-					if ($item->isoez==1) $inhalt.=cdatawrap(create_autologin_moodle_example_link(block_exaport_ers_null($item->beispiel_url)));
-					else $inhalt.=cdatawrap(block_exaport_ers_null($item->beispiel_url));
-					$inhalt.='</beispiel_url>'."\r\n";
-					$inhalt.='<beispiel_description>'.cdatawrap($item->beispiel_angabe).'</beispiel_description>'."\r\n";
-					$texteingabe=0;$bildbearbeiten=0;
-					if ($item->iseditable==1 && !empty($item->example_url)) $bildbearbeiten=1;
-					else if ($item->iseditable==1) $texteingabe=1;
-			
-					$inhalt.='<texteingabe>'.block_exaport_numtobool($texteingabe).'</texteingabe>'."\r\n";
-					$inhalt.='<bildbearbeiten>'.block_exaport_numtobool($bildbearbeiten).'</bildbearbeiten>'."\r\n";
-					$inhalt.='<originalbild>'.cdatawrap($item->example_url).'</originalbild>'."\r\n";
-					$inhalt.='</item>'."\r\n";
-				//}
 				}
 			}
 			$inhalt.='</result> '."\r\n";
@@ -1310,6 +1311,7 @@ function block_exaport_competence_selected($subjid,$userid,$itemid){
 		else return false;
 }
 function block_exaport_checkIfUpdate($userid){
+	
 		//$conditions = array("username" => $uname,"password" => $pword);
 		//if (!$user = $DB->get_record("user", $conditions)){
 		global $DB;
@@ -1326,6 +1328,8 @@ function block_exaport_checkIfUpdate($userid){
 
 function block_exaport_installoez($userid,$isupdate=false){
 	global $DB;
+	
+	$rem_ids=array();
 	$where="";$catold=array();
 	
 	if (!$kont = $DB->get_records("block_exaportcate", array("userid"=>$userid,"isoez"=>2))){
@@ -1351,7 +1355,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		$rse = $DB->get_record_sql($sql,array($userid));
 		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}*/
 	}
-	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid 
+	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid,examp.parentid  
 	FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
 	INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 	INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
@@ -1366,6 +1370,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 	$beispiel_url="";
 	//if ($isupdate==false){
 		foreach($row as $rs){
+			$parentid_is_old=false;
 			if ($stid!=$rs->stid){
 				$keyst=$rs->stsource."#".$rs->stsourceid."#3";
 				$jetzn=time();
@@ -1410,20 +1415,36 @@ function block_exaport_installoez($userid,$isupdate=false){
 			if (!empty($rs->items)) $items=$rs->items;
 			else $items=$rs->item;
 			$iteminsert=true;
+			
+			$pid=intval($rs->parentid);
+			if ($pid>0){
+					if (!empty($rem_ids[0][$pid])){
+						$pid=$rem_ids[0][$pid];
+					}else{
+						$parentid_is_old=true;
+					}
+			}
+	
 			if ($isupdate==true){
 				if ($itemrs = $DB->get_records("block_exaportitem",array("isoez"=>1,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"userid"=>$userid,"categoryid"=>$newtopid))){  //kategoryId mitnehmen, weil ein item kopiert und auf verschiedene kategorien zugeordnet werden kann. beim update soll dann nur das jeweilige item aktualisiert werden, sonst ist categorie falsch
 					$iteminsert=false;
 					foreach($itemrs as $item){
-						$data=array("id"=>$item->id,"userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile);
+						$rem_ids[0][$rs->exampid]=$item->id; //remark relation for parentids later
+						$data=array("id"=>$item->id,"userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile,"parentid"=>$pid);
 						$DB->update_record('block_exaportitem', $data);
+						if ($parentid_is_old) $rem_ids[1][$item->id]=intval($rs->parentid); //save old parentid from new id
 					}
 				}
 			}
-			if ($iteminsert==true) $DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile));
-		}
+			if ($iteminsert==true) {
+				$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile,"parentid"=>$pid));
+				$rem_ids[0][$rs->exampid]=$newid; //remark relation for parentids later
+				if ($parentid_is_old) $rem_ids[1][$newid]=intval($rs->parentid);
+			}
+		} //end foreach $row
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1,import_oez_tstamp=".time()." WHERE user_id=".$userid;
 		$DB->execute($sql);
-
+  	block_exaport_update_unset_pids('block_exaportitem',$rem_ids);
 
 	/*}else{
 		foreach($row as $rs){
@@ -1448,5 +1469,24 @@ function block_exaport_installoez($userid,$isupdate=false){
 	}*/
 
 }
+function block_exaport_update_unset_pids($utable,$rem_ids){
+		global $DB;
+		/*echo "<pre>";
+		print_r($rem_ids);*/
 
+		if (!empty($rem_ids[1])){
+			foreach ($rem_ids[1] as $newid=>$v) {
+				//echo "UPDATE mdl_".$utable." SET parentid=".$rem_ids[0][$v]." WHERE id=".$newid;
+	    	$DB->update_record($utable, array("id"=>$newid,"parentid"=>$rem_ids[0][$v]));
+	    	//echo "bei datensatz ".$newid." wird parentid=".$rem_ids[0][$v];
+			}		
+		}
+}
+
+function block_exaport_parent_is_solved($id,$userid){
+	global $DB;
+	$sql="SELECT i.id FROM {block_exaportitem} i WHERE id=? AND userid=? AND (attachment<>'' || url<>'' || intro<>'')";
+	if ($DB->get_record_sql($sql,array($id,$userid))) return true;
+	else return false;
+}
  ?>

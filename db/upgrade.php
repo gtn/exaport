@@ -380,5 +380,19 @@ function xmldb_block_exaport_upgrade($oldversion) {
     	// exaport savepoint reached
     	upgrade_block_savepoint(true, 2013111800, 'exaport');
     }
+     if ($oldversion < 2014031700) {
+    
+    	// Define field name_short to be added to block_exaportcate
+    	$table = new xmldb_table('block_exaportitem');
+    	$field = new xmldb_field('parentid', XMLDB_TYPE_INTEGER, '10', 0, null, null, null, 'example_url');
+    	// Conditionally launch add field name_short
+    	if (!$dbman->field_exists($table, $field)) {
+    		$dbman->add_field($table, $field);
+    	}
+    
+    	// exaport savepoint reached
+    	upgrade_block_savepoint(true, 2014031700, 'exaport');
+    }
+    
 	return $result;
 }

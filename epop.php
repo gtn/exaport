@@ -745,8 +745,26 @@ else if ($action=="get_items_for_view"){
 								$file_record_img->license   = $CFG->sitedefaultlicense;
 								$file_record_img->author    = $user->lastname." ".$user->firstname;
 								$file_record_img->source    = '';
-								$newfile = $fs->convert_image($file_record_img, $tempfile->get_id(),  $imageinfo['width']/2, $imageinfo['height']/2);
 								
+								$iw=intval($imageinfo['width']);
+								$ih=intval($imageinfo['height']);
+								$fakt=1;
+								if ($iw>2000){
+									$fakt=(2000/$iw);
+									$iw=ceil($iw*$fakt);
+									$ih=ceil($ih*$fakt);
+								}
+								if ($ih>2000){
+									$fakt=(2000/$ih);
+									$iw=ceil($iw*$fakt);
+									$ih=ceil($ih*$fakt);
+								}
+								if ($fakt<>1){
+									$newfile = $fs->convert_image($file_record_img, $tempfile->get_id(),  $iw, $ih);
+								}else{
+									$file_record->itemid=$new->id;
+									$newfile = $fs->create_file_from_pathname($file_record, $file->filepath);
+								}
 								if($tempfile)
 									$tempfile->delete();
 						}else{

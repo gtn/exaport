@@ -62,23 +62,23 @@ window.jQueryExaport = jQuery.noConflict(true);
 							if (type == 'views_mod') html += "<th align=\"center\">&nbsp;</th>";
 							html += "<th align=\"left\">"+$E.translate('name')+"</th><th align=\"right\">"+$E.translate('role')+"</th></tr>";
 
-							html += '<tr><td align=\"center\" width="50">';
+							html += '<tr><td align=\"center\" width="5%">';
 							html += '<input class="shareusers-check-all" courseid="'+course.id+'" type="checkbox" />';
 							html += "<br />"+$E.translate('checkall');
 							html += "</td></tr>";
 
 							$.each(course.users, function(tmp, user){
-								html += '<tr><td align=\"center\" width="50">';
+								html += '<tr><td align=\"center\" width="5%">';
 								html += '<input class="shareusers" type="checkbox" courseid="'+course.id+'" name="shareusers['+user.id+']" value="'+user.id+'"' +
-									(typeof sharedUsers[user.id] != 'undefined' ? ' checked' : '') +
+									(user.shared_to ? ' checked="checked"' : '') +
 									' />';
 								if (type == 'views_mod') {
 									html += "<br />"+$E.translate('sharejs');
-									html += '</td><td align=\"center\" width="50" style="padding-right: 20px;">';
+									html += '</td><td align=\"center\" width="5%" style="padding-right: 20px;">';
 									html += '<input class="notifyusers" type="checkbox" disabled="disabled" name="notifyusers['+user.id+']" value="'+user.id+'" />';
 									html += "<br />"+$E.translate('notify');
 								}
-								html += "</td><td align=\"center\">" + user.name + "</td><td align=\"center\">" + user.rolename + "</td></tr>";
+								html += "</td><td align=\"center\" width='45%'>" + user.name + "</td><td align=\"center\" width='45%'>" + user.rolename + "</td></tr>";
 							});
 
 							html += "</table>";

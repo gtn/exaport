@@ -936,8 +936,8 @@ function exaport_get_shareable_users(){
 	$tusers=array();
 	$courses=exaport_get_shareable_courses_with_users('sharing');
 		foreach($courses as $course){
-				foreach ($course["users"] as $user){
-					$tusers[$user["id"]]=$user["name"];
+				foreach ($course->users as $user){
+					$tusers[$user->id] = $user->name;
 				}
 		}
 	return $tusers;

@@ -255,7 +255,7 @@ if ($editform->is_cancelled()) {
 		if (empty($dbView->internaccess)) {
 			$dbView->internaccess = 0;
 		}
-		if (block_exaport_shareall_enabled() || !$dbView->internaccess || empty($dbView->shareall)) {
+		if (!block_exaport_shareall_enabled() || !$dbView->internaccess || empty($dbView->shareall)) {
 			$dbView->shareall = 0;
 		}
 		if (empty($dbView->externcomment)) {

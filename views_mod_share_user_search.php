@@ -50,6 +50,7 @@ if (!$view = $DB->get_record('block_exaportview', $conditions)) {
 $shareusers = optional_param_array('shareusers', null, PARAM_INT);
 
 if ($shareusers) {
+	// update shared users
 	$sharedUsers = exaport_get_view_shared_users($id);
 
 	foreach ($shareusers as $userid => $share) {
@@ -66,6 +67,12 @@ if ($shareusers) {
 			// do nothing, everything is fine
 		}
 	}
+
+	$DB->update_record("block_exaportview", array(
+		'id' => $view->id,
+		'internaccess' => true,
+		'shareall' => false
+	));
 }
 				
 block_exaport_print_header('views', 'share');

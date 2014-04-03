@@ -60,12 +60,6 @@ require_capability('block/exaport:use', $context);
 if (!$COURSE) {
    print_error("invalidcourseid","block_exaport");
 }
-//echo json_encode(exaport_get_shareable_courses_with_users('sharing'));
-if ($action == 'userlist') {
-	echo json_encode(exaport_get_shareable_courses_with_users('sharing'));
-	exit;
-}
-
 
 if ($id) {
 	$conditions = array("id" => $id, "userid" => $USER->id);
@@ -82,6 +76,11 @@ if ($id) {
 		$hash = substr(md5(microtime()), 3, 8);
     } while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
 	$view->hash = $hash;/**/
+}
+
+if ($view && $action == 'userlist') {
+	echo json_encode(exaport_get_shareable_courses_with_users_for_view($view->id));
+	exit;
 }
 
 $returnurl_to_list = $CFG->wwwroot.'/blocks/exaport/views_list.php?courseid='.$courseid;
@@ -120,15 +119,9 @@ if ($action == 'delete') {
 
 
 if ($view) {
-	$conditions = array("viewid" => $view->id);
-	$sharedUsers = $DB->get_records('block_exaportviewshar', $conditions, null, 'userid');
-	if (!$sharedUsers) {
-		$sharedUsers = array();
-	} else {
-		$sharedUsers = array_flip(array_keys($sharedUsers));
-	}
+	$hasSharedUsers = !!$DB->count_records('block_exaportviewshar', array("viewid" => $view->id));
 } else {
-	$sharedUsers = array();
+	$hasSharedUsers = false;
 }
 
 
@@ -262,7 +255,7 @@ if ($editform->is_cancelled()) {
 		if (empty($dbView->internaccess)) {
 			$dbView->internaccess = 0;
 		}
-		if (block_exaport_shareall_enabled() || !$dbView->internaccess || empty($dbView->shareall)) {
+		if (!block_exaport_shareall_enabled() || !$dbView->internaccess || empty($dbView->shareall)) {
 			$dbView->shareall = 0;
 		}
 		if (empty($dbView->externcomment)) {
@@ -484,7 +477,7 @@ switch ($action) {
 		$strAction = get_string('new');
 		break;
 	case 'edit':
-		if (!isset($postView->internaccess) && ($postView->shareall || $sharedUsers)) {
+		if (!isset($postView->internaccess) && ($postView->shareall || $hasSharedUsers)) {
 			$postView->internaccess = 1;
 		}
 		$strAction = get_string('edit');
@@ -632,7 +625,6 @@ unset($value);
 <script type="text/javascript">
 //<![CDATA[
 	var portfolioItems = <?php echo json_encode(block_exaport_get_portfolio_items()); ?>;
-	var sharedUsers = <?php echo json_encode($sharedUsers); ?>;
 	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 //]]>
 </script>
@@ -873,7 +865,10 @@ break;
 							echo '<tr><td style="padding-right: 10px">';
 							echo '<input type="radio" name="shareall" value="0"'.(!$postView->shareall?' checked="checked"':'').'/>';
 							echo '</td><td>'.get_string("internalaccessusers", "block_exaport").'</td></tr>';
-							echo '<tr id="internaccess-users"><td></td><td id="sharing-userlist">userlist</td></tr>';
+							echo '<tr id="internaccess-users"><td></td><td>';
+							if (block_exaport_shareall_enabled()) echo '<div style="padding-bottom: 20px;"><a href="views_mod_share_user_search.php?courseid='.$courseid.'&id='.$view->id.'">'.get_string("share_to_other_users", "block_exaport").'</a></div>';
+							echo '<div id="sharing-userlist">userlist</div>';
+							echo '</td></tr>';
 						echo '</table></div>';
 					echo '</td></tr>';
 				}

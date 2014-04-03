@@ -316,6 +316,57 @@ function exaport_get_shareable_courses() {
 	return $courses;
 }
 
+function exaport_get_view_shared_users($viewid) {
+	global $DB;
+	
+	$sharedUsers = $DB->get_records_menu('block_exaportviewshar', array("viewid" => $viewid), null, 'userid, userid AS tmp');
+	return $sharedUsers;
+}
+
+function exaport_get_shareable_courses_with_users_for_view($viewid) {
+	global $DB;
+	
+	$sharedUsers = exaport_get_view_shared_users($viewid);
+	$courses = exaport_get_shareable_courses_with_users('sharing');
+	
+	foreach ($courses as $course) {
+		foreach ($course->users as $user) {
+			if (isset($sharedUsers[$user->id])) {
+				$user->shared_to = true;
+				unset($sharedUsers[$user->id]);
+			} else {
+				$user->shared_to = false;
+			}
+		}
+	}
+
+	if ($sharedUsers) {
+		$extraUsers = array();
+		
+		foreach ($sharedUsers as $userid) {
+			$user = $DB->get_record('user', array('id' => $userid), user_picture::fields());
+			if (!$user)
+				// doesn't exist anymore
+				continue;
+
+			$extraUsers[] = (object)array(
+				'id' => $user->id,
+				'name' => fullname($user),
+				'rolename' => '',
+				'shared_to' => true
+			);
+		}
+
+		array_unshift($courses, (object)array(
+			'id' => -1,
+			'fullname' => get_string('other_users_course', 'block_exaport'),
+			'users' => $extraUsers
+		));
+	}
+	
+	return $courses;
+}
+
 function exaport_get_shareable_courses_with_users($type) {
 	global $USER, $COURSE;
 
@@ -324,12 +375,11 @@ function exaport_get_shareable_courses_with_users($type) {
 	// loop through all my courses
 	foreach (enrol_get_my_courses(null, 'fullname ASC') as $dbCourse) {
 
-		$course = array(
+		$course = (object)array(
 			'id' => $dbCourse->id,
 			'fullname' => $dbCourse->fullname,
 			'users' => array()
 		);
-		//print_r($course);
 		
 		$context = context_course::instance($dbCourse->id);
 		$roles = get_roles_used_in_context($context);
@@ -345,7 +395,7 @@ function exaport_get_shareable_courses_with_users($type) {
 				if ($user->id == $USER->id)
 					continue;
 
-				$course['users'][$user->id] = array(
+				$course->users[$user->id] = (object)array(
 					'id' => $user->id,
 					'name' => fullname($user),
 					'rolename' => $role->name ? $role->name : $role->shortname
@@ -353,14 +403,14 @@ function exaport_get_shareable_courses_with_users($type) {
 			}
 		}
 
-		$courses[$course['id']] = $course;
+		$courses[$course->id] = $course;
 	}
 
 	// move active course to first position
 	if (isset($courses[$COURSE->id]) && ($type != 'shared_views')) {
 		$course = $courses[$COURSE->id];
 		unset($courses[$COURSE->id]);
-		$courses = array_merge(array($course['id']=>$course), $courses);
+		$courses = array_merge(array($course->id=>$course), $courses);
 	}
 	
 	// test courses

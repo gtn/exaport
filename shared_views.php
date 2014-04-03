@@ -112,7 +112,7 @@ function exaport_print_views($views, $parsedsort) {
 	);
 	
 	if (isset($courses[$COURSE->id])) {
-		$userIdsInThisCourse = array_keys($courses[$COURSE->id]['users']);
+		$userIdsInThisCourse = array_keys($courses[$COURSE->id]->users);
 		
 		foreach ($views as $view) {
 			if (in_array($view->userid, $userIdsInThisCourse)) {
@@ -132,7 +132,7 @@ function exaport_print_views($views, $parsedsort) {
 		if (!isset($courses[$COURSE->id])) echo '<option/>';
 		
 		foreach ($courses as $c) {
-			echo '<option value="'.$c['id'].'"'.($c['id']==$COURSE->id?' selected="selected"':'').'>'.$c['fullname'].'</option>';
+			echo '<option value="'.$c->id.'"'.($c->id==$COURSE->id?' selected="selected"':'').'>'.$c->fullname.'</option>';
 		}
 		echo '</select></span>';
 	}

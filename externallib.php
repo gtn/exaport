@@ -200,7 +200,7 @@ class block_exaport_external extends external_api {
 		return new external_function_parameters(
 				array(	'id' => new external_value(PARAM_INT, 'item id'),
 						'title' => new external_value(PARAM_TEXT, 'item title'),
-						'url' => new external_value(PARAM_URL, 'url'),
+						'url' => new external_value(PARAM_TEXT, 'url'),
 						'intro' => new external_value(PARAM_TEXT, 'introduction'),
 						'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
 						'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'))
@@ -213,15 +213,15 @@ class block_exaport_external extends external_api {
 	 * @param int itemid
 	 * @return array of course subjects
 	 */
-	public static function update_item($id, $title,$categoryid,$url,$intro,$filename,$type) {
+	public static function update_item($id, $title,$url,$intro,$filename,$type) {
 		global $CFG,$DB,$USER;
 
-		$params = self::validate_parameters(self::update_item_parameters(), array('id'=>$id,'title'=>$title,'categoryid'=>$categoryid,'url'=>$url,'intro'=>$intro,'filename'=>$filename,'type'=>$type));
+		$params = self::validate_parameters(self::update_item_parameters(), array('id'=>$id,'title'=>$title,'url'=>$url,'intro'=>$intro,'filename'=>$filename,'type'=>$type));
 
 		$record = new stdClass();
 		$record->id = $id;
 		$record->name = $title;
-		$record->categoryid = $categoryid;
+		$record->categoryid = $DB->get_field("block_exaportitem", "categoryid", array("id"=>$id));
 		$record->url = $url;
 		$record->intro = $intro;
 		$record->type = $type;
@@ -1040,6 +1040,177 @@ class block_exaport_external extends external_api {
 						'success' => new external_value(PARAM_BOOL, 'status')
 				)
 		);
+	}
+
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function get_category_parameters() {
+		return new external_function_parameters(
+				array(
+						'categoryid' => new external_value(PARAM_INT, 'cat id')
+				)
+		);
+
+	}
+
+	/**
+	 * Get views
+	 * @return array of e-Portfolio views
+	 */
+	public static function get_category($categoryid) {
+		global $CFG,$DB;
+
+		return $DB->get_record("block_exaportcate", array("id" => $categoryid), "name");
+	}
+
+	/**
+	 * Returns desription of method return values
+	 * @return external_multiple_structure
+	 */
+	public static function get_category_returns() {
+		return new external_single_structure(
+				array(
+						'name' => new external_value(PARAM_TEXT, 'title of category')
+				)
+		);
+	}
+	
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function delete_category_parameters() {
+		return new external_function_parameters(
+				array(
+						'categoryid' => new external_value(PARAM_INT, 'cat id')
+				)
+		);
+	}
+	
+	/**
+	 * Grant internal acces to view to one user
+	 * @param int viewid, userid, val
+	 * @return success
+	 */
+	public static function delete_category($categoryid) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::delete_category_parameters(), array('categoryid'=>$categoryid));
+	
+		self::block_exaport_recursive_delete_category($categoryid);
+		return array("success"=>true);
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_single_structure
+	 */
+	public static function delete_category_returns() {
+		return new external_single_structure(
+				array(
+						'success' => new external_value(PARAM_BOOL, 'status')
+				)
+		);
+	}
+	
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function get_competencies_by_item_parameters() {
+		return new external_function_parameters(
+				array(
+						'itemid' => new external_value(PARAM_INT, 'item id')
+				)
+		);
+	}
+	
+	/**
+	 * Get all items
+	 * @return all items available
+	 */
+	public static function get_competencies_by_item($itemid) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::get_competencies_by_item_parameters(), array('itemid'=>$itemid));
+		
+		return $DB->get_records("block_exacompdescractiv_mm",array("activityid"=>$itemid,"activitytype"=>2000),"","descrid as competenceid");
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_multiple_structure
+	 */
+	public static function get_competencies_by_item_returns() {
+		return new external_multiple_structure(
+				new external_single_structure(
+						array(
+								'competenceid' => new external_value(PARAM_INT, 'id of competence')
+						)
+				)
+		);
+	}
+	
+	/**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function get_users_by_view_parameters() {
+		return new external_function_parameters(
+				array(
+						'viewid' => new external_value(PARAM_INT, 'view id')
+				)
+		);
+	}
+	
+	/**
+	 * Get all items
+	 * @return all items available
+	 */
+	public static function get_users_by_view($viewid) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::get_users_by_view_parameters(), array('viewid'=>$viewid));
+	
+		return $DB->get_records("block_exaportviewshar",array("viewid"=>$viewid));
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_multiple_structure
+	 */
+	public static function get_users_by_view_returns() {
+		return new external_multiple_structure(
+				new external_single_structure(
+						array(
+								'userid' => new external_value(PARAM_INT, 'id of user')
+						)
+				)
+		);
+	}
+	
+	private static function block_exaport_recursive_delete_category($id) {
+		global $DB;
+	
+		// delete subcategories
+		if ($entries = $DB->get_records('block_exaportcate', array("pid" => $id))) {
+			foreach ($entries as $entry) {
+				block_exaport_recursive_delete_category($entry->id);
+			}
+		}
+		$DB->delete_records('block_exaportcate', array('pid'=>$id));
+	
+		// delete itemsharing
+		if ($entries = $DB->get_records('block_exaportitem', array("categoryid" => $id))) {
+			foreach ($entries as $entry) {
+				$DB->delete_records('block_exaportitemshar', array('itemid'=>$entry->id));
+			}
+		}
+			
+		// delete items
+		$DB->delete_records('block_exaportitem', array('categoryid'=>$id));
 	}
 }
 

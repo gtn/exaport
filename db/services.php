@@ -20,7 +20,11 @@ $services = array(
 						'block_exaport_view_grant_external_access',
 						'block_exaport_view_get_available_users',
 						'block_exaport_view_grant_internal_access_all',
-						'block_exaport_view_grant_internal_access'
+						'block_exaport_view_grant_internal_access',
+						'block_exaport_get_category',
+						'block_exaport_delete_category',
+						'block_exaport_get_competencies_by_item',
+						'block_exaport_get_users_by_view'
 						),
 				'restrictedusers' =>0,                      //if enabled, the Moodle administrator must link some user to this service
 				//into the administration
@@ -162,6 +166,35 @@ $functions = array(
 				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
 				'description' => 'Grant internal access to a view to one user',    //human readable description of the web service function
 				'type'        => 'write'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_get_category' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'get_category',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'Get category infor',    //human readable description of the web service function
+				'type'        => 'read'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_delete_category' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'delete_category',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'Delete category',    //human readable description of the web service function
+				'type'        => 'write'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_get_competencies_by_item' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'get_competencies_by_item',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'Get competence ids for a ePortfolio item',    //human readable description of the web service function
+				'type'        => 'read'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_get_users_by_view' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'get_users_by_view',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'Get view users',    //human readable description of the web service function
+				'type'        => 'read'                  //database rights of the web service function (read, write)
 		)
+		
 );
 ?>

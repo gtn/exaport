@@ -397,8 +397,15 @@ if ($editform->is_cancelled()) {
 							$mailresult = message_send($notificationdata);
 						}
 					}
-				}				
-			};		
+				}
+			}
+			
+			if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
+				// search button pressed -> redirect to search form
+				redirect(new moodle_url('/blocks/exaport/views_mod_share_user_search.php',
+					array('courseid' => $courseid, 'id' => $dbView->id, 'q' => optional_param('share_to_other_users_q', '', PARAM_RAW))));
+				exit;
+			}
 			break;
 		default: break;
 	};
@@ -866,7 +873,14 @@ break;
 							echo '<input type="radio" name="shareall" value="0"'.(!$postView->shareall?' checked="checked"':'').'/>';
 							echo '</td><td>'.get_string("internalaccessusers", "block_exaport").'</td></tr>';
 							echo '<tr id="internaccess-users"><td></td><td>';
-							if (block_exaport_shareall_enabled()) echo '<div style="padding-bottom: 20px;"><a href="views_mod_share_user_search.php?courseid='.$courseid.'&id='.$view->id.'">'.get_string("share_to_other_users", "block_exaport").'</a></div>';
+							if (block_exaport_shareall_enabled()) {
+								// show user search form
+								echo get_string("share_to_other_users", "block_exaport").':';
+								echo '<div style="padding-bottom: 20px;">';
+								echo '<input name="share_to_other_users_q" type="text" /> ';
+								echo '<input name="share_to_other_users_submit" type="submit" value="'.get_string('search').'" />';
+								echo '</div>';
+							}
 							echo '<div id="sharing-userlist">userlist</div>';
 							echo '</td></tr>';
 						echo '</table></div>';

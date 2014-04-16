@@ -75,7 +75,8 @@
         <FIELD NAME="source" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" PREVIOUS="beispiel_angabe" NEXT="sourceid"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" PREVIOUS="source" NEXT="iseditable"/>
         <FIELD NAME="iseditable" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" PREVIOUS="sourceid" NEXT="example_url"/>
-        <FIELD NAME="example_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="iseditable"/>
+        <FIELD NAME="example_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="iseditable" NEXT="parentid"/>
+        <FIELD NAME="parentid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" PREVIOUS="example_url"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="userid"/>

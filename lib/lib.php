@@ -290,7 +290,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 		
 			
 			   echo '<div id="messageboxses1"';
-			    if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
+			    //if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
 			    echo '>
 					<div id="messagetxtses1">
 						'.get_string("desp_einleitung", "block_exaport").'

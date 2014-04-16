@@ -241,6 +241,8 @@ $string['exportviewselect'] = 'To export all items of a specific view, please se
 $string['type'] = 'Type';
 $string['share'] = 'Share';
 $string['explainingall'] = 'All Items in your portfolio';
+$string['share_to_other_users'] = 'Share to other users not in my courses';
+$string['other_users_course'] = 'Users not in my courses';
 
 // Item sorting
 $string['userdefinedsort'] = 'Define your own search';

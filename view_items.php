@@ -385,7 +385,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 					</span>
 			</div>
 			<div class="excomdos_tileimage">
-				<a href="<?php echo $url; ?>"><img src="<?php echo $CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id; ?>" /></a>
+				<a href="<?php echo $url; ?>"><img alt="<?php echo $item->name ?>" title="<?php echo $item->name ?>" src="<?php echo $CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id; ?>" /></a>
 			</div>
 			<div class="exomdos_tiletitle">
 				<a href="<?php echo $url; ?>"><?php echo $item->name; ?></a>

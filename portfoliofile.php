@@ -32,6 +32,7 @@
 
 require_once dirname(__FILE__).'/inc.php';
 require_once dirname(__FILE__).'/lib/sharelib.php';
+require_once($CFG->dirroot . '/webservice/lib.php');
 
 if (empty($CFG->filelifetime)) {
 	$lifetime = 86400;     // Seconds for files to remain in caches
@@ -46,15 +47,24 @@ $relativepath = get_file_argument('portfoliofile.php'); // the check of the para
 $access = optional_param('access', 0, PARAM_TEXT);
 $id = optional_param('itemid', 0, PARAM_INT);
 $userhash = optional_param('hv', 0, PARAM_ALPHANUM);
+$token = optional_param('token', null, PARAM_ALPHANUM);
 //block_exaport_epop_checkhash
 $epopaccess=false;
+
+//authenticate the user
+
 
 if ($userhash!="0"){
 	$user=block_exaport_epop_checkhash($userhash);
 	if ($user==false) {require_login();}
 	else {$epopaccess=true;}
 }else{
-	require_login();
+	if($token) {
+		$webservicelib = new webservice();
+		$authenticationinfo = $webservicelib->authenticate_user($token);
+	}
+	else
+		require_login();
 }
 
 

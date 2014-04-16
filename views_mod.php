@@ -497,17 +497,46 @@ function block_exaport_get_view_blocks($view) {
 	global $DB, $USER;
 	
 	$portfolioItems = block_exaport_get_portfolio_items();
+	$badges = block_exaport_get_all_user_badges();
 	
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
 		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
-	$blocks = $DB->get_records_sql($query, array($view->id));	
-	foreach ($blocks as $block) {
-		if (($block->type == 'item') && isset($portfolioItems[$block->itemid]))
+	$allBlocks = $DB->get_records_sql($query, array($view->id));	
+	$blocks = array();
+	
+	foreach ($allBlocks as $block) {
+		if ($block->type == 'item') {
+			if (!isset($portfolioItems[$block->itemid])) {
+				// item not found
+				continue;
+			}
 			$block->item = $portfolioItems[$block->itemid];
-		//$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);		
-		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);		
+		} elseif ($block->type == 'badge') {
+			// find bage by id
+			$badge = null;
+			foreach ($badges as $tmp) {
+				if ($tmp->id == $block->itemid) {
+					$badge = $tmp;
+					break;
+				}
+			}
+			if (!$badge) {
+				// badge not found
+				continue;
+			}
+			
+			$context = context_course::instance($badge->courseid);
+			$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+
+			$block->badge = $badge;
+		} else {
+			$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);
+			$block->itemid = null;
+		}
+		
+		$blocks[$block->id] = $block;
 	}
 
 	return $blocks;
@@ -613,7 +642,7 @@ if ($type<>'title') {// for delete php notes
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_text_defaulttext',
+	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_badge', 'view_specialitem_text_defaulttext',
 	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',
 	'file', 'note', 'link',
@@ -688,9 +717,19 @@ echo '<ul>
             <h4 class="blocktype-title js-hidden">'.get_string('media', 'block_exaport').'</h4>
             <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
         </div>
-    </li>	
+    </li>';
+
+if (block_exaport_badges_enabled()) {
+    echo '<li class="portfolioElement" title="'.get_string('mybadges', 'badges').'" block-type="badge">
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />
+            <h4 class="blocktype-title js-hidden">'.get_string('mybadges', 'badges').'</h4>
+            <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
+        </div>
+    </li>';
+}
 	
-</ul>';
+echo '</ul>';
 echo '</div>';
 
 $cols_layout = array (
@@ -908,4 +947,3 @@ echo '<div id="block_form" class="block" style="position: absolute; top: 10px; l
 	</script>
 	';
 echo $OUTPUT->footer();	
-?>

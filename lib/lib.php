@@ -27,7 +27,7 @@
 
 require_once $CFG->libdir . '/filelib.php';
 
-if(block_exaport_check_competence_interaction())
+if (block_exaport_check_competence_interaction())
 	require_once $CFG->dirroot . '/blocks/exacomp/lib/div.php';
 	
 global $DB;
@@ -680,3 +680,15 @@ function block_exaport_get_root_category() {
 
 	);
 }
+
+function block_exaport_badges_enabled() {
+	return (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled());
+}
+
+function block_exaport_get_all_user_badges() {
+	if (block_exaport_badges_enabled())
+		return block_exacomp_get_all_user_badges();
+	else
+		return null;
+}
+

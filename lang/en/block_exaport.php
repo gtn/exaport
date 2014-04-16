@@ -264,6 +264,7 @@ $string['view_specialitem_headline'] = 'Headline';
 $string['view_specialitem_personal'] = 'Personal information';
 $string['view_specialitem_text'] = 'Text';
 $string['view_specialitem_media'] = 'Media';
+$string['view_specialitem_badge'] = 'Badge';
 $string['view_specialitem_headline_defaulttext'] = 'Enter Headline Here';
 $string['view_specialitem_text_defaulttext'] = 'Enter Text Here';
 $string['view_sharing'] = 'Sharing';
@@ -301,6 +302,7 @@ $string['items'] = "Items";
 $string['media'] = "Media";
 $string['fieldstoshow'] = "Fields to show";
 $string['listofartefacts'] = "List of Artefacts";
+$string['listofbadges'] = "List of Badges";
 $string['addButton'] = "Add";
 $string['saveButton'] = "Save";
 $string['cancelButton'] = "Cancel";
@@ -338,6 +340,7 @@ $string['cofigureblock_header'] = "Choose headline";
 $string['cofigureblock_item'] = "Choose item";
 $string['cofigureblock_media'] = "Choose media";
 $string['cofigureblock_personalinfo'] = "Choose personal info";
+$string['cofigureblock_badge'] = "Choose Badges";
 
 // Desp
 $string['back_to_desp'] = 'back to language portfolio';

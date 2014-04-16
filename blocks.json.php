@@ -32,6 +32,7 @@ if ($id != -1) {
 	$type = $block_data->type;
 };
 	
+$message = array();
 
 switch($type) {
 	case 'item': $message["html"] = get_form_items($id, $block_data);
@@ -44,10 +45,13 @@ switch($type) {
 		break;		
 	case 'media': $message["html"] = get_form_media($id, $block_data);
 		break;		
+	case 'badge': $message["html"] = get_form_badge($id, $block_data);
+		break;		
 	default: break;
 }
 
 echo json_encode($message);
+exit;
 
 //echo $message["html"];
 
@@ -379,6 +383,54 @@ function get_form_media($id, $block_data=array()) {
 	return $content;
 }
 
+function get_form_badge($id, $block_data=array()) {
+	global $DB, $USER;
+	
+	$badges = block_exaport_get_all_user_badges();
+	
+	$content  = "";
+    $content .= '<form enctype="multipart/form-data" id="blockform" method="post" class="pieform" onsubmit="exaportViewEdit.addBadge('.$id.'); return false;">';
+	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';	
+	$content .= '<table style="width: 100%;">';
+	$content .= '<tr><th>';
+	$content .= '<label for="list">'.get_string('listofbadges','block_exaport').'</label>';
+	$content .= '</th></tr>';
+	$content .= '<tr><td>';	
+
+	ob_start();
+	?>
+	<div id="add-items-list">
+		<?php
+			if (!empty($badges)) {
+				foreach ($badges as $badge) {
+					echo '<div class="add-item">';
+					echo '<input type="checkbox" name="add_badges[]" value="'.$badge->id.'" /> ';
+					echo $badge->name;
+					echo '</div>';
+				}
+			}
+		?>
+	</div>
+	<script type="text/javascript">
+	//<![CDATA[
+		exaportViewEdit.setPopupTitle(<?php echo json_encode(get_string('cofigureblock_badge','block_exaport')); ?>);
+		exaportViewEdit.initAddItems();
+	//]]>
+	</script>
+	<?php
+	$content .= ob_get_clean();
+
+
+	$content .= '</td></tr>';		
+	$content .= '<tr><td>';	
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+	$content .= '</td></tr>';
+	$content .= '</table>';	
+	$content .= '</form>';
+
+	return $content;
+};
 
 function tinyMCE_enable_script($element_id) {
 	global $CFG, $PAGE;

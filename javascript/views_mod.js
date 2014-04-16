@@ -65,6 +65,33 @@ var exaportViewEdit = {};
 			saveBlockData();
 		},
 		
+		addBadge: function(id) {
+
+			if (!this.checkFields()) return;
+
+			if (id != -1) 
+				newItem = lastclicked;	
+			var i = 0;
+			$('#container input[name="add_badges[]"]:checked').each(function () {
+				i = i+1;
+				if (i>1) {
+					var clone = $(newItem).clone();
+					newItem.after(clone);
+					newItem = clone;
+					};
+				data = {};
+				data.type = 'badge';
+				data.itemid = $(this).val();
+				newItem.data('portfolio', data);			
+				generateItem('update', $(newItem));
+			});
+			$('#block_form').hide();
+			overlay.hide();
+			newItem=null;
+			
+			saveBlockData();
+		},
+		
 		cancelAddEdit: function() {
 			$('#block_form').hide();
 			overlay.hide();
@@ -159,7 +186,7 @@ var exaportViewEdit = {};
 			newItem=null;
 			
 			saveBlockData();
-		},		
+		},
 		
 		resetViewContent: function(){
 			// load stored blocks
@@ -366,9 +393,7 @@ var exaportViewEdit = {};
 		if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
 			data.item = portfolioItems[data.itemid];
 		}
-		if (data.itemid && data.item) {  
-			data.type = 'item';
-
+		if (data.type == 'item' && data.itemid && data.item) {  
 			var itemData = data.item;
 			var ilink=itemData.link
 			if (ilink!="")  ilink=$E.translate('link') + ': ' + ilink + '<br />';
@@ -431,6 +456,27 @@ var exaportViewEdit = {};
 			);
 			$item.find('div.header').append($E.translate('view_specialitem_media')+($.trim(data.block_title).length?': '+data.block_title:''));
 			$item.find('div.body').append(data.contentmedia);
+		} else if (data.type == 'badge') {
+			if (typeof data.badge == 'undefined') {
+				$item.html('loading');
+			} else {
+				var badge = data.badge;
+				$item.html(
+					'<div id="id_holder" style="display:none;"></div>' +	
+					'<div class="item_info" style="overflow: hidden;">' +
+					'<div class="header">'+$E.translate('view_specialitem_badge')+': '+badge.name+'</div>' +
+					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">' +
+					'<img style="max-width: 100%; max-height: 100%;" src="'+badge.imageUrl+'">' +
+	/*				+
+					'</div>' +
+					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
+					$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
+					$E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
+					'</div>
+					*/
+					'</div>'
+				);
+			}
 		} else {		
 			data.type = 'text';
 			$item.html(
@@ -457,8 +503,8 @@ var exaportViewEdit = {};
 		$item.find('div#id_holder').append(data.id);		
 		
 		if (type == 'new') {
-			if (data.type != 'item') {
-				// no edit button for items
+			if ((data.type != 'item') && (data.type != 'badge')) {
+				// no edit button for items and badges
 				$('<a class="edit" title="Edit"><span>Edit</span></a>').appendTo($item).click(editItemClick);
 			}
 		}

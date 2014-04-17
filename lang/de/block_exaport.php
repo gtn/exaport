@@ -419,3 +419,7 @@ $string['category_up'] = 'übergeordnete Kategorie';
 $string['supported'] = 'Projekt wurde unterstützt von';
 $string['developed'] = 'entwickelt von';
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
+$string['addstdcat'] = 'Standardkategorien importieren';
+
+$string['lang_categories'] = '
+';

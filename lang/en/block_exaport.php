@@ -429,3 +429,7 @@ $string['developed'] = 'developed by';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';
 $string['i_shared'] = 'I shared an eportfolio view with you';
+$string['addstdcat'] = 'import standard categories';
+
+$string['lang_categories'] = '
+';

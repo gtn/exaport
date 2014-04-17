@@ -1,7 +1,6 @@
 <?php
 
 require_once dirname(__FILE__) . '/inc.php';
-
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
 require_login($courseid);
@@ -10,7 +9,10 @@ block_exaport_setup_default_categories();
 
 $url = '/blocks/exaport/category.php?courseid='.$courseid;
 $PAGE->set_url($url);
-
+if (optional_param('action', '', PARAM_ALPHA) == 'addstdcat') {
+	block_exaport_import_categories('lang_categories');
+	redirect('view_items.php?courseid='.$courseid);
+}
 if (optional_param('action', '', PARAM_ALPHA) == 'movetocategory') {
 	confirm_sesskey();
 
@@ -113,11 +115,16 @@ class simplehtml_form extends moodleform {
         $mform = $this->_form; // Don't forget the underscore! 
  
         $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'pid');
+        $mform->setType('pid', PARAM_INT);
         $mform->addElement('hidden', 'courseid');
+        $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'back');
+        $mform->setType('back', PARAM_TEXT);
 
         $mform->addElement('text', 'name', get_string('name'));
+        $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', block_exaport_get_string('titlenotemtpy'), 'required', null, 'client');
 
         $this->add_action_buttons();

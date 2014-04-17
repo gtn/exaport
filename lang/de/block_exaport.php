@@ -421,5 +421,7 @@ $string['developed'] = 'entwickelt von';
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';
 
-$string['lang_categories'] = '
-';
+/*langstrings for additional categories--*/
+if (file_exists($CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php')){
+	require $CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php';
+}

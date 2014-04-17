@@ -431,5 +431,7 @@ $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';
 $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';
 
-$string['lang_categories'] = '
-';
+/*langstrings for additional categories--*/
+if (file_exists($CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php')){
+	require $CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php';
+}

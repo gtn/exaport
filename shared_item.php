@@ -122,7 +122,7 @@ if(isset($_POST['data'])) {
     }
     block_exaport_set_competences($values, $item, $USER->id);
 }
-echo "<div class='block_eportfolio_center'>\n";
+echo "<div>\n";
 
 
 

@@ -545,13 +545,13 @@ function block_exaport_get_view_blocks($view) {
 function block_exaport_get_portfolio_items() {
 	global $DB, $USER;
 	
-	$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments".
+	$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
 		 " from {block_exaportitem} i".
 		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
 		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
 		 " where i.userid=?".
-		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name".
+		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, i.userid".
 		 " ORDER BY i.name";
 		 //echo $query;
 	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
@@ -582,6 +582,10 @@ function block_exaport_get_portfolio_items() {
 				}
 				
 				}while ($cat->pid != 0);
+		}
+		
+		if ($item->intro) {
+			$item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
 		}
 		
 		//get competences of the item

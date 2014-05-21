@@ -505,12 +505,12 @@ var exaportViewEdit = {};
 		if (type == 'new') {
 			if ((data.type != 'item') && (data.type != 'badge')) {
 				// no edit button for items and badges
-				$('<a class="edit" title="Edit"><span>Edit</span></a>').appendTo($item).click(editItemClick);
+				$('<a class="edit" title="Edit"><span>Edit</span></a>').prependTo($item).click(editItemClick);
 			}
 		}
 		else 
 			$item.append('<a class="unsaved" title="This block was not saved"><span>Unsaved</span></a>'); 
-		$('<a class="delete" title="'+$E.translate('delete')+'"><span>'+$E.translate('delete')+'</span></a>').appendTo($item).click(deleteItemClick);
+		$('<a class="delete" title="'+$E.translate('delete')+'"><span>'+$E.translate('delete')+'</span></a>').prependTo($item).click(deleteItemClick);
 		$item.find(':input').change(function(){
 			$item.data('portfolio').text = $(this).val(); 			
 		}); /**/

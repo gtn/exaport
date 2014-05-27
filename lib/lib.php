@@ -697,10 +697,10 @@ function block_exaport_badges_enabled() {
 
 function block_exaport_get_all_user_badges() {
 	if (block_exaport_badges_enabled()) {
-		if (!function_exists('block_exacomp_get_all_user_badges'))
+		if (!function_exists('block_exacomp_get_all_user_badges')){
 			print_error("please update exabis competencies to latest version");
 			exit;
-		else
+		}else
 			return block_exacomp_get_all_user_badges();
 	} else
 		return null;

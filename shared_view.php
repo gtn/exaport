@@ -121,6 +121,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 
 		if ($block->type == 'item') {
 			$item = $block->item; 
+			$has_competences = false;
 
 			if($comp){
 				$has_competences = block_exaport_check_item_competences($item);

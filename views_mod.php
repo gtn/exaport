@@ -60,12 +60,6 @@ require_capability('block/exaport:use', $context);
 if (!$COURSE) {
    print_error("invalidcourseid","block_exaport");
 }
-//echo json_encode(exaport_get_shareable_courses_with_users('sharing'));
-if ($action == 'userlist') {
-	echo json_encode(exaport_get_shareable_courses_with_users('sharing'));
-	exit;
-}
-
 
 if ($id) {
 	$conditions = array("id" => $id, "userid" => $USER->id);
@@ -82,6 +76,11 @@ if ($id) {
 		$hash = substr(md5(microtime()), 3, 8);
     } while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
 	$view->hash = $hash;/**/
+}
+
+if ($view && $action == 'userlist') {
+	echo json_encode(exaport_get_shareable_courses_with_users_for_view($view->id));
+	exit;
 }
 
 $returnurl_to_list = $CFG->wwwroot.'/blocks/exaport/views_list.php?courseid='.$courseid;
@@ -120,15 +119,9 @@ if ($action == 'delete') {
 
 
 if ($view) {
-	$conditions = array("viewid" => $view->id);
-	$sharedUsers = $DB->get_records('block_exaportviewshar', $conditions, null, 'userid');
-	if (!$sharedUsers) {
-		$sharedUsers = array();
-	} else {
-		$sharedUsers = array_flip(array_keys($sharedUsers));
-	}
+	$hasSharedUsers = !!$DB->count_records('block_exaportviewshar', array("viewid" => $view->id));
 } else {
-	$sharedUsers = array();
+	$hasSharedUsers = false;
 }
 
 
@@ -262,7 +255,7 @@ if ($editform->is_cancelled()) {
 		if (empty($dbView->internaccess)) {
 			$dbView->internaccess = 0;
 		}
-		if (block_exaport_shareall_enabled() || !$dbView->internaccess || empty($dbView->shareall)) {
+		if (!block_exaport_shareall_enabled() || !$dbView->internaccess || empty($dbView->shareall)) {
 			$dbView->shareall = 0;
 		}
 		if (empty($dbView->externcomment)) {
@@ -404,8 +397,15 @@ if ($editform->is_cancelled()) {
 							$mailresult = message_send($notificationdata);
 						}
 					}
-				}				
-			};		
+				}
+			}
+			
+			if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
+				// search button pressed -> redirect to search form
+				redirect(new moodle_url('/blocks/exaport/views_mod_share_user_search.php',
+					array('courseid' => $courseid, 'id' => $dbView->id, 'q' => optional_param('share_to_other_users_q', '', PARAM_RAW))));
+				exit;
+			}
 			break;
 		default: break;
 	};
@@ -484,7 +484,7 @@ switch ($action) {
 		$strAction = get_string('new');
 		break;
 	case 'edit':
-		if (!isset($postView->internaccess) && ($postView->shareall || $sharedUsers)) {
+		if (!isset($postView->internaccess) && ($postView->shareall || $hasSharedUsers)) {
 			$postView->internaccess = 1;
 		}
 		$strAction = get_string('edit');
@@ -497,17 +497,46 @@ function block_exaport_get_view_blocks($view) {
 	global $DB, $USER;
 	
 	$portfolioItems = block_exaport_get_portfolio_items();
+	$badges = block_exaport_get_all_user_badges();
 	
 	$query = "select b.*".
 		 " from {block_exaportviewblock} b".
 		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
-	$blocks = $DB->get_records_sql($query, array($view->id));	
-	foreach ($blocks as $block) {
-		if (($block->type == 'item') && isset($portfolioItems[$block->itemid]))
+	$allBlocks = $DB->get_records_sql($query, array($view->id));	
+	$blocks = array();
+	
+	foreach ($allBlocks as $block) {
+		if ($block->type == 'item') {
+			if (!isset($portfolioItems[$block->itemid])) {
+				// item not found
+				continue;
+			}
 			$block->item = $portfolioItems[$block->itemid];
-		//$block->print_text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'view_content', 'hash/'.$view->userid.'-'.$view->hash);		
-		$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);		
+		} elseif ($block->type == 'badge') {
+			// find bage by id
+			$badge = null;
+			foreach ($badges as $tmp) {
+				if ($tmp->id == $block->itemid) {
+					$badge = $tmp;
+					break;
+				}
+			}
+			if (!$badge) {
+				// badge not found
+				continue;
+			}
+			
+			$context = context_course::instance($badge->courseid);
+			$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+
+			$block->badge = $badge;
+		} else {
+			$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);
+			$block->itemid = null;
+		}
+		
+		$blocks[$block->id] = $block;
 	}
 
 	return $blocks;
@@ -516,13 +545,13 @@ function block_exaport_get_view_blocks($view) {
 function block_exaport_get_portfolio_items() {
 	global $DB, $USER;
 	
-	$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, COUNT(com.id) As comments".
+	$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
 		 " from {block_exaportitem} i".
 		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
 		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
 		 " where i.userid=?".
-		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name".
+		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, i.userid".
 		 " ORDER BY i.name";
 		 //echo $query;
 	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
@@ -553,6 +582,10 @@ function block_exaport_get_portfolio_items() {
 				}
 				
 				}while ($cat->pid != 0);
+		}
+		
+		if ($item->intro) {
+			$item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
 		}
 		
 		//get competences of the item
@@ -613,7 +646,7 @@ if ($type<>'title') {// for delete php notes
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_text_defaulttext',
+	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_badge', 'view_specialitem_text_defaulttext',
 	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',
 	'file', 'note', 'link',
@@ -632,7 +665,6 @@ unset($value);
 <script type="text/javascript">
 //<![CDATA[
 	var portfolioItems = <?php echo json_encode(block_exaport_get_portfolio_items()); ?>;
-	var sharedUsers = <?php echo json_encode($sharedUsers); ?>;
 	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 //]]>
 </script>
@@ -688,9 +720,19 @@ echo '<ul>
             <h4 class="blocktype-title js-hidden">'.get_string('media', 'block_exaport').'</h4>
             <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
         </div>
-    </li>	
+    </li>';
+
+if (block_exaport_badges_enabled()) {
+    echo '<li class="portfolioElement" title="'.get_string('mybadges', 'badges').'" block-type="badge">
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />
+            <h4 class="blocktype-title js-hidden">'.get_string('mybadges', 'badges').'</h4>
+            <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
+        </div>
+    </li>';
+}
 	
-</ul>';
+echo '</ul>';
 echo '</div>';
 
 $cols_layout = array (
@@ -873,7 +915,17 @@ break;
 							echo '<tr><td style="padding-right: 10px">';
 							echo '<input type="radio" name="shareall" value="0"'.(!$postView->shareall?' checked="checked"':'').'/>';
 							echo '</td><td>'.get_string("internalaccessusers", "block_exaport").'</td></tr>';
-							echo '<tr id="internaccess-users"><td></td><td id="sharing-userlist">userlist</td></tr>';
+							echo '<tr id="internaccess-users"><td></td><td>';
+							if (block_exaport_shareall_enabled()) {
+								// show user search form
+								echo get_string("share_to_other_users", "block_exaport").':';
+								echo '<div style="padding-bottom: 20px;">';
+								echo '<input name="share_to_other_users_q" type="text" /> ';
+								echo '<input name="share_to_other_users_submit" type="submit" value="'.get_string('search').'" />';
+								echo '</div>';
+							}
+							echo '<div id="sharing-userlist">userlist</div>';
+							echo '</td></tr>';
 						echo '</table></div>';
 					echo '</td></tr>';
 				}
@@ -908,4 +960,3 @@ echo '<div id="block_form" class="block" style="position: absolute; top: 10px; l
 	</script>
 	';
 echo $OUTPUT->footer();	
-?>

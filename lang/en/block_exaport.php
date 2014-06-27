@@ -241,6 +241,8 @@ $string['exportviewselect'] = 'To export all items of a specific view, please se
 $string['type'] = 'Type';
 $string['share'] = 'Share';
 $string['explainingall'] = 'All Items in your portfolio';
+$string['share_to_other_users'] = 'Share to other users not in my courses';
+$string['other_users_course'] = 'Users not in my courses';
 
 // Item sorting
 $string['userdefinedsort'] = 'Define your own search';
@@ -264,6 +266,7 @@ $string['view_specialitem_headline'] = 'Headline';
 $string['view_specialitem_personal'] = 'Personal information';
 $string['view_specialitem_text'] = 'Text';
 $string['view_specialitem_media'] = 'Media';
+$string['view_specialitem_badge'] = 'Badge';
 $string['view_specialitem_headline_defaulttext'] = 'Enter Headline Here';
 $string['view_specialitem_text_defaulttext'] = 'Enter Text Here';
 $string['view_sharing'] = 'Sharing';
@@ -301,6 +304,7 @@ $string['items'] = "Items";
 $string['media'] = "Media";
 $string['fieldstoshow'] = "Fields to show";
 $string['listofartefacts'] = "List of Artefacts";
+$string['listofbadges'] = "List of Badges";
 $string['addButton'] = "Add";
 $string['saveButton'] = "Save";
 $string['cancelButton'] = "Cancel";
@@ -338,6 +342,7 @@ $string['cofigureblock_header'] = "Choose headline";
 $string['cofigureblock_item'] = "Choose item";
 $string['cofigureblock_media'] = "Choose media";
 $string['cofigureblock_personalinfo'] = "Choose personal info";
+$string['cofigureblock_badge'] = "Choose Badges";
 
 // Desp
 $string['back_to_desp'] = 'back to language portfolio';
@@ -424,3 +429,9 @@ $string['developed'] = 'developed by';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';
 $string['i_shared'] = 'I shared an eportfolio view with you';
+$string['addstdcat'] = 'import standard categories';
+
+/*langstrings for additional categories--*/
+if (file_exists($CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php')){
+	require $CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php';
+}

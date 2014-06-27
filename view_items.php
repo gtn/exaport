@@ -153,6 +153,12 @@ echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&course
 	'<img src="pix/file_new_32.png" /><br />'.get_string("file", "block_exaport")."</a></span>";
 echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=note">'.
 	'<img src="pix/note_new_32.png" /><br />'.get_string("note", "block_exaport")."</a></span>";
+//anzeigen wenn kategorien vorhanden zum importieren aus sprachfile
+$categories = trim(get_string("lang_categories", "block_exaport"));
+if ($categories){
+	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?action=addstdcat&courseid='.$courseid.'">'.
+		'<img src="pix/folder_new_32.png" /><br />'.get_string("addstdcat", "block_exaport")."</a></span>";
+}
 echo '</div>';
 
 echo '<div class="excomdos_changeview"><p>';
@@ -385,7 +391,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 					</span>
 			</div>
 			<div class="excomdos_tileimage">
-				<a href="<?php echo $url; ?>"><img src="<?php echo $CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id; ?>" /></a>
+				<a href="<?php echo $url; ?>"><img alt="<?php echo $item->name ?>" title="<?php echo $item->name ?>" src="<?php echo $CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id; ?>" /></a>
 			</div>
 			<div class="exomdos_tiletitle">
 				<a href="<?php echo $url; ?>"><?php echo $item->name; ?></a>

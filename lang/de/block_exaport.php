@@ -419,3 +419,9 @@ $string['category_up'] = 'übergeordnete Kategorie';
 $string['supported'] = 'Projekt wurde unterstützt von';
 $string['developed'] = 'entwickelt von';
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
+$string['addstdcat'] = 'Standardkategorien importieren';
+
+/*langstrings for additional categories--*/
+if (file_exists($CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php')){
+	require $CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php';
+}

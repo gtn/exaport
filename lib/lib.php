@@ -27,7 +27,7 @@
 
 require_once $CFG->libdir . '/filelib.php';
 
-if(block_exaport_check_competence_interaction())
+if (block_exaport_check_competence_interaction())
 	require_once $CFG->dirroot . '/blocks/exacomp/lib/div.php';
 	
 global $DB;
@@ -85,38 +85,47 @@ function block_exaport_external_comments_enabled() {
 
 function block_exaport_setup_default_categories() {
 	global $DB, $USER,$CFG;
-    
 	if (block_exaport_course_has_desp() && !$DB->record_exists('block_exaportcate', array('userid'=>$USER->id))
 		&& !empty($CFG->block_exaport_create_desp_categories)) {
+		block_exaport_import_categories("desp_categories");
+	}
+}
+function block_exaport_import_categories($categoriesSTR){
+	global $DB, $USER;
+	$categories = trim(get_string($categoriesSTR, "block_exaport"));
+	
+	if (!$categories) return;
+	
+	$categories = explode("\n", $categories);
+	$categories = array_map('trim', $categories);
+	
+	$newentry = new stdClass();
+	$newentry->timemodified = time();
+	$newentry->userid = $USER->id;
+	$newentry->pid = 0;
+	
+	$lastMainId = null;
+	foreach ($categories as $category) {
 		
-		$categories = trim(get_string("desp_categories", "block_exaport"));
-		
-		if (!$categories) return;
-		
-		$categories = explode("\n", $categories);
-		$categories = array_map('trim', $categories);
-		
-		$newentry = new stdClass();
-		$newentry->timemodified = time();
-		$newentry->userid = $USER->id;
-		$newentry->pid = 0;
-
-		$lastMainId = null;
-		foreach ($categories as $category) {
-			if ($category[0] == '-' && $lastMainId) {
-				// subcategory
-				$newentry->name = trim($category, '-');
-				$newentry->pid = $lastMainId;
-				$DB->insert_record("block_exaportcate", $newentry);	
-			} else {
-				$newentry->name = $category;
-				$newentry->pid = 0;
+		if ($category[0] == '-' && $lastMainId) {
+			// subcategory
+			$newentry->name = trim($category, '-');
+			$newentry->pid = $lastMainId;
+			//$categoryDB = $DB->get_records('block_exaportcate', array("name"=>trim($category,'-')));
+			if(!$DB->record_exists('block_exaportcate', array("name"=>trim($category,'-'))))
+				$DB->insert_record("block_exaportcate", $newentry);
+		} else {
+			$newentry->name = $category;
+			$newentry->pid = 0;
+			//$categoryDB = $DB->get_records('block_exaportcate', array("name"=>$category));
+			if(!$DB->record_exists('block_exaportcate', array("name"=>$category)))
 				$lastMainId = $DB->insert_record("block_exaportcate", $newentry);
+			else {
+				$lastMainId = $DB->get_field('block_exaportcate', 'id', array("name"=>$category));
 			}
 		}
 	}
 }
-
 function block_exaport_feature_enabled($feature) {
     global $CFG;
     if ($feature == 'views')
@@ -159,10 +168,11 @@ function block_exaport_course_has_desp() {
 	
 	if (isset($COURSE->has_desp))
 		return $COURSE->has_desp;
+	
 	// desp block installed?
 	if (!is_dir(dirname(__FILE__).'/../../desp'))
 		return $COURSE->has_desp = false;
-	
+
 	$context = context_course::instance($COURSE->id);
 	
 	return $COURSE->has_desp = $DB->record_exists('block_instances', array('blockname'=>'desp', 'parentcontextid'=>$context->id));
@@ -236,7 +246,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 			$tabs_sub[] = new tabobject('title', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'),get_string("viewtitle", "block_exaport"), '', true);		
 			$tabs_sub[] = new tabobject('layout', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'),get_string("viewlayout", "block_exaport"), '', true);
 			$tabs_sub[] = new tabobject('content', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'),get_string("viewcontent", "block_exaport"), '', true);
-			if (has_capability('block/exaport:shareextern', context_system::instance()) && has_capability('block/exaport:shareintern', context_system::instance())) {
+			if (has_capability('block/exaport:shareextern', context_system::instance()) || has_capability('block/exaport:shareintern', context_system::instance())) {
 				$tabs_sub[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
 			}
 		}
@@ -680,3 +690,19 @@ function block_exaport_get_root_category() {
 
 	);
 }
+
+function block_exaport_badges_enabled() {
+	return (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled());
+}
+
+function block_exaport_get_all_user_badges() {
+	if (block_exaport_badges_enabled()) {
+		if (!function_exists('block_exacomp_get_all_user_badges')){
+			print_error("please update exabis competencies to latest version");
+			exit;
+		}else
+			return block_exacomp_get_all_user_badges();
+	} else
+		return null;
+}
+

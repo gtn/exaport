@@ -97,7 +97,7 @@ if ($action == 'delete') {
 		$conditions = array("id" => $view->id);
 		$status = $DB->delete_records('block_exaportview', $conditions);
 		
-		add_to_log(SITEID, 'blog', 'delete', 'views_mod.php?courseid='.$courseid.'&id='.$view->id.'&action=delete&confirm=1', $view->name);
+		block_exaport_add_to_log(SITEID, 'blog', 'delete', 'views_mod.php?courseid='.$courseid.'&id='.$view->id.'&action=delete&confirm=1', $view->name);
 
 		if (!$status) {
 			print_error('deleteposterror', 'block_exaport', $returnurl);
@@ -269,7 +269,7 @@ if ($editform->is_cancelled()) {
 			$dbView->userid = $USER->id;
 			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
-				add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
+				block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
 				print_error('addposterror', 'block_exaport', $returnurl);
 			}
@@ -288,7 +288,7 @@ if ($editform->is_cancelled()) {
 					$dbView->layout=$view->layout;
 			};
 			if ($DB->update_record('block_exaportview', $dbView)) {
-				add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
+				block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
 			} else {
 				print_error('updateposterror', 'block_exaport', $returnurl);
 			}

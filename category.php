@@ -79,7 +79,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 		else
 		{
 			
-			add_to_log($courseid, "bookmark", "delete category", "", $category->id);
+			block_exaport_add_to_log($courseid, "bookmark", "delete category", "", $category->id);
 			
 			redirect('view_items.php?courseid='.$courseid.'&categoryid='.$category->pid);
 		}

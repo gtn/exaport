@@ -48,6 +48,22 @@ function block_exaport_get_item_file($item) {
 		return reset($areafiles);
 }
 
+function block_exaport_add_to_log($courseid, $module, $action, $url='', $info='', $cm=0, $user=0) {
+	if (!function_exists('get_log_manager')) {
+		// old style
+		return add_to_log($courseid, $module, $action, $url='', $info='', $cm=0, $user=0);
+	}
+	
+	// hack for new style
+	
+	// This is a nasty hack that allows us to put all the legacy stuff into legacy storage,
+    // this way we may move all the legacy settings there too.
+    $manager = get_log_manager();
+    if (method_exists($manager, 'legacy_add_to_log')) {
+        $manager->legacy_add_to_log($courseid, $module, $action, $url, $info, $cm, $user);
+    }
+}
+
 function block_exaport_file_remove($item) {
 	$fs = get_file_storage();
 	// associated file (if it's a file item)

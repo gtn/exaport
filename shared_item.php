@@ -232,7 +232,7 @@ function block_exaport_do_add_comment($item, $post, $blogeditform) {
    
     // Insert the new blog entry.
     if ($DB->insert_record('block_exaportitemcomm', $post)) {
-        add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
+        block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
     } else {
         error('There was an error adding this post in the database');
     }

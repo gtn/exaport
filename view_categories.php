@@ -84,7 +84,7 @@ if($cataction) {
 				}
 				else
 				{
-					add_to_log($courseid, "bookmark", "add category", "", $newentry->id);
+					block_exaport_add_to_log($courseid, "bookmark", "add category", "", $newentry->id);
 					$message = get_string("categorysaved","block_exaport");
 				}
 			break;
@@ -132,7 +132,7 @@ if($cataction) {
 					}
 					else
 					{
-						add_to_log($courseid, "bookmark", "update category", "", $newentry->id);
+						block_exaport_add_to_log($courseid, "bookmark", "update category", "", $newentry->id);
 						$message = get_string("categoryedited","block_exaport");
 					}
 				}
@@ -173,7 +173,7 @@ if($cataction) {
 							}
 							$DB->delete_records('block_exaportitem', array('categoryid'=>$delid));
 							
-							add_to_log($courseid, "bookmark", "delete category", "", $newentry->id);
+							block_exaport_add_to_log($courseid, "bookmark", "delete category", "", $newentry->id);
 							$message = get_string("categorydeleted","block_exaport");
 						}
 					}

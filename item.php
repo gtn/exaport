@@ -300,7 +300,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
 	}
 	if ($DB->update_record('block_exaportitem', $post)) {
-		add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
+		block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
 	} else {
 		print_error('updateposterror', 'block_exaport', $returnurl);
 	}
@@ -362,7 +362,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 				$DB->insert_record('block_exacompdescuser_mm', array("descid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
 			}
 		}
-		add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add', $post->name);
+		block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add', $post->name);
 	} else {
 		print_error('addposterror', 'block_exaport', $returnurl);
 	}
@@ -387,7 +387,7 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 		$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id));
 	}
 
-	add_to_log(SITEID, 'blog', 'delete', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
+	block_exaport_add_to_log(SITEID, 'blog', 'delete', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
 
 	if (!$status) {
 		print_error('deleteposterror', 'block_exaport', $returnurl);

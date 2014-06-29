@@ -191,7 +191,7 @@ function do_edit($post, $blogeditform, $returnurl, $courseid) {
     $post->intro = $post->intro['text'];
     
     if (update_record('block_exaportitem', $post)) {
-        add_to_log(SITEID, 'bookmark', 'update', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
+        block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
     } else {
         print_error('updateposterror', 'block_exaport', $returnurl);
     }
@@ -249,7 +249,7 @@ function do_delete($post, $returnurl, $courseid) {
 
     $status = $DB->delete_records('block_exaportitem', 'id', $post->id);
 
-    add_to_log(SITEID, 'blog', 'delete', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
+    block_exaport_add_to_log(SITEID, 'blog', 'delete', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
 
     if (!$status) {
         print_error('deleteposterror', 'block_exaport', $returnurl);

@@ -944,7 +944,7 @@ if ($type!='title') {
 	echo '</div></form>';
 };
 
-echo '<div id="block_form" class="block" style="position: absolute; top: 10px; left: 30%; width: 510px;">
+echo '<div id="block_form" class="block" style="position: absolute; top: 50px; left: 30%; width: 510px;">
         <div class="block-controls">                
             <a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
         </div>

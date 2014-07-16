@@ -27,9 +27,13 @@
 
 require_once $CFG->libdir . '/filelib.php';
 
-if (block_exaport_check_competence_interaction())
-	require_once $CFG->dirroot . '/blocks/exacomp/lib/div.php';
-	
+if (block_exaport_check_competence_interaction()){
+	if(file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php'))
+		require_once $CFG->dirroot . '/blocks/exacomp/lib/lib.php';
+	else 
+		require_once $CFG->dirroot . '/blocks/exacomp/lib/div.php';
+}
+
 global $DB;
 
 /*** FILE FUNCTIONS **********************************************************************/

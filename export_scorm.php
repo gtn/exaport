@@ -136,23 +136,23 @@ function get_category_items($categoryid, $viewid=null, $type=null) {
 
 	$conditions = array();
     if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$itemQuery = "select i.*" .
-    			" FROM {block_exaportitem} AS i" .
-    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
-    			" where i.userid = ?" .
-    			($type ? " and i.type=?" : '') .
-    			" and i.categoryid = ?" .
-    			" order by i.name desc";
+    	$itemQuery = "SELECT i.*" .
+    			" FROM {block_exaportitem} i" .
+    			($viewid ? " JOIN {block_exaportviewblock} vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+    			" WHERE i.userid = ?" .
+    			($type ? " AND i.type=?" : '') .
+    			" AND i.categoryid = ?" .
+    			" ORDER BY i.name desc";
     			
     	$conditions = array($viewid, $USER->id, $type, $categoryid);
     }else{
-    	$itemQuery = "select i.*" .
-    			" FROM {block_exaportitem} AS i" .
-        		($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
-        		" where i.userid = ?" .
-         		($type ? " and i.type=?" : '') .
-            	" and i.categoryid =?" .
-            	" order by i.name desc";
+    	$itemQuery = "SELECT i.*" .
+    			" FROM {block_exaportitem} i" .
+        		($viewid ? " JOIN {block_exaportviewblock} vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+        		" WHERE i.userid = ?" .
+         		($type ? " AND i.type=?" : '') .
+            	" AND i.categoryid =?" .
+            	" ORDER BY i.name desc";
         $conditions = array($viewid, $USER->id, $type,  $categoryid);
     }
     
@@ -165,22 +165,22 @@ function get_category_files($categoryid, $viewid=null) {
 	$conditions = array();
     if(strcmp($CFG->dbtype, "sqlsrv")==0){
     	$itemQuery = "select i.*" .
-    			" FROM {block_exaportitem} AS i" .
-    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+    			" FROM {block_exaportitem} i" .
+    			($viewid ? " JOIN {block_exaportviewblock} vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
     			" WHERE i.userid = ?" .
     			" AND i.type='file'" .
-    			" and i.categoryid = ?" .
-    			" order by i.name desc";
+    			" AND i.categoryid = ?" .
+    			" ORDER BY i.name desc";
     	$conditions = array($viewid, $USER->id, $categoryid);
     }
     else{
     	$itemQuery = "select i.*" .
-            " FROM {block_exaportitem} AS i" .
-            ($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+            " FROM {block_exaportitem} i" .
+            ($viewid ? " JOIN {block_exaportviewblock} vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
             " WHERE i.userid = ?" .
             " AND i.type='file'" .
-            " and i.categoryid = ?" .
-            " order by i.name desc";
+            " AND i.categoryid = ?" .
+            " ORDER BY i.name desc";
         $conditions = array($viewid, $USER->id, $categoryid);
     }
     return $DB->get_records_sql($itemQuery, $conditions);

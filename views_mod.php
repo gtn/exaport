@@ -551,7 +551,7 @@ function block_exaport_get_portfolio_items() {
 		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
 		 " where i.userid=?".
-		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, i.userid".
+		 " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
 		 " ORDER BY i.name";
 		 //echo $query;
 	$portfolioItems = $DB->get_records_sql($query, array($USER->id));

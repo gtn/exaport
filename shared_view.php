@@ -131,7 +131,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 	
 					$competences = "";
 					foreach($array as $element){
-						$conditions = array("id" => $element->descid);
+						$conditions = array("id" => $element->compid);
 						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
 						if($competencesdb != null){

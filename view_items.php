@@ -426,7 +426,7 @@ function block_exaport_get_item_comp_icon($item) {
 	$competences = "";
 	foreach($array as $element){
 
-		$conditions = array("id" => $element->descid);
+		$conditions = array("id" => $element->compid);
 		$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
 		if($competencesdb != null){

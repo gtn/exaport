@@ -598,7 +598,7 @@ function block_exaport_get_portfolio_items() {
 			if(count($array)>0){
 				$competences = "";
 				foreach($array as $element){
-					$conditions = array("id" => $element->descid);
+					$conditions = array("id" => $element->compid);
 					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
 					if($competencesdb != null){

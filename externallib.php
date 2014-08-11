@@ -287,8 +287,8 @@ class block_exaport_external extends external_api {
 
 		$interaction = block_exaport_check_competence_interaction();
 		if ($interaction) {
-			$DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $id, "activitytype" => 2000));
-			$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $id, "activitytype" => 2000, "reviewerid" => $USER->id));
+			$DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $id, "eportfolioitem" => 1));
+			$DB->delete_records('block_exacompcompuser_mm', array("activityid" => $id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
 		}
 
 		return array("success"=>true);
@@ -425,11 +425,11 @@ class block_exaport_external extends external_api {
 		if($val == 1){
 			$item = $DB->get_record("block_exaportitem", array("id"=>$itemid));
 			$course = $DB->get_record("course", array("id"=>$item->courseid));
-			$DB->insert_record("block_exacompdescractiv_mm", array('descrid'=>$descriptorid, 'activityid'=>$itemid, 'activitytype'=>2000, 'activitytitle'=>$item->name, 'coursetitle'=>$course->shortname));
-			$DB->insert_record('block_exacompdescuser_mm', array("descid" => $descriptorid, "activityid" => $itemid, "activitytype" => 2000, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
+			$DB->insert_record("block_exacompcompactiv_mm", array('compid'=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1, 'activitytitle'=>$item->name, 'coursetitle'=>$course->shortname));
+			$DB->insert_record('block_exacompcompuser_mm', array("compid" => $descriptorid, "activityid" => $itemid, "eportfolioitem" => 1, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
 		}else if($val == 0){
-			$DB->delete_records("block_exacompdescractiv_mm", array('descrid'=>$descriptorid, 'activityid'=>$itemid, 'activitytype'=>2000));
-			$DB->delete_records("block_exacompdescuser_mm", array("descid"=>$descriptorid, 'activityid'=>$itemid, 'activitytype'=>2000));
+			$DB->delete_records("block_exacompcompactiv_mm", array('compid'=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1));
+			$DB->delete_records("block_exacompcompuser_mm", array("compid"=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1));
 		}
 
 		return array("success"=>true);
@@ -1136,7 +1136,7 @@ class block_exaport_external extends external_api {
 	
 		$params = self::validate_parameters(self::get_competencies_by_item_parameters(), array('itemid'=>$itemid));
 		
-		return $DB->get_records("block_exacompdescractiv_mm",array("activityid"=>$itemid,"activitytype"=>2000),"","descrid as competenceid");
+		return $DB->get_records("block_exacompcompactiv_mm",array("activityid"=>$itemid,"eportfolioitem"=>1),"","compid as competenceid");
 	}
 	
 	/**

@@ -19,8 +19,8 @@ class block_exaport_personal_information_form extends moodleform {
 		$mform->addElement('hidden', 'cataction');
 		$mform->setType('cataction', PARAM_ALPHA);
 		
-		$mform->addElement('hidden', 'descid');
-		$mform->setType('descid', PARAM_INT);
+		$mform->addElement('hidden', 'compid');
+		$mform->setType('compid', PARAM_INT);
 		
 		$mform->addElement('hidden', 'courseid');
 		$mform->setType('courseid', PARAM_INT);

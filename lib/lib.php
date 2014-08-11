@@ -30,7 +30,7 @@ require_once $CFG->libdir . '/filelib.php';
 if (block_exaport_check_competence_interaction()){
 	if(file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php'))
 		require_once $CFG->dirroot . '/blocks/exacomp/lib/lib.php';
-	else 
+	else
 		require_once $CFG->dirroot . '/blocks/exacomp/lib/div.php';
 }
 
@@ -504,7 +504,7 @@ function block_exaport_check_competence_interaction() {
 function block_exaport_check_item_competences($item) {
     global $DB;
 
-    $competences = $DB->get_records('block_exacompdescractiv_mm', array("activityid" => $item->id, "activitytype" => 2000));
+    $competences = $DB->get_records('block_exacompcompactiv_mm', array("activityid" => $item->id, "eportfolioitem" => 1));
     if ($competences)
         return true;
     else
@@ -514,7 +514,7 @@ function block_exaport_check_item_competences($item) {
 function block_exaport_build_comp_table($item, $role="teacher") {
     global $DB;
 
-    $sql = "SELECT CONCAT(da.id,'_',d.id) as uniquid,d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompdescractiv_mm} da WHERE d.id=da.descrid AND da.activitytype=2000 AND da.activityid=?";
+    $sql = "SELECT CONCAT(da.id,'_',d.id) as uniquid,d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompcompactiv_mm} da WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
     $descriptors = $DB->get_records_sql($sql, array($item->id));
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
                 <tr><td><h2>" . $item->name . "</h2></td></tr>";
@@ -563,25 +563,25 @@ function block_exaport_build_comp_table($item, $role="teacher") {
 function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
     global $DB;
 
-    $DB->delete_records('block_exacompdescuser_mm',array("activityid"=>$item->id, "activitytype"=>2000, "role"=>$role, "userid"=>$item->userid));
+    $DB->delete_records('block_exacompcompuser_mm',array("activityid"=>$item->id, "eportfolioitem"=>1, "role"=>$role, "userid"=>$item->userid));
     
     foreach ($values as $value) {
         $data = array(
             "activityid" => $item->id,
-            "activitytype" => 2000,
-            "descid" => $value,
+            "eportfolioitem" => 1,
+            "compid" => $value,
             "userid" => $item->userid,
             "reviewerid" => $reviewerid,
             "role" => $role
         );
         print_r($data);
-        $DB->insert_record('block_exacompdescuser_mm', $data);
+        $DB->insert_record('block_exacompcompuser_mm', $data);
     }
 }
 function block_exaport_get_competences($item, $role=1) {
     global $DB;
 
-    return $DB->get_records('block_exacompdescuser_mm',array("userid"=>$item->userid,"role"=>$role,"activitytype"=>2000,"activityid"=>$item->id));
+    return $DB->get_records('block_exacompcompuser_mm',array("userid"=>$item->userid,"role"=>$role,"eportfolioitem"=>1,"activityid"=>$item->id));
 }
 function block_exaport_build_comp_tree() {
     global $DB, $USER;

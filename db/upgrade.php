@@ -418,7 +418,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		/*block_exaportitem*/
 		$table = new xmldb_table('block_exaportitem');
 		
-		$field = new xmldb_field('intro', XMLDB_TYPE_CHAR, '1000');
+		$field = new xmldb_field('intro', XMLDB_TYPE_CHAR, '1333');
 		$dbman->change_field_type($table, $field);
 		
 		$field = new xmldb_field('beispiel_angabe', XMLDB_TYPE_CHAR, '1333');

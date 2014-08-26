@@ -79,9 +79,12 @@ foreach ($blocks as $block) {
 
 if ($view->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");
-} else {
+}else {
 	$PAGE->requires->css('/blocks/exaport/css/shared_view.css');
-	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+	$PAGE->set_title(get_string("externaccess", "block_exaport"));
+	$PAGE->set_heading( get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+	
+	echo $OUTPUT->header();
 }
 
 ?>

@@ -14,14 +14,17 @@ if ($action=="login"){
 	$pword = optional_param('password', 0, PARAM_TEXT);	//32
 	
 	if ($uname!="0" && $pword!="0"){
+	
 		$uname=kuerzen($uname,100);
 		$pword=kuerzen($pword,50);
 		$uhash=0;
 		$conditions = array("username" => $uname,"password" => $pword);
 		if (!$user = $DB->get_record("user", $conditions)){
+			
 			$condition = array("username" => $uname);
 			if ($user = $DB->get_record("user", $condition)){
 				//$validiert=validate_internal_user_password($user,$pword);
+			
 				$validiert=authenticate_user_login($uname,$pword); 
 			}else{
 				$validiert=false;
@@ -31,6 +34,7 @@ if ($action=="login"){
 		}
 		
 		if ($validiert==true){
+			
 			if ($user->auth=='nologin' || $user->confirmed==0 || $user->suspended!=0 || $user->deleted!=0) $uhash=0;
 			else{
 				if (!$user_hash = $DB->get_record("block_exaportuser", array("user_id"=>$user->id))){
@@ -1335,7 +1339,7 @@ function block_exaport_checkIfUpdate($userid){
 		//$conditions = array("username" => $uname,"password" => $pword);
 		//if (!$user = $DB->get_record("user", $conditions)){
 		global $DB;
-		$sql="SELECT * FROM {block_exacompsettings} WHERE course=0 AND activities='importxml'";
+		$sql="SELECT * FROM {block_exacompsettings} WHERE courseid=0 AND activities='importxml'";
 		if ($modsetting = $DB->get_record_sql($sql)){
 			if ($usersetting = $DB->get_record("block_exaportuser",array("user_id"=>$userid))){
 				if (!empty($usersetting->import_oez_tstamp)){

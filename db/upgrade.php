@@ -393,9 +393,9 @@ function xmldb_block_exaport_upgrade($oldversion) {
     	// exaport savepoint reached
     	upgrade_block_savepoint(true, 2014031700, 'exaport');
     }
-    if($oldversion < 2014081100){
+    //if($oldversion < 2014081100){
     	//to be compatible with oracle change text fields to varchar
-    	/* block_exaportuser */
+			/*
     	$table = new xmldb_table('block_exaportuser');
     	$field = new xmldb_field('description', XMLDB_TYPE_CHAR, '1333');
 		$dbman->change_field_type($table, $field);
@@ -403,7 +403,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		$field = new xmldb_field('view_items_layout', XMLDB_TYPE_CHAR, '1000');
 		$dbman->change_field_type($table, $field);
 		
-		/*block_exaportcate*/
+		
 		$table = new xmldb_table('block_exaportcate');
 		
 		$field = new xmldb_field('description', XMLDB_TYPE_CHAR, '1333');
@@ -415,7 +415,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		$field = new xmldb_field('name_short', XMLDB_TYPE_CHAR, '500');
 		$dbman->change_field_type($table, $field);
 		
-		/*block_exaportitem*/
+		
 		$table = new xmldb_table('block_exaportitem');
 		
 		$field = new xmldb_field('intro', XMLDB_TYPE_CHAR, '1333');
@@ -424,13 +424,13 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		$field = new xmldb_field('beispiel_angabe', XMLDB_TYPE_CHAR, '1333');
 		$dbman->change_field_type($table, $field);
 		
-    	/*block_exaportitemcomm*/
+    
 		$table = new xmldb_table('block_exaportitemcomm');
 		
 		$field = new xmldb_field('entry', XMLDB_TYPE_CHAR, '1333');
 		$dbman->change_field_type($table, $field);
 		
-		/*block_exaportview*/
+		
 		$table = new xmldb_table('block_exaportview');
 		
 		$field = new xmldb_field('name', XMLDB_TYPE_CHAR, '1000');
@@ -439,7 +439,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		$field = new xmldb_field('description', XMLDB_TYPE_CHAR, '1333');
 		$dbman->change_field_type($table, $field);
 		
-		/*block_exaportviewblock*/
+		
 		$table = new xmldb_table('block_exaportviewblock');
 		
 		$field = new xmldb_field('type', XMLDB_TYPE_CHAR, '1000');
@@ -454,9 +454,9 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		$field = new xmldb_field('contentmedia', XMLDB_TYPE_CHAR, '1333');
 		$dbman->change_field_type($table, $field);
 		
-		// exaport savepoint reached
-    	upgrade_block_savepoint(true, 2014081100, 'exaport');
-    }
+		
+    	upgrade_block_savepoint(true, 2014081100, 'exaport');*/
+   // }
     
 	return $result;
 }

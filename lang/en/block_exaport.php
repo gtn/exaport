@@ -396,6 +396,7 @@ $string['version_5.2.0_needed'] = 'Exabis E-Portfolio requires at least PHP-Vers
 $string['competenceinteraction'] = 'Allow interaction with block exabis competencies, in case it is installed';
 $string['opencomps'] = 'Choose your competencies';
 $string['selectcomps'] = 'Choose competencies associated with your upload!';
+$string['competences_old_version'] = 'An outdated version of Exabis Competences that is no longer supported by Exabis Eportfolio is installed on this moodle.';
 $string['expandcomps'] = 'Expand all';
 $string['contactcomps'] = 'Contract all';
 $string['studentcomps'] = 'Here you can self-assess whether you have acquired the competency with your artefact.';

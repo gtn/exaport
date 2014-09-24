@@ -84,9 +84,9 @@ if ($existing && $comp) {
 	// initialize with empty string
 	if (empty($existing->compids)) $existing->compids = '';
 	
-	$competences = $DB->get_records('block_exacompdescractiv_mm', array("activityid" => $existing->id, "activitytype" => 2000));
+	$competences = $DB->get_records('block_exacompcompactiv_mm', array("activityid" => $existing->id, "eportfolioitem" => 1));
 	foreach ($competences as $competence) {
-		$existing->compids .= $competence->descrid . ',';
+		$existing->compids .= $competence->compid . ',';
 	}
 	if (!$competences)
 		$existing->compids = null;
@@ -248,7 +248,11 @@ block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($bac
 if ($comp) {
 	echo '<fieldset id="general" style="border: 1px solid;">';
 	echo '<legend class="ftoggler"><b>' . get_string("competences", "block_exaport") . '</b></legend>';
-	echo "<p style='margin-left: 5px;'><a class='competences' href='#'>" . get_string("selectcomps", "block_exaport") . "</a>";
+	if(file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php'))
+		echo "<p style='margin-left: 5px;'><a class='competences' href='#'>" . get_string("selectcomps", "block_exaport") . "</a>";
+	else{
+		echo "<p style='margin-left: 5px;'".get_string("competences_old_version", "block_exaport");
+	}
 	echo "<div style='margin-left: 5px;' id='comptitles'></div></p>";
 	echo '</fieldset>';
 	?>
@@ -306,8 +310,8 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 	}
 	$interaction = block_exaport_check_competence_interaction();
 	if ($interaction) {
-		$DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $post->id, "activitytype" => 2000));
-		$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id));
+		$DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $post->id, "eportfolioitem" => 1));
+		$DB->delete_records('block_exacompcompuser_mm', array("activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
 		$comps = $post->compids;
 		if ($comps) {
 			$comps = explode(",", $comps);
@@ -315,8 +319,8 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 
 			foreach ($comps as $comp) {
 				if ($comp != 0)
-					$DB->insert_record('block_exacompdescractiv_mm', array("descrid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "activitytitle" => $post->name, "coursetitle" => $course->shortname));
-				$DB->insert_record('block_exacompdescuser_mm', array("descid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
+					$DB->insert_record('block_exacompcompactiv_mm', array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "activitytitle" => $post->name, "coursetitle" => $course->shortname));
+				$DB->insert_record('block_exacompcompuser_mm', array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
 			}
 		}
 	}
@@ -358,8 +362,8 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 
 			foreach ($comps as $comp) {
 				if ($comp != 0)
-					$DB->insert_record('block_exacompdescractiv_mm', array("descrid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "activitytitle" => $post->name, "coursetitle" => $course->shortname));
-				$DB->insert_record('block_exacompdescuser_mm', array("descid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
+					$DB->insert_record('block_exacompcompactiv_mm', array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "activitytitle" => $post->name, "coursetitle" => $course->shortname));
+				$DB->insert_record('block_exacompcompuser_mm', array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
 			}
 		}
 		block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add', $post->name);
@@ -383,8 +387,8 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
 	$interaction = block_exaport_check_competence_interaction();
 	if ($interaction) {
-		$DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $post->id, "activitytype" => 2000));
-		$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id));
+		$DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $post->id, "eportfolioitem" => 1));
+		$DB->delete_records('block_exacompcompuser_mm', array("activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
 	}
 
 	block_exaport_add_to_log(SITEID, 'blog', 'delete', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);

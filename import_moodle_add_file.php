@@ -234,9 +234,10 @@ function do_add($post, $blogeditform, $returnurl, $courseid, $checked_file) {
     if(block_exaport_check_competence_interaction()) {    
 
         //Kompetenzen checken und erneut speichern
-        $comps = $DB->get_records('block_exacompdescractiv_mm',array("activityid"=>$post->activityid,"activitytype"=>1));
+        //TODO Test if missing activitytype = 1 has influence
+        $comps = $DB->get_records('block_exacompcompactiv_mm',array("activityid"=>$post->activityid));
         foreach($comps as $comp) {
-            $DB->insert_record('block_exacompdescractiv_mm',array("activityid"=>$post->id, "activitytype"=>2000,"descrid"=>$comp->descrid,"activitytitle"=>$post->name,"coursetitle"=>$COURSE->shortname));
+            $DB->insert_record('block_exacompcompactiv_mm',array("activityid"=>$post->id, "eportfolioitem"=>1,"compid"=>$comp->descrid,"activitytitle"=>$post->name,"coursetitle"=>$COURSE->shortname));
         }
     }
 }

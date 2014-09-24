@@ -79,9 +79,12 @@ foreach ($blocks as $block) {
 
 if ($view->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");
-} else {
+}else {
 	$PAGE->requires->css('/blocks/exaport/css/shared_view.css');
-	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+	$PAGE->set_title(get_string("externaccess", "block_exaport"));
+	$PAGE->set_heading( get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+	
+	echo $OUTPUT->header();
 }
 
 ?>
@@ -131,7 +134,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 	
 					$competences = "";
 					foreach($array as $element){
-						$conditions = array("id" => $element->descid);
+						$conditions = array("id" => $element->compid);
 						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
 						if($competencesdb != null){

@@ -8,7 +8,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="user_id"/>
         <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="description"/>
-        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="user_id" NEXT="persinfo_timemodified"/>
+        <FIELD NAME="description" TYPE="char" LENGTH='1333' NOTNULL="true" SEQUENCE="false" PREVIOUS="user_id" NEXT="persinfo_timemodified"/>
         <FIELD NAME="persinfo_timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="description" NEXT="persinfo_externaccess"/>
         <FIELD NAME="persinfo_externaccess" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="persinfo_timemodified" NEXT="itemsort"/>
         <FIELD NAME="itemsort" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" PREVIOUS="persinfo_externaccess" NEXT="user_hash"/>
@@ -16,7 +16,7 @@
         <FIELD NAME="user_hash_long" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" PREVIOUS="user_hash" NEXT="oezinstall"/>
         <FIELD NAME="oezinstall" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="user_hash_long" NEXT="import_oez_tstamp"/>
         <FIELD NAME="import_oez_tstamp" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="last time oez update/import" PREVIOUS="oezinstall" NEXT="view_items_layout"/>
-        <FIELD NAME="view_items_layout" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="import_oez_tstamp"/>
+        <FIELD NAME="view_items_layout" TYPE="char" LENGTH='1000' NOTNULL="false" SEQUENCE="false" PREVIOUS="import_oez_tstamp"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="user_id"/>
@@ -32,16 +32,16 @@
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="time modified" PREVIOUS="name" NEXT="courseid"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="isoez"/>
         <FIELD NAME="isoez" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="description"/>
-        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="oez" PREVIOUS="isoez" NEXT="subjid"/>
+        <FIELD NAME="description" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" COMMENT="oez" PREVIOUS="isoez" NEXT="subjid"/>
         <FIELD NAME="subjid" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="subject id" PREVIOUS="description" NEXT="topicid"/>
         <FIELD NAME="topicid" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="topic id" PREVIOUS="subjid" NEXT="source"/>
         <FIELD NAME="source" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" PREVIOUS="topicid" NEXT="sourceid"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" PREVIOUS="source" NEXT="parent_ids"/>
         <FIELD NAME="parent_ids" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent category ids" PREVIOUS="sourceid" NEXT="parent_titles"/>
-        <FIELD NAME="parent_titles" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent categories, names" PREVIOUS="parent_ids" NEXT="stid"/>
+        <FIELD NAME="parent_titles" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent categories, names" PREVIOUS="parent_ids" NEXT="stid"/>
         <FIELD NAME="stid" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="schooltypeid" PREVIOUS="parent_titles" NEXT="sourcemod"/>
         <FIELD NAME="sourcemod" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="modus of category exacomp schooltype=3, subject=5, topic=7" PREVIOUS="stid" NEXT="name_short"/>
-        <FIELD NAME="name_short" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="sourcemod"/>
+        <FIELD NAME="name_short" TYPE="char" LENGTH="500" NOTNULL="false" SEQUENCE="false" PREVIOUS="sourcemod"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="primary key for bookmark categories" NEXT="userid"/>
@@ -58,7 +58,7 @@
         <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="type" NEXT="name"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="categoryid" NEXT="url"/>
         <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="intro"/>
-        <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="url" NEXT="attachment"/>
+        <FIELD NAME="intro" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" PREVIOUS="url" NEXT="attachment"/>
         <FIELD NAME="attachment" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" PREVIOUS="intro" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="attachment" NEXT="courseid"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="shareall"/>
@@ -71,7 +71,7 @@
         <FIELD NAME="beispiel_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="fileurl" NEXT="exampid"/>
         <FIELD NAME="exampid" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="if oez, exampleid of source example from exacomp" PREVIOUS="beispiel_url" NEXT="langid"/>
         <FIELD NAME="langid" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="desp" PREVIOUS="exampid" NEXT="beispiel_angabe"/>
-        <FIELD NAME="beispiel_angabe" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="langid" NEXT="source"/>
+        <FIELD NAME="beispiel_angabe" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" PREVIOUS="langid" NEXT="source"/>
         <FIELD NAME="source" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" PREVIOUS="beispiel_angabe" NEXT="sourceid"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" PREVIOUS="source" NEXT="iseditable"/>
         <FIELD NAME="iseditable" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" PREVIOUS="sourceid" NEXT="example_url"/>
@@ -106,7 +106,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="itemid"/>
         <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="itemid" NEXT="entry"/>
-        <FIELD NAME="entry" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="userid" NEXT="timemodified"/>
+        <FIELD NAME="entry" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" PREVIOUS="userid" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="entry"/>
       </FIELDS>
       <KEYS>
@@ -119,8 +119,8 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="userid"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
-        <FIELD NAME="name" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="userid" NEXT="description"/>
-        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="name" NEXT="timemodified"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="1000" NOTNULL="false" SEQUENCE="false" PREVIOUS="userid" NEXT="description"/>
+        <FIELD NAME="description" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" PREVIOUS="name" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="description" NEXT="shareall"/>
         <FIELD NAME="shareall" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" PREVIOUS="timemodified" NEXT="externaccess"/>
         <FIELD NAME="externaccess" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" PREVIOUS="shareall" NEXT="externcomment"/>
@@ -143,15 +143,15 @@
         <FIELD NAME="viewid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="id" NEXT="positionx"/>
         <FIELD NAME="positionx" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="viewid" NEXT="positiony"/>
         <FIELD NAME="positiony" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="positionx" NEXT="type"/>
-        <FIELD NAME="type" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="positiony" NEXT="itemid"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="1000" NOTNULL="false" SEQUENCE="false" PREVIOUS="positiony" NEXT="itemid"/>
         <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="type" NEXT="text"/>
-        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="itemid" NEXT="block_title"/>
-        <FIELD NAME="block_title" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="text" NEXT="firstname"/>
+        <FIELD NAME="text" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" PREVIOUS="itemid" NEXT="block_title"/>
+        <FIELD NAME="block_title" TYPE="char" LENGTH="1000" NOTNULL="false" SEQUENCE="false" PREVIOUS="text" NEXT="firstname"/>
         <FIELD NAME="firstname" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="block_title" NEXT="lastname"/>
         <FIELD NAME="lastname" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="firstname" NEXT="email"/>
         <FIELD NAME="email" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false" PREVIOUS="lastname" NEXT="picture"/>
         <FIELD NAME="picture" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" PREVIOUS="email" NEXT="contentmedia"/>
-        <FIELD NAME="contentmedia" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="picture" NEXT="width"/>
+        <FIELD NAME="contentmedia" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" PREVIOUS="picture" NEXT="width"/>
         <FIELD NAME="width" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="contentmedia" NEXT="height"/>
         <FIELD NAME="height" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="width"/>
       </FIELDS>

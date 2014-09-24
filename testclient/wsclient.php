@@ -9,14 +9,26 @@
 
 //$token = '6f8233ff407d082557f51006bd494489'; //flo
 $token = '41ec1df3194f653a072a68ac9241b537'; //michy
-$domainname = 'http://localhost:1337/moodle26/'; //michy
-//$domainname = 'hhtp://localhost:8888/moodle26/'; //flo
-/*$functionname = 'block_exaport_get_items';
+$domainname = 'http://localhost/moodle271/';
+
+require_once('./curl.php');
+$curl = new curl;
+
+$restformat = "";
+
+$serverurl = 'http://localhost/moodle271/login/token.php?username=schueler&password=Schueler123!&service=exaportservices';
+$resp = $curl->get($serverurl);
+$resp = json_decode($resp)->token;
+$token = $resp;
+print_r($token);
+
+
+$functionname = 'block_exaport_get_items';
 
 $params = new stdClass();
-$params->level = 1;
+$params->level = 0;
 
-$restformat="";
+
 header('Content-Type: text/plain');
 $serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
 require_once('./curl.php');
@@ -28,7 +40,41 @@ echo "
 
 
 ";
-*/
+
+$functionname = 'block_exaport_get_competencies_by_item';
+$params = new stdClass();
+$params->itemid = 2;
+$restformat="";
+$serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
+require_once('./curl.php');
+$curl = new curl;
+$resp = $curl->post($serverurl . $restformat, $params);
+print_r($resp);
+/*
+$functionname = 'block_exaport_add_item';
+
+$params = new stdClass();
+$params->title = "ws testnote";
+$params->categoryid = 0;
+$params->url = "";
+$params->intro = "testnote";
+$params->url = "";
+$params->type = "note";
+$params->filename = "";
+
+header('Content-Type: text/plain');
+$serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
+require_once('./curl.php');
+$curl = new curl;
+$resp = $curl->post($serverurl . $restformat, $params);
+print_r($resp);
+echo "
+
+
+
+";*/
+
+
 /*$functionname = 'block_exaport_get_item';
 $params = new stdClass();
 $params->itemid = 2;
@@ -212,6 +258,7 @@ $curl = new curl;
 $resp = $curl->post($serverurl . $restformat);
 print_r($resp);
 */
+/*
 $functionname = 'block_exaport_set_item_competence';
 $params = new stdClass();
 $params->itemid = 5;

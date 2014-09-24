@@ -349,21 +349,21 @@ foreach($xml->items->item as $item){
 			$desc = $DB->get_record('block_exacompdescriptors', array("sourceid"=>$compid));
 			$newentry = new stdClass();
 			$newentry->activityid = $newid;
-			$newentry->descid = $desc->id;
+			$newentry->compid = $desc->id;
 			$newentry->userid = $USER->id;
 			$newentry->reviewerid = $USER->id;
 			$newentry->role = 0;
-			$newentry->activitytype = 2000;
+			$newentry->eportfolioitem = 1;
 			$newentry->wert = 0;
-			$DB->insert_record("block_exacompdescuser_mm", $newentry);
+			$DB->insert_record("block_exacompcompuser_mm", $newentry);
 			
 			$newentry2 = new stdClass();
-			$newentry2->descrid = $desc->id;
+			$newentry2->compid = $desc->id;
 			$newentry2->activityid = $newid;
-			$newentry2->activitytype = 2000;
+			$newentry2->eportfolioitem = 1;
 			$newentry2->activitytitle = $title;
 			$newentry2->coursetitle = $COURSE->shortname;
-			$DB->insert_record("block_exacompdescractiv_mm", $newentry2);
+			$DB->insert_record("block_exacompcompactiv_mm", $newentry2);
 		}
 	}
 }

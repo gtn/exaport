@@ -80,7 +80,7 @@ $categories = $DB->get_records_sql('
 	FROM {block_exaportcate} c
 	LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
 	WHERE c.userid = ?
-	GROUP BY c.id
+	GROUP BY c.id, c.name, c.pid
 	ORDER BY c.name ASC
 ', array($USER->id));
 
@@ -197,9 +197,12 @@ $items = $DB->get_records_sql("
 		FROM {block_exaportitem} i
 		LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
 		WHERE i.userid = ? AND i.categoryid=?
-			AND ".block_exaport_get_item_where()."
-		GROUP BY i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.categoryid, i.url, i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
-		i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable
+			AND ".block_exaport_get_item_where()."	
+		GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro, 
+		i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, 
+		i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url, 
+		i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, 
+		i.iseditable, i.example_url, i.parentid
 		$sql_sort
 	", $condition);
 
@@ -426,7 +429,7 @@ function block_exaport_get_item_comp_icon($item) {
 	$competences = "";
 	foreach($array as $element){
 
-		$conditions = array("id" => $element->descid);
+		$conditions = array("id" => $element->compid);
 		$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
 		if($competencesdb != null){

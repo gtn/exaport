@@ -14,14 +14,17 @@ if ($action=="login"){
 	$pword = optional_param('password', 0, PARAM_TEXT);	//32
 	
 	if ($uname!="0" && $pword!="0"){
+	
 		$uname=kuerzen($uname,100);
 		$pword=kuerzen($pword,50);
 		$uhash=0;
 		$conditions = array("username" => $uname,"password" => $pword);
 		if (!$user = $DB->get_record("user", $conditions)){
+			
 			$condition = array("username" => $uname);
 			if ($user = $DB->get_record("user", $condition)){
 				//$validiert=validate_internal_user_password($user,$pword);
+			
 				$validiert=authenticate_user_login($uname,$pword); 
 			}else{
 				$validiert=false;
@@ -31,6 +34,7 @@ if ($action=="login"){
 		}
 		
 		if ($validiert==true){
+			
 			if ($user->auth=='nologin' || $user->confirmed==0 || $user->suspended!=0 || $user->deleted!=0) $uhash=0;
 			else{
 				if (!$user_hash = $DB->get_record("block_exaportuser", array("user_id"=>$user->id))){
@@ -166,14 +170,13 @@ if ($action=="login"){
 		foreach ($descriptors as $descriptor){
 			$dlist.=",".$descriptor->id;
 		}
-		$select='activityid='.$item_id.' AND activitytype=2000';
-		if ($dlist!="0") $select.=' AND descrid IN ('.$dlist.')';
+		$select='activityid='.$item_id.' AND eportfolioitem=1';
+		if ($dlist!="0") $select.=' AND compid IN ('.$dlist.')';
 		//echo $select;
-		$DB->delete_records_select("block_exacompdescractiv_mm",$select);
+		$DB->delete_records_select("block_exacompcompactiv_mm",$select);
 		foreach ($competences as $k=>$v){
 			if (is_numeric($v)){
-				//echo "insert into block_exacompdescractiv_mm".$v."_".$item_id."<br>";
-				$DB->insert_record('block_exacompdescractiv_mm', array("activityid"=>$item_id,"activitytype"=>"2000","descrid"=>$v,"activitytitle"=>"","coursetitle"=>""));
+				$DB->insert_record('block_exacompcompactiv_mm', array("activityid"=>$item_id,"eportfolioitem"=>"1","compid"=>$v,"activitytitle"=>"","coursetitle"=>""));
 			}
 		}
 	}
@@ -215,8 +218,8 @@ if ($action=="login"){
 	if (!$user) echo "invalid hash";
 	else{
 		$itemid = optional_param('itemid', ' ', PARAM_INT);
-		$result = $DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $itemid));
-		$result = $DB->delete_records('block_exacompdescuser_mm', array("activityid" => $itemid));
+		$result = $DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $itemid));
+		$result = $DB->delete_records('block_exacompcompuser_mm', array("activityid" => $itemid));
 		$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
 		WHERE i.id=?";
 		if($resu = $DB->get_records_sql($sql,array($itemid))){
@@ -428,9 +431,9 @@ else if ($action=="get_items_for_view"){
 			$subjectid=optional_param('subjectid', 0, PARAM_INT);
 			$clist=",";
 			if ($itemid>0){
-				$compok=$DB->get_records("block_exacompdescractiv_mm", array("activityid"=>$itemid));
+				$compok=$DB->get_records("block_exacompcompactiv_mm", array("activityid"=>$itemid));
 				foreach ($compok as $k=>$v){
-					$clist.=$v->descrid.",";
+					$clist.=$v->compid.",";
 				}
 			}
 	    //$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
@@ -918,9 +921,9 @@ function create_autologin_moodle_example_link($url){
 
 function block_exaport_delete_competences($itemid,$userid){
 	global $DB;
-	$result = $DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $itemid));
+	$result = $DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $itemid));
 	//echo "delete from block_exacompdescractiv_mm where activityid=".$itemid;
-	$result = $DB->delete_records('block_exacompdescuser_mm', array("activityid" => $itemid));
+	$result = $DB->delete_records('block_exacompcompuser_mm', array("activityid" => $itemid));
 	//echo "delete from block_exacompdescuser_mm where activityid=".$itemid;
 }
 
@@ -929,8 +932,8 @@ function block_exaport_save_competences($competences,$new,$userid,$aname){
 	 if (count($competences)>0){
 		     	foreach ($competences as $k=>$v){
 		     		if (is_numeric($v)){
-		     			$DB->insert_record('block_exacompdescractiv_mm', array("descrid"=>$v,"activityid"=>$new->id,"activitytype"=>2000,"activitytitle"=>$aname));
-		     			$DB->insert_record('block_exacompdescuser_mm',array("descid"=>$v,"activityid"=>$new->id,"userid"=>$userid,"reviewerid"=>$userid,"activitytype"=>"2000","role"=>0));
+		     			$DB->insert_record('block_exacompcompactiv_mm', array("compid"=>$v,"activityid"=>$new->id,"eportfolioitem"=>1,"activitytitle"=>$aname));
+		     			$DB->insert_record('block_exacompcompuser_mm',array("compid"=>$v,"activityid"=>$new->id,"userid"=>$userid,"reviewerid"=>$userid,"eportfolioitem"=>1,"role"=>0));
 		     		}
 		     	}
 	}
@@ -1320,9 +1323,9 @@ function block_exaport_competence_selected($subjid,$userid,$itemid){
 		INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 		INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
 		INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
-		INNER JOIN {block_exacompdescractiv_mm} dmm ON dmm.descrid=descr.id
-		INNER JOIN {block_exaportitem} item ON item.id=dmm.activityid AND activitytype=2000
-		WHERE subj.id=".$subjid." AND item.userid=".$userid;
+		INNER JOIN {block_exacompcompactiv_mm} dmm ON dmm.compid=descr.id
+		INNER JOIN {block_exaportitem} item ON item.id=dmm.activityid AND eportfolioitem=1 AND dmm.comptype = 0 
+		WHERE dmm.comptype = 0 AND subj.id=".$subjid." AND item.userid=".$userid;
 		if ($itemid>0){
 			$sql.=" AND dmm.activityid=".$itemid;
 		}
@@ -1336,7 +1339,7 @@ function block_exaport_checkIfUpdate($userid){
 		//$conditions = array("username" => $uname,"password" => $pword);
 		//if (!$user = $DB->get_record("user", $conditions)){
 		global $DB;
-		$sql="SELECT * FROM {block_exacompsettings} WHERE course=0 AND activities='importxml'";
+		$sql="SELECT * FROM {block_exacompsettings} WHERE courseid=0 AND activities='importxml'";
 		if ($modsetting = $DB->get_record_sql($sql)){
 			if ($usersetting = $DB->get_record("block_exaportuser",array("user_id"=>$userid))){
 				if (!empty($usersetting->import_oez_tstamp)){

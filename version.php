@@ -26,9 +26,11 @@
 *  This copyright notice MUST APPEAR in all copies of the script!!!
 ***************************************************************/
 
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2014031700;
-$plugin->maturity  = MATURITY_BETA;
-$plugin->release  = "4.1";
-$plugin->requires = 2011033005.06;
+$plugin->version = 2014091200;
+$plugin->maturity  = MATURITY_STABLE;
+$plugin->requires  = 2013111800;
+$plugin->release = 'v2.6.5';
+

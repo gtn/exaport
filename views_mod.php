@@ -536,6 +536,14 @@ function block_exaport_get_view_blocks($view) {
 			$block->itemid = null;
 		}
 		
+		// clean html texts for output
+		if (isset($block->print_text) && $block->print_text) {
+			$block->print_text = clean_text($block->print_text, FORMAT_HTML);
+		}
+		if (isset($block->intro) && $block->intro) {
+			$block->intro = clean_text($block->intro, FORMAT_HTML);
+		}
+		
 		$blocks[$block->id] = $block;
 	}
 
@@ -586,6 +594,7 @@ function block_exaport_get_portfolio_items() {
 		
 		if ($item->intro) {
 			$item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+			$item->intro = clean_text($item->intro, FORMAT_HTML);
 		}
 		
 		//get competences of the item

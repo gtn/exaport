@@ -314,7 +314,8 @@ var exaportViewEdit = {};
 	{
 		var blocks = [];
 		$('.portfolioDesignBlocks').each(function(positionx){
-			$(this).find('li:visible').not('.block-placeholder').each(function(positiony){
+			// immediate li children, because content can have li too
+			$(this).children('li:visible').not('.block-placeholder').each(function(positiony){
 				blocks.push($.extend($(this).data('portfolio'), {
 					positionx: positionx+1,
 					positiony: positiony+1
@@ -408,7 +409,7 @@ var exaportViewEdit = {};
 					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />'+ ilink + 
-					$E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
+					$E.translate('comments')+': '+itemData.comments+'<div class="exaport-item-intro"></div>' +
 					'<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/pix/t/grades.gif" class="iconsmall" alt="'+'competences'+'" /></a>'+
 					'</div></div>'
 				);
@@ -422,9 +423,11 @@ var exaportViewEdit = {};
 					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
-					$E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
+					$E.translate('comments')+': '+itemData.comments+'<div class="exaport-item-intro"></div>' +
 					'</div></div>'
 				);
+				// user html may be malformed, so savely inject it here
+				$item.find('.exaport-item-intro').html(itemData.intro);
 			}
 		} else if (data.type == 'personal_information') {
 			$item.html(
@@ -559,7 +562,7 @@ var exaportViewEdit = {};
 	function resetElementStates()
 	{
 		$('.portfolioOptions li').removeClass('selected');
-		$('.portfolioDesignBlocks li').each(function(){
+		$('.portfolioDesignBlocks > li').each(function(){
 			$('.portfolioOptions li[itemid='+$(this).data('portfolio').itemid+']').addClass('selected');
 		});
 	}	

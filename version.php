@@ -4,7 +4,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2006 exabis internet solutions <info@exabis.at>
+*  (c) 2014 exabis internet solutions <info@exabis.at>
 *  All rights reserved
 *
 *  You can redistribute it and/or modify
@@ -26,11 +26,9 @@
 *  This copyright notice MUST APPEAR in all copies of the script!!!
 ***************************************************************/
 
-
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2014091200;
+$plugin->version = 2014092600;
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->requires  = 2013111800;
-$plugin->release = 'v2.6.5';
-
+$plugin->requires  = 2014041100;
+$plugin->release = 'v2.7-r1';

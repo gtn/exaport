@@ -383,7 +383,7 @@ else if ($action=="get_items_for_view"){
 	$user=checkhash();
 	if (!$user) echo "invalid hash";
 	else{
-		$sql = "SELECT t.id,t.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		$sql = "SELECT t.id,t.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 		$sql.= " GROUP BY t.id,t.title";
 		$topics = $DB->get_records_sql($sql);
 		header ("Content-Type:text/xml");
@@ -402,7 +402,7 @@ else if ($action=="get_items_for_view"){
 	if (!$user) echo "invalid hash";
 	else{
 		$itemid=optional_param('itemid', 0, PARAM_INT);
-		$sql = "SELECT s.id,s.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		$sql = "SELECT s.id,s.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 		$sql.= " GROUP BY s.id,s.title";
 		$subjects = $DB->get_records_sql($sql);
 		header ("Content-Type:text/xml");
@@ -436,9 +436,9 @@ else if ($action=="get_items_for_view"){
 					$clist.=$v->compid.",";
 				}
 			}
-	    //$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+	    //$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 	     //neu am 20.5.2014 weil descriptoren mehrfach vorkommen
-	    $sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+	    $sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 	    $sql.=" GROUP BY d.id, d.title ORDER BY d.sorting";
 	    if ($subjectid>0 && $action=="getCompetences"){
 	    	$sql.=" AND s.id=".$subjectid;

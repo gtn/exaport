@@ -402,7 +402,7 @@ else if ($action=="get_items_for_view"){
 	if (!$user) echo "invalid hash";
 	else{
 		$itemid=optional_param('itemid', 0, PARAM_INT);
-		$sql = "SELECT s.id,s.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		$sql = "SELECT s.id,s.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 		$sql.= " GROUP BY s.id,s.title";
 		$subjects = $DB->get_records_sql($sql);
 		header ("Content-Type:text/xml");
@@ -439,10 +439,10 @@ else if ($action=="get_items_for_view"){
 	    //$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 	     //neu am 20.5.2014 weil descriptoren mehrfach vorkommen
 	    $sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
-	    $sql.=" GROUP BY d.id, d.title ORDER BY d.sorting";
 	    if ($subjectid>0 && $action=="getCompetences"){
 	    	$sql.=" AND s.id=".$subjectid;
 	    }
+	    $sql.=" GROUP BY d.id, d.title ORDER BY d.sorting";
 	    //echo $sql;
 	    
 	    $descriptors = $DB->get_records_sql($sql);
@@ -1319,7 +1319,7 @@ function sauber($wert){
 }
 function block_exaport_competence_selected($subjid,$userid,$itemid){
 	global $DB;
-	$sql="SELECT dmm.id,descr.id FROM {block_exacompsubjects} subj 
+	$sql="SELECT CONCAT(dmm.id,'_',descr.id,'_',item.id) as uniqueid, dmm.id,descr.id FROM {block_exacompsubjects} subj 
 		INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 		INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
 		INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid

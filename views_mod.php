@@ -111,6 +111,7 @@ if ($action == 'delete') {
 		echo '<br />';
 		//notice_yesno(get_string("deletecheck", null, $view->name), 'views_mod.php', 'views_list.php', $optionsyes, $optionsno, 'post', 'get');
 		echo $OUTPUT->confirm(get_string("deletecheck",null,$view->name), new moodle_url('views_mod.php', $optionsyes), new moodle_url('views_list.php', $optionsno));
+		echo block_exaport_wrapperdivend();
                 echo $OUTPUT->footer();
 		die;
 	}
@@ -968,4 +969,5 @@ echo '<div id="block_form" class="block" style="position: absolute; top: 50px; l
 		jQueryExaport("#block_form").appendTo("#page-blocks-exabis_competences-views_mod");
 	</script>
 	';
+	echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();	

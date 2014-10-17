@@ -85,6 +85,7 @@ if ($view->access->request == 'intern') {
 	$PAGE->set_heading( get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
 	
 	echo $OUTPUT->header();
+	echo block_exaport_wrapperdivstart();
 }
 
 ?>
@@ -234,5 +235,5 @@ echo "<br />";
 echo "<div class='block_eportfolio_center'>\n";
 
 echo "</div>\n";
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();

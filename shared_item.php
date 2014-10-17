@@ -99,6 +99,7 @@ if ($item->access->page == 'view') {
         block_exaport_print_header("views");
     } else {
         print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+        echo block_exaport_wrapperdivstart();
     }
 } elseif ($item->access->page == 'portfolio') {
     if ($item->access->request == 'intern') {
@@ -109,6 +110,7 @@ if ($item->access->page == 'view') {
         }
     } else {
         print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+        echo block_exaport_wrapperdivstart();
     }
 }
 
@@ -177,6 +179,7 @@ if ($backlink) {
 }
 
 echo "</div>";
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();
 
 function block_exaport_show_comments($item) {

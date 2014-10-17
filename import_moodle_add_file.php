@@ -96,6 +96,7 @@ if ($action == 'delete') {
         $optionsyes = array('id' => $id, 'action' => 'delete', 'confirm' => 1, 'sesskey' => sesskey(), 'courseid' => $courseid);
         $optionsno = array('userid' => $existing->userid, 'courseid' => $courseid);
         print_header("$SITE->shortname", $SITE->fullname);
+        echo block_exaport_wrapperdivstart();
         // ev. noch eintrag anzeigen!!!
         //blog_print_entry($existing);
         echo '<br />';
@@ -177,7 +178,7 @@ echo "</div>";
 
 $exteditform->set_data($post);
 $exteditform->display();
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 exit;
 

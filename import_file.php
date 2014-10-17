@@ -145,7 +145,7 @@ if ($imported) {
 } else {
     $exteditform->display();
 }
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 
 function import_files($unzip_dir, $structures, $i = 0, $previd=NULL) {

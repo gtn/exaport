@@ -197,12 +197,18 @@ function block_exaport_course_has_desp() {
 	
 	return $COURSE->has_desp = $DB->record_exists('block_instances', array('blockname'=>'desp', 'parentcontextid'=>$context->id));
 }
-
+function block_exaport_wrapperdivstart(){
+	return html_writer::start_tag('div',array('id'=>'exaport'));
+}
+function block_exaport_wrapperdivend(){
+	return html_writer::end_tag('div');
+}
 /**
  * Print moodle header
  * @param string $item_identifier translation-id for this page
  * @param string $sub_item_identifier translation-id for second level if needed
  */
+
 function block_exaport_print_header($item_identifier, $sub_item_identifier = null) {
 
     if (!is_string($item_identifier)) {
@@ -305,7 +311,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
     global $OUTPUT;
     
   	echo $OUTPUT->header();
-   
+    echo block_exaport_wrapperdivstart();
 	if (block_exaport_course_has_desp()) {
 		// include the desp css
 		echo '<link href="'.$CFG->wwwroot.'/blocks/desp/styles.css" rel="stylesheet" type="text/css" />';

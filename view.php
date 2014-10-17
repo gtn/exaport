@@ -138,5 +138,5 @@ echo "<span class=\"left\">".get_string("supported", "block_exaport")."<br/><img
 echo "<span class=\"right\">".get_string("developed", "block_exaport")."<br/><a href=\"http://www.gtn-solutions.com/\"><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/gtn.png\" width=\"89\" height=\"40\" alt=\"gtn-solutions\"/></a></span>";
 echo "<div class=\"block_eportfolio_clear\" />";
 echo "</div>";
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

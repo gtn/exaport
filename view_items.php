@@ -41,7 +41,9 @@ if (! $course = $DB->get_record("course", array("id" => $courseid)) ) {
 $url = '/blocks/exaport/view_items.php';
 $PAGE->set_url($url);
 
+
 block_exaport_print_header("bookmarks");
+
 
 echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
 
@@ -410,7 +412,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 }
 
 echo "</div>";
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();
 
 

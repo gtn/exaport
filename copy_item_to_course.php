@@ -86,7 +86,7 @@ if ($sharecourseid) {
 	echo '</div>';
 	
 	redirect($CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid."&type=".$backtype);
-
+echo block_exaport_wrapperdivend();
 	print_footer();
 	exit;
 }
@@ -112,5 +112,5 @@ if (!$courses) {
 
 echo "<br /><a href=\"{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid={$courseid}&amp;backtype={$backtype}\">".get_string("back","block_exaport")."</a><br /><br />";
 echo '</div';
-
+echo block_exaport_wrapperdivend();
 print_footer();

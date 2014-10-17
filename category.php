@@ -98,7 +98,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 	
 	echo '<br />';
 	echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport", $category), new moodle_url('category.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
-	
+	echo block_exaport_wrapperdivend();
 	$OUTPUT->footer();
 
 	exit;
@@ -172,6 +172,6 @@ if ($mform->is_cancelled()) {
 
 	$mform->set_data($category);
 	$mform->display();
-  
+  echo block_exaport_wrapperdivend();
 	echo $OUTPUT->footer();
 }

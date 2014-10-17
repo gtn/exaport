@@ -699,6 +699,7 @@ if ($confirm) {
     echo '</div>';
 
     echo $OUTPUT->box_end();
+    echo block_exaport_wrapperdivend();
     $OUTPUT->footer($course);
     exit;
 }
@@ -737,4 +738,5 @@ echo '</form>';
 echo '</div>';
 
 echo $OUTPUT->box_end();
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

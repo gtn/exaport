@@ -181,5 +181,5 @@ echo "</fieldset>
 	  </form>";
 
 echo "</div>";
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();

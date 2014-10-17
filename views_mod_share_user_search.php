@@ -118,5 +118,5 @@ if ($q) {
 } else {
 }
 
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

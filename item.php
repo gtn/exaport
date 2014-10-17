@@ -111,6 +111,7 @@ if ($action == 'delete') {
 		echo '<br />';
 		//notice_yesno(get_string("delete".$type."confirm", "block_exaport"), 'item.php', 'view_items.php', $optionsyes, $optionsno, 'post', 'get');
 		echo $OUTPUT->confirm(get_string("delete" . $type . "confirm", "block_exaport"), new moodle_url('item.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
+		echo block_exaport_wrapperdivend();
 		echo $OUTPUT->footer();
 		die;
 	}
@@ -284,7 +285,7 @@ if ($comp) {
 $editform->set_data($post);
 echo $OUTPUT->box($extra_content);
 $editform->display();
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 
 /**

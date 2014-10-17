@@ -258,7 +258,7 @@ if (!$views) {
 echo "<br /><br />";
 
 echo "</div>";
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 
 

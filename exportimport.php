@@ -62,5 +62,5 @@ if (has_capability('block/exaport:importfrommoodle', $context)) {
 }
 
 echo "</div>";
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

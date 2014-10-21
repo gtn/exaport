@@ -164,7 +164,7 @@ function get_category_files($categoryid, $viewid=null) {
 
 	$conditions = array();
     if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$itemQuery = "select i.*" .
+    	$itemQuery = "select ".($viewid ? " vb.id as vbid,")." i.*" .
     			" FROM {block_exaportitem} i" .
     			($viewid ? " JOIN {block_exaportviewblock} vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
     			" WHERE i.userid = ?" .
@@ -174,7 +174,7 @@ function get_category_files($categoryid, $viewid=null) {
     	$conditions = array($viewid, $USER->id, $categoryid);
     }
     else{
-    	$itemQuery = "select i.*" .
+    	$itemQuery = "select ".($viewid ? " vb.id as vbid,")."i.*" .
             " FROM {block_exaportitem} i" .
             ($viewid ? " JOIN {block_exaportviewblock} vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
             " WHERE i.userid = ?" .

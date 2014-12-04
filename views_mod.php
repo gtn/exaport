@@ -112,7 +112,7 @@ if ($action == 'delete') {
 		//notice_yesno(get_string("deletecheck", null, $view->name), 'views_mod.php', 'views_list.php', $optionsyes, $optionsno, 'post', 'get');
 		echo $OUTPUT->confirm(get_string("deletecheck",null,$view->name), new moodle_url('views_mod.php', $optionsyes), new moodle_url('views_list.php', $optionsno));
 		echo block_exaport_wrapperdivend();
-                echo $OUTPUT->footer();
+        echo $OUTPUT->footer();
 		die;
 	}
 }
@@ -648,7 +648,7 @@ $editform->set_data($postView);
 if ($type<>'title') {// for delete php notes 
 	$form = $editform->toArray();
 	echo $form['javascript'];
-	echo '<form'.$form['attributes'].'><div id="view-mod">';
+	echo '<form'.$form['attributes'].'><div id="exaport-view-mod">';
 	echo $form['html_hidden_fields'];
 };
 	
@@ -954,7 +954,7 @@ if ($type!='title') {
 	echo '</div></form>';
 };
 
-echo '<div id="block_form" class="block" style="position: absolute; top: 50px; left: 30%; width: 510px;">
+echo '<div id="exaport-block_form" class="block">
         <div class="block-controls">                
             <a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
         </div>
@@ -962,11 +962,11 @@ echo '<div id="block_form" class="block" style="position: absolute; top: 50px; l
             <h4 id="block_form_title">'.get_string('cofigureblock','block_exaport').'</h4>
         </div>
         <div class="block-content">
-			<div id="container"></div>
+			<div id="exaport-container"></div>
 		</div>
 	</div>
 	<script type="text/javascript"> // for valid html and move block to body parent
-		jQueryExaport("#block_form").appendTo("#page-blocks-exabis_competences-views_mod");
+		jQueryExaport("#exaport-block_form").appendTo("#page-blocks-exabis_competences-views_mod");
 	</script>
 	';
 	echo block_exaport_wrapperdivend();

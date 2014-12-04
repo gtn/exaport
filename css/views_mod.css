@@ -11,7 +11,7 @@
 }
 
 
-#exaport #view-mod textarea {
+#exaport #exaport-view-mod textarea {
 	width: 95%;
 	height: 200px !important;
 	font-family: Verdana;
@@ -289,9 +289,19 @@
 	width: 20%;
 }
 
-#exaport #block_form {
+#exaport-block_form {
 	overflow: visible;
 	position: absolute;
+	top: 50px;
+	left: 30%;
+	width: 510px;
+	display: none;
+	border: 7px solid #eee;
+	z-index: 2001;
+	background: #fff;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
 }
 
 #exaport .view-middle {

@@ -1,4 +1,4 @@
-#exaport #overlay {
+#exaport-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -42,7 +42,7 @@
     width: 16px;
 }	
 
-#exaport #block_form .block-header h4 {
+#exaport-block_form .block-header h4 {
     border-bottom: 2px solid #D1D1D1;
     font-size: 1.3333em !important;
     margin: 0 5px;
@@ -50,11 +50,11 @@
     color: #1E6297;
 }
  
-#exaport #block_form th {
+#exaport-block_form th {
     text-align: left;
 }
 
-#exaport #block_form .submit {
+#exaport-block_form .submit {
     background: url("images/btn-bkgd.gif") repeat-x scroll left top #2D5308;
     font-weight: bold;
     border-color: #51732F;

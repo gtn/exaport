@@ -508,7 +508,7 @@ else if ($action=="get_items_for_view"){
 	else{
 
 		$filepath="/";
-		$title = addslashes(optional_param('title', '', PARAM_TEXT));
+		$title = addslashes(optional_param('title', 'mytitle', PARAM_TEXT));
 		$description = addslashes(optional_param('description', '', PARAM_TEXT));
 		//$description = sauber($_POST["description"]);
 		$itemid=optional_param('itemid', 0, PARAM_INT);

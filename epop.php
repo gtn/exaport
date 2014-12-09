@@ -1461,9 +1461,11 @@ function block_exaport_installoez($userid,$isupdate=false){
 				}
 			}
 			if ($iteminsert==true) {
-				$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile,"parentid"=>$pid));
-				$rem_ids[0][$rs->exampid]=$newid; //remark relation for parentids later
-				if ($parentid_is_old) $rem_ids[1][$newid]=intval($rs->parentid);
+				if(!empty($items)){
+					$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile,"parentid"=>$pid));
+					$rem_ids[0][$rs->exampid]=$newid; //remark relation for parentids later
+					if ($parentid_is_old) $rem_ids[1][$newid]=intval($rs->parentid);
+				}
 			}
 		} //end foreach $row
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1,import_oez_tstamp=".time()." WHERE user_id=".$userid;

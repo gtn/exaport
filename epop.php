@@ -1379,7 +1379,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		$rse = $DB->get_record_sql($sql,array($userid));
 		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}*/
 	}
-	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid,examp.parentid  
+	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.task,examp.source as sourceexamp,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid,examp.parentid  
 	FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
 	INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 	INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
@@ -1432,10 +1432,11 @@ function block_exaport_installoez($userid,$isupdate=false){
 					$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid,"source"=>$rs->topsource,"sourceid"=>$rs->topsourceid,"sourcemod"=>7));$topid=$rs->topid;
 				}
 			}
+			$beispiel_url="";
 			if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
 			if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
+			if ($rs->task!="" && $rs->sourceexamp==3) $beispiel_url=$rs->task;
 	
-			if ($rs->completefile!="") $example_url=$rs->completefile;
 			if (!empty($rs->items)) $items=$rs->items;
 			else $items=$rs->item;
 			$iteminsert=true;
@@ -1450,7 +1451,9 @@ function block_exaport_installoez($userid,$isupdate=false){
 			}
 	
 			if ($isupdate==true){
-				if ($itemrs = $DB->get_records("block_exaportitem",array("isoez"=>1,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"userid"=>$userid,"categoryid"=>$newtopid))){  //kategoryId mitnehmen, weil ein item kopiert und auf verschiedene kategorien zugeordnet werden kann. beim update soll dann nur das jeweilige item aktualisiert werden, sonst ist categorie falsch
+				if($rs->source==3) $sourceidtemp=$rs->exampid; //if example created from teacher in moodle, there is no sourceid. because sourceid is from komet xml tool exacomp_data.xml
+				else $sourceidtemp=$rs->sourceid;
+				if ($itemrs = $DB->get_records("block_exaportitem",array("isoez"=>1,"source"=>$rs->source,"sourceid"=>$sourceidtemp,"userid"=>$userid,"categoryid"=>$newtopid))){  //kategoryId mitnehmen, weil ein item kopiert und auf verschiedene kategorien zugeordnet werden kann. beim update soll dann nur das jeweilige item aktualisiert werden, sonst ist categorie falsch
 					$iteminsert=false;
 					foreach($itemrs as $item){
 						$rem_ids[0][$rs->exampid]=$item->id; //remark relation for parentids later
@@ -1462,7 +1465,10 @@ function block_exaport_installoez($userid,$isupdate=false){
 			}
 			if ($iteminsert==true) {
 				if(!empty($items)){
-					$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile,"parentid"=>$pid));
+					if($rs->source==3) $sourceidtemp=$rs->exampid; //if example created from teacher in moodle, there is no sourceid. because sourceid is from komet xml tool exacomp_data.xml
+					else $sourceidtemp=$rs->sourceid;
+					$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$sourceidtemp,"example_url"=>$rs->completefile,"parentid"=>$pid));
+					
 					$rem_ids[0][$rs->exampid]=$newid; //remark relation for parentids later
 					if ($parentid_is_old) $rem_ids[1][$newid]=intval($rs->parentid);
 				}

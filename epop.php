@@ -1379,7 +1379,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		$rse = $DB->get_record_sql($sql,array($userid));
 		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}*/
 	}
-	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.task,examp.source as sourceexamp,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid,examp.parentid,examp.solution  
+	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.task,examp.source as sourceexamp,examp.ressources,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid,examp.parentid,examp.solution  
 	FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
 	INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 	INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
@@ -1435,7 +1435,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 			$beispiel_url="";
 			if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
 			if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
-			if ($rs->task!="" && $rs->sourceexamp==3) $beispiel_url=$rs->task;
+			if ($rs->task!="") $beispiel_url=$rs->task;
 	
 			if (!empty($rs->items)) $items=$rs->items;
 			else $items=$rs->item;

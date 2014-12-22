@@ -586,8 +586,7 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
 }
 function block_exaport_get_competences($item, $role=1) {
     global $DB;
-
-    return $DB->get_records('block_exacompcompuser_mm',array("userid"=>$item->userid,"role"=>$role,"eportfolioitem"=>1,"activityid"=>$item->id));
+	return $DB->get_records('block_exacompcompactiv_mm', array("eportfolioitem"=>1, "activityid"=>$item->id));
 }
 function block_exaport_build_comp_tree() {
     global $DB, $USER;

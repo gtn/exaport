@@ -1335,7 +1335,6 @@ function block_exaport_competence_selected($subjid,$userid,$itemid){
 		else return false;
 }
 function block_exaport_checkIfUpdate($userid){
-	
 		//$conditions = array("username" => $uname,"password" => $pword);
 		//if (!$user = $DB->get_record("user", $conditions)){
 		global $DB;
@@ -1392,6 +1391,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 	$row = $DB->get_records_sql($sql);
 	$stid=-1;$subjid=-1;$topid=-1;
 	$beispiel_url="";
+	$itemlist='0';
 	//if ($isupdate==false){
 		foreach($row as $rs){
 			$parentid_is_old=false;
@@ -1449,7 +1449,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 						$parentid_is_old=true;
 					}
 			}
-	
+			
 			if ($isupdate==true){
 				if($rs->source==3){
 					 $sourceidtemp=$rs->exampid; //if example created from teacher in moodle, there is no sourceid. because sourceid is from komet xml tool exacomp_data.xml
@@ -1462,6 +1462,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 				if ($itemrs = $DB->get_records("block_exaportitem",array("isoez"=>1,"source"=>$rs->source,"sourceid"=>$sourceidtemp,"userid"=>$userid,"categoryid"=>$newtopid))){  //kategoryId mitnehmen, weil ein item kopiert und auf verschiedene kategorien zugeordnet werden kann. beim update soll dann nur das jeweilige item aktualisiert werden, sonst ist categorie falsch
 					$iteminsert=false;
 					foreach($itemrs as $item){
+						$itemlist.=','.$item->id;
 						$rem_ids[0][$rs->exampid]=$item->id; //remark relation for parentids later
 						$data=array("id"=>$item->id,"userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$example_url,"parentid"=>$pid);
 						$DB->update_record('block_exaportitem', $data);
@@ -1481,12 +1482,16 @@ function block_exaport_installoez($userid,$isupdate=false){
 						$example_url=$rs->completefile;
 					}
 					$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$sourceidtemp,"example_url"=>$example_url,"parentid"=>$pid));
-					
+					$itemlist.=','.$newid;
 					$rem_ids[0][$rs->exampid]=$newid; //remark relation for parentids later
 					if ($parentid_is_old) $rem_ids[1][$newid]=intval($rs->parentid);
 				}
 			}
 		} //end foreach $row
+		
+		$sql='DELETE FROM {block_exaportitem} WHERE id NOT IN ('.$itemlist.') AND userid='.$userid.' AND isoez=1 AND intro="" AND url="" AND attachment=""';
+		$DB->execute($sql);
+		
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1,import_oez_tstamp=".time()." WHERE user_id=".$userid;
 		$DB->execute($sql);
   	block_exaport_update_unset_pids('block_exaportitem',$rem_ids);

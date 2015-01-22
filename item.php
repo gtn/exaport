@@ -163,6 +163,7 @@ if ($editform->is_cancelled()) {
 			break;
 
 		case 'edit':
+            $fromform->type = $type;
 			if (!$existing) {
 				print_error("bookmarknotfound", "block_exaport");
 			}
@@ -225,6 +226,13 @@ switch ($action) {
 					$extra_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
 				}
 				$extra_content .= "</div>";
+                
+                // Filemanager for editing file
+                $draftitemid = file_get_submitted_draft_itemid('file');
+                $context = context_user::instance($USER->id);
+                file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
+                                        array('subdirs' => false, 'maxfiles' => 1));                 
+                $post->file = $draftitemid;   
 			}
 				
 			if (!$extra_content) {
@@ -304,6 +312,13 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 		if ($post->url=='http://') $post->url="";
 		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
 	}
+    
+    // Updating file.
+    if ($post->type == 'file') {
+        $context = context_user::instance($USER->id);
+        file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, null);
+    }
+    
 	if ($DB->update_record('block_exaportitem', $post)) {
 		block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
 	} else {

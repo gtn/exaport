@@ -99,7 +99,11 @@ class block_exaport_item_edit_form extends moodleform {
 				$mform->addRule('file', null, 'required', null, 'client');
 				
 			} else {
-				// filename for assignment import
+                // Filemanager for edit file.
+                $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1));
+                $mform->addRule('file', null, 'required', null, 'client');
+
+				// Filename for assignment import.
 				$mform->addElement('hidden', 'filename');
 				$mform->setType('filename', PARAM_TEXT);
 				$mform->setDefault('filename', '');

@@ -1335,6 +1335,7 @@ function block_exaport_competence_selected($subjid,$userid,$itemid){
 		else return false;
 }
 function block_exaport_checkIfUpdate($userid){
+	
 		//$conditions = array("username" => $uname,"password" => $pword);
 		//if (!$user = $DB->get_record("user", $conditions)){
 		global $DB;
@@ -1391,6 +1392,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 	$row = $DB->get_records_sql($sql);
 	$stid=-1;$subjid=-1;$topid=-1;
 	$beispiel_url="";
+	$catlist='0';
 	$itemlist='0';
 	//if ($isupdate==false){
 		foreach($row as $rs){
@@ -1405,8 +1407,11 @@ function block_exaport_installoez($userid,$isupdate=false){
 				}else{
 					
 					$datas=array("pid"=>0,"stid"=>$rs->stid,"sourcemod"=>"3","userid"=>$userid,"name"=>$rs->kat0,"timemodified"=>$jetzn,"course"=>"0","isoez"=>"1","subjid"=>0,"topicid"=>0,"source"=>$rs->stsource,"sourceid"=>$rs->stsourceid,"description"=>$rs->stdescription);
-					$newstid=$DB->insert_record('block_exaportcate', $datas);$stid=$rs->stid;
+					$newstid=$DB->insert_record('block_exaportcate', $datas);
+					
 				}
+				$stid=$rs->stid;
+				$catlist.=','.$newstid;
 			}
 			if ($subjid!=$rs->subjid){ 
 				$keysub=$rs->subsource."#".$rs->subsourceid."#5"; 
@@ -1416,8 +1421,10 @@ function block_exaport_installoez($userid,$isupdate=false){
 					$newsubjid=$catold[$keysub]["id"];
 					$DB->update_record('block_exaportcate', array("id"=>$newsubjid,"name"=>$kat1s,"pid"=>$newstid,"timemodified"=>time(),"stid"=>$stid,"subjid"=>$rs->subjid,"description"=>$rs->subjdescription));
 				}else{
-					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5,"description"=>$rs->subjdescription));$subjid=$rs->subjid;
+					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5,"description"=>$rs->subjdescription));
 				}
+				$subjid=$rs->subjid;
+				$catlist.=','.$newsubjid;
 			}
 			if ($topid!=$rs->topid){
 				$keytop=$rs->topsource."#".$rs->topsourceid."#7";
@@ -1429,8 +1436,10 @@ function block_exaport_installoez($userid,$isupdate=false){
 					$newtopid=$catold[$keytop]["id"];
 					$DB->update_record('block_exaportcate', array("id"=>$newtopid,"name"=>$kat2s,"pid"=>$newsubjid,"timemodified"=>time(),"description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid));
 				}else{
-					$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid,"source"=>$rs->topsource,"sourceid"=>$rs->topsourceid,"sourcemod"=>7));$topid=$rs->topid;
+					$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid,"source"=>$rs->topsource,"sourceid"=>$rs->topsourceid,"sourcemod"=>7));
 				}
+				$topid=$rs->topid;
+				$catlist.=','.$newtopid;
 			}
 			$beispiel_url="";
 			if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
@@ -1491,6 +1500,14 @@ function block_exaport_installoez($userid,$isupdate=false){
 		
 		$sql='DELETE FROM {block_exaportitem} WHERE id NOT IN ('.$itemlist.') AND userid='.$userid.' AND isoez=1 AND intro="" AND url="" AND attachment=""';
 		$DB->execute($sql);
+		
+		$sql='SELECT * FROM {block_exaportcate} WHERE id NOT IN ('.$catlist.') AND userid='.$userid.' AND isoez=1';
+		$rows = $DB->get_records_sql($sql);
+		foreach($rows as $row){
+			if (!$DB->get_record("block_exaportitem", array("categoryid"=>$row->id))){
+				$DB->delete_records("block_exaportcate",array("id"=>$row->id));
+			}
+		}
 		
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1,import_oez_tstamp=".time()." WHERE user_id=".$userid;
 		$DB->execute($sql);

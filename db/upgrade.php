@@ -463,5 +463,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
     	upgrade_block_savepoint(true, 2014092600, 'exaport');
     }
     
+    if($oldversion < 2015012600) {
+    	// Define field autofill_artefacts to be added to block_exaporview
+    	$table = new xmldb_table('block_exaportview');
+    	$field = new xmldb_field('autofill_artefacts', XMLDB_TYPE_TEXT, null, null, null, null, null, null);
+    
+    	// Conditionally launch add field autofill_artefacts
+    	if (!$dbman->field_exists($table, $field)) {
+    		$dbman->add_field($table, $field);
+        }
+    }
+    
 	return $result;
 }

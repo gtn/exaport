@@ -146,6 +146,7 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform->addElement('hidden', 'action');
 		$mform->addElement('hidden', 'courseid');
 		$mform->addElement('hidden', 'viewid');
+        $mform->addElement('hidden', 'autofill_artefacts');
 		if (optional_param('type', 'content', PARAM_ALPHA)<>'title' and optional_param("action", "", PARAM_ALPHA)<>'add')
 			$mform->addElement('hidden', 'name');
 
@@ -158,7 +159,27 @@ class block_exaport_view_edit_form extends moodleform {
 
 							$mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'), array('rows'=> '20', 'cols'=>'5'), array('maxfiles' => EDITOR_UNLIMITED_FILES));
 							$mform->setType('description', PARAM_RAW);
-							
+                            
+                            if ($this->_customdata['view']) {
+                                $artefacts = block_exaport_get_portfolio_items();
+                                if (count($artefacts) > 0) {
+                                    if ($this->_customdata['view']->id > 0) {
+                                        foreach ($artefacts as $artefact) {
+                                            $allartefacts[] = $artefact->id;
+                                        };
+                                        $filledartefacts = explode(',', $this->_customdata['view']->autofill_artefacts);
+                                        sort($filledartefacts);
+                                        sort($allartefacts);
+                                        $diff = array_diff($allartefacts, $filledartefacts);
+                                        if (count($diff)>0) {
+                                            $mform->addElement('checkbox', 'autofill_add', '', get_string('autofillview_addartefacts', 'block_exaport'));
+                                        };
+                                    } else {
+                                        $mform->addElement('checkbox', 'autofill', '', get_string('autofillview', 'block_exaport'));
+                                    };
+                                };
+                            };
+
 							if (block_exaport_course_has_desp()) {
 								$langcode=get_string("langcode","block_desp");
 								$sql = "SELECT lang.id,lang.".$langcode." as name FROM {block_desp_lang} lang WHERE id IN(SELECT langid FROM {block_desp_check_lang} WHERE userid=?) OR id IN (SELECT langid FROM {block_desp_lanhistories} WHERE userid=?) ORDER BY lang.".$langcode;
@@ -270,6 +291,11 @@ if ($editform->is_cancelled()) {
 			$dbView->userid = $USER->id;
 			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
+                if ($dbView->autofill == 1) {
+                    $filledartefacts = fill_view_with_artefacts($dbView->id);
+                    $dbView->autofill_artefacts = $filledartefacts;
+                    $DB->update_record('block_exaportview', $dbView);
+                }
 				block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
 				print_error('addposterror', 'block_exaport', $returnurl);
@@ -288,6 +314,11 @@ if ($editform->is_cancelled()) {
 				else 
 					$dbView->layout=$view->layout;
 			};
+            // Add new artefacts if selected.
+            if ($dbView->autofill_add == 1) {
+                    $filledartefacts = fill_view_with_artefacts($dbView->id, $dbView->autofill_artefacts);
+                    $dbView->autofill_artefacts = $filledartefacts;
+            };
 			if ($DB->update_record('block_exaportview', $dbView)) {
 				block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
 			} else {
@@ -415,7 +446,8 @@ if ($editform->is_cancelled()) {
 		redirect($returnurl_to_list);
 	else /**/
 	$returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&sesskey='.sesskey().'&action=edit';
-	redirect($returnurl);
+
+    redirect($returnurl);
 }
 
 // gui setup
@@ -491,7 +523,46 @@ switch ($action) {
 		$strAction = get_string('edit');
 		break;
 	default :
-		print_error("unknownaction", "block_exaport");	                	            
+		print_error("unknownaction", "block_exaport");
+}
+
+/**
+ * Autofill the view with all existing artefacts
+ * @param integer $viewid
+ * @param string $existingartefacts 
+ * @return string Artefacts
+ */
+function fill_view_with_artefacts($viewid, $existingartefacts='') {
+	global $DB, $USER;
+    
+    $artefacts = block_exaport_get_portfolio_items();
+    if ($existingartefacts<>'') {
+        $existingartefactsarray = explode(',', $existingartefacts); 
+        $filledartefacts = $existingartefacts;
+    } else {
+        $existingartefactsarray = array();
+        $filledartefacts = '';
+    }
+    if (count($artefacts)>0) {
+        $y = 1;
+        foreach ($artefacts as $artefact) {
+            if (!in_array($artefact->id, $existingartefactsarray)) {
+                $block = new stdClass();
+                $block->itemid = $artefact->id;
+                $block->viewid = $viewid;
+                $block->type = 'item';
+                $block->positionx = 1;
+                $block->positiony = $y;
+                $block->id = $DB->insert_record('block_exaportviewblock', $block);
+                $y++;
+                $filledartefacts .= ','.$artefact->id;
+            }
+        }
+        if ($existingartefacts == '') {        
+            $filledartefacts = substr($filledartefacts, 1);
+        };
+    }; /**/
+    return $filledartefacts;
 }
 
 function block_exaport_get_view_blocks($view) {

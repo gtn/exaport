@@ -128,6 +128,7 @@
         <FIELD NAME="hash" TYPE="char" LENGTH="8" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="langid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="desp language id"/>
         <FIELD NAME="layout" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="2" SEQUENCE="false"/>
+        <FIELD NAME="autofill_artefacts" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

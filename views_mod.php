@@ -161,6 +161,7 @@ class block_exaport_view_edit_form extends moodleform {
 							$mform->setType('description', PARAM_RAW);
                             
                             if ($this->_customdata['view']) {
+                                // Auto generate view with the artefacts checkbos.
                                 $artefacts = block_exaport_get_portfolio_items();
                                 if (count($artefacts) > 0) {
                                     if ($this->_customdata['view']->id > 0) {
@@ -177,6 +178,19 @@ class block_exaport_view_edit_form extends moodleform {
                                     } else {
                                         $mform->addElement('checkbox', 'autofill', '', get_string('autofillview', 'block_exaport'));
                                     };
+                                };
+                                // Share to cheacher checkbox.
+                                $allteachers = block_exaport_get_course_teachers();
+                                // If view is editing.
+                                if ($this->_customdata['view']->id > 0) {
+                                    $allsharedusers = block_exaport_get_shared_users($this->_customdata['view']->id);
+                                    $diff = array_diff($allteachers, $allsharedusers);
+                                    // If there is teacher which does not share.
+                                    if ((count($allteachers) > 0) && (count($diff) > 0)) {
+                                        $mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher_add', 'block_exaport'));
+                                    };
+                                } else { // If view is adding.
+                                        $mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher', 'block_exaport'));
                                 };
                             };
 
@@ -291,11 +305,16 @@ if ($editform->is_cancelled()) {
 			$dbView->userid = $USER->id;
 			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
+                // Auto fill with the artefacts.
                 if ($dbView->autofill == 1) {
                     $filledartefacts = fill_view_with_artefacts($dbView->id);
                     $dbView->autofill_artefacts = $filledartefacts;
                     $DB->update_record('block_exaportview', $dbView);
                 }
+                // Auto Share to the teachers.
+                if ($dbView->sharetoteacher == 1) {
+                    share_view_to_teachers($dbView->id);
+                };
 				block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
 				print_error('addposterror', 'block_exaport', $returnurl);
@@ -318,6 +337,10 @@ if ($editform->is_cancelled()) {
             if ($dbView->autofill_add == 1) {
                     $filledartefacts = fill_view_with_artefacts($dbView->id, $dbView->autofill_artefacts);
                     $dbView->autofill_artefacts = $filledartefacts;
+            };
+            // Auto Share to the teachers.
+            if ($dbView->sharetoteacher == 1) {
+                share_view_to_teachers($dbView->id);
             };
 			if ($DB->update_record('block_exaportview', $dbView)) {
 				block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
@@ -447,7 +470,7 @@ if ($editform->is_cancelled()) {
 	else /**/
 	$returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&sesskey='.sesskey().'&action=edit';
 
-    redirect($returnurl);
+     redirect($returnurl);
 }
 
 // gui setup
@@ -563,6 +586,43 @@ function fill_view_with_artefacts($viewid, $existingartefacts='') {
         };
     }; /**/
     return $filledartefacts;
+}
+
+/**
+ * Autoshare the view to teachers
+ * @param integer $viewid
+ * @return nothing
+ */
+function share_view_to_teachers($viewid) {
+    global $DB, $USER;
+    if ($viewid > 0) {
+        $allteachers = block_exaport_get_course_teachers();
+        $allsharedusers = block_exaport_get_shared_users($viewid);
+        $diff = array_diff($allteachers, $allsharedusers);
+        $view = $DB->get_record_sql('SELECT * FROM {block_exaportview} WHERE id = ?', array('id'=>$viewid));
+        if (!$view->shareall) {
+            $view->shareall = 0;
+        };
+        if (!$view->externaccess) {
+            $view->externaccess = 0;
+        };
+        if (!$view->externcomment) {
+            $view->externcomment = 0;
+        };
+        $DB->update_record('block_exaportview', $view);        
+        // Add all teachers to shared users (if it is not there yet).
+        if ((count($allteachers) > 0) && (count($diff) > 0)) {
+            foreach ($diff as $userid) {
+                // If course has a teacher.
+                if ($userid > 0) {
+                    $shareItem = new stdClass();
+                    $shareItem->viewid = $view->id;
+                    $shareItem->userid = $userid;
+                    $DB->insert_record("block_exaportviewshar", $shareItem);
+                };
+            };
+        };
+    };
 }
 
 function block_exaport_get_view_blocks($view) {
@@ -703,6 +763,50 @@ function block_exaport_get_portfolio_items() {
 	
 	return $portfolioItems;
 }
+
+/**
+ * Function gets teachers array of course
+ * @return array
+ */
+function block_exaport_get_course_teachers() {
+    global $DB, $USER;
+    $courseid = optional_param('courseid', 0, PARAM_INT);
+    // Role id='3' - teachers. '4'- assistents.
+    $query = "SELECT u.id as userid, c.id, c.shortname, u.username
+        FROM {course} c
+        LEFT OUTER JOIN {context} cx ON c.id = cx.instanceid
+        LEFT OUTER JOIN {role_assignments} ra ON cx.id = ra.contextid AND ra.roleid = '3'
+        LEFT OUTER JOIN {user} u ON ra.userid = u.id
+        WHERE cx.contextlevel = '50' AND u.id>0 AND c.id = ".$courseid;
+    $courseteachers = $DB->get_records_sql($query); 
+    $teacherarray = array();
+    foreach($courseteachers as $teacher) {
+        if ($teacher->userid <> $USER->id) { // Except himself.
+            $teacherarray[] = $teacher->userid;
+        };
+    };
+    sort($teacherarray);
+    return $teacherarray;
+}
+
+/**
+ * Function gets all shared users
+ * @param $viewid
+ * @return array
+ */
+function block_exaport_get_shared_users($viewid) {
+    global $DB, $USER;
+    $sharedusers = array ();
+    if ($viewid > 0) {
+        $query = "SELECT userid FROM {block_exaportviewshar} s WHERE s.viewid=".$viewid;
+        $users = $DB->get_records_sql($query); 
+        foreach($users as $user) {
+            $sharedusers[] = $user->userid;
+        };
+    };
+    sort($sharedusers);
+    return $sharedusers;
+};
 
 if ($view) {
 	$postView->blocks = json_encode(block_exaport_get_view_blocks($view));

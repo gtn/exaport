@@ -272,6 +272,10 @@ $string['view_sharing_noaccess'] = 'Kein Zugriff';
 $string['show'] = 'Anzeigen';
 $string['thiscourse'] = 'Aktueller Kurs';
 $string['othercourses'] = 'Andere Kurse';
+$string['autofillview'] = 'Auto-generate a view based upon all available artefacts';
+$string['autofillview_addartefacts'] = 'New artifacts were created after creating this view. Add new artefacts to this view';
+$string['sharetoteacher'] = 'Share to the teacher of the course';
+$string['sharetoteacher_add'] = 'There is the teacher who did not share. Share to this teacher(s)';
 
 // Copy to course
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';

@@ -275,6 +275,10 @@ $string['view_sharing_noaccess'] = 'No Access';
 $string['show'] = "Show";
 $string['thiscourse'] = 'This course';
 $string['othercourses'] = 'other courses';
+$string['autofillview'] = 'Auto-generate a view based upon all available artefacts';
+$string['autofillview_addartefacts'] = 'New artifacts were created after creating this view. Add new artefacts to this view';
+$string['sharetoteacher'] = 'Share to the teacher of the course';
+$string['sharetoteacher_add'] = 'There is the teacher who did not share. Share to this teacher(s)';
 
 $string['createpage'] = 'Drag and drop content blocks from the tabs below to create your page.';
 $string['chooselayout'] = 'Select how you would like the columns in your page to be laid out.';

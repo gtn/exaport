@@ -141,6 +141,7 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform->setType('courseid', PARAM_INT);
 		$mform->setType('viewid', PARAM_INT);
 		$mform->setType('name', PARAM_TEXT);
+        $mform->setType('autofill_artefacts', PARAM_TEXT);
 		$mform->addElement('hidden', 'items');
 		$mform->addElement('hidden', 'draft_itemid');
 		$mform->addElement('hidden', 'action');
@@ -306,13 +307,13 @@ if ($editform->is_cancelled()) {
 			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
                 // Auto fill with the artefacts.
-                if ($dbView->autofill == 1) {
+                if (isset($dbView->autofill) and $dbView->autofill == 1) {
                     $filledartefacts = fill_view_with_artefacts($dbView->id);
                     $dbView->autofill_artefacts = $filledartefacts;
                     $DB->update_record('block_exaportview', $dbView);
                 }
                 // Auto Share to the teachers.
-                if ($dbView->sharetoteacher == 1) {
+                if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
                     share_view_to_teachers($dbView->id);
                 };
 				block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
@@ -327,19 +328,19 @@ if ($editform->is_cancelled()) {
 			}
 
 			$dbView->id = $view->id;
-			if (empty($dbView->layout)  || $dbView->layout==0) {
+			if (empty($dbView->layout) || $dbView->layout==0) {
 				if (empty($view->layout) || $view->layout==0)  
 					$dbView->layout=2;
 				else 
 					$dbView->layout=$view->layout;
 			};
             // Add new artefacts if selected.
-            if ($dbView->autofill_add == 1) {
+            if (isset($dbView->autofill_add) and $dbView->autofill_add == 1) {
                     $filledartefacts = fill_view_with_artefacts($dbView->id, $dbView->autofill_artefacts);
                     $dbView->autofill_artefacts = $filledartefacts;
             };
             // Auto Share to the teachers.
-            if ($dbView->sharetoteacher == 1) {
+            if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
                 share_view_to_teachers($dbView->id);
             };
 			if ($DB->update_record('block_exaportview', $dbView)) {

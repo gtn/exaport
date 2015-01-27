@@ -1386,7 +1386,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 	INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
 	INNER JOIN {block_exacompdescrexamp_mm} emm ON emm.descrid=descr.id
 	INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid";
-	$sql.=" WHERE st.isoez=1 OR (st.isoez=2 AND examp.source=2) OR (st.isoez=2 AND examp.source=3)".$where." ";
+	$sql.=" WHERE st.isoez=1 OR st.epop=1 OR subj.epop=1 OR top.epop=1 OR descr.epop=1 OR examp.epop=1 OR (st.isoez=2 AND examp.source=2) OR (examp.source=3)".$where." ";
 	$sql.=" ORDER BY st.id,subj.id,top.id";
 //echo $sql;die;
 	$row = $DB->get_records_sql($sql);

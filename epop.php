@@ -1473,7 +1473,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 					foreach($itemrs as $item){
 						$itemlist.=','.$item->id;
 						$rem_ids[0][$rs->exampid]=$item->id; //remark relation for parentids later
-						$data=array("id"=>$item->id,"userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$example_url,"parentid"=>$pid);
+						$data=array("id"=>$item->id,"userid"=>$userid,"categoryid"=>$newtopid,"name"=>$items,"beispiel_angabe"=>$rs->exampdescription,"timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$example_url,"parentid"=>$pid);
 						$DB->update_record('block_exaportitem', $data);
 						if ($parentid_is_old) $rem_ids[1][$item->id]=intval($rs->parentid); //save old parentid from new id
 					}

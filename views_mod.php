@@ -163,7 +163,7 @@ class block_exaport_view_edit_form extends moodleform {
                             
                             if ($this->_customdata['view']) {
                                 // Auto generate view with the artefacts checkbos.
-                                $artefacts = block_exaport_get_portfolio_items();
+                                $artefacts = block_exaport_get_portfolio_items(1);
                                 if (count($artefacts) > 0) {
                                     if ($this->_customdata['view']->id > 0) {
                                         foreach ($artefacts as $artefact) {
@@ -471,7 +471,7 @@ if ($editform->is_cancelled()) {
 	else /**/
 	$returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&sesskey='.sesskey().'&action=edit';
 
-     redirect($returnurl);
+    redirect($returnurl);
 }
 
 // gui setup
@@ -559,7 +559,7 @@ switch ($action) {
 function fill_view_with_artefacts($viewid, $existingartefacts='') {
 	global $DB, $USER;
     
-    $artefacts = block_exaport_get_portfolio_items();
+    $artefacts = block_exaport_get_portfolio_items(1);
     if ($existingartefacts<>'') {
         $existingartefactsarray = explode(',', $existingartefacts); 
         $filledartefacts = $existingartefacts;
@@ -683,18 +683,22 @@ function block_exaport_get_view_blocks($view) {
 	return $blocks;
 }
 
-function block_exaport_get_portfolio_items() {
+function block_exaport_get_portfolio_items($epopwhere = 0) {
 	global $DB, $USER;
-	
+    if ($epopwhere == 1) {
+        $addwhere = " AND ".block_exaport_get_item_where();
+    } else {
+        $addwhere = "";
+    };
 	$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
 		 " from {block_exaportitem} i".
 		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
 		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
 		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-		 " where i.userid=?".
+		 " where i.userid=? ".$addwhere.
 		 " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
 		 " ORDER BY i.name";
-		 //echo $query;
+		 //echo $query."<br><br>";
 	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
 	if (!$portfolioItems) {
 		$portfolioItems = array();

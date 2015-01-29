@@ -110,6 +110,8 @@ window.jQueryExaport = jQuery.noConflict(true);
 					$('#sharing-userlist :checkbox[name="'+this.name+'"]').attr('checked', this.checked);
 				});
 				*/
+
+                // stop slow loading
 				$('#sharing-userlist .shareusers:checkbox').click(function(){
 					// enable/disable notifyuser, according to shared users checkbox
 					var $notifyboxes = $(this).closest('tr').find('.notifyusers');
@@ -120,12 +122,27 @@ window.jQueryExaport = jQuery.noConflict(true);
 					}
 					
 					// check/uncheck all users
-					var $courseCheckboxes = $('#sharing-userlist .shareusers:checkbox[courseid='+$(this).attr('courseid')+']')
+					var $courseCheckboxes = $('#sharing-userlist .shareusers:checkbox[courseid='+$(this).attr('courseid')+']');
 					$('#sharing-userlist .shareusers-check-all[courseid='+$(this).attr('courseid')+']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
-				}).each(function(){
-					// wrapped in each, because triggerHandler only works on first element
-					$(this).triggerHandler('click');
 				});
+                $('.course-group-content').each(function(){
+                    var flag = 0;
+                    $(this).find( 'table > tbody > tr > td > input.shareusers').each(function(){
+                        if (flag==1)
+                            return false;
+                        if ($(this).prop('checked')==false)
+                            flag = 1;
+
+                        var $notifyboxes = $(this).closest('tr').find('.notifyusers');
+                        $notifyboxes.attr('disabled', !this.checked);
+                        if (!this.checked) {
+                            $notifyboxes.prop('checked', false);
+                        }
+                    });
+                    if (flag == 0) {
+                        $(this).find('table > tbody > tr > td > input.shareusers-check-all').prop('checked', true);
+                    }
+                });
 
 				// open/close course group
 				$('.course-group-title').on('click', function(){

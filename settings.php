@@ -22,4 +22,8 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configcheckbox('block_exaport_disable_external_comments', get_string('settings_disable_external_comments_head', 'block_exaport'),
                        get_string('settings_disable_external_comments_body', 'block_exaport', $CFG->wwwroot.'/blocks/exaport/admin.php?action=remove_shareall'), 0));
+    
+    $settings->add(new admin_setting_configcheckbox('block_exaport_external_trainer_assign', get_string('block_exaport_external_trainer_assign_head', 'block_exaport'),
+            get_string('block_exaport_external_trainer_assign_body', 'block_exaport'), 0));
+    
 }

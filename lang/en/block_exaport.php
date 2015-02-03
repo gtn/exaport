@@ -417,6 +417,12 @@ $string['settings_disable_shareall_head'] = 'Disable sharing with all users';
 $string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
 $string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
 $string['settings_disable_external_comments_body'] = '';
+$string['block_exaport_external_trainer_assign_head'] = 'Allow assigning external trainers for students. This is required for using the elove app';
+$string['block_exaport_external_trainer_assign_body'] = '';
+$string['block_exaport_external_trainer_assign'] = 'Assign external trainers';
+$string['block_exaport_external_trainer_assign_new'] = 'New assign: ';
+$string['block_exaport_external_trainer'] = 'Trainer';
+$string['block_exaport_external_trainer_student'] = 'Student';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
 

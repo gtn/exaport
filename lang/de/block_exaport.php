@@ -352,6 +352,13 @@ $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier
 //settings
 $string['settings_interaktion_exacomp_head'] = 'Interaktion exabis ePortfolio - exabis competencies';
 $string['settings_interaktion_exacomp_body'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
+$string['block_exaport_external_trainer_assign_head'] = 'Allow assigning external trainers for students. This is required for using the elove app';
+$string['block_exaport_external_trainer_assign_body'] = '';
+$string['block_exaport_external_trainer_assign'] = 'Externe Trainer zuordnen';
+$string['block_exaport_external_trainer_assign_new'] = 'Neue Zuordnung: ';
+$string['block_exaport_external_trainer'] = 'Ausbilder: ';
+$string['block_exaport_external_trainer_student'] = 'Auszubildender: ';
+
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(bisher gibt es noch keine Bookmarks)';
 $stringNotUsed['externallink'] = 'Externer Link';

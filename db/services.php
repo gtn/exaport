@@ -24,7 +24,8 @@ $services = array(
 						'block_exaport_get_category',
 						'block_exaport_delete_category',
 						'block_exaport_get_competencies_by_item',
-						'block_exaport_get_users_by_view'
+						'block_exaport_get_users_by_view',
+				        'block_exaport_get_external_trainer_students'
 						),
 				'restrictedusers' =>0,                      //if enabled, the Moodle administrator must link some user to this service
 				//into the administration
@@ -194,7 +195,13 @@ $functions = array(
 				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
 				'description' => 'Get view users',    //human readable description of the web service function
 				'type'        => 'read'                  //database rights of the web service function (read, write)
+		),
+        'block_exaport_get_external_trainer_students' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'get_external_trainer_students',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'Get external trainer\'s students' ,    //human readable description of the web service function
+				'type'        => 'read'                  //database rights of the web service function (read, write)
 		)
-		
 );
 ?>

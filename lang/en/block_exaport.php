@@ -334,6 +334,7 @@ $string['sharedwith'] = 'Shared with';
 $string['sharedwith_meand'] = 'Shared with me and {$a} other users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
+$string['sharedwith_shareexternal'] = 'Shared external';
 
 // Copy to course
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';

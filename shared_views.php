@@ -83,7 +83,8 @@ $views = $DB->get_records_sql(
                 " JOIN {block_exaportview} v ON u.id=v.userid" .
                 " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?" .
                 " LEFT JOIN {block_exaportviewshar} vshar_total ON v.id=vshar_total.viewid" .
-                " WHERE (".(block_exaport_shareall_enabled()?'v.shareall=1 OR':'')." vshar.userid IS NOT NULL) ". // only show shared all, if enabled
+                " WHERE ((".(block_exaport_shareall_enabled()?'v.shareall=1 OR':'')." vshar.userid IS NOT NULL) ". // only show shared all, if enabled
+                " OR v.externaccess = 1)".  // Add published external views.
 				" AND v.userid!=? ". // don't show my own views
 				$whre .
 				" GROUP BY v.id, v.userid, v.name, v.description, v.timemodified, v.shareall, v.externaccess, v.externcomment, v.hash, v.langid, v.layout, u.firstname, u.lastname, u.picture".
@@ -263,10 +264,20 @@ echo $OUTPUT->footer($course);
 
 
 function block_exaport_get_shared_with_text($view) {
-	if ($view->shareall)
-		return block_exaport_get_string('sharedwith_shareall');
+    $shared = "";
+    if ($view->shareall)
+		$shared = block_exaport_get_string('sharedwith_shareall');
 	elseif ($view->cnt_shared_users > 1)
-		return block_exaport_get_string('sharedwith_meand', $view->cnt_shared_users-1);
-	else
-		return block_exaport_get_string('sharedwith_onlyme');
+		$shared = block_exaport_get_string('sharedwith_meand', $view->cnt_shared_users-1);
+	elseif ($view->cnt_shared_users == 1)
+		$shared = block_exaport_get_string('sharedwith_onlyme'); /**/
+    if ($view->externaccess) {
+        if ($shared != "") {
+            return block_exaport_get_string('sharedwith_shareexternal')." / ".$shared;
+        } else {
+            return block_exaport_get_string('sharedwith_shareexternal');
+        }
+    } else {
+        return $shared;
+    };
 }

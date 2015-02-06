@@ -875,6 +875,11 @@ switch ($type) {
 		<?php
 		// view data form
 echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');
+// Preview button.
+echo '<div style="float: right;">
+            <a target="_blank" href="'.s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">
+                    <img alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/preview.png" />
+            </a></div>';
 echo '<ul>
     <li class="portfolioElement" title="'.get_string('personalinformation', 'block_exaport').'" block-type="personal_information">
         <div class="blocktype" style="position: relative;">

@@ -371,7 +371,7 @@ function exaport_get_shareable_courses_with_users($type) {
 	global $USER, $COURSE;
 
 	$courses = array();
-
+//, 'suspended' => 0, 'deleted' => 0
 	// loop through all my courses
 	foreach (enrol_get_my_courses(null, 'fullname ASC') as $dbCourse) {
 
@@ -386,7 +386,7 @@ function exaport_get_shareable_courses_with_users($type) {
 		//print_r($roles);
 		
 		foreach ($roles as $role) {
-			$users = get_role_users($role->id, $context, false, user_picture::fields('u'));
+			$users = get_role_users($role->id, $context, false, user_picture::fields('u'), null, true, '', '', '', ' deleted=0 AND suspended=0');
 			if (!$users) {
 				continue;
 			}

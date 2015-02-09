@@ -1240,7 +1240,41 @@ class block_exaport_external extends external_api {
                 )
         );
     }
-    
+    /**
+	 * Returns description of method parameters
+	 * @return external_function_parameters
+	 */
+	public static function get_item_example_status_parameters() {
+		return new external_function_parameters(
+				array(
+						'exampleid' => new external_value(PARAM_INT, 'example id')
+				)
+		);
+	}
+	
+	/**
+	 * Get status of example
+	 * @return status
+	 */
+	public static function get_item_example_status($exampleid) {
+		global $CFG,$DB,$USER;
+	
+		$params = self::validate_parameters(self::gget_item_example_status_parameters(), array('exampleid'=>$exampleid));
+	
+		return 0;
+	}
+	
+	/**
+	 * Returns desription of method return values
+	 * @return external_multiple_structure
+	 */
+	public static function get_item_example_status_returns() {
+		return new external_single_structure(
+				array(
+						'status' => new external_value(PARAM_INT, 'status')
+				)
+		);
+	}
     private static function block_exaport_recursive_delete_category($id) {
         global $DB;
 

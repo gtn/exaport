@@ -1259,9 +1259,9 @@ class block_exaport_external extends external_api {
 	public static function get_item_example_status($exampleid) {
 		global $CFG,$DB,$USER;
 	
-		$params = self::validate_parameters(self::gget_item_example_status_parameters(), array('exampleid'=>$exampleid));
-	
-		return 0;
+		$params = self::validate_parameters(self::get_item_example_status_parameters(), array('exampleid'=>$exampleid));
+		//TODO suche db eintrag mit exampleid und neuestem timestamp
+		return array("status"=>1);
 	}
 	
 	/**

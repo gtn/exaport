@@ -1260,8 +1260,17 @@ class block_exaport_external extends external_api {
 		global $CFG,$DB,$USER;
 	
 		$params = self::validate_parameters(self::get_item_example_status_parameters(), array('exampleid'=>$exampleid));
-		//TODO suche db eintrag mit exampleid und neuestem timestamp
-		return array("status"=>1);
+		$entries = $DB->get_records('block_exaportitemexample', array('exampleid'=>$exampleid));
+		
+		$current_timestamp = 0;
+		$status = 0;
+		foreach($entries as $entry){
+			if($current_timestamp < $entry->timecreated){
+				$current_timestamp = $entry->timecreated;
+				$status = $entry->status;
+			}
+		}
+		return array("status"=>$status);;
 	}
 	
 	/**

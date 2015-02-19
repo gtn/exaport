@@ -75,10 +75,6 @@ class block_exaport extends block_list {
 		$this->content->items[]='<a title="' . get_string('export', 'block_exaport') . '" href="' . $CFG->wwwroot . '/blocks/exaport/export_scorm.php?courseid=' . $COURSE->id . '">' . get_string('export', 'block_exaport') . '</a>';
 		$this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/export_scorm.png" height="16" width="23" alt="'.get_string("export", "block_exaport").'" />';
 
-		if(has_capability('block/exaport:assignstudents', $context)) {
-		    $this->content->items[]='<a title="' . get_string('block_exaport_external_trainer_assign', 'block_exaport') . '" href="' . $CFG->wwwroot . '/blocks/exaport/externaltrainers.php?courseid=' . $COURSE->id . '">' . get_string('block_exaport_external_trainer_assign', 'block_exaport') . '</a>';
-		    $this->content->icons[]='<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/personal.png" height="16" width="23" alt="'.get_string("export", "block_exaport").'" />';
-		}
         return $this->content;
     }
 }

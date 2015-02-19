@@ -196,20 +196,6 @@ $functions = array(
 				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
 				'description' => 'Get view users',    //human readable description of the web service function
 				'type'        => 'read'                  //database rights of the web service function (read, write)
-		),
-        'block_exaport_get_external_trainer_students' => array(         //web service function name
-				'classname'   => 'block_exaport_external',  //class containing the external function
-				'methodname'  => 'get_external_trainer_students',          //external function name
-				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
-				'description' => 'Get external trainer\'s students' ,    //human readable description of the web service function
-				'type'        => 'read'                  //database rights of the web service function (read, write)
-		),
-		'block_exaport_get_item_example_status' => array(    //web service function name
-		        'classname'   => 'block_exaport_external',  //class containing the external function
-				'methodname'  => 'get_item_example_status',          //external function name
-				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
-				'description' => 'Get Example Status',    //human readable description of the web service function
-				'type'        => 'read'                  //database rights of the web service function (read, write)
 		)
 );
 ?>

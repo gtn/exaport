@@ -172,7 +172,17 @@ function block_exaport_get_item_epop($id,$user){
 		return $item;
 	}
 }
-
+function block_exaport_get_elove_item($itemid, $userid, $authenticationinfo) {
+    global $DB;
+    //check if user is userid or if user is trainer of userid
+    if($userid == $authenticationinfo['user']->id)
+        return $DB->get_record('block_exaportitem', array('id'=>$itemid,'userid'=>$userid));
+    else if($DB->record_exists('block_exacompexternaltrainer', array('trainerid'=>$authenticationinfo['user']->id,
+            'studentid'=>$userid)))
+        return $DB->get_record('block_exaportitem', array('id'=>$itemid));
+    else
+        return false;
+}
 function block_exaport_epop_checkhash($userhash){
 	global $DB;
 	

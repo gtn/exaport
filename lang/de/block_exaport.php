@@ -137,6 +137,9 @@ $string['delete'] = 'L&ouml;schen';
 $string['add'] = 'Hinzuf&uuml;gen';
 $string['edit'] = 'Editieren';
 $string['checkall'] = 'Alle auswählen';
+$string['grouptitle'] = 'Gruppentitel';
+$string['membersnumber'] = 'Anzahl von Zuhörern';
+$string['nogroupsfound'] = 'Keine Gruppen gefunden';
 
 // export/import
 $string['import'] = 'Import';
@@ -272,9 +275,9 @@ $string['view_sharing_noaccess'] = 'Kein Zugriff';
 $string['show'] = 'Anzeigen';
 $string['thiscourse'] = 'Aktueller Kurs';
 $string['othercourses'] = 'Andere Kurse';
-$string['autofillview'] = 'Auto-generate a view based upon all available artefacts';
+$string['autofillview'] = 'Autogenerierte Views von bestehenden Artefakten';
 $string['autofillview_addartefacts'] = 'New artifacts were created after creating this view. Add new artefacts to this view';
-$string['sharetoteacher'] = 'Share to the teacher of the course';
+$string['sharetoteacher'] = 'sofort mit Kurs-Trainer/in teilen';
 $string['sharetoteacher_add'] = 'There is the teacher who did not share. Share to this teacher(s)';
 
 // Copy to course

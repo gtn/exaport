@@ -474,5 +474,20 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
     }
     
+    if($oldversion < 2015030201) {
+        // Add group sharing
+        $table = new xmldb_table('block_exaportviewgroupshar');
+        if (!$dbman->table_exists($table)) {
+            // fields
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+            $table->add_field('viewid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+            $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
+            // Create table            
+            $dbman->create_table($table);
+        }
+    }
+
+    
 	return $result;
 }

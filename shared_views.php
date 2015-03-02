@@ -80,19 +80,40 @@ if ($u > 0) {
 }
 else 
     $whre = "";
+
+// Views for user groups
+$usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), $sort='', $fields='groupid');
+if (is_array($usergroups)) {
+    foreach ($usergroups as $id => &$group) {
+        $usergroups[$id] = $group->groupid;
+    };
+    $usergroups_list = implode(',', $usergroups);
+    $userviews = $DB->get_records_sql('SELECT viewid FROM {block_exaportviewgroupshar} WHERE groupid IN ('.$usergroups_list.')');
+    foreach ($userviews as $id => &$view) {
+        $userviews[$id] = $view->viewid;
+    };
+    $userviews_list = implode(',', $userviews);
+};
+    
 $views = $DB->get_records_sql(
-                "SELECT v.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT vshar_total.userid) AS cnt_shared_users " .
+                "SELECT v.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT vshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT vgshar.groupid) AS cnt_shared_groups  " .
                 " FROM {user} u" .
                 " JOIN {block_exaportview} v ON u.id=v.userid" .
                 ($onlyexternal == 0 ? 
-                    " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?" 
+                    " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?"
                     : "").                    
-                " LEFT JOIN {block_exaportviewshar} vshar_total ON v.id=vshar_total.viewid" .
+                " LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid ".
+                " LEFT JOIN {block_exaportviewshar} vshar_total ON v.id=vshar_total.viewid " .
                 " WHERE (".
                     ($onlyexternal == 0 ? 
                             "(".(block_exaport_shareall_enabled() ? 'v.shareall=1 OR' : '')." vshar.userid IS NOT NULL) OR "  // only show shared all, if enabled
                             : " "). 
-                " v.externaccess = 1)".  // Add published external views.
+                    // Shared for you group
+//                    ((is_array($usergroups)) ? " u.id IN (".$usergroups_list.") OR " : "").
+                " v.externaccess = 1 ". // Add published external views.
+                ($onlyexternal == 0 ? 
+                    (is_array($userviews) && count($userviews)>0 ? " OR v.id IN (".$userviews_list.") ": "") : ""). // Add group shareing views
+                ")".  
 				" AND v.userid!=? ". // don't show my own views
 				$whre .
 				" GROUP BY v.id, v.userid, v.name, v.description, v.timemodified, v.shareall, v.externaccess, v.externcomment, v.hash, v.langid, v.layout, u.firstname, u.lastname, u.picture".
@@ -273,7 +294,7 @@ if ($views) {
 		//echo get_string('sortby') . ': ';
         echo '<div class="view-group-header">';
         echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;onlyexternal=".($onlyexternal == 1 ? "0" : "1" ).
-            (isset($sort) ? '&amp;sort='.$sort : '') . "\">" . 
+            (isset($sort) && $sort!='' ? '&amp;sort='.$sort : '') . "\">" . 
             ($onlyexternal == 1 ? get_string("display_all", "block_exaport") : get_string("display_onlyexternal", "block_exaport") ).
              "</a>";
 		echo '</div>';
@@ -286,9 +307,13 @@ echo $OUTPUT->footer($course);
 
 function block_exaport_get_shared_with_text($view) {
     $shared = "";
-    if ($view->shareall)
+    if ($view->shareall == 1)
 		$shared = block_exaport_get_string('sharedwith_shareall');
-	elseif ($view->cnt_shared_users > 1)
+    elseif ($view->cnt_shared_groups > 1)
+        $shared .= block_exaport_get_string('sharedwith_groupand', $view->cnt_shared_groups-1);
+    elseif ($view->cnt_shared_groups == 1) 
+        $shared = block_exaport_get_string('sharedwith_group');
+    elseif ($view->cnt_shared_users > 1)
 		$shared = block_exaport_get_string('sharedwith_meand', $view->cnt_shared_users-1);
 	elseif ($view->cnt_shared_users == 1)
 		$shared = block_exaport_get_string('sharedwith_onlyme'); /**/

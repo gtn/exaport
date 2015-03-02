@@ -122,6 +122,7 @@ $string['shareallexceptthose'] = 'Access for <span class=\'block_eportfolio_bold
 $string['sharenoneexceptthose'] = 'Access for <span class=\'block_eportfolio_bold\'>nobody</span> except the following users';
 $string['internalaccessall'] = 'Access for <span class=\'block_eportfolio_bold\'>all</span>';
 $string['internalaccessusers'] = 'Access only for the following users';
+$string['internalaccessgroups'] = 'Access only for the following groups';
 $string['externaccess'] = 'external E-Portfolio-Link';
 $string['showallusers'] = 'Show users of all my courses';
 $string['showcourseusers'] = 'Show only users of the course';
@@ -136,6 +137,9 @@ $string['delete'] = 'Delete';
 $string['add'] = 'Add';
 $string['edit'] = 'Edit';
 $string['checkall'] = 'Check all';
+$string['grouptitle'] = 'Group title';
+$string['membersnumber'] = 'Number of listeners';
+$string['nogroupsfound'] = 'No groups found';
 
 // export/import
 $string['import'] = 'Import';
@@ -335,6 +339,8 @@ $string['sharedwith_meand'] = 'Shared with me and {$a} other users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
+$string['sharedwith_group'] = 'Shared with my group';
+$string['sharedwith_groupand'] = 'Shared with my group and {$a} other groups';
 $string['only_external'] = 'Only external shared views';
 $string['display_onlyexternal'] = 'Display only external shared views';
 $string['display_all'] = 'Display all views';

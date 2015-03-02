@@ -132,6 +132,15 @@ function block_exaport_get_view_from_access($access)
 		// require exaport:use -> guest hasn't this right
 		$context = context_system::instance();
 		require_capability('block/exaport:use', $context);
+        
+        // Groups for user
+        $usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), $sort='', $fields='groupid');
+        if (is_array($usergroups)) {
+            foreach ($usergroups as $id => &$group) {
+                $usergroups[$id] = $group->groupid;
+            };
+            $usergroups_list = implode(',', $usergroups);
+        };
 
 		$hash = $accessPath[1];
 		$hash = explode('-', $hash);
@@ -146,10 +155,14 @@ function block_exaport_get_view_from_access($access)
 		
 		$view = $DB->get_record_sql("SELECT v.* FROM {block_exaportview} v".
 							" LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?".
+                            (is_array($usergroups) ? "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid " : "").
+                            
 							" WHERE v.userid=? AND v.id=? AND".
 							" ((v.userid=?)". // myself
 							"  OR (v.shareall=1)". // shared all
-							"  OR (v.shareall=0 AND vshar.userid IS NOT NULL))", array($USER->id, $userid, $viewid, $USER->id)); // shared for me
+							"  OR (v.shareall=0 AND vshar.userid IS NOT NULL) ".
+                            (is_array($usergroups) ? " OR vgshar.groupid IN (".$usergroups_list.") " : "").
+                            ")", array($USER->id, $userid, $viewid, $USER->id)); // shared for me
 
 		if (!$view) {
 			// view not found
@@ -333,6 +346,13 @@ function exaport_get_view_shared_users($viewid) {
 	return $sharedUsers;
 }
 
+function exaport_get_view_shared_groups($viewid) {
+	global $DB;
+	
+	$sharedGroups = $DB->get_records_menu('block_exaportviewgroupshar', array("viewid" => $viewid), null, 'groupid, groupid AS tmp');
+	return $sharedGroups;
+}
+
 function exaport_get_shareable_courses_with_users_for_view($viewid) {
 	global $DB;
 	
@@ -376,6 +396,50 @@ function exaport_get_shareable_courses_with_users_for_view($viewid) {
 	
 	return $courses;
 }
+
+function exaport_get_shareable_courses_with_groups_for_view($viewid) {
+	global $DB;
+	
+	$sharedGroups = exaport_get_view_shared_groups($viewid);
+	$courses = exaport_get_shareable_courses_with_groups('sharing');
+	
+	foreach ($courses as $course) {
+		foreach ($course->groups as $group) {
+			if (isset($sharedGroups[$group->id])) {
+				$group->shared_to = true;
+				unset($sharedGroups[$group->id]);
+			} else {
+				$group->shared_to = false;
+			}
+		}
+	}
+
+	if ($sharedGroups) {
+		$extraGroups = array();
+		
+		foreach ($sharedGroups as $groupid) {
+			$group = $DB->get_record('groups', array('id' => $groupid));
+			if (!$group)
+				// doesn't exist anymore
+				continue;
+
+			$extraGroups[] = (object)array(
+				'id' => $group->id,
+				'title' => $group->name,
+				'shared_to' => true
+			);
+		}
+
+		array_unshift($courses, (object)array(
+			'id' => -1,
+			'title' => get_string('other_groups_course', 'block_exaport'),
+			'groups' => $extraGroups
+		));
+	}
+	
+	return $courses;
+}
+
 
 function exaport_get_shareable_courses_with_users($type) {
 	global $USER, $COURSE;
@@ -480,6 +544,68 @@ function exaport_get_shareable_courses_with_users($type) {
 	);
 	*/
 
+	return $courses;
+}
+
+function exaport_get_shareable_courses_with_groups($type) {
+	global $DB, $USER, $COURSE;
+
+	$courses = array();
+	// loop through all my courses
+	foreach (enrol_get_my_courses(null, 'fullname ASC') as $dbCourse) {
+		$course = (object)array(
+			'id' => $dbCourse->id,
+			'fullname' => $dbCourse->fullname,
+			'groups' => array()
+		);
+		
+		$context = context_course::instance($dbCourse->id);
+        //$groupoptions = array();
+        if (groups_get_course_groupmode($dbCourse) == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
+            $groups = groups_get_user_groups($dbCourse->id);
+            $allgroups = groups_get_all_groups($dbCourse->id);
+            if (!empty($groups[$dbCourse->defaultgroupingid])) {
+                foreach ($groups[$dbCourse->defaultgroupingid] AS $groupid) {
+                    $members = 0;
+                    $members = $DB->count_records("groups_members", array("groupid" => $group->id)); 
+                    $course->groups[$group->id] = (object)array(
+                        'id' => $groupid,
+                        'title' => format_string($group->name, true, array('context'=>$context)), 
+                        'members' => $members
+                    );
+//                    $groupoptions[$groupid] = format_string($allgroups[$groupid]->name, true, array('context'=>$context));
+                }
+            }
+        } else {
+            //$groupoptions = array('0'=>get_string('allgroups'));
+            if (has_capability('moodle/site:accessallgroups', $context)) {
+                // user can see all groups
+                $allgroups = groups_get_all_groups($dbCourse->id);
+            } else {
+                // user can see course level groups
+                $allgroups = groups_get_all_groups($dbCourse->id, 0, $COURSE->defaultgroupingid);
+            }
+            foreach($allgroups as $group) {
+                $members = 0;
+                $members = $DB->count_records("groups_members", array("groupid" => $group->id)); 
+                $course->groups[$group->id] = (object)array(
+                    'id' => $group->id,
+                    'title' => format_string($group->name, true, array('context'=>$context)),
+                    'members' => $members
+                );
+                //$groupoptions[$group->id] = format_string($group->name, true, array('context'=>$context));
+            }
+        }
+
+		$courses[$course->id] = $course;
+	}
+
+	// move active course to first position
+	if (isset($courses[$COURSE->id]) && ($type != 'shared_views')) {
+		$course = $courses[$COURSE->id];
+		unset($courses[$COURSE->id]);
+		$courses = array_merge(array($course->id=>$course), $courses);
+	}
 	return $courses;
 }
 

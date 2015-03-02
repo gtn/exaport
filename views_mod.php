@@ -39,9 +39,20 @@ if ($action=="add")
 //if (function_exists("clean_param_array")) $shareusers=clean_param_array($_POST["shareusers"],PARAM_SEQUENCE,true);
 //else 
 if (!empty($_POST["shareusers"])){
-	$shareusers=$_POST["shareusers"];
-	if (function_exists("clean_param_array")) $shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
-}else{$shareusers="";}
+	$shareusers = $_POST["shareusers"];
+	if (function_exists("clean_param_array")) 
+        $shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
+} else {
+    $shareusers = "";
+}
+
+if (!empty($_POST["sharegroups"])){
+	$sharegroups = $_POST["sharegroups"];
+	if (function_exists("clean_param_array")) 
+        $sharegroups=clean_param_array($sharegroups, PARAM_SEQUENCE, false);
+} else {
+    $sharegroups = "";
+}
 
 
 if (!confirm_sesskey()) {
@@ -80,6 +91,11 @@ if ($id) {
 
 if ($view && $action == 'userlist') {
 	echo json_encode(exaport_get_shareable_courses_with_users_for_view($view->id));
+	exit;
+}
+
+if ($view && $action == 'grouplist') {
+	echo json_encode(exaport_get_shareable_courses_with_groups_for_view($view->id));
 	exit;
 }
 
@@ -455,6 +471,18 @@ if ($editform->is_cancelled()) {
 					}
 				}
 			}
+            // delete all shared groups
+			$DB->delete_records("block_exaportviewgroupshar", array('viewid'=>$dbView->id));
+            // Add new groups sharing. shareall == 0 - users sharing; 1 - share for all; 2 - groups sharing.
+			if ($dbView->internaccess && $dbView->shareall == 2 && is_array($sharegroups)) {
+				foreach ($sharegroups as $sharegroup) {
+					$sharegroup = clean_param($sharegroup, PARAM_INT);
+					$shareItem = new stdClass();
+					$shareItem->viewid = $dbView->id;
+					$shareItem->groupid = $sharegroup;
+					$DB->insert_record("block_exaportviewgroupshar", $shareItem);
+				};
+            };
 			
 			if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
 				// search button pressed -> redirect to search form
@@ -471,6 +499,7 @@ if ($editform->is_cancelled()) {
 	else /**/
 	$returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&sesskey='.sesskey().'&action=edit';
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     redirect($returnurl);
 }
 
@@ -836,6 +865,7 @@ if ($type<>'title') {// for delete php notes
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
+    'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
 	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_badge', 'view_specialitem_text_defaulttext',
 	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',
@@ -1104,9 +1134,10 @@ break;
 						echo '<div style="padding: 4px 0;"><table>';
 							if (block_exaport_shareall_enabled()) {
 								echo '<tr><td style="padding-right: 10px; width: 10px">';
-								echo '<input type="radio" name="shareall" value="1"'.($postView->shareall?' checked="checked"':'').' />';
+								echo '<input type="radio" name="shareall" value="1"'.($postView->shareall==1 ? ' checked="checked"':'').' />';
 								echo '</td><td>'.get_string("internalaccessall", "block_exaport").'</td></tr>';
 							}
+                            // Internal access for users.
 							echo '<tr><td style="padding-right: 10px">';
 							echo '<input type="radio" name="shareall" value="0"'.(!$postView->shareall?' checked="checked"':'').'/>';
 							echo '</td><td>'.get_string("internalaccessusers", "block_exaport").'</td></tr>';
@@ -1120,6 +1151,13 @@ break;
 								echo '</div>';
 							}
 							echo '<div id="sharing-userlist">userlist</div>';
+							echo '</td></tr>';
+                            // Internal access for groups.
+							echo '<tr><td style="padding-right: 10px">';
+							echo '<input type="radio" name="shareall" value="2"'.($postView->shareall == 2 ? ' checked="checked" ':'').'/>';
+							echo '</td><td>'.get_string("internalaccessgroups", "block_exaport").'</td></tr>';
+							echo '<tr id="internaccess-groups"><td></td><td>';
+							echo '<div id="sharing-grouplist">grouplist</div>';
 							echo '</td></tr>';
 						echo '</table></div>';
 					echo '</td></tr>';

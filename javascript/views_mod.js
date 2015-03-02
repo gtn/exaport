@@ -587,7 +587,7 @@ var exaportViewEdit = {};
 	});
 
 	$(function(){
-		ExabisEportfolio.load_userlist('views_mod');
+		//ExabisEportfolio.load_userlist('views_mod');
 	});
 
 	// sharing
@@ -605,17 +605,26 @@ var exaportViewEdit = {};
 
 		if ($form.find(':input[name=internaccess]').is(':checked')) {
 			$('#internaccess-settings').show();
+			$('#internaccess-groups').hide();
 			if (share_text) {
 				share_text += ' '+$E.translate('viewand')+' ';
 			}
 			share_text += $E.translate('internalaccess')+': ';
 			
-			if ($form.find(':input[name=shareall]:checked').val() > 0) {
+			if ($form.find(':input[name=shareall]:checked').val() == 1) {
 				share_text += $E.translate('internalaccessall');
 				$('#internaccess-users').hide();
+				$('#internaccess-groups').hide();
+			} else if ($form.find(':input[name=shareall]:checked').val() == 2) {
+				share_text += $E.translate('internalaccessgroups');
+				$('#internaccess-users').hide();
+				$('#internaccess-groups').show();
+                ExabisEportfolio.load_grouplist('views_mod');
 			} else {
 				share_text += $E.translate('internalaccessusers');
+				$('#internaccess-groups').hide();
 				$('#internaccess-users').show();
+                ExabisEportfolio.load_userlist('views_mod');
 			}
 		} else {
 			$('#internaccess-settings').hide();

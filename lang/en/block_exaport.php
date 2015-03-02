@@ -247,6 +247,7 @@ $string['share'] = 'Share';
 $string['explainingall'] = 'All Items in your portfolio';
 $string['share_to_other_users'] = 'Share to other users not in my courses';
 $string['other_users_course'] = 'Users not in my courses';
+$string['other_groups_course'] = 'Other courses';
 
 // Item sorting
 $string['userdefinedsort'] = 'Define your own search';

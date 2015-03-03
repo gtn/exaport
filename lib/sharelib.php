@@ -153,7 +153,7 @@ function block_exaport_get_view_from_access($access)
 		//$userid = $hash[0];
 		//$viewid = $hash[1];
 		
-		$view = $DB->get_record_sql("SELECT v.* FROM {block_exaportview} v".
+		$view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v".
 							" LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?".
                             (is_array($usergroups) ? "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid " : "").
                             

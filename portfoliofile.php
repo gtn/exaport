@@ -89,7 +89,7 @@ if ($access && $id) {
 	//if ($item->type != 'file') print_error('Item not a file');
 
 	if ($file = block_exaport_get_item_file($item)) {
-		send_stored_file($file);
+		send_stored_file($file, 1);
 	} else {
 		not_found();
 	}

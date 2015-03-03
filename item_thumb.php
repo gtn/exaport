@@ -19,7 +19,7 @@ switch ($item->type) {
 		
 		// serve file
 		if ($file && $file->is_valid_image()) {
-			send_stored_file($file);
+			send_stored_file($file, 1);
 			exit;
 		}
 

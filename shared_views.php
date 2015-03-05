@@ -83,16 +83,16 @@ else
 
 // Views for user groups
 $usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), $sort='', $fields='groupid');
-if (is_array($usergroups)) {
+if ((is_array($usergroups)) && (count($usergroups) > 0)) {
     foreach ($usergroups as $id => &$group) {
         $usergroups[$id] = $group->groupid;
     };
-    $usergroups_list = implode(',', $usergroups);
-    $userviews = $DB->get_records_sql('SELECT viewid FROM {block_exaportviewgroupshar} WHERE groupid IN ('.$usergroups_list.')');
-    foreach ($userviews as $id => &$view) {
-        $userviews[$id] = $view->viewid;
-    };
-    $userviews_list = implode(',', $userviews);
+        $usergroups_list = implode(',', $usergroups);
+        $userviews = $DB->get_records_sql('SELECT viewid FROM {block_exaportviewgroupshar} WHERE groupid IN ('.$usergroups_list.')');
+        foreach ($userviews as $id => &$view) {
+            $userviews[$id] = $view->viewid;
+        };
+        $userviews_list = implode(',', $userviews);
 };
     
 $views = $DB->get_records_sql(
@@ -112,7 +112,7 @@ $views = $DB->get_records_sql(
 //                    ((is_array($usergroups)) ? " u.id IN (".$usergroups_list.") OR " : "").
                 " v.externaccess = 1 ". // Add published external views.
                 ($onlyexternal == 0 ? 
-                    (is_array($userviews) && count($userviews)>0 ? " OR v.id IN (".$userviews_list.") ": "") : ""). // Add group shareing views
+                    (isset($userviews) && count($userviews)>0 ? " OR v.id IN (".$userviews_list.") ": "") : ""). // Add group shareing views
                 ")".  
 				" AND v.userid!=? ". // don't show my own views
 				$whre .

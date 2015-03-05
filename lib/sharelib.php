@@ -135,7 +135,7 @@ function block_exaport_get_view_from_access($access)
         
         // Groups for user
         $usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), $sort='', $fields='groupid');
-        if (is_array($usergroups)) {
+        if ((is_array($usergroups)) && (count($usergroups) > 0)) {
             foreach ($usergroups as $id => &$group) {
                 $usergroups[$id] = $group->groupid;
             };
@@ -155,13 +155,13 @@ function block_exaport_get_view_from_access($access)
 		
 		$view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v".
 							" LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?".
-                            (is_array($usergroups) ? "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid " : "").
+                            (((is_array($usergroups)) && (count($usergroups) > 0)) ? "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid " : "").
                             
 							" WHERE v.userid=? AND v.id=? AND".
 							" ((v.userid=?)". // myself
 							"  OR (v.shareall=1)". // shared all
 							"  OR (v.shareall=0 AND vshar.userid IS NOT NULL) ".
-                            (is_array($usergroups) ? " OR vgshar.groupid IN (".$usergroups_list.") " : "").
+                            (((is_array($usergroups)) && (count($usergroups) > 0)) ? " OR vgshar.groupid IN (".$usergroups_list.") " : "").
                             ")", array($USER->id, $userid, $viewid, $USER->id)); // shared for me
 
 		if (!$view) {

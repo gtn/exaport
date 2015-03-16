@@ -1215,6 +1215,65 @@ class block_exaport_external extends external_api {
         // delete items
         $DB->delete_records('block_exaportitem', array('categoryid'=>$id));
     }
+    
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function export_file_to_externalportfolio_parameters() {
+        return new external_function_parameters(
+                 array(
+                                'component' => new external_value(PARAM_RAW, 'filestorage - component'),
+                                'contextid' => new external_value(PARAM_INT, 'filestorage - contextid'),
+                                'userid' => new external_value(PARAM_INT, 'filestorage - userid'),
+                                'filearea' => new external_value(PARAM_RAW, 'filestorage - filearea'),
+                                'filename' => new external_value(PARAM_RAW, 'filestorage - filename'),
+                                'filepath' => new external_value(PARAM_RAW, 'filestorage - filepath'),
+                                'itemid' => new external_value(PARAM_INT, 'filestorage - itemid'),
+                                   'license' => new external_value(PARAM_RAW, 'filestorage - license'),
+                                   'author' => new external_value(PARAM_RAW, 'filestorage - author'),
+                                   'source' => new external_value(PARAM_RAW, 'filestorage - source'),
+                        )
+        );
+    }
+
+    /**
+     * Export file to external protfolio
+     * @return all items available
+     */
+    public static function export_file_to_externalportfolio($component, $contextid, $userid, $filearea, $filename, $filepath, $itemid, $license, $author, $source) {
+        global $CFG,$DB,$USER;
+
+        $params = self::validate_parameters(self::export_file_to_externalportfolio_parameters(), array('component'=>$component, 'contextid'=>$contextid, 'userid'=>$userid, 'filearea'=>$filearea,
+                        'filename'=>$filename, 'filepath'=>$filepath, 'itemid'=>$itemid, 'license'=>$license, 'author'=>$author, 'source'=>$source));
+        if (empty($component) || empty($contextid) || empty($userid) || empty($filearea) || empty($filename) || empty($filepath) || empty($itemid)) {
+            throw new invalid_parameter_exception('There is not enough parametersy');
+        };
+        // Preparing for transmission of data
+        
+        $file_params = $params;
+        unset($file_params['license']);
+        unset($file_params['author']);
+        
+        // script for export
+        require_once($CFG->dirroot.'/blocks/exaport/upload_externalportfolio.php');
+        
+        return array('success'=>$success, 'linktofile'=>$result_querystring);
+    }
+
+    /**
+     * Returns desription of method return values
+     * @return external_multiple_structure
+     */
+    public static function export_file_to_externalportfolio_returns() {
+        return new external_single_structure(
+                array(
+                        'success' => new external_value(PARAM_BOOL, 'status'),
+                        'linktofile' => new external_value(PARAM_TEXT, 'link to file')
+                )
+        );
+    }
+    
 }
 
 ?>

@@ -26,7 +26,8 @@ $services = array(
 						'block_exaport_get_competencies_by_item',
 						'block_exaport_get_users_by_view',
 				        'block_exaport_get_external_trainer_students',
-                        'block_exaport_get_item_example_status'
+                        'block_exaport_get_item_example_status',
+                        'block_exaport_export_file_to_externalportfolio'
 						),
 				'restrictedusers' =>0,                      //if enabled, the Moodle administrator must link some user to this service
 				//into the administration
@@ -196,6 +197,13 @@ $functions = array(
 				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
 				'description' => 'Get view users',    //human readable description of the web service function
 				'type'        => 'read'                  //database rights of the web service function (read, write)
+		),
+		'block_exaport_export_file_to_externalportfolio' => array(         //web service function name
+				'classname'   => 'block_exaport_external',  //class containing the external function
+				'methodname'  => 'export_file_to_externalportfolio',          //external function name
+				'classpath'   => 'blocks/exaport/externallib.php',  //file containing the class/external function
+				'description' => 'Export file to external portfolio',    //human readable description of the web service function
+				'type'        => 'write'                  //database rights of the web service function (read, write)
 		)
 );
 ?>

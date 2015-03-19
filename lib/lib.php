@@ -730,4 +730,285 @@ function block_exaport_get_all_user_badges() {
 	} else
 		return null;
 }
+function block_exaport_get_user_category($title, $userid) {
+    global $DB;
+    
+    return $DB->get_record('block_exaportcate', array('userid'=>$userid,'name'=>$title));
+}
+function block_exaport_create_user_category($title, $userid, $parentid = 0) {
+    global $DB;
+    
+    if(!$DB->record_exists('block_exaportcate', array('userid'=>$userid,'name'=>$title,'pid'=>$parentid))) {
+        $id = $DB->insert_record('block_exaportcate',array('userid'=>$userid,'name'=>$title,'pid'=>$parentid));
+        return $DB->get_record('block_exaportcate',array('id'=>$id));
+    }
+    return false;
+}
 
+/**
+ * Autofill the view with all existing artefacts
+ * @param integer $viewid
+ * @param string $existingartefacts
+ * @return string Artefacts
+ */
+function fill_view_with_artefacts($viewid, $existingartefacts='') {
+    global $DB, $USER;
+
+    $artefacts = block_exaport_get_portfolio_items(1);
+    if ($existingartefacts<>'') {
+        $existingartefactsarray = explode(',', $existingartefacts);
+        $filledartefacts = $existingartefacts;
+    } else {
+        $existingartefactsarray = array();
+        $filledartefacts = '';
+    }
+    if (count($artefacts)>0) {
+        $y = 1;
+        foreach ($artefacts as $artefact) {
+            if (!in_array($artefact->id, $existingartefactsarray)) {
+                $block = new stdClass();
+                $block->itemid = $artefact->id;
+                $block->viewid = $viewid;
+                $block->type = 'item';
+                $block->positionx = 1;
+                $block->positiony = $y;
+                $block->id = $DB->insert_record('block_exaportviewblock', $block);
+                $y++;
+                $filledartefacts .= ','.$artefact->id;
+            }
+        }
+        if ($existingartefacts == '') {
+            $filledartefacts = substr($filledartefacts, 1);
+        };
+    }; /**/
+    return $filledartefacts;
+}
+
+/**
+ * Autoshare the view to teachers
+ * @param integer $viewid
+ * @return nothing
+ */
+function share_view_to_teachers($viewid) {
+    global $DB, $USER;
+    if ($viewid > 0) {
+        $allteachers = block_exaport_get_course_teachers();
+        $allsharedusers = block_exaport_get_shared_users($viewid);
+        $diff = array_diff($allteachers, $allsharedusers);
+        $view = $DB->get_record_sql('SELECT * FROM {block_exaportview} WHERE id = ?', array('id'=>$viewid));
+        if (!$view->shareall) {
+            $view->shareall = 0;
+        };
+        if (!$view->externaccess) {
+            $view->externaccess = 0;
+        };
+        if (!$view->externcomment) {
+            $view->externcomment = 0;
+        };
+        $DB->update_record('block_exaportview', $view);
+        // Add all teachers to shared users (if it is not there yet).
+        if ((count($allteachers) > 0) && (count($diff) > 0)) {
+            foreach ($diff as $userid) {
+                // If course has a teacher.
+                if ($userid > 0) {
+                    $shareItem = new stdClass();
+                    $shareItem->viewid = $view->id;
+                    $shareItem->userid = $userid;
+                    $DB->insert_record("block_exaportviewshar", $shareItem);
+                };
+            };
+        };
+    };
+}
+
+function block_exaport_get_view_blocks($view) {
+    global $DB, $USER;
+
+    $portfolioItems = block_exaport_get_portfolio_items();
+    $badges = block_exaport_get_all_user_badges();
+
+    $query = "select b.*".
+            " from {block_exaportviewblock} b".
+            " where b.viewid = ? ORDER BY b.positionx, b.positiony";
+
+    $allBlocks = $DB->get_records_sql($query, array($view->id));
+    $blocks = array();
+
+    foreach ($allBlocks as $block) {
+        if ($block->type == 'item') {
+            if (!isset($portfolioItems[$block->itemid])) {
+                // item not found
+                continue;
+            }
+            $block->item = $portfolioItems[$block->itemid];
+        } elseif ($block->type == 'badge') {
+            // find bage by id
+            $badge = null;
+            foreach ($badges as $tmp) {
+                if ($tmp->id == $block->itemid) {
+                    $badge = $tmp;
+                    break;
+                }
+            }
+            if (!$badge) {
+                // badge not found
+                continue;
+            }
+            	
+            $context = context_course::instance($badge->courseid);
+            $badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+
+            $block->badge = $badge;
+        } else {
+            $block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);
+            $block->itemid = null;
+        }
+
+        // clean html texts for output
+        if (isset($block->print_text) && $block->print_text) {
+            $block->print_text = clean_text($block->print_text, FORMAT_HTML);
+        }
+        if (isset($block->intro) && $block->intro) {
+            $block->intro = clean_text($block->intro, FORMAT_HTML);
+        }
+
+        $blocks[$block->id] = $block;
+    }
+
+    return $blocks;
+}
+
+function block_exaport_get_portfolio_items($epopwhere = 0) {
+    global $DB, $USER;
+    if ($epopwhere == 1) {
+        $addwhere = " AND ".block_exaport_get_item_where();
+    } else {
+        $addwhere = "";
+    };
+    $query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
+            " from {block_exaportitem} i".
+            " left join {block_exaportcate} ic on i.categoryid = ic.id".
+            " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+            " left join {block_exaportitemcomm} com on com.itemid = i.id".
+            " where i.userid=? ".$addwhere.
+            " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
+            " ORDER BY i.name";
+    //echo $query."<br><br>";
+    $portfolioItems = $DB->get_records_sql($query, array($USER->id));
+    if (!$portfolioItems) {
+        $portfolioItems = array();
+    }
+
+    // add shared items
+    $shared_items = exaport_get_shared_items_for_user($USER->id, true);
+    $portfolioItems = $portfolioItems + $shared_items;
+
+    foreach ($portfolioItems as &$item) {
+        if (null == $item->cname) {
+            $item->category = format_string(block_exaport_get_root_category()->name);
+            $item->catid = 0;
+        } elseif (null == $item->cname_parent) {
+            $item->category = format_string($item->cname);
+        } else {
+            //$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
+            $catid= $item->catid;
+            $catname = $item->cname;
+            $item->category = "";
+            do{
+                $conditions = array("userid" => $USER->id, "id" => $catid);
+                $cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
+                foreach($cats as $cat){
+                    if($item->category == "")
+                        $item->category =format_string($cat->name);
+                    else
+                        $item->category =format_string($cat->name)." &rArr; ".$item->category;
+                    $catid = $cat->pid;
+                }
+
+            }while ($cat->pid != 0);
+        }
+
+        if ($item->intro) {
+            $item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+            $item->intro = clean_text($item->intro, FORMAT_HTML);
+        }
+
+        //get competences of the item
+        $item->userid = $USER->id;
+
+        $comp = block_exaport_check_competence_interaction();
+        if($comp){
+            $array = block_exaport_get_competences($item, 0);
+
+            if(count($array)>0){
+                $competences = "";
+                foreach($array as $element){
+                    $conditions = array("id" => $element->compid);
+                    $competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING);
+
+                    if($competencesdb != null){
+                        $competences .= $competencesdb->title.'<br>';
+                    }
+                }
+                $competences = str_replace("\r", "", $competences);
+                $competences = str_replace("\n", "", $competences);
+                $competences = str_replace("\"", "&quot;", $competences);
+                $competences = str_replace("'", "&prime;", $competences);
+                	
+                $item->competences = $competences;
+            }
+        }
+
+        unset($item->userid);
+
+        unset($item->cname);
+        unset($item->cname_parent);
+    }
+    //	print_r($portfolioItems);
+
+    return $portfolioItems;
+}
+
+/**
+ * Function gets teachers array of course
+ * @return array
+ */
+function block_exaport_get_course_teachers() {
+    global $DB, $USER;
+    $courseid = optional_param('courseid', 0, PARAM_INT);
+    // Role id='3' - teachers. '4'- assistents.
+    $query = "SELECT u.id as userid, c.id, c.shortname, u.username
+    FROM {course} c
+    LEFT OUTER JOIN {context} cx ON c.id = cx.instanceid
+    LEFT OUTER JOIN {role_assignments} ra ON cx.id = ra.contextid AND ra.roleid = '3'
+    LEFT OUTER JOIN {user} u ON ra.userid = u.id
+    WHERE cx.contextlevel = '50' AND u.id>0 AND c.id = ".$courseid;
+    $courseteachers = $DB->get_records_sql($query);
+    $teacherarray = array();
+    foreach($courseteachers as $teacher) {
+        if ($teacher->userid <> $USER->id) { // Except himself.
+            $teacherarray[] = $teacher->userid;
+        };
+    };
+    sort($teacherarray);
+    return $teacherarray;
+}
+
+/**
+ * Function gets all shared users
+ * @param $viewid
+ * @return array
+ */
+function block_exaport_get_shared_users($viewid) {
+    global $DB, $USER;
+    $sharedusers = array ();
+    if ($viewid > 0) {
+        $query = "SELECT userid FROM {block_exaportviewshar} s WHERE s.viewid=".$viewid;
+        $users = $DB->get_records_sql($query);
+        foreach($users as $user) {
+            $sharedusers[] = $user->userid;
+        };
+    };
+    sort($sharedusers);
+    return $sharedusers;
+};

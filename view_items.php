@@ -25,6 +25,7 @@
 ***************************************************************/
 
 require_once dirname(__FILE__).'/inc.php';
+require_once dirname(__FILE__).'/lib/sharelib.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
@@ -78,7 +79,7 @@ block_exaport_setup_default_categories();
 
 // read all categories
 $categories = $DB->get_records_sql('
-	SELECT c.id, c.name, c.pid, COUNT(i.id) AS item_cnt
+	SELECT c.id, c.name, c.pid, c.shareall, COUNT(i.id) AS item_cnt
 	FROM {block_exaportcate} c
 	LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
 	WHERE c.userid = ?
@@ -184,6 +185,9 @@ echo '<div class="excomdos_cat">';
 echo block_exaport_get_string('current_category').': ';
 echo '<b>'.$currentCategory->name.'</b> ';
 if ($currentCategory->id > 0) {
+	if (count(exaport_get_category_shared_users($currentCategory->id)) > 0 || count(exaport_get_category_shared_groups($currentCategory->id)) > 0 || $currentCategory->shareall==1) { 
+		echo ' <img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
+	};
 	echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=edit&back=same"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
 	echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=delete&back=same"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
 }
@@ -359,6 +363,10 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 							<?php echo block_exaport_get_string('category'); ?>
 						</span>
 						<span class="excomdos_tileedit">
+							<?php 
+							if (count(exaport_get_category_shared_users($category->id)) > 0 || count(exaport_get_category_shared_groups($category->id)) > 0 || $category->shareall==1) { ?>
+								<img src="pix/noteitshared.gif" alt="file" title="shared to other users">
+							<?php }; ?>
 							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
 							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete'; ?>"><img src="pix/del.png" alt="file"></a>
 						</span>

@@ -432,6 +432,8 @@ $string['settings_disable_external_comments_body'] = '';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
 
+$string['sharedArtefacts'] = 'Shared for you artifacts';
+
 $string['create_as_note'] = 'Create as Artefact';
 $string['category_not_found'] = 'Category not found';
 $string['root_category'] = 'Root Category';

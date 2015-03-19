@@ -242,7 +242,14 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 		if(!$viewblock) {						
 			// item not linked to view -> no rights
                 }
-		$conditions = array("id" => $itemid, "userid" => $view->userid);
+		// share artefact can not only owner. So we find did share item to others users. If shared - take owner and insert into select.
+		$sharable = is_sharableitem($view->userid, $itemid);
+		if ($sharable) {
+			$ownerid = $sharable;
+		} else {
+			$ownerid = $view->userid;
+		} 
+		$conditions = array("id" => $itemid, "userid" => $ownerid);
 		if (!$item = $DB->get_record("block_exaportitem", $conditions)) {
 			// item not found
                                                 echo 'pfeift';
@@ -350,6 +357,20 @@ function exaport_get_view_shared_groups($viewid) {
 	global $DB;
 	
 	$sharedGroups = $DB->get_records_menu('block_exaportviewgroupshar', array("viewid" => $viewid), null, 'groupid, groupid AS tmp');
+	return $sharedGroups;
+}
+
+function exaport_get_category_shared_users($catid) {
+	global $DB;
+	
+	$sharedUsers = $DB->get_records_menu('block_exaportcatshar', array("catid" => $catid), null, 'userid, userid AS tmp');
+	return $sharedUsers;
+}
+
+function exaport_get_category_shared_groups($catid) {
+	global $DB;
+	
+	$sharedGroups = $DB->get_records_menu('block_exaportcatgroupshar', array("catid" => $catid), null, 'groupid, groupid AS tmp');
 	return $sharedGroups;
 }
 
@@ -638,4 +659,95 @@ function exaport_print_js() {
     echo "}\n";
     echo "// -->\n";
     echo "</script>\n";
+}
+
+function exaport_get_shared_items_for_user($userid, $onlyitems = false) {
+	global $DB;
+	global $USER;
+	
+	// Categories for user groups
+	$usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), '', 'groupid');
+	if ((is_array($usergroups)) && (count($usergroups) > 0)) {
+		foreach ($usergroups as $id => &$group) {
+			$usergroups[$id] = $group->groupid;
+		};
+		$usergroups_list = implode(',', $usergroups);
+		$usercats = $DB->get_records_sql('SELECT catid FROM {block_exaportcatgroupshar} WHERE groupid IN ('.$usergroups_list.')');
+		foreach ($usercats as $id => &$cat) {
+			$usercats[$id] = $cat->catid;
+		};
+		$usercats_list = implode(',', $usercats);
+	};
+
+	// All categories and users who shared.
+	$categories = $DB->get_records_sql(
+                "SELECT c.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
+                " FROM {user} u" .
+                " JOIN {block_exaportcate} c ON u.id=c.userid" .
+				" LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?".
+
+                " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid ". 
+                " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid " .
+                " WHERE (".
+					"(".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) ".  // only show shared all, if enabled
+                 // Shared for you group
+                 (isset($usercats) && count($usercats)>0 ? " OR c.id IN (".$usercats_list.") ": ""). // Add group shareing categories
+                ")".  
+				" AND c.userid!=? ". // don't show my own categories
+				" AND internshare = 1 ".
+				" GROUP BY c.id, c.userid, c.name, c.timemodified, c.shareall, u.firstname, u.lastname, u.picture".
+                " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
+		
+	//$sharedcategories = $DB->get_records_menu('block_exaportcatshar', array("userid" => $userid), null, 'id, id AS tmp');
+
+	// Get users for grouping later
+	$shared_users = array();
+	$shared_categories = array();
+	foreach($categories as $key => $categorie) {
+		if (!in_array($categorie->userid, $shared_users))
+				$shared_users[] = $categorie->userid;
+		if (!in_array($categorie->id, $shared_categories))
+				$shared_categories[] = $categorie->id;
+	};
+	
+	// Get items for every user
+	$shared_categories_list = implode(',', $shared_categories);
+	$shared_artefacts = array();
+	foreach($shared_users as $key => $user) {
+		if ($onlyitems) {
+			// Only items for customise blocks. for views_mod.php. Or for check is sharable
+			$addwhere = 'AND categoryid IN ('.$shared_categories_list.')';
+			$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
+				 " from {block_exaportitem} i".
+				 " left join {block_exaportcate} ic on i.categoryid = ic.id".
+				 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+				 " left join {block_exaportitemcomm} com on com.itemid = i.id".
+				 " where i.userid=? AND categoryid IN (".$shared_categories_list.")".
+				 " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
+				 " ORDER BY i.name";
+				 //echo $query."<br><br>";
+			$user_items = $DB->get_records_sql($query, array($user));
+			$shared_artefacts = $shared_artefacts + $user_items;
+		} else {
+			$shared_artefacts[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $user)));		
+			$shared_artefacts[$key]['items'] = $DB->get_records_sql('SELECT * FROM {block_exaportitem} WHERE userid=? AND categoryid IN ('.$shared_categories_list.')', array('id' => $user));
+			// delete empty categories
+			if (count($shared_artefacts[$key]['items'])==0) {
+				unset($shared_artefacts[$key]);
+			}
+		};
+	}
+
+	return $shared_artefacts;
+}
+
+// returns owners id 
+function is_sharableitem($userid, $itemid) {
+	global $DB;	
+	$itemsforuser = exaport_get_shared_items_for_user($userid, true);
+	if (array_key_exists($itemid, $itemsforuser)) {
+		return $itemsforuser[$itemid]->userid;
+	} else {
+		return false;
+	}
 }

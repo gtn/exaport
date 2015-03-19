@@ -165,6 +165,26 @@ function get_form_items($id, $block_data=array()) {
 
 
 	$content .= '</td></tr>';		
+	// Shared artefacts for this user
+	$sharedartefacts = exaport_get_shared_items_for_user($USER->id);
+	if (count($sharedartefacts) > 0) {
+		$content .= '<tr><td><hr width=95% style="margin: 3px auto;">';	
+		$content .= get_string('sharedArtefacts', 'block_exaport');
+		$content .= '</td></tr>';
+		$content .= '<tr><td>';	
+		foreach($sharedartefacts as $key => $user) {
+			$content .= '<div class="add-item-category">'.$user['fullname'].'</div>';
+			if (isset($user['items']) && is_array($user['items']) && count($user['items']) > 0) {
+				foreach ($user['items'] as $itemid => $item) {
+					$content .= '<div class="add-item">';
+					$content .= '<input type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
+					$content .= $item->name;
+					$content .= '</div>';							
+				}
+			}
+		};
+		$content .= '</td></tr>';
+	}
 	$content .= '<tr><td>';	
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
 	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';

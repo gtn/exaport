@@ -488,6 +488,39 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
     }
 
-    
+    if($oldversion < 2015031901) {
+        // Add sharing for artefacts
+    	$table = new xmldb_table('block_exaportcate');
+    	$field = new xmldb_field('shareall', '3', null, null, null, null, null, null);
+    	if (!$dbman->field_exists($table, $field)) {
+    		$dbman->add_field($table, $field);
+        }
+		$field = new xmldb_field('internshare', '3', null, null, null, null, null, null);
+    	if (!$dbman->field_exists($table, $field)) {
+    		$dbman->add_field($table, $field);
+        }
+		
+        $table = new xmldb_table('block_exaportcatshar');
+        if (!$dbman->table_exists($table)) {
+            // fields
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+            $table->add_field('catid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
+            // Create table            
+            $dbman->create_table($table);
+        }
+        $table = new xmldb_table('block_exaportcatgroupshar');
+        if (!$dbman->table_exists($table)) {
+            // fields
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+            $table->add_field('catid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+            $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
+            // Create table            
+            $dbman->create_table($table);
+        }
+    }
+
 	return $result;
 }

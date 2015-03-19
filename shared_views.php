@@ -82,7 +82,7 @@ else
     $whre = "";
 
 // Views for user groups
-$usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), $sort='', $fields='groupid');
+$usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), '', 'groupid');
 if ((is_array($usergroups)) && (count($usergroups) > 0)) {
     foreach ($usergroups as $id => &$group) {
         $usergroups[$id] = $group->groupid;

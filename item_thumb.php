@@ -8,7 +8,13 @@ $item_id = optional_param('item_id', -1, PARAM_INT);
 
 $item = null;
 if ($item_id > 0) { 
-	$item = $DB->get_record('block_exaportitem', array('id'=>$item_id, 'userid'=>$USER->id));
+	$sharable = is_sharableitem($USER->id, $item_id);
+	if ($sharable) {
+		$ownerid = $sharable;
+	} else {
+		$ownerid = $USER->id;
+	} /**/
+	$item = $DB->get_record('block_exaportitem', array('id'=>$item_id, 'userid'=>$ownerid));
 }
 if (empty($item)) die('item not found');
 

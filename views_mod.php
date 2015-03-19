@@ -733,6 +733,10 @@ function block_exaport_get_portfolio_items($epopwhere = 0) {
 		$portfolioItems = array();
 	}
 
+	// add shared items
+	$shared_items = exaport_get_shared_items_for_user($USER->id, true);
+	$portfolioItems = $portfolioItems + $shared_items;
+	
 	foreach ($portfolioItems as &$item) {
 		if (null == $item->cname) {
 			$item->category = format_string(block_exaport_get_root_category()->name);
@@ -794,6 +798,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0) {
 		unset($item->cname);
 		unset($item->cname_parent);
 	}
+//	print_r($portfolioItems);
 	
 	return $portfolioItems;
 }

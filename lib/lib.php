@@ -636,7 +636,9 @@ function block_exaport_build_comp_tree() {
 
         $index++;
     }
-    $tree.='</ul></form>';
+    $tree .= '</ul></li></ul></li></ul>
+			<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport(function($){$.colorbox.close()});">
+			</form>';
 
     return $tree;
 }

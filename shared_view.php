@@ -157,12 +157,22 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			echo '<div class="view-item view-item-type-'.$item->type.'">';
 			// thumbnail of item
 			if ($item->type=="file") {
+				$file_params = '';
 				$select = "contextid='".context_user::instance($item->userid)->id."' AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";	
 //				if ($img = $DB->get_record('files', array('contextid'=>get_context_instance(CONTEXT_USER, $item->userid)->id, 'component'=>'block_exaport', 'filearea'=>'item_file', 'itemid'=>$item->id, 'filesize'=>'>0'), 'id, filename, mimetype')) {
-				if ($img = $DB->get_record_select('files', $select, null, 'id, filename, mimetype')) {
-					if (strpos($img->mimetype, "image")!==false) {					
-						$img_src = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $img->filename;
+				if ($file = $DB->get_record_select('files', $select, null, 'id, filename, mimetype, filesize')) {
+					if (strpos($file->mimetype, "image")!==false) {					
+						$img_src = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $file->filename;
 						echo '<div class="view-item-image"><img height="100" src="'.$img_src.'" alt=""/></div>';
+					} else {
+						// Link to file.
+						$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access."&itemid=".$item->id);
+						// Human filesize.
+						$units = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+						$power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
+						$filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
+						// Fileinfo block.
+						$file_params = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> <span class="filedescription">('.$filesize.')</span></div>';
 					};
 				};		
 			}
@@ -177,6 +187,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
                         }
                         echo '</div>';
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
+			echo $file_params;			
 			echo '<div class="view-item-text">';
 			if ($item->url) {
 				// link

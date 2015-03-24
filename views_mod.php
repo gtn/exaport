@@ -178,7 +178,7 @@ class block_exaport_view_edit_form extends moodleform {
 							$mform->setType('description', PARAM_RAW);
                             
                             if ($this->_customdata['view']) {
-                                // Auto generate view with the artefacts checkbos.
+                                // Auto generate view with the artefacts checkbox.
                                 $artefacts = block_exaport_get_portfolio_items(1);
                                 if (count($artefacts) > 0) {
                                     if ($this->_customdata['view']->id > 0) {
@@ -618,10 +618,20 @@ foreach ($translations as $key => &$value) {
 }
 unset($value);
 
+$portfolioItems = block_exaport_get_portfolio_items();
+// add potential sometime shared items (there is in {block_exaportviewblock} but now is NOT shared)
+$query = "select b.* from {block_exaportviewblock} b, {block_exaportitem} i where b.viewid = ? AND b.itemid = i.id AND i.userid<>? ORDER BY b.positionx, b.positiony";
+$allpotentialitems = $DB->get_records_sql($query, array($view->id, $USER->id));
+$portfolioshareditems = array();
+foreach ($allpotentialitems as $item) {
+	if (!array_key_exists($item->itemid, $portfolioItems))
+		$portfolioItems = $portfolioItems + block_exaport_get_portfolio_items(0, $item->itemid);
+};
+
 ?>
 <script type="text/javascript">
 //<![CDATA[
-	var portfolioItems = <?php echo json_encode(block_exaport_get_portfolio_items()); ?>;
+	var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
 	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 //]]>
 </script>

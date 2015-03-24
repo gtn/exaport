@@ -189,7 +189,7 @@ var exaportViewEdit = {};
 		},
 		
 		resetViewContent: function(){
-			// load stored blocks
+			// load stored blocks			
 			var blocks = $('form :input[name=blocks]').val();
 			if (blocks) {
 				blocks = $.parseJSON(blocks);
@@ -200,7 +200,6 @@ var exaportViewEdit = {};
 					type: 'headline'
 				}];
 			}
-
 			var portfolioDesignBlocks = $('.portfolioDesignBlocks');
 			portfolioDesignBlocks.empty();
 			$.each(blocks, function(){
@@ -519,6 +518,12 @@ var exaportViewEdit = {};
 			$item.data('portfolio').text = $(this).val(); 			
 		}); /**/
 		updateBlockData();
+		// unshared blocks
+		if (data.unshared == 1) {
+			$item.find('div.item_info').addClass('unshared_block');
+			$item_header = $item.find('div.header').html();
+			$item.find('div.header').html($item_header + '<span class="unshared_message">Unshared</span>');
+		}
 
 		return $item;
 	}

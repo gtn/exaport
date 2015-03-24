@@ -73,3 +73,14 @@
     display: inline;
     margin-right: 20px;
 }
+
+.unshared_block {
+	color: #aaa;
+}
+
+.unshared_message {
+	display: block;
+	float: right;
+	margin-right: 10px;
+	color:red;
+}

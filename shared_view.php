@@ -65,9 +65,15 @@ foreach ($blocks as $block) {
 		$columns[$block->positionx] = array();
 
 	if ($block->type == 'item') {
-		$conditions = array("id" => $block->itemid);
+		$conditions = array("id" => $block->itemid);		
 		if ($item = $DB->get_record("block_exaportitem", $conditions)) {
-			$block->item = $item;
+			// Add checking on sharable item.
+			if ($sharable = is_sharableitem($view->userid, $item->id) || $view->userid == $item->userid) {
+				$block->item = $item;
+			}
+			else {
+				continue; // Hide unshared items
+			}
 		} else {
 			$block->type = 'text';
 		}
@@ -177,7 +183,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				};		
 			}
 			elseif ($item->type=="link") {				
-				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'" alt=""/></a></div>';
+				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'" alt=""/></a></div>';
 			};			
 			echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
                         // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer

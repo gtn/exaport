@@ -729,6 +729,8 @@ function exaport_get_shared_items_for_user($userid, $onlyitems = false) {
 			$user_items = $DB->get_records_sql($query, array($user));
 			$shared_artefacts = $shared_artefacts + $user_items;
 		} else {
+			
+			$shared_artefacts[$key]['userid'] = $user;		
 			$shared_artefacts[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $user)));		
 			$shared_artefacts[$key]['items'] = $DB->get_records_sql('SELECT * FROM {block_exaportitem} WHERE userid=? AND categoryid IN ('.$shared_categories_list.')', array('id' => $user));
 			// delete empty categories

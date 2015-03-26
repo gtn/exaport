@@ -355,6 +355,16 @@ $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier
 //settings
 $string['settings_interaktion_exacomp_head'] = 'Interaktion exabis ePortfolio - exabis competencies';
 $string['settings_interaktion_exacomp_body'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
+$string['settings_allow_loginas_head'] = 'Allow login as';
+$string['settings_allow_loginas_body'] = '';
+$string['settings_create_desp_categories_head'] = 'Create Desp Categories';
+$string['settings_create_desp_categories_body'] = '';
+$string['settings_disable_shareall_head'] = 'Disable sharing with all users';
+$string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
+$string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
+$string['settings_disable_external_comments_body'] = '';
+$string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
+$string['block_exaport_app_externaleportfolio_body'] = 'For App';
 
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(bisher gibt es noch keine Bookmarks)';

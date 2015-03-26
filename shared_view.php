@@ -162,8 +162,8 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			
 			echo '<div class="view-item view-item-type-'.$item->type.'">';
 			// thumbnail of item
+			$file_params = '';
 			if ($item->type=="file") {
-				$file_params = '';
 				$select = "contextid='".context_user::instance($item->userid)->id."' AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";	
 //				if ($img = $DB->get_record('files', array('contextid'=>get_context_instance(CONTEXT_USER, $item->userid)->id, 'component'=>'block_exaport', 'filearea'=>'item_file', 'itemid'=>$item->id, 'filesize'=>'>0'), 'id, filename, mimetype')) {
 				if ($file = $DB->get_record_select('files', $select, null, 'id, filename, mimetype, filesize')) {

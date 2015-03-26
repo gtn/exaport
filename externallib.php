@@ -147,7 +147,8 @@ class block_exaport_external extends external_api {
                         'url' => new external_value(PARAM_URL, 'url'),
                         'intro' => new external_value(PARAM_TEXT, 'introduction'),
                         'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
-                        'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'))
+                        'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'),
+						'fileitemid' => new external_value(PARAM_INT, 'itemid for draft-area files; for "private" files is ignored'))
         );
 
     }
@@ -157,10 +158,10 @@ class block_exaport_external extends external_api {
      * @param int itemid
      * @return array of course subjects
      */
-    public static function add_item($title,$categoryid,$url,$intro,$filename,$type) {
+    public static function add_item($title,$categoryid,$url,$intro,$filename,$type,$fileitemid) {
         global $CFG,$DB,$USER;
 
-        $params = self::validate_parameters(self::add_item_parameters(), array('title'=>$title,'categoryid'=>$categoryid,'url'=>$url,'intro'=>$intro,'filename'=>$filename,'type'=>$type));
+        $params = self::validate_parameters(self::add_item_parameters(), array('title'=>$title,'categoryid'=>$categoryid,'url'=>$url,'intro'=>$intro,'filename'=>$filename,'type'=>$type,'fileitemid'=>$fileitemid));
 
         $itemid = $DB->insert_record("block_exaportitem", array('userid'=>$USER->id,'name'=>$title,'categoryid'=>$categoryid,'url'=>$url,'intro'=>$intro,'type'=>$type,'timemodified'=>time()));
 
@@ -170,6 +171,9 @@ class block_exaport_external extends external_api {
             $fs = get_file_storage();
             try {
                 $old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
+				if (!$old) {
+					$old = $fs->get_file($context->id, "user", "draft", $fileitemid, "/", $filename);
+				}
 
                 if($old) {
                     $file_record = array('contextid'=>$context->id, 'component'=>'block_exaport', 'filearea'=>'item_file',
@@ -1244,6 +1248,10 @@ class block_exaport_external extends external_api {
     public static function export_file_to_externalportfolio($component, $contextid, $userid, $filearea, $filename, $filepath, $itemid, $license, $author, $source) {
         global $CFG,$DB,$USER;
 
+		if (!$CFG->block_exaport_app_externaleportfolio) {
+			return array('success'=>'export_to_exaport', 'linktofile'=>'');
+		}
+		
         $params = self::validate_parameters(self::export_file_to_externalportfolio_parameters(), array('component'=>$component, 'contextid'=>$contextid, 'userid'=>$userid, 'filearea'=>$filearea,
                         'filename'=>$filename, 'filepath'=>$filepath, 'itemid'=>$itemid, 'license'=>$license, 'author'=>$author, 'source'=>$source));
         if (empty($component) || empty($contextid) || empty($userid) || empty($filearea) || empty($filename) || empty($filepath) || empty($itemid)) {
@@ -1268,7 +1276,7 @@ class block_exaport_external extends external_api {
     public static function export_file_to_externalportfolio_returns() {
         return new external_single_structure(
                 array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
+                        'success' => new external_value(PARAM_TEXT, 'status'),
                         'linktofile' => new external_value(PARAM_TEXT, 'link to file')
                 )
         );

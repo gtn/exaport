@@ -428,11 +428,13 @@ $string['settings_disable_shareall_head'] = 'Disable sharing with all users';
 $string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
 $string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
 $string['settings_disable_external_comments_body'] = '';
-
+$string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
+$string['block_exaport_app_externaleportfolio_body'] = 'For App';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
 
 $string['sharedArtefacts'] = 'Shared for you artifacts';
+$string['shareditems_category'] = 'Shared for you artifacts';
 
 $string['create_as_note'] = 'Create as Artefact';
 $string['category_not_found'] = 'Category not found';

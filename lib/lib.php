@@ -1,5 +1,4 @@
 <?php
-
 /* * *************************************************************
  *  Copyright notice
  *
@@ -718,6 +717,22 @@ function block_exaport_get_root_category() {
 	);
 }
 
+function block_exaport_get_shareditems_category($name = null, $userid = null) {
+	global $DB, $USER;
+	return (object) array(
+		'id' => -1,
+		'pid' => 0,
+		'name' => $name != null ? $name : block_exaport_get_string('shareditems_category'),
+		'item_cnt' => '',
+		'userid' => $userid ? $userid : ''
+/* 		'item_cnt' => $DB->get_field_sql('
+			SELECT COUNT(i.id) AS item_cnt
+			FROM {block_exaportitem} i
+			WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
+		', array($USER->id))  */
+	);
+}
+
 function block_exaport_badges_enabled() {
 	return (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled());
 }
@@ -839,8 +854,15 @@ function block_exaport_get_view_blocks($view) {
     foreach ($allBlocks as $block) {
         if ($block->type == 'item') {
             if (!isset($portfolioItems[$block->itemid])) {
-                // item not found
-                continue;
+				// Could be shared sometime (because found in block_exaportviewblock with viewid)
+				if (!$potentialitem = $DB->get_record("block_exaportitem", array('id' => $block->itemid))) {
+					// item not found
+					continue;
+				} else {
+					$items = block_exaport_get_portfolio_items(0, $block->itemid);					
+					$portfolioItems[$block->itemid] = $items[$block->itemid];
+					$block->unshared = 1;
+				}
             }
             $block->item = $portfolioItems[$block->itemid];
         } elseif ($block->type == 'badge') {
@@ -880,19 +902,25 @@ function block_exaport_get_view_blocks($view) {
     return $blocks;
 }
 
-function block_exaport_get_portfolio_items($epopwhere = 0) {
+function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
     global $DB, $USER;
     if ($epopwhere == 1) {
         $addwhere = " AND ".block_exaport_get_item_where();
     } else {
         $addwhere = "";
     };
+	// only needed item by id
+	if ($itemid) {
+		$where = ' i.id = '.$itemid;	
+	} else {
+		$where = " i.userid=? ".$addwhere;
+	}
     $query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
             " from {block_exaportitem} i".
             " left join {block_exaportcate} ic on i.categoryid = ic.id".
             " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
             " left join {block_exaportitemcomm} com on com.itemid = i.id".
-            " where i.userid=? ".$addwhere.
+            " where ".$where.
             " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
             " ORDER BY i.name";
     //echo $query."<br><br>";

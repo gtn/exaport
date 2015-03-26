@@ -30,6 +30,7 @@ require_once dirname(__FILE__).'/lib/sharelib.php';
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
+$userid = optional_param('userid', 0, PARAM_INT);
 
 block_exaport_require_login($courseid);
 
@@ -97,6 +98,13 @@ foreach ($categories as $category) {
 // the main root category
 $rootCategory = block_exaport_get_root_category();
 $categories[0] = $rootCategory;
+
+// shared artefacts
+if ($shared_artefacts = exaport_get_shared_items_for_user($USER->id)) {
+	$categories[-1] = block_exaport_get_shareditems_category();
+	$categoriesByParent[0][] = $categories[-1];
+//	print_r($categoriesByParent);
+}
 
 // what's the current category? invalid / no category = root
 if (isset($categories[$categoryid])) {
@@ -198,19 +206,41 @@ $sql_sort = block_exaport_item_sort_to_sql($parsedsort, false);
 
 $condition = array($USER->id, $currentCategory->id);
 
-$items = $DB->get_records_sql("
-		SELECT i.*, COUNT(com.id) As comments
-		FROM {block_exaportitem} i
-		LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-		WHERE i.userid = ? AND i.categoryid=?
-			AND ".block_exaport_get_item_where()."	
-		GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro, 
-		i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, 
-		i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url, 
-		i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, 
-		i.iseditable, i.example_url, i.parentid
-		$sql_sort
-	", $condition);
+if ($currentCategory->id == -1 && count($shared_artefacts) > 0) {
+	// Shared items.
+	//$categoriesByParent[-1][] = $rootCategory;
+	if ($userid > 0) {
+		$parentCategory = block_exaport_get_shareditems_category();
+	};
+	foreach($shared_artefacts as $key => $artefact) {
+		$categories[$key] = block_exaport_get_shareditems_category($artefact['fullname'], $artefact['userid']);
+		$categoriesByParent[-1][] = $categories[$key];
+	};
+	$items = array();
+	if ($userid > 0) {
+		foreach ($shared_artefacts as $key => $usershares) {
+			if ($usershares['userid'] == $userid) {
+				$items = $usershares['items'];
+				break;
+			}
+		}
+	};
+} else {
+	// Common items.
+	$items = $DB->get_records_sql("
+			SELECT i.*, COUNT(com.id) As comments
+			FROM {block_exaportitem} i
+			LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+			WHERE i.userid = ? AND i.categoryid=?
+				AND ".block_exaport_get_item_where()."	
+			GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro, 
+			i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess, 
+			i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url, 
+			i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, 
+			i.iseditable, i.example_url, i.parentid
+			$sql_sort
+		", $condition);
+}
 
 if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCategory) {
 	// show output only if we have items, or we have subcategories, or we are in a subcategory
@@ -355,35 +385,65 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 		
 		if (!empty($categoriesByParent[$currentCategory->id])) {
 			foreach ($categoriesByParent[$currentCategory->id] as $category) {
-				$url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id;
-				?>
-				<div class="excomdos_tile excomdos_tile_category id-<?php echo $category->id; ?>">
-					<div class="excomdos_tilehead">
-						<span class="excomdos_tileinfo">
-							<?php echo block_exaport_get_string('category'); ?>
-						</span>
-						<span class="excomdos_tileedit">
-							<?php 
-							if (count(exaport_get_category_shared_users($category->id)) > 0 || count(exaport_get_category_shared_groups($category->id)) > 0 || $category->shareall==1) { ?>
-								<img src="pix/noteitshared.gif" alt="file" title="shared to other users">
-							<?php }; ?>
-							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
-							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete'; ?>"><img src="pix/del.png" alt="file"></a>
-						</span>
-				</div>
-				<div class="excomdos_tileimage">
-					<a href="<?php echo $url; ?>"><img src="pix/folder_tile.png"></a>
-				</div>
-				<div class="exomdos_tiletitle">
-					<a href="<?php echo $url; ?>"><?php echo $category->name; ?></a>
-				</div>
-				</div>
-				<?php
+				if ($userid < 1) {
+					$url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id.(isset($category->userid) && $category->userid ? '&userid='.$category->userid : '');
+					?>
+					<div class="excomdos_tile excomdos_tile_category id-<?php echo $category->id; ?>">
+						<div class="excomdos_tilehead">
+							<span class="excomdos_tileinfo">
+								<?php 
+									if ($currentCategory->id == -1) {
+										echo block_exaport_get_string('user'); 
+									} else {
+										echo block_exaport_get_string('category'); 
+									}
+								?>
+							</span>
+							<span class="excomdos_tileedit">
+								<?php 
+								if ($category->id == -1) {
+									// TODO: export to portfolio
+								} else {
+									if (count(exaport_get_category_shared_users($category->id)) > 0 || count(exaport_get_category_shared_groups($category->id)) > 0 || (isset($category->shareall) && $category->shareall==1)) { ?>
+										<img src="pix/noteitshared.gif" alt="file" title="shared to other users">
+									<?php }; ?>
+									<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
+									<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete'; ?>"><img src="pix/del.png" alt="file"></a>
+								<?php 									
+								}
+								?>
+							</span>
+					</div>
+					<div class="excomdos_tileimage">
+						<a href="<?php echo $url; ?>">
+								<?php 
+								if ($category->id == -1) {
+									// Users from shared items
+									if (isset($category->userid) && $category->userid > 0) {
+										// Get user picture
+										$user = $DB->get_record('user', array('id' => $category->userid));
+										$userpicture = $OUTPUT->user_picture($user, array('size' => 80, 'link'=>null));
+										echo $userpicture; 
+									} else {
+										echo '<img src="pix/folder_tile_user.png">';
+									};
+								} else {
+									echo '<img src="pix/folder_tile.png">';
+								}
+								?>
+						</a>
+					</div>
+					<div class="exomdos_tiletitle">
+						<a href="<?php echo $url; ?>"><?php echo $category->name; ?></a>
+					</div>
+					</div>
+					<?php
+				};
 			}
 		}
 
 		foreach ($items as $item) {
-			$url = $CFG->wwwroot.'/blocks/exaport/shared_item.php?courseid='.$courseid.'&access=portfolio/id/'.$USER->id.'&itemid='.$item->id;
+				$url = $CFG->wwwroot.'/blocks/exaport/shared_item.php?courseid='.$courseid.'&access=portfolio/id/'.$USER->id.'&itemid='.$item->id;
 			?>
 			<div class="excomdos_tile excomdos_tile_item id-<?php echo $item->id; ?>">
 				<div class="excomdos_tilehead">
@@ -393,14 +453,36 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 					</span>
 					<span class="excomdos_tileedit">
 						<?php 
+						if ($currentCategory->id == -1) {
+							// Link to export to portfolio
+							if (!empty($CFG->enableportfolios)) {
+								//echo 'link to portfolio';
+/* 								require_once($CFG->libdir . '/portfoliolib.php');
+								$button = new portfolio_add_button();
+								$callbackparams = array('cmid' => 1, //$this->cm->id,
+														'sid' => 1, //$sid,
+														'area' => 'item_file', //$filearea,
+														'component' => 'block_exaport'); //$component);
+								$button->set_callback_options('assign_portfolio_caller',
+															  $callbackparams,
+															  'mod_assign');
+								$button->reset_formats();
+								echo $button->to_html(PORTFOLIO_ADD_TEXT_LINK); */
+								//http://moodle.localhost/portfolio/add.php?ca_cmid=5&ca_fileid=598&sesskey=PpTfcWtKSF&callbackcomponent=mod_assign&callbackclass=assign_portfolio_caller&course=2&callerformats=file%2Cleap2a
+								
+								//echo '<a href="http://moodle.localhost/portfolio/add.php?ca_fileid=1660&sesskey='.sesskey().'&callbackcomponent=block_exaport&callbackclass=portfolio_plugin_exaport&course=2&callerformats=file%2Cleap2a">export</a>';
+							}
+						} else {						
 							if ($item->comments > 0) {
 								echo '<span class="excomdos_listcomments">'.$item->comments.'<img src="pix/comments.png" alt="file"></span>';
 							}
-
 							echo block_exaport_get_item_comp_icon($item);
+							?>
+							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
+							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid; ?>"><img src="pix/del.png" alt="file"></a>
+						<?php 
+						}
 						?>
-						<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
-						<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid; ?>"><img src="pix/del.png" alt="file"></a>
 					</span>
 			</div>
 			<div class="excomdos_tileimage">

@@ -80,7 +80,7 @@ block_exaport_setup_default_categories();
 
 // read all categories
 $categories = $DB->get_records_sql('
-	SELECT c.id, c.name, c.pid, c.shareall, COUNT(i.id) AS item_cnt
+	SELECT c.id, c.name, c.pid, c.shareall, c.internshare, COUNT(i.id) AS item_cnt
 	FROM {block_exaportcate} c
 	LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
 	WHERE c.userid = ?
@@ -191,9 +191,14 @@ echo '</p></div></div>';
 		
 echo '<div class="excomdos_cat">';
 echo block_exaport_get_string('current_category').': ';
-echo '<b>'.$currentCategory->name.'</b> ';
+echo '<b>'.$currentCategory->name;
+// Add user fullname to current category name.
+if ($currentCategory->id == -1 && $userid>0) {
+	echo ' / '. fullname($DB->get_record('user', array('id' => $userid)));
+};
+echo '</b> ';
 if ($currentCategory->id > 0) {
-	if (count(exaport_get_category_shared_users($currentCategory->id)) > 0 || count(exaport_get_category_shared_groups($currentCategory->id)) > 0 || $currentCategory->shareall==1) { 
+	if ($currentCategory->internshare == 1 && (count(exaport_get_category_shared_users($currentCategory->id)) > 0 || count(exaport_get_category_shared_groups($currentCategory->id)) > 0 || $currentCategory->shareall==1)) { 
 		echo ' <img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
 	};
 	echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=edit&back=same"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
@@ -288,18 +293,40 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 		
 		if (!empty($categoriesByParent[$currentCategory->id])) {
 			foreach ($categoriesByParent[$currentCategory->id] as $category) {
-				$item_i++;
-				$table->data[$item_i] = array();
-				$table->data[$item_i]['type'] = '<img src="pix/folder_32.png" alt="'.block_exaport_get_string('category').'">';
-				$table->data[$item_i]['name'] = 
-					'<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id.'">'.$category->name.'</a>';
+				// Checking for shared items. If userid is null - show users, if userid > 0 - need to show items from user.
+				if ($userid < 1) {
+					$item_i++;
+					$table->data[$item_i] = array();
+					if ($category->id == -1) {
+						// Users from shared items
+						if (isset($category->userid) && $category->userid > 0) {
+							// Get user picture
+							$user = $DB->get_record('user', array('id' => $category->userid));
+							$userpicture = $OUTPUT->user_picture($user, array('size' => 32, 'link'=>null));
+							$table->data[$item_i]['type'] = $userpicture; 
+						} else {
+							$table->data[$item_i]['type'] = '<img src="pix/folder_32_user.png">';
+						};
+					} else {
+						$table->data[$item_i]['type'] = '<img src="pix/folder_32.png" alt="'.block_exaport_get_string('category').'">';
+					};
+					$table->data[$item_i]['name'] = 
+						'<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id.(isset($category->userid) && $category->userid ? '&userid='.$category->userid : '').'">'.$category->name.'</a>';
 
-				$table->data[$item_i][] = null;
-				$table->data[$item_i]['icons'] = 
-					'<span class="excomdos_listicons">'.
-					' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
-					' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'.
-					'</span>';
+					$table->data[$item_i][] = null;
+					
+					if ($category->id > 0) {
+						$table->data[$item_i]['icons'] = '<span class="excomdos_listicons">';
+						if ((isset($category->internshare) && $category->internshare == 1) && (count(exaport_get_category_shared_users($category->id)) > 0 || count(exaport_get_category_shared_groups($category->id)) > 0 || (isset($category->shareall) && $category->shareall==1))) {
+							$table->data[$item_i]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
+						}; 
+						$table->data[$item_i]['icons'] .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
+							' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'.
+							'</span>';
+					} else { // Category with shared items.
+						$table->data[$item_i]['icons'] = '';
+					}
+				} // if user_id;
 			}
 		}
 
@@ -341,7 +368,13 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 
 			$icons = '';
 			
-			if ($item->comments > 0) {
+			// Link to export to my portfolio
+			if ($currentCategory->id == -1) {
+				$table->data[$item_i]['icons'] = '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=copytoself'.'"><img src="pix/import.png" title="'.get_string('make_it_yours', "block_exaport").'"></a>';
+				continue;	
+			};
+			
+			if (isset($item->comments) && $item->comments > 0) {
 				$icons .= '<span class="excomdos_listcomments">'.$item->comments.'<img src="pix/comments.png" alt="file"></span>';
 			}
 			
@@ -385,6 +418,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 		
 		if (!empty($categoriesByParent[$currentCategory->id])) {
 			foreach ($categoriesByParent[$currentCategory->id] as $category) {
+
 				if ($userid < 1) {
 					$url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id.(isset($category->userid) && $category->userid ? '&userid='.$category->userid : '');
 					?>
@@ -402,9 +436,9 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 							<span class="excomdos_tileedit">
 								<?php 
 								if ($category->id == -1) {
-									// TODO: export to portfolio
+									// 
 								} else {
-									if (count(exaport_get_category_shared_users($category->id)) > 0 || count(exaport_get_category_shared_groups($category->id)) > 0 || (isset($category->shareall) && $category->shareall==1)) { ?>
+									if ((isset($category->internshare) && $category->internshare == 1) && (count(exaport_get_category_shared_users($category->id)) > 0 || count(exaport_get_category_shared_groups($category->id)) > 0 || (isset($category->shareall) && $category->shareall==1))) { ?>
 										<img src="pix/noteitshared.gif" alt="file" title="shared to other users">
 									<?php }; ?>
 									<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
@@ -455,23 +489,7 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 						<?php 
 						if ($currentCategory->id == -1) {
 							// Link to export to portfolio
-							if (!empty($CFG->enableportfolios)) {
-								//echo 'link to portfolio';
-/* 								require_once($CFG->libdir . '/portfoliolib.php');
-								$button = new portfolio_add_button();
-								$callbackparams = array('cmid' => 1, //$this->cm->id,
-														'sid' => 1, //$sid,
-														'area' => 'item_file', //$filearea,
-														'component' => 'block_exaport'); //$component);
-								$button->set_callback_options('assign_portfolio_caller',
-															  $callbackparams,
-															  'mod_assign');
-								$button->reset_formats();
-								echo $button->to_html(PORTFOLIO_ADD_TEXT_LINK); */
-								//http://moodle.localhost/portfolio/add.php?ca_cmid=5&ca_fileid=598&sesskey=PpTfcWtKSF&callbackcomponent=mod_assign&callbackclass=assign_portfolio_caller&course=2&callerformats=file%2Cleap2a
-								
-								//echo '<a href="http://moodle.localhost/portfolio/add.php?ca_fileid=1660&sesskey='.sesskey().'&callbackcomponent=block_exaport&callbackclass=portfolio_plugin_exaport&course=2&callerformats=file%2Cleap2a">export</a>';
-							}
+							echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=copytoself'.'"><img src="pix/import.png" title="'.get_string('make_it_yours', "block_exaport").'"></a>';
 						} else {						
 							if ($item->comments > 0) {
 								echo '<span class="excomdos_listcomments">'.$item->comments.'<img src="pix/comments.png" alt="file"></span>';

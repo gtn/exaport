@@ -1228,15 +1228,10 @@ class block_exaport_external extends external_api {
         return new external_function_parameters(
                  array(
                                 'component' => new external_value(PARAM_RAW, 'filestorage - component'),
-                                'contextid' => new external_value(PARAM_INT, 'filestorage - contextid'),
-                                'userid' => new external_value(PARAM_INT, 'filestorage - userid'),
                                 'filearea' => new external_value(PARAM_RAW, 'filestorage - filearea'),
                                 'filename' => new external_value(PARAM_RAW, 'filestorage - filename'),
                                 'filepath' => new external_value(PARAM_RAW, 'filestorage - filepath'),
                                 'itemid' => new external_value(PARAM_INT, 'filestorage - itemid'),
-                                   'license' => new external_value(PARAM_RAW, 'filestorage - license'),
-                                   'author' => new external_value(PARAM_RAW, 'filestorage - author'),
-                                   'source' => new external_value(PARAM_RAW, 'filestorage - source'),
                         )
         );
     }
@@ -1245,16 +1240,16 @@ class block_exaport_external extends external_api {
      * Export file to external protfolio
      * @return all items available
      */
-    public static function export_file_to_externalportfolio($component, $contextid, $userid, $filearea, $filename, $filepath, $itemid, $license, $author, $source) {
+    public static function export_file_to_externalportfolio($component, $filearea, $filename, $filepath, $itemid) {
         global $CFG,$DB,$USER;
 
 		if (!$CFG->block_exaport_app_externaleportfolio) {
 			return array('success'=>'export_to_exaport', 'linktofile'=>'');
 		}
-		
-        $params = self::validate_parameters(self::export_file_to_externalportfolio_parameters(), array('component'=>$component, 'contextid'=>$contextid, 'userid'=>$userid, 'filearea'=>$filearea,
-                        'filename'=>$filename, 'filepath'=>$filepath, 'itemid'=>$itemid, 'license'=>$license, 'author'=>$author, 'source'=>$source));
-        if (empty($component) || empty($contextid) || empty($userid) || empty($filearea) || empty($filename) || empty($filepath) || empty($itemid)) {
+
+        $params = self::validate_parameters(self::export_file_to_externalportfolio_parameters(), array('component'=>$component, 'filearea'=>$filearea,
+                        'filename'=>$filename, 'filepath'=>$filepath, 'itemid'=>$itemid));						
+        if (empty($component) || empty($filearea) || empty($filename) || empty($filepath)) {
             throw new invalid_parameter_exception('There is not enough parametersy');
         };
         // Preparing for transmission of data

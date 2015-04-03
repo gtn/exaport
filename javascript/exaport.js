@@ -95,12 +95,14 @@ window.jQueryExaport = jQuery.noConflict(true);
 				$('#sharing-userlist').html(html);
 				
 				// set default checkboxes for category
-				if (sharedusersarr.length > 0) {
-					$.each(sharedusersarr, function(tmp, userid){
-						$('#mform1 #internaccess-users input:checkbox[value='+userid+']').attr("checked", true);
-					})
+				if (typeof sharedusersarr != 'undefined') { // In view sharing this array is undefined
+					if (sharedusersarr.length > 0) {
+						$.each(sharedusersarr, function(tmp, userid){
+							$('#mform1 #internaccess-users input:checkbox[value='+userid+']').attr("checked", true);
+						})
+					}
 				}
-
+				
 				$('#sharing-userlist .shareusers-check-all').click(function(){
 					// check/uncheck all users in this course
 					$('#sharing-userlist .shareusers:checkbox[courseid='+$(this).attr('courseid')+']')
@@ -221,12 +223,13 @@ window.jQueryExaport = jQuery.noConflict(true);
 				$('#sharing-grouplist').html(html);
 
 				// set default checkboxes for category
-				if (sharedgroupsarr.length > 0) {
-					$.each(sharedgroupsarr, function(tmp, groupid){
-						$('#mform1 #internaccess-groups input:checkbox[value='+groupid+']').attr("checked", true);
-					})
+				if (typeof sharedgroupsarr != 'undefined') { // In view sharing this array is undefined
+					if (sharedgroupsarr !== undefined && sharedgroupsarr.length > 0) {
+						$.each(sharedgroupsarr, function(tmp, groupid){
+							$('#mform1 #internaccess-groups input:checkbox[value='+groupid+']').attr("checked", true);
+						})
+					}
 				}
-
 				
 				$('#sharing-grouplist .sharegroups-check-all').click(function(){
 					// check/uncheck all groups in this course

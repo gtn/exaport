@@ -134,7 +134,11 @@ class simplehtml_form extends moodleform {
 			FROM {block_exaportcate} c
 			WHERE c.userid = ? AND id = ?
 			', array($USER->id, $id));
-		if (!$category) $category = new stdClass;
+		if (!$category) {	
+			$category = new stdClass;
+			$category->shareall = 0;
+			$category->id = 0;
+		};
 		
         $mform = $this->_form; // Don't forget the underscore! 
  

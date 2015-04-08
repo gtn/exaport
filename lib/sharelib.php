@@ -272,7 +272,6 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 		// in user portfolio mode
 
 		if (!$user = block_exaport_get_user_from_access($matches[1],$epopaccess)) {
-			
 			return;
 		}
 
@@ -284,14 +283,19 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 			}
 		} else {
 			// intern
-
+			// shared artefacts.
+			$sharable = is_sharableitem($USER->id, $itemid);
+			if ($sharable) {
+				$viewerid = $sharable;
+			} else {
+				$viewerid = $USER->id;
+			};
 			$item = $DB->get_record_sql("SELECT i.* FROM {block_exaportitem} i".
 								" LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid=?".
 								" WHERE i.id=? AND".
 								" ((i.userid=?)". // myself
 								"  OR (i.shareall=1 AND ishar.userid IS NULL)". // all and ishar not set?
-								"  OR (i.shareall=0 AND ishar.userid IS NOT NULL))", array($USER->id, $itemid, $USER->id)); // nobody, but me
-
+								"  OR (i.shareall=0 AND ishar.userid IS NOT NULL))", array($USER->id, $itemid, $viewerid)); // nobody, but me
 			if (!$item) {
 				// item not found
 				return;
@@ -585,7 +589,7 @@ function exaport_get_shareable_courses_with_groups($type) {
         if (groups_get_course_groupmode($dbCourse) == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
             $groups = groups_get_user_groups($dbCourse->id);
             $allgroups = groups_get_all_groups($dbCourse->id);
-            if (!empty($groups[$dbCourse->defaultgroupingid])) {
+            if (isset($dbCourse->defaultgroupingid) && !empty($groups[$dbCourse->defaultgroupingid])) {
                 foreach ($groups[$dbCourse->defaultgroupingid] AS $groupid) {
                     $members = 0;
                     $members = $DB->count_records("groups_members", array("groupid" => $group->id)); 

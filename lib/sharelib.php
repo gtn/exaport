@@ -620,7 +620,6 @@ function exaport_get_shareable_courses_with_groups($type) {
 
 		$courses[$course->id] = $course;
 	}
-
 	// move active course to first position
 	if (isset($courses[$COURSE->id]) && ($type != 'shared_views')) {
 		$course = $courses[$COURSE->id];

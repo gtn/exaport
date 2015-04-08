@@ -205,6 +205,105 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+    </TABLE>	
+    <TABLE NAME="block_exaportresume" COMMENT="users resume">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="cover" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="cover of resume"/>
+		<FIELD NAME="interests" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="interests in resume"/>
+		<FIELD NAME="goalspersonal" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="personal goals"/>
+		<FIELD NAME="goalsacademic" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="academic goals"/>
+		<FIELD NAME="goalscareers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="careers goals"/>
+		<FIELD NAME="skillspersonal" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="personal skills"/>
+		<FIELD NAME="skillsacademic" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="academic skills"/>
+		<FIELD NAME="skillscareers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="careers skills"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
     </TABLE>
+	<TABLE NAME="block_exaportresume_certif" COMMENT="users resume certifications">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="date" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of ceritificate"/>
+		<FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="title of certificate"/>
+		<FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="description of certificate"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+	<TABLE NAME="block_exaportresume_edu" COMMENT="users resume educations">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start education"/>
+		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end education"/>
+		<FIELD NAME="institution" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="institution"/>
+		<FIELD NAME="institutionaddress" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="institution address"/>
+		<FIELD NAME="qualtype" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="qualification type"/>
+		<FIELD NAME="qualname" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="qualification name"/>
+		<FIELD NAME="qualdescription" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="qualification description"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+	<TABLE NAME="block_exaportresume_employ" COMMENT="users resume employments">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start work"/>
+		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end work"/>
+		<FIELD NAME="employer" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="employer name"/>
+		<FIELD NAME="employeraddress" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="employer address"/>
+		<FIELD NAME="jobtitle" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="job title"/>
+		<FIELD NAME="positiondescription" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="position description"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+	<TABLE NAME="block_exaportresume_mbrship" COMMENT="users resume memberships">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start membership"/>
+		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end membership"/>
+		<FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="membership title"/>
+		<FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="membership description"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+	<TABLE NAME="block_exaportresume_public" COMMENT="users resume publications">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="date" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of publication"/>
+		<FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="publication title"/>
+		<FIELD NAME="contribution" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="contribution"/>
+		<FIELD NAME="contributiondetails" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="contribution details"/>
+		<FIELD NAME="url" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="url to publication"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+		
   </TABLES>
 </XMLDB>

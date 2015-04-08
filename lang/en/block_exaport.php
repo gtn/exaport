@@ -140,6 +140,7 @@ $string['checkall'] = 'Check all';
 $string['grouptitle'] = 'Group title';
 $string['membersnumber'] = 'Number of listeners';
 $string['nogroupsfound'] = 'No groups found';
+$string['make_it_yours'] = 'Make it yours';
 
 // export/import
 $string['import'] = 'Import';
@@ -432,6 +433,75 @@ $string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if 
 $string['block_exaport_app_externaleportfolio_body'] = 'For App';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
+
+// Resume
+$string['resume'] = 'Resume';
+$string['resume_template_newresume'] = '<h2>My new resume</h2>';
+$string['resume_my'] = 'My resume';
+$string['resume_cover'] = 'Cover letter';
+$string['resume_coversaved'] = 'Cover saved';
+$string['resume_eduhistory'] = 'Education history';
+$string['resume_edu'] = 'Education';
+$string['resume_edusaved'] = 'Education saved';
+$string['resume_deleteeduconfirm'] = 'Do you really want to delete this education?';
+$string['resume_edudeleted'] = 'Education deleted';
+$string['resume_employhistory'] = 'Employment history';
+$string['resume_employ'] = 'Employment';
+$string['resume_employsaved'] = 'Employment saved';
+$string['resume_deleteemployconfirm'] = 'Do you really want to delete this employment?';
+$string['resume_employdeleted'] = 'Employment deleted';
+$string['resume_interests'] = 'Interests';
+$string['resume_interestssaved'] = 'Interests saved';
+$string['resume_startdate'] = 'Start date';
+$string['resume_enddate'] = 'End date';
+$string['resume_institution'] = 'Institution ';
+$string['resume_institutionaddress'] = 'Institution address';
+$string['resume_qualification'] = 'Qualification';
+$string['resume_qualtype'] = 'Qualification type';
+$string['resume_qualname'] = 'Qualification name';
+$string['resume_qualdescription'] = 'Qualification description';
+$string['resume_files'] = 'Attachments';
+$string['resume_employer'] = 'Employer';
+$string['resume_employeraddress'] = 'Employer address';
+$string['resume_jobtitle'] = 'Job title';
+$string['resume_position'] = 'Position';
+$string['resume_positiondescription'] = 'Position description';
+$string['resume_certif'] = 'Certifications, accreditations and awards';
+$string['resume_date'] = 'Date';
+$string['resume_title'] = 'Title';
+$string['resume_description'] = 'Description';
+$string['resume_certifsaved'] = 'Certification, accreditation or award saved';
+$string['resume_deletecertifconfirm'] = 'Do you really want to delete this certification, accreditation or award?';
+$string['resume_certifdeleted'] = 'Certification, accreditation or award deleted';
+$string['resume_public'] = 'Books and publications';
+$string['resume_contribution'] = 'Contribution';
+$string['resume_contributiondetails'] = 'Details of your contribution';
+$string['resume_url'] = 'URL';
+$string['resume_publicsaved'] = 'Books and publications saved';
+$string['resume_deletepublicconfirm'] = 'Do you really want to delete this book or publication?';
+$string['resume_publicdeleted'] = 'Book or publication deleted';
+$string['resume_mbrship'] = 'Professional memberships';
+$string['resume_mbrshipsaved'] = 'Membership saved';
+$string['resume_deletembrshipconfirm'] = 'Do you really want to delete this membership?';
+$string['resume_mbrshipdeleted'] = 'Membership deleted';
+$string['resume_mygoals'] = 'My goals';
+$string['resume_goals'] = 'Goals';
+$string['resume_goalspersonal'] = 'Personal goals';
+$string['resume_goalsacademic'] = 'Academic goals';
+$string['resume_goalscareers'] = 'Career goals';
+$string['resume_goalspersonalsaved'] = 'Personal goals saved';
+$string['resume_goalsacademicsaved'] = 'Academis goals saved';
+$string['resume_goalscareerssaved'] = 'Careers goals saved';
+$string['resume_myskills'] = 'My skills';
+$string['resume_skills'] = 'Skills';
+$string['resume_skillspersonal'] = 'Personal skills';
+$string['resume_skillsacademic'] = 'Academic skills';
+$string['resume_skillscareers'] = 'Career skills';
+$string['resume_skillspersonalsaved'] = 'Personal skills saved';
+$string['resume_skillsacademicsaved'] = 'Academis skills saved';
+$string['resume_skillscareerssaved'] = 'Careers skills saved';
+
+
 
 $string['sharedArtefacts'] = 'Shared for you artifacts';
 $string['shareditems_category'] = 'Shared for you artifacts';

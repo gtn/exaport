@@ -31,7 +31,12 @@ require_once dirname(__FILE__) . '/lib/resumelib.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 //$userid = optional_param('userid', 0, PARAM_INT);
+$confirm = optional_param("confirm", "", PARAM_BOOL);
 $edit = optional_param('edit', 0, PARAM_RAW);
+$delete = optional_param('delete', 0, PARAM_RAW);
+$sortchange = optional_param('sortchange', 0, PARAM_RAW);
+$id = optional_param('id', 0, PARAM_INT);
+$opened = optional_param('opened', '', PARAM_RAW); // Which block will be open
 
 $resume = block_exaport_get_resume_params();
 // Create new resume if there isn't
@@ -40,6 +45,7 @@ if (!$resume) {
 	$newresumeparams->courseid = $courseid;
 	$newresumeparams->cover = get_string("resume_template_newresume", "block_exaport");
     $DB->insert_record("block_exaportresume", $newresumeparams);
+	$resume = block_exaport_get_resume_params();
 };
 
 block_exaport_require_login($courseid);
@@ -53,56 +59,101 @@ if (!$course = $DB->get_record("course", $conditions)) {
 
 $url = '/blocks/exaport/resume.php';
 $PAGE->set_url($url);
+$PAGE->requires->css('/blocks/exaport/css/resume.css');
+
 block_exaport_print_header("personal", "resume");
+
+$PAGE->requires->js('/blocks/exaport/javascript/resume.js', true);
 
 echo "<br />";
 
 $show_information = true;
+$redirect = false;
 
 $userpreferences = block_exaport_get_user_preferences();
 $description = $userpreferences->description;
 
-echo "<div class='block_eportfolio_center'>";
-
+echo "<div class='block_eportfolio_center'><h2>";
 echo $OUTPUT->box(text_to_html(get_string("resume_my", "block_exaport")), 'center');
+echo "</h2></div>"; /**/
 
-echo "</div>";
+// delete item
+if ($delete) {
+	if (data_submitted() && $confirm && confirm_sesskey()) {
+		$conditions = array('id' => $id, 'resume_id' => $resume->id, 'user_id' => $USER->id);
+		block_exaport_resume_mm_delete($delete, $conditions);
+		echo "<div class='block_eportfolio_center'>".$OUTPUT->box(text_to_html(get_string("resume_".$delete."deleted", "block_exaport")), 'center')."</div>";
+		$redirect = true;
+	} else {
+		$optionsyes = array('id' => $id, 'delete' => $delete, 'confirm' => 1, 'sesskey' => sesskey(), 'courseid' => $courseid);
+		$optionsno = array('courseid' => $courseid);
+
+		echo '<br />';
+		echo $OUTPUT->confirm(get_string("resume_delete".$delete."confirm", "block_exaport"), new moodle_url('resume.php', $optionsyes), new moodle_url('resume.php', $optionsno));
+		echo block_exaport_wrapperdivend();
+		echo $OUTPUT->footer();
+		die;
+	}
+}
 
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
 
+// Editing form.
 if ($edit) {
+	$withfiles = false;
 	$show_information = false;
     if (!confirm_sesskey()) {
-        print_error("badsessionkey", "block_exaport");
+        print_error("blobadsessionkey", "block_exaport");
     };
 	$data = new stdClass();
 	$data->courseid = $courseid;
 	$data->edit = $edit;
-
-	switch ($edit) {
+//	$data->resume_id = $resume->id;
+	// Header of form.
+	$formheader = get_string('edit', "block_exaport").': '.get_string('resume_'.$edit, "block_exaport");
+	
+	switch ($edit) {		
+		case 'goalspersonal':			
+		case 'goalsacademic':			
+		case 'goalscareers':
+		case 'skillspersonal':			
+		case 'skillsacademic':			
+		case 'skillscareers':
+			$withfiles = true;
 		case 'cover':
-		case 'interests':			
-			$workform = new block_exaport_resume_editor_form($_SERVER['REQUEST_URI'], array('field'=>$edit));
-			$data->cover = $resume->cover;
-			$data->coverformat = FORMAT_HTML;
-			$data->interests = $resume->interests;
-			$data->interestsformat = FORMAT_HTML;
-			$data = file_prepare_standard_editor($data, $edit, $textfieldoptions, context_user::instance($USER->id),
-												'block_exaport', 'resume_'.$edit, $USER->id);
+		case 'interests':	
+			$data->{$edit} = $resume->{$edit};
+			$data->{$edit.'format'} = FORMAT_HTML;				
+			$workform = new block_exaport_resume_editor_form($_SERVER['REQUEST_URI'], array('formheader' => $formheader, 'field'=>$edit, 'withfiles' => $withfiles));
+			$data = file_prepare_standard_editor($data, $edit, $textfieldoptions, context_user::instance($USER->id),			
+												'block_exaport', 'resume_editor_'.$edit, $resume->id); 												
+			// files
+			if ($withfiles) {
+				$draftitemid = file_get_submitted_draft_itemid('attachments');
+				file_prepare_draft_area($draftitemid, context_user::instance($USER->id)->id, 'block_exaport', 'resume_'.$edit, $id,
+								array('subdirs' => false, 'maxfiles' => 5)); 
+				$data->attachments = $draftitemid;
+			};
 			$workform->set_data($data);
 			if ($workform->is_cancelled()) {
 				$show_information = true;
 			} else if ($fromform = $workform->get_data()) { 
 				$fromform = file_postupdate_standard_editor($fromform, $edit, $textfieldoptions, context_user::instance($USER->id),
-															'block_exaport', 'resume_'.$edit, $USER->id);
+															'block_exaport', 'resume_editor_'.$edit, $resume->id);
+				// files
+				if ($withfiles) {
+					file_save_draft_area_files($fromform->attachments, context_user::instance($USER->id)->id, 'block_exaport', 'resume_'.$edit, $id, null);
+				};
+															
 				block_exaport_set_resume_params(array($edit => $fromform->{$edit}, 'courseid' => $fromform->courseid));
-				echo $OUTPUT->box(get_string($edit."saved", "block_exaport"), 'center');
+				echo "<div class='block_eportfolio_center'>".$OUTPUT->box(get_string('resume_'.$edit."saved", "block_exaport"), 'center')."</div>";
 				$show_information = true;
+				$redirect = true;
 			} else {
 				$workform->display();
 			};
 			break;
-		case 'education':
+		case 'edu':
 			$display_inputs = array (
 				'startdate' => 'text:required',
 				'enddate' => 'text',
@@ -110,58 +161,178 @@ if ($edit) {
 				'institutionaddress' => 'text',
 				'qualtype' => 'text',
 				'qualname' => 'text',
-				'qualdescription' => 'textarea'
+				'qualdescription' => 'textarea',
+				'files' => 'filearea'
 			);
-			$workform = new block_exaport_resume_multifields_form($_SERVER['REQUEST_URI'], array('inputs'=>$display_inputs));
-			$data->resume_id = $resume->id;
-			$workform->set_data($data);
-			if ($workform->is_cancelled()) {
-				$show_information = true;
-			} else if ($fromform = $workform->get_data()) { 
-
-				print_r($fromform);
-				// --------------- block_exaport_set_resume_mm(array($edit => $fromform->{$edit}, 'user_id' => $USER->id));
-				echo $OUTPUT->box(get_string($edit."saved", "block_exaport"), 'center');
-				$show_information = true;
-			} else {
-				$workform->display();
+			if ($show_information = block_exaport_resume_prepare_block_mm_data($resume, $id, $edit, $display_inputs, $data)) {
+				$redirect = true;
 			};
+			break;
+		case 'employ':
+			$display_inputs = array (
+				'startdate' => 'text:required',
+				'enddate' => 'text',
+				'employer' => 'text:required',
+				'employeraddress' => 'text',
+				'jobtitle' => 'text:required',
+				'positiondescription' => 'textarea',
+				'files' => 'filearea'
+			);
+			if ($show_information = block_exaport_resume_prepare_block_mm_data($resume, $id, $edit, $display_inputs, $data)) {
+				$redirect = true;
+			};
+			break;
+		case 'certif':
+			$display_inputs = array (
+				'date' => 'text:required',
+				'title' => 'text:required',
+				'description' => 'textarea',
+				'files' => 'filearea'
+			);
+			if ($show_information = block_exaport_resume_prepare_block_mm_data($resume, $id, $edit, $display_inputs, $data)) {
+				$redirect = true;
+			};
+			break;
+		case 'public':
+			$display_inputs = array (
+				'date' => 'text:required',
+				'title' => 'text:required',
+				'contribution' => 'text:required',
+				'contributiondetails' => 'textarea',
+				'url' => 'text',
+				'files' => 'filearea'
+			);
+			if ($show_information = block_exaport_resume_prepare_block_mm_data($resume, $id, $edit, $display_inputs, $data)) {
+				$redirect = true;
+			};		
+			break;
+		case 'mbrship':
+			$display_inputs = array (
+				'startdate' => 'text:required',
+				'enddate' => 'text',
+				'title' => 'text:required',
+				'description' => 'textarea',
+				'files' => 'filearea'
+			);
+			if ($show_information = block_exaport_resume_prepare_block_mm_data($resume, $id, $edit, $display_inputs, $data)) {
+				$redirect = true;
+			};		
 			break;
 		default:
 			$show_information = true;
+			$redirect = true;
 	}
 };
 
+// Sort changing
+if ($sortchange) {
+	if (!confirm_sesskey()) {
+        print_error("blobadsessionkey", "block_exaport");
+    };
+	$id1 = optional_param('id1', 0, PARAM_INT);
+	$id2 = optional_param('id2', 0, PARAM_INT);
+	if ($id1 && $id2) {
+		$data1 = $DB->get_record("block_exaportresume_".$sortchange, array('id' => $id1, 'user_id' => $USER->id));
+		$data2 = $DB->get_record("block_exaportresume_".$sortchange, array('id' => $id2, 'user_id' => $USER->id));
+		// change sorting
+		$newdata1 = new stdClass();
+		$newdata1->id = $data1->id;
+		$newdata1->sorting = $data2->sorting;
+		$upd1 = $DB->update_record("block_exaportresume_".$sortchange, $newdata1);
+		$newdata2 = new stdClass();
+		$newdata2->id = $data2->id;
+		$newdata2->sorting = $data1->sorting;
+		$upd1 = $DB->update_record("block_exaportresume_".$sortchange, $newdata2);
+		$redirect = true;
+	}
+}
+
 // Resume blocks
-$resume = block_exaport_get_resume_params();
+//$resume = block_exaport_get_resume_params();
+
+// Redirect after doings
+if ($redirect) {
+	$opened_block = ($edit?$edit:($delete?$delete:($sortchange?$sortchange:'')));
+	if (strpos($opened_block, 'goals') !== false) {
+		$opened_block = 'goals';
+	};
+	if (strpos($opened_block, 'skills') !== false) {
+		$opened_block = 'skills';
+	};
+	if ($opened_block) {
+		$opened_block = '#'.$opened_block;
+	};
+	$returnurl = $CFG->wwwroot . '/blocks/exaport/resume.php?courseid='.$courseid.'&id='.$resume->id.$opened_block;
+	redirect($returnurl);
+};
 
 if ($show_information) {
+	
+	echo '<div class="collapsible-actions"><a href="#" class="expandall">Expand all</a>';
+	echo '<a href="#" class="collapsall hidden">Collaps all</a></div>';
 
 	// Cover.
-	echo block_exaport_form_resume_part($courseid, 'cover', get_string('resume_cover', 'block_exaport'), $resume->cover, 'edit');
+	$cover = file_rewrite_pluginfile_urls($resume->cover, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'resume_cover', $resume->id);
+	echo block_exaport_form_resume_part($courseid, 'cover', get_string('resume_cover', 'block_exaport'), $cover, 'edit', $opened);
 
 	// Education history.
-	$educationhistory = '!!! EDUCATION HISTORY !!!';
-	echo block_exaport_form_resume_part($courseid, 'education', get_string('resume_educationhistory', 'block_exaport'), $educationhistory, 'add');
+	$conditions = array('user_id' => $USER->id, 'resume_id' => $resume->id);
+	$educations = block_exaport_resume_get_mm_records('edu', $conditions);
+	$educationhistory = block_exaport_resume_templating_mm_records($courseid, 'edu', 'qualification', $educations);
+	echo block_exaport_form_resume_part($courseid, 'edu', get_string('resume_eduhistory', 'block_exaport'), $educationhistory, 'add', $opened);
 	
 	// Employment history.
-	$employmenthistory = '!!! EMPLOYMENT HISTORY !!!';
-	echo block_exaport_form_resume_part($courseid, 'employment', get_string('resume_employmenthistory', 'block_exaport'), $employmenthistory, 'add');
+	$conditions = array('user_id' => $USER->id, 'resume_id' => $resume->id);
+	$employments = block_exaport_resume_get_mm_records('employ', $conditions);
+	$employmenthistory = block_exaport_resume_templating_mm_records($courseid, 'employ', 'position', $employments);
+	echo block_exaport_form_resume_part($courseid, 'employ', get_string('resume_employhistory', 'block_exaport'), $employmenthistory, 'add', $opened);
+
+	// Certifications, accreditations and awards .
+	$conditions = array('user_id' => $USER->id, 'resume_id' => $resume->id);
+	$certifications = block_exaport_resume_get_mm_records('certif', $conditions);
+	$certificationhistory = block_exaport_resume_templating_mm_records($courseid, 'certif', 'title', $certifications);
+	echo block_exaport_form_resume_part($courseid, 'certif', get_string('resume_certif', 'block_exaport'), $certificationhistory, 'add', $opened);
+
+	// Books and publications
+	$conditions = array('user_id' => $USER->id, 'resume_id' => $resume->id);
+	$publications = block_exaport_resume_get_mm_records('public', $conditions);
+	$publicationhistory = block_exaport_resume_templating_mm_records($courseid, 'public', 'title', $publications);
+	echo block_exaport_form_resume_part($courseid, 'public', get_string('resume_public', 'block_exaport'), $publicationhistory, 'add', $opened);
 	
+	// Professional memberships
+	$conditions = array('user_id' => $USER->id, 'resume_id' => $resume->id);
+	$memberships = block_exaport_resume_get_mm_records('mbrship', $conditions);
+	$membershiphistory = block_exaport_resume_templating_mm_records($courseid, 'mbrship', 'title', $memberships);
+	echo block_exaport_form_resume_part($courseid, 'mbrship', get_string('resume_mbrship', 'block_exaport'), $membershiphistory, 'add', $opened);
+	
+	// My Goals
+	$goals = block_exaport_resume_templating_list_goals_skills($courseid, $resume, 'goals', get_string('resume_goals', 'block_exaport'));
+	echo block_exaport_form_resume_part($courseid, 'goals', get_string('resume_mygoals', 'block_exaport'), $goals, '', $opened);
+
+	// My Skills
+	$skills = block_exaport_resume_templating_list_goals_skills($courseid, $resume, 'skills', get_string('resume_skills', 'block_exaport'));
+	echo block_exaport_form_resume_part($courseid, 'skills', get_string('resume_myskills', 'block_exaport'), $skills, '', $opened);
+
 	// Interests.
-	echo block_exaport_form_resume_part($courseid, 'interests', get_string('resume_interests', 'block_exaport'), $resume->interests, 'edit');
+	$interests = file_rewrite_pluginfile_urls($resume->interests, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'resume_interests', $resume->id);
+	echo block_exaport_form_resume_part($courseid, 'interests', get_string('resume_interests', 'block_exaport'), $interests, 'edit', $opened);
 	
 };
 
-function block_exaport_form_resume_part($courseid = 0, $edit = '', $header = '', $content = '', $buttons = '') {
+function block_exaport_form_resume_part($courseid = 0, $edit = '', $header = '', $content = '', $buttons = '', $opened=false) {
 	global $CFG;
 	$resume_part = '';
-	$resume_part .= '<form class="mform" method="post" action="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid . '">';
+	//$resume_part .= print_collapsible_region('TEXT', '', 'id'.$edit, 'header', '', false, true) ;
+	$resume_part .= '<form class="mform resumeform" method="post" action="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid . '">';
 	$resume_part .= '<input type="hidden" name="edit" value="'.$edit.'" />';
 	$resume_part .= '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
-	$resume_part .= '<fieldset class="clearfix collapsible">';
-	$resume_part .= '<legend class="ftoggler">'.$header.'</legend>';
-	$resume_part .= '<div class="fcontainer clearfix">';
+	$resume_part .= '<fieldset class="clearfix view-group'.($opened == $edit ? '-open':'').'">';
+	//$resume_part .= '<fieldset class="clearfix collapsible" id="id_resume_'.$edit.'">';
+	$resume_part .= '<legend class="view-group-header">'.$header.'</legend>';
+	//$resume_part .= '<legend class="ftoggler"><a class="fheader" href="#" role="button" aria-controls="id_resume_'.$edit.'" aria-expanded="false">'.$header.'</a></legend>';	
+	$resume_part .= '<a name="'.$edit.'"></a>';
+	$resume_part .= '<div class="view-group-content clearfix">';
+	//$resume_part .= '<div class="fcontainer clearfix">';	
 	$resume_part .= '<div>'.$content.'</div>';
 	switch ($buttons) {
 		case 'edit':
@@ -169,6 +340,9 @@ function block_exaport_form_resume_part($courseid = 0, $edit = '', $header = '',
 				break;
 		case 'add':
 				$resume_part .= '<input type="submit" value="' . get_string("add") . '" />';
+				break;
+		default :
+				$resume_part .= '';
 				break;
 	};
 	$resume_part .= '</div>';

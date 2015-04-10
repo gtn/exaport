@@ -6,7 +6,7 @@ class block_exaport_resume_editor_form extends moodleform {
 
 	function definition() {
 
-		global $CFG, $USER, $DB;
+		global $CFG, $USER, $DB, $COURSE;
 		$mform    =& $this->_form;
 		
 		$param = $this->_customdata['field'];		
@@ -17,10 +17,10 @@ class block_exaport_resume_editor_form extends moodleform {
 		$mform->addElement('html', '<div class="block_eportfolio_center">'.$this->_customdata['formheader'].'</div>');		
 		
 		$mform->addElement('editor', $param.'_editor', get_string('resume_'.$param, 'block_exaport'), null,
-							array('maxfiles' => EDITOR_UNLIMITED_FILES));
-							
+							array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+
 		if ($withfiles) {
-			$mform->addElement('filemanager', 'attachments', get_string('resume_files', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 5));
+			$mform->addElement('filemanager', 'attachments', get_string('resume_files', 'block_exaport'), null, array('subdirs' => false, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'maxfiles' => 5));
 		}
 				
 		$mform->addElement('hidden', 'courseid');
@@ -65,7 +65,7 @@ class block_exaport_resume_multifields_form extends moodleform {
 							$mform->setType($fieldname, PARAM_RAW);
 							break;
 					case 'filearea' : 
-							$mform->addElement('filemanager', 'attachments', get_string('resume_'.$fieldname, 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 5));
+							$mform->addElement('filemanager', 'attachments', get_string('resume_'.$fieldname, 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 5, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 							//$mform->addRule('attachments', null, 'required', null, 'client');
 							//$mform->addElement('filemanager', $fieldname, get_string('resume_'.$fieldname, 'block_exaport'));
 							//$mform->setType($fieldname, PARAM_RAW);
@@ -95,7 +95,7 @@ class block_exaport_resume_multifields_form extends moodleform {
 }
 
 function block_exaport_resume_prepare_block_mm_data($resume, $id, $type_block, $display_inputs, $data) {
-	global $DB, $USER, $OUTPUT;
+	global $DB, $CFG, $USER, $OUTPUT;
 
 	$show_information = false;
 	$formheader = get_string('edit', "block_exaport").': '.get_string('resume_'.$type_block, "block_exaport");
@@ -111,8 +111,11 @@ function block_exaport_resume_prepare_block_mm_data($resume, $id, $type_block, $
 		$item_id = block_exaport_set_resume_mm($type_block, $fromform);
 		// save uploaded file in 'resume_education' filearea
 		$context = context_user::instance($USER->id);
-		file_save_draft_area_files($fromform->attachments, $context->id, 'block_exaport', 'resume_'.$type_block, $item_id, null);
-		
+		// Checking userquota.
+		$upload_filesizes = block_exaport_get_filesize_by_draftid($fromform->attachments);
+		if (block_exaport_file_userquotecheck($upload_filesizes) && block_exaport_get_maxfilesize_by_draftid_check($fromform->attachments)) {
+			file_save_draft_area_files($fromform->attachments, $context->id, 'block_exaport', 'resume_'.$type_block, $item_id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+		};
 		echo "<div class='block_eportfolio_center'>".$OUTPUT->box(get_string('resume_'.$type_block."saved", "block_exaport"), 'center')."</div>";
 		$show_information = true;
 	} else {
@@ -121,7 +124,7 @@ function block_exaport_resume_prepare_block_mm_data($resume, $id, $type_block, $
 			$draftitemid = file_get_submitted_draft_itemid('attachments');
 			$context = context_user::instance($USER->id);
 			file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'resume_'.$type_block, $id,
-									array('subdirs' => false, 'maxfiles' => 5));                 					
+									array('subdirs' => false, 'maxfiles' => 5, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 					
 			// all data to form.
 			$data = $DB->get_record("block_exaportresume_".$type_block, array('id' => $id, 'user_id' => $USER->id));
 			$data->attachments = $draftitemid;   
@@ -264,7 +267,7 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
 					if ($record->positiondescription) {
 						$table->data[$item_i]['title'] .= '<a href="#" class="expandable-head">';
 					};
-					$table->data[$item_i]['title'] .= $record->employer.'</strong>';
+					$table->data[$item_i]['title'] .= $record->jobtitle.': '.$record->employer.'</strong>';
 					if ($record->positiondescription) {
 						$table->data[$item_i]['title'] .= '</a>';
 					};

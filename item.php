@@ -277,7 +277,7 @@ switch ($action) {
                 $draftitemid = file_get_submitted_draft_itemid('file');
                 $context = context_user::instance($USER->id);
                 file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
-                                        array('subdirs' => false, 'maxfiles' => 1));                 
+                                        array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 
                 $post->file = $draftitemid;   
 			}
 				
@@ -362,7 +362,11 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     // Updating file.
     if ($post->type == 'file') {
         $context = context_user::instance($USER->id);
-        file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, null);
+		// checking userquoata
+		$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
+		if (block_exaport_file_userquotecheck($upload_filesizes) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
+			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+		};
     }
     
 	if ($DB->update_record('block_exaportitem', $post)) {
@@ -415,7 +419,11 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 		if ($post->type == 'file') {
 			// save uploaded file in user filearea
 			$context = context_user::instance($USER->id);
-			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, null);
+			// checking userquoata
+			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
+			if (block_exaport_file_userquotecheck($upload_filesizes)) {
+				file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+			};
 		}
 		$comps = $post->compids;
 		if ($comps) {

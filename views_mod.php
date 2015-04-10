@@ -174,7 +174,7 @@ class block_exaport_view_edit_form extends moodleform {
 //							$mform->addElement('textarea', 'description', get_string("title", "block_exaport"), 'cols="60" rows="5"');
 //							$mform->setType('description', PARAM_TEXT);
 
-							$mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'), array('rows'=> '20', 'cols'=>'5'), array('maxfiles' => EDITOR_UNLIMITED_FILES));
+							$mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'), array('rows'=> '20', 'cols'=>'5'), array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 							$mform->setType('description', PARAM_RAW);
                             
                             if ($this->_customdata['view']) {
@@ -379,13 +379,10 @@ if ($editform->is_cancelled()) {
 			// delete all blocks
 			$DB->delete_records('block_exaportviewblock', array('viewid'=>$dbView->id));
 			// add blocks
-			
 			$blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, 
-								array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id)), 
-								$formView->blocks);
-								
-			$blocks = json_decode($blocks);
-			
+							array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id), 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), 
+							$formView->blocks);
+			$blocks = json_decode($blocks);	
 		
 			if(!$blocks)
 				print_error("noentry","block_exaport");
@@ -425,7 +422,7 @@ if ($editform->is_cancelled()) {
 			if (optional_param('ajax', 0, PARAM_INT)) {
 				$ret = new stdClass;
 				$ret->ok = true;
-				file_prepare_draft_area($view->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+				file_prepare_draft_area($view->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
 				$ret->blocks = json_encode(block_exaport_get_view_blocks($view));
 				
 				echo json_encode($ret);
@@ -509,7 +506,7 @@ $postView->action       = $action;
 $postView->courseid     = $courseid;
 $postView->draft_itemid = null;
 
-file_prepare_draft_area($postView->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+file_prepare_draft_area($postView->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
 
 // we need to copy additional files from the personal information to the views editor, just in case if the personal information is added
 copy_personal_information_draft_files($postView->draft_itemid, context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);
@@ -753,8 +750,8 @@ break;
 			};
 			if ($data->description) {
 				$draftid_editor = file_get_submitted_draft_itemid('description');
-				$currenttext = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true), $data->description);	
-				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));								
+				$currenttext = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $data->description);	
+				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor);								
 				$data->description_editor = array('text'=>$data->description, 'format'=>$data->descriptionformat, 'itemid'=>$draftid_editor);
 			};
 			$data->cataction = 'save';

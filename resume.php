@@ -131,7 +131,7 @@ if ($edit) {
 			if ($withfiles) {
 				$draftitemid = file_get_submitted_draft_itemid('attachments');
 				file_prepare_draft_area($draftitemid, context_user::instance($USER->id)->id, 'block_exaport', 'resume_'.$edit, $id,
-								array('subdirs' => false, 'maxfiles' => 5)); 
+								array('subdirs' => false, 'maxfiles' => 5, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size)); 
 				$data->attachments = $draftitemid;
 			};
 			$workform->set_data($data);
@@ -142,9 +142,12 @@ if ($edit) {
 															'block_exaport', 'resume_editor_'.$edit, $resume->id);
 				// files
 				if ($withfiles) {
-					file_save_draft_area_files($fromform->attachments, context_user::instance($USER->id)->id, 'block_exaport', 'resume_'.$edit, $id, null);
+					// checking userquoata
+					$upload_filesizes = block_exaport_get_filesize_by_draftid($fromform->attachments);
+					if (block_exaport_file_userquotecheck($upload_filesizes) && block_exaport_get_maxfilesize_by_draftid_check($fromform->attachments)) {
+						file_save_draft_area_files($fromform->attachments, context_user::instance($USER->id)->id, 'block_exaport', 'resume_'.$edit, $id, array('subdirs' => false, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'maxfiles' => 5));
+					};
 				};
-															
 				block_exaport_set_resume_params(array($edit => $fromform->{$edit}, 'courseid' => $fromform->courseid));
 				echo "<div class='block_eportfolio_center'>".$OUTPUT->box(get_string('resume_'.$edit."saved", "block_exaport"), 'center')."</div>";
 				$show_information = true;

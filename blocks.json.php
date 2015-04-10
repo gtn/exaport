@@ -201,7 +201,7 @@ function get_form_text($id, $block_data=array()) {
     $draftid_editor = file_get_submitted_draft_itemid('text');
 	if ($block_data->text) {
 		$text = $block_data->text;
-		$text = file_rewrite_pluginfile_urls($text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));
+		$text = file_rewrite_pluginfile_urls($text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor);
 	} else {
 		$text = '';
 	}
@@ -277,12 +277,12 @@ if ($USER->picture) {
 		$text = $block_data->text;
 
 		$text = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, 'block_exaport', 'view_content',
-                                       required_param('viewid', PARAM_INT), array('subdirs'=>true), $text);
+                                       required_param('viewid', PARAM_INT), array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $text);
 	} else {
 		$text = block_exaport_get_user_preferences()->description;
 
 		$text = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, 'block_exaport', 'personal_information',
-                                       $USER->id, array('subdirs'=>true), $text);
+                                       $USER->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $text);
 	}
 	$content  = "";
 

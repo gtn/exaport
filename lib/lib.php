@@ -1046,3 +1046,31 @@ function block_exaport_get_shared_users($viewid) {
     sort($sharedusers);
     return $sharedusers;
 };
+
+function block_exaport_file_userquotecheck($addingfiles = 0) {
+	global $DB, $USER, $CFG;
+	$result = $DB->get_record_sql('SELECT SUM(filesize) as allfilesize FROM {files} WHERE contextid = ? and component="block_exaport"', array(context_user::instance($USER->id)->id));
+	if ($result->allfilesize + $addingfiles > $CFG->block_exaport_userquota) {
+		throw new file_exception('userquotalimit');
+	}		
+	return true;	
+}
+
+function block_exaport_get_filesize_by_draftid($draftid = 0) {
+	global $DB, $USER, $CFG;
+	$result = $DB->get_record_sql('SELECT SUM(filesize) AS allfilesize FROM {files} WHERE contextid = ? AND component = "user" AND filearea="draft" AND itemid = ?', array(context_user::instance($USER->id)->id, $draftid));
+	if ($result) {
+		return $result->allfilesize;
+	} else {
+		return 0;
+	}
+}
+
+function block_exaport_get_maxfilesize_by_draftid_check($draftid = 0) {
+	global $DB, $USER, $CFG;
+	$result = $DB->get_record_sql('SELECT MAX(filesize) AS maxfilesize FROM {files} WHERE contextid = ? AND component = "user" AND filearea="draft" AND itemid = ?', array(context_user::instance($USER->id)->id, $draftid));
+	if (($CFG->block_exaport_max_uploadfile_size > 0) && ($result->maxfilesize > $CFG->block_exaport_max_uploadfile_size)) {
+		throw new file_exception('maxbytes');
+	}		
+	return true;	
+}

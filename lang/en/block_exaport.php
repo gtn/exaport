@@ -431,6 +431,10 @@ $string['settings_disable_external_comments_head'] = 'Disable sharing of comment
 $string['settings_disable_external_comments_body'] = '';
 $string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
 $string['block_exaport_app_externaleportfolio_body'] = 'For App';
+$string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis E-Portfolio';
+$string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis E-Portfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_userquota'] = 'User quota for Exabis E-Portfolio';
+$string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis E-Portfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
 

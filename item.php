@@ -421,7 +421,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 			$context = context_user::instance($USER->id);
 			// checking userquoata
 			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
-			if (block_exaport_file_userquotecheck($upload_filesizes)) {
+			if (block_exaport_file_userquotecheck($upload_filesizes) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
 				file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 			};
 		}

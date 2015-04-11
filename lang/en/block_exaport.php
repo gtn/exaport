@@ -507,8 +507,8 @@ $string['resume_skillscareerssaved'] = 'Careers skills saved';
 
 
 
-$string['sharedArtefacts'] = 'Shared for you artifacts';
-$string['shareditems_category'] = 'Shared for you artifacts';
+$string['sharedArtefacts'] = 'Group portfolios shared with you';
+$string['shareditems_category'] = 'Group portfolios shared with you';
 
 $string['create_as_note'] = 'Create as Artefact';
 $string['category_not_found'] = 'Category not found';

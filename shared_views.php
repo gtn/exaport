@@ -227,9 +227,15 @@ function exaport_print_views($views, $parsedsort, $onlyexternal=0) {
 				$table->data = array();
 
 				foreach ($item['views'] as $view) {
+					//If there is external access - display external link. 
+					 if ($view->externaccess) {
+						$linktoview = "<a href=\"".block_exaport_get_external_view_url($view, $view->userid)."\">".format_string($view->name) . "</a>";
+					} else { 
+						$linktoview = "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/{$view->userid}-{$view->id}\">".
+										format_string($view->name) . "</a>";
+					};
 					$table->data[] = array(
-						"<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/{$view->userid}-{$view->id}\">" .
-						format_string($view->name) . "</a>",
+						$linktoview,
 						userdate($view->timemodified),
 						block_exaport_get_shared_with_text($view)
 					);

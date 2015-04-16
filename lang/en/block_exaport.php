@@ -494,7 +494,7 @@ $string['resume_goalspersonal'] = 'Personal goals';
 $string['resume_goalsacademic'] = 'Academic goals';
 $string['resume_goalscareers'] = 'Career goals';
 $string['resume_goalspersonalsaved'] = 'Personal goals saved';
-$string['resume_goalsacademicsaved'] = 'Academis goals saved';
+$string['resume_goalsacademicsaved'] = 'Academic goals saved';
 $string['resume_goalscareerssaved'] = 'Careers goals saved';
 $string['resume_myskills'] = 'My skills';
 $string['resume_skills'] = 'Skills';
@@ -502,9 +502,11 @@ $string['resume_skillspersonal'] = 'Personal skills';
 $string['resume_skillsacademic'] = 'Academic skills';
 $string['resume_skillscareers'] = 'Career skills';
 $string['resume_skillspersonalsaved'] = 'Personal skills saved';
-$string['resume_skillsacademicsaved'] = 'Academis skills saved';
+$string['resume_skillsacademicsaved'] = 'Academic skills saved';
 $string['resume_skillscareerssaved'] = 'Careers skills saved';
-
+$string['resume_goalscomp'] = 'Goals competency';
+$string['resume_skillscomp'] = 'Skills competency';
+$string['resume_badges'] = 'Badges';
 
 
 $string['sharedArtefacts'] = 'Group portfolios shared with you';

@@ -23,4 +23,12 @@ jQueryExaport(function($){
 	
 	var hash = window.location.hash.substring(1);
 	$('a[name='+hash+']').parents('.view-group').toggleClass('view-group-open');	
+	
+	// delete cookie for treeview 
+	document.cookie = 'comptree=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
+	// open all checked uls
+	$("#comptree input:checked").parents('ul').show();
+	$("#comptree input:checked").parents('ul').attr('rel', 'open');
+	// create tree for competencies
+	ddtreemenu.createTree("comptree", true);
 });

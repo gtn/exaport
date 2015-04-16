@@ -591,7 +591,8 @@ function block_exaport_get_competences($item, $role=1) {
     global $DB;
 	return $DB->get_records('block_exacompcompactiv_mm', array("eportfolioitem"=>1, "activityid"=>$item->id));
 }
-function block_exaport_build_comp_tree() {
+
+function block_exaport_build_comp_tree($forresume = false, $resume = null) {
     global $DB, $USER;
 	
 	$courses = $DB->get_records('course', array());
@@ -609,7 +610,11 @@ function block_exaport_build_comp_tree() {
 		}
 	}
 	
-    $tree = '<form name="treeform"><ul id="comptree" class="treeview">';
+	if ($forresume) {
+		$tree = '<form name="treeform" method="post" action="/blocks/exaport/resume.php?courseid='.$resume->courseid.'&id='.$resume->id.'&sesskey='.sesskey().'"><ul id="comptree" class="treeview">';
+	} else {
+		$tree = '<form name="treeform"><ul id="comptree" class="treeview">';
+	};
     $subject = "";
     $topic = "";
     $newsub = true;
@@ -619,8 +624,8 @@ function block_exaport_build_comp_tree() {
     foreach ($descriptors as $descriptor) {
         if ($descriptor->subject != $subject) {
             $subject = $descriptor->subject;
-            if (!$newsub
-                )$tree.='</ul></li></ul></li>';
+            if (!$newsub)
+				$tree.='</ul></li></ul></li>';
             $tree.='<li id="gegenst'.$descriptor->subjectid.'" alt="'.$subject.'">' . $subject;
             $tree.='<ul>';
 
@@ -635,13 +640,25 @@ function block_exaport_build_comp_tree() {
             $tree.='<ul>';
             $newtop = false;
         }
-        $tree.='<li><input class="'.$descriptor->subjectid.'" type="checkbox" name="desc" value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
+		if ($forresume && in_array($descriptor->id, $resume->descriptors)) {
+			$checked = 'checked="checked"';
+		} else {
+			$checked = '';
+		}
+        $tree.='<li><input class="'.$descriptor->subjectid.'" type="checkbox" name="desc'.($forresume ? '[]':'').'" '.$checked.' value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
 
         $index++;
     }
-    $tree .= '</ul></li></ul></li></ul>
-			<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport(function($){$.colorbox.close()});">
-			</form>';
+    $tree .= '</ul></li></ul></li></ul>';
+	if ($forresume) {
+		$tree .= '<input type="hidden" value="'.$forresume.'" name="edit">';
+		$tree .= '<input type="hidden" value="'.sesskey().'" name="sesskey">';
+		$tree .= '<input type="submit" id="id_submitbutton" type="submit" value="'.get_string('savechanges').'" name="submitbutton">';
+		$tree .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" value="'.get_string('cancel').'" name="cancel">';
+	} else {
+		$tree .= '<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport(function($){$.colorbox.close()});">';
+	}
+	$tree .= '</form>';
 
     return $tree;
 }
@@ -883,8 +900,13 @@ function block_exaport_get_view_blocks($view) {
                 continue;
             }
             	
-            $context = context_course::instance($badge->courseid);
-            $badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			if (!$badge->courseid) { // For badges with courseid = NULL
+				$badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			} else {
+			    $context = context_course::instance($badge->courseid);	
+				$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			}
+            
 
             $block->badge = $badge;
         } else {

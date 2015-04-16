@@ -60,10 +60,13 @@ if (!$course = $DB->get_record("course", $conditions)) {
 $url = '/blocks/exaport/resume.php';
 $PAGE->set_url($url);
 $PAGE->requires->css('/blocks/exaport/css/resume.css');
+$PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
+$PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
 
 block_exaport_print_header("personal", "resume");
 
 $PAGE->requires->js('/blocks/exaport/javascript/resume.js', true);
+
 
 echo "<br />";
 
@@ -221,6 +224,17 @@ if ($edit) {
 				$redirect = true;
 			};		
 			break;
+		case 'goalscomp':
+		case 'skillscomp':			
+			if ($show_information = block_exaport_resume_competences_form($resume, $id, $edit)) {
+				$redirect = true;
+			};		
+			break;
+		case 'badges':			
+			if ($show_information = block_exaport_resume_checkboxeslist_form($resume, $edit, $data)) {
+				$redirect = true;
+			};		
+			break;
 		default:
 			$show_information = true;
 			$redirect = true;
@@ -295,6 +309,14 @@ if ($show_information) {
 	$certifications = block_exaport_resume_get_mm_records('certif', $conditions);
 	$certificationhistory = block_exaport_resume_templating_mm_records($courseid, 'certif', 'title', $certifications);
 	echo block_exaport_form_resume_part($courseid, 'certif', get_string('resume_certif', 'block_exaport'), $certificationhistory, 'add', $opened);
+	
+	// Badges
+	if ($CFG->enablebadges && block_exaport_badges_enabled()) {
+		$conditions = array('resumeid' => $resume->id);
+		$badges = block_exaport_resume_get_mm_records('badges', $conditions);
+		$badgesrecords = block_exaport_resume_templating_mm_records($courseid, 'badges', 'title', $badges, 0, 0, 0);
+		echo block_exaport_form_resume_part($courseid, 'badges', get_string('resume_badges', 'block_exaport'), $badgesrecords, 'edit', $opened);
+	};
 
 	// Books and publications
 	$conditions = array('user_id' => $USER->id, 'resume_id' => $resume->id);

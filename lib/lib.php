@@ -1107,3 +1107,21 @@ function block_exaport_get_maxfilesize_by_draftid_check($draftid = 0) {
 	}		
 	return true;	
 }
+
+function block_exaport_is_valid_media_by_filename ($filename) {
+	global $DB, $USER, $CFG;
+	$path_parts = pathinfo($filename);
+	switch ($path_parts['extension']) {
+		case 'avi':
+		case 'mp4':
+		case 'flv':
+		case 'swf':
+		case 'mpg':
+		case 'mpeg':
+		case '3gp':
+		case 'webm':
+		case 'ogg':
+			return true;
+		default: return false;
+	}
+}

@@ -37,15 +37,12 @@ function block_exaport_get_user_from_hash($hash)
 }
 
 function block_exaport_print_extern_item($item, $access) {
-	global $CFG, $OUTPUT;
+	global $CFG, $OUTPUT, $PAGE;
 
 	echo $OUTPUT->heading(format_string($item->name));
 
 	$box_content = '';
 
-	
-		
-	
 	if ($item->type == 'file') {
 		if ($file = block_exaport_get_item_file($item)) {
 			$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id);
@@ -54,7 +51,28 @@ function block_exaport_print_extern_item($item, $access) {
                 $box_content .= "<img src=\"$ffurl\" alt=\"" . format_string($item->name) . "\" />";
             } else {
             	//echo $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $link));
-				$box_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
+				$box_content .= "<p class=\"filelink\">" . $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
+				if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
+					// Videoblock
+					$box_content .= '
+						<div id="video_block">
+							<div id="video_content">
+								<video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered" 
+											controls preload="auto" width="640" height="480"
+											data-setup=\'{}\'>
+									<source src="'.$ffurl.'" type="video/mp4" />
+									<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+								</video>
+							</div>
+							<div id="video_error" style="display: none;" class="incompatible_video">';
+					$a = new stdClass();
+					$a->link = $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl));
+					$box_content .= get_string('incompatible_video', 'block_exaport', $a);
+					$box_content .= '</div>
+						</div>';
+					$box_content .= "
+						<script src=\"".$CFG->wwwroot."/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
+				};
             }
         }
 		if (!$box_content) {

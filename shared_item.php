@@ -40,6 +40,12 @@ $context = context_system::instance();
 $PAGE->set_context($context);
 require_login(0, true);
 
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
+$PAGE->requires->js( new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/vedeo-js/video.js'), true);
+$PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
+
 $item = block_exaport_get_item($itemid, $access);
 
     if ($deletecomment == 1) {
@@ -97,7 +103,7 @@ if ($item->allowComments) {
 if ($item->access->page == 'view') {
     if ($item->access->request == 'intern') {
         block_exaport_print_header("views");
-    } else {
+    } else { 
         print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
         echo block_exaport_wrapperdivstart();
     }

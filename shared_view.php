@@ -81,7 +81,10 @@ foreach ($blocks as $block) {
 	$columns[$block->positionx][] = $block;
 }
 
-
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
 if ($view->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");
@@ -179,6 +182,9 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 						$filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
 						// Fileinfo block.
 						$file_params = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> <span class="filedescription">('.$filesize.')</span></div>';
+						if (block_exaport_is_valid_media_by_filename($file->filename)) {
+							echo '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" alt=""/></div>';
+						}
 					};
 				};		
 			}

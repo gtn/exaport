@@ -146,7 +146,7 @@ function block_exaport_resume_checkboxeslist_form($resume, $edit, $data) {
 	};
 	
 	$formheader = get_string('edit', "block_exaport").': '.get_string('resume_'.$edit, "block_exaport");
-	$workform = new block_exaport_resume_checkboxlist_form($_SERVER['REQUEST_URI'], array('formheader' => $formheader, 'records'=>$records));
+	$workform = new block_exaport_resume_checkboxlist_form($_SERVER['REQUEST_URI'].'#'.$edit, array('formheader' => $formheader, 'records'=>$records));
 	$data->check = $default_values;
 	$data->resume_id = $resume->id;
 	$workform->set_data($data);
@@ -185,7 +185,7 @@ function block_exaport_resume_prepare_block_mm_data($resume, $id, $type_block, $
 
 	$show_information = false;
 	$formheader = get_string('edit', "block_exaport").': '.get_string('resume_'.$type_block, "block_exaport");
-	$workform = new block_exaport_resume_multifields_form($_SERVER['REQUEST_URI'], array('formheader' => $formheader, 'inputs'=>$display_inputs));
+	$workform = new block_exaport_resume_multifields_form($_SERVER['REQUEST_URI'].'#'.$type_block, array('formheader' => $formheader, 'inputs'=>$display_inputs));
 	$data->resume_id = $resume->id;
 	$workform->set_data($data);
 	
@@ -492,7 +492,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 			$table->data[$item_i]['files'] = '';
 			$table->data[$item_i]['icons'] = '';
 		} else {
-			$table->data[$item_i]['title'] = '<a href="#" class="expandable-head">'.get_string('resume_'.$type.'comp', 'block_exaport').'</a>';
+			$table->data[$item_i]['title'] = '<a name="'.$type.'comp"></a><a href="#" class="expandable-head">'.get_string('resume_'.$type.'comp', 'block_exaport').'</a>';
 			$comptitles = '';
 			$competences = $DB->get_records('block_exacompcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
 			foreach ($competences as $competence) {
@@ -533,7 +533,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 	foreach ($elements as $element) {
 		$item_i++;
 		// Title and Description
-		$table->data[$item_i]['title'] = '<a href="#" class="expandable-head">'.get_string('resume_'.$type.$element, 'block_exaport').'</a>';
+		$table->data[$item_i]['title'] = '<a name="'.$type.$element.'"></a><a href="#" class="expandable-head">'.get_string('resume_'.$type.$element, 'block_exaport').'</a>';
 		$description = $resume->{$type.$element};
 		$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_'.$type.$element, $resume->id);
 		$table->data[$item_i]['title'] .= '<div class="expandable-text hidden">'.$description.'</div>';
@@ -552,8 +552,8 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 		$table->data[$item_i]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&edit='.$type.$element.'&id='.$resume->id.'&sesskey='.sesskey().'"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
 	};
 
-	
-	return html_writer::table($table);
+	$table_content = html_writer::table($table);
+	return $table_content;
 }
 
 function block_exaport_resume_list_files($filearea, $files) {

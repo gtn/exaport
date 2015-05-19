@@ -645,5 +645,26 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2015040801, 'exaport');
 	}
 
+
+    if ($oldversion < 2015051901) {
+
+        // Define table block_exaportresume_badges to be created.
+        $table = new xmldb_table('block_exaportresume_badges');
+        // Adding fields to table block_exaportresume_badges.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('resumeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('badgeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('sorting', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, '10');
+        // Adding keys to table block_exaportresume_badges.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        // Conditionally launch create table for block_exaportresume_badges.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2015051901, 'exaport');
+    }
+
+
 	return $result;
 }

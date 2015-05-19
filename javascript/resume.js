@@ -22,6 +22,10 @@ jQueryExaport(function($){
 	});
 	
 	var hash = window.location.hash.substring(1);
+	if (hash.search('goals') >= 0) 
+		hash = 'goals';
+	if (hash.search('skills') >= 0) 
+		hash = 'skills';
 	$('a[name='+hash+']').parents('.view-group').toggleClass('view-group-open');	
 	
 	// delete cookie for treeview 

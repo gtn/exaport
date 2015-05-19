@@ -127,7 +127,7 @@ if ($edit) {
 		case 'interests':	
 			$data->{$edit} = $resume->{$edit};
 			$data->{$edit.'format'} = FORMAT_HTML;				
-			$workform = new block_exaport_resume_editor_form($_SERVER['REQUEST_URI'], array('formheader' => $formheader, 'field'=>$edit, 'withfiles' => $withfiles));
+			$workform = new block_exaport_resume_editor_form($_SERVER['REQUEST_URI'].'#'.$edit, array('formheader' => $formheader, 'field'=>$edit, 'withfiles' => $withfiles));
 			$data = file_prepare_standard_editor($data, $edit, $textfieldoptions, context_user::instance($USER->id),			
 												'block_exaport', 'resume_editor_'.$edit, $resume->id); 												
 			// files
@@ -280,7 +280,8 @@ if ($redirect) {
 		$opened_block = '#'.$opened_block;
 	};
 	$returnurl = $CFG->wwwroot . '/blocks/exaport/resume.php?courseid='.$courseid.'&id='.$resume->id.$opened_block;
-	redirect($returnurl);
+	// redirecting. Uncomment next line if you need this function
+	// redirect($returnurl);
 };
 
 if ($show_information) {

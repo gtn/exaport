@@ -37,6 +37,7 @@ $delete = optional_param('delete', 0, PARAM_RAW);
 $sortchange = optional_param('sortchange', 0, PARAM_RAW);
 $id = optional_param('id', 0, PARAM_INT);
 $opened = optional_param('opened', '', PARAM_RAW); // Which block will be open
+$xmleuropass = optional_param('xmleuropass', 0, PARAM_INT);
 
 $resume = block_exaport_get_resume_params();
 // Create new resume if there isn't
@@ -57,6 +58,14 @@ if (!$course = $DB->get_record("course", $conditions)) {
     print_error("invalidinstance", "block_exaport");
 }
 
+// get XML for europass
+if ($xmleuropass == 1 && $id > 0) {
+	$xml = europassXML($id);
+	echo $xml;
+	exit;
+}
+
+
 $url = '/blocks/exaport/resume.php';
 $PAGE->set_url($url);
 $PAGE->requires->css('/blocks/exaport/css/resume.css');
@@ -76,6 +85,7 @@ $redirect = false;
 $userpreferences = block_exaport_get_user_preferences();
 $description = $userpreferences->description;
 
+//echo '<div class="services"><a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&xmleuropass=1&id='.$resume->id.'" class="expandall">Export to Europass</a></div>';
 echo "<div class='block_eportfolio_center'><h2>";
 echo $OUTPUT->box(text_to_html(get_string("resume_my", "block_exaport")), 'center');
 echo "</h2></div>"; /**/
@@ -285,7 +295,6 @@ if ($redirect) {
 };
 
 if ($show_information) {
-	
 	echo '<div class="collapsible-actions"><a href="#" class="expandall">Expand all</a>';
 	echo '<a href="#" class="collapsall hidden">Collaps all</a></div>';
 

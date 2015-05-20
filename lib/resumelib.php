@@ -487,14 +487,14 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 	// Competencies
 	if (block_exaport_check_competence_interaction()) {
 		$dbman = $DB->get_manager();
-		if (!$dbman->table_exists('block_exacompcompresume_mm')){
-			$table->data[$item_i]['title'] = get_string('resume_'.$type.'comp', 'block_exaport').' / <span style="color:red;">Error: Please update exabis competencies to latest version</span>';
+		if (!$dbman->table_exists('block_exacompdescriptors')){
+			$table->data[$item_i]['title'] = get_string('resume_'.$type.'comp', 'block_exaport').' / <span style="color:red;">Error: Please install latest version of exabis competencies</span>';
 			$table->data[$item_i]['files'] = '';
 			$table->data[$item_i]['icons'] = '';
 		} else {
 			$table->data[$item_i]['title'] = '<a name="'.$type.'comp"></a><a href="#" class="expandable-head">'.get_string('resume_'.$type.'comp', 'block_exaport').'</a>';
 			$comptitles = '';
-			$competences = $DB->get_records('block_exacompcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
+			$competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
 			foreach ($competences as $competence) {
 				$competencesdb = $DB->get_record('block_exacompdescriptors', array('id' => $competence->compid), $fields='*', $strictness=IGNORE_MISSING); 
 				if($competencesdb != null){
@@ -510,25 +510,8 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 				$table->data[$item_i]['icons'] = '';
 			}
 		};
-		//echo block_exaport_build_comp_tree();
 
-//		echo "<p style='margin-left: 5px;'><a class='competences' href='#'>" . get_string("selectcomps", "block_exaport") . "</a>";		
 	};
-//get competences from item if editing
-// $comp = block_exaport_check_competence_interaction();
-// if ($existing && $comp) {
-	
-	// initialize with empty string
-	// if (empty($existing->compids)) $existing->compids = '';
-	
-	// $competences = $DB->get_records('block_exacompcompactiv_mm', array("activityid" => $existing->id, "eportfolioitem" => 1));
-	// foreach ($competences as $competence) {
-		// $existing->compids .= $competence->compid . ',';
-	// }
-	// if (!$competences)
-		// $existing->compids = null;
-// }
-// $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&categoryid=" . $categoryid;	
 	
 	foreach ($elements as $element) {
 		$item_i++;
@@ -606,17 +589,17 @@ function block_exaport_resume_competences_form($resume, $id, $type_block) {
 	if ($save) {
 		$interaction = block_exaport_check_competence_interaction();
 		if ($interaction) {
-			$DB->delete_records('block_exacompcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
+			$DB->delete_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
 			$compids = optional_param_array('desc', array(), PARAM_RAW);
 			if (count($compids)>0) {
 				foreach($compids as $compid) {
-					$DB->insert_record('block_exacompcompresume_mm', array("resumeid" => $resume->id, "compid" => $compid, "comptype" => $type));
+					$DB->insert_record('block_exaportcompresume_mm', array("resumeid" => $resume->id, "compid" => $compid, "comptype" => $type));
 				}
 			}
 		};
 		return true;
 	};
-	$resume->descriptors = array_keys($DB->get_records('block_exacompcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type), null, 'compid'));
+	$resume->descriptors = array_keys($DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type), null, 'compid'));
 	$content = '<div class="block_eportfolio_center">'.get_string('edit', "block_exaport").': '.get_string('resume_'.$type_block, "block_exaport").'</div>';
 	$content .= block_exaport_build_comp_tree($type_block, $resume);
 	echo $content;
@@ -628,4 +611,13 @@ function block_exaport_get_user_badge_image($badge) {
 	$src = '/pluginfile.php/'.context_user::instance($badge->usercreated)->id.'/badges/userbadge/'.$badge->id.'/'.$badge->uniquehash;
 	$img = '<img src="'.$src.'" style="float: left; margin: 0px 10px;">';
 	return $img;
+}
+
+// get XML for europass
+function europassXML($resumeid = 0) {
+	$xml = '';
+	
+	$xml .= $resumeid;
+	return $xml;
+	
 }

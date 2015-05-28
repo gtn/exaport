@@ -593,7 +593,7 @@ function block_exaport_get_competences($item, $role=1) {
 }
 
 function block_exaport_build_comp_tree($forresume = false, $resume = null) {
-    global $DB, $USER;
+    global $DB, $USER, $CFG;
 	
 	$courses = $DB->get_records('course', array());
 	
@@ -611,7 +611,8 @@ function block_exaport_build_comp_tree($forresume = false, $resume = null) {
 	}
 	
 	if ($forresume) {
-		$tree = '<form name="treeform" method="post" action="/blocks/exaport/resume.php?courseid='.$resume->courseid.'&id='.$resume->id.'&sesskey='.sesskey().'#'.$forresume.'"><ul id="comptree" class="treeview">';
+		$tree = '<form name="treeform" method="post" action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$resume->courseid.'&id='.$resume->id.'&sesskey='.sesskey().'#'.$forresume.'"><ul id="comptree" class="treeview">';
+		
 	} else {
 		$tree = '<form name="treeform"><ul id="comptree" class="treeview">';
 	};

@@ -2,6 +2,11 @@
 
 require_once $CFG->libdir.'/formslib.php';
 
+global $attachedFileNames, $attachedFileDatas, $attachedFileMimeTypes;
+$attachedFileNames = array();
+$attachedFileDatas = array();
+$attachedFileMimeTypes  = array();
+
 class block_exaport_resume_editor_form extends moodleform {
 
 	function definition() {
@@ -615,9 +620,584 @@ function block_exaport_get_user_badge_image($badge) {
 
 // get XML for europass
 function europassXML($resumeid = 0) {
+	global $USER, $DB;
+	global $attachedFileNames, $attachedFileDatas, $attachedFileMimeTypes;
 	$xml = '';
+	$resume = $DB->get_record('block_exaportresume', array("id" => $resumeid, 'user_id' => $USER->id));
 	
-	$xml .= $resumeid;
+	$dom = new DOMDocument('1.0', 'utf-8');
+	$root = $dom->createElement('SkillsPassport');
+	$root->setAttribute('xmlns','http://europass.cedefop.europa.eu/Europass');
+	$root->setAttribute('xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance');
+	$root->setAttribute('xsi:schemaLocation','http://europass.cedefop.europa.eu/Europass http://europass.cedefop.europa.eu/xml/v3.2.0/EuropassSchema.xsd');
+	$root->setAttribute('locale','en');
+	// DocumentInfo
+	$DocumentInfo = $dom->createElement('DocumentInfo');
+		$DocumentType = $dom->createElement('DocumentType');
+			$text = $dom->createTextNode('ECV');
+			$DocumentType->appendChild($text);
+			$DocumentInfo->appendChild($DocumentType);
+		$Bundle = $dom->createElement('Bundle');
+			$DocumentInfo->appendChild($Bundle);
+		$CreationDate = $dom->createElement('CreationDate');
+			$text = $dom->createTextNode(date("Y-m-d").'T'.date("H:i:s.000").'Z');
+			$CreationDate->appendChild($text);
+			$DocumentInfo->appendChild($CreationDate);
+		$LastUpdateDate = $dom->createElement('LastUpdateDate');
+			$text = $dom->createTextNode(date("Y-m-d").'T'.date("H:i:s.000").'Z');
+			$LastUpdateDate->appendChild($text);
+			$DocumentInfo->appendChild($LastUpdateDate);		
+		$XSDVersion = $dom->createElement('XSDVersion');
+			$text = $dom->createTextNode('V3.2');
+			$XSDVersion->appendChild($text);
+			$DocumentInfo->appendChild($XSDVersion);
+		$Generator = $dom->createElement('Generator');
+			$text = $dom->createTextNode('Moodle exaport resume');
+			$Generator->appendChild($text);
+			$DocumentInfo->appendChild($Generator);
+		$Comment = $dom->createElement('Comment');
+			$text = $dom->createTextNode('Europass CV from Moodle exaport');
+			$Comment->appendChild($text);
+			$DocumentInfo->appendChild($Comment);
+	$root->appendChild($DocumentInfo);
+		
+	// LearnerInfo
+	$LearnerInfo = $dom->createElement('LearnerInfo');
+		$Identification = $dom->createElement('Identification');
+			$PersonName = $dom->createElement('PersonName');
+				$Title = $dom->createElement('Title');
+					$text = $dom->createTextNode('');
+					$Title->appendChild($text);
+					$PersonName->appendChild($Title);
+				$FirstName = $dom->createElement('FirstName');
+					$text = $dom->createTextNode($USER->firstname);
+					$FirstName->appendChild($text);
+					$PersonName->appendChild($FirstName);
+				$Surname = $dom->createElement('Surname');
+					$text = $dom->createTextNode($USER->lastname);
+					$Surname->appendChild($text);
+					$PersonName->appendChild($Surname);
+			$Identification->appendChild($PersonName);
+			
+			$ContactInfo = $dom->createElement('ContactInfo');
+				// address info
+				$Address = $dom->createElement('Address');
+					$Contact = $dom->createElement('Contact');
+						$AddressLine = $dom->createElement('AddressLine');
+							$text = $dom->createTextNode($USER->address);
+							$AddressLine->appendChild($text);
+							$Contact->appendChild($AddressLine);
+						$PostalCode = $dom->createElement('PostalCode');
+							$text = $dom->createTextNode('');
+							$PostalCode->appendChild($text);
+							$Contact->appendChild($PostalCode);
+						$Municipality = $dom->createElement('Municipality');
+							$text = $dom->createTextNode($USER->city);
+							$Municipality->appendChild($text);
+							$Contact->appendChild($Municipality);
+						$Country = $dom->createElement('Country');
+							$Code = $dom->createElement('Code');
+								$text = $dom->createTextNode($USER->country);
+								$Code->appendChild($text);
+								$Country->appendChild($Code);
+							$Label = $dom->createElement('Label');
+								$text = $dom->createTextNode('');
+								$Label->appendChild($text);
+								$Country->appendChild($Label);
+							$Contact->appendChild($Country);
+					$Address->appendChild($Contact);
+				$ContactInfo->appendChild($Address);
+				// email
+				$Email = $dom->createElement('Email');
+					$Contact = $dom->createElement('Contact');
+						$text = $dom->createTextNode($USER->email);
+						$Contact->appendChild($text);
+						$Email->appendChild($Contact);
+				$ContactInfo->appendChild($Email);
+				// phones
+				$TelephoneList = $dom->createElement('TelephoneList');
+					$phones = array('1' => 'home', '2' => 'mobile');
+					foreach ($phones as $index => $label) {
+						$Telephone = $dom->createElement('Telephone');
+							$Contact = $dom->createElement('Contact');
+								$text = $dom->createTextNode($USER->{'phone'.$index});
+								$Contact->appendChild($text);
+								$Telephone->appendChild($Contact);
+							$Use = $dom->createElement('Use');
+								$Code = $dom->createElement('Code');
+									$text = $dom->createTextNode($label);
+									$Code->appendChild($text);
+								$Use->appendChild($Code);
+							$Telephone->appendChild($Use);
+						$TelephoneList->appendChild($Telephone);
+					};
+				$ContactInfo->appendChild($TelephoneList);
+				// www
+				$WebsiteList = $dom->createElement('WebsiteList');
+					$Website = $dom->createElement('Website');
+						$Contact = $dom->createElement('Contact');
+							$text = $dom->createTextNode($USER->url);
+							$Contact->appendChild($text);
+							$Website->appendChild($Contact);
+						$Use = $dom->createElement('Use');
+							$Code = $dom->createElement('Code');
+								$text = $dom->createTextNode('personal');
+								$Code->appendChild($text);
+							$Use->appendChild($Code);
+						$Website->appendChild($Use);
+					$WebsiteList->appendChild($Website);
+				$ContactInfo->appendChild($WebsiteList);
+				// messengers
+				$InstantMessagingList = $dom->createElement('InstantMessagingList');
+					$messangers = array('skype', 'icq', 'aim', 'msn', 'yahoo');					
+					foreach ($messangers as $messanger) {
+						$InstantMessaging = $dom->createElement('InstantMessaging');
+							$Contact = $dom->createElement('Contact');
+								$text = $dom->createTextNode($USER->{$messanger});
+								$Contact->appendChild($text);
+								$InstantMessaging->appendChild($Contact);
+							$Use = $dom->createElement('Use');
+								$Code = $dom->createElement('Code');
+									$text = $dom->createTextNode($messanger);
+									$Code->appendChild($text);
+								$Use->appendChild($Code);
+							$InstantMessaging->appendChild($Use);
+						$InstantMessagingList->appendChild($InstantMessaging);
+					};
+				$ContactInfo->appendChild($InstantMessagingList);
+			$Identification->appendChild($ContactInfo);
+			
+			// PHOTO
+			$fs = get_file_storage();
+			$file = $fs->get_file(context_user::instance($USER->id)->id, 'user', 'icon', 0, '/', 'f3.png');			 
+			if ($file) {
+				$Photo = $dom->createElement('Photo');
+					$MimeType = $dom->createElement('MimeType');
+						$text = $dom->createTextNode($file->get_mimetype());
+						$MimeType->appendChild($text);
+					$Photo->appendChild($MimeType);
+					$Data = $dom->createElement('Data');
+						$userpicturefilecontent = base64_encode($file->get_content());					
+						//$userpicturefilecontent .= print_r($file, true);
+						$text = $dom->createTextNode($userpicturefilecontent);
+						$Data->appendChild($text);
+					$Photo->appendChild($Data);
+				$Identification->appendChild($Photo);
+			};
+			
+		$LearnerInfo->appendChild($Identification);	
+		// Headline - insert of the cover of exaport resume
+		$Headline = $dom->createElement('Headline');
+			$Type = $dom->createElement('Type');
+				$Code = $dom->createElement('Code');
+					$text = $dom->createTextNode('personal_statement');
+					$Code->appendChild($text);
+				$Type->appendChild($Code);	
+				$Label = $dom->createElement('Label');
+					$text = $dom->createTextNode('PERSONAL STATEMENT');
+					$Label->appendChild($text);
+				$Type->appendChild($Label);	
+			$Headline->appendChild($Type);	
+			$Description = $dom->createElement('Description');
+				$Label = $dom->createElement('Label');
+					$text = $dom->createTextNode(cleanForExternalXML($resume->cover));
+					$Label->appendChild($text);
+				$Description->appendChild($Label);	
+			$Headline->appendChild($Description);	
+		$LearnerInfo->appendChild($Headline);	
+		
+		// WorkExperienceList / Employment history
+		$resume->employments = $DB->get_records('block_exaportresume_employ', array("resume_id" => $resume->id), 'sorting');
+		$WorkExperienceList = europassXMLEmployersEducations($dom, 'WorkExperience', $resume->employments);
+		$LearnerInfo->appendChild($WorkExperienceList);	/**/
+		
+		// EducationList / Education history
+		$resume->educations = $DB->get_records('block_exaportresume_edu', array("resume_id" => $resume->id), 'sorting');
+		$WorkEducationsList = europassXMLEmployersEducations($dom, 'Education', $resume->educations);
+		$LearnerInfo->appendChild($WorkEducationsList);	/**/
+		
+		// Skills. Carrer skills to Job-related skills.
+		$Skills = $dom->createElement('Skills');
+			$Other = $dom->createElement('Other');
+				$Description = $dom->createElement('Description');
+					$skillscontent = $resume->skillscareers.$resume->skillsacademic.$resume->skillspersonal;			
+					$competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => 'skills'));
+					foreach ($competences as $competence) {
+						$competencesdb = $DB->get_record('block_exacompdescriptors', array('id' => $competence->compid), $fields='*', $strictness=IGNORE_MISSING); 
+						if($competencesdb != null){
+							$skillscontent .= $competencesdb->title.'<br>';
+						};
+					};					
+					$text = $dom->createTextNode(cleanForExternalXML($skillscontent));
+					$Description->appendChild($text);
+					$Other->appendChild($Description);
+				// Skill's files
+				$files = $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', 'resume_skillscareers', $resume->id, 'filename', false);
+				$files = $files + $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', 'resume_skillspersonal', $resume->id, 'filename', false);
+				$files = $files + $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', 'resume_skillsacademic', $resume->id, 'filename', false);
+				if (count($files) > 0) {
+					$fileArray = europassXMLGetAttachedFileContents($files);
+					$Documentation = europassXMLDocumentationList($dom, $fileArray);
+					$Other->appendChild($Documentation);	
+				}; 
+				
+			$Skills->appendChild($Other);	
+		$LearnerInfo->appendChild($Skills);	
+		
+		// AchievementList.
+		$AchievementList = $dom->createElement('AchievementList');
+		// Sertifications, awards.
+		list($sertificationsString, $elementIDs) = listForResumeElements($resume->id, 'block_exaportresume_certif');
+		$Sertifications = europassXMLAchievement($dom, 'certif', $elementIDs, get_string('resume_certif', 'block_exaport'), cleanForExternalXML($sertificationsString));
+		$AchievementList->appendChild($Sertifications);	
+		
+		// Books, publications.
+		list($publicationsString, $elementIDs) = listForResumeElements($resume->id, 'block_exaportresume_public');
+		$Publications = europassXMLAchievement($dom, 'public', $elementIDs, get_string('resume_public', 'block_exaport'), cleanForExternalXML($publicationsString));
+		$AchievementList->appendChild($Publications);	
+		
+		// Memberships	.	
+		list($mbrshipString, $elementIDs) = listForResumeElements($resume->id, 'block_exaportresume_mbrship');
+		$Memberships = europassXMLAchievement($dom, 'membership', $elementIDs, get_string('resume_mbrship', 'block_exaport'), cleanForExternalXML($mbrshipString));
+		$AchievementList->appendChild($Memberships);	
+		
+		// Goals.
+		//$goalsString = listForResumeElements($resume->id, 'block_exaportresume_mbrship');
+		$goalsString = $resume->goalspersonal.'<br>'.$resume->goalsacademic.'<br>'.$resume->goalscareers;
+		$competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => 'goals'));
+		foreach ($competences as $competence) {
+			$competencesdb = $DB->get_record('block_exacompdescriptors', array('id' => $competence->compid), $fields='*', $strictness=IGNORE_MISSING); 
+			if($competencesdb != null){
+				$goalsString .= $competencesdb->title.'<br>';
+			};
+		};	
+		$Goals = europassXMLAchievement($dom, 'goals', array($resume->id), get_string('resume_mygoals', 'block_exaport'), cleanForExternalXML($goalsString));
+		$AchievementList->appendChild($Goals);	
+
+		// Interests.	
+		$Interests = europassXMLAchievement($dom, 'intersts', array($resume->id), get_string('resume_interests', 'block_exaport'), cleanForExternalXML($resume->interests));
+		$AchievementList->appendChild($Interests);	
+		
+		$LearnerInfo->appendChild($AchievementList);
+
+		// All attached files IDs
+		$fileArray = array_keys($attachedFileNames);
+		$Documentation = europassXMLDocumentationList($dom, $fileArray);
+		$LearnerInfo->appendChild($Documentation);	
+
+	$root->appendChild($LearnerInfo);
+	
+	// Attachment files
+	if (count($attachedFileNames)>0) {
+		$AttachmentList = $dom->createElement('AttachmentList');
+		foreach ($attachedFileNames as $ID => $filename) {
+			$Attachment = $dom->createElement('Attachment');
+			$Attachment->setAttribute('id', $ID);
+				// name
+				$Name = $dom->createElement('Name');
+					$text = $dom->createTextNode($filename);
+					$Name->appendChild($text);
+					$Attachment->appendChild($Name);
+				// mimetype
+				$MimeType = $dom->createElement('MimeType');
+					$text = $dom->createTextNode($attachedFileMimeTypes[$ID]);
+					$MimeType->appendChild($text);
+					$Attachment->appendChild($MimeType);	
+				// data
+				$Data = $dom->createElement('Data');
+					$text = $dom->createTextNode($attachedFileDatas[$ID]);
+					$Data->appendChild($text);
+					$Attachment->appendChild($Data);						
+				// description
+				$Description = $dom->createElement('Description');
+					$text = $dom->createTextNode($filename);
+					$Description->appendChild($text);
+					$Attachment->appendChild($Description);
+			$AttachmentList->appendChild($Attachment);
+		};
+		$root->appendChild($AttachmentList);
+	}
+	
+	// Cover. Insert the Cover letter from the exaport to the main content of the europass cover
+	$CoverLetter = $dom->createElement('CoverLetter');
+		$Letter = $dom->createElement('Letter');
+			$Body = $dom->createElement('Body');
+				$MainBody = $dom->createElement('MainBody');
+					$text = $dom->createTextNode(cleanForExternalXML($resume->cover));
+					$MainBody->appendChild($text);	
+				$Body->appendChild($MainBody);	
+			$Letter->appendChild($Body);	
+		$CoverLetter->appendChild($Letter);	
+	$root->appendChild($CoverLetter);	
+	
+	$dom->appendChild($root);
+	$xml .= $dom->saveXML();
+	
+	// save to file for development
+ 	// $filename = 'd:/incom/testXML.xml';
+	// $strXML = $xml;
+	// file_put_contents($filename, $strXML); 
+	
 	return $xml;
-	
 }
+
+// Clean text for XML. Images, links, e.t.c
+function cleanForExternalXML($text = '') {
+	$result = $text;
+	// img
+	$result = preg_replace("/<img[^>]+\>/i", "", $result); 	
+	return $result;
+}
+
+function getDateParamsFromString($datestring) {
+	$date_arr = date_parse($datestring);
+	if ($date_arr['year'])
+		$year = $date_arr['year'];
+	else if (preg_match('/(19|20|21)\d{2}/', $datestring, $maches)) 
+		$year = $maches[0];
+	else 
+		$year = '';
+	if ($date_arr['month'])
+		$month = $date_arr['month'];
+	else 
+		$month = '';
+	if ($date_arr['day'])
+		$day = $date_arr['day'];
+	else 
+		$day = '';
+	$dateparams['year'] = $year;
+	if ($month <> '')
+		$dateparams['month'] = $month;
+	if ($day <> '')
+		$dateparams['day'] = $day;
+	return $dateparams;
+}
+
+// xml for educations and employers
+function europassXMLEmployersEducations($dom, $type, $data) {
+	global $USER;
+	switch ($type) {
+		case 'WorkExperience':
+				$orgname = 'employer';
+				$orgaddress = 'employeraddress';
+				$activities = 'positiondescription';
+				break;
+		case 'Education':
+				$orgname = 'institution';
+				$orgaddress = 'institutionaddress';
+				$activities = 'qualdescription';
+				break;		
+	}
+
+	$ExperienceList = $dom->createElement($type.'List');
+		foreach ($data as $id => $dataitem) {
+			// print_r($employment); echo '<br><br><br>';
+			$ExperienceItem = $dom->createElement($type);
+				// Period
+				$Period = $dom->createElement('Period');
+					$From = $dom->createElement('From');
+					$date_arr = getDateParamsFromString($dataitem->startdate);
+					foreach ($date_arr as $param => $value)
+						$From->setAttribute($param, $value);
+					$Period->appendChild($From);	
+					$textcurrent = $dom->createTextNode(cleanForExternalXML('true'));
+					if ($dataitem->enddate <> '') {
+						$To = $dom->createElement('To');
+						$date_arr = getDateParamsFromString($dataitem->enddate);
+						foreach ($date_arr as $param => $value)
+							$To->setAttribute($param, $value);
+						$Period->appendChild($To);	
+						$textcurrent = $dom->createTextNode(cleanForExternalXML('false'));
+					};
+					$Current = $dom->createElement('Current');
+						$Current->appendChild($textcurrent);
+						$Period->appendChild($Current);	
+				$ExperienceItem->appendChild($Period);					
+				// Position
+				if ($type == 'WorkExperience') {
+					$Position = $dom->createElement('Position');
+						$Label = $dom->createElement('Label');
+							$text = $dom->createTextNode($dataitem->jobtitle);
+							$Label->appendChild($text);
+							$Position->appendChild($Label);	
+						$Position->appendChild($Label);	
+					$ExperienceItem->appendChild($Position);	
+				} else if ($type == 'Education') {
+					$Title = $dom->createElement('Title');
+						$text = $dom->createTextNode($dataitem->qualname);
+						$Title->appendChild($text);
+					$ExperienceItem->appendChild($Title);	
+				};
+				// Activities
+				if ($dataitem->{$activities} <> '') {
+					$Activities = $dom->createElement('Activities');
+							$text = $dom->createTextNode($dataitem->{$activities});
+							$Activities->appendChild($text);				
+					$ExperienceItem->appendChild($Activities);				
+				};
+				// Employer.
+				if ($type == 'WorkExperience') {
+					$OrganisationXML = $dom->createElement('Employer');
+				} else if ($type == 'Education') {
+					$OrganisationXML = $dom->createElement('Organisation');
+				}
+					// Organisation name.
+					$Name = $dom->createElement('Name');
+						$text = $dom->createTextNode($dataitem->{$orgname});
+						$Name->appendChild($text);
+						$OrganisationXML->appendChild($Name);	
+					// Employer contacts.
+					if ($dataitem->{$orgaddress} <> '') {
+						$ContactInfo = $dom->createElement('ContactInfo');
+							// address info.
+							$Address = $dom->createElement('Address');
+								$Contact = $dom->createElement('Contact');
+									$AddressLine = $dom->createElement('AddressLine');
+										$text = $dom->createTextNode($dataitem->{$orgaddress});
+										$AddressLine->appendChild($text);
+										$Contact->appendChild($AddressLine);
+								$Address->appendChild($Contact);
+								$ContactInfo->appendChild($Address);						
+						$OrganisationXML->appendChild($ContactInfo);	
+					};
+				$ExperienceItem->appendChild($OrganisationXML);	
+				// attached files
+				switch ($type) {
+					case 'WorkExperience':
+						$filearea = 'resume_employ';
+						break;
+					case 'Education':
+						$filearea = 'resume_edu';
+						break;		
+				};
+				$fs = get_file_storage();
+				$files = $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', $filearea, $dataitem->id, 'filename', false);
+				if (count($files) > 0) {
+					$fileArray = europassXMLGetAttachedFileContents($files);
+					$Documentation = europassXMLDocumentationList($dom, $fileArray);
+					$ExperienceItem->appendChild($Documentation);	
+				}; 
+			$ExperienceList->appendChild($ExperienceItem);	
+		};
+	return $ExperienceList;
+}
+
+// Single Achievement for achievementlist
+function europassXMLAchievement($dom, $type, $ids = array(), $title, $content) {
+	global $USER;
+	$files = array();
+	$fs = get_file_storage();
+	$Achievement = $dom->createElement('Achievement');
+		$Title = $dom->createElement('Title');
+			$Label = $dom->createElement('Label');
+				$text = $dom->createTextNode($title);
+				$Label->appendChild($text);
+				$Title->appendChild($Label);
+			$Achievement->appendChild($Title);
+		$Description = $dom->createElement('Description');
+			$text = $dom->createTextNode($content);
+			$Description->appendChild($text);
+			$Achievement->appendChild($Description);
+		// Achievement's files
+		switch ($type) {
+			case 'certif':
+				$filearea = 'resume_certif';
+				break;
+			case 'public':
+				$filearea = 'resume_publication';
+				break;
+			case 'membership':
+				$filearea = 'resume_membership';
+				break;
+			case 'goals':
+				foreach ($ids as $id) {
+					$files = $files + $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', 'resume_goalspersonal', $id, 'filename', false);
+					$files = $files + $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', 'resume_goalsacademic', $id, 'filename', false);
+				};
+				$filearea = 'resume_goalscareers';
+				break;
+			default:
+				$filearea = 'none';
+		};
+		foreach ($ids as $id) {
+			$files = $files + $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', $filearea, $id, 'filename', false);
+		};
+		if (count($files) > 0) {
+			$fileArray = europassXMLGetAttachedFileContents($files);
+			$Documentation = europassXMLDocumentationList($dom, $fileArray);
+			$Achievement->appendChild($Documentation);	
+		}; 
+	return $Achievement;
+}
+
+// Get string from resume block.
+function listForResumeElements($resumeid, $tablename) {
+	global $DB, $USER;
+	$items = $DB->get_records($tablename, array("resume_id" => $resumeid, 'user_id' => $USER->id));
+	$itemsstring = '<ul>';
+	foreach ($items as $ind => $item) {
+		$itemsstring .= '<li>';
+		$itemsIDs[] = $ind;
+		switch ($tablename) {
+			case 'block_exaportresume_certif': 
+					$itemsstring .= $item->title;
+					$itemsstring .= ' ('.$item->date.')';				
+					$itemsstring .= ($item->description ? ". ":"").$item->description;
+					break;
+			case 'block_exaportresume_public':
+					$itemsstring .= $item->title;
+					$itemsstring .= ' ('.$item->date.'). ';				
+					$itemsstring .= $item->contribution;
+					$itemsstring .= ($item->contributiondetails ? ": ":"").$item->contributiondetails;
+					break;
+			case 'block_exaportresume_mbrship':
+					$itemsstring .= $item->title;
+					$itemsstring .= ' ('.$item->startdate.($item->enddate ? "-".$item->enddate : "").')';				
+					$itemsstring .= ($item->description ? ". ":"").$item->description;
+					break;
+			default: $itemsstring .= '';
+		};
+
+		$itemsstring .= '</li>';
+	}
+	$itemsstring .= '</ul>';
+	return array($itemsstring, $itemsIDs);
+}
+
+// Fill global arrays with:
+//					fileid => filecontent
+// 					fileid => mimetype
+// 					fileid => filename
+function europassXMLGetAttachedFileContents($files) {
+	global $attachedFileNames, $attachedFileDatas, $attachedFileMimeTypes;
+	$chars = '123456789';
+	$numChars = strlen($chars);
+	foreach ($files as $file) {
+		$fmimetype = $file->get_mimetype();
+		if (($fmimetype=='application/pdf' || $fmimetype=='image/jpeg' || $fmimetype=='image/png') && $file->get_filesize() <= 2560000 ) {
+			// random ID
+			$ID = 'ATT_';
+			for ($i = 0; $i < 13; $i++) {
+				$ID .= substr($chars, rand(1, $numChars) - 1, 1);
+			};
+			$attachedFileMimeTypes[$ID] = $fmimetype;
+			$attachedFileDatas[$ID] = base64_encode($file->get_content());					
+			$attachedFileNames[$ID] = $file->get_filename();			
+			$arrayIDs[] = $ID;
+		};
+	};
+	return $arrayIDs;
+}
+
+// get XML for documentations (attached to item)
+function europassXMLDocumentationList($dom, $fileArray) {
+	if (count($fileArray)>0) {
+		$Documentation = $dom->createElement('Documentation');
+		foreach ($fileArray as $fileID) {
+			$ReferenceTo = $dom->createElement('ReferenceTo');		
+			$ReferenceTo->setAttribute('idref', $fileID);
+			$Documentation->appendChild($ReferenceTo);
+		};
+		return $Documentation;
+	};
+};

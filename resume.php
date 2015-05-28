@@ -60,9 +60,14 @@ if (!$course = $DB->get_record("course", $conditions)) {
 
 // get XML for europass
 if ($xmleuropass == 1 && $id > 0) {
-	$xml = europassXML($id);
-	echo $xml;
-	exit;
+	$doexport = optional_param('doexport', '', PARAM_RAW);
+	if ($doexport <> '') {
+		header('Content-disposition: attachment; filename=europass.xml');
+		header("Content-type: application/xml");
+		$xml = europassXML($id);
+		echo $xml;
+		exit;
+	}
 }
 
 
@@ -85,10 +90,23 @@ $redirect = false;
 $userpreferences = block_exaport_get_user_preferences();
 $description = $userpreferences->description;
 
-//echo '<div class="services"><a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&xmleuropass=1&id='.$resume->id.'" class="expandall">Export to Europass</a></div>';
+if ($xmleuropass <> 1) {
+	echo '<div class="services"><a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&xmleuropass=1&id='.$resume->id.'">'.
+		'<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/europass.png" height="35"><br/>'.
+		get_string("resume_exportto_europass", "block_exaport").'</a></div>';
+};
 echo "<div class='block_eportfolio_center'><h2>";
 echo $OUTPUT->box(text_to_html(get_string("resume_my", "block_exaport")), 'center');
 echo "</h2></div>"; /**/
+
+if ($xmleuropass == 1 && $id > 0) {
+	echo '<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/europass.png" height="50"><br/>';
+	echo get_string("resume_exportto_europass_intro", "block_exaport");
+	echo '<form action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&xmleuropass=1&id='.$resume->id.'" method="post">';
+	echo '<input type="submit" name="doexport" value="'.get_string("resume_exportto_europass_getXML", "block_exaport").'">';
+	echo '</form>';
+	$show_information = false;
+}
 
 // delete item
 if ($delete) {

@@ -292,8 +292,9 @@ if ($sortchange) {
 	}
 }
 
-// Resume blocks
-//$resume = block_exaport_get_resume_params();
+// Resume blocks after saving
+unset($resume);
+$resume = block_exaport_get_resume_params();
 
 // Redirect after doings
 if ($redirect) {

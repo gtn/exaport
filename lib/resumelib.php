@@ -497,7 +497,6 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 			$table->data[$item_i]['files'] = '';
 			$table->data[$item_i]['icons'] = '';
 		} else {
-			$table->data[$item_i]['title'] = '<a name="'.$type.'comp"></a><a href="#" class="expandable-head">'.get_string('resume_'.$type.'comp', 'block_exaport').'</a>';
 			$comptitles = '';
 			$competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
 			foreach ($competences as $competence) {
@@ -506,6 +505,11 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 					$comptitles .= $competencesdb->title.'<br>';
 				};
 			};		
+			if ($comptitles <> '') {
+				$table->data[$item_i]['title'] = '<a name="'.$type.'comp"></a><a href="#" class="expandable-head">'.get_string('resume_'.$type.'comp', 'block_exaport').'</a>';
+			} else {
+				$table->data[$item_i]['title'] = '<a name="'.$type.'comp"></a>'.get_string('resume_'.$type.'comp', 'block_exaport');
+			}
 			$table->data[$item_i]['title'] .= '<div class="expandable-text hidden">'.$comptitles.'</div>';
 			$table->data[$item_i]['files'] = '';
 			// Links to edit / delete
@@ -521,20 +525,29 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 	foreach ($elements as $element) {
 		$item_i++;
 		// Title and Description
-		$table->data[$item_i]['title'] = '<a name="'.$type.$element.'"></a><a href="#" class="expandable-head">'.get_string('resume_'.$type.$element, 'block_exaport').'</a>';
+		$description = '';
 		$description = $resume->{$type.$element};
 		$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_'.$type.$element, $resume->id);
-		$table->data[$item_i]['title'] .= '<div class="expandable-text hidden">'.$description.'</div>';
-		// Count of files
+		$description = trim($description);
+		if (preg_replace('/\<br(\s*)?\/?\>/i', "", $description)=='') // if text is only <br> (html-editor can return this)
+			$description = '';
+		$table->data[$item_i]['title'] = '';
 		$fs = get_file_storage();
 		$context = context_user::instance($USER->id);
 		$files = $fs->get_area_files($context->id, 'block_exaport', 'resume_'.$type.$element, $resume->id, 'filename', false);
+		// Count of files
 		$count_files = count($files);
 		if ($count_files > 0) {
 			$table->data[$item_i]['files'] = '<a href="#" class="expandable-head">'.$count_files.'</a>';
 			$table->data[$item_i]['files'] .= '<div class="expandable-text hidden">'.block_exaport_resume_list_files($type.$element, $files).'</div>';
 		} else {
 			$table->data[$item_i]['files'] = '0'; 
+		};
+		if ($description <> '') {
+			$table->data[$item_i]['title'] = '<a name="'.$type.$element.'"></a><a href="#" class="expandable-head">'.get_string('resume_'.$type.$element, 'block_exaport').'</a>';
+			$table->data[$item_i]['title'] .= '<div class="expandable-text hidden">'.$description.'</div>';
+		} else {
+			$table->data[$item_i]['title'] = '<a name="'.$type.$element.'"></a>'.get_string('resume_'.$type.$element, 'block_exaport');
 		};
 		// Links to edit / delete
 		$table->data[$item_i]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&edit='.$type.$element.'&id='.$resume->id.'&sesskey='.sesskey().'"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';

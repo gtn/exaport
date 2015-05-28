@@ -490,7 +490,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 	
 	$item_i = 0;
 	// Competencies
-	if (0 && block_exaport_check_competence_interaction()) {
+	if (block_exaport_check_competence_interaction()) {
 		$dbman = $DB->get_manager();
 		if (!$dbman->table_exists('block_exacompdescriptors')){
 			$table->data[$item_i]['title'] = get_string('resume_'.$type.'comp', 'block_exaport').' / <span style="color:red;">Error: Please install latest version of exabis competencies</span>';

@@ -432,8 +432,8 @@ $string['resume_skillscareers'] = 'Karriere-Kompetenzen';
 $string['resume_skillspersonalsaved'] = 'Persönliche Kompetenzen gespeichert';
 $string['resume_skillsacademicsaved'] = 'Bildungs-Kompetenzen gespeichert';
 $string['resume_skillscareerssaved'] = 'Karriere-Kompetenzen gespeichert';
-$string['resume_goalscomp'] = 'Ziele competency';
-$string['resume_skillscomp'] = 'Kompetenzen';
+$string['resume_goalscomp'] = 'Bildungsstandards';
+$string['resume_skillscomp'] = 'Bildungsstandards';
 $string['resume_badges'] = 'Abzeichen';
 
 // Not Used Anymore

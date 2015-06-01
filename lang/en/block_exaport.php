@@ -509,11 +509,11 @@ $string['resume_skillscomp'] = 'Educational standards';
 $string['resume_badges'] = 'Badges';
 $string['resume_exportto_europass'] = 'Export to Europass';
 $string['resume_exportto_europass_intro'] = 'You can generate your Curriculum Vitae from your Exaport resume<br>
-	The generated XML-file have to be inserted into <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">online europass CV editor</a><br>
+	The generated XML-file has to be inserted into the <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">online europass CV editor</a><br><br>
 	Some notes:<br>
-	<ul><li>Definitely need to check out the resulting CV</li>
-		<li>Your personal data will be taken from your moodle account</li>
-		<li>Check all dates</li>
+	<ul><li>You definitely need to check out the resulting CV</li>
+		<li>Your personal data will be taken from your Moodle account</li>
+		<li>Please check all dates</li>
 		<li>Images from the HTML-editors will not be exported</li>
 		<li>Most texts from the HTML-editors need to be reformatted</li>
 		<li>Requirements for attached files: accepted formats: PDF, PNG, JPG; size limit: 2.5MB.</li>

@@ -896,7 +896,9 @@ function europassXML($resumeid = 0) {
 		// All attached files IDs
 		$fileArray = array_keys($attachedFileNames);
 		$Documentation = europassXMLDocumentationList($dom, $fileArray);
-		$LearnerInfo->appendChild($Documentation);	
+		if ($Documentation) {
+			$LearnerInfo->appendChild($Documentation);	
+		};
 
 	$root->appendChild($LearnerInfo);
 	
@@ -1146,6 +1148,7 @@ function europassXMLAchievement($dom, $type, $ids = array(), $title, $content) {
 // Get string from resume block.
 function listForResumeElements($resumeid, $tablename) {
 	global $DB, $USER;
+	$itemsIDs = array();
 	$items = $DB->get_records($tablename, array("resume_id" => $resumeid, 'user_id' => $USER->id));
 	$itemsstring = '<ul>';
 	foreach ($items as $ind => $item) {
@@ -1213,4 +1216,5 @@ function europassXMLDocumentationList($dom, $fileArray) {
 		};
 		return $Documentation;
 	};
+	return null;
 };

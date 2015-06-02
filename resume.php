@@ -62,8 +62,8 @@ if (!$course = $DB->get_record("course", $conditions)) {
 if ($xmleuropass == 1 && $id > 0) {
 	$doexport = optional_param('doexport', '', PARAM_RAW);
 	if ($doexport <> '') {
-		header("Content-type: application/xml");
 		header('Content-disposition: attachment; filename=europass.xml');
+		header("Content-type: application/xml");
 		$xml = europassXML($id);
 		echo $xml;
 		exit;

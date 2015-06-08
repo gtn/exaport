@@ -80,7 +80,7 @@ block_exaport_setup_default_categories();
 
 // read all categories
 $categories = $DB->get_records_sql('
-	SELECT c.id, c.name, c.pid, c.shareall, c.internshare, COUNT(i.id) AS item_cnt
+	SELECT c.id, c.name, c.pid, c.shareall, c.internshare, c.structure_shareall, c.structure_share, COUNT(i.id) AS item_cnt
 	FROM {block_exaportcate} c
 	LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
 	WHERE c.userid = ?
@@ -201,6 +201,9 @@ if ($currentCategory->id > 0) {
 	if ($currentCategory->internshare == 1 && (count(exaport_get_category_shared_users($currentCategory->id)) > 0 || count(exaport_get_category_shared_groups($currentCategory->id)) > 0 || $currentCategory->shareall==1)) { 
 		echo ' <img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
 	};
+	if ($currentCategory->structure_share == 1) { 
+		echo ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
+	}; 
 	echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=edit&back=same"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
 	echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=delete&back=same"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
 }
@@ -319,6 +322,9 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 						$table->data[$item_i]['icons'] = '<span class="excomdos_listicons">';
 						if ((isset($category->internshare) && $category->internshare == 1) && (count(exaport_get_category_shared_users($category->id)) > 0 || count(exaport_get_category_shared_groups($category->id)) > 0 || (isset($category->shareall) && $category->shareall==1))) {
 							$table->data[$item_i]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
+						}; 
+						if ($category->structure_share == 1) { 
+							$table->data[$item_i]['icons'] .= ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
 						}; 
 						$table->data[$item_i]['icons'] .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
 							' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'.
@@ -440,7 +446,10 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 								} else {
 									if ((isset($category->internshare) && $category->internshare == 1) && (count(exaport_get_category_shared_users($category->id)) > 0 || count(exaport_get_category_shared_groups($category->id)) > 0 || (isset($category->shareall) && $category->shareall==1))) { ?>
 										<img src="pix/noteitshared.gif" alt="file" title="shared to other users">
-									<?php }; ?>
+									<?php }; 
+									if ($category->structure_share == 1) { 
+										echo ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
+									};?>
 									<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
 									<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$category->id.'&action=delete'; ?>"><img src="pix/del.png" alt="file"></a>
 								<?php 									

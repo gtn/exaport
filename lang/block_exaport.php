@@ -130,7 +130,6 @@ $string['sharedpersons'] = 'Persons with shared Portfolios';
 $string['moodleimport'] = 'Import from Moodle-assignments';
 $string['nomoodleimportyet'] = 'At the moment you have no submission at any assignment!';
 $string['deletecategoryconfirm'] = 'Do you really want to delete the category "{$a->name}"? All entries in this category and all subcategories will be deleted!';
-$string['deleteurlconfirm'] = 'Do you really want to delete this url?';
 $string['name'] = 'Name';
 $string['role'] = 'Role';
 $string['nousersfound'] = 'No users found';
@@ -520,16 +519,6 @@ $string['resume_exportto_europass_intro'] = 'You can generate your Curriculum Vi
 		<li>Requirements for attached files: accepted formats: PDF, PNG, JPG; size limit: 2.5MB.</li>
 	</ul>';
 $string['resume_exportto_europass_getXML'] = 'Download XML';
-
-// structure sharing
-$string['structure'] = 'Structure';
-$string['sharedstructures'] = 'Shared Structures';
-$string['share_structure'] = 'Share as a structure';
-$string['share_structure_description'] = 'The users will be able to copy this category and subcategories for yourself';
-$string['nothingstructureshared'] = 'Nobody is sharing a structure with you';
-$string['copystructure'] = 'Copy structure';
-$string['copystructureconfirmation'] = 'Do you really want to copy this structure?';
-$string['copytocategory'] = 'Copy to this category:';
 
 
 $string['sharedArtefacts'] = 'Group portfolios shared with you';

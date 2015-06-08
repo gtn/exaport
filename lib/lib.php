@@ -214,7 +214,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
         echo 'noch nicht unterst�tzt';
     }
 
-    global $CFG, $COURSE, $PAGE;
+    global $CFG, $COURSE, $PAGE, $USER;
 
 	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
@@ -257,6 +257,8 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	$tabs[] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
     $tabs[] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
     $tabs[] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
+	if (has_sharablestructure($USER->id))
+		$tabs[] = new tabobject('sharedstructures', $CFG->wwwroot . '/blocks/exaport/shared_structures.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedstructures"), '', true);
 
     // tabs f�r das untermen�
     $tabs_sub = array();
@@ -600,7 +602,8 @@ function block_exaport_build_comp_tree($forresume = false, $resume = null) {
 	$descriptors = array();
 	foreach($courses as $course){
 		$context = context_course::instance($course->id);
-		if(is_enrolled($context, $USER)){
+		if(is_enrolled($context, $USER)){   
+			//  || $forresume  // for resume - all competensies. not only for his cources.
 			$alldescr = block_exacomp_get_descritors_list($course->id);
 			foreach($alldescr as $descr){
 				if(!in_array($descr, $descriptors)){
@@ -1125,4 +1128,30 @@ function block_exaport_is_valid_media_by_filename ($filename) {
 			return true;
 		default: return false;
 	}
+}
+
+// do user has sharable structures or do not
+function has_sharablestructure($userid) {
+	global $DB, $USER;	
+	// shared to all
+	//if ($DB->get_records('block_exaportcate', array('structure_share' => '1', 'structure_shareall' => '1'))) 
+	if ($DB->get_records_sql('SELECT * FROM {block_exaportcate} WHERE structure_share=1 AND structure_shareall=1 AND userid<>'.$USER->id))
+		return true;
+	// shared to user
+	//if ($DB->get_records('block_exaportcat_structshar', array('userid' => $userid))) 
+	if ($DB->get_records_sql('SELECT * FROM {block_exaportcat_structshar} WHERE userid='.$userid.' AND userid<>'.$USER->id))
+		return true;
+	// shared to user's group
+	$usergroups = $DB->get_records('groups_members', array('userid' => $userid), '', 'groupid');
+	if ((is_array($usergroups)) && (count($usergroups) > 0)) { 
+		foreach ($usergroups as $id => $group) {
+			$usergroups[$id] = $group->groupid;
+		};
+		$usergroups_list = implode(',', $usergroups);
+		$userstructures = $DB->get_records_sql('SELECT cs.* FROM {block_exaportcat_structgroupshar} cs LEFT JOIN {block_exaportcate} c ON cs.catid=c.id WHERE c.userid<>'.$USER->id.' AND groupid IN ('.$usergroups_list.')');
+		if (count($userstructures) > 0) 
+			return true;
+	}; 
+	
+	return false;
 }

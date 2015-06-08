@@ -42,6 +42,7 @@ $xmleuropass = optional_param('xmleuropass', 0, PARAM_INT);
 $resume = block_exaport_get_resume_params();
 // Create new resume if there isn't
 if (!$resume) {
+	$newresumeparams = new stdClass();
 	$newresumeparams->user_id = $USER->id;
 	$newresumeparams->courseid = $courseid;
 	$newresumeparams->cover = get_string("resume_template_newresume", "block_exaport");
@@ -90,7 +91,7 @@ $redirect = false;
 $userpreferences = block_exaport_get_user_preferences();
 $description = $userpreferences->description;
 
-if ($xmleuropass <> 1) {
+if ($xmleuropass <> 1 && $edit == '0') {
 	echo '<div class="services"><a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&xmleuropass=1&id='.$resume->id.'">'.
 		'<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/europass.png" height="35"><br/>'.
 		get_string("resume_exportto_europass", "block_exaport").'</a></div>';

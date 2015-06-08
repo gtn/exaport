@@ -468,7 +468,6 @@ function exaport_get_shareable_courses_with_groups_for_view($viewid) {
 
 function exaport_get_shareable_courses_with_users($type) {
 	global $USER, $COURSE;
-
 	$courses = array();
 //, 'suspended' => 0, 'deleted' => 0
 	// loop through all my courses
@@ -755,4 +754,29 @@ function is_sharableitem($userid, $itemid) {
 	} else {
 		return false;
 	}
+}
+
+
+// check sharable structure for user
+function is_sharablestructure($userid, $catid) {
+	global $DB;	
+	// shared to all
+	if ($DB->get_record('block_exaportcate', array('id' => $catid, 'structure_share' => '1', 'structure_shareall' => '1'))) 
+		return true;
+	// shared to user
+	if ($DB->get_record('block_exaportcat_structshar', array('catid' => $catid, 'userid' => $userid))) 
+		return true;
+	// shared to user's group
+	$usergroups = $DB->get_records('groups_members', array('userid' => $userid), '', 'groupid');
+	if ((is_array($usergroups)) && (count($usergroups) > 0)) { 
+		foreach ($usergroups as $id => $group) {
+			$usergroups[$id] = $group->groupid;
+		};
+		$usergroups_list = implode(',', $usergroups);
+		$userstructures = $DB->get_records_sql('SELECT * FROM {block_exaportcat_structgroupshar} WHERE groupid IN ('.$usergroups_list.')');
+		if (count($userstructures) > 0) 
+			return true;
+	}; 
+	
+	return false;
 }

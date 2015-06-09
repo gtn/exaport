@@ -683,7 +683,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2015052001, 'exaport');    
    }
 
-   if ($oldversion < 2015060801) {
+   if ($oldversion < 2015060901) {
 
         // Define field shareall to be added to block_exaportcate.
         $table = new xmldb_table('block_exaportcate');
@@ -709,22 +709,20 @@ function xmldb_block_exaport_upgrade($oldversion) {
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         };
-	// Define table block_exaportcat_structgroupshar to be created.
-        $table = new xmldb_table('block_exaportcat_structgroupshar');
-        // Adding fields to table block_exaportcat_structgroupshar.
+	// Define table block_exaportcat_strgrshar to be created.
+        $table = new xmldb_table('block_exaportcat_strgrshar');
+        // Adding fields to table block_exaportcat_strgrshar.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('catid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
         $table->add_field('groupid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
 	$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportcat_structgroupshar.
+        // Conditionally launch create table for block_exaportcat_strgrshar.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
 
-
-
         // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2015060801, 'exaport');
+        upgrade_block_savepoint(true, 2015060901, 'exaport');
     }
 
 

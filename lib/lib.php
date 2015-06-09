@@ -1148,7 +1148,7 @@ function has_sharablestructure($userid) {
 			$usergroups[$id] = $group->groupid;
 		};
 		$usergroups_list = implode(',', $usergroups);
-		$userstructures = $DB->get_records_sql('SELECT cs.* FROM {block_exaportcat_structgroupshar} cs LEFT JOIN {block_exaportcate} c ON cs.catid=c.id WHERE c.userid<>'.$USER->id.' AND groupid IN ('.$usergroups_list.')');
+		$userstructures = $DB->get_records_sql('SELECT cs.* FROM {block_exaportcat_strgrshar} cs LEFT JOIN {block_exaportcate} c ON cs.catid=c.id WHERE c.userid<>'.$USER->id.' AND groupid IN ('.$usergroups_list.')');
 		if (count($userstructures) > 0) 
 			return true;
 	}; 

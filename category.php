@@ -237,7 +237,7 @@ class simplehtml_form extends moodleform {
 			$mform->addElement('html', '</td><td>'.get_string('internalaccessgroups', 'block_exaport').'</td></tr>');
 			$mform->addElement('html', '</td></tr>');
 			if ($category->id > 0) {
-				$sharedUsers = $DB->get_records_menu('block_exaportcat_structgroupshar', array("catid" => $category->id), null, 'groupid, groupid AS tmp');
+				$sharedUsers = $DB->get_records_menu('block_exaportcat_strgrshar', array("catid" => $category->id), null, 'groupid, groupid AS tmp');
 				$mform->addElement('html', '<script> var structure_sharedgroupsarr = [];');
 				foreach($sharedUsers as $i => $user)
 					$mform->addElement('html', 'structure_sharedgroupsarr['.$i.'] = '.$user.';');
@@ -357,7 +357,7 @@ if ($mform->is_cancelled()) {
 		$structure_sharegroups = "";
 	}	
 	//  delete all shared groups
-	$DB->delete_records("block_exaportcat_structgroupshar", array('catid' => $newEntry->id));
+	$DB->delete_records("block_exaportcat_strgrshar", array('catid' => $newEntry->id));
 	// add new shared groups
 	if ($newEntry->structure_share && $newEntry->structure_shareall==2 && is_array($structure_sharegroups)) {
 		foreach ($structure_sharegroups as $sharegroup) {
@@ -365,7 +365,7 @@ if ($mform->is_cancelled()) {
 			$shareItem = new stdClass();
 			$shareItem->catid = $newEntry->id;
 			$shareItem->groupid = $sharegroup;
-			$DB->insert_record("block_exaportcat_structgroupshar", $shareItem);
+			$DB->insert_record("block_exaportcat_strgrshar", $shareItem);
 		};
 	}; 
 	

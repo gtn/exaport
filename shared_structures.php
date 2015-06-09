@@ -93,7 +93,7 @@ if ((is_array($usergroups)) && (count($usergroups) > 0)) {
     };
 	$usergroups_list = implode(',', $usergroups);
 	// print_r($usergroups_list);
-	$userstructures = $DB->get_records_sql('SELECT * FROM {block_exaportcat_structgroupshar} WHERE groupid IN ('.$usergroups_list.')');
+	$userstructures = $DB->get_records_sql('SELECT * FROM {block_exaportcat_strgrshar} WHERE groupid IN ('.$usergroups_list.')');
 	foreach ($userstructures as $id => $category) {
 		 $userstructures_arr[$id] = $category->catid;
 	};
@@ -105,7 +105,7 @@ $structures = $DB->get_records_sql(
                 " FROM {user} u" .
                 " JOIN {block_exaportcate} c ON (u.id=c.userid AND c.userid!=?)" .
                 " LEFT JOIN {block_exaportcat_structshar} cshar ON c.id=cshar.catid AND cshar.userid = ?".
-                " LEFT JOIN {block_exaportcat_structgroupshar} cgshar ON c.id=cgshar.catid ".
+                " LEFT JOIN {block_exaportcat_strgrshar} cgshar ON c.id=cgshar.catid ".
                 " LEFT JOIN {block_exaportcat_structshar} cshar_total ON c.id=cshar_total.catid " .
                 " WHERE ".
 					"(".(block_exaport_shareall_enabled() ? ' c.structure_shareall=1 OR ' : '')." cshar.userid IS NOT NULL) ". 

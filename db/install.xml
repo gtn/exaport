@@ -338,7 +338,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="block_exaportcat_structgroupshar" COMMENT="block_exaportcat_structgroupshar table retrofitted from MySQL">
+    <TABLE NAME="block_exaportcat_strgrshar" COMMENT="block_exaportcat_strgrshar table retrofitted from MySQL">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="catid" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="false"/>

@@ -435,6 +435,19 @@ $string['resume_skillscareerssaved'] = 'Karriere-Kompetenzen gespeichert';
 $string['resume_goalscomp'] = 'Bildungsstandards';
 $string['resume_skillscomp'] = 'Bildungsstandards';
 $string['resume_badges'] = 'Abzeichen';
+$string['resume_exportto_europass'] = 'Export für Europass';
+$string['resume_exportto_europass_intro'] = 'Ein Lebenslauf kann von der Exportdatei generiert werden, indem man den
+	<a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">Online-Europass CV Editor verwendet</a><br><br>
+
+	Ein paar Kurznotizen:<br>
+	<ul><li>Der generierte Lebenslauf sollte auf alle Fälle nochmals kontrolliert werden</li>
+		<li>Persönliche Daten werden aus den persönlichen Moodle-Informationen generiert</li>
+		<li>Alle Datumsangaben sollten überprüft werden</li>
+		<li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
+		<li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
+		<li>Voragben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
+	</ul>';
+$string['resume_exportto_europass_getXML'] = 'Herunterladen XML';
 $string['resume_expand'] = 'Alles öffnen';
 $string['resume_collaps'] = 'Alles schließen';
 

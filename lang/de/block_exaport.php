@@ -447,7 +447,7 @@ $string['resume_exportto_europass_intro'] = 'Ein Lebenslauf kann von der Exportd
 		<li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
 		<li>Voragben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
 	</ul>';
-$string['resume_exportto_europass_getXML'] = 'Herunterladen XML';
+$string['resume_exportto_europass_getXML'] = 'XML herunterladen';
 $string['resume_expand'] = 'Alles öffnen';
 $string['resume_collaps'] = 'Alles schließen';
 

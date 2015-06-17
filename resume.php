@@ -91,16 +91,8 @@ $redirect = false;
 $userpreferences = block_exaport_get_user_preferences();
 $description = $userpreferences->description;
 
-if ($xmleuropass <> 1 && $edit == '0') {
-	echo '<div class="services"><a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&xmleuropass=1&id='.$resume->id.'">'.
-		'<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/europass.png" height="35"><br/>'.
-		get_string("resume_exportto_europass", "block_exaport").'</a></div>';
-};
-echo "<div class='block_eportfolio_center'><h2>";
-echo $OUTPUT->box(text_to_html(get_string("resume_my", "block_exaport")), 'center');
-echo "</h2></div>"; /**/
-
 if ($xmleuropass == 1 && $id > 0) {
+	echo block_exaport_resume_header();
 	echo '<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/europass.png" height="50"><br/>';
 	echo get_string("resume_exportto_europass_intro", "block_exaport");
 	echo '<form action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&xmleuropass=1&id='.$resume->id.'" method="post">';
@@ -117,6 +109,7 @@ if ($delete) {
 		echo "<div class='block_eportfolio_center'>".$OUTPUT->box(text_to_html(get_string("resume_".$delete."deleted", "block_exaport")), 'center')."</div>";
 		$redirect = true;
 	} else {
+		echo block_exaport_resume_header();
 		$optionsyes = array('id' => $id, 'delete' => $delete, 'confirm' => 1, 'sesskey' => sesskey(), 'courseid' => $courseid);
 		$optionsno = array('courseid' => $courseid);
 
@@ -185,6 +178,7 @@ if ($edit) {
 				$show_information = true;
 				$redirect = true;
 			} else {
+				echo block_exaport_resume_header();
 				$workform->display();
 			};
 			break;
@@ -314,7 +308,14 @@ if ($redirect) {
 	// redirect($returnurl);
 };
 
+if ($xmleuropass <> 1 && $show_information) {
+	echo '<div class="services"><a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&xmleuropass=1&id='.$resume->id.'">'.
+		'<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/europass.png" height="35"><br/>'.
+		get_string("resume_exportto_europass", "block_exaport").'</a></div>';
+};
+
 if ($show_information) {
+	echo block_exaport_resume_header();
 	echo '<div class="collapsible-actions"><a href="#" class="expandall">'.get_string('resume_expand', 'block_exaport').'</a>';
 	echo '<a href="#" class="collapsall hidden">'.get_string('resume_collaps', 'block_exaport').'</a></div>';
 
@@ -404,6 +405,14 @@ function block_exaport_form_resume_part($courseid = 0, $edit = '', $header = '',
 	$resume_part .= '</fieldset>';
 	$resume_part .= '</form>';
 	return $resume_part;
+}
+
+function block_exaport_resume_header() {
+	global $OUTPUT;
+	$content = "<div class='block_eportfolio_center'><h2>";
+	$content .= $OUTPUT->box(text_to_html(get_string("resume_my", "block_exaport")), 'center');
+	$content .= "</h2></div>";
+	return $content;
 }
 
 

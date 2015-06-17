@@ -180,6 +180,7 @@ function block_exaport_resume_checkboxeslist_form($resume, $edit, $data) {
 		};
 		$show_information = true;		
 	} else {
+		echo block_exaport_resume_header();
 		$workform->display();
 	};
 	return $show_information;
@@ -220,7 +221,8 @@ function block_exaport_resume_prepare_block_mm_data($resume, $id, $type_block, $
 			$data = $DB->get_record("block_exaportresume_".$type_block, array('id' => $id, 'user_id' => $USER->id));
 			$data->attachments = $draftitemid;   
 			$workform->set_data($data);
-		} 					
+		} 			
+		echo block_exaport_resume_header();		
 		$workform->display();
 	};	
 	
@@ -617,8 +619,9 @@ function block_exaport_resume_competences_form($resume, $id, $type_block) {
 		};
 		return true;
 	};
+	$content = block_exaport_resume_header();
 	$resume->descriptors = array_keys($DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type), null, 'compid'));
-	$content = '<div class="block_eportfolio_center">'.get_string('edit', "block_exaport").': '.get_string('resume_'.$type_block, "block_exaport").'</div>';
+	$content .= '<div class="block_eportfolio_center">'.get_string('edit', "block_exaport").': '.get_string('resume_'.$type_block, "block_exaport").'</div>';
 	$content .= block_exaport_build_comp_tree($type_block, $resume);
 	echo $content;
 	return false;

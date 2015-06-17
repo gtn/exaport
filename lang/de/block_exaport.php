@@ -435,6 +435,8 @@ $string['resume_skillscareerssaved'] = 'Karriere-Kompetenzen gespeichert';
 $string['resume_goalscomp'] = 'Bildungsstandards';
 $string['resume_skillscomp'] = 'Bildungsstandards';
 $string['resume_badges'] = 'Abzeichen';
+$string['resume_expand'] = 'Alles öffnen';
+$string['resume_collaps'] = 'Alles schließen';
 
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(bisher gibt es noch keine Bookmarks)';

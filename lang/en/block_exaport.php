@@ -520,6 +520,8 @@ $string['resume_exportto_europass_intro'] = 'You can generate your Curriculum Vi
 		<li>Requirements for attached files: accepted formats: PDF, PNG, JPG; size limit: 2.5MB.</li>
 	</ul>';
 $string['resume_exportto_europass_getXML'] = 'Download XML';
+$string['resume_expand'] = 'Expand all';
+$string['resume_collaps'] = 'Collaps all';
 
 // structure sharing
 $string['structure'] = 'Structure';

@@ -315,8 +315,8 @@ if ($redirect) {
 };
 
 if ($show_information) {
-	echo '<div class="collapsible-actions"><a href="#" class="expandall">Expand all</a>';
-	echo '<a href="#" class="collapsall hidden">Collaps all</a></div>';
+	echo '<div class="collapsible-actions"><a href="#" class="expandall">'.get_string('resume_expand', 'block_exaport').'</a>';
+	echo '<a href="#" class="collapsall hidden">'.get_string('resume_collaps', 'block_exaport').'</a></div>';
 
 	// Cover.
 	$cover = file_rewrite_pluginfile_urls($resume->cover, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'resume_cover', $resume->id);

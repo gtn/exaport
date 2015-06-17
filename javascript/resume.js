@@ -22,11 +22,12 @@ jQueryExaport(function($){
 	});
 	
 	var hash = window.location.hash.substring(1);
-	if (hash.search('goals') >= 0) 
+/*	if (hash.search('goals') >= 0) 
 		hash = 'goals';
 	if (hash.search('skills') >= 0) 
-		hash = 'skills';
+		hash = 'skills';                     */
 	$('a[name='+hash+']').parents('.view-group').toggleClass('view-group-open');	
+	$('a[name='+hash+']').parents('td').children('.expandable-text').toggleClass('hidden');
 	
 	// delete cookie for treeview 
 	document.cookie = 'comptree=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';

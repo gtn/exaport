@@ -599,15 +599,19 @@ function block_exaport_build_comp_tree($forresume = false, $resume = null) {
 	
 	$courses = $DB->get_records('course', array());
 	
+	// teacher accepted competensies (for resume);
+	$tmp_recs = $DB->get_records('block_exacompcompuser', array("userid"=>$USER->id, "role"=>1 /*teacher*/), null, 'compid');
+	$accepted_descriptors = array_keys($tmp_recs);
+	
 	$descriptors = array();
 	foreach($courses as $course){
 		$context = context_course::instance($course->id);
 		if(is_enrolled($context, $USER)){   
-			//  || $forresume  // for resume - all competensies. not only for his cources.
 			$alldescr = block_exacomp_get_descritors_list($course->id);
 			foreach($alldescr as $descr){
 				if(!in_array($descr, $descriptors)){
-					$descriptors[] = $descr;
+					if (!$forresume || ($forresume && in_array($descr->id, $accepted_descriptors)))
+						$descriptors[] = $descr;
 				}
 			}
 		}

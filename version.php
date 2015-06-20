@@ -32,3 +32,4 @@ $plugin->version = 2015060901;
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->requires  = 2014041100;
 $plugin->release = 'v4.3';
+$plugin->component = 'block_exaport';

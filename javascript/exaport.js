@@ -137,11 +137,7 @@ window.jQueryExaport = jQuery.noConflict(true);
 				*/
 
                 // stop slow loading
-<<<<<<< HEAD
-				$('#sharing-userlist .shareusers:checkbox').click(function(){
-=======
 				$('#'+target+'sharing-userlist .shareusers:checkbox').click(function(){
->>>>>>> experimental
 					// enable/disable notifyuser, according to shared users checkbox
 					var $notifyboxes = $(this).closest('tr').find('.notifyusers');
 
@@ -151,14 +147,6 @@ window.jQueryExaport = jQuery.noConflict(true);
 					}
 					
 					// check/uncheck all users
-<<<<<<< HEAD
-					var $courseCheckboxes = $('#sharing-userlist .shareusers:checkbox[courseid='+$(this).attr('courseid')+']');
-					$('#sharing-userlist .shareusers-check-all[courseid='+$(this).attr('courseid')+']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
-				});
-                $('.course-group-content').each(function(){
-                    var flag = 0;
-                    $(this).find( 'table > tbody > tr > td > input.shareusers').each(function(){
-=======
 					var $courseCheckboxes = $('#'+target+'sharing-userlist .shareusers:checkbox[courseid='+$(this).attr('courseid')+']');
 					$('#'+target+'sharing-userlist .shareusers-check-all[courseid='+$(this).attr('courseid')+']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
 				});
@@ -288,26 +276,13 @@ window.jQueryExaport = jQuery.noConflict(true);
                 $('.course-group-content').each(function(){
                     var flag = 0;
                     $(this).find( 'table > tbody > tr > td > input.sharegroups').each(function(){
->>>>>>> experimental
                         if (flag==1)
                             return false;
                         if ($(this).prop('checked')==false)
                             flag = 1;
-<<<<<<< HEAD
-
-                        var $notifyboxes = $(this).closest('tr').find('.notifyusers');
-                        $notifyboxes.attr('disabled', !this.checked);
-                        if (!this.checked) {
-                            $notifyboxes.prop('checked', false);
-                        }
-                    });
-                    if (flag == 0) {
-                        $(this).find('table > tbody > tr > td > input.shareusers-check-all').prop('checked', true);
-=======
                     });
                     if (flag == 0) {
                         $(this).find('table > tbody > tr > td > input.sharegroups-check-all').prop('checked', true);
->>>>>>> experimental
                     }
                 });
 

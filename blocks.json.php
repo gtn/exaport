@@ -165,6 +165,26 @@ function get_form_items($id, $block_data=array()) {
 
 
 	$content .= '</td></tr>';		
+	// Shared artefacts for this user
+	$sharedartefacts = exaport_get_shared_items_for_user($USER->id);
+	if (count($sharedartefacts) > 0) {
+		$content .= '<tr><td><hr width=95% style="margin: 3px auto;">';	
+		$content .= get_string('sharedArtefacts', 'block_exaport');
+		$content .= '</td></tr>';
+		$content .= '<tr><td>';	
+		foreach($sharedartefacts as $key => $user) {
+			$content .= '<div class="add-item-category">'.$user['fullname'].'</div>';
+			if (isset($user['items']) && is_array($user['items']) && count($user['items']) > 0) {
+				foreach ($user['items'] as $itemid => $item) {
+					$content .= '<div class="add-item">';
+					$content .= '<input type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
+					$content .= $item->name;
+					$content .= '</div>';							
+				}
+			}
+		};
+		$content .= '</td></tr>';
+	}
 	$content .= '<tr><td>';	
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
 	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
@@ -181,7 +201,7 @@ function get_form_text($id, $block_data=array()) {
     $draftid_editor = file_get_submitted_draft_itemid('text');
 	if ($block_data->text) {
 		$text = $block_data->text;
-		$text = file_rewrite_pluginfile_urls($text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));
+		$text = file_rewrite_pluginfile_urls($text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor);
 	} else {
 		$text = '';
 	}
@@ -257,12 +277,12 @@ if ($USER->picture) {
 		$text = $block_data->text;
 
 		$text = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, 'block_exaport', 'view_content',
-                                       required_param('viewid', PARAM_INT), array('subdirs'=>true), $text);
+                                       required_param('viewid', PARAM_INT), array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $text);
 	} else {
 		$text = block_exaport_get_user_preferences()->description;
 
 		$text = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, 'block_exaport', 'personal_information',
-                                       $USER->id, array('subdirs'=>true), $text);
+                                       $USER->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $text);
 	}
 	$content  = "";
 

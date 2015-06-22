@@ -62,6 +62,15 @@ if ($userhash!="0"){
 	if($token) {
 		$webservicelib = new webservice();
 		$authenticationinfo = $webservicelib->authenticate_user($token);
+		$accessPath = explode('/', $access);
+		
+		$item = block_exaport_get_elove_item($id, $accessPath[2], $authenticationinfo);
+		if ($file = block_exaport_get_item_file($item)) {
+		    send_stored_file($file);
+		} else {
+		    not_found();
+		}
+		exit;
 	}
 	else
 		require_login();
@@ -74,13 +83,13 @@ if ($access && $id) {
 	if ($epopaccess){
 	$item = block_exaport_get_item_epop($id, $user);}
 	else{
-	$item = block_exaport_get_item($id, $access, $epopaccess);}
+	$item = block_exaport_get_item($id, $access, false);}
 	
 	if (!$item) print_error('Item not found');
 	//if ($item->type != 'file') print_error('Item not a file');
 
 	if ($file = block_exaport_get_item_file($item)) {
-		send_stored_file($file);
+		send_stored_file($file, 1);
 	} else {
 		not_found();
 	}

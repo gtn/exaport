@@ -14,7 +14,7 @@ class block_exaport_comment_edit_form extends moodleform {
 		$this->_form->_attributes['action'] = $_SERVER['REQUEST_URI'];
 		$mform->addElement('header', 'comment', get_string("addcomment", "block_exaport"));
 
-		$mform->addElement('editor', 'entry', get_string("comment", "block_exaport"),null, array('rows' => 10));
+		$mform->addElement('editor', 'entry', get_string("comment", "block_exaport"),null, array('rows' => 10, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 		$mform->setType('entry', PARAM_TEXT);
 		$mform->addRule('entry', get_string("commentshouldnotbeempty", "block_exaport"), 'required', null, 'client');
 		//$mform->setHelpButton('entry', array('writing', 'richtext'), false, 'editorhelpbutton');
@@ -95,11 +95,15 @@ class block_exaport_item_edit_form extends moodleform {
 
 		} elseif ($type == 'file') {
 			if ($this->_customdata['action'] == 'add') {
-				$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1));
+				$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 				$mform->addRule('file', null, 'required', null, 'client');
 				
 			} else {
-				// filename for assignment import
+                // Filemanager for edit file.
+                $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+                $mform->addRule('file', null, 'required', null, 'client');
+
+				// Filename for assignment import.
 				$mform->addElement('hidden', 'filename');
 				$mform->setType('filename', PARAM_TEXT);
 				$mform->setDefault('filename', '');

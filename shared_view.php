@@ -65,9 +65,15 @@ foreach ($blocks as $block) {
 		$columns[$block->positionx] = array();
 
 	if ($block->type == 'item') {
-		$conditions = array("id" => $block->itemid);
+		$conditions = array("id" => $block->itemid);		
 		if ($item = $DB->get_record("block_exaportitem", $conditions)) {
-			$block->item = $item;
+			// Add checking on sharable item.
+			if ($sharable = is_sharableitem($view->userid, $item->id) || $view->userid == $item->userid) {
+				$block->item = $item;
+			}
+			else {
+				continue; // Hide unshared items
+			}
 		} else {
 			$block->type = 'text';
 		}
@@ -75,7 +81,10 @@ foreach ($blocks as $block) {
 	$columns[$block->positionx][] = $block;
 }
 
-
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
 if ($view->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");
@@ -156,18 +165,31 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			
 			echo '<div class="view-item view-item-type-'.$item->type.'">';
 			// thumbnail of item
+			$file_params = '';
 			if ($item->type=="file") {
 				$select = "contextid='".context_user::instance($item->userid)->id."' AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";	
 //				if ($img = $DB->get_record('files', array('contextid'=>get_context_instance(CONTEXT_USER, $item->userid)->id, 'component'=>'block_exaport', 'filearea'=>'item_file', 'itemid'=>$item->id, 'filesize'=>'>0'), 'id, filename, mimetype')) {
-				if ($img = $DB->get_record_select('files', $select, null, 'id, filename, mimetype')) {
-					if (strpos($img->mimetype, "image")!==false) {					
-						$img_src = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $img->filename;
+				if ($file = $DB->get_record_select('files', $select, null, 'id, filename, mimetype, filesize')) {
+					if (strpos($file->mimetype, "image")!==false) {					
+						$img_src = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $file->filename;
 						echo '<div class="view-item-image"><img height="100" src="'.$img_src.'" alt=""/></div>';
+					} else {
+						// Link to file.
+						$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access."&itemid=".$item->id);
+						// Human filesize.
+						$units = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+						$power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
+						$filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
+						// Fileinfo block.
+						$file_params = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> <span class="filedescription">('.$filesize.')</span></div>';
+						if (block_exaport_is_valid_media_by_filename($file->filename)) {
+							echo '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" alt=""/></div>';
+						}
 					};
 				};		
 			}
 			elseif ($item->type=="link") {				
-				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'" alt=""/></a></div>';
+				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'" alt=""/></a></div>';
 			};			
 			echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
                         // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer
@@ -177,6 +199,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
                         }
                         echo '</div>';
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
+			echo $file_params;			
 			echo '<div class="view-item-text">';
 			if ($item->url) {
 				// link

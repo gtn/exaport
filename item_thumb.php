@@ -3,14 +3,35 @@ require_once dirname(__FILE__).'/inc.php';
 require_once dirname(__FILE__).'/lib/sharelib.php';
 
 $item_id = optional_param('item_id', -1, PARAM_INT);
+$access = optional_param('access', '', PARAM_TEXT);
 
 //require_login(0, true);
-
 $item = null;
-if ($item_id > 0) { 
-	$item = $DB->get_record('block_exaportitem', array('id'=>$item_id, 'userid'=>$USER->id));
+
+// thumbnails for BackEnd (editing the view part)
+if ($access == '') {
+	echo $access;
+	if ($sharable = is_sharableitem($USER->id, $item_id)) {
+		// Get thumbnails if item was shared for current user
+		$item = $DB->get_record('block_exaportitem', array('id'=>$item_id));
+	} else {
+		$item = $DB->get_record('block_exaportitem', array('id'=>$item_id, 'userid' => $USER->id));
+	}
+} else {
+	// Checking access to item by access to view
+	if (!$view = block_exaport_get_view_from_access($access)) {
+		die("view not found");
+	}	
+	$view_id = $view->id;
+	$view_ownerid = $view->userid;
+	$item = $DB->get_record('block_exaportitem', array('id'=>$item_id));
+	$sharable = is_sharableitem($view_ownerid, $item_id);
+	if ($view_ownerid != $item->userid && !$sharable) {
+		die('item not found');
+	}
 }
 if (empty($item)) die('item not found');
+//exit;
 
 switch ($item->type) {
 	case "file": 
@@ -19,7 +40,7 @@ switch ($item->type) {
 		
 		// serve file
 		if ($file && $file->is_valid_image()) {
-			send_stored_file($file);
+			send_stored_file($file, 1);
 			exit;
 		}
 

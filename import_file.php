@@ -230,7 +230,7 @@ function import_user_image($unzip_dir, $url){
 			
 			$array = $data->description_editor;
 			//file_prepare_draft_area($array["itemid"], get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $new->id);
-			file_prepare_draft_area($array["itemid"], context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $new->id);
+			file_prepare_draft_area($array["itemid"], context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $new->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 			//var_dump(file_get_draft_area_info($array["itemid"]));
 			
 			//file_prepare_draft_area($data->itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $new->id);

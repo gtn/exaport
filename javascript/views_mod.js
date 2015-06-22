@@ -189,7 +189,7 @@ var exaportViewEdit = {};
 		},
 		
 		resetViewContent: function(){
-			// load stored blocks
+			// load stored blocks			
 			var blocks = $('form :input[name=blocks]').val();
 			if (blocks) {
 				blocks = $.parseJSON(blocks);
@@ -200,7 +200,6 @@ var exaportViewEdit = {};
 					type: 'headline'
 				}];
 			}
-
 			var portfolioDesignBlocks = $('.portfolioDesignBlocks');
 			portfolioDesignBlocks.empty();
 			$.each(blocks, function(){
@@ -519,6 +518,12 @@ var exaportViewEdit = {};
 			$item.data('portfolio').text = $(this).val(); 			
 		}); /**/
 		updateBlockData();
+		// unshared blocks
+		if (data.unshared == 1) {
+			$item.find('div.item_info').addClass('unshared_block');
+			$item_header = $item.find('div.header').html();
+			$item.find('div.header').html($item_header + '<span class="unshared_message">Unshared</span>');
+		}
 
 		return $item;
 	}
@@ -587,7 +592,7 @@ var exaportViewEdit = {};
 	});
 
 	$(function(){
-		ExabisEportfolio.load_userlist('views_mod');
+		//ExabisEportfolio.load_userlist('views_mod');
 	});
 
 	// sharing
@@ -605,17 +610,26 @@ var exaportViewEdit = {};
 
 		if ($form.find(':input[name=internaccess]').is(':checked')) {
 			$('#internaccess-settings').show();
+			$('#internaccess-groups').hide();
 			if (share_text) {
 				share_text += ' '+$E.translate('viewand')+' ';
 			}
 			share_text += $E.translate('internalaccess')+': ';
 			
-			if ($form.find(':input[name=shareall]:checked').val() > 0) {
+			if ($form.find(':input[name=shareall]:checked').val() == 1) {
 				share_text += $E.translate('internalaccessall');
 				$('#internaccess-users').hide();
+				$('#internaccess-groups').hide();
+			} else if ($form.find(':input[name=shareall]:checked').val() == 2) {
+				share_text += $E.translate('internalaccessgroups');
+				$('#internaccess-users').hide();
+				$('#internaccess-groups').show();
+                ExabisEportfolio.load_grouplist('views_mod');
 			} else {
 				share_text += $E.translate('internalaccessusers');
+				$('#internaccess-groups').hide();
 				$('#internaccess-users').show();
+                ExabisEportfolio.load_userlist('views_mod');
 			}
 		} else {
 			$('#internaccess-settings').hide();

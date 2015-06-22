@@ -1,5 +1,4 @@
 <?php
-
 /* * *************************************************************
  *  Copyright notice
  *
@@ -215,7 +214,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
         echo 'noch nicht unterst�tzt';
     }
 
-    global $CFG, $COURSE, $PAGE;
+    global $CFG, $COURSE, $PAGE, $USER;
 
 	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
@@ -258,6 +257,8 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	$tabs[] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
     $tabs[] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
     $tabs[] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
+	if (has_sharablestructure($USER->id))
+		$tabs[] = new tabobject('sharedstructures', $CFG->wwwroot . '/blocks/exaport/shared_structures.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedstructures"), '', true);
 
     // tabs f�r das untermen�
     $tabs_sub = array();
@@ -276,6 +277,10 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 				$tabs_sub[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
 			}
 		}
+	} elseif (strpos($item_identifier, 'personal') === 0) {
+        $activetabsubs[] = $sub_item_identifier;
+		$tabs_sub[] = new tabobject('personalinfo', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("explainpersonal", "block_exaport"), '', true);
+		$tabs_sub[] = new tabobject('resume', s($CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id), get_string("resume", "block_exaport"), '', true);
 	} elseif (strpos($item_identifier, 'bookmarks') === 0) {
         $activetabsubs[] = $item_identifier;
         $currenttab = 'bookmarks';
@@ -586,28 +591,38 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
 }
 function block_exaport_get_competences($item, $role=1) {
     global $DB;
-
-    return $DB->get_records('block_exacompcompuser_mm',array("userid"=>$item->userid,"role"=>$role,"eportfolioitem"=>1,"activityid"=>$item->id));
+	return $DB->get_records('block_exacompcompactiv_mm', array("eportfolioitem"=>1, "activityid"=>$item->id));
 }
-function block_exaport_build_comp_tree() {
-    global $DB, $USER;
+
+function block_exaport_build_comp_tree($forresume = false, $resume = null) {
+    global $DB, $USER, $CFG;
 	
 	$courses = $DB->get_records('course', array());
+	
+	// teacher accepted competensies (for resume);
+	$tmp_recs = $DB->get_records('block_exacompcompuser', array("userid"=>$USER->id, "role"=>1 /*teacher*/), null, 'compid');
+	$accepted_descriptors = array_keys($tmp_recs);
 	
 	$descriptors = array();
 	foreach($courses as $course){
 		$context = context_course::instance($course->id);
-		if(is_enrolled($context, $USER)){
+		if(is_enrolled($context, $USER)){   
 			$alldescr = block_exacomp_get_descritors_list($course->id);
 			foreach($alldescr as $descr){
 				if(!in_array($descr, $descriptors)){
-					$descriptors[] = $descr;
+					if (!$forresume || ($forresume && in_array($descr->id, $accepted_descriptors)))
+						$descriptors[] = $descr;
 				}
 			}
 		}
 	}
 	
-    $tree = '<form name="treeform"><ul id="comptree" class="treeview">';
+	if ($forresume) {
+		$tree = '<form name="treeform" method="post" action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$resume->courseid.'&id='.$resume->id.'&sesskey='.sesskey().'#'.$forresume.'"><ul id="comptree" class="treeview">';
+		
+	} else {
+		$tree = '<form name="treeform"><ul id="comptree" class="treeview">';
+	};
     $subject = "";
     $topic = "";
     $newsub = true;
@@ -617,8 +632,8 @@ function block_exaport_build_comp_tree() {
     foreach ($descriptors as $descriptor) {
         if ($descriptor->subject != $subject) {
             $subject = $descriptor->subject;
-            if (!$newsub
-                )$tree.='</ul></li></ul></li>';
+            if (!$newsub)
+				$tree.='</ul></li></ul></li>';
             $tree.='<li id="gegenst'.$descriptor->subjectid.'" alt="'.$subject.'">' . $subject;
             $tree.='<ul>';
 
@@ -633,11 +648,25 @@ function block_exaport_build_comp_tree() {
             $tree.='<ul>';
             $newtop = false;
         }
-        $tree.='<li><input class="'.$descriptor->subjectid.'" type="checkbox" name="desc" value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
+		if ($forresume && in_array($descriptor->id, $resume->descriptors)) {
+			$checked = 'checked="checked"';
+		} else {
+			$checked = '';
+		}
+        $tree.='<li><input class="'.$descriptor->subjectid.'" type="checkbox" name="desc'.($forresume ? '[]':'').'" '.$checked.' value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
 
         $index++;
     }
-    $tree.='</ul></form>';
+    $tree .= '</ul></li></ul></li></ul>';
+	if ($forresume) {
+		$tree .= '<input type="hidden" value="'.$forresume.'" name="edit">';
+		$tree .= '<input type="hidden" value="'.sesskey().'" name="sesskey">';
+		$tree .= '<input type="submit" id="id_submitbutton" type="submit" value="'.get_string('savechanges').'" name="submitbutton">';
+		$tree .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" value="'.get_string('cancel').'" name="cancel">';
+	} else {
+		$tree .= '<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport(function($){$.colorbox.close()});">';
+	}
+	$tree .= '</form>';
 
     return $tree;
 }
@@ -717,6 +746,22 @@ function block_exaport_get_root_category() {
 	);
 }
 
+function block_exaport_get_shareditems_category($name = null, $userid = null) {
+	global $DB, $USER;
+	return (object) array(
+		'id' => -1,
+		'pid' => 0,
+		'name' => $name != null ? $name : block_exaport_get_string('shareditems_category'),
+		'item_cnt' => '',
+		'userid' => $userid ? $userid : ''
+/* 		'item_cnt' => $DB->get_field_sql('
+			SELECT COUNT(i.id) AS item_cnt
+			FROM {block_exaportitem} i
+			WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
+		', array($USER->id))  */
+	);
+}
+
 function block_exaport_badges_enabled() {
 	return (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled());
 }
@@ -731,4 +776,386 @@ function block_exaport_get_all_user_badges() {
 	} else
 		return null;
 }
+function block_exaport_get_user_category($title, $userid) {
+    global $DB;
+    
+    return $DB->get_record('block_exaportcate', array('userid'=>$userid,'name'=>$title));
+}
+function block_exaport_create_user_category($title, $userid, $parentid = 0) {
+    global $DB;
+    
+    if(!$DB->record_exists('block_exaportcate', array('userid'=>$userid,'name'=>$title,'pid'=>$parentid))) {
+        $id = $DB->insert_record('block_exaportcate',array('userid'=>$userid,'name'=>$title,'pid'=>$parentid));
+        return $DB->get_record('block_exaportcate',array('id'=>$id));
+    }
+    return false;
+}
 
+/**
+ * Autofill the view with all existing artefacts
+ * @param integer $viewid
+ * @param string $existingartefacts
+ * @return string Artefacts
+ */
+function fill_view_with_artefacts($viewid, $existingartefacts='') {
+    global $DB, $USER;
+
+    $artefacts = block_exaport_get_portfolio_items(1);
+    if ($existingartefacts<>'') {
+        $existingartefactsarray = explode(',', $existingartefacts);
+        $filledartefacts = $existingartefacts;
+    } else {
+        $existingartefactsarray = array();
+        $filledartefacts = '';
+    }
+    if (count($artefacts)>0) {
+        $y = 1;
+        foreach ($artefacts as $artefact) {
+            if (!in_array($artefact->id, $existingartefactsarray)) {
+                $block = new stdClass();
+                $block->itemid = $artefact->id;
+                $block->viewid = $viewid;
+                $block->type = 'item';
+                $block->positionx = 1;
+                $block->positiony = $y;
+                $block->id = $DB->insert_record('block_exaportviewblock', $block);
+                $y++;
+                $filledartefacts .= ','.$artefact->id;
+            }
+        }
+        if ($existingartefacts == '') {
+            $filledartefacts = substr($filledartefacts, 1);
+        };
+    }; /**/
+    return $filledartefacts;
+}
+
+/**
+ * Autoshare the view to teachers
+ * @param integer $viewid
+ * @return nothing
+ */
+function share_view_to_teachers($viewid) {
+    global $DB, $USER;
+    if ($viewid > 0) {
+        $allteachers = block_exaport_get_course_teachers();
+        $allsharedusers = block_exaport_get_shared_users($viewid);
+        $diff = array_diff($allteachers, $allsharedusers);
+        $view = $DB->get_record_sql('SELECT * FROM {block_exaportview} WHERE id = ?', array('id'=>$viewid));
+        if (!$view->shareall) {
+            $view->shareall = 0;
+        };
+        if (!$view->externaccess) {
+            $view->externaccess = 0;
+        };
+        if (!$view->externcomment) {
+            $view->externcomment = 0;
+        };
+        $DB->update_record('block_exaportview', $view);
+        // Add all teachers to shared users (if it is not there yet).
+        if ((count($allteachers) > 0) && (count($diff) > 0)) {
+            foreach ($diff as $userid) {
+                // If course has a teacher.
+                if ($userid > 0) {
+                    $shareItem = new stdClass();
+                    $shareItem->viewid = $view->id;
+                    $shareItem->userid = $userid;
+                    $DB->insert_record("block_exaportviewshar", $shareItem);
+                };
+            };
+        };
+    };
+}
+
+function block_exaport_get_view_blocks($view) {
+    global $DB, $USER;
+
+    $portfolioItems = block_exaport_get_portfolio_items();
+    $badges = block_exaport_get_all_user_badges();
+
+    $query = "select b.*".
+            " from {block_exaportviewblock} b".
+            " where b.viewid = ? ORDER BY b.positionx, b.positiony";
+
+    $allBlocks = $DB->get_records_sql($query, array($view->id));
+    $blocks = array();
+
+    foreach ($allBlocks as $block) {
+        if ($block->type == 'item') {
+            if (!isset($portfolioItems[$block->itemid])) {
+				// Could be shared sometime (because found in block_exaportviewblock with viewid)
+				if (!$potentialitem = $DB->get_record("block_exaportitem", array('id' => $block->itemid))) {
+					// item not found
+					continue;
+				} else {
+					$items = block_exaport_get_portfolio_items(0, $block->itemid);					
+					$portfolioItems[$block->itemid] = $items[$block->itemid];
+					$block->unshared = 1;
+				}
+            }
+            $block->item = $portfolioItems[$block->itemid];
+        } elseif ($block->type == 'badge') {
+            // find bage by id
+            $badge = null;
+            foreach ($badges as $tmp) {
+                if ($tmp->id == $block->itemid) {
+                    $badge = $tmp;
+                    break;
+                }
+            }
+            if (!$badge) {
+                // badge not found
+                continue;
+            }
+            	
+			if (!$badge->courseid) { // For badges with courseid = NULL
+				$badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			} else {
+			    $context = context_course::instance($badge->courseid);	
+				$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			}
+            
+
+            $block->badge = $badge;
+        } else {
+            $block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);
+            $block->itemid = null;
+        }
+
+        // clean html texts for output
+        if (isset($block->print_text) && $block->print_text) {
+            $block->print_text = clean_text($block->print_text, FORMAT_HTML);
+        }
+        if (isset($block->intro) && $block->intro) {
+            $block->intro = clean_text($block->intro, FORMAT_HTML);
+        }
+
+        $blocks[$block->id] = $block;
+    }
+
+    return $blocks;
+}
+
+function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
+    global $DB, $USER;
+    if ($epopwhere == 1) {
+        $addwhere = " AND ".block_exaport_get_item_where();
+    } else {
+        $addwhere = "";
+    };
+	// only needed item by id
+	if ($itemid) {
+		$where = ' i.id = '.$itemid;	
+	} else {
+		$where = " i.userid=? ".$addwhere;
+	}
+    $query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
+            " from {block_exaportitem} i".
+            " left join {block_exaportcate} ic on i.categoryid = ic.id".
+            " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+            " left join {block_exaportitemcomm} com on com.itemid = i.id".
+            " where ".$where.
+            " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
+            " ORDER BY i.name";
+    //echo $query."<br><br>";
+    $portfolioItems = $DB->get_records_sql($query, array($USER->id));
+    if (!$portfolioItems) {
+        $portfolioItems = array();
+    }
+
+    // add shared items
+    $shared_items = exaport_get_shared_items_for_user($USER->id, true);
+    $portfolioItems = $portfolioItems + $shared_items;
+
+    foreach ($portfolioItems as &$item) {
+        if (null == $item->cname) {
+            $item->category = format_string(block_exaport_get_root_category()->name);
+            $item->catid = 0;
+        } elseif (null == $item->cname_parent) {
+            $item->category = format_string($item->cname);
+        } else {
+            //$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
+            $catid= $item->catid;
+            $catname = $item->cname;
+            $item->category = "";
+            do{
+                $conditions = array("userid" => $USER->id, "id" => $catid);
+                $cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
+                foreach($cats as $cat){
+                    if($item->category == "")
+                        $item->category =format_string($cat->name);
+                    else
+                        $item->category =format_string($cat->name)." &rArr; ".$item->category;
+                    $catid = $cat->pid;
+                }
+
+            }while ($cat->pid != 0);
+        }
+
+        if ($item->intro) {
+            $item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+            $item->intro = clean_text($item->intro, FORMAT_HTML);
+        }
+
+        //get competences of the item
+        $item->userid = $USER->id;
+
+        $comp = block_exaport_check_competence_interaction();
+        if($comp){
+            $array = block_exaport_get_competences($item, 0);
+
+            if(count($array)>0){
+                $competences = "";
+                foreach($array as $element){
+                    $conditions = array("id" => $element->compid);
+                    $competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING);
+
+                    if($competencesdb != null){
+                        $competences .= $competencesdb->title.'<br>';
+                    }
+                }
+                $competences = str_replace("\r", "", $competences);
+                $competences = str_replace("\n", "", $competences);
+                $competences = str_replace("\"", "&quot;", $competences);
+                $competences = str_replace("'", "&prime;", $competences);
+                	
+                $item->competences = $competences;
+            }
+        }
+
+        unset($item->userid);
+
+        unset($item->cname);
+        unset($item->cname_parent);
+    }
+    //	print_r($portfolioItems);
+
+    return $portfolioItems;
+}
+
+/**
+ * Function gets teachers array of course
+ * @return array
+ */
+function block_exaport_get_course_teachers() {
+    global $DB, $USER;
+    $courseid = optional_param('courseid', 0, PARAM_INT);
+    // Role id='3' - teachers. '4'- assistents.
+    $query = "SELECT u.id as userid, c.id, c.shortname, u.username
+    FROM {course} c
+    LEFT OUTER JOIN {context} cx ON c.id = cx.instanceid
+    LEFT OUTER JOIN {role_assignments} ra ON cx.id = ra.contextid AND ra.roleid = '3'
+    LEFT OUTER JOIN {user} u ON ra.userid = u.id
+    WHERE cx.contextlevel = '50' AND u.id>0 AND c.id = ".$courseid;
+    $courseteachers = $DB->get_records_sql($query);
+    $teacherarray = array();
+    foreach($courseteachers as $teacher) {
+        if ($teacher->userid <> $USER->id) { // Except himself.
+            $teacherarray[] = $teacher->userid;
+        };
+    };
+    sort($teacherarray);
+    return $teacherarray;
+}
+
+/**
+ * Function gets all shared users
+ * @param $viewid
+ * @return array
+ */
+function block_exaport_get_shared_users($viewid) {
+    global $DB, $USER;
+    $sharedusers = array ();
+    if ($viewid > 0) {
+        $query = "SELECT userid FROM {block_exaportviewshar} s WHERE s.viewid=".$viewid;
+        $users = $DB->get_records_sql($query);
+        foreach($users as $user) {
+            $sharedusers[] = $user->userid;
+        };
+    };
+    sort($sharedusers);
+    return $sharedusers;
+};
+
+function block_exaport_file_userquotecheck($addingfiles = 0, $id=0) {
+	global $DB, $USER, $CFG;
+	$result = $DB->get_record_sql('SELECT SUM(filesize) as allfilesize FROM {files} WHERE contextid = ? and component="block_exaport"', array(context_user::instance($USER->id)->id));
+	if ($result->allfilesize + $addingfiles > $CFG->block_exaport_userquota) {
+		$courseid = optional_param('courseid', 0, PARAM_INT);
+		$categoryid = optional_param('categoryid', 0, PARAM_INT);
+		$type = optional_param('type', 0, PARAM_RAW);
+		print_error('userquotalimit', '', new moodle_url('/blocks/exaport/item.php', 
+				array('sesskey' => sesskey(),
+						'courseid' => $courseid,
+						'action' => 'edit',
+						'type' => $type,
+						'id' => $id, 
+						'categoryid' => $categoryid)), null);
+		//throw new file_exception('userquotalimit');
+	}		
+	return true;	
+}
+
+function block_exaport_get_filesize_by_draftid($draftid = 0) {
+	global $DB, $USER, $CFG;
+	$result = $DB->get_record_sql('SELECT SUM(filesize) AS allfilesize FROM {files} WHERE contextid = ? AND component = "user" AND filearea="draft" AND itemid = ?', array(context_user::instance($USER->id)->id, $draftid));
+	if ($result) {
+		return $result->allfilesize;
+	} else {
+		return 0;
+	}
+}
+
+function block_exaport_get_maxfilesize_by_draftid_check($draftid = 0) {
+	global $DB, $USER, $CFG;
+	$result = $DB->get_record_sql('SELECT MAX(filesize) AS maxfilesize FROM {files} WHERE contextid = ? AND component = "user" AND filearea="draft" AND itemid = ?', array(context_user::instance($USER->id)->id, $draftid));
+	if (($CFG->block_exaport_max_uploadfile_size > 0) && ($result->maxfilesize > $CFG->block_exaport_max_uploadfile_size)) {
+		print_error('maxbytes', 'exaport', 'blocks/exaport/view_items.php', null);
+		//throw new file_exception('maxbytes');
+	}		
+	return true;	
+}
+
+function block_exaport_is_valid_media_by_filename ($filename) {
+	global $DB, $USER, $CFG;
+	$path_parts = pathinfo($filename);
+	switch ($path_parts['extension']) {
+		case 'avi':
+		case 'mp4':
+		case 'flv':
+		case 'swf':
+		case 'mpg':
+		case 'mpeg':
+		case '3gp':
+		case 'webm':
+		case 'ogg':
+			return true;
+		default: return false;
+	}
+}
+
+// do user has sharable structures or do not
+function has_sharablestructure($userid) {
+	global $DB, $USER;	
+	// shared to all
+	//if ($DB->get_records('block_exaportcate', array('structure_share' => '1', 'structure_shareall' => '1'))) 
+	if ($DB->get_records_sql('SELECT * FROM {block_exaportcate} WHERE structure_share=1 AND structure_shareall=1 AND userid<>'.$USER->id))
+		return true;
+	// shared to user
+	//if ($DB->get_records('block_exaportcat_structshar', array('userid' => $userid))) 
+	if ($DB->get_records_sql('SELECT * FROM {block_exaportcat_structshar} WHERE userid='.$userid.' AND userid<>'.$USER->id))
+		return true;
+	// shared to user's group
+	$usergroups = $DB->get_records('groups_members', array('userid' => $userid), '', 'groupid');
+	if ((is_array($usergroups)) && (count($usergroups) > 0)) { 
+		foreach ($usergroups as $id => $group) {
+			$usergroups[$id] = $group->groupid;
+		};
+		$usergroups_list = implode(',', $usergroups);
+		$userstructures = $DB->get_records_sql('SELECT cs.* FROM {block_exaportcat_strgrshar} cs LEFT JOIN {block_exaportcate} c ON cs.catid=c.id WHERE c.userid<>'.$USER->id.' AND groupid IN ('.$usergroups_list.')');
+		if (count($userstructures) > 0) 
+			return true;
+	}; 
+	
+	return false;
+}

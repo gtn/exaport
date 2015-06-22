@@ -1386,12 +1386,14 @@ function block_exaport_installoez($userid,$isupdate=false){
 	INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
 	INNER JOIN {block_exacompdescrexamp_mm} emm ON emm.descrid=descr.id
 	INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid";
-	$sql.=" WHERE st.isoez=1 OR (st.isoez=2 AND examp.source=2) OR (st.isoez=2 AND examp.source=3)".$where." ";
+	$sql.=" WHERE st.isoez=1 OR st.epop=1 OR subj.epop=1 OR top.epop=1 OR descr.epop=1 OR examp.epop=1 OR (st.isoez=2 AND examp.source=2) OR (examp.source=3)".$where." ";
 	$sql.=" ORDER BY st.id,subj.id,top.id";
 //echo $sql;die;
 	$row = $DB->get_records_sql($sql);
 	$stid=-1;$subjid=-1;$topid=-1;
 	$beispiel_url="";
+	$catlist='0';
+	$itemlist='0';
 	//if ($isupdate==false){
 		foreach($row as $rs){
 			$parentid_is_old=false;
@@ -1405,8 +1407,11 @@ function block_exaport_installoez($userid,$isupdate=false){
 				}else{
 					
 					$datas=array("pid"=>0,"stid"=>$rs->stid,"sourcemod"=>"3","userid"=>$userid,"name"=>$rs->kat0,"timemodified"=>$jetzn,"course"=>"0","isoez"=>"1","subjid"=>0,"topicid"=>0,"source"=>$rs->stsource,"sourceid"=>$rs->stsourceid,"description"=>$rs->stdescription);
-					$newstid=$DB->insert_record('block_exaportcate', $datas);$stid=$rs->stid;
+					$newstid=$DB->insert_record('block_exaportcate', $datas);
+					
 				}
+				$stid=$rs->stid;
+				$catlist.=','.$newstid;
 			}
 			if ($subjid!=$rs->subjid){ 
 				$keysub=$rs->subsource."#".$rs->subsourceid."#5"; 
@@ -1416,8 +1421,10 @@ function block_exaport_installoez($userid,$isupdate=false){
 					$newsubjid=$catold[$keysub]["id"];
 					$DB->update_record('block_exaportcate', array("id"=>$newsubjid,"name"=>$kat1s,"pid"=>$newstid,"timemodified"=>time(),"stid"=>$stid,"subjid"=>$rs->subjid,"description"=>$rs->subjdescription));
 				}else{
-					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5,"description"=>$rs->subjdescription));$subjid=$rs->subjid;
+					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5,"description"=>$rs->subjdescription));
 				}
+				$subjid=$rs->subjid;
+				$catlist.=','.$newsubjid;
 			}
 			if ($topid!=$rs->topid){
 				$keytop=$rs->topsource."#".$rs->topsourceid."#7";
@@ -1429,8 +1436,10 @@ function block_exaport_installoez($userid,$isupdate=false){
 					$newtopid=$catold[$keytop]["id"];
 					$DB->update_record('block_exaportcate', array("id"=>$newtopid,"name"=>$kat2s,"pid"=>$newsubjid,"timemodified"=>time(),"description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid));
 				}else{
-					$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid,"source"=>$rs->topsource,"sourceid"=>$rs->topsourceid,"sourcemod"=>7));$topid=$rs->topid;
+					$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid,"source"=>$rs->topsource,"sourceid"=>$rs->topsourceid,"sourcemod"=>7));
 				}
+				$topid=$rs->topid;
+				$catlist.=','.$newtopid;
 			}
 			$beispiel_url="";
 			if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
@@ -1449,7 +1458,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 						$parentid_is_old=true;
 					}
 			}
-	
+			
 			if ($isupdate==true){
 				if($rs->source==3){
 					 $sourceidtemp=$rs->exampid; //if example created from teacher in moodle, there is no sourceid. because sourceid is from komet xml tool exacomp_data.xml
@@ -1462,8 +1471,9 @@ function block_exaport_installoez($userid,$isupdate=false){
 				if ($itemrs = $DB->get_records("block_exaportitem",array("isoez"=>1,"source"=>$rs->source,"sourceid"=>$sourceidtemp,"userid"=>$userid,"categoryid"=>$newtopid))){  //kategoryId mitnehmen, weil ein item kopiert und auf verschiedene kategorien zugeordnet werden kann. beim update soll dann nur das jeweilige item aktualisiert werden, sonst ist categorie falsch
 					$iteminsert=false;
 					foreach($itemrs as $item){
+						$itemlist.=','.$item->id;
 						$rem_ids[0][$rs->exampid]=$item->id; //remark relation for parentids later
-						$data=array("id"=>$item->id,"userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$example_url,"parentid"=>$pid);
+						$data=array("id"=>$item->id,"userid"=>$userid,"categoryid"=>$newtopid,"name"=>$items,"beispiel_angabe"=>$rs->exampdescription,"timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$example_url,"parentid"=>$pid);
 						$DB->update_record('block_exaportitem', $data);
 						if ($parentid_is_old) $rem_ids[1][$item->id]=intval($rs->parentid); //save old parentid from new id
 					}
@@ -1481,12 +1491,24 @@ function block_exaport_installoez($userid,$isupdate=false){
 						$example_url=$rs->completefile;
 					}
 					$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$sourceidtemp,"example_url"=>$example_url,"parentid"=>$pid));
-					
+					$itemlist.=','.$newid;
 					$rem_ids[0][$rs->exampid]=$newid; //remark relation for parentids later
 					if ($parentid_is_old) $rem_ids[1][$newid]=intval($rs->parentid);
 				}
 			}
 		} //end foreach $row
+		
+		$sql='DELETE FROM {block_exaportitem} WHERE id NOT IN ('.$itemlist.') AND userid='.$userid.' AND isoez=1 AND intro="" AND url="" AND attachment=""';
+		$DB->execute($sql);
+		
+		$sql='SELECT * FROM {block_exaportcate} WHERE id NOT IN ('.$catlist.') AND userid='.$userid.' AND isoez=1';
+		$rows = $DB->get_records_sql($sql);
+		foreach($rows as $row){
+			if (!$DB->get_record("block_exaportitem", array("categoryid"=>$row->id))){
+				$DB->delete_records("block_exaportcate",array("id"=>$row->id));
+			}
+		}
+		
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1,import_oez_tstamp=".time()." WHERE user_id=".$userid;
 		$DB->execute($sql);
   	block_exaport_update_unset_pids('block_exaportitem',$rem_ids);

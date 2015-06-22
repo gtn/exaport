@@ -22,4 +22,28 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configcheckbox('block_exaport_disable_external_comments', get_string('settings_disable_external_comments_head', 'block_exaport'),
                        get_string('settings_disable_external_comments_body', 'block_exaport', $CFG->wwwroot.'/blocks/exaport/admin.php?action=remove_shareall'), 0));
+
+    $settings->add(new admin_setting_configcheckbox('block_exaport_app_externaleportfolio', get_string('block_exaport_app_externaleportfolio_head', 'block_exaport'),
+                       get_string('block_exaport_app_externaleportfolio_body', 'block_exaport'), 0));    
+					   
+	// max size of uploading file
+	$maxbytes = 0;
+    if (!empty($CFG->maxbytes)) {
+        $maxbytes = $CFG->maxbytes;
+    }
+    $max_upload_choices = get_max_upload_sizes(0, 0, 0, $maxbytes);
+    // maxbytes set to 0 will allow the maximum server limit for uploads
+	$a = new stdClass();
+	$a->sitemaxbytes = $max_upload_choices[$CFG->maxbytes];
+	$a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies';
+	$settings->add(new admin_setting_configselect('block_exaport_max_uploadfile_size', get_string('block_exaport_maxbytes', 'block_exaport'),
+						get_string('block_exaport_maxbytes_body', 'block_exaport', $a), 0, $max_upload_choices));
+ 
+	// Userquota.    
+    $defaultuserquota = 104857600; // 100MB
+    $a = new stdClass();
+    $a->bytes = $CFG->userquota;
+    $a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies';
+    $settings->add(new admin_setting_configtext('block_exaport_userquota', get_string('block_exaport_userquota', 'block_exaport'),
+						get_string('block_exaport_userquota_body', 'block_exaport', $a), $defaultuserquota));
 }

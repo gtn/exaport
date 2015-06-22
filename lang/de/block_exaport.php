@@ -137,6 +137,9 @@ $string['delete'] = 'L&ouml;schen';
 $string['add'] = 'Hinzuf&uuml;gen';
 $string['edit'] = 'Editieren';
 $string['checkall'] = 'Alle auswählen';
+$string['grouptitle'] = 'Gruppentitel';
+$string['membersnumber'] = 'Anzahl von Zuhörern';
+$string['nogroupsfound'] = 'Keine Gruppen gefunden';
 
 // export/import
 $string['import'] = 'Import';
@@ -272,6 +275,10 @@ $string['view_sharing_noaccess'] = 'Kein Zugriff';
 $string['show'] = 'Anzeigen';
 $string['thiscourse'] = 'Aktueller Kurs';
 $string['othercourses'] = 'Andere Kurse';
+$string['autofillview'] = 'Autogenerierte Views von bestehenden Artefakten';
+$string['autofillview_addartefacts'] = 'New artifacts were created after creating this view. Add new artefacts to this view';
+$string['sharetoteacher'] = 'sofort mit Kurs-Trainer/in teilen';
+$string['sharetoteacher_add'] = 'There is the teacher who did not share. Share to this teacher(s)';
 
 // Copy to course
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';
@@ -348,6 +355,102 @@ $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier
 //settings
 $string['settings_interaktion_exacomp_head'] = 'Interaktion exabis ePortfolio - exabis competencies';
 $string['settings_interaktion_exacomp_body'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
+$string['settings_allow_loginas_head'] = 'Allow login as';
+$string['settings_allow_loginas_body'] = '';
+$string['settings_create_desp_categories_head'] = 'Create Desp Categories';
+$string['settings_create_desp_categories_body'] = '';
+$string['settings_disable_shareall_head'] = 'Disable sharing with all users';
+$string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
+$string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
+$string['settings_disable_external_comments_body'] = '';
+$string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
+$string['block_exaport_app_externaleportfolio_body'] = 'For App';
+
+// Resume
+$string['resume'] = 'Resümee';
+$string['resume_template_newresume'] = '<h2>Mein Resümee</h2>';
+$string['resume_my'] = 'Mein Resümee';
+$string['resume_cover'] = 'Begleit-Informationen';
+$string['resume_coversaved'] = 'Begleit-Informationen gespeichert';
+$string['resume_eduhistory'] = 'Bildungs-Karriere';
+$string['resume_edu'] = 'Bildung';
+$string['resume_edusaved'] = 'Bildungsverlauf gespeichert';
+$string['resume_deleteeduconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
+$string['resume_edudeleted'] = 'Eintrag gelöscht';
+$string['resume_employhistory'] = 'Beschäftigungs-Historie';
+$string['resume_employ'] = 'Beschäftigung';
+$string['resume_employsaved'] = 'Beschäftigung gespeichert';
+$string['resume_deleteemployconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
+$string['resume_employdeleted'] = 'Beschäftigung gelöscht';
+$string['resume_interests'] = 'Interessen';
+$string['resume_interestssaved'] = 'Interessen gespeichert';
+$string['resume_startdate'] = 'Start-Datum';
+$string['resume_enddate'] = 'End-Datum';
+$string['resume_institution'] = 'Firma';
+$string['resume_institutionaddress'] = 'Firmenadresse';
+$string['resume_qualification'] = 'Qualifikation';
+$string['resume_qualtype'] = 'Art der Qualifikation';
+$string['resume_qualname'] = 'Bezeichnung der Qualifikation';
+$string['resume_qualdescription'] = 'Beschreibung der Qualifikation';
+$string['resume_files'] = 'Anhang';
+$string['resume_employer'] = 'Arbeitgeber';
+$string['resume_employeraddress'] = 'Adresse des Arbeitgebers';
+$string['resume_jobtitle'] = 'Job-Titel';
+$string['resume_position'] = 'Position';
+$string['resume_positiondescription'] = 'Beschreibung der Position';
+$string['resume_certif'] = 'Zertifikate, Akkreditierungen, Auszeichnungen';
+$string['resume_date'] = 'Datum';
+$string['resume_title'] = 'Title';
+$string['resume_description'] = 'Beschreibung';
+$string['resume_certifsaved'] = 'Zertifikat, Akkreditierung bzw. Auszeichnung gespeichert';
+$string['resume_deletecertifconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
+$string['resume_certifdeleted'] = 'Zertifikat, Akkreditierung bzw. Auszeichnung gelöscht';
+$string['resume_public'] = 'Bücher und Publikationen';
+$string['resume_contribution'] = 'Beiträge';
+$string['resume_contributiondetails'] = 'Details zum Beitrag';
+$string['resume_url'] = 'URL';
+$string['resume_publicsaved'] = 'Bücher und Publikationen gespeichert';
+$string['resume_deletepublicconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
+$string['resume_publicdeleted'] = 'Buch oder Publikation gelöscht';
+$string['resume_mbrship'] = 'Mitgliedschaften';
+$string['resume_mbrshipsaved'] = 'Mitgliedschaften gespeichert';
+$string['resume_deletembrshipconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
+$string['resume_mbrshipdeleted'] = 'Mitgliedschaft gelöscht';
+$string['resume_mygoals'] = 'Meine Ziele';
+$string['resume_goals'] = 'Ziele';
+$string['resume_goalspersonal'] = 'persönliche Ziele';
+$string['resume_goalsacademic'] = 'Bildungsziele';
+$string['resume_goalscareers'] = 'Karriereziele';
+$string['resume_goalspersonalsaved'] = 'Persönliche Ziele gespeichert';
+$string['resume_goalsacademicsaved'] = 'Bildungsziele gespeichert';
+$string['resume_goalscareerssaved'] = 'Karriereziele gespeichert';
+$string['resume_myskills'] = 'Meine Kompetenzen';
+$string['resume_skills'] = 'Kompetenzen';
+$string['resume_skillspersonal'] = 'Persönliche Kompetenzen';
+$string['resume_skillsacademic'] = 'Bildungs-Kompetenzen';
+$string['resume_skillscareers'] = 'Karriere-Kompetenzen';
+$string['resume_skillspersonalsaved'] = 'Persönliche Kompetenzen gespeichert';
+$string['resume_skillsacademicsaved'] = 'Bildungs-Kompetenzen gespeichert';
+$string['resume_skillscareerssaved'] = 'Karriere-Kompetenzen gespeichert';
+$string['resume_goalscomp'] = 'Bildungsstandards';
+$string['resume_skillscomp'] = 'Bildungsstandards';
+$string['resume_badges'] = 'Abzeichen';
+$string['resume_exportto_europass'] = 'Export für Europass';
+$string['resume_exportto_europass_intro'] = 'Ein Lebenslauf kann von der Exportdatei generiert werden, indem man den
+	<a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">Online-Europass CV Editor verwendet</a><br><br>
+
+	Ein paar Kurznotizen:<br>
+	<ul><li>Der generierte Lebenslauf sollte auf alle Fälle nochmals kontrolliert werden</li>
+		<li>Persönliche Daten werden aus den persönlichen Moodle-Informationen generiert</li>
+		<li>Alle Datumsangaben sollten überprüft werden</li>
+		<li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
+		<li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
+		<li>Voragben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
+	</ul>';
+$string['resume_exportto_europass_getXML'] = 'XML herunterladen';
+$string['resume_expand'] = 'Alles öffnen';
+$string['resume_collaps'] = 'Alles schließen';
+
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(bisher gibt es noch keine Bookmarks)';
 $stringNotUsed['externallink'] = 'Externer Link';

@@ -46,7 +46,7 @@ block_exaport_setup_default_categories();
 
 $url = '/blocks/exaport/view.php';
 $PAGE->set_url($url);
-block_exaport_print_header("personal");
+block_exaport_print_header("personal", "personalinfo");
 
 echo "<br />";
 

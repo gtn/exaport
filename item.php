@@ -56,6 +56,53 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }
 
 $id = optional_param('id', 0, PARAM_INT);
+
+if ($action == 'copytoself') {
+	confirm_sesskey();
+	require_once dirname(__FILE__).'/lib/sharelib.php';
+	if (!$owner_id = is_sharableitem($USER->id, $id)) {
+		die(block_exaport_get_string('bookmarknotfound'));
+		
+	}
+	
+	$conditions = array("id" => $id, "userid" => $owner_id);	
+	$source_item = $DB->get_record('block_exaportitem', $conditions);
+	
+	$copy = $source_item;
+	
+	unset($copy->id);
+	$copy->userid = $USER->id;
+	$copy->categoryid = 0;
+	$copy->timemodified = time();
+	$copy->shareall = 0;
+	$copy->externaccess = 0;
+	$copy->externcomment = 0;
+	$copy->shareall = 0;
+	
+	$newitem_id = $DB->insert_record('block_exaportitem', $copy);
+	if ($copy->type=='file') {
+		$fs = get_file_storage();
+		$fileinfo = array(
+			'component' => 'block_exaport',
+			'filearea' => 'item_file',     
+			'itemid' => $id); 
+		$ownerusercontext = context_user::instance($owner_id);
+		$usercontext = context_user::instance($USER->id);
+		$oldfiles = $fs->get_area_files($ownerusercontext->id, 'block_exaport', 'item_file', $id);
+		foreach ($oldfiles as $f) {
+			$newfile_params = array(
+				'contextid'	=> $usercontext->id,
+				'itemid'    => $newitem_id,
+				'userid' 	=> $USER->id
+				);
+			$filecopy = $fs->create_file_from_storedfile($newfile_params, $f->get_id());
+		};
+	};
+	
+	$returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid='.$courseid."&categoryid=-1&userid=".$owner_id;
+	redirect($returnurl);
+} 
+
 if ($id) {
 	$conditions = array("id" => $id, "userid" => $USER->id);
 	if (!$existing = $DB->get_record('block_exaportitem', $conditions)) {
@@ -137,7 +184,6 @@ if ($action == 'movetocategory') {
 	exit;
 }
 
-
 require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
@@ -163,6 +209,7 @@ if ($editform->is_cancelled()) {
 			break;
 
 		case 'edit':
+            $fromform->type = $type;
 			if (!$existing) {
 				print_error("bookmarknotfound", "block_exaport");
 			}
@@ -225,6 +272,13 @@ switch ($action) {
 					$extra_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
 				}
 				$extra_content .= "</div>";
+                
+                // Filemanager for editing file
+                $draftitemid = file_get_submitted_draft_itemid('file');
+                $context = context_user::instance($USER->id);
+                file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
+                                        array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 
+                $post->file = $draftitemid;   
 			}
 				
 			if (!$extra_content) {
@@ -304,6 +358,17 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 		if ($post->url=='http://') $post->url="";
 		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
 	}
+    
+    // Updating file.
+    if ($post->type == 'file') {
+        $context = context_user::instance($USER->id);
+		// checking userquoata
+		$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
+		if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
+			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+		};
+    }
+    
 	if ($DB->update_record('block_exaportitem', $post)) {
 		block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
 	} else {
@@ -354,7 +419,11 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 		if ($post->type == 'file') {
 			// save uploaded file in user filearea
 			$context = context_user::instance($USER->id);
-			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, null);
+			// checking userquoata
+			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
+			if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
+				file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+			};
 		}
 		$comps = $post->compids;
 		if ($comps) {

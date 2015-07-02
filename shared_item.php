@@ -104,7 +104,8 @@ if ($item->access->page == 'view') {
     if ($item->access->request == 'intern') {
         block_exaport_print_header("views");
     } else { 
-        print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+		block_exaport_print_header("sharedbookmarks");
+        // print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
         echo block_exaport_wrapperdivstart();
     }
 } elseif ($item->access->page == 'portfolio') {
@@ -115,7 +116,8 @@ if ($item->access->page == 'view') {
             block_exaport_print_header("sharedbookmarks");
         }
     } else {
-        print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+		block_exaport_print_header("sharedbookmarks");
+        // print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
         echo block_exaport_wrapperdivstart();
     }
 }

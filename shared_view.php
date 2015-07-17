@@ -26,6 +26,7 @@
 
 require_once dirname(__FILE__).'/inc.php';
 require_once dirname(__FILE__).'/lib/sharelib.php';
+require_once dirname(__FILE__).'/blockmediafunc.php';
 
 global $CFG, $USER, $DB, $PAGE;
 
@@ -67,6 +68,9 @@ foreach ($blocks as $block) {
 	if ($block->type == 'item') {
 		$conditions = array("id" => $block->itemid);		
 		if ($item = $DB->get_record("block_exaportitem", $conditions)) {
+			if (!$block->width) $block->width = 320;
+			if (!$block->height) $block->height = 240;
+			$item->intro = process_media_url($item->intro, $block->width, $block->height);
 			// Add checking on sharable item.
 			if ($sharable = is_sharableitem($view->userid, $item->id) || $view->userid == $item->userid) {
 				$block->item = $item;

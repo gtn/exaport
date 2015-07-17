@@ -27,6 +27,7 @@
 require_once dirname(__FILE__) . '/inc.php';
 require_once dirname(__FILE__) . '/lib/sharelib.php';
 require_once dirname(__FILE__) . '/lib/externlib.php';
+require_once dirname(__FILE__).'/blockmediafunc.php';
 
 global $DB, $SESSION;
 $access = optional_param('access', 0, PARAM_TEXT);
@@ -47,6 +48,7 @@ $PAGE->requires->js( new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/
 $PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
 
 $item = block_exaport_get_item($itemid, $access);
+$item->intro = process_media_url($item->intro, 320, 240);
 
     if ($deletecomment == 1) {
         if (!confirm_sesskey()) {

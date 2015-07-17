@@ -404,6 +404,7 @@ if ($editform->is_cancelled()) {
 						$newItem->type = 'note';
 						$newItem->categoryid = 0;
 						$newItem->userid = $USER->id;
+						// $newItem->intro = process_media_url($block->contentmedia, $block->width, $block->height);
 						$newItem->intro = $block->contentmedia;
 						$newItem->timemodified = time();
 

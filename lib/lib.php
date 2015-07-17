@@ -881,7 +881,7 @@ function block_exaport_get_view_blocks($view) {
     $blocks = array();
 
     foreach ($allBlocks as $block) {
-        if ($block->type == 'item') {
+        if ($block->type == 'item') {					
             if (!isset($portfolioItems[$block->itemid])) {
 				// Could be shared sometime (because found in block_exaportviewblock with viewid)
 				if (!$potentialitem = $DB->get_record("block_exaportitem", array('id' => $block->itemid))) {
@@ -893,6 +893,11 @@ function block_exaport_get_view_blocks($view) {
 					$block->unshared = 1;
 				}
             }
+			if (!$block->width)
+				$block->width = 320;
+			if (!$block->height)
+				$block->height = 240;
+			$portfolioItems[$block->itemid]->intro = process_media_url($portfolioItems[$block->itemid]->intro, $block->width, $block->height);
             $block->item = $portfolioItems[$block->itemid];
         } elseif ($block->type == 'badge') {
             // find bage by id

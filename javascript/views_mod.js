@@ -557,7 +557,7 @@ var exaportViewEdit = {};
 
 				$('#exaport-container').html(data.html);				
 				$('#exaport-block_form').show();
-				alert('TODO: x');
+				//alert('TODO: x');
 				overlay.css('cursor', 'default');
 
 				// focus first element

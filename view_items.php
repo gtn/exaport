@@ -471,7 +471,22 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 										echo '<img src="pix/folder_tile_user.png">';
 									};
 								} else {
-									echo '<img src="pix/folder_tile.png">';
+									// Custom Icon file 
+									$context = context_user::instance($USER->id);
+									$fs = get_file_storage();
+									$iconfiles = $fs->get_area_files($context->id, 'block_exaport', 'category_icon', $category->id);
+									if (count($iconfiles)>0) {
+										$img_url = 'pix/folder_tile.png';
+										foreach ($iconfiles as $icon) {
+											if ($icon->get_filename() <> '.') {
+												$img_url = $CFG->wwwroot.'/pluginfile.php/'.$icon->get_contextid().'/block_exaport/category_icon/'.$icon->get_itemid().'/'.$icon->get_filename();
+											};
+										};
+										echo '<img src="'.$img_url.'">';
+									} else {
+										// common icon
+										echo '<img src="pix/folder_tile.png">';
+									};
 								}
 								?>
 						</a>

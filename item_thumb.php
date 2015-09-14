@@ -33,6 +33,21 @@ if ($access == '') {
 if (empty($item)) die('item not found');
 //exit;
 
+// Custom Icon file 
+$context = context_user::instance($USER->id);
+$fs = get_file_storage();
+$iconfiles = $fs->get_area_files($context->id, 'block_exaport', 'item_iconfile', $item_id);
+if (count($iconfiles)>0) {
+	foreach ($iconfiles as $icon) {
+		if ($icon->get_filename() <> '.') {
+			$file = $fs->get_file($context->id, 'block_exaport', 'item_iconfile', $item_id, '/', $icon->get_filename());
+		};
+	};
+	header("Content-type: ".$file->get_mimetype());
+	echo $file->get_content();
+	exit;
+};
+
 switch ($item->type) {
 	case "file": 
 		// thumbnail of file

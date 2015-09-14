@@ -285,6 +285,13 @@ switch ($action) {
 				$extra_content = 'File not found';
 			}
 		}
+		
+		// Filemanager for editing icon picture 
+		$draftitemid = file_get_submitted_draft_itemid('iconfile');
+		$context = context_user::instance($USER->id);
+		file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_iconfile', $post->id,
+								array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 
+		$post->iconfile = $draftitemid;   
 
 		break;
 	default :
@@ -359,15 +366,22 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
 	}
     
+    $context = context_user::instance($USER->id);
     // Updating file.
     if ($post->type == 'file') {
-        $context = context_user::instance($USER->id);
 		// checking userquoata
 		$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
 		if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
 			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 		};
     }
+
+	// icon for item
+	// checking userquoata
+	$upload_filesizes = block_exaport_get_filesize_by_draftid($post->iconfile);
+	if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)) {
+		file_save_draft_area_files($post->iconfile, $context->id, 'block_exaport', 'item_iconfile', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+	};
     
 	if ($DB->update_record('block_exaportitem', $post)) {
 		block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
@@ -416,15 +430,25 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 			$DB->update_record('block_exaportitem', $post);
 		}
 
+		$context = context_user::instance($USER->id);
 		if ($post->type == 'file') {
 			// save uploaded file in user filearea
-			$context = context_user::instance($USER->id);
 			// checking userquoata
 			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
 			if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
 				file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 			};
 		}
+		
+		// icon picture
+		if ($post->iconfile) {
+			// checking userquoata
+			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->iconfile);
+			if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)) {
+				file_save_draft_area_files($post->iconfile, $context->id, 'block_exaport', 'item_iconfile', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+			};
+		};
+		
 		$comps = $post->compids;
 		if ($comps) {
 			$comps = explode(",", $comps);

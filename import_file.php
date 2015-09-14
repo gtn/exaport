@@ -338,8 +338,8 @@ function import_structure($unzip_dir, $structures, $course, $i = 0, &$xml=NULL, 
         }
     }
 }
-function import_item_competences($newid, $oldid, &$xml, $dir){
-global $USER, $DB;
+function import_item_competences($newid, $oldid, &$xml, $dir, $title){
+global $USER, $DB, $COURSE;
 
 foreach($xml->items->item as $item){
 	$id = (int)$item->attributes()->identifier[0];

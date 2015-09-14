@@ -110,7 +110,6 @@ class block_exaport_item_edit_form extends moodleform {
 			}
 		}
 
-
 		if (block_exaport_course_has_desp()) {
 			$langcode=get_string("langcode","block_desp");
 			 
@@ -139,6 +138,9 @@ class block_exaport_item_edit_form extends moodleform {
 			if ($type == 'note')
 				$mform->addRule('intro_editor', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
 		}
+		
+		$mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'accepted_types' => array('image', 'web_image')));
+		// $mform->addRule('iconfile', null, 'required', null, 'client');
 
 		$this->add_action_buttons();
 	}

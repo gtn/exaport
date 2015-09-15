@@ -764,15 +764,16 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
 
 function block_exaport_badges_enabled() {
 	global $CFG;
-	// For working badges without exacomp installation:
-	if (version_compare($CFG->release, '2.5') >= 0) {
+	// checking with exacomp
+	if (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled()) {
+		return true;
+	} else if (version_compare($CFG->release, '2.5') >= 0) {
+		// For working badges without exacomp installation:
 		require_once($CFG->libdir . '/badgeslib.php');
 		require_once($CFG->dirroot . '/badges/lib/awardlib.php');
 		return true;
-	} else {
-		// checking with exacomp
-		return (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled());
 	};
+	return false;
 }
 
 function block_exaport_get_all_user_badges() {

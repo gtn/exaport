@@ -763,12 +763,27 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
 }
 
 function block_exaport_badges_enabled() {
-	return (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled());
+	global $CFG;
+	// For working badges without exacomp installation:
+	if (version_compare($CFG->release, '2.5') >= 0) {
+		require_once($CFG->libdir . '/badgeslib.php');
+		require_once($CFG->dirroot . '/badges/lib/awardlib.php');
+		return true;
+	} else {
+		// checking with exacomp
+		return (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled());
+	};
 }
 
 function block_exaport_get_all_user_badges() {
+	global $USER;
 	if (block_exaport_badges_enabled()) {
 		if (!function_exists('block_exacomp_get_all_user_badges')){
+			
+			// for using badges without exacomp installation
+			$records = badges_get_user_badges($USER->id);
+			return $records;
+			// old code
 			print_error("please update exabis competencies to latest version");
 			exit;
 		}else
@@ -1164,3 +1179,4 @@ function has_sharablestructure($userid) {
 	
 	return false;
 }
+

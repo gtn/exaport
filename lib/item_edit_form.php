@@ -141,8 +141,26 @@ class block_exaport_item_edit_form extends moodleform {
 		
 		$mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'accepted_types' => array('image', 'web_image')));
 		// $mform->addRule('iconfile', null, 'required', null, 'client');
-
-		$this->add_action_buttons();
+		if(isset($this->_customdata['allowedit']) && $this->_customdata['allowedit'] == 1)
+			$this->add_action_buttons();
+		else {
+			$exampleid = $DB->get_field('block_exacompitemexample', 'exampleid', array('itemid' => $this->_customdata['current']->id));
+			$url = new moodle_url("/blocks/exacomp/example_submission.php",array("courseid"=>$this->_customdata['course']->id,"newsubmission"=>true,"exampleid"=>$exampleid));
+			
+			$mform->addElement('hidden', 'allowedit');
+			$mform->setType('allowedit', PARAM_INT);
+			$mform->setDefault('allowedit', 0);
+		
+			$mform->disabledIf('name', 'allowedit', 'neq', 1);
+			$mform->disabledIf('categoryid', 'allowedit', 'neq', 1);
+			$mform->disabledIf('url', 'allowedit', 'neq', 1);
+			$mform->disabledIf('file', 'allowedit', 'neq', 1);
+			$mform->disabledIf('intro', 'allowedit', 'neq', 1);
+			$mform->disabledIf('intro_editor', 'allowedit', 'neq', 1);
+			$mform->disabledIf('iconfile', 'allowedit', 'neq', 1);
+			
+			$mform->addElement('button', 'newsubmission', get_string("newsubmission","block_exacomp"),array('onclick'=>'location.href = " ' . str_replace("&amp;", "&", $url) . '"'));
+		}
 	}
 
 	function category_select_setup() {

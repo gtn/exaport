@@ -1180,4 +1180,29 @@ function has_sharablestructure($userid) {
 	
 	return false;
 }
+function block_exaport_item_is_editable($itemid) {
+	global $CFG, $DB, $USER;
+	$allowEdit = true;
 
+	if(!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
+		//check item grading and teacher comment
+		$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid));
+		if(isset($itemExample)) {
+			if(isset($itemExample->teachervalue) && $itemExample->teachervalue != null) {
+				$allowEdit = false;
+			}else {
+				$itemcomments = $DB->get_records ( 'block_exaportitemcomm', array (
+						'itemid' => $itemid
+				), 'timemodified ASC', 'entry, userid', 0, 2 );
+				if ($itemcomments) {
+					foreach ( $itemcomments as $itemcomment ) {
+						if ($USER->id != $itemcomment->userid) {
+							$allowEdit = false;
+						}
+					}
+				}
+			}
+		}
+	}
+	return $allowEdit;
+}

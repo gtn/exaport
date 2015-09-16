@@ -57,6 +57,10 @@ if (!$course = $DB->get_record("course", $conditions)) {
 
 $id = optional_param('id', 0, PARAM_INT);
 
+$allowEdit = block_exaport_item_is_editable($id);
+
+// echo ($allowEdit) ? "jo" : "na";die;
+
 if ($action == 'copytoself') {
 	confirm_sesskey();
 	require_once dirname(__FILE__).'/lib/sharelib.php';
@@ -141,7 +145,7 @@ if ($existing && $comp) {
 $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&categoryid=" . $categoryid;
 
 // delete item
-if ($action == 'delete') {
+if ($action == 'delete' && $allowEdit) {
 	if (!$existing) {
 		print_error("bookmarknotfound", "block_exaport");
 	}
@@ -164,7 +168,7 @@ if ($action == 'delete') {
 	}
 }
 
-if ($action == 'movetocategory') {
+if ($action == 'movetocategory'  && $allowEdit) {
 	confirm_sesskey();
 
 	if (!$existing) {
@@ -192,14 +196,14 @@ $useTextarea = false;
 if ($existing && $existing->intro && preg_match('!<iframe!i', $existing->intro))
 	$useTextarea = true;
 
-$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'useTextarea'=>$useTextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action));
+$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'useTextarea'=>$useTextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action, 'allowedit' => $allowEdit));
 
 if ($editform->is_cancelled()) {
 	redirect($returnurl);
 } else if ($editform->no_submit_button_pressed()) {
 	die("nosubmitbutton");
 	//no_submit_button_actions($editform, $sitecontext);
-} else if ($fromform = $editform->get_data()) {
+} else if ($fromform = $editform->get_data()  && $allowEdit) {
 	switch ($action) {
 		case 'add':
 			$fromform->type = $type;
@@ -229,6 +233,7 @@ $extra_content = '';
 // gui setup
 $post = new stdClass();
 $post->introformat = FORMAT_HTML;
+$post->allowedit = $allowEdit;
 
 switch ($action) {
 	case 'add':

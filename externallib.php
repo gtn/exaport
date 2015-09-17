@@ -103,6 +103,7 @@ class block_exaport_external extends external_api {
         $item->file = "";
         $item->isimage = false;
         $item->filename = "";
+        $item->mimetype = "";
         $item->intro = strip_tags($item->intro);
 
         if ($item->type == 'file') {
@@ -110,6 +111,7 @@ class block_exaport_external extends external_api {
                 $item->file = ("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$USER->id."&itemid=".$item->id);
                 $item->isimage = $file->is_valid_image();
                 $item->filename = $file->get_filename();
+                $item->mimetype = $file->get_mimetype();
             }
         }
         	
@@ -131,7 +133,8 @@ class block_exaport_external extends external_api {
                         'intro' => new external_value(PARAM_RAW, 'description of item'),
                         'filename' => new external_value(PARAM_TEXT, 'title of item'),
                         'file' => new external_value(PARAM_URL, 'file url'),
-                        'isimage' => new external_value(PARAM_BOOL,'true if file is image')
+                        'isimage' => new external_value(PARAM_BOOL,'true if file is image'),
+                		'mimetype' => new external_value(PARAM_TEXT, 'mimetype')
                 )
         );
     }

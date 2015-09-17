@@ -365,7 +365,7 @@ $string['settings_disable_external_comments_head'] = 'Disable sharing of comment
 $string['settings_disable_external_comments_body'] = '';
 $string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
 $string['block_exaport_app_externaleportfolio_body'] = 'For App';
-$string['block_exaport_app_alloweditdelete_head'] = 'Schüler dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
+$string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit exabis competencies und Dakora sinnvoll';
 
 // Resume

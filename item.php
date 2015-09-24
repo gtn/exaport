@@ -203,7 +203,7 @@ if ($editform->is_cancelled()) {
 } else if ($editform->no_submit_button_pressed()) {
 	die("nosubmitbutton");
 	//no_submit_button_actions($editform, $sitecontext);
-} else if ($fromform = $editform->get_data()  && $allowEdit) {
+} else if (($fromform = $editform->get_data())  && $allowEdit) {
 	switch ($action) {
 		case 'add':
 			$fromform->type = $type;

@@ -490,6 +490,8 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 		$DB->delete_records('block_exacompcompuser_mm', array("activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
 	}
 
+	$DB->delete_records('block_exacompitemexample', array('itemid' => $post->id));
+	
 	block_exaport_add_to_log(SITEID, 'blog', 'delete', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
 
 	if (!$status) {

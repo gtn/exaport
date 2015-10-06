@@ -86,6 +86,9 @@ $string['explainingshared'] = 'These participants have shared some of their exte
 $string['explainingsharefile'] = 'To allow a participant to see the file, click on their name and then click on Save Changes.  You can choose more than one participant.';
 $string['explainingsharenote'] = 'To allow a participant to see the note, click on their name and then click on Save Changes.  You can choose more than one participant.';
 $string['file'] = 'File';
+$string['iconfile'] = 'Icon picture';
+$string['iconfile_merge'] = 'Merge this icon picture with the folder icon';
+$string['iconfile_merge_description'] = 'Icon picture will try (without any guarantee) to merge with standard folder icon. The icon will be replaced with the new image.';
 $string['firstnameshared'] = 'First Name';
 $string['go'] = 'Go!';
 $string['hidesummary'] = '(hide summary)';
@@ -436,6 +439,8 @@ $string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis E-Port
 $string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis E-Portfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_userquota'] = 'User quota for Exabis E-Portfolio';
 $string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis E-Portfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
+$string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with exabis competencies and dakora';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
 

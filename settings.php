@@ -46,4 +46,8 @@ if ($ADMIN->fulltree) {
     $a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies';
     $settings->add(new admin_setting_configtext('block_exaport_userquota', get_string('block_exaport_userquota', 'block_exaport'),
 						get_string('block_exaport_userquota_body', 'block_exaport', $a), $defaultuserquota));
+    
+    $settings->add(new admin_setting_configcheckbox('block_exaport_app_alloweditdelete', get_string('block_exaport_app_alloweditdelete_head', 'block_exaport'),
+    		get_string('block_exaport_app_alloweditdelete_body', 'block_exaport'), 1));
+    
 }

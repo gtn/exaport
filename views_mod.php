@@ -404,6 +404,7 @@ if ($editform->is_cancelled()) {
 						$newItem->type = 'note';
 						$newItem->categoryid = 0;
 						$newItem->userid = $USER->id;
+						// $newItem->intro = process_media_url($block->contentmedia, $block->width, $block->height);
 						$newItem->intro = $block->contentmedia;
 						$newItem->timemodified = time();
 
@@ -692,10 +693,10 @@ echo '<ul>
     </li>';
 
 if (block_exaport_badges_enabled()) {
-    echo '<li class="portfolioElement" title="'.get_string('mybadges', 'badges').'" block-type="badge">
+    echo '<li class="portfolioElement" title="'.get_string('badges', 'badges').'" block-type="badge">
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('mybadges', 'badges').'</h4>
+            <h4 class="blocktype-title js-hidden">'.get_string('badges', 'badges').'</h4>
             <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
         </div>
     </li>';

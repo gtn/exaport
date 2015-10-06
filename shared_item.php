@@ -27,6 +27,7 @@
 require_once dirname(__FILE__) . '/inc.php';
 require_once dirname(__FILE__) . '/lib/sharelib.php';
 require_once dirname(__FILE__) . '/lib/externlib.php';
+require_once dirname(__FILE__).'/blockmediafunc.php';
 
 global $DB, $SESSION;
 $access = optional_param('access', 0, PARAM_TEXT);
@@ -47,6 +48,7 @@ $PAGE->requires->js( new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/
 $PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
 
 $item = block_exaport_get_item($itemid, $access);
+$item->intro = process_media_url($item->intro, 320, 240);
 
     if ($deletecomment == 1) {
         if (!confirm_sesskey()) {
@@ -104,7 +106,8 @@ if ($item->access->page == 'view') {
     if ($item->access->request == 'intern') {
         block_exaport_print_header("views");
     } else { 
-        print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+		block_exaport_print_header("sharedbookmarks");
+        // print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
         echo block_exaport_wrapperdivstart();
     }
 } elseif ($item->access->page == 'portfolio') {
@@ -115,7 +118,8 @@ if ($item->access->page == 'view') {
             block_exaport_print_header("sharedbookmarks");
         }
     } else {
-        print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+		block_exaport_print_header("sharedbookmarks");
+        // print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
         echo block_exaport_wrapperdivstart();
     }
 }

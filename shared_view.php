@@ -26,6 +26,7 @@
 
 require_once dirname(__FILE__).'/inc.php';
 require_once dirname(__FILE__).'/lib/sharelib.php';
+require_once dirname(__FILE__).'/blockmediafunc.php';
 
 global $CFG, $USER, $DB, $PAGE;
 
@@ -58,6 +59,8 @@ $query = "select b.*". // , i.*, i.id as itemid".
 
 $blocks = $DB->get_records_sql($query, array($view->id));
 
+$badges = block_exaport_get_all_user_badges();
+
 // read columns
 $columns = array();
 foreach ($blocks as $block) {
@@ -67,6 +70,9 @@ foreach ($blocks as $block) {
 	if ($block->type == 'item') {
 		$conditions = array("id" => $block->itemid);		
 		if ($item = $DB->get_record("block_exaportitem", $conditions)) {
+			if (!$block->width) $block->width = 320;
+			if (!$block->height) $block->height = 240;
+			$item->intro = process_media_url($item->intro, $block->width, $block->height);
 			// Add checking on sharable item.
 			if ($sharable = is_sharableitem($view->userid, $item->id) || $view->userid == $item->userid) {
 				$block->item = $item;
@@ -240,6 +246,30 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				echo $block->contentmedia;
 			echo '</div>';
 
+		} elseif ($block->type == 'badge') {
+			if (count($badges) == 0)
+				continue;
+			echo '<div class="header view-header">'.nl2br($block->block_title).'</div>';
+			$badge = null;
+			foreach ($badges as $tmp) {
+                if ($tmp->id == $block->itemid) {
+                    $badge = $tmp;
+                    break;
+                };
+            };
+            if (!$badge) {
+                // badge not found
+                continue;
+            }
+			echo '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
+			if (!$badge->courseid) { // For badges with courseid = NULL
+				$badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			} else {
+			    $context = context_course::instance($badge->courseid);	
+				$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			}
+			echo '<img src="'.$badge->imageUrl.'">';
+			echo '</div>';
 		} else {
 			// text
 			echo '<div class="header">'.$block->block_title.'</div>';

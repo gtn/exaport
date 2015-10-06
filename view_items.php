@@ -391,8 +391,11 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 				$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/copy_item_to_course.php?courseid='.$courseid.'&itemid='.$item->id.'&backtype=">'.get_string("copyitemtocourse", "block_exaport").'</a>';
 
 			$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit&backtype="><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
-			$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid.'"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
-			
+			if($allowEdit = block_exaport_item_is_editable($item->id))
+				$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid.'"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
+			else
+				$icons .= '<img src="pix/deleteview.png" alt="' . get_string("delete"). '">';
+						
 			$icons = '<span class="excomdos_listicons">'.$icons.'</span>';
 
 			$table->data[$item_i]['icons'] = $icons;
@@ -471,7 +474,22 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 										echo '<img src="pix/folder_tile_user.png">';
 									};
 								} else {
-									echo '<img src="pix/folder_tile.png">';
+									// Custom Icon file 
+									$context = context_user::instance($USER->id);
+									$fs = get_file_storage();
+									$iconfiles = $fs->get_area_files($context->id, 'block_exaport', 'category_icon', $category->id);
+									if (count($iconfiles)>0) {
+										$img_url = 'pix/folder_tile.png';
+										foreach ($iconfiles as $icon) {
+											if ($icon->get_filename() <> '.') {
+												$img_url = $CFG->wwwroot.'/pluginfile.php/'.$icon->get_contextid().'/block_exaport/category_icon/'.$icon->get_itemid().'/'.$icon->get_filename();
+											};
+										};
+										echo '<img src="'.$img_url.'">';
+									} else {
+										// common icon
+										echo '<img src="pix/folder_tile.png">';
+									};
 								}
 								?>
 						</a>
@@ -506,8 +524,11 @@ if ($items || !empty($categoriesByParent[$currentCategory->id]) || $parentCatego
 							echo block_exaport_get_item_comp_icon($item);
 							?>
 							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
-							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid; ?>"><img src="pix/del.png" alt="file"></a>
-						<?php 
+							<?php if($allowEdit = block_exaport_item_is_editable($item->id)) { ?>
+								<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid; ?>"><img src="pix/del.png" alt="file"></a>
+							<?php } else { ?>
+								<img src="pix/deleteview.png" alt="file">
+						<?php }
 						}
 						?>
 					</span>

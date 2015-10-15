@@ -193,8 +193,15 @@ function block_exaport_get_elove_item($itemid, $userid, $authenticationinfo) {
     else if($DB->record_exists('block_exacompexternaltrainer', array('trainerid'=>$authenticationinfo['user']->id,
             'studentid'=>$userid)))
         return $DB->get_record('block_exaportitem', array('id'=>$itemid));
-    else
-        return false;
+    else {
+    	$sql = "SELECT * FROM {block_exaportview} v 
+    			JOIN {block_exaportviewblock} vb ON v.id = vb.viewid AND vb.itemid = ?
+    			JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ?";
+    	if($DB->record_exists_sql($sql,array($itemid,$authenticationinfo['user']->id)))
+    		return $DB->get_record('block_exaportitem', array('id'=>$itemid));
+    		
+	    return false;
+    }
 }
 function block_exaport_epop_checkhash($userhash){
 	global $DB;

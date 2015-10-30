@@ -45,10 +45,12 @@ class block_exaport_external extends external_api {
             $result->type = "category";
             $result->parent = $category->pid;
 
+            $result->amount = self::block_exaport_count_items($category->id, 0);
+            
             $results[] = $result;
         }
 
-        $items = $DB->get_records("block_exaportitem", array("userid" => $USER->id,"categoryid" => $level),'','id,name,type, 0 as parent');
+        $items = $DB->get_records("block_exaportitem", array("userid" => $USER->id,"categoryid" => $level),'','id,name,type, 0 as parent, 0 as amount');
         $results = array_merge($results,$items);
 
         return $results;
@@ -65,7 +67,8 @@ class block_exaport_external extends external_api {
                                 'id' => new external_value(PARAM_INT, 'id of item'),
                                 'name' => new external_value(PARAM_TEXT, 'title of item'),
                                 'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
-                                'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned')
+                                'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned'),
+                        		'amount' => new external_value(PARAM_INT, 'iff item is a cat, amount of items in the category, otherwise 0')
                         )
                 )
         );
@@ -103,6 +106,7 @@ class block_exaport_external extends external_api {
         $item->file = "";
         $item->isimage = false;
         $item->filename = "";
+        $item->mimetype = "";
         $item->intro = strip_tags($item->intro);
 
         if ($item->type == 'file') {
@@ -110,6 +114,7 @@ class block_exaport_external extends external_api {
                 $item->file = ("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$USER->id."&itemid=".$item->id);
                 $item->isimage = $file->is_valid_image();
                 $item->filename = $file->get_filename();
+                $item->mimetype = $file->get_mimetype();
             }
         }
         	
@@ -131,7 +136,8 @@ class block_exaport_external extends external_api {
                         'intro' => new external_value(PARAM_RAW, 'description of item'),
                         'filename' => new external_value(PARAM_TEXT, 'title of item'),
                         'file' => new external_value(PARAM_URL, 'file url'),
-                        'isimage' => new external_value(PARAM_BOOL,'true if file is image')
+                        'isimage' => new external_value(PARAM_BOOL,'true if file is image'),
+                		'mimetype' => new external_value(PARAM_TEXT, 'mimetype')
                 )
         );
     }
@@ -1070,7 +1076,11 @@ class block_exaport_external extends external_api {
     public static function get_category($categoryid) {
         global $CFG,$DB;
 
-        return $DB->get_record("block_exaportcate", array("id" => $categoryid), "name");
+        $cat = $DB->get_record("block_exaportcate", array("id" => $categoryid), "name");
+        
+        $amount = $DB->count_records('block_exaportitem', array('categoryid' => $categoryid));
+        
+        return array('name' => $cat->name, 'items' => $amount);
     }
 
     /**
@@ -1080,7 +1090,8 @@ class block_exaport_external extends external_api {
     public static function get_category_returns() {
         return new external_single_structure(
                 array(
-                        'name' => new external_value(PARAM_TEXT, 'title of category')
+                        'name' => new external_value(PARAM_TEXT, 'title of category'),
+                		'items' => new external_value(PARAM_INT, 'amount of category items')
                 )
         );
     }
@@ -1198,6 +1209,17 @@ class block_exaport_external extends external_api {
         );
     }
 
+    private static function block_exaport_count_items($categoryid, $items = 0) {
+    	global $DB;
+    	
+    	$items  += $DB->count_records('block_exaportitem', array('categoryid' => $categoryid));
+    	
+    	foreach($DB->get_records('block_exaportcate',array('pid'=>$categoryid)) as $child) {
+    		$items += self::block_exaport_count_items($child->id, $items);
+    	}
+    	 
+    	return $items;
+    }
     private static function block_exaport_recursive_delete_category($id) {
         global $DB;
 

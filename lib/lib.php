@@ -763,12 +763,28 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
 }
 
 function block_exaport_badges_enabled() {
-	return (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled());
+	global $CFG;
+	// checking with exacomp
+	if (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled()) {
+		return true;
+	} else if (version_compare($CFG->release, '2.5') >= 0) {
+		// For working badges without exacomp installation:
+		require_once($CFG->libdir . '/badgeslib.php');
+		require_once($CFG->dirroot . '/badges/lib/awardlib.php');
+		return true;
+	};
+	return false;
 }
 
 function block_exaport_get_all_user_badges() {
+	global $USER;
 	if (block_exaport_badges_enabled()) {
 		if (!function_exists('block_exacomp_get_all_user_badges')){
+			
+			// for using badges without exacomp installation
+			$records = badges_get_user_badges($USER->id);
+			return $records;
+			// old code
 			print_error("please update exabis competencies to latest version");
 			exit;
 		}else
@@ -1161,4 +1177,30 @@ function has_sharablestructure($userid) {
 	}; 
 	
 	return false;
+}
+function block_exaport_item_is_editable($itemid) {
+	global $CFG, $DB, $USER;
+	$allowEdit = true;
+
+	if(!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
+		//check item grading and teacher comment
+		$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid));
+		if(isset($itemExample)) {
+			if(isset($itemExample->teachervalue) && $itemExample->teachervalue != null) {
+				$allowEdit = false;
+			}else {
+				$itemcomments = $DB->get_records ( 'block_exaportitemcomm', array (
+						'itemid' => $itemid
+				), 'timemodified ASC', 'entry, userid', 0, 2 );
+				if ($itemcomments) {
+					foreach ( $itemcomments as $itemcomment ) {
+						if ($USER->id != $itemcomment->userid) {
+							$allowEdit = false;
+						}
+					}
+				}
+			}
+		}
+	}
+	return $allowEdit;
 }

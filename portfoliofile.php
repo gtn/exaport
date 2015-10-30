@@ -64,7 +64,11 @@ if ($userhash!="0"){
 		$authenticationinfo = $webservicelib->authenticate_user($token);
 		$accessPath = explode('/', $access);
 		
+		if(strpos($accessPath[2],'-'))
+			$accessPath[2] = (explode('-', $accessPath[2])[1]);
+		
 		$item = block_exaport_get_elove_item($id, $accessPath[2], $authenticationinfo);
+		
 		if ($file = block_exaport_get_item_file($item)) {
 		    send_stored_file($file);
 		} else {

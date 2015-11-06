@@ -35,6 +35,7 @@ $backtype = optional_param('backtype', 'all', PARAM_ALPHA);
 $compids = optional_param('compids', '', PARAM_TEXT);
 $backtype = block_exaport_check_item_type($backtype, true);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
+$descriptorselection = optional_param('descriptorselection',true,PARAM_BOOL);
 
 if (!confirm_sesskey()) {
 	print_error("badsessionkey", "block_exaport");
@@ -303,7 +304,7 @@ switch ($action) {
 		print_error("unknownaction", "block_exaport");
 }
 
-$comp = block_exaport_check_competence_interaction();
+$comp = block_exaport_check_competence_interaction() && $descriptorselection;
 
 if ($comp) {
 	$PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);

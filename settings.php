@@ -34,7 +34,7 @@ if ($ADMIN->fulltree) {
     $max_upload_choices = get_max_upload_sizes(0, 0, 0, $maxbytes);
     // maxbytes set to 0 will allow the maximum server limit for uploads
 	$a = new stdClass();
-	$a->sitemaxbytes = $max_upload_choices[$CFG->maxbytes];
+	$a->sitemaxbytes = $max_upload_choices[$maxbytes];
 	$a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies';
 	$settings->add(new admin_setting_configselect('block_exaport_max_uploadfile_size', get_string('block_exaport_maxbytes', 'block_exaport'),
 						get_string('block_exaport_maxbytes_body', 'block_exaport', $a), 0, $max_upload_choices));
@@ -42,7 +42,7 @@ if ($ADMIN->fulltree) {
 	// Userquota.    
     $defaultuserquota = 104857600; // 100MB
     $a = new stdClass();
-    $a->bytes = $CFG->userquota;
+    $a->bytes = !empty($CFG->userquota) ? $CFG->userquota : $defaultuserquota;
     $a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies';
     $settings->add(new admin_setting_configtext('block_exaport_userquota', get_string('block_exaport_userquota', 'block_exaport'),
 						get_string('block_exaport_userquota_body', 'block_exaport', $a), $defaultuserquota));

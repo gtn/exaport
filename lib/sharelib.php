@@ -259,7 +259,6 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 		$conditions = array("id" => $itemid, "userid" => $ownerid);
 		if (!$item = $DB->get_record("block_exaportitem", $conditions)) {
 			// item not found
-                                                echo 'pfeift';
 			return;
 		}
 

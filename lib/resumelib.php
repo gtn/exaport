@@ -31,10 +31,13 @@ class block_exaport_resume_editor_form extends moodleform {
 		$mform->addElement('hidden', 'courseid');
 		$mform->setType('courseid', PARAM_INT);
 
-		$mform->addElement('hidden', 'edit');
-		$mform->setType('edit', PARAM_BOOL);
+		$mform->addElement('hidden', 'action');
+		$mform->setType('action', PARAM_TEXT);
 		
-//		$mform->addElement('hidden', 'resume_id');
+		$mform->addElement('hidden', 'type');
+		$mform->setType('type', PARAM_TEXT);
+		
+		//		$mform->addElement('hidden', 'resume_id');
 //		$mform->setType('resume_id', PARAM_INT);
 
 		$this->add_action_buttons();
@@ -91,8 +94,11 @@ class block_exaport_resume_multifields_form extends moodleform {
 		$mform->addElement('hidden', 'resume_id');
 		$mform->setType('resume_id', PARAM_INT);
 		
-		$mform->addElement('hidden', 'edit');
-		$mform->setType('edit', PARAM_BOOL); /**/
+		$mform->addElement('hidden', 'action');
+		$mform->setType('action', PARAM_TEXT);
+		
+		$mform->addElement('hidden', 'type');
+		$mform->setType('type', PARAM_TEXT);
 
 		$this->add_action_buttons();
 	}
@@ -121,9 +127,12 @@ class block_exaport_resume_checkboxlist_form extends moodleform {
 		$mform->addElement('hidden', 'resume_id');
 		$mform->setType('resume_id', PARAM_INT);
 		
-		$mform->addElement('hidden', 'edit');
-		$mform->setType('edit', PARAM_BOOL); /**/
-
+		$mform->addElement('hidden', 'action');
+		$mform->setType('action', PARAM_TEXT);
+		
+		$mform->addElement('hidden', 'type');
+		$mform->setType('type', PARAM_TEXT);
+		
 		$this->add_action_buttons();
 	}
 
@@ -218,7 +227,7 @@ function block_exaport_resume_prepare_block_mm_data($resume, $id, $type_block, $
 			file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'resume_'.$type_block, $id,
 									array('subdirs' => false, 'maxfiles' => 5, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 					
 			// all data to form.
-			$data = $DB->get_record("block_exaportresume_".$type_block, array('id' => $id, 'user_id' => $USER->id));
+			$data = $DB->get_record("block_exaportresume_".$type_block, array('id' => $id, 'resume_id' => $resume->id));
 			$data->attachments = $draftitemid;   
 			$workform->set_data($data);
 		} 			
@@ -242,14 +251,12 @@ function block_exaport_get_resume_params_record($userid = null) {
 
 function block_exaport_get_resume_params($userid = null) {
     global $DB;
-    if (is_null($userid)) {
+    if ($userid === null) {
         global $USER;
         $userid = $USER->id;
     }
 	
-	$resumeparams = new stdClass();
     $resumeparams = block_exaport_get_resume_params_record($userid);
-
     return $resumeparams;
 }
 
@@ -455,8 +462,8 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
 			if ($item_i < count($records)-1) {
 				$id_next = $keys[$item_i+1];
 			};
-			$linkto_up = '<a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&sortchange='.$type.'&id1='.$record->id.'&id2='.$id_next.'&sesskey='.sesskey().'"><img src="pix/down_16.png" alt="'.get_string("down").'" /></a>';
-			$linkto_down = '<a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&sortchange='.$type.'&id1='.$record->id.'&id2='.$id_prev.'&sesskey='.sesskey().'"><img src="pix/up_16.png" alt="'.get_string("up").'" /></a>';		
+			$linkto_up = '<a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=sortchange&type='.$type.'&id1='.$record->id.'&id2='.$id_next.'&sesskey='.sesskey().'"><img src="pix/down_16.png" alt="'.get_string("down").'" /></a>';
+			$linkto_down = '<a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=sortchange&type='.$type.'&id1='.$record->id.'&id2='.$id_prev.'&sesskey='.sesskey().'"><img src="pix/up_16.png" alt="'.get_string("up").'" /></a>';		
 			$table->data[$item_i]['up'] = '&nbsp';
 			$table->data[$item_i]['down'] = '&nbsp';
 			if ($item_i < count($records)-1) {
@@ -469,8 +476,8 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
 		};
 		// Links to edit / delete
 		if ($editcolumn) {
-			$table->data[$item_i]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&edit='.$type.'&id='.$record->id.'&sesskey='.sesskey().'"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
-							' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&delete='.$type.'&id='.$record->id.'&sesskey='.sesskey().'"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'; 
+			$table->data[$item_i]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=edit&type='.$type.'&id='.$record->id.'&sesskey='.sesskey().'"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
+							' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=delete&type='.$type.'&id='.$record->id.'"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>'; 
 		};
 	};
 	return html_writer::table($table);
@@ -516,7 +523,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 			$table->data[$item_i]['files'] = '';
 			// Links to edit / delete
 			if (file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php')) {
-				$table->data[$item_i]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&edit='.$type.'comp&id='.$resume->id.'&sesskey='.sesskey().'"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
+				$table->data[$item_i]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=edit&type='.$type.'comp&id='.$resume->id.'&sesskey='.sesskey().'"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
 			} else {
 				$table->data[$item_i]['icons'] = '';
 			}
@@ -552,7 +559,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 			$table->data[$item_i]['title'] = '<a name="'.$type.$element.'"></a>'.get_string('resume_'.$type.$element, 'block_exaport');
 		};
 		// Links to edit / delete
-		$table->data[$item_i]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&edit='.$type.$element.'&id='.$resume->id.'&sesskey='.sesskey().'"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
+		$table->data[$item_i]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=edit&type='.$type.$element.'&id='.$resume->id.'&sesskey='.sesskey().'"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
 	};
 
 	$table_content = html_writer::table($table);
@@ -587,15 +594,9 @@ function block_exaport_resume_mm_delete($table, $conditions) {
 }
 
 function block_exaport_get_max_sorting($table, $resume_id) {
-	global $DB, $USER;
-	$conditions = array($USER->id, $resume_id);
-    // TODO: refactor and use return $DB->get_field_sql(...)
-	$rec = $DB->get_record_sql('SELECT MAX(sorting) as max_sorting FROM {block_exaportresume_'.$table.'} WHERE user_id=? AND resume_id=?', $conditions); 
-	if (isset($rec->max_sorting)) {
-		return $rec->max_sorting;
-	} else {
-		return 0;
-	}
+	global $DB;
+
+	return $DB->get_field_sql('SELECT MAX(sorting) FROM {block_exaportresume_'.$table.'} WHERE resume_id=?', array($resume_id)); 
 }
 
 function block_exaport_resume_competences_form($resume, $id, $type_block) {
@@ -950,6 +951,7 @@ function europassXML($resumeid = 0) {
 	$root->appendChild($CoverLetter);	
 	
 	$dom->appendChild($root);
+	$dom->formatOutput = true;
 	$xml .= $dom->saveXML();
 	
 	// save to file for development
@@ -1159,7 +1161,7 @@ function europassXMLAchievement($dom, $type, $ids = array(), $title, $content) {
 function listForResumeElements($resumeid, $tablename) {
 	global $DB, $USER;
 	$itemsIDs = array();
-	$items = $DB->get_records($tablename, array("resume_id" => $resumeid, 'user_id' => $USER->id));
+	$items = $DB->get_records($tablename, array("resume_id" => $resumeid));
 	$itemsstring = '<ul>';
 	foreach ($items as $ind => $item) {
 		$itemsstring .= '<li>';

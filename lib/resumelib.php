@@ -589,6 +589,7 @@ function block_exaport_resume_mm_delete($table, $conditions) {
 function block_exaport_get_max_sorting($table, $resume_id) {
 	global $DB, $USER;
 	$conditions = array($USER->id, $resume_id);
+    // TODO: refactor and use return $DB->get_field_sql(...)
 	$rec = $DB->get_record_sql('SELECT MAX(sorting) as max_sorting FROM {block_exaportresume_'.$table.'} WHERE user_id=? AND resume_id=?', $conditions); 
 	if (isset($rec->max_sorting)) {
 		return $rec->max_sorting;

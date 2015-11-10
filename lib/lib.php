@@ -1100,7 +1100,7 @@ function block_exaport_get_shared_users($viewid) {
 
 function block_exaport_file_userquotecheck($addingfiles = 0, $id=0) {
 	global $DB, $USER, $CFG;
-	$result = $DB->get_record_sql('SELECT SUM(filesize) as allfilesize FROM {files} WHERE contextid = ? and component="block_exaport"', array(context_user::instance($USER->id)->id));
+	$result = $DB->get_record_sql("SELECT SUM(filesize) as allfilesize FROM {files} WHERE contextid = ? and component='block_exaport'", array(context_user::instance($USER->id)->id));
 	if ($result->allfilesize + $addingfiles > $CFG->block_exaport_userquota) {
 		$courseid = optional_param('courseid', 0, PARAM_INT);
 		$categoryid = optional_param('categoryid', 0, PARAM_INT);
@@ -1119,7 +1119,7 @@ function block_exaport_file_userquotecheck($addingfiles = 0, $id=0) {
 
 function block_exaport_get_filesize_by_draftid($draftid = 0) {
 	global $DB, $USER, $CFG;
-	$result = $DB->get_record_sql('SELECT SUM(filesize) AS allfilesize FROM {files} WHERE contextid = ? AND component = "user" AND filearea="draft" AND itemid = ?', array(context_user::instance($USER->id)->id, $draftid));
+	$result = $DB->get_record_sql("SELECT SUM(filesize) AS allfilesize FROM {files} WHERE contextid = ? AND component = 'user' AND filearea='draft' AND itemid = ?", array(context_user::instance($USER->id)->id, $draftid));
 	if ($result) {
 		return $result->allfilesize;
 	} else {
@@ -1129,7 +1129,7 @@ function block_exaport_get_filesize_by_draftid($draftid = 0) {
 
 function block_exaport_get_maxfilesize_by_draftid_check($draftid = 0) {
 	global $DB, $USER, $CFG;
-	$result = $DB->get_record_sql('SELECT MAX(filesize) AS maxfilesize FROM {files} WHERE contextid = ? AND component = "user" AND filearea="draft" AND itemid = ?', array(context_user::instance($USER->id)->id, $draftid));
+	$result = $DB->get_record_sql("SELECT MAX(filesize) AS maxfilesize FROM {files} WHERE contextid = ? AND component = 'user' AND filearea='draft' AND itemid = ?", array(context_user::instance($USER->id)->id, $draftid));
 	if (($CFG->block_exaport_max_uploadfile_size > 0) && ($result->maxfilesize > $CFG->block_exaport_max_uploadfile_size)) {
 		print_error('maxbytes', 'exaport', 'blocks/exaport/view_items.php', null);
 		//throw new file_exception('maxbytes');
@@ -1157,13 +1157,11 @@ function block_exaport_is_valid_media_by_filename ($filename) {
 
 // do user has sharable structures or do not
 function has_sharablestructure($userid) {
-	global $DB, $USER;	
+	global $DB, $USER;
 	// shared to all
-	//if ($DB->get_records('block_exaportcate', array('structure_share' => '1', 'structure_shareall' => '1'))) 
 	if ($DB->get_records_sql('SELECT * FROM {block_exaportcate} WHERE structure_share=1 AND structure_shareall=1 AND userid<>'.$USER->id))
 		return true;
 	// shared to user
-	//if ($DB->get_records('block_exaportcat_structshar', array('userid' => $userid))) 
 	if ($DB->get_records_sql('SELECT * FROM {block_exaportcat_structshar} WHERE userid='.$userid.' AND userid<>'.$USER->id))
 		return true;
 	// shared to user's group

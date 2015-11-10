@@ -725,6 +725,31 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2015060901, 'exaport');
     }
 
+    if ($oldversion < 2015110900) {
+        // drop unused user_id fields
+        $field = new xmldb_field('user_id');
+        
+        $table = new xmldb_table('block_exaportresume_certif');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $table = new xmldb_table('block_exaportresume_edu');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $table = new xmldb_table('block_exaportresume_employ');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $table = new xmldb_table('block_exaportresume_mbrship');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $table = new xmldb_table('block_exaportresume_public');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+    }
 
    return $result;
 }

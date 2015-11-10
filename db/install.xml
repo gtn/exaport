@@ -229,7 +229,6 @@
 	<TABLE NAME="block_exaportresume_certif" COMMENT="users resume certifications">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
 		<FIELD NAME="date" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of ceritificate"/>
 		<FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="title of certificate"/>
@@ -243,7 +242,6 @@
 	<TABLE NAME="block_exaportresume_edu" COMMENT="users resume educations">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
 		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start education"/>
 		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end education"/>
@@ -261,7 +259,6 @@
 	<TABLE NAME="block_exaportresume_employ" COMMENT="users resume employments">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
 		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start work"/>
 		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end work"/>
@@ -278,7 +275,6 @@
 	<TABLE NAME="block_exaportresume_mbrship" COMMENT="users resume memberships">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
 		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start membership"/>
 		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end membership"/>
@@ -293,7 +289,6 @@
 	<TABLE NAME="block_exaportresume_public" COMMENT="users resume publications">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
 		<FIELD NAME="date" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of publication"/>
 		<FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="publication title"/>

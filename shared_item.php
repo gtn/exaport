@@ -41,12 +41,8 @@ $context = context_system::instance();
 $PAGE->set_context($context);
 require_login(0, true);
 
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
 $PAGE->requires->js( new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/vedeo-js/video.js'), true);
 $PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
-
 $item = block_exaport_get_item($itemid, $access);
 $item->intro = process_media_url($item->intro, 320, 240);
 
@@ -83,7 +79,10 @@ $PAGE->set_url($url);
 
 if ($item->allowComments) {
     require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
-    $commentseditform = new block_exaport_comment_edit_form();
+    
+    $itemExample = $DB->get_record('block_exacompitemexample', array('itemid' => $itemid));
+    
+    $commentseditform = new block_exaport_comment_edit_form($PAGE->url,array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade'=>($itemExample->teachervalue) ? $itemExample->teachervalue : 0));
 
     if ($commentseditform->is_cancelled()
         );
@@ -93,6 +92,7 @@ if ($item->allowComments) {
         switch ($action) {
             case 'add':
                 block_exaport_do_add_comment($item, $fromform, $commentseditform);
+                
                 //redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
                 $prms='access='.$access.'&itemid='.$itemid;
                 if (!empty($backtype)) $prms.='backtype='.$backtype;
@@ -190,6 +190,7 @@ if ($backlink) {
 
 echo "</div>";
 echo block_exaport_wrapperdivend();
+
 echo $OUTPUT->footer();
 
 function block_exaport_show_comments($item) {
@@ -243,6 +244,12 @@ function block_exaport_do_add_comment($item, $post, $blogeditform) {
     $post->course = $COURSE->id;
     $post->entry=$post->entry["text"];
    
+    if(block_exaport_has_grading_permission($item->id) && isset($post->itemgrade)) {
+    	$itemExample = $DB->get_record('block_exacompitemexample',array('itemid'=>$item->id));
+    	$itemExample->teachervalue = $post->itemgrade;
+    	$DB->update_record('block_exacompitemexample', $itemExample);
+    }
+    	
     // Insert the new blog entry.
     if ($DB->insert_record('block_exaportitemcomm', $post)) {
         block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);

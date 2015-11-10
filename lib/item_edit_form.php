@@ -19,8 +19,6 @@ class block_exaport_comment_edit_form extends moodleform {
 		$mform->addRule('entry', get_string("commentshouldnotbeempty", "block_exaport"), 'required', null, 'client');
 		//$mform->setHelpButton('entry', array('writing', 'richtext'), false, 'editorhelpbutton');
 
-		$this->add_action_buttons(false, get_string('add'));
-
 		$mform->addElement('hidden', 'action');
 		$mform->setType('action', PARAM_ACTION);
 		$mform->setDefault('action', 'add');
@@ -35,6 +33,21 @@ class block_exaport_comment_edit_form extends moodleform {
 		$mform->addElement('hidden', 'userid');
 		$mform->setType('userid', PARAM_INT);
 		$mform->setDefault('userid', 0);
+		
+		$gradingPermission = $this->_customdata['gradingpermission'];
+
+		if($gradingPermission) {
+			$mform->addElement('header', 'itemgrading', get_string("itemgrading", "block_exaport"));
+			$itemgrade = $this->_customdata['itemgrade'];
+			$mform->addElement('select', 'itemgrade', get_string('gradeitem', 'block_exaport'), range(0, 100));
+			$mform->setDefault('itemgrade', $itemgrade);
+			
+			$slider = '<div id="slider"></div>';
+			$mform->addElement('html',$slider);
+		}
+		
+		$this->add_action_buttons(false, get_string('add'));
+		
 	}
 
 }

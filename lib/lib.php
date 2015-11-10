@@ -217,13 +217,15 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
     global $CFG, $COURSE, $PAGE, $USER;
 
 	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
+    
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
-
+	
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
 	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
-
+	$PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
+	
 	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
 
@@ -1203,4 +1205,22 @@ function block_exaport_item_is_editable($itemid) {
 		}
 	}
 	return $allowEdit;
+}
+function block_exaport_has_grading_permission($itemid) {
+	global $DB;
+	
+	if(block_exaport_check_competence_interaction()) {
+		// check if item is a submission for an exacomp example
+		$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid));
+		if(isset($itemExample)) {
+			$item = $DB->get_record('block_exaportitem', array('id'=>$itemid));
+			if(!isset($item->courseid) || $item->courseid == 0)
+				return false;
+			
+			$coursecontext = context_course::instance($item->courseid);
+			return has_capability('block/exacomp:teacher', $coursecontext);
+		}
+	}
+	
+	return false;
 }

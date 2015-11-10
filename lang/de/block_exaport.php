@@ -165,6 +165,8 @@ $string['noguestpost'] = 'G&auml;ste haben hier keinen Zugriff!';
 $string['comments'] = 'Kommentare';
 $string['addcomment'] = 'Kommentar hinzuf&uuml;gen';
 $string['externcomment'] = 'Kommentare mitver&ouml;ffentlichen';
+$string['itemgrading'] = 'Beurteilung';
+$string['gradeitem'] = 'Abgabe beurteilen';
 
 // Notes
 $string['deletenoteconfirm'] = 'Wollen Sie diese Notiz wirklich l&ouml;schen?';

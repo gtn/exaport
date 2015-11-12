@@ -218,17 +218,16 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
 	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
     
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+    $PAGE->requires->jquery();
+    $PAGE->requires->jquery_plugin('ui');
+    $PAGE->requires->jquery_plugin('ui-css');
+    
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
 	
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
 	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
-	$PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
 	
 	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
-
-
 
 	$scriptName = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
 	if (file_exists($CFG->dirroot.'/blocks/exaport/css/'.$scriptName.'.css'))

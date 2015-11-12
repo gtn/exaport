@@ -248,6 +248,11 @@ function block_exaport_do_add_comment($item, $post, $blogeditform) {
     	$itemExample = $DB->get_record('block_exacompitemexample',array('itemid'=>$item->id));
     	$itemExample->teachervalue = $post->itemgrade;
     	$DB->update_record('block_exacompitemexample', $itemExample);
+    	
+    	// check for example additional info and set it
+    	$exampleEval = $DB->get_record('block_exacompexameval', array('courseid'=>$item->courseid,'exampleid'=>$itemExample->exampleid,'studentid'=>$item->userid));
+    	$exampleEval->additionalinfo = $post->itemgrade;
+    	$DB->update_record('block_exacompexameval', $exampleEval);
     }
     	
     // Insert the new blog entry.

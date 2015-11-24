@@ -34,8 +34,8 @@
 #exaport .excomdos_listtable td, #exaport .excomdos_listtable thead th {
 	padding: 0.5em;
 	border: 1px solid #cacaca;
-    border-collapse: collapse;
-    vertical-align: top;
+	border-collapse: collapse;
+	vertical-align: top;
 }
 
 #exaport .excomdos_listtable thead th {

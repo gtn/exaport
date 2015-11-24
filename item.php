@@ -89,7 +89,7 @@ if ($action == 'copytoself') {
 		$fs = get_file_storage();
 		$fileinfo = array(
 			'component' => 'block_exaport',
-			'filearea' => 'item_file',     
+			'filearea' => 'item_file',	 
 			'itemid' => $id); 
 		$ownerusercontext = context_user::instance($owner_id);
 		$usercontext = context_user::instance($USER->id);
@@ -97,7 +97,7 @@ if ($action == 'copytoself') {
 		foreach ($oldfiles as $f) {
 			$newfile_params = array(
 				'contextid'	=> $usercontext->id,
-				'itemid'    => $newitem_id,
+				'itemid'	=> $newitem_id,
 				'userid' 	=> $USER->id
 				);
 			$filecopy = $fs->create_file_from_storedfile($newfile_params, $f->get_id());
@@ -214,7 +214,7 @@ if ($editform->is_cancelled()) {
 			break;
 
 		case 'edit':
-            $fromform->type = $type;
+			$fromform->type = $type;
 			if (!$existing) {
 				print_error("bookmarknotfound", "block_exaport");
 			}
@@ -272,19 +272,19 @@ switch ($action) {
 				$ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $post->userid . "&itemid=" . $post->id;
 
 				$extra_content = "<div class='block_eportfolio_center'>\n";
-				if ($file->is_valid_image()) {    // Image attachments don't get printed as links
+				if ($file->is_valid_image()) {	// Image attachments don't get printed as links
 					$extra_content .= "<img src=\"$ffurl\" alt=\"" . format_string($post->name) . "\" />";
 				} else {
 					$extra_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
 				}
 				$extra_content .= "</div>";
-                
-                // Filemanager for editing file
-                $draftitemid = file_get_submitted_draft_itemid('file');
-                $context = context_user::instance($USER->id);
-                file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
-                                        array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 
-                $post->file = $draftitemid;   
+				
+				// Filemanager for editing file
+				$draftitemid = file_get_submitted_draft_itemid('file');
+				$context = context_user::instance($USER->id);
+				file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
+										array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));				 
+				$post->file = $draftitemid;   
 			}
 				
 			if (!$extra_content) {
@@ -296,7 +296,7 @@ switch ($action) {
 		$draftitemid = file_get_submitted_draft_itemid('iconfile');
 		$context = context_user::instance($USER->id);
 		file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_iconfile', $post->id,
-								array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 
+								array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));				 
 		$post->iconfile = $draftitemid;   
 
 		break;
@@ -371,16 +371,16 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 		if ($post->url=='http://') $post->url="";
 		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
 	}
-    
-    $context = context_user::instance($USER->id);
-    // Updating file.
-    if ($post->type == 'file') {
+	
+	$context = context_user::instance($USER->id);
+	// Updating file.
+	if ($post->type == 'file') {
 		// checking userquoata
 		$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
 		if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
 			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 		};
-    }
+	}
 
 	// icon for item
 	// checking userquoata
@@ -388,7 +388,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 	if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)) {
 		file_save_draft_area_files($post->iconfile, $context->id, 'block_exaport', 'item_iconfile', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 	};
-    
+	
 	if ($DB->update_record('block_exaportitem', $post)) {
 		block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
 	} else {

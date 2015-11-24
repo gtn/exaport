@@ -39,7 +39,7 @@ $context = context_system::instance();
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
-    print_error("invalidinstance", "block_exaport");
+	print_error("invalidinstance", "block_exaport");
 }
 
 block_exaport_setup_default_categories();
@@ -64,74 +64,74 @@ echo "</div>";
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
 
 if ($edit) {
-    if (!confirm_sesskey()) {
-        print_error("badsessionkey", "block_exaport");
-    }
+	if (!confirm_sesskey()) {
+		print_error("badsessionkey", "block_exaport");
+	}
 
-    $informationform = new block_exaport_personal_information_form();
+	$informationform = new block_exaport_personal_information_form();
 
-    if ($informationform->is_cancelled()) {
-        
-    } else if ($fromform = $informationform->get_data()) { 
+	if ($informationform->is_cancelled()) {
+		
+	} else if ($fromform = $informationform->get_data()) { 
 		$fromform = file_postupdate_standard_editor($fromform, 'description', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'personal_information', $USER->id);
-        block_exaport_set_user_preferences(array('description' => $fromform->description, 'persinfo_timemodified' => time()));
+		block_exaport_set_user_preferences(array('description' => $fromform->description, 'persinfo_timemodified' => time()));
 
-        // read new data from the database
-        $userpreferences = block_exaport_get_user_preferences();
-        $description = $userpreferences->description;
+		// read new data from the database
+		$userpreferences = block_exaport_get_user_preferences();
+		$description = $userpreferences->description;
 
-        echo $OUTPUT->box(get_string("descriptionsaved", "block_exaport"), 'center');
-    } else {                                               
-        $show_information = false;
+		echo $OUTPUT->box(get_string("descriptionsaved", "block_exaport"), 'center');
+	} else {											   
+		$show_information = false;
 
-        $data = new stdClass();
-        $data->courseid = $courseid;
-        $data->description = $description;
+		$data = new stdClass();
+		$data->courseid = $courseid;
+		$data->description = $description;
 		$data->descriptionformat = FORMAT_HTML;
-        $data->cataction = 'save';
-        $data->edit = 1;
+		$data->cataction = 'save';
+		$data->edit = 1;
 		
 		$data = file_prepare_standard_editor($data, 'description', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'personal_information', $USER->id);
-        $informationform->set_data($data);
-        $informationform->display();
-    }
+		$informationform->set_data($data);
+		$informationform->display();
+	}
 }
 
 if ($show_information) {
 
-    echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
+	echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
-    echo '<tr class="header"><td class="picture left">';
-    $user = $DB->get_record('user', array("id" => $USER->id));
-    echo $OUTPUT->user_picture($user, array("courseid" => $courseid));
-    echo '</td>';
+	echo '<tr class="header"><td class="picture left">';
+	$user = $DB->get_record('user', array("id" => $USER->id));
+	echo $OUTPUT->user_picture($user, array("courseid" => $courseid));
+	echo '</td>';
 
-    echo '<td class="topic starter"><div class="author">';
-    $by = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
-            $USER->id . '&amp;course=' . $courseid . '">' . fullname($USER, $USER->id) . '</a>';
-    print_string('byname', 'moodle', $by);
-    echo '</div></td></tr>';
+	echo '<td class="topic starter"><div class="author">';
+	$by = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
+			$USER->id . '&amp;course=' . $courseid . '">' . fullname($USER, $USER->id) . '</a>';
+	print_string('byname', 'moodle', $by);
+	echo '</div></td></tr>';
 
-    echo '<tr><td class="left side">';
+	echo '<tr><td class="left side">';
 
-    echo '</td><td class="content">' . "\n";
+	echo '</td><td class="content">' . "\n";
 
 	$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'personal_information_self', null);
-    echo $description;
+	echo $description;
 
-    echo '</td></tr></table>' . "\n\n";
+	echo '</td></tr></table>' . "\n\n";
 
-    echo '<div class="block_eportfolio_center">';
+	echo '<div class="block_eportfolio_center">';
 
-    echo '<form method="post" action="' . $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $courseid . '">';
-    echo '<fieldset class="hidden">';
-    echo '<input type="hidden" name="edit" value="1" />';
-    echo '<input type="submit" value="' . get_string("edit") . '" />';
-    echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+	echo '<form method="post" action="' . $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $courseid . '">';
+	echo '<fieldset class="hidden">';
+	echo '<input type="hidden" name="edit" value="1" />';
+	echo '<input type="submit" value="' . get_string("edit") . '" />';
+	echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
 
-    echo '</fieldset>';
-    echo '</form>';
-    echo '</div>';
+	echo '</fieldset>';
+	echo '</form>';
+	echo '</div>';
 }
 
 echo "<span class=\"left\">".get_string("supported", "block_exaport")."<br/><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/bmukk.png\" width=\"63\" height=\"24\" alt=\"bmukk\" /></span>";

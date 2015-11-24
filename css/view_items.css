@@ -15,8 +15,8 @@
 .excomdos_cont .excomdos_listtable td, .excomdos_cont .excomdos_listtable thead th {
 	padding: 0.5em;
 	border: 1px solid #cacaca;
-    border-collapse: collapse;
-    vertical-align: top;
+	border-collapse: collapse;
+	vertical-align: top;
 }
 
 .excomdos_cont .excomdos_catselect {
@@ -98,8 +98,8 @@
 	margin:0.5em;
 	
 -webkit-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
--moz-box-shadow:    0px 0px 5px rgba(50, 50, 50, 0.21);
-box-shadow:         0px 0px 5px rgba(50, 50, 50, 0.21);
+-moz-box-shadow:	0px 0px 5px rgba(50, 50, 50, 0.21);
+box-shadow:		 0px 0px 5px rgba(50, 50, 50, 0.21);
 }
 .excomdos_cont .excomdos_tile.ui-state-active {
 	background: #ffc;

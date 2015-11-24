@@ -12,13 +12,13 @@ $PAGE->set_url($url);
 
 // Get userlist for sharing category
 if (optional_param('action', '', PARAM_ALPHA) == 'userlist' || optional_param('action', '', PARAM_ALPHA) == 'structureuserlist') {
-    require_once dirname(__FILE__).'/lib/sharelib.php';
+	require_once dirname(__FILE__).'/lib/sharelib.php';
 	echo json_encode(exaport_get_shareable_courses_with_users(''));
 	exit;
 }
 // Get grouplist for sharing category
 if (optional_param('action', '', PARAM_ALPHA) == 'grouplist' || optional_param('action', '', PARAM_ALPHA) == 'structuregrouplist') {
-    require_once dirname(__FILE__).'/lib/sharelib.php';
+	require_once dirname(__FILE__).'/lib/sharelib.php';
 	echo json_encode(exaport_get_shareable_courses_with_groups(''));
 	exit;
 }
@@ -122,9 +122,9 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 require_once("$CFG->libdir/formslib.php");
 
 class simplehtml_form extends moodleform {
-    //Add elements to form
-    public function definition() {
-        global $CFG;
+	//Add elements to form
+	public function definition() {
+		global $CFG;
 		global $DB;
 		global $USER;
 
@@ -141,27 +141,27 @@ class simplehtml_form extends moodleform {
 			$category->id = 0;
 		};
 		
-        $mform = $this->_form; // Don't forget the underscore! 
+		$mform = $this->_form; // Don't forget the underscore! 
  
-        $mform->addElement('hidden', 'id');
-        $mform->setType('id', PARAM_INT);
-        $mform->addElement('hidden', 'pid');
-        $mform->setType('pid', PARAM_INT);
-        $mform->addElement('hidden', 'courseid');
-        $mform->setType('courseid', PARAM_INT);
-        $mform->addElement('hidden', 'back');
-        $mform->setType('back', PARAM_TEXT);
+		$mform->addElement('hidden', 'id');
+		$mform->setType('id', PARAM_INT);
+		$mform->addElement('hidden', 'pid');
+		$mform->setType('pid', PARAM_INT);
+		$mform->addElement('hidden', 'courseid');
+		$mform->setType('courseid', PARAM_INT);
+		$mform->addElement('hidden', 'back');
+		$mform->setType('back', PARAM_TEXT);
 
-        $mform->addElement('text', 'name', get_string('name'));
-        $mform->setType('name', PARAM_TEXT);
-        $mform->addRule('name', block_exaport_get_string('titlenotemtpy'), 'required', null, 'client');
+		$mform->addElement('text', 'name', get_string('name'));
+		$mform->setType('name', PARAM_TEXT);
+		$mform->addRule('name', block_exaport_get_string('titlenotemtpy'), 'required', null, 'client');
 		
 		$mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'accepted_types' => array('image', 'web_image')));
 
 		if (extension_loaded('gd') && function_exists('gd_info')) {
 			$mform->addElement('checkbox', 'iconmerge', get_string('iconfile_merge', 'block_exaport'), get_string('iconfile_merge_description', 'block_exaport'));
 		};
-        
+		
 		// sharing
 		if (has_capability('block/exaport:shareintern', context_system::instance())) {
 			$mform->addElement('checkbox', 'internshare', get_string('share', 'block_exaport'));
@@ -255,12 +255,12 @@ class simplehtml_form extends moodleform {
 			$mform->addElement('html', '</div></div>');
 		};
 
-        $this->add_action_buttons();
-    }
-    //Custom validation should be added here
-    function validation($data, $files) {
-        return array();
-    }
+		$this->add_action_buttons();
+	}
+	//Custom validation should be added here
+	function validation($data, $files) {
+		return array();
+	}
 }
 
 //Instantiate simplehtml_form 
@@ -430,10 +430,10 @@ if ($mform->is_cancelled()) {
 				// Create file containing new image
 				$fileinfo = array(
 					'contextid' => $context->id, 
-					'component' => 'user',    
-					'filearea' => 'draft',     
+					'component' => 'user',	
+					'filearea' => 'draft',	 
 					'itemid' => $image->itemid,  
-					'filepath' => '/',           
+					'filepath' => '/',		   
 					'filename' => $image->filename);
 				$fs->create_file_from_string($fileinfo, $image_data);
 			};
@@ -472,7 +472,7 @@ if ($mform->is_cancelled()) {
 	$draftitemid = file_get_submitted_draft_itemid('iconfile');
 	$context = context_user::instance($USER->id);
 	file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'category_icon', $category->id,
-							array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 
+							array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));				 
 	$category->iconfile = $draftitemid;   
 
 	$mform->set_data($category);
@@ -484,7 +484,7 @@ $PAGE->requires->js('/blocks/exaport/javascript/category.js', true);
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-    'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
+	'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
 	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',
 	'checkall',
 );
@@ -531,7 +531,7 @@ function skewScaleImage($src_img, $max_width = 100, $max_height = 100, $skew = 1
 	$dst_img = imagecreatetruecolor($new_w, $h);
 	$bg_colour = imagecolorallocate($dst_img, 0, 0, 0); 
 	imagecolortransparent($dst_img, $bg_colour);
-    imagefill($dst_img, 0, 0, $bg_colour);
+	imagefill($dst_img, 0, 0, $bg_colour);
 
 	for ($i = 0 ; $i < $h ; $i ++)
 	{

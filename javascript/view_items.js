@@ -16,7 +16,7 @@ jQueryExaport(function($){
 			// set background of the current tile to white, background needed when dragging
 			ui.helper.css('background-color', '#fff');
 		}
-    });
+	});
 	
 	$(".excomdos_tiletable .excomdos_tile_category").droppable({
 		activeClass: "ui-state-active",
@@ -40,5 +40,5 @@ jQueryExaport(function($){
 				}
 			});
 		}
-    })
+	})
 });

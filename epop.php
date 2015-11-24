@@ -30,7 +30,7 @@ if ($action=="login"){
 				$validiert=false;
 			}
 		}else{
-			$validiert=true;//alte version bei der die passwörter verschlüsselt geschickt werden
+			$validiert=true;//alte version bei der die passwï¿½rter verschlï¿½sselt geschickt werden
 		}
 		
 		if ($validiert==true){
@@ -159,7 +159,7 @@ if ($action=="login"){
 		$subject_id = optional_param('subject_id', '0', PARAM_INT);
 		//$subject_id = optional_param('subject_id', ' ', PARAM_INT);
 		
-		//die kompetenzen werden nach subject gruppiert angezeigt, daher nur diese gruppe löschen
+		//die kompetenzen werden nach subject gruppiert angezeigt, daher nur diese gruppe lï¿½schen
 		$sql="SELECT descr.id FROM {block_exacompsubjects} subj 
 		INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 		INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
@@ -193,8 +193,8 @@ if ($action=="login"){
 		}else{
 			do {
 			$hash = substr(md5(microtime()), 3, 8);
-        } while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
-        
+		} while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
+		
 			if ($newid = $DB->insert_record('block_exaportview', array("name"=>$title,"userid"=>$user->id,"description"=>$description,"timemodified"=>time(),"shareall"=>0,"externaccess"=>0,"externcomment"=>0,"langid"=>0,"hash"=>$hash,"layout"=>"2"))) {
 				echo $newid;
 			}else{
@@ -318,12 +318,12 @@ else if ($action=="get_items_for_view"){
 	$user=checkhash();
 	if (!$user) echo "invalid hash";
 	else{
-	    $sql = "SELECT vi.id as viid, i.id as itemid,v.id,v.name,v.description,v.externaccess,v.shareall,v.hash,i.name as itemname,i.categoryid as catid,i.type, i.url,i.intro FROM ";
-	    $sql.=" {block_exaportview} v LEFT JOIN {block_exaportviewblock} vi ON v.id=vi.viewid INNER JOIN {block_exaportitem} i ON i.id=vi.itemid WHERE v.userid=?";
+		$sql = "SELECT vi.id as viid, i.id as itemid,v.id,v.name,v.description,v.externaccess,v.shareall,v.hash,i.name as itemname,i.categoryid as catid,i.type, i.url,i.intro FROM ";
+		$sql.=" {block_exaportview} v LEFT JOIN {block_exaportviewblock} vi ON v.id=vi.viewid INNER JOIN {block_exaportitem} i ON i.id=vi.itemid WHERE v.userid=?";
 	  	
 	  	$sql= "SELECT * FROM {block_exaportview} WHERE userid=?";
 	  
-	    $views = $DB->get_records_sql($sql,array($user->id));
+		$views = $DB->get_records_sql($sql,array($user->id));
 			header ("Content-Type:text/xml");
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<views>'."\r\n";
@@ -436,16 +436,16 @@ else if ($action=="get_items_for_view"){
 					$clist.=$v->compid.",";
 				}
 			}
-	    //$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
-	     //neu am 20.5.2014 weil descriptoren mehrfach vorkommen
-	    $sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
-	    if ($subjectid>0 && $action=="getCompetences"){
-	    	$sql.=" AND s.id=".$subjectid;
-	    }
-	    $sql.=" GROUP BY d.id, d.title ORDER BY d.sorting";
-	    //echo $sql;
-	    
-	    $descriptors = $DB->get_records_sql($sql);
+		//$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		 //neu am 20.5.2014 weil descriptoren mehrfach vorkommen
+		$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		if ($subjectid>0 && $action=="getCompetences"){
+			$sql.=" AND s.id=".$subjectid;
+		}
+		$sql.=" GROUP BY d.id, d.title ORDER BY d.sorting";
+		//echo $sql;
+		
+		$descriptors = $DB->get_records_sql($sql);
 			header ("Content-Type:text/xml");
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
 			$inhalt.='<result>'."\r\n";
@@ -516,8 +516,8 @@ else if ($action=="get_items_for_view"){
 				$itemrs=$DB->get_record("block_exaportitem",array("id"=>$itemid));
 				if (!empty($itemrs)){
 					/* 
-					//auch özeps items können nicht aktualisiert werden, die müssen gelöscht werden, ab 31.5.13
-					if ($itemrs->isoez==1){ //normale items können files nicht aktualisiert werden, da muss das ganze item gelöscht werden
+					//auch ï¿½zeps items kï¿½nnen nicht aktualisiert werden, die mï¿½ssen gelï¿½scht werden, ab 31.5.13
+					if ($itemrs->isoez==1){ //normale items kï¿½nnen files nicht aktualisiert werden, da muss das ganze item gelï¿½scht werden
 						$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
 						WHERE i.attachment<>0 AND i.id=?";
 						$res = $DB->get_records_sql($sql,array($itemid));
@@ -570,7 +570,7 @@ else if ($action=="get_items_for_view"){
 			//only update picture
 			$new->timemodified = time();
 		}else{
-			if ($itemrs->isoez!=1){ //wenn neues item, özeps items können eh nicht neu sein
+			if ($itemrs->isoez!=1){ //wenn neues item, ï¿½zeps items kï¿½nnen eh nicht neu sein
 				$new->userid = $user->id;
 				//$new->categoryid = $category;
 				$new->name = $title;		
@@ -616,49 +616,49 @@ else if ($action=="get_items_for_view"){
 			$context = context_user::instance($user->id);
 			
 			foreach ($_FILES as $fieldname=>$uploaded_file) {
-		    // check upload errors
-		    if (!empty($_FILES[$fieldname]['error'])) {
-		        switch ($_FILES[$fieldname]['error']) {
-		        case UPLOAD_ERR_INI_SIZE:
-		            throw new moodle_exception('upload_error_ini_size', 'repository_upload');
-		            break;
-		        case UPLOAD_ERR_FORM_SIZE:
-		            throw new moodle_exception('upload_error_form_size', 'repository_upload');
-		            break;
-		        case UPLOAD_ERR_PARTIAL:
-		            throw new moodle_exception('upload_error_partial', 'repository_upload');
-		            break;
-		        case UPLOAD_ERR_NO_FILE:
-		            throw new moodle_exception('upload_error_no_file', 'repository_upload');
-		            break;
-		        case UPLOAD_ERR_NO_TMP_DIR:
-		            throw new moodle_exception('upload_error_no_tmp_dir', 'repository_upload');
-		            break;
-		        case UPLOAD_ERR_CANT_WRITE:
-		            throw new moodle_exception('upload_error_cant_write', 'repository_upload');
-		            break;
-		        case UPLOAD_ERR_EXTENSION:
-		            throw new moodle_exception('upload_error_extension', 'repository_upload');
-		            break;
-		        default:
-		            throw new moodle_exception('nofile');
-		        }
-		    }
-		    $file = new stdClass();
-		    $file->filename = clean_param($_FILES[$fieldname]['name'], PARAM_FILE);
-		    
-		    // check system maxbytes setting
-		    if (($_FILES[$fieldname]['size'] > get_max_upload_file_size($CFG->maxbytes))) {
-		        // oversize file will be ignored, error added to array to notify
-		        // web service client
-		        $file->errortype = 'fileoversized';
-		        $file->error = get_string('maxbytes', 'error');
-		    } else {
-		        $file->filepath = $_FILES[$fieldname]['tmp_name'];
-		        // calculate total size of upload
-		        $totalsize += $_FILES[$fieldname]['size'];
-		    }
-		    $files[] = $file;
+			// check upload errors
+			if (!empty($_FILES[$fieldname]['error'])) {
+				switch ($_FILES[$fieldname]['error']) {
+				case UPLOAD_ERR_INI_SIZE:
+					throw new moodle_exception('upload_error_ini_size', 'repository_upload');
+					break;
+				case UPLOAD_ERR_FORM_SIZE:
+					throw new moodle_exception('upload_error_form_size', 'repository_upload');
+					break;
+				case UPLOAD_ERR_PARTIAL:
+					throw new moodle_exception('upload_error_partial', 'repository_upload');
+					break;
+				case UPLOAD_ERR_NO_FILE:
+					throw new moodle_exception('upload_error_no_file', 'repository_upload');
+					break;
+				case UPLOAD_ERR_NO_TMP_DIR:
+					throw new moodle_exception('upload_error_no_tmp_dir', 'repository_upload');
+					break;
+				case UPLOAD_ERR_CANT_WRITE:
+					throw new moodle_exception('upload_error_cant_write', 'repository_upload');
+					break;
+				case UPLOAD_ERR_EXTENSION:
+					throw new moodle_exception('upload_error_extension', 'repository_upload');
+					break;
+				default:
+					throw new moodle_exception('nofile');
+				}
+			}
+			$file = new stdClass();
+			$file->filename = clean_param($_FILES[$fieldname]['name'], PARAM_FILE);
+			
+			// check system maxbytes setting
+			if (($_FILES[$fieldname]['size'] > get_max_upload_file_size($CFG->maxbytes))) {
+				// oversize file will be ignored, error added to array to notify
+				// web service client
+				$file->errortype = 'fileoversized';
+				$file->error = get_string('maxbytes', 'error');
+			} else {
+				$file->filepath = $_FILES[$fieldname]['tmp_name'];
+				// calculate total size of upload
+				$totalsize += $_FILES[$fieldname]['size'];
+			}
+			$files[] = $file;
 			}
 		
 			//$fs = get_file_storage();
@@ -666,91 +666,91 @@ else if ($action=="get_items_for_view"){
 			$usedspace = 0;
 			$privatefiles = $fs->get_area_files($context->id, 'block_exaport', 'item_file', false, 'id', false);
 			foreach ($privatefiles as $file) {
-			    $usedspace += $file->get_filesize();
+				$usedspace += $file->get_filesize();
 			}
 			if ($totalsize > ($CFG->userquota - $usedspace)) {
-		    throw new file_exception('userquotalimit');
+			throw new file_exception('userquotalimit');
 			}
 			$results = array();
 
 			foreach ($files as $file) {
-		    if (!empty($file->error)) {
-		        // including error and filename
-		        $results[] = $file;
-		        continue;
-		    }
-		    $file_record = new stdClass;
-		    $file_record->component = 'block_exaport';
-		    $file_record->contextid = $context->id;
-		    $file_record->userid    = $user->id;
-		    $file_record->filearea  = 'item_file';
-		    $file_record->filename = $file->filename;
-		    $file_record->filepath  = $filepath;
-		    $file_record->itemid    = 0;
-		    $file_record->license   = $CFG->sitedefaultlicense;
-		    $file_record->author    = $user->lastname." ".$user->firstname;
-		    $file_record->source    = '';
+			if (!empty($file->error)) {
+				// including error and filename
+				$results[] = $file;
+				continue;
+			}
+			$file_record = new stdClass;
+			$file_record->component = 'block_exaport';
+			$file_record->contextid = $context->id;
+			$file_record->userid	= $user->id;
+			$file_record->filearea  = 'item_file';
+			$file_record->filename = $file->filename;
+			$file_record->filepath  = $filepath;
+			$file_record->itemid	= 0;
+			$file_record->license   = $CFG->sitedefaultlicense;
+			$file_record->author	= $user->lastname." ".$user->firstname;
+			$file_record->source	= '';
 		
-		    //Check if the file already exist
+			//Check if the file already exist
 		   /* $existingfile = $fs->file_exists($file_record->contextid, $file_record->component, $file_record->filearea,
-		                $file_record->itemid, $file_record->filepath, $file_record->filename);*/
-		    
-		    	$file_record->filename=get_unique_filename($fs, $file_record,$file_record->filename);
-		    	//print_r($file_record);die;
-		       // $file_record->filename = $file->filename."_01";
-		    	$new->type = 'file';
-		           
-		           
-		           //print_r($new); 
-		           if($itemid>0){
-		           		//$new->id=$itemid;
-		           	/* $newarr=(array)$new;
-		           	 print_r($newarr);	
-		           	$newarr2=array("id"=>$itemid,"userid"=>"7","courseid"=>0,"categoryid"=>0,"name"=>$new->name);
-		           		print_r($newarr2);	*/
+						$file_record->itemid, $file_record->filepath, $file_record->filename);*/
+			
+				$file_record->filename=get_unique_filename($fs, $file_record,$file_record->filename);
+				//print_r($file_record);die;
+			   // $file_record->filename = $file->filename."_01";
+				$new->type = 'file';
+				   
+				   
+				   //print_r($new); 
+				   if($itemid>0){
+				   		//$new->id=$itemid;
+				   	/* $newarr=(array)$new;
+				   	 print_r($newarr);	
+				   	$newarr2=array("id"=>$itemid,"userid"=>"7","courseid"=>0,"categoryid"=>0,"name"=>$new->name);
+				   		print_r($newarr2);	*/
 									if ($action!="updatePic"){
-			           		$DB->update_record('block_exaportitem', $new);
-			           	}else{
-			           		$new2=new stdClass;
-			           		$new2->id=$new->id;
-			           		$new2->type="file"; //wenn note soll file werden
-			           		$DB->update_record('block_exaportitem', $new2);
-			           	}
-			           	if ($itemrs->isoez!=1){
-			           		//nicht mehr beim upload dabei
-				           	//block_exaport_delete_competences($itemid,$user->id);
-					           //block_exaport_save_competences($competences,$new,$user->id,$new->name);
-					        }else{
-						         block_exaport_delete_competences($itemid,$user->id);
-						         $competencesoez=block_exaport_get_oezcompetencies($itemrs->exampid);
-						         block_exaport_save_competences($competencesoez,$new,$user->id,$itemrs->name);
-					        }
-					        
-		           }else{
-			           if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
-			           	//block_exaport_save_competences($competences,$new,$user->id,$new->name);
-			           	echo $new->id;
-			           }else{
-			           	//echo "saved2=false";
-			           }
-			         }
+					   		$DB->update_record('block_exaportitem', $new);
+					   	}else{
+					   		$new2=new stdClass;
+					   		$new2->id=$new->id;
+					   		$new2->type="file"; //wenn note soll file werden
+					   		$DB->update_record('block_exaportitem', $new2);
+					   	}
+					   	if ($itemrs->isoez!=1){
+					   		//nicht mehr beim upload dabei
+						   	//block_exaport_delete_competences($itemid,$user->id);
+							   //block_exaport_save_competences($competences,$new,$user->id,$new->name);
+							}else{
+								 block_exaport_delete_competences($itemid,$user->id);
+								 $competencesoez=block_exaport_get_oezcompetencies($itemrs->exampid);
+								 block_exaport_save_competences($competencesoez,$new,$user->id,$itemrs->name);
+							}
+							
+				   }else{
+					   if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+					   	//block_exaport_save_competences($competences,$new,$user->id,$new->name);
+					   	echo $new->id;
+					   }else{
+					   	//echo "saved2=false";
+					   }
+					 }
 					 
-		    	if ($tempfile = $fs->create_file_from_pathname($file_record, $file->filepath)){
-		        	 
-		        if(strcmp(mimeinfo('type', $file->filename), "image/jpeg") == 0){
+				if ($tempfile = $fs->create_file_from_pathname($file_record, $file->filepath)){
+					 
+				if(strcmp(mimeinfo('type', $file->filename), "image/jpeg") == 0){
 								$imageinfo = $tempfile->get_imageinfo();
 								
 								$file_record_img = new stdClass;
 								$file_record_img->component = 'block_exaport';
 								$file_record_img->contextid = $context->id;
-								$file_record_img->userid    = $user->id;
+								$file_record_img->userid	= $user->id;
 								$file_record_img->filearea  = 'item_file';
 								$file_record_img->filename = $file->filename;
 								$file_record_img->filepath  = $filepath;
-								$file_record_img->itemid    = $new->id;
+								$file_record_img->itemid	= $new->id;
 								$file_record_img->license   = $CFG->sitedefaultlicense;
-								$file_record_img->author    = $user->lastname." ".$user->firstname;
-								$file_record_img->source    = '';
+								$file_record_img->author	= $user->lastname." ".$user->firstname;
+								$file_record_img->source	= '';
 								
 								$iw=intval($imageinfo['width']);
 								$ih=intval($imageinfo['height']);
@@ -782,45 +782,45 @@ else if ($action=="get_items_for_view"){
 					
 						$attachm=$newfile->get_id();
 						echo "ID=".$attachm;
-		          $new2=$DB->update_record('block_exaportitem', array("id"=>$new->id,"attachment"=>$attachm));
-		      }else{
-		        	
-		        };
-		       
-		                      
-		        $results[] = $file_record;
-		    
+				  $new2=$DB->update_record('block_exaportitem', array("id"=>$new->id,"attachment"=>$attachm));
+			  }else{
+					
+				};
+			   
+							  
+				$results[] = $file_record;
+			
 			}
 	
 		}else{
 			if ($action!="updatePic"){
 				if($itemid>0){
-			           		$new->id=$itemid;
-			           		$DB->update_record('block_exaportitem', $new);
-			           		if ($itemrs->isoez!=1){
-				           		//block_exaport_delete_competences($itemid,$user->id);
-					           	//block_exaport_save_competences($competences,$new,$user->id,$new->name);
-					          }else{
-					          	block_exaport_delete_competences($itemid,$user->id);
-					          	//wenn text oder link, dann beispiel gelöst, wenn type file ist datei dabei, auch gelöst
-					          	if (!empty($new->intro) || !empty($new->url) || $new->type=="file"){
-						          	$competencesoez=block_exaport_get_oezcompetencies($itemrs->exampid);
-						           	block_exaport_save_competences($competencesoez,$new,$user->id,$itemrs->name);
-						          }
-					          	//kein fileupload, keine kompetenzen erworben
-					          }
-					          echo $new->id;
+					   		$new->id=$itemid;
+					   		$DB->update_record('block_exaportitem', $new);
+					   		if ($itemrs->isoez!=1){
+						   		//block_exaport_delete_competences($itemid,$user->id);
+							   	//block_exaport_save_competences($competences,$new,$user->id,$new->name);
+							  }else{
+							  	block_exaport_delete_competences($itemid,$user->id);
+							  	//wenn text oder link, dann beispiel gelï¿½st, wenn type file ist datei dabei, auch gelï¿½st
+							  	if (!empty($new->intro) || !empty($new->url) || $new->type=="file"){
+								  	$competencesoez=block_exaport_get_oezcompetencies($itemrs->exampid);
+								   	block_exaport_save_competences($competencesoez,$new,$user->id,$itemrs->name);
+								  }
+							  	//kein fileupload, keine kompetenzen erworben
+							  }
+							  echo $new->id;
 			  }else{
 			  /*foreach($new as $k=>$v){
 			  	echo "<br>".$k."--".$v;
 			  }
 			  die;*/
 					if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
-				     echo $new->id;
-				     //$competences = $DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $existing->id, "activitytype" => 2000));
-				     //block_exaport_save_competences($competences,$new,$user->id,$new->name);
+					 echo $new->id;
+					 //$competences = $DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $existing->id, "activitytype" => 2000));
+					 //block_exaport_save_competences($competences,$new,$user->id,$new->name);
 				  }else{
-				     //echo "saved=false";
+					 //echo "saved=false";
 				  }
 				}
 			}
@@ -870,19 +870,19 @@ function isoezeps($url){
 
 function delete_file($hash) {
 
-    $fs = get_file_storage();
+	$fs = get_file_storage();
  $file = $fs->get_file_by_hash($hash);
 // Prepare file record object
 /*$fileinfo = array(
-    'component' => $component,
-    'filearea' => $filearea,     // usually = table name
-    'itemid' => $id,               // usually = ID of row in table
-    'contextid' => $contextid, // ID of context
-    'filepath' => '/',           // any path beginning and ending in /
-    'filename' => $filename); // any filename
-    //print_r($fileinfo);die;
-    $file = $fs->get_file($fileinfo["contextid"], $fileinfo["component"], $fileinfo["filearea"], 
-        $fileinfo["itemid"], $fileinfo["filepath"], $fileinfo["filename"]);
+	'component' => $component,
+	'filearea' => $filearea,	 // usually = table name
+	'itemid' => $id,			   // usually = ID of row in table
+	'contextid' => $contextid, // ID of context
+	'filepath' => '/',		   // any path beginning and ending in /
+	'filename' => $filename); // any filename
+	//print_r($fileinfo);die;
+	$file = $fs->get_file($fileinfo["contextid"], $fileinfo["component"], $fileinfo["filearea"], 
+		$fileinfo["itemid"], $fileinfo["filepath"], $fileinfo["filename"]);
  print_r($fileinfo);*/
 // echo $file."----";
 	// Delete it if it exists
@@ -892,8 +892,8 @@ print_r($array);*/
 
 	if ($file) {
 		//116f95207c5be238b1bd2a7ee1b1e3dba771a32c
-	    $file->delete();
-	    return true;
+		$file->delete();
+		return true;
 	}else return false;
  
 }
@@ -930,12 +930,12 @@ function block_exaport_delete_competences($itemid,$userid){
 function block_exaport_save_competences($competences,$new,$userid,$aname){
 	global $DB;
 	 if (count($competences)>0){
-		     	foreach ($competences as $k=>$v){
-		     		if (is_numeric($v)){
-		     			$DB->insert_record('block_exacompcompactiv_mm', array("compid"=>$v,"activityid"=>$new->id,"eportfolioitem"=>1,"activitytitle"=>$aname));
-		     			$DB->insert_record('block_exacompcompuser_mm',array("compid"=>$v,"activityid"=>$new->id,"userid"=>$userid,"reviewerid"=>$userid,"eportfolioitem"=>1,"role"=>0));
-		     		}
-		     	}
+			 	foreach ($competences as $k=>$v){
+			 		if (is_numeric($v)){
+			 			$DB->insert_record('block_exacompcompactiv_mm', array("compid"=>$v,"activityid"=>$new->id,"eportfolioitem"=>1,"activitytitle"=>$aname));
+			 			$DB->insert_record('block_exacompcompuser_mm',array("compid"=>$v,"activityid"=>$new->id,"userid"=>$userid,"reviewerid"=>$userid,"eportfolioitem"=>1,"role"=>0));
+			 		}
+			 	}
 	}
 }
 function exaport_get_shareable_users(){
@@ -1010,7 +1010,7 @@ function block_exacomp_write_xml_user($tusers){
 function get_unique_filename($fs, $file_record,$fn){
 	
 $existingfile = $fs->file_exists($file_record->contextid, $file_record->component, $file_record->filearea,
-		                $file_record->itemid, $file_record->filepath, $fn);
+						$file_record->itemid, $file_record->filepath, $fn);
 if ($existingfile) {
 	$laenge=strlen($fn);
 	$ext=strrchr ($fn, ".");
@@ -1029,7 +1029,7 @@ if ($existingfile) {
 }
 return $fn;
 
-}	    	
+}			
 function get_number_subcats($id){
 	global $DB;
 	$conditions=array("pid"=>$id);
@@ -1062,14 +1062,14 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 					//$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'" isoez="'.$item->isoez.'" url="'.$item->attachment.'"></item>';
 				//}else{
 				
-				/*itemauswahl für view: nur gelöste aufgaben/items anzeigen*/
+				/*itemauswahl fï¿½r view: nur gelï¿½ste aufgaben/items anzeigen*/
 				if ($view_id>0){
 					if($item->attachment!="" || $item->intro!="" || $item->url!="") $showitem=true;
 					else $showitem=false;
 				}else{
 					$showitem=true;
 				}
-				/*itemauswahl für view ende*/
+				/*itemauswahl fï¿½r view ende*/
 				
 				if($showitem==true){
 					if(empty($item->parentid) || $item->parentid==0 || block_exaport_parent_is_solved($item->parentid,$item->userid)){
@@ -1149,7 +1149,7 @@ function write_xml_categories($conditions,$catid,$userid){
 						}
 					}
 				}
-			}        
+			}		
 			if ($sozkomp = $DB->get_records("block_exacompschooltypes", array("title"=>"Personale Kompetenzen"))){
 				foreach ($sozkomp as $ks){
 					if($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid"=>$ks->id))){
@@ -1196,7 +1196,7 @@ function block_exaport_numtobool($wert){
 }
 function kuerzen($wert,$laenge){
 	if (strlen($wert)>$laenge){
-		$wert = substr($wert, 0,$laenge ); // gibt "abcd" zurück 
+		$wert = substr($wert, 0,$laenge ); // gibt "abcd" zurï¿½ck 
 	}
 	return $wert;
 }
@@ -1366,7 +1366,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		//exacomp: timestamp hinterlegen, wann update
 		//nur wenn neue daten, dann update
 		//zuerst export_cate in array schreiben mit stid#subjid#topid, um abfragen zu sparen
-		//dann neue daten durchlaufen, wenn neu dann insert, wenn vorhanden dann title und parentid prüfen und bei bedarf update, für löschen merker machen
+		//dann neue daten durchlaufen, wenn neu dann insert, wenn vorhanden dann title und parentid prï¿½fen und bei bedarf update, fï¿½r lï¿½schen merker machen
 		//echo $userid;die;
 		if ($cats = $DB->get_records("block_exaportcate", array("userid"=>$userid))){
 			
@@ -1544,8 +1544,8 @@ function block_exaport_update_unset_pids($utable,$rem_ids){
 		if (!empty($rem_ids[1])){
 			foreach ($rem_ids[1] as $newid=>$v) {
 				//echo "UPDATE mdl_".$utable." SET parentid=".$rem_ids[0][$v]." WHERE id=".$newid;
-	    	$DB->update_record($utable, array("id"=>$newid,"parentid"=>$rem_ids[0][$v]));
-	    	//echo "bei datensatz ".$newid." wird parentid=".$rem_ids[0][$v];
+			$DB->update_record($utable, array("id"=>$newid,"parentid"=>$rem_ids[0][$v]));
+			//echo "bei datensatz ".$newid." wird parentid=".$rem_ids[0][$v];
 			}		
 		}
 }

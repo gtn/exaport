@@ -35,7 +35,7 @@ require_once dirname(__FILE__).'/lib/sharelib.php';
 require_once($CFG->dirroot . '/webservice/lib.php');
 
 if (empty($CFG->filelifetime)) {
-	$lifetime = 86400;     // Seconds for files to remain in caches
+	$lifetime = 86400;	 // Seconds for files to remain in caches
 } else {
 	$lifetime = $CFG->filelifetime;
 }
@@ -70,9 +70,9 @@ if ($userhash!="0"){
 		$item = block_exaport_get_elove_item($id, $accessPath[2], $authenticationinfo);
 		
 		if ($file = block_exaport_get_item_file($item)) {
-		    send_stored_file($file);
+			send_stored_file($file);
 		} else {
-		    not_found();
+			not_found();
 		}
 		exit;
 	}

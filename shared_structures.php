@@ -48,20 +48,20 @@ $PAGE->set_url($url);
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
-    error("That's an invalid course id");
+	error("That's an invalid course id");
 }
 
 $parsedsort = block_exaport_parse_sort($sort, array('course', 'user', 'structure'));
 if ($parsedsort[0] == 'structure') {
-    $sql_sort = " ORDER BY c.name, u.lastname, u.firstname";
-    if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$sql_sort = " ORDER BY cast(c.name AS varchar(max)), u.lastname, u.firstname";
-    }
+	$sql_sort = " ORDER BY c.name, u.lastname, u.firstname";
+	if(strcmp($CFG->dbtype, "sqlsrv")==0){
+		$sql_sort = " ORDER BY cast(c.name AS varchar(max)), u.lastname, u.firstname";
+	}
 } else {
-    $sql_sort = " ORDER BY u.lastname, u.firstname, c.name";
-    if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$sql_sort = " ORDER BY u.lastname, u.firstname, cast(c.name AS varchar(max))";
-    }
+	$sql_sort = " ORDER BY u.lastname, u.firstname, c.name";
+	if(strcmp($CFG->dbtype, "sqlsrv")==0){
+		$sql_sort = " ORDER BY u.lastname, u.firstname, cast(c.name AS varchar(max))";
+	}
 }
 
 // Copy action
@@ -80,37 +80,37 @@ $strheader = get_string("sharedstructures", "block_exaport");
 
 
 if ($u > 0) {
-    $whre=" AND u.id=".$u;
+	$whre=" AND u.id=".$u;
 }
 else 
-    $whre = "";
+	$whre = "";
 
 // Sections for user groups
 $usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), '', 'groupid');
 if ((is_array($usergroups)) && (count($usergroups) > 0)) { 
-    foreach ($usergroups as $id => $group) {
-        $usergroups[$id] = $group->groupid;
-    };
+	foreach ($usergroups as $id => $group) {
+		$usergroups[$id] = $group->groupid;
+	};
 	$usergroups_list = implode(',', $usergroups);
 	// print_r($usergroups_list);
 	$userstructures = $DB->get_records_sql('SELECT * FROM {block_exaportcat_strgrshar} WHERE groupid IN ('.$usergroups_list.')');
 	foreach ($userstructures as $id => $category) {
 		 $userstructures_arr[$id] = $category->catid;
 	};
-    $userstructures_list = implode(',', $userstructures_arr);
+	$userstructures_list = implode(',', $userstructures_arr);
 }; 
 // $DB->set_debug(true);
 $structures = $DB->get_records_sql(
-                "SELECT c.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
-                " FROM {user} u" .
-                " JOIN {block_exaportcate} c ON (u.id=c.userid AND c.userid!=?)" .
-                " LEFT JOIN {block_exaportcat_structshar} cshar ON c.id=cshar.catid AND cshar.userid = ?".
-                " LEFT JOIN {block_exaportcat_strgrshar} cgshar ON c.id=cgshar.catid ".
-                " LEFT JOIN {block_exaportcat_structshar} cshar_total ON c.id=cshar_total.catid " .
-                " WHERE ".
+				"SELECT c.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
+				" FROM {user} u" .
+				" JOIN {block_exaportcate} c ON (u.id=c.userid AND c.userid!=?)" .
+				" LEFT JOIN {block_exaportcat_structshar} cshar ON c.id=cshar.catid AND cshar.userid = ?".
+				" LEFT JOIN {block_exaportcat_strgrshar} cgshar ON c.id=cgshar.catid ".
+				" LEFT JOIN {block_exaportcat_structshar} cshar_total ON c.id=cshar_total.catid " .
+				" WHERE ".
 					"(".(block_exaport_shareall_enabled() ? ' c.structure_shareall=1 OR ' : '')." cshar.userid IS NOT NULL) ". 
-                    // Shared for you group
-                    // ((is_array($usergroups)) ? " u.id IN (".$usergroups_list.") " : "").
+					// Shared for you group
+					// ((is_array($usergroups)) ? " u.id IN (".$usergroups_list.") " : "").
 					(isset($userstructures) && count($userstructures)>0 ? " OR c.id IN (".$userstructures_list.") ": "") . // Add group sharing views
 					" ". // don't show my own views
 				$whre .
@@ -154,7 +154,7 @@ class block_exaport_copystructure_form extends moodleform {
 
 
 function exaport_print_structures($structures, $parsedsort) {
-    global $CFG, $courseid, $COURSE, $OUTPUT, $DB;
+	global $CFG, $courseid, $COURSE, $OUTPUT, $DB;
 
 	$courses = exaport_get_shareable_courses_with_users('shared_views');
 	$sort = $parsedsort[0];
@@ -255,7 +255,7 @@ function exaport_print_structures($structures, $parsedsort) {
 					);
 				}
 
-                echo '<div class="view-group">';
+				echo '<div class="view-group">';
 				echo '<div class="header view-group-header" style="align: right">';
 				echo '<span class="view-group-pic">'.$OUTPUT->user_picture($curuser, array('link'=>false)).'</span>';
 				echo '<span class="view-group-title">'.fullname($curuser).' ('.count($item['structures']).') </span>';
@@ -342,14 +342,14 @@ echo $OUTPUT->footer($course);
 
 
 function block_exaport_get_shared_with_text($structure) {
-    $shared = "";
-    if ($structure->structure_shareall == 1)
+	$shared = "";
+	if ($structure->structure_shareall == 1)
 		$shared = block_exaport_get_string('sharedwith_shareall');
-    elseif ($structure->cnt_shared_groups > 1)
-        $shared .= block_exaport_get_string('sharedwith_groupand', $structure->cnt_shared_groups-1);
-    elseif ($structure->cnt_shared_groups == 1) 
-        $shared = block_exaport_get_string('sharedwith_group');
-    elseif ($structure->cnt_shared_users > 1)
+	elseif ($structure->cnt_shared_groups > 1)
+		$shared .= block_exaport_get_string('sharedwith_groupand', $structure->cnt_shared_groups-1);
+	elseif ($structure->cnt_shared_groups == 1) 
+		$shared = block_exaport_get_string('sharedwith_group');
+	elseif ($structure->cnt_shared_users > 1)
 		$shared = block_exaport_get_string('sharedwith_meand', $structure->cnt_shared_users-1);
 	elseif ($structure->cnt_shared_users == 1)
 		$shared = block_exaport_get_string('sharedwith_onlyme'); /**/

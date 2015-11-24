@@ -28,7 +28,7 @@ print_r($response);
 
 /// DOWNLOAD PARAMETERS
 //Note: The service associated to the user token must allow "file download" !
-//      in the administration, edit the service to check the setting (click "advanced" button on the edit page).
+//	  in the administration, edit the service to check the setting (click "advanced" button on the edit page).
 
 //Normally you retrieve the file download url from calling the web service core_course_get_contents()
 //However to be quick to demonstrate the download call,

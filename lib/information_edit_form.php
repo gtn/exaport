@@ -7,15 +7,15 @@ class block_exaport_personal_information_form extends moodleform {
 	function definition() {
 
 		global $CFG;
-		$mform    =& $this->_form;
+		$mform	=& $this->_form;
 
 //		$mform->addElement('editor', 'description', get_string('message', 'forum'), array('cols'=>50, 'rows'=>30));
 //		$mform->setType('description', PARAM_RAW);
 //		$mform->addRule('description', get_string('required'), 'required', null, 'client');
 
-                $mform->addElement('editor', 'description_editor', get_string('steckbrief', 'block_exaport'), null,
-                    array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-                
+				$mform->addElement('editor', 'description_editor', get_string('steckbrief', 'block_exaport'), null,
+					array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+				
 		$mform->addElement('hidden', 'cataction');
 		$mform->setType('cataction', PARAM_ALPHA);
 		

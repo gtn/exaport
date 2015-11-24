@@ -76,7 +76,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 				$DB->execute($sql);
 
 				$update = new stdClass();
-				$update->id         = $file->id;
+				$update->id		 = $file->id;
 				$update->attachment = '';
 				$DB->update_record('block_exaportitem', $update);
 			}
@@ -192,7 +192,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 			$description = preg_replace_callback("!".preg_quote($CFG->wwwroot)."/draftfile.php/(?<contextid>[0-9]+)/user/draft/(?<draftid>[0-9]+)/!", "block_exaport_wrong_personal_information_upgrade_2012120301", $personalInfo->description);
 			
 			$update = new stdClass();
-			$update->id         = $personalInfo->id;
+			$update->id		 = $personalInfo->id;
 			$update->description = $description;
 			$DB->update_record('block_exaportuser', $update);
 		}
@@ -337,66 +337,66 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		} 
 	}
 
-    if ($oldversion < 2013071700) {
+	if ($oldversion < 2013071700) {
 
-        // Define field view_items_layout to be added to block_exaportuser
-        $table = new xmldb_table('block_exaportuser');
-        $field = new xmldb_field('view_items_layout', XMLDB_TYPE_TEXT, null, null, null, null, null, 'import_oez_tstamp');
+		// Define field view_items_layout to be added to block_exaportuser
+		$table = new xmldb_table('block_exaportuser');
+		$field = new xmldb_field('view_items_layout', XMLDB_TYPE_TEXT, null, null, null, null, null, 'import_oez_tstamp');
 
-        // Conditionally launch add field view_items_layout
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
+		// Conditionally launch add field view_items_layout
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
 
-        // eportfolio savepoint reached
-       
-    }
-    
-    if ($oldversion < 2013102205) {
+		// eportfolio savepoint reached
+	   
+	}
+	
+	if ($oldversion < 2013102205) {
 
-        // Define field view_items_layout to be added to block_exaportuser
-        $table = new xmldb_table('block_exaportitem');
-        $field = new xmldb_field('example_url');
+		// Define field view_items_layout to be added to block_exaportuser
+		$table = new xmldb_table('block_exaportitem');
+		$field = new xmldb_field('example_url');
 				$field->set_attributes(XMLDB_TYPE_CHAR, '255',null, null, null, null, null);
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
 
-        // eportfolio savepoint reached
-        upgrade_block_savepoint(true, 2013102205, 'exaport');
-    }
+		// eportfolio savepoint reached
+		upgrade_block_savepoint(true, 2013102205, 'exaport');
+	}
 
-    if ($oldversion < 2013111800) {
-    
-    	// Define field name_short to be added to block_exaportcate
-    	$table = new xmldb_table('block_exaportcate');
-    	$field = new xmldb_field('name_short', XMLDB_TYPE_TEXT, null, null, null, null, null, 'sourcemod');
-    
-    	// Conditionally launch add field name_short
-    	if (!$dbman->field_exists($table, $field)) {
-    		$dbman->add_field($table, $field);
-    	}
-    
-    	// exaport savepoint reached
-    	upgrade_block_savepoint(true, 2013111800, 'exaport');
-    }
-     if ($oldversion < 2014031700) {
-    
-    	// Define field name_short to be added to block_exaportcate
-    	$table = new xmldb_table('block_exaportitem');
-    	$field = new xmldb_field('parentid', XMLDB_TYPE_INTEGER, '10', 0, null, null, null, 'example_url');
-    	// Conditionally launch add field name_short
-    	if (!$dbman->field_exists($table, $field)) {
-    		$dbman->add_field($table, $field);
-    	}
-    
-    	// exaport savepoint reached
-    	upgrade_block_savepoint(true, 2014031700, 'exaport');
-    }
-    if($oldversion < 2014081100){
-    	//to be compatible with oracle change text fields to varchar
-    	/* block_exaportuser */
-    	$table = new xmldb_table('block_exaportuser');
+	if ($oldversion < 2013111800) {
+	
+		// Define field name_short to be added to block_exaportcate
+		$table = new xmldb_table('block_exaportcate');
+		$field = new xmldb_field('name_short', XMLDB_TYPE_TEXT, null, null, null, null, null, 'sourcemod');
+	
+		// Conditionally launch add field name_short
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+	
+		// exaport savepoint reached
+		upgrade_block_savepoint(true, 2013111800, 'exaport');
+	}
+	 if ($oldversion < 2014031700) {
+	
+		// Define field name_short to be added to block_exaportcate
+		$table = new xmldb_table('block_exaportitem');
+		$field = new xmldb_field('parentid', XMLDB_TYPE_INTEGER, '10', 0, null, null, null, 'example_url');
+		// Conditionally launch add field name_short
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+	
+		// exaport savepoint reached
+		upgrade_block_savepoint(true, 2014031700, 'exaport');
+	}
+	if($oldversion < 2014081100){
+		//to be compatible with oracle change text fields to varchar
+		/* block_exaportuser */
+		$table = new xmldb_table('block_exaportuser');
 		
 		$field = new xmldb_field('view_items_layout', XMLDB_TYPE_CHAR, '1000');
 		$dbman->change_field_type($table, $field);
@@ -426,330 +426,330 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		$dbman->change_field_type($table, $field);
 		
 		// exaport savepoint reached
-    	upgrade_block_savepoint(true, 2014081100, 'exaport');
-    }
-    if($oldversion < 2014092600){
-    	$table = new xmldb_table('block_exaportuser');
-    	$field = new xmldb_field('description', XMLDB_TYPE_TEXT, null);
-    	$dbman->change_field_type($table, $field);
-    	
-    	$table = new xmldb_table('block_exaportcate');
-    	$field = new xmldb_field('description', XMLDB_TYPE_TEXT, null);
-    	$dbman->change_field_type($table, $field);
-    	
-    	$table = new xmldb_table('block_exaportitem');
-    	
-    	$field = new xmldb_field('intro', XMLDB_TYPE_TEXT, null);
-    	$dbman->change_field_type($table, $field);
-    	
-    	$field = new xmldb_field('beispiel_angabe', XMLDB_TYPE_TEXT, null);
-    	$dbman->change_field_type($table, $field);
-    	
-    	$table = new xmldb_table('block_exaportitemcomm');
-    	$field = new xmldb_field('entry', XMLDB_TYPE_TEXT, null);
-    	$dbman->change_field_type($table, $field);
-    	
-    	$table = new xmldb_table('block_exaportview');
-    	$field = new xmldb_field('description', XMLDB_TYPE_TEXT, null);
-    	$dbman->change_field_type($table, $field);
-    	
-    	/*block_exaportviewblock*/
-    	$table = new xmldb_table('block_exaportviewblock');
-    	$field = new xmldb_field('text', XMLDB_TYPE_TEXT, null);
-    	$dbman->change_field_type($table, $field);
-    	$field = new xmldb_field('contentmedia', XMLDB_TYPE_TEXT, null);
-    	$dbman->change_field_type($table, $field);
-    	// exaport savepoint reached
-    	upgrade_block_savepoint(true, 2014092600, 'exaport');
-    }
-    
-    if($oldversion < 2015012600) {
-    	// Define field autofill_artefacts to be added to block_exaporview
-    	$table = new xmldb_table('block_exaportview');
-    	$field = new xmldb_field('autofill_artefacts', XMLDB_TYPE_TEXT, null, null, null, null, null, null);
-    
-    	// Conditionally launch add field autofill_artefacts
-    	if (!$dbman->field_exists($table, $field)) {
-    		$dbman->add_field($table, $field);
-        }
-    }
-    
-    if($oldversion < 2015030201) {
-        // Add group sharing
-        $table = new xmldb_table('block_exaportviewgroupshar');
-        if (!$dbman->table_exists($table)) {
-            // fields
-            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
-            $table->add_field('viewid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-            $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
-            // Create table            
-            $dbman->create_table($table);
-        }
-    }
-
-    if($oldversion < 2015031901) {
-        // Add sharing for artefacts
-    	$table = new xmldb_table('block_exaportcate');
-    	$field = new xmldb_field('shareall', '3', null, null, null, null, null, null);
-    	if (!$dbman->field_exists($table, $field)) {
-    		$dbman->add_field($table, $field);
-        }
-		$field = new xmldb_field('internshare', '3', null, null, null, null, null, null);
-    	if (!$dbman->field_exists($table, $field)) {
-    		$dbman->add_field($table, $field);
-        }
+		upgrade_block_savepoint(true, 2014081100, 'exaport');
+	}
+	if($oldversion < 2014092600){
+		$table = new xmldb_table('block_exaportuser');
+		$field = new xmldb_field('description', XMLDB_TYPE_TEXT, null);
+		$dbman->change_field_type($table, $field);
 		
-        $table = new xmldb_table('block_exaportcatshar');
-        if (!$dbman->table_exists($table)) {
-            // fields
-            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
-            $table->add_field('catid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
-            // Create table            
-            $dbman->create_table($table);
-        }
-        $table = new xmldb_table('block_exaportcatgroupshar');
-        if (!$dbman->table_exists($table)) {
-            // fields
-            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
-            $table->add_field('catid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-            $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
-            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
-            // Create table            
-            $dbman->create_table($table);
-        }
-    }
+		$table = new xmldb_table('block_exaportcate');
+		$field = new xmldb_field('description', XMLDB_TYPE_TEXT, null);
+		$dbman->change_field_type($table, $field);
+		
+		$table = new xmldb_table('block_exaportitem');
+		
+		$field = new xmldb_field('intro', XMLDB_TYPE_TEXT, null);
+		$dbman->change_field_type($table, $field);
+		
+		$field = new xmldb_field('beispiel_angabe', XMLDB_TYPE_TEXT, null);
+		$dbman->change_field_type($table, $field);
+		
+		$table = new xmldb_table('block_exaportitemcomm');
+		$field = new xmldb_field('entry', XMLDB_TYPE_TEXT, null);
+		$dbman->change_field_type($table, $field);
+		
+		$table = new xmldb_table('block_exaportview');
+		$field = new xmldb_field('description', XMLDB_TYPE_TEXT, null);
+		$dbman->change_field_type($table, $field);
+		
+		/*block_exaportviewblock*/
+		$table = new xmldb_table('block_exaportviewblock');
+		$field = new xmldb_field('text', XMLDB_TYPE_TEXT, null);
+		$dbman->change_field_type($table, $field);
+		$field = new xmldb_field('contentmedia', XMLDB_TYPE_TEXT, null);
+		$dbman->change_field_type($table, $field);
+		// exaport savepoint reached
+		upgrade_block_savepoint(true, 2014092600, 'exaport');
+	}
 	
-    if($oldversion < 2015040801) {
+	if($oldversion < 2015012600) {
+		// Define field autofill_artefacts to be added to block_exaporview
+		$table = new xmldb_table('block_exaportview');
+		$field = new xmldb_field('autofill_artefacts', XMLDB_TYPE_TEXT, null, null, null, null, null, null);
+	
+		// Conditionally launch add field autofill_artefacts
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+	}
+	
+	if($oldversion < 2015030201) {
+		// Add group sharing
+		$table = new xmldb_table('block_exaportviewgroupshar');
+		if (!$dbman->table_exists($table)) {
+			// fields
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+			$table->add_field('viewid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+			$table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
+			// Create table			
+			$dbman->create_table($table);
+		}
+	}
+
+	if($oldversion < 2015031901) {
+		// Add sharing for artefacts
+		$table = new xmldb_table('block_exaportcate');
+		$field = new xmldb_field('shareall', '3', null, null, null, null, null, null);
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+		$field = new xmldb_field('internshare', '3', null, null, null, null, null, null);
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+		
+		$table = new xmldb_table('block_exaportcatshar');
+		if (!$dbman->table_exists($table)) {
+			// fields
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+			$table->add_field('catid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+			$table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
+			// Create table			
+			$dbman->create_table($table);
+		}
+		$table = new xmldb_table('block_exaportcatgroupshar');
+		if (!$dbman->table_exists($table)) {
+			// fields
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+			$table->add_field('catid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+			$table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, null);
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
+			// Create table			
+			$dbman->create_table($table);
+		}
+	}
+	
+	if($oldversion < 2015040801) {
 		// Add resume functionality.
 
-        // Define table block_exaportresume to be created.
-        $table = new xmldb_table('block_exaportresume');
-        // Adding fields to table block_exaportresume.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('cover', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('interests', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('goalspersonal', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('goalsacademic', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('goalscareers', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('skillspersonal', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('skillsacademic', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('skillscareers', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        // Adding keys to table block_exaportresume.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportresume.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
+		// Define table block_exaportresume to be created.
+		$table = new xmldb_table('block_exaportresume');
+		// Adding fields to table block_exaportresume.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('courseid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('cover', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('interests', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('goalspersonal', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('goalsacademic', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('goalscareers', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('skillspersonal', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('skillsacademic', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('skillscareers', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		// Adding keys to table block_exaportresume.
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportresume.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}
 		
-        // Define table block_exaportresume_certif to be created.
-        $table = new xmldb_table('block_exaportresume_certif');
-        // Adding fields to table block_exaportresume_certif.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('date', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('title', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
-        $table->add_field('description', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
-        // Adding keys to table block_exaportresume_certif.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportresume_certif.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }		
+		// Define table block_exaportresume_certif to be created.
+		$table = new xmldb_table('block_exaportresume_certif');
+		// Adding fields to table block_exaportresume_certif.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('date', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('title', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+		$table->add_field('description', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+		// Adding keys to table block_exaportresume_certif.
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportresume_certif.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}		
 		
-        // Define table block_exaportresume_edu to be created.
-        $table = new xmldb_table('block_exaportresume_edu');
-        // Adding fields to table block_exaportresume_edu.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('startdate', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('enddate', XMLDB_TYPE_CHAR, '250', null, null, null, null);
-        $table->add_field('institution', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
-        $table->add_field('institutionaddress', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('qualtype', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('qualname', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('qualdescription', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
-        // Adding keys to table block_exaportresume_edu.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportresume_edu.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }		
+		// Define table block_exaportresume_edu to be created.
+		$table = new xmldb_table('block_exaportresume_edu');
+		// Adding fields to table block_exaportresume_edu.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('startdate', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('enddate', XMLDB_TYPE_CHAR, '250', null, null, null, null);
+		$table->add_field('institution', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+		$table->add_field('institutionaddress', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('qualtype', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('qualname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('qualdescription', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+		// Adding keys to table block_exaportresume_edu.
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportresume_edu.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}		
 		
 		// Define table block_exaportresume_employ to be created.
-        $table = new xmldb_table('block_exaportresume_employ');
-        // Adding fields to table block_exaportresume_employ.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('startdate', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('enddate', XMLDB_TYPE_CHAR, '250', null, null, null, null);
-        $table->add_field('employer', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
-        $table->add_field('employeraddress', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('jobtitle', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('positiondescription', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
-        // Adding keys to table block_exaportresume_employ.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportresume_employ.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
+		$table = new xmldb_table('block_exaportresume_employ');
+		// Adding fields to table block_exaportresume_employ.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('startdate', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('enddate', XMLDB_TYPE_CHAR, '250', null, null, null, null);
+		$table->add_field('employer', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+		$table->add_field('employeraddress', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('jobtitle', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('positiondescription', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+		// Adding keys to table block_exaportresume_employ.
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportresume_employ.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}
 
 		// Define table block_exaportresume_mbrship to be created.
-        $table = new xmldb_table('block_exaportresume_mbrship');
-        // Adding fields to table block_exaportresume_mbrship.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('startdate', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('enddate', XMLDB_TYPE_CHAR, '250', null, null, null, null);
-        $table->add_field('title', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
-        $table->add_field('description', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
-        // Adding keys to table block_exaportresume_mbrship.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportresume_mbrship.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
+		$table = new xmldb_table('block_exaportresume_mbrship');
+		// Adding fields to table block_exaportresume_mbrship.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('startdate', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('enddate', XMLDB_TYPE_CHAR, '250', null, null, null, null);
+		$table->add_field('title', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+		$table->add_field('description', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+		// Adding keys to table block_exaportresume_mbrship.
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportresume_mbrship.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}
 
 		 // Define table block_exaportresume_public to be created.
-        $table = new xmldb_table('block_exaportresume_public');
-        // Adding fields to table block_exaportresume_public.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('date', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('title', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
-        $table->add_field('contribution', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
-        $table->add_field('contributiondetails', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('url', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
-        // Adding keys to table block_exaportresume_public.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportresume_public.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
+		$table = new xmldb_table('block_exaportresume_public');
+		// Adding fields to table block_exaportresume_public.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('user_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('resume_id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('date', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('title', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+		$table->add_field('contribution', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+		$table->add_field('contributiondetails', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('url', XMLDB_TYPE_TEXT, null, null, null, null, null);
+		$table->add_field('sorting', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+		// Adding keys to table block_exaportresume_public.
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportresume_public.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}
 
-        // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2015040801, 'exaport');
+		// Exaport savepoint reached.
+		upgrade_block_savepoint(true, 2015040801, 'exaport');
 	}
 
 
-    if ($oldversion < 2015051901) {
+	if ($oldversion < 2015051901) {
 
-        // Define table block_exaportresume_badges to be created.
-        $table = new xmldb_table('block_exaportresume_badges');
-        // Adding fields to table block_exaportresume_badges.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('resumeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('badgeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('sorting', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, '10');
-        // Adding keys to table block_exaportresume_badges.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportresume_badges.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
-        // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2015051901, 'exaport');
-    }
+		// Define table block_exaportresume_badges to be created.
+		$table = new xmldb_table('block_exaportresume_badges');
+		// Adding fields to table block_exaportresume_badges.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('resumeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('badgeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('sorting', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, '10');
+		// Adding keys to table block_exaportresume_badges.
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportresume_badges.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}
+		// Exaport savepoint reached.
+		upgrade_block_savepoint(true, 2015051901, 'exaport');
+	}
 
-    if ($oldversion < 2015052001) {
+	if ($oldversion < 2015052001) {
 	 // Define table block_exaportcompresume_mm to be created.
-        $table = new xmldb_table('block_exaportcompresume_mm');
-        // Adding fields to table block_exaportcompresume_mm.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('compid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('resumeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('comptype', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, null);
-        // Adding keys to table block_exaportcompresume_mm.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportcompresume_mm.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
-        // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2015052001, 'exaport');    
+		$table = new xmldb_table('block_exaportcompresume_mm');
+		// Adding fields to table block_exaportcompresume_mm.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('compid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('resumeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('comptype', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, null);
+		// Adding keys to table block_exaportcompresume_mm.
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportcompresume_mm.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}
+		// Exaport savepoint reached.
+		upgrade_block_savepoint(true, 2015052001, 'exaport');	
    }
 
    if ($oldversion < 2015060901) {
 
-        // Define field shareall to be added to block_exaportcate.
-        $table = new xmldb_table('block_exaportcate');
-        $field = new xmldb_field('structure_shareall', XMLDB_TYPE_INTEGER, '3', null, null, null, '0', 'internshare');
-        // Conditionally launch add field shareall.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-        $field = new xmldb_field('structure_share', XMLDB_TYPE_INTEGER, '3', null, null, null, '0', 'structure_shareall');
-        // Conditionally launch add field shareall.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
+		// Define field shareall to be added to block_exaportcate.
+		$table = new xmldb_table('block_exaportcate');
+		$field = new xmldb_field('structure_shareall', XMLDB_TYPE_INTEGER, '3', null, null, null, '0', 'internshare');
+		// Conditionally launch add field shareall.
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+		$field = new xmldb_field('structure_share', XMLDB_TYPE_INTEGER, '3', null, null, null, '0', 'structure_shareall');
+		// Conditionally launch add field shareall.
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
 
 	 // Define table block_exaportcat_structshar to be created.
-        $table = new xmldb_table('block_exaportcat_structshar');
-        // Adding fields to table block_exaportcat_structshar.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('catid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('userid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportcat_structshar.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        };
+		$table = new xmldb_table('block_exaportcat_structshar');
+		// Adding fields to table block_exaportcat_structshar.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('catid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('userid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportcat_structshar.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		};
 	// Define table block_exaportcat_strgrshar to be created.
-        $table = new xmldb_table('block_exaportcat_strgrshar');
-        // Adding fields to table block_exaportcat_strgrshar.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('catid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('groupid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
+		$table = new xmldb_table('block_exaportcat_strgrshar');
+		// Adding fields to table block_exaportcat_strgrshar.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('catid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('groupid', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
 	$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportcat_strgrshar.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
+		// Conditionally launch create table for block_exaportcat_strgrshar.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}
 
-        // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2015060901, 'exaport');
-    }
+		// Exaport savepoint reached.
+		upgrade_block_savepoint(true, 2015060901, 'exaport');
+	}
 
-    if ($oldversion < 2015110900) {
-        // drop unused user_id fields
-        $field = new xmldb_field('user_id');
-        
-        $table = new xmldb_table('block_exaportresume_certif');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->drop_field($table, $field);
-        }
-        $table = new xmldb_table('block_exaportresume_edu');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->drop_field($table, $field);
-        }
-        $table = new xmldb_table('block_exaportresume_employ');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->drop_field($table, $field);
-        }
-        $table = new xmldb_table('block_exaportresume_mbrship');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->drop_field($table, $field);
-        }
-        $table = new xmldb_table('block_exaportresume_public');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->drop_field($table, $field);
-        }
-    }
+	if ($oldversion < 2015110900) {
+		// drop unused user_id fields
+		$field = new xmldb_field('user_id');
+		
+		$table = new xmldb_table('block_exaportresume_certif');
+		if ($dbman->field_exists($table, $field)) {
+			$dbman->drop_field($table, $field);
+		}
+		$table = new xmldb_table('block_exaportresume_edu');
+		if ($dbman->field_exists($table, $field)) {
+			$dbman->drop_field($table, $field);
+		}
+		$table = new xmldb_table('block_exaportresume_employ');
+		if ($dbman->field_exists($table, $field)) {
+			$dbman->drop_field($table, $field);
+		}
+		$table = new xmldb_table('block_exaportresume_mbrship');
+		if ($dbman->field_exists($table, $field)) {
+			$dbman->drop_field($table, $field);
+		}
+		$table = new xmldb_table('block_exaportresume_public');
+		if ($dbman->field_exists($table, $field)) {
+			$dbman->drop_field($table, $field);
+		}
+	}
 
    return $result;
 }

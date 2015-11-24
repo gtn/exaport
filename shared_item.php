@@ -46,93 +46,93 @@ $PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
 $item = block_exaport_get_item($itemid, $access);
 $item->intro = process_media_url($item->intro, 320, 240);
 
-    if ($deletecomment == 1) {
-        if (!confirm_sesskey()) {
-            print_error("badsessionkey", "block_exaport");
-        }
-        $conditions = array("id" => $commentid, "userid" => $USER->id, "itemid" => $itemid);
-        if ($DB->count_records("block_exaportitemcomm", $conditions) == 1) {
-            $DB->delete_records("block_exaportitemcomm", $conditions);
+	if ($deletecomment == 1) {
+		if (!confirm_sesskey()) {
+			print_error("badsessionkey", "block_exaport");
+		}
+		$conditions = array("id" => $commentid, "userid" => $USER->id, "itemid" => $itemid);
+		if ($DB->count_records("block_exaportitemcomm", $conditions) == 1) {
+			$DB->delete_records("block_exaportitemcomm", $conditions);
 
-            //parse_str($_SERVER['QUERY_STRING'], $params);
-            //redirect($_SERVER['PHP_SELF'] . '?' . http_build_query(array('deletecomment' => null, 'commentid' => null, 'sesskey' => null) + (array) $params));
-        } else {
-        		if(!isset($_POST['action'])){ //if deletecomment is set and form is submitted, comment was immediatly deleted and cant be deleted anymore, no error
-	           
-	            print_error("commentnotfound", "block_exaport");
-	            //redirect($_SERVER['REQUEST_URI']);
-	          }
-        }
+			//parse_str($_SERVER['QUERY_STRING'], $params);
+			//redirect($_SERVER['PHP_SELF'] . '?' . http_build_query(array('deletecomment' => null, 'commentid' => null, 'sesskey' => null) + (array) $params));
+		} else {
+				if(!isset($_POST['action'])){ //if deletecomment is set and form is submitted, comment was immediatly deleted and cant be deleted anymore, no error
+			   
+				print_error("commentnotfound", "block_exaport");
+				//redirect($_SERVER['REQUEST_URI']);
+			  }
+		}
 }
-    
+	
 if (!$item) {
-    print_error("bookmarknotfound", "block_exaport");
+	print_error("bookmarknotfound", "block_exaport");
 }
 
 $conditions = array("id" => $item->userid);
 if (!$user = $DB->get_record("user", $conditions)) {
-    print_error("nouserforid", "block_exaport");
+	print_error("nouserforid", "block_exaport");
 }
 
 $url = '/blocks/exabis_competences/shared_item.php';
 $PAGE->set_url($url);
 
 if ($item->allowComments) {
-    require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
-    
-    $itemExample = $DB->get_record('block_exacompitemexample', array('itemid' => $itemid));
-    
-    $commentseditform = new block_exaport_comment_edit_form($PAGE->url,array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade'=>($itemExample->teachervalue) ? $itemExample->teachervalue : 0));
+	require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
+	
+	$itemExample = $DB->get_record('block_exacompitemexample', array('itemid' => $itemid));
+	
+	$commentseditform = new block_exaport_comment_edit_form($PAGE->url,array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade'=>($itemExample->teachervalue) ? $itemExample->teachervalue : 0));
 
-    if ($commentseditform->is_cancelled()
-        );
-    else if ($commentseditform->no_submit_button_pressed()
-        );
-    else if ($fromform = $commentseditform->get_data()) {
-        switch ($action) {
-            case 'add':
-                block_exaport_do_add_comment($item, $fromform, $commentseditform);
-                
-                //redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
-                $prms='access='.$access.'&itemid='.$itemid;
-                if (!empty($backtype)) $prms.='backtype='.$backtype;
-                redirect($CFG->wwwroot.'/blocks/exaport/shared_item.php?'.$prms);
-                break;
-        }
-    }
+	if ($commentseditform->is_cancelled()
+		);
+	else if ($commentseditform->no_submit_button_pressed()
+		);
+	else if ($fromform = $commentseditform->get_data()) {
+		switch ($action) {
+			case 'add':
+				block_exaport_do_add_comment($item, $fromform, $commentseditform);
+				
+				//redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
+				$prms='access='.$access.'&itemid='.$itemid;
+				if (!empty($backtype)) $prms.='backtype='.$backtype;
+				redirect($CFG->wwwroot.'/blocks/exaport/shared_item.php?'.$prms);
+				break;
+		}
+	}
 }
 
 if ($item->access->page == 'view') {
-    if ($item->access->request == 'intern') {
-        block_exaport_print_header("views");
-    } else { 
+	if ($item->access->request == 'intern') {
+		block_exaport_print_header("views");
+	} else { 
 		block_exaport_print_header("sharedbookmarks");
-        // print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
-        echo block_exaport_wrapperdivstart();
-    }
+		// print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+		echo block_exaport_wrapperdivstart();
+	}
 } elseif ($item->access->page == 'portfolio') {
-    if ($item->access->request == 'intern') {
-        if ($backtype && ($item->userid == $USER->id)) {
-            block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype));
-        } else {
-            block_exaport_print_header("sharedbookmarks");
-        }
-    } else {
+	if ($item->access->request == 'intern') {
+		if ($backtype && ($item->userid == $USER->id)) {
+			block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype));
+		} else {
+			block_exaport_print_header("sharedbookmarks");
+		}
+	} else {
 		block_exaport_print_header("sharedbookmarks");
-        // print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
-        echo block_exaport_wrapperdivstart();
-    }
+		// print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+		echo block_exaport_wrapperdivstart();
+	}
 }
 
 //IF FORM DATA -> INSERT
 if(isset($_POST['data'])) {
-    foreach ($_POST['data'] as $key => $desc) {
-        if (!empty($_POST['data'][$key])) {
-                // Die Einträge in ein Array speichern
-                $values[] = $key;
-        }
-    }
-    block_exaport_set_competences($values, $item, $USER->id);
+	foreach ($_POST['data'] as $key => $desc) {
+		if (!empty($_POST['data'][$key])) {
+				// Die Einträge in ein Array speichern
+				$values[] = $key;
+		}
+	}
+	block_exaport_set_competences($values, $item, $USER->id);
 }
 echo "<div>\n";
 
@@ -142,50 +142,50 @@ echo "<div>\n";
 block_exaport_print_extern_item($item, $access);
 
 if ($item->allowComments) {
-    $newcomment = new stdClass();
-    $newcomment->action = 'add';
-    $newcomment->courseid = $COURSE->id;
-    $newcomment->timemodified = time();
-    $newcomment->itemid = $itemid;
-    $newcomment->userid = $USER->id;
-    $newcomment->access = $access;
-    $newcomment->backtype = $backtype;
+	$newcomment = new stdClass();
+	$newcomment->action = 'add';
+	$newcomment->courseid = $COURSE->id;
+	$newcomment->timemodified = time();
+	$newcomment->itemid = $itemid;
+	$newcomment->userid = $USER->id;
+	$newcomment->access = $access;
+	$newcomment->backtype = $backtype;
 
-    block_exaport_show_comments($item);
+	block_exaport_show_comments($item);
 
-    $commentseditform->set_data($newcomment);
-    //$commentseditform->_form->_attributes['action'] = $_SERVER['REQUEST_URI'];
-    $commentseditform->display();
+	$commentseditform->set_data($newcomment);
+	//$commentseditform->_form->_attributes['action'] = $_SERVER['REQUEST_URI'];
+	$commentseditform->display();
 } elseif ($item->showComments) {
-    block_exaport_print_extcomments($item->id);
+	block_exaport_print_extcomments($item->id);
 }
 
 if ($item->access->page == 'view') {
-    $backlink = 'shared_view.php?access=' . $item->access->parentAccess;
+	$backlink = 'shared_view.php?access=' . $item->access->parentAccess;
 } else {
-    // intern
-    if ($item->userid == $USER->id) {
-        $backlink = '';
-    }
-    $backlink = '';
-    // extern.php?id=$id
+	// intern
+	if ($item->userid == $USER->id) {
+		$backlink = '';
+	}
+	$backlink = '';
+	// extern.php?id=$id
 }
 
 
 if (block_exaport_check_competence_interaction ()) {
 //begin
-    $has_competences = block_exaport_check_item_competences($item);
-    //if ($has_competences && has_capability('block/exaport:competences', $context)) {
+	$has_competences = block_exaport_check_item_competences($item);
+	//if ($has_competences && has_capability('block/exaport:competences', $context)) {
 	if($has_competences){
 		//für alle rollen? Keine interaktion?
 		//echo get_string("teachercomps","block_exaport");
-        block_exaport_build_comp_table($item);
-    }
+		block_exaport_build_comp_table($item);
+	}
 	//end
 } else
-    $has_competences = false;
+	$has_competences = false;
 if ($backlink) {
-    echo "<br /><a href=\"{$CFG->wwwroot}/blocks/exaport/" . $backlink . "\">" . get_string("back", "block_exaport") . "</a><br /><br />";
+	echo "<br /><a href=\"{$CFG->wwwroot}/blocks/exaport/" . $backlink . "\">" . get_string("back", "block_exaport") . "</a><br /><br />";
 }
 
 echo "</div>";
@@ -194,71 +194,71 @@ echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();
 
 function block_exaport_show_comments($item) {
-    global $CFG, $USER, $COURSE, $DB, $OUTPUT;
-    $conditions = array("itemid" => $item->id);
-    $comments = $DB->get_records("block_exaportitemcomm", $conditions, 'timemodified DESC');
+	global $CFG, $USER, $COURSE, $DB, $OUTPUT;
+	$conditions = array("itemid" => $item->id);
+	$comments = $DB->get_records("block_exaportitemcomm", $conditions, 'timemodified DESC');
 
-    if ($comments) {
-        foreach ($comments as $comment) {
-            $stredit = get_string('edit');
-            $strdelete = get_string('delete');
+	if ($comments) {
+		foreach ($comments as $comment) {
+			$stredit = get_string('edit');
+			$strdelete = get_string('delete');
 
-            $conditions = array("id" => $comment->userid);
-            $user = $DB->get_record('user', $conditions);
+			$conditions = array("id" => $comment->userid);
+			$user = $DB->get_record('user', $conditions);
 
-            echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
+			echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
-            echo '<tr class="header"><td class="picture left">';
-            echo $OUTPUT->user_picture($user);
-            echo '</td>';
+			echo '<tr class="header"><td class="picture left">';
+			echo $OUTPUT->user_picture($user);
+			echo '</td>';
 
-            echo '<td class="topic starter"><div class="author">';
-            $fullname = fullname($user, $comment->userid);
-            $by = new object();
-            $by->name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
-                    $user->id . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
-            $by->date = userdate($comment->timemodified);
-            print_string('bynameondate', 'forum', $by);
+			echo '<td class="topic starter"><div class="author">';
+			$fullname = fullname($user, $comment->userid);
+			$by = new object();
+			$by->name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
+					$user->id . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
+			$by->date = userdate($comment->timemodified);
+			print_string('bynameondate', 'forum', $by);
 
-            if ($comment->userid == $USER->id) {
-                echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&deletecomment=1&sesskey=' . sesskey()) . '">' . get_string('delete') . '</a>';
-            }
-            echo '</div></td></tr>';
+			if ($comment->userid == $USER->id) {
+				echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&deletecomment=1&sesskey=' . sesskey()) . '">' . get_string('delete') . '</a>';
+			}
+			echo '</div></td></tr>';
 
-            echo '<tr><td class="left side">';
+			echo '<tr><td class="left side">';
 
-            echo '</td><td class="content">' . "\n";
+			echo '</td><td class="content">' . "\n";
 
-            echo format_text($comment->entry);
+			echo format_text($comment->entry);
 
-            echo '</td></tr></table>' . "\n\n";
-        }
-    }
+			echo '</td></tr></table>' . "\n\n";
+		}
+	}
 }
 
 function block_exaport_do_add_comment($item, $post, $blogeditform) {
-    global $CFG, $USER, $COURSE, $DB;
+	global $CFG, $USER, $COURSE, $DB;
 
-    $post->userid = $USER->id;
-    $post->timemodified = time();
-    $post->course = $COURSE->id;
-    $post->entry=$post->entry["text"];
+	$post->userid = $USER->id;
+	$post->timemodified = time();
+	$post->course = $COURSE->id;
+	$post->entry=$post->entry["text"];
    
-    if(block_exaport_has_grading_permission($item->id) && isset($post->itemgrade)) {
-    	$itemExample = $DB->get_record('block_exacompitemexample',array('itemid'=>$item->id));
-    	$itemExample->teachervalue = $post->itemgrade;
-    	$DB->update_record('block_exacompitemexample', $itemExample);
-    	
-    	// check for example additional info and set it
-    	$exampleEval = $DB->get_record('block_exacompexameval', array('courseid'=>$item->courseid,'exampleid'=>$itemExample->exampleid,'studentid'=>$item->userid));
-    	$exampleEval->additionalinfo = $post->itemgrade;
-    	$DB->update_record('block_exacompexameval', $exampleEval);
-    }
-    	
-    // Insert the new blog entry.
-    if ($DB->insert_record('block_exaportitemcomm', $post)) {
-        block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
-    } else {
-        error('There was an error adding this post in the database');
-    }
+	if(block_exaport_has_grading_permission($item->id) && isset($post->itemgrade)) {
+		$itemExample = $DB->get_record('block_exacompitemexample',array('itemid'=>$item->id));
+		$itemExample->teachervalue = $post->itemgrade;
+		$DB->update_record('block_exacompitemexample', $itemExample);
+		
+		// check for example additional info and set it
+		$exampleEval = $DB->get_record('block_exacompexameval', array('courseid'=>$item->courseid,'exampleid'=>$itemExample->exampleid,'studentid'=>$item->userid));
+		$exampleEval->additionalinfo = $post->itemgrade;
+		$DB->update_record('block_exacompexameval', $exampleEval);
+	}
+		
+	// Insert the new blog entry.
+	if ($DB->insert_record('block_exaportitemcomm', $post)) {
+		block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
+	} else {
+		error('There was an error adding this post in the database');
+	}
 }

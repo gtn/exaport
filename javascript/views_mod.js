@@ -260,7 +260,7 @@ var exaportViewEdit = {};
 				connectWith: ['.portfolioDesignBlocks'],
 				placeholder: "block-placeholder",
 				forcePlaceholderSize: true,
-				stop: function(e, ui){    
+				stop: function(e, ui){	
 					// listenelemente zurücksetzen
 					resetElements();
 				}
@@ -278,7 +278,7 @@ var exaportViewEdit = {};
 				placeholder: ".block-placeholder",
 				forcePlaceholderSize: true,
 				helper: "clone",
-				stop: function(e, ui){    
+				stop: function(e, ui){	
 				}		
 			});
 		},
@@ -624,12 +624,12 @@ var exaportViewEdit = {};
 				share_text += $E.translate('internalaccessgroups');
 				$('#internaccess-users').hide();
 				$('#internaccess-groups').show();
-                ExabisEportfolio.load_grouplist('views_mod');
+				ExabisEportfolio.load_grouplist('views_mod');
 			} else {
 				share_text += $E.translate('internalaccessusers');
 				$('#internaccess-groups').hide();
 				$('#internaccess-users').show();
-                ExabisEportfolio.load_userlist('views_mod');
+				ExabisEportfolio.load_userlist('views_mod');
 			}
 		} else {
 			$('#internaccess-settings').hide();

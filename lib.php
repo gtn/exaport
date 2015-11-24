@@ -9,14 +9,14 @@ require_once dirname(__FILE__).'/lib/sharelib.php';
 // http://localhost/moodle20/pluginfile.php/17/block_exaport/item_content/portfolio/id/2/itemid/3/pic_145.jpg
 // 17/block_exaport/item_content/portfolio/id/2/itemid/3/pic_145.jpg
 // user context id (moodle standard)
-//    moudle name (moodle standard)
-//                  file column name (moodle standard)
-//                               access string according to exaport
-//                                              itemid (string)
-//                                                     itemid
-//                                                       file name
+//	moudle name (moodle standard)
+//				  file column name (moodle standard)
+//							   access string according to exaport
+//											  itemid (string)
+//													 itemid
+//													   file name
 function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
-    global $USER, $CFG, $DB;
+	global $USER, $CFG, $DB;
 
 	// always require login, at least guest
 	require_login();

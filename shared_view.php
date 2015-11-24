@@ -198,12 +198,12 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'" alt=""/></a></div>';
 			};			
 			echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
-                        // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer
-                        if($comp && has_capability('block/exaport:competences', $context)) {
-                            if($has_competences)
-                                echo '<img align="right" src="'.$CFG->wwwroot.'/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
-                        }
-                        echo '</div>';
+						// Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer
+						if($comp && has_capability('block/exaport:competences', $context)) {
+							if($has_competences)
+								echo '<img align="right" src="'.$CFG->wwwroot.'/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
+						}
+						echo '</div>';
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
 			echo $file_params;			
 			echo '<div class="view-item-text">';
@@ -252,20 +252,20 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			echo '<div class="header view-header">'.nl2br($block->block_title).'</div>';
 			$badge = null;
 			foreach ($badges as $tmp) {
-                if ($tmp->id == $block->itemid) {
-                    $badge = $tmp;
-                    break;
-                };
-            };
-            if (!$badge) {
-                // badge not found
-                continue;
-            }
+				if ($tmp->id == $block->itemid) {
+					$badge = $tmp;
+					break;
+				};
+			};
+			if (!$badge) {
+				// badge not found
+				continue;
+			}
 			echo '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
 			if (!$badge->courseid) { // For badges with courseid = NULL
 				$badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
 			} else {
-			    $context = context_course::instance($badge->courseid);	
+				$context = context_course::instance($badge->courseid);	
 				$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
 			}
 			echo '<img src="'.$badge->imageUrl.'">';

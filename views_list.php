@@ -145,7 +145,7 @@ if (!$views) {
 				}
 				$table->data[$view_i]['accessoptions'] .= '<div>'.get_string("internalaccessgroups", "block_exaport").':</div><div style="padding-left: 10px;">'.join(', ', $groups).'</div>';
 			}
-        } else {
+		} else {
 			// read users
 			$query = "SELECT ".$DB->sql_fullname()." AS name".
 				" FROM {user} u,".
@@ -179,7 +179,7 @@ if (!$views) {
 	}
 
 	$output = html_writer::table($table);
-        echo $output;
+		echo $output;
 }
 
 echo "<div class='block_eportfolio_center'>";

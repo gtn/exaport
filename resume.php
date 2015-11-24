@@ -42,7 +42,7 @@ if (!$resume) {
 	$newresumeparams->user_id = $USER->id;
 	$newresumeparams->courseid = $courseid;
 	$newresumeparams->cover = get_string("resume_template_newresume", "block_exaport");
-    $DB->insert_record("block_exaportresume", $newresumeparams);
+	$DB->insert_record("block_exaportresume", $newresumeparams);
 	$resume = block_exaport_get_resume_params();
 }
 
@@ -52,13 +52,13 @@ $context = context_system::instance();
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
-    print_error("invalidinstance", "block_exaport");
+	print_error("invalidinstance", "block_exaport");
 }
 
 // get XML for europass
 if ($action == 'xmleuropass_export') {
 	$xml = europassXML($resume->id);
-    
+	
 	header('Content-disposition: attachment; filename=europass.xml');
 	header("Content-type: application/xml");
 	echo $xml;
@@ -121,9 +121,9 @@ $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'c
 if ($action == 'edit') {
 	$withfiles = false;
 	$show_information = false;
-    if (!confirm_sesskey()) {
-        print_error("blobadsessionkey", "block_exaport");
-    };
+	if (!confirm_sesskey()) {
+		print_error("blobadsessionkey", "block_exaport");
+	};
 	$data = new stdClass();
 	$data->courseid = $courseid;
 	$data->action = 'edit';
@@ -262,9 +262,9 @@ if ($action == 'edit') {
 // Sort changing
 if ($action == 'sortchange' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'public'])) {
 	if (!confirm_sesskey()) {
-        print_error("blobadsessionkey", "block_exaport");
-    }
-    // TODO: check $type
+		print_error("blobadsessionkey", "block_exaport");
+	}
+	// TODO: check $type
 	$id1 = optional_param('id1', 0, PARAM_INT);
 	$id2 = optional_param('id2', 0, PARAM_INT);
 	if ($id1 && $id2) {

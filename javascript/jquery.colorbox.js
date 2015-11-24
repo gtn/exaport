@@ -48,12 +48,12 @@
 		overlayClose: true,		
 		escKey: true,
 		arrowKey: true,
-        top: false,
-        bottom: false,
-        left: false,
-        right: false,
-        fixed: false,
-        data: false
+		top: false,
+		bottom: false,
+		left: false,
+		right: false,
+		fixed: false,
+		data: false
 	},
 	
 	// Abstracting the HTML and event identifiers for easy rebranding
@@ -107,8 +107,8 @@
 	open,
 	active,
 	closing,
-    handler,
-    loadingTimer,
+	handler,
+	loadingTimer,
 	
 	publicMethod,
 	boxElement = prefix + 'Element';
@@ -121,8 +121,8 @@
 	function $div(id, cssText) { 
 		var div = document.createElement('div');
 		if (id) {
-            div.id = prefix + id;
-        }
+			div.id = prefix + id;
+		}
 		div.style.cssText = cssText || '';
 		return $(div);
 	}
@@ -143,17 +143,17 @@
 	function process(settings) {
 		for (var i in settings) {
 			if ($.isFunction(settings[i]) && i.substring(0, 2) !== 'on') { // checks to make sure the function isn't one of the callbacks, they will be handled at the appropriate time.
-			    settings[i] = settings[i].call(element);
+				settings[i] = settings[i].call(element);
 			}
 		}
-        
+		
 		settings.rel = settings.rel || element.rel || 'nofollow';
 		settings.href = settings.href || $(element).attr('href');
 		settings.title = settings.title || element.title;
-        
-        if (typeof settings.href === "string") {
-            settings.href = $.trim(settings.href);
-        }
+		
+		if (typeof settings.href === "string") {
+			settings.href = $.trim(settings.href);
+		}
 	}
 
 	function trigger(event, callback) {
@@ -206,8 +206,8 @@
 				stop();
 			}
 		} else {
-            $box.removeClass(className + "off " + className + "on");
-        }
+			$box.removeClass(className + "off " + className + "on");
+		}
 	}
 
 	function launch(elem) {
@@ -380,16 +380,16 @@
 		// Setting padding to remove the need to do size conversions during the animation step.
 		$box.css({"padding-bottom": interfaceHeight, "padding-right": interfaceWidth}).hide();
 		
-        // Setup button events.
-        $next.click(function () {
-            publicMethod.next();
-        });
-        $prev.click(function () {
-            publicMethod.prev();
-        });
-        $close.click(function () {
-            publicMethod.close();
-        });
+		// Setup button events.
+		$next.click(function () {
+			publicMethod.next();
+		});
+		$prev.click(function () {
+			publicMethod.prev();
+		});
+		$close.click(function () {
+			publicMethod.close();
+		});
 		
 		$groupControls = $next.add($prev).add($current).add($slideshow);
 		
@@ -399,7 +399,7 @@
 		
 
 
-        
+		
 		$overlay.click(function () {
 			if (settings.overlayClose) {
 				publicMethod.close();
@@ -408,7 +408,7 @@
 		
 		// Set Navigation Key Bindings
 		$(document).bind('keydown.' + prefix, function (e) {
-            var key = e.keyCode;
+			var key = e.keyCode;
 			if (open && settings.escKey && key === 27) {
 				e.preventDefault();
 				publicMethod.close();
@@ -426,33 +426,33 @@
 
 
 			if (document.getElementsByName("compids").length) {
-                var comps=document.getElementsByName("compids")[0].value;
+				var comps=document.getElementsByName("compids")[0].value;
 				var comptitles="";
 				var subold="";
-//                comps = comps.split(",");
-//                alert(comps[0]);
-                for(var i=0; i < document.treeform.desc.length; i++){
-                    var oc = false;
-                    var suche = comps.indexOf(document.treeform.desc[i].value+",");
-                    if(suche != -1 && suche > 0) {
-                        if(comps[suche-1] == ",")
-                            oc = true;
-                    }
-                    if(suche == 0)
-                        oc = true;
+//				comps = comps.split(",");
+//				alert(comps[0]);
+				for(var i=0; i < document.treeform.desc.length; i++){
+					var oc = false;
+					var suche = comps.indexOf(document.treeform.desc[i].value+",");
+					if(suche != -1 && suche > 0) {
+						if(comps[suche-1] == ",")
+							oc = true;
+					}
+					if(suche == 0)
+						oc = true;
 
-                    if(oc) {
-                      document.treeform.desc[i].checked = true;
-                      subid=document.treeform.desc[i].getAttribute('class');
-                      if (subid!=subold){
-                      	subold=subid;
-                      	subtitl=document.getElementById('gegenst'+subid).getAttribute('alt');
-                      	comptitles +='<h3>' + subtitl + '</h3>';
-                      }
-                      
+					if(oc) {
+					  document.treeform.desc[i].checked = true;
+					  subid=document.treeform.desc[i].getAttribute('class');
+					  if (subid!=subold){
+					  	subold=subid;
+					  	subtitl=document.getElementById('gegenst'+subid).getAttribute('alt');
+					  	comptitles +='<h3>' + subtitl + '</h3>';
+					  }
+					  
 											comptitles +='<span>' + document.treeform.desc[i].getAttribute('alt') + '</span><br/>';
 										}
-                }
+				}
 				document.getElementById("comptitles").innerHTML = comptitles;
 			}
 	};
@@ -463,41 +463,41 @@
 	};
 
 	publicMethod.position = function (speed, loadedCallback) {
-        var animate_speed, top = 0, left = 0;
-        
-        // remove the modal so that it doesn't influence the document width/height        
-        $box.hide();
-        
-        if (settings.fixed && !isIE6) {
-            $box.css({position: 'fixed'});
-        } else {
-            top = $window.scrollTop();
-            left = $window.scrollLeft();
-            $box.css({position: 'absolute'});
-        }
-        
+		var animate_speed, top = 0, left = 0;
+		
+		// remove the modal so that it doesn't influence the document width/height		
+		$box.hide();
+		
+		if (settings.fixed && !isIE6) {
+			$box.css({position: 'fixed'});
+		} else {
+			top = $window.scrollTop();
+			left = $window.scrollLeft();
+			$box.css({position: 'absolute'});
+		}
+		
 		// keeps the top and left positions within the browser's viewport.
-        if (settings.right !== false) {
-            left += Math.max($window.width() - settings.w - loadedWidth - interfaceWidth - setSize(settings.right, 'x'), 0);
-        } else if (settings.left !== false) {
-            left += setSize(settings.left, 'x');
-        } else {
-            left += Math.max($window.width() - settings.w - loadedWidth - interfaceWidth, 0) / 2;
-        }
-        
-        if (settings.bottom !== false) {
-            top += Math.max(document.documentElement.clientHeight - settings.h - loadedHeight - interfaceHeight - setSize(settings.bottom, 'y'), 0);
-        } else if (settings.top !== false) {
-            top += setSize(settings.top, 'y');
-        } else {
-            top += Math.max(document.documentElement.clientHeight - settings.h - loadedHeight - interfaceHeight, 0) / 2;
-        }
-        
-        $box.show();
-        
+		if (settings.right !== false) {
+			left += Math.max($window.width() - settings.w - loadedWidth - interfaceWidth - setSize(settings.right, 'x'), 0);
+		} else if (settings.left !== false) {
+			left += setSize(settings.left, 'x');
+		} else {
+			left += Math.max($window.width() - settings.w - loadedWidth - interfaceWidth, 0) / 2;
+		}
+		
+		if (settings.bottom !== false) {
+			top += Math.max(document.documentElement.clientHeight - settings.h - loadedHeight - interfaceHeight - setSize(settings.bottom, 'y'), 0);
+		} else if (settings.top !== false) {
+			top += setSize(settings.top, 'y');
+		} else {
+			top += Math.max(document.documentElement.clientHeight - settings.h - loadedHeight - interfaceHeight, 0) / 2;
+		}
+		
+		$box.show();
+		
 		// setting the speed to 0 to reduce the delay between same-sized content.
 		animate_speed = ($box.width() === settings.w + loadedWidth && $box.height() === settings.h + loadedHeight) ? 0 : speed;
-        
+		
 		// this gives the wrapper plenty of breathing room so it's floated contents can move around smoothly,
 		// but it has to be shrank down around the size of div#colorbox when it's done.  If not,
 		// it can invoke an obscure IE bug when using iframes.
@@ -592,8 +592,8 @@
 		// floating the IMG removes the bottom line-height and fixed a problem where IE miscalculates the width of the parent element as 100% of the document width.
 		//$(photo).css({'float': 'none', marginLeft: 'auto', marginRight: 'auto'});
 		
-        $(photo).css({'float': 'none'});
-        
+		$(photo).css({'float': 'none'});
+		
 		// Hides SELECT elements in IE6 because they would otherwise sit on top of the overlay.
 		if (isIE6) {
 			$('select').not($box.find('select')).filter(function () {
@@ -611,14 +611,14 @@
 					return;
 				}
 				
-                function removeFilter() {
-                    if (isIE) {
-                        $box[0].style.removeAttribute('filter');
-                    }
-                }
-                
+				function removeFilter() {
+					if (isIE) {
+						$box[0].style.removeAttribute('filter');
+					}
+				}
+				
 				complete = function () {
-                    clearTimeout(loadingTimer);
+					clearTimeout(loadingTimer);
 					$loadingOverlay.hide();
 					trigger(event_complete, settings.onComplete);
 				};
@@ -683,7 +683,7 @@
 					}
 					
 					if (isIE) {
-                        iframe.frameBorder = 0;
+						iframe.frameBorder = 0;
 						iframe.allowTransparency = "true";
 					}
 					
@@ -697,7 +697,7 @@
 				if (settings.transition === 'fade') {
 					$box.fadeTo(speed, 1, removeFilter);
 				} else {
-                    removeFilter();
+					removeFilter();
 				}
 				
 				$window.bind('resize.' + prefix, function () {
@@ -757,10 +757,10 @@
 		
 		href = settings.href;
 		
-        loadingTimer = setTimeout(function () {
-            $loadingOverlay.show();
-        }, 100);
-        
+		loadingTimer = setTimeout(function () {
+			$loadingOverlay.show();
+		}, 100);
+		
 		if (settings.inline) {
 			// Inserts an empty placeholder where inline content is being pulled from.
 			// An event is bound to put inline content back when ColorBox closes or loads new content.
@@ -807,8 +807,8 @@
 				if ($related[1] && (index < $related.length - 1 || settings.loop)) {
 					photo.style.cursor = 'pointer';
 					photo.onclick = function () {
-                        publicMethod.next();
-                    };
+						publicMethod.next();
+					};
 				}
 				
 				if (isIE) {
@@ -829,7 +829,7 @@
 			});
 		}
 	};
-        
+		
 	// Navigates to the next page/image in a set.
 	publicMethod.next = function () {
 		if (!active && $related[1] && (index < $related.length - 1 || settings.loop)) {
@@ -860,7 +860,7 @@
 			$overlay.fadeTo(200, 0);
 			
 			$box.stop().fadeTo(300, 0, function () {
-                 
+				 
 				$box.add($overlay).css({'opacity': 1, cursor: 'auto'}).hide();
 				
 				trigger(event_purge);
@@ -874,24 +874,24 @@
 			});
 			
 			if (document.getElementsByName("compids").length) {
-              var comps="";
+			  var comps="";
 							var comptitles="";
 							var subold="";
-                        for(var i=0; i < document.treeform.desc.length; i++){
-                           if(document.treeform.desc[i].checked) {
-                            comps += document.treeform.desc[i].value + ',';
-                            subid=document.treeform.desc[i].getAttribute('class');
-			                      if (subid!=subold){
-			                      	subold=subid;
-			                      	subtitl=document.getElementById('gegenst'+subid).getAttribute('alt');
-			                      	comptitles +='<h3>' + subtitl + '</h3>';
-			                      }
+						for(var i=0; i < document.treeform.desc.length; i++){
+						   if(document.treeform.desc[i].checked) {
+							comps += document.treeform.desc[i].value + ',';
+							subid=document.treeform.desc[i].getAttribute('class');
+								  if (subid!=subold){
+								  	subold=subid;
+								  	subtitl=document.getElementById('gegenst'+subid).getAttribute('alt');
+								  	comptitles +='<h3>' + subtitl + '</h3>';
+								  }
 														comptitles += '<span>' +document.treeform.desc[i].getAttribute('alt') + '</span><br/>';
 													}
-                        }
-                        document.getElementsByName("compids")[0].value = comps;
+						}
+						document.getElementsByName("compids")[0].value = comps;
 						document.getElementById("comptitles").innerHTML = comptitles;
-                        //document.getElementById("id_compids").value = comps;
+						//document.getElementById("id_compids").value = comps;
 			}
 		}
 	};
@@ -903,22 +903,22 @@
 	};
 
 	publicMethod.settings = defaults;
-    
+	
 	// Bind the live event before DOM-ready for maximum performance in IE6 & 7.
-    handler = function (e) {
-        // checks to see if it was a non-left mouse-click and for clicks modified with ctrl, shift, or alt.
-        if (!((e.button !== 0 && typeof e.button !== 'undefined') || e.ctrlKey || e.shiftKey || e.altKey)) {
-            e.preventDefault();
-            launch(this);
-        }
-    };
-    
-    if ($.fn.delegate) {
-        $(document).delegate('.' + boxElement, 'click', handler);
-    } else {
-        $('.' + boxElement).live('click', handler);
-    }
-    
+	handler = function (e) {
+		// checks to see if it was a non-left mouse-click and for clicks modified with ctrl, shift, or alt.
+		if (!((e.button !== 0 && typeof e.button !== 'undefined') || e.ctrlKey || e.shiftKey || e.altKey)) {
+			e.preventDefault();
+			launch(this);
+		}
+	};
+	
+	if ($.fn.delegate) {
+		$(document).delegate('.' + boxElement, 'click', handler);
+	} else {
+		$('.' + boxElement).live('click', handler);
+	}
+	
 	// Initializes ColorBox when the DOM has loaded
 	$(publicMethod.init);
 

@@ -46,11 +46,11 @@ function block_exaport_print_extern_item($item, $access) {
 	if ($item->type == 'file') {
 		if ($file = block_exaport_get_item_file($item)) {
 			$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id);
-            
-            if ($file->is_valid_image()) {    // Image attachments don't get printed as links
-                $box_content .= "<img src=\"$ffurl\" alt=\"" . format_string($item->name) . "\" />";
-            } else {
-            	//echo $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $link));
+			
+			if ($file->is_valid_image()) {	// Image attachments don't get printed as links
+				$box_content .= "<img src=\"$ffurl\" alt=\"" . format_string($item->name) . "\" />";
+			} else {
+				//echo $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $link));
 				$box_content .= "<p class=\"filelink\">" . $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
 				if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
 					// Videoblock
@@ -73,8 +73,8 @@ function block_exaport_print_extern_item($item, $access) {
 					$box_content .= "
 						<script src=\"".$CFG->wwwroot."/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
 				};
-            }
-        }
+			}
+		}
 		if (!$box_content) {
 			$box_content = 'File not found';
 		}
@@ -109,7 +109,7 @@ function block_exaport_print_extcomments($itemid) {
 		echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
 		echo '<tr class="header"><td class="picture left">';
-                echo $OUTPUT->user_picture($user);
+				echo $OUTPUT->user_picture($user);
 		echo '</td>';
 
 		echo '<td class="topic starter"><div class="author">';

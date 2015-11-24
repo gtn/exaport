@@ -46,26 +46,26 @@ $PAGE->set_url($url);
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
-    error("That's an invalid course id");
+	error("That's an invalid course id");
 }
 
 $parsedsort = block_exaport_parse_sort($sort, array('course', 'user', 'view', 'timemodified'));
 if ($parsedsort[0] == 'timemodified') {
-    $sql_sort = " ORDER BY v.timemodified DESC, v.name, u.lastname, u.firstname";
-    $parsedsort[1] = 'desc';
-    if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$sql_sort = " ORDER BY v.timemodified DESC, cast(v.name AS varchar(max)), u.lastname, u.firstname";
-    }
+	$sql_sort = " ORDER BY v.timemodified DESC, v.name, u.lastname, u.firstname";
+	$parsedsort[1] = 'desc';
+	if(strcmp($CFG->dbtype, "sqlsrv")==0){
+		$sql_sort = " ORDER BY v.timemodified DESC, cast(v.name AS varchar(max)), u.lastname, u.firstname";
+	}
 } elseif ($parsedsort[0] == 'view') {
-    $sql_sort = " ORDER BY v.name, u.lastname, u.firstname";
-    if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$sql_sort = " ORDER BY cast(v.name AS varchar(max)), u.lastname, u.firstname";
-    }
+	$sql_sort = " ORDER BY v.name, u.lastname, u.firstname";
+	if(strcmp($CFG->dbtype, "sqlsrv")==0){
+		$sql_sort = " ORDER BY cast(v.name AS varchar(max)), u.lastname, u.firstname";
+	}
 } else {
-    $sql_sort = " ORDER BY u.lastname, u.firstname, v.name";
-    if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$sql_sort = " ORDER BY u.lastname, u.firstname, cast(v.name AS varchar(max))";
-    }
+	$sql_sort = " ORDER BY u.lastname, u.firstname, v.name";
+	if(strcmp($CFG->dbtype, "sqlsrv")==0){
+		$sql_sort = " ORDER BY u.lastname, u.firstname, cast(v.name AS varchar(max))";
+	}
 }
 
 
@@ -76,65 +76,65 @@ $strheader = get_string("sharedbookmarks", "block_exaport");
 
 echo "<div class='block_eportfolio_center'>\n";
 if ($u > 0) {
-    $whre=" AND u.id=".$u;
+	$whre=" AND u.id=".$u;
 }
 else 
-    $whre = "";
+	$whre = "";
 
 // Views for user groups
 $usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), '', 'groupid');
 if ((is_array($usergroups)) && (count($usergroups) > 0)) {
-    foreach ($usergroups as $id => &$group) {
-        $usergroups[$id] = $group->groupid;
-    };
-        $usergroups_list = implode(',', $usergroups);
-        $userviews = $DB->get_records_sql('SELECT viewid FROM {block_exaportviewgroupshar} WHERE groupid IN ('.$usergroups_list.')');
-        foreach ($userviews as $id => &$view) {
-            $userviews[$id] = $view->viewid;
-        };
-        $userviews_list = implode(',', $userviews);
+	foreach ($usergroups as $id => &$group) {
+		$usergroups[$id] = $group->groupid;
+	};
+		$usergroups_list = implode(',', $usergroups);
+		$userviews = $DB->get_records_sql('SELECT viewid FROM {block_exaportviewgroupshar} WHERE groupid IN ('.$usergroups_list.')');
+		foreach ($userviews as $id => &$view) {
+			$userviews[$id] = $view->viewid;
+		};
+		$userviews_list = implode(',', $userviews);
 };
-    
+	
 $views = $DB->get_records_sql(
-                "SELECT v.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT vshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT vgshar.groupid) AS cnt_shared_groups  " .
-                " FROM {user} u" .
-                " JOIN {block_exaportview} v ON u.id=v.userid" .
-                ($onlyexternal == 0 ? 
-                    " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?"
-                    : "").                    
-                " LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid ".
-                " LEFT JOIN {block_exaportviewshar} vshar_total ON v.id=vshar_total.viewid " .
-                " WHERE (".
-                    ($onlyexternal == 0 ? 
-                            "(".(block_exaport_shareall_enabled() ? 'v.shareall=1 OR' : '')." vshar.userid IS NOT NULL) OR "  // only show shared all, if enabled
-                            : " "). 
-                    // Shared for you group
-//                    ((is_array($usergroups)) ? " u.id IN (".$usergroups_list.") OR " : "").
-                " v.externaccess = 1 ". // Add published external views.
-                ($onlyexternal == 0 ? 
-                    (isset($userviews) && count($userviews)>0 ? " OR v.id IN (".$userviews_list.") ": "") : ""). // Add group shareing views
-                ")".  
+				"SELECT v.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT vshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT vgshar.groupid) AS cnt_shared_groups  " .
+				" FROM {user} u" .
+				" JOIN {block_exaportview} v ON u.id=v.userid" .
+				($onlyexternal == 0 ? 
+					" LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?"
+					: "").					
+				" LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid ".
+				" LEFT JOIN {block_exaportviewshar} vshar_total ON v.id=vshar_total.viewid " .
+				" WHERE (".
+					($onlyexternal == 0 ? 
+							"(".(block_exaport_shareall_enabled() ? 'v.shareall=1 OR' : '')." vshar.userid IS NOT NULL) OR "  // only show shared all, if enabled
+							: " "). 
+					// Shared for you group
+//					((is_array($usergroups)) ? " u.id IN (".$usergroups_list.") OR " : "").
+				" v.externaccess = 1 ". // Add published external views.
+				($onlyexternal == 0 ? 
+					(isset($userviews) && count($userviews)>0 ? " OR v.id IN (".$userviews_list.") ": "") : ""). // Add group shareing views
+				")".  
 				" AND v.userid!=? ". // don't show my own views
 				$whre .
 				" GROUP BY v.id, v.userid, v.name, v.description, v.timemodified, v.shareall, v.externaccess, v.externcomment, v.hash, v.langid, v.layout, u.firstname, u.lastname, u.picture".
-                " $sql_sort", array($USER->id, $USER->id));
+				" $sql_sort", array($USER->id, $USER->id));
 
 function exaport_search_views($views, $column, $value) {
-    $viewsFound = array();
-    foreach ($views as $view) {
-        if ($view->{$column} == $value) {
-            $view->found = true;
-            $viewsFound[] = $view;
-        }
-    }
-    return $viewsFound;
+	$viewsFound = array();
+	foreach ($views as $view) {
+		if ($view->{$column} == $value) {
+			$view->found = true;
+			$viewsFound[] = $view;
+		}
+	}
+	return $viewsFound;
 }
 
 function exaport_print_views($views, $parsedsort, $onlyexternal=0) {
-    global $CFG, $courseid, $COURSE, $OUTPUT, $DB;
+	global $CFG, $courseid, $COURSE, $OUTPUT, $DB;
 
 	$courses = exaport_get_shareable_courses_with_users('shared_views');
-    $sort = $parsedsort[0];
+	$sort = $parsedsort[0];
 	
 	$mainViewGroups = array(
 		'thiscourse' => array(),
@@ -187,9 +187,9 @@ function exaport_print_views($views, $parsedsort, $onlyexternal=0) {
 
 		// header
 		echo '<h2>'.get_string($mainViewGroupId,'block_exaport').'</h2>';
-        if ($onlyexternal == 1) {
-            echo get_string("only_external", "block_exaport");
-        }
+		if ($onlyexternal == 1) {
+			echo get_string("only_external", "block_exaport");
+		}
 		
 		if (empty($mainViewGroup)) {
 			// print for this course only
@@ -241,7 +241,7 @@ function exaport_print_views($views, $parsedsort, $onlyexternal=0) {
 					);
 				}
 
-                echo '<div class="view-group'.($onlyexternal == 1 ? ' view-group-open':"").'">';
+				echo '<div class="view-group'.($onlyexternal == 1 ? ' view-group-open':"").'">';
 				echo '<div class="header view-group-header" style="align: right">';
 				echo '<span class="view-group-pic">'.$OUTPUT->user_picture($curuser, array('link'=>false)).'</span>';
 				echo '<span class="view-group-title">'.fullname($curuser).' ('.count($item['views']).') </span>';
@@ -289,20 +289,20 @@ function exaport_print_views($views, $parsedsort, $onlyexternal=0) {
 echo '<div style="padding-bottom: 20px;">';
 
 if (!$views) {
-    echo get_string("nothingshared", "block_exaport");
+	echo get_string("nothingshared", "block_exaport");
 } else {
-    exaport_print_views($views, $parsedsort, $onlyexternal);
+	exaport_print_views($views, $parsedsort, $onlyexternal);
 }
 
 echo "";
 
 if ($views) {
 		//echo get_string('sortby') . ': ';
-        echo '<div class="view-group-header">';
-        echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;onlyexternal=".($onlyexternal == 1 ? "0" : "1" ).
-            (isset($sort) && $sort!='' ? '&amp;sort='.$sort : '') . "\">" . 
-            ($onlyexternal == 1 ? get_string("display_all", "block_exaport") : get_string("display_onlyexternal", "block_exaport") ).
-             "</a>";
+		echo '<div class="view-group-header">';
+		echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;onlyexternal=".($onlyexternal == 1 ? "0" : "1" ).
+			(isset($sort) && $sort!='' ? '&amp;sort='.$sort : '') . "\">" . 
+			($onlyexternal == 1 ? get_string("display_all", "block_exaport") : get_string("display_onlyexternal", "block_exaport") ).
+			 "</a>";
 		echo '</div>';
 	}
 
@@ -312,24 +312,24 @@ echo $OUTPUT->footer($course);
 
 
 function block_exaport_get_shared_with_text($view) {
-    $shared = "";
-    if ($view->shareall == 1)
+	$shared = "";
+	if ($view->shareall == 1)
 		$shared = block_exaport_get_string('sharedwith_shareall');
-    elseif ($view->cnt_shared_groups > 1)
-        $shared .= block_exaport_get_string('sharedwith_groupand', $view->cnt_shared_groups-1);
-    elseif ($view->cnt_shared_groups == 1) 
-        $shared = block_exaport_get_string('sharedwith_group');
-    elseif ($view->cnt_shared_users > 1)
+	elseif ($view->cnt_shared_groups > 1)
+		$shared .= block_exaport_get_string('sharedwith_groupand', $view->cnt_shared_groups-1);
+	elseif ($view->cnt_shared_groups == 1) 
+		$shared = block_exaport_get_string('sharedwith_group');
+	elseif ($view->cnt_shared_users > 1)
 		$shared = block_exaport_get_string('sharedwith_meand', $view->cnt_shared_users-1);
 	elseif ($view->cnt_shared_users == 1)
 		$shared = block_exaport_get_string('sharedwith_onlyme'); /**/
-    if ($view->externaccess) {
-        if ($shared != "") {
-            return block_exaport_get_string('sharedwith_shareexternal')." / ".$shared;
-        } else {
-            return block_exaport_get_string('sharedwith_shareexternal');
-        }
-    } else {
-        return $shared;
-    };
+	if ($view->externaccess) {
+		if ($shared != "") {
+			return block_exaport_get_string('sharedwith_shareexternal')." / ".$shared;
+		} else {
+			return block_exaport_get_string('sharedwith_shareexternal');
+		}
+	} else {
+		return $shared;
+	};
 }

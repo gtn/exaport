@@ -110,8 +110,8 @@ function block_exaport_get_view_from_access($access)
 		if (count($hash) != 2)
 			return;
 
-	    $userid = clean_param($hash[0], PARAM_INT);
-	    $hash =  clean_param($hash[1], PARAM_ALPHANUM);
+		$userid = clean_param($hash[0], PARAM_INT);
+		$hash =  clean_param($hash[1], PARAM_ALPHANUM);
 		//$userid = $hash[0];
 		//$hash = $hash[1];
 		
@@ -132,15 +132,15 @@ function block_exaport_get_view_from_access($access)
 		// require exaport:use -> guest hasn't this right
 		$context = context_system::instance();
 		require_capability('block/exaport:use', $context);
-        
-        // Groups for user
-        $usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), $sort='', $fields='groupid');
-        if ((is_array($usergroups)) && (count($usergroups) > 0)) {
-            foreach ($usergroups as $id => &$group) {
-                $usergroups[$id] = $group->groupid;
-            };
-            $usergroups_list = implode(',', $usergroups);
-        };
+		
+		// Groups for user
+		$usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), $sort='', $fields='groupid');
+		if ((is_array($usergroups)) && (count($usergroups) > 0)) {
+			foreach ($usergroups as $id => &$group) {
+				$usergroups[$id] = $group->groupid;
+			};
+			$usergroups_list = implode(',', $usergroups);
+		};
 
 		$hash = $accessPath[1];
 		$hash = explode('-', $hash);
@@ -148,21 +148,21 @@ function block_exaport_get_view_from_access($access)
 		if (count($hash) != 2)
 			return;
 	
-	    $userid = clean_param($hash[0], PARAM_INT);
-	    $viewid =  clean_param($hash[1], PARAM_INT);
+		$userid = clean_param($hash[0], PARAM_INT);
+		$viewid =  clean_param($hash[1], PARAM_INT);
 		//$userid = $hash[0];
 		//$viewid = $hash[1];
 		
 		$view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v".
 							" LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?".
-                            (((is_array($usergroups)) && (count($usergroups) > 0)) ? "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid " : "").
-                            
+							(((is_array($usergroups)) && (count($usergroups) > 0)) ? "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid " : "").
+							
 							" WHERE v.userid=? AND v.id=? AND".
 							" ((v.userid=?)". // myself
 							"  OR (v.shareall=1)". // shared all
 							"  OR (v.shareall=0 AND vshar.userid IS NOT NULL) ".
-                            (((is_array($usergroups)) && (count($usergroups) > 0)) ? " OR vgshar.groupid IN (".$usergroups_list.") " : "").
-                            ")", array($USER->id, $userid, $viewid, $USER->id)); // shared for me
+							(((is_array($usergroups)) && (count($usergroups) > 0)) ? " OR vgshar.groupid IN (".$usergroups_list.") " : "").
+							")", array($USER->id, $userid, $viewid, $USER->id)); // shared for me
 
 		if (!$view) {
 			// view not found
@@ -186,22 +186,22 @@ function block_exaport_get_item_epop($id,$user){
 	}
 }
 function block_exaport_get_elove_item($itemid, $userid, $authenticationinfo) {
-    global $DB;
-    //check if user is userid or if user is trainer of userid
-    if($userid == $authenticationinfo['user']->id)
-        return $DB->get_record('block_exaportitem', array('id'=>$itemid,'userid'=>$userid));
-    else if($DB->record_exists('block_exacompexternaltrainer', array('trainerid'=>$authenticationinfo['user']->id,
-            'studentid'=>$userid)))
-        return $DB->get_record('block_exaportitem', array('id'=>$itemid));
-    else {
-    	$sql = "SELECT * FROM {block_exaportview} v 
-    			JOIN {block_exaportviewblock} vb ON v.id = vb.viewid AND vb.itemid = ?
-    			JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ?";
-    	if($DB->record_exists_sql($sql,array($itemid,$authenticationinfo['user']->id)))
-    		return $DB->get_record('block_exaportitem', array('id'=>$itemid));
-    		
-	    return false;
-    }
+	global $DB;
+	//check if user is userid or if user is trainer of userid
+	if($userid == $authenticationinfo['user']->id)
+		return $DB->get_record('block_exaportitem', array('id'=>$itemid,'userid'=>$userid));
+	else if($DB->record_exists('block_exacompexternaltrainer', array('trainerid'=>$authenticationinfo['user']->id,
+			'studentid'=>$userid)))
+		return $DB->get_record('block_exaportitem', array('id'=>$itemid));
+	else {
+		$sql = "SELECT * FROM {block_exaportview} v 
+				JOIN {block_exaportviewblock} vb ON v.id = vb.viewid AND vb.itemid = ?
+				JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ?";
+		if($DB->record_exists_sql($sql,array($itemid,$authenticationinfo['user']->id)))
+			return $DB->get_record('block_exaportitem', array('id'=>$itemid));
+			
+		return false;
+	}
 }
 function block_exaport_epop_checkhash($userhash){
 	global $DB;
@@ -237,18 +237,18 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 					CAST(b.type AS varchar) = 'item'
 					LIMIT 1";
 		}
-        else{
-        	$sql = "SELECT b.* FROM {block_exaportviewblock} b
-          			WHERE b.viewid=? AND
-          			b.itemid=? AND
-          			b.type = 'item'
+		else{
+			$sql = "SELECT b.* FROM {block_exaportviewblock} b
+		  			WHERE b.viewid=? AND
+		  			b.itemid=? AND
+		  			b.type = 'item'
 					LIMIT 1";
-        }
-								     
+		}
+									 
 		$viewblock = $DB->get_record_sql($sql, array($view->id, $itemid)); // nobody, but me
 		if(!$viewblock) {						
 			// item not linked to view -> no rights
-                }
+				}
 		// share artefact can not only owner. So we find did share item to others users. If shared - take owner and insert into select.
 		$sharable = is_sharableitem($view->userid, $itemid);
 		if ($sharable) {
@@ -590,42 +590,42 @@ function exaport_get_shareable_courses_with_groups($type) {
 		);
 		
 		$context = context_course::instance($dbCourse->id);
-        //$groupoptions = array();
-        if (groups_get_course_groupmode($dbCourse) == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
-            $groups = groups_get_user_groups($dbCourse->id);
-            $allgroups = groups_get_all_groups($dbCourse->id);
-            if (isset($dbCourse->defaultgroupingid) && !empty($groups[$dbCourse->defaultgroupingid])) {
-                foreach ($groups[$dbCourse->defaultgroupingid] AS $groupid) {
-                    $members = 0;
-                    $members = $DB->count_records("groups_members", array("groupid" => $group->id)); 
-                    $course->groups[$group->id] = (object)array(
-                        'id' => $groupid,
-                        'title' => format_string($group->name, true, array('context'=>$context)), 
-                        'members' => $members
-                    );
-//                    $groupoptions[$groupid] = format_string($allgroups[$groupid]->name, true, array('context'=>$context));
-                }
-            }
-        } else {
-            //$groupoptions = array('0'=>get_string('allgroups'));
-            if (has_capability('moodle/site:accessallgroups', $context)) {
-                // user can see all groups
-                $allgroups = groups_get_all_groups($dbCourse->id);
-            } else {
-                // user can see course level groups
-                $allgroups = groups_get_all_groups($dbCourse->id, 0, $COURSE->defaultgroupingid);
-            }
-            foreach($allgroups as $group) {
-                $members = 0;
-                $members = $DB->count_records("groups_members", array("groupid" => $group->id)); 
-                $course->groups[$group->id] = (object)array(
-                    'id' => $group->id,
-                    'title' => format_string($group->name, true, array('context'=>$context)),
-                    'members' => $members
-                );
-                //$groupoptions[$group->id] = format_string($group->name, true, array('context'=>$context));
-            }
-        }
+		//$groupoptions = array();
+		if (groups_get_course_groupmode($dbCourse) == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
+			$groups = groups_get_user_groups($dbCourse->id);
+			$allgroups = groups_get_all_groups($dbCourse->id);
+			if (isset($dbCourse->defaultgroupingid) && !empty($groups[$dbCourse->defaultgroupingid])) {
+				foreach ($groups[$dbCourse->defaultgroupingid] AS $groupid) {
+					$members = 0;
+					$members = $DB->count_records("groups_members", array("groupid" => $group->id)); 
+					$course->groups[$group->id] = (object)array(
+						'id' => $groupid,
+						'title' => format_string($group->name, true, array('context'=>$context)), 
+						'members' => $members
+					);
+//					$groupoptions[$groupid] = format_string($allgroups[$groupid]->name, true, array('context'=>$context));
+				}
+			}
+		} else {
+			//$groupoptions = array('0'=>get_string('allgroups'));
+			if (has_capability('moodle/site:accessallgroups', $context)) {
+				// user can see all groups
+				$allgroups = groups_get_all_groups($dbCourse->id);
+			} else {
+				// user can see course level groups
+				$allgroups = groups_get_all_groups($dbCourse->id, 0, $COURSE->defaultgroupingid);
+			}
+			foreach($allgroups as $group) {
+				$members = 0;
+				$members = $DB->count_records("groups_members", array("groupid" => $group->id)); 
+				$course->groups[$group->id] = (object)array(
+					'id' => $group->id,
+					'title' => format_string($group->name, true, array('context'=>$context)),
+					'members' => $members
+				);
+				//$groupoptions[$group->id] = format_string($group->name, true, array('context'=>$context));
+			}
+		}
 
 		$courses[$course->id] = $course;
 	}
@@ -644,29 +644,29 @@ function exaport_get_extern_access($userid) {
 }
 
 function exaport_print_js() {
-    echo "<script type=\"text/javascript\">\n";
-    echo "<!--\n";
-    echo "function SetAllCheckBoxes(FormName, FieldName, CheckValue)\n";
-    echo "{\n";
-    echo "	if(!document.getElementById(FormName))\n";
-    echo "		return;\n";
-    echo "	var objCheckBoxes = document.getElementById(FormName).elements[FieldName];\n";
-    echo "	if(!objCheckBoxes)\n";
-    echo "		return;\n";
-    echo "	var countCheckBoxes = objCheckBoxes.length;\n";
-    echo "	if(!countCheckBoxes)\n";
-    echo "		objCheckBoxes.checked = CheckValue;\n";
-    echo "	else\n";
-    echo "		// set the check value for all check boxes\n";
-    echo "		for(var i = 0; i < countCheckBoxes; i++)\n";
-    echo "			objCheckBoxes[i].checked = CheckValue;\n";
-    echo "      if (CheckValue == true)\n";
-    echo "              document.getElementById(FormName).selectall.value = \"1\";\n";
-    echo "      else\n";
-    echo "              document.getElementById(FormName).selectall.value = \"0\";\n";
-    echo "}\n";
-    echo "// -->\n";
-    echo "</script>\n";
+	echo "<script type=\"text/javascript\">\n";
+	echo "<!--\n";
+	echo "function SetAllCheckBoxes(FormName, FieldName, CheckValue)\n";
+	echo "{\n";
+	echo "	if(!document.getElementById(FormName))\n";
+	echo "		return;\n";
+	echo "	var objCheckBoxes = document.getElementById(FormName).elements[FieldName];\n";
+	echo "	if(!objCheckBoxes)\n";
+	echo "		return;\n";
+	echo "	var countCheckBoxes = objCheckBoxes.length;\n";
+	echo "	if(!countCheckBoxes)\n";
+	echo "		objCheckBoxes.checked = CheckValue;\n";
+	echo "	else\n";
+	echo "		// set the check value for all check boxes\n";
+	echo "		for(var i = 0; i < countCheckBoxes; i++)\n";
+	echo "			objCheckBoxes[i].checked = CheckValue;\n";
+	echo "	  if (CheckValue == true)\n";
+	echo "			  document.getElementById(FormName).selectall.value = \"1\";\n";
+	echo "	  else\n";
+	echo "			  document.getElementById(FormName).selectall.value = \"0\";\n";
+	echo "}\n";
+	echo "// -->\n";
+	echo "</script>\n";
 }
 
 function exaport_get_shared_items_for_user($userid, $onlyitems = false) {
@@ -689,22 +689,22 @@ function exaport_get_shared_items_for_user($userid, $onlyitems = false) {
 
 	// All categories and users who shared.
 	$categories = $DB->get_records_sql(
-                "SELECT c.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
-                " FROM {user} u" .
-                " JOIN {block_exaportcate} c ON u.id=c.userid" .
+				"SELECT c.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
+				" FROM {user} u" .
+				" JOIN {block_exaportcate} c ON u.id=c.userid" .
 				" LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?".
 
-                " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid ". 
-                " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid " .
-                " WHERE (".
+				" LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid ". 
+				" LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid " .
+				" WHERE (".
 					"(".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) ".  // only show shared all, if enabled
-                 // Shared for you group
-                 (isset($usercats) && count($usercats)>0 ? " OR c.id IN (".$usercats_list.") ": ""). // Add group shareing categories
-                ")".  
+				 // Shared for you group
+				 (isset($usercats) && count($usercats)>0 ? " OR c.id IN (".$usercats_list.") ": ""). // Add group shareing categories
+				")".  
 				" AND c.userid!=? ". // don't show my own categories
 				" AND internshare = 1 ".
 				" GROUP BY c.id, c.userid, c.name, c.timemodified, c.shareall, u.firstname, u.lastname, u.picture".
-                " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
+				" ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
 		
 	//$sharedcategories = $DB->get_records_menu('block_exaportcatshar', array("userid" => $userid), null, 'id, id AS tmp');
 

@@ -78,7 +78,7 @@ The default control bar that is a container for most of the controls.
   display: none;
   position: absolute;
   /* Place control bar at the bottom of the player box/video.
-     If you want more margin below the control bar, add more height. */
+	 If you want more margin below the control bar, add more height. */
   bottom: 0;
   /* Use left/right to stretch to 100% width of player div */
   left: 0;
@@ -135,7 +135,7 @@ fonts to show/hide properly.
 */
 @media \0screen {
   .vjs-default-skin.vjs-user-inactive.vjs-playing .vjs-control-bar :before {
-    content: "";
+	content: "";
   }
 }
 /* General styles for individual controls. */
@@ -263,8 +263,8 @@ fonts to show/hide properly.
   width: 0.5em;
   height: 0.5em;
   /* Assumes volume starts at 1.0. If you change the size of the
-     handle relative to the volume bar, you'll need to update this value
-     too. */
+	 handle relative to the volume bar, you'll need to update this value
+	 too. */
 
   left: 4.5em;
 }
@@ -276,10 +276,10 @@ fonts to show/hide properly.
   height: 1em;
 }
 /* The volume menu button is like menu buttons (captions/subtitles) but works
-    a little differently. It needs to be possible to tab to the volume slider
-    without hitting space bar on the menu button. To do this we're not using
-    display:none to hide the slider menu by default, and instead setting the
-    width and height to zero. */
+	a little differently. It needs to be possible to tab to the volume slider
+	without hitting space bar on the menu button. To do this we're not using
+	display:none to hide the slider menu by default, and instead setting the
+	width and height to zero. */
 .vjs-default-skin .vjs-volume-menu-button .vjs-menu {
   display: block;
   width: 0;
@@ -321,12 +321,12 @@ fonts to show/hide properly.
   transition: all 0.4s;
 }
 /* On hover, make the progress bar grow to something that's more clickable.
-    This simply changes the overall font for the progress bar, and this
-    updates both the em-based widths and heights, as wells as the icon font */
+	This simply changes the overall font for the progress bar, and this
+	updates both the em-based widths and heights, as wells as the icon font */
 .vjs-default-skin:hover .vjs-progress-control {
   font-size: .9em;
   /* Even though we're not changing the top/height, we need to include them in
-      the transition so they're handled correctly. */
+	  the transition so they're handled correctly. */
 
   /* transition */
   -webkit-transition: all 0.2s;
@@ -356,12 +356,12 @@ fonts to show/hide properly.
 }
 .vjs-default-skin .vjs-play-progress {
   /*
-    Using a data URI to create the white diagonal lines with a transparent
-      background. Surprisingly works in IE8.
-      Created using http://www.patternify.com
-    Changing the first color value will change the bar color.
-    Also using a paralax effect to make the lines move backwards.
-      The -50% left position makes that happen.
+	Using a data URI to create the white diagonal lines with a transparent
+	  background. Surprisingly works in IE8.
+	  Created using http://www.patternify.com
+	Changing the first color value will change the bar color.
+	Also using a paralax effect to make the lines move backwards.
+	  The -50% left position makes that happen.
   */
 
   background: #66a8cc url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAP0lEQVQIHWWMAQoAIAgDR/QJ/Ub//04+w7ZICBwcOg5FZi5iBB82AGzixEglJrd4TVK5XUJpskSTEvpdFzX9AB2pGziSQcvAAAAAAElFTkSuQmCC) -50% 0 repeat;
@@ -495,7 +495,7 @@ easily in the skin designer. http://designer.videojs.com/
   display: none;
 }
 /* Hide on mobile devices. Remove when we stop using native controls
-    by default on mobile  */
+	by default on mobile  */
 .vjs-default-skin.vjs-using-native-controls .vjs-big-play-button {
   display: none;
 }
@@ -520,7 +520,7 @@ easily in the skin designer. http://designer.videojs.com/
   content: "\e001";
   font-family: VideoJS;
   /* In order to center the play icon vertically we need to set the line height
-     to the same as the button height */
+	 to the same as the button height */
 
   line-height: 2.6em;
   text-shadow: 0.05em 0.05em 0.1em #000;
@@ -553,7 +553,7 @@ easily in the skin designer. http://designer.videojs.com/
   font-size: 4em;
   color: #666666;
   /* In order to center the play icon vertically we need to set the line height
-     to the same as the button height */
+	 to the same as the button height */
 
   line-height: 1;
   text-shadow: 0.05em 0.05em 0.1em #000;
@@ -631,34 +631,34 @@ easily in the skin designer. http://designer.videojs.com/
 }
 @-moz-keyframes spin {
   0% {
-    -moz-transform: rotate(0deg);
+	-moz-transform: rotate(0deg);
   }
   100% {
-    -moz-transform: rotate(359deg);
+	-moz-transform: rotate(359deg);
   }
 }
 @-webkit-keyframes spin {
   0% {
-    -webkit-transform: rotate(0deg);
+	-webkit-transform: rotate(0deg);
   }
   100% {
-    -webkit-transform: rotate(359deg);
+	-webkit-transform: rotate(359deg);
   }
 }
 @-o-keyframes spin {
   0% {
-    -o-transform: rotate(0deg);
+	-o-transform: rotate(0deg);
   }
   100% {
-    -o-transform: rotate(359deg);
+	-o-transform: rotate(359deg);
   }
 }
 @keyframes spin {
   0% {
-    transform: rotate(0deg);
+	transform: rotate(0deg);
   }
   100% {
-    transform: rotate(359deg);
+	transform: rotate(359deg);
   }
 }
 /* Menu Buttons (Captions/Subtitles/etc.)
@@ -795,7 +795,7 @@ control positioning and full window mode. **
   position: relative;
   padding: 0;
   /* Start with 10px for base font size so other dimensions can be em based and
-     easily calculable. */
+	 easily calculable. */
 
   font-size: 10px;
   /* Allow poster to be vertically aligned. */
@@ -812,8 +812,8 @@ control positioning and full window mode. **
 
   font-family: Arial, sans-serif;
   /* Turn off user selection (text highlighting) by default.
-     The majority of player components will not be text blocks.
-     Text areas will need to turn user selection back on. */
+	 The majority of player components will not be text blocks.
+	 Text areas will need to turn user selection back on. */
 
   /* user-select */
   -webkit-user-select: none;
@@ -822,7 +822,7 @@ control positioning and full window mode. **
   user-select: none;
 }
 /* Playback technology elements expand to the width/height of the containing div
-    <video> or <object> */
+	<video> or <object> */
 .video-js .vjs-tech {
   position: absolute;
   top: 0;
@@ -893,7 +893,7 @@ body.vjs-full-window {
   display: block;
 }
 /* Hide the poster when controls are disabled because it's clickable
-    and the native poster can take over */
+	and the native poster can take over */
 .video-js.vjs-controls-disabled .vjs-poster {
   display: none;
 }
@@ -987,9 +987,9 @@ body.vjs-full-window {
   visibility: visible;
 }
 /*  In IE8 w/ no JavaScript (no HTML5 shim), the video tag doesn't register.
-    The .video-js classname on the video tag also isn't considered.
-    This optional paragraph inside the video tag can provide a message to users
-    about what's required to play video. */
+	The .video-js classname on the video tag also isn't considered.
+	This optional paragraph inside the video tag can provide a message to users
+	about what's required to play video. */
 .vjs-no-js {
   padding: 2em;
   color: #ccc;

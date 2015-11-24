@@ -19,7 +19,7 @@ if (!$confirm) {
 }
 
 if (!confirm_sesskey()) {
-    print_error("badsessionkey", "block_exaport");
+	print_error("badsessionkey", "block_exaport");
 }
 
 // test database
@@ -243,11 +243,11 @@ try {
 		 
 			// Prepare file record object
 			$fileinfo = array(
-				'contextid' => context_user::instance($file->userid)->id,    // ID of context
+				'contextid' => context_user::instance($file->userid)->id,	// ID of context
 				'component' => 'block_exaport', // usually = table name
-				'filearea' => 'item_file',     // usually = table name
-				'itemid' => $file->id,          // usually = ID of row in table
-				'filepath' => '/',              // any path beginning and ending in /
+				'filearea' => 'item_file',	 // usually = table name
+				'itemid' => $file->id,		  // usually = ID of row in table
+				'filepath' => '/',			  // any path beginning and ending in /
 				'filename' => $file->attachment,
 				'userid' => $file->userid);
  
@@ -258,7 +258,7 @@ try {
 			$ret = $fs->create_file_from_pathname($fileinfo, $filepath);
 			
 			$update = new stdClass();
-			$update->id         = $file->id;
+			$update->id		 = $file->id;
 			$update->attachment = '';
 			$DB->update_record('block_exaportitem', $update);
 

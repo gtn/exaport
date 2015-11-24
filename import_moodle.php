@@ -40,7 +40,7 @@ require_capability('block/exaport:importfrommoodle', $context);
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
-    error("That's an invalid course id");
+	error("That's an invalid course id");
 }
 $url = '/blocks/exabis_competences/import_moodle.php';
 $PAGE->set_url($url);
@@ -69,51 +69,51 @@ $table->width = "85%";
 $table->data = array();
 
 if ($assignments) {
-    foreach ($assignments as $assignment) {
-        if (!$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid)) {
-            print_error('invalidcoursemodule');
-        }
-        $course = $DB->get_record('course', array("id" => $courseid));
-        //$context = get_context_instance(CONTEXT_MODULE, $cm->id);
-        $context = context_module::instance($cm->id);
-        $fs = get_file_storage();
-        $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->id);
+	foreach ($assignments as $assignment) {
+		if (!$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid)) {
+			print_error('invalidcoursemodule');
+		}
+		$course = $DB->get_record('course', array("id" => $courseid));
+		//$context = get_context_instance(CONTEXT_MODULE, $cm->id);
+		$context = context_module::instance($cm->id);
+		$fs = get_file_storage();
+		$files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->id);
 //
 //
-//        foreach ($files as $f) {
-//            // $f is an instance of stored_file
-//            $filename= $f->get_filename();
-//            $link = file_encode_url($CFG->wwwroot.'/pluginfile.php', '/'.$context->id.'/mod_assignment/submission/'.$assignment->id.'/'.$filename);
+//		foreach ($files as $f) {
+//			// $f is an instance of stored_file
+//			$filename= $f->get_filename();
+//			$link = file_encode_url($CFG->wwwroot.'/pluginfile.php', '/'.$context->id.'/mod_assignment/submission/'.$assignment->id.'/'.$filename);
 //
-//            echo $link;
-//        }
+//			echo $link;
+//		}
 
-        unset($icons);
-        $icons = '';
-        foreach ($files as $file) {
+		unset($icons);
+		$icons = '';
+		foreach ($files as $file) {
 
-            $icon =  new pix_icon(file_mimetype_icon($file->get_mimetype()),'');
+			$icon =  new pix_icon(file_mimetype_icon($file->get_mimetype()),'');
 
-            $filename = $file->get_filename();
-            if($filename == ".")
-                continue;
-            
-            $link = file_encode_url($CFG->wwwroot . '/pluginfile.php', '/' . $context->id . '/mod_assignment/submission/' . $assignment->id . '/' . $filename);
+			$filename = $file->get_filename();
+			if($filename == ".")
+				continue;
+			
+			$link = file_encode_url($CFG->wwwroot . '/pluginfile.php', '/' . $context->id . '/mod_assignment/submission/' . $assignment->id . '/' . $filename);
 
-            $icons .= '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid . '&amp;submissionid=' . $assignment->id . '&amp;filename=' . $filename . '&amp;sesskey=' . sesskey() . '&activityid='.$cm->id.'&assignmentid='.$assignment->aid.'">' .
-                    get_string("add_this_file", "block_exaport") . '</a>';
+			$icons .= '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid . '&amp;submissionid=' . $assignment->id . '&amp;filename=' . $filename . '&amp;sesskey=' . sesskey() . '&activityid='.$cm->id.'&assignmentid='.$assignment->aid.'">' .
+					get_string("add_this_file", "block_exaport") . '</a>';
 
-            $table->data[] = array($assignment->name, userdate($assignment->timemodified), '<img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.png" class="icon" alt="' . $icon->pix . '" />' .
-                '<a href="' . $link . '" >' . $filename . '</a><br />', $assignment->coursename, $icons);
-        
-        }
-        
-        
-    }
-    $output .= html_writer::table($table);
-    echo $output;
+			$table->data[] = array($assignment->name, userdate($assignment->timemodified), '<img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.png" class="icon" alt="' . $icon->pix . '" />' .
+				'<a href="' . $link . '" >' . $filename . '</a><br />', $assignment->coursename, $icons);
+		
+		}
+		
+		
+	}
+	$output .= html_writer::table($table);
+	echo $output;
 } else {
-    echo "<p>" . get_string("nomoodleimportyet", "block_exaport") . "</p>";
+	echo "<p>" . get_string("nomoodleimportyet", "block_exaport") . "</p>";
 }
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

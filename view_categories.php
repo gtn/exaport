@@ -56,7 +56,7 @@ echo "<br />";
 
 echo $OUTPUT->box( text_to_html(get_string("explaincategories","block_exaport")));
 
-echo '</div>';                               
+echo '</div>';							   
 
 
 if($cataction) {
@@ -151,9 +151,9 @@ if($cataction) {
 					$strcat = get_string("categories", "block_exaport");
 
 					echo '<br />';
-                                        echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport"), new moodle_url('view_categories.php', $optionsyes), new moodle_url('view_categories.php', $optionsno));
-                                       echo block_exaport_wrapperdivend();
-                                        $OUTPUT->footer();
+										echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport"), new moodle_url('view_categories.php', $optionsyes), new moodle_url('view_categories.php', $optionsno));
+									   echo block_exaport_wrapperdivend();
+										$OUTPUT->footer();
 					die;
 				}
 				else if($catconfirm==2) {
@@ -186,7 +186,7 @@ if($cataction) {
 				}
 			break;
 		}
-                echo $OUTPUT->box("<div class='block_eportfolio_center'>$message</div>");
+				echo $OUTPUT->box("<div class='block_eportfolio_center'>$message</div>");
 	}
 }
 
@@ -228,8 +228,8 @@ if($edit == 1) {
 	echo '<td valign="top" style="text-align:center" colspan="2"><form method="post" action="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?courseid='.$courseid.'"><fieldset><input type="submit" name="submit" value="'.get_string("endedit", "block_exaport").'" /><input type="hidden" name="sesskey" value="' . sesskey() . '" /></fieldset></form></td>';
 	echo '</tr>';
 	echo '</table></div>';
-}                 
-else {            
+}				 
+else {			
 	echo '<div class="block_eportfolio_categories">';
 	$conditions = array("userid" => $USER->id, "pid" => 0);
 	$owncats=$DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name ASC");

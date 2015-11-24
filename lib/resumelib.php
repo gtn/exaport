@@ -12,7 +12,7 @@ class block_exaport_resume_editor_form extends moodleform {
 	function definition() {
 
 		global $CFG, $USER, $DB, $COURSE;
-		$mform    =& $this->_form;
+		$mform	=& $this->_form;
 		
 		$param = $this->_customdata['field'];		
 		$withfiles = $this->_customdata['withfiles'];
@@ -225,7 +225,7 @@ function block_exaport_resume_prepare_block_mm_data($resume, $id, $type_block, $
 			$draftitemid = file_get_submitted_draft_itemid('attachments');
 			$context = context_user::instance($USER->id);
 			file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'resume_'.$type_block, $id,
-									array('subdirs' => false, 'maxfiles' => 5, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 					
+									array('subdirs' => false, 'maxfiles' => 5, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));				 					
 			// all data to form.
 			$data = $DB->get_record("block_exaportresume_".$type_block, array('id' => $id, 'resume_id' => $resume->id));
 			$data->attachments = $draftitemid;   
@@ -239,55 +239,55 @@ function block_exaport_resume_prepare_block_mm_data($resume, $id, $type_block, $
 }
 
 function block_exaport_get_resume_params_record($userid = null) {
-    global $DB;
+	global $DB;
 
-    if (is_null($userid)) {
-        global $USER;
-        $userid = $USER->id;
-    }
-    $conditions = array("user_id" => $userid);
-    return $DB->get_record('block_exaportresume', $conditions);
+	if (is_null($userid)) {
+		global $USER;
+		$userid = $USER->id;
+	}
+	$conditions = array("user_id" => $userid);
+	return $DB->get_record('block_exaportresume', $conditions);
 }
 
 function block_exaport_get_resume_params($userid = null) {
-    global $DB;
-    if ($userid === null) {
-        global $USER;
-        $userid = $USER->id;
-    }
+	global $DB;
+	if ($userid === null) {
+		global $USER;
+		$userid = $USER->id;
+	}
 	
-    $resumeparams = block_exaport_get_resume_params_record($userid);
-    return $resumeparams;
+	$resumeparams = block_exaport_get_resume_params_record($userid);
+	return $resumeparams;
 }
 
 function block_exaport_set_resume_params($userid, $params = null) {
-    global $DB;
+	global $DB;
 
-    if (is_null($params) && (is_array($userid) || is_object($userid))) {
-        global $USER;
-        $params = $userid;
-        $userid = $USER->id;
-    }
+	if (is_null($params) && (is_array($userid) || is_object($userid))) {
+		global $USER;
+		$params = $userid;
+		$userid = $USER->id;
+	}
 
-    $newresumeparams = new stdClass();
+	$newresumeparams = new stdClass();
 
-    if (is_object($params)) {
-        $newresumeparams = $params;
+	if (is_object($params)) {
+		$newresumeparams = $params;
 	} elseif (is_array($params)) {
 		$newresumeparams = (object) $params;
-    } 
+	} 
 
-    if ($oldresumeparams = block_exaport_get_resume_params_record($userid)) {
-        $newresumeparams->id = $oldresumeparams->id;
-        $DB->update_record('block_exaportresume', $newresumeparams);
-    } else {
-        $newresumeparams->user_id = $userid;
-        $DB->insert_record("block_exaportresume", $newresumeparams);
-    }
+	if ($oldresumeparams = block_exaport_get_resume_params_record($userid)) {
+		$newresumeparams->id = $oldresumeparams->id;
+		$DB->update_record('block_exaportresume', $newresumeparams);
+	} else {
+		$newresumeparams->user_id = $userid;
+		$DB->insert_record("block_exaportresume", $newresumeparams);
+	}
 }
 
 function block_exaport_set_resume_mm($table, $fromform) {
-    global $DB;	
+	global $DB;	
 	if ($fromform->id < 1) {
 		$fromform->sorting = block_exaport_get_max_sorting($table, $fromform->resume_id) + 10; // Step of sorting
 		$id = $DB->insert_record('block_exaportresume_'.$table, $fromform);
@@ -299,7 +299,7 @@ function block_exaport_set_resume_mm($table, $fromform) {
 }
 
 function block_exaport_resume_get_mm_records($table, $conditions) {
-    global $DB;	
+	global $DB;	
 	//$records = $DB->get_records('block_exaportresume_'.$table, $conditions);	
 	foreach ($conditions as $field => $value) {
 		$where_arr[] = $field.' = ? ';
@@ -574,7 +574,7 @@ function block_exaport_resume_list_files($filearea, $files) {
 		$filename = $file->get_filename();
 //		$url = moodle_url::make_pluginfile_url($file->get_contextid(), 'block_exaport', 'resume_'.$filearea, $file->get_itemid(), $file->get_filepath(), $filename, true);
 //		$url = moodle_url::make_file_url('/pluginfile.php', array($file->get_contextid(), 'block_exaport', 'resume_'.$filearea,
-//            $file->get_itemid(), $file->get_filepath(), $filename));
+//			$file->get_itemid(), $file->get_filepath(), $filename));
 		$url = $CFG->wwwroot.'/pluginfile.php/'.$file->get_contextid().'/block_exaport/resume_'.$filearea.'/'.$file->get_itemid().'/'.$filename;
 		$listfiles .= '<li>'.html_writer::link($url, $filename).'</li>';
 	};

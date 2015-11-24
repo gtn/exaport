@@ -181,41 +181,41 @@
 
 /* PORTFOLIO ELEMENTS */
 #exaport #blocktype-list {
-    clear: left;
-    font-size: .9167em;
-    padding: 0 20px;
+	clear: left;
+	font-size: .9167em;
+	padding: 0 20px;
 }
 
 #exaport #blocktype-list ul {
-    list-style-type: none;
-    margin: 0;
+	list-style-type: none;
+	margin: 0;
 }
 #exaport #blocktype-list li {
-    display: table-cell;
-    vertical-align: top;
-    padding: 10px 5px 5px 5px;
-    margin: 0 0 5px 0;
-    width: 100px;
-    line-height: 1.4em;
-    white-space: normal;
+	display: table-cell;
+	vertical-align: top;
+	padding: 10px 5px 5px 5px;
+	margin: 0 0 5px 0;
+	width: 100px;
+	line-height: 1.4em;
+	white-space: normal;
 }
 #exaport .ie7 #blocktype-list li {
-    z-index: 100;
-    display: inline;
-    float: left;
+	z-index: 100;
+	display: inline;
+	float: left;
 }
 #exaport #blocktype-list .blocktype-radio {
-    border: none;
-    cursor: default; /* ie fix */
+	border: none;
+	cursor: default; /* ie fix */
 }
 #exaport #blocktype-list .blocktype h4 {
-    margin: 3px 0;
+	margin: 3px 0;
 }
 
 #exaport .js-hidden {
-    position: absolute;
-    top: 0;
-    visibility: hidden;
+	position: absolute;
+	top: 0;
+	visibility: hidden;
 }
 
 #exaport .select_layout {
@@ -224,19 +224,19 @@
 }
 
 #exaport .cb {
-    clear: both;
-    border-color: -moz-use-text-color -moz-use-text-color #D1D1D1;
-    border-style: none none dotted;
-    border-width: 0 0 1px;
+	clear: both;
+	border-color: -moz-use-text-color -moz-use-text-color #D1D1D1;
+	border-style: none none dotted;
+	border-width: 0 0 1px;
 }
 
 #exaport .select_layout .fl {
-    margin: 0 20px 20px 0;
-    text-align: center;
-    width: 150px;
+	margin: 0 20px 20px 0;
+	text-align: center;
+	width: 150px;
 }
 #exaport .fl {
-    float: left;
+	float: left;
 }
 
 #exaport .table_share, #exaport .table_share table {
@@ -314,17 +314,17 @@
 }
 
 #exaport #link_thumbnail {
-    margin-bottom: -625px;
-    margin-right: -825px;
-    width: 1024px;
-    height: 768px;
-    border: solid 5px #cccccc;
-    -moz-transform: scale(0.2);
-    -moz-transform-origin: 0 0;
-    -o-transform: scale(0.2);
-    -o-transform-origin: 0 0;
-    -webkit-transform: scale(0.2);
-    -webkit-transform-origin: 0 0;
+	margin-bottom: -625px;
+	margin-right: -825px;
+	width: 1024px;
+	height: 768px;
+	border: solid 5px #cccccc;
+	-moz-transform: scale(0.2);
+	-moz-transform-origin: 0 0;
+	-o-transform: scale(0.2);
+	-o-transform-origin: 0 0;
+	-webkit-transform: scale(0.2);
+	-webkit-transform-origin: 0 0;
 }
 
 #exaport #page-content #region-main .region-content {
@@ -334,7 +334,7 @@
 	width:100%;
 }
 #exaport table.mceLayout {
-    width: 430px!important;
+	width: 430px!important;
 }
 
 #exaport input.submit {

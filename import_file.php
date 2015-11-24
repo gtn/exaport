@@ -44,7 +44,7 @@ $context = context_system::instance();
 require_capability('block/exaport:use', $context);
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
-    error("That's an invalid course id");
+	error("That's an invalid course id");
 }//require_capability('block/exaport:import', $context);
 
 $url = '/blocks/exaport/import_file.php';
@@ -56,84 +56,84 @@ $returnurl = $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $cou
 
 $exteditform = new block_exaport_scorm_upload_form(null, null);
 if ($exteditform->is_cancelled()) {
-    redirect($returnurl);
+	redirect($returnurl);
 } else if ($exteditform->no_submit_button_pressed()) {
-    die("nosubmitbutton");
-    //no_submit_button_actions($exteditform, $sitecontext);
+	die("nosubmitbutton");
+	//no_submit_button_actions($exteditform, $sitecontext);
 }
 
 block_exaport_print_header("exportimportimport");
 
 ////////
 if ($fromform = $exteditform->get_data()) {
-    $imported = true;
-    $dir = make_upload_directory(import_file_area_name());
-    $zipcontent = $exteditform->get_file_content('attachment');
-    if (file_put_contents($dir."/".$exteditform->get_new_filename('attachment'), $zipcontent) && $newfilename = $exteditform->get_new_filename('attachment')) {
-        if (preg_match('/^(.*).zip$/', $newfilename, $regs)) {
-            if ($scormdir = make_upload_directory(import_file_area_name())) {
-                $unzip_dir = $scormdir . '/' . $regs[1];
+	$imported = true;
+	$dir = make_upload_directory(import_file_area_name());
+	$zipcontent = $exteditform->get_file_content('attachment');
+	if (file_put_contents($dir."/".$exteditform->get_new_filename('attachment'), $zipcontent) && $newfilename = $exteditform->get_new_filename('attachment')) {
+		if (preg_match('/^(.*).zip$/', $newfilename, $regs)) {
+			if ($scormdir = make_upload_directory(import_file_area_name())) {
+				$unzip_dir = $scormdir . '/' . $regs[1];
 
-                if (is_dir($unzip_dir)) {
-                    $i = 0;
-                    do {
-                        $i++;
-                        $unzip_dir = $scormdir . '/' . $regs[1] . $i;
-                    } while (is_dir($unzip_dir));
-                }
+				if (is_dir($unzip_dir)) {
+					$i = 0;
+					do {
+						$i++;
+						$unzip_dir = $scormdir . '/' . $regs[1] . $i;
+					} while (is_dir($unzip_dir));
+				}
 
-                if (mkdir($unzip_dir)) {
-                    if (unzip_file($dir . '/' . $newfilename, $unzip_dir, false)) {
+				if (mkdir($unzip_dir)) {
+					if (unzip_file($dir . '/' . $newfilename, $unzip_dir, false)) {
 						if(is_file($unzip_dir."/itemscomp.xml")){
 							$xml = simplexml_load_file($unzip_dir."/itemscomp.xml");
 						}
 						
-                        // parsing of file
-                        $scormparser = new SCORMParser();
-                        $scormTree = $scormparser->parse($unzip_dir . '/imsmanifest.xml');
-                        // write warnings and errors
-                        if ($scormparser->isWarning()) {
-                            error($scormparser->getWarning());
-                        } else if ($scormparser->isError()) {
-                            error($scormparser->getError());
-                        } else {
-                            foreach ($scormTree as $organization) {
-                                switch ($organization["data"]["identifier"]) {
-                                    case "DATA": if (isset($organization["items"][0]["data"]["url"])) {
-                                            $filepath = $unzip_dir . '/' . clean_param($organization["items"][0]["data"]["url"], PARAM_PATH);
-                                            if (is_file($filepath)) {
-                                                import_user_description($filepath, $unzip_dir);
-                                            }
-                                        }
-                                        break;
-                                    case "PORTFOLIO": 
+						// parsing of file
+						$scormparser = new SCORMParser();
+						$scormTree = $scormparser->parse($unzip_dir . '/imsmanifest.xml');
+						// write warnings and errors
+						if ($scormparser->isWarning()) {
+							error($scormparser->getWarning());
+						} else if ($scormparser->isError()) {
+							error($scormparser->getError());
+						} else {
+							foreach ($scormTree as $organization) {
+								switch ($organization["data"]["identifier"]) {
+									case "DATA": if (isset($organization["items"][0]["data"]["url"])) {
+											$filepath = $unzip_dir . '/' . clean_param($organization["items"][0]["data"]["url"], PARAM_PATH);
+											if (is_file($filepath)) {
+												import_user_description($filepath, $unzip_dir);
+											}
+										}
+										break;
+									case "PORTFOLIO": 
 					if(isset($organization["items"])){
 						if(isset($xml)){
 							import_structure($unzip_dir, $organization["items"], $course, 0, $xml);
 						} else import_structure($unzip_dir, $organization["items"], $course);
-                                        }
+										}
 					break;
-                                    default: import_files($unzip_dir, $organization["items"]);
-                                        break;
-                                }
-                            }
-                        }
-                    } else {
-                        error(get_string("couldntextractscormfile", "block_exaport"));
-                    }
-                } else {
-                    error(get_string("couldntcreatetempdir", "block_exaport"));
-                }
-            } else {
-                error(get_string("couldntcreatetempdir", "block_exaport"));
-            }
-        } else {
-            //print_error(get_string("scormhastobezip", "block_exaport"));
-            print_error("scormhastobezip","block_exaport");
-        }
-    } else {
-        error(get_string("uploadfailed", "block_exaport"));
-    }
+									default: import_files($unzip_dir, $organization["items"]);
+										break;
+								}
+							}
+						}
+					} else {
+						error(get_string("couldntextractscormfile", "block_exaport"));
+					}
+				} else {
+					error(get_string("couldntcreatetempdir", "block_exaport"));
+				}
+			} else {
+				error(get_string("couldntcreatetempdir", "block_exaport"));
+			}
+		} else {
+			//print_error(get_string("scormhastobezip", "block_exaport"));
+			print_error("scormhastobezip","block_exaport");
+		}
+	} else {
+		error(get_string("uploadfailed", "block_exaport"));
+	}
 }
 
 
@@ -141,20 +141,20 @@ $form_data = new stdClass();
 $form_data->courseid = $courseid;
 $exteditform->set_data($form_data);
 if ($imported) {
-    notify(get_string("success", "block_exaport"));
+	notify(get_string("success", "block_exaport"));
 } else {
-    $exteditform->display();
+	$exteditform->display();
 }
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 
 function import_files($unzip_dir, $structures, $i = 0, $previd=NULL) {
-    // this function is for future use.
+	// this function is for future use.
 }
 
 function portfolio_file_area_name() {
-    global $CFG, $USER;
-    return "exaport/temp/import/{$USER->id}";
+	global $CFG, $USER;
+	return "exaport/temp/import/{$USER->id}";
 }
 
 function create_image($content){
@@ -181,32 +181,32 @@ function import_user_image($unzip_dir, $url){
 	$path = $unzip_dir."/data/personal/".$url;
    
 	$linkedFileName = block_exaport_clean_path($url);
-    $linkedFilePath = dirname($path) . '/' . $linkedFileName;
+	$linkedFilePath = dirname($path) . '/' . $linkedFileName;
 	
 	 $content = file_get_contents($linkedFilePath);
 		
-    if (is_file($linkedFilePath)) {
+	if (is_file($linkedFilePath)) {
 	
-        $new = new stdClass();
+		$new = new stdClass();
 		$new->userid = $USER->id;
-        $new->categoryid = 5;
-        $new->name = $url;
-        $new->intro = $path;
-        $new->timemodified = time();
-        $new->type = 'file';
-        $new->course = null;
+		$new->categoryid = 5;
+		$new->name = $url;
+		$new->intro = $path;
+		$new->timemodified = time();
+		$new->type = 'file';
+		$new->course = null;
 		
-        if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+		if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
 			$fs = get_file_storage();
 
 			// Prepare file record object
 			$fileinfo = array(
-				//'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,    // ID of context
+				//'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,	// ID of context
 				'contextid' => context_user::instance($USER->id)->id,
 				'component' => 'block_exaport', // usually = table name
-				'filearea' => 'personal_information',     // usually = table name
-				'itemid' => $new->id,          // usually = ID of row in table
-				'filepath' => '/',              // any path beginning and ending in /
+				'filearea' => 'personal_information',	 // usually = table name
+				'itemid' => $new->id,		  // usually = ID of row in table
+				'filepath' => '/',			  // any path beginning and ending in /
 				'filename' => $linkedFileName,
 				'userid' => $USER->id);
 
@@ -241,15 +241,15 @@ function import_user_image($unzip_dir, $url){
 			$informationform->display();
 			
 			$DB->delete_records("block_exaportitem",array("id"=>$new->id));
-        } else {
-            notify(get_string("linkedfilenotfound", "block_exaport", array("url" => $url, "title" => "test")));
-        }
-    }
+		} else {
+			notify(get_string("linkedfilenotfound", "block_exaport", array("url" => $url, "title" => "test")));
+		}
+	}
 }
 function import_user_description($file, $unzip_dir) {
-    global $USER, $DB;
+	global $USER, $DB;
 	
-    $content = file_get_contents($file);
+	$content = file_get_contents($file);
 	
 	//$content = create_image($content);
 	//$images = get_image_url($content);
@@ -258,85 +258,85 @@ function import_user_description($file, $unzip_dir) {
 		//import_user_image($unzip_dir, $image);
 	//}
 	
-    if (($startDesc = strpos($content, '<!--###BOOKMARK_PERSONAL_DESC###-->')) !== false) {
-        $startDesc+=strlen('<!--###BOOKMARK_PERSONAL_DESC###-->');
+	if (($startDesc = strpos($content, '<!--###BOOKMARK_PERSONAL_DESC###-->')) !== false) {
+		$startDesc+=strlen('<!--###BOOKMARK_PERSONAL_DESC###-->');
 		
-        if (($endDesc = strpos($content, '<!--###BOOKMARK_PERSONAL_DESC###-->', $startDesc)) !== false) {
-            if ($DB->record_exists('block_exaportuser', array('user_id'=>$USER->id))) {
-                $conditions = array("user_id" => $USER->id);
-                $record = $DB->get_record('block_exaportuser', $conditions);
-//                $record->description = block_exaport_clean_text(substr($content, $startDesc, $endDesc - $startDesc));
-                $record->description = substr($content, $startDesc, $endDesc - $startDesc);
-                $record->persinfo_timemodified = time();
-                if (!$DB->update_record('block_exaportuser', $record)) {
-                    error(get_string("couldntupdatedesc", "block_exaport"));
-                }
-            } else {
-                $newentry = new stdClass();
-//                $newentry->description = addslashes(substr($content, $startDesc, $endDesc - $startDesc));
-                $newentry->description = substr($content, $startDesc, $endDesc - $startDesc);
-                $newentry->persinfo_timemodified = time();
-                $newentry->id = $USER->id;
-                if (!$DB->insert_record('block_exaportuser', $newentry)) {
-                    error(get_string("couldntinsertdesc", "block_exaport"));
-                }
-            }
-        }
-    }
+		if (($endDesc = strpos($content, '<!--###BOOKMARK_PERSONAL_DESC###-->', $startDesc)) !== false) {
+			if ($DB->record_exists('block_exaportuser', array('user_id'=>$USER->id))) {
+				$conditions = array("user_id" => $USER->id);
+				$record = $DB->get_record('block_exaportuser', $conditions);
+//				$record->description = block_exaport_clean_text(substr($content, $startDesc, $endDesc - $startDesc));
+				$record->description = substr($content, $startDesc, $endDesc - $startDesc);
+				$record->persinfo_timemodified = time();
+				if (!$DB->update_record('block_exaportuser', $record)) {
+					error(get_string("couldntupdatedesc", "block_exaport"));
+				}
+			} else {
+				$newentry = new stdClass();
+//				$newentry->description = addslashes(substr($content, $startDesc, $endDesc - $startDesc));
+				$newentry->description = substr($content, $startDesc, $endDesc - $startDesc);
+				$newentry->persinfo_timemodified = time();
+				$newentry->id = $USER->id;
+				if (!$DB->insert_record('block_exaportuser', $newentry)) {
+					error(get_string("couldntinsertdesc", "block_exaport"));
+				}
+			}
+		}
+	}
 }
 
 function import_structure($unzip_dir, $structures, $course, $i = 0, &$xml=NULL, $previd=NULL) {
-    global $USER, $COURSE, $DB;
-    foreach ($structures as $structure) {
-        if (isset($structure["data"])) {
-            if (isset($structure["data"]["title"]) &&
-                    isset($structure["data"]["url"]) &&
-                    ($previd != NULL)) {
+	global $USER, $COURSE, $DB;
+	foreach ($structures as $structure) {
+		if (isset($structure["data"])) {
+			if (isset($structure["data"]["title"]) &&
+					isset($structure["data"]["url"]) &&
+					($previd != NULL)) {
 				if(isset($structure["data"]["id"])){
 					insert_entry($unzip_dir, $structure["data"]["url"], $structure["data"]["title"], $previd, $course, $xml, $structure["data"]["id"]);
 				}else{
 					insert_entry($unzip_dir, $structure["data"]["url"], $structure["data"]["title"], $previd, $course);
 				}
 		   } else if (isset($structure["data"]["title"])) {
-                if (is_null($previd)) {
-                    if ($DB->count_records_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid=0") == 0) {
-                        $newentry = new stdClass();
-                        $newentry->name = block_exaport_clean_title($structure["data"]["title"]);
-                        $newentry->timemodified = time();
-                        $newentry->course = $COURSE->id;
-                        $newentry->userid = $USER->id;
-                        //$newentry->pid = $previd;
-
-                        if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
-                            notify("Could not insert category!");
-                        }
-                    } else {
-                        $entry = $DB->get_record_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid=0");
-                        $entryid = $entry->id;
-                    }
-                } else {
-                    if ($DB->count_records_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid='$previd'") == 0) {
-                        $newentry = new stdClass();
+				if (is_null($previd)) {
+					if ($DB->count_records_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid=0") == 0) {
+						$newentry = new stdClass();
 						$newentry->name = block_exaport_clean_title($structure["data"]["title"]);
-                        $newentry->timemodified = time();
-                        $newentry->course = $COURSE->id;
-                        $newentry->userid = $USER->id;
-                        $newentry->pid = $previd;
+						$newentry->timemodified = time();
+						$newentry->course = $COURSE->id;
+						$newentry->userid = $USER->id;
+						//$newentry->pid = $previd;
 
-                        if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
-                            notify("Could not insert category!");
-                        }
-                    } else {
-                        $entry = $DB->get_record_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid='$previd'");
-                        $entryid = $entry->id;
-                    }
-                }
-            }
-        }
-        if (isset($structure["items"]) && isset($entryid)) {
-            import_structure($unzip_dir, $structure["items"], $course, $i + 1, $xml, $entryid);
-        }
-    }
+						if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
+							notify("Could not insert category!");
+						}
+					} else {
+						$entry = $DB->get_record_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid=0");
+						$entryid = $entry->id;
+					}
+				} else {
+					if ($DB->count_records_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid='$previd'") == 0) {
+						$newentry = new stdClass();
+						$newentry->name = block_exaport_clean_title($structure["data"]["title"]);
+						$newentry->timemodified = time();
+						$newentry->course = $COURSE->id;
+						$newentry->userid = $USER->id;
+						$newentry->pid = $previd;
+
+						if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
+							notify("Could not insert category!");
+						}
+					} else {
+						$entry = $DB->get_record_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid='$previd'");
+						$entryid = $entry->id;
+					}
+				}
+			}
+		}
+		if (isset($structure["items"]) && isset($entryid)) {
+			import_structure($unzip_dir, $structure["items"], $course, $i + 1, $xml, $entryid);
+		}
+	}
 }
 function import_item_competences($newid, $oldid, &$xml, $dir, $title){
 global $USER, $DB, $COURSE;
@@ -369,76 +369,76 @@ foreach($xml->items->item as $item){
 }
 }
 function block_exaport_clean_title($title) {
-    return clean_param($title, PARAM_TEXT);
+	return clean_param($title, PARAM_TEXT);
 }
 
 function block_exaport_clean_url($url) {
-    return clean_param($url, PARAM_URL);
+	return clean_param($url, PARAM_URL);
 }
 
 function block_exaport_clean_text($text) {
-    return $text;
+	return $text;
 }
 
 function block_exaport_clean_path($text) {
-    return clean_param($text, PARAM_PATH);
+	return clean_param($text, PARAM_PATH);
 }
-       
+	   
 function insert_entry($unzip_dir, $url, $title, $category, $course, &$xml=NULL, $id=NULL) {
-    global $USER, $CFG, $COURSE, $DB;
-    $filePath = $unzip_dir . '/' . $url;
-    $content = file_get_contents($filePath);
+	global $USER, $CFG, $COURSE, $DB;
+	$filePath = $unzip_dir . '/' . $url;
+	$content = file_get_contents($filePath);
 	
 	
-    if ((($startUrl = strpos($content, '<!--###BOOKMARK_EXT_URL###-->')) !== false) &&
-            (($startDesc = strpos($content, '<!--###BOOKMARK_EXT_DESC###-->')) !== false)) {
-        $startUrl+=strlen('<!--###BOOKMARK_EXT_URL###-->');
-        $startDesc+=strlen('<!--###BOOKMARK_EXT_DESC###-->');
-        if ((($endUrl = strpos($content, '<!--###BOOKMARK_EXT_URL###-->', $startUrl)) !== false) &&
-                (($endDesc = strpos($content, '<!--###BOOKMARK_EXT_DESC###-->', $startDesc)) !== false)) {
-            $new = new stdClass();
-            $new->userid = $USER->id;
-            $new->categoryid = $category;
-            $new->name = block_exaport_clean_title($title);
-            $new->url = block_exaport_clean_url(substr($content, $startUrl, $endUrl - $startUrl));
-            $new->intro = block_exaport_clean_text(substr($content, $startDesc, $endDesc - $startDesc));
-            $new->timemodified = time();
-            $new->type = 'link';
-            $new->course = $COURSE->id;
+	if ((($startUrl = strpos($content, '<!--###BOOKMARK_EXT_URL###-->')) !== false) &&
+			(($startDesc = strpos($content, '<!--###BOOKMARK_EXT_DESC###-->')) !== false)) {
+		$startUrl+=strlen('<!--###BOOKMARK_EXT_URL###-->');
+		$startDesc+=strlen('<!--###BOOKMARK_EXT_DESC###-->');
+		if ((($endUrl = strpos($content, '<!--###BOOKMARK_EXT_URL###-->', $startUrl)) !== false) &&
+				(($endDesc = strpos($content, '<!--###BOOKMARK_EXT_DESC###-->', $startDesc)) !== false)) {
+			$new = new stdClass();
+			$new->userid = $USER->id;
+			$new->categoryid = $category;
+			$new->name = block_exaport_clean_title($title);
+			$new->url = block_exaport_clean_url(substr($content, $startUrl, $endUrl - $startUrl));
+			$new->intro = block_exaport_clean_text(substr($content, $startDesc, $endDesc - $startDesc));
+			$new->timemodified = time();
+			$new->type = 'link';
+			$new->course = $COURSE->id;
 
-            if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+			if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
 				if(isset($xml) && isset($id)){	
 					import_item_competences($new->id, $id, $xml, $unzip_dir, $new->name);
 				}
-                get_comments($content, $new->id, 'block_exaportitemcomm');
-            } else {
-                notify(get_string("couldntinsert", "block_exaport", $title));
-            }
-        } else {
-            notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
-        }
-    } else if ((($startUrl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->')) !== false) &&
-            (($startDesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->')) !== false)) {
-        $startUrl+=strlen('<!--###BOOKMARK_FILE_URL###-->');
-        $startDesc+=strlen('<!--###BOOKMARK_FILE_DESC###-->');
-        if ((($endUrl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->', $startUrl)) !== false) &&
-                (($endDesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startDesc)) !== false)) {
-            $linkedFileName = block_exaport_clean_path(substr($content, $startUrl, $endUrl - $startUrl));
-            $linkedFilePath = dirname($filePath) . '/' . $linkedFileName;
+				get_comments($content, $new->id, 'block_exaportitemcomm');
+			} else {
+				notify(get_string("couldntinsert", "block_exaport", $title));
+			}
+		} else {
+			notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+		}
+	} else if ((($startUrl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->')) !== false) &&
+			(($startDesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->')) !== false)) {
+		$startUrl+=strlen('<!--###BOOKMARK_FILE_URL###-->');
+		$startDesc+=strlen('<!--###BOOKMARK_FILE_DESC###-->');
+		if ((($endUrl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->', $startUrl)) !== false) &&
+				(($endDesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startDesc)) !== false)) {
+			$linkedFileName = block_exaport_clean_path(substr($content, $startUrl, $endUrl - $startUrl));
+			$linkedFilePath = dirname($filePath) . '/' . $linkedFileName;
 		
-            if (is_file($linkedFilePath)) {
-                $new = new stdClass();
-                $new->userid = $USER->id;
-                $new->categoryid = $category;
-                $new->name = block_exaport_clean_title($title);
-                $new->intro = block_exaport_clean_text(substr($content, $startDesc, $endDesc - $startDesc));
-                $new->timemodified = time();
-                $new->type = 'file';
-                $new->course = $COURSE->id;
-                // not necessary
-                //$new->url          = str_replace($CFG->wwwroot, "", $_SERVER["HTTP_REFERER"]);
+			if (is_file($linkedFilePath)) {
+				$new = new stdClass();
+				$new->userid = $USER->id;
+				$new->categoryid = $category;
+				$new->name = block_exaport_clean_title($title);
+				$new->intro = block_exaport_clean_text(substr($content, $startDesc, $endDesc - $startDesc));
+				$new->timemodified = time();
+				$new->type = 'file';
+				$new->course = $COURSE->id;
+				// not necessary
+				//$new->url		  = str_replace($CFG->wwwroot, "", $_SERVER["HTTP_REFERER"]);
 
-                if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+				if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
 					if(isset($xml) && isset($id)){
 						import_item_competences($new->id, $id, $xml, $unzip_dir, $new->name);
 					}
@@ -446,12 +446,12 @@ function insert_entry($unzip_dir, $url, $title, $category, $course, &$xml=NULL, 
 
 					// Prepare file record object
 					$fileinfo = array(
-						//'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,    // ID of context
+						//'contextid' => get_context_instance(CONTEXT_USER, $USER->id)->id,	// ID of context
 						'contextid' => context_user::instance($USER->id)->id,
 						'component' => 'block_exaport', // usually = table name
-						'filearea' => 'item_file',     // usually = table name
-						'itemid' => $new->id,          // usually = ID of row in table
-						'filepath' => '/',              // any path beginning and ending in /
+						'filearea' => 'item_file',	 // usually = table name
+						'itemid' => $new->id,		  // usually = ID of row in table
+						'filepath' => '/',			  // any path beginning and ending in /
 						'filename' => $linkedFileName,
 						'userid' => $USER->id);
 
@@ -462,96 +462,96 @@ function insert_entry($unzip_dir, $url, $title, $category, $course, &$xml=NULL, 
 					} else {
 						get_comments($content, $new->id, 'block_exaportitemcomm');
 					}
-                } else {
-                    notify(get_string("couldntinsert", "block_exaport", $title));
-                }
-            } else {
-                notify(get_string("linkedfilenotfound", "block_exaport", array("filename" => $linkedFileName, "url" => $url, "title" => $title)));
-            }
-        } else {
-            notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
-        }
-    } else if ((($startDesc = strpos($content, '<!--###BOOKMARK_NOTE_DESC###-->')) !== false)) {
-        $startDesc+=strlen('<!--###BOOKMARK_NOTE_DESC###-->');
-        if ((($endDesc = strpos($content, '<!--###BOOKMARK_NOTE_DESC###-->', $startDesc)) !== false)) {
-            $new = new stdClass();
-            $new->userid = $USER->id;
-            $new->categoryid = $category;
-            $new->name = block_exaport_clean_title($title);
-            $new->intro = block_exaport_clean_text(substr($content, $startDesc, $endDesc - $startDesc));
-            $new->timemodified = time();
-            $new->type = 'note';
-            $new->course = $COURSE->id;
+				} else {
+					notify(get_string("couldntinsert", "block_exaport", $title));
+				}
+			} else {
+				notify(get_string("linkedfilenotfound", "block_exaport", array("filename" => $linkedFileName, "url" => $url, "title" => $title)));
+			}
+		} else {
+			notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+		}
+	} else if ((($startDesc = strpos($content, '<!--###BOOKMARK_NOTE_DESC###-->')) !== false)) {
+		$startDesc+=strlen('<!--###BOOKMARK_NOTE_DESC###-->');
+		if ((($endDesc = strpos($content, '<!--###BOOKMARK_NOTE_DESC###-->', $startDesc)) !== false)) {
+			$new = new stdClass();
+			$new->userid = $USER->id;
+			$new->categoryid = $category;
+			$new->name = block_exaport_clean_title($title);
+			$new->intro = block_exaport_clean_text(substr($content, $startDesc, $endDesc - $startDesc));
+			$new->timemodified = time();
+			$new->type = 'note';
+			$new->course = $COURSE->id;
 
-            if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+			if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
 				if(isset($xml) && isset($id)){	
 					import_item_competences($new->id, $id, $xml, $unzip_dir, $new->name);
 				}
-                get_comments($content, $new->id, 'block_exaportitemcomm');
-            } else {
-                notify(get_string("couldntinsert", "block_exaport", $title));
-            }
-        } else {
-            notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
-        }
-    } else {
-        notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
-    }
+				get_comments($content, $new->id, 'block_exaportitemcomm');
+			} else {
+				notify(get_string("couldntinsert", "block_exaport", $title));
+			}
+		} else {
+			notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+		}
+	} else {
+		notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+	}
 }
 
 function get_comments($content, $bookmarkid, $table) {
-    global $USER,$DB;
-    $i = 1;
-    $comment = "";
-    while ((($startAuthor = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->')) !== false) &&
-    (($startTime = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_TIME###-->')) !== false) &&
-    (($startContent = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_CONTENT###-->')) !== false)) {
-        $startAuthor+=strlen('<!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->');
-        $startTime+=strlen('<!--###BOOKMARK_COMMENT(' . $i . ')_TIME###-->');
-        $startContent+=strlen('<!--###BOOKMARK_COMMENT(' . $i . ')_CONTENT###-->');
+	global $USER,$DB;
+	$i = 1;
+	$comment = "";
+	while ((($startAuthor = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->')) !== false) &&
+	(($startTime = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_TIME###-->')) !== false) &&
+	(($startContent = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_CONTENT###-->')) !== false)) {
+		$startAuthor+=strlen('<!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->');
+		$startTime+=strlen('<!--###BOOKMARK_COMMENT(' . $i . ')_TIME###-->');
+		$startContent+=strlen('<!--###BOOKMARK_COMMENT(' . $i . ')_CONTENT###-->');
 
-        if ((($endAuthor = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->', $startAuthor)) !== false) &&
-                (($endTime = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_TIME###-->', $startTime)) !== false) &&
-                (($endContent = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_CONTENT###-->', $startContent)) !== false)) {
+		if ((($endAuthor = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->', $startAuthor)) !== false) &&
+				(($endTime = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_TIME###-->', $startTime)) !== false) &&
+				(($endContent = strpos($content, '<!--###BOOKMARK_COMMENT(' . $i . ')_CONTENT###-->', $startContent)) !== false)) {
 
-            $commentAuthor = block_exaport_clean_text(substr($content, $startAuthor, $endAuthor - $startAuthor));
-            $commentTime = block_exaport_clean_text(substr($content, $startTime, $endTime - $startTime));
-            $commentContent = block_exaport_clean_text(substr($content, $startContent, $endContent - $startContent));
+			$commentAuthor = block_exaport_clean_text(substr($content, $startAuthor, $endAuthor - $startAuthor));
+			$commentTime = block_exaport_clean_text(substr($content, $startTime, $endTime - $startTime));
+			$commentContent = block_exaport_clean_text(substr($content, $startContent, $endContent - $startContent));
 
-            $comment .= '<span class="block_eportfolio_commentauthor">' . $commentAuthor . '</span> ' . $commentTime . '<br />' . $commentContent . '<br /><br />';
-        } else {
-            notify(get_string("couldninsertcomment", "block_exaport"));
-        }
-        $i++;
-    }
-    if ($comment != "") {
-        $new = new stdClass();
-        $new->userid = $USER->id;
-        $new->timemodified = time();
-        $new->itemid = $bookmarkid;
-        $new->entry = get_string("importedcommentsstart", "block_exaport") . $comment . get_string("importedcommentsend", "block_exaport");
-        if (!$DB->insert_record($table, $new)) {
-            notify(get_string("couldninsertcomment", "block_exaport"));
-        }
-    }
+			$comment .= '<span class="block_eportfolio_commentauthor">' . $commentAuthor . '</span> ' . $commentTime . '<br />' . $commentContent . '<br /><br />';
+		} else {
+			notify(get_string("couldninsertcomment", "block_exaport"));
+		}
+		$i++;
+	}
+	if ($comment != "") {
+		$new = new stdClass();
+		$new->userid = $USER->id;
+		$new->timemodified = time();
+		$new->itemid = $bookmarkid;
+		$new->entry = get_string("importedcommentsstart", "block_exaport") . $comment . get_string("importedcommentsend", "block_exaport");
+		if (!$DB->insert_record($table, $new)) {
+			notify(get_string("couldninsertcomment", "block_exaport"));
+		}
+	}
 }
 
 function handle_filename_collision($destination, $filename) {
-    if (file_exists($destination . '/' . $filename)) {
-        $parts = explode('.', $filename);
-        $lastPart = array_pop($parts);
-        $firstPart = implode('.', $parts);
-        $i = 0;
-        do {
-            $i++;
-            $filename = $firstPart . '_' . $i . '.' . $lastPart;
-        } while (file_exists($destination . '/' . $filename));
-    }
-    return $filename;
+	if (file_exists($destination . '/' . $filename)) {
+		$parts = explode('.', $filename);
+		$lastPart = array_pop($parts);
+		$firstPart = implode('.', $parts);
+		$i = 0;
+		do {
+			$i++;
+			$filename = $firstPart . '_' . $i . '.' . $lastPart;
+		} while (file_exists($destination . '/' . $filename));
+	}
+	return $filename;
 }
 
 function import_file_area_name() {
-    global $USER, $CFG, $COURSE;
+	global $USER, $CFG, $COURSE;
 
-    return "exaport/temp/import/{$USER->id}";
+	return "exaport/temp/import/{$USER->id}";
 }

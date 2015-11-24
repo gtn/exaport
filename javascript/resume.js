@@ -25,7 +25,7 @@ jQueryExaport(function($){
 /*	if (hash.search('goals') >= 0) 
 		hash = 'goals';
 	if (hash.search('skills') >= 0) 
-		hash = 'skills';                     */
+		hash = 'skills';					 */
 	$('a[name='+hash+']').parents('.view-group').toggleClass('view-group-open');	
 	$('a[name='+hash+']').parents('table.generaltable').find('.expandable-text').toggleClass('hidden');
 	

@@ -14,27 +14,27 @@
 $fs = get_file_storage();
  $file = $fs->get_file_by_hash($hash);
 
-        // Read contents
-        if ($file) {
-                send_stored_file($file);
-        } else {
-                not_found();
-        }
-        
+		// Read contents
+		if ($file) {
+				send_stored_file($file);
+		} else {
+				not_found();
+		}
+		
 
-        
-         
-        
-        function get_hash($itemid) {
+		
+		 
+		
+		function get_hash($itemid) {
 	global $DB;
 
-    if ($file_record = $DB->get_record_sql("select min(id), pathnamehash from {files} where itemid={$itemid} AND filename!='.' GROUP BY id, pathnamehash")) {
-        return $file_record->pathnamehash;
-    } else {
-        return false;
-    }
+	if ($file_record = $DB->get_record_sql("select min(id), pathnamehash from {files} where itemid={$itemid} AND filename!='.' GROUP BY id, pathnamehash")) {
+		return $file_record->pathnamehash;
+	} else {
+		return false;
+	}
 }
-        */
+		*/
 
 
  ?>

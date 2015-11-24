@@ -41,22 +41,22 @@ if ($action=="add")
 if (!empty($_POST["shareusers"])){
 	$shareusers = $_POST["shareusers"];
 	if (function_exists("clean_param_array")) 
-        $shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
+		$shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
 } else {
-    $shareusers = "";
+	$shareusers = "";
 }
 
 if (!empty($_POST["sharegroups"])){
 	$sharegroups = $_POST["sharegroups"];
 	if (function_exists("clean_param_array")) 
-        $sharegroups=clean_param_array($sharegroups, PARAM_SEQUENCE, false);
+		$sharegroups=clean_param_array($sharegroups, PARAM_SEQUENCE, false);
 } else {
-    $sharegroups = "";
+	$sharegroups = "";
 }
 
 
 if (!confirm_sesskey()) {
-	print_error("badsessionkey","block_exaport");    	
+	print_error("badsessionkey","block_exaport");		
 }
 
 $url = '/blocks/exabis_competences/views_mod.php';
@@ -85,7 +85,7 @@ if ($id) {
 	// generate view hash
 	do {
 		$hash = substr(md5(microtime()), 3, 8);
-    } while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
+	} while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
 	$view->hash = $hash;/**/
 }
 
@@ -105,7 +105,7 @@ $returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'
 // delete item
 if ($action == 'delete') {
 	if (!$view) {
-		print_error("viewnotfound", "block_exaport");        
+		print_error("viewnotfound", "block_exaport");		
 	}
 	if (data_submitted() && $confirm && confirm_sesskey()) {
 		$conditions = array("viewid" => $view->id);
@@ -128,7 +128,7 @@ if ($action == 'delete') {
 		//notice_yesno(get_string("deletecheck", null, $view->name), 'views_mod.php', 'views_list.php', $optionsyes, $optionsno, 'post', 'get');
 		echo $OUTPUT->confirm(get_string("deletecheck",null,$view->name), new moodle_url('views_mod.php', $optionsyes), new moodle_url('views_list.php', $optionsno));
 		echo block_exaport_wrapperdivend();
-        echo $OUTPUT->footer();
+		echo $OUTPUT->footer();
 		die;
 	}
 }
@@ -157,13 +157,13 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform->setType('courseid', PARAM_INT);
 		$mform->setType('viewid', PARAM_INT);
 		$mform->setType('name', PARAM_TEXT);
-        $mform->setType('autofill_artefacts', PARAM_TEXT);
+		$mform->setType('autofill_artefacts', PARAM_TEXT);
 		$mform->addElement('hidden', 'items');
 		$mform->addElement('hidden', 'draft_itemid');
 		$mform->addElement('hidden', 'action');
 		$mform->addElement('hidden', 'courseid');
 		$mform->addElement('hidden', 'viewid');
-        $mform->addElement('hidden', 'autofill_artefacts');
+		$mform->addElement('hidden', 'autofill_artefacts');
 		if (optional_param('type', 'content', PARAM_ALPHA)<>'title' and optional_param("action", "", PARAM_ALPHA)<>'add')
 			$mform->addElement('hidden', 'name');
 
@@ -176,40 +176,40 @@ class block_exaport_view_edit_form extends moodleform {
 
 							$mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'), array('rows'=> '20', 'cols'=>'5'), array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 							$mform->setType('description', PARAM_RAW);
-                            
-                            if ($this->_customdata['view']) {
-                                // Auto generate view with the artefacts checkbox.
-                                $artefacts = block_exaport_get_portfolio_items(1);
-                                if (count($artefacts) > 0) {
-                                    if ($this->_customdata['view']->id > 0) {
-                                        foreach ($artefacts as $artefact) {
-                                            $allartefacts[] = $artefact->id;
-                                        };
-                                        $filledartefacts = explode(',', $this->_customdata['view']->autofill_artefacts);
-                                        sort($filledartefacts);
-                                        sort($allartefacts);
-                                        $diff = array_diff($allartefacts, $filledartefacts);
-                                        if (count($diff)>0) {
-                                            $mform->addElement('checkbox', 'autofill_add', '', get_string('autofillview_addartefacts', 'block_exaport'));
-                                        };
-                                    } else {
-                                        $mform->addElement('checkbox', 'autofill', '', get_string('autofillview', 'block_exaport'));
-                                    };
-                                };
-                                // Share to cheacher checkbox.
-                                $allteachers = block_exaport_get_course_teachers();
-                                // If view is editing.
-                                if ($this->_customdata['view']->id > 0) {
-                                    $allsharedusers = block_exaport_get_shared_users($this->_customdata['view']->id);
-                                    $diff = array_diff($allteachers, $allsharedusers);
-                                    // If there is teacher which does not share.
-                                    if ((count($allteachers) > 0) && (count($diff) > 0)) {
-                                        $mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher_add', 'block_exaport'));
-                                    };
-                                } else { // If view is adding.
-                                        $mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher', 'block_exaport'));
-                                };
-                            };
+							
+							if ($this->_customdata['view']) {
+								// Auto generate view with the artefacts checkbox.
+								$artefacts = block_exaport_get_portfolio_items(1);
+								if (count($artefacts) > 0) {
+									if ($this->_customdata['view']->id > 0) {
+										foreach ($artefacts as $artefact) {
+											$allartefacts[] = $artefact->id;
+										};
+										$filledartefacts = explode(',', $this->_customdata['view']->autofill_artefacts);
+										sort($filledartefacts);
+										sort($allartefacts);
+										$diff = array_diff($allartefacts, $filledartefacts);
+										if (count($diff)>0) {
+											$mform->addElement('checkbox', 'autofill_add', '', get_string('autofillview_addartefacts', 'block_exaport'));
+										};
+									} else {
+										$mform->addElement('checkbox', 'autofill', '', get_string('autofillview', 'block_exaport'));
+									};
+								};
+								// Share to cheacher checkbox.
+								$allteachers = block_exaport_get_course_teachers();
+								// If view is editing.
+								if ($this->_customdata['view']->id > 0) {
+									$allsharedusers = block_exaport_get_shared_users($this->_customdata['view']->id);
+									$diff = array_diff($allteachers, $allsharedusers);
+									// If there is teacher which does not share.
+									if ((count($allteachers) > 0) && (count($diff) > 0)) {
+										$mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher_add', 'block_exaport'));
+									};
+								} else { // If view is adding.
+										$mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher', 'block_exaport'));
+								};
+							};
 
 							if (block_exaport_course_has_desp()) {
 								$langcode=get_string("langcode","block_desp");
@@ -255,13 +255,13 @@ class block_exaport_view_edit_form extends moodleform {
 	}
 
 	function toArray() {
-        //finalize the form definition if not yet done
-        if (!$this->_definition_finalized) {
-            $this->_definition_finalized = true;
-            $this->definition_after_data();
-        }
+		//finalize the form definition if not yet done
+		if (!$this->_definition_finalized) {
+			$this->_definition_finalized = true;
+			$this->definition_after_data();
+		}
 
-        $form = $this->_form->toArray();
+		$form = $this->_form->toArray();
 
 		$form['html_hidden_fields'] = '';
 		$form['elements_by_name'] = array();
@@ -273,7 +273,7 @@ class block_exaport_view_edit_form extends moodleform {
 		}
 	
 		return $form;
-    }
+	}
 }
 
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id)->id);
@@ -295,9 +295,9 @@ if ($editform->is_cancelled()) {
 	$dbView->timemodified = time();
 	if (!$view || !isset($view->hash)) {
 		// generate view hash
-        do {
+		do {
 			$hash = substr(md5(microtime()), 3, 8);
-        } while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
+		} while ($DB->record_exists("block_exaportview", array("hash"=>$hash)));
 		$dbView->hash = $hash;
 	}
 
@@ -322,16 +322,16 @@ if ($editform->is_cancelled()) {
 			$dbView->userid = $USER->id;
 			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
-                // Auto fill with the artefacts.
-                if (isset($dbView->autofill) and $dbView->autofill == 1) {
-                    $filledartefacts = fill_view_with_artefacts($dbView->id);
-                    $dbView->autofill_artefacts = $filledartefacts;
-                    $DB->update_record('block_exaportview', $dbView);
-                }
-                // Auto Share to the teachers.
-                if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
-                    share_view_to_teachers($dbView->id);
-                };
+				// Auto fill with the artefacts.
+				if (isset($dbView->autofill) and $dbView->autofill == 1) {
+					$filledartefacts = fill_view_with_artefacts($dbView->id);
+					$dbView->autofill_artefacts = $filledartefacts;
+					$DB->update_record('block_exaportview', $dbView);
+				}
+				// Auto Share to the teachers.
+				if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
+					share_view_to_teachers($dbView->id);
+				};
 				block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
 				print_error('addposterror', 'block_exaport', $returnurl);
@@ -340,7 +340,7 @@ if ($editform->is_cancelled()) {
 
 		case 'edit':	
 			if (!$view) {
-				print_error("viewnotfound", "block_exaport");	                
+				print_error("viewnotfound", "block_exaport");					
 			}
 
 			$dbView->id = $view->id;
@@ -350,15 +350,15 @@ if ($editform->is_cancelled()) {
 				else 
 					$dbView->layout=$view->layout;
 			};
-            // Add new artefacts if selected.
-            if (isset($dbView->autofill_add) and $dbView->autofill_add == 1) {
-                    $filledartefacts = fill_view_with_artefacts($dbView->id, $dbView->autofill_artefacts);
-                    $dbView->autofill_artefacts = $filledartefacts;
-            };
-            // Auto Share to the teachers.
-            if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
-                share_view_to_teachers($dbView->id);
-            };
+			// Add new artefacts if selected.
+			if (isset($dbView->autofill_add) and $dbView->autofill_add == 1) {
+					$filledartefacts = fill_view_with_artefacts($dbView->id, $dbView->autofill_artefacts);
+					$dbView->autofill_artefacts = $filledartefacts;
+			};
+			// Auto Share to the teachers.
+			if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
+				share_view_to_teachers($dbView->id);
+			};
 			if ($DB->update_record('block_exaportview', $dbView)) {
 				block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
 			} else {
@@ -452,26 +452,26 @@ if ($editform->is_cancelled()) {
 						if (isset($shareusers[$notifyuser])) {
 							// notify
 							$notificationdata = new stdClass();
-							$notificationdata->component        = 'block_exaport';
-							$notificationdata->name             = 'sharing';
-							$notificationdata->userfrom         = $USER;
-							$notificationdata->userto           = $DB->get_record('user', array('id' => $notifyuser));
+							$notificationdata->component		= 'block_exaport';
+							$notificationdata->name			 = 'sharing';
+							$notificationdata->userfrom		 = $USER;
+							$notificationdata->userto		   = $DB->get_record('user', array('id' => $notifyuser));
 							// TODO: subject + message text
-							$notificationdata->subject          = get_string('i_shared', 'block_exaport');
-							$notificationdata->fullmessage      = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid=1&access=id/'.$USER->id.'-'.$dbView->id;
+							$notificationdata->subject		  = get_string('i_shared', 'block_exaport');
+							$notificationdata->fullmessage	  = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid=1&access=id/'.$USER->id.'-'.$dbView->id;
 							$notificationdata->fullmessageformat = FORMAT_PLAIN;
 							$notificationdata->fullmessagehtml  = '';
-							$notificationdata->smallmessage     = '';
-							$notificationdata->notification     = 1;
+							$notificationdata->smallmessage	 = '';
+							$notificationdata->notification	 = 1;
 		
 							$mailresult = message_send($notificationdata);
 						}
 					}
 				}
 			}
-            // delete all shared groups
+			// delete all shared groups
 			$DB->delete_records("block_exaportviewgroupshar", array('viewid'=>$dbView->id));
-            // Add new groups sharing. shareall == 0 - users sharing; 1 - share for all; 2 - groups sharing.
+			// Add new groups sharing. shareall == 0 - users sharing; 1 - share for all; 2 - groups sharing.
 			if ($dbView->internaccess && $dbView->shareall == 2 && is_array($sharegroups)) {
 				foreach ($sharegroups as $sharegroup) {
 					$sharegroup = clean_param($sharegroup, PARAM_INT);
@@ -480,7 +480,7 @@ if ($editform->is_cancelled()) {
 					$shareItem->groupid = $sharegroup;
 					$DB->insert_record("block_exaportviewgroupshar", $shareItem);
 				};
-            };
+			};
 			
 			if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
 				// search button pressed -> redirect to search form
@@ -498,13 +498,13 @@ if ($editform->is_cancelled()) {
 	$returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&sesskey='.sesskey().'&action=edit';
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    redirect($returnurl);
+	redirect($returnurl);
 }
 
 // gui setup
 $postView = ($view ? $view : new stdClass());
-$postView->action       = $action;
-$postView->courseid     = $courseid;
+$postView->action	   = $action;
+$postView->courseid	 = $courseid;
 $postView->draft_itemid = null;
 
 file_prepare_draft_area($postView->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
@@ -515,8 +515,8 @@ function copy_personal_information_draft_files($targetDraftitemid, $contextid, $
 	global $USER;
 	
 	// copy from filelib.php
-    $usercontext = context_user::instance($USER->id);
-    $fs = get_file_storage();
+	$usercontext = context_user::instance($USER->id);
+	$fs = get_file_storage();
 
 	$file_record = array('contextid'=>$usercontext->id, 'component'=>'user', 'filearea'=>'draft', 'itemid'=>$targetDraftitemid);
 	if (!is_null($itemid) and $files = $fs->get_area_files($contextid, $component, $filearea, $itemid)) {
@@ -548,7 +548,7 @@ function copy_personal_information_draft_files($targetDraftitemid, $contextid, $
 			$original->contextid = $contextid;
 			$original->component = $component;
 			$original->filearea  = $filearea;
-			$original->itemid    = $itemid;
+			$original->itemid	= $itemid;
 			$original->filename  = $file->get_filename();
 			$original->filepath  = $file->get_filepath();
 			$newsourcefield->original = file_storage::pack_reference($original);
@@ -600,7 +600,7 @@ if ($type<>'title') {// for delete php notes
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-    'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
+	'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
 	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_badge', 'view_specialitem_text_defaulttext',
 	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',
@@ -652,54 +652,54 @@ switch ($type) {
 echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');
 // Preview button.
 echo '<div style="float: right;">
-            <a target="_blank" href="'.s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">
-                    <img alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/preview.png" />
-            </a></div>';
+			<a target="_blank" href="'.s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">
+					<img alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/preview.png" />
+			</a></div>';
 echo '<ul>
-    <li class="portfolioElement" title="'.get_string('personalinformation', 'block_exaport').'" block-type="personal_information">
-        <div class="blocktype" style="position: relative;">
-            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/personal_info.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('personalinformation', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('personalinformation', 'block_exaport').'</div>
-        </div>
-    </li>
-    <li class="portfolioElement" title="'.get_string('headertext', 'block_exaport').'" block-type="headline">
-        <div class="blocktype" style="position: relative;">
-            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/header_text.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('headertext', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('headertext', 'block_exaport').'</div>
-        </div>
-    </li>
-    <li class="portfolioElement" title="'.get_string('view_specialitem_text', 'block_exaport').'" block-type="text">
-        <div class="blocktype" style="position: relative;">
-            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/text.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('view_specialitem_text', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('view_specialitem_text', 'block_exaport').'</div>
-        </div>
-    </li>
-    <li class="portfolioElement" title="'.get_string('items', 'block_exaport').'" block-type="item">
-        <div class="blocktype" style="position: relative;">
-            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/lists.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('items', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
-        </div>
-    </li>	
-    <li class="portfolioElement" title="'.get_string('media', 'block_exaport').'" block-type="media">
-        <div class="blocktype" style="position: relative;">
-            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('media', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
-        </div>
-    </li>';
+	<li class="portfolioElement" title="'.get_string('personalinformation', 'block_exaport').'" block-type="personal_information">
+		<div class="blocktype" style="position: relative;">
+			<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/personal_info.png" />
+			<h4 class="blocktype-title js-hidden">'.get_string('personalinformation', 'block_exaport').'</h4>
+			<div class="blocktype-description js-hidden">'.get_string('personalinformation', 'block_exaport').'</div>
+		</div>
+	</li>
+	<li class="portfolioElement" title="'.get_string('headertext', 'block_exaport').'" block-type="headline">
+		<div class="blocktype" style="position: relative;">
+			<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/header_text.png" />
+			<h4 class="blocktype-title js-hidden">'.get_string('headertext', 'block_exaport').'</h4>
+			<div class="blocktype-description js-hidden">'.get_string('headertext', 'block_exaport').'</div>
+		</div>
+	</li>
+	<li class="portfolioElement" title="'.get_string('view_specialitem_text', 'block_exaport').'" block-type="text">
+		<div class="blocktype" style="position: relative;">
+			<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/text.png" />
+			<h4 class="blocktype-title js-hidden">'.get_string('view_specialitem_text', 'block_exaport').'</h4>
+			<div class="blocktype-description js-hidden">'.get_string('view_specialitem_text', 'block_exaport').'</div>
+		</div>
+	</li>
+	<li class="portfolioElement" title="'.get_string('items', 'block_exaport').'" block-type="item">
+		<div class="blocktype" style="position: relative;">
+			<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/lists.png" />
+			<h4 class="blocktype-title js-hidden">'.get_string('items', 'block_exaport').'</h4>
+			<div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
+		</div>
+	</li>	
+	<li class="portfolioElement" title="'.get_string('media', 'block_exaport').'" block-type="media">
+		<div class="blocktype" style="position: relative;">
+			<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" />
+			<h4 class="blocktype-title js-hidden">'.get_string('media', 'block_exaport').'</h4>
+			<div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
+		</div>
+	</li>';
 
 if (block_exaport_badges_enabled()) {
-    echo '<li class="portfolioElement" title="'.get_string('badges', 'badges').'" block-type="badge">
-        <div class="blocktype" style="position: relative;">
-            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('badges', 'badges').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
-        </div>
-    </li>';
+	echo '<li class="portfolioElement" title="'.get_string('badges', 'badges').'" block-type="badge">
+		<div class="blocktype" style="position: relative;">
+			<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />
+			<h4 class="blocktype-title js-hidden">'.get_string('badges', 'badges').'</h4>
+			<div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
+		</div>
+	</li>';
 }
 	
 echo '</ul>';
@@ -772,7 +772,7 @@ break;
 			echo '
 			<p>'.get_string('chooselayout','block_exaport').'</p>
 			<div class="select_layout">
-            <hr class="cb" />
+			<hr class="cb" />
 				<div class="fl columnoption"><strong>'.get_string("viewlayoutgroup1", "block_exaport").'</strong></div>
 				<div class="fl layoutoptions">
 					<div class="radiobutton"><input class="radio" name="layout" value="1" type="radio" '.($view->layout==1?'checked="checked"':'').' /></div>
@@ -799,7 +799,7 @@ break;
 			<hr class="cb" />
 				<div class="fl columnoption"><strong>'.get_string("viewlayoutgroup3", "block_exaport").'</strong></div>
 				<div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="5" type="radio" '.($view->layout==5?'checked="checked"':'').' /></div>
+					<div class="radiobutton"><input class="radio" name="layout" value="5" type="radio" '.($view->layout==5?'checked="checked"':'').' /></div>
 					<div class="layoutimg"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/vl-33-33-33.png" alt="" /></div>
 					<div class="layoutdescription">'.get_string("viewlayout5", "block_exaport").'</div>
 				</div>
@@ -813,10 +813,10 @@ break;
 					<div class="layoutimg"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/vl-15-70-15.png" alt="" /></div>
 					<div class="layoutdescription">'.get_string("viewlayout7", "block_exaport").'</div>
 				</div>
-            <hr class="cb" />
+			<hr class="cb" />
 				<div class="fl columnoption"><strong>'.get_string("viewlayoutgroup4", "block_exaport").'</strong></div>
 					<div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="8" type="radio" '.($view->layout==8?'checked="checked"':'').' /></div>
+					<div class="radiobutton"><input class="radio" name="layout" value="8" type="radio" '.($view->layout==8?'checked="checked"':'').' /></div>
 					<div class="layoutimg"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/vl-25-25-25-25.png" alt="" /></div>
 					<div class="layoutdescription">'.get_string("viewlayout8", "block_exaport").'</div>
 				</div>
@@ -825,7 +825,7 @@ break;
 					<div class="layoutimg"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/vl-20-30-30-20.png" alt="" /></div>
 					<div class="layoutdescription">'.get_string("viewlayout9", "block_exaport").'</div>
 				</div>
-            <hr class="cb" />
+			<hr class="cb" />
 				<div class="fl columnoption"><strong>'.get_string("viewlayoutgroup5", "block_exaport").'</strong></div>
 				<div class="fl layoutoptions">
 					<div class="radiobutton"><input class="radio" name="layout" value="10" type="radio" '.($view->layout==10?'checked="checked"':'').' /></div>
@@ -882,7 +882,7 @@ break;
 								echo '<input type="radio" name="shareall" value="1"'.($postView->shareall==1 ? ' checked="checked"':'').' />';
 								echo '</td><td>'.get_string("internalaccessall", "block_exaport").'</td></tr>';
 							}
-                            // Internal access for users.
+							// Internal access for users.
 							echo '<tr><td style="padding-right: 10px">';
 							echo '<input type="radio" name="shareall" value="0"'.(!$postView->shareall?' checked="checked"':'').'/>';
 							echo '</td><td>'.get_string("internalaccessusers", "block_exaport").'</td></tr>';
@@ -897,7 +897,7 @@ break;
 							}
 							echo '<div id="sharing-userlist">userlist</div>';
 							echo '</td></tr>';
-                            // Internal access for groups.
+							// Internal access for groups.
 							echo '<tr><td style="padding-right: 10px">';
 							echo '<input type="radio" name="shareall" value="2"'.($postView->shareall == 2 ? ' checked="checked" ':'').'/>';
 							echo '</td><td>'.get_string("internalaccessgroups", "block_exaport").'</td></tr>';
@@ -923,13 +923,13 @@ if ($type!='title') {
 };
 
 echo '<div id="exaport-block_form" class="block">
-        <div class="block-controls">                
-            <a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
-        </div>
-        <div class="block-header">
-            <h4 id="block_form_title">'.get_string('cofigureblock','block_exaport').'</h4>
-        </div>
-        <div class="block-content">
+		<div class="block-controls">				
+			<a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
+		</div>
+		<div class="block-header">
+			<h4 id="block_form_title">'.get_string('cofigureblock','block_exaport').'</h4>
+		</div>
+		<div class="block-content">
 			<div id="exaport-container"></div>
 		</div>
 	</div>

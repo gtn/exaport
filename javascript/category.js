@@ -23,11 +23,11 @@ jQueryExaport(function($){
 			} else if ($form.find(':input[name=shareall]:checked').val() == 2) {
 				$('#internaccess-users').hide();
 				$('#internaccess-groups').show();
-                ExabisEportfolio.load_grouplist('cat_mod');
+				ExabisEportfolio.load_grouplist('cat_mod');
 			} else {
 				$('#internaccess-groups').hide();
 				$('#internaccess-users').show();
-                ExabisEportfolio.load_userlist('cat_mod');
+				ExabisEportfolio.load_userlist('cat_mod');
 			}
 		} else {
 			$('#internaccess-settings').hide();
@@ -48,11 +48,11 @@ jQueryExaport(function($){
 			} else if ($form.find(':input[name=structure_shareall]:checked').val() == 2) {
 				$('#structure_sharing-users').hide();
 				$('#structure_sharing-groups').show();
-                ExabisEportfolio.load_grouplist('cat_mod', 'structure_');
+				ExabisEportfolio.load_grouplist('cat_mod', 'structure_');
 			} else {
 				$('#structure_sharing-groups').hide();
 				$('#structure_sharing-users').show();
-                ExabisEportfolio.load_userlist('cat_mod', 'structure_');
+				ExabisEportfolio.load_userlist('cat_mod', 'structure_');
 			}
 		} else {
 			$('#structureshare-settings').hide();

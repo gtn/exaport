@@ -136,7 +136,7 @@ window.jQueryExaport = jQuery.noConflict(true);
 				});
 				*/
 
-                // stop slow loading
+				// stop slow loading
 				$('#'+target+'sharing-userlist .shareusers:checkbox').click(function(){
 					// enable/disable notifyuser, according to shared users checkbox
 					var $notifyboxes = $(this).closest('tr').find('.notifyusers');
@@ -150,24 +150,24 @@ window.jQueryExaport = jQuery.noConflict(true);
 					var $courseCheckboxes = $('#'+target+'sharing-userlist .shareusers:checkbox[courseid='+$(this).attr('courseid')+']');
 					$('#'+target+'sharing-userlist .shareusers-check-all[courseid='+$(this).attr('courseid')+']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
 				});
-                $('.course-group-content').each(function(){
-                    var flag = 0;
-                    $(this).find( 'table > tbody > tr > td > input.shareusers').each(function(){
-                        if (flag==1)
-                            return false;
-                        if ($(this).prop('checked')==false)
-                            flag = 1;
+				$('.course-group-content').each(function(){
+					var flag = 0;
+					$(this).find( 'table > tbody > tr > td > input.shareusers').each(function(){
+						if (flag==1)
+							return false;
+						if ($(this).prop('checked')==false)
+							flag = 1;
 
-                        var $notifyboxes = $(this).closest('tr').find('.notifyusers');
-                        $notifyboxes.attr('disabled', !this.checked);
-                        if (!this.checked) {
-                            $notifyboxes.prop('checked', false);
-                        }
-                    });
-                    if (flag == 0) {
-                        $(this).find('table > tbody > tr > td > input.shareusers-check-all').prop('checked', true);
-                    }
-                });
+						var $notifyboxes = $(this).closest('tr').find('.notifyusers');
+						$notifyboxes.attr('disabled', !this.checked);
+						if (!this.checked) {
+							$notifyboxes.prop('checked', false);
+						}
+					});
+					if (flag == 0) {
+						$(this).find('table > tbody > tr > td > input.shareusers-check-all').prop('checked', true);
+					}
+				});
 
 				// open/close course group
 				$('.course-group-title').on('click', function(){
@@ -267,24 +267,24 @@ window.jQueryExaport = jQuery.noConflict(true);
 						});
 				});
 
-                // stop slow loading
+				// stop slow loading
 				$('#'+target+'sharing-grouplist .sharegroups:checkbox').click(function(){
 					// check/uncheck all groups
 					var $courseCheckboxes = $('#'+target+'sharing-grouplist .sharegroups:checkbox[courseid='+$(this).attr('courseid')+']');
 					$('#'+target+'sharing-grouplist .sharegroups-check-all[courseid='+$(this).attr('courseid')+']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
 				});
-                $('.course-group-content').each(function(){
-                    var flag = 0;
-                    $(this).find( 'table > tbody > tr > td > input.sharegroups').each(function(){
-                        if (flag==1)
-                            return false;
-                        if ($(this).prop('checked')==false)
-                            flag = 1;
-                    });
-                    if (flag == 0) {
-                        $(this).find('table > tbody > tr > td > input.sharegroups-check-all').prop('checked', true);
-                    }
-                });
+				$('.course-group-content').each(function(){
+					var flag = 0;
+					$(this).find( 'table > tbody > tr > td > input.sharegroups').each(function(){
+						if (flag==1)
+							return false;
+						if ($(this).prop('checked')==false)
+							flag = 1;
+					});
+					if (flag == 0) {
+						$(this).find('table > tbody > tr > td > input.sharegroups-check-all').prop('checked', true);
+					}
+				});
 
 				// open/close course group
 				$('.course-group-title').on('click', function(){

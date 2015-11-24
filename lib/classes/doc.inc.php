@@ -4,32 +4,32 @@
 /***************************************************************************************************
 ****************************************************************************************************
 *****
-*****      MiniXML - PHP class library for generating and parsing XML.
-*****                                            
-*****      Copyright (C) 2002-2005 Patrick Deegan, Psychogenic.com
-*****      All rights reserved.
+*****	  MiniXML - PHP class library for generating and parsing XML.
+*****											
+*****	  Copyright (C) 2002-2005 Patrick Deegan, Psychogenic.com
+*****	  All rights reserved.
 *****
-*****      http://minixml.psychogenic.com    
-*****                                                       
+*****	  http://minixml.psychogenic.com	
+*****													   
 *****   This program is free software; you can redistribute 
-*****   it and/or modify it under the terms of the GNU      
-*****   General Public License as published by the Free     
-*****   Software Foundation; either version 2 of the        
-*****   License, or (at your option) any later version.     
-*****                                                       
+*****   it and/or modify it under the terms of the GNU	  
+*****   General Public License as published by the Free	 
+*****   Software Foundation; either version 2 of the		
+*****   License, or (at your option) any later version.	 
+*****													   
 *****   This program is distributed in the hope that it will
 *****   be useful, but WITHOUT ANY WARRANTY; without even   
 *****   the implied warranty of MERCHANTABILITY or FITNESS  
-*****   FOR A PARTICULAR PURPOSE.  See the GNU General      
-*****   Public License for more details.                    
-*****                                                       
+*****   FOR A PARTICULAR PURPOSE.  See the GNU General	  
+*****   Public License for more details.					
+*****													   
 *****   You should have received a copy of the GNU General  
-*****   Public License along with this program; if not,     
-*****   write to the Free Software Foundation, Inc., 675    
+*****   Public License along with this program; if not,	 
+*****   write to the Free Software Foundation, Inc., 675	
 *****   Mass Ave, Cambridge, MA 02139, USA.
 *****
 *****
-*****   You may contact the author, Pat Deegan, through the     
+*****   You may contact the author, Pat Deegan, through the	 
 *****   contact section at http://www.psychogenic.com
 *****
 *****   Much more information on using this API can be found on the
@@ -49,7 +49,7 @@ define("MINIXML_COMPLETE_REGEX",'/^\s*<\s*([^\s>]+)(\s+[^>]+)?>(.*?)<\s*\/\1\s*>
 
 /*
 #define("MINIXML_SIMPLE_REGEX",
-# //         1         2      3                    4       5          6                   7          8             9          #10     11
+# //		 1		 2	  3					4	   5		  6				   7		  8			 9		  #10	 11
 #'/\s*<\s*([^\s>]+)([^>]+)?>(.*?)<\s*\/\\1\s*>\s*([^<]+)?(.*)|\s*<!--(.+?)-->\s*|\s*<\s*([^\s>]+)([^>]*)\/\s*>\s*([^<>]+)?|^([^<]+)(.*)/smi');
 
 */
@@ -228,13 +228,13 @@ class MiniXMLDoc {
 	**	  </vendor>
 	**	  <partList>
 	**	   <partNum>
-	**	    DA42
+	**		DA42
 	**	   </partNum>
 	**	   <partNum>
-	**	    D99983FFF
+	**		D99983FFF
 	**	   </partNum>
 	**	   <partNum>
-	**	    ss-839uent
+	**		ss-839uent
 	**	   </partNum>
 	**	  </partList>
 	**	 </partRateRequest>
@@ -560,8 +560,8 @@ class MiniXMLDoc {
 		if ( 
 			( array_key_exists($pname, $params['attributes']) && is_array($params['attributes'][$pname])
 			  && array_key_exists($name, $params['attributes'][$pname]) && $params['attributes'][$pname][$name])
-		     || ( 
-		     	  array_key_exists('-all', $params['attributes']) && is_array($params['attributes']['-all']) 
+			 || ( 
+			 	  array_key_exists('-all', $params['attributes']) && is_array($params['attributes']['-all']) 
 			  && array_key_exists($name, $params['attributes']['-all']) && $params['attributes']['-all'][$name])
 		   )
 		{

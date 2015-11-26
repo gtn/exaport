@@ -1181,11 +1181,16 @@ function has_sharablestructure($userid) {
 }
 function block_exaport_item_is_editable($itemid) {
 	global $CFG, $DB, $USER;
+	
+	if(!block_exaport_item_is_resubmitable($itemid))
+		return false;
+	
 	$allowEdit = true;
 
+	$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid));
+	
 	if(!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
 		//check item grading and teacher comment
-		$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid));
 		if(isset($itemExample)) {
 			if(isset($itemExample->teachervalue) && $itemExample->teachervalue != null) {
 				$allowEdit = false;
@@ -1204,6 +1209,19 @@ function block_exaport_item_is_editable($itemid) {
 		}
 	}
 	return $allowEdit;
+}
+function block_exaport_item_is_resubmitable($itemid) {
+	global $DB, $USER, $COURSE;
+	$allowResubmission = true;
+
+	if(	$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid)) ) {
+		if($eval = $DB->get_record(block_exacomp::DB_EXAMPLEEVAL, array('exampleid'=>$itemExample->exampleid,'studentid'=>$USER->id,'courseid'=>$COURSE->id))) {
+			if($eval->resubmission == 0)
+				$allowResubmission = false;
+		}
+	}
+	
+	return $allowResubmission;
 }
 function block_exaport_has_grading_permission($itemid) {
 	global $DB;

@@ -59,8 +59,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 $id = optional_param('id', 0, PARAM_INT);
 
 $allowEdit = block_exaport_item_is_editable($id);
-
-// echo ($allowEdit) ? "jo" : "na";die;
+$allowResubmission = block_exaport_item_is_resubmitable($id);
 
 if ($action == 'copytoself') {
 	confirm_sesskey();
@@ -197,7 +196,7 @@ $useTextarea = false;
 if ($existing && $existing->intro && preg_match('!<iframe!i', $existing->intro))
 	$useTextarea = true;
 
-$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'useTextarea'=>$useTextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action, 'allowedit' => $allowEdit));
+$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'useTextarea'=>$useTextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action, 'allowedit' => $allowEdit, 'allowresubmission' => $allowResubmission));
 
 if ($editform->is_cancelled()) {
 	redirect($returnurl);

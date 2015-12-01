@@ -308,6 +308,7 @@ $comp = block_exaport_check_competence_interaction() && $descriptorselection;
 if ($comp) {
 	$PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
 	$PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery_old.js', true);
 }
 
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);

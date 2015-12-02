@@ -224,9 +224,6 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	
 	$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
 	
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
-	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
-	
 	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
 	$scriptName = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
@@ -665,7 +662,7 @@ function block_exaport_build_comp_tree($forresume = false, $resume = null) {
 		$tree .= '<input type="submit" id="id_submitbutton" type="submit" value="'.get_string('savechanges').'" name="submitbutton">';
 		$tree .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" value="'.get_string('cancel').'" name="cancel">';
 	} else {
-		$tree .= '<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport(function($){$.colorbox.close()});">';
+		$tree .= '<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport.colorbox.close();">';
 	}
 	$tree .= '</form>';
 

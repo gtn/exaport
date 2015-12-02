@@ -306,9 +306,13 @@ switch ($action) {
 $comp = block_exaport_check_competence_interaction() && $descriptorselection;
 
 if ($comp) {
+	$PAGE->requires->jquery();
+	
 	$PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
 	$PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery_old.js', true);
+	
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
+	$PAGE->requires->css('/blocks/exaport/css/colorbox.css');
 }
 
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
@@ -341,8 +345,44 @@ if ($comp) {
 <script type="text/javascript">
 //<![CDATA[
 	jQueryExaport(function($){
-		$(".competences").colorbox({width:"75%", height:"75%", inline:true, href:"#inline_comp_tree"});
+		$(".competences").colorbox({width:"75%", height:"75%", inline:true, href:"#inline_comp_tree", onClosed: function(){
+			// save ids to input field
+			var compids = '';
+			$descriptors.filter(':checked').each(function() { compids += this.value+','; });
+			$compids.val(compids);
+
+			build_competence_output();
+		}});
 		ddtreemenu.createTree("comptree", true);
+
+		var $compids = $('input[name=compids]');
+		var $descriptors = $(document.treeform.desc);
+
+		function build_competence_output() {
+			
+			var comptitles="";
+			var subold="";
+			
+			$descriptors.filter(':checked').each(function(i, descriptor){
+				subid=descriptor.getAttribute('class');
+				if (subid!=subold){
+					subold=subid;
+  					subtitl=document.getElementById('gegenst'+subid).getAttribute('alt');
+			  		comptitles +='<h3>' + subtitl + '</h3>';
+			  	}
+				  
+				comptitles += '<span>' + descriptor.getAttribute('alt') + '</span><br/>';
+			});
+
+			$("#comptitles").html(comptitles);
+		}
+
+		// check competencies in tree
+		var comps = $compids.val().split(',');
+		$.each(comps, function(i, value){
+			$descriptors.filter('[value="'+value+'"]').attr('checked', true);
+		});
+		build_competence_output();
 	});
 //]]>
 </script>

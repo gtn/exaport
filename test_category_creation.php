@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/inc.php';
+require_once __DIR__.'/inc.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 require_login($courseid);
@@ -8,7 +8,7 @@ require_login($courseid);
 echo 'course id: '.$COURSE->id."<br />\n";
 
 // desp block installed?
-if (!is_dir(dirname(__FILE__).'/../desp'))
+if (!is_dir(__DIR__.'/../desp'))
 	die ('no desp installed');
 
 $context = context_course::instance($COURSE->id);

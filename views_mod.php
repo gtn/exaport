@@ -24,9 +24,9 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-require_once dirname(__FILE__).'/inc.php';
-require_once dirname(__FILE__).'/lib/sharelib.php';
-require_once dirname(__FILE__).'/blockmediafunc.php';
+require_once __DIR__.'/inc.php';
+require_once __DIR__.'/lib/sharelib.php';
+require_once __DIR__.'/blockmediafunc.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
@@ -732,7 +732,7 @@ echo '<div class="view-middle">';
 	echo '<div class="clear"><span>&nbsp;</span></div>';
 echo '</div>';
 
-//include dirname(__FILE__).'/blocks_tmpl.php';
+//include __DIR__.'/blocks_tmpl.php';
 
 break;
 // --------------------

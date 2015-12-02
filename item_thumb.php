@@ -1,6 +1,6 @@
 <?php
-require_once dirname(__FILE__).'/inc.php';
-require_once dirname(__FILE__).'/lib/sharelib.php';
+require_once __DIR__.'/inc.php';
+require_once __DIR__.'/lib/sharelib.php';
 
 $item_id = optional_param('item_id', -1, PARAM_INT);
 $access = optional_param('access', '', PARAM_TEXT);

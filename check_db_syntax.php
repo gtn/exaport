@@ -173,7 +173,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 	$excludes = '/(function |^\s*\*|^\s*\/\/|\$this-\>adodb-\>(Execute|Connect|PConnect|ErrorMsg|MetaTables|MetaIndexes|MetaColumns|MetaColumnNames|MetaPrimaryKeys|)|protected \$[a-zA-Z]*db|Incorrect |check find_index_name|not available anymore|output|Replace it with the correct use of|where order of parameters is|_moodle_database|invaliddbtype|has been deprecated in Moodle 2\.0\. Will be out in Moodle 2\.1|Potential SQL injection detected|requires at least two parameters|hint_database = install_db_val|Current database \(|admin_setting_configselect|(if|while|for|return).*\>get_recordset(_list|_select|_sql)?.*\>valid\(\)|NEWNAMEGOESHERE.*XMLDB_LINEFEED)/';
 
 /// Getting current dir
-	$dir = dirname(__FILE__);
+	$dir = __DIR__;
 
 /// Check if the dir seems to be moodle root (with some random shots)
 	$is_moodle_root = false;
@@ -387,7 +387,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 		}
 
 	/// Take out dirroot from $file
-		$file = trim(str_replace(dirname(__FILE__), '', $file), '/');
+		$file = trim(str_replace(__DIR__, '', $file), '/');
 
 	/// Look for $file in array of known false positives
 		if (array_key_exists($file, $fp)) {

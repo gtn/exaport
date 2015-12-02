@@ -25,9 +25,9 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  * ************************************************************* */
 
-require_once dirname(__FILE__) . '/inc.php';
-require_once dirname(__FILE__) . '/lib/sharelib.php';
-require_once dirname(__FILE__) . '/lib/resumelib.php';
+require_once __DIR__.'/inc.php';
+require_once __DIR__.'/lib/sharelib.php';
+require_once __DIR__.'/lib/resumelib.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $confirm = optional_param("confirm", "", PARAM_BOOL);

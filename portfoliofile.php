@@ -30,8 +30,8 @@
 // Exported SCORM-File (user has to be logged in)
 // portfoliofile.php/temp/export/$userid/filename.ext
 
-require_once dirname(__FILE__).'/inc.php';
-require_once dirname(__FILE__).'/lib/sharelib.php';
+require_once __DIR__.'/inc.php';
+require_once __DIR__.'/lib/sharelib.php';
 require_once($CFG->dirroot . '/webservice/lib.php');
 
 if (empty($CFG->filelifetime)) {

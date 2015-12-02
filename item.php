@@ -24,7 +24,7 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 * ************************************************************* */
 
-require_once dirname(__FILE__) . '/inc.php';
+require_once __DIR__.'/inc.php';
 
 global $DB;
 
@@ -64,7 +64,7 @@ $allowEdit = block_exaport_item_is_editable($id);
 
 if ($action == 'copytoself') {
 	confirm_sesskey();
-	require_once dirname(__FILE__).'/lib/sharelib.php';
+	require_once __DIR__.'/lib/sharelib.php';
 	if (!$owner_id = is_sharableitem($USER->id, $id)) {
 		die(block_exaport_get_string('bookmarknotfound'));
 		

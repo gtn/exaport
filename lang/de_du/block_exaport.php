@@ -24,4 +24,4 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-require dirname(__FILE__).'/../de/block_exaport.php';
+require __DIR__.'/../de/block_exaport.php';

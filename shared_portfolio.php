@@ -24,8 +24,8 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-require_once dirname(__FILE__).'/inc.php';
-require_once dirname(__FILE__).'/lib/sharelib.php';
+require_once __DIR__.'/inc.php';
+require_once __DIR__.'/lib/sharelib.php';
 
 $access = optional_param('access', 0, PARAM_TEXT);
 

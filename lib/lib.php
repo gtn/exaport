@@ -189,7 +189,7 @@ function block_exaport_course_has_desp() {
 		return $COURSE->has_desp;
 	
 	// desp block installed?
-	if (!is_dir(dirname(__FILE__).'/../../desp'))
+	if (!is_dir(__DIR__.'/../../desp'))
 		return $COURSE->has_desp = false;
 
 	$context = context_course::instance($COURSE->id);

@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/inc.php';
+require_once __DIR__.'/inc.php';
 
 require_login(0, false);
 $context = context_system::instance();

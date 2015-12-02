@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . '/inc.php';
+require_once __DIR__.'/inc.php';
 $url = optional_param('url', 0, PARAM_URL);
 $url=str_replace("http://","",$url); //sicherheit, nur interne links
 //echo $url;die;

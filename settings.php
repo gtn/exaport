@@ -2,7 +2,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once dirname(__FILE__).'/lib/lib.php';
+require_once __DIR__.'/lib/lib.php';
 
 if ($ADMIN->fulltree) {
 	$settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas', get_string('settings_allow_loginas_head', 'block_exaport'),

@@ -100,7 +100,7 @@ define("MINIXML_NOWHITESPACES", -999); /* Flag that may be passed to the toStrin
 
 
 
-$MiniXMLLocation = dirname(__FILE__);
+$MiniXMLLocation = __DIR__;
 define("MINIXML_CLASSDIR", "$MiniXMLLocation/classes");
 require_once(MINIXML_CLASSDIR . "/doc.inc.php");
 

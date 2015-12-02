@@ -1,6 +1,6 @@
 <?php
 
-require dirname(__FILE__) . '/inc.php';
+require __DIR__.'/inc.php';
 
 require_login();
 

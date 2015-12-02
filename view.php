@@ -25,9 +25,9 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  * ************************************************************* */
 
-require_once dirname(__FILE__) . '/inc.php';
-require_once dirname(__FILE__) . '/lib/sharelib.php';
-require_once dirname(__FILE__) . '/lib/information_edit_form.php';
+require_once __DIR__.'/inc.php';
+require_once __DIR__.'/lib/sharelib.php';
+require_once __DIR__.'/lib/information_edit_form.php';
 
 $userid = optional_param('userid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);

@@ -25,12 +25,12 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  * ************************************************************* */
 
-require_once dirname(__FILE__) . '/inc.php';
-require_once dirname(__FILE__) . '/lib/sharelib.php';
-require_once dirname(__FILE__) . '/lib/edit_form.php';
-require_once dirname(__FILE__) . '/lib/minixml.inc.php';
-require_once dirname(__FILE__) . '/lib/class.scormparser.php';
-require_once dirname(__FILE__) . '/lib/information_edit_form.php';
+require_once __DIR__.'/inc.php';
+require_once __DIR__.'/lib/sharelib.php';
+require_once __DIR__.'/lib/edit_form.php';
+require_once __DIR__.'/lib/minixml.inc.php';
+require_once __DIR__.'/lib/class.scormparser.php';
+require_once __DIR__.'/lib/information_edit_form.php';
 
 global $DB;
 

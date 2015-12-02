@@ -1,8 +1,8 @@
 <?php
-require_once dirname(__FILE__) . '/inc.php';
-require_once dirname(__FILE__) . '/lib/lib.php';
-//require_once dirname(__FILE__) . '/lib/moodlelib.php';
-require_once dirname(__FILE__) . '/lib/sharelib.php';
+require_once __DIR__.'/inc.php';
+require_once __DIR__.'/lib/lib.php';
+//require_once __DIR__.'/lib/moodlelib.php';
+require_once __DIR__.'/lib/sharelib.php';
 global $DB,$USER,$COURSE,$CFG;
 
 $user=checkhash();

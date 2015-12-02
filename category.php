@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/inc.php';
+require_once __DIR__.'/inc.php';
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
 require_login($courseid);
@@ -12,13 +12,13 @@ $PAGE->set_url($url);
 
 // Get userlist for sharing category
 if (optional_param('action', '', PARAM_ALPHA) == 'userlist' || optional_param('action', '', PARAM_ALPHA) == 'structureuserlist') {
-	require_once dirname(__FILE__).'/lib/sharelib.php';
+	require_once __DIR__.'/lib/sharelib.php';
 	echo json_encode(exaport_get_shareable_courses_with_users(''));
 	exit;
 }
 // Get grouplist for sharing category
 if (optional_param('action', '', PARAM_ALPHA) == 'grouplist' || optional_param('action', '', PARAM_ALPHA) == 'structuregrouplist') {
-	require_once dirname(__FILE__).'/lib/sharelib.php';
+	require_once __DIR__.'/lib/sharelib.php';
 	echo json_encode(exaport_get_shareable_courses_with_groups(''));
 	exit;
 }

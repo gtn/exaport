@@ -25,7 +25,7 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  * ************************************************************* */
 global $DB, $OUTPUT,$CFG;
-require_once dirname(__FILE__) . '/inc.php';
+require_once __DIR__.'/inc.php';
 require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 
 

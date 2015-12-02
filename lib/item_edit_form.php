@@ -172,7 +172,10 @@ class block_exaport_item_edit_form extends moodleform {
 			$mform->disabledIf('intro_editor', 'allowedit', 'neq', 1);
 			$mform->disabledIf('iconfile', 'allowedit', 'neq', 1);
 			
-			$mform->addElement('button', 'newsubmission', get_string("newsubmission","block_exacomp"),array('onclick'=>'location.href = " ' . str_replace("&amp;", "&", $url) . '"'));
+			if(isset($this->_customdata['allowresubmission']) && $this->_customdata['allowresubmission'] == 1)
+				$mform->addElement('button', 'newsubmission', get_string("newsubmission","block_exacomp"),array('onclick'=>'location.href = " ' . str_replace("&amp;", "&", $url) . '"'));
+			else 
+				$mform->addElement('html',get_string("isgraded","block_exacomp"));
 		}
 	}
 

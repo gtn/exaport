@@ -246,13 +246,17 @@ function block_exaport_do_add_comment($item, $post, $blogeditform) {
    
 	if(block_exaport_has_grading_permission($item->id) && isset($post->itemgrade)) {
 		$itemExample = $DB->get_record('block_exacompitemexample',array('itemid'=>$item->id));
-		$itemExample->teachervalue = $post->itemgrade;
-		$DB->update_record('block_exacompitemexample', $itemExample);
-		
-		// check for example additional info and set it
-		$exampleEval = $DB->get_record('block_exacompexameval', array('courseid'=>$item->courseid,'exampleid'=>$itemExample->exampleid,'studentid'=>$item->userid));
-		$exampleEval->additionalinfo = $post->itemgrade;
-		$DB->update_record('block_exacompexameval', $exampleEval);
+		if ($itemExample) {
+			$itemExample->teachervalue = $post->itemgrade;
+			$DB->update_record('block_exacompitemexample', $itemExample);
+
+			// check for example additional info and set it
+			$exampleEval = $DB->get_record('block_exacompexameval', array('courseid' => $item->courseid, 'exampleid' => $itemExample->exampleid, 'studentid' => $item->userid));
+			if ($exampleEval) {
+				$exampleEval->additionalinfo = $post->itemgrade;
+				$DB->update_record('block_exacompexameval', $exampleEval);
+			}
+		}
 	}
 		
 	// Insert the new blog entry.

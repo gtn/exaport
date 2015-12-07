@@ -330,7 +330,7 @@ if ($editform->is_cancelled()) {
 				}
 				// Auto Share to the teachers.
 				if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
-					share_view_to_teachers($dbView->id);
+					block_exaport_share_view_to_teachers($dbView->id);
 				};
 				block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
@@ -357,7 +357,7 @@ if ($editform->is_cancelled()) {
 			};
 			// Auto Share to the teachers.
 			if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
-				share_view_to_teachers($dbView->id);
+				block_exaport_share_view_to_teachers($dbView->id);
 			};
 			if ($DB->update_record('block_exaportview', $dbView)) {
 				block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);

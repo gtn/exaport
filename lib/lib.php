@@ -851,8 +851,8 @@ function fill_view_with_artefacts($viewid, $existingartefacts='') {
  * @param integer $viewid
  * @return nothing
  */
-function share_view_to_teachers($viewid) {
-	global $DB, $USER;
+function block_exaport_share_view_to_teachers($viewid) {
+	global $DB;
 	if ($viewid > 0) {
 		$allteachers = block_exaport_get_course_teachers();
 		$allsharedusers = block_exaport_get_shared_users($viewid);

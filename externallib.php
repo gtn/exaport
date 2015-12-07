@@ -1300,5 +1300,3 @@ class block_exaport_external extends external_api {
 	}
 	
 }
-
-?>

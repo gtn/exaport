@@ -601,26 +601,28 @@ function block_exaport_get_max_sorting($table, $resume_id) {
 
 function block_exaport_resume_competences_form($resume, $id, $type_block) {
 	global $DB;
+
 	$type = substr($type_block, 0, -4); // skillscomp -> skills / goalscomp -> goals
 	$save = optional_param('submitbutton', '', PARAM_RAW);
 	$cancel = optional_param('cancel', '', PARAM_RAW);
 	$resume->descriptors = array();
 	if ($cancel) {
 		return true;
-	};
+	}
+
 	if ($save) {
 		$interaction = block_exaport_check_competence_interaction();
 		if ($interaction) {
 			$DB->delete_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
-			$compids = optional_param_array('desc', array(), PARAM_RAW);
+			$compids = optional_param_array('desc', array(), PARAM_INT);
 			if (count($compids)>0) {
 				foreach($compids as $compid) {
 					$DB->insert_record('block_exaportcompresume_mm', array("resumeid" => $resume->id, "compid" => $compid, "comptype" => $type));
 				}
 			}
-		};
+		}
 		return true;
-	};
+	}
 	$content = block_exaport_resume_header();
 	$resume->descriptors = array_keys($DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type), null, 'compid'));
 	$content .= '<div class="block_eportfolio_center">'.get_string('edit', "block_exaport").': '.get_string('resume_'.$type_block, "block_exaport").'</div>';

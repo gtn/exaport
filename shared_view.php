@@ -146,7 +146,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				$has_competences = block_exaport_check_item_competences($item);
 			
 				if($has_competences){
-					$array = block_exaport_get_competences($item, 0);
+					$compids = block_exaport_get_active_compids($item);
 	
 					$competences = "";
 					foreach($array as $element){

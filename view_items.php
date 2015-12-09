@@ -559,17 +559,17 @@ function block_exaport_get_item_comp_icon($item) {
 	
 	if (!block_exaport_check_competence_interaction())
 		return;
-	
-	$array = block_exaport_get_competences($item, 0);
 
-	if(!count($array))
+	$compids = block_exaport_get_active_compids($item);
+
+	if(!$compids)
 		return;
 		
 	// if item is assoziated with competences display them
 	$competences = "";
-	foreach($array as $element){
+	foreach($compids as $compid){
 
-		$conditions = array("id" => $element->compid);
+		$conditions = array("id" => $compid);
 		$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
 		if($competencesdb != null){

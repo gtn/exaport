@@ -26,14 +26,20 @@ jQueryExaport(function($){
 		hash = 'goals';
 	if (hash.search('skills') >= 0) 
 		hash = 'skills';					 */
-	$('a[name='+hash+']').parents('.view-group').toggleClass('view-group-open');	
-	$('a[name='+hash+']').parents('table.generaltable').find('.expandable-text').toggleClass('hidden');
-	
-	// delete cookie for treeview 
-	document.cookie = 'comptree=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
-	// open all checked uls
-	$("#comptree input:checked").parents('ul').show();
-	$("#comptree input:checked").parents('ul').attr('rel', 'open');
-	// create tree for competencies
-	ddtreemenu.createTree("comptree", true);
+	if (hash) {
+		$('a[name=' + hash + ']').parents('.view-group').toggleClass('view-group-open');
+		$('a[name=' + hash + ']').parents('table.generaltable').find('.expandable-text').toggleClass('hidden');
+	}
+
+	if ($('#comptree').length) {
+		// delete cookie for treeview
+		// TODO: why?!?
+		document.cookie = 'comptree=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
+		// open all checked uls
+		$("#comptree input:checked").parents('ul').show();
+		$("#comptree input:checked").parents('ul').attr('rel', 'open');
+
+		// create tree for competencies
+		ddtreemenu.createTree("comptree", true);
+	}
 });

@@ -97,7 +97,9 @@ if ($action == 'xmleuropass') {
 
 // delete item
 if ($action == 'delete' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'public'])) {
-	if (data_submitted() && $confirm && confirm_sesskey()) {
+	if (data_submitted() && $confirm) {
+		require_sesskey();
+
 		$conditions = array('id' => $id, 'resume_id' => $resume->id);
 		block_exaport_resume_mm_delete($type, $conditions);
 		echo "<div class='block_eportfolio_center'>".$OUTPUT->box(text_to_html(get_string("resume_".$type."deleted", "block_exaport")), 'center')."</div>";
@@ -121,9 +123,9 @@ $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'c
 if ($action == 'edit') {
 	$withfiles = false;
 	$show_information = false;
-	if (!confirm_sesskey()) {
-		print_error("blobadsessionkey", "block_exaport");
-	};
+
+	require_sesskey();
+
 	$data = new stdClass();
 	$data->courseid = $courseid;
 	$data->action = 'edit';
@@ -261,10 +263,8 @@ if ($action == 'edit') {
 
 // Sort changing
 if ($action == 'sortchange' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'public'])) {
-	if (!confirm_sesskey()) {
-		print_error("blobadsessionkey", "block_exaport");
-	}
-	// TODO: check $type
+	require_sesskey();
+
 	$id1 = optional_param('id1', 0, PARAM_INT);
 	$id2 = optional_param('id2', 0, PARAM_INT);
 	if ($id1 && $id2) {

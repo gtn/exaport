@@ -197,17 +197,18 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		$hasItems = true;
 		foreach ($bookmarks as $bookmark) {
 			
+			// TODO: move this whole part into it's own function also for view_items.php etc.
 			if(block_exaport_check_competence_interaction()){
 				//begin
-				$array = block_exaport_get_competences($bookmark, 0);
-				
-				if(count($array)>0){
+				$compids = block_exaport_get_active_compids($item);
+
+				if($compids){
 					$competences = "";
 					$competencesids = array();
-					foreach($array as $element){
-				
-						$conditions = array("id" => $element->compid);
-						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
+					foreach($compids as $compid){
+
+						$conditions = array("id" => $compid);
+						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING);
 						if($competencesdb != null){
 							$competences .= $competencesdb->title.'<br />';
 							array_push($competencesids, $competencesdb->sourceid);
@@ -273,16 +274,15 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 
 		foreach ($files as $file) {
 			if(block_exaport_check_competence_interaction()){
-				$array = block_exaport_get_competences($file, 0);
+				$compids = block_exaport_get_active_compids($item);
 			
-				if(count($array)>0){
+				if($compids){
 					$competences = "";
 					$competencesids = array();
-					foreach($array as $element){
+					foreach($compids as $compid){
 				
-						$conditions = array("id" => $element->compid);
+						$conditions = array("id" => $compid);
 						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
-	
 						if($competencesdb != null){
 							$competences .= $competencesdb->title.'<br />';
 							array_push($competencesids, $competencesdb->sourceid);
@@ -356,16 +356,15 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		$hasItems = true;
 		foreach ($notes as $note) {
 			if(block_exaport_check_competence_interaction()){
-				$array = block_exaport_get_competences($note, 0);
-				
-				if(count($array)>0){
+				$compids = block_exaport_get_active_compids($item);
+
+				if($compids){
 					$competences = "";
 					$competencesids = array();
-					foreach($array as $element){
-				
-						$conditions = array("id" => $element->compid);
-						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
-	
+					foreach($compids as $compid){
+
+						$conditions = array("id" => $compid);
+						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING);
 						if($competencesdb != null){
 							$competences .= $competencesdb->title.'<br />';
 							array_push($competencesids, $competencesdb->sourceid);

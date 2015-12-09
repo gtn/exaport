@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once $CFG->libdir . '/filelib.php';
 
 if (block_exaport_check_competence_interaction()){
+	// TODO: don't use any of the exacomp functions, use \block_exacomp\api::method() instead!
 	if(file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php'))
 		require_once $CFG->dirroot . '/blocks/exacomp/lib/lib.php';
 	else
@@ -502,24 +503,14 @@ function block_exaport_get_user_preferences($userid = null) {
 }
 
 function block_exaport_check_competence_interaction() {
-	global $DB, $CFG;
-	$dbman = $DB->get_manager();
+	global $CFG;
 
-	try {
-		return (!empty($CFG->block_exaport_enable_interaction_competences) && $dbman->table_exists('block_exacompdescriptors'));
-	} catch(dml_read_exception $e) {
-		return false;
-	}
+	return !empty($CFG->block_exaport_enable_interaction_competences) &&
+		class_exists('\block_exacomp\api') && \block_exacomp\api::active();
 }
 
 function block_exaport_check_item_competences($item) {
-	global $DB;
-
-	$competences = $DB->get_records('block_exacompcompactiv_mm', array("activityid" => $item->id, "eportfolioitem" => 1));
-	if ($competences)
-		return true;
-	else
-		return false;
+	return (bool)\block_exacomp\api::get_active_comp_for_exaport_item($item->id);
 }
 
 function block_exaport_build_comp_table($item, $role="teacher") {
@@ -589,86 +580,80 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
 		$DB->insert_record('block_exacompcompuser_mm', $data);
 	}
 }
-function block_exaport_get_competences($item, $role=1) {
-	global $DB;
-	return $DB->get_records('block_exacompcompactiv_mm', array("eportfolioitem"=>1, "activityid"=>$item->id));
+function block_exaport_get_active_compids($item) {
+	return \block_exacomp\api::get_active_comp_for_exaport_item($item->id);
 }
 
-function block_exaport_build_comp_tree($forresume = false, $resume = null) {
-	global $DB, $USER, $CFG;
-	
-	$courses = $DB->get_records('course', array());
-	
-	// teacher accepted competensies (for resume);
-	$tmp_recs = $DB->get_records('block_exacompcompuser', array("userid"=>$USER->id, "role"=>1 /*teacher*/), null, 'compid');
-	$accepted_descriptors = array_keys($tmp_recs);
-	
-	$descriptors = array();
-	foreach($courses as $course){
-		$context = context_course::instance($course->id);
-		if(is_enrolled($context, $USER)){   
-			$alldescr = block_exacomp_get_descritors_list($course->id);
-			foreach($alldescr as $descr){
-				if(!in_array($descr, $descriptors)){
-					if (!$forresume || ($forresume && in_array($descr->id, $accepted_descriptors)))
-						$descriptors[] = $descr;
-				}
-			}
-		}
-	}
-	
-	if ($forresume) {
-		$tree = '<form name="treeform" method="post" action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$resume->courseid.'&id='.$resume->id.'&sesskey='.sesskey().'#'.$forresume.'"><ul id="comptree" class="treeview">';
-		
+function block_exaport_get_comp_output($item) {
+	$compids = block_exaport_get_active_compids($item);
+}
+function block_exaport_build_comp_tree($type, $item_or_resume) {
+	global $CFG;
+
+	if ($type == 'skillscomp' || $type == 'goalscomp') {
+		$forresume = true;
+		$resume = $item_or_resume;
+		$item = null;
+		$active_descriptors = $resume->descriptors;
+	} elseif ($type == 'item') {
+		$forresume = false;
+		$resume = null;
+		$item = $item_or_resume;
+		$active_descriptors = isset($item->compids_array) ? $item->compids_array : [];
 	} else {
-		$tree = '<form name="treeform"><ul id="comptree" class="treeview">';
-	};
-	$subject = "";
-	$topic = "";
-	$newsub = true;
-	$newtop = true;
-	$index = 0;
+		throw new \block_exaport\exception("wrong \$type: $type");
+	}
 
-	foreach ($descriptors as $descriptor) {
-		if ($descriptor->subject != $subject) {
-			$subject = $descriptor->subject;
-			if (!$newsub)
-				$tree.='</ul></li></ul></li>';
-			$tree.='<li id="gegenst'.$descriptor->subjectid.'" alt="'.$subject.'">' . $subject;
-			$tree.='<ul>';
+	if ($forresume) {
+		$output = '<form id="treeform" method="post" action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$resume->courseid.'&id='.$resume->id.'&sesskey='.sesskey().'#'.$type.'">';
+	} else {
+		$output = '<form id="treeform">';
+	}
 
-			$newsub = false;
-			$newtop = true;
-		}
-		if ($descriptor->topic != $topic) {
-			$topic = $descriptor->topic;
-			if (!$newtop)
-				$tree.='</ul></li>';
-			$tree.='<li>' . $topic;
-			$tree.='<ul>';
-			$newtop = false;
-		}
-		if ($forresume && in_array($descriptor->id, $resume->descriptors)) {
-			$checked = 'checked="checked"';
+	$print_tree = function($items, $level = 0) use (&$print_tree, $forresume, $active_descriptors) {
+		if (!$items) return '';
+
+		$output = '';
+		if ($level == 0) {
+			$output .= '<ul id="comptree" class="treeview">';
 		} else {
-			$checked = '';
+			$output .= '<ul>';
 		}
-		$tree.='<li><input class="'.$descriptor->subjectid.'" type="checkbox" name="desc'.($forresume ? '[]':'').'" '.$checked.' value="' . $descriptor->id . '" alt="' . $descriptor->title . '">' . $descriptor->title . '</li>';
 
-		$index++;
-	}
-	$tree .= '</ul></li></ul></li></ul>';
+		foreach ($items as $item) {
+			if ($item->type == 'item' && in_array($item->id, $active_descriptors)) {
+				$checked = 'checked="checked"';
+			} else {
+				$checked = '';
+			}
+
+			$output .= '<li>';
+			if ($item->type == 'item') {
+				$output .= '<input type="checkbox" name="desc' . ($forresume ? '[]' : '') . '" ' . $checked . ' value="' . $item->id . '">';
+			}
+			$output .= $item->title.$print_tree($item->subs, $level+1).'</li>';
+		}
+
+		$output .= '</ul>';
+
+		return $output;
+	};
+
+	$compTree = \block_exacomp\api::get_comp_tree_for_exastud($forresume ? 'resume' : 'item');
+	$output .= $print_tree($compTree);
+
 	if ($forresume) {
-		$tree .= '<input type="hidden" value="'.$forresume.'" name="edit">';
-		$tree .= '<input type="hidden" value="'.sesskey().'" name="sesskey">';
-		$tree .= '<input type="submit" id="id_submitbutton" type="submit" value="'.get_string('savechanges').'" name="submitbutton">';
-		$tree .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" value="'.get_string('cancel').'" name="cancel">';
+		$output .= '<input type="hidden" value="edit" name="action">';
+		$output .= '<input type="hidden" value="'.$type.'" name="type">';
+		$output .= '<input type="hidden" value="'.sesskey().'" name="sesskey">';
+		$output .= '<input type="submit" id="id_submitbutton" type="submit" value="'.get_string('savechanges').'" name="submitbutton">';
+		$output .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" value="'.get_string('cancel').'" name="cancel">';
 	} else {
-		$tree .= '<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport.colorbox.close();">';
+		$output .= '<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport.colorbox.close();">';
 	}
-	$tree .= '</form>';
+	$output .= '</form>';
 
-	return $tree;
+	return $output;
 }
 function block_exaport_assignmentversion(){
 	global $DB;
@@ -1023,12 +1008,12 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 
 		$comp = block_exaport_check_competence_interaction();
 		if($comp){
-			$array = block_exaport_get_competences($item, 0);
+			$compids = block_exaport_get_active_compids($item);
 
-			if(count($array)>0){
+			if($compids){
 				$competences = "";
-				foreach($array as $element){
-					$conditions = array("id" => $element->compid);
+				foreach($compids as $compid){
+					$conditions = array("id" => $compid);
 					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING);
 
 					if($competencesdb != null){
@@ -1211,16 +1196,19 @@ function block_exaport_item_is_editable($itemid) {
 }
 function block_exaport_item_is_resubmitable($itemid) {
 	global $DB, $USER, $COURSE;
-	$allowResubmission = true;
+
+	if (!block_exaport_check_competence_interaction()) {
+		return false;
+	}
 
 	if(	$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid)) ) {
 		if($eval = $DB->get_record(block_exacomp::DB_EXAMPLEEVAL, array('exampleid'=>$itemExample->exampleid,'studentid'=>$USER->id,'courseid'=>$COURSE->id))) {
-			if($eval->resubmission == 0)
-				$allowResubmission = false;
+			if(!$eval->resubmission)
+				return false;
 		}
 	}
 	
-	return $allowResubmission;
+	return true;
 }
 function block_exaport_has_grading_permission($itemid) {
 	global $DB;

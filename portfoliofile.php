@@ -65,7 +65,7 @@ if ($userhash!="0"){
 		$accessPath = explode('/', $access);
 		
 		if(strpos($accessPath[2],'-'))
-			$accessPath[2] = (explode('-', $accessPath[2])[1]);
+			$accessPath[2] = (explode('-', $accessPath[2])[0]);
 		
 		$item = block_exaport_get_elove_item($id, $accessPath[2], $authenticationinfo);
 		

@@ -1043,25 +1043,31 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
  * Function gets teachers array of course
  * @return array
  */
-function block_exaport_get_course_teachers() {
+function block_exaport_get_course_teachers($exceptMyself = true) {
 	global $DB, $USER;
+
 	$courseid = optional_param('courseid', 0, PARAM_INT);
+	$context = context_course::instance($courseid);
+
 	// Role id='3' - teachers. '4'- assistents.
-	$query = "SELECT u.id as userid, c.id, c.shortname, u.username
-	FROM {course} c
-	LEFT OUTER JOIN {context} cx ON c.id = cx.instanceid
-	LEFT OUTER JOIN {role_assignments} ra ON cx.id = ra.contextid AND ra.roleid = '3'
-	LEFT OUTER JOIN {user} u ON ra.userid = u.id
-	WHERE cx.contextlevel = '50' AND u.id>0 AND c.id = ".$courseid;
-	$courseteachers = $DB->get_records_sql($query);
-	$teacherarray = array();
-	foreach($courseteachers as $teacher) {
-		if ($teacher->userid <> $USER->id) { // Except himself.
-			$teacherarray[] = $teacher->userid;
-		};
-	};
-	sort($teacherarray);
-	return $teacherarray;
+	$query = "SELECT u.id as userid, u.id AS tmp
+	FROM {user} u
+	JOIN {role_assignments} ra ON ra.userid = u.id
+	WHERE ra.contextid=? AND ra.roleid = '3'";
+	$exastudTeachers = $DB->get_records_sql($query, [$context->id]);
+
+	// if exacomp is not installed this function returns an emtpy array
+	$exacompTeachers = get_enrolled_users($context,'block/exacomp:teacher');
+
+	$teachers = $exastudTeachers + $exacompTeachers;
+
+	if ($exceptMyself) {
+		unset($teachers[$USER->id]);
+	}
+
+	$teachers = array_keys($teachers);
+
+	return $teachers;
 }
 
 /**
@@ -1227,4 +1233,20 @@ function block_exaport_has_grading_permission($itemid) {
 	}
 	
 	return false;
+}
+
+function block_exaport_delete_user_data($userid){
+	global $DB;
+
+	$result = $DB->delete_records('block_exaportcate', array('userid'=>$userid));
+	$result = $DB->delete_records('block_exaportcatshar', array('userid'=>$userid));
+	$result = $DB->delete_records('block_exaportcat_structshar', array('userid'=>$userid));
+	$result = $DB->delete_records('block_exaportitem', array('userid'=>$userid));
+	$result = $DB->delete_records('block_exaportitemcomm', array('userid'=>$userid));
+	$result = $DB->delete_records('block_exaportitemshar', array('userid'=>$userid));
+	$result = $DB->delete_records('block_exaportview', array('userid'=>$userid));
+	$result = $DB->delete_records('block_exaportviewshar', array('userid'=>$userid));
+
+	$result = $DB->delete_records('block_exaportresume', array('user_id'=>$userid));
+	$result = $DB->delete_records('block_exaportuser', array('user_id'=>$userid));
 }

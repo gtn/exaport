@@ -588,7 +588,7 @@ function block_exaport_get_comp_output($item) {
 	$compids = block_exaport_get_active_compids($item);
 }
 function block_exaport_build_comp_tree($type, $item_or_resume) {
-	global $CFG;
+	global $CFG, $USER;
 
 	if ($type == 'skillscomp' || $type == 'goalscomp') {
 		$forresume = true;
@@ -639,7 +639,7 @@ function block_exaport_build_comp_tree($type, $item_or_resume) {
 		return $output;
 	};
 
-	$compTree = \block_exacomp\api::get_comp_tree_for_exastud($forresume ? 'resume' : 'item');
+	$compTree = \block_exacomp\api::get_comp_tree_for_exastud($USER->id, $forresume ? 'resume' : 'item');
 	$output .= $print_tree($compTree);
 
 	if ($forresume) {

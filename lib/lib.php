@@ -601,7 +601,7 @@ function block_exaport_build_comp_tree($type, $item_or_resume) {
 		$item = $item_or_resume;
 		$active_descriptors = isset($item->compids_array) ? $item->compids_array : [];
 	} else {
-		throw new \block_exaport\exception("wrong \$type: $type");
+		throw new \block_exaport\moodle_exception("wrong \$type: $type");
 	}
 
 	if ($forresume) {

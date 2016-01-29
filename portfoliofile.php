@@ -53,33 +53,32 @@ $epopaccess=false;
 
 //authenticate the user
 
+if ($token) {
+	$webservicelib = new webservice();
+	$authenticationinfo = $webservicelib->authenticate_user($token);
+	$accessPath = explode('/', $access);
+
+	if(strpos($accessPath[2],'-'))
+		$accessPath[2] = (explode('-', $accessPath[2])[0]);
+
+	$item = block_exaport_get_elove_item($id, $accessPath[2], $authenticationinfo);
+	if(!$item)
+		print_error("viewnotfound", "block_exaport");
+
+	if ($file = block_exaport_get_item_file($item)) {
+		send_stored_file($file);
+	} else {
+		not_found();
+	}
+	exit;
+}
 
 if ($userhash!="0"){
 	$user=block_exaport_epop_checkhash($userhash);
 	if ($user==false) {require_login();}
 	else {$epopaccess=true;}
-}else{
-	if($token) {
-		$webservicelib = new webservice();
-		$authenticationinfo = $webservicelib->authenticate_user($token);
-		$accessPath = explode('/', $access);
-		
-		if(strpos($accessPath[2],'-'))
-			$accessPath[2] = (explode('-', $accessPath[2])[0]);
-		
-		$item = block_exaport_get_elove_item($id, $accessPath[2], $authenticationinfo);
-		if(!$item)
-			print_error("viewnotfound", "block_exaport");
-		
-		if ($file = block_exaport_get_item_file($item)) {
-			send_stored_file($file);
-		} else {
-			not_found();
-		}
-		exit;
-	}
-	else
-		require_login();
+} else {
+	require_login();
 }
 
 

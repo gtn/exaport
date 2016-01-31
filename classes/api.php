@@ -6,7 +6,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once __DIR__.'/../lib/lib.php';
 
-use \block_exaport\globals as g;
+use block_exaport\globals as g;
 
 class api {
 	static function active() {

@@ -190,7 +190,7 @@ function block_exaport_get_elove_item($itemid, $userid, $authenticationinfo) {
 	//check if user is userid or if user is trainer of userid
 	if($userid == $authenticationinfo['user']->id)
 		return $DB->get_record('block_exaportitem', array('id'=>$itemid,'userid'=>$userid));
-	else if($DB->record_exists('block_exacompexternaltrainer', array('trainerid'=>$authenticationinfo['user']->id,
+	else if($DB->record_exists(\block_exacomp\DB_EXTERNAL_TRAINERS, array('trainerid'=>$authenticationinfo['user']->id,
 			'studentid'=>$userid)))
 		return $DB->get_record('block_exaportitem', array('id'=>$itemid));
 	else {

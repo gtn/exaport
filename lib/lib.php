@@ -1177,7 +1177,7 @@ function block_exaport_item_is_editable($itemid) {
 	
 	$allowEdit = true;
 
-	$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid));
+	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid));
 	
 	if(!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
 		//check item grading and teacher comment
@@ -1207,8 +1207,8 @@ function block_exaport_item_is_resubmitable($itemid) {
 		return false;
 	}
 
-	if(	$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid)) ) {
-		if($eval = $DB->get_record(block_exacomp::DB_EXAMPLEEVAL, array('exampleid'=>$itemExample->exampleid,'studentid'=>$USER->id,'courseid'=>$COURSE->id))) {
+	if(	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid)) ) {
+		if($eval = $DB->get_record(\block_exacomp\DB_EXAMPLEEVAL, array('exampleid'=>$itemExample->exampleid,'studentid'=>$USER->id,'courseid'=>$COURSE->id))) {
 			if(!$eval->resubmission)
 				return false;
 		}
@@ -1221,7 +1221,7 @@ function block_exaport_has_grading_permission($itemid) {
 	
 	if(block_exaport_check_competence_interaction()) {
 		// check if item is a submission for an exacomp example
-		$itemExample = $DB->get_record(block_exacomp::DB_ITEMEXAMPLE,array("itemid" => $itemid));
+		$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid));
 		if(isset($itemExample)) {
 			$item = $DB->get_record('block_exaportitem', array('id'=>$itemid));
 			if(!isset($item->courseid) || $item->courseid == 0)

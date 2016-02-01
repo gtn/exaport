@@ -87,10 +87,7 @@ foreach ($blocks as $block) {
 	$columns[$block->positionx][] = $block;
 }
 
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
-$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
+block_exaport_init_js_css();
 
 if ($view->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");

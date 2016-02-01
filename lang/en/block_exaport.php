@@ -232,6 +232,7 @@ $string['invalidfileatthisassignment'] = 'File does not exist at this assignment
 $string['publishedportfolios'] = 'Published portfolios';
 $string['viewcategories'] = 'manage categories';
 $string['updownarrow'] = 'updown arrow';
+$string['delete_confirmation_comment'] = 'Do you really want to delete this comment?';
 
 // Shared portfolios
 $string['nocoursetogether'] = 'No Course';

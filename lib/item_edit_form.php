@@ -12,12 +12,6 @@ class block_exaport_comment_edit_form extends moodleform {
 		$mform = & $this->_form;
 
 		$this->_form->_attributes['action'] = $_SERVER['REQUEST_URI'];
-		$mform->addElement('header', 'comment', get_string("addcomment", "block_exaport"));
-
-		$mform->addElement('editor', 'entry', get_string("comment", "block_exaport"),null, array('rows' => 10, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-		$mform->setType('entry', PARAM_TEXT);
-		$mform->addRule('entry', get_string("commentshouldnotbeempty", "block_exaport"), 'required', null, 'client');
-		//$mform->setHelpButton('entry', array('writing', 'richtext'), false, 'editorhelpbutton');
 
 		$mform->addElement('hidden', 'action');
 		$mform->setType('action', PARAM_ACTION);
@@ -34,9 +28,16 @@ class block_exaport_comment_edit_form extends moodleform {
 		$mform->setType('userid', PARAM_INT);
 		$mform->setDefault('userid', 0);
 		
-		$gradingPermission = $this->_customdata['gradingpermission'];
+		$mform->addElement('header', 'comment', get_string("addcomment", "block_exaport"));
 
-		if($gradingPermission) {
+		$mform->addElement('editor', 'entry', get_string("comment", "block_exaport"),null, array('rows' => 10, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+		$mform->setType('entry', PARAM_TEXT);
+		$mform->addRule('entry', get_string("commentshouldnotbeempty", "block_exaport"), 'required', null, 'client');
+		//$mform->setHelpButton('entry', array('writing', 'richtext'), false, 'editorhelpbutton');
+
+		$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => 0, 'maxfiles' => 1));
+
+		if ($this->_customdata['gradingpermission']) {
 			$mform->addElement('header', 'itemgrading', get_string("itemgrading", "block_exaport"));
 			$itemgrade = $this->_customdata['itemgrade'];
 			$mform->addElement('select', 'itemgrade', get_string('gradeitem', 'block_exaport'), range(0, 100));

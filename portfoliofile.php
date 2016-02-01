@@ -86,14 +86,23 @@ if ($access && $id) {
 	// file storage logic
 	
 	if ($epopaccess){
-	$item = block_exaport_get_item_epop($id, $user);}
-	else{
-	$item = block_exaport_get_item($id, $access, false);}
+		$item = block_exaport_get_item_epop($id, $user);
+	} else {
+		$item = block_exaport_get_item($id, $access, false);
+	}
 	
 	if (!$item) print_error('Item not found');
 	//if ($item->type != 'file') print_error('Item not a file');
 
-	if ($file = block_exaport_get_item_file($item)) {
+	if ($commentid = optional_param('commentid', 0, PARAM_INT)) {
+		$comment = $DB->get_record("block_exaportitemcomm", ['itemid' => $item->id, 'id' => $commentid]);
+		if (!$comment) not_found();
+		$file = block_exaport_get_item_comment_file($comment->id);
+	} else {
+		$file = block_exaport_get_item_file($item);
+	}
+
+	if ($file) {
 		send_stored_file($file, 1);
 	} else {
 		not_found();

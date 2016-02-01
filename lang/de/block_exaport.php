@@ -228,6 +228,7 @@ $string['invalidfileatthisassignment'] = 'Datei existiert nicht zu dieser Abgabe
 $string['publishedportfolios'] = 'Ver&ouml;ffentliche Portfolios';
 $string['viewcategories'] = 'Kategorien verwalten';
 $string['updownarrow'] = 'Pfeil nach oben/nach unten';
+$string['delete_confirmation_comment'] = 'Wollen Sie wirklich diesen Kommentar löschen?';
 
 // Shared portfolios
 $string['nocoursetogether'] = 'Kein Kurs';

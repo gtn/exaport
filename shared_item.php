@@ -46,23 +46,27 @@ $PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
 $item = block_exaport_get_item($itemid, $access);
 $item->intro = process_media_url($item->intro, 320, 240);
 
-	if ($deletecomment == 1) {
-		if (!confirm_sesskey()) {
-			print_error("badsessionkey", "block_exaport");
-		}
-		$conditions = array("id" => $commentid, "userid" => $USER->id, "itemid" => $itemid);
-		if ($DB->count_records("block_exaportitemcomm", $conditions) == 1) {
-			$DB->delete_records("block_exaportitemcomm", $conditions);
+if ($deletecomment) {
+	require_sesskey();
 
-			//parse_str($_SERVER['QUERY_STRING'], $params);
-			//redirect($_SERVER['PHP_SELF'] . '?' . http_build_query(array('deletecomment' => null, 'commentid' => null, 'sesskey' => null) + (array) $params));
-		} else {
-				if(!isset($_POST['action'])){ //if deletecomment is set and form is submitted, comment was immediatly deleted and cant be deleted anymore, no error
-			   
-				print_error("commentnotfound", "block_exaport");
-				//redirect($_SERVER['REQUEST_URI']);
-			  }
+	$conditions = array("id" => $commentid, "userid" => $USER->id, "itemid" => $itemid);
+	if ($DB->count_records("block_exaportitemcomm", $conditions) == 1) {
+		$DB->delete_records("block_exaportitemcomm", $conditions);
+
+		$fs = get_file_storage();
+		if ($file = block_exaport_get_item_comment_file($commentid)) {
+			// this deletes the file and the directory entry
+			$fs->delete_area_files($file->get_contextid(), $file->get_component(), $file->get_filearea(), $file->get_itemid());
 		}
+
+		//parse_str($_SERVER['QUERY_STRING'], $params);
+		//redirect($_SERVER['PHP_SELF'] . '?' . http_build_query(array('deletecomment' => null, 'commentid' => null, 'sesskey' => null) + (array) $params));
+	} else {
+		if(!isset($_POST['action'])){ //if deletecomment is set and form is submitted, comment was immediatly deleted and cant be deleted anymore, no error
+			print_error("commentnotfound", "block_exaport");
+			//redirect($_SERVER['REQUEST_URI']);
+		}
+	}
 }
 	
 if (!$item) {
@@ -91,8 +95,8 @@ if ($item->allowComments) {
 	else if ($fromform = $commentseditform->get_data()) {
 		switch ($action) {
 			case 'add':
-				block_exaport_do_add_comment($item, $fromform, $commentseditform);
-				
+				block_exaport_do_add_comment($item, $fromform);
+
 				//redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
 				$prms='access='.$access.'&itemid='.$itemid;
 				if (!empty($backtype)) $prms.='backtype='.$backtype;
@@ -151,7 +155,7 @@ if ($item->allowComments) {
 	$newcomment->access = $access;
 	$newcomment->backtype = $backtype;
 
-	block_exaport_show_comments($item);
+	block_exaport_show_comments($item, $access);
 
 	$commentseditform->set_data($newcomment);
 	//$commentseditform->_form->_attributes['action'] = $_SERVER['REQUEST_URI'];
@@ -193,16 +197,13 @@ echo block_exaport_wrapperdivend();
 
 echo $OUTPUT->footer();
 
-function block_exaport_show_comments($item) {
+function block_exaport_show_comments($item, $access) {
 	global $CFG, $USER, $COURSE, $DB, $OUTPUT;
 	$conditions = array("itemid" => $item->id);
 	$comments = $DB->get_records("block_exaportitemcomm", $conditions, 'timemodified DESC');
 
 	if ($comments) {
 		foreach ($comments as $comment) {
-			$stredit = get_string('edit');
-			$strdelete = get_string('delete');
-
 			$conditions = array("id" => $comment->userid);
 			$user = $DB->get_record('user', $conditions);
 
@@ -214,14 +215,14 @@ function block_exaport_show_comments($item) {
 
 			echo '<td class="topic starter"><div class="author">';
 			$fullname = fullname($user, $comment->userid);
-			$by = new object();
+			$by = new stdClass();
 			$by->name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
 					$user->id . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
 			$by->date = userdate($comment->timemodified);
 			print_string('bynameondate', 'forum', $by);
 
 			if ($comment->userid == $USER->id) {
-				echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&deletecomment=1&sesskey=' . sesskey()) . '">' . get_string('delete') . '</a>';
+				echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&deletecomment=1&sesskey=' . sesskey()) . '" onclick="'.s('return confirm('.json_encode(block_exaport\get_string('delete_confirmation_comment')).')').'">' . get_string('delete') . '</a>';
 			}
 			echo '</div></td></tr>';
 
@@ -231,13 +232,21 @@ function block_exaport_show_comments($item) {
 
 			echo format_text($comment->entry);
 
+			if ($file = block_exaport_get_item_comment_file($comment->id)) {
+				$fileurl = $CFG->wwwroot."/blocks/exaport/portfoliofile.php?access={$access}&itemid={$item->id}&commentid={$comment->id}";
+				echo '</td></tr><tr><td class="left side">';
+
+				echo '</td><td class="content">' . "\n";
+				echo get_string('file', 'block_exaport').': <a href="'.s($fileurl).'" target="_blank">'.$file->get_filename().'</a> ('.display_size($file->get_filesize()).')';
+			}
+
 			echo '</td></tr></table>' . "\n\n";
 		}
 	}
 }
 
-function block_exaport_do_add_comment($item, $post, $blogeditform) {
-	global $CFG, $USER, $COURSE, $DB;
+function block_exaport_do_add_comment($item, $post) {
+	global $USER, $COURSE, $DB;
 
 	$post->userid = $USER->id;
 	$post->timemodified = time();
@@ -259,10 +268,10 @@ function block_exaport_do_add_comment($item, $post, $blogeditform) {
 		}
 	}
 		
-	// Insert the new blog entry.
-	if ($DB->insert_record('block_exaportitemcomm', $post)) {
-		block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
-	} else {
-		error('There was an error adding this post in the database');
-	}
+	// Insert the new comment
+	$post->id = $DB->insert_record('block_exaportitemcomm', $post);
+
+	file_save_draft_area_files($post->file, context_system::instance()->id, 'block_exaport', 'item_comment_file', $post->id, array('subdirs' => 0, 'maxfiles' => 1));
+
+	block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
 }

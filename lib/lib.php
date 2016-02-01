@@ -54,6 +54,23 @@ function block_exaport_get_item_file($item) {
 		return reset($areafiles);
 }
 
+/**
+ * @param $itemcomment
+ * @return stored_file
+ * @throws dml_exception
+ */
+function block_exaport_get_item_comment_file($commentid) {
+	$fs = get_file_storage();
+
+	// list all files, excluding directories!
+	$areafiles = $fs->get_area_files(context_system::instance()->id, 'block_exaport', 'item_comment_file', $commentid, null, false);
+
+	if (empty($areafiles))
+		return null;
+	else
+		return reset($areafiles);
+}
+
 function block_exaport_add_to_log($courseid, $module, $action, $url='', $info='', $cm=0, $user=0) {
 	if (!function_exists('get_log_manager')) {
 		// old style
@@ -179,7 +196,7 @@ function block_exaport_print_file($url, $filename, $alttext) {
 	$icon = new pix_icon(file_mimetype_icon($filename), '');
 	$type = mimeinfo('type', $filename);
 	if (in_array($type, array('image/gif', 'image/jpeg', 'image/png'))) {	// Image attachments don't get printed as links
-		return "<img src=\"$url\" alt=\"" . format_string($alttext) . "\" />";
+		return "<img src=\"$url\" alt=\"" . s($alttext) . "\" />";
 	} else {
 		return '<p><img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.gif" class="icon" alt="' . $icon->pix . '" />&nbsp;' . $OUTPUT->action_link($url, $filename) . "</p>";
 	}
@@ -205,12 +222,38 @@ function block_exaport_wrapperdivstart(){
 function block_exaport_wrapperdivend(){
 	return html_writer::end_tag('div');
 }
+
+function block_exaport_init_js_css() {
+	global $PAGE, $CFG;
+
+	// only allowed to be called once
+	static $js_inited = false;
+	if ($js_inited) return;
+	$js_inited = true;
+
+	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
+
+	$PAGE->requires->jquery();
+	$PAGE->requires->jquery_plugin('ui');
+	$PAGE->requires->jquery_plugin('ui-css');
+
+	$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+
+	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
+
+	$scriptName = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
+	if (file_exists($CFG->dirroot.'/blocks/exaport/css/'.$scriptName.'.css'))
+		$PAGE->requires->css('/blocks/exaport/css/'.$scriptName.'.css');
+	if (file_exists($CFG->dirroot.'/blocks/exaport/javascript/'.$scriptName.'.js'))
+		$PAGE->requires->js('/blocks/exaport/javascript/'.$scriptName.'.js', true);
+
+}
+
 /**
  * Print moodle header
  * @param string $item_identifier translation-id for this page
  * @param string $sub_item_identifier translation-id for second level if needed
  */
-
 function block_exaport_print_header($item_identifier, $sub_item_identifier = null) {
 
 	if (!is_string($item_identifier)) {
@@ -219,21 +262,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
 	global $CFG, $COURSE, $PAGE, $USER;
 
-	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
-	
-	$PAGE->requires->jquery();
-	$PAGE->requires->jquery_plugin('ui');
-	$PAGE->requires->jquery_plugin('ui-css');
-	
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-	
-	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
-
-	$scriptName = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
-	if (file_exists($CFG->dirroot.'/blocks/exaport/css/'.$scriptName.'.css'))
-		$PAGE->requires->css('/blocks/exaport/css/'.$scriptName.'.css');
-	if (file_exists($CFG->dirroot.'/blocks/exaport/javascript/'.$scriptName.'.js'))
-		$PAGE->requires->js('/blocks/exaport/javascript/'.$scriptName.'.js', true);
+	block_exaport_init_js_css();
 
 	$strbookmarks = block_exaport_get_string("mybookmarks");
 
@@ -1219,20 +1248,23 @@ function block_exaport_item_is_resubmitable($itemid) {
 function block_exaport_has_grading_permission($itemid) {
 	global $DB;
 	
-	if(block_exaport_check_competence_interaction()) {
-		// check if item is a submission for an exacomp example
-		$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid));
-		if(isset($itemExample)) {
-			$item = $DB->get_record('block_exaportitem', array('id'=>$itemid));
-			if(!isset($item->courseid) || $item->courseid == 0)
-				return false;
-			
-			$coursecontext = context_course::instance($item->courseid);
-			return has_capability('block/exacomp:teacher', $coursecontext);
-		}
+	if (!block_exaport_check_competence_interaction()) {
+		return false;
 	}
-	
-	return false;
+
+	// check if item is a submission for an exacomp example
+	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid));
+	if (!$itemExample) {
+		return false;
+	}
+
+	$item = $DB->get_record('block_exaportitem', array('id'=>$itemid));
+	if (!$item || !$item->courseid) {
+		return false;
+	}
+
+	$coursecontext = context_course::instance($item->courseid);
+	return has_capability('block/exacomp:teacher', $coursecontext);
 }
 
 function block_exaport_delete_user_data($userid){

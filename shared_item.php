@@ -86,7 +86,7 @@ if ($item->allowComments) {
 	
 	$itemExample = $DB->get_record('block_exacompitemexample', array('itemid' => $itemid));
 	
-	$commentseditform = new block_exaport_comment_edit_form($PAGE->url,array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade'=>($itemExample->teachervalue) ? $itemExample->teachervalue : 0));
+	$commentseditform = new block_exaport_comment_edit_form($PAGE->url,array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade'=>($itemExample && $itemExample->teachervalue) ? $itemExample->teachervalue : 0));
 
 	if ($commentseditform->is_cancelled()
 		);

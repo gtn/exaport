@@ -71,12 +71,6 @@ class block_exaport_item_edit_form extends moodleform {
 		$mform->addElement('hidden', 'courseid');
 		$mform->setType('courseid', PARAM_INT);
 
-		$mform->addElement('hidden', 'activityid');
-		$mform->setType('activityid', PARAM_INT);
-		// wird f�r das formular beim moodle import ben�tigt
-		$mform->addElement('hidden', 'submissionid');
-		$mform->setType('submissionid', PARAM_INT);
-
 		$mform->addElement('hidden', 'action');
 		$mform->setType('action', PARAM_ACTION);
 		$mform->setDefault('action', '');
@@ -108,19 +102,20 @@ class block_exaport_item_edit_form extends moodleform {
 		if ($type == 'link') {
 
 		} elseif ($type == 'file') {
-			if ($this->_customdata['action'] == 'add') {
+			if ($this->_customdata['action'] == 'assignment_import') {
+				// assignment import.
+				$mform->addElement('hidden', 'submissionid');
+				$mform->setType('submissionid', PARAM_INT);
+				$mform->addElement('hidden', 'fileid');
+				$mform->setType('fileid', PARAM_TEXT);
+			} elseif ($this->_customdata['action'] == 'add') {
 				$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 				$mform->addRule('file', null, 'required', null, 'client');
-				
+
 			} else {
 				// Filemanager for edit file.
 				$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 				$mform->addRule('file', null, 'required', null, 'client');
-
-				// Filename for assignment import.
-				$mform->addElement('hidden', 'filename');
-				$mform->setType('filename', PARAM_TEXT);
-				$mform->setDefault('filename', '');
 			}
 		}
 
@@ -154,10 +149,11 @@ class block_exaport_item_edit_form extends moodleform {
 		}
 		
 		$mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'accepted_types' => array('image', 'web_image')));
+
 		// $mform->addRule('iconfile', null, 'required', null, 'client');
-		if(isset($this->_customdata['allowedit']) && $this->_customdata['allowedit'] == 1)
+		if(!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {
 			$this->add_action_buttons();
-		else {
+		} else {
 			$exampleid = $DB->get_field('block_exacompitemexample', 'exampleid', array('itemid' => $this->_customdata['current']->id));
 			$url = new moodle_url("/blocks/exacomp/example_submission.php",array("courseid"=>$this->_customdata['course']->id,"newsubmission"=>true,"exampleid"=>$exampleid));
 			

@@ -1,51 +1,36 @@
 <?php
 
-/* * *************************************************************
- *  Copyright notice
- *
- *  (c) 2006 exabis internet solutions <info@exabis.at>
- *  All rights reserved
- *
- *  You can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This module is based on the Collaborative Moodle Modules from
- *  NCSA Education Division (http://www.ncsa.uiuc.edu)
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- * ************************************************************* */
-global $DB,$CFG;
 require_once __DIR__.'/inc.php';
-require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 
 
 $id = optional_param('id', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $confirm = optional_param('confirm', '', PARAM_BOOL);
-$filename = optional_param('filename', '', PARAM_FILE);
-$assignmentid = optional_param('submissionid', 0, PARAM_INT);
-$aid = optional_param('assignmentid', 0, PARAM_INT);
+$fileid = optional_param('fileid', '', PARAM_FILE);
+$submissionid = optional_param('submissionid', 0, PARAM_INT);
 
-$modassign=block_exaport_assignmentversion();
-$cm = get_coursemodule_from_instance($modassign->title, $aid);
+$modassign = block_exaport_assignmentversion();
+
+if ($modassign->new) {
+	$assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, a.name, a.course, c.fullname AS coursename
+								FROM {assignsubmission_file} sf
+								INNER JOIN {assign_submission} s ON sf.submission=s.id
+								INNER JOIN {assign} a ON s.assignment=a.id
+								LEFT JOIN {course} c on a.course = c.id
+								WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+}else{
+	$assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, a.name, a.course, a.assignmenttype, c.fullname AS coursename
+								FROM {assignment_submissions} s
+								JOIN {assignment} a ON s.assignment=a.id
+								LEFT JOIN {course} c on a.course = c.id
+								WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+}
+
+$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid);
 
 $post = new stdClass();
 $checked_file = null;
 $action = 'add';
-
-if (!confirm_sesskey()) {
-	print_error("badsessionkey", "block_exaport");
-}
 
 $context = context_system::instance();
 $url = '/blocks/exabis_competences/import_moodle_add_file.php';
@@ -63,12 +48,12 @@ if (!block_exaport_has_categories($USER->id)) {
 	print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
 }
 
-if ($assignmentid == 0) {
+if ($submissionid == 0) {
 	error("No assignment given!");
 }
 
 
-if (!($checked_file = check_assignment_file($assignmentid, $filename,$modassign))) {
+if (!($checked_file = check_assignment_file($cm, $assignment, $fileid))) {
 	print_error("invalidfileatthisassignment", "block_exaport");
 }
 
@@ -86,6 +71,9 @@ if ($id) {
 }
 
 if ($action == 'delete') {
+	require_sesskey();
+	// TODO: is this still used?!?
+
 	if (!$existing) {
 		print_error("wrongfilepostid", "block_exaport");
 	}
@@ -118,12 +106,12 @@ if ($action == 'add') {
 	$existing->categoryid = "";
 	$existing->intro = "";
 	$existing->filename = $checked_file->get_filename();
-	$existing->submission = $assignmentid;
+	$existing->submission = $submissionid;
 	if (!empty($cm->id)) $existing->activityid = $cm->id;
 	else $existing->activityid =-1;
 }
 
-$exteditform = new block_exaport_item_edit_form(null, Array('existing' => $existing, 'type' => 'file', 'action' => 'edit','assignmentid'=>$aid));
+$exteditform = new block_exaport_item_edit_form(null, Array('existing' => $existing, 'type' => 'file', 'action' => 'assignment_import'));
 
 
 if ($exteditform->is_cancelled()) {
@@ -132,9 +120,11 @@ if ($exteditform->is_cancelled()) {
 	die("nosubmitbutton");
 	//no_submit_button_actions($exteditform, $sitecontext);
 } else if ($fromform = $exteditform->get_data()) {
+	require_sesskey();
+
 	switch ($action) {
 		case 'add':
-			do_add($fromform, $exteditform, $returnurl, $courseid, $checked_file);
+			do_add($cm, $fromform, $exteditform, $returnurl, $courseid, $checked_file);
 			break;
 
 		case 'edit':
@@ -155,10 +145,9 @@ switch ($action) {
 	case 'add':
 		$post->action = $action;
 		$post->courseid = $courseid;
-		$post->submissionid = $assignmentid;
-		$post->filename = $checked_file->get_filename();
+		$post->submissionid = $submissionid;
+		$post->fileid = $fileid;
 		$strAction = get_string('new');
-		$post->activityid = $cm->id;
 		break;
 	default :
 		print_error("unknownaction", "block_exaport");
@@ -167,13 +156,14 @@ switch ($action) {
 block_exaport_print_header("bookmarksfiles");
 
 
-if (!$cm = get_coursemodule_from_instance($modassign->title, $aid)) {
+if (!$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid)) {
 	print_error('invalidcoursemodule');
 }
 $filecontext = context_module::instance($cm->id);
 
 echo "<div class='block_eportfolio_center'>\n";
-echo $OUTPUT->box(block_exaport_print_file(file_encode_url($CFG->wwwroot . '/pluginfile.php', '/' . $filecontext->id . '/mod_assignment/submission/' . $assignmentid . '/' . $filename), $checked_file->get_filename(), $checked_file->get_filename()));
+
+echo $OUTPUT->box(block_exaport_print_file($checked_file));
 echo "</div>";
 
 $exteditform->set_data($post);
@@ -190,7 +180,7 @@ function do_edit($post, $blogeditform, $returnurl, $courseid) {
 
 	$post->timemodified = time();
 	$post->intro = $post->intro['text'];
-	
+
 	if (update_record('block_exaportitem', $post)) {
 		block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
 	} else {
@@ -201,7 +191,7 @@ function do_edit($post, $blogeditform, $returnurl, $courseid) {
 /**
  * Write a new blog entry into database
  */
-function do_add($post, $blogeditform, $returnurl, $courseid, $checked_file) {
+function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checked_file) {
 	global $CFG, $USER, $DB, $COURSE;
 
 	$post->userid = $USER->id;
@@ -216,7 +206,7 @@ function do_add($post, $blogeditform, $returnurl, $courseid, $checked_file) {
 
 	$textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
 	$post->introformat = FORMAT_HTML;
-	
+
 	$post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'item_content', $post->id);
 
 	$filerecord = new stdClass();
@@ -232,11 +222,11 @@ function do_add($post, $blogeditform, $returnurl, $courseid, $checked_file) {
 	// Insert the new blog entry.
 	$DB->update_record('block_exaportitem', $post);
 
-	if(block_exaport_check_competence_interaction()) {	
+	if(block_exaport_check_competence_interaction()) {
 
 		//Kompetenzen checken und erneut speichern
 		//TODO Test if missing activitytype = 1 has influence
-		$comps = $DB->get_records('block_exacompcompactiv_mm',array("activityid"=>$post->activityid));
+		$comps = $DB->get_records('block_exacompcompactiv_mm',array("activityid"=>$cm->id));
 		foreach($comps as $comp) {
 			$DB->insert_record('block_exacompcompactiv_mm',array("activityid"=>$post->id, "eportfolioitem"=>1,"compid"=>$comp->descrid,"activitytitle"=>$post->name,"coursetitle"=>$COURSE->shortname));
 		}
@@ -258,45 +248,13 @@ function do_delete($post, $returnurl, $courseid) {
 	}
 }
 
-function check_assignment_file($assignmentid, $file,$modassign) {
-	global $CFG, $USER, $DB;
-	$fileinfo = new stdClass();
-		if ($modassign->new==1){
-			if (!$assignment = $DB->get_record_sql('SELECT s.id, a.id AS aid, s.assignment, a.course AS courseid
-				  FROM {assignsubmission_file} sf
-								INNER JOIN {assign_submission} s ON sf.submission=s.id
-								INNER JOIN {assign} a ON s.assignment=a.id
-				  WHERE s.userid=? AND s.id=?', array($USER->id, $assignmentid))) {
-	
-			print_error("invalidassignmentid", "block_exaport");
-		}
-								
-		}else{
-		if (!$assignment = $DB->get_record_sql('SELECT s.id, a.id AS aid, s.assignment, a.course AS courseid
-										FROM {assignment_submissions} s
-										JOIN {assignment} a ON s.assignment=a.id
-										WHERE s.userid=? AND s.id=?', array($USER->id, $assignmentid))) {
-	
-			print_error("invalidassignmentid", "block_exaport");
-		}
-	  }
+function check_assignment_file($cm, $assignment, $fileid) {
+	global $USER, $DB;
 
-	if (!$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid)) {
-		print_error('invalidcoursemodule');
-	}
-
-	//$context = get_context_instance(CONTEXT_MODULE, $cm->id);
+	$modassign = block_exaport_assignmentversion();
 	$context = context_module::instance($cm->id);
 	$fs = get_file_storage();
-	$files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->id);
-	if ($files) {
-		foreach ($files as $actFile) {
+	$files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid, "filename", false);
 
-			if ($actFile->get_filename() == $file) {
-				return $actFile;
-			}
-		}
-	}
-
-	return null;
+	return isset($files[$fileid]) ? $files[$fileid] : null;
 }

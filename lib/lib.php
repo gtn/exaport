@@ -191,12 +191,14 @@ function block_exaport_moodleimport_file_area_name($userid, $assignmentid, $cour
 	return $courseid . '/' . $CFG->moddata . '/assignment/' . $assignmentid . '/' . $userid;
 }
 
-function block_exaport_print_file($url, $filename, $alttext) {
+function block_exaport_print_file(stored_file $file) {
 	global $CFG, $OUTPUT;
-	$icon = new pix_icon(file_mimetype_icon($filename), '');
-	$type = mimeinfo('type', $filename);
-	if (in_array($type, array('image/gif', 'image/jpeg', 'image/png'))) {	// Image attachments don't get printed as links
-		return "<img src=\"$url\" alt=\"" . s($alttext) . "\" />";
+
+	$url = moodle_url::make_pluginfile_url ( $file->get_contextid (), $file->get_component (), $file->get_filearea (), $file->get_itemid (), $file->get_filepath (), $file->get_filename () );
+
+	$icon = new pix_icon(file_mimetype_icon($file->get_mimetype()), '');
+	if (in_array($file->get_mimetype(), array('image/gif', 'image/jpeg', 'image/png'))) {	// Image attachments don't get printed as links
+		return "<img src=\"$url\" alt=\"" . s($file->get_filename()) . "\" />";
 	} else {
 		return '<p><img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.gif" class="icon" alt="' . $icon->pix . '" />&nbsp;' . $OUTPUT->action_link($url, $filename) . "</p>";
 	}

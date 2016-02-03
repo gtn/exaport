@@ -671,7 +671,12 @@ function block_exaport_build_comp_tree($type, $item_or_resume) {
 	};
 
 	$compTree = \block_exacomp\api::get_comp_tree_for_exastud($USER->id, $forresume ? 'resume' : 'item');
-	$output .= $print_tree($compTree);
+
+	if (!$compTree) {
+		$output .= '<div><h4 style="text-align:center; padding: 40px;">'.block_exaport\trans(['de:Du hast noch keine Kompetenzen erworben', "en:You haven't achieved any competencies yet"]).'</h4></div>';
+	} else {
+		$output .= $print_tree($compTree);
+	}
 
 	if ($forresume) {
 		$output .= '<input type="hidden" value="edit" name="action">';

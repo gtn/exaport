@@ -914,7 +914,8 @@ function create_autologin_moodle_example_link($url){
 
 	$url=str_replace("oezeps.at/moodle","oezeps.at/moodle/blocks/exaport/epopal.php?url=",$url);
 	$url=str_replace("digikomp.at","digikomp.at/blocks/exaport/epopal.php?url=",$url);
-	$url=str_replace("www2.edumoodle.at/epop","www2.edumoodle.at/epop/blocks/exaport/epopal.php?url=",$url);
+	$url=str_replace("www2.edumoodle.at/epop","www2.lernplattform.schule.at/epop/blocks/exaport/epopal.php?url=",$url);
+	$url=str_replace("www2.lernplattform.schule.at/epop","www2.lernplattform.schule.at/epop/blocks/exaport/epopal.php?url=",$url);
 
 	return $url;
 }

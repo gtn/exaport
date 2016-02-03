@@ -30,7 +30,7 @@ if ($action=="login"){
 				$validiert=false;
 			}
 		}else{
-			$validiert=true;//alte version bei der die passwörter verschlüsselt geschickt werden
+			$validiert=true;//alte version bei der die passwï¿½r verschlï¿½ geschickt werden
 		}
 		
 		if ($validiert==true){
@@ -159,7 +159,7 @@ if ($action=="login"){
 		$subject_id = optional_param('subject_id', '0', PARAM_INT);
 		//$subject_id = optional_param('subject_id', ' ', PARAM_INT);
 		
-		//die kompetenzen werden nach subject gruppiert angezeigt, daher nur diese gruppe löschen
+		//die kompetenzen werden nach subject gruppiert angezeigt, daher nur diese gruppe lï¿½en
 		$sql="SELECT descr.id FROM {block_exacompsubjects} subj 
 		INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 		INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
@@ -516,8 +516,8 @@ else if ($action=="get_items_for_view"){
 				$itemrs=$DB->get_record("block_exaportitem",array("id"=>$itemid));
 				if (!empty($itemrs)){
 					/* 
-					//auch özeps items können nicht aktualisiert werden, die müssen gelöscht werden, ab 31.5.13
-					if ($itemrs->isoez==1){ //normale items können files nicht aktualisiert werden, da muss das ganze item gelöscht werden
+					//auch ï¿½s items kï¿½n nicht aktualisiert werden, die mï¿½gelï¿½t werden, ab 31.5.13
+					if ($itemrs->isoez==1){ //normale items kï¿½n files nicht aktualisiert werden, da muss das ganze item gelï¿½t werden
 						$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
 						WHERE i.attachment<>0 AND i.id=?";
 						$res = $DB->get_records_sql($sql,array($itemid));
@@ -570,7 +570,7 @@ else if ($action=="get_items_for_view"){
 			//only update picture
 			$new->timemodified = time();
 		}else{
-			if ($itemrs->isoez!=1){ //wenn neues item, özeps items können eh nicht neu sein
+			if ($itemrs->isoez!=1){ //wenn neues item, ï¿½s items kï¿½n eh nicht neu sein
 				$new->userid = $user->id;
 				//$new->categoryid = $category;
 				$new->name = $title;		
@@ -802,7 +802,7 @@ else if ($action=="get_items_for_view"){
 					           	//block_exaport_save_competences($competences,$new,$user->id,$new->name);
 					          }else{
 					          	block_exaport_delete_competences($itemid,$user->id);
-					          	//wenn text oder link, dann beispiel gelöst, wenn type file ist datei dabei, auch gelöst
+					          	//wenn text oder link, dann beispiel gelï¿½ wenn type file ist datei dabei, auch gelï¿½
 					          	if (!empty($new->intro) || !empty($new->url) || $new->type=="file"){
 						          	$competencesoez=block_exaport_get_oezcompetencies($itemrs->exampid);
 						           	block_exaport_save_competences($competencesoez,$new,$user->id,$itemrs->name);
@@ -914,7 +914,8 @@ function create_autologin_moodle_example_link($url){
 
 	$url=str_replace("oezeps.at/moodle","oezeps.at/moodle/blocks/exaport/epopal.php?url=",$url);
 	$url=str_replace("digikomp.at","digikomp.at/blocks/exaport/epopal.php?url=",$url);
-	$url=str_replace("www2.edumoodle.at/epop","www2.edumoodle.at/epop/blocks/exaport/epopal.php?url=",$url);
+	$url=str_replace("www2.edumoodle.at/epop","www2.lernplattform.schule.at/epop/blocks/exaport/epopal.php?url=",$url);
+	$url=str_replace("www2.lernplattform.schule.at/epop","www2.lernplattform.schule.at/epop/blocks/exaport/epopal.php?url=",$url);
 
 	return $url;
 }
@@ -1062,14 +1063,14 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 					//$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'" isoez="'.$item->isoez.'" url="'.$item->attachment.'"></item>';
 				//}else{
 				
-				/*itemauswahl für view: nur gelöste aufgaben/items anzeigen*/
+				/*itemauswahl fï¿½w: nur gelï¿½ aufgaben/items anzeigen*/
 				if ($view_id>0){
 					if($item->attachment!="" || $item->intro!="" || $item->url!="") $showitem=true;
 					else $showitem=false;
 				}else{
 					$showitem=true;
 				}
-				/*itemauswahl für view ende*/
+				/*itemauswahl fï¿½w ende*/
 				
 				if($showitem==true){
 					if(empty($item->parentid) || $item->parentid==0 || block_exaport_parent_is_solved($item->parentid,$item->userid)){
@@ -1196,8 +1197,7 @@ function block_exaport_numtobool($wert){
 }
 function kuerzen($wert,$laenge){
 	if (strlen($wert)>$laenge){
-		$wert = substr($wert, 0,$laenge ); // gibt "abcd" zurück 
-	}
+		$wert = substr($wert, 0,$laenge ); // gibt "abcd" zurï¿½	}
 	return $wert;
 }
 
@@ -1366,7 +1366,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		//exacomp: timestamp hinterlegen, wann update
 		//nur wenn neue daten, dann update
 		//zuerst export_cate in array schreiben mit stid#subjid#topid, um abfragen zu sparen
-		//dann neue daten durchlaufen, wenn neu dann insert, wenn vorhanden dann title und parentid prüfen und bei bedarf update, für löschen merker machen
+		//dann neue daten durchlaufen, wenn neu dann insert, wenn vorhanden dann title und parentid prï¿½nd bei bedarf update, fï¿½chen merker machen
 		//echo $userid;die;
 		if ($cats = $DB->get_records("block_exaportcate", array("userid"=>$userid))){
 			

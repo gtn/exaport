@@ -38,6 +38,8 @@ if (block_exaport_check_competence_interaction()){
 
 require_once __DIR__.'/common.php';
 
+use block_exaport\globals as g;
+
 /*** FILE FUNCTIONS **********************************************************************/
 
 function block_exaport_get_item_file($item) {
@@ -636,60 +638,84 @@ function block_exaport_build_comp_tree($type, $item_or_resume) {
 	}
 
 	if ($forresume) {
-		$output = '<form id="treeform" method="post" action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$resume->courseid.'&id='.$resume->id.'&sesskey='.sesskey().'#'.$type.'">';
+		$content = '<form id="treeform" method="post" action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$resume->courseid.'&id='.$resume->id.'&sesskey='.sesskey().'#'.$type.'">';
 	} else {
-		$output = '<form id="treeform">';
+		$content = '<form id="treeform">';
 	}
 
 	$print_tree = function($items, $level = 0) use (&$print_tree, $forresume, $active_descriptors) {
 		if (!$items) return '';
 
-		$output = '';
+		$content = '';
 		if ($level == 0) {
-			$output .= '<ul id="comptree" class="treeview">';
+			$content .= '<ul id="comptree" class="treeview">';
 		} else {
-			$output .= '<ul>';
+			$content .= '<ul>';
 		}
 
 		foreach ($items as $item) {
-			if ($item->type == 'item' && in_array($item->id, $active_descriptors)) {
+			if ($item instanceof \block_exacomp\descriptor && in_array($item->id, $active_descriptors)) {
 				$checked = 'checked="checked"';
 			} else {
 				$checked = '';
 			}
 
-			$output .= '<li>';
-			if ($item->type == 'item') {
-				$output .= '<input type="checkbox" name="desc' . ($forresume ? '[]' : '') . '" ' . $checked . ' value="' . $item->id . '">';
+			$content .= '<li>';
+			if ($item instanceof \block_exacomp\descriptor) {
+				$content .= '<input type="checkbox" name="desc' . ($forresume ? '[]' : '') . '" ' . $checked . ' value="' . $item->id . '">';
 			}
-			$output .= $item->title.$print_tree($item->subs, $level+1).'</li>';
+			$content .=
+				$item->title.
+				($item->achieved ? ' '.g::$OUTPUT->pix_icon("i/badge", block_exaport\trans(['de:Erreichte Kompetenz', 'en:Achieved Competency'])) : '').
+				$print_tree($item->get_subs(), $level+1).
+				'</li>';
 		}
 
-		$output .= '</ul>';
+		$content .= '</ul>';
 
-		return $output;
+		return $content;
 	};
 
-	$compTree = \block_exacomp\api::get_comp_tree_for_exastud($USER->id, $forresume ? 'resume' : 'item');
+	$compTree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
 
-	if (!$compTree) {
-		$output .= '<div><h4 style="text-align:center; padding: 40px;">'.block_exaport\trans(['de:Du hast noch keine Kompetenzen erworben', "en:You haven't achieved any competencies yet"]).'</h4></div>';
-	} else {
-		$output .= $print_tree($compTree);
+	// no filtering
+	/*
+	if ($compTree && $forresume) {
+		$filter_tree = function($item) use (&$filter_tree, $forresume, $active_descriptors) {
+			$item->set_subs(array_filter($item->get_subs(), $filter_tree));
+
+			if ($item instanceof \block_exacomp\descriptor) {
+				// achieved, or children achieved
+				return ($item->get_subs() || $item->achieved);
+			} else {
+				return !!$item->get_subs();
+			}
+		};
+		$compTree = array_filter($compTree, $filter_tree);
 	}
+	*/
+
+	/*
+	if (!$compTree) {
+		$content .= '<div><h4 style="text-align:center; padding: 40px;">'.block_exaport\trans(['de:Eine Kurse hat leider keine Kompetenzen für den Kurs aktiviert', "en:"]).'</h4></div>';
+	} else {
+		$content .= $print_tree($compTree);
+	}
+	*/
+	$content .= $print_tree($compTree);
 
 	if ($forresume) {
-		$output .= '<input type="hidden" value="edit" name="action">';
-		$output .= '<input type="hidden" value="'.$type.'" name="type">';
-		$output .= '<input type="hidden" value="'.sesskey().'" name="sesskey">';
-		$output .= '<input type="submit" id="id_submitbutton" type="submit" value="'.get_string('savechanges').'" name="submitbutton">';
-		$output .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" value="'.get_string('cancel').'" name="cancel">';
+		$content .= '<input type="hidden" value="edit" name="action">';
+		$content .= '<input type="hidden" value="'.$type.'" name="type">';
+		$content .= '<input type="hidden" value="'.sesskey().'" name="sesskey">';
+		$content .= '<input type="submit" id="id_submitbutton" type="submit" value="'.get_string('savechanges').'" name="submitbutton">';
+		$content .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" value="'.get_string('cancel').'" name="cancel">';
 	} else {
-		$output .= '<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport.colorbox.close();">';
+		$content .= '<input type="button" id="id_submitbutton2" value="'.get_string('savechanges').'" name="savecompetencesbutton" onClick="jQueryExaport.colorbox.close();">';
 	}
-	$output .= '</form>';
+	$content .= '</form>';
 
-	return $output;
+	return $content;
 }
 function block_exaport_assignmentversion(){
 	global $DB;

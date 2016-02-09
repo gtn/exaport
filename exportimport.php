@@ -54,6 +54,10 @@ if (has_capability('block/exaport:export', $context)) {
 }
 
 if (has_capability('block/exaport:export', $context)) {
+	echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/export.png\" height=\"16\" width=\"16\" alt='".get_string("export_directory", "block_exaport")."' /> <a title=\"" . get_string("export_directory","block_exaport") . "\" href=\"{$CFG->wwwroot}/blocks/exaport/export_directory.php?courseid=".$courseid."\">".get_string("export_directory","block_exaport")."</a></p>";
+}
+
+if (has_capability('block/exaport:export', $context)) {
 	echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='".get_string("import", "block_exaport")."' /> <a title=\"" . get_string("import","block_exaport") . "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_file.php?courseid=".$courseid."\">".get_string("import","block_exaport")."</a></p>";
 }
 

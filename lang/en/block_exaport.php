@@ -247,6 +247,8 @@ $string['export'] = 'Export SCORM-File';
 $string['exportepx'] = 'Export EPX-File';
 $string['createepxexport'] = 'Create EPX-File';
 $string['exportviewselect'] = 'To export all items of a specific view, please select it here';
+$string['export_directory'] = 'Export Directory-structure';
+$string['createexport_directory'] = 'Create Directory-structure';
 
 // 
 $string['type'] = 'Type';

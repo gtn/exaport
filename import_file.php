@@ -381,6 +381,7 @@ function block_exaport_clean_text($text) {
 }
 
 function block_exaport_clean_path($text) {
+	$text = html_entity_decode($text);
 	return clean_param($text, PARAM_PATH);
 }
 	   
@@ -425,7 +426,6 @@ function insert_entry($unzip_dir, $url, $title, $category, $course, &$xml=NULL, 
 				(($endDesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startDesc)) !== false)) {
 			$linkedFileName = block_exaport_clean_path(substr($content, $startUrl, $endUrl - $startUrl));
 			$linkedFilePath = dirname($filePath) . '/' . $linkedFileName;
-		
 			if (is_file($linkedFilePath)) {
 				$new = new stdClass();
 				$new->userid = $USER->id;

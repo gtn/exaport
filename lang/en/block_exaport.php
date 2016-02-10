@@ -557,6 +557,8 @@ $string['category'] = 'Category';
 $string['category_up'] = 'back to Parent Category';
 $string['supported'] = 'supported by';
 $string['developed'] = 'developed by';
+$string['myfilearea'] = 'My file area';
+
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';
 $string['i_shared'] = 'I shared an eportfolio view with you';

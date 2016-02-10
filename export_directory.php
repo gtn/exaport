@@ -159,6 +159,27 @@ function export_file_area_name() {
 	return "exaport/temp/export/{$USER->id}";
 }
 
+function get_htmlfile_name_path($exportpath, $export_dir, $itemname) {
+	$filename = clean_param($itemname, PARAM_ALPHANUM);
+	$ext = ".html";
+	$i = 0;
+	if ($filename == "") {
+		$filepath = $export_dir . $filename . $i . $ext;
+		$resfilename = $filename . $i . $ext;
+	} else {
+		$filepath = $export_dir . $filename . $ext;
+		$resfilename = $filename . $ext;
+	};
+	if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
+		do {
+			$i++;
+			$filepath = $export_dir . $filename . $i . $ext;
+			$resfilename = $filename . $i . $ext;
+		} while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
+	};
+	return array($resfilename, $filepath);
+}
+
 function add_comments($table, $bookmarkid) {
 	global $DB;
 
@@ -246,8 +267,26 @@ function get_category_files($categoryid, $viewid=null) {
 function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath, $export_dir, &$identifier, &$ridentifier, $viewid, &$itemscomp) {
 	global $USER, $CFG, $COURSE, $DB;
 
+	// index file for category
+	$indexfilecontent = '';
+	$indexfilecontent .= createHTMLHeader(spch($name));
+	$indexfilecontent .= '<body>' . "\n";
+	$indexfilecontent .= '<h1>'.get_string("current_category", "block_exaport").': '.spch($name).'</h1>' . "\n";
+	// subcategory links
+	$cats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$id'", null, "name ASC");
+	if ($cats) {
+		$indexfilecontent .= '<h2>'.get_string("categories", "block_exaport").'</h2>';
+		$indexfilecontent .= '<ul>';
+		foreach ($cats as $cat) {
+			$subdirName = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $cat->name);
+			$subdirName = mb_ereg_replace("([\.]{2,})", '', $subdirName);
+			$indexfilecontent .= '<li><a href="'.$subdirName.'/index.html">'.$cat->name.'</a></li>';
+		};
+		$indexfilecontent .= '</ul>';
+	};
+	
 	$bookmarks = get_category_items($id, $viewid, 'link');
-
+	
 	$hasItems = false;
 
 	if ($bookmarks) {
@@ -255,9 +294,9 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		foreach ($bookmarks as $bookmark) {		
 			if(block_exaport_check_competence_interaction()){
 				//begin
-				$compids = block_exaport_get_active_compids($item);
+				$compids = block_exaport_get_active_compids($bookmark);
 
-				if($compids){
+				if($compids){									
 					$competences = "";
 					$competencesids = array();
 					foreach($compids as $compid){
@@ -282,13 +321,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			unset($filename);
 
 			$filecontent = '';
-			$filecontent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-			$filecontent .= '<html xmlns="http://www.w3.org/1999/xhtml">' . "\n";
-			$filecontent .= '<head>' . "\n";
-			$filecontent .= '  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' . "\n";
-			$filecontent .= '  <title>' . spch(format_string($bookmark->name)) . '</title>' . "\n";
-			$filecontent .= '<!-- ' . get_string("exportcomment", "block_exaport") . ' -->';
-			$filecontent .= '</head>' . "\n";
+			$filecontent = createHTMLHeader(spch(format_string($bookmark->name)));
 			$filecontent .= '<body>' . "\n";
 			$filecontent .= '  <h1 id="header">' . spch(format_string($bookmark->name)) . '</h1>' . "\n";
 			$filecontent .= '  <div id="url"><a href="' . spch($bookmark->url) . '"><!--###BOOKMARK_EXT_URL###-->' . spch($bookmark->url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
@@ -298,23 +331,30 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
-			$filename = clean_param($bookmark->name, PARAM_ALPHANUM);
-			$ext = ".html";
-			$i = 0;
-			if ($filename == "")
-				$filepath = $export_dir . $filename . $i . $ext;
-			else
-				$filepath = $export_dir . $filename . $ext;
-			if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
-				do {
-					$i++;
-					$filepath = $export_dir . $filename . $i . $ext;
-				} while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
-			}
+			// $filename = clean_param($bookmark->name, PARAM_ALPHANUM);
+			// $ext = ".html";
+			// $i = 0;
+			// if ($filename == "") {
+				// $filepath = $export_dir . $filename . $i . $ext;
+				// $resfilename = $filename . $i . $ext;
+			// } else {
+				// $filepath = $export_dir . $filename . $ext;
+				// $resfilename = $filename . $ext;
+			// };
+			// if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
+				// do {
+					// $i++;
+					// $filepath = $export_dir . $filename . $i . $ext;
+					// $resfilename = $filename . $i . $ext;
+				// } while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
+			// }
+			list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $export_dir, $bookmark->name);
 
 			file_put_contents($exportpath . $filepath, $filecontent);
 			create_ressource($resources, 'RES-' . $ridentifier, $filepath);
 			create_item($xmlElement, 'ITEM-' . $identifier, $bookmark->name, 'RES-' . $ridentifier, $bookmark->id);
+			
+			$indexfileItems .= '<li><a href="'.$resfilename.'">'.$bookmark->name.'</a></li>';			
 		
 			$identifier++;
 			$ridentifier++;
@@ -329,7 +369,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 
 		foreach ($files as $file) {
 			if(block_exaport_check_competence_interaction()){
-				$compids = block_exaport_get_active_compids($item);
+				$compids = block_exaport_get_active_compids($file);
 			
 				if($compids){
 					$competences = "";
@@ -367,13 +407,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			$fsFile->copy_content_to($exportpath . $export_dir . $content_filename);
 
 			$filecontent = '';
-			$filecontent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-			$filecontent .= '<html xmlns="http://www.w3.org/1999/xhtml">' . "\n";
-			$filecontent .= '<head>' . "\n";
-			$filecontent .= '  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' . "\n";
-			$filecontent .= '  <title>' . spch($file->name) . '</title>' . "\n";
-			$filecontent .= '<!-- ' . get_string("exportcomment", "block_exaport") . ' -->';
-			$filecontent .= '</head>' . "\n";
+			$filecontent = createHTMLHeader(spch($file->name));
 			$filecontent .= '<body>' . "\n";
 			$filecontent .= '  <h1 id="header">' . spch($file->name) . '</h1>' . "\n";
 			$filecontent .= '  <div id="url"><a href="' . spch($content_filename) . '"><!--###BOOKMARK_FILE_URL###-->' . spch($content_filename) . '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
@@ -383,22 +417,25 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
    			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
-			$filename = clean_param($file->name, PARAM_ALPHANUM);
-			$ext = ".html";
-			$i = 0;
-			if ($filename == "")
-				$filepath = $export_dir . $filename . $i . $ext;
-			else
-				$filepath = $export_dir . $filename . $ext;
-			if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
-				do {
-					$i++;
-					$filepath = $export_dir . $filename . $i . $ext;
-				} while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
-			}
+			// $filename = clean_param($file->name, PARAM_ALPHANUM);
+			// $ext = ".html";
+			// $i = 0;
+			// if ($filename == "")
+				// $filepath = $export_dir . $filename . $i . $ext;
+			// else
+				// $filepath = $export_dir . $filename . $ext;
+			// if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
+				// do {
+					// $i++;
+					// $filepath = $export_dir . $filename . $i . $ext;
+				// } while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
+			// }
+			list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $export_dir, $file->name);
 			file_put_contents($exportpath . $filepath, $filecontent);
 			create_ressource($resources, 'RES-' . $ridentifier, $filepath);
 			create_item($xmlElement, 'ITEM-' . $identifier, $file->name, 'RES-' . $ridentifier, $file->id);
+			
+			$indexfileItems .= '<li><a href="'.$resfilename.'">'.$file->name.'</a></li>';			
 			
 			$identifier++;
 			$ridentifier++;
@@ -411,7 +448,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		$hasItems = true;
 		foreach ($notes as $note) {
 			if(block_exaport_check_competence_interaction()){
-				$compids = block_exaport_get_active_compids($item);
+				$compids = block_exaport_get_active_compids($note);
 
 				if($compids){
 					$competences = "";
@@ -437,13 +474,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			unset($filename);
 
 			$filecontent = '';
-			$filecontent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-			$filecontent .= '<html xmlns="http://www.w3.org/1999/xhtml">' . "\n";
-			$filecontent .= '<head>' . "\n";
-			$filecontent .= '  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' . "\n";
-			$filecontent .= '  <title>' . spch($note->name) . '</title>' . "\n";
-			$filecontent .= '<!-- ' . get_string("exportcomment", "block_exaport") . ' -->';
-			$filecontent .= '</head>' . "\n";
+			$filecontent .= createHTMLHeader(spch($note->name));
 			$filecontent .= '<body>' . "\n";
 			$filecontent .= '  <h1 id="header">' . spch($note->name) . '</h1>' . "\n";
 			$filecontent .= '  <div id="description"><!--###BOOKMARK_NOTE_DESC###-->' . spch_text($note->intro) . '<!--###BOOKMARK_NOTE_DESC###--></div>' . "\n";
@@ -452,31 +483,55 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
-			$filename = clean_param($note->name, PARAM_ALPHANUM);
-			$ext = ".html";
-			$i = 0;
-			if ($filename == "")
-				$filepath = $export_dir . $filename . $i . $ext;
-			else
-				$filepath = $export_dir . $filename . $ext;
-			if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
-				do {
-					$i++;
-					$filepath = $export_dir . $filename . $i . $ext;
-				} while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
-			}
+			// $filename = clean_param($note->name, PARAM_ALPHANUM);
+			// $ext = ".html";
+			// $i = 0;
+			// if ($filename == "")
+				// $filepath = $export_dir . $filename . $i . $ext;
+			// else
+				// $filepath = $export_dir . $filename . $ext;
+			// if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
+				// do {
+					// $i++;
+					// $filepath = $export_dir . $filename . $i . $ext;
+				// } while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
+			// }
+			list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $export_dir, $note->name);
 			file_put_contents($exportpath . $filepath, $filecontent);
 			create_ressource($resources, 'RES-' . $ridentifier, $filepath);
 			create_item($xmlElement, 'ITEM-' . $identifier, $note->name, 'RES-' . $ridentifier, $note->id);
+			
+			$indexfileItems .= '<li><a href="'.$resfilename.'">'.$note->name.'</a></li>';			
 			
 			$identifier++;
 			$ridentifier++;
 		}
 	}
+	if ($hasItems) {
+		$indexfilecontent .= '<h2>'.get_string("listofartefacts", "block_exaport").'</h2>';
+		$indexfilecontent .= '<ul>';
+		$indexfilecontent .= $indexfileItems;
+		$indexfilecontent .= '</ul>';
+	};
+	
+	$indexfilecontent .= '</body>' . "\n";
+	$indexfilecontent .= '</html>' . "\n";
+	file_put_contents($exportpath . $export_dir . 'index.html', $indexfilecontent);
 
 	return $hasItems;
 }
 
+
+function createHTMLHeader($title) {
+	$filecontent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+	$filecontent .= '<html xmlns="http://www.w3.org/1999/xhtml">' . "\n";
+	$filecontent .= '<head>' . "\n";
+	$filecontent .= '  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' . "\n";
+	$filecontent .= '  <title>' . $title . '</title>' . "\n";
+	$filecontent .= '<!-- ' . get_string("exportcomment", "block_exaport") . ' -->';
+	$filecontent .= '</head>' . "\n";
+	return $filecontent;
+}
 
 function createXMLcomps($itemscomp, $exportdir){
 global $USER;
@@ -615,34 +670,18 @@ if ($confirm) {
 	}
 
 	$filecontent = '';
-	$filecontent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-	$filecontent .= '<html xmlns="http://www.w3.org/1999/xhtml">' . "\n";
-	$filecontent .= '<head>' . "\n";
-	$filecontent .= '  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' . "\n";
-	$filecontent .= '  <title>' . spch(fullname($USER, $USER->id)) . '</title>' . "\n";
-	$filecontent .= '<!-- ' . get_string("exportcomment", "block_exaport") . ' -->';
-	$filecontent .= '</head>' . "\n";
+	$filecontent .= createHTMLHeader(spch(fullname($USER, $USER->id)));
 	$filecontent .= '<body>' . "\n";
 	$filecontent .= '  <h1 id="header">' . spch(fullname($USER, $USER->id)) . '</h1>' . "\n";
 	$filecontent .= '  <div id="description"><!--###BOOKMARK_PERSONAL_DESC###-->' . spch_text($description) . '<!--###BOOKMARK_PERSONAL_DESC###--></div>' . "\n";
 	$filecontent .= '</body>' . "\n";
 	$filecontent .= '</html>' . "\n";
-
-	$filename = clean_param(fullname($USER, $USER->id), PARAM_ALPHANUM);
-	$ext = ".html";
-	$i = 0;
-	if ($filename == "")
-		$filepath = 'data/' . $filename . $i . $ext;
-	else
-		$filepath = 'data/' . $filename . $ext;
-	if (is_file($exportdir . $filepath) || is_dir($exportdir . $filepath) || is_link($exportdir . $filepath)) {
-		do {
-			$i++;
-			$filepath = 'data/' . $filename . $i . $ext;
-		} while (is_file($exportdir . $filepath) || is_dir($exportdir . $filepath) || is_link($exportdir . $filepath));
-	}
+	
+	list ($profilefilename, $filepath) = get_htmlfile_name_path($exportdir, 'data/', fullname($USER, $USER->id));
+	$filepath_to_personal = $filepath;
 
 	file_put_contents($exportdir . $filepath, $filecontent);
+	
 	create_ressource($resources, 'RES-' . $ridentifier, $filepath);
 	create_item($desc_organization, 'ITEM-' . $identifier, fullname($USER, $USER->id), 'RES-' . $ridentifier);
 
@@ -669,6 +708,7 @@ if ($confirm) {
 	//save files, from personal information
 	$fs = get_file_storage();
 	$areafiles = $fs->get_area_files(context_user::instance($USER->id)->id,'block_exaport', 'personal_information');
+	$areafiles_exist = false;
 	foreach ($areafiles as $areafile){
 		if (!$areafile) continue;
 		
@@ -685,9 +725,30 @@ if ($confirm) {
 			}
 			
 			$areafile->copy_content_to($exportdir ."data/personal/". $content_filename);
+			$areafiles_exist = true;
 		}
 	
 	}
+	
+	// main index.html
+	$filecontent = '';
+	$filecontent .= createHTMLHeader(spch(fullname($USER, $USER->id)));
+	$filecontent .= '<body>' . "\n";
+	$filecontent .= '  <h1 id="header">' . spch(fullname($USER, $USER->id)) . '</h1>' . "\n";
+	$filecontent .= '  <div id="description"><!--###BOOKMARK_PERSONAL_DESC###-->' . spch_text($description) . '<!--###BOOKMARK_PERSONAL_DESC###--></div>' . "\n";
+	$filecontent .= '  <ul>' . "\n";
+	if (is_file($exportdir.$filepath_to_personal))
+		$filecontent .= '  <li><a href="'.$filepath_to_personal.'">' . get_string("explainpersonal", "block_exaport") . '</a></li>' . "\n";
+	if (is_file($exportdir.$categoriesSubdirName.'index.html'))
+		$filecontent .= '  <li><a href="'.$categoriesSubdirName.'index.html">' . get_string("bookmarks", "block_exaport") . '</a></li>' . "\n";
+	if ($areafiles_exist)
+		$filecontent .= '  <li><a href="data/personal/">' . get_string("myfilearea", "block_exaport") . '</a></li>' . "\n";	
+	$filecontent .= '  </ul>' . "\n";
+	$filecontent .= '</body>' . "\n";
+	$filecontent .= '</html>' . "\n";
+	
+	file_put_contents($exportdir . 'index.html', $filecontent);		
+	$sourcefiles[] = $exportdir . "index.html";
 	
 	//begin
 	createXMLcomps($itemscomp, $exportdir);

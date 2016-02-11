@@ -143,8 +143,6 @@ function get_category_items($categoryid, $viewid=null, $type=null) {
 				($type ? " AND i.type=?" : '') .
 				" AND i.categoryid = ?" .
 				" ORDER BY i.name desc";
-				
-		$conditions = array($viewid, $USER->id, $type, $categoryid);
 	}else{
 		$itemQuery = "SELECT i.*" .
 				" FROM {block_exaportitem} i" .
@@ -153,8 +151,13 @@ function get_category_items($categoryid, $viewid=null, $type=null) {
 		 		($type ? " AND i.type=?" : '') .
 				" AND i.categoryid =?" .
 				" ORDER BY i.name desc";
-		$conditions = array($viewid, $USER->id, $type,  $categoryid);
 	}
+	if ($viewid)
+		$conditions[] = $viewid;
+	$conditions[] = $USER->id;
+	if ($type)
+		$conditions[] = $type;
+	$conditions[] = $categoryid;
 	
 	return $DB->get_records_sql($itemQuery, $conditions);
 }
@@ -171,7 +174,6 @@ function get_category_files($categoryid, $viewid=null) {
 				" AND i.type='file'" .
 				" AND i.categoryid = ?" .
 				" ORDER BY i.name desc";
-		$conditions = array($viewid, $USER->id, $categoryid);
 	}
 	else{
 		$itemQuery = "select ".($viewid ? " vb.id as vbid," : "")."i.*" .
@@ -181,8 +183,11 @@ function get_category_files($categoryid, $viewid=null) {
 			" AND i.type='file'" .
 			" AND i.categoryid = ?" .
 			" ORDER BY i.name desc";
-		$conditions = array($viewid, $USER->id, $categoryid);
 	}
+	if ($viewid)
+		$conditions[] = $viewid;
+	$conditions[] = $USER->id;
+	$conditions[] = $categoryid;
 	return $DB->get_records_sql($itemQuery, $conditions);
 }
 
@@ -200,7 +205,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			// TODO: move this whole part into it's own function also for view_items.php etc.
 			if(block_exaport_check_competence_interaction()){
 				//begin
-				$compids = block_exaport_get_active_compids($item);
+				$compids = block_exaport_get_active_compids($bookmark);
 
 				if($compids){
 					$competences = "";
@@ -274,7 +279,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 
 		foreach ($files as $file) {
 			if(block_exaport_check_competence_interaction()){
-				$compids = block_exaport_get_active_compids($item);
+				$compids = block_exaport_get_active_compids($file);
 			
 				if($compids){
 					$competences = "";
@@ -356,7 +361,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		$hasItems = true;
 		foreach ($notes as $note) {
 			if(block_exaport_check_competence_interaction()){
-				$compids = block_exaport_get_active_compids($item);
+				$compids = block_exaport_get_active_compids($note);
 
 				if($compids){
 					$competences = "";
@@ -428,14 +433,18 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 	//$i = 0;
 	foreach ($owncats as $owncat) {
 		//unset($item);
-		$i++;
 		
-		$item = & $parsedDoc->createElement('item');
-		$item->attribute('identifier', sprintf('B%04d', $i));
-		$item->attribute('isvisible', 'true');
-		$itemtitle = & $item->createChild('title');
-		$itemtitle->text($owncat->name);
-
+		if ($owncat->id == 0) {
+			// ignore root virtual category
+			$item = $organization;
+		} else {
+			$i++;
+			$item = & $parsedDoc->createElement('item');
+			$item->attribute('identifier', sprintf('B%04d', $i));
+			$item->attribute('isvisible', 'true');
+			$itemtitle = & $item->createChild('title');
+			$itemtitle->text($owncat->name);
+		};
 		// get everything inside this category:
 		$mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, 'data/', $identifier, $ridentifier, $viewid, $itemscomp);
 
@@ -447,10 +456,12 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 
 		if ($mainNotEmpty) {
 			// if the main category is not empty, append it to the xml-file
-			$organization->appendChild($item);
-			$ridentifier++;
-			$identifier++;
-			$i++;
+			if ($owncat->id > 0) {
+				$organization->appendChild($item);
+				$ridentifier++;
+				$identifier++;
+				$i++;
+			};
 			$return = true;
 		}
 	}
@@ -617,7 +628,13 @@ if ($confirm) {
 
 	//echo '<div class="block_exaport_export">';
 	//echo "<h3>" . get_string("categories","block_exaport") . "</h3>";
-	$owncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid=0", null, "name ASC");
+	// $owncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid=0", null, "name ASC");
+	// virtual root category
+	$owncat = new stdClass();
+	$owncat->id = 0;
+	$owncat->name = 'Root';
+	$owncats = array();
+	$owncats[] = $owncat;
 	$i = 0;
 	
 	//begin

@@ -107,12 +107,12 @@ if ($fromform = $exteditform->get_data()) {
 										}
 										break;
 									case "PORTFOLIO": 
-					if(isset($organization["items"])){
-						if(isset($xml)){
-							import_structure($unzip_dir, $organization["items"], $course, 0, $xml);
-						} else import_structure($unzip_dir, $organization["items"], $course);
-										}
-					break;
+										if(isset($organization["items"])){
+											if(isset($xml)){
+												import_structure($unzip_dir, $organization["items"], $course, 0, $xml, 0);
+											} else import_structure($unzip_dir, $organization["items"], $course);
+															}
+										break;
 									default: import_files($unzip_dir, $organization["items"]);
 										break;
 								}
@@ -287,16 +287,18 @@ function import_user_description($file, $unzip_dir) {
 
 function import_structure($unzip_dir, $structures, $course, $i = 0, &$xml=NULL, $previd=NULL) {
 	global $USER, $COURSE, $DB;
-	foreach ($structures as $structure) {
+	foreach ($structures as $structure) {		
 		if (isset($structure["data"])) {
-			if (isset($structure["data"]["title"]) &&
-					isset($structure["data"]["url"]) &&
-					($previd != NULL)) {
-				if(isset($structure["data"]["id"])){
+			if (isset($structure["data"]["title"]) 
+					&& isset($structure["data"]["url"]) 
+					&& !isset($structure["items"])
+					//&& ($previd != NULL)) 
+					) {
+				if(isset($structure["data"]["id"])) {
 					insert_entry($unzip_dir, $structure["data"]["url"], $structure["data"]["title"], $previd, $course, $xml, $structure["data"]["id"]);
-				}else{
+				} else {
 					insert_entry($unzip_dir, $structure["data"]["url"], $structure["data"]["title"], $previd, $course);
-				}
+				};
 		   } else if (isset($structure["data"]["title"])) {
 				if (is_null($previd)) {
 					if ($DB->count_records_select("block_exaportcate", "name='" . block_exaport_clean_title($structure["data"]["title"]) . "' AND userid='$USER->id' AND pid=0") == 0) {
@@ -305,7 +307,6 @@ function import_structure($unzip_dir, $structures, $course, $i = 0, &$xml=NULL, 
 						$newentry->timemodified = time();
 						$newentry->course = $COURSE->id;
 						$newentry->userid = $USER->id;
-						//$newentry->pid = $previd;
 
 						if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
 							notify("Could not insert category!");

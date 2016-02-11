@@ -73,14 +73,18 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 			if (substr($newSubdir, -1) != "/")
 				$newSubdir .= "/";
 		};
-	
-		$i++;
-		$item = & $parsedDoc->createElement('item');
-		$item->attribute('identifier', sprintf('B%04d', $i));
-		$item->attribute('isvisible', 'true');
-		$itemtitle = & $item->createChild('title');
-		$itemtitle->text($owncat->name);
-
+		
+		if ($owncat->id == 0) {
+			// ignore root virtual category
+			$item = $organization;
+		} else {
+			$i++;
+			$item = & $parsedDoc->createElement('item');
+			$item->attribute('identifier', sprintf('B%04d', $i));
+			$item->attribute('isvisible', 'true');
+			$itemtitle = & $item->createChild('title');
+			$itemtitle->text($owncat->name);
+		};
 		// get everything inside this category:
 		$mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, $subdirname.$newSubdir, $identifier, $ridentifier, $viewid, $itemscomp);
 
@@ -93,10 +97,12 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 
 		if ($mainNotEmpty) {
 			// if the main category is not empty, append it to the xml-file
-			$organization->appendChild($item);
-			$ridentifier++;
-			$identifier++;
-			$i++;
+			if ($owncat->id > 0) {
+				$organization->appendChild($item);
+				$ridentifier++;
+				$identifier++;
+				$i++;
+			};
 			$return = true;
 		}
 	}
@@ -216,7 +222,6 @@ function get_category_items($categoryid, $viewid=null, $type=null) {
 				($type ? " AND i.type=?" : '') .
 				" AND i.categoryid = ?" .
 				" ORDER BY i.name desc";				
-		// $conditions = array($viewid, $USER->id, $type, $categoryid);
 	}else{
 		$itemQuery = "SELECT i.*" .
 				" FROM {block_exaportitem} i" .
@@ -331,23 +336,6 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
-			// $filename = clean_param($bookmark->name, PARAM_ALPHANUM);
-			// $ext = ".html";
-			// $i = 0;
-			// if ($filename == "") {
-				// $filepath = $export_dir . $filename . $i . $ext;
-				// $resfilename = $filename . $i . $ext;
-			// } else {
-				// $filepath = $export_dir . $filename . $ext;
-				// $resfilename = $filename . $ext;
-			// };
-			// if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
-				// do {
-					// $i++;
-					// $filepath = $export_dir . $filename . $i . $ext;
-					// $resfilename = $filename . $i . $ext;
-				// } while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
-			// }
 			list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $export_dir, $bookmark->name);
 
 			file_put_contents($exportpath . $filepath, $filecontent);
@@ -417,19 +405,6 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
    			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
-			// $filename = clean_param($file->name, PARAM_ALPHANUM);
-			// $ext = ".html";
-			// $i = 0;
-			// if ($filename == "")
-				// $filepath = $export_dir . $filename . $i . $ext;
-			// else
-				// $filepath = $export_dir . $filename . $ext;
-			// if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
-				// do {
-					// $i++;
-					// $filepath = $export_dir . $filename . $i . $ext;
-				// } while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
-			// }
 			list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $export_dir, $file->name);
 			file_put_contents($exportpath . $filepath, $filecontent);
 			create_ressource($resources, 'RES-' . $ridentifier, $filepath);
@@ -483,19 +458,6 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
-			// $filename = clean_param($note->name, PARAM_ALPHANUM);
-			// $ext = ".html";
-			// $i = 0;
-			// if ($filename == "")
-				// $filepath = $export_dir . $filename . $i . $ext;
-			// else
-				// $filepath = $export_dir . $filename . $ext;
-			// if (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath)) {
-				// do {
-					// $i++;
-					// $filepath = $export_dir . $filename . $i . $ext;
-				// } while (is_file($exportpath . $filepath) || is_dir($exportpath . $filepath) || is_link($exportpath . $filepath));
-			// }
 			list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $export_dir, $note->name);
 			file_put_contents($exportpath . $filepath, $filecontent);
 			create_ressource($resources, 'RES-' . $ridentifier, $filepath);
@@ -607,7 +569,7 @@ if ($confirm) {
 	$sourcefiles = array();
 	$sourcefiles[] = $export_categories_dir;
 	$sourcefiles[] = $export_data_dir;
-/*
+
 	// copy all necessary files:
 	copy("files/adlcp_rootv1p2.xsd", $exportdir . "adlcp_rootv1p2.xsd");
 	$sourcefiles[] = $exportdir . "adlcp_rootv1p2.xsd";
@@ -617,8 +579,6 @@ if ($confirm) {
 	$sourcefiles[] = $exportdir . "imscp_rootv1p1p2.xsd";
 	copy("files/imsmd_rootv1p2p1.xsd", $exportdir . "imsmd_rootv1p2p1.xsd");
 	$sourcefiles[] = $exportdir . "imsmd_rootv1p2p1.xsd";
-*/
-
 
 	$parsedDoc = new MiniXMLDoc();
 

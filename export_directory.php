@@ -56,7 +56,7 @@ function export_data_file_area_name() {
 }
 
 
-function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i, &$itemscomp, $subdirname){	
+function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i, &$itemscomp, $subdirname, $depth){	
 	global $DB, $USER;
 	$return = false;
 	
@@ -86,14 +86,14 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 			$itemtitle->text($owncat->name);
 		};
 		// get everything inside this category:
-		$mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, $subdirname.$newSubdir, $identifier, $ridentifier, $viewid, $itemscomp);
+		$mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, $subdirname.$newSubdir, $identifier, $ridentifier, $viewid, $itemscomp, $depth);
 
 		$innerowncats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$owncat->id'", null, "name ASC");
 		if ($innerowncats) {
-			$value = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i, $itemscomp, $subdirname.$newSubdir);
+			$value = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i, $itemscomp, $subdirname.$newSubdir, $depth+1);
 			if ($value) 
 				$mainNotEmpty = $value;
-		}
+		};
 
 		if ($mainNotEmpty) {
 			// if the main category is not empty, append it to the xml-file
@@ -269,13 +269,14 @@ function get_category_files($categoryid, $viewid=null) {
 	return $DB->get_records_sql($itemQuery, $conditions);
 }
 
-function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath, $export_dir, &$identifier, &$ridentifier, $viewid, &$itemscomp) {
+function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath, $export_dir, &$identifier, &$ridentifier, $viewid, &$itemscomp, $depth=0) {
 	global $USER, $CFG, $COURSE, $DB;
 
 	// index file for category
 	$indexfilecontent = '';
-	$indexfilecontent .= createHTMLHeader(spch($name));
+	$indexfilecontent .= createHTMLHeader(spch($name), $depth+1);
 	$indexfilecontent .= '<body>' . "\n";
+	$indexfilecontent .= '<div id="exa_ex">' . "\n";			
 	$indexfilecontent .= '<h1>'.get_string("current_category", "block_exaport").': '.spch($name).'</h1>' . "\n";
 	// subcategory links
 	$cats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$id'", null, "name ASC");
@@ -326,13 +327,15 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			unset($filename);
 
 			$filecontent = '';
-			$filecontent = createHTMLHeader(spch(format_string($bookmark->name)));
+			$filecontent = createHTMLHeader(spch(format_string($bookmark->name)), $depth+1);
 			$filecontent .= '<body>' . "\n";
+			$filecontent .= '<div id="exa_ex">' . "\n";			
 			$filecontent .= '  <h1 id="header">' . spch(format_string($bookmark->name)) . '</h1>' . "\n";
 			$filecontent .= '  <div id="url"><a href="' . spch($bookmark->url) . '"><!--###BOOKMARK_EXT_URL###-->' . spch($bookmark->url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
 			$filecontent .= '  <div id="description"><!--###BOOKMARK_EXT_DESC###-->' . spch_text($bookmark->intro) . '<!--###BOOKMARK_EXT_DESC###--></div>' . "\n";
 			$filecontent .= add_comments('block_exaportitemcomm', $bookmark->id);
 			if(isset($bookmark->competences)) $filecontent .= '<br /> <div id="competences">'.$bookmark->competences.'<div>';
+			$filecontent .= '</div>' . "\n";
 			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
@@ -395,13 +398,15 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			$fsFile->copy_content_to($exportpath . $export_dir . $content_filename);
 
 			$filecontent = '';
-			$filecontent = createHTMLHeader(spch($file->name));
+			$filecontent = createHTMLHeader(spch($file->name), $depth+1);
 			$filecontent .= '<body>' . "\n";
+			$filecontent .= '<div id="exa_ex">' . "\n";
 			$filecontent .= '  <h1 id="header">' . spch($file->name) . '</h1>' . "\n";
 			$filecontent .= '  <div id="url"><a href="' . spch($content_filename) . '"><!--###BOOKMARK_FILE_URL###-->' . spch($content_filename) . '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
 			$filecontent .= '  <div id="description"><!--###BOOKMARK_FILE_DESC###-->' . spch_text($file->intro) . '<!--###BOOKMARK_FILE_DESC###--></div>' . "\n";
 			$filecontent .= add_comments('block_exaportitemcomm', $file->id);
 			if(isset($file->competences)) $filecontent .= '<br /> <div id="competences">'.$file->competences.'<div>';
+			$filecontent .= '</div>' . "\n";
    			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
@@ -449,12 +454,14 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			unset($filename);
 
 			$filecontent = '';
-			$filecontent .= createHTMLHeader(spch($note->name));
+			$filecontent .= createHTMLHeader(spch($note->name), $depth+1);
 			$filecontent .= '<body>' . "\n";
+			$filecontent .= '<div id="exa_ex">' . "\n";			
 			$filecontent .= '  <h1 id="header">' . spch($note->name) . '</h1>' . "\n";
 			$filecontent .= '  <div id="description"><!--###BOOKMARK_NOTE_DESC###-->' . spch_text($note->intro) . '<!--###BOOKMARK_NOTE_DESC###--></div>' . "\n";
 			$filecontent .= add_comments('block_exaportitemcomm', $note->id);
 			if(isset($note->competences)) $filecontent .= '<br /> <div id="competences">'.$note->competences.'<div>';
+			$filecontent .= '</div>' . "\n";
 			$filecontent .= '</body>' . "\n";
 			$filecontent .= '</html>' . "\n";
 
@@ -475,7 +482,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		$indexfilecontent .= $indexfileItems;
 		$indexfilecontent .= '</ul>';
 	};
-	
+	$indexfilecontent .= '</div>' . "\n";
 	$indexfilecontent .= '</body>' . "\n";
 	$indexfilecontent .= '</html>' . "\n";
 	file_put_contents($exportpath . $export_dir . 'index.html', $indexfilecontent);
@@ -484,12 +491,16 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 }
 
 
-function createHTMLHeader($title) {
+function createHTMLHeader($title, $depthPath = 0) {
+	$depth = '';
+	for($i = 1; $i<=$depthPath; $i++) 
+		$depth .= '../';
 	$filecontent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
 	$filecontent .= '<html xmlns="http://www.w3.org/1999/xhtml">' . "\n";
 	$filecontent .= '<head>' . "\n";
 	$filecontent .= '  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' . "\n";
 	$filecontent .= '  <title>' . $title . '</title>' . "\n";
+	$filecontent .= '  <link href="'.$depth.'export_style.css" rel="stylesheet">' . "\n";	
 	$filecontent .= '<!-- ' . get_string("exportcomment", "block_exaport") . ' -->';
 	$filecontent .= '</head>' . "\n";
 	return $filecontent;
@@ -579,6 +590,8 @@ if ($confirm) {
 	$sourcefiles[] = $exportdir . "imscp_rootv1p1p2.xsd";
 	copy("files/imsmd_rootv1p2p1.xsd", $exportdir . "imsmd_rootv1p2p1.xsd");
 	$sourcefiles[] = $exportdir . "imsmd_rootv1p2p1.xsd";
+	copy("files/export_style.css", $exportdir . "export_style.css");
+	$sourcefiles[] = $exportdir . "export_style.css";
 
 	$parsedDoc = new MiniXMLDoc();
 
@@ -630,10 +643,12 @@ if ($confirm) {
 	}
 
 	$filecontent = '';
-	$filecontent .= createHTMLHeader(spch(fullname($USER, $USER->id)));
+	$filecontent .= createHTMLHeader(spch(fullname($USER, $USER->id)), 1);
 	$filecontent .= '<body>' . "\n";
+	$filecontent .= '	<div id="exa_ex">' . "\n";
 	$filecontent .= '  <h1 id="header">' . spch(fullname($USER, $USER->id)) . '</h1>' . "\n";
 	$filecontent .= '  <div id="description"><!--###BOOKMARK_PERSONAL_DESC###-->' . spch_text($description) . '<!--###BOOKMARK_PERSONAL_DESC###--></div>' . "\n";
+	$filecontent .= '</div>' . "\n";
 	$filecontent .= '</body>' . "\n";
 	$filecontent .= '</html>' . "\n";
 	
@@ -692,8 +707,9 @@ if ($confirm) {
 	
 	// main index.html
 	$filecontent = '';
-	$filecontent .= createHTMLHeader(spch(fullname($USER, $USER->id)));
+	$filecontent .= createHTMLHeader(spch(fullname($USER, $USER->id)), 0);
 	$filecontent .= '<body>' . "\n";
+	$filecontent .= '	<div id="exa_ex">' . "\n";
 	$filecontent .= '  <h1 id="header">' . spch(fullname($USER, $USER->id)) . '</h1>' . "\n";
 	$filecontent .= '  <div id="description"><!--###BOOKMARK_PERSONAL_DESC###-->' . spch_text($description) . '<!--###BOOKMARK_PERSONAL_DESC###--></div>' . "\n";
 	$filecontent .= '  <ul>' . "\n";
@@ -704,6 +720,7 @@ if ($confirm) {
 	if ($areafiles_exist)
 		$filecontent .= '  <li><a href="data/personal/">' . get_string("myfilearea", "block_exaport") . '</a></li>' . "\n";	
 	$filecontent .= '  </ul>' . "\n";
+	$filecontent .= '</div>' . "\n";
 	$filecontent .= '</body>' . "\n";
 	$filecontent .= '</html>' . "\n";
 	

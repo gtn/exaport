@@ -1,36 +1,26 @@
 <?php
-/***************************************************************
-*  Copyright notice
-*
-*  (c) 2006 exabis internet solutions <info@exabis.at>
-*  All rights reserved
-*
-*  Updated version 1.1
-*  Date: 2007/07/02
-*
-*  This script is part of the TYPO3 project. The TYPO3 project is
-*  free software; you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 2 of the License, or
-*  (at your option) any later version.
-*
-*  The GNU General Public License can be found at
-*  http://www.gnu.org/copyleft/gpl.html.
-*
-*  This script is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  This copyright notice MUST APPEAR in all copies of the script!
-***************************************************************/
+// This file is part of Exabis Eportfolio
+//
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
+//
+// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This script is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
+//
+// This copyright notice MUST APPEAR in all copies of the script!
 
 require_once $CFG->dirroot.'/mod/scorm/datamodels/scormlib.php';
 
 /**
  * SCORMParser: Parsing a SCORM File
- *
- * @author Matteo Savio <matteo.savio@exabis.com>
  */
 class SCORMParser {
 	var $error = false;
@@ -43,7 +33,6 @@ class SCORMParser {
 	/**
 	 * setError(): set the error message
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param msg The error-message
 	 */
 	function setError($msg) {
@@ -55,7 +44,6 @@ class SCORMParser {
 	 * setWarning(): set the warning message
 	 * even with a warning message the file can be parsed
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param msg The warning-message
 	 */
 	function setWarning($msg) {
@@ -66,7 +54,6 @@ class SCORMParser {
 	/**
 	 * isError(): check if there was an error at parsing
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @return boolean error
 	 */
 	function isError() {
@@ -76,7 +63,6 @@ class SCORMParser {
 	/**
 	 * isWarning(): check if there was a warning at parsing
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @return boolean warning
 	 */
 	function isWarning() {
@@ -86,7 +72,6 @@ class SCORMParser {
 	/**
 	 * getError(): returns the error string
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @return Error message
 	 */
 	function getError() {
@@ -96,7 +81,6 @@ class SCORMParser {
 	/**
 	 * getWarning(): returns the warning string
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @return Warning message
 	 */
 	function getWarning() {
@@ -106,7 +90,6 @@ class SCORMParser {
 	/**
 	 * parse(): Parses an SCORM-File
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param msg The location of the imsmanifest.xml
 	 * @return The page-tree
 	 */
@@ -153,7 +136,6 @@ class SCORMParser {
 	/**
 	 * combine(): Merges the organisation with the resources
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param organizations The organization tree
 	 * @param resources The resources tree
 	 * @return The combined tree
@@ -230,7 +212,6 @@ class SCORMParser {
 	/**
 	 * parse_manifest(): Parses the manifest-tag
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param element: The element MANIFEST and the subtree
 	 * @return The parsed tree
 	 */
@@ -272,7 +253,6 @@ class SCORMParser {
 	/**
 	 * getOrganizations(): Parses the three at the ORGANIZATIONS element
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param element: The element ORGIANIZATIONS and the subtree
 	 * @return The organization-tree
 	 */
@@ -315,7 +295,6 @@ class SCORMParser {
 	/**
 	 * recItemSearch(): Parses the ITEM and children (also ITEMs)
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param element: The element ITEM and the subtree
 	 * @return The items
 	 */
@@ -344,7 +323,6 @@ class SCORMParser {
 	 * getResources(): Parses the RESOURCES and children (also ITEMs)
 	 *				 XML:BASE (realative pathoffset) is not implemented yet.
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param element: The element RESOURCES and the subtree
 	 * @return The resources
 	 */
@@ -367,7 +345,6 @@ class SCORMParser {
 	/**
 	 * getResources(): Parses the RESOURCE-element
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param element: The element RESOURCE
 	 * @return The resource with dependencies
 	 */
@@ -402,7 +379,6 @@ class SCORMParser {
 	/**
 	 * getMetadata(): Parses the METADATA. Empty function, the Metadata of the SCORM-file is not needed yet.
 	 *
-	 * @author Matteo Savio <matteo.savio@exabis.com>
 	 * @param element: The element METADATA and subtree
 	 * @return NULL
 	 */

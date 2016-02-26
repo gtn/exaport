@@ -1,11 +1,21 @@
 <?php
-// This file is NOT a part of Moodle - http://moodle.org/
+// This file is part of Exabis Eportfolio
 //
-// This client for Moodle 2 is free software: you can redistribute it and/or modify
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
+//
+// Exabis Eportfolio is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
+// This script is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
+//
+// This copyright notice MUST APPEAR in all copies of the script!
 
 //$token = '6f8233ff407d082557f51006bd494489'; //flo
 $token = '41ec1df3194f653a072a68ac9241b537'; //michy

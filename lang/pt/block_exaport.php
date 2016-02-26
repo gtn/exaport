@@ -1,32 +1,25 @@
 <?php
-/***************************************************************
-*  Copyright notice
-*
-*  (c) 2006 exabis internet solutions <info@exabis.at>
-*  All rights reserved
-*
-*  You can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 2 of the License, or
-*  (at your option) any later version.
-*
-*  This module is based on the Collaborative Moodle Modules from
-*  NCSA Education Division (http://www.ncsa.uiuc.edu)
-*
-*  The GNU General Public License can be found at
-*  http://www.gnu.org/copyleft/gpl.html.
-*
-*  This script is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  This copyright notice MUST APPEAR in all copies of the script!
-***************************************************************/
+// This file is part of Exabis Eportfolio
+//
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
+//
+// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This script is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
+//
+// This copyright notice MUST APPEAR in all copies of the script!
 
 // Translation
 $string['translation:language'] = 'Portuguese';
-$string['translation:person'] = 'AntÛnio Soares';
+$string['translation:person'] = 'Ant√≥nio Soares';
 $string['translation:organisation'] = 'www.esec-arouca.pt';
 $string['translation:email'] = 'amspsoares@gmail.com';
 
@@ -72,7 +65,7 @@ $string['categoryedited'] = 'Categoria guardada.';
 $string['categorydeleted'] = 'Category apagada.';
 $string['date'] = 'Data';
 $string['dontincludeurl'] = 'Verifique esta caixa para desassociar o marcador ao URL (endere&ccedil;o).';
-$string['duplicatedurl'] = 'Este URL(endere&ccedil;o) j&aacute; est· marcado.';
+$string['duplicatedurl'] = 'Este URL(endere&ccedil;o) j&aacute; est√° marcado.';
 $string['editcategories'] = 'editar categorias';
 $string['explaining'] = 'O Portef&oacute;lio pode ser utilizado para guardar endere&ccedil;os Web, ficheiros, bem como anota&ccedil;&otilde;es que podem conter ideias ou coment&aacute;rios que o utilizador deseje colocar';
 $string['explaininglink'] = NULL;
@@ -87,11 +80,11 @@ $string['firstnameshared'] = 'Primeiro Nome';
 $string['go'] = 'Ir!';
 $string['hidesummary'] = '(esconder o resumo)';
 $string['managecategories'] = 'Gerir categorias';
-$string['mandatoryfields'] = 'S&atilde;o necess·rios o nome de campo, categoria e introdu&ccedil;&atilde;o. Por favor preencha-os.';
-$string['mandatoryfieldsforcat'] = 'O nome de campo &eacute; necess·rio. Por favor preencha-o.';
+$string['mandatoryfields'] = 'S&atilde;o necess√°rios o nome de campo, categoria e introdu&ccedil;&atilde;o. Por favor preencha-os.';
+$string['mandatoryfieldsforcat'] = 'O nome de campo &eacute; necess√°rio. Por favor preencha-o.';
 $string['mybookmarks'] = 'O meu portef&oacute;lio';
 $string['mybookmarkstitle'] = 'Adicione as suas liga&ccedil;&otilde;es aqui.';
-$string['mydialogues'] = 'Os meus di·logos';
+$string['mydialogues'] = 'Os meus di√°logos';
 $string['mymoodle'] = 'O Meu Moodle';
 $string['newlink'] = NULL;
 $string['newfile'] = 'Adicionar um novo ficheiro';
@@ -148,9 +141,9 @@ $string['bookmarkslinks'] = NULL;
 $string['bookmarksfiles'] = 'Ficheiros';
 $string['bookmarksnotes'] = 'Anota&ccedil;&otilde;es';
 $string['noguestpost'] = 'Os convidados (Guests) n&atilde;o podem aceder aqui!';
-$string['comments'] = 'Coment·rios';
-$string['addcomment'] = 'Adicionar coment·rio';
-$string['externcomment'] = 'Partilhar coment·rios no portef&oacute;lio externo.';
+$string['comments'] = 'Coment√°rios';
+$string['addcomment'] = 'Adicionar coment√°rio';
+$string['externcomment'] = 'Partilhar coment√°rios no portef&oacute;lio externo.';
 
 // Notes
 $string['deletenoteconfirm'] = 'Quer realmente apagar esta anota&ccedil;&atilde;o?';
@@ -158,9 +151,9 @@ $string['deletelinkconfirm'] = NULL;
 $string['deletefileconfirm'] = 'Quer realmente apagar este ficheiro?';
 
 // Different
-$string['couldninsertcomment'] = 'N&atilde;o foi poss&iacute;vel inserir o coment·rio!';
-$string['importedcommentsstart'] = 'Coment·rios importados:<br /><br />';
-$string['importedcommentsend'] = 'Fim de importa&ccedil;&atilde;o de coment·rios';
+$string['couldninsertcomment'] = 'N&atilde;o foi poss&iacute;vel inserir o coment√°rio!';
+$string['importedcommentsstart'] = 'Coment√°rios importados:<br /><br />';
+$string['importedcommentsend'] = 'Fim de importa&ccedil;&atilde;o de coment√°rios';
 $string['filetypenotdetected'] = 'O ficheiro do tipo $a->filename ($a->title) n&atilde;o pode ser detectado. O ficheiro n&atilde;o foi importado!';
 $string['linkedfilenotfound'] = 'O ficheiro do tipo $a->filename em  $a->url ($a->title) n&atilde;o foi encontrado. O ficheiro n&atilde;o foi importado!';
 $string['couldntinsert'] = 'N&atilde;o foi poss&agrave;vel inserir $a na base de dados';
@@ -170,14 +163,14 @@ $string['success'] = 'O ficheiro foi importado com sucesso';
 $string['couldntinsertcategory'] = 'N&atilde;o foi poss&agrave;vel inserir a categoria!';
 $string['couldntupdatecategory'] = 'N&atilde;o foi poss&agrave;vel actualizar a categoria!';
 $string['couldntextractscormfile'] = 'N&atilde;o foi poss&agrave;vel extrair o ficheiro SCORM!';
-$string['couldntcreatetempdir'] = 'N&atilde;o foi poss&agrave;vel criar uma directoria tempor·ria!';
+$string['couldntcreatetempdir'] = 'N&atilde;o foi poss&agrave;vel criar uma directoria tempor√°ria!';
 $string['scormhastobezip'] = 'O ficheiro SCORM tem de ser um ficheiro do tipo .zip!';
 $string['uploadfailed'] = 'O Upload falhou.';
 $string['couldntupdatedesc'] = 'N&atilde;o foi poss&agrave;vel actualizar a sua descri&ccedil;&atilde;o!';
 $string['couldntinsertdesc'] = 'N&atilde;o foi poss&agrave;vel inserir a sua descri&ccedil;&atilde;o!';
-$string['exportcomment'] = 'Este &eacute; um ficheiro exportado do Exabis E-Portfolio. Por favor n&atilde;o retire os coment·rios, uma vez que s&atilde;o necess·rios para a importa&ccedil;&atilde;o!';
-$string['comment'] = 'Coment·rio';
-$string['commentshouldnotbeempty'] = 'Deve introduzir um coment·rio.';
+$string['exportcomment'] = 'Este &eacute; um ficheiro exportado do Exabis E-Portfolio. Por favor n&atilde;o retire os coment√°rios, uma vez que s&atilde;o necess√°rios para a importa&ccedil;&atilde;o!';
+$string['comment'] = 'Coment√°rio';
+$string['commentshouldnotbeempty'] = 'Deve introduzir um coment√°rio.';
 $string['title'] = 'T&agrave;tulo';
 $string['titlenotemtpy'] = 'Deve introduzir um t&agrave;tulo.';
 $string['intro'] = 'Conte&uacute;do';
@@ -190,9 +183,9 @@ $string['deselectall'] = 'Desseleccionar todos';
 $string['internalaccess'] = 'Acesso interno';
 $string['externalaccess'] = 'Acesso externo';
 $string['loginasmode'] = 'N&atilde;o pode aceder aos portef&oacute; em modo de \'Login As\' (Entrar Como).';
-$string['badsessionkey'] = 'Chave de Sess&atilde;o Inv·lida';
-$string['invalidinstance'] = '&Eacute; uma inst‚ncia inv·lida';
-$string['invalidcourseid'] = '&Eacute; uma ID de curso inv·lido';
+$string['badsessionkey'] = 'Chave de Sess&atilde;o Inv√°lida';
+$string['invalidinstance'] = '&Eacute; uma inst√¢ncia inv√°lida';
+$string['invalidcourseid'] = '&Eacute; uma ID de curso inv√°lido';
 $string['wronglinkid'] = 'ID de liga&ccedil;&atilde;o errado';
 $string['incorrectlinksid'] = 'ID incorreto de liga&ccedil;&atilde;o &agrave; mensagem';
 $string['incorrectnoteid'] = 'ID de anota&ccedil;&atilde;o incorrecta';
@@ -203,13 +196,13 @@ $string['wrongfilepostid'] = 'ID de ficheiro incorrecto';
 $string['wrongnoteid'] = 'ID de anota&ccedil;&atilde;o incorrecta';
 $string['wrongnotepostid'] = 'ID de mensagem &agrave; anota&ccedil;&atilde;o incorrecta';
 $string['bookmarknotfound'] = 'Marcador n&atilde;o encontrado';
-$string['commentnotfound'] = 'Coment·rio n&atilde;o encontrado';
+$string['commentnotfound'] = 'Coment√°rio n&atilde;o encontrado';
 $string['updateposterror'] = 'Houve um erro na actualiza&ccedil;&atilde;o desta mensagem na base de dados';
 $string['deleteposterror'] = 'Ocorreu um erro ao tentar apagar esta mensagem';
 $string['addposterror'] = 'Houve um erro ao tentar adicionar esta mensagem &agrave; base de dados';
-$string['invalidassignmentid'] = 'ID de trabalho inv·lido';
+$string['invalidassignmentid'] = 'ID de trabalho inv√°lido';
 $string['invalidfileatthisassignment'] = 'O ficheiro n&atilde;o existe para esse trabalho!';
-$string['publishedportfolios'] = 'PortefÛlios publicados';
+$string['publishedportfolios'] = 'Portef√≥lios publicados';
 $string['viewcategories'] = 'gerir categorias';
 $string['updownarrow'] = 'seta para cima';
 

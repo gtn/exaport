@@ -613,7 +613,7 @@ function block_exaport_get_active_compids($item) {
 function block_exaport_get_comp_output($item) {
 	$compids = block_exaport_get_active_compids($item);
 }
-function block_exaport_build_comp_tree($type, $item_or_resume) {
+function block_exaport_build_comp_tree($type, $item_or_resume, $allowEdit = true) {
 	global $CFG, $USER;
 
 	if ($type == 'skillscomp' || $type == 'goalscomp') {
@@ -636,7 +636,7 @@ function block_exaport_build_comp_tree($type, $item_or_resume) {
 		$content = '<form id="treeform">';
 	}
 
-	$print_tree = function($items, $level = 0) use (&$print_tree, $forresume, $active_descriptors) {
+	$print_tree = function($items, $level = 0) use (&$print_tree, $forresume, $active_descriptors, $allowEdit) {
 		if (!$items) return '';
 
 		$content = '';
@@ -655,7 +655,7 @@ function block_exaport_build_comp_tree($type, $item_or_resume) {
 
 			$content .= '<li>';
 			if ($item instanceof \block_exacomp\descriptor) {
-				$content .= '<input type="checkbox" name="desc' . ($forresume ? '[]' : '') . '" ' . $checked . ' value="' . $item->id . '">';
+				$content .= '<input type="checkbox" name="desc' . ($forresume ? '[]' : '') . '" ' . $checked . ' value="' . $item->id . '" '.(!$allowEdit?'disabled="disabled"':'').'>';
 			}
 			$content .=
 				$item->title.

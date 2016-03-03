@@ -322,7 +322,7 @@ if ($exacomp_active) {
 		</a> | <a href="javascript:ddtreemenu.flatten('comptree', 'contact')"><?php echo get_string("contactcomps", "block_exaport") ?>
 		</a>
 
-		<?php echo block_exaport_build_comp_tree('item', $existing); ?>
+		<?php echo block_exaport_build_comp_tree('item', $existing, $allowEdit); ?>
 	</div>
 </div>
 

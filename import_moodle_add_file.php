@@ -96,6 +96,7 @@ if ($action == 'delete') {
         $optionsyes = array('id' => $id, 'action' => 'delete', 'confirm' => 1, 'sesskey' => sesskey(), 'courseid' => $courseid);
         $optionsno = array('userid' => $existing->userid, 'courseid' => $courseid);
         print_header("$SITE->shortname", $SITE->fullname);
+        echo block_exaport_wrapperdivstart();
         // ev. noch eintrag anzeigen!!!
         //blog_print_entry($existing);
         echo '<br />';
@@ -177,7 +178,7 @@ echo "</div>";
 
 $exteditform->set_data($post);
 $exteditform->display();
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 exit;
 
@@ -191,7 +192,7 @@ function do_edit($post, $blogeditform, $returnurl, $courseid) {
     $post->intro = $post->intro['text'];
     
     if (update_record('block_exaportitem', $post)) {
-        add_to_log(SITEID, 'bookmark', 'update', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
+        block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
     } else {
         print_error('updateposterror', 'block_exaport', $returnurl);
     }
@@ -234,9 +235,10 @@ function do_add($post, $blogeditform, $returnurl, $courseid, $checked_file) {
     if(block_exaport_check_competence_interaction()) {    
 
         //Kompetenzen checken und erneut speichern
-        $comps = $DB->get_records('block_exacompdescractiv_mm',array("activityid"=>$post->activityid,"activitytype"=>1));
+        //TODO Test if missing activitytype = 1 has influence
+        $comps = $DB->get_records('block_exacompcompactiv_mm',array("activityid"=>$post->activityid));
         foreach($comps as $comp) {
-            $DB->insert_record('block_exacompdescractiv_mm',array("activityid"=>$post->id, "activitytype"=>2000,"descrid"=>$comp->descrid,"activitytitle"=>$post->name,"coursetitle"=>$COURSE->shortname));
+            $DB->insert_record('block_exacompcompactiv_mm',array("activityid"=>$post->id, "eportfolioitem"=>1,"compid"=>$comp->descrid,"activitytitle"=>$post->name,"coursetitle"=>$COURSE->shortname));
         }
     }
 }
@@ -249,7 +251,7 @@ function do_delete($post, $returnurl, $courseid) {
 
     $status = $DB->delete_records('block_exaportitem', 'id', $post->id);
 
-    add_to_log(SITEID, 'blog', 'delete', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
+    block_exaport_add_to_log(SITEID, 'blog', 'delete', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
 
     if (!$status) {
         print_error('deleteposterror', 'block_exaport', $returnurl);

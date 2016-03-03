@@ -4,7 +4,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2006 exabis internet solutions <info@exabis.at>
+*  (c) 2014 exabis internet solutions <info@exabis.at>
 *  All rights reserved
 *
 *  You can redistribute it and/or modify
@@ -28,7 +28,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2014031700;
-$plugin->maturity  = MATURITY_BETA;
-$plugin->release  = "4.1";
-$plugin->requires = 2011033005.06;
+$plugin->version = 2015110900;
+$plugin->maturity  = MATURITY_STABLE;
+$plugin->requires  = 2014041100;
+$plugin->release = 'v4.3';
+$plugin->component = 'block_exaport';

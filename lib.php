@@ -125,6 +125,37 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 		} else {
 			return false;
 		}
+	} elseif ($filearea == 'category_icon') {
+		$filename = array_pop($args);
+		$category_id = array_pop($args);
+		// $filename = join('/', $args);
+		
+		// get file
+		$fs = get_file_storage();
+		$file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'category_icon', $category_id, '/', $filename);
+
+		// serve file
+		if ($file) {
+			send_stored_file($file);
+		} else {
+			return false;
+		}
+	} else if (in_array($filearea, array('resume_cover', 'resume_interests', 'resume_edu', 'resume_employ', 'resume_certif', 'resume_public', 'resume_mbrship')) ||
+		in_array($filearea, array('resume_goalspersonal', 'resume_goalsacademic', 'resume_goalscareers', 'resume_skillspersonal', 'resume_skillsacademic', 'resume_skillscareers')) || 
+		in_array($filearea, array('resume_editor_goalspersonal', 'resume_editor_goalsacademic', 'resume_editor_goalscareers', 'resume_editor_skillspersonal', 'resume_editor_skillsacademic', 'resume_editor_skillscareers'))) {
+		$filename = array_pop($args);		
+		$id = array_pop($args);
+		
+		// get file
+		$fs = get_file_storage();
+		$file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', $filearea, $id, '/', $filename);
+
+		// serve file
+		if ($file) {
+			send_stored_file($file);
+		} else {
+			return false;
+		}
 	} else {
 		die('wrong file area');
 	}

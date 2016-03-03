@@ -136,23 +136,23 @@ function get_category_items($categoryid, $viewid=null, $type=null) {
 
 	$conditions = array();
     if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$itemQuery = "select i.*" .
-    			" FROM {block_exaportitem} AS i" .
-    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
-    			" where i.userid = ?" .
-    			($type ? " and i.type=?" : '') .
-    			" and i.categoryid = ?" .
-    			" order by i.name desc";
+    	$itemQuery = "SELECT i.*" .
+    			" FROM {block_exaportitem} i" .
+    			($viewid ? " JOIN {block_exaportviewblock} vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+    			" WHERE i.userid = ?" .
+    			($type ? " AND i.type=?" : '') .
+    			" AND i.categoryid = ?" .
+    			" ORDER BY i.name desc";
     			
     	$conditions = array($viewid, $USER->id, $type, $categoryid);
     }else{
-    	$itemQuery = "select i.*" .
-    			" FROM {block_exaportitem} AS i" .
-        		($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
-        		" where i.userid = ?" .
-         		($type ? " and i.type=?" : '') .
-            	" and i.categoryid =?" .
-            	" order by i.name desc";
+    	$itemQuery = "SELECT i.*" .
+    			" FROM {block_exaportitem} i" .
+        		($viewid ? " JOIN {block_exaportviewblock} vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+        		" WHERE i.userid = ?" .
+         		($type ? " AND i.type=?" : '') .
+            	" AND i.categoryid =?" .
+            	" ORDER BY i.name desc";
         $conditions = array($viewid, $USER->id, $type,  $categoryid);
     }
     
@@ -164,23 +164,23 @@ function get_category_files($categoryid, $viewid=null) {
 
 	$conditions = array();
     if(strcmp($CFG->dbtype, "sqlsrv")==0){
-    	$itemQuery = "select i.*" .
-    			" FROM {block_exaportitem} AS i" .
-    			($viewid ? " JOIN {block_exaportviewblock} AS vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+    	$itemQuery = "select ".($viewid ? " vb.id as vbid," : "")." i.*" .
+    			" FROM {block_exaportitem} i" .
+    			($viewid ? " JOIN {block_exaportviewblock} vb ON cast(vb.type AS varchar(11))='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
     			" WHERE i.userid = ?" .
     			" AND i.type='file'" .
-    			" and i.categoryid = ?" .
-    			" order by i.name desc";
+    			" AND i.categoryid = ?" .
+    			" ORDER BY i.name desc";
     	$conditions = array($viewid, $USER->id, $categoryid);
     }
     else{
-    	$itemQuery = "select i.*" .
-            " FROM {block_exaportitem} AS i" .
-            ($viewid ? " JOIN {block_exaportviewblock} AS vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+    	$itemQuery = "select ".($viewid ? " vb.id as vbid," : "")."i.*" .
+            " FROM {block_exaportitem} i" .
+            ($viewid ? " JOIN {block_exaportviewblock} vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
             " WHERE i.userid = ?" .
             " AND i.type='file'" .
-            " and i.categoryid = ?" .
-            " order by i.name desc";
+            " AND i.categoryid = ?" .
+            " ORDER BY i.name desc";
         $conditions = array($viewid, $USER->id, $categoryid);
     }
     return $DB->get_records_sql($itemQuery, $conditions);
@@ -206,7 +206,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 					$competencesids = array();
 					foreach($array as $element){
 				
-						$conditions = array("id" => $element->descid);
+						$conditions = array("id" => $element->compid);
 						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 						if($competencesdb != null){
 							$competences .= $competencesdb->title.'<br />';
@@ -280,7 +280,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 					$competencesids = array();
 					foreach($array as $element){
 				
-						$conditions = array("id" => $element->descid);
+						$conditions = array("id" => $element->compid);
 						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 	
 						if($competencesdb != null){
@@ -363,7 +363,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 					$competencesids = array();
 					foreach($array as $element){
 				
-						$conditions = array("id" => $element->descid);
+						$conditions = array("id" => $element->compid);
 						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 	
 						if($competencesdb != null){
@@ -699,6 +699,7 @@ if ($confirm) {
     echo '</div>';
 
     echo $OUTPUT->box_end();
+    echo block_exaport_wrapperdivend();
     $OUTPUT->footer($course);
     exit;
 }
@@ -737,4 +738,5 @@ echo '</form>';
 echo '</div>';
 
 echo $OUTPUT->box_end();
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

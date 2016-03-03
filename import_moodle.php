@@ -115,5 +115,5 @@ if ($assignments) {
 } else {
     echo "<p>" . get_string("nomoodleimportyet", "block_exaport") . "</p>";
 }
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

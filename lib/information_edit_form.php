@@ -14,13 +14,13 @@ class block_exaport_personal_information_form extends moodleform {
 //		$mform->addRule('description', get_string('required'), 'required', null, 'client');
 
                 $mform->addElement('editor', 'description_editor', get_string('steckbrief', 'block_exaport'), null,
-                    array('maxfiles' => EDITOR_UNLIMITED_FILES));
+                    array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
                 
 		$mform->addElement('hidden', 'cataction');
 		$mform->setType('cataction', PARAM_ALPHA);
 		
-		$mform->addElement('hidden', 'descid');
-		$mform->setType('descid', PARAM_INT);
+		$mform->addElement('hidden', 'compid');
+		$mform->setType('compid', PARAM_INT);
 		
 		$mform->addElement('hidden', 'courseid');
 		$mform->setType('courseid', PARAM_INT);

@@ -41,6 +41,7 @@ if ($user->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");
 } else {
 	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+	echo block_exaport_wrapperdivstart();
 }
 
 $parsedsort = block_exaport_parse_item_sort($userpreferences->itemsort, false);
@@ -143,5 +144,5 @@ else {
 echo "<br />";
 
 echo "</div>\n";
-
+echo block_exaport_wrapperdivend();
 print_footer();

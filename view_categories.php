@@ -84,7 +84,7 @@ if($cataction) {
 				}
 				else
 				{
-					add_to_log($courseid, "bookmark", "add category", "", $newentry->id);
+					block_exaport_add_to_log($courseid, "bookmark", "add category", "", $newentry->id);
 					$message = get_string("categorysaved","block_exaport");
 				}
 			break;
@@ -107,6 +107,7 @@ if($cataction) {
 					</fieldset>
 				</form></div><?php
 					echo $OUTPUT->box_end();
+					echo block_exaport_wrapperdivend();
 					$OUTPUT->footer($course);
 					exit;
 				}
@@ -132,7 +133,7 @@ if($cataction) {
 					}
 					else
 					{
-						add_to_log($courseid, "bookmark", "update category", "", $newentry->id);
+						block_exaport_add_to_log($courseid, "bookmark", "update category", "", $newentry->id);
 						$message = get_string("categoryedited","block_exaport");
 					}
 				}
@@ -151,6 +152,7 @@ if($cataction) {
 
 					echo '<br />';
                                         echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport"), new moodle_url('view_categories.php', $optionsyes), new moodle_url('view_categories.php', $optionsno));
+                                       echo block_exaport_wrapperdivend();
                                         $OUTPUT->footer();
 					die;
 				}
@@ -173,7 +175,7 @@ if($cataction) {
 							}
 							$DB->delete_records('block_exaportitem', array('categoryid'=>$delid));
 							
-							add_to_log($courseid, "bookmark", "delete category", "", $newentry->id);
+							block_exaport_add_to_log($courseid, "bookmark", "delete category", "", $newentry->id);
 							$message = get_string("categorydeleted","block_exaport");
 						}
 					}
@@ -250,7 +252,7 @@ else {
 	echo '</form>';
 	echo '</div></div>';
 }
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 
 function rekedit($outer_categories, $courseid, $first, $level){

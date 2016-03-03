@@ -51,7 +51,7 @@ $PAGE->set_pagelayout('print');
 $PAGE->requires->css('/blocks/exaport/css/view_items_print.css');
 
 echo $OUTPUT->header();
-
+echo block_exaport_wrapperdivstart();
 block_exaport_setup_default_categories();
 
 echo "<div class='box generalbox'>";
@@ -171,5 +171,5 @@ foreach ($items as $item) {
 }
 
 echo html_writer::table($table);
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();

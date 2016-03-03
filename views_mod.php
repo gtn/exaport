@@ -39,9 +39,20 @@ if ($action=="add")
 //if (function_exists("clean_param_array")) $shareusers=clean_param_array($_POST["shareusers"],PARAM_SEQUENCE,true);
 //else 
 if (!empty($_POST["shareusers"])){
-	$shareusers=$_POST["shareusers"];
-	if (function_exists("clean_param_array")) $shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
-}else{$shareusers="";}
+	$shareusers = $_POST["shareusers"];
+	if (function_exists("clean_param_array")) 
+        $shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
+} else {
+    $shareusers = "";
+}
+
+if (!empty($_POST["sharegroups"])){
+	$sharegroups = $_POST["sharegroups"];
+	if (function_exists("clean_param_array")) 
+        $sharegroups=clean_param_array($sharegroups, PARAM_SEQUENCE, false);
+} else {
+    $sharegroups = "";
+}
 
 
 if (!confirm_sesskey()) {
@@ -83,6 +94,11 @@ if ($view && $action == 'userlist') {
 	exit;
 }
 
+if ($view && $action == 'grouplist') {
+	echo json_encode(exaport_get_shareable_courses_with_groups_for_view($view->id));
+	exit;
+}
+
 $returnurl_to_list = $CFG->wwwroot.'/blocks/exaport/views_list.php?courseid='.$courseid;
 $returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$id.'&sesskey='.sesskey().'&action=edit';
 
@@ -97,7 +113,7 @@ if ($action == 'delete') {
 		$conditions = array("id" => $view->id);
 		$status = $DB->delete_records('block_exaportview', $conditions);
 		
-		add_to_log(SITEID, 'blog', 'delete', 'views_mod.php?courseid='.$courseid.'&id='.$view->id.'&action=delete&confirm=1', $view->name);
+		block_exaport_add_to_log(SITEID, 'blog', 'delete', 'views_mod.php?courseid='.$courseid.'&id='.$view->id.'&action=delete&confirm=1', $view->name);
 
 		if (!$status) {
 			print_error('deleteposterror', 'block_exaport', $returnurl);
@@ -111,7 +127,8 @@ if ($action == 'delete') {
 		echo '<br />';
 		//notice_yesno(get_string("deletecheck", null, $view->name), 'views_mod.php', 'views_list.php', $optionsyes, $optionsno, 'post', 'get');
 		echo $OUTPUT->confirm(get_string("deletecheck",null,$view->name), new moodle_url('views_mod.php', $optionsyes), new moodle_url('views_list.php', $optionsno));
-                echo $OUTPUT->footer();
+		echo block_exaport_wrapperdivend();
+        echo $OUTPUT->footer();
 		die;
 	}
 }
@@ -140,11 +157,13 @@ class block_exaport_view_edit_form extends moodleform {
 		$mform->setType('courseid', PARAM_INT);
 		$mform->setType('viewid', PARAM_INT);
 		$mform->setType('name', PARAM_TEXT);
+        $mform->setType('autofill_artefacts', PARAM_TEXT);
 		$mform->addElement('hidden', 'items');
 		$mform->addElement('hidden', 'draft_itemid');
 		$mform->addElement('hidden', 'action');
 		$mform->addElement('hidden', 'courseid');
 		$mform->addElement('hidden', 'viewid');
+        $mform->addElement('hidden', 'autofill_artefacts');
 		if (optional_param('type', 'content', PARAM_ALPHA)<>'title' and optional_param("action", "", PARAM_ALPHA)<>'add')
 			$mform->addElement('hidden', 'name');
 
@@ -155,9 +174,43 @@ class block_exaport_view_edit_form extends moodleform {
 //							$mform->addElement('textarea', 'description', get_string("title", "block_exaport"), 'cols="60" rows="5"');
 //							$mform->setType('description', PARAM_TEXT);
 
-							$mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'), array('rows'=> '20', 'cols'=>'5'), array('maxfiles' => EDITOR_UNLIMITED_FILES));
+							$mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'), array('rows'=> '20', 'cols'=>'5'), array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 							$mform->setType('description', PARAM_RAW);
-							
+                            
+                            if ($this->_customdata['view']) {
+                                // Auto generate view with the artefacts checkbox.
+                                $artefacts = block_exaport_get_portfolio_items(1);
+                                if (count($artefacts) > 0) {
+                                    if ($this->_customdata['view']->id > 0) {
+                                        foreach ($artefacts as $artefact) {
+                                            $allartefacts[] = $artefact->id;
+                                        };
+                                        $filledartefacts = explode(',', $this->_customdata['view']->autofill_artefacts);
+                                        sort($filledartefacts);
+                                        sort($allartefacts);
+                                        $diff = array_diff($allartefacts, $filledartefacts);
+                                        if (count($diff)>0) {
+                                            $mform->addElement('checkbox', 'autofill_add', '', get_string('autofillview_addartefacts', 'block_exaport'));
+                                        };
+                                    } else {
+                                        $mform->addElement('checkbox', 'autofill', '', get_string('autofillview', 'block_exaport'));
+                                    };
+                                };
+                                // Share to cheacher checkbox.
+                                $allteachers = block_exaport_get_course_teachers();
+                                // If view is editing.
+                                if ($this->_customdata['view']->id > 0) {
+                                    $allsharedusers = block_exaport_get_shared_users($this->_customdata['view']->id);
+                                    $diff = array_diff($allteachers, $allsharedusers);
+                                    // If there is teacher which does not share.
+                                    if ((count($allteachers) > 0) && (count($diff) > 0)) {
+                                        $mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher_add', 'block_exaport'));
+                                    };
+                                } else { // If view is adding.
+                                        $mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher', 'block_exaport'));
+                                };
+                            };
+
 							if (block_exaport_course_has_desp()) {
 								$langcode=get_string("langcode","block_desp");
 								$sql = "SELECT lang.id,lang.".$langcode." as name FROM {block_desp_lang} lang WHERE id IN(SELECT langid FROM {block_desp_check_lang} WHERE userid=?) OR id IN (SELECT langid FROM {block_desp_lanhistories} WHERE userid=?) ORDER BY lang.".$langcode;
@@ -269,7 +322,17 @@ if ($editform->is_cancelled()) {
 			$dbView->userid = $USER->id;
 			if (empty($dbView->layout)  || $dbView->layout==0)  $dbView->layout=2;
 			if ($dbView->id = $DB->insert_record('block_exaportview', $dbView)) {
-				add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
+                // Auto fill with the artefacts.
+                if (isset($dbView->autofill) and $dbView->autofill == 1) {
+                    $filledartefacts = fill_view_with_artefacts($dbView->id);
+                    $dbView->autofill_artefacts = $filledartefacts;
+                    $DB->update_record('block_exaportview', $dbView);
+                }
+                // Auto Share to the teachers.
+                if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
+                    share_view_to_teachers($dbView->id);
+                };
+				block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
 				print_error('addposterror', 'block_exaport', $returnurl);
 			}
@@ -281,14 +344,23 @@ if ($editform->is_cancelled()) {
 			}
 
 			$dbView->id = $view->id;
-			if (empty($dbView->layout)  || $dbView->layout==0) {
+			if (empty($dbView->layout) || $dbView->layout==0) {
 				if (empty($view->layout) || $view->layout==0)  
 					$dbView->layout=2;
 				else 
 					$dbView->layout=$view->layout;
 			};
+            // Add new artefacts if selected.
+            if (isset($dbView->autofill_add) and $dbView->autofill_add == 1) {
+                    $filledartefacts = fill_view_with_artefacts($dbView->id, $dbView->autofill_artefacts);
+                    $dbView->autofill_artefacts = $filledartefacts;
+            };
+            // Auto Share to the teachers.
+            if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
+                share_view_to_teachers($dbView->id);
+            };
 			if ($DB->update_record('block_exaportview', $dbView)) {
-				add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
+				block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
 			} else {
 				print_error('updateposterror', 'block_exaport', $returnurl);
 			}
@@ -307,13 +379,10 @@ if ($editform->is_cancelled()) {
 			// delete all blocks
 			$DB->delete_records('block_exaportviewblock', array('viewid'=>$dbView->id));
 			// add blocks
-			
 			$blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, 
-								array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id)), 
-								$formView->blocks);
-								
-			$blocks = json_decode($blocks);
-			
+							array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id), 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), 
+							$formView->blocks);
+			$blocks = json_decode($blocks);	
 		
 			if(!$blocks)
 				print_error("noentry","block_exaport");
@@ -335,6 +404,7 @@ if ($editform->is_cancelled()) {
 						$newItem->type = 'note';
 						$newItem->categoryid = 0;
 						$newItem->userid = $USER->id;
+						// $newItem->intro = process_media_url($block->contentmedia, $block->width, $block->height);
 						$newItem->intro = $block->contentmedia;
 						$newItem->timemodified = time();
 
@@ -353,7 +423,7 @@ if ($editform->is_cancelled()) {
 			if (optional_param('ajax', 0, PARAM_INT)) {
 				$ret = new stdClass;
 				$ret->ok = true;
-				file_prepare_draft_area($view->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+				file_prepare_draft_area($view->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
 				$ret->blocks = json_encode(block_exaport_get_view_blocks($view));
 				
 				echo json_encode($ret);
@@ -399,6 +469,18 @@ if ($editform->is_cancelled()) {
 					}
 				}
 			}
+            // delete all shared groups
+			$DB->delete_records("block_exaportviewgroupshar", array('viewid'=>$dbView->id));
+            // Add new groups sharing. shareall == 0 - users sharing; 1 - share for all; 2 - groups sharing.
+			if ($dbView->internaccess && $dbView->shareall == 2 && is_array($sharegroups)) {
+				foreach ($sharegroups as $sharegroup) {
+					$sharegroup = clean_param($sharegroup, PARAM_INT);
+					$shareItem = new stdClass();
+					$shareItem->viewid = $dbView->id;
+					$shareItem->groupid = $sharegroup;
+					$DB->insert_record("block_exaportviewgroupshar", $shareItem);
+				};
+            };
 			
 			if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
 				// search button pressed -> redirect to search form
@@ -414,7 +496,9 @@ if ($editform->is_cancelled()) {
 		redirect($returnurl_to_list);
 	else /**/
 	$returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&sesskey='.sesskey().'&action=edit';
-	redirect($returnurl);
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    redirect($returnurl);
 }
 
 // gui setup
@@ -423,7 +507,7 @@ $postView->action       = $action;
 $postView->courseid     = $courseid;
 $postView->draft_itemid = null;
 
-file_prepare_draft_area($postView->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true), null);
+file_prepare_draft_area($postView->draft_itemid,context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
 
 // we need to copy additional files from the personal information to the views editor, just in case if the personal information is added
 copy_personal_information_draft_files($postView->draft_itemid, context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, array('subdirs'=>true), null);
@@ -490,137 +574,7 @@ switch ($action) {
 		$strAction = get_string('edit');
 		break;
 	default :
-		print_error("unknownaction", "block_exaport");	                	            
-}
-
-function block_exaport_get_view_blocks($view) {
-	global $DB, $USER;
-	
-	$portfolioItems = block_exaport_get_portfolio_items();
-	$badges = block_exaport_get_all_user_badges();
-	
-	$query = "select b.*".
-		 " from {block_exaportviewblock} b".
-		 " where b.viewid = ? ORDER BY b.positionx, b.positiony";
-
-	$allBlocks = $DB->get_records_sql($query, array($view->id));	
-	$blocks = array();
-	
-	foreach ($allBlocks as $block) {
-		if ($block->type == 'item') {
-			if (!isset($portfolioItems[$block->itemid])) {
-				// item not found
-				continue;
-			}
-			$block->item = $portfolioItems[$block->itemid];
-		} elseif ($block->type == 'badge') {
-			// find bage by id
-			$badge = null;
-			foreach ($badges as $tmp) {
-				if ($tmp->id == $block->itemid) {
-					$badge = $tmp;
-					break;
-				}
-			}
-			if (!$badge) {
-				// badge not found
-				continue;
-			}
-			
-			$context = context_course::instance($badge->courseid);
-			$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
-
-			$block->badge = $badge;
-		} else {
-			$block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);
-			$block->itemid = null;
-		}
-		
-		$blocks[$block->id] = $block;
-	}
-
-	return $blocks;
-}
-
-function block_exaport_get_portfolio_items() {
-	global $DB, $USER;
-	
-	$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
-		 " from {block_exaportitem} i".
-		 " left join {block_exaportcate} ic on i.categoryid = ic.id".
-		 " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-		 " left join {block_exaportitemcomm} com on com.itemid = i.id".
-		 " where i.userid=?".
-		 " GROUP BY i.id, i.name, i.type, i.type, i.url, ic.id, ic.name, ic2.name, i.userid".
-		 " ORDER BY i.name";
-		 //echo $query;
-	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
-	if (!$portfolioItems) {
-		$portfolioItems = array();
-	}
-
-	foreach ($portfolioItems as &$item) {
-		if (null == $item->cname) {
-			$item->category = format_string(block_exaport_get_root_category()->name);
-			$item->catid = 0;
-		} elseif (null == $item->cname_parent) {
-			$item->category = format_string($item->cname);
-		} else {
-			//$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
-			$catid= $item->catid;
-				$catname = $item->cname;
-				$item->category = "";
-				do{
-					$conditions = array("userid" => $USER->id, "id" => $catid);
-					$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
-					foreach($cats as $cat){
-						if($item->category == "")
-							$item->category =format_string($cat->name);
-						else
-							$item->category =format_string($cat->name)." &rArr; ".$item->category;
-						$catid = $cat->pid;
-				}
-				
-				}while ($cat->pid != 0);
-		}
-		
-		if ($item->intro) {
-			$item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
-		}
-		
-		//get competences of the item
-		$item->userid = $USER->id;
-		
-		$comp = block_exaport_check_competence_interaction();
-		if($comp){
-			$array = block_exaport_get_competences($item, 0);
-		
-			if(count($array)>0){
-				$competences = "";
-				foreach($array as $element){
-					$conditions = array("id" => $element->descid);
-					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
-
-					if($competencesdb != null){
-						$competences .= $competencesdb->title.'<br>';
-					}
-				}
-				$competences = str_replace("\r", "", $competences);
-				$competences = str_replace("\n", "", $competences);
-				$competences = str_replace("\"", "&quot;", $competences);
-				$competences = str_replace("'", "&prime;", $competences);		
-					
-				$item->competences = $competences;
-			}
-		}
-		
-		unset($item->userid);
-		
-		unset($item->cname);
-		unset($item->cname_parent);
-	}
-	
-	return $portfolioItems;
+		print_error("unknownaction", "block_exaport");
 }
 
 if ($view) {
@@ -638,7 +592,7 @@ $editform->set_data($postView);
 if ($type<>'title') {// for delete php notes 
 	$form = $editform->toArray();
 	echo $form['javascript'];
-	echo '<form'.$form['attributes'].'><div id="view-mod">';
+	echo '<form'.$form['attributes'].'><div id="exaport-view-mod">';
 	echo $form['html_hidden_fields'];
 };
 	
@@ -646,6 +600,7 @@ if ($type<>'title') {// for delete php notes
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
+    'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
 	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_badge', 'view_specialitem_text_defaulttext',
 	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',
@@ -661,10 +616,20 @@ foreach ($translations as $key => &$value) {
 }
 unset($value);
 
+$portfolioItems = block_exaport_get_portfolio_items();
+// add potential sometime shared items (there is in {block_exaportviewblock} but now is NOT shared)
+$query = "select b.* from {block_exaportviewblock} b, {block_exaportitem} i where b.viewid = ? AND b.itemid = i.id AND i.userid<>? ORDER BY b.positionx, b.positiony";
+$allpotentialitems = $DB->get_records_sql($query, array($view->id, $USER->id));
+$portfolioshareditems = array();
+foreach ($allpotentialitems as $item) {
+	if (!array_key_exists($item->itemid, $portfolioItems))
+		$portfolioItems = $portfolioItems + block_exaport_get_portfolio_items(0, $item->itemid);
+};
+
 ?>
 <script type="text/javascript">
 //<![CDATA[
-	var portfolioItems = <?php echo json_encode(block_exaport_get_portfolio_items()); ?>;
+	var portfolioItems = <?php echo json_encode($portfolioItems); ?>;
 	ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 //]]>
 </script>
@@ -685,6 +650,11 @@ switch ($type) {
 		<?php
 		// view data form
 echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');
+// Preview button.
+echo '<div style="float: right;">
+            <a target="_blank" href="'.s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">
+                    <img alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/preview.png" />
+            </a></div>';
 echo '<ul>
     <li class="portfolioElement" title="'.get_string('personalinformation', 'block_exaport').'" block-type="personal_information">
         <div class="blocktype" style="position: relative;">
@@ -723,10 +693,10 @@ echo '<ul>
     </li>';
 
 if (block_exaport_badges_enabled()) {
-    echo '<li class="portfolioElement" title="'.get_string('mybadges', 'badges').'" block-type="badge">
+    echo '<li class="portfolioElement" title="'.get_string('badges', 'badges').'" block-type="badge">
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('mybadges', 'badges').'</h4>
+            <h4 class="blocktype-title js-hidden">'.get_string('badges', 'badges').'</h4>
             <div class="blocktype-description js-hidden">'.get_string('selectitems','block_exaport').'</div>
         </div>
     </li>';
@@ -781,8 +751,8 @@ break;
 			};
 			if ($data->description) {
 				$draftid_editor = file_get_submitted_draft_itemid('description');
-				$currenttext = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true), $data->description);	
-				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor, array('subdirs'=>true));								
+				$currenttext = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $data->description);	
+				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor);								
 				$data->description_editor = array('text'=>$data->description, 'format'=>$data->descriptionformat, 'itemid'=>$draftid_editor);
 			};
 			$data->cataction = 'save';
@@ -909,9 +879,10 @@ break;
 						echo '<div style="padding: 4px 0;"><table>';
 							if (block_exaport_shareall_enabled()) {
 								echo '<tr><td style="padding-right: 10px; width: 10px">';
-								echo '<input type="radio" name="shareall" value="1"'.($postView->shareall?' checked="checked"':'').' />';
+								echo '<input type="radio" name="shareall" value="1"'.($postView->shareall==1 ? ' checked="checked"':'').' />';
 								echo '</td><td>'.get_string("internalaccessall", "block_exaport").'</td></tr>';
 							}
+                            // Internal access for users.
 							echo '<tr><td style="padding-right: 10px">';
 							echo '<input type="radio" name="shareall" value="0"'.(!$postView->shareall?' checked="checked"':'').'/>';
 							echo '</td><td>'.get_string("internalaccessusers", "block_exaport").'</td></tr>';
@@ -925,6 +896,13 @@ break;
 								echo '</div>';
 							}
 							echo '<div id="sharing-userlist">userlist</div>';
+							echo '</td></tr>';
+                            // Internal access for groups.
+							echo '<tr><td style="padding-right: 10px">';
+							echo '<input type="radio" name="shareall" value="2"'.($postView->shareall == 2 ? ' checked="checked" ':'').'/>';
+							echo '</td><td>'.get_string("internalaccessgroups", "block_exaport").'</td></tr>';
+							echo '<tr id="internaccess-groups"><td></td><td>';
+							echo '<div id="sharing-grouplist">grouplist</div>';
 							echo '</td></tr>';
 						echo '</table></div>';
 					echo '</td></tr>';
@@ -944,7 +922,7 @@ if ($type!='title') {
 	echo '</div></form>';
 };
 
-echo '<div id="block_form" class="block" style="position: absolute; top: 10px; left: 30%; width: 510px;">
+echo '<div id="exaport-block_form" class="block">
         <div class="block-controls">                
             <a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
         </div>
@@ -952,11 +930,12 @@ echo '<div id="block_form" class="block" style="position: absolute; top: 10px; l
             <h4 id="block_form_title">'.get_string('cofigureblock','block_exaport').'</h4>
         </div>
         <div class="block-content">
-			<div id="container"></div>
+			<div id="exaport-container"></div>
 		</div>
 	</div>
 	<script type="text/javascript"> // for valid html and move block to body parent
-		jQueryExaport("#block_form").appendTo("#page-blocks-exabis_competences-views_mod");
+		jQueryExaport("#exaport-block_form").appendTo("#page-blocks-exabis_competences-views_mod");
 	</script>
 	';
+	echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();	

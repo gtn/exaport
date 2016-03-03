@@ -129,9 +129,23 @@ if (!$views) {
 		$table->data[$view_i]['timemodified'] = userdate($view->timemodified);
 
 		$table->data[$view_i]['accessoptions'] = '';
-		if ($view->shareall && block_exaport_shareall_enabled()) {
+		if ($view->shareall==1 && block_exaport_shareall_enabled()) {
 			$table->data[$view_i]['accessoptions'] .= '<div>'.get_string("internalaccess", "block_exaport").':</div><div style="padding-left: 10px;">'.get_string("internalaccessall", "block_exaport").'</div>';
-		} else {
+		} else if ($view->shareall==2 && block_exaport_shareall_enabled()) {  
+			// read groups
+			$query = "SELECT name".
+				" FROM {groups} g,".
+				" {block_exaportviewgroupshar} vshar WHERE g.id=vshar.groupid AND vshar.viewid=?".
+				" ORDER BY name";
+			$groups = $DB->get_records_sql($query, array($view->id));
+			
+			if ($groups) {
+				foreach ($groups as &$group) {
+					$group = $group->name;
+				}
+				$table->data[$view_i]['accessoptions'] .= '<div>'.get_string("internalaccessgroups", "block_exaport").':</div><div style="padding-left: 10px;">'.join(', ', $groups).'</div>';
+			}
+        } else {
 			// read users
 			$query = "SELECT ".$DB->sql_fullname()." AS name".
 				" FROM {user} u,".
@@ -181,5 +195,5 @@ echo "</fieldset>
 	  </form>";
 
 echo "</div>";
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();

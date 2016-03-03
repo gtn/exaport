@@ -26,6 +26,7 @@
 
 require_once dirname(__FILE__).'/inc.php';
 require_once dirname(__FILE__).'/lib/sharelib.php';
+require_once dirname(__FILE__).'/blockmediafunc.php';
 
 global $CFG, $USER, $DB, $PAGE;
 
@@ -58,6 +59,8 @@ $query = "select b.*". // , i.*, i.id as itemid".
 
 $blocks = $DB->get_records_sql($query, array($view->id));
 
+$badges = block_exaport_get_all_user_badges();
+
 // read columns
 $columns = array();
 foreach ($blocks as $block) {
@@ -65,9 +68,18 @@ foreach ($blocks as $block) {
 		$columns[$block->positionx] = array();
 
 	if ($block->type == 'item') {
-		$conditions = array("id" => $block->itemid);
+		$conditions = array("id" => $block->itemid);		
 		if ($item = $DB->get_record("block_exaportitem", $conditions)) {
-			$block->item = $item;
+			if (!$block->width) $block->width = 320;
+			if (!$block->height) $block->height = 240;
+			$item->intro = process_media_url($item->intro, $block->width, $block->height);
+			// Add checking on sharable item.
+			if ($sharable = is_sharableitem($view->userid, $item->id) || $view->userid == $item->userid) {
+				$block->item = $item;
+			}
+			else {
+				continue; // Hide unshared items
+			}
 		} else {
 			$block->type = 'text';
 		}
@@ -75,13 +87,20 @@ foreach ($blocks as $block) {
 	$columns[$block->positionx][] = $block;
 }
 
-
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
 if ($view->access->request == 'intern') {
 	block_exaport_print_header("sharedbookmarks");
-} else {
+}else {
 	$PAGE->requires->css('/blocks/exaport/css/shared_view.css');
-	print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+	$PAGE->set_title(get_string("externaccess", "block_exaport"));
+	$PAGE->set_heading( get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+	
+	echo $OUTPUT->header();
+	echo block_exaport_wrapperdivstart();
 }
 
 ?>
@@ -131,7 +150,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 	
 					$competences = "";
 					foreach($array as $element){
-						$conditions = array("id" => $element->descid);
+						$conditions = array("id" => $element->compid);
 						$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING); 
 
 						if($competencesdb != null){
@@ -152,18 +171,31 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			
 			echo '<div class="view-item view-item-type-'.$item->type.'">';
 			// thumbnail of item
+			$file_params = '';
 			if ($item->type=="file") {
 				$select = "contextid='".context_user::instance($item->userid)->id."' AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";	
 //				if ($img = $DB->get_record('files', array('contextid'=>get_context_instance(CONTEXT_USER, $item->userid)->id, 'component'=>'block_exaport', 'filearea'=>'item_file', 'itemid'=>$item->id, 'filesize'=>'>0'), 'id, filename, mimetype')) {
-				if ($img = $DB->get_record_select('files', $select, null, 'id, filename, mimetype')) {
-					if (strpos($img->mimetype, "image")!==false) {					
-						$img_src = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $img->filename;
+				if ($file = $DB->get_record_select('files', $select, null, 'id, filename, mimetype, filesize')) {
+					if (strpos($file->mimetype, "image")!==false) {					
+						$img_src = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id . "/" . 'block_exaport' . "/" . 'item_file' . "/view/".$access."/itemid/" . $item->id."/". $file->filename;
 						echo '<div class="view-item-image"><img height="100" src="'.$img_src.'" alt=""/></div>';
+					} else {
+						// Link to file.
+						$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access."&itemid=".$item->id);
+						// Human filesize.
+						$units = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+						$power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
+						$filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
+						// Fileinfo block.
+						$file_params = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> <span class="filedescription">('.$filesize.')</span></div>';
+						if (block_exaport_is_valid_media_by_filename($file->filename)) {
+							echo '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" alt=""/></div>';
+						}
 					};
 				};		
 			}
 			elseif ($item->type=="link") {				
-				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'" alt=""/></a></div>';
+				echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.$href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'" alt=""/></a></div>';
 			};			
 			echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
                         // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer
@@ -173,6 +205,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
                         }
                         echo '</div>';
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
+			echo $file_params;			
 			echo '<div class="view-item-text">';
 			if ($item->url) {
 				// link
@@ -213,6 +246,30 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				echo $block->contentmedia;
 			echo '</div>';
 
+		} elseif ($block->type == 'badge') {
+			if (count($badges) == 0)
+				continue;
+			echo '<div class="header view-header">'.nl2br($block->block_title).'</div>';
+			$badge = null;
+			foreach ($badges as $tmp) {
+                if ($tmp->id == $block->itemid) {
+                    $badge = $tmp;
+                    break;
+                };
+            };
+            if (!$badge) {
+                // badge not found
+                continue;
+            }
+			echo '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
+			if (!$badge->courseid) { // For badges with courseid = NULL
+				$badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			} else {
+			    $context = context_course::instance($badge->courseid);	
+				$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+			}
+			echo '<img src="'.$badge->imageUrl.'">';
+			echo '</div>';
 		} else {
 			// text
 			echo '<div class="header">'.$block->block_title.'</div>';
@@ -231,5 +288,5 @@ echo "<br />";
 echo "<div class='block_eportfolio_center'>\n";
 
 echo "</div>\n";
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();

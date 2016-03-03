@@ -27,6 +27,7 @@
 require_once dirname(__FILE__) . '/inc.php';
 require_once dirname(__FILE__) . '/lib/sharelib.php';
 require_once dirname(__FILE__) . '/lib/externlib.php';
+require_once dirname(__FILE__).'/blockmediafunc.php';
 
 global $DB, $SESSION;
 $access = optional_param('access', 0, PARAM_TEXT);
@@ -40,7 +41,14 @@ $context = context_system::instance();
 $PAGE->set_context($context);
 require_login(0, true);
 
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/jquery-ui.js', true);
+$PAGE->requires->js( new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/vedeo-js/video.js'), true);
+$PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
+
 $item = block_exaport_get_item($itemid, $access);
+$item->intro = process_media_url($item->intro, 320, 240);
 
     if ($deletecomment == 1) {
         if (!confirm_sesskey()) {
@@ -97,8 +105,10 @@ if ($item->allowComments) {
 if ($item->access->page == 'view') {
     if ($item->access->request == 'intern') {
         block_exaport_print_header("views");
-    } else {
-        print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+    } else { 
+		block_exaport_print_header("sharedbookmarks");
+        // print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+        echo block_exaport_wrapperdivstart();
     }
 } elseif ($item->access->page == 'portfolio') {
     if ($item->access->request == 'intern') {
@@ -108,7 +118,9 @@ if ($item->access->page == 'view') {
             block_exaport_print_header("sharedbookmarks");
         }
     } else {
-        print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+		block_exaport_print_header("sharedbookmarks");
+        // print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
+        echo block_exaport_wrapperdivstart();
     }
 }
 
@@ -177,6 +189,7 @@ if ($backlink) {
 }
 
 echo "</div>";
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();
 
 function block_exaport_show_comments($item) {
@@ -232,7 +245,7 @@ function block_exaport_do_add_comment($item, $post, $blogeditform) {
    
     // Insert the new blog entry.
     if ($DB->insert_record('block_exaportitemcomm', $post)) {
-        add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
+        block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
     } else {
         error('There was an error adding this post in the database');
     }

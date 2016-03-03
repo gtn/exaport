@@ -88,18 +88,7 @@ echo '<a href="views_mod.php?courseid='.$courseid.'&id='.$id.'&sesskey='.sesskey
 <?php
 
 if ($q) {
-	$extrasql = array();
-	$params = array();
-
-	$qparams = preg_split('![\s,]+!', $q);
-	foreach ($qparams as $i=>$qparam) {
-		
-		$extrasql[] = "(firstname LIKE ? OR lastname LIKE ?)";
-		$params[] = "%$qparam%";
-		$params[] = "%$qparam%";
-	}
-
-	$users = get_users_listing('firstname', 'ASC', 0, 10, '', '', '', join(' AND ', $extrasql), $params, $context);
+	$users = get_users_listing('firstname', 'ASC', 0, 10, $q, '', '', '', array(), $context);
 	
 	if ($users) {
 		echo '<form method="post" action="'.$_SERVER['REQUEST_URI'].'" style="padding-top: 10px;">';
@@ -129,5 +118,5 @@ if ($q) {
 } else {
 }
 
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

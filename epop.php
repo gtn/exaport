@@ -14,23 +14,27 @@ if ($action=="login"){
 	$pword = optional_param('password', 0, PARAM_TEXT);	//32
 	
 	if ($uname!="0" && $pword!="0"){
+	
 		$uname=kuerzen($uname,100);
 		$pword=kuerzen($pword,50);
 		$uhash=0;
 		$conditions = array("username" => $uname,"password" => $pword);
 		if (!$user = $DB->get_record("user", $conditions)){
+			
 			$condition = array("username" => $uname);
 			if ($user = $DB->get_record("user", $condition)){
 				//$validiert=validate_internal_user_password($user,$pword);
+			
 				$validiert=authenticate_user_login($uname,$pword); 
 			}else{
 				$validiert=false;
 			}
 		}else{
-			$validiert=true;//alte version bei der die passwörter verschlüsselt geschickt werden
+			$validiert=true;//alte version bei der die passwï¿½r verschlï¿½ geschickt werden
 		}
 		
 		if ($validiert==true){
+			
 			if ($user->auth=='nologin' || $user->confirmed==0 || $user->suspended!=0 || $user->deleted!=0) $uhash=0;
 			else{
 				if (!$user_hash = $DB->get_record("block_exaportuser", array("user_id"=>$user->id))){
@@ -155,7 +159,7 @@ if ($action=="login"){
 		$subject_id = optional_param('subject_id', '0', PARAM_INT);
 		//$subject_id = optional_param('subject_id', ' ', PARAM_INT);
 		
-		//die kompetenzen werden nach subject gruppiert angezeigt, daher nur diese gruppe löschen
+		//die kompetenzen werden nach subject gruppiert angezeigt, daher nur diese gruppe lï¿½en
 		$sql="SELECT descr.id FROM {block_exacompsubjects} subj 
 		INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 		INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
@@ -166,14 +170,13 @@ if ($action=="login"){
 		foreach ($descriptors as $descriptor){
 			$dlist.=",".$descriptor->id;
 		}
-		$select='activityid='.$item_id.' AND activitytype=2000';
-		if ($dlist!="0") $select.=' AND descrid IN ('.$dlist.')';
+		$select='activityid='.$item_id.' AND eportfolioitem=1';
+		if ($dlist!="0") $select.=' AND compid IN ('.$dlist.')';
 		//echo $select;
-		$DB->delete_records_select("block_exacompdescractiv_mm",$select);
+		$DB->delete_records_select("block_exacompcompactiv_mm",$select);
 		foreach ($competences as $k=>$v){
 			if (is_numeric($v)){
-				//echo "insert into block_exacompdescractiv_mm".$v."_".$item_id."<br>";
-				$DB->insert_record('block_exacompdescractiv_mm', array("activityid"=>$item_id,"activitytype"=>"2000","descrid"=>$v,"activitytitle"=>"","coursetitle"=>""));
+				$DB->insert_record('block_exacompcompactiv_mm', array("activityid"=>$item_id,"eportfolioitem"=>"1","compid"=>$v,"activitytitle"=>"","coursetitle"=>""));
 			}
 		}
 	}
@@ -215,8 +218,8 @@ if ($action=="login"){
 	if (!$user) echo "invalid hash";
 	else{
 		$itemid = optional_param('itemid', ' ', PARAM_INT);
-		$result = $DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $itemid));
-		$result = $DB->delete_records('block_exacompdescuser_mm', array("activityid" => $itemid));
+		$result = $DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $itemid));
+		$result = $DB->delete_records('block_exacompcompuser_mm', array("activityid" => $itemid));
 		$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
 		WHERE i.id=?";
 		if($resu = $DB->get_records_sql($sql,array($itemid))){
@@ -380,7 +383,7 @@ else if ($action=="get_items_for_view"){
 	$user=checkhash();
 	if (!$user) echo "invalid hash";
 	else{
-		$sql = "SELECT t.id,t.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		$sql = "SELECT t.id,t.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 		$sql.= " GROUP BY t.id,t.title";
 		$topics = $DB->get_records_sql($sql);
 		header ("Content-Type:text/xml");
@@ -399,7 +402,7 @@ else if ($action=="get_items_for_view"){
 	if (!$user) echo "invalid hash";
 	else{
 		$itemid=optional_param('itemid', 0, PARAM_INT);
-		$sql = "SELECT s.id,s.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+		$sql = "SELECT s.id,s.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, {block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 		$sql.= " GROUP BY s.id,s.title";
 		$subjects = $DB->get_records_sql($sql);
 		header ("Content-Type:text/xml");
@@ -428,18 +431,18 @@ else if ($action=="get_items_for_view"){
 			$subjectid=optional_param('subjectid', 0, PARAM_INT);
 			$clist=",";
 			if ($itemid>0){
-				$compok=$DB->get_records("block_exacompdescractiv_mm", array("activityid"=>$itemid));
+				$compok=$DB->get_records("block_exacompcompactiv_mm", array("activityid"=>$itemid));
 				foreach ($compok as $k=>$v){
-					$clist.=$v->descrid.",";
+					$clist.=$v->compid.",";
 				}
 			}
-	    //$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
+	    //$sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 	     //neu am 20.5.2014 weil descriptoren mehrfach vorkommen
-	    $sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.typeid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
-	    $sql.=" GROUP BY d.id, d.title ORDER BY d.sorting";
+	    $sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t,{block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
 	    if ($subjectid>0 && $action=="getCompetences"){
 	    	$sql.=" AND s.id=".$subjectid;
 	    }
+	    $sql.=" GROUP BY d.id, d.title ORDER BY d.sorting";
 	    //echo $sql;
 	    
 	    $descriptors = $DB->get_records_sql($sql);
@@ -505,7 +508,7 @@ else if ($action=="get_items_for_view"){
 	else{
 
 		$filepath="/";
-		$title = addslashes(optional_param('title', '', PARAM_TEXT));
+		$title = addslashes(optional_param('title', 'mytitle', PARAM_TEXT));
 		$description = addslashes(optional_param('description', '', PARAM_TEXT));
 		//$description = sauber($_POST["description"]);
 		$itemid=optional_param('itemid', 0, PARAM_INT);
@@ -513,8 +516,8 @@ else if ($action=="get_items_for_view"){
 				$itemrs=$DB->get_record("block_exaportitem",array("id"=>$itemid));
 				if (!empty($itemrs)){
 					/* 
-					//auch özeps items können nicht aktualisiert werden, die müssen gelöscht werden, ab 31.5.13
-					if ($itemrs->isoez==1){ //normale items können files nicht aktualisiert werden, da muss das ganze item gelöscht werden
+					//auch ï¿½s items kï¿½n nicht aktualisiert werden, die mï¿½gelï¿½t werden, ab 31.5.13
+					if ($itemrs->isoez==1){ //normale items kï¿½n files nicht aktualisiert werden, da muss das ganze item gelï¿½t werden
 						$sql="SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
 						WHERE i.attachment<>0 AND i.id=?";
 						$res = $DB->get_records_sql($sql,array($itemid));
@@ -567,7 +570,7 @@ else if ($action=="get_items_for_view"){
 			//only update picture
 			$new->timemodified = time();
 		}else{
-			if ($itemrs->isoez!=1){ //wenn neues item, özeps items können eh nicht neu sein
+			if ($itemrs->isoez!=1){ //wenn neues item, ï¿½s items kï¿½n eh nicht neu sein
 				$new->userid = $user->id;
 				//$new->categoryid = $category;
 				$new->name = $title;		
@@ -799,7 +802,7 @@ else if ($action=="get_items_for_view"){
 					           	//block_exaport_save_competences($competences,$new,$user->id,$new->name);
 					          }else{
 					          	block_exaport_delete_competences($itemid,$user->id);
-					          	//wenn text oder link, dann beispiel gelöst, wenn type file ist datei dabei, auch gelöst
+					          	//wenn text oder link, dann beispiel gelï¿½ wenn type file ist datei dabei, auch gelï¿½
 					          	if (!empty($new->intro) || !empty($new->url) || $new->type=="file"){
 						          	$competencesoez=block_exaport_get_oezcompetencies($itemrs->exampid);
 						           	block_exaport_save_competences($competencesoez,$new,$user->id,$itemrs->name);
@@ -911,16 +914,17 @@ function create_autologin_moodle_example_link($url){
 
 	$url=str_replace("oezeps.at/moodle","oezeps.at/moodle/blocks/exaport/epopal.php?url=",$url);
 	$url=str_replace("digikomp.at","digikomp.at/blocks/exaport/epopal.php?url=",$url);
-	$url=str_replace("www2.edumoodle.at/epop","www2.edumoodle.at/epop/blocks/exaport/epopal.php?url=",$url);
+	$url=str_replace("www2.edumoodle.at/epop","www2.lernplattform.schule.at/epop/blocks/exaport/epopal.php?url=",$url);
+	$url=str_replace("www2.lernplattform.schule.at/epop","www2.lernplattform.schule.at/epop/blocks/exaport/epopal.php?url=",$url);
 
 	return $url;
 }
 
 function block_exaport_delete_competences($itemid,$userid){
 	global $DB;
-	$result = $DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $itemid));
+	$result = $DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $itemid));
 	//echo "delete from block_exacompdescractiv_mm where activityid=".$itemid;
-	$result = $DB->delete_records('block_exacompdescuser_mm', array("activityid" => $itemid));
+	$result = $DB->delete_records('block_exacompcompuser_mm', array("activityid" => $itemid));
 	//echo "delete from block_exacompdescuser_mm where activityid=".$itemid;
 }
 
@@ -929,8 +933,8 @@ function block_exaport_save_competences($competences,$new,$userid,$aname){
 	 if (count($competences)>0){
 		     	foreach ($competences as $k=>$v){
 		     		if (is_numeric($v)){
-		     			$DB->insert_record('block_exacompdescractiv_mm', array("descrid"=>$v,"activityid"=>$new->id,"activitytype"=>2000,"activitytitle"=>$aname));
-		     			$DB->insert_record('block_exacompdescuser_mm',array("descid"=>$v,"activityid"=>$new->id,"userid"=>$userid,"reviewerid"=>$userid,"activitytype"=>"2000","role"=>0));
+		     			$DB->insert_record('block_exacompcompactiv_mm', array("compid"=>$v,"activityid"=>$new->id,"eportfolioitem"=>1,"activitytitle"=>$aname));
+		     			$DB->insert_record('block_exacompcompuser_mm',array("compid"=>$v,"activityid"=>$new->id,"userid"=>$userid,"reviewerid"=>$userid,"eportfolioitem"=>1,"role"=>0));
 		     		}
 		     	}
 	}
@@ -1059,14 +1063,14 @@ function write_xml_items($conditions,$view_id=0,$competence_category=""){
 					//$inhalt.='<item id="'.$item->id.'" name="'.$item->name.'" isoez="'.$item->isoez.'" url="'.$item->attachment.'"></item>';
 				//}else{
 				
-				/*itemauswahl für view: nur gelöste aufgaben/items anzeigen*/
+				/*itemauswahl fï¿½w: nur gelï¿½ aufgaben/items anzeigen*/
 				if ($view_id>0){
 					if($item->attachment!="" || $item->intro!="" || $item->url!="") $showitem=true;
 					else $showitem=false;
 				}else{
 					$showitem=true;
 				}
-				/*itemauswahl für view ende*/
+				/*itemauswahl fï¿½w ende*/
 				
 				if($showitem==true){
 					if(empty($item->parentid) || $item->parentid==0 || block_exaport_parent_is_solved($item->parentid,$item->userid)){
@@ -1193,8 +1197,7 @@ function block_exaport_numtobool($wert){
 }
 function kuerzen($wert,$laenge){
 	if (strlen($wert)>$laenge){
-		$wert = substr($wert, 0,$laenge ); // gibt "abcd" zurück 
-	}
+		$wert = substr($wert, 0,$laenge ); // gibt "abcd" zurï¿½	}
 	return $wert;
 }
 
@@ -1316,13 +1319,13 @@ function sauber($wert){
 }
 function block_exaport_competence_selected($subjid,$userid,$itemid){
 	global $DB;
-	$sql="SELECT dmm.id,descr.id FROM {block_exacompsubjects} subj 
+	$sql="SELECT CONCAT(dmm.id,'_',descr.id,'_',item.id) as uniqueid, dmm.id,descr.id FROM {block_exacompsubjects} subj 
 		INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 		INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
 		INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
-		INNER JOIN {block_exacompdescractiv_mm} dmm ON dmm.descrid=descr.id
-		INNER JOIN {block_exaportitem} item ON item.id=dmm.activityid AND activitytype=2000
-		WHERE subj.id=".$subjid." AND item.userid=".$userid;
+		INNER JOIN {block_exacompcompactiv_mm} dmm ON dmm.compid=descr.id
+		INNER JOIN {block_exaportitem} item ON item.id=dmm.activityid AND eportfolioitem=1 AND dmm.comptype = 0 
+		WHERE dmm.comptype = 0 AND subj.id=".$subjid." AND item.userid=".$userid;
 		if ($itemid>0){
 			$sql.=" AND dmm.activityid=".$itemid;
 		}
@@ -1336,7 +1339,7 @@ function block_exaport_checkIfUpdate($userid){
 		//$conditions = array("username" => $uname,"password" => $pword);
 		//if (!$user = $DB->get_record("user", $conditions)){
 		global $DB;
-		$sql="SELECT * FROM {block_exacompsettings} WHERE course=0 AND activities='importxml'";
+		$sql="SELECT * FROM {block_exacompsettings} WHERE courseid=0 AND activities='importxml'";
 		if ($modsetting = $DB->get_record_sql($sql)){
 			if ($usersetting = $DB->get_record("block_exaportuser",array("user_id"=>$userid))){
 				if (!empty($usersetting->import_oez_tstamp)){
@@ -1363,7 +1366,7 @@ function block_exaport_installoez($userid,$isupdate=false){
 		//exacomp: timestamp hinterlegen, wann update
 		//nur wenn neue daten, dann update
 		//zuerst export_cate in array schreiben mit stid#subjid#topid, um abfragen zu sparen
-		//dann neue daten durchlaufen, wenn neu dann insert, wenn vorhanden dann title und parentid prüfen und bei bedarf update, für löschen merker machen
+		//dann neue daten durchlaufen, wenn neu dann insert, wenn vorhanden dann title und parentid prï¿½nd bei bedarf update, fï¿½chen merker machen
 		//echo $userid;die;
 		if ($cats = $DB->get_records("block_exaportcate", array("userid"=>$userid))){
 			
@@ -1376,19 +1379,21 @@ function block_exaport_installoez($userid,$isupdate=false){
 		$rse = $DB->get_record_sql($sql,array($userid));
 		if (!empty($rse->ids)){$where=" AND examp.id NOT IN(".$rse->ids.")";}*/
 	}
-	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.ressources,examp.task,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid,examp.parentid  
+	$sql="SELECT DISTINCT concat(top.id,'_',examp.id) as id,st.title as kat0, st.id as stid,st.source as stsource,st.sourceid as stsourceid, subj.title as kat1,st.description as stdescription, subj.titleshort as kat1s,subj.id as subjid,subj.source as subsource,subj.sourceid as subsourceid,subj.description as subjdescription, top.title as kat2,top.titleshort as kat2s,top.id as topid,top.description as topdescription,top.source as topsource,top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription,examp.externalurl,examp.externaltask,examp.task,examp.source as sourceexamp,examp.ressources,examp.id as exampid,examp.completefile,examp.iseditable,examp.source,examp.sourceid,examp.parentid,examp.solution  
 	FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id 
 	INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id 
 	INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id
 	INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid
 	INNER JOIN {block_exacompdescrexamp_mm} emm ON emm.descrid=descr.id
 	INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid";
-	$sql.=" WHERE st.isoez=1".$where." ";
+	$sql.=" WHERE st.isoez=1 OR st.epop=1 OR subj.epop=1 OR top.epop=1 OR descr.epop=1 OR examp.epop=1 OR (st.isoez=2 AND examp.source=2) OR (examp.source=3)".$where." ";
 	$sql.=" ORDER BY st.id,subj.id,top.id";
 //echo $sql;die;
 	$row = $DB->get_records_sql($sql);
 	$stid=-1;$subjid=-1;$topid=-1;
 	$beispiel_url="";
+	$catlist='0';
+	$itemlist='0';
 	//if ($isupdate==false){
 		foreach($row as $rs){
 			$parentid_is_old=false;
@@ -1402,8 +1407,11 @@ function block_exaport_installoez($userid,$isupdate=false){
 				}else{
 					
 					$datas=array("pid"=>0,"stid"=>$rs->stid,"sourcemod"=>"3","userid"=>$userid,"name"=>$rs->kat0,"timemodified"=>$jetzn,"course"=>"0","isoez"=>"1","subjid"=>0,"topicid"=>0,"source"=>$rs->stsource,"sourceid"=>$rs->stsourceid,"description"=>$rs->stdescription);
-					$newstid=$DB->insert_record('block_exaportcate', $datas);$stid=$rs->stid;
+					$newstid=$DB->insert_record('block_exaportcate', $datas);
+					
 				}
+				$stid=$rs->stid;
+				$catlist.=','.$newstid;
 			}
 			if ($subjid!=$rs->subjid){ 
 				$keysub=$rs->subsource."#".$rs->subsourceid."#5"; 
@@ -1413,8 +1421,10 @@ function block_exaport_installoez($userid,$isupdate=false){
 					$newsubjid=$catold[$keysub]["id"];
 					$DB->update_record('block_exaportcate', array("id"=>$newsubjid,"name"=>$kat1s,"pid"=>$newstid,"timemodified"=>time(),"stid"=>$stid,"subjid"=>$rs->subjid,"description"=>$rs->subjdescription));
 				}else{
-					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5,"description"=>$rs->subjdescription));$subjid=$rs->subjid;
+					$newsubjid=$DB->insert_record('block_exaportcate', array("pid"=>$newstid,"userid"=>$userid,"name"=>$kat1s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>0,"source"=>$rs->subsource,"sourceid"=>$rs->subsourceid,"sourcemod"=>5,"description"=>$rs->subjdescription));
 				}
+				$subjid=$rs->subjid;
+				$catlist.=','.$newsubjid;
 			}
 			if ($topid!=$rs->topid){
 				$keytop=$rs->topsource."#".$rs->topsourceid."#7";
@@ -1426,13 +1436,16 @@ function block_exaport_installoez($userid,$isupdate=false){
 					$newtopid=$catold[$keytop]["id"];
 					$DB->update_record('block_exaportcate', array("id"=>$newtopid,"name"=>$kat2s,"pid"=>$newsubjid,"timemodified"=>time(),"description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid));
 				}else{
-					$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid,"source"=>$rs->topsource,"sourceid"=>$rs->topsourceid,"sourcemod"=>7));$topid=$rs->topid;
+					$newtopid=$DB->insert_record('block_exaportcate', array("pid"=>$newsubjid,"userid"=>$userid,"name"=>$kat2s,"timemodified"=>time(),"course"=>0,"isoez"=>"1","description"=>$rs->topdescription,"stid"=>$stid,"subjid"=>$rs->subjid,"topicid"=>$rs->topid,"source"=>$rs->topsource,"sourceid"=>$rs->topsourceid,"sourcemod"=>7));
 				}
+				$topid=$rs->topid;
+				$catlist.=','.$newtopid;
 			}
+			$beispiel_url="";
 			if ($rs->externaltask!="") $beispiel_url=$rs->externaltask;
 			if ($rs->externalurl!="") $beispiel_url=$rs->externalurl;
+			if ($rs->task!="") $beispiel_url=$rs->task;
 	
-			if ($rs->completefile!="") $example_url=$rs->completefile;
 			if (!empty($rs->items)) $items=$rs->items;
 			else $items=$rs->item;
 			$iteminsert=true;
@@ -1445,24 +1458,57 @@ function block_exaport_installoez($userid,$isupdate=false){
 						$parentid_is_old=true;
 					}
 			}
-	
+			
 			if ($isupdate==true){
-				if ($itemrs = $DB->get_records("block_exaportitem",array("isoez"=>1,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"userid"=>$userid,"categoryid"=>$newtopid))){  //kategoryId mitnehmen, weil ein item kopiert und auf verschiedene kategorien zugeordnet werden kann. beim update soll dann nur das jeweilige item aktualisiert werden, sonst ist categorie falsch
+				if($rs->source==3){
+					 $sourceidtemp=$rs->exampid; //if example created from teacher in moodle, there is no sourceid. because sourceid is from komet xml tool exacomp_data.xml
+					 //$example_url=$rs->solution;
+					 $example_url=$rs->completefile;
+				}else{
+					 $sourceidtemp=$rs->sourceid;
+					 $example_url=$rs->completefile;
+				}
+				if ($itemrs = $DB->get_records("block_exaportitem",array("isoez"=>1,"source"=>$rs->source,"sourceid"=>$sourceidtemp,"userid"=>$userid,"categoryid"=>$newtopid))){  //kategoryId mitnehmen, weil ein item kopiert und auf verschiedene kategorien zugeordnet werden kann. beim update soll dann nur das jeweilige item aktualisiert werden, sonst ist categorie falsch
 					$iteminsert=false;
 					foreach($itemrs as $item){
+						$itemlist.=','.$item->id;
 						$rem_ids[0][$rs->exampid]=$item->id; //remark relation for parentids later
-						$data=array("id"=>$item->id,"userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile,"parentid"=>$pid);
+						$data=array("id"=>$item->id,"userid"=>$userid,"categoryid"=>$newtopid,"name"=>$items,"beispiel_angabe"=>$rs->exampdescription,"timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$example_url,"parentid"=>$pid);
 						$DB->update_record('block_exaportitem', $data);
 						if ($parentid_is_old) $rem_ids[1][$item->id]=intval($rs->parentid); //save old parentid from new id
 					}
 				}
 			}
 			if ($iteminsert==true) {
-				$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$rs->sourceid,"example_url"=>$rs->completefile,"parentid"=>$pid));
-				$rem_ids[0][$rs->exampid]=$newid; //remark relation for parentids later
-				if ($parentid_is_old) $rem_ids[1][$newid]=intval($rs->parentid);
+				if(!empty($items)){
+					if($rs->source==3) {
+						$sourceidtemp=$rs->exampid; //if example created from teacher in moodle, there is no sourceid. because sourceid is from komet xml tool exacomp_data.xml
+						//$example_url=$rs->solution;
+						$example_url=$rs->completefile;
+					}
+					else {
+						$sourceidtemp=$rs->sourceid;
+						$example_url=$rs->completefile;
+					}
+					$newid=$DB->insert_record('block_exaportitem', array("userid"=>$userid,"type"=>"note","categoryid"=>$newtopid,"name"=>$items,"url"=>"","intro"=>"","beispiel_angabe"=>$rs->exampdescription,"attachment"=>"","timemodified"=>time(),"courseid"=>0,"isoez"=>"1","beispiel_url"=>$beispiel_url,"exampid"=>$rs->exampid,"iseditable"=>$rs->iseditable,"source"=>$rs->source,"sourceid"=>$sourceidtemp,"example_url"=>$example_url,"parentid"=>$pid));
+					$itemlist.=','.$newid;
+					$rem_ids[0][$rs->exampid]=$newid; //remark relation for parentids later
+					if ($parentid_is_old) $rem_ids[1][$newid]=intval($rs->parentid);
+				}
 			}
 		} //end foreach $row
+		
+		$sql='DELETE FROM {block_exaportitem} WHERE id NOT IN ('.$itemlist.') AND userid='.$userid.' AND isoez=1 AND intro="" AND url="" AND attachment=""';
+		$DB->execute($sql);
+		
+		$sql='SELECT * FROM {block_exaportcate} WHERE id NOT IN ('.$catlist.') AND userid='.$userid.' AND isoez=1';
+		$rows = $DB->get_records_sql($sql);
+		foreach($rows as $row){
+			if (!$DB->get_record("block_exaportitem", array("categoryid"=>$row->id))){
+				$DB->delete_records("block_exaportcate",array("id"=>$row->id));
+			}
+		}
+		
 		$sql="UPDATE {block_exaportuser} SET oezinstall=1,import_oez_tstamp=".time()." WHERE user_id=".$userid;
 		$DB->execute($sql);
   	block_exaport_update_unset_pids('block_exaportitem',$rem_ids);

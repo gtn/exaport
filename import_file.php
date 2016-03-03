@@ -145,7 +145,7 @@ if ($imported) {
 } else {
     $exteditform->display();
 }
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 
 function import_files($unzip_dir, $structures, $i = 0, $previd=NULL) {
@@ -230,7 +230,7 @@ function import_user_image($unzip_dir, $url){
 			
 			$array = $data->description_editor;
 			//file_prepare_draft_area($array["itemid"], get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $new->id);
-			file_prepare_draft_area($array["itemid"], context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $new->id);
+			file_prepare_draft_area($array["itemid"], context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $new->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
 			//var_dump(file_get_draft_area_info($array["itemid"]));
 			
 			//file_prepare_draft_area($data->itemid, get_context_instance(CONTEXT_USER, $USER->id)->id, 'block_exaport', 'personal_information', $new->id);
@@ -338,8 +338,8 @@ function import_structure($unzip_dir, $structures, $course, $i = 0, &$xml=NULL, 
         }
     }
 }
-function import_item_competences($newid, $oldid, &$xml, $dir){
-global $USER, $DB;
+function import_item_competences($newid, $oldid, &$xml, $dir, $title){
+global $USER, $DB, $COURSE;
 
 foreach($xml->items->item as $item){
 	$id = (int)$item->attributes()->identifier[0];
@@ -349,21 +349,21 @@ foreach($xml->items->item as $item){
 			$desc = $DB->get_record('block_exacompdescriptors', array("sourceid"=>$compid));
 			$newentry = new stdClass();
 			$newentry->activityid = $newid;
-			$newentry->descid = $desc->id;
+			$newentry->compid = $desc->id;
 			$newentry->userid = $USER->id;
 			$newentry->reviewerid = $USER->id;
 			$newentry->role = 0;
-			$newentry->activitytype = 2000;
+			$newentry->eportfolioitem = 1;
 			$newentry->wert = 0;
-			$DB->insert_record("block_exacompdescuser_mm", $newentry);
+			$DB->insert_record("block_exacompcompuser_mm", $newentry);
 			
 			$newentry2 = new stdClass();
-			$newentry2->descrid = $desc->id;
+			$newentry2->compid = $desc->id;
 			$newentry2->activityid = $newid;
-			$newentry2->activitytype = 2000;
+			$newentry2->eportfolioitem = 1;
 			$newentry2->activitytitle = $title;
 			$newentry2->coursetitle = $COURSE->shortname;
-			$DB->insert_record("block_exacompdescractiv_mm", $newentry2);
+			$DB->insert_record("block_exacompcompactiv_mm", $newentry2);
 		}
 	}
 }

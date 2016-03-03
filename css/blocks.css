@@ -1,4 +1,4 @@
-#overlay {
+#exaport-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -12,7 +12,7 @@
     z-index: 2000;
 }
 
-.block{
+#exaport .block{
   display: none;
   border: 7px solid #eee;
   z-index: 2001;
@@ -22,17 +22,17 @@
     -webkit-border-radius: 10px;
  }
 
-.portfolioElement.ui-draggable{
+#exaport .portfolioElement.ui-draggable{
 	cursor: move;
 }
 
-.block-controls {
+#exaport .block-controls {
     display: inline;
     float: right;
     margin-left: 10px;
 }
 
-.block-controls a {
+#exaport .block-controls a {
     background: none repeat scroll 0 0 transparent;
     border: 0 none;
     cursor: pointer;
@@ -42,7 +42,7 @@
     width: 16px;
 }	
 
-#block_form .block-header h4 {
+#exaport-block_form .block-header h4 {
     border-bottom: 2px solid #D1D1D1;
     font-size: 1.3333em !important;
     margin: 0 5px;
@@ -50,11 +50,11 @@
     color: #1E6297;
 }
  
-#block_form th {
+#exaport-block_form th {
     text-align: left;
 }
 
-#block_form .submit {
+#exaport-block_form .submit {
     background: url("images/btn-bkgd.gif") repeat-x scroll left top #2D5308;
     font-weight: bold;
     border-color: #51732F;
@@ -69,7 +69,18 @@
     text-decoration: none;
 }
 
-.inlinelist li {
+#exaport .inlinelist li {
     display: inline;
     margin-right: 20px;
+}
+
+.unshared_block {
+	color: #aaa;
+}
+
+.unshared_message {
+	display: block;
+	float: right;
+	margin-right: 10px;
+	color:red;
 }

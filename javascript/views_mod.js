@@ -12,8 +12,8 @@ var exaportViewEdit = {};
 		checkFields: function() {
 			var ok = true;
 			
-			$('#container').find('.not-empty-check').each(function(){
-				var input = $('#container').find('input[name='+$(this).attr('for')+']');
+			$('#exaport-container').find('.not-empty-check').each(function(){
+				var input = $('#exaport-container').find('input[name='+$(this).attr('for')+']');
 				
 				if (input.length == 0) {
 					// input not found, ignore
@@ -45,7 +45,7 @@ var exaportViewEdit = {};
 			if (id != -1) 
 				newItem = lastclicked;	
 			var i = 0;
-			$('#container input[name="add_items[]"]:checked').each(function () {
+			$('#exaport-container input[name="add_items[]"]:checked').each(function () {
 				i = i+1;
 				if (i>1) {
 					var clone = $(newItem).clone();
@@ -58,7 +58,7 @@ var exaportViewEdit = {};
 				newItem.data('portfolio', data);			
 				generateItem('update', $(newItem));
 			});
-			$('#block_form').hide();
+			$('#exaport-block_form').hide();
 			overlay.hide();
 			newItem=null;
 			
@@ -72,7 +72,7 @@ var exaportViewEdit = {};
 			if (id != -1) 
 				newItem = lastclicked;	
 			var i = 0;
-			$('#container input[name="add_badges[]"]:checked').each(function () {
+			$('#exaport-container input[name="add_badges[]"]:checked').each(function () {
 				i = i+1;
 				if (i>1) {
 					var clone = $(newItem).clone();
@@ -85,7 +85,7 @@ var exaportViewEdit = {};
 				newItem.data('portfolio', data);			
 				generateItem('update', $(newItem));
 			});
-			$('#block_form').hide();
+			$('#exaport-block_form').hide();
 			overlay.hide();
 			newItem=null;
 			
@@ -93,7 +93,7 @@ var exaportViewEdit = {};
 		},
 		
 		cancelAddEdit: function() {
-			$('#block_form').hide();
+			$('#exaport-block_form').hide();
 			overlay.hide();
 			if (newItem) $(newItem).remove();
 			updateBlockData();
@@ -113,7 +113,7 @@ var exaportViewEdit = {};
 	//		data.text = $('#id_text').val();
 			newItem.data('portfolio', data);
 			generateItem('update', $(newItem));
-			$('#block_form').hide();
+			$('#exaport-block_form').hide();
 			overlay.hide();
 			newItem=null;
 			
@@ -132,7 +132,7 @@ var exaportViewEdit = {};
 			data.id = id;
 			newItem.data('portfolio', data);		
 			generateItem('update', $(newItem));	
-			$('#block_form').hide();
+			$('#exaport-block_form').hide();
 			overlay.hide();
 			newItem=null;
 			
@@ -158,7 +158,7 @@ var exaportViewEdit = {};
 			data.text = tinyMCE.get('block_intro').getContent();
 			newItem.data('portfolio', data);			
 			generateItem('update', $(newItem));	
-			$('#block_form').hide();
+			$('#exaport-block_form').hide();
 			overlay.hide();
 			newItem=null;
 
@@ -181,7 +181,7 @@ var exaportViewEdit = {};
 			data.id = id;
 			newItem.data('portfolio', data);		
 			generateItem('update', $(newItem));	
-			$('#block_form').hide();
+			$('#exaport-block_form').hide();
 			overlay.hide();
 			newItem=null;
 			
@@ -189,7 +189,7 @@ var exaportViewEdit = {};
 		},
 		
 		resetViewContent: function(){
-			// load stored blocks
+			// load stored blocks			
 			var blocks = $('form :input[name=blocks]').val();
 			if (blocks) {
 				blocks = $.parseJSON(blocks);
@@ -200,7 +200,6 @@ var exaportViewEdit = {};
 					type: 'headline'
 				}];
 			}
-
 			var portfolioDesignBlocks = $('.portfolioDesignBlocks');
 			portfolioDesignBlocks.empty();
 			$.each(blocks, function(){
@@ -239,11 +238,11 @@ var exaportViewEdit = {};
 							},
 							success: function(res) {
 								var data = JSON.parse (res);
-								$('#container').html(data.html);				
-								$('#block_form').show();
+								$('#exaport-container').html(data.html);				
+								$('#exaport-block_form').show();
 
 								// focus first element
-								$('#container').find('input:visible:first').focus();
+								$('#exaport-container').find('input:visible:first').focus();
 							}
 						});
 						updateBlockData();
@@ -285,7 +284,7 @@ var exaportViewEdit = {};
 		},
 
 		setPopupTitle: function(title){
-			$("#block_form_title").html(title);
+			$("#exaport-block_form_title").html(title);
 		},
 
 		initAddItems: function(title){
@@ -307,14 +306,16 @@ var exaportViewEdit = {};
 	});
 	
 	$(function(){
-		overlay = $('<div id="overlay" />').css({"opacity": "0.5"}).hide().appendTo(document.body);
+		overlay = $('<div id="exaport-overlay" />').css({"opacity": "0.5"}).hide().appendTo(document.body);
+		console.log(overlay);
 	});
 	
 	function updateBlockData()
 	{
 		var blocks = [];
 		$('.portfolioDesignBlocks').each(function(positionx){
-			$(this).find('li:visible').not('.block-placeholder').each(function(positiony){
+			// immediate li children, because content can have li too
+			$(this).children('li:visible').not('.block-placeholder').each(function(positiony){
 				blocks.push($.extend($(this).data('portfolio'), {
 					positionx: positionx+1,
 					positiony: positiony+1
@@ -408,8 +409,8 @@ var exaportViewEdit = {};
 					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />'+ ilink + 
-					$E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
-					'<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/pix/t/grades.gif" class="iconsmall" alt="'+'competences'+'" /></a>'+
+					$E.translate('comments')+': '+itemData.comments+'<div class="exaport-item-intro"></div>' +
+					'<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\''+itemData.competences+'\')" onmouseout="UnTip()"><img src="'+M.cfg['wwwroot']+'/pix/t/grades.png" class="iconsmall" alt="'+'competences'+'" /></a>'+
 					'</div></div>'
 				);
 			}else{
@@ -422,9 +423,11 @@ var exaportViewEdit = {};
 					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
 					$E.translate('category')+': '+itemData.category+'<br />' + ilink + 
-					$E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
+					$E.translate('comments')+': '+itemData.comments+'<div class="exaport-item-intro"></div>' +
 					'</div></div>'
 				);
+				// user html may be malformed, so savely inject it here
+				$item.find('.exaport-item-intro').html(itemData.intro);
 			}
 		} else if (data.type == 'personal_information') {
 			$item.html(
@@ -515,6 +518,12 @@ var exaportViewEdit = {};
 			$item.data('portfolio').text = $(this).val(); 			
 		}); /**/
 		updateBlockData();
+		// unshared blocks
+		if (data.unshared == 1) {
+			$item.find('div.item_info').addClass('unshared_block');
+			$item_header = $item.find('div.header').html();
+			$item.find('div.header').html($item_header + '<span class="unshared_message">Unshared</span>');
+		}
 
 		return $item;
 	}
@@ -546,12 +555,13 @@ var exaportViewEdit = {};
 			success: function(res) {
 				var data = JSON.parse(res);
 
-				$('#container').html(data.html);				
-				$('#block_form').show();
-				$("#overlay").css('cursor', 'default');
+				$('#exaport-container').html(data.html);				
+				$('#exaport-block_form').show();
+				//alert('TODO: x');
+				overlay.css('cursor', 'default');
 
 				// focus first element
-				$('#container').find('input:visible:first').focus();
+				$('#exaport-container').find('input:visible:first').focus();
 			}
 		});
 	}		
@@ -559,7 +569,7 @@ var exaportViewEdit = {};
 	function resetElementStates()
 	{
 		$('.portfolioOptions li').removeClass('selected');
-		$('.portfolioDesignBlocks li').each(function(){
+		$('.portfolioDesignBlocks > li').each(function(){
 			$('.portfolioOptions li[itemid='+$(this).data('portfolio').itemid+']').addClass('selected');
 		});
 	}	
@@ -582,14 +592,14 @@ var exaportViewEdit = {};
 	});
 
 	$(function(){
-		ExabisEportfolio.load_userlist('views_mod');
+		//ExabisEportfolio.load_userlist('views_mod');
 	});
 
 	// sharing
 	function update_sharing()
 	{
 		var share_text = '';
-		var $form = $('#view-mod');
+		var $form = $('#exaport-view-mod');
 
 		if ($form.find(':input[name=externaccess]').is(':checked')) {
 			share_text += $E.translate('externalaccess')+' ';
@@ -600,17 +610,26 @@ var exaportViewEdit = {};
 
 		if ($form.find(':input[name=internaccess]').is(':checked')) {
 			$('#internaccess-settings').show();
+			$('#internaccess-groups').hide();
 			if (share_text) {
 				share_text += ' '+$E.translate('viewand')+' ';
 			}
 			share_text += $E.translate('internalaccess')+': ';
 			
-			if ($form.find(':input[name=shareall]:checked').val() > 0) {
+			if ($form.find(':input[name=shareall]:checked').val() == 1) {
 				share_text += $E.translate('internalaccessall');
 				$('#internaccess-users').hide();
+				$('#internaccess-groups').hide();
+			} else if ($form.find(':input[name=shareall]:checked').val() == 2) {
+				share_text += $E.translate('internalaccessgroups');
+				$('#internaccess-users').hide();
+				$('#internaccess-groups').show();
+                ExabisEportfolio.load_grouplist('views_mod');
 			} else {
 				share_text += $E.translate('internalaccessusers');
+				$('#internaccess-groups').hide();
 				$('#internaccess-users').show();
+                ExabisEportfolio.load_userlist('views_mod');
 			}
 		} else {
 			$('#internaccess-settings').hide();

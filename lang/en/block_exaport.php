@@ -86,6 +86,9 @@ $string['explainingshared'] = 'These participants have shared some of their exte
 $string['explainingsharefile'] = 'To allow a participant to see the file, click on their name and then click on Save Changes.  You can choose more than one participant.';
 $string['explainingsharenote'] = 'To allow a participant to see the note, click on their name and then click on Save Changes.  You can choose more than one participant.';
 $string['file'] = 'File';
+$string['iconfile'] = 'Icon picture';
+$string['iconfile_merge'] = 'Merge this icon picture with the folder icon';
+$string['iconfile_merge_description'] = 'Icon picture will try (without any guarantee) to merge with standard folder icon. The icon will be replaced with the new image.';
 $string['firstnameshared'] = 'First Name';
 $string['go'] = 'Go!';
 $string['hidesummary'] = '(hide summary)';
@@ -122,6 +125,7 @@ $string['shareallexceptthose'] = 'Access for <span class=\'block_eportfolio_bold
 $string['sharenoneexceptthose'] = 'Access for <span class=\'block_eportfolio_bold\'>nobody</span> except the following users';
 $string['internalaccessall'] = 'Access for <span class=\'block_eportfolio_bold\'>all</span>';
 $string['internalaccessusers'] = 'Access only for the following users';
+$string['internalaccessgroups'] = 'Access only for the following groups';
 $string['externaccess'] = 'external E-Portfolio-Link';
 $string['showallusers'] = 'Show users of all my courses';
 $string['showcourseusers'] = 'Show only users of the course';
@@ -129,6 +133,7 @@ $string['sharedpersons'] = 'Persons with shared Portfolios';
 $string['moodleimport'] = 'Import from Moodle-assignments';
 $string['nomoodleimportyet'] = 'At the moment you have no submission at any assignment!';
 $string['deletecategoryconfirm'] = 'Do you really want to delete the category "{$a->name}"? All entries in this category and all subcategories will be deleted!';
+$string['deleteurlconfirm'] = 'Do you really want to delete this url?';
 $string['name'] = 'Name';
 $string['role'] = 'Role';
 $string['nousersfound'] = 'No users found';
@@ -136,6 +141,10 @@ $string['delete'] = 'Delete';
 $string['add'] = 'Add';
 $string['edit'] = 'Edit';
 $string['checkall'] = 'Check all';
+$string['grouptitle'] = 'Group title';
+$string['membersnumber'] = 'Number of listeners';
+$string['nogroupsfound'] = 'No groups found';
+$string['make_it_yours'] = 'Make it yours';
 
 // export/import
 $string['import'] = 'Import';
@@ -243,6 +252,7 @@ $string['share'] = 'Share';
 $string['explainingall'] = 'All Items in your portfolio';
 $string['share_to_other_users'] = 'Share to other users not in my courses';
 $string['other_users_course'] = 'Users not in my courses';
+$string['other_groups_course'] = 'Other courses';
 
 // Item sorting
 $string['userdefinedsort'] = 'Define your own search';
@@ -275,6 +285,10 @@ $string['view_sharing_noaccess'] = 'No Access';
 $string['show'] = "Show";
 $string['thiscourse'] = 'This course';
 $string['othercourses'] = 'other courses';
+$string['autofillview'] = 'Auto-generate a view based upon all available artefacts';
+$string['autofillview_addartefacts'] = 'New artifacts were created after creating this view. Add new artefacts to this view';
+$string['sharetoteacher'] = 'Share to the teacher of the course';
+$string['sharetoteacher_add'] = 'There is the teacher who did not share. Share to this teacher(s)';
 
 $string['createpage'] = 'Drag and drop content blocks from the tabs below to create your page.';
 $string['chooselayout'] = 'Select how you would like the columns in your page to be laid out.';
@@ -330,6 +344,12 @@ $string['sharedwith'] = 'Shared with';
 $string['sharedwith_meand'] = 'Shared with me and {$a} other users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
+$string['sharedwith_shareexternal'] = 'Shared external';
+$string['sharedwith_group'] = 'Shared with my group';
+$string['sharedwith_groupand'] = 'Shared with my group and {$a} other groups';
+$string['only_external'] = 'Only external shared views';
+$string['display_onlyexternal'] = 'Display only external shared views';
+$string['display_all'] = 'Display all views';
 
 // Copy to course
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';
@@ -396,6 +416,7 @@ $string['version_5.2.0_needed'] = 'Exabis E-Portfolio requires at least PHP-Vers
 $string['competenceinteraction'] = 'Allow interaction with block exabis competencies, in case it is installed';
 $string['opencomps'] = 'Choose your competencies';
 $string['selectcomps'] = 'Choose competencies associated with your upload!';
+$string['competences_old_version'] = 'An outdated version of Exabis Competences that is no longer supported by Exabis Eportfolio is installed on this moodle.';
 $string['expandcomps'] = 'Expand all';
 $string['contactcomps'] = 'Contract all';
 $string['studentcomps'] = 'Here you can self-assess whether you have acquired the competency with your artefact.';
@@ -412,8 +433,114 @@ $string['settings_disable_shareall_head'] = 'Disable sharing with all users';
 $string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
 $string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
 $string['settings_disable_external_comments_body'] = '';
+$string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
+$string['block_exaport_app_externaleportfolio_body'] = 'For App';
+$string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis E-Portfolio';
+$string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis E-Portfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_userquota'] = 'User quota for Exabis E-Portfolio';
+$string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis E-Portfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
+$string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with exabis competencies and dakora';
 
 $string['delete_all_shareall'] = 'Delete all shareall?';
+
+// Resume
+$string['resume'] = 'Resume';
+$string['resume_template_newresume'] = '<h2>My new resume</h2>';
+$string['resume_my'] = 'My resume';
+$string['resume_cover'] = 'Cover letter';
+$string['resume_coversaved'] = 'Cover saved';
+$string['resume_eduhistory'] = 'Education history';
+$string['resume_edu'] = 'Education';
+$string['resume_edusaved'] = 'Education saved';
+$string['resume_deleteeduconfirm'] = 'Do you really want to delete this education?';
+$string['resume_edudeleted'] = 'Education deleted';
+$string['resume_employhistory'] = 'Employment history';
+$string['resume_employ'] = 'Employment';
+$string['resume_employsaved'] = 'Employment saved';
+$string['resume_deleteemployconfirm'] = 'Do you really want to delete this employment?';
+$string['resume_employdeleted'] = 'Employment deleted';
+$string['resume_interests'] = 'Interests';
+$string['resume_interestssaved'] = 'Interests saved';
+$string['resume_startdate'] = 'Start date';
+$string['resume_enddate'] = 'End date';
+$string['resume_institution'] = 'Institution ';
+$string['resume_institutionaddress'] = 'Institution address';
+$string['resume_qualification'] = 'Qualification';
+$string['resume_qualtype'] = 'Qualification type';
+$string['resume_qualname'] = 'Qualification name';
+$string['resume_qualdescription'] = 'Qualification description';
+$string['resume_files'] = 'Attachments';
+$string['resume_employer'] = 'Employer';
+$string['resume_employeraddress'] = 'Employer address';
+$string['resume_jobtitle'] = 'Job title';
+$string['resume_position'] = 'Position';
+$string['resume_positiondescription'] = 'Position description';
+$string['resume_certif'] = 'Certifications, accreditations and awards';
+$string['resume_date'] = 'Date';
+$string['resume_title'] = 'Title';
+$string['resume_description'] = 'Description';
+$string['resume_certifsaved'] = 'Certification, accreditation or award saved';
+$string['resume_deletecertifconfirm'] = 'Do you really want to delete this certification, accreditation or award?';
+$string['resume_certifdeleted'] = 'Certification, accreditation or award deleted';
+$string['resume_public'] = 'Books and publications';
+$string['resume_contribution'] = 'Contribution';
+$string['resume_contributiondetails'] = 'Details of your contribution';
+$string['resume_url'] = 'URL';
+$string['resume_publicsaved'] = 'Books and publications saved';
+$string['resume_deletepublicconfirm'] = 'Do you really want to delete this book or publication?';
+$string['resume_publicdeleted'] = 'Book or publication deleted';
+$string['resume_mbrship'] = 'Professional memberships';
+$string['resume_mbrshipsaved'] = 'Membership saved';
+$string['resume_deletembrshipconfirm'] = 'Do you really want to delete this membership?';
+$string['resume_mbrshipdeleted'] = 'Membership deleted';
+$string['resume_mygoals'] = 'My goals';
+$string['resume_goals'] = 'Goals';
+$string['resume_goalspersonal'] = 'Personal goals';
+$string['resume_goalsacademic'] = 'Academic goals';
+$string['resume_goalscareers'] = 'Career goals';
+$string['resume_goalspersonalsaved'] = 'Personal goals saved';
+$string['resume_goalsacademicsaved'] = 'Academic goals saved';
+$string['resume_goalscareerssaved'] = 'Careers goals saved';
+$string['resume_myskills'] = 'My skills';
+$string['resume_skills'] = 'Skills';
+$string['resume_skillspersonal'] = 'Personal skills';
+$string['resume_skillsacademic'] = 'Academic skills';
+$string['resume_skillscareers'] = 'Career skills';
+$string['resume_skillspersonalsaved'] = 'Personal skills saved';
+$string['resume_skillsacademicsaved'] = 'Academic skills saved';
+$string['resume_skillscareerssaved'] = 'Careers skills saved';
+$string['resume_goalscomp'] = 'Educational standards';
+$string['resume_skillscomp'] = 'Educational standards';
+$string['resume_badges'] = 'Badges';
+$string['resume_exportto_europass'] = 'Export to Europass';
+$string['resume_exportto_europass_intro'] = 'You can generate your Curriculum Vitae from your Exaport resume<br>
+	The generated XML-file has to be inserted into the <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">online europass CV editor</a><br><br>
+	Some notes:<br>
+	<ul><li>You definitely need to check out the resulting CV</li>
+		<li>Your personal data will be taken from your Moodle account</li>
+		<li>Please check all dates</li>
+		<li>Images from the HTML-editors will not be exported</li>
+		<li>Most texts from the HTML-editors need to be reformatted</li>
+		<li>Requirements for attached files: accepted formats: PDF, PNG, JPG; size limit: 2.5MB.</li>
+	</ul>';
+$string['resume_exportto_europass_getXML'] = 'Download XML';
+$string['resume_expand'] = 'Expand all';
+$string['resume_collaps'] = 'Collaps all';
+
+// structure sharing
+$string['structure'] = 'Structure';
+$string['sharedstructures'] = 'Shared Structures';
+$string['share_structure'] = 'Share as a structure';
+$string['share_structure_description'] = 'The users will be able to copy this category and subcategories for yourself';
+$string['nothingstructureshared'] = 'Nobody is sharing a structure with you';
+$string['copystructure'] = 'Copy structure';
+$string['copystructureconfirmation'] = 'Do you really want to copy this structure?';
+$string['copytocategory'] = 'Copy to this category:';
+
+
+$string['sharedArtefacts'] = 'Group portfolios shared with you';
+$string['shareditems_category'] = 'Group portfolios shared with you';
 
 $string['create_as_note'] = 'Create as Artefact';
 $string['category_not_found'] = 'Category not found';
@@ -430,6 +557,8 @@ $string['developed'] = 'developed by';
 $stringNotUsed['nobookmarks'] = '(no bookmarks yet)';
 $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';
+
+$string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';
 
 /*langstrings for additional categories--*/
 if (file_exists($CFG->dirroot . '/blocks/exaport/block_exaport_standard_categories_de.php')){

@@ -35,6 +35,7 @@ $backtype = optional_param('backtype', 'all', PARAM_ALPHA);
 $compids = optional_param('compids', '', PARAM_TEXT);
 $backtype = block_exaport_check_item_type($backtype, true);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
+$descriptorselection = optional_param('descriptorselection',true,PARAM_BOOL);
 
 if (!confirm_sesskey()) {
 	print_error("badsessionkey", "block_exaport");
@@ -56,6 +57,57 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }
 
 $id = optional_param('id', 0, PARAM_INT);
+
+$allowEdit = block_exaport_item_is_editable($id);
+
+// echo ($allowEdit) ? "jo" : "na";die;
+
+if ($action == 'copytoself') {
+	confirm_sesskey();
+	require_once dirname(__FILE__).'/lib/sharelib.php';
+	if (!$owner_id = is_sharableitem($USER->id, $id)) {
+		die(block_exaport_get_string('bookmarknotfound'));
+		
+	}
+	
+	$conditions = array("id" => $id, "userid" => $owner_id);	
+	$source_item = $DB->get_record('block_exaportitem', $conditions);
+	
+	$copy = $source_item;
+	
+	unset($copy->id);
+	$copy->userid = $USER->id;
+	$copy->categoryid = 0;
+	$copy->timemodified = time();
+	$copy->shareall = 0;
+	$copy->externaccess = 0;
+	$copy->externcomment = 0;
+	$copy->shareall = 0;
+	
+	$newitem_id = $DB->insert_record('block_exaportitem', $copy);
+	if ($copy->type=='file') {
+		$fs = get_file_storage();
+		$fileinfo = array(
+			'component' => 'block_exaport',
+			'filearea' => 'item_file',     
+			'itemid' => $id); 
+		$ownerusercontext = context_user::instance($owner_id);
+		$usercontext = context_user::instance($USER->id);
+		$oldfiles = $fs->get_area_files($ownerusercontext->id, 'block_exaport', 'item_file', $id);
+		foreach ($oldfiles as $f) {
+			$newfile_params = array(
+				'contextid'	=> $usercontext->id,
+				'itemid'    => $newitem_id,
+				'userid' 	=> $USER->id
+				);
+			$filecopy = $fs->create_file_from_storedfile($newfile_params, $f->get_id());
+		};
+	};
+	
+	$returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid='.$courseid."&categoryid=-1&userid=".$owner_id;
+	redirect($returnurl);
+} 
+
 if ($id) {
 	$conditions = array("id" => $id, "userid" => $USER->id);
 	if (!$existing = $DB->get_record('block_exaportitem', $conditions)) {
@@ -84,9 +136,9 @@ if ($existing && $comp) {
 	// initialize with empty string
 	if (empty($existing->compids)) $existing->compids = '';
 	
-	$competences = $DB->get_records('block_exacompdescractiv_mm', array("activityid" => $existing->id, "activitytype" => 2000));
+	$competences = $DB->get_records('block_exacompcompactiv_mm', array("activityid" => $existing->id, "eportfolioitem" => 1));
 	foreach ($competences as $competence) {
-		$existing->compids .= $competence->descrid . ',';
+		$existing->compids .= $competence->compid . ',';
 	}
 	if (!$competences)
 		$existing->compids = null;
@@ -94,7 +146,7 @@ if ($existing && $comp) {
 $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&categoryid=" . $categoryid;
 
 // delete item
-if ($action == 'delete') {
+if ($action == 'delete' && $allowEdit) {
 	if (!$existing) {
 		print_error("bookmarknotfound", "block_exaport");
 	}
@@ -111,12 +163,13 @@ if ($action == 'delete') {
 		echo '<br />';
 		//notice_yesno(get_string("delete".$type."confirm", "block_exaport"), 'item.php', 'view_items.php', $optionsyes, $optionsno, 'post', 'get');
 		echo $OUTPUT->confirm(get_string("delete" . $type . "confirm", "block_exaport"), new moodle_url('item.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
+		echo block_exaport_wrapperdivend();
 		echo $OUTPUT->footer();
 		die;
 	}
 }
 
-if ($action == 'movetocategory') {
+if ($action == 'movetocategory'  && $allowEdit) {
 	confirm_sesskey();
 
 	if (!$existing) {
@@ -136,7 +189,6 @@ if ($action == 'movetocategory') {
 	exit;
 }
 
-
 require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
 $textfieldoptions = array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id));
@@ -145,14 +197,14 @@ $useTextarea = false;
 if ($existing && $existing->intro && preg_match('!<iframe!i', $existing->intro))
 	$useTextarea = true;
 
-$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'useTextarea'=>$useTextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action));
+$editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type, Array('current' => $existing, 'useTextarea'=>$useTextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course, 'type' => $type, 'action' => $action, 'allowedit' => $allowEdit));
 
 if ($editform->is_cancelled()) {
 	redirect($returnurl);
 } else if ($editform->no_submit_button_pressed()) {
 	die("nosubmitbutton");
 	//no_submit_button_actions($editform, $sitecontext);
-} else if ($fromform = $editform->get_data()) {
+} else if (($fromform = $editform->get_data())  && $allowEdit) {
 	switch ($action) {
 		case 'add':
 			$fromform->type = $type;
@@ -162,6 +214,7 @@ if ($editform->is_cancelled()) {
 			break;
 
 		case 'edit':
+            $fromform->type = $type;
 			if (!$existing) {
 				print_error("bookmarknotfound", "block_exaport");
 			}
@@ -181,6 +234,7 @@ $extra_content = '';
 // gui setup
 $post = new stdClass();
 $post->introformat = FORMAT_HTML;
+$post->allowedit = $allowEdit;
 
 switch ($action) {
 	case 'add':
@@ -224,19 +278,33 @@ switch ($action) {
 					$extra_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
 				}
 				$extra_content .= "</div>";
+                
+                // Filemanager for editing file
+                $draftitemid = file_get_submitted_draft_itemid('file');
+                $context = context_user::instance($USER->id);
+                file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
+                                        array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 
+                $post->file = $draftitemid;   
 			}
 				
 			if (!$extra_content) {
 				$extra_content = 'File not found';
 			}
 		}
+		
+		// Filemanager for editing icon picture 
+		$draftitemid = file_get_submitted_draft_itemid('iconfile');
+		$context = context_user::instance($USER->id);
+		file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_iconfile', $post->id,
+								array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));                 
+		$post->iconfile = $draftitemid;   
 
 		break;
 	default :
 		print_error("unknownaction", "block_exaport");
 }
 
-$comp = block_exaport_check_competence_interaction();
+$comp = block_exaport_check_competence_interaction() && $descriptorselection;
 
 if ($comp) {
 	$PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
@@ -248,7 +316,11 @@ block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($bac
 if ($comp) {
 	echo '<fieldset id="general" style="border: 1px solid;">';
 	echo '<legend class="ftoggler"><b>' . get_string("competences", "block_exaport") . '</b></legend>';
-	echo "<p style='margin-left: 5px;'><a class='competences' href='#'>" . get_string("selectcomps", "block_exaport") . "</a>";
+	if(file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php'))
+		echo "<p style='margin-left: 5px;'><a class='competences' href='#'>" . get_string("selectcomps", "block_exaport") . "</a>";
+	else{
+		echo "<p style='margin-left: 5px;'".get_string("competences_old_version", "block_exaport");
+	}
 	echo "<div style='margin-left: 5px;' id='comptitles'></div></p>";
 	echo '</fieldset>';
 	?>
@@ -280,7 +352,7 @@ if ($comp) {
 $editform->set_data($post);
 echo $OUTPUT->box($extra_content);
 $editform->display();
-
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 
 /**
@@ -299,15 +371,33 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 		if ($post->url=='http://') $post->url="";
 		else if (strpos($post->url,'http://') === false && strpos($post->url,'https://') === false) $post->url = "http://".$post->url;
 	}
+    
+    $context = context_user::instance($USER->id);
+    // Updating file.
+    if ($post->type == 'file') {
+		// checking userquoata
+		$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
+		if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
+			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+		};
+    }
+
+	// icon for item
+	// checking userquoata
+	$upload_filesizes = block_exaport_get_filesize_by_draftid($post->iconfile);
+	if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)) {
+		file_save_draft_area_files($post->iconfile, $context->id, 'block_exaport', 'item_iconfile', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+	};
+    
 	if ($DB->update_record('block_exaportitem', $post)) {
-		add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
+		block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit', $post->name);
 	} else {
 		print_error('updateposterror', 'block_exaport', $returnurl);
 	}
 	$interaction = block_exaport_check_competence_interaction();
 	if ($interaction) {
-		$DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $post->id, "activitytype" => 2000));
-		$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id));
+		$DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $post->id, "eportfolioitem" => 1));
+		$DB->delete_records('block_exacompcompuser_mm', array("activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
 		$comps = $post->compids;
 		if ($comps) {
 			$comps = explode(",", $comps);
@@ -315,8 +405,8 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 
 			foreach ($comps as $comp) {
 				if ($comp != 0)
-					$DB->insert_record('block_exacompdescractiv_mm', array("descrid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "activitytitle" => $post->name, "coursetitle" => $course->shortname));
-				$DB->insert_record('block_exacompdescuser_mm', array("descid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
+					$DB->insert_record('block_exacompcompactiv_mm', array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "activitytitle" => $post->name, "coursetitle" => $course->shortname));
+				$DB->insert_record('block_exacompcompuser_mm', array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
 			}
 		}
 	}
@@ -346,11 +436,25 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 			$DB->update_record('block_exaportitem', $post);
 		}
 
+		$context = context_user::instance($USER->id);
 		if ($post->type == 'file') {
 			// save uploaded file in user filearea
-			$context = context_user::instance($USER->id);
-			file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, null);
+			// checking userquoata
+			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
+			if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
+				file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+			};
 		}
+		
+		// icon picture
+		if ($post->iconfile) {
+			// checking userquoata
+			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->iconfile);
+			if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)) {
+				file_save_draft_area_files($post->iconfile, $context->id, 'block_exaport', 'item_iconfile', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+			};
+		};
+		
 		$comps = $post->compids;
 		if ($comps) {
 			$comps = explode(",", $comps);
@@ -358,11 +462,11 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 
 			foreach ($comps as $comp) {
 				if ($comp != 0)
-					$DB->insert_record('block_exacompdescractiv_mm', array("descrid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "activitytitle" => $post->name, "coursetitle" => $course->shortname));
-				$DB->insert_record('block_exacompdescuser_mm', array("descid" => $comp, "activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
+					$DB->insert_record('block_exacompcompactiv_mm', array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "activitytitle" => $post->name, "coursetitle" => $course->shortname));
+				$DB->insert_record('block_exacompcompuser_mm', array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0));
 			}
 		}
-		add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add', $post->name);
+		block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add', $post->name);
 	} else {
 		print_error('addposterror', 'block_exaport', $returnurl);
 	}
@@ -383,11 +487,13 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
 	$interaction = block_exaport_check_competence_interaction();
 	if ($interaction) {
-		$DB->delete_records('block_exacompdescractiv_mm', array("activityid" => $post->id, "activitytype" => 2000));
-		$DB->delete_records('block_exacompdescuser_mm', array("activityid" => $post->id, "activitytype" => 2000, "reviewerid" => $USER->id));
+		$DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $post->id, "eportfolioitem" => 1));
+		$DB->delete_records('block_exacompcompuser_mm', array("activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
+		$DB->delete_records('block_exacompitemexample', array('itemid' => $post->id));
 	}
-
-	add_to_log(SITEID, 'blog', 'delete', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
+	
+	
+	block_exaport_add_to_log(SITEID, 'blog', 'delete', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
 
 	if (!$status) {
 		print_error('deleteposterror', 'block_exaport', $returnurl);

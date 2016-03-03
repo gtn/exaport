@@ -1,27 +1,27 @@
-#view .view-column {
+#exaport #view .view-column {
 	padding-left: 10px;
 }
-#view .view-column-1 {
+#exaport #view .view-column-1 {
 	padding-left: 0;
 }
 
-#view .view-personal-information {
+#exaport #view .view-personal-information {
 	border: 1px solid #ddd;
 	padding: 4px 8px;
 	margin-bottom: 10px;
 	overflow: hidden;
 }
-#view .view-header {
+#exaport #view .view-header {
 	padding: 14px 8px 3px 8px;
 	margin: 0 0 10px 0;
 }
-#view .view-text {
+#exaport #view .view-text {
 	border: 1px solid #ddd;
 	padding: 4px 8px;
 	margin-bottom: 10px;
 }
 
-#view .view-item {
+#exaport #view .view-item {
 	border: 1px solid #ddd;
 	padding: 4px 8px;
 	margin-bottom: 10px;
@@ -31,79 +31,79 @@
 	color: #000;
 	text-decoration: none;
 }
-#view .view-item:hover {
+#exaport #view .view-item:hover {
 	background: #eee;
 }
-#view .view-item-header {
+#exaport #view .view-item-header {
 	background: url(../pix/bookmarksnotes.png) 0 2px no-repeat;
 	padding-left: 20px;
 	display: block;
 }
-#view .view-item-type-file .view-item-header {
+#exaport #view .view-item-type-file .view-item-header {
 	background-image: url(../pix/bookmarksfiles.png);
 }
-#view .view-item-type-link .view-item-header {
+#exaport #view .view-item-type-link .view-item-header {
 	background-image: url(../pix/bookmarkslinks.png);
 }
-#view .view-item-text {
+#exaport #view .view-item-text {
 	padding: 4px 0 0 0;
 	display: block;
 }
-#view .view-item-link {
+#exaport #view .view-item-link {
 	display: block;
 	padding: 4px 8px;
 	text-align: right;
 	font-size: 12px;
 	clear: both;
 }
-#view .view-item:hover .view-item-link {
+#exaport #view .view-item:hover .view-item-link {
 	text-decoration: underline;
 }
-#view .view-item-image {
+#exaport #view .view-item-image {
 	float:right; position: relative;
 }
 
 /* layouts */
-.table_layout {
+#exaport .table_layout {
 	width: 100%;
 }
-.table_layout td {
+#exaport .table_layout td {
 	vertical-align: top;
 }
 
-.layout1 td {
+#exaport .layout1 td {
 	width: 100%;
 }
-.layout2 td {
+#exaport .layout2 td {
 	width: 50%;
 }
-.layout3 .td1 {
+#exaport .layout3 .td1 {
 	width: 67%;
 }
-.layout4 .td1 {
+#exaport .layout4 .td1 {
 	width: 33%;
 }
-.layout5 td {
+#exaport .layout5 td {
 	width: 33%;
 }
-.layout6 .td1, .layout6 .td3 {
+#exaport .layout6 .td1, #exaport .layout6 .td3 {
 	width: 25%;
 }
-.layout7 .td1, .layout7 .td3 {
+#exaport .layout7 .td1, #exaport .layout7 .td3 {
 	width: 15%;
 }
-.layout8 td {
+#exaport .layout8 td {
 	width: 25%;
 }
-.layout9 .td1, .layout9 .td4 {
+#exaport .layout9 .td1, #exaport .layout9 .td4 {
 	width: 20%;
 }
-.layout9 .td2, .layout9 .td3 {
+#exaport .layout9 .td2, #exaport .layout9 .td3 {
 	width: 30%;
 }
-.layout10 td {
+#exaport .layout10 td {
 	width: 20%;
 }
-#view .view-text {
+#exaport #view .view-text {
 overflow: hidden;
 }

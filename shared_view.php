@@ -239,7 +239,6 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 		} elseif ($block->type == 'badge') {
 			if (count($badges) == 0)
 				continue;
-			echo '<div class="header view-header">'.nl2br($block->block_title).'</div>';
 			$badge = null;
 			foreach ($badges as $tmp) {
 				if ($tmp->id == $block->itemid) {
@@ -251,6 +250,8 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 				// badge not found
 				continue;
 			}
+			echo '<div class="header">'.nl2br($badge->name).'</div>';
+			echo '<div class="view-text">';
 			echo '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
 			if (!$badge->courseid) { // For badges with courseid = NULL
 				$badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
@@ -260,6 +261,10 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			}
 			echo '<img src="'.$badge->imageUrl.'">';
 			echo '</div>';
+			echo '<div class="badge-description">';
+			echo $badge->description;
+			echo '</div>';			
+			echo '</div>';			
 		} else {
 			// text
 			echo '<div class="header">'.$block->block_title.'</div>';

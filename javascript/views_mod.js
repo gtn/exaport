@@ -487,6 +487,8 @@ var exaportViewEdit = {};
 					'<div class="header">'+$E.translate('view_specialitem_badge')+': '+badge.name+'</div>' +
 					'<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">' +
 					'<img style="max-width: 100%; max-height: 100%;" src="'+badge.imageUrl+'">' +
+					'</div>'+
+					'<div class="body">'+badge.description+'</div>'
 	/*				+
 					'</div>' +
 					'<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
@@ -494,7 +496,6 @@ var exaportViewEdit = {};
 					$E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
 					'</div>
 					*/
-					'</div>'
 				);
 			}
 		} else {		

@@ -238,6 +238,9 @@ function block_exaport_init_js_css() {
 
 	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
+	$PAGE->requires->css('/blocks/exaport/css/styles.css');
+
+
 	$scriptName = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
 	if (file_exists($CFG->dirroot.'/blocks/exaport/css/'.$scriptName.'.css'))
 		$PAGE->requires->css('/blocks/exaport/css/'.$scriptName.'.css');
@@ -985,10 +988,10 @@ function block_exaport_get_view_blocks($view) {
 
 		// clean html texts for output
 		if (isset($block->print_text) && $block->print_text) {
-			$block->print_text = clean_text($block->print_text, FORMAT_HTML);
+			$block->print_text = format_text($block->print_text, FORMAT_HTML);
 		}
 		if (isset($block->intro) && $block->intro) {
-			$block->intro = clean_text($block->intro, FORMAT_HTML);
+			$block->intro = format_text($block->intro, FORMAT_HTML);
 		}
 
 		$blocks[$block->id] = $block;
@@ -1055,7 +1058,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 
 		if ($item->intro) {
 			$item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
-			$item->intro = clean_text($item->intro, FORMAT_HTML);
+			$item->intro = format_text($item->intro, FORMAT_HTML);
 		}
 
 		//get competences of the item

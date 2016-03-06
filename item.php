@@ -256,7 +256,7 @@ switch ($action) {
 
 				$extra_content = "<div class='block_eportfolio_center'>\n";
 				if ($file->is_valid_image()) {	// Image attachments don't get printed as links
-					$extra_content .= "<img src=\"$ffurl\" alt=\"" . format_string($post->name) . "\" />";
+					$extra_content .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . format_string($post->name) . "\" /></div>";
 				} else {
 					$extra_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
 				}
@@ -302,7 +302,7 @@ if ($exacomp_active) {
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
 
 if ($exacomp_active) {
-	echo '<fieldset id="general" style="border: 1px solid;">';
+	echo '<fieldset id="general" style="border: 1px solid #ddd; margin: 10px;">';
 	echo '<legend class="ftoggler"><b>' . get_string("competences", "block_exaport") . '</b></legend>';
 	if(file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php'))
 		echo "<p style='margin-left: 5px;'><a class='competences' href='#'>" . get_string("selectcomps", "block_exaport") . "</a>";

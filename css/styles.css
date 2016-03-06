@@ -1,0 +1,13 @@
+div.item-detail-image {
+	padding: 10px;
+	display: inline-block;
+	border: 1px solid #E3DFD4;
+
+	-webkit-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
+	-moz-box-shadow:	0px 0px 5px rgba(50, 50, 50, 0.21);
+	box-shadow:		 0px 0px 5px rgba(50, 50, 50, 0.21);
+}
+div.item-detail-image img {
+	max-width: 800px;
+	max-height: 600px;
+}

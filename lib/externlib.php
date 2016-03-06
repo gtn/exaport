@@ -41,7 +41,7 @@ function block_exaport_print_extern_item($item, $access) {
 			$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id);
 			
 			if ($file->is_valid_image()) {	// Image attachments don't get printed as links
-				$box_content .= "<div><img src=\"$ffurl\" alt=\"" . s($item->name) . "\" /></div>";
+				$box_content .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . s($item->name) . "\" /></div>";
 			} else {
 				//echo $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $link));
 				$box_content .= "<p class=\"filelink\">" . $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
@@ -74,6 +74,7 @@ function block_exaport_print_extern_item($item, $access) {
 	}
 
 	$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
+	$intro = format_text($intro);
 	if ($item->url) {
 			$box_content .= '<p><a target="_blank" href="'.s($item->url).'">' . str_replace('http://', '', $item->url) . '</a></p>';
 		}

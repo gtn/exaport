@@ -125,8 +125,10 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 	echo '<td class="view-column td'.$i.'">';
 	if (isset($columns[$i]))
 	foreach ($columns[$i] as $block) {
-		if ($block->text)
+		if ($block->text) {
 			$block->text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $access);
+			$block->text = format_text($block->text, FORMAT_HTML);
+		}
 
 		if ($block->type == 'item') {
 			$item = $block->item; 
@@ -195,6 +197,7 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 						}
 						echo '</div>';
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
+			$intro = format_text($intro, FORMAT_HTML);
 			echo $file_params;			
 			echo '<div class="view-item-text">';
 			if ($item->url) {
@@ -262,14 +265,14 @@ for ($i = 1; $i<=$cols_layout[$view->layout]; $i++) {
 			echo '<img src="'.$badge->imageUrl.'">';
 			echo '</div>';
 			echo '<div class="badge-description">';
-			echo $badge->description;
+			echo format_text($badge->description, FORMAT_HTML);
 			echo '</div>';			
 			echo '</div>';			
 		} else {
 			// text
 			echo '<div class="header">'.$block->block_title.'</div>';
 			echo '<div class="view-text">';
-			echo $block->text;
+			echo format_text($block->text, FORMAT_HTML);
 			echo '</div>';
 		}
 	}	

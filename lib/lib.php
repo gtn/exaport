@@ -278,56 +278,52 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	$tabs = array();
 
 	if (block_exaport_course_has_desp()) {
-		$tabs[] = new tabobject('back', $CFG->wwwroot . '/blocks/desp/index.php?courseid=' . $COURSE->id, get_string("back_to_desp", "block_exaport"), '', true);
+		$tabs['back'] = new tabobject('back', $CFG->wwwroot . '/blocks/desp/index.php?courseid=' . $COURSE->id, get_string("back_to_desp", "block_exaport"), '', true);
 	}
 
-	$tabs[] = new tabobject('personal', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("personal", "block_exaport"), '', true);
+	$tabs['personal'] = new tabobject('personal', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("personal", "block_exaport"), '', true);
 	// $tabs[] = new tabobject('categories', $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $COURSE->id, get_string("categories", "block_exaport"), '', true);
-	$tabs[] = new tabobject('bookmarks', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("bookmarks"), '', true);
-	$tabs[] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
-	$tabs[] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
-	$tabs[] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
+	$tabs['bookmarks'] = new tabobject('bookmarks', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("bookmarks"), '', true);
+	$tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
+	$tabs['exportimport'] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
+	$tabs['sharedbookmarks'] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
 	if (has_sharablestructure($USER->id))
-		$tabs[] = new tabobject('sharedstructures', $CFG->wwwroot . '/blocks/exaport/shared_structures.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedstructures"), '', true);
+		$tabs['sharedstructures'] = new tabobject('sharedstructures', $CFG->wwwroot . '/blocks/exaport/shared_structures.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedstructures"), '', true);
 
-	// tabs f�r das untermen�
-	$tabs_sub = array();
-	// ausgew�hlte tabs f�r untermen�s
-	$activetabsubs = Array();
+	$tabs['personal']->subtree[] = new tabobject('personalinfo', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("explainpersonal", "block_exaport"), '', true);
+	$tabs['personal']->subtree[] = new tabobject('resume', s($CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id), get_string("resume", "block_exaport"), '', true);
 
-	if (strpos($item_identifier, 'views') === 0) {
+	$tab_item_identifier = preg_replace('!_.*!', '', $item_identifier);
+	$tab_sub_item_identifier = preg_replace('!_.*!', '', $sub_item_identifier);
+
+	if (strpos($tab_item_identifier, 'bookmarks') === 0) {
+		$tab_item_identifier = 'bookmarks';
+	}
+
+	// kind of hacked here, find another solution
+	if ($tab_item_identifier == 'views') {
 		$id = optional_param('id', 0, PARAM_INT);
 		if ($id>0) {
-			$activetabsubs[] = $sub_item_identifier;
-			
-			$tabs_sub[] = new tabobject('title', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'),get_string("viewtitle", "block_exaport"), '', true);		
-			$tabs_sub[] = new tabobject('layout', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'),get_string("viewlayout", "block_exaport"), '', true);
-			$tabs_sub[] = new tabobject('content', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'),get_string("viewcontent", "block_exaport"), '', true);
+			$tabs['views']->subtree[] = new tabobject('title', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'),get_string("viewtitle", "block_exaport"), '', true);
+			$tabs['views']->subtree[] = new tabobject('layout', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'),get_string("viewlayout", "block_exaport"), '', true);
+			$tabs['views']->subtree[] = new tabobject('content', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'),get_string("viewcontent", "block_exaport"), '', true);
 			if (has_capability('block/exaport:shareextern', context_system::instance()) || has_capability('block/exaport:shareintern', context_system::instance())) {
-				$tabs_sub[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);			
+				$tabs['views']->subtree[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);
 			}
 		}
-	} elseif (strpos($item_identifier, 'personal') === 0) {
-		$activetabsubs[] = $sub_item_identifier;
-		$tabs_sub[] = new tabobject('personalinfo', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("explainpersonal", "block_exaport"), '', true);
-		$tabs_sub[] = new tabobject('resume', s($CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id), get_string("resume", "block_exaport"), '', true);
-	} elseif (strpos($item_identifier, 'bookmarks') === 0) {
-		$activetabsubs[] = $item_identifier;
-		$currenttab = 'bookmarks';
-	} elseif (strpos($item_identifier, 'exportimport') === 0) {
-		$currenttab = 'exportimport';
-
-		// unterpunkt?
-		if ($tmp = substr($item_identifier, strlen($currenttab))) {
-			$nav_item_identifier = $tmp;
-		}
-
-		if (strpos($nav_item_identifier, 'export') !== false)
-			$icon = 'export';
-		else
-			$icon = 'import';
 	}
 
+	$tabtree = new tabtree($tabs, $currenttab);
+	if ($tab_sub_item_identifier && $tabobj = $tabtree->find($tab_sub_item_identifier)) {
+		// overwrite active and selected
+		$tabobj->active = true;
+		$tabobj->selected = true;
+	}
+	if ($tabobj = $tabtree->find($tab_item_identifier)) {
+		// overwrite active and selected
+		$tabobj->active = true;
+		$tabobj->selected = true;
+	}
 
 	$item_name = get_string($nav_item_identifier, "block_exaport");
 	if ($item_name[0] == '[')
@@ -352,25 +348,19 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 		echo '<link href="'.$CFG->wwwroot.'/blocks/desp/styles.css" rel="stylesheet" type="text/css" />';
 	}
 
-	$OUTPUT->heading("<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/" . $icon . ".png\" width=\"16\" height=\"16\" alt='icon-$item_identifier' /> " . $strbookmarks . ': ' . $item_name);
-
-	print_tabs(array($tabs, $tabs_sub), $currenttab, null, $activetabsubs);
+	echo $OUTPUT->render($tabtree);
 
 	if (block_exaport_course_has_desp() && (strpos($currenttab,'bookmarks') === 0) ) {
-		
-		
-			
-			   echo '<div id="messageboxses1"';
-				//if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
-				echo '>
-					<div id="messagetxtses1">
-						'.get_string("desp_einleitung", "block_exaport").'
-					</div>
-				</div>
-				
-				<br /><br />';
+		echo '<div id="messageboxses1"';
+		//if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
+		echo '>
+			<div id="messagetxtses1">
+				'.get_string("desp_einleitung", "block_exaport").'
+			</div>
+		</div>
+
+		<br /><br />';
 	}
-	
 }
 
 function block_exaport_get_string($string, $param=null) {

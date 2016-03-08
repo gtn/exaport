@@ -40,7 +40,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }
 $url = '/blocks/exabis_competences/export_scorm.php';
 $PAGE->set_url($url);
-block_exaport_print_header("exportimportexport");
+block_exaport_print_header("exportimport", "exportimportexport");
 
 if (!defined('FILE_APPEND')) {
 	define('FILE_APPEND', 1);

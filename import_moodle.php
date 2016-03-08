@@ -37,7 +37,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }
 $url = '/blocks/exabis_competences/import_moodle.php';
 $PAGE->set_url($url);
-block_exaport_print_header("exportimportmoodleimport");
+block_exaport_print_header("exportimport", "exportimportmoodleimport");
 
 $modassign=block_exaport_assignmentversion();
 if ($modassign->new) {

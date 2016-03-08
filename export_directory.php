@@ -57,7 +57,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 $url = '/blocks/exabis_competences/export_scorm.php';
 $PAGE->set_url($url);
 if (!$confirm)
-	block_exaport_print_header("exportimportexport");
+	block_exaport_print_header("exportimport", "exportimportexport");
 
 function export_data_file_area_name() {
 	global $USER;

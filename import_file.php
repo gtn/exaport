@@ -54,7 +54,7 @@ if ($exteditform->is_cancelled()) {
 	//no_submit_button_actions($exteditform, $sitecontext);
 }
 
-block_exaport_print_header("exportimportimport");
+block_exaport_print_header("exportimport", "exportimportimport");
 
 ////////
 if ($fromform = $exteditform->get_data()) {

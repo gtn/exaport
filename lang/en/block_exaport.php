@@ -144,6 +144,7 @@ $string['import'] = 'Import';
 $string['explainexport'] = 'Export your portfolio here.';
 $string['createexport'] = 'Create SCORM-File';
 $string['clicktodownloadscorm'] = 'Press button to download the SCORM file:';
+$string['add_directory_structure'] = 'Add directory-structure';
 $string['download'] = 'Download';
 $string['endedit'] = 'End editing';
 $string['change'] = 'Change';

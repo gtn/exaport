@@ -384,7 +384,7 @@ if ($editform->is_cancelled()) {
 				$block->viewid = $dbView->id;
 
 				// media process
-				if ($block->type=='media') {
+				if (!empty($block->type) && $block->type=='media') {
 					if (!empty($block->contentmedia)) {
 						if (empty($block->width)) $block->width = 360; else $block->width = (int) $block->width;
 						if (empty($block->height)) $block->height = 240; else $block->height = (int) $block->height;
@@ -915,20 +915,5 @@ if ($type!='title') {
 	echo '</div></form>';
 };
 
-echo '<div id="exaport-block_form" class="block">
-		<div class="block-controls">				
-			<a class="delete" title="'.get_string('closewindow').'" onclick="exaportViewEdit.cancelAddEdit();" href="#"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/remove-block.png" alt="" /></a>
-		</div>
-		<div class="block-header">
-			<h4 id="block_form_title">'.get_string('cofigureblock','block_exaport').'</h4>
-		</div>
-		<div class="block-content">
-			<div id="exaport-container"></div>
-		</div>
-	</div>
-	<script type="text/javascript"> // for valid html and move block to body parent
-		jQueryExaport("#exaport-block_form").appendTo("#page-blocks-exabis_competences-views_mod");
-	</script>
-	';
 	echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();

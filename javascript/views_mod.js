@@ -20,17 +20,17 @@ var exaportViewEdit = {};
 
 (function($){
 
+	var $E = window.block_exaport;
+
 	var newItem = null, lastclicked = null;
 	
-	var overlay = null;
-
 	$.extend(exaportViewEdit, {
 	
 		checkFields: function() {
 			var ok = true;
 			
-			$('#exaport-container').find('.not-empty-check').each(function(){
-				var input = $('#exaport-container').find('input[name='+$(this).attr('for')+']');
+			$E.last_popup.$body.find('.not-empty-check').each(function(){
+				var input = $E.last_popup.$body.find('input[name='+$(this).attr('for')+']');
 				
 				if (input.length == 0) {
 					// input not found, ignore
@@ -62,7 +62,7 @@ var exaportViewEdit = {};
 			if (id != -1) 
 				newItem = lastclicked;	
 			var i = 0;
-			$('#exaport-container input[name="add_items[]"]:checked').each(function () {
+			$E.last_popup.$body.find('input[name="add_items[]"]:checked').each(function () {
 				i = i+1;
 				if (i>1) {
 					var clone = $(newItem).clone();
@@ -75,8 +75,7 @@ var exaportViewEdit = {};
 				newItem.data('portfolio', data);			
 				generateItem('update', $(newItem));
 			});
-			$('#exaport-block_form').hide();
-			overlay.hide();
+			$E.last_popup.remove();
 			newItem=null;
 			
 			saveBlockData();
@@ -89,7 +88,7 @@ var exaportViewEdit = {};
 			if (id != -1) 
 				newItem = lastclicked;	
 			var i = 0;
-			$('#exaport-container input[name="add_badges[]"]:checked').each(function () {
+			$E.last_popup.$body.find('input[name="add_badges[]"]:checked').each(function () {
 				i = i+1;
 				if (i>1) {
 					var clone = $(newItem).clone();
@@ -102,17 +101,15 @@ var exaportViewEdit = {};
 				newItem.data('portfolio', data);			
 				generateItem('update', $(newItem));
 			});
-			$('#exaport-block_form').hide();
-			overlay.hide();
+			$E.last_popup.remove();
 			newItem=null;
 			
 			saveBlockData();
 		},
 		
 		cancelAddEdit: function() {
-			$('#exaport-block_form').hide();
-			overlay.hide();
-			if (newItem) $(newItem).remove();
+			$E.last_popup.remove();
+
 			updateBlockData();
 		},
 		
@@ -130,8 +127,7 @@ var exaportViewEdit = {};
 	//		data.text = $('#id_text').val();
 			newItem.data('portfolio', data);
 			generateItem('update', $(newItem));
-			$('#exaport-block_form').hide();
-			overlay.hide();
+			$E.last_popup.remove();
 			newItem=null;
 			
 			saveBlockData();
@@ -149,8 +145,7 @@ var exaportViewEdit = {};
 			data.id = id;
 			newItem.data('portfolio', data);		
 			generateItem('update', $(newItem));	
-			$('#exaport-block_form').hide();
-			overlay.hide();
+			$E.last_popup.remove();
 			newItem=null;
 			
 			saveBlockData();
@@ -175,8 +170,7 @@ var exaportViewEdit = {};
 			data.text = tinyMCE.get('block_intro').getContent();
 			newItem.data('portfolio', data);			
 			generateItem('update', $(newItem));	
-			$('#exaport-block_form').hide();
-			overlay.hide();
+			$E.last_popup.remove();
 			newItem=null;
 
 			saveBlockData();
@@ -198,8 +192,7 @@ var exaportViewEdit = {};
 			data.id = id;
 			newItem.data('portfolio', data);		
 			generateItem('update', $(newItem));	
-			$('#exaport-block_form').hide();
-			overlay.hide();
+			$E.last_popup.remove();
 			newItem=null;
 			
 			saveBlockData();
@@ -241,7 +234,6 @@ var exaportViewEdit = {};
 					// get ajax only for item from the top block
 					var uiattr = $(ui.item[0]).closest('ul').prop("className");
 					if (uiattr.search("portfolioDesignBlocks")==-1) {
-						overlay.show();
 
 						$.ajax({
 							url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
@@ -255,11 +247,13 @@ var exaportViewEdit = {};
 							},
 							success: function(res) {
 								var data = JSON.parse (res);
-								$('#exaport-container').html(data.html);				
-								$('#exaport-block_form').show();
+
+								var popup = $E.popup({ bodyContent: data.html, onhide: function(){
+									if (newItem) $(newItem).remove();
+								} });
 
 								// focus first element
-								$('#exaport-container').find('input:visible:first').focus();
+								$E.last_popup.$body.find('input:visible:first').focus();
 							}
 						});
 						updateBlockData();
@@ -301,7 +295,9 @@ var exaportViewEdit = {};
 		},
 
 		setPopupTitle: function(title){
-			$("#exaport-block_form_title").html(title);
+			if (block_exaport.last_popup) {
+				block_exaport.last_popup.set('headerContent', title);
+			}
 		},
 
 		initAddItems: function(title){
@@ -322,11 +318,6 @@ var exaportViewEdit = {};
 		}
 	});
 	
-	$(function(){
-		overlay = $('<div id="exaport-overlay" />').css({"opacity": "0.5"}).hide().appendTo(document.body);
-		console.log(overlay);
-	});
-	
 	function updateBlockData()
 	{
 		var blocks = [];
@@ -345,8 +336,6 @@ var exaportViewEdit = {};
 	}
 	
 	function saveBlockData() {
-		overlay.show();
-
 		var data = $('form#view_edit_form').serializeArray();
 		data.push({name: 'ajax', value: 1});
 		$.ajax({
@@ -357,7 +346,6 @@ var exaportViewEdit = {};
 				var data = JSON.parse(res);
 				$('form :input[name=blocks]').val(data.blocks);
 				exaportViewEdit.resetViewContent();
-				overlay.hide();
 			}
 		});
 	}
@@ -557,7 +545,6 @@ var exaportViewEdit = {};
 	{
 		var item_id = $(this).parent().find("#id_holder").html();
 
-		overlay.show();
 		lastclicked = $(this).parent();
 		
 		$.ajax({
@@ -573,13 +560,10 @@ var exaportViewEdit = {};
 			success: function(res) {
 				var data = JSON.parse(res);
 
-				$('#exaport-container').html(data.html);				
-				$('#exaport-block_form').show();
-				//alert('TODO: x');
-				overlay.css('cursor', 'default');
+				var popup = $E.popup({ bodyContent: data.html });
 
 				// focus first element
-				$('#exaport-container').find('input:visible:first').focus();
+				popup.$body.find('input:visible:first').focus();
 			}
 		});
 	}		

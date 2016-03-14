@@ -319,6 +319,40 @@ var exaportViewEdit = {};
 					$(this).removeClass('checked');
 				}
 			});
+		},
+		
+		filterItemsByTag: function() {
+			$('div.add-item-category').hide();
+			$('div.add-item').show();
+			$('div.add-item-sub').show();
+			$('tr.sharedArtefacts').show();
+			var selectedTag = $('.tagfilter').val();
+			if (selectedTag != '') {
+				$('div.add-item').each(function() {
+					var elementTags = $(this).data('tags');
+					if (elementTags !== undefined) {
+						if (elementTags.indexOf(selectedTag) == -1)
+							$(this).hide();
+					} else {
+						$(this).hide();
+					};
+				});
+			} else {
+				 $('div.add-item-category, div.add-item-sub').show();
+			};
+			// hide category names if it has no visible artefact
+			$('div.add-item-sub').each(function(){
+				if($(this).find('div.add-item:visible').length == 0) {
+				   $(this).hide();
+				};
+			});
+			$('div.add-item:visible').each(function(){
+				var categoryId = $(this).data('category');
+				$('div.add-item-category[data-category="'+categoryId+'"]').show();
+			});		
+			// list of shared artefacts
+			if ($('div.add-item[data-category="sharedFromUser"]:visible').length == 0)
+				$('tr.sharedArtefacts').hide();		
 		}
 	});
 	

@@ -212,6 +212,7 @@ if ($editform->is_cancelled()) {
 	redirect($returnurl);
 }
 
+include_once($CFG->dirroot.'/tag/lib.php');
 $strAction = "";
 $extra_content = '';
 // gui setup
@@ -242,6 +243,7 @@ switch ($action) {
 		$post->type = $existing->type;
 		$post->compids = isset($existing->compids) ? $existing->compids : '';
 		$post->langid = $existing->langid;
+		$post->tags = tag_get_tags_array('exaport_item', $id);
 
 		if (!$useTextarea)
 			$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'item_content', $post->id);
@@ -437,6 +439,10 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 			}
 		}
 	}
+	
+	// Tags.
+    tag_set('exaport_item', $post->id, $post->tags, 'block_exaport', context_user::instance($USER->id)->id);
+
 }
 
 /**
@@ -494,6 +500,9 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 			}
 		}
 		block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add', $post->name);
+			
+		// Tags.
+		tag_set('exaport_item', $post->id, $post->tags, 'block_exaport', context_user::instance($USER->id)->id);
 	} else {
 		print_error('addposterror', 'block_exaport', $returnurl);
 	}

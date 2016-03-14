@@ -1301,3 +1301,33 @@ function block_exaport_delete_user_data($userid){
 	$result = $DB->delete_records('block_exaportresume', array('user_id'=>$userid));
 	$result = $DB->delete_records('block_exaportuser', array('user_id'=>$userid));
 }
+
+function block_exaport_get_item_tags($itemid, $orderBy = '') {
+	global $DB;
+	$tags = array();
+	if (is_array($itemid)) {
+		// Tags for a few items.
+		if (count($itemid)>0) {
+			list($whereItems, $paramItems) = $DB->get_in_or_equal($itemid, SQL_PARAMS_NAMED);
+			$result = $DB->get_records_sql('SELECT DISTINCT rawname 			
+									FROM {tag_instance} ti LEFT JOIN {tag} t ON t.id=ti.tagid 
+									WHERE component=\'block_exaport\' AND itemtype=\'exaport_item\' AND itemid '.$whereItems.' '.
+									($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
+								$paramItems);	
+		};
+	} else {
+		// Tags for one item.
+		$result = $DB->get_records_sql('SELECT * 
+									FROM {tag_instance} ti LEFT JOIN {tag} t ON t.id=ti.tagid 
+									WHERE component=\'block_exaport\' AND itemtype=\'exaport_item\' AND itemid = ?'.
+									($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
+								array($itemid));			
+	}
+	if (!$result) {
+		$result = array();
+	};	
+	foreach ($result as &$tag) {
+		$tags[] = $tag->rawname;
+	}
+	return $tags;
+}

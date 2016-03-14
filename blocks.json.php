@@ -114,11 +114,14 @@ function get_form_items($id, $block_data=array()) {
 		", array($USER->id));
 	
 	$itemsByCategory = array();
+	$itemIdList = array();
 	// save items to category
 	foreach ($items as $item) {
 		if (empty($itemsByCategory[$item->categoryid]))
 			$itemsByCategory[$item->categoryid] = array();
+		$item->tags = block_exaport_get_item_tags($item->id);
 		$itemsByCategory[$item->categoryid][] = $item;
+		$itemIdList[] = $item->id;
 	}
 	
 	$content  = "";
@@ -127,6 +130,15 @@ function get_form_items($id, $block_data=array()) {
 	$content .= '<table style="width: 100%;">';
 	$content .= '<tr><th>';
 	$content .= '<label for="list">'.get_string('listofartefacts','block_exaport').'</label>';
+	$usertags = block_exaport_get_item_tags($itemIdList, 'rawname');
+	if (count($usertags) > 0) {
+		$content .= '<select class="tagfilter" onChange="exaportViewEdit.filterItemsByTag()">';
+		$content .= '<option value="">filter by tag</option>';
+		foreach ($usertags as $tagname) {
+			$content .= '<option value="'.$tagname.'">'.$tagname.'</option>';
+		};
+		$content .= '</select>';
+	};
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
 
@@ -147,11 +159,14 @@ function get_form_items($id, $block_data=array()) {
 		
 		if (($category->id > 0) && ($category->pid > 0)) $content .= '<div class="add-item-sub">';
 		
-		$content .= '<div class="add-item-category">'.$category->name.'</div>';
+		$content .= '<div class="add-item-category" data-category="'.$category->id.'">'.$category->name.'</div>';
 	
 		if (!empty($itemsByCategory[$category->id])) {
 			foreach ($itemsByCategory[$category->id] as $item) {
-				$content .= '<div class="add-item">';
+				$tags = '';
+				if (count($item->tags)>0)
+					$tags = 'data-tags=\''.json_encode($item->tags, JSON_UNESCAPED_UNICODE).'\'';  // JSON_UNESCAPED_UNICODE --> PHP 5.4
+				$content .= '<div class="add-item" '.$tags.' data-category="'.$category->id.'">';
 				$content .= '<input type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
 				$content .= $item->name;
 				$content .= '</div>';
@@ -186,15 +201,19 @@ function get_form_items($id, $block_data=array()) {
 	// Shared artefacts for this user
 	$sharedartefacts = exaport_get_shared_items_for_user($USER->id);
 	if (count($sharedartefacts) > 0) {
-		$content .= '<tr><td><hr width=95% style="margin: 3px auto;">';	
+		$content .= '<tr class="sharedArtefacts"><td><hr width=95% style="margin: 3px auto;">';	
 		$content .= get_string('sharedArtefacts', 'block_exaport');
 		$content .= '</td></tr>';
-		$content .= '<tr><td>';	
+		$content .= '<tr class="sharedArtefacts"><td>';	
 		foreach($sharedartefacts as $key => $user) {
-			$content .= '<div class="add-item-category">'.$user['fullname'].'</div>';
+			$content .= '<div class="add-item-category" data-category="sharedFromUser">'.$user['fullname'].'</div>';
 			if (isset($user['items']) && is_array($user['items']) && count($user['items']) > 0) {
 				foreach ($user['items'] as $itemid => $item) {
-					$content .= '<div class="add-item">';
+					$item->tags = block_exaport_get_item_tags($item->id);
+					$tags = '';
+					if (count($item->tags)>0)
+						$tags = 'data-tags=\''.json_encode($item->tags, JSON_UNESCAPED_UNICODE).'\'';  // JSON_UNESCAPED_UNICODE --> PHP 5.4
+					$content .= '<div class="add-item" '.$tags.' data-category="sharedFromUser">';
 					$content .= '<input type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
 					$content .= $item->name;
 					$content .= '</div>';							

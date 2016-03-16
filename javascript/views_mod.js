@@ -254,6 +254,8 @@ var exaportViewEdit = {};
 
 								// focus first element
 								$E.last_popup.$body.find('input:visible:first').focus();
+								
+								$('#blockform').on('change keydown paste input', '#filterByTitle', exaportViewEdit.filterItemsByTitle);
 							}
 						});
 						updateBlockData();
@@ -318,6 +320,8 @@ var exaportViewEdit = {};
 		},
 		
 		filterItemsByTag: function() {
+			// clear the search by title
+			$('#blockform #filterByTitle').val('')
 			$('div.add-item-category').hide();
 			$('div.add-item').show();
 			$('div.add-item-sub').show();
@@ -349,6 +353,47 @@ var exaportViewEdit = {};
 			// list of shared artefacts
 			if ($('div.add-item[data-category="sharedFromUser"]:visible').length == 0)
 				$('tr.sharedArtefacts').hide();		
+		},
+		
+		filterItemsByTitle: function() {
+			// reset filter by tag;
+			$('.tagfilter')[0].selectedIndex = 0;
+			var text = $('#blockform #filterByTitle').val().toLowerCase();
+ 			$('div.add-item-category').hide();
+			$('div.add-item').show();
+			$('div.add-item-sub').show();
+			$('tr.sharedArtefacts').show();
+			if (text != '') {
+				$('div.add-item:visible').each(function() {
+					var elementText = $(this).text();
+					if (elementText.toLowerCase().indexOf(text) > -1) {
+						$(this).show();
+					} else {
+						$(this).hide();
+					};
+				});
+			} else {
+				 $('div.add-item-category, div.add-item-sub').show();
+			};
+			// hide category names if it has no visible artefact
+			$('div.add-item-sub').each(function(){
+				if($(this).find('div.add-item:visible').length == 0) {
+				   $(this).hide();
+				};
+			});
+			$('div.add-item:visible').each(function(){
+				var categoryId = $(this).data('category');
+				$('div.add-item-category[data-category="'+categoryId+'"]').show();
+			});		
+			// list of shared artefacts
+			if ($('div.add-item[data-category="sharedFromUser"]:visible').length == 0)
+				$('tr.sharedArtefacts').hide();		 
+		},
+		
+		clearItemFilters: function() {
+			$('.tagfilter')[0].selectedIndex = 0;
+			$('#blockform #filterByTitle').val('');
+			exaportViewEdit.filterItemsByTitle();
 		}
 	});
 	
@@ -598,6 +643,7 @@ var exaportViewEdit = {};
 
 				// focus first element
 				popup.$body.find('input:visible:first').focus();
+				
 			}
 		});
 	}		

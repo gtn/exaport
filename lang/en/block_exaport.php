@@ -338,6 +338,10 @@ $string['height'] = 'Height';
 $string['width'] = 'Width';
 $string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
 
+$string['filterByTag'] = 'Filter by tag';
+$string['searchByTitle'] = 'Search';
+$string['clearAllFilers'] = 'Clear all filters';
+
 $string['sharedwith'] = 'Shared with';
 $string['sharedwith_meand'] = 'Shared with me and {$a} other users';
 $string['sharedwith_onlyme'] = 'Shared only with me';

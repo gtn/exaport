@@ -81,7 +81,7 @@ foreach ($data as $key=>$value) {
 
 /**/
 function get_form_items($id, $block_data=array()) {
-	global $DB, $USER;
+	global $DB, $USER, $CFG;
 	
 	// read all categories
 	$categories = $DB->get_records_sql('
@@ -128,17 +128,24 @@ function get_form_items($id, $block_data=array()) {
 	$content .= '<form enctype="multipart/form-data" id="blockform" method="post" class="pieform" onsubmit="exaportViewEdit.addItem('.$id.'); return false;">';
 	$content .= '<input type="hidden" name="item_id" value="'.$id.'">';	
 	$content .= '<table style="width: 100%;">';
+	// filter by tag
 	$content .= '<tr><th>';
 	$content .= '<label for="list">'.get_string('listofartefacts','block_exaport').'</label>';
 	$usertags = block_exaport_get_item_tags($itemIdList, 'rawname');
 	if (count($usertags) > 0) {
-		$content .= '<select class="tagfilter" onChange="exaportViewEdit.filterItemsByTag()">';
-		$content .= '<option value="">filter by tag</option>';
+		$content .= '<select class="tagfilter" onChange="exaportViewEdit.filterItemsByTag();">';
+		$content .= '<option value="">'.get_string('filterByTag','block_exaport').'</option>';
 		foreach ($usertags as $tagname) {
 			$content .= '<option value="'.$tagname.'">'.$tagname.'</option>';
 		};
 		$content .= '</select>';
 	};
+	
+	// search by title
+	$content .= ' <input type="text" id="filterByTitle" placeholder="'.get_string('searchByTitle','block_exaport').'">';
+	// clear all filters
+	$content .= ' <img id="clearAllFilters" src="'.$CFG->wwwroot.'/blocks/exaport/pix/clearfilters.png" 
+			title="'.get_string('clearAllFilers','block_exaport').'" onClick="exaportViewEdit.clearItemFilters();">';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
 

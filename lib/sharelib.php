@@ -219,7 +219,7 @@ function block_exaport_get_item($itemid, $access, $epopaccess=false)
 		// in view mode
 
 		if (!$view = block_exaport_get_view_from_access($matches[1])) {
-			print_error("viewnotfound", "block_exaport");
+			throw new \block_exacomp\permission_exception("viewnotfound", "block_exaport");
 		}
 		//Parameter richtig?!
 		//$conditions = array("viewid" => $view->id, "type" => 'item', "itemid" => $itemid);

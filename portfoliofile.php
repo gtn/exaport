@@ -38,15 +38,21 @@ if (empty($CFG->filelifetime)) {
 
 $relativepath = get_file_argument('portfoliofile.php'); // the check of the parameter to PARAM_PATH is executed inside get_file_argument
 $access = optional_param('access', 0, PARAM_TEXT);
-$id = optional_param('itemid', 0, PARAM_INT);
+$itemid = optional_param('itemid', 0, PARAM_INT);
 $userhash = optional_param('hv', 0, PARAM_ALPHANUM);
+// old elove token
 $token = optional_param('token', null, PARAM_ALPHANUM);
+// new token
+$wstoken = optional_param('wstoken', null, PARAM_ALPHANUM);
 //block_exaport_epop_checkhash
 $epopaccess=false;
 
 //authenticate the user
 
-if ($token) {
+if ($token && !$wstoken) {
+	// this whole block is old elove logic
+	// TODO: refactor and delete!
+
 	$webservicelib = new webservice();
 	$authenticationinfo = $webservicelib->authenticate_user($token);
 	$accessPath = explode('/', $access);
@@ -54,7 +60,7 @@ if ($token) {
 	if(strpos($accessPath[2],'-'))
 		$accessPath[2] = (explode('-', $accessPath[2])[0]);
 
-	$item = block_exaport_get_elove_item($id, $accessPath[2], $authenticationinfo);
+	$item = block_exaport_get_elove_item($itemid, $accessPath[2], $authenticationinfo);
 	if(!$item)
 		print_error("viewnotfound", "block_exaport");
 
@@ -66,7 +72,11 @@ if ($token) {
 	exit;
 }
 
-if ($userhash!="0"){
+$authenticationinfo = null;
+if ($wstoken) {
+	$webservicelib = new webservice();
+	$authenticationinfo = $webservicelib->authenticate_user($wstoken);
+} elseif ($userhash){
 	$user=block_exaport_epop_checkhash($userhash);
 	if ($user==false) {require_login();}
 	else {$epopaccess=true;}
@@ -75,17 +85,18 @@ if ($userhash!="0"){
 }
 
 
-if ($access && $id) {
+if ($itemid) {
 	// file storage logic
-	
+
 	if ($epopaccess){
-		$item = block_exaport_get_item_epop($id, $user);
-	} else {
-		$item = block_exaport_get_item($id, $access, false);
+		$item = block_exaport_get_item_epop($itemid, $user);
+	} elseif ($access) {
+		$item = block_exaport_get_item($itemid, $access, false);
+	} elseif (($userid = optional_param('userid', 0, PARAM_INT)) && $authenticationinfo) {
+		$item = block_exaport_get_elove_item($itemid, $userid, $authenticationinfo);
 	}
-	
+
 	if (!$item) print_error('Item not found');
-	//if ($item->type != 'file') print_error('Item not a file');
 
 	if ($commentid = optional_param('commentid', 0, PARAM_INT)) {
 		$comment = $DB->get_record("block_exaportitemcomm", ['itemid' => $item->id, 'id' => $commentid]);

@@ -164,6 +164,30 @@ function block_exaport_get_view_from_access($access)
 
 		$view->access = new stdClass();
 		$view->access->request = 'intern';
+	} else if ($accessPath[0] == 'email') {
+		list($hash, $email, $phrase) = explode('-', $accessPath[1]);
+
+		$conditions = array("hash" => $hash);
+		if (!$view = $DB->get_record("block_exaportview", $conditions)) {
+			// view not found
+			return;
+		};
+
+		$sharedEmails = explode(';', $view->sharedemails);
+		if (!in_array($email, $sharedEmails)) {
+			// view is not shared for this email
+			return;
+		};
+		
+		$emailPhrase = block_exaport_securephrase_viewemail($view, $email);
+		if ($emailPhrase !== $phrase)
+			return;
+
+		$userid = clean_param($hash[0], PARAM_INT);
+		$hash =  clean_param($hash[1], PARAM_ALPHANUM);
+
+		$view->access = new stdClass();
+		$view->access->request = 'extern';
 	}
 
 	return $view;

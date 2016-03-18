@@ -237,7 +237,12 @@ class block_exaport_view_edit_form extends moodleform {
 							if (block_exaport_shareall_enabled()) {
 								$mform->addElement('text', 'shareall');
 								$mform->setType('shareall', PARAM_INT);							
-							}
+							};
+							
+							if ($this->_customdata['view']->sharedemails != '')
+								$this->_customdata['view']->emailaccess = 1;
+							$mform->addElement('checkbox', 'emailaccess');
+							$mform->setType('emailaccess', PARAM_INT);
 						break;
 			default: break;
 		};		
@@ -306,6 +311,9 @@ if ($editform->is_cancelled()) {
 		}
 		if (empty($dbView->externcomment)) {
 			$dbView->externcomment = 0;
+		}
+		if (empty($dbView->emailaccess)) {
+			$dbView->emailaccess = 0;
 		}
 	}/**/
 
@@ -481,6 +489,18 @@ if ($editform->is_cancelled()) {
 					array('courseid' => $courseid, 'id' => $dbView->id, 'q' => optional_param('share_to_other_users_q', '', PARAM_RAW))));
 				exit;
 			}
+			
+			if ($dbView->emailaccess) {
+				$newemails = optional_param('emailsshared', '', PARAM_RAW);
+				if ($newemails != '') {
+					$oldemails = $view->sharedemails;
+					if ($oldemails != $newemails) {
+						$newemails = block_exaport_emailaccess_sendemails($view, $oldemails, $newemails);
+						$dbView->sharedemails = $newemails;
+						$DB->update_record('block_exaportview', $dbView);
+					};
+				};
+			};
 			break;
 		default: break;
 	};
@@ -900,7 +920,19 @@ break;
 						echo '</table></div>';
 					echo '</td></tr>';
 				}
-		
+				
+				echo '<tr><td style="height: 10px"></td></tr>';
+				echo '<tr><td style="padding-right: 10px; width: 10px">';
+					echo $form['elements_by_name']['emailaccess']['html'];
+					echo '</td><td>'.get_string("emailaccess", "block_exaport").'</td></tr>';
+					
+					if ($view) {
+						echo '<tr id="emailaccess-settings"><td></td><td>';
+						echo '<textarea name="emailsshared">'.$view->sharedemails.'</textarea>';
+						echo get_string("emailaccessdescription", "block_exaport");
+						echo '</td></tr>';
+					};
+						
 				echo '</table></div>';
 			echo '</div>';
 		echo '</div>';
@@ -917,3 +949,67 @@ if ($type!='title') {
 
 	echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();
+
+
+function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails) {
+	global $CFG, $USER, $DB;
+	$courseid = optional_param('courseid', 0, PARAM_INT);
+	$userfrom = $USER;
+	$userfrom->maildisplay = true;
+	$oldArray = explode(';', $oldemails);
+	$newArray = preg_split('/(;|,)/', $newemails);
+	$newArray = array_map('trim', $newArray);
+	$newArray = array_filter($newArray);
+	$newemails = implode(';', $newArray);
+	// New emails - need to send emails
+	$needToSend = array_diff($newArray, $oldArray);
+	if (count($needToSend)>0) {
+		foreach ($needToSend as $email) {
+			if (filter_var($email, FILTER_VALIDATE_EMAIL)) {				
+				$accessphrase = block_exaport_securephrase_viewemail($view, $email);
+				$url = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=email/'.$view->hash.'-'.$email.'-'.$accessphrase;
+				$message_subject = get_string("emailaccessmessagesubject", "block_exaport");
+				$a = new stdClass();
+				$a->url = $url;
+				$a->sendername = fullname($USER);
+				$a->viewname = $view->name;
+				$message_text = get_string("emailaccessmessage", "block_exaport", $a);
+				$message_html = get_string("emailaccessmessageHTML", "block_exaport", $a);
+				
+				// Find user by email.
+				$userconditions = array('email' => $email);
+				if (!$toUser = $DB->get_record("user", $userconditions, '*', MUST_EXIST)) {
+					$toUser = new stdClass();
+					$toUser->email = $email;
+					$toUser->firstname = '';
+					$toUser->lastname = '';
+					$toUser->maildisplay = true;
+					$toUser->mailformat = 1;
+					$toUser->id = -99;
+					$toUser->firstnamephonetic = '';
+					$toUser->lastnamephonetic = '';
+					$toUser->middlename = '';
+					$toUser->alternatename = '';
+				} else {
+					// send moodle message if the user exists
+					$message = new stdClass();
+					$message->component = 'block_exaport';
+					$message->name = 'sharing';
+					$message->userfrom = $userfrom;
+					$message->userto = $toUser;
+					$message->subject = $message_subject;
+					$message->fullmessage = $message_text;
+					$message->fullmessageformat = FORMAT_HTML;
+					$message->fullmessagehtml = $message_html;
+					$message->smallmessage = '';
+					$message->notification = 1;
+					message_send($message);
+				};				
+				// Send email.
+				email_to_user($toUser, $USER, $message_subject, $message_text, $message_html);
+			};
+		};
+	};	
+	return $newemails;
+}
+

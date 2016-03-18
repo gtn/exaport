@@ -1331,3 +1331,9 @@ function block_exaport_get_item_tags($itemid, $orderBy = '') {
 	}
 	return $tags;
 }
+
+function block_exaport_securephrase_viewemail(&$view, $email)
+{
+	// secure phrase relates to the email, view id and '==' chars
+	return md5($email.$view->id.'=='.$view->id);
+} 

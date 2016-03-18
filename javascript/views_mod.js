@@ -716,6 +716,16 @@ var exaportViewEdit = {};
 		} else {
 			$('#internaccess-settings').hide();
 		}
+		
+		if ($form.find(':input[name=emailaccess]').is(':checked')) {
+			if (share_text) {
+				share_text += ' '+$E.translate('viewand')+' ';
+			};
+			share_text += $E.translate('emailaccess')+' ';
+			$('#emailaccess-settings').show();
+		} else {
+			$('#emailaccess-settings').hide();
+		};
 
 		if (!share_text) {
 			share_text = $E.translate('view_sharing_noaccess');

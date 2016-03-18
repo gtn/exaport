@@ -120,6 +120,11 @@ $string['internalaccessall'] = 'Access for <span class=\'block_eportfolio_bold\'
 $string['internalaccessusers'] = 'Access only for the following users';
 $string['internalaccessgroups'] = 'Access only for the following groups';
 $string['externaccess'] = 'external E-Portfolio-Link';
+$string['emailaccess'] = 'Access for emails';
+$string['emailaccessdescription'] = 'Emails, separated by commas or semicolon.<br /> For every new email will be sent unique link with access to this view. Deleting of email will delete access by this link.';
+$string['emailaccessmessagesubject'] = 'Shared view for you';
+$string['emailaccessmessage'] = 'Hello! {$a->sendername} has shared his view "{$a->viewname}" for you. Please look it by this link: {$a->url}';
+$string['emailaccessmessageHTML'] = 'Hello!<br /> {$a->sendername} has shared his view "{$a->viewname}" for you.<br /> Please look it by <a href="{$a->url}">this link</a>';
 $string['showallusers'] = 'Show users of all my courses';
 $string['showcourseusers'] = 'Show only users of the course';
 $string['sharedpersons'] = 'Persons with shared Portfolios';

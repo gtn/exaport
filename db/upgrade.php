@@ -769,5 +769,17 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		}
 	}
 
+	if ($oldversion < 2016031800) {
+		// views sharing by email	           
+		$table = new xmldb_table('block_exaportview');
+		$field = new xmldb_field('sharedemails', XMLDB_TYPE_TEXT, 'medium', null, null, null, null, null);
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+	
+		// exaport savepoint reached
+		upgrade_block_savepoint(true, 2016031800, 'exaport');
+	}
+
    return $result;
 }

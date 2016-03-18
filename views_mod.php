@@ -618,7 +618,7 @@ $translations = array(
 	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',
 	'file', 'note', 'link',
-	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',
+	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify', 'emailaccess',
 	'checkall',
 );
 

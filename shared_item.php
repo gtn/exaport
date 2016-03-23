@@ -37,6 +37,11 @@ require_login(0, true);
 $PAGE->requires->js( new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/vedeo-js/video.js'), true);
 $PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
 $item = block_exaport_get_item($itemid, $access);
+
+if (!$item) {
+	print_error("bookmarknotfound", "block_exaport");
+}
+
 $item->intro = process_media_url($item->intro, 320, 240);
 
 if ($deletecomment) {
@@ -62,10 +67,6 @@ if ($deletecomment) {
 	}
 }
 	
-if (!$item) {
-	print_error("bookmarknotfound", "block_exaport");
-}
-
 $conditions = array("id" => $item->userid);
 if (!$user = $DB->get_record("user", $conditions)) {
 	print_error("nouserforid", "block_exaport");

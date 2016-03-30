@@ -17,16 +17,12 @@
 //
 // This copyright notice MUST APPEAR in all copies of the script!
 
-require_once("$CFG->libdir/externallib.php");
-require_once("$CFG->libdir/weblib.php");
-require_once $CFG->dirroot . '/blocks/exaport/lib/lib.php';
-require_once $CFG->dirroot . '/lib/filelib.php';
+defined('MOODLE_INTERNAL') || die();
 
-/**
- * COMPETENCE TYPES
- */
-define('TYPE_DESCRIPTOR', 0);
-define('TYPE_TOPIC', 1);
+require __DIR__.'/inc.php';
+require_once $CFG->libdir.'/externallib.php';
+require_once $CFG->libdir.'/weblib.php';
+require_once $CFG->dirroot.'/lib/filelib.php';
 
 class block_exaport_external extends external_api {
 
@@ -457,11 +453,11 @@ class block_exaport_external extends external_api {
 		if($val == 1){
 			$item = $DB->get_record("block_exaportitem", array("id"=>$itemid));
 			$course = $DB->get_record("course", array("id"=>$item->courseid));
-			$DB->insert_record("block_exacompcompactiv_mm", array('compid'=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1, 'activitytitle'=>$item->name, 'coursetitle'=>$course->shortname, 'comptype'=>TYPE_DESCRIPTOR));
-			$DB->insert_record('block_exacompcompuser_mm', array("compid" => $descriptorid, "activityid" => $itemid, "eportfolioitem" => 1, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0, 'comptype'=>TYPE_DESCRIPTOR));
+			$DB->insert_record("block_exacompcompactiv_mm", array('compid'=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1, 'activitytitle'=>$item->name, 'coursetitle'=>$course->shortname, 'comptype'=>\block_exacomp\TYPE_DESCRIPTOR));
+			$DB->insert_record('block_exacompcompuser_mm', array("compid" => $descriptorid, "activityid" => $itemid, "eportfolioitem" => 1, "reviewerid" => $USER->id, "userid" => $USER->id, "role" => 0, 'comptype'=>\block_exacomp\TYPE_DESCRIPTOR));
 		}else if($val == 0){
-			$DB->delete_records("block_exacompcompactiv_mm", array('compid'=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1, 'comptype'=>TYPE_DESCRIPTOR));
-			$DB->delete_records("block_exacompcompuser_mm", array("compid"=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1, 'comptype'=>TYPE_DESCRIPTOR));
+			$DB->delete_records("block_exacompcompactiv_mm", array('compid'=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1, 'comptype'=>\block_exacomp\TYPE_DESCRIPTOR));
+			$DB->delete_records("block_exacompcompuser_mm", array("compid"=>$descriptorid, 'activityid'=>$itemid, 'eportfolioitem'=>1, 'comptype'=>\block_exacomp\TYPE_DESCRIPTOR));
 		}
 
 		return array("success"=>true);
@@ -1172,7 +1168,7 @@ class block_exaport_external extends external_api {
 		global $CFG,$DB,$USER;
 		$params = self::validate_parameters(self::get_competencies_by_item_parameters(), array('itemid'=>$itemid));
 
-		return $DB->get_records("block_exacompcompactiv_mm",array("activityid"=>$itemid,"eportfolioitem"=>1, "comptype"=>TYPE_DESCRIPTOR),"","compid as competenceid");
+		return $DB->get_records("block_exacompcompactiv_mm",array("activityid"=>$itemid,"eportfolioitem"=>1, "comptype"=>\block_exacomp\TYPE_DESCRIPTOR),"","compid as competenceid");
 	}
 
 	/**

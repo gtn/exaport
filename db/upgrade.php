@@ -781,5 +781,49 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		upgrade_block_savepoint(true, 2016031800, 'exaport');
 	}
 
+	if ($oldversion < 2016040500) {
+		// views sharing by email - remastering
+		$table = new xmldb_table('block_exaportviewemailshar');
+		// Adding fields to table block_exaportcat_structshar.
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+		$table->add_field('viewid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('email', XMLDB_TYPE_CHAR, '150', null, XMLDB_NOTNULL, null, null);
+		$table->add_field('hash', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, null);
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Conditionally launch create table for block_exaportviewemailshar.
+		if (!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		};        
+		// move old emails to the new table
+		foreach ($views = $DB->get_records('block_exaportview') as $view) {
+			$update = new stdClass();
+			$update->id	= $view->id;
+			if ($view->sharedemails != '') {
+				$sharedEmails = explode(';', $view->sharedemails);
+				foreach($sharedEmails as $newEmail) {
+					// old secure phrase. For keep old links.
+					$hash = md5($newEmail.$view->id.'=='.$view->id);
+					$insertData = array('viewid' => $view->id, 'email' => $newEmail, 'hash' => $hash);
+					$DB->insert_record('block_exaportviewemailshar', $insertData);						
+					$update->sharedemails = 1;
+					$DB->update_record('block_exaportview', $update);						
+				};
+			} else {
+				$update->sharedemails = 0;
+				$DB->update_record('block_exaportview', $update);										
+			};
+		};
+		
+		// Changing type of field sharedemails on table block_exaportview to int
+		$table = new xmldb_table('block_exaportview');
+		$field = new xmldb_field('sharedemails', XMLDB_TYPE_INTEGER, '3', null, null, null, '0', null);
+		// Launch change of type for field sharedemails
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->change_field_type($table, $field);
+		};	
+		// exaport savepoint reached
+		upgrade_block_savepoint(true, 2016040500, 'exaport');
+	}	
+	
    return $result;
 }

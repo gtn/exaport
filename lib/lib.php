@@ -1334,6 +1334,6 @@ function block_exaport_get_item_tags($itemid, $orderBy = '') {
 
 function block_exaport_securephrase_viewemail(&$view, $email)
 {
-	// secure phrase relates to the email, view id and '==' chars
-	return md5($email.$view->id.'=='.$view->id);
+	// secure phrase relates to the email
+	return substr(sha1(rand() . $view->id . $email. time(). rand()), rand(0, 7), 32);
 } 

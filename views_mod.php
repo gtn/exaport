@@ -239,10 +239,9 @@ class block_exaport_view_edit_form extends moodleform {
 								$mform->setType('shareall', PARAM_INT);							
 							};
 							
-							if ($this->_customdata['view']->sharedemails != '')
-								$this->_customdata['view']->emailaccess = 1;
-							$mform->addElement('checkbox', 'emailaccess');
-							$mform->setType('emailaccess', PARAM_INT);
+							$mform->addElement('checkbox', 'sharedemails');
+							$mform->setType('sharedemails', PARAM_INT);
+							
 						break;
 			default: break;
 		};		
@@ -312,8 +311,8 @@ if ($editform->is_cancelled()) {
 		if (empty($dbView->externcomment)) {
 			$dbView->externcomment = 0;
 		}
-		if (empty($dbView->emailaccess)) {
-			$dbView->emailaccess = 0;
+		if (empty($dbView->sharedemails)) {
+			$dbView->sharedemails = 0;
 		}
 	}/**/
 
@@ -490,14 +489,38 @@ if ($editform->is_cancelled()) {
 				exit;
 			}
 			
-			if ($dbView->emailaccess) {
-				$newemails = optional_param('emailsshared', '', PARAM_RAW);
-				if ($newemails != '') {
-					$oldemails = $view->sharedemails;
-					if ($oldemails != $newemails) {
-						$newemails = block_exaport_emailaccess_sendemails($view, $oldemails, $newemails);
-						$dbView->sharedemails = $newemails;
-						$DB->update_record('block_exaportview', $dbView);
+			if ($dbView->sharedemails) {
+				$newemails = optional_param('emailsforshare', '', PARAM_RAW);
+				$newemails = preg_split('/(;|,|\s)/', $newemails);
+				$newemails = array_map('trim', $newemails);
+				$newemails = array_filter($newemails);
+				$newemails = array_unique($newemails);
+				if (count($newemails) > 0) {
+					$oldemails = array_values(exaport_get_view_shared_emails($view->id));
+					if ($oldemails !== $newemails) {
+						// get old hashes for keep them in the database
+						$oldemailshares = $DB->get_records_menu('block_exaportviewemailshar', array('viewid' => $view->id), '', 'email, hash');
+						// delete all shares for this view
+						$DB->delete_records('block_exaportviewemailshar', array('viewid' => $view->id));
+						$insertData = new stdClass; 
+						$insertData->viewid = $view->id;
+						$hashesforemails = array();
+						foreach ($newemails as $email) {
+							if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+								$insertData->email = $email;
+								if (!in_array($email, $oldemails)) {
+									// insert new share
+									$insertData->hash = block_exaport_securephrase_viewemail($view, $email);
+								} else {
+									// insert share with old hash
+									$insertData->hash = $oldemailshares[$email];
+								};
+								$DB->insert_record('block_exaportviewemailshar', $insertData);
+								$hashesforemails[$email] = $insertData->hash;
+							}
+						};
+						// send messages
+						block_exaport_emailaccess_sendemails($view, $oldemails, $newemails, $hashesforemails);
 					};
 				};
 			};
@@ -923,12 +946,13 @@ break;
 				
 				echo '<tr><td style="height: 10px"></td></tr>';
 				echo '<tr><td style="padding-right: 10px; width: 10px">';
-					echo $form['elements_by_name']['emailaccess']['html'];
+					echo $form['elements_by_name']['sharedemails']['html'];
 					echo '</td><td>'.get_string("emailaccess", "block_exaport").'</td></tr>';
 					
 					if ($view) {
+						$view->emailsforshare = implode(';', exaport_get_view_shared_emails($view->id));
 						echo '<tr id="emailaccess-settings"><td></td><td>';
-						echo '<textarea name="emailsshared">'.$view->sharedemails.'</textarea>';
+						echo '<textarea name="emailsforshare">'.str_replace(';', "\r\n", $view->emailsforshare).'</textarea><br>';
 						echo get_string("emailaccessdescription", "block_exaport");
 						echo '</td></tr>';
 					};
@@ -951,22 +975,17 @@ if ($type!='title') {
 echo $OUTPUT->footer();
 
 
-function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails) {
+function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $hashesforemails) {
 	global $CFG, $USER, $DB;
 	$courseid = optional_param('courseid', 0, PARAM_INT);
 	$userfrom = $USER;
 	$userfrom->maildisplay = true;
-	$oldArray = explode(';', $oldemails);
-	$newArray = preg_split('/(;|,)/', $newemails);
-	$newArray = array_map('trim', $newArray);
-	$newArray = array_filter($newArray);
-	$newemails = implode(';', $newArray);
 	// New emails - need to send emails
-	$needToSend = array_diff($newArray, $oldArray);
+	$needToSend = array_diff($newemails, $oldemails);
 	if (count($needToSend)>0) {
 		foreach ($needToSend as $email) {
 			if (filter_var($email, FILTER_VALIDATE_EMAIL)) {				
-				$accessphrase = block_exaport_securephrase_viewemail($view, $email);
+				$accessphrase = $hashesforemails[$email];
 				$url = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=email/'.$view->hash.'-'.$email.'-'.$accessphrase;
 				$message_subject = get_string("emailaccessmessagesubject", "block_exaport");
 				$a = new stdClass();
@@ -978,7 +997,7 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails) {
 				
 				// Find user by email.
 				$userconditions = array('email' => $email);
-				if (!$toUser = $DB->get_record("user", $userconditions, '*', MUST_EXIST)) {
+				if (!$toUser = $DB->get_record("user", $userconditions, '*')) {
 					$toUser = new stdClass();
 					$toUser->email = $email;
 					$toUser->firstname = '';
@@ -1010,6 +1029,6 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails) {
 			};
 		};
 	};	
-	return $newemails;
+	return true;
 }
 

@@ -172,15 +172,14 @@ function block_exaport_get_view_from_access($access)
 			// view not found
 			return;
 		};
-
-		$sharedEmails = explode(';', $view->sharedemails);
-		if (!in_array($email, $sharedEmails)) {
+			
+		if ($view->sharedemails != 1) {
 			// view is not shared for this email
 			return;
 		};
 		
-		$emailPhrase = block_exaport_securephrase_viewemail($view, $email);
-		if ($emailPhrase !== $phrase)
+		// check email-phrase
+		if (!$DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id, 'email' => $email, 'hash' => $phrase)))
 			return;
 
 		$userid = clean_param($hash[0], PARAM_INT);
@@ -385,6 +384,13 @@ function exaport_get_view_shared_groups($viewid) {
 	
 	$sharedGroups = $DB->get_records_menu('block_exaportviewgroupshar', array("viewid" => $viewid), null, 'groupid, groupid AS tmp');
 	return $sharedGroups;
+}
+
+function exaport_get_view_shared_emails($viewid) {
+	global $DB;
+	
+	$sharedEmails = $DB->get_records_menu('block_exaportviewemailshar', array("viewid" => $viewid), null, 'email, email AS tmp');
+	return $sharedEmails;
 }
 
 function exaport_get_category_shared_users($catid) {

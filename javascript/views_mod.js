@@ -717,7 +717,7 @@ var exaportViewEdit = {};
 			$('#internaccess-settings').hide();
 		}
 		
-		if ($form.find(':input[name=emailaccess]').is(':checked')) {
+		if ($form.find(':input[name=sharedemails]').is(':checked')) {
 			if (share_text) {
 				share_text += ' '+$E.translate('viewand')+' ';
 			};

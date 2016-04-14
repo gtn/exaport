@@ -27,7 +27,7 @@ $access = optional_param('access', 0, PARAM_TEXT);
 
 require_login(0, true);
 
-$url = '/blocks/exabis_competences/shared_view.php';
+$url = '/blocks/exaport/shared_view.php';
 $PAGE->set_url($url);
 $context = context_system::instance();
 $PAGE->set_context($context);

@@ -52,8 +52,8 @@ if (!confirm_sesskey()) {
 	print_error("badsessionkey","block_exaport");		
 }
 
-$url = '/blocks/exabis_competences/views_mod.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/views_mod.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 require_login($courseid);
 

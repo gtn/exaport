@@ -33,8 +33,8 @@ require_login($courseid);
 $context = context_system::instance();
 require_capability('block/exaport:use', $context);
 
-$url = '/blocks/exabis_competences/shared_views.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/shared_views.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {

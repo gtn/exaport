@@ -24,8 +24,8 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 block_exaport_require_login($courseid);
 
 $context = context_system::instance();
-$url = '/blocks/exabis_competences/exportimport.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/exportimport.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 global $DB;
 $conditions = array("id" => $courseid);

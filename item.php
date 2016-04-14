@@ -34,7 +34,7 @@ require_login($courseid);
 require_capability('block/exaport:use', $context);
 
 $url = '/blocks/exaport/item.php';
-$PAGE->set_url($url);
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 $conditions = array("id" => $courseid);
 

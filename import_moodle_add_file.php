@@ -50,8 +50,8 @@ $checked_file = null;
 $action = 'add';
 
 $context = context_system::instance();
-$url = '/blocks/exabis_competences/import_moodle_add_file.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/import_moodle_add_file.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 require_login($courseid);
 require_capability('block/exaport:use', $context);

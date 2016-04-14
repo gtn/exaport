@@ -40,7 +40,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }//require_capability('block/exaport:import', $context);
 
 $url = '/blocks/exaport/import_file.php';
-$PAGE->set_url($url);
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 $strimport = get_string("import", "block_exaport");
 $imported = false;

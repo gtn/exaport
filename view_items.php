@@ -34,7 +34,7 @@ if (! $course = $DB->get_record("course", array("id" => $courseid)) ) {
 }
 
 $url = '/blocks/exaport/view_items.php';
-$PAGE->set_url($url);
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 
 block_exaport_print_header("bookmarks");

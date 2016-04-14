@@ -37,7 +37,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 block_exaport_setup_default_categories();
 
 $url = '/blocks/exaport/view.php';
-$PAGE->set_url($url);
+$PAGE->set_url($url, ['courseid' => $courseid]);
 block_exaport_print_header("personal", "personalinfo");
 
 echo "<br />";

@@ -59,7 +59,7 @@ if ($action == 'xmleuropass_export') {
 
 
 $url = '/blocks/exaport/resume.php';
-$PAGE->set_url($url);
+$PAGE->set_url($url, ['courseid' => $courseid]);
 $PAGE->requires->css('/blocks/exaport/css/resume.css');
 $PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
 $PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);

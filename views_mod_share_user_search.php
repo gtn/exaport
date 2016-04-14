@@ -27,8 +27,8 @@ $q = trim(optional_param('q', '', PARAM_TEXT));
 block_exaport_require_login($courseid);
 
 $context = context_system::instance();
-$url = '/blocks/exabis_competences/views_mod_share_user_search.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/views_mod_share_user_search.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 $conditions = array("id" => $courseid);
 if (! $course = $DB->get_record("course", $conditions) ) {

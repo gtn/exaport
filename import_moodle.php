@@ -35,8 +35,8 @@ $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
 	error("That's an invalid course id");
 }
-$url = '/blocks/exabis_competences/import_moodle.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/import_moodle.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 block_exaport_print_header("exportimport", "exportimportmoodleimport");
 
 $modassign=block_exaport_assignmentversion();

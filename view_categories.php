@@ -39,8 +39,8 @@ if (! $course = $DB->get_record("course", $conditions) ) {
 
 block_exaport_setup_default_categories();
 
-$url = '/blocks/exabis_competences/view_categories.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/view_categories.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 block_exaport_print_header("categories");
 
 echo '<div class="block_eportfolio_center">';

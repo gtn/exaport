@@ -30,8 +30,8 @@ $action = optional_param("action", "add", PARAM_ALPHA);
 
 define('SUBMIT_BUTTON_TEXT', get_string($action == 'add' ? 'addButton' : 'saveButton', 'block_exaport'));
 
-$url = '/blocks/exabis_competences/blocks.json.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/blocks.json.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 $context = context_system::instance();
 $PAGE->set_context($context);
 
@@ -505,7 +505,7 @@ function tinyMCE_enable_script($element_id) {
 	$lang		   = current_language();
 	$rev = theme_get_revision();
 
-	$content .= '
+	$content = '
 	<script type="text/javascript">
 	//<![CDATA[
 	YUI().use(\'node\', function(Y) {

@@ -72,7 +72,7 @@ if (!$user = $DB->get_record("user", $conditions)) {
 	print_error("nouserforid", "block_exaport");
 }
 
-$url = '/blocks/exabis_competences/shared_item.php';
+$url = '/blocks/exaport/shared_item.php';
 $PAGE->set_url($url);
 
 if ($item->allowComments) {

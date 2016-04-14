@@ -38,7 +38,7 @@ if (! $course = $DB->get_record("course", $conditions) ) {
 }
 
 $url = '/blocks/exaport/view_items_print.php';
-$PAGE->set_url($url);
+$PAGE->set_url($url, ['courseid' => $courseid]);
 $PAGE->set_pagelayout('print');
 
 $PAGE->requires->css('/blocks/exaport/css/view_items_print.css');

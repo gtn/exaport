@@ -30,8 +30,8 @@ $strheadline = get_string("bookmarks".$type_plural, "block_exaport");
 
 block_exaport_require_login($courseid);
 
-$url = '/blocks/exabis_competences/views_list.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/views_list.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 
 if (!$COURSE) {
    print_error("invalidcourseid","block_exaport");

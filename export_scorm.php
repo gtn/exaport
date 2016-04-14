@@ -55,8 +55,8 @@ $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
 	error("That's an invalid course id");
 }
-$url = '/blocks/exabis_competences/export_scorm.php';
-$PAGE->set_url($url);
+$url = '/blocks/exaport/export_scorm.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
 if (!$confirm)
 	block_exaport_print_header("exportimport", "exportimportexport");
 

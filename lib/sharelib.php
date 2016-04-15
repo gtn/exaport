@@ -165,7 +165,7 @@ function block_exaport_get_view_from_access($access)
 		$view->access = new stdClass();
 		$view->access->request = 'intern';
 	} else if ($accessPath[0] == 'email') {
-		list($hash, $email, $phrase) = explode('-', $accessPath[1]);
+		list($hash, $email, $phrase) = explode('@@', $accessPath[1]);
 
 		$conditions = array("hash" => $hash);
 		if (!$view = $DB->get_record("block_exaportview", $conditions)) {
@@ -179,11 +179,9 @@ function block_exaport_get_view_from_access($access)
 		};
 		
 		// check email-phrase
-		if (!$DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id, 'email' => $email, 'hash' => $phrase)))
+		if (!$DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id, 'email' => $email, 'hash' => $phrase))) {
 			return;
-
-		$userid = clean_param($hash[0], PARAM_INT);
-		$hash =  clean_param($hash[1], PARAM_ALPHANUM);
+		};
 
 		$view->access = new stdClass();
 		$view->access->request = 'extern';

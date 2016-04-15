@@ -986,7 +986,7 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
 		foreach ($needToSend as $email) {
 			if (filter_var($email, FILTER_VALIDATE_EMAIL)) {				
 				$accessphrase = $hashesforemails[$email];
-				$url = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=email/'.$view->hash.'-'.$email.'-'.$accessphrase;
+				$url = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=email/'.$view->hash.'@@'.$email.'@@'.$accessphrase;
 				$message_subject = get_string("emailaccessmessagesubject", "block_exaport");
 				$a = new stdClass();
 				$a->url = $url;

@@ -33,6 +33,8 @@ require_once __DIR__.'/common.php';
 
 use block_exaport\globals as g;
 
+require 'lib.exaport.php';
+
 /*** FILE FUNCTIONS **********************************************************************/
 
 function block_exaport_get_item_file($item) {
@@ -195,7 +197,7 @@ function block_exaport_print_file(stored_file $file) {
 	if (in_array($file->get_mimetype(), array('image/gif', 'image/jpeg', 'image/png'))) {	// Image attachments don't get printed as links
 		return "<img src=\"$url\" alt=\"" . s($file->get_filename()) . "\" />";
 	} else {
-		return '<p><img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.gif" class="icon" alt="' . $icon->pix . '" />&nbsp;' . $OUTPUT->action_link($url, $filename) . "</p>";
+		return '<p><img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.gif" class="icon" alt="' . $icon->pix . '" />&nbsp;' . $OUTPUT->action_link($url, $file->get_filename()) . "</p>";
 	}
 }
 

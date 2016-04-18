@@ -977,7 +977,7 @@ echo $OUTPUT->footer();
 
 function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $hashesforemails) {
 	global $CFG, $USER, $DB;
-	$courseid = optional_param('courseid', 0, PARAM_INT);
+
 	$userfrom = $USER;
 	$userfrom->maildisplay = true;
 	// New emails - need to send emails
@@ -986,7 +986,7 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
 		foreach ($needToSend as $email) {
 			if (filter_var($email, FILTER_VALIDATE_EMAIL)) {				
 				$accessphrase = $hashesforemails[$email];
-				$url = $CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=email/'.$view->hash.'@@'.$email.'@@'.$accessphrase;
+				$url = $CFG->wwwroot.'/blocks/exaport/shared_view.php?access=email/'.$view->hash.'-'.$accessphrase;
 				$message_subject = get_string("emailaccessmessagesubject", "block_exaport");
 				$a = new stdClass();
 				$a->url = $url;
@@ -997,19 +997,7 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
 				
 				// Find user by email.
 				$userconditions = array('email' => $email);
-				if (!$toUser = $DB->get_record("user", $userconditions, '*')) {
-					$toUser = new stdClass();
-					$toUser->email = $email;
-					$toUser->firstname = '';
-					$toUser->lastname = '';
-					$toUser->maildisplay = true;
-					$toUser->mailformat = 1;
-					$toUser->id = -99;
-					$toUser->firstnamephonetic = '';
-					$toUser->lastnamephonetic = '';
-					$toUser->middlename = '';
-					$toUser->alternatename = '';
-				} else {
+				if ($toUser = $DB->get_record("user", $userconditions, '*')) {
 					// send moodle message if the user exists
 					$message = new stdClass();
 					$message->component = 'block_exaport';
@@ -1022,13 +1010,27 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
 					$message->fullmessagehtml = $message_html;
 					$message->smallmessage = '';
 					$message->notification = 1;
+
 					message_send($message);
-				};				
-				// Send email.
-				email_to_user($toUser, $USER, $message_subject, $message_text, $message_html);
-			};
-		};
-	};	
+				} else {
+					$toUser = new stdClass();
+					$toUser->email = $email;
+					$toUser->firstname = '';
+					$toUser->lastname = '';
+					$toUser->maildisplay = true;
+					$toUser->mailformat = 1;
+					$toUser->id = -99;
+					$toUser->firstnamephonetic = '';
+					$toUser->lastnamephonetic = '';
+					$toUser->middlename = '';
+					$toUser->alternatename = '';
+
+					email_to_user($toUser, $USER, $message_subject, $message_text, $message_html);
+				}
+			}
+		}
+	}
+
 	return true;
 }
 

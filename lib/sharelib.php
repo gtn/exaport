@@ -138,8 +138,9 @@ function block_exaport_get_view_from_access($access)
 		$hash = $accessPath[1];
 		$hash = explode('-', $hash);
 
-		if (count($hash) != 2)
+		if (count($hash) != 2) {
 			return;
+		}
 	
 		$userid = clean_param($hash[0], PARAM_INT);
 		$viewid =  clean_param($hash[1], PARAM_INT);
@@ -165,21 +166,25 @@ function block_exaport_get_view_from_access($access)
 		$view->access = new stdClass();
 		$view->access->request = 'intern';
 	} else if ($accessPath[0] == 'email') {
-		list($hash, $email, $phrase) = explode('@@', $accessPath[1]);
+		$hash = explode('-', $accessPath[1]);
+		if (count($hash) != 2) {
+			return;
+		}
 
-		$conditions = array("hash" => $hash);
-		if (!$view = $DB->get_record("block_exaportview", $conditions)) {
+		list($viewHash, $emailHash) = $hash;
+
+		if (!$view = $DB->get_record("block_exaportview", ["hash" => $viewHash])) {
 			// view not found
 			return;
 		};
 			
 		if ($view->sharedemails != 1) {
-			// view is not shared for this email
+			// view is not shared for any emails
 			return;
 		};
 		
 		// check email-phrase
-		if (!$DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id, 'email' => $email, 'hash' => $phrase))) {
+		if (!$DB->record_exists('block_exaportviewemailshar', ['viewid' => $view->id, 'hash' => $emailHash])) {
 			return;
 		};
 

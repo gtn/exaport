@@ -1,9 +1,9 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Competencies
 //
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
 //
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Exabis Competencies is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -18,22 +18,25 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 namespace block_exaport\common;
-/* functions common accross exabis plugins */
 
 defined('MOODLE_INTERNAL') || die();
 
 class url extends \moodle_url {
+	public static function create($url, array $params = null, $anchor = null) {
+		return new static($url, $params, $anchor);
+	}
+
 	/**
 	 *
 	 * @param array $overrideparams new attributes for object
 	 * @return self
 	 */
 	public function copy(array $overrideparams = null) {
-		$class = get_class();
-		$object = new $class($this);
+		$object = new static($this);
 		if ($overrideparams) {
 			$object->params($overrideparams);
 		}
+
 		return $object;
 	}
 
@@ -46,6 +49,7 @@ class url extends \moodle_url {
 				unset($params[$key]);
 			}
 		}
+
 		return $params;
 	}
 
@@ -58,6 +62,7 @@ class url extends \moodle_url {
 				unset($this->params[$key]);
 			}
 		}
+
 		return $this->params;
 	}
 }
@@ -81,8 +86,8 @@ abstract class event extends \core\event\base {
 	}
 }
 
-class exception extends \moodle_exception {
-	function __construct($errorcode, $module='', $link='', $a=NULL, $debuginfo=null) {
+class moodle_exception extends \moodle_exception {
+	function __construct($errorcode, $module = '', $link = '', $a = null, $debuginfo = null) {
 
 		// try to get local error message (use namespace as $component)
 		if (empty($module)) {
@@ -98,15 +103,16 @@ class exception extends \moodle_exception {
 class SimpleXMLElement extends \SimpleXMLElement {
 	/**
 	 * Adds a child with $value inside CDATA
-	 * @param unknown $name
-	 * @param unknown $value
+	 * @param string $name
+	 * @param mixed $value
+	 * @return SimpleXMLElement
 	 */
-	public function addChildWithCDATA($name, $value = NULL) {
+	public function addChildWithCDATA($name, $value = null) {
 		$new_child = $this->addChild($name);
 
-		if ($new_child !== NULL) {
+		if ($new_child !== null) {
 			$node = dom_import_simplexml($new_child);
-			$no   = $node->ownerDocument;
+			$no = $node->ownerDocument;
 			$node->appendChild($no->createCDATASection($value));
 		}
 
@@ -114,10 +120,10 @@ class SimpleXMLElement extends \SimpleXMLElement {
 	}
 
 	public static function create($rootElement) {
-		return new self('<?xml version="1.0" encoding="UTF-8"?><'.$rootElement.' />');
+		return new static('<?xml version="1.0" encoding="UTF-8"?><'.$rootElement.' />');
 	}
 
-	public function addChildWithCDATAIfValue($name, $value = NULL) {
+	public function addChildWithCDATAIfValue($name, $value = null) {
 		if ($value) {
 			return $this->addChildWithCDATA($name, $value);
 		} else {
@@ -132,9 +138,10 @@ class SimpleXMLElement extends \SimpleXMLElement {
 			$newNode = $node->ownerDocument->importNode(dom_import_simplexml($newNode), true);
 			$node->appendChild($newNode);
 
-			// return last children, this is the added child!
+			// return last child, this is the added child!
 			$children = $this->children();
-			return $children[count($children)-1];
+
+			return $children[$children->count() - 1];
 		} else {
 			return parent::addChild($name, $value, $namespace);
 		}
@@ -143,27 +150,58 @@ class SimpleXMLElement extends \SimpleXMLElement {
 	public function asPrettyXML() {
 		$dom = dom_import_simplexml($this)->ownerDocument;
 		$dom->formatOutput = true;
+
 		return $dom->saveXML();
 	}
 }
 
-class db {
+abstract class exadb extends \moodle_database {
 	/**
-	 * @param $table
-	 * @param $data
-	 * @param $where
-	 * @return null|object
+	 * @param string $table
+	 * @param array|object $data
+	 * @param array|null $where
+	 * @return null|bool|object
 	 */
-	public static function update_record($table, $data, $where) {
+	public function update_record($table, $data, $where = null) {
+	}
+
+	public function insert_or_update_record($table, $data, $where = null) {
+	}
+}
+
+class exadb_forwarder {
+	function __call($func, $args) {
 		global $DB;
+
+		if (method_exists($DB, $func)) {
+			// in exadb class
+			return call_user_func_array([$DB, $func], $args);
+		}
+
+		throw new \coding_exception(" Call to undefined method g::\$DB->$func");
+	}
+}
+
+class exadb_extender extends exadb_forwarder {
+
+	/**
+	 * @param string $table
+	 * @param array|object $data
+	 * @param array|null $where
+	 * @return null|bool|object
+	 */
+	public function update_record($table, $data, $where = null) {
+		if ($where === null) {
+			return parent::update_record($table, $data);
+		}
 
 		$where = (array)$where;
 		$data = (array)$data;
 
-		if ($dbItem = $DB->get_record($table, $where)) {
+		if ($dbItem = $this->get_record($table, $where)) {
 			if ($data) {
 				$data['id'] = $dbItem->id;
-				$DB->update_record($table, $data);
+				parent::update_record($table, (object)$data);
 			}
 
 			return (object)($data + (array)$dbItem);
@@ -177,20 +215,18 @@ class db {
 	 * @param $data
 	 * @param null $where
 	 * @return object
-	 * @throws exception
+	 * @throws moodle_exception
 	 */
-	public static function insert_or_update_record($table, $data, $where = null) {
-		global $DB;
-
+	public function insert_or_update_record($table, $data, $where = null) {
 		$data = (array)$data;
 
-		if ($dbItem = $DB->get_record($table, $where !== null ? $where : $data)) {
+		if ($dbItem = $this->get_record($table, $where !== null ? $where : $data)) {
 			if (empty($data)) {
-				throw new exception('$data is empty');
+				throw new moodle_exception('$data is empty');
 			}
 
 			$data['id'] = $dbItem->id;
-			$DB->update_record($table, $data);
+			$this->update_record($table, (object)$data);
 
 			return (object)($data + (array)$dbItem);
 		} else {
@@ -198,7 +234,7 @@ class db {
 			if ($where !== null) {
 				$data = $data + $where; // first the values of $data, then of $where, but don't override $data
 			}
-			$id = $DB->insert_record($table, $data);
+			$id = $this->insert_record($table, (object)$data);
 			$data['id'] = $id;
 
 			return (object)$data;
@@ -227,10 +263,8 @@ class param {
 	}
 
 	public static function clean_array($values, $definition) {
+		$definition = (array)$definition;
 
-		if (count($definition) != 1) {
-			print_error('no array definition');
-		}
 		if (is_object($values)) {
 			$values = (array)$values;
 		} elseif (!is_array($values)) {
@@ -250,8 +284,8 @@ class param {
 		}
 
 		$ret = array();
-		foreach ($values as $key=>$value) {
-			$value = static::_clean($value, $valueType, true);
+		foreach ($values as $key => $value) {
+			$value = static::_clean($value, $valueType);
 			if ($value === null) continue;
 
 			if ($keyType == PARAM_SEQUENCE) {
@@ -285,7 +319,17 @@ class param {
 		}
 	}
 
-	public static function optional_array($parname, array $definition) {
+	public static function get_required_param($parname) {
+		$param = static::get_param($parname);
+
+		if ($param === null) {
+			throw new moodle_exception('param not found: '.$parname);
+		}
+
+		return $param;
+	}
+
+	public static function optional_array($parname, $definition) {
 		$param = static::get_param($parname);
 
 		if ($param === null) {
@@ -295,14 +339,10 @@ class param {
 		}
 	}
 
-	public static function required_array($parname, array $definition) {
-		$param = static::get_param($parname);
+	public static function required_array($parname, $definition) {
+		$param = static::get_required_param($parname);
 
-		if ($param === null) {
-			print_error('param not found: '.$parname);
-		} else {
-			return static::clean_array($param, $definition);
-		}
+		return static::clean_array($param, $definition);
 	}
 
 	public static function optional_object($parname, $definition) {
@@ -316,13 +356,9 @@ class param {
 	}
 
 	public static function required_object($parname, $definition) {
-		$param = static::get_param($parname);
+		$param = static::get_required_param($parname);
 
-		if ($param === null) {
-			print_error('param not found: '.$parname);
-		} else {
-			return static::clean_object($param, $definition);
-		}
+		return static::clean_object($param, $definition);
 	}
 
 	public static function required_json($parname, $definition = null) {
@@ -351,7 +387,7 @@ class _globals_dummy_CFG {
 
 class globals {
 	/**
-	 * @var \moodle_database
+	 * @var exadb
 	 */
 	public static $DB;
 
@@ -386,8 +422,8 @@ class globals {
 	public static $CFG;
 
 	public static function init() {
-		global $DB, $PAGE, $OUTPUT, $COURSE, $USER, $CFG, $SITE;
-		globals::$DB =& $DB;
+		global $PAGE, $OUTPUT, $COURSE, $USER, $CFG, $SITE;
+		globals::$DB = new exadb_extender();
 		globals::$PAGE =& $PAGE;
 		globals::$OUTPUT =& $OUTPUT;
 		globals::$COURSE =& $COURSE;
@@ -396,18 +432,63 @@ class globals {
 		globals::$SITE =& $SITE;
 	}
 }
+
 globals::init();
 
 function _plugin_name() {
 	return preg_replace('!\\\\.*$!', '', __NAMESPACE__); // the \\\\ syntax matches a \ (backslash)!
 }
 
+call_user_func(function() {
+	if (!globals::$CFG->debugdeveloper) {
+		return;
+	}
+
+	$lang = current_language();
+	$langDir = dirname(__DIR__).'/lang';
+	$langFile = $langDir.'/'.$lang.'/'._plugin_name().'.php';
+
+	if (file_exists($langDir.'/total.php') && ($time = filemtime($langDir.'/total.php')) != filemtime($langFile) && is_writable($langFile)) {
+		// regenerate
+		$totalLanguages = require $langDir.'/total.php';
+
+		$byLang = [];
+
+		foreach ($totalLanguages as $key => $langs) {
+			if (!$langs) {
+				$byLang['de'][$key] = null;
+				$byLang['en'][$key] = null;
+				continue;
+			}
+			foreach ($langs as $lang => $value) {
+				$byLang[$lang][$key] = $value;
+			}
+		}
+
+		foreach ($byLang as $lang => $strings) {
+			$output = '<?php'."\n\n".'$string = '.var_export($strings, true).' + $string;';
+			$output .= '
+
+// load local langstrings
+if (file_exists(__DIR__."/../../local.config/lang.".basename(__DIR__).".php")){
+	require __DIR__."/../../local.config/lang.".basename(__DIR__).".php";
+}
+
+			';
+			file_put_contents($langDir.'/'.$lang.'/'._plugin_name().'.php', $output);
+			touch($langDir.'/'.$lang.'/'._plugin_name().'.php', $time);
+		}
+	}
+});
+
 /**
- * Returns a localized string.
- * This method is neccessary because a project based evaluation is available in the current exastud
- * version, which requires a different naming.
+ * get a language string from current plugin or else from global language strings
+ * @param $identifier
+ * @param null $component
+ * @param null $a
+ * @return string
  */
-function get_string($identifier, $component = null, $a = null, $lazyload = false) {
+function get_string($identifier, $component = null, $a = null) {
 	$manager = get_string_manager();
 
 	if ($component === null)
@@ -419,16 +500,21 @@ function get_string($identifier, $component = null, $a = null, $lazyload = false
 	return $manager->get_string($identifier, '', $a);
 }
 
+function print_error($errorcode, $module = 'error', $link = '', $a = null, $debuginfo = null) {
+	throw new moodle_exception($errorcode, $module, $link, $a, $debuginfo);
+}
+
 function _t_check_identifier($string) {
-	if (preg_match('!^([^:]+):(.*)$!', $string, $matches))
+	if (preg_match('!^([^:]+):(.*)$!s', $string, $matches))
 		return $matches;
 	else
 		return null;
 }
+
 function _t_parse_string($string, $a) {
 	// copy from moodle/lib/classes/string_manager_standard.php
 	// Process array's and objects (except lang_strings).
-	if (is_array($a) or (is_object($a) && !($a instanceof lang_string))) {
+	if (is_array($a) or (is_object($a) && !($a instanceof \lang_string))) {
 		$a = (array)$a;
 		$search = array();
 		$replace = array();
@@ -437,11 +523,11 @@ function _t_parse_string($string, $a) {
 				// We do not support numeric keys - sorry!
 				continue;
 			}
-			if (is_array($value) or (is_object($value) && !($value instanceof lang_string))) {
+			if (is_array($value) or (is_object($value) && !($value instanceof \lang_string))) {
 				// We support just string or lang_string as value.
 				continue;
 			}
-			$search[]  = '{$a->'.$key.'}';
+			$search[] = '{$a->'.$key.'}';
 			$replace[] = (string)$value;
 		}
 		if ($search) {
@@ -453,7 +539,8 @@ function _t_parse_string($string, $a) {
 
 	return $string;
 }
-/*
+
+/**
  * translator function
  */
 function trans() {
@@ -508,19 +595,38 @@ function trans() {
 	$lang = current_language();
 	if (isset($languagestrings[$lang])) {
 		return _t_parse_string($languagestrings[$lang], $a);
-	} elseif ($languagestrings) {
+	}
+
+	$manager = get_string_manager();
+	$component = _plugin_name();
+	$identifier = reset($languagestrings);
+	$identifier = key($languagestrings).':'.$identifier;
+
+	if ($manager->string_exists($identifier, $component)) {
+		return $manager->get_string($identifier, $component, $a);
+	}
+	$identifier = reset($languagestrings);
+	if ($manager->string_exists($identifier, $component)) {
+		return $manager->get_string($identifier, $component, $a);
+	}
+
+	if ($languagestrings) {
 		return _t_parse_string(reset($languagestrings), $a);
 	} else {
 		return _t_parse_string($identifier, $a);
 	}
 }
 
-/* the whole part below is done, so eclipse knows the common classes and functions */
+/**
+ * exporting all classes and functions from the common namespace to the plugin namespace
+ * the whole part below is done, so eclipse knows the common classes and functions
+ */
 namespace block_exaport;
 
 function _should_export_class($classname) {
 	return !class_exists('\\'.__NAMESPACE__.'\\'.$classname);
 }
+
 function _export_function($function) {
 	if (!function_exists('\\'.__NAMESPACE__.'\\'.$function)) {
 		eval('
@@ -532,17 +638,45 @@ function _export_function($function) {
 		');
 		// return call_user_func_array(__CLASS__.'\common\\'.__FUNCTION__, func_get_args());
 	}
+
 	return false;
 }
 
 // export classnames, if not already existing
-if (_should_export_class('db')) { class db extends common\db {} }
-if (_should_export_class('event')) { abstract class event extends common\event {} }
-if (_should_export_class('exception')) { class exception extends common\exception {} }
-if (_should_export_class('globals')) { class globals extends common\globals {} }
-if (_should_export_class('param')) { class param extends common\param {} }
-if (_should_export_class('SimpleXMLElement')) { class SimpleXMLElement extends common\SimpleXMLElement {} }
-if (_should_export_class('url')) { class url extends common\url {} }
+if (_should_export_class('event')) {
+	abstract class event extends common\event {
+	}
+}
+if (_should_export_class('moodle_exception')) {
+	class moodle_exception extends common\moodle_exception {
+	}
+}
+if (_should_export_class('globals')) {
+	class globals extends common\globals {
+	}
+}
+if (_should_export_class('param')) {
+	class param extends common\param {
+	}
+}
+if (_should_export_class('SimpleXMLElement')) {
+	class SimpleXMLElement extends common\SimpleXMLElement {
+	}
+}
+if (_should_export_class('url')) {
+	class url extends common\url {
+	}
+}
 
-if (_export_function('get_string')) { function get_string($identifier) {} }
-if (_export_function('trans')) { function trans() {} }
+if (_export_function('get_string')) {
+	function get_string($identifier, $component = null, $a = null) {
+	}
+}
+if (_export_function('print_error')) {
+	function print_error($errorcode, $module = 'error', $link = '', $a = null, $debuginfo = null) {
+	}
+}
+if (_export_function('trans')) {
+	function trans() {
+	}
+}

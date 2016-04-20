@@ -411,7 +411,7 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '</td></tr>';		
 	$content .= '<tr><th>';
 	$content .= get_string('media_allowed_notes','block_exaport');
-	$content .= '<br><ul class="inlinelist" style="list-style-type: none;">
+	$content .= '<br><ul class="inline-list" style="list-style-type: none;">
   <li><a target="_blank" href="http://www.glogster.com/"><img title="Glogster" alt="Glogster" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/glogster.png"></a></li>
   <li><a target="_blank" href="http://video.google.com/"><img title="Google Video" alt="Google Video" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/googlevideo.png"></a></li>
   <li><a target="_blank" href="http://www.prezi.com/"><img title="Prezi" alt="Prezi" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media_sources/prezi.png"></a></li>

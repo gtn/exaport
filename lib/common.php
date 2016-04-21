@@ -446,11 +446,20 @@ call_user_func(function() {
 
 	$lang = current_language();
 	$langDir = dirname(__DIR__).'/lang';
+	$totalFile = $langDir.'/total.php';
 	$langFile = $langDir.'/'.$lang.'/'._plugin_name().'.php';
 
-	if (file_exists($langDir.'/total.php') && ($time = filemtime($langDir.'/total.php')) != filemtime($langFile) && is_writable($langFile)) {
+	if (file_exists($totalFile) && file_exists($langFile) && ($time = filemtime($totalFile)) != filemtime($langFile) && is_writable($langFile)) {
 		// regenerate
-		$totalLanguages = require $langDir.'/total.php';
+		$totalLanguages = require $totalFile;
+
+		// get copyright
+		$copyright = file_get_contents($totalFile);
+		if (!preg_match('!(//.*\r?\n)+!', $copyright, $matches)) {
+			throw new moodle_exception('copyright not found');
+		} else {
+			$copyright = $matches[0];
+		}
 
 		$byLang = [];
 
@@ -466,15 +475,28 @@ call_user_func(function() {
 		}
 
 		foreach ($byLang as $lang => $strings) {
-			$output = '<?php'."\n\n".'$string = '.var_export($strings, true).' + $string;';
-			$output .= '
+			$output = '<?php'."\n{$copyright}\n";
+
+			foreach ($strings as $key=>$value) {
+				if (strpos($key, '===') === 0) {
+					// group
+					$output .= "\n\n// ".trim($key, ' =')."\n";
+				} else {
+					$output .= '$string['.var_export($key, true).'] = '.var_export($value, true).";\n";
+				}
+			}
+
+			// add local.config languages if present
+			if (file_exists(dirname(__DIR__)."/local.config/lang.".$lang.".php")){
+				$output .= '
 
 // load local langstrings
 if (file_exists(__DIR__."/../../local.config/lang.".basename(__DIR__).".php")){
 	require __DIR__."/../../local.config/lang.".basename(__DIR__).".php";
 }
+';
+			}
 
-			';
 			file_put_contents($langDir.'/'.$lang.'/'._plugin_name().'.php', $output);
 			touch($langDir.'/'.$lang.'/'._plugin_name().'.php', $time);
 		}

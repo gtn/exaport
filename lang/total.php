@@ -1,10 +1,23 @@
 <?php
+// This file is part of Exabis Eportfolio
+//
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
+//
+// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This script is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
+//
+// This copyright notice MUST APPEAR in all copies of the script!
 
 return  [
-
-
-
-	'=== Translation ===' => NULL,
 	'translation:language' => [
 		'de' => 'German',
 		'en' => 'English',
@@ -21,7 +34,6 @@ return  [
 		'de' => 'ariepl.work@gmail.com',
 		'en' => 'ariepl.work@gmail.com',
 	],
-
 
 
 	'=== Main ===' => NULL,
@@ -492,7 +504,6 @@ return  [
 	],
 
 
-
 	'=== export/import ===' => NULL,
 	'import' => [
 		'de' => 'Import',
@@ -511,6 +522,7 @@ return  [
 		'en' => 'Press button to download the SCORM file:',
 	],
 	'add_directory_structure' => [
+		'de' => 'Mit Unterverzeichnissen exportieren',
 		'en' => 'Add directory-structure',
 	],
 	'download' => [
@@ -599,7 +611,6 @@ return  [
 	],
 
 
-
 	'=== Notes ===' => NULL,
 	'deletenoteconfirm' => [
 		'de' => 'Wollen Sie diese Notiz wirklich l&ouml;schen?',
@@ -613,7 +624,6 @@ return  [
 		'de' => 'Wollen Sie diese Datei wirklich l&ouml;schen?',
 		'en' => 'Do you really want to delete this file?',
 	],
-
 
 
 	'=== Different ===' => NULL,
@@ -839,7 +849,6 @@ return  [
 	],
 
 
-
 	'=== Shared portfolios ===' => NULL,
 	'nocoursetogether' => [
 		'de' => 'Kein Kurs',
@@ -851,7 +860,6 @@ return  [
 	],
 
 
-
 	'=== Errors ===' => NULL,
 	'nouserforid' => [
 		'de' => 'Kein Benutzer zu dieser Id!',
@@ -861,7 +869,6 @@ return  [
 		'de' => NULL,
 		'en' => 'User not found (access-code unknown)',
 	],
-
 
 
 	'=== Export ===' => NULL,
@@ -878,7 +885,7 @@ return  [
 		'en' => 'Create EPX-File',
 	],
 	'exportviewselect' => [
-		'de' => 'Um alle Eintr&auml;ge einer bestimmten View zu exportieren, bitte diese hier w&auml;hlen',
+		'de' => 'Um alle Einträge einer bestimmten View zu exportieren, bitte diese hier w&auml;hlen',
 		'en' => 'To export all items of a specific view, please select it here',
 	],
 	'export_directory' => [
@@ -887,7 +894,6 @@ return  [
 	'createexport_directory' => [
 		'en' => 'Create Directory-structure',
 	],
-
 
 
 	'=== stuff ===' => NULL,
@@ -914,7 +920,6 @@ return  [
 	],
 
 
-
 	'=== Item sorting ===' => NULL,
 	'userdefinedsort' => [
 		'de' => 'Eigene Sortierung vornehmen',
@@ -928,7 +933,6 @@ return  [
 		'de' => 'An letzte Stelle',
 		'en' => 'Move bottom',
 	],
-
 
 
 	'=== Views ===' => NULL,
@@ -1281,7 +1285,6 @@ return  [
 	],
 
 
-
 	'=== Copy to course ===' => NULL,
 	'filecopiedtocourse' => [
 		'de' => 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert',
@@ -1326,7 +1329,6 @@ return  [
 	'cofigureblock_badge' => [
 		'en' => 'Choose Badges',
 	],
-
 
 
 	'=== Desp ===' => NULL,
@@ -1437,7 +1439,6 @@ return  [
 	],
 
 
-
 	'=== Config ===' => NULL,
 	'config_version_3' => [
 		'de' => 'Neue E-Portfolio Ansicht: Inklusive Views usw.',
@@ -1504,7 +1505,7 @@ return  [
 		'en' => 'Interaction with block exabis competencies, in case it is installed',
 	],
 	'settings_allow_loginas_head' => [
-		'de' => 'Allow login as',
+		'de' => '"Login als" erlauben',
 		'en' => 'Allow login as',
 	],
 	'settings_allow_loginas_body' => [
@@ -1520,15 +1521,15 @@ return  [
 		'en' => '',
 	],
 	'settings_disable_shareall_head' => [
-		'de' => 'Disable sharing with all users',
+		'de' => 'Mit allen Benutzern teilen deaktivieren',
 		'en' => 'Disable sharing with all users',
 	],
 	'settings_disable_shareall_body' => [
-		'de' => 'Click <a href="{$a}">here</a>, to remove all global shares',
+		'de' => 'Klicken Sie <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen',
 		'en' => 'Click <a href="{$a}">here</a>, to remove all global shares',
 	],
 	'settings_disable_external_comments_head' => [
-		'de' => 'Disable sharing of comments in external view',
+		'de' => 'Teilen von Kommentaren in externen Views deaktivieren',
 		'en' => 'Disable sharing of comments in external view',
 	],
 	'settings_disable_external_comments_body' => [
@@ -1566,7 +1567,6 @@ return  [
 	'delete_all_shareall' => [
 		'en' => 'Delete all shareall?',
 	],
-
 
 
 	'=== Resume ===' => NULL,
@@ -1883,7 +1883,6 @@ return  [
 	],
 
 
-
 	'=== structure sharing ===' => NULL,
 	'structure' => [
 		'en' => 'Structure',
@@ -1958,7 +1957,6 @@ return  [
 	'myfilearea' => [
 		'en' => 'My file area',
 	],
-
 
 
 	'=== Not Used Anymore ===' => NULL,

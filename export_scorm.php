@@ -203,6 +203,7 @@ function get_category_files($categoryid, $viewid=null) {
 
 function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath, $export_dir, &$identifier, &$ridentifier, $viewid, &$itemscomp, $depth=0, $with_directory=false) {
 	global $USER, $CFG, $COURSE, $DB, $zip, $existingfilesArray;
+	$indexfileItems = '';
 
 	// index file for category
 	if ($with_directory) {
@@ -220,10 +221,10 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 				$subdirName = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $cat->name);
 				$subdirName = mb_ereg_replace("([\.]{2,})", '', $subdirName);
 				$indexfilecontent .= '<li><a href="'.$subdirName.'/index.html">'.$cat->name.'</a></li>';
-			};
+			}
 			$indexfilecontent .= '</ul>';
-		};
-	};
+		}
+	}
 	$bookmarks = get_category_items($id, $viewid, 'link');
 	
 	$hasItems = false;
@@ -280,7 +281,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			
 			if ($with_directory) {
 				$indexfileItems .= '<li><a href="'.$resfilename.'">'.$bookmark->name.'</a></li>';			
-			};
+			}
 		
 			$identifier++;
 			$ridentifier++;
@@ -353,7 +354,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			
 			if ($with_directory) {
 				$indexfileItems .= '<li><a href="'.$resfilename.'">'.$file->name.'</a></li>';			
-			};
+			}
 			
 			$identifier++;
 			$ridentifier++;
@@ -410,7 +411,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 			
 			if ($with_directory) {
 				$indexfileItems .= '<li><a href="'.$resfilename.'">'.$note->name.'</a></li>';			
-			};
+			}
 			
 			$identifier++;
 			$ridentifier++;
@@ -421,13 +422,13 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		$indexfilecontent .= '<ul>';
 		$indexfilecontent .= $indexfileItems;
 		$indexfilecontent .= '</ul>';
-	};
+	}
 	if ($with_directory) {
 		$indexfilecontent .= '</div>' . "\n";
 		$indexfilecontent .= '</body>' . "\n";
 		$indexfilecontent .= '</html>' . "\n";
 		$zip->addFromString($exportpath . $export_dir . 'index.html', $indexfilecontent);
-	};
+	}
 
 	return $hasItems;
 }
@@ -449,7 +450,7 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 			$zip->addEmptyDir($exportdir.$subdirname.$newSubdir);
 			if (substr($newSubdir, -1) != "/")
 				$newSubdir .= "/";
-		};
+		}
 		if ($owncat->id == 0) {
 			// ignore root virtual category
 			$item = $organization;
@@ -460,7 +461,7 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 			$item->attribute('isvisible', 'true');
 			$itemtitle = & $item->createChild('title');
 			$itemtitle->text($owncat->name);
-		};
+		}
 		// get everything inside this category:
 		$mainNotEmpty = get_category_content($item, $resources, $owncat->id, $owncat->name, $exportdir, $subdirname.$newSubdir, $identifier, $ridentifier, $viewid, $itemscomp, $depth, $with_directory);
 
@@ -469,7 +470,7 @@ function rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ride
 			$value = rekcat($innerowncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $item, $i, $itemscomp, $subdirname.$newSubdir, $depth+1, $with_directory);
 			if ($value) 
 				$mainNotEmpty = $value;
-		};
+		}
 
 		if ($mainNotEmpty) {
 			// if the main category is not empty, append it to the xml-file
@@ -516,7 +517,7 @@ global $USER, $zip;
 		}
 	}
 	
-	$zip->addFromString($exportpath . 'itemscomp.xml', $parsedDoc->toString(MINIXML_NOWHITESPACES));
+	$zip->addFromString('itemscomp.xml', $parsedDoc->toString(MINIXML_NOWHITESPACES));
 }
 
 if ($confirm) {
@@ -525,9 +526,6 @@ if ($confirm) {
 	}
 
 	$exportdir = '';
-
-	// Delete everything inside
-	remove_dir($exportdir, true);
 
 	// Put a / on the end
 	if (substr($exportdir, -1) != "/")
@@ -550,7 +548,7 @@ if ($confirm) {
 		};
 	} else {
 		$categoriesSubdirName = $export_data_dir;
-	};	
+	}
 
 	// copy all necessary files:
 	$zip->addFromString('adlcp_rootv1p2.xsd', file_get_contents('files/adlcp_rootv1p2.xsd'));
@@ -643,7 +641,7 @@ if ($confirm) {
 	
 	if ($owncats) {
 		rekcat($owncats, $parsedDoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i, $itemscomp, $categoriesSubdirName, 0, $with_directory);
-	};
+	}
 	
 	//save files, from personal information
 	$fs = get_file_storage();
@@ -661,7 +659,7 @@ if ($confirm) {
 				$i++;
 				$content_filename = $i . '-' . $areafile->get_filename();
 			}
-			$existingfilesArray[] = $exportpath . $export_dir . $content_filename;
+			$existingfilesArray[] = $exportdir . $content_filename;
 			
 			$zip->addFromString($exportdir ."data/personal/". $content_filename, $areafile->get_content());
 			$areafiles_exist = true;
@@ -686,7 +684,7 @@ if ($confirm) {
 		$filecontent .= '</div>' . "\n";
 		$filecontent .= '</body>' . "\n";
 		$filecontent .= '</html>' . "\n";
-	};
+	}
 	$zip->addFromString($exportdir . 'index.html', $filecontent);
 	
 	//begin
@@ -705,8 +703,6 @@ if ($confirm) {
 
 	$zipname = clean_param($USER->username, PARAM_ALPHANUM) . strftime("_%Y_%m_%d_%H%M") . ".zip";
 
-	remove_dir($exportdir);
-
 /**/
     // return zip
 	$zipfile = $zip->filename;
@@ -715,7 +711,7 @@ if ($confirm) {
 	header('Content-Length: ' . filesize($zipfile));
 	header('Content-Disposition: attachment; filename="'.$zipname.'"');
 	readfile($zipfile);
-	unlink($zipfile);	
+	unlink($zipfile);
 	exit;	
 }
 
@@ -744,7 +740,7 @@ if (block_exaport_feature_enabled('views')) {
 		echo '<option value="' . $view->id . '">' . $view->name . '</option>';
 	}
 	echo '</select>';
-};
+}
 
 echo '<label><input type="checkbox" name="with_directory" value="1" />'.get_string("add_directory_structure", "block_exaport").'</label>';
 echo ' </div>';
@@ -772,19 +768,20 @@ function get_htmlfile_name_path($exportpath, $export_dir, $itemname) {
 	} else {
 		$filepath = $export_dir . $filename . $ext;
 		$resfilename = $filename . $ext;
-	};
+	}
 	if (in_array($exportpath . $filepath, $existingfilesArray)) {
 		do {
 			$i++;
 			$filepath = $export_dir . $filename . $i . $ext;
 			$resfilename = $filename . $i . $ext;
 		} while (in_array($exportpath . $filepath, $existingfilesArray));
-	};
+	}
 	$existingfilesArray[] = $exportpath . $filepath;
 	return array($resfilename, $filepath);
 }
 
 function createHTMLHeader($title, $depthPath = 0) {
+	$filecontent = '';
 	$depth = '';
 	for($i = 1; $i<=$depthPath; $i++) 
 		$depth .= '../';

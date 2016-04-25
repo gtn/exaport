@@ -47,18 +47,6 @@ $string['awaiting'] = '($a awaiting)';
 $string['back'] = 'Back';
 $string['backtocourse'] = 'Back to course';
 $string['bookmarks'] = 'My Portfolio';
-$string['bookmarksaved'] = 'Bookmark added.';
-$string['bookmarksavedexternal'] = 'External link added.';
-$string['bookmarksavednote'] = 'Note added.';
-$string['bookmarksavedfile'] = 'File added.';
-$string['bookmarkedited'] = 'Bookmark saved.';
-$string['bookmarkeditedexternal'] = 'External link saved.';
-$string['bookmarkeditedfile'] = 'File saved.';
-$string['bookmarkeditednote'] = 'Note saved.';
-$string['bookmarkdeleted'] = 'Bookmark deleted.';
-$string['bookmarkdeletedexternal'] = 'External link deleted.';
-$string['bookmarkdeletedfile'] = 'File deleted.';
-$string['bookmarkdeletednote'] = 'Note deleted.';
 $string['categories'] = 'Categories';
 $string['explaincategories'] = 'Categories: here you can create and modify categories';
 $string['category'] = 'Category';
@@ -383,13 +371,6 @@ $string['cofigureblock_badge'] = 'Choose Badges';
 // Desp
 $string['back_to_desp'] = 'back to language portfolio';
 $string['desp_pluginname'] = 'Dossier';
-$string['desp_mybookmarks'] = 'My Dossier';
-$string['desp_bookmarks'] = 'My Dossier';
-$string['desp_explaining'] = 'My Artefacts';
-$string['desp_sharedbookmarks'] = 'published dossiers';
-$string['desp_explainingnote'] = 'Notes. These notes may be shared with all authorized course members.';
-$string['desp_explaininglink'] = 'Links.  These links may be shared with all authorized course members.';
-$string['desp_explainingfile'] = 'Files. These files may be shared with all authorized course members.';
 $string['steckbrief'] = 'Profile';
 $string['desp_categories'] = '
 	stories, roleplays, essays, collagen
@@ -426,10 +407,7 @@ $string['desp_categories'] = '
 
 
 // Config
-$string['config_version_3'] = 'New E-Portfolio layout: including views, etc.';
-$string['config_version_2'] = 'Old E-Portfolio layout';
 $string['config_feature_copy_to_course'] = 'Allow students to copy E-Portfolio files to their courses';
-$string['version_5.2.0_needed'] = 'Exabis E-Portfolio requires at least PHP-Version 5.2.0';
 $string['competenceinteraction'] = 'Allow interaction with block exabis competencies, in case it is installed';
 $string['opencomps'] = 'Choose your competencies';
 $string['selectcomps'] = 'Choose competencies associated with your upload!';

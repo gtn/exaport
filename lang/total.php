@@ -129,54 +129,6 @@ return [
 		'de' => 'Mein Portfolio',
 		'en' => 'My Portfolio',
 	],
-	'bookmarksaved' => [
-		'de' => 'Bookmark hinzugef&uuml;gt.',
-		'en' => 'Bookmark added.',
-	],
-	'bookmarksavedexternal' => [
-		'de' => 'Externer Link hinzugef&uuml;gt',
-		'en' => 'External link added.',
-	],
-	'bookmarksavednote' => [
-		'de' => 'Notiz hinzugef&uuml;gt.',
-		'en' => 'Note added.',
-	],
-	'bookmarksavedfile' => [
-		'de' => 'Datei hinzugef&uuml;gt.',
-		'en' => 'File added.',
-	],
-	'bookmarkedited' => [
-		'de' => 'Bookmark gespeichert.',
-		'en' => 'Bookmark saved.',
-	],
-	'bookmarkeditedexternal' => [
-		'de' => 'Externer Link gespeichert.',
-		'en' => 'External link saved.',
-	],
-	'bookmarkeditedfile' => [
-		'de' => 'Datei gespeichert.',
-		'en' => 'File saved.',
-	],
-	'bookmarkeditednote' => [
-		'de' => 'Notiz gespeichert.',
-		'en' => 'Note saved.',
-	],
-	'bookmarkdeleted' => [
-		'de' => 'Bookmark gel&ouml;scht.',
-		'en' => 'Bookmark deleted.',
-	],
-	'bookmarkdeletedexternal' => [
-		'de' => 'Externer Link gel&ouml;scht.',
-		'en' => 'External link deleted.',
-	],
-	'bookmarkdeletedfile' => [
-		'de' => 'Datei gel&ouml;scht.',
-		'en' => 'File deleted.',
-	],
-	'bookmarkdeletednote' => [
-		'de' => 'Notiz gel&ouml;scht.',
-		'en' => 'Note deleted.',
-	],
 	'categories' => [
 		'de' => 'Kategorien',
 		'en' => 'Categories',
@@ -1339,34 +1291,6 @@ return [
 	'desp_pluginname' => [
 		'en' => 'Dossier',
 	],
-	'desp_mybookmarks' => [
-		'de' => 'Mein Dossier',
-		'en' => 'My Dossier',
-	],
-	'desp_bookmarks' => [
-		'de' => 'Mein Dossier',
-		'en' => 'My Dossier',
-	],
-	'desp_explaining' => [
-		'de' => 'Meine Artefakte',
-		'en' => 'My Artefacts',
-	],
-	'desp_sharedbookmarks' => [
-		'de' => 'ver&ouml;ffentlichte Dossiers',
-		'en' => 'published dossiers',
-	],
-	'desp_explainingnote' => [
-		'de' => '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.',
-		'en' => 'Notes. These notes may be shared with all authorized course members.',
-	],
-	'desp_explaininglink' => [
-		'de' => '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.',
-		'en' => 'Links.  These links may be shared with all authorized course members.',
-	],
-	'desp_explainingfile' => [
-		'de' => '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.',
-		'en' => 'Files. These files may be shared with all authorized course members.',
-	],
 	'steckbrief' => [
 		'de' => 'Steckbrief',
 		'en' => 'Profile',
@@ -1440,21 +1364,9 @@ return [
 
 
 	'=== Config ===' => null,
-	'config_version_3' => [
-		'de' => 'Neue E-Portfolio Ansicht: Inklusive Views usw.',
-		'en' => 'New E-Portfolio layout: including views, etc.',
-	],
-	'config_version_2' => [
-		'de' => 'Alte E-Portfolio Ansicht',
-		'en' => 'Old E-Portfolio layout',
-	],
 	'config_feature_copy_to_course' => [
 		'de' => 'Sch&uuml;ler d&uuml;rfen Dateien in den Kurs kopieren',
 		'en' => 'Allow students to copy E-Portfolio files to their courses',
-	],
-	'version_5.2.0_needed' => [
-		'de' => null,
-		'en' => 'Exabis E-Portfolio requires at least PHP-Version 5.2.0',
 	],
 	'competenceinteraction' => [
 		'de' => 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.',

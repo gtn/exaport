@@ -47,18 +47,6 @@ $string['awaiting'] = '(\\$a wartend)';
 $string['back'] = 'zur&uuml;ck';
 $string['backtocourse'] = 'zur&uuml;ck zum Kurs';
 $string['bookmarks'] = 'Mein Portfolio';
-$string['bookmarksaved'] = 'Bookmark hinzugef&uuml;gt.';
-$string['bookmarksavedexternal'] = 'Externer Link hinzugef&uuml;gt';
-$string['bookmarksavednote'] = 'Notiz hinzugef&uuml;gt.';
-$string['bookmarksavedfile'] = 'Datei hinzugef&uuml;gt.';
-$string['bookmarkedited'] = 'Bookmark gespeichert.';
-$string['bookmarkeditedexternal'] = 'Externer Link gespeichert.';
-$string['bookmarkeditedfile'] = 'Datei gespeichert.';
-$string['bookmarkeditednote'] = 'Notiz gespeichert.';
-$string['bookmarkdeleted'] = 'Bookmark gel&ouml;scht.';
-$string['bookmarkdeletedexternal'] = 'Externer Link gel&ouml;scht.';
-$string['bookmarkdeletedfile'] = 'Datei gel&ouml;scht.';
-$string['bookmarkdeletednote'] = 'Notiz gel&ouml;scht.';
 $string['categories'] = 'Kategorien';
 $string['explaincategories'] = '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier können Sie die Kategorien einsehen und bearbeiten.';
 $string['category'] = 'Kategorie';
@@ -348,13 +336,6 @@ $string['cofigureblock_personalinfo'] = 'Pers&ouml;nliche Information';
 
 // Desp
 $string['back_to_desp'] = 'zur&uuml;ck zum d-ESP';
-$string['desp_mybookmarks'] = 'Mein Dossier';
-$string['desp_bookmarks'] = 'Mein Dossier';
-$string['desp_explaining'] = 'Meine Artefakte';
-$string['desp_sharedbookmarks'] = 'ver&ouml;ffentlichte Dossiers';
-$string['desp_explainingnote'] = '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
-$string['desp_explaininglink'] = '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
-$string['desp_explainingfile'] = '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['steckbrief'] = 'Steckbrief';
 $string['desp_categories'] = '
 	Erzählungen, Rollenspielszenen, Gedichte, Collagen
@@ -391,10 +372,7 @@ $string['desp_categories'] = '
 
 
 // Config
-$string['config_version_3'] = 'Neue E-Portfolio Ansicht: Inklusive Views usw.';
-$string['config_version_2'] = 'Alte E-Portfolio Ansicht';
 $string['config_feature_copy_to_course'] = 'Sch&uuml;ler d&uuml;rfen Dateien in den Kurs kopieren';
-$string['version_5.2.0_needed'] = NULL;
 $string['competenceinteraction'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
 $string['opencomps'] = 'Kompetenzen ausw&auml;hlen';
 $string['selectcomps'] = 'W&auml;hle hier die Kompetenzen, die zu deinem Upload passen!';

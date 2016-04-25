@@ -570,6 +570,10 @@ $string['developed'] = 'developed by';
 $string['myfilearea'] = 'My file area';
 
 
+// language categories
+$string['lang_categories'] = '';
+
+
 // Not Used Anymore
 $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';

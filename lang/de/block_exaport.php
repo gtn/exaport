@@ -520,6 +520,9 @@ $string['supported'] = 'Projekt wurde unterstützt von';
 $string['developed'] = 'entwickelt von';
 
 
+// language categories
+
+
 // Not Used Anymore
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';

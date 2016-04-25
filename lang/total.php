@@ -17,7 +17,7 @@
 //
 // This copyright notice MUST APPEAR in all copies of the script!
 
-return  [
+return [
 	'translation:language' => [
 		'de' => 'German',
 		'en' => 'English',
@@ -36,7 +36,7 @@ return  [
 	],
 
 
-	'=== Main ===' => NULL,
+	'=== Main ===' => null,
 	'blocktitle' => [
 		'de' => 'Exabis E-Portfolio',
 		'en' => 'Exabis E-Portfolio',
@@ -504,7 +504,7 @@ return  [
 	],
 
 
-	'=== export/import ===' => NULL,
+	'=== export/import ===' => null,
 	'import' => [
 		'de' => 'Import',
 		'en' => 'Import',
@@ -611,7 +611,7 @@ return  [
 	],
 
 
-	'=== Notes ===' => NULL,
+	'=== Notes ===' => null,
 	'deletenoteconfirm' => [
 		'de' => 'Wollen Sie diese Notiz wirklich l&ouml;schen?',
 		'en' => 'Do you really want to delete this note?',
@@ -626,7 +626,7 @@ return  [
 	],
 
 
-	'=== Different ===' => NULL,
+	'=== Different ===' => null,
 	'couldninsertcomment' => [
 		'de' => 'Kommentar konnte nicht eingef&uuml;gt werden!',
 		'en' => 'Couldn\'t insert comment!',
@@ -849,7 +849,7 @@ return  [
 	],
 
 
-	'=== Shared portfolios ===' => NULL,
+	'=== Shared portfolios ===' => null,
 	'nocoursetogether' => [
 		'de' => 'Kein Kurs',
 		'en' => 'No Course',
@@ -860,18 +860,18 @@ return  [
 	],
 
 
-	'=== Errors ===' => NULL,
+	'=== Errors ===' => null,
 	'nouserforid' => [
 		'de' => 'Kein Benutzer zu dieser Id!',
 		'en' => 'User not found (id unknown)',
 	],
 	'nouserforaccess' => [
-		'de' => NULL,
+		'de' => null,
 		'en' => 'User not found (access-code unknown)',
 	],
 
 
-	'=== Export ===' => NULL,
+	'=== Export ===' => null,
 	'export' => [
 		'de' => 'Export SCORM-Datei',
 		'en' => 'Export SCORM-File',
@@ -896,7 +896,7 @@ return  [
 	],
 
 
-	'=== stuff ===' => NULL,
+	'=== stuff ===' => null,
 	'type' => [
 		'de' => 'Typ',
 		'en' => 'Type',
@@ -920,7 +920,7 @@ return  [
 	],
 
 
-	'=== Item sorting ===' => NULL,
+	'=== Item sorting ===' => null,
 	'userdefinedsort' => [
 		'de' => 'Eigene Sortierung vornehmen',
 		'en' => 'Define your own search',
@@ -935,7 +935,7 @@ return  [
 	],
 
 
-	'=== Views ===' => NULL,
+	'=== Views ===' => null,
 	'view' => [
 		'de' => 'View',
 		'en' => 'View',
@@ -1285,7 +1285,7 @@ return  [
 	],
 
 
-	'=== Copy to course ===' => NULL,
+	'=== Copy to course ===' => null,
 	'filecopiedtocourse' => [
 		'de' => 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert',
 		'en' => 'File copied to course $a->coursename under the name of $a->filename',
@@ -1331,7 +1331,7 @@ return  [
 	],
 
 
-	'=== Desp ===' => NULL,
+	'=== Desp ===' => null,
 	'back_to_desp' => [
 		'de' => 'zur&uuml;ck zum d-ESP',
 		'en' => 'back to language portfolio',
@@ -1439,7 +1439,7 @@ return  [
 	],
 
 
-	'=== Config ===' => NULL,
+	'=== Config ===' => null,
 	'config_version_3' => [
 		'de' => 'Neue E-Portfolio Ansicht: Inklusive Views usw.',
 		'en' => 'New E-Portfolio layout: including views, etc.',
@@ -1453,7 +1453,7 @@ return  [
 		'en' => 'Allow students to copy E-Portfolio files to their courses',
 	],
 	'version_5.2.0_needed' => [
-		'de' => NULL,
+		'de' => null,
 		'en' => 'Exabis E-Portfolio requires at least PHP-Version 5.2.0',
 	],
 	'competenceinteraction' => [
@@ -1569,7 +1569,7 @@ return  [
 	],
 
 
-	'=== Resume ===' => NULL,
+	'=== Resume ===' => null,
 	'resume' => [
 		'de' => 'Resümee',
 		'en' => 'Resume',
@@ -1883,7 +1883,7 @@ return  [
 	],
 
 
-	'=== structure sharing ===' => NULL,
+	'=== structure sharing ===' => null,
 	'structure' => [
 		'en' => 'Structure',
 	],
@@ -1959,7 +1959,13 @@ return  [
 	],
 
 
-	'=== Not Used Anymore ===' => NULL,
+	'=== language categories ===' => null,
+	'lang_categories' => [
+		'en' => '',
+	],
+
+
+	'=== Not Used Anymore ===' => null,
 	'i_shared' => [
 		'de' => 'Ich habe eine View mit Ihnen geteilt',
 		'en' => 'I shared an eportfolio view with you',

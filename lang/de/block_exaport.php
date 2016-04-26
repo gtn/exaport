@@ -24,10 +24,10 @@ $string['translation:email'] = 'ariepl.work@gmail.com';
 
 
 // Main
-$string['blocktitle'] = 'Exabis E-Portfolio';
-$string['pluginname'] = 'Exabis E-Portfolio';
+$string['pluginname'] = 'Exabis ePortfolio';
+$string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Nutzung';
-$string['exaport:addinstance'] = 'Exabis E-Portfolio zum Kurs hinzuf&uumlgen';
+$string['exaport:addinstance'] = 'Exabis ePortfolio zum Kurs hinzuf&uumlgen';
 $string['exaport:myaddinstance'] = 'Exabis E-Portfolie zur Startseite hinzuf&uumlgen';
 $string['exaport:export'] = 'Export of SCORM-Files';
 $string['exaport:import'] = 'Import of SCORM-Files';
@@ -36,8 +36,6 @@ $string['exaport:shareintern'] = 'Internal sharing of views';
 $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
-$string['modulename'] = 'Exabis E-Portfolio';
-$string['blockname'] = 'Exabis E-Portfolio';
 $string['new'] = 'Neu';
 $string['addbookmark'] = 'Bookmark hinzuf&uuml;gen';
 $string['addcategory'] = 'Kategorie hinzuf&uuml;gen';
@@ -58,7 +56,7 @@ $string['date'] = 'Datum';
 $string['dontincludeurl'] = 'Diese Option ausw&auml;hlen um die Verkn&uuml;pfung zwischen Bookmark und URL aufzuheben';
 $string['duplicatedurl'] = 'Diese URL ist bereits bei den Bookmarks vorhanden.';
 $string['editcategories'] = 'Kategorien bearbeiten';
-$string['explaining'] = 'Das E-Portfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.';
+$string['explaining'] = 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.';
 $string['explaininglink'] = '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['explainingfile'] = '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['explainingnote'] = '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
@@ -74,7 +72,7 @@ $string['managecategories'] = 'Kategorien verwalten';
 $string['mandatoryfields'] = 'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte f&uuml;llen Sie beides aus.';
 $string['mandatoryfieldsforcat'] = 'Eine Feldbezeichnung ist erforderlich. Bitte f&uuml;llen Sie diese aus.';
 $string['mybookmarks'] = 'Mein Portfolio';
-$string['mybookmarkstitle'] = 'E-Portfolio-Modul: F&uuml;gen Sie hier Links und Dateien hinzu.';
+$string['mybookmarkstitle'] = 'ePortfolio-Modul: F&uuml;gen Sie hier Links und Dateien hinzu.';
 $string['mydialogues'] = 'Meine Blogs';
 $string['mymoodle'] = 'Mein Moodle';
 $string['newlink'] = 'Neuen externen Link hinzuf&uuml;gen';
@@ -103,7 +101,7 @@ $string['shareallexceptthose'] = 'Zugriff f&uuml;r <span class=\'block_eportfoli
 $string['sharenoneexceptthose'] = 'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer';
 $string['internalaccessall'] = 'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>alle</span>';
 $string['internalaccessusers'] = 'Zugriff nur f&uuml;r folgende Benutzer';
-$string['externaccess'] = 'externer E-Portfolio-Link';
+$string['externaccess'] = 'externer ePortfolio-Link';
 $string['showallusers'] = 'Zeige Benutzer aller meiner Kurse';
 $string['showcourseusers'] = 'Zeige nur Benutzer des aktuellen Kurses';
 $string['sharedpersons'] = 'Personen mit ver&ouml;ffentlichten Portfolios';
@@ -124,7 +122,7 @@ $string['nogroupsfound'] = 'Keine Gruppen gefunden';
 
 // export/import
 $string['import'] = 'Import';
-$string['explainexport'] = '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr E-Portfolio exportieren</span>';
+$string['explainexport'] = '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>';
 $string['createexport'] = 'SCORM-Datei erstellen';
 $string['clicktodownloadscorm'] = 'Folgenden Button dr&uuml;cken, um SCORM-Datei herunterzuladen:';
 $string['add_directory_structure'] = 'Mit Unterverzeichnissen exportieren';
@@ -175,7 +173,7 @@ $string['scormhastobezip'] = 'SCORM-Datei muss im zip-Format vorliegen!';
 $string['uploadfailed'] = 'Upload nicht erfolgreich!';
 $string['couldntupdatedesc'] = 'Beschreibung konnte nicht aktualisiert werden!';
 $string['couldntinsertdesc'] = 'Beschreibung konnte nicht eingef&uuml;gt werden!';
-$string['exportcomment'] = 'Das ist eine exportierte Datei von exabis E-Portfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden k&ouml;nnen!';
+$string['exportcomment'] = 'Das ist eine exportierte Datei von exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden k&ouml;nnen!';
 $string['comment'] = 'Kommentar';
 $string['commentshouldnotbeempty'] = 'Der Kommentar darf nicht leer sein.';
 $string['title'] = 'Titel';
@@ -217,7 +215,7 @@ $string['delete_confirmation_comment'] = 'Wollen Sie wirklich diesen Kommentar l
 
 // Shared portfolios
 $string['nocoursetogether'] = 'Kein Kurs';
-$string['nothingshared'] = 'Kein freigegebenen E-Portfolios gefunden';
+$string['nothingshared'] = 'Kein freigegebenen ePortfolios gefunden';
 
 
 // Errors

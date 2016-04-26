@@ -24,11 +24,11 @@ $string['translation:email'] = 'ariepl.work@gmail.com';
 
 
 // Main
-$string['blocktitle'] = 'Exabis E-Portfolio';
-$string['pluginname'] = 'Exabis E-Portfolio';
+$string['pluginname'] = 'Exabis ePortfolio';
+$string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Use allowed';
-$string['exaport:addinstance'] = 'add Exabis E-Portfolio to the course';
-$string['exaport:myaddinstance'] = 'add Exabis E-Portfolio on My home';
+$string['exaport:addinstance'] = 'add Exabis ePortfolio to the course';
+$string['exaport:myaddinstance'] = 'add Exabis ePortfolio on My home';
 $string['exaport:export'] = 'Export of SCORM-Files';
 $string['exaport:import'] = 'Import of SCORM-Files';
 $string['exaport:importfrommoodle'] = 'Import from Moodle';
@@ -36,8 +36,6 @@ $string['exaport:shareintern'] = 'Internal sharing of views';
 $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
-$string['modulename'] = 'Exabis E-Portfolio';
-$string['blockname'] = 'Exabis E-Portfolio';
 $string['new'] = 'New';
 $string['addbookmark'] = 'Add bookmark';
 $string['addcategory'] = 'Add category';
@@ -77,7 +75,7 @@ $string['managecategories'] = 'Manage categories';
 $string['mandatoryfields'] = 'The field\'s name, category and intro are required. Please fill them in.';
 $string['mandatoryfieldsforcat'] = 'The field name is required. Please fill them in.';
 $string['mybookmarks'] = 'My Portfolio';
-$string['mybookmarkstitle'] = 'Exabis E-Portfolio module: Add your links and files here.';
+$string['mybookmarkstitle'] = 'Exabis ePortfolio module: Add your links and files here.';
 $string['mydialogues'] = 'My Dialogues';
 $string['mymoodle'] = 'My Moodle';
 $string['newlink'] = 'Add new link';
@@ -107,7 +105,7 @@ $string['sharenoneexceptthose'] = 'Access for <span class=\'block_eportfolio_bol
 $string['internalaccessall'] = 'Access for <span class=\'block_eportfolio_bold\'>all</span>';
 $string['internalaccessusers'] = 'Access only for the following users';
 $string['internalaccessgroups'] = 'Access only for the following groups';
-$string['externaccess'] = 'external E-Portfolio-Link';
+$string['externaccess'] = 'external ePortfolio-Link';
 $string['emailaccess'] = 'Access for emails';
 $string['emailaccessdescription'] = 'Emails, separated by commas, semicolon or new line.<br /> For every new email will be sent unique link with access to this view. Deleting of email will delete access by this link.';
 $string['emailaccessmessagesubject'] = 'Shared view for you';
@@ -186,7 +184,7 @@ $string['scormhastobezip'] = 'SCORM-File has to be a .zip-File';
 $string['uploadfailed'] = 'Upload failed.';
 $string['couldntupdatedesc'] = 'Could not update your description!';
 $string['couldntinsertdesc'] = 'Could not insert the description!';
-$string['exportcomment'] = 'This is an exported file from Exabis E-Portfolio. Please do not remove the comments, they are needed for the import!';
+$string['exportcomment'] = 'This is an exported file from Exabis ePortfolio. Please do not remove the comments, they are needed for the import!';
 $string['comment'] = 'Comment';
 $string['commentshouldnotbeempty'] = 'You have to enter a comment.';
 $string['title'] = 'Title';
@@ -407,7 +405,7 @@ $string['desp_categories'] = '
 
 
 // Config
-$string['config_feature_copy_to_course'] = 'Allow students to copy E-Portfolio files to their courses';
+$string['config_feature_copy_to_course'] = 'Allow students to copy ePortfolio files to their courses';
 $string['competenceinteraction'] = 'Allow interaction with block exabis competencies, in case it is installed';
 $string['opencomps'] = 'Choose your competencies';
 $string['selectcomps'] = 'Choose competencies associated with your upload!';
@@ -430,10 +428,10 @@ $string['settings_disable_external_comments_head'] = 'Disable sharing of comment
 $string['settings_disable_external_comments_body'] = '';
 $string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
 $string['block_exaport_app_externaleportfolio_body'] = 'For App';
-$string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis E-Portfolio';
-$string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis E-Portfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
-$string['block_exaport_userquota'] = 'User quota for Exabis E-Portfolio';
-$string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis E-Portfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis ePortfolio';
+$string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_userquota'] = 'User quota for Exabis ePortfolio';
+$string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with exabis competencies and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';

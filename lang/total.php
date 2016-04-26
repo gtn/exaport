@@ -37,25 +37,27 @@ return [
 
 
 	'=== Main ===' => null,
-	'blocktitle' => [
-		'de' => 'Exabis E-Portfolio',
-		'en' => 'Exabis E-Portfolio',
-	],
+	// shown in admin plugin list
 	'pluginname' => [
-		'de' => 'Exabis E-Portfolio',
-		'en' => 'Exabis E-Portfolio',
+		'de' => 'Exabis ePortfolio',
+		'en' => 'Exabis ePortfolio',
+	],
+	// shown in block title and all headers
+	'blocktitle' => [
+		'de' => 'Exabis ePortfolio',
+		'en' => 'Exabis ePortfolio',
 	],
 	'exaport:use' => [
 		'de' => 'Nutzung',
 		'en' => 'Use allowed',
 	],
 	'exaport:addinstance' => [
-		'de' => 'Exabis E-Portfolio zum Kurs hinzuf&uumlgen',
-		'en' => 'add Exabis E-Portfolio to the course',
+		'de' => 'Exabis ePortfolio zum Kurs hinzuf&uumlgen',
+		'en' => 'add Exabis ePortfolio to the course',
 	],
 	'exaport:myaddinstance' => [
 		'de' => 'Exabis E-Portfolie zur Startseite hinzuf&uumlgen',
-		'en' => 'add Exabis E-Portfolio on My home',
+		'en' => 'add Exabis ePortfolio on My home',
 	],
 	'exaport:export' => [
 		'de' => 'Export of SCORM-Files',
@@ -84,14 +86,6 @@ return [
 	'exaport:competences' => [
 		'de' => 'Allow competences',
 		'en' => 'Allow competences',
-	],
-	'modulename' => [
-		'de' => 'Exabis E-Portfolio',
-		'en' => 'Exabis E-Portfolio',
-	],
-	'blockname' => [
-		'de' => 'Exabis E-Portfolio',
-		'en' => 'Exabis E-Portfolio',
 	],
 	'new' => [
 		'de' => 'Neu',
@@ -174,7 +168,7 @@ return [
 		'en' => 'edit categories',
 	],
 	'explaining' => [
-		'de' => 'Das E-Portfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.',
+		'de' => 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.',
 		'en' => 'The Portfolio may be used to store web addresses, files, as well as enter notes that may contain insights or little notes the user may wish to write down.',
 	],
 	'explaininglink' => [
@@ -247,8 +241,8 @@ return [
 		'en' => 'My Portfolio',
 	],
 	'mybookmarkstitle' => [
-		'de' => 'E-Portfolio-Modul: F&uuml;gen Sie hier Links und Dateien hinzu.',
-		'en' => 'Exabis E-Portfolio module: Add your links and files here.',
+		'de' => 'ePortfolio-Modul: F&uuml;gen Sie hier Links und Dateien hinzu.',
+		'en' => 'Exabis ePortfolio module: Add your links and files here.',
 	],
 	'mydialogues' => [
 		'de' => 'Meine Blogs',
@@ -366,8 +360,8 @@ return [
 		'en' => 'Access only for the following groups',
 	],
 	'externaccess' => [
-		'de' => 'externer E-Portfolio-Link',
-		'en' => 'external E-Portfolio-Link',
+		'de' => 'externer ePortfolio-Link',
+		'en' => 'external ePortfolio-Link',
 	],
 	'emailaccess' => [
 		'en' => 'Access for emails',
@@ -462,7 +456,7 @@ return [
 		'en' => 'Import',
 	],
 	'explainexport' => [
-		'de' => '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr E-Portfolio exportieren</span>',
+		'de' => '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>',
 		'en' => 'Export your portfolio here.',
 	],
 	'createexport' => [
@@ -648,8 +642,8 @@ return [
 		'en' => 'Could not insert the description!',
 	],
 	'exportcomment' => [
-		'de' => 'Das ist eine exportierte Datei von exabis E-Portfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden k&ouml;nnen!',
-		'en' => 'This is an exported file from Exabis E-Portfolio. Please do not remove the comments, they are needed for the import!',
+		'de' => 'Das ist eine exportierte Datei von exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden k&ouml;nnen!',
+		'en' => 'This is an exported file from Exabis ePortfolio. Please do not remove the comments, they are needed for the import!',
 	],
 	'comment' => [
 		'de' => 'Kommentar',
@@ -807,7 +801,7 @@ return [
 		'en' => 'No Course',
 	],
 	'nothingshared' => [
-		'de' => 'Kein freigegebenen E-Portfolios gefunden',
+		'de' => 'Kein freigegebenen ePortfolios gefunden',
 		'en' => 'Nobody is sharing a portfolio with you',
 	],
 
@@ -1366,7 +1360,7 @@ return [
 	'=== Config ===' => null,
 	'config_feature_copy_to_course' => [
 		'de' => 'Sch&uuml;ler d&uuml;rfen Dateien in den Kurs kopieren',
-		'en' => 'Allow students to copy E-Portfolio files to their courses',
+		'en' => 'Allow students to copy ePortfolio files to their courses',
 	],
 	'competenceinteraction' => [
 		'de' => 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.',
@@ -1457,16 +1451,16 @@ return [
 		'en' => 'For App',
 	],
 	'block_exaport_maxbytes' => [
-		'en' => 'Maximum uploaded file size in Exabis E-Portfolio',
+		'en' => 'Maximum uploaded file size in Exabis ePortfolio',
 	],
 	'block_exaport_maxbytes_body' => [
-		'en' => 'This specifies a maximum size that uploaded files can be throughout the Exabis E-Portfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>',
+		'en' => 'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>',
 	],
 	'block_exaport_userquota' => [
-		'en' => 'User quota for Exabis E-Portfolio',
+		'en' => 'User quota for Exabis ePortfolio',
 	],
 	'block_exaport_userquota_body' => [
-		'en' => 'The maximum number of bytes that a user can store in their own Exabis E-Portfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
+		'en' => 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
 	],
 	'block_exaport_app_alloweditdelete_head' => [
 		'de' => 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen',

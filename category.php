@@ -227,6 +227,7 @@ class simplehtml_form extends moodleform {
 		};
 		
 		// sharing as a structure
+		/*
 		if (1) {
 			$mform->addElement('checkbox', 'structure_share', get_string('share_structure', 'block_exaport'), get_string('share_structure_description', 'block_exaport'));
 			$mform->setType('structure_share', PARAM_INT);
@@ -265,12 +266,13 @@ class simplehtml_form extends moodleform {
 				foreach($sharedUsers as $i => $user)
 					$mform->addElement('html', 'structure_sharedgroupsarr['.$i.'] = '.$user.';');
 				$mform->addElement('html', '</script>');
-			}/**/
+			}
 			$mform->addElement('html', '<tr id="structure_sharing-groups"><td></td><td><div id="structure_sharing-grouplist">grouplist</div></td></tr>');			
 			
 			$mform->addElement('html', '</table></div>');
 			$mform->addElement('html', '</div></div>');
 		};
+		*/
 
 		$this->add_action_buttons();
 	}

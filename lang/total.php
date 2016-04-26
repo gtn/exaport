@@ -1812,7 +1812,7 @@ return [
 		'en' => 'Nobody is sharing a structure with you',
 	],
 	'copystructure' => [
-		'en' => 'Copy structure',
+		'en' => 'Copy this category to My Portfolio',
 	],
 	'copystructureconfirmation' => [
 		'en' => 'Do you really want to copy this structure?',

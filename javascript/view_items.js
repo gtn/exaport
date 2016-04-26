@@ -26,7 +26,7 @@ document.getElementById("long-preview-" + i).style.display = "none";
 }
 
 jQueryExaport(function($){
-	$(".excomdos_tiletable .excomdos_tile").draggable({
+	$(".excomdos_tiletable .excomdos_tile:not(.excomdos_tile_fixed)").draggable({
 		scroll: true, // scroll when dragging
 		helper: "clone",
 		start: function( event, ui ) { // when dragging

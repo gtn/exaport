@@ -51,6 +51,18 @@ function block_exaport_get_item_file($item) {
 		return reset($areafiles);
 }
 
+function block_exaport_get_category_icon($category) {
+	$fs = get_file_storage();
+
+	$file = current($fs->get_area_files(context_user::instance($category->userid)->id, 'block_exaport', 'category_icon', $category->id, 'itemid', false));
+	if ($file) {
+		return g::$CFG->wwwroot.'/pluginfile.php/'.$file->get_contextid().'/block_exaport/category_icon/'.$file->get_itemid().'/'.$file->get_filename();
+	} else {
+		return null;
+	}
+}
+
+
 /**
  * @param $itemcomment
  * @return stored_file
@@ -289,8 +301,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	$tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
 	$tabs['exportimport'] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
 	$tabs['sharedbookmarks'] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
-	if (has_sharablestructure($USER->id))
-		$tabs['sharedstructures'] = new tabobject('sharedstructures', $CFG->wwwroot . '/blocks/exaport/shared_structures.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedstructures"), '', true);
+	$tabs['sharedstructures'] = new tabobject('sharedstructures', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id.'&type=shared', block_exaport_get_string("sharedstructures"), '', true);
 
 	$tabs['personal']->subtree[] = new tabobject('personalinfo', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("explainpersonal", "block_exaport"), '', true);
 	$tabs['personal']->subtree[] = new tabobject('resume', s($CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id), get_string("resume", "block_exaport"), '', true);
@@ -770,8 +781,9 @@ function block_exaport_get_root_category() {
 	global $DB, $USER;
 	return (object) array(
 		'id' => 0,
-		'pid' => -999,
+		'pid' => 0,
 		'name' => block_exaport_get_string('root_category'),
+		'url' => g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id,
 		'item_cnt' => $DB->get_field_sql('
 			SELECT COUNT(i.id) AS item_cnt
 			FROM {block_exaportitem} i
@@ -785,9 +797,10 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
 	global $DB, $USER;
 	return (object) array(
 		'id' => -1,
-		'pid' => 0,
+		'pid' => -123, // not parent available
 		'name' => $name != null ? $name : block_exaport_get_string('shareditems_category'),
 		'item_cnt' => '',
+		'url' => g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id.'&type=shared&userid='.$userid,
 		'userid' => $userid ? $userid : ''
 /* 		'item_cnt' => $DB->get_field_sql('
 			SELECT COUNT(i.id) AS item_cnt

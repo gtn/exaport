@@ -158,6 +158,10 @@ box-shadow:		 0px 0px 5px rgba(50, 50, 50, 0.21);
 	margin: 2.5em 0;
 	height: 60px;
 }
+.excomdos_cont.excomdos_cont-type-shared .excomdos_additem {
+	font-size: 0.85rem;
+	margin: 0;
+}
 .excomdos_cont .excomdos_additem_content {
 	float: left;
 }

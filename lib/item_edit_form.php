@@ -226,7 +226,7 @@ function rek_category_select_setup($outercategories, $entryname, $categories){
 		$conditions = array("userid" => $USER->id, "pid" => $curcategory->id);
 		$inner_categories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
 		if ($inner_categories) {
-			$categories = rek_category_select_setup($inner_categories, $name.' &rArr; ', $categories);
+			$categories = rek_category_select_setup($inner_categories, $name.' &rarr; ', $categories);
 		}
 	}
 	return $categories;

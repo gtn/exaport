@@ -22,7 +22,6 @@ require_once __DIR__.'/lib/sharelib.php';
 require_once __DIR__.'/lib/externlib.php';
 require_once __DIR__.'/blockmediafunc.php';
 
-global $DB, $SESSION;
 $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
@@ -106,21 +105,16 @@ if ($item->access->page == 'view') {
 	} else { 
 		block_exaport_print_header("sharedbookmarks");
 		// print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
-		echo block_exaport_wrapperdivstart();
 	}
 } elseif ($item->access->page == 'portfolio') {
-	if ($item->access->request == 'intern') {
-		if ($backtype && ($item->userid == $USER->id)) {
-			block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype));
-		} else {
-			block_exaport_print_header("sharedbookmarks");
-		}
+	if ($item->userid == $USER->id) {
+		block_exaport_print_header("bookmarks");
 	} else {
-		block_exaport_print_header("sharedbookmarks");
-		// print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
-		echo block_exaport_wrapperdivstart();
+		block_exaport_print_header("sharedstructures");
 	}
 }
+
+echo block_exaport_wrapperdivstart();
 
 //IF FORM DATA -> INSERT
 if(isset($_POST['data'])) {

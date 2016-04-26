@@ -26,23 +26,20 @@ function _copy_category_to_myself_iterator($curr_cat, $parentcatid) {
 	$new_cat->timemodified = $curr_cat->timemodified;
 	$new_cat->courseid = g::$COURSE->id;
 	$new_cat->description = $curr_cat->description;
-	$new_cat->id = g::$DB->insert_record("block_exaportcate", $curr_cat);
+	$new_cat->id = g::$DB->insert_record("block_exaportcate", $new_cat);
 
-	$children = g::$DB->get_records("block_exaportcate", array('pid' => $new_cat->id));
-	/*
+	$children = g::$DB->get_records("block_exaportcate", array('pid' => $curr_cat->id));
 	foreach ($children as $category) {
-		copy_category_to_myself_iterator($category, $new_cat->id);
+		_copy_category_to_myself_iterator($category, $new_cat->id);
 	}
-	*/
 
 	$items = g::$DB->get_records('block_exaportitem', ['categoryid' => $curr_cat->id]);
 	foreach ($items as $item) {
 		$new_item = new \stdClass();
-		$new_item->userid = $item->userid;
+		$new_item->userid = g::$USER->id;
 		$new_item->type = $item->type;
-		$new_item->categoryid = $item->$new_cat->id;
+		$new_item->categoryid = $new_cat->id;
 		$new_item->name = $item->name;
-		$new_item->userid = $item->userid;
 		$new_item->url = $item->url;
 		$new_item->intro = $item->intro;
 		$new_item->attachment = $item->attachment;
@@ -50,8 +47,41 @@ function _copy_category_to_myself_iterator($curr_cat, $parentcatid) {
 		$new_item->courseid = g::$COURSE->id;
 		$new_item->sortorder = $item->sortorder;
 
-		// TODO: kommentare
-		// TODO: tags
+		$new_item->id = g::$DB->insert_record('block_exaportitem', $new_item);
+
+		// files
+		$fs = get_file_storage();
+		if ($file = block_exaport_get_item_file($item)) {
+			$fs->create_file_from_storedfile(array(
+				'contextid' => \context_user::instance(g::$USER->id)->id,
+				'component' => 'block_exaport',
+				'filearea' => 'item_file',
+				'itemid' => $new_item->id,
+			), $file);
+		}
+		if ($file = block_exaport_get_file($item, 'item_iconfile')) {
+			$fs->create_file_from_storedfile(array(
+				'contextid' => \context_user::instance(g::$USER->id)->id,
+				'component' => 'block_exaport',
+				'filearea' => 'item_iconfile',
+				'itemid' => $new_item->id,
+			), $file);
+		}
+
+		// comments
+		$comments = g::$DB->get_records("block_exaportitemcomm", ["itemid" => $item->id], 'timemodified DESC');
+		foreach ($comments as $comment) {
+			$new_comment = new \stdClass();
+			$new_comment->itemid = $new_item->id;
+			$new_comment->userid = $comment->userid;
+			$new_comment->entry = $comment->entry;
+			$new_comment->timemodified = $comment->timemodified;
+		}
+
+		// tags
+		include_once(g::$CFG->dirroot.'/tag/lib.php');
+		$tags = tag_get_tags_array('exaport_item', $item->id);
+		tag_set('exaport_item', $new_item->id, $tags, 'block_exaport', \context_user::instance(g::$USER->id)->id);
 	}
 
 	return $new_cat;

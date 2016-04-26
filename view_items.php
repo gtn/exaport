@@ -397,13 +397,15 @@ if ($layout == 'details') {
 
 	$itemscnt = count($items);
 	foreach ($items as $item) {
+		$url = $CFG->wwwroot.'/blocks/exaport/shared_item.php?courseid='.$courseid.'&access=portfolio/id/'.$item->userid.'&itemid='.$item->id;
+
 		$item_i++;
 
 		$table->data[$item_i] = array();
 
 		$table->data[$item_i]['type'] = '<img src="pix/'.$item->type.'_32.png" alt="'.get_string($item->type, "block_exaport").'">';
 
-		$table->data[$item_i]['name'] = "<a href=\"".s("{$CFG->wwwroot}/blocks/exaport/shared_item.php?courseid=$courseid&access=portfolio/id/".$USER->id."&itemid=$item->id&backtype=&att=".$item->attachment)."\">" . $item->name . "</a>";
+		$table->data[$item_i]['name'] = "<a href=\"".s($url)."\">" . $item->name . "</a>";
 		if ($item->intro) {
 			$intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id, 'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
 
@@ -537,7 +539,7 @@ if ($layout == 'details') {
 	}
 
 	foreach ($items as $item) {
-			$url = $CFG->wwwroot.'/blocks/exaport/shared_item.php?courseid='.$courseid.'&access=portfolio/id/'.$USER->id.'&itemid='.$item->id;
+		$url = $CFG->wwwroot.'/blocks/exaport/shared_item.php?courseid='.$courseid.'&access=portfolio/id/'.$item->userid.'&itemid='.$item->id;
 		?>
 		<div class="excomdos_tile excomdos_tile_item id-<?php echo $item->id; ?>">
 			<div class="excomdos_tilehead">

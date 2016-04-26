@@ -37,18 +37,21 @@ require 'lib.exaport.php';
 
 /*** FILE FUNCTIONS **********************************************************************/
 
-function block_exaport_get_item_file($item) {
+/**
+ * @param $item
+ * @param $type
+ * @return stored_file
+ */
+function block_exaport_get_file($item, $type) {
 	$fs = get_file_storage();
-	
-	// list all files, excluding directories!
-	$areafiles = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id, 'itemid', false);
-	
-	// file found?
-	if (empty($areafiles))
-		return null;
-	else
-		// return first file (there should be only one file anyway)
-		return reset($areafiles);
+	$files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
+
+	// return first file
+	return reset($files);
+}
+
+function block_exaport_get_item_file($item) {
+	return block_exaport_get_file($item, 'item_file');
 }
 
 function block_exaport_get_category_icon($category) {
@@ -56,6 +59,10 @@ function block_exaport_get_category_icon($category) {
 
 	$file = current($fs->get_area_files(context_user::instance($category->userid)->id, 'block_exaport', 'category_icon', $category->id, 'itemid', false));
 	if ($file) {
+		// hack, this logic doesn't work for other users for now
+		if ($category->userid !== g::$USER->id) {
+			return;
+		}
 		return g::$CFG->wwwroot.'/pluginfile.php/'.$file->get_contextid().'/block_exaport/category_icon/'.$file->get_itemid().'/'.$file->get_filename();
 	} else {
 		return null;
@@ -1232,37 +1239,39 @@ function has_sharablestructure($userid) {
 	
 	return false;
 }
+
 function block_exaport_item_is_editable($itemid) {
 	global $CFG, $DB, $USER;
-	
-	if(!block_exaport_item_is_resubmitable($itemid))
-		return false;
-	
-	$allowEdit = true;
 
-	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid));
-	
-	if(!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
+	if (!block_exaport_item_is_resubmitable($itemid)) {
+		return false;
+	}
+
+	if (!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
+		$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE, array("itemid" => $itemid));
+
 		//check item grading and teacher comment
-		if(isset($itemExample)) {
-			if(isset($itemExample->teachervalue) && $itemExample->teachervalue != null) {
-				$allowEdit = false;
-			}else {
-				$itemcomments = $DB->get_records ( 'block_exaportitemcomm', array (
-						'itemid' => $itemid
-				), 'timemodified ASC', 'entry, userid', 0, 2 );
-				if ($itemcomments) {
-					foreach ( $itemcomments as $itemcomment ) {
-						if ($USER->id != $itemcomment->userid) {
-							$allowEdit = false;
-						}
+		if ($itemExample) {
+			if ($itemExample->teachervalue) {
+				// lehrerbewertung da
+				return false;
+			} else {
+				$itemcomments = $DB->get_records('block_exaportitemcomm', array(
+					'itemid' => $itemid,
+				), 'timemodified ASC', 'entry, userid', 0, 2);
+				foreach ($itemcomments as $itemcomment) {
+					if ($USER->id != $itemcomment->userid) {
+						// somebody commented on this item -> must be teacher
+						return false;
 					}
 				}
 			}
 		}
 	}
-	return $allowEdit;
+
+	return true;
 }
+
 function block_exaport_item_is_resubmitable($itemid) {
 	global $DB, $USER, $COURSE;
 

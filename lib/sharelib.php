@@ -713,7 +713,7 @@ namespace {
 				$usercats[$id] = $cat->catid;
 			};
 			$usercats_list = implode(',', $usercats);
-		};
+		}
 
 		// All categories and users who shared.
 		$categories = $DB->get_records_sql(

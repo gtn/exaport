@@ -23,8 +23,10 @@ $string['translation:organisation'] = 'IZ Steyr';
 $string['translation:email'] = 'ariepl.work@gmail.com';
 
 
-// Main
+// === Main ===
+// shown in admin plugin list
 $string['pluginname'] = 'Exabis ePortfolio';
+// shown in block title and all headers
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Nutzung';
 $string['exaport:addinstance'] = 'Exabis ePortfolio zum Kurs hinzuf&uumlgen';
@@ -120,7 +122,7 @@ $string['membersnumber'] = 'Anzahl von Zuhörern';
 $string['nogroupsfound'] = 'Keine Gruppen gefunden';
 
 
-// export/import
+// === export/import ===
 $string['import'] = 'Import';
 $string['explainexport'] = '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>';
 $string['createexport'] = 'SCORM-Datei erstellen';
@@ -149,13 +151,13 @@ $string['itemgrading'] = 'Beurteilung';
 $string['gradeitem'] = 'Abgabe beurteilen';
 
 
-// Notes
+// === Notes ===
 $string['deletenoteconfirm'] = 'Wollen Sie diese Notiz wirklich l&ouml;schen?';
 $string['deletelinkconfirm'] = 'Wollen Sie diesen Link wirklich l&ouml;schen?';
 $string['deletefileconfirm'] = 'Wollen Sie diese Datei wirklich l&ouml;schen?';
 
 
-// Different
+// === Different ===
 $string['couldninsertcomment'] = 'Kommentar konnte nicht eingef&uuml;gt werden!';
 $string['importedcommentsstart'] = 'Importierte Kommentare:<br /><br />';
 $string['importedcommentsend'] = 'Ende importierte Kommentare';
@@ -213,36 +215,35 @@ $string['updownarrow'] = 'Pfeil nach oben/nach unten';
 $string['delete_confirmation_comment'] = 'Wollen Sie wirklich diesen Kommentar löschen?';
 
 
-// Shared portfolios
+// === Shared portfolios ===
 $string['nocoursetogether'] = 'Kein Kurs';
 $string['nothingshared'] = 'Kein freigegebenen ePortfolios gefunden';
 
 
-// Errors
+// === Errors ===
 $string['nouserforid'] = 'Kein Benutzer zu dieser Id!';
-$string['nouserforaccess'] = NULL;
 
 
-// Export
+// === Export ===
 $string['export'] = 'Export SCORM-Datei';
 $string['exportepx'] = 'Export EPX-Datei';
 $string['createepxexport'] = 'EPX-Datei erstellen';
 $string['exportviewselect'] = 'Um alle Einträge einer bestimmten View zu exportieren, bitte diese hier w&auml;hlen';
 
 
-// stuff
+// === stuff ===
 $string['type'] = 'Typ';
 $string['share'] = 'Share';
 $string['explainingall'] = 'Alle Eintr&auml;ge im Portfolio';
 
 
-// Item sorting
+// === Item sorting ===
 $string['userdefinedsort'] = 'Eigene Sortierung vornehmen';
 $string['movetop'] = 'An erste Stelle';
 $string['movebottom'] = 'An letzte Stelle';
 
 
-// Views
+// === Views ===
 $string['view'] = 'View';
 $string['views'] = 'Views';
 $string['explainingviews'] = 'View verwalten';
@@ -319,7 +320,7 @@ $string['width'] = 'Breite';
 $string['media_allowed_notes'] = 'URLs der folgenden Seiten sind erlaubt:';
 
 
-// Copy to course
+// === Copy to course ===
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';
 $string['copyitemtocourse'] = 'In Kurs kopieren';
 $string['desp_language'] = 'Desp Sprache';
@@ -332,7 +333,7 @@ $string['cofigureblock_media'] = 'Medieneintrag';
 $string['cofigureblock_personalinfo'] = 'Pers&ouml;nliche Information';
 
 
-// Desp
+// === Desp ===
 $string['back_to_desp'] = 'zur&uuml;ck zum d-ESP';
 $string['steckbrief'] = 'Steckbrief';
 $string['desp_categories'] = '
@@ -369,7 +370,7 @@ $string['desp_categories'] = '
 ';
 
 
-// Config
+// === Config ===
 $string['config_feature_copy_to_course'] = 'Sch&uuml;ler d&uuml;rfen Dateien in den Kurs kopieren';
 $string['competenceinteraction'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
 $string['opencomps'] = 'Kompetenzen ausw&auml;hlen';
@@ -397,7 +398,7 @@ $string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trot
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit exabis competencies und Dakora sinnvoll';
 
 
-// Resume
+// === Resume ===
 $string['resume'] = 'Resümee';
 $string['resume_template_newresume'] = '<h2>Mein Resümee</h2>';
 $string['resume_my'] = 'Mein Resümee';
@@ -483,7 +484,8 @@ $string['resume_expand'] = 'Alles öffnen';
 $string['resume_collaps'] = 'Alles schließen';
 
 
-// structure sharing
+// === structure sharing ===
+$string['shared_categories'] = 'Geteilte Kategorien';
 $string['create_as_note'] = 'Als Artefakt hinzufügen';
 $string['category_not_found'] = 'Kategorie nicht gefunden';
 $string['root_category'] = 'Hauptkategorie';
@@ -496,9 +498,9 @@ $string['supported'] = 'Projekt wurde unterstützt von';
 $string['developed'] = 'entwickelt von';
 
 
-// language categories
+// === language categories ===
 
 
-// Not Used Anymore
+// === Not Used Anymore ===
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';

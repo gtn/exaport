@@ -72,6 +72,7 @@ if ($type == 'shared') {
 	$sharedUsers = block_exaport\get_categories_shared_to_user($USER->id);
 	$selectedUser = $userid && isset($sharedUsers[$userid]) ? $sharedUsers[$userid] : null;
 
+	/*
 	if (!$selectedUser) {
 		$currentCategory = $rootCategory;
 		$parentCategory = null;
@@ -84,7 +85,16 @@ if ($type == 'shared') {
 		}
 
 		$items = [];
-	} elseif ($categoryid) {
+	} else {
+		$currentCategory = $selectedUser;
+		$subCategories = $selectedUser->categories;
+		$parentCategory = $rootCategory;
+		$items = [];
+	}
+	*/
+	if (!$selectedUser || !$categoryid) {
+		throw new moodle_exception('wrong category/userid');
+	} else {
 		$categories = $DB->get_records_sql('
 			SELECT c.id, c.userid, c.name, c.pid, c.shareall, c.internshare, c.structure_shareall, c.structure_share, COUNT(i.id) AS item_cnt
 			FROM {block_exaportcate} c
@@ -128,7 +138,11 @@ if ($type == 'shared') {
 		if (isset($categories[$currentCategory->pid]) && category_allowed($selectedUser, $categories, $categories[$currentCategory->pid])) {
 			$parentCategory = $categories[$currentCategory->pid];
 		} else {
-			$parentCategory = $selectedUser;
+			$parentCategory = (object)[
+				'id' => 0,
+				'url' => new moodle_url('shared_categories.php', ['courseid'=>2]),
+				'name' => '',
+			];
 		}
 
 		if (!category_allowed($selectedUser, $categories, $currentCategory)) {
@@ -148,20 +162,6 @@ if ($type == 'shared') {
 			i.iseditable, i.example_url, i.parentid
 			$sql_sort
 		", [$currentCategory->id]);
-	} else {
-		$currentCategory = $selectedUser;
-		$subCategories = $selectedUser->categories;
-		$parentCategory = $rootCategory;
-		$items = [];
-	}
-
-	if ($action == 'copy') {
-		// already checked if category can be accessed etc.
-
-		$category = block_exaport\copy_category_to_myself($categoryid);
-		$returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id;
-		redirect($returnurl);
-		exit;
 	}
 
 } else {
@@ -224,7 +224,7 @@ if ($type == 'shared') {
 
 $PAGE->set_url($currentCategory->url);
 
-block_exaport_print_header($type == 'shared' ? 'sharedstructures' : "bookmarks");
+block_exaport_print_header($type == 'shared' ? 'shared_categories' : "bookmarks");
 
 // echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
 
@@ -321,8 +321,10 @@ if ($type == 'mine' && $currentCategory->id > 0) {
 	echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentCategory->id.'&action=delete&back=same"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
 } elseif ($type == 'shared' && $selectedUser && $categoryid) {
 	// when category selected, allow copy
+	/*
 	$url = $PAGE->url->out(true, ['action'=>'copy']);
-	echo '<button onclick="document.location.href=\''.$url.'\'">'.block_exaport_get_string('copystructure').'</button>';
+	echo '<button onclick="document.location.href=\'shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$categoryid.'\'">'.block_exaport_get_string('copycategory').'</button>';
+	*/
 }
 echo '</div>';
 

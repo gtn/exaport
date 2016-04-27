@@ -110,7 +110,7 @@ if ($item->access->page == 'view') {
 	if ($item->userid == $USER->id) {
 		block_exaport_print_header("bookmarks");
 	} else {
-		block_exaport_print_header("sharedstructures");
+		block_exaport_print_header("shared_categories");
 	}
 }
 

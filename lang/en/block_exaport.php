@@ -23,8 +23,10 @@ $string['translation:organisation'] = 'IZ Steyr';
 $string['translation:email'] = 'ariepl.work@gmail.com';
 
 
-// Main
+// === Main ===
+// shown in admin plugin list
 $string['pluginname'] = 'Exabis ePortfolio';
+// shown in block title and all headers
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Use allowed';
 $string['exaport:addinstance'] = 'add Exabis ePortfolio to the course';
@@ -131,7 +133,7 @@ $string['nogroupsfound'] = 'No groups found';
 $string['make_it_yours'] = 'Make it yours';
 
 
-// export/import
+// === export/import ===
 $string['import'] = 'Import';
 $string['explainexport'] = 'Export your portfolio here.';
 $string['createexport'] = 'Create SCORM-File';
@@ -160,13 +162,13 @@ $string['itemgrading'] = 'Grading';
 $string['gradeitem'] = 'Grade the item';
 
 
-// Notes
+// === Notes ===
 $string['deletenoteconfirm'] = 'Do you really want to delete this note?';
 $string['deletelinkconfirm'] = 'Do you really want to delete this link?';
 $string['deletefileconfirm'] = 'Do you really want to delete this file?';
 
 
-// Different
+// === Different ===
 $string['couldninsertcomment'] = 'Couldn\'t insert comment!';
 $string['importedcommentsstart'] = 'Imported comments:<br /><br />';
 $string['importedcommentsend'] = 'End of imported comments';
@@ -224,17 +226,17 @@ $string['updownarrow'] = 'updown arrow';
 $string['delete_confirmation_comment'] = 'Do you really want to delete this comment?';
 
 
-// Shared portfolios
+// === Shared portfolios ===
 $string['nocoursetogether'] = 'No Course';
 $string['nothingshared'] = 'Nobody is sharing a portfolio with you';
 
 
-// Errors
+// === Errors ===
 $string['nouserforid'] = 'User not found (id unknown)';
 $string['nouserforaccess'] = 'User not found (access-code unknown)';
 
 
-// Export
+// === Export ===
 $string['export'] = 'Export SCORM-File';
 $string['exportepx'] = 'Export EPX-File';
 $string['createepxexport'] = 'Create EPX-File';
@@ -243,7 +245,7 @@ $string['export_directory'] = 'Export Directory-structure';
 $string['createexport_directory'] = 'Create Directory-structure';
 
 
-// stuff
+// === stuff ===
 $string['type'] = 'Type';
 $string['share'] = 'Share';
 $string['explainingall'] = 'All Items in your portfolio';
@@ -252,13 +254,13 @@ $string['other_users_course'] = 'Users not in my courses';
 $string['other_groups_course'] = 'Other courses';
 
 
-// Item sorting
+// === Item sorting ===
 $string['userdefinedsort'] = 'Define your own search';
 $string['movetop'] = 'Move top';
 $string['movebottom'] = 'Move bottom';
 
 
-// Views
+// === Views ===
 $string['view'] = 'View';
 $string['views'] = 'Views';
 $string['explainingviews'] = 'Manage your views.';
@@ -341,18 +343,18 @@ $string['filterByTag'] = 'Filter by tag';
 $string['searchByTitle'] = 'Search';
 $string['clearAllFilers'] = 'Clear all filters';
 $string['sharedwith'] = 'Shared with';
-$string['sharedwith_meand'] = 'Shared with me and {$a} other users';
+$string['sharedwith_user_cnt'] = 'Shared with {$a} users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedwith_group'] = 'Shared with my group';
-$string['sharedwith_groupand'] = 'Shared with my group and {$a} other groups';
+$string['sharedwith_group_cnt'] = 'Shared with my {$a} groups';
 $string['only_external'] = 'Only external shared views';
 $string['display_onlyexternal'] = 'Display only external shared views';
 $string['display_all'] = 'Display all views';
 
 
-// Copy to course
+// === Copy to course ===
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';
 $string['copyitemtocourse'] = 'Copy to course';
 $string['desp_language'] = 'Desp Language';
@@ -366,7 +368,7 @@ $string['cofigureblock_personalinfo'] = 'Choose personal info';
 $string['cofigureblock_badge'] = 'Choose Badges';
 
 
-// Desp
+// === Desp ===
 $string['back_to_desp'] = 'back to language portfolio';
 $string['desp_pluginname'] = 'Dossier';
 $string['steckbrief'] = 'Profile';
@@ -404,7 +406,7 @@ $string['desp_categories'] = '
 ';
 
 
-// Config
+// === Config ===
 $string['config_feature_copy_to_course'] = 'Allow students to copy ePortfolio files to their courses';
 $string['competenceinteraction'] = 'Allow interaction with block exabis competencies, in case it is installed';
 $string['opencomps'] = 'Choose your competencies';
@@ -437,7 +439,7 @@ $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination 
 $string['delete_all_shareall'] = 'Delete all shareall?';
 
 
-// Resume
+// === Resume ===
 $string['resume'] = 'Resume';
 $string['resume_template_newresume'] = '<h2>My new resume</h2>';
 $string['resume_my'] = 'My resume';
@@ -522,14 +524,14 @@ $string['resume_expand'] = 'Expand all';
 $string['resume_collaps'] = 'Collaps all';
 
 
-// structure sharing
+// === structure sharing ===
 $string['structure'] = 'Structure';
-$string['sharedstructures'] = 'Shared Structures';
+$string['shared_categories'] = 'Shared Categories';
 $string['share_structure'] = 'Share as a structure';
 $string['share_structure_description'] = 'The users will be able to copy this category and subcategories for yourself';
 $string['nothingstructureshared'] = 'Nobody is sharing a structure with you';
-$string['copystructure'] = 'Copy this category to My Portfolio';
-$string['copystructureconfirmation'] = 'Do you really want to copy this structure?';
+$string['browsecategory'] = 'Browse this category';
+$string['copycategory'] = 'Copy this category to My Portfolio';
 $string['copytocategory'] = 'Copy to this category:';
 $string['sharedArtefacts'] = 'Group portfolios shared with you';
 $string['shareditems_category'] = 'Group portfolios shared with you';
@@ -546,11 +548,11 @@ $string['developed'] = 'developed by';
 $string['myfilearea'] = 'My file area';
 
 
-// language categories
+// === language categories ===
 $string['lang_categories'] = '';
 
 
-// Not Used Anymore
+// === Not Used Anymore ===
 $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';
 $string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';

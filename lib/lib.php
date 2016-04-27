@@ -306,9 +306,9 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	// $tabs[] = new tabobject('categories', $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $COURSE->id, get_string("categories", "block_exaport"), '', true);
 	$tabs['bookmarks'] = new tabobject('bookmarks', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("bookmarks"), '', true);
 	$tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
-	$tabs['exportimport'] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
 	$tabs['sharedbookmarks'] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
-	$tabs['sharedstructures'] = new tabobject('sharedstructures', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id.'&type=shared', block_exaport_get_string("sharedstructures"), '', true);
+	$tabs['shared_categories'] = new tabobject('shared_categories', $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $COURSE->id, block_exaport_get_string("shared_categories"), '', true);
+	$tabs['exportimport'] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
 
 	$tabs['personal']->subtree[] = new tabobject('personalinfo', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("explainpersonal", "block_exaport"), '', true);
 	$tabs['personal']->subtree[] = new tabobject('resume', s($CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id), get_string("resume", "block_exaport"), '', true);
@@ -360,7 +360,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
  
 	 // header
 	global $OUTPUT;
-	
+
   	echo $OUTPUT->header();
 	echo block_exaport_wrapperdivstart();
 	if (block_exaport_course_has_desp()) {
@@ -385,7 +385,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
 function block_exaport_get_string($string, $param=null) {
 	$manager = get_string_manager();
-	
+
 	if (block_exaport_course_has_desp() && $manager->string_exists('desp_'.$string, 'block_exaport'))
 		return $manager->get_string('desp_'.$string, 'block_exaport', $param);
 
@@ -404,8 +404,7 @@ function todo_string($string) {
 }
 
 function block_exaport_print_footer() {
-	global $COURSE;
-	print_footer($COURSE);
+	echo g::$OUTPUT->footer();
 }
 
 /**

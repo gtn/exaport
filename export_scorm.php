@@ -58,7 +58,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 $url = '/blocks/exaport/export_scorm.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 if (!$confirm)
-	block_exaport_print_header("exportimport", "exportimportexport");
+	block_exaport_print_header("importexport", "exportimportexport");
 
 if (!defined('FILE_APPEND')) {
 	define('FILE_APPEND', 1);
@@ -592,7 +592,7 @@ if ($confirm) {
 
 	// Root entry in organization
 	$title = & $organization->createChild('title');
-	$title->text(get_string("mybookmarks", "block_exaport"));
+	$title->text(get_string("myportfolio", "block_exaport"));
 
 	$userdescriptions = $DB->get_records_select("block_exaportuser", "user_id = '$USER->id'");
 
@@ -677,7 +677,7 @@ if ($confirm) {
 		$filecontent .= '  <div id="description"><!--###BOOKMARK_PERSONAL_DESC###-->' . spch_text($description) . '<!--###BOOKMARK_PERSONAL_DESC###--></div>' . "\n";
 		$filecontent .= '  <ul>' . "\n";
 		$filecontent .= '  <li><a href="'.$filepath_to_personal.'">' . get_string("explainpersonal", "block_exaport") . '</a></li>' . "\n";
-		$filecontent .= '  <li><a href="'.$categoriesSubdirName.'index.html">' . get_string("bookmarks", "block_exaport") . '</a></li>' . "\n";
+		$filecontent .= '  <li><a href="'.$categoriesSubdirName.'index.html">' . get_string("myportfolio", "block_exaport") . '</a></li>' . "\n";
 		if ($areafiles_exist)
 			$filecontent .= '  <li><a href="data/personal/">' . get_string("myfilearea", "block_exaport") . '</a></li>' . "\n";	
 		$filecontent .= '  </ul>' . "\n";

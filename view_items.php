@@ -224,7 +224,7 @@ if ($type == 'shared') {
 
 $PAGE->set_url($currentCategory->url);
 
-block_exaport_print_header($type == 'shared' ? 'shared_categories' : "bookmarks");
+block_exaport_print_header($type == 'shared' ? 'shared_categories' : "myportfolio");
 
 // echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
 
@@ -270,11 +270,11 @@ if ($type == 'mine') {
 	echo '<div class="excomdos_additem_content">';
 	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?action=add&courseid='.$courseid.'&pid='.$categoryid.'">'.
 		'<img src="pix/folder_new_32.png" /><br />'.get_string("category", "block_exaport")."</a></span>";
-	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=link">'.
+	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.'&type=link">'.
 		'<img src="pix/link_new_32.png" /><br />'.get_string("link", "block_exaport")."</a></span>";
-	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=file">'.
+	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.'&type=file">'.
 		'<img src="pix/file_new_32.png" /><br />'.get_string("file", "block_exaport")."</a></span>";
-	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&sesskey='.sesskey().'&categoryid='.$categoryid.'&type=note">'.
+	echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.'&type=note">'.
 		'<img src="pix/note_new_32.png" /><br />'.get_string("note", "block_exaport")."</a></span>";
 	//anzeigen wenn kategorien vorhanden zum importieren aus sprachfile
 	$categories = trim(get_string("lang_categories", "block_exaport"));
@@ -454,9 +454,9 @@ if ($layout == 'details') {
 			$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/copy_item_to_course.php?courseid='.$courseid.'&itemid='.$item->id.'&backtype=">'.get_string("copyitemtocourse", "block_exaport").'</a>';
 
 		if ($type == 'mine') {
-			$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit&backtype="><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
+			$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&action=edit"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
 			if ($allowEdit = block_exaport_item_is_editable($item->id))
-				$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid.'"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
+				$icons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&action=delete&categoryid='.$categoryid.'"><img src="pix/del.png" alt="' . get_string("delete"). '"/></a>';
 			else
 				$icons .= '<img src="pix/deleteview.png" alt="' . get_string("delete"). '">';
 		}
@@ -562,9 +562,9 @@ if ($layout == 'details') {
 
 						if ($type == 'mine') {
 							?>
-							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
+							<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
 							<?php if($allowEdit = block_exaport_item_is_editable($item->id)) { ?>
-								<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&sesskey='.sesskey().'&action=delete&categoryid='.$categoryid; ?>"><img src="pix/del.png" alt="file"></a>
+								<a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.'&action=delete&categoryid='.$categoryid; ?>"><img src="pix/del.png" alt="file"></a>
 							<?php } else { ?>
 								<img src="pix/deleteview.png" alt="file">
 								<?php

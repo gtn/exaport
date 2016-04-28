@@ -126,12 +126,11 @@ $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $cours
 
 // delete item
 if ($action == 'delete' && $allowEdit) {
-	require_sesskey();
-
 	if (!$existing) {
 		print_error("bookmarknotfound", "block_exaport");
 	}
 	if (data_submitted() && $confirm && confirm_sesskey()) {
+		require_sesskey();
 		block_exaport_do_delete($existing, $returnurl, $courseid);
 		redirect($returnurl);
 	} else {
@@ -142,7 +141,7 @@ if ($action == 'delete' && $allowEdit) {
 		// ev. noch eintrag anzeigen!!!
 		//blog_print_entry($existing);
 		echo '<br />';
-		//notice_yesno(get_string("delete".$type."confirm", "block_exaport"), 'item.php', 'view_items.php', $optionsyes, $optionsno, 'post', 'get');
+
 		echo $OUTPUT->confirm(get_string("delete" . $type . "confirm", "block_exaport"), new moodle_url('item.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
 		echo block_exaport_wrapperdivend();
 		echo $OUTPUT->footer();

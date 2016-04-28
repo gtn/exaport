@@ -91,7 +91,6 @@ if ($action == 'copy') {
 }
 
 block_exaport_print_header("shared_categories");
-echo block_exaport_get_string('make_it_yours');
 
 function exaport_print_structures($categories, $parsedsort) {
 	global $CFG, $courseid, $COURSE, $OUTPUT, $DB;
@@ -135,9 +134,7 @@ function exaport_print_structures($categories, $parsedsort) {
 		echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=user\"" .
 		($sort == 'user' ? ' style="font-weight: bold;"' : '') . ">" . get_string('user') . "</a> | ";
 		echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=structure\"" .
-		($sort == 'structure' ? ' style="font-weight: bold;"' : '') . ">" . get_string('structure', 'block_exaport') . "</a> | ";
-		// echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;sort=timemodified&amp;onlyexternal=".$onlyexternal."\"" .
-		// ($sort == 'timemodified' ? ' style="font-weight: bold;"' : '') . ">" . get_string('date', 'block_exaport') . "</a> ";
+		($sort == 'structure' ? ' style="font-weight: bold;"' : '') . ">" . get_string('category', 'block_exaport') . "</a>";
 		echo '</div>';
 	}
 
@@ -177,7 +174,7 @@ function exaport_print_structures($categories, $parsedsort) {
 				$table->width = "100%";
 				$table->size = array('40%', '20%', '20%', '20%');
 				$table->head = array(
-					block_exaport_get_string('structure'),
+					block_exaport_get_string('category'),
 					block_exaport_get_string("sharedwith"),
 					'',
 					'',
@@ -217,10 +214,10 @@ function exaport_print_structures($categories, $parsedsort) {
 			$table->width = "100%";
 			$table->size = array('1%', '20%', '20%', '20%', '20%', '20%');
 			$table->head = array(
-				'userpic' => '',
-				'user' => get_string('user'),
-				'structure' => block_exaport_get_string('structure'),
-				'sharedwith' => block_exaport_get_string("sharedwith"),
+				'',
+				get_string('user'),
+				block_exaport_get_string('category'),
+				block_exaport_get_string("sharedwith"),
 				'',
 				'',
 			);
@@ -272,8 +269,6 @@ function block_exaport_get_shared_with_text($structure) {
 	$shared = "";
 	if ($structure->shareall)
 		$shared = block_exaport_get_string('sharedwith_shareall');
-	elseif ($structure->cnt_shared_groups > 1)
-		$shared .= block_exaport_get_string('sharedwith_group_cnt', $structure->cnt_shared_groups);
 	elseif ($structure->cnt_shared_groups)
 		$shared = block_exaport_get_string('sharedwith_group');
 	elseif ($structure->cnt_shared_users > 1)

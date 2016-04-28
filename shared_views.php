@@ -54,9 +54,9 @@ if ($parsedsort[0] == 'timemodified') {
 
 
 
-block_exaport_print_header("sharedbookmarks");
+block_exaport_print_header("shared_views");
 
-$strheader = get_string("sharedbookmarks", "block_exaport");
+$strheader = get_string("shared_views", "block_exaport");
 
 echo "<div class='block_eportfolio_center'>\n";
 
@@ -293,8 +293,6 @@ function block_exaport_get_shared_with_text($view) {
 	$shared = "";
 	if ($view->shareall == 1)
 		$shared = block_exaport_get_string('sharedwith_shareall');
-	elseif ($view->cnt_shared_groups > 1)
-		$shared .= block_exaport_get_string('sharedwith_group_cnt', $view->cnt_shared_groups);
 	elseif ($view->cnt_shared_groups)
 		$shared = block_exaport_get_string('sharedwith_group');
 	elseif ($view->cnt_shared_users > 1)

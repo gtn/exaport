@@ -952,8 +952,8 @@ break;
 					if ($view) {
 						$view->emailsforshare = implode(';', exaport_get_view_shared_emails($view->id));
 						echo '<tr id="emailaccess-settings"><td></td><td>';
-						echo '<textarea name="emailsforshare">'.str_replace(';', "\r\n", $view->emailsforshare).'</textarea><br>';
 						echo get_string("emailaccessdescription", "block_exaport");
+						echo '<textarea name="emailsforshare">'.str_replace(';', "\r\n", $view->emailsforshare).'</textarea><br>';
 						echo '</td></tr>';
 					};
 						

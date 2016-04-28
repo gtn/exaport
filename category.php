@@ -122,10 +122,10 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 		'categoryid' => optional_param('back', '', PARAM_TEXT)=='same' ? $category->id : $category->pid
 	);
 	
-	$strbookmarks = get_string("mybookmarks", "block_exaport");
+	$strbookmarks = get_string("myportfolio", "block_exaport");
 	$strcat = get_string("categories", "block_exaport");
 
-	block_exaport_print_header("bookmarks");
+	block_exaport_print_header("myportfolio");
 	
 	echo '<br />';
 	echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport", $category), new moodle_url('category.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
@@ -469,7 +469,7 @@ if ($mform->is_cancelled()) {
 	redirect('view_items.php?courseid='.$courseid.'&categoryid='.
 		($newEntry->back=='same' ? $newEntry->id : $newEntry->pid));
 } else {
-	block_exaport_print_header("bookmarks");
+	block_exaport_print_header("myportfolio");
 	
 	$category = null;
 	if ($id = optional_param('id', 0, PARAM_INT)) {

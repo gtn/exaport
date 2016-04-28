@@ -46,7 +46,6 @@ $string['attachincluded'] = 'Attachment?';
 $string['awaiting'] = '($a awaiting)';
 $string['back'] = 'Back';
 $string['backtocourse'] = 'Back to course';
-$string['bookmarks'] = 'My Portfolio';
 $string['categories'] = 'Categories';
 $string['explaincategories'] = 'Categories: here you can create and modify categories';
 $string['category'] = 'Category';
@@ -76,10 +75,8 @@ $string['hidesummary'] = '(hide summary)';
 $string['managecategories'] = 'Manage categories';
 $string['mandatoryfields'] = 'The field\'s name, category and intro are required. Please fill them in.';
 $string['mandatoryfieldsforcat'] = 'The field name is required. Please fill them in.';
-$string['mybookmarks'] = 'My Portfolio';
-$string['mybookmarkstitle'] = 'Exabis ePortfolio module: Add your links and files here.';
-$string['mydialogues'] = 'My Dialogues';
-$string['mymoodle'] = 'My Moodle';
+$string['myportfolio'] = 'My Portfolio Artifacts';
+$string['myportfoliotitle'] = 'Exabis ePortfolio module: Add your links and files here.';
 $string['newlink'] = 'Add new link';
 $string['newfile'] = 'Add new file';
 $string['newnote'] = 'Add new note';
@@ -91,7 +88,7 @@ $string['nobookmarksnote'] = '(no notes yet)';
 $string['noentry'] = 'No entry';
 $string['note'] = 'Note';
 $string['notetitle'] = 'Note';
-$string['sharedbookmarks'] = 'Shared Portfolios';
+$string['shared_views'] = 'Shared Views';
 $string['showall'] = 'Show Other Courses Too';
 $string['showcourse'] = 'Show This Course Only';
 $string['showsummary'] = '(show summary)';
@@ -108,18 +105,17 @@ $string['internalaccessall'] = 'Access for <span class=\'block_eportfolio_bold\'
 $string['internalaccessusers'] = 'Access only for the following users';
 $string['internalaccessgroups'] = 'Access only for the following groups';
 $string['externaccess'] = 'external ePortfolio-Link';
-$string['emailaccess'] = 'Access for emails';
-$string['emailaccessdescription'] = 'Emails, separated by commas, semicolon or new line.<br /> For every new email will be sent unique link with access to this view. Deleting of email will delete access by this link.';
-$string['emailaccessmessagesubject'] = 'Shared view for you';
-$string['emailaccessmessage'] = 'Hello! {$a->sendername} has shared a view "{$a->viewname}" for you. You can view it here: {$a->url}';
-$string['emailaccessmessageHTML'] = 'Hello!<br /> {$a->sendername} has shared a view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.';
+$string['emailaccess'] = 'Share by Email';
+$string['emailaccessdescription'] = 'Input an email address per line<br />Each email will receive a unique link with access to this view. Deleting the email will remove access to this view.';
+$string['emailaccessmessagesubject'] = 'New shared View for you';
+$string['emailaccessmessage'] = 'Hello! {$a->sendername} has shared the view "{$a->viewname}" for you. You can view it here: {$a->url}';
+$string['emailaccessmessageHTML'] = 'Hello!<br />{$a->sendername} has shared the view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.';
 $string['showallusers'] = 'Show users of all my courses';
 $string['showcourseusers'] = 'Show only users of the course';
 $string['sharedpersons'] = 'Persons with shared Portfolios';
 $string['moodleimport'] = 'Import from Moodle-assignments';
 $string['nomoodleimportyet'] = 'At the moment you have no submission at any assignment!';
 $string['deletecategoryconfirm'] = 'Do you really want to delete the category "{$a->name}"? All entries in this category and all subcategories will be deleted!';
-$string['deleteurlconfirm'] = 'Do you really want to delete this url?';
 $string['name'] = 'Name';
 $string['role'] = 'Role';
 $string['nousersfound'] = 'No users found';
@@ -146,7 +142,7 @@ $string['explainpersonal'] = 'Personal information';
 $string['personal'] = 'Information';
 $string['descriptionsaved'] = 'Description saved';
 $string['course'] = 'Course';
-$string['exportimport'] = 'Export/Import';
+$string['importexport'] = 'Import/Export';
 $string['explainimport'] = 'Here you can import a SCORM-File into the portfolio. If markers from previous exports are found the import tries to import the data in the existing filestructure.';
 $string['makeimport'] = 'Import';
 $string['add_this_file'] = 'add this file';
@@ -249,7 +245,7 @@ $string['createexport_directory'] = 'Create Directory-structure';
 $string['type'] = 'Type';
 $string['share'] = 'Share';
 $string['explainingall'] = 'All Items in your portfolio';
-$string['share_to_other_users'] = 'Share to other users not in my courses';
+$string['share_to_other_users'] = 'Search Users';
 $string['other_users_course'] = 'Users not in my courses';
 $string['other_groups_course'] = 'Other courses';
 
@@ -262,7 +258,7 @@ $string['movebottom'] = 'Move bottom';
 
 // === Views ===
 $string['view'] = 'View';
-$string['views'] = 'Views';
+$string['views'] = 'My Views';
 $string['explainingviews'] = 'Manage your views.';
 $string['noviews'] = 'Please create a new View';
 $string['viewnotfound'] = 'View not found';
@@ -348,7 +344,6 @@ $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedwith_group'] = 'Shared with my group';
-$string['sharedwith_group_cnt'] = 'Shared with my {$a} groups';
 $string['only_external'] = 'Only external shared views';
 $string['display_onlyexternal'] = 'Display only external shared views';
 $string['display_all'] = 'Display all views';
@@ -440,9 +435,8 @@ $string['delete_all_shareall'] = 'Delete all shareall?';
 
 
 // === Resume ===
-$string['resume'] = 'Resume';
-$string['resume_template_newresume'] = '<h2>My new resume</h2>';
-$string['resume_my'] = 'My resume';
+$string['resume_template_newresume'] = '<h2>My new CV</h2>';
+$string['resume_my'] = 'My CV';
 $string['resume_cover'] = 'Cover letter';
 $string['resume_coversaved'] = 'Cover saved';
 $string['resume_eduhistory'] = 'Education history';
@@ -525,14 +519,10 @@ $string['resume_collaps'] = 'Collaps all';
 
 
 // === structure sharing ===
-$string['structure'] = 'Structure';
 $string['shared_categories'] = 'Shared Categories';
-$string['share_structure'] = 'Share as a structure';
-$string['share_structure_description'] = 'The users will be able to copy this category and subcategories for yourself';
 $string['nothingstructureshared'] = 'Nobody is sharing a structure with you';
 $string['browsecategory'] = 'Browse this category';
-$string['copycategory'] = 'Copy this category to My Portfolio';
-$string['copytocategory'] = 'Copy to this category:';
+$string['copycategory'] = 'Copy to my Portfolio';
 $string['sharedArtefacts'] = 'Group portfolios shared with you';
 $string['shareditems_category'] = 'Group portfolios shared with you';
 $string['create_as_note'] = 'Create as Artefact';
@@ -550,6 +540,10 @@ $string['myfilearea'] = 'My file area';
 
 // === language categories ===
 $string['lang_categories'] = '';
+
+
+// === Message ===
+$string['messageprovider:sharing'] = 'Sharing notifications';
 
 
 // === Not Used Anymore ===

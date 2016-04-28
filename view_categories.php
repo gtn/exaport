@@ -140,7 +140,7 @@ if($cataction) {
 					$optionsyes = array('cataction'=>'delete', 'courseid' => $courseid, 'catconfirm'=>2, 'sesskey'=>sesskey(), 'delid'=>$delid, 'edit' => 1);
 					$optionsno = array('courseid'=>$courseid, 'edit'=>1, 'sesskey'=>sesskey());
 					
-					$strbookmarks = get_string("mybookmarks", "block_exaport");
+					$strbookmarks = get_string("myportfolio", "block_exaport");
 					$strcat = get_string("categories", "block_exaport");
 
 					echo '<br />';

@@ -103,12 +103,12 @@ if ($item->access->page == 'view') {
 	if ($item->access->request == 'intern') {
 		block_exaport_print_header("views");
 	} else { 
-		block_exaport_print_header("sharedbookmarks");
+		block_exaport_print_header("shared_views");
 		// print_header(get_string("externaccess", "block_exaport"), get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
 	}
 } elseif ($item->access->page == 'portfolio') {
 	if ($item->userid == $USER->id) {
-		block_exaport_print_header("bookmarks");
+		block_exaport_print_header("myportfolio");
 	} else {
 		block_exaport_print_header("shared_categories");
 	}

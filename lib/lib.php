@@ -278,18 +278,16 @@ function block_exaport_init_js_css() {
 function block_exaport_print_header($item_identifier, $sub_item_identifier = null) {
 
 	if (!is_string($item_identifier)) {
-		echo 'noch nicht unterst�tzt';
+		throw new moodle_exception('not supported');
 	}
 
-	global $CFG, $COURSE, $PAGE, $USER;
+	global $CFG, $COURSE, $PAGE;
 
 	block_exaport_init_js_css();
 
-	$strbookmarks = block_exaport_get_string("mybookmarks");
-
 	// navigationspfad
 	$navlinks = array();
-	$navlinks[] = array('name' => $strbookmarks, 'link' => "view.php?courseid=" . $COURSE->id, 'type' => 'title');
+	$navlinks[] = array('name' => block_exaport_get_string("blocktitle"), 'link' => "view.php?courseid=" . $COURSE->id, 'type' => 'title');
 	$nav_item_identifier = $item_identifier;
 
 	$icon = $item_identifier;
@@ -302,22 +300,19 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 		$tabs['back'] = new tabobject('back', $CFG->wwwroot . '/blocks/desp/index.php?courseid=' . $COURSE->id, get_string("back_to_desp", "block_exaport"), '', true);
 	}
 
-	$tabs['personal'] = new tabobject('personal', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("personal", "block_exaport"), '', true);
+	$tabs['resume_my'] = new tabobject('resume_my', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("resume_my", "block_exaport"), '', true);
 	// $tabs[] = new tabobject('categories', $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $COURSE->id, get_string("categories", "block_exaport"), '', true);
-	$tabs['bookmarks'] = new tabobject('bookmarks', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("bookmarks"), '', true);
+	$tabs['myportfolio'] = new tabobject('myportfolio', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("myportfolio"), '', true);
 	$tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
-	$tabs['sharedbookmarks'] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
+	$tabs['shared_views'] = new tabobject('shared_views', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("shared_views"), '', true);
 	$tabs['shared_categories'] = new tabobject('shared_categories', $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $COURSE->id, block_exaport_get_string("shared_categories"), '', true);
-	$tabs['exportimport'] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
-
-	$tabs['personal']->subtree[] = new tabobject('personalinfo', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("explainpersonal", "block_exaport"), '', true);
-	$tabs['personal']->subtree[] = new tabobject('resume', s($CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id), get_string("resume", "block_exaport"), '', true);
+	$tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id, get_string("importexport", "block_exaport"), '', true);
 
 	$tab_item_identifier = preg_replace('!_.*!', '', $item_identifier);
 	$tab_sub_item_identifier = preg_replace('!_.*!', '', $sub_item_identifier);
 
 	if (strpos($tab_item_identifier, 'bookmarks') === 0) {
-		$tab_item_identifier = 'bookmarks';
+		$tab_item_identifier = 'myportfolio';
 	}
 
 	// kind of hacked here, find another solution
@@ -370,7 +365,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
 	echo $OUTPUT->render($tabtree);
 
-	if (block_exaport_course_has_desp() && (strpos($currenttab,'bookmarks') === 0) ) {
+	if (block_exaport_course_has_desp() && (strpos($currenttab,'myportfolio') === 0) ) {
 		echo '<div id="messageboxses1"';
 		//if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
 		echo '>

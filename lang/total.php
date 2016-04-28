@@ -56,7 +56,7 @@ return [
 		'add Exabis ePortfolio to the course',
 	],
 	'exaport:myaddinstance' => [
-		'Exabis E-Portfolie zur Startseite hinzuf&uumlgen',
+		'Exabis ePortfolie zur Startseite hinzuf&uumlgen',
 		'add Exabis ePortfolio on My home',
 	],
 	'exaport:export' => [
@@ -92,11 +92,11 @@ return [
 		'New',
 	],
 	'addbookmark' => [
-		'Bookmark hinzuf&uuml;gen',
+		'Bookmark hinzufügen',
 		'Add bookmark',
 	],
 	'addcategory' => [
-		'Kategorie hinzuf&uuml;gen',
+		'Kategorie hinzufügen',
 		'Add category',
 	],
 	'attachment' => [
@@ -112,16 +112,12 @@ return [
 		'($a awaiting)',
 	],
 	'back' => [
-		'zur&uuml;ck',
+		'zurück',
 		'Back',
 	],
 	'backtocourse' => [
-		'zur&uuml;ck zum Kurs',
+		'zurück zum Kurs',
 		'Back to course',
-	],
-	'bookmarks' => [
-		'Mein Portfolio',
-		'My Portfolio',
 	],
 	'categories' => [
 		'Kategorien',
@@ -140,7 +136,7 @@ return [
 		'Category name',
 	],
 	'categorysaved' => [
-		'Kategorie hinzugef&uuml;gt.',
+		'Kategorie hinzugefügt.',
 		'Category added.',
 	],
 	'categoryedited' => [
@@ -156,7 +152,7 @@ return [
 		'Date',
 	],
 	'dontincludeurl' => [
-		'Diese Option ausw&auml;hlen um die Verkn&uuml;pfung zwischen Bookmark und URL aufzuheben',
+		'Diese Option ausw&auml;hlen um die Verknüpfung zwischen Bookmark und URL aufzuheben',
 		'Check this box to unassociate the bookmark with the URL',
 	],
 	'duplicatedurl' => [
@@ -232,39 +228,31 @@ return [
 		'Manage categories',
 	],
 	'mandatoryfields' => [
-		'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte f&uuml;llen Sie beides aus.',
+		'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte füllen Sie beides aus.',
 		'The field\'s name, category and intro are required. Please fill them in.',
 	],
 	'mandatoryfieldsforcat' => [
-		'Eine Feldbezeichnung ist erforderlich. Bitte f&uuml;llen Sie diese aus.',
+		'Eine Feldbezeichnung ist erforderlich. Bitte füllen Sie diese aus.',
 		'The field name is required. Please fill them in.',
 	],
-	'mybookmarks' => [
-		'Mein Portfolio',
-		'My Portfolio',
+	'myportfolio' => [
+		'Meine Portfolio Artefakte',
+		'My Portfolio Artifacts',
 	],
-	'mybookmarkstitle' => [
-		'ePortfolio-Modul: F&uuml;gen Sie hier Links und Dateien hinzu.',
+	'myportfoliotitle' => [
+		'ePortfolio-Modul: Fügen Sie hier Links und Dateien hinzu.',
 		'Exabis ePortfolio module: Add your links and files here.',
 	],
-	'mydialogues' => [
-		'Meine Blogs',
-		'My Dialogues',
-	],
-	'mymoodle' => [
-		'Mein Moodle',
-		'My Moodle',
-	],
 	'newlink' => [
-		'Neuen externen Link hinzuf&uuml;gen',
+		'Neuen externen Link hinzufügen',
 		'Add new link',
 	],
 	'newfile' => [
-		'Neue Datei hinzuf&uuml;gen',
+		'Neue Datei hinzufügen',
 		'Add new file',
 	],
 	'newnote' => [
-		'Neue Notiz hinzuf&uuml;gen',
+		'Neue Notiz hinzufügen',
 		'Add new note',
 	],
 	'nocategories' => [
@@ -299,9 +287,9 @@ return [
 		'Notiz',
 		'Note',
 	],
-	'sharedbookmarks' => [
-		'ver&ouml;ffentlichte Portfolios',
-		'Shared Portfolios',
+	'shared_views' => [
+		'Geteilte Views',
+		'Shared Views',
 	],
 	'showall' => [
 		'auch andere Kurse anzeigen',
@@ -320,7 +308,7 @@ return [
 		'Share',
 	],
 	'strunshare' => [
-		'Ver&ouml;ffentlichung zur&uuml;cknehmen',
+		'Ver&ouml;ffentlichung zurücknehmen',
 		'Unshare',
 	],
 	'summary' => [
@@ -344,23 +332,23 @@ return [
 		'Access options',
 	],
 	'shareallexceptthose' => [
-		'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern',
+		'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern',
 		'Access for <span class=\'block_eportfolio_bold\'>all</span> (even those who aren\'t listed here) except the following users',
 	],
 	'sharenoneexceptthose' => [
-		'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer',
+		'Zugriff für <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer',
 		'Access for <span class=\'block_eportfolio_bold\'>nobody</span> except the following users',
 	],
 	'internalaccessall' => [
-		'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>alle</span>',
+		'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span>',
 		'Access for <span class=\'block_eportfolio_bold\'>all</span>',
 	],
 	'internalaccessusers' => [
-		'Zugriff nur f&uuml;r folgende Benutzer',
+		'Zugriff nur für folgende Benutzer',
 		'Access only for the following users',
 	],
 	'internalaccessgroups' => [
-		null,
+		'Zugriff für folgende Gruppen',
 		'Access only for the following groups',
 	],
 	'externaccess' => [
@@ -368,24 +356,24 @@ return [
 		'external ePortfolio-Link',
 	],
 	'emailaccess' => [
-		null,
-		'Access for emails',
+		'Per Email teilen',
+		'Share by Email',
 	],
 	'emailaccessdescription' => [
-		null,
-		'Emails, separated by commas, semicolon or new line.<br /> For every new email will be sent unique link with access to this view. Deleting of email will delete access by this link.',
+		'Geben Sie eine Email Adresse pro Zeile ein<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese View. Das Löschen der Adresse löscht den Zugriff auf diese Veiw.',
+		'Input an email address per line<br />Each email will receive a unique link with access to this view. Deleting the email will remove access to this view.',
 	],
 	'emailaccessmessagesubject' => [
-		null,
-		'Shared view for you',
+		'Eine View wurde mit dir geteilt',
+		'New shared View for you',
 	],
 	'emailaccessmessage' => [
-		null,
-		'Hello! {$a->sendername} has shared a view "{$a->viewname}" for you. You can view it here: {$a->url}',
+		'Hallo! {$a->sendername} hat eine die View "{$a->viewname}" mit dir geteilt. Sie kann hier abgerufen werden: {$a->url}',
+		'Hello! {$a->sendername} has shared the view "{$a->viewname}" for you. You can view it here: {$a->url}',
 	],
 	'emailaccessmessageHTML' => [
-		null,
-		'Hello!<br /> {$a->sendername} has shared a view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.',
+		'Hallo!<br />{$a->sendername} hat eine die View "{$a->viewname}" mit dir geteilt.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
+		'Hello!<br />{$a->sendername} has shared the view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.',
 	],
 	'showallusers' => [
 		'Zeige Benutzer aller meiner Kurse',
@@ -411,10 +399,6 @@ return [
 		'Wollen Sie die Kategorie "{$a->name}" wirklich l&ouml;schen? Es werden alle Eintr&auml;ge in dieser Kategorie und alle Unterkategorien mitgel&ouml;scht!',
 		'Do you really want to delete the category "{$a->name}"? All entries in this category and all subcategories will be deleted!',
 	],
-	'deleteurlconfirm' => [
-		null,
-		'Do you really want to delete this url?',
-	],
 	'name' => [
 		'Name',
 		'Name',
@@ -432,7 +416,7 @@ return [
 		'Delete',
 	],
 	'add' => [
-		'Hinzuf&uuml;gen',
+		'Hinzufügen',
 		'Add',
 	],
 	'edit' => [
@@ -475,7 +459,7 @@ return [
 		'Create SCORM-File',
 	],
 	'clicktodownloadscorm' => [
-		'Folgenden Button dr&uuml;cken, um SCORM-Datei herunterzuladen:',
+		'Folgenden Button drücken, um SCORM-Datei herunterzuladen:',
 		'Press button to download the SCORM file:',
 	],
 	'add_directory_structure' => [
@@ -510,9 +494,9 @@ return [
 		'Kurs',
 		'Course',
 	],
-	'exportimport' => [
-		'Export/Import',
-		'Export/Import',
+	'importexport' => [
+		'Import/Export',
+		'Import/Export',
 	],
 	'explainimport' => [
 		'hier k&ouml;nnen Sie SCORM-Dateien ins Portfolio importieren. Wenn Marker gefunden werden, die darauf hinweisen, dass diese SCORM-Datei zuvor aus dem Portfolio-Modul exportiert wurde, so wird versucht, die Stuktur entsprechend zu importieren.',
@@ -523,7 +507,7 @@ return [
 		'Import',
 	],
 	'add_this_file' => [
-		'Diese Datei hinzuf&uuml;gen',
+		'Diese Datei hinzufügen',
 		'add this file',
 	],
 	'bookmarksall' => [
@@ -551,7 +535,7 @@ return [
 		'Comments',
 	],
 	'addcomment' => [
-		'Kommentar hinzuf&uuml;gen',
+		'Kommentar hinzufügen',
 		'Add comment',
 	],
 	'externcomment' => [
@@ -585,7 +569,7 @@ return [
 
 	// === Different ===
 	'couldninsertcomment' => [
-		'Kommentar konnte nicht eingef&uuml;gt werden!',
+		'Kommentar konnte nicht eingefügt werden!',
 		'Couldn\'t insert comment!',
 	],
 	'importedcommentsstart' => [
@@ -605,7 +589,7 @@ return [
 		'File $a->filename in $a->url ($a->title) was not found. File not imported!',
 	],
 	'couldntinsert' => [
-		'Konnte $a nicht in der Datenbank einf&uuml;gen',
+		'Konnte $a nicht in der Datenbank einfügen',
 		'Couldn\'t insert $a into database',
 	],
 	'couldntcreatedirectory' => [
@@ -621,7 +605,7 @@ return [
 		'File imported successful',
 	],
 	'couldntinsertcategory' => [
-		'Kategorie konnte nicht eingef&uuml;gt werden!',
+		'Kategorie konnte nicht eingefügt werden!',
 		'Could not insert category!',
 	],
 	'couldntupdatecategory' => [
@@ -649,7 +633,7 @@ return [
 		'Could not update your description!',
 	],
 	'couldntinsertdesc' => [
-		'Beschreibung konnte nicht eingef&uuml;gt werden!',
+		'Beschreibung konnte nicht eingefügt werden!',
 		'Could not insert the description!',
 	],
 	'exportcomment' => [
@@ -713,15 +697,15 @@ return [
 		'You can\'t access portfolios in \'Login As\'-Mode.',
 	],
 	'badsessionkey' => [
-		'Session nicht mehr g&uuml;ltig',
+		'Session nicht mehr gültig',
 		'Bad Session Key',
 	],
 	'invalidinstance' => [
-		'Ung&uuml;ltige Instanz',
+		'Ungültige Instanz',
 		'That\'s an invalid instance',
 	],
 	'invalidcourseid' => [
-		'Ung&uuml;ltige Kursnummer',
+		'Ungültige Kursnummer',
 		'That\'s an invalid course id',
 	],
 	'wronglinkid' => [
@@ -777,7 +761,7 @@ return [
 		'Error occured while deleting post',
 	],
 	'addposterror' => [
-		'Posting konnte in Datenbank nicht hinzugef&uuml;gt werden',
+		'Posting konnte in Datenbank nicht hinzugefügt werden',
 		'There was an error adding this post in the database',
 	],
 	'invalidassignmentid' => [
@@ -869,8 +853,8 @@ return [
 		'All Items in your portfolio',
 	],
 	'share_to_other_users' => [
-		null,
-		'Share to other users not in my courses',
+		'Benutzer suchen',
+		'Search Users',
 	],
 	'other_users_course' => [
 		null,
@@ -903,8 +887,8 @@ return [
 		'View',
 	],
 	'views' => [
-		'Views',
-		'Views',
+		'Meine Views',
+		'My Views',
 	],
 	'explainingviews' => [
 		'View verwalten',
@@ -1223,19 +1207,19 @@ return [
 		'Clear all filters',
 	],
 	'sharedwith' => [
-		null,
+		'Geteilt mit',
 		'Shared with',
 	],
 	'sharedwith_user_cnt' => [
-		null,
+		'Mit {$a} Benutzern geteilt',
 		'Shared with {$a} users',
 	],
 	'sharedwith_onlyme' => [
-		null,
+		'Nur mit mir geteilt',
 		'Shared only with me',
 	],
 	'sharedwith_shareall' => [
-		null,
+		'Mit allen Benutzern geteilt',
 		'Shared with all users',
 	],
 	'sharedwith_shareexternal' => [
@@ -1243,12 +1227,8 @@ return [
 		'Shared external',
 	],
 	'sharedwith_group' => [
-		null,
+		'Mit meiner Gruppe geteilt',
 		'Shared with my group',
-	],
-	'sharedwith_group_cnt' => [
-		null,
-		'Shared with my {$a} groups',
 	],
 	'only_external' => [
 		null,
@@ -1313,7 +1293,7 @@ return [
 
 	// === Desp ===
 	'back_to_desp' => [
-		'zur&uuml;ck zum d-ESP',
+		'zurück zum d-ESP',
 		'back to language portfolio',
 	],
 	'desp_pluginname' => [
@@ -1394,7 +1374,7 @@ return [
 
 	// === Config ===
 	'config_feature_copy_to_course' => [
-		'Sch&uuml;ler d&uuml;rfen Dateien in den Kurs kopieren',
+		'Schüler dürfen Dateien in den Kurs kopieren',
 		'Allow students to copy ePortfolio files to their courses',
 	],
 	'competenceinteraction' => [
@@ -1426,7 +1406,7 @@ return [
 		'Here you can self-assess whether you have acquired the competency with your artefact.',
 	],
 	'teachercomps' => [
-		'Hier k&ouml;nnen Sie beurteilen, ob der Sch&uuml;ler folgende Kompetenzen durch sein Artefakt erreicht hat.',
+		'Hier k&ouml;nnen Sie beurteilen, ob der Schüler folgende Kompetenzen durch sein Artefakt erreicht hat.',
 		'Here you can assess whether your students have acquired the competency with this artefact.',
 	],
 	'competences' => [
@@ -1516,17 +1496,13 @@ return [
 
 
 	// === Resume ===
-	'resume' => [
-		'Resümee',
-		'Resume',
-	],
 	'resume_template_newresume' => [
-		'<h2>Mein Resümee</h2>',
-		'<h2>My new resume</h2>',
+		'<h2>Mein Lebenslauf</h2>',
+		'<h2>My new CV</h2>',
 	],
 	'resume_my' => [
-		'Mein Resümee',
-		'My resume',
+		'Mein Lebenslauf',
+		'My CV',
 	],
 	'resume_cover' => [
 		'Begleit-Informationen',
@@ -1830,37 +1806,21 @@ return [
 
 
 	// === structure sharing ===
-	'structure' => [
-		null,
-		'Structure',
-	],
 	'shared_categories' => [
 		'Geteilte Kategorien',
 		'Shared Categories',
-	],
-	'share_structure' => [
-		null,
-		'Share as a structure',
-	],
-	'share_structure_description' => [
-		null,
-		'The users will be able to copy this category and subcategories for yourself',
 	],
 	'nothingstructureshared' => [
 		null,
 		'Nobody is sharing a structure with you',
 	],
 	'browsecategory' => [
-		null,
+		'Inhalt anzeigen',
 		'Browse this category',
 	],
 	'copycategory' => [
-		null,
-		'Copy this category to My Portfolio',
-	],
-	'copytocategory' => [
-		null,
-		'Copy to this category:',
+		'In mein Portfolio kopieren',
+		'Copy to my Portfolio',
 	],
 	'sharedArtefacts' => [
 		null,
@@ -1920,6 +1880,13 @@ return [
 	'lang_categories' => [
 		null,
 		'',
+	],
+
+
+	// === Message ===
+	'messageprovider:sharing' => [
+		'Nachricht, wenn ein Benutzer/in etwas mit mir teilt',
+		'Sharing notifications',
 	],
 
 

@@ -83,7 +83,7 @@ foreach ($blocks as $block) {
 block_exaport_init_js_css();
 
 if ($view->access->request == 'intern') {
-	block_exaport_print_header("sharedbookmarks");
+	block_exaport_print_header("shared_views");
 }else {
 	$PAGE->requires->css('/blocks/exaport/css/shared_view.css');
 	$PAGE->set_title(get_string("externaccess", "block_exaport"));

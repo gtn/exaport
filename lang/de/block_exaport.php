@@ -30,7 +30,7 @@ $string['pluginname'] = 'Exabis ePortfolio';
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Nutzung';
 $string['exaport:addinstance'] = 'Exabis ePortfolio zum Kurs hinzuf&uumlgen';
-$string['exaport:myaddinstance'] = 'Exabis E-Portfolie zur Startseite hinzuf&uumlgen';
+$string['exaport:myaddinstance'] = 'Exabis ePortfolie zur Startseite hinzuf&uumlgen';
 $string['exaport:export'] = 'Export of SCORM-Files';
 $string['exaport:import'] = 'Import of SCORM-Files';
 $string['exaport:importfrommoodle'] = 'Import from Moodle';
@@ -39,23 +39,22 @@ $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
 $string['new'] = 'Neu';
-$string['addbookmark'] = 'Bookmark hinzuf&uuml;gen';
-$string['addcategory'] = 'Kategorie hinzuf&uuml;gen';
+$string['addbookmark'] = 'Bookmark hinzufügen';
+$string['addcategory'] = 'Kategorie hinzufügen';
 $string['attachment'] = 'Anhang';
 $string['attachincluded'] = 'Anhang?';
 $string['awaiting'] = '(\\$a wartend)';
-$string['back'] = 'zur&uuml;ck';
-$string['backtocourse'] = 'zur&uuml;ck zum Kurs';
-$string['bookmarks'] = 'Mein Portfolio';
+$string['back'] = 'zurück';
+$string['backtocourse'] = 'zurück zum Kurs';
 $string['categories'] = 'Kategorien';
 $string['explaincategories'] = '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier können Sie die Kategorien einsehen und bearbeiten.';
 $string['category'] = 'Kategorie';
 $string['categoryhead'] = 'Bezeichnung der Kategorie';
-$string['categorysaved'] = 'Kategorie hinzugef&uuml;gt.';
+$string['categorysaved'] = 'Kategorie hinzugefügt.';
 $string['categoryedited'] = 'Kategorie gespeichert.';
 $string['categorydeleted'] = 'Kategorie gel&ouml;scht.';
 $string['date'] = 'Datum';
-$string['dontincludeurl'] = 'Diese Option ausw&auml;hlen um die Verkn&uuml;pfung zwischen Bookmark und URL aufzuheben';
+$string['dontincludeurl'] = 'Diese Option ausw&auml;hlen um die Verknüpfung zwischen Bookmark und URL aufzuheben';
 $string['duplicatedurl'] = 'Diese URL ist bereits bei den Bookmarks vorhanden.';
 $string['editcategories'] = 'Kategorien bearbeiten';
 $string['explaining'] = 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.';
@@ -71,15 +70,13 @@ $string['firstnameshared'] = 'Familienname';
 $string['go'] = 'Go!';
 $string['hidesummary'] = '(Gesamtaufstellung ausblenden)';
 $string['managecategories'] = 'Kategorien verwalten';
-$string['mandatoryfields'] = 'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte f&uuml;llen Sie beides aus.';
-$string['mandatoryfieldsforcat'] = 'Eine Feldbezeichnung ist erforderlich. Bitte f&uuml;llen Sie diese aus.';
-$string['mybookmarks'] = 'Mein Portfolio';
-$string['mybookmarkstitle'] = 'ePortfolio-Modul: F&uuml;gen Sie hier Links und Dateien hinzu.';
-$string['mydialogues'] = 'Meine Blogs';
-$string['mymoodle'] = 'Mein Moodle';
-$string['newlink'] = 'Neuen externen Link hinzuf&uuml;gen';
-$string['newfile'] = 'Neue Datei hinzuf&uuml;gen';
-$string['newnote'] = 'Neue Notiz hinzuf&uuml;gen';
+$string['mandatoryfields'] = 'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte füllen Sie beides aus.';
+$string['mandatoryfieldsforcat'] = 'Eine Feldbezeichnung ist erforderlich. Bitte füllen Sie diese aus.';
+$string['myportfolio'] = 'Meine Portfolio Artefakte';
+$string['myportfoliotitle'] = 'ePortfolio-Modul: Fügen Sie hier Links und Dateien hinzu.';
+$string['newlink'] = 'Neuen externen Link hinzufügen';
+$string['newfile'] = 'Neue Datei hinzufügen';
+$string['newnote'] = 'Neue Notiz hinzufügen';
 $string['nocategories'] = '(bisher gibt es noch keine Kategorien)';
 $string['nobookmarksall'] = '(bisher gibt es noch keine Eintr&auml;ge)';
 $string['nobookmarkslink'] = '(bisher gibt es noch keine Links)';
@@ -88,22 +85,28 @@ $string['nobookmarksnote'] = '(bisher gibt es noch keine Notizen)';
 $string['noentry'] = 'Kein Eintrag';
 $string['note'] = 'Notiz';
 $string['notetitle'] = 'Notiz';
-$string['sharedbookmarks'] = 'ver&ouml;ffentlichte Portfolios';
+$string['shared_views'] = 'Geteilte Views';
 $string['showall'] = 'auch andere Kurse anzeigen';
 $string['showcourse'] = 'nur diesen Kurs anzeigen';
 $string['showsummary'] = '(Gesamtaufstellung einblenden)';
 $string['strshare'] = 'Ver&ouml;ffentlichen';
-$string['strunshare'] = 'Ver&ouml;ffentlichung zur&uuml;cknehmen';
+$string['strunshare'] = 'Ver&ouml;ffentlichung zurücknehmen';
 $string['summary'] = 'Gesamtaufstellung (optional)';
 $string['url'] = 'URL';
 $string['maincategory'] = 'Hauptkategorie';
 $string['subcategory'] = 'Unterkategorie';
 $string['accessoptions'] = 'Zugriffsoptionen';
-$string['shareallexceptthose'] = 'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern';
-$string['sharenoneexceptthose'] = 'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer';
-$string['internalaccessall'] = 'Zugriff f&uuml;r <span class=\'block_eportfolio_bold\'>alle</span>';
-$string['internalaccessusers'] = 'Zugriff nur f&uuml;r folgende Benutzer';
+$string['shareallexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern';
+$string['sharenoneexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer';
+$string['internalaccessall'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span>';
+$string['internalaccessusers'] = 'Zugriff nur für folgende Benutzer';
+$string['internalaccessgroups'] = 'Zugriff für folgende Gruppen';
 $string['externaccess'] = 'externer ePortfolio-Link';
+$string['emailaccess'] = 'Per Email teilen';
+$string['emailaccessdescription'] = 'Geben Sie eine Email Adresse pro Zeile ein<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese View. Das Löschen der Adresse löscht den Zugriff auf diese Veiw.';
+$string['emailaccessmessagesubject'] = 'Eine View wurde mit dir geteilt';
+$string['emailaccessmessage'] = 'Hallo! {$a->sendername} hat eine die View "{$a->viewname}" mit dir geteilt. Sie kann hier abgerufen werden: {$a->url}';
+$string['emailaccessmessageHTML'] = 'Hallo!<br />{$a->sendername} hat eine die View "{$a->viewname}" mit dir geteilt.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden';
 $string['showallusers'] = 'Zeige Benutzer aller meiner Kurse';
 $string['showcourseusers'] = 'Zeige nur Benutzer des aktuellen Kurses';
 $string['sharedpersons'] = 'Personen mit ver&ouml;ffentlichten Portfolios';
@@ -114,7 +117,7 @@ $string['name'] = 'Name';
 $string['role'] = 'Rolle';
 $string['nousersfound'] = 'Keine Benutzer gefunden';
 $string['delete'] = 'L&ouml;schen';
-$string['add'] = 'Hinzuf&uuml;gen';
+$string['add'] = 'Hinzufügen';
 $string['edit'] = 'Editieren';
 $string['checkall'] = 'Alle auswählen';
 $string['grouptitle'] = 'Gruppentitel';
@@ -126,7 +129,7 @@ $string['nogroupsfound'] = 'Keine Gruppen gefunden';
 $string['import'] = 'Import';
 $string['explainexport'] = '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>';
 $string['createexport'] = 'SCORM-Datei erstellen';
-$string['clicktodownloadscorm'] = 'Folgenden Button dr&uuml;cken, um SCORM-Datei herunterzuladen:';
+$string['clicktodownloadscorm'] = 'Folgenden Button drücken, um SCORM-Datei herunterzuladen:';
 $string['add_directory_structure'] = 'Mit Unterverzeichnissen exportieren';
 $string['download'] = 'Herunterladen';
 $string['endedit'] = 'Editieren beenden';
@@ -135,17 +138,17 @@ $string['explainpersonal'] = '<span class=\'block_eportfolio_bold\'>Pers&ouml;nl
 $string['personal'] = 'Informationen';
 $string['descriptionsaved'] = 'Beschreibung gespeichert';
 $string['course'] = 'Kurs';
-$string['exportimport'] = 'Export/Import';
+$string['importexport'] = 'Import/Export';
 $string['explainimport'] = 'hier k&ouml;nnen Sie SCORM-Dateien ins Portfolio importieren. Wenn Marker gefunden werden, die darauf hinweisen, dass diese SCORM-Datei zuvor aus dem Portfolio-Modul exportiert wurde, so wird versucht, die Stuktur entsprechend zu importieren.';
 $string['makeimport'] = 'Import';
-$string['add_this_file'] = 'Diese Datei hinzuf&uuml;gen';
+$string['add_this_file'] = 'Diese Datei hinzufügen';
 $string['bookmarksall'] = 'Alle Eintr&auml;ge';
 $string['bookmarkslinks'] = 'Links';
 $string['bookmarksfiles'] = 'Dateien';
 $string['bookmarksnotes'] = 'Notizen';
 $string['noguestpost'] = 'G&auml;ste haben hier keinen Zugriff!';
 $string['comments'] = 'Kommentare';
-$string['addcomment'] = 'Kommentar hinzuf&uuml;gen';
+$string['addcomment'] = 'Kommentar hinzufügen';
 $string['externcomment'] = 'Kommentare mitver&ouml;ffentlichen';
 $string['itemgrading'] = 'Beurteilung';
 $string['gradeitem'] = 'Abgabe beurteilen';
@@ -158,23 +161,23 @@ $string['deletefileconfirm'] = 'Wollen Sie diese Datei wirklich l&ouml;schen?';
 
 
 // === Different ===
-$string['couldninsertcomment'] = 'Kommentar konnte nicht eingef&uuml;gt werden!';
+$string['couldninsertcomment'] = 'Kommentar konnte nicht eingefügt werden!';
 $string['importedcommentsstart'] = 'Importierte Kommentare:<br /><br />';
 $string['importedcommentsend'] = 'Ende importierte Kommentare';
 $string['filetypenotdetected'] = 'Filetyp von $a->filename ($a->title) konnte nicht ermittelt werden. Datei wurde nicht importiert!';
 $string['linkedfilenotfound'] = 'Datei $a->filename in $a->url ($a->title) wurde nicht gefunden. Datei wurde nicht importiert!';
-$string['couldntinsert'] = 'Konnte $a nicht in der Datenbank einf&uuml;gen';
+$string['couldntinsert'] = 'Konnte $a nicht in der Datenbank einfügen';
 $string['couldntcreatedirectory'] = 'Verzeichnis konnte nicht erstellt werden';
 $string['couldntcopyfile'] = 'Konnte Datei $a nicht kopieren! Datei wurde nicht importiert!';
 $string['success'] = 'Datei erfolgreich importiert';
-$string['couldntinsertcategory'] = 'Kategorie konnte nicht eingef&uuml;gt werden!';
+$string['couldntinsertcategory'] = 'Kategorie konnte nicht eingefügt werden!';
 $string['couldntupdatecategory'] = 'Kategorie konnte nicht aktualisiert werden!';
 $string['couldntextractscormfile'] = 'SCORM-Datei konnte nicht extrahiert werden!';
 $string['couldntcreatetempdir'] = 'Tempor&auml;res Verzeichnis konnte nicht erstellt werden.!';
 $string['scormhastobezip'] = 'SCORM-Datei muss im zip-Format vorliegen!';
 $string['uploadfailed'] = 'Upload nicht erfolgreich!';
 $string['couldntupdatedesc'] = 'Beschreibung konnte nicht aktualisiert werden!';
-$string['couldntinsertdesc'] = 'Beschreibung konnte nicht eingef&uuml;gt werden!';
+$string['couldntinsertdesc'] = 'Beschreibung konnte nicht eingefügt werden!';
 $string['exportcomment'] = 'Das ist eine exportierte Datei von exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden k&ouml;nnen!';
 $string['comment'] = 'Kommentar';
 $string['commentshouldnotbeempty'] = 'Der Kommentar darf nicht leer sein.';
@@ -190,9 +193,9 @@ $string['deselectall'] = 'Alle Markierungen l&ouml;schen';
 $string['internalaccess'] = 'Interner Zugriff';
 $string['externalaccess'] = 'Externer Zugriff';
 $string['loginasmode'] = 'Sie haben als Administrator keine Zugriff auf fremde Portfolios';
-$string['badsessionkey'] = 'Session nicht mehr g&uuml;ltig';
-$string['invalidinstance'] = 'Ung&uuml;ltige Instanz';
-$string['invalidcourseid'] = 'Ung&uuml;ltige Kursnummer';
+$string['badsessionkey'] = 'Session nicht mehr gültig';
+$string['invalidinstance'] = 'Ungültige Instanz';
+$string['invalidcourseid'] = 'Ungültige Kursnummer';
 $string['wronglinkid'] = 'Falsche Link-Id';
 $string['incorrectlinksid'] = 'Falsche Links-Post Id';
 $string['incorrectnoteid'] = 'Falsche Notizen Id';
@@ -206,7 +209,7 @@ $string['bookmarknotfound'] = 'Bookmark nicht gefunden';
 $string['commentnotfound'] = 'Kommentar nicht gefunden';
 $string['updateposterror'] = 'Posting konnte in Datenbank nicht aktualisiert werden';
 $string['deleteposterror'] = 'Fehler beim L&ouml;schen des Postings';
-$string['addposterror'] = 'Posting konnte in Datenbank nicht hinzugef&uuml;gt werden';
+$string['addposterror'] = 'Posting konnte in Datenbank nicht hinzugefügt werden';
 $string['invalidassignmentid'] = 'Falsche Abgabe-Id';
 $string['invalidfileatthisassignment'] = 'Datei existiert nicht zu dieser Abgabe!';
 $string['publishedportfolios'] = 'Ver&ouml;ffentliche Portfolios';
@@ -235,6 +238,7 @@ $string['exportviewselect'] = 'Um alle Einträge einer bestimmten View zu export
 $string['type'] = 'Typ';
 $string['share'] = 'Share';
 $string['explainingall'] = 'Alle Eintr&auml;ge im Portfolio';
+$string['share_to_other_users'] = 'Benutzer suchen';
 
 
 // === Item sorting ===
@@ -245,7 +249,7 @@ $string['movebottom'] = 'An letzte Stelle';
 
 // === Views ===
 $string['view'] = 'View';
-$string['views'] = 'Views';
+$string['views'] = 'Meine Views';
 $string['explainingviews'] = 'View verwalten';
 $string['noviews'] = 'Bitte Views anlegen';
 $string['viewnotfound'] = 'Das Objekt ist für den Benutzer nicht einsehbar / Keine Zugriffsberechtigung.';
@@ -318,6 +322,11 @@ $string['mediacontent'] = 'URL oder eingebetteter Code*';
 $string['height'] = 'H&ouml;he';
 $string['width'] = 'Breite';
 $string['media_allowed_notes'] = 'URLs der folgenden Seiten sind erlaubt:';
+$string['sharedwith'] = 'Geteilt mit';
+$string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
+$string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
+$string['sharedwith_shareall'] = 'Mit allen Benutzern geteilt';
+$string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 
 
 // === Copy to course ===
@@ -334,7 +343,7 @@ $string['cofigureblock_personalinfo'] = 'Pers&ouml;nliche Information';
 
 
 // === Desp ===
-$string['back_to_desp'] = 'zur&uuml;ck zum d-ESP';
+$string['back_to_desp'] = 'zurück zum d-ESP';
 $string['steckbrief'] = 'Steckbrief';
 $string['desp_categories'] = '
 	Erzählungen, Rollenspielszenen, Gedichte, Collagen
@@ -371,7 +380,7 @@ $string['desp_categories'] = '
 
 
 // === Config ===
-$string['config_feature_copy_to_course'] = 'Sch&uuml;ler d&uuml;rfen Dateien in den Kurs kopieren';
+$string['config_feature_copy_to_course'] = 'Schüler dürfen Dateien in den Kurs kopieren';
 $string['competenceinteraction'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
 $string['opencomps'] = 'Kompetenzen ausw&auml;hlen';
 $string['selectcomps'] = 'W&auml;hle hier die Kompetenzen, die zu deinem Upload passen!';
@@ -379,7 +388,7 @@ $string['competences_old_version'] = 'Auf diesem Moodle ist eine alte Version vo
 $string['expandcomps'] = 'Alle &ouml;ffnen';
 $string['contactcomps'] = 'Alle schlie&szlig;en';
 $string['studentcomps'] = 'Hier kannst du einsch&auml;tzen, ob folgende Kompetenzen durch Dein Artefakt erreicht wurden.';
-$string['teachercomps'] = 'Hier k&ouml;nnen Sie beurteilen, ob der Sch&uuml;ler folgende Kompetenzen durch sein Artefakt erreicht hat.';
+$string['teachercomps'] = 'Hier k&ouml;nnen Sie beurteilen, ob der Schüler folgende Kompetenzen durch sein Artefakt erreicht hat.';
 $string['competences'] = 'Kompetenzen';
 $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.';
 $string['settings_interaktion_exacomp_head'] = 'Interaktion exabis ePortfolio - exabis competencies';
@@ -399,9 +408,8 @@ $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit exab
 
 
 // === Resume ===
-$string['resume'] = 'Resümee';
-$string['resume_template_newresume'] = '<h2>Mein Resümee</h2>';
-$string['resume_my'] = 'Mein Resümee';
+$string['resume_template_newresume'] = '<h2>Mein Lebenslauf</h2>';
+$string['resume_my'] = 'Mein Lebenslauf';
 $string['resume_cover'] = 'Begleit-Informationen';
 $string['resume_coversaved'] = 'Begleit-Informationen gespeichert';
 $string['resume_eduhistory'] = 'Bildungs-Karriere';
@@ -486,6 +494,8 @@ $string['resume_collaps'] = 'Alles schließen';
 
 // === structure sharing ===
 $string['shared_categories'] = 'Geteilte Kategorien';
+$string['browsecategory'] = 'Inhalt anzeigen';
+$string['copycategory'] = 'In mein Portfolio kopieren';
 $string['create_as_note'] = 'Als Artefakt hinzufügen';
 $string['category_not_found'] = 'Kategorie nicht gefunden';
 $string['root_category'] = 'Hauptkategorie';
@@ -499,6 +509,10 @@ $string['developed'] = 'entwickelt von';
 
 
 // === language categories ===
+
+
+// === Message ===
+$string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit mir teilt';
 
 
 // === Not Used Anymore ===

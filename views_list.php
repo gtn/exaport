@@ -23,11 +23,6 @@ require_once __DIR__.'/lib/sharelib.php';
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 
-/*
-$strbookmarks = get_string("mybookmarks", "block_exaport");
-$strheadline = get_string("bookmarks".$type_plural, "block_exaport");
-*/
-
 block_exaport_require_login($courseid);
 
 $url = '/blocks/exaport/views_list.php';

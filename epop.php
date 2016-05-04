@@ -228,7 +228,7 @@ if ($action=="login"){
 	else{
 		$tusers=array();
 		$tusers=exaport_get_shareable_users();
-		block_exacomp_write_xml_user($tusers);
+		block_exaport_write_xml_user($tusers);
 	}
 }else if ($action=="delete_item"){
 	$user=checkhash();
@@ -607,7 +607,7 @@ else if ($action=="get_items_for_view"){
 			//$competences=explode("_",$comp);
 			
 			/* was ist der richtige typ?
-				wenn datei dabei ist, immer datei, das wird unten immer gemacht, wenn if(block_exacomp_checkfiles()
+				wenn datei dabei ist, immer datei, das wird unten immer gemacht, wenn if(block_exaport_checkfiles()
 				wenn neu: url+text->note, url->link, text->note
 				wenn update: wenn vorher datei, bleibts datei, sonst wie bei neu
 			*/
@@ -626,7 +626,7 @@ else if ($action=="get_items_for_view"){
 				else $new->type = 'note';
 			}*/
 		}
-		if(block_exacomp_checkfiles()){
+		if(block_exaport_checkfiles()){
 			
 			$fs = get_file_storage();
 			$totalsize = 0;
@@ -1011,7 +1011,7 @@ function block_exaport_getshares($view,$usrid,$sharetag=true,$strshared="viewSha
 	if ($sharetag) $inhalt.="	</shares>"."\r\n";
 	return $inhalt;
 }
-function block_exacomp_write_xml_user($tusers){
+function block_exaport_write_xml_user($tusers){
 	header ("Content-Type:text/xml");
 	if ($tusers){
 			$inhalt='<?xml version="1.0" encoding="UTF-8" ?>'."\r\n";
@@ -1220,7 +1220,7 @@ function kuerzen($wert,$laenge){
 	return $wert;
 }
 
-function block_exacomp_checkfiles(){
+function block_exaport_checkfiles(){
 	if (empty($_FILES)) {return false;}
 	else{
 		$ret=true;

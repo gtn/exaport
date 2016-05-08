@@ -1304,22 +1304,6 @@ function block_exaport_has_grading_permission($itemid) {
 	return has_capability('block/exacomp:teacher', $coursecontext);
 }
 
-function block_exaport_delete_user_data($userid){
-	global $DB;
-
-	$result = $DB->delete_records('block_exaportcate', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportcatshar', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportcat_structshar', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportitem', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportitemcomm', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportitemshar', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportview', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportviewshar', array('userid'=>$userid));
-
-	$result = $DB->delete_records('block_exaportresume', array('user_id'=>$userid));
-	$result = $DB->delete_records('block_exaportuser', array('user_id'=>$userid));
-}
-
 function block_exaport_get_item_tags($itemid, $orderBy = '') {
 	global $DB;
 	$tags = array();

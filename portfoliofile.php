@@ -23,12 +23,17 @@
 // Exported SCORM-File (user has to be logged in)
 // portfoliofile.php/temp/export/$userid/filename.ext
 
+if (!empty($_GET['token']) || !empty($_GET['wstoken'])) {
+	// automatisches einloggen beim öffnen mit token (vom webservice) verhindern
+	define('NO_MOODLE_COOKIES', true);
+}
+
 require_once __DIR__.'/inc.php';
 require_once __DIR__.'/lib/sharelib.php';
-require_once($CFG->dirroot . '/webservice/lib.php');
+require_once $CFG->dirroot.'/webservice/lib.php';
 
 if (empty($CFG->filelifetime)) {
-	$lifetime = 86400;	 // Seconds for files to remain in caches
+	$lifetime = 86400;     // Seconds for files to remain in caches
 } else {
 	$lifetime = $CFG->filelifetime;
 }
@@ -40,46 +45,26 @@ $relativepath = get_file_argument('portfoliofile.php'); // the check of the para
 $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
 $userhash = optional_param('hv', 0, PARAM_ALPHANUM);
-// old elove token
+// old elove token - moodle sometimes uses wstoken, sometimes token
 $token = optional_param('token', null, PARAM_ALPHANUM);
 // new token
-$wstoken = optional_param('wstoken', null, PARAM_ALPHANUM);
+$wstoken = optional_param('wstoken', $token, PARAM_ALPHANUM);
 //block_exaport_epop_checkhash
-$epopaccess=false;
+$epopaccess = false;
 
 //authenticate the user
-
-if ($token && !$wstoken) {
-	// this whole block is old elove logic
-	// TODO: refactor and delete!
-
-	$webservicelib = new webservice();
-	$authenticationinfo = $webservicelib->authenticate_user($token);
-	$accessPath = explode('/', $access);
-
-	if(strpos($accessPath[2],'-'))
-		$accessPath[2] = (explode('-', $accessPath[2])[0]);
-
-	$item = block_exaport_get_elove_item($itemid, $accessPath[2], $authenticationinfo);
-	if(!$item)
-		print_error("viewnotfound", "block_exaport");
-
-	if ($file = block_exaport_get_item_file($item)) {
-		send_stored_file($file);
-	} else {
-		not_found();
-	}
-	exit;
-}
 
 $authenticationinfo = null;
 if ($wstoken) {
 	$webservicelib = new webservice();
 	$authenticationinfo = $webservicelib->authenticate_user($wstoken);
-} elseif ($userhash){
-	$user=block_exaport_epop_checkhash($userhash);
-	if ($user==false) {require_login();}
-	else {$epopaccess=true;}
+} elseif ($userhash) {
+	$user = block_exaport_epop_checkhash($userhash);
+	if ($user == false) {
+		require_login();
+	} else {
+		$epopaccess = true;
+	}
 } else {
 	require_login();
 }
@@ -88,7 +73,7 @@ if ($wstoken) {
 if ($itemid) {
 	// file storage logic
 
-	if ($epopaccess){
+	if ($epopaccess) {
 		$item = block_exaport_get_item_epop($itemid, $user);
 	} elseif ($access) {
 		$item = block_exaport_get_item($itemid, $access, false);
@@ -96,11 +81,15 @@ if ($itemid) {
 		$item = block_exaport_get_elove_item($itemid, $userid, $authenticationinfo);
 	}
 
-	if (!$item) print_error('Item not found');
+	if (!$item) {
+		print_error('Item not found');
+	}
 
 	if ($commentid = optional_param('commentid', 0, PARAM_INT)) {
 		$comment = $DB->get_record("block_exaportitemcomm", ['itemid' => $item->id, 'id' => $commentid]);
-		if (!$comment) not_found();
+		if (!$comment) {
+			not_found();
+		}
 		$file = block_exaport_get_item_comment_file($comment->id);
 	} else {
 		$file = block_exaport_get_item_file($item);
@@ -113,11 +102,13 @@ if ($itemid) {
 	}
 } else {
 	// old logic? still used?
-	
+
 	if (!$relativepath) {
 		error('No valid arguments supplied or incorrect server configuration');
-	} else if ($relativepath{0} != '/') {
-		error('No valid arguments supplied, path does not start with slash!');
+	} else {
+		if ($relativepath{0} != '/') {
+			error('No valid arguments supplied, path does not start with slash!');
+		}
 	}
 
 	// relative path must start with '/', because of backup/restore!!!
@@ -125,58 +116,50 @@ if ($itemid) {
 	// extract relative path components
 	$args = explode('/', trim($relativepath, '/'));
 
-	if( $args[0] != 'exaport') {
+	if ($args[0] != 'exaport') {
 		error('No valid arguments supplied');
 	}
 
-	if($args[1] == 'temp') {
-		if($args[2] == 'export') {
+	if ($args[1] == 'temp') {
+		if ($args[2] == 'export') {
 			$args[3] = $access_user_id = clean_param($args[3], PARAM_INT);
-			if($access_user_id == $USER->id) {
+			if ($access_user_id == $USER->id) {
 				// check ok, allowed to access the file
-			}
-			else {
+			} else {
 				error('No valid arguments supplied');
 			}
-		}
-		else {
+		} else {
 			error('No valid arguments supplied');
 		}
-	}
-	elseif ($args[1] == 'files') { // in this case the user tries to access a file of a portfolio entry.
+	} elseif ($args[1] == 'files') { // in this case the user tries to access a file of a portfolio entry.
 		// portfoliofile.php/files/$userid/$portfolioid/filename.ext
 		if (isset($args[2]) && isset($args[3])) {
 			$args[2] = $access_user_id = clean_param($args[2], PARAM_INT);
 			$args[3] = $access_portfolio_id = clean_param($args[3], PARAM_INT);
 
-			if($access_user_id == $USER->id) { // check if this user has a portfolio with id $access_portfolio_id;
-				if ($DB->count_records('block_exaportitem', array('userid'=>$USER->id, 'id'=>$access_portfolio_id)) == 1) {
+			if ($access_user_id == $USER->id) { // check if this user has a portfolio with id $access_portfolio_id;
+				if ($DB->count_records('block_exaportitem', array('userid' => $USER->id, 'id' => $access_portfolio_id)) == 1) {
 					// check ok, allowed to access the file
-				}
-				else {
+				} else {
 					error('No valid arguments supplied');
 				}
-			}
-			else {
+			} else {
 				error('No valid arguments supplied');
 			}
-		}
-		else {
+		} else {
 			error('No valid arguments supplied');
 		}
-	}
-	else {
+	} else {
 		error('No valid arguments supplied');
 	}
 
-	$filepath = $CFG->dataroot . '/' . implode('/', $args);
+	$filepath = $CFG->dataroot.'/'.implode('/', $args);
 }
-	
+
 if (!file_exists($filepath)) {
-	if(isset($course)) {
+	if (isset($course)) {
 		not_found($course->id);
-	}
-	else {
+	} else {
 		not_found();
 	}
 }
@@ -185,10 +168,9 @@ send_file($filepath, basename($filepath), $lifetime, $CFG->filteruploadedfiles, 
 function not_found($courseid = 0) {
 	global $CFG;
 	header('HTTP/1.0 404 not found');
-	if($courseid > 0) {
+	if ($courseid > 0) {
 		error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); //this is not displayed on IIS??
-	}
-	else {
+	} else {
 		error(get_string('filenotfound', 'error')); //this is not displayed on IIS??
 	}
 }

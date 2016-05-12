@@ -24,6 +24,7 @@ $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
 $access = optional_param('access', 0, PARAM_TEXT);
 $onlyexternal = optional_param('onlyexternal', 0, PARAM_INT);
+$userid = optional_param('userid', 0, PARAM_INT); // for excomp to only show views of one user
 
 require_login($courseid);
 
@@ -94,6 +95,9 @@ $views = $DB->get_records_sql(
 		(isset($userviews) && count($userviews)>0 ? " OR v.id IN (".$userviews_list.") ": "") : ""). // Add group shareing views
 	")".
 	" AND v.userid!=? ". // don't show my own views
+	($userid
+		? "AND v.userid=".$userid
+		: '').
 	" GROUP BY v.id, v.userid, v.name, v.description, v.timemodified, v.shareall, v.externaccess, v.externcomment, v.hash, v.langid, v.layout, u.firstname, u.lastname, u.picture".
 	" $sql_sort", array($USER->id, $USER->id));
 

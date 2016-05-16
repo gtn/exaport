@@ -708,7 +708,7 @@ namespace {
 				$usergroups[$id] = $group->groupid;
 			};
 			$usergroups_list = implode(',', $usergroups);
-			$usercats = $DB->get_records_sql('SELECT catid FROM {block_exaportcatgroupshar} WHERE groupid IN ('.$usergroups_list.')');
+			$usercats = $DB->get_records_sql('SELECT DISTINCT catid FROM {block_exaportcatgroupshar} WHERE groupid IN ('.$usergroups_list.')');
 			foreach ($usercats as $id => &$cat) {
 				$usercats[$id] = $cat->catid;
 			};

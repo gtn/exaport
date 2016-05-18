@@ -542,13 +542,10 @@ function block_exaport_check_competence_interaction() {
 		class_exists('\block_exacomp\api') && \block_exacomp\api::active();
 }
 
-function block_exaport_check_item_competences($item) {
-	return (bool)\block_exacomp\api::get_active_comp_for_exaport_item($item->id);
-}
-
 function block_exaport_build_comp_table($item, $role="teacher") {
 	global $DB;
 
+	// TODO: refactor: use block_exaport_get_active_comps_for_item instead
 	$sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompcompactiv_mm} da WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
 	$descriptors = $DB->get_records_sql($sql, array($item->id));
 	$content = "<table class='compstable flexible boxaligncenter generaltable'>
@@ -613,13 +610,23 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
 		$DB->insert_record('block_exacompcompuser_mm', $data);
 	}
 }
-function block_exaport_get_active_compids($item) {
-	return \block_exacomp\api::get_active_comp_for_exaport_item($item->id);
+
+/**
+ * @deprecated refactor to use block_exaport_get_active_comps_for_item
+ */
+function block_exaport_get_active_compids_for_item($item) {
+	$ids = array_keys(block_exaport_get_active_comps_for_item($item));
+	return array_combine($ids, $ids);
 }
 
-function block_exaport_get_comp_output($item) {
-	$compids = block_exaport_get_active_compids($item);
+function block_exaport_check_item_competences($item) {
+	return (bool)block_exaport_get_active_comps_for_item($item);
 }
+
+function block_exaport_get_active_comps_for_item($item) {
+	return \block_exacomp\api::get_active_comps_for_exaport_item($item);
+}
+
 function block_exaport_build_comp_tree($type, $item_or_resume, $allowEdit = true) {
 	global $CFG, $USER;
 
@@ -1072,7 +1079,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 
 		$comp = block_exaport_check_competence_interaction();
 		if($comp){
-			$compids = block_exaport_get_active_compids($item);
+			$compids = block_exaport_get_active_compids_for_item($item);
 
 			if($compids){
 				$competences = "";

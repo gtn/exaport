@@ -234,7 +234,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		foreach ($bookmarks as $bookmark) {		
 			if(block_exaport_check_competence_interaction()){
 				//begin
-				$compids = block_exaport_get_active_compids($bookmark);
+				$compids = block_exaport_get_active_compids_for_item($bookmark);
 
 				if($compids){									
 					$competences = "";
@@ -296,7 +296,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 
 		foreach ($files as $file) {
 			if(block_exaport_check_competence_interaction()){
-				$compids = block_exaport_get_active_compids($file);
+				$compids = block_exaport_get_active_compids_for_item($file);
 			
 				if($compids){
 					$competences = "";
@@ -367,7 +367,7 @@ function get_category_content(&$xmlElement, &$resources, $id, $name, $exportpath
 		$hasItems = true;
 		foreach ($notes as $note) {
 			if(block_exaport_check_competence_interaction()){
-				$compids = block_exaport_get_active_compids($note);
+				$compids = block_exaport_get_active_compids_for_item($note);
 
 				if($compids){
 					$competences = "";

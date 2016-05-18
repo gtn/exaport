@@ -602,7 +602,7 @@ function block_exaport_get_item_comp_icon($item) {
 	if (!block_exaport_check_competence_interaction())
 		return;
 
-	$compids = block_exaport_get_active_compids($item);
+	$compids = block_exaport_get_active_compids_for_item($item);
 
 	if(!$compids)
 		return;

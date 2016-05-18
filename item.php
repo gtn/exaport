@@ -118,7 +118,7 @@ else {
 $exacomp_active = block_exaport_check_competence_interaction();
 if ($existing && $exacomp_active) {
 	// for the tree:
-	$existing->compids_array = \block_exacomp\api::get_active_comp_for_exaport_item($existing->id);
+	$existing->compids_array = \block_exacomp\api::get_active_comps_for_exaport_item($existing->id);
 	// for form:
 	$existing->compids = join(',', $existing->compids_array);
 }

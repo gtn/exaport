@@ -26,7 +26,7 @@ $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 $commentid = optional_param('commentid', 0, PARAM_INT);
-$deletecomment = optional_param('deletecomment', 0, PARAM_INT);
+$comment_delete = optional_param('comment_delete', 0, PARAM_INT);
 $backtype = optional_param('backtype', 0, PARAM_TEXT);
 
 $context = context_system::instance();
@@ -43,7 +43,7 @@ if (!$item) {
 
 $item->intro = process_media_url($item->intro, 320, 240);
 
-if ($deletecomment) {
+if ($comment_delete) {
 	require_sesskey();
 
 	$conditions = array("id" => $commentid, "userid" => $USER->id, "itemid" => $itemid);
@@ -57,9 +57,9 @@ if ($deletecomment) {
 		}
 
 		//parse_str($_SERVER['QUERY_STRING'], $params);
-		//redirect($_SERVER['PHP_SELF'] . '?' . http_build_query(array('deletecomment' => null, 'commentid' => null, 'sesskey' => null) + (array) $params));
+		//redirect($_SERVER['PHP_SELF'] . '?' . http_build_query(array('comment_delete' => null, 'commentid' => null, 'sesskey' => null) + (array) $params));
 	} else {
-		if(!isset($_POST['action'])){ //if deletecomment is set and form is submitted, comment was immediatly deleted and cant be deleted anymore, no error
+		if(!isset($_POST['action'])){ //if comment_delete is set and form is submitted, comment was immediatly deleted and cant be deleted anymore, no error
 			print_error("commentnotfound", "block_exaport");
 			//redirect($_SERVER['REQUEST_URI']);
 		}
@@ -90,7 +90,7 @@ if ($item->allowComments) {
 			case 'add':
 				block_exaport_do_add_comment($item, $fromform);
 
-				//redirect(str_replace("&deletecomment=1","",$_SERVER['REQUEST_URI']));
+				//redirect(str_replace("&comment_delete=1","",$_SERVER['REQUEST_URI']));
 				$prms='access='.$access.'&itemid='.$itemid;
 				if (!empty($backtype)) $prms.='backtype='.$backtype;
 				redirect($CFG->wwwroot.'/blocks/exaport/shared_item.php?'.$prms);
@@ -210,7 +210,7 @@ function block_exaport_show_comments($item, $access) {
 			print_string('bynameondate', 'forum', $by);
 
 			if ($comment->userid == $USER->id) {
-				echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&deletecomment=1&sesskey=' . sesskey()) . '" onclick="'.s('return confirm('.json_encode(block_exaport\get_string('delete_confirmation_comment')).')').'">' . get_string('delete') . '</a>';
+				echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) . '" onclick="'.s('return confirm('.json_encode(block_exaport\get_string('comment_delete_confirmation')).')').'">' . get_string('delete') . '</a>';
 			}
 			echo '</div></td></tr>';
 

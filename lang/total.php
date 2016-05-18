@@ -784,7 +784,7 @@ return [
 		'Pfeil nach oben/nach unten',
 		'updown arrow',
 	],
-	'delete_confirmation_comment' => [
+	'comment_delete_confirmation' => [
 		'Wollen Sie wirklich diesen Kommentar löschen?',
 		'Do you really want to delete this comment?',
 	],

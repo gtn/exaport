@@ -219,7 +219,7 @@ $string['invalidfileatthisassignment'] = 'File does not exist at this assignment
 $string['publishedportfolios'] = 'Published portfolios';
 $string['viewcategories'] = 'manage categories';
 $string['updownarrow'] = 'updown arrow';
-$string['delete_confirmation_comment'] = 'Do you really want to delete this comment?';
+$string['comment_delete_confirmation'] = 'Do you really want to delete this comment?';
 
 
 // === Shared portfolios ===

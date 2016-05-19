@@ -50,7 +50,7 @@ updated-script for data-transfer from previous versions included (thanks to eThi
 
 2011-07-13 4.0
 * updated to Moodle 2.x-compatibility
-* introduction of connection to exabis competencies
+* introduction of connection to Exabis Competence Grid
 * added a few configure block options
 
 2009-03-19 3.2.1

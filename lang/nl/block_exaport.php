@@ -261,8 +261,8 @@ $string['config_version_3'] = 'Nieuwe ePortfolio indeling: inclusief aanzichten 
 $string['config_version_2'] = 'Oude ePortfolio indeling';
 $string['config_feature_copy_to_course'] = NULL;
 $string['version_5.2.0_needed'] = NULL;
-$string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - exabis competencies';
-$string['settings_interaktion_exacomp_body'] = 'interaction with block exabis competencies, if installed.';
+$string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
+$string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(nog geen verwijzingen)';
 $stringNotUsed['explainingexternal'] = 'Externe links. Deze links kunnen gedeeld worden met alle cursusleden, die toestemming hebben.';

@@ -261,8 +261,8 @@ $string['config_version_3'] = 'Új Portfólió szerkezet:: beleértve a nézetek
 $string['config_version_2'] = 'Régi Portfólió szerkezet';
 $string['config_feature_copy_to_course'] = NULL;
 $string['version_5.2.0_needed'] = NULL;
-$string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - exabis competencies';
-$string['settings_interaktion_exacomp_body'] = 'interaction with block exabis competencies, if installed.';
+$string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
+$string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(nincsenek könyvjelzők)';
 $stringNotUsed['nobookmarksexternal'] = '(nincsenek külső hivatkozások)';

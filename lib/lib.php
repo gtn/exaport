@@ -841,7 +841,7 @@ function block_exaport_get_all_user_badges() {
 			$records = badges_get_user_badges($USER->id);
 			return $records;
 			// old code
-			print_error("please update exabis competencies to latest version");
+			print_error("please update Exabis Competence Grid to latest version");
 			exit;
 		}else
 			return block_exacomp_get_all_user_badges();

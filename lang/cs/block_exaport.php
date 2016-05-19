@@ -261,8 +261,8 @@ $string['config_version_3'] = 'Konfigurace verze 3';
 $string['config_version_2'] = 'Konfigurace verze 2';
 $string['config_feature_copy_to_course'] = NULL;
 $string['version_5.2.0_needed'] = NULL;
-$string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - exabis competencies';
-$string['settings_interaktion_exacomp_body'] = 'interaction with block exabis competencies, if installed.';
+$string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
+$string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(zatím žádné záložky)';
 $stringNotUsed['nobookmarksexternal'] = '(zatím žádné externí odkazy)';

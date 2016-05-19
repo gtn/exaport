@@ -381,8 +381,8 @@ $string['desp_categories'] = '
 
 // === Config ===
 $string['config_feature_copy_to_course'] = 'Schüler dürfen Dateien in den Kurs kopieren';
-$string['competenceinteraction'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
-$string['opencomps'] = 'Kompetenzen ausw&auml;hlen';
+$string['competenceinteraction'] = 'Interaktion mit Block Exabis Competence Grid, falls dieser installiert ist, zulassen.';
+$string['opencomps'] = 'Kompetenzen auswählen';
 $string['selectcomps'] = 'W&auml;hle hier die Kompetenzen, die zu deinem Upload passen!';
 $string['competences_old_version'] = 'Auf diesem Moodle ist eine alte Version von Exabis Competences installiert. Diese wird von Exabis Eportfolio nicht mehr unterstützt.';
 $string['expandcomps'] = 'Alle &ouml;ffnen';
@@ -391,8 +391,8 @@ $string['studentcomps'] = 'Hier kannst du einsch&auml;tzen, ob folgende Kompeten
 $string['teachercomps'] = 'Hier k&ouml;nnen Sie beurteilen, ob der Schüler folgende Kompetenzen durch sein Artefakt erreicht hat.';
 $string['competences'] = 'Kompetenzen';
 $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.';
-$string['settings_interaktion_exacomp_head'] = 'Interaktion exabis ePortfolio - exabis competencies';
-$string['settings_interaktion_exacomp_body'] = 'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.';
+$string['settings_interaktion_exacomp_head'] = 'Interaktion exabis ePortfolio - Exabis Competence Grid';
+$string['settings_interaktion_exacomp_body'] = 'Interaktion mit Block Exabis Competence Grid, falls dieser installiert ist, zulassen.';
 $string['settings_allow_loginas_head'] = '"Login als" erlauben';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
@@ -404,7 +404,7 @@ $string['settings_disable_external_comments_body'] = '';
 $string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
 $string['block_exaport_app_externaleportfolio_body'] = 'For App';
 $string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
-$string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit exabis competencies und Dakora sinnvoll';
+$string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 
 
 // === Resume ===

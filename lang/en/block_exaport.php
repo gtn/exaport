@@ -403,18 +403,18 @@ $string['desp_categories'] = '
 
 // === Config ===
 $string['config_feature_copy_to_course'] = 'Allow students to copy ePortfolio files to their courses';
-$string['competenceinteraction'] = 'Allow interaction with block exabis competencies, in case it is installed';
-$string['opencomps'] = 'Choose your competencies';
-$string['selectcomps'] = 'Choose competencies associated with your upload!';
+$string['competenceinteraction'] = 'Allow interaction with block Exabis Competence Grid, in case it is installed';
+$string['opencomps'] = 'Choose your competences';
+$string['selectcomps'] = 'Choose competences associated with your upload!';
 $string['competences_old_version'] = 'An outdated version of Exabis Competences that is no longer supported by Exabis Eportfolio is installed on this moodle.';
 $string['expandcomps'] = 'Expand all';
 $string['contactcomps'] = 'Contract all';
 $string['studentcomps'] = 'Here you can self-assess whether you have acquired the competency with your artefact.';
 $string['teachercomps'] = 'Here you can assess whether your students have acquired the competency with this artefact.';
-$string['competences'] = 'competencies';
+$string['competences'] = 'competences';
 $string['desp_einleitung'] = 'Here is your portfolio. You can show others what you have accomplished by yourself.';
-$string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - exabis competencies';
-$string['settings_interaktion_exacomp_body'] = 'Interaction with block exabis competencies, in case it is installed';
+$string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - Exabis Competence Grid';
+$string['settings_interaktion_exacomp_body'] = 'Interaction with block Exabis Competence Grid, in case it is installed';
 $string['settings_allow_loginas_head'] = 'Allow login as';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
@@ -430,7 +430,7 @@ $string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that upl
 $string['block_exaport_userquota'] = 'User quota for Exabis ePortfolio';
 $string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
-$string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with exabis competencies and dakora';
+$string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';
 
 

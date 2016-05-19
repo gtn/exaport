@@ -261,8 +261,8 @@ $string['config_version_3'] = 'Nuevo diseño de E-Portafolio : incluyendo vistas
 $string['config_version_2'] = 'Antiguo  diseño de ePortfolio ';
 $string['config_feature_copy_to_course'] = 'Permitir a los estudiantes para copiar archivos de E-portafolio a sus cursos';
 $string['version_5.2.0_needed'] = 'Exabis E-portafolio REQUIERE al Menos la version 5.2.0 de PHP';
-$string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - exabis competencies';
-$string['settings_interaktion_exacomp_body'] = 'interaction with block exabis competencies, if installed.';
+$string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
+$string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
 // Not Used Anymore
 $stringNotUsed['nobookmarks'] = '(Sin marcas yet)';
 $string['steckbrief'] = 'Profile';

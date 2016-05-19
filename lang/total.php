@@ -1378,16 +1378,16 @@ return [
 		'Allow students to copy ePortfolio files to their courses',
 	],
 	'competenceinteraction' => [
-		'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.',
-		'Allow interaction with block exabis competencies, in case it is installed',
+		'Interaktion mit Block Exabis Competence Grid, falls dieser installiert ist, zulassen.',
+		'Allow interaction with block Exabis Competence Grid, in case it is installed',
 	],
 	'opencomps' => [
-		'Kompetenzen ausw&auml;hlen',
-		'Choose your competencies',
+		'Kompetenzen auswählen',
+		'Choose your competences',
 	],
 	'selectcomps' => [
 		'W&auml;hle hier die Kompetenzen, die zu deinem Upload passen!',
-		'Choose competencies associated with your upload!',
+		'Choose competences associated with your upload!',
 	],
 	'competences_old_version' => [
 		'Auf diesem Moodle ist eine alte Version von Exabis Competences installiert. Diese wird von Exabis Eportfolio nicht mehr unterstützt.',
@@ -1411,19 +1411,19 @@ return [
 	],
 	'competences' => [
 		'Kompetenzen',
-		'competencies',
+		'competences',
 	],
 	'desp_einleitung' => [
 		'Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.',
 		'Here is your portfolio. You can show others what you have accomplished by yourself.',
 	],
 	'settings_interaktion_exacomp_head' => [
-		'Interaktion exabis ePortfolio - exabis competencies',
-		'Interaction exabis ePortfolio - exabis competencies',
+		'Interaktion exabis ePortfolio - Exabis Competence Grid',
+		'Interaction exabis ePortfolio - Exabis Competence Grid',
 	],
 	'settings_interaktion_exacomp_body' => [
-		'Interaktion mit Block exabis competencies, falls dieser installiert ist, zulassen.',
-		'Interaction with block exabis competencies, in case it is installed',
+		'Interaktion mit Block Exabis Competence Grid, falls dieser installiert ist, zulassen.',
+		'Interaction with block Exabis Competence Grid, in case it is installed',
 	],
 	'settings_allow_loginas_head' => [
 		'"Login als" erlauben',
@@ -1486,8 +1486,8 @@ return [
 		'Students are allowed to edit and delete items after teacher reviews',
 	],
 	'block_exaport_app_alloweditdelete_body' => [
-		'Nur in Kombination mit exabis competencies und Dakora sinnvoll',
-		'Only useful in combination with exabis competencies and dakora',
+		'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll',
+		'Only useful in combination with Exabis Competence Grid and dakora',
 	],
 	'delete_all_shareall' => [
 		null,

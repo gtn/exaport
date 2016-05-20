@@ -620,11 +620,11 @@ function block_exaport_get_active_compids_for_item($item) {
 }
 
 function block_exaport_check_item_competences($item) {
-	return (bool)block_exaport_get_active_comps_for_item($item->id);
+	return (bool)block_exaport_get_active_comps_for_item($item);
 }
 
 function block_exaport_get_active_comps_for_item($item) {
-	return \block_exacomp\api::get_active_comps_for_exaport_item($item);
+	return \block_exacomp\api::get_active_comps_for_exaport_item($item->id);
 }
 
 function block_exaport_build_comp_tree($type, $item_or_resume, $allowEdit = true) {

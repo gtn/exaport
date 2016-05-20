@@ -620,7 +620,7 @@ function block_exaport_get_active_compids_for_item($item) {
 }
 
 function block_exaport_check_item_competences($item) {
-	return (bool)block_exaport_get_active_comps_for_item($item);
+	return (bool)block_exaport_get_active_comps_for_item($item->id);
 }
 
 function block_exaport_get_active_comps_for_item($item) {

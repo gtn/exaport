@@ -18,7 +18,6 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 require_once __DIR__.'/inc.php';
-require_once __DIR__.'/lib/sharelib.php';
 
 $item_id = optional_param('item_id', -1, PARAM_INT);
 $access = optional_param('access', '', PARAM_TEXT);
@@ -45,10 +44,10 @@ if ($access == '') {
 	$item = $DB->get_record('block_exaportitem', array('id'=>$item_id));
 	$sharable = is_sharableitem($view_ownerid, $item_id);
 	if ($view_ownerid != $item->userid && !$sharable) {
-		die('item not found');
+		throw new moodle_exception('item not found');
 	}
 }
-if (empty($item)) die('item not found');
+if (empty($item)) throw new moodle_exception('item not found');
 //exit;
 
 // Custom Icon file 

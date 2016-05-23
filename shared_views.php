@@ -18,7 +18,6 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 require_once __DIR__.'/inc.php';
-require_once __DIR__.'/lib/sharelib.php';
 
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
@@ -62,19 +61,8 @@ $strheader = get_string("shared_views", "block_exaport");
 echo "<div class='block_eportfolio_center'>\n";
 
 // Views for user groups
-$usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), '', 'groupid');
-if ((is_array($usergroups)) && (count($usergroups) > 0)) {
-	foreach ($usergroups as $id => &$group) {
-		$usergroups[$id] = $group->groupid;
-	};
-		$usergroups_list = implode(',', $usergroups);
-		$userviews = $DB->get_records_sql('SELECT viewid FROM {block_exaportviewgroupshar} WHERE groupid IN ('.$usergroups_list.')');
-		foreach ($userviews as $id => &$view) {
-			$userviews[$id] = $view->viewid;
-		};
-		$userviews_list = implode(',', $userviews);
-};
-	
+$userviews = block_exaport_get_group_share_views($USER->id);
+
 $views = $DB->get_records_sql(
 	"SELECT v.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT vshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT vgshar.groupid) AS cnt_shared_groups  " .
 	" FROM {user} u" .
@@ -92,7 +80,7 @@ $views = $DB->get_records_sql(
 //					((is_array($usergroups)) ? " u.id IN (".$usergroups_list.") OR " : "").
 	" v.externaccess = 1 ". // Add published external views.
 	($onlyexternal == 0 ?
-		(isset($userviews) && count($userviews)>0 ? " OR v.id IN (".$userviews_list.") ": "") : ""). // Add group shareing views
+		(count($userviews) ? " OR v.id IN (".join(',', array_keys($userviews)).") ": "") : ""). // Add group shareing views
 	")".
 	" AND v.userid!=? ". // don't show my own views
 	($userid

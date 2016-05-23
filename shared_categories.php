@@ -18,7 +18,6 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 require_once __DIR__.'/inc.php';
-require_once __DIR__.'/lib/sharelib.php';
 
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
@@ -32,8 +31,8 @@ require_capability('block/exaport:use', $context);
 $url = '/blocks/exaport/shared_categories.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
-$parsedsort = block_exaport_parse_sort($sort, array('course', 'user', 'structure'));
-if ($parsedsort[0] == 'structure') {
+$parsedsort = block_exaport_parse_sort($sort, array('user', 'category'));
+if ($parsedsort[0] == 'category') {
 	$sql_sort = " ORDER BY c.name, u.lastname, u.firstname";
 	if(strcmp($CFG->dbtype, "sqlsrv")==0){
 		$sql_sort = " ORDER BY cast(c.name AS varchar(max)), u.lastname, u.firstname";
@@ -46,18 +45,7 @@ if ($parsedsort[0] == 'structure') {
 }
 
 // Categories for user groups
-$usergroups = $DB->get_records('groups_members', array('userid' => $USER->id), '', 'groupid');
-if ((is_array($usergroups)) && (count($usergroups) > 0)) {
-	foreach ($usergroups as $id => &$group) {
-		$usergroups[$id] = $group->groupid;
-	};
-	$usergroups_list = implode(',', $usergroups);
-	$usercats = $DB->get_records_sql('SELECT catid FROM {block_exaportcatgroupshar} WHERE groupid IN ('.$usergroups_list.')');
-	foreach ($usercats as $id => &$cat) {
-		$usercats[$id] = $cat->catid;
-	};
-	$usercats_list = implode(',', $usercats);
-}
+$usercats = block_exaport_get_group_share_categories($USER->id);
 
 $categories = $DB->get_records_sql(
 	"SELECT c.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
@@ -70,7 +58,7 @@ $categories = $DB->get_records_sql(
 	" WHERE (".
 		"(".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) ".  // only show shared all, if enabled
 	 // Shared for you group
-	 (isset($usercats) && count($usercats)>0 ? " OR c.id IN (".$usercats_list.") ": ""). // Add group shareing categories
+	 ($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") ": ""). // Add group shareing categories
 	")".
 	" AND internshare = 1 ".
 	" GROUP BY c.id, c.userid, c.name, c.description, c.timemodified, u.firstname, u.lastname, u.picture".
@@ -133,8 +121,8 @@ function exaport_print_structures($categories, $parsedsort) {
 		echo get_string('sortby') . ': ';
 		echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=user\"" .
 		($sort == 'user' ? ' style="font-weight: bold;"' : '') . ">" . get_string('user') . "</a> | ";
-		echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=structure\"" .
-		($sort == 'structure' ? ' style="font-weight: bold;"' : '') . ">" . get_string('category', 'block_exaport') . "</a>";
+		echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=category\"" .
+		($sort == 'category' ? ' style="font-weight: bold;"' : '') . ">" . get_string('category', 'block_exaport') . "</a>";
 		echo '</div>';
 	}
 
@@ -241,8 +229,10 @@ function exaport_print_structures($categories, $parsedsort) {
 				);
 			}
 
+			/*
 			$sorticon = $parsedsort[1] . '.png';
 			$table->head[$parsedsort[0]] .= " <img src=\"pix/$sorticon\" alt='" . get_string("updownarrow", "block_exaport") . "' />";
+			*/
 
 			echo html_writer::table($table);
 		}

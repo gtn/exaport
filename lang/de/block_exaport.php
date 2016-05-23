@@ -121,7 +121,7 @@ $string['add'] = 'Hinzufügen';
 $string['edit'] = 'Editieren';
 $string['checkall'] = 'Alle auswählen';
 $string['grouptitle'] = 'Gruppentitel';
-$string['membersnumber'] = 'Anzahl von Zuhörern';
+$string['membercount'] = 'Anzahl von Mitgliedern';
 $string['nogroupsfound'] = 'Keine Gruppen gefunden';
 
 

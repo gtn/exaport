@@ -18,7 +18,6 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 require_once __DIR__.'/inc.php';
-require_once __DIR__.'/lib/sharelib.php';
 require_once __DIR__.'/blockmediafunc.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -28,25 +27,6 @@ $id = optional_param('id', 0, PARAM_INT);
 $type = optional_param('type', 'content', PARAM_ALPHA);
 if ($action=="add")
 	$type="title";
-
-//if (function_exists("clean_param_array")) $shareusers=clean_param_array($_POST["shareusers"],PARAM_SEQUENCE,true);
-//else 
-if (!empty($_POST["shareusers"])){
-	$shareusers = $_POST["shareusers"];
-	if (function_exists("clean_param_array")) 
-		$shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
-} else {
-	$shareusers = "";
-}
-
-if (!empty($_POST["sharegroups"])){
-	$sharegroups = $_POST["sharegroups"];
-	if (function_exists("clean_param_array")) 
-		$sharegroups=clean_param_array($sharegroups, PARAM_SEQUENCE, false);
-} else {
-	$sharegroups = "";
-}
-
 
 if (!confirm_sesskey()) {
 	print_error("badsessionkey","block_exaport");		
@@ -88,7 +68,15 @@ if ($view && $action == 'userlist') {
 }
 
 if ($view && $action == 'grouplist') {
-	echo json_encode(exaport_get_shareable_courses_with_groups_for_view($view->id));
+	$sharedGroups = exaport_get_view_shared_groups($view->id);
+
+	$group_groups = block_exaport_get_shareable_groups_for_json();
+	foreach ($group_groups as $group_group) {
+		foreach ($group_group->groups as $group) {
+			$group->shared_to = isset($sharedGroups[$group->id]);
+		}
+	}
+	echo json_encode($group_groups);
 	exit;
 }
 
@@ -435,7 +423,9 @@ if ($editform->is_cancelled()) {
 			// delete all shared users
 			$DB->delete_records("block_exaportviewshar", array('viewid'=>$dbView->id));
 			// add new shared users
-			if ($dbView->internaccess && !$dbView->shareall && is_array($shareusers)) {
+			if ($dbView->internaccess && !$dbView->shareall) {
+				$shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+
 				foreach ($shareusers as $shareuser) {
 					$shareuser = clean_param($shareuser, PARAM_INT);
 					$shareItem = new stdClass();
@@ -469,18 +459,25 @@ if ($editform->is_cancelled()) {
 					}
 				}
 			}
+
 			// delete all shared groups
 			$DB->delete_records("block_exaportviewgroupshar", array('viewid'=>$dbView->id));
 			// Add new groups sharing. shareall == 0 - users sharing; 1 - share for all; 2 - groups sharing.
-			if ($dbView->internaccess && $dbView->shareall == 2 && is_array($sharegroups)) {
-				foreach ($sharegroups as $sharegroup) {
-					$sharegroup = clean_param($sharegroup, PARAM_INT);
-					$shareItem = new stdClass();
-					$shareItem->viewid = $dbView->id;
-					$shareItem->groupid = $sharegroup;
-					$DB->insert_record("block_exaportviewgroupshar", $shareItem);
-				};
-			};
+			if ($dbView->internaccess && $dbView->shareall == 2) {
+				$sharegroups = \block_exaport\param::optional_array('sharegroups', PARAM_INT);
+				$usergroups = block_exaport_get_user_cohorts();
+
+				foreach ($sharegroups as $groupid) {
+					if (!isset($usergroups[$groupid])) {
+						// not allowed
+						continue;
+					}
+					$DB->insert_record("block_exaportviewgroupshar", [
+						'viewid' => $dbView->id,
+						'groupid' => $groupid,
+					]);
+				}
+			}
 			
 			if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
 				// search button pressed -> redirect to search form
@@ -636,7 +633,7 @@ if ($type<>'title') {// for delete php notes
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-	'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
+	'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
 	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_badge', 'view_specialitem_text_defaulttext',
 	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',

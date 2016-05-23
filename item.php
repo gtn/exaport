@@ -49,7 +49,6 @@ $allowResubmission = block_exaport_item_is_resubmitable($id);
 
 if ($action == 'copytoself') {
 	require_sesskey();
-	require_once __DIR__.'/lib/sharelib.php';
 	if (!$owner_id = is_sharableitem($USER->id, $id)) {
 		die(block_exaport_get_string('bookmarknotfound'));
 		

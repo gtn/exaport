@@ -823,7 +823,9 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		};	
 		// exaport savepoint reached
 		upgrade_block_savepoint(true, 2016040500, 'exaport');
-	}	
+	}
+
+	// TODO: delete structure fields / tables
 	
-   return $result;
+   	return $result;
 }

@@ -124,7 +124,7 @@ $string['add'] = 'Add';
 $string['edit'] = 'Edit';
 $string['checkall'] = 'Check all';
 $string['grouptitle'] = 'Group title';
-$string['membersnumber'] = 'Number of listeners';
+$string['membercount'] = 'Number of members';
 $string['nogroupsfound'] = 'No groups found';
 $string['make_it_yours'] = 'Make it yours';
 

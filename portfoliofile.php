@@ -29,11 +29,10 @@ if (!empty($_GET['token']) || !empty($_GET['wstoken'])) {
 }
 
 require_once __DIR__.'/inc.php';
-require_once __DIR__.'/lib/sharelib.php';
 require_once $CFG->dirroot.'/webservice/lib.php';
 
 if (empty($CFG->filelifetime)) {
-	$lifetime = 86400;     // Seconds for files to remain in caches
+	$lifetime = 86400;	 // Seconds for files to remain in caches
 } else {
 	$lifetime = $CFG->filelifetime;
 }
@@ -50,7 +49,7 @@ $token = optional_param('token', null, PARAM_ALPHANUM);
 // new token
 $wstoken = optional_param('wstoken', $token, PARAM_ALPHANUM);
 //block_exaport_epop_checkhash
-$epopaccess = false;
+$epopaccess=false;
 
 //authenticate the user
 
@@ -58,11 +57,11 @@ $authenticationinfo = null;
 if ($wstoken) {
 	$webservicelib = new webservice();
 	$authenticationinfo = $webservicelib->authenticate_user($wstoken);
-} elseif ($userhash) {
-	$user = block_exaport_epop_checkhash($userhash);
+} elseif ($userhash){
+	$user=block_exaport_epop_checkhash($userhash);
 	if ($user == false) {
 		require_login();
-	} else {
+} else {
 		$epopaccess = true;
 	}
 } else {
@@ -73,7 +72,7 @@ if ($wstoken) {
 if ($itemid) {
 	// file storage logic
 
-	if ($epopaccess) {
+	if ($epopaccess){
 		$item = block_exaport_get_item_epop($itemid, $user);
 	} elseif ($access) {
 		$item = block_exaport_get_item($itemid, $access, false);
@@ -102,13 +101,13 @@ if ($itemid) {
 	}
 } else {
 	// old logic? still used?
-
+	
 	if (!$relativepath) {
 		error('No valid arguments supplied or incorrect server configuration');
 	} else {
 		if ($relativepath{0} != '/') {
-			error('No valid arguments supplied, path does not start with slash!');
-		}
+		error('No valid arguments supplied, path does not start with slash!');
+	}
 	}
 
 	// relative path must start with '/', because of backup/restore!!!
@@ -116,14 +115,14 @@ if ($itemid) {
 	// extract relative path components
 	$args = explode('/', trim($relativepath, '/'));
 
-	if ($args[0] != 'exaport') {
+	if( $args[0] != 'exaport') {
 		error('No valid arguments supplied');
 	}
 
-	if ($args[1] == 'temp') {
-		if ($args[2] == 'export') {
+	if($args[1] == 'temp') {
+		if($args[2] == 'export') {
 			$args[3] = $access_user_id = clean_param($args[3], PARAM_INT);
-			if ($access_user_id == $USER->id) {
+			if($access_user_id == $USER->id) {
 				// check ok, allowed to access the file
 			} else {
 				error('No valid arguments supplied');
@@ -137,8 +136,8 @@ if ($itemid) {
 			$args[2] = $access_user_id = clean_param($args[2], PARAM_INT);
 			$args[3] = $access_portfolio_id = clean_param($args[3], PARAM_INT);
 
-			if ($access_user_id == $USER->id) { // check if this user has a portfolio with id $access_portfolio_id;
-				if ($DB->count_records('block_exaportitem', array('userid' => $USER->id, 'id' => $access_portfolio_id)) == 1) {
+			if($access_user_id == $USER->id) { // check if this user has a portfolio with id $access_portfolio_id;
+				if ($DB->count_records('block_exaportitem', array('userid'=>$USER->id, 'id'=>$access_portfolio_id)) == 1) {
 					// check ok, allowed to access the file
 				} else {
 					error('No valid arguments supplied');
@@ -153,11 +152,11 @@ if ($itemid) {
 		error('No valid arguments supplied');
 	}
 
-	$filepath = $CFG->dataroot.'/'.implode('/', $args);
+	$filepath = $CFG->dataroot . '/' . implode('/', $args);
 }
-
+	
 if (!file_exists($filepath)) {
-	if (isset($course)) {
+	if(isset($course)) {
 		not_found($course->id);
 	} else {
 		not_found();
@@ -168,7 +167,7 @@ send_file($filepath, basename($filepath), $lifetime, $CFG->filteruploadedfiles, 
 function not_found($courseid = 0) {
 	global $CFG;
 	header('HTTP/1.0 404 not found');
-	if ($courseid > 0) {
+	if($courseid > 0) {
 		error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); //this is not displayed on IIS??
 	} else {
 		error(get_string('filenotfound', 'error')); //this is not displayed on IIS??

@@ -26,7 +26,7 @@ document.getElementById("long-preview-" + i).style.display = "none";
 }
 
 jQueryExaport(function($){
-	$(".excomdos_tiletable .excomdos_tile:not(.excomdos_tile_fixed)").draggable({
+	$(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile:not(.excomdos_tile_fixed)").draggable({
 		scroll: true, // scroll when dragging
 		helper: "clone",
 		start: function( event, ui ) { // when dragging
@@ -35,7 +35,7 @@ jQueryExaport(function($){
 		}
 	});
 	
-	$(".excomdos_tiletable .excomdos_tile_category").droppable({
+	$(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile_category").droppable({
 		activeClass: "ui-state-active",
 		hoverClass: "ui-state-hover",
 		drop: function( event, ui ) {

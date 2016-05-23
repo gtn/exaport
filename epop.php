@@ -18,11 +18,8 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 error_reporting(E_ALL);
- require_once __DIR__.'/inc.php';
- require_once __DIR__.'/lib/lib.php';
- //require_once __DIR__.'/lib/moodlelib.php';
- require_once __DIR__.'/lib/sharelib.php';
- global $DB,$USER,$COURSE,$CFG;
+require_once __DIR__.'/inc.php';
+global $DB,$USER,$COURSE,$CFG;
  
 $action = optional_param('action', 0, PARAM_ALPHANUMEXT);  //100
 

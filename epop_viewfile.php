@@ -18,10 +18,7 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 require_once __DIR__.'/inc.php';
- require_once __DIR__.'/lib/lib.php';
- require_once __DIR__.'/lib/sharelib.php';
- global $DB,$USER,$COURSE,$CFG;
- 
+
  $url = $CFG->wwwroot."/pluginfile.php/1/block_exaport/attachment/437/alom.jpg";
  $url='http://gtn02.gtn-solutions.com/moodle20/blocks/exaport/portfoliofile.php?access=portfolio/id/7&itemid=437&att=437';
  echo "<img src='".$url."'>";

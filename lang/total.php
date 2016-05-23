@@ -431,9 +431,9 @@ return [
 		'Gruppentitel',
 		'Group title',
 	],
-	'membersnumber' => [
-		'Anzahl von Zuhörern',
-		'Number of listeners',
+	'membercount' => [
+		'Anzahl von Mitgliedern',
+		'Number of members',
 	],
 	'nogroupsfound' => [
 		'Keine Gruppen gefunden',

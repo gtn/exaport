@@ -983,20 +983,12 @@ return [
 		'other courses',
 	],
 	'autofillview' => [
-		'Autogenerierte Views von bestehenden Artefakten',
-		'Auto-generate a view based upon all available artefacts',
-	],
-	'autofillview_addartefacts' => [
-		'New artifacts were created after creating this view. Add new artefacts to this view',
-		'New artifacts were created after creating this view. Add new artefacts to this view',
+		'Alle bestehenden Artefakte in diese View einfügen',
+		'Automatically add all available artefacts to this view',
 	],
 	'sharetoteacher' => [
-		'sofort mit Kurs-Trainer/in teilen',
-		'Share to the teacher of the course',
-	],
-	'sharetoteacher_add' => [
-		'There is the teacher who did not share. Share to this teacher(s)',
-		'There is the teacher who did not share. Share to this teacher(s)',
+		'Sofort mit allen Kurs-Trainer/innen teilen',
+		'Share to all teachers in this course',
 	],
 	'createpage' => [
 		'Zieh das Elemente in das Feld unterhalb, um deinen Inhalt zu erstellen.',

@@ -344,9 +344,6 @@ $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedwith_group'] = 'Shared with my group';
-$string['only_external'] = 'Only external shared views';
-$string['display_onlyexternal'] = 'Display only external shared views';
-$string['display_all'] = 'Display all views';
 
 
 // === Copy to course ===

@@ -1230,18 +1230,6 @@ return [
 		'Mit meiner Gruppe geteilt',
 		'Shared with my group',
 	],
-	'only_external' => [
-		null,
-		'Only external shared views',
-	],
-	'display_onlyexternal' => [
-		null,
-		'Display only external shared views',
-	],
-	'display_all' => [
-		null,
-		'Display all views',
-	],
 
 
 	// === Copy to course ===

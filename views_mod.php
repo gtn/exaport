@@ -370,11 +370,8 @@ if ($editform->is_cancelled()) {
 			$blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, 
 							array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id), 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), 
 							$formView->blocks);
-			$blocks = json_decode($blocks);	
+			$blocks = json_decode($blocks) ?: [];
 		
-			if(!$blocks)
-				print_error("noentry","block_exaport");
-			
 			foreach ($blocks as $block) {
 				$block->viewid = $dbView->id;
 

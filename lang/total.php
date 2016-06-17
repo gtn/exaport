@@ -550,7 +550,10 @@ return [
 		'Abgabe beurteilen',
 		'Grade the item',
 	],
-
+	'submititem' => [
+		'Abgeben',
+		'Submit',
+	],
 
 	// === Notes ===
 	'deletenoteconfirm' => [

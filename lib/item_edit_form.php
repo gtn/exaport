@@ -174,7 +174,7 @@ class block_exaport_item_edit_form extends moodleform {
 		
 		// $mform->addRule('iconfile', null, 'required', null, 'client');
 		if(!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {
-			$this->add_action_buttons();
+			$this->add_action_buttons($cancel = true, $submitlabel= get_string('submititem','block_exaport'));
 		} else {
 			$exampleid = $DB->get_field('block_exacompitemexample', 'exampleid', array('itemid' => $this->_customdata['current']->id));
 			$url = new moodle_url("/blocks/exacomp/example_submission.php",array("courseid"=>$this->_customdata['course']->id,"newsubmission"=>true,"exampleid"=>$exampleid));

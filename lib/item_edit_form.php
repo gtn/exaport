@@ -169,7 +169,9 @@ class block_exaport_item_edit_form extends moodleform {
 		if (!empty($CFG->usetags)) {
 			include_once($CFG->dirroot.'/tag/lib.php');
             // $mform->addElement('header', 'tagshdr', get_string('tags', 'tag'));
-            $mform->addElement('tags', 'tags', get_string('tags'));
+            
+			// TODO: fix this for moodle 3.x!
+			//$mform->addElement('tags', 'tags', get_string('tags'));
 		};
 		
 		// $mform->addRule('iconfile', null, 'required', null, 'client');

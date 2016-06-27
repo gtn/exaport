@@ -152,7 +152,7 @@ $string['addcomment'] = 'Kommentar hinzufügen';
 $string['externcomment'] = 'Kommentare mitver&ouml;ffentlichen';
 $string['itemgrading'] = 'Beurteilung';
 $string['gradeitem'] = 'Abgabe beurteilen';
-
+$string['submititem'] = 'Abgeben';
 
 // === Notes ===
 $string['deletenoteconfirm'] = 'Wollen Sie diese Notiz wirklich l&ouml;schen?';
@@ -320,6 +320,7 @@ $string['mediacontent'] = 'URL oder eingebetteter Code*';
 $string['height'] = 'H&ouml;he';
 $string['width'] = 'Breite';
 $string['media_allowed_notes'] = 'URLs der folgenden Seiten sind erlaubt:';
+$string['tagarea_block_exaportitem'] = 'Meine Portfolio Artefakte';
 $string['sharedwith'] = 'Geteilt mit';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';

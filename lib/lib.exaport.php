@@ -15,6 +15,7 @@ function copy_category_to_myself($categoryid) {
 }
 
 function _copy_category_to_myself_iterator($curr_cat, $parentcatid) {
+	global $CFG;
 	$new_cat = new \stdClass();
 	$new_cat->pid = $parentcatid;
 	$new_cat->userid = g::$USER->id;
@@ -79,9 +80,18 @@ function _copy_category_to_myself_iterator($curr_cat, $parentcatid) {
 		}
 
 		// tags
-		include_once(g::$CFG->dirroot.'/tag/lib.php');
-		$tags = tag_get_tags_array('exaport_item', $item->id);
-		tag_set('exaport_item', $new_item->id, $tags, 'block_exaport', \context_user::instance(g::$USER->id)->id);
+		if (!empty($CFG->usetags)) {
+			if ($CFG->branch < 31) {
+				// Moodle before v3.1
+				include_once(g::$CFG->dirroot.'/tag/lib.php');
+				$tags = tag_get_tags_array('block_exaportitem', $item->id);
+				tag_set('block_exaportitem', $new_item->id, $tags, 'block_exaport', \context_user::instance(g::$USER->id)->id);
+			} else {
+				// Moodle v3.1
+				$tags = core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $item->id);	
+				core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $new_item->id, \context_user::instance($USER->id), $tags);
+			}
+		}
 	}
 
 	return $new_cat;

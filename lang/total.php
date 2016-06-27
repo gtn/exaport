@@ -1193,6 +1193,10 @@ return [
 		null,
 		'Filter by tag',
 	],
+	'tagarea_block_exaportitem' => [
+		'Meine Portfolio Artefakte',
+		'My Portfolio Artifacts',
+	],
 	'searchByTitle' => [
 		null,
 		'Search',

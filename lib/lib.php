@@ -1288,34 +1288,96 @@ function block_exaport_has_grading_permission($itemid) {
 }
 
 function block_exaport_get_item_tags($itemid, $orderBy = '') {
-	global $DB;
-	$tags = array();
+	global $DB, $CFG;
+	$tags = array();	
 	if (is_array($itemid)) {
 		// Tags for a few items.
 		if (count($itemid)>0) {
 			list($whereItems, $paramItems) = $DB->get_in_or_equal($itemid, SQL_PARAMS_NAMED);
 			$result = $DB->get_records_sql('SELECT DISTINCT rawname 			
 									FROM {tag_instance} ti LEFT JOIN {tag} t ON t.id=ti.tagid 
-									WHERE component=\'block_exaport\' AND itemtype=\'exaport_item\' AND itemid '.$whereItems.' '.
+									WHERE component=\'block_exaport\' AND itemtype=\'block_exaportitem\' AND itemid '.$whereItems.' '.
 									($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
-								$paramItems);	
-		};
+								$paramItems);									
+		}
 	} else {
 		// Tags for one item.
 		$result = $DB->get_records_sql('SELECT * 
 									FROM {tag_instance} ti LEFT JOIN {tag} t ON t.id=ti.tagid 
-									WHERE component=\'block_exaport\' AND itemtype=\'exaport_item\' AND itemid = ?'.
+									WHERE component=\'block_exaport\' AND itemtype=\'block_exaportitem\' AND itemid = ?'.
 									($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
 								array($itemid));			
 	}
 	if (!$result) {
 		$result = array();
-	};	
+	}
 	foreach ($result as &$tag) {
 		$tags[] = $tag->rawname;
 	}
 	return $tags;
 }
+
+/**
+ * Returns artefacts tagged with a specified tag.
+ *
+ * This is a callback used by the tag area block_exaport/block_exaportitem to search for artefacts
+ * tagged with a specific tag.
+ *
+ * @param core_tag_tag $tag
+ * @param bool $exclusivemode if set to true it means that no other entities tagged with this tag
+ *             are displayed on the page and the per-page limit may be bigger
+ * @param int $fromctx context id where the link was displayed, may be used by callbacks
+ *            to display items in the same context first
+ * @param int $ctx context id where to search for records
+ * @param bool $rec search in subcontexts as well
+ * @param int $page 0-based number of page being displayed
+ * @return \core_tag\output\tagindex
+ */
+function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx = 0, $ctx = 0, $rec = 1, $page = 0) {
+    global $OUTPUT;
+    $perpage = $exclusivemode ? 20 : 5;
+
+    // Build the SQL query.
+    // $ctxselect = context_helper::get_preload_record_columns_sql('ctx');
+    $query = "SELECT i.id, i.name, i.type, i.userid, cat.name AS categoryname, i.categoryid
+                FROM {block_exaportitem} i
+                LEFT JOIN {block_exaportcate} cat ON i.categoryid = cat.id
+                JOIN {tag_instance} tt ON i.id = tt.itemid
+				WHERE tt.itemtype = :itemtype AND tt.tagid = :tagid AND tt.component = :component AND i.id %ITEMFILTER%";
+
+    $params = array('itemtype' => 'block_exaportitem', 'tagid' => $tag->id, 'component' => 'block_exaport');
+
+       $totalpages = $page + 1;
+
+    // Use core_tag_index_builder to build and filter the list of items.
+    $builder = new core_tag_index_builder('block_exaport', 'block_exaportitem', $query, $params, $page * $perpage, $perpage + 1);
+    $items = $builder->get_items();
+    if (count($items) > $perpage) {
+        $totalpages = $page + 2; // We don't need exact page count, just indicate that the next page exists.
+        array_pop($items);
+    }
+
+    // Build the display contents.
+    if ($items) {
+        $tagfeed = new core_tag\output\tagfeed();
+        foreach ($items as $item) {
+            $itemurl = new moodle_url('/blocks/exaport/shared_item.php', array('itemid' => $item->id, 'access' => 'portfolio/id/'.$item->userid));
+            $itemname = format_string($item->name, true);
+            $itemname = html_writer::link($itemurl, $itemname);
+			$categoryname = $item->categoryname;
+			$iconsrc = new moodle_url('/blocks/exaport/item_thumb.php', array('item_id' => $item->id));
+            $icon = html_writer::link($itemurl, html_writer::empty_tag('img', array('src' => $iconsrc)));
+            $tagfeed->add($icon, $itemname, $categoryname);
+        }
+
+        $content = $OUTPUT->render_from_template('core_tag/tagfeed',
+                $tagfeed->export_for_template($OUTPUT));
+
+        return new core_tag\output\tagindex($tag, 'block_exaport', 'block_exaportitem', $content,
+                $exclusivemode, $fromctx, $ctx, $rec, $page, $totalpages);
+    }
+}
+
 
 function block_exaport_securephrase_viewemail(&$view, $email)
 {

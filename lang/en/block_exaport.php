@@ -156,7 +156,7 @@ $string['addcomment'] = 'Add comment';
 $string['externcomment'] = 'Share comments in external portfolio';
 $string['itemgrading'] = 'Grading';
 $string['gradeitem'] = 'Grade the item';
-
+$string['submititem'] = 'Submit';
 
 // === Notes ===
 $string['deletenoteconfirm'] = 'Do you really want to delete this note?';
@@ -334,6 +334,7 @@ $string['height'] = 'Height';
 $string['width'] = 'Width';
 $string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
 $string['filterByTag'] = 'Filter by tag';
+$string['tagarea_block_exaportitem'] = 'My Portfolio Artifacts';
 $string['searchByTitle'] = 'Search';
 $string['clearAllFilers'] = 'Clear all filters';
 $string['sharedwith'] = 'Shared with';

@@ -166,13 +166,12 @@ class block_exaport_item_edit_form extends moodleform {
 		$mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'accepted_types' => array('image', 'web_image')));
 
 		// Tags.
-		if (!empty($CFG->usetags)) {
-			include_once($CFG->dirroot.'/tag/lib.php');
+		if (!empty($CFG->usetags)) { 		
+			// include_once($CFG->dirroot.'/tag/lib.php');
             // $mform->addElement('header', 'tagshdr', get_string('tags', 'tag'));
             
-			// TODO: fix this for moodle 3.x!
-			//$mform->addElement('tags', 'tags', get_string('tags'));
-		};
+			$mform->addElement('tags', 'tags', get_string('tags'), array('itemtype' => 'block_exaportitem', 'component' => 'block_exaport'));
+		}
 		
 		// $mform->addRule('iconfile', null, 'required', null, 'client');
 		if(!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {

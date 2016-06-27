@@ -44,6 +44,9 @@ if (!$course = $DB->get_record("course", $conditions)) {
 
 $id = optional_param('id', 0, PARAM_INT);
 
+if ($CFG->branch < 31)
+	include($CFG->dirroot.'/tag/lib.php');
+
 $allowEdit = block_exaport_item_is_editable($id);
 $allowResubmission = block_exaport_item_is_resubmitable($id);
 
@@ -210,7 +213,6 @@ if ($editform->is_cancelled()) {
 	redirect($returnurl);
 }
 
-include_once($CFG->dirroot.'/tag/lib.php');
 $strAction = "";
 $extra_content = '';
 // gui setup
@@ -241,7 +243,12 @@ switch ($action) {
 		$post->type = $existing->type;
 		$post->compids = isset($existing->compids) ? $existing->compids : '';
 		$post->langid = $existing->langid;
-		$post->tags = tag_get_tags_array('exaport_item', $id);
+		if (!empty($CFG->usetags)) {
+			if ($CFG->branch < 31)
+				$post->tags = tag_get_tags_array('block_exaportitem', $id);
+			else 
+				$post->tags = core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $post->id);		
+		}
 
 		if (!$useTextarea)
 			$post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'item_content', $post->id);
@@ -439,7 +446,12 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 	}
 	
 	// Tags.
-    tag_set('exaport_item', $post->id, $post->tags, 'block_exaport', context_user::instance($USER->id)->id);
+	if ($CFG->branch < 31)
+		// Moodle before v3.1
+		tag_set('block_exaportitem', $post->id, $post->tags, 'block_exaport', context_user::instance($USER->id)->id);
+	else 
+		// Moodle v3.1
+		core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $post->id, context_user::instance($USER->id), $post->tags);
 
 }
 
@@ -474,7 +486,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->file);
 			if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->file)) {
 				file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-			};
+			}
 		}
 		
 		// icon picture
@@ -483,8 +495,8 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 			$upload_filesizes = block_exaport_get_filesize_by_draftid($post->iconfile);
 			if (block_exaport_file_userquotecheck($upload_filesizes, $post->id) && block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)) {
 				file_save_draft_area_files($post->iconfile, $context->id, 'block_exaport', 'item_iconfile', $post->id, array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-			};
-		};
+			}
+		}
 		
 		$comps = $post->compids;
 		if ($comps) {
@@ -500,7 +512,12 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 		block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add', $post->name);
 			
 		// Tags.
-		tag_set('exaport_item', $post->id, $post->tags, 'block_exaport', context_user::instance($USER->id)->id);
+		if ($CFG->branch < 31) 
+			// Moodle before v3.1
+			tag_set('block_exaportitem', $post->id, $post->tags, 'block_exaport', context_user::instance($USER->id)->id);
+		else 			
+			// Moodle v3.1
+			core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $post->id, context_user::instance($USER->id), $post->tags);
 	} else {
 		print_error('addposterror', 'block_exaport', $returnurl);
 	}

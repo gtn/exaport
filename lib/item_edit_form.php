@@ -52,6 +52,9 @@ class block_exaport_comment_edit_form extends moodleform {
 
 		$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => 0, 'maxfiles' => 1));
 
+		/*
+		fjungwirth: hide grading at this stage (meeting LS 4.7.16)
+		
 		if ($this->_customdata['gradingpermission']) {
 			$mform->addElement('header', 'itemgrading', get_string("itemgrading", "block_exaport"));
 			$itemgrade = $this->_customdata['itemgrade'];
@@ -61,6 +64,7 @@ class block_exaport_comment_edit_form extends moodleform {
 			$slider = '<div id="slider"></div>';
 			$mform->addElement('html',$slider);
 		}
+		*/
 		
 		$this->add_action_buttons(false, get_string('add'));
 		

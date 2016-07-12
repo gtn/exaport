@@ -823,7 +823,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		};	
 		// exaport savepoint reached
 		upgrade_block_savepoint(true, 2016040500, 'exaport');
-	}	
+	}
 	
-   return $result;
+	if ($oldversion < 2016062700) {
+		// Change tags itemtype from 'exaport_item' to 'block_exaportitem'
+		// for more compatibility with Moodle v3.1
+		$sql = "UPDATE {tag_instance} SET itemtype='block_exaportitem' WHERE itemtype='exaport_item'";
+		$DB->execute($sql);
+	}
+
+	// TODO: delete structure fields / tables
+	
+   	return $result;
 }

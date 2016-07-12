@@ -41,7 +41,7 @@ if ($action == 'remove_shareall') {
 		exit;
 	}
 
-	block_exaport_print_header("bookmarks");
+	block_exaport_print_header("myportfolio");
 	
 	echo '<br />';
 	echo $OUTPUT->confirm(block_exaport_get_string("delete_all_shareall"),

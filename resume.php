@@ -18,7 +18,6 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 require_once __DIR__.'/inc.php';
-require_once __DIR__.'/lib/sharelib.php';
 require_once __DIR__.'/lib/resumelib.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -64,7 +63,7 @@ $PAGE->requires->css('/blocks/exaport/css/resume.css');
 $PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
 $PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
 
-block_exaport_print_header("personal", "resume");
+block_exaport_print_header("resume_my");
 
 $PAGE->requires->js('/blocks/exaport/javascript/resume.js', true);
 
@@ -302,6 +301,46 @@ if ($action != 'xmleuropass' && $show_information) {
 };
 
 if ($show_information) {
+	echo "<div class='block_eportfolio_center'><h2>";
+	echo $OUTPUT->box(text_to_html(get_string("explainpersonal", "block_exaport")), 'center');
+	echo "</h2></div>";
+
+	echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
+
+	echo '<tr class="header"><td class="picture left">';
+	$user = $DB->get_record('user', array("id" => $USER->id));
+	echo $OUTPUT->user_picture($user, array("courseid" => $courseid));
+	echo '</td>';
+
+	echo '<td class="topic starter"><div class="author">';
+	$by = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
+			$USER->id . '&amp;course=' . $courseid . '">' . fullname($USER, $USER->id) . '</a>';
+	print_string('byname', 'moodle', $by);
+	echo '</div></td></tr>';
+
+	echo '<tr><td class="left side">';
+
+	echo '</td><td class="content">' . "\n";
+
+	$description = file_rewrite_pluginfile_urls($description, 'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'personal_information_self', null);
+	echo $description;
+
+	echo '</td></tr></table>' . "\n\n";
+
+	echo '<div class="block_eportfolio_center">';
+
+	echo '<form method="post" action="' . $CFG->wwwroot . '/blocks/exaport/personal_information.php?courseid=' . $courseid . '">';
+	echo '<fieldset class="hidden">';
+	echo '<input type="hidden" name="edit" value="1" />';
+	echo '<input type="submit" value="' . get_string("edit") . '" />';
+	echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+
+	echo '</fieldset>';
+	echo '</form>';
+	echo '</div>';
+
+	echo '<br />';
+
 	echo block_exaport_resume_header();
 	echo '<div class="collapsible-actions"><a href="#" class="expandall">'.get_string('resume_expand', 'block_exaport').'</a>';
 	echo '<a href="#" class="collapsall hidden">'.get_string('resume_collaps', 'block_exaport').'</a></div>';

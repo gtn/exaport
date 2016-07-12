@@ -1,4 +1,4 @@
-Exabis E-Portfolio ChangeLog
+Exabis ePortfolio ChangeLog
 2015-09-06 4.2
 admin configuration option for userquota and max upload filesize
 resume with competencies, skills and badges 
@@ -50,7 +50,7 @@ updated-script for data-transfer from previous versions included (thanks to eThi
 
 2011-07-13 4.0
 * updated to Moodle 2.x-compatibility
-* introduction of connection to exabis competencies
+* introduction of connection to Exabis Competence Grid
 * added a few configure block options
 
 2009-03-19 3.2.1
@@ -66,9 +66,9 @@ changes from 3.2.0 to 3.2.1:
 
 2009-01-01 3.2.0
 * Error changes for views
-* Allow export in epx/scorm of whole E-Portfolio or a single view only
+* Allow export in epx/scorm of whole ePortfolio or a single view only
 * List of shared views instead of shared view-items
-* Switching between old E-Portfolio (without views) and new E-Portfolio layout
+* Switching between old ePortfolio (without views) and new ePortfolio layout
 
 2008-11-20 3.1.0
 * Added views function
@@ -77,7 +77,7 @@ changes from 3.2.0 to 3.2.1:
 * Views can be external or internal shared
 
 2008-09-21
-* E-Portfolio block is now in moodle cvs
+* ePortfolio block is now in moodle cvs
 
 2008-09-01 Version 3.0.0
 * Complete Code-Review
@@ -86,7 +86,7 @@ changes from 3.2.0 to 3.2.1:
 * added de_du
 
 Version 2.2
-* Exabis E-Portfolio now requires PHP 5 - if you don't have it don't use the .epx-Export
+* Exabis ePortfolio now requires PHP 5 - if you don't have it don't use the .epx-Export
 * Added Export of .epx-Files
 
 2008-07-31 Version 2.1.3
@@ -153,7 +153,7 @@ Version 2.2
 * Removed bug when exporting external portfolios (comment-column was not created when you didn't update the plugin)
 * When sharing a portfolio entry your own name is now shown.
 * Problem with not finding the mimeinfo()-function (white page when editing a file portfolio entry)
-* Added capability system. Comment: The Exabis E-Portfolio-rights have to be set globally (Assign global roles).
+* Added capability system. Comment: The Exabis ePortfolio-rights have to be set globally (Assign global roles).
   Comment: the capability shareextern needs shareintern. You can only share extern if both shareintern and shareextern are set.
 		   allowposts is used to prevents posts on other (shared) bookmarks. You can always post on your own bookmark.
 * Changed directory structure: put all the code inside eportfolio/. You can delete the direcotries bookmark/ and portfolio_export/ that were needed in previous installations. Please delete them *after* installing the new version.

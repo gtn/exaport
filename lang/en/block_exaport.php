@@ -23,12 +23,14 @@ $string['translation:organisation'] = 'IZ Steyr';
 $string['translation:email'] = 'ariepl.work@gmail.com';
 
 
-// Main
-$string['blocktitle'] = 'Exabis E-Portfolio';
-$string['pluginname'] = 'Exabis E-Portfolio';
+// === Main ===
+// shown in admin plugin list
+$string['pluginname'] = 'Exabis ePortfolio';
+// shown in block title and all headers
+$string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Use allowed';
-$string['exaport:addinstance'] = 'add Exabis E-Portfolio to the course';
-$string['exaport:myaddinstance'] = 'add Exabis E-Portfolio on My home';
+$string['exaport:addinstance'] = 'add Exabis ePortfolio to the course';
+$string['exaport:myaddinstance'] = 'add Exabis ePortfolio on My home';
 $string['exaport:export'] = 'Export of SCORM-Files';
 $string['exaport:import'] = 'Import of SCORM-Files';
 $string['exaport:importfrommoodle'] = 'Import from Moodle';
@@ -36,8 +38,6 @@ $string['exaport:shareintern'] = 'Internal sharing of views';
 $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
-$string['modulename'] = 'Exabis E-Portfolio';
-$string['blockname'] = 'Exabis E-Portfolio';
 $string['new'] = 'New';
 $string['addbookmark'] = 'Add bookmark';
 $string['addcategory'] = 'Add category';
@@ -46,19 +46,6 @@ $string['attachincluded'] = 'Attachment?';
 $string['awaiting'] = '($a awaiting)';
 $string['back'] = 'Back';
 $string['backtocourse'] = 'Back to course';
-$string['bookmarks'] = 'My Portfolio';
-$string['bookmarksaved'] = 'Bookmark added.';
-$string['bookmarksavedexternal'] = 'External link added.';
-$string['bookmarksavednote'] = 'Note added.';
-$string['bookmarksavedfile'] = 'File added.';
-$string['bookmarkedited'] = 'Bookmark saved.';
-$string['bookmarkeditedexternal'] = 'External link saved.';
-$string['bookmarkeditedfile'] = 'File saved.';
-$string['bookmarkeditednote'] = 'Note saved.';
-$string['bookmarkdeleted'] = 'Bookmark deleted.';
-$string['bookmarkdeletedexternal'] = 'External link deleted.';
-$string['bookmarkdeletedfile'] = 'File deleted.';
-$string['bookmarkdeletednote'] = 'Note deleted.';
 $string['categories'] = 'Categories';
 $string['explaincategories'] = 'Categories: here you can create and modify categories';
 $string['category'] = 'Category';
@@ -88,10 +75,8 @@ $string['hidesummary'] = '(hide summary)';
 $string['managecategories'] = 'Manage categories';
 $string['mandatoryfields'] = 'The field\'s name, category and intro are required. Please fill them in.';
 $string['mandatoryfieldsforcat'] = 'The field name is required. Please fill them in.';
-$string['mybookmarks'] = 'My Portfolio';
-$string['mybookmarkstitle'] = 'Exabis E-Portfolio module: Add your links and files here.';
-$string['mydialogues'] = 'My Dialogues';
-$string['mymoodle'] = 'My Moodle';
+$string['myportfolio'] = 'My Portfolio Artifacts';
+$string['myportfoliotitle'] = 'Exabis ePortfolio module: Add your links and files here.';
 $string['newlink'] = 'Add new link';
 $string['newfile'] = 'Add new file';
 $string['newnote'] = 'Add new note';
@@ -103,7 +88,7 @@ $string['nobookmarksnote'] = '(no notes yet)';
 $string['noentry'] = 'No entry';
 $string['note'] = 'Note';
 $string['notetitle'] = 'Note';
-$string['sharedbookmarks'] = 'Shared Portfolios';
+$string['shared_views'] = 'Shared Views';
 $string['showall'] = 'Show Other Courses Too';
 $string['showcourse'] = 'Show This Course Only';
 $string['showsummary'] = '(show summary)';
@@ -119,19 +104,18 @@ $string['sharenoneexceptthose'] = 'Access for <span class=\'block_eportfolio_bol
 $string['internalaccessall'] = 'Access for <span class=\'block_eportfolio_bold\'>all</span>';
 $string['internalaccessusers'] = 'Access only for the following users';
 $string['internalaccessgroups'] = 'Access only for the following groups';
-$string['externaccess'] = 'external E-Portfolio-Link';
-$string['emailaccess'] = 'Access for emails';
-$string['emailaccessdescription'] = 'Emails, separated by commas, semicolon or new line.<br /> For every new email will be sent unique link with access to this view. Deleting of email will delete access by this link.';
-$string['emailaccessmessagesubject'] = 'Shared view for you';
-$string['emailaccessmessage'] = 'Hello! {$a->sendername} has shared a view "{$a->viewname}" for you. You can view it here: {$a->url}';
-$string['emailaccessmessageHTML'] = 'Hello!<br /> {$a->sendername} has shared a view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.';
+$string['externaccess'] = 'external ePortfolio-Link';
+$string['emailaccess'] = 'Share by Email';
+$string['emailaccessdescription'] = 'Input an email address per line<br />Each email will receive a unique link with access to this view. Deleting the email will remove access to this view.';
+$string['emailaccessmessagesubject'] = 'New shared View for you';
+$string['emailaccessmessage'] = 'Hello! {$a->sendername} has shared the view "{$a->viewname}" for you. You can view it here: {$a->url}';
+$string['emailaccessmessageHTML'] = 'Hello!<br />{$a->sendername} has shared the view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.';
 $string['showallusers'] = 'Show users of all my courses';
 $string['showcourseusers'] = 'Show only users of the course';
 $string['sharedpersons'] = 'Persons with shared Portfolios';
 $string['moodleimport'] = 'Import from Moodle-assignments';
 $string['nomoodleimportyet'] = 'At the moment you have no submission at any assignment!';
 $string['deletecategoryconfirm'] = 'Do you really want to delete the category "{$a->name}"? All entries in this category and all subcategories will be deleted!';
-$string['deleteurlconfirm'] = 'Do you really want to delete this url?';
 $string['name'] = 'Name';
 $string['role'] = 'Role';
 $string['nousersfound'] = 'No users found';
@@ -140,12 +124,12 @@ $string['add'] = 'Add';
 $string['edit'] = 'Edit';
 $string['checkall'] = 'Check all';
 $string['grouptitle'] = 'Group title';
-$string['membersnumber'] = 'Number of listeners';
+$string['membercount'] = 'Number of members';
 $string['nogroupsfound'] = 'No groups found';
 $string['make_it_yours'] = 'Make it yours';
 
 
-// export/import
+// === export/import ===
 $string['import'] = 'Import';
 $string['explainexport'] = 'Export your portfolio here.';
 $string['createexport'] = 'Create SCORM-File';
@@ -158,7 +142,7 @@ $string['explainpersonal'] = 'Personal information';
 $string['personal'] = 'Information';
 $string['descriptionsaved'] = 'Description saved';
 $string['course'] = 'Course';
-$string['exportimport'] = 'Export/Import';
+$string['importexport'] = 'Import/Export';
 $string['explainimport'] = 'Here you can import a SCORM-File into the portfolio. If markers from previous exports are found the import tries to import the data in the existing filestructure.';
 $string['makeimport'] = 'Import';
 $string['add_this_file'] = 'add this file';
@@ -172,15 +156,15 @@ $string['addcomment'] = 'Add comment';
 $string['externcomment'] = 'Share comments in external portfolio';
 $string['itemgrading'] = 'Grading';
 $string['gradeitem'] = 'Grade the item';
+$string['submititem'] = 'Submit';
 
-
-// Notes
+// === Notes ===
 $string['deletenoteconfirm'] = 'Do you really want to delete this note?';
 $string['deletelinkconfirm'] = 'Do you really want to delete this link?';
 $string['deletefileconfirm'] = 'Do you really want to delete this file?';
 
 
-// Different
+// === Different ===
 $string['couldninsertcomment'] = 'Couldn\'t insert comment!';
 $string['importedcommentsstart'] = 'Imported comments:<br /><br />';
 $string['importedcommentsend'] = 'End of imported comments';
@@ -198,7 +182,7 @@ $string['scormhastobezip'] = 'SCORM-File has to be a .zip-File';
 $string['uploadfailed'] = 'Upload failed.';
 $string['couldntupdatedesc'] = 'Could not update your description!';
 $string['couldntinsertdesc'] = 'Could not insert the description!';
-$string['exportcomment'] = 'This is an exported file from Exabis E-Portfolio. Please do not remove the comments, they are needed for the import!';
+$string['exportcomment'] = 'This is an exported file from Exabis ePortfolio. Please do not remove the comments, they are needed for the import!';
 $string['comment'] = 'Comment';
 $string['commentshouldnotbeempty'] = 'You have to enter a comment.';
 $string['title'] = 'Title';
@@ -235,20 +219,20 @@ $string['invalidfileatthisassignment'] = 'File does not exist at this assignment
 $string['publishedportfolios'] = 'Published portfolios';
 $string['viewcategories'] = 'manage categories';
 $string['updownarrow'] = 'updown arrow';
-$string['delete_confirmation_comment'] = 'Do you really want to delete this comment?';
+$string['comment_delete_confirmation'] = 'Do you really want to delete this comment?';
 
 
-// Shared portfolios
+// === Shared portfolios ===
 $string['nocoursetogether'] = 'No Course';
 $string['nothingshared'] = 'Nobody is sharing a portfolio with you';
 
 
-// Errors
+// === Errors ===
 $string['nouserforid'] = 'User not found (id unknown)';
 $string['nouserforaccess'] = 'User not found (access-code unknown)';
 
 
-// Export
+// === Export ===
 $string['export'] = 'Export SCORM-File';
 $string['exportepx'] = 'Export EPX-File';
 $string['createepxexport'] = 'Create EPX-File';
@@ -257,24 +241,24 @@ $string['export_directory'] = 'Export Directory-structure';
 $string['createexport_directory'] = 'Create Directory-structure';
 
 
-// stuff
+// === stuff ===
 $string['type'] = 'Type';
 $string['share'] = 'Share';
 $string['explainingall'] = 'All Items in your portfolio';
-$string['share_to_other_users'] = 'Share to other users not in my courses';
+$string['share_to_other_users'] = 'Search Users';
 $string['other_users_course'] = 'Users not in my courses';
 $string['other_groups_course'] = 'Other courses';
 
 
-// Item sorting
+// === Item sorting ===
 $string['userdefinedsort'] = 'Define your own search';
 $string['movetop'] = 'Move top';
 $string['movebottom'] = 'Move bottom';
 
 
-// Views
+// === Views ===
 $string['view'] = 'View';
-$string['views'] = 'Views';
+$string['views'] = 'My Views';
 $string['explainingviews'] = 'Manage your views.';
 $string['noviews'] = 'Please create a new View';
 $string['viewnotfound'] = 'View not found';
@@ -298,10 +282,8 @@ $string['view_sharing_noaccess'] = 'No Access';
 $string['show'] = 'Show';
 $string['thiscourse'] = 'This course';
 $string['othercourses'] = 'other courses';
-$string['autofillview'] = 'Auto-generate a view based upon all available artefacts';
-$string['autofillview_addartefacts'] = 'New artifacts were created after creating this view. Add new artefacts to this view';
-$string['sharetoteacher'] = 'Share to the teacher of the course';
-$string['sharetoteacher_add'] = 'There is the teacher who did not share. Share to this teacher(s)';
+$string['autofillview'] = 'Automatically add all available artefacts to this view';
+$string['sharetoteacher'] = 'Share to all teachers in this course';
 $string['createpage'] = 'Drag and drop content blocks from the tabs below to create your page.';
 $string['chooselayout'] = 'Select how you would like the columns in your page to be laid out.';
 $string['viewtitle'] = 'Title and description';
@@ -352,21 +334,18 @@ $string['height'] = 'Height';
 $string['width'] = 'Width';
 $string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
 $string['filterByTag'] = 'Filter by tag';
+$string['tagarea_block_exaportitem'] = 'My Portfolio Artifacts';
 $string['searchByTitle'] = 'Search';
 $string['clearAllFilers'] = 'Clear all filters';
 $string['sharedwith'] = 'Shared with';
-$string['sharedwith_meand'] = 'Shared with me and {$a} other users';
+$string['sharedwith_user_cnt'] = 'Shared with {$a} users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedwith_group'] = 'Shared with my group';
-$string['sharedwith_groupand'] = 'Shared with my group and {$a} other groups';
-$string['only_external'] = 'Only external shared views';
-$string['display_onlyexternal'] = 'Display only external shared views';
-$string['display_all'] = 'Display all views';
 
 
-// Copy to course
+// === Copy to course ===
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';
 $string['copyitemtocourse'] = 'Copy to course';
 $string['desp_language'] = 'Desp Language';
@@ -380,16 +359,9 @@ $string['cofigureblock_personalinfo'] = 'Choose personal info';
 $string['cofigureblock_badge'] = 'Choose Badges';
 
 
-// Desp
+// === Desp ===
 $string['back_to_desp'] = 'back to language portfolio';
 $string['desp_pluginname'] = 'Dossier';
-$string['desp_mybookmarks'] = 'My Dossier';
-$string['desp_bookmarks'] = 'My Dossier';
-$string['desp_explaining'] = 'My Artefacts';
-$string['desp_sharedbookmarks'] = 'published dossiers';
-$string['desp_explainingnote'] = 'Notes. These notes may be shared with all authorized course members.';
-$string['desp_explaininglink'] = 'Links.  These links may be shared with all authorized course members.';
-$string['desp_explainingfile'] = 'Files. These files may be shared with all authorized course members.';
 $string['steckbrief'] = 'Profile';
 $string['desp_categories'] = '
 	stories, roleplays, essays, collagen
@@ -425,23 +397,20 @@ $string['desp_categories'] = '
 ';
 
 
-// Config
-$string['config_version_3'] = 'New E-Portfolio layout: including views, etc.';
-$string['config_version_2'] = 'Old E-Portfolio layout';
-$string['config_feature_copy_to_course'] = 'Allow students to copy E-Portfolio files to their courses';
-$string['version_5.2.0_needed'] = 'Exabis E-Portfolio requires at least PHP-Version 5.2.0';
-$string['competenceinteraction'] = 'Allow interaction with block exabis competencies, in case it is installed';
-$string['opencomps'] = 'Choose your competencies';
-$string['selectcomps'] = 'Choose competencies associated with your upload!';
+// === Config ===
+$string['config_feature_copy_to_course'] = 'Allow students to copy ePortfolio files to their courses';
+$string['competenceinteraction'] = 'Allow interaction with block Exabis Competence Grid, in case it is installed';
+$string['opencomps'] = 'Choose your competences';
+$string['selectcomps'] = 'Choose competences associated with your upload!';
 $string['competences_old_version'] = 'An outdated version of Exabis Competences that is no longer supported by Exabis Eportfolio is installed on this moodle.';
 $string['expandcomps'] = 'Expand all';
 $string['contactcomps'] = 'Contract all';
 $string['studentcomps'] = 'Here you can self-assess whether you have acquired the competency with your artefact.';
 $string['teachercomps'] = 'Here you can assess whether your students have acquired the competency with this artefact.';
-$string['competences'] = 'competencies';
+$string['competences'] = 'competences';
 $string['desp_einleitung'] = 'Here is your portfolio. You can show others what you have accomplished by yourself.';
-$string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - exabis competencies';
-$string['settings_interaktion_exacomp_body'] = 'Interaction with block exabis competencies, in case it is installed';
+$string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - Exabis Competence Grid';
+$string['settings_interaktion_exacomp_body'] = 'Interaction with block Exabis Competence Grid, in case it is installed';
 $string['settings_allow_loginas_head'] = 'Allow login as';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
@@ -452,19 +421,18 @@ $string['settings_disable_external_comments_head'] = 'Disable sharing of comment
 $string['settings_disable_external_comments_body'] = '';
 $string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
 $string['block_exaport_app_externaleportfolio_body'] = 'For App';
-$string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis E-Portfolio';
-$string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis E-Portfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
-$string['block_exaport_userquota'] = 'User quota for Exabis E-Portfolio';
-$string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis E-Portfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis ePortfolio';
+$string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_userquota'] = 'User quota for Exabis ePortfolio';
+$string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
-$string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with exabis competencies and dakora';
+$string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';
 
 
-// Resume
-$string['resume'] = 'Resume';
-$string['resume_template_newresume'] = '<h2>My new resume</h2>';
-$string['resume_my'] = 'My resume';
+// === Resume ===
+$string['resume_template_newresume'] = '<h2>My new CV</h2>';
+$string['resume_my'] = 'My CV';
 $string['resume_cover'] = 'Cover letter';
 $string['resume_coversaved'] = 'Cover saved';
 $string['resume_eduhistory'] = 'Education history';
@@ -546,15 +514,11 @@ $string['resume_expand'] = 'Expand all';
 $string['resume_collaps'] = 'Collaps all';
 
 
-// structure sharing
-$string['structure'] = 'Structure';
-$string['sharedstructures'] = 'Shared Structures';
-$string['share_structure'] = 'Share as a structure';
-$string['share_structure_description'] = 'The users will be able to copy this category and subcategories for yourself';
+// === structure sharing ===
+$string['shared_categories'] = 'Shared Categories';
 $string['nothingstructureshared'] = 'Nobody is sharing a structure with you';
-$string['copystructure'] = 'Copy structure';
-$string['copystructureconfirmation'] = 'Do you really want to copy this structure?';
-$string['copytocategory'] = 'Copy to this category:';
+$string['browsecategory'] = 'Browse this category';
+$string['copycategory'] = 'Copy to my Portfolio';
 $string['sharedArtefacts'] = 'Group portfolios shared with you';
 $string['shareditems_category'] = 'Group portfolios shared with you';
 $string['create_as_note'] = 'Create as Artefact';
@@ -570,7 +534,15 @@ $string['developed'] = 'developed by';
 $string['myfilearea'] = 'My file area';
 
 
-// Not Used Anymore
+// === language categories ===
+$string['lang_categories'] = '';
+
+
+// === Message ===
+$string['messageprovider:sharing'] = 'Sharing notifications';
+
+
+// === Not Used Anymore ===
 $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';
 $string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';

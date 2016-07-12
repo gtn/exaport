@@ -1,9 +1,9 @@
 <?php
-// This file is part of Exabis Competencies
+// This file is part of Exabis Competence Grid
 //
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
 //
-// Exabis Competencies is free software: you can redistribute it and/or modify
+// Exabis Competence Grid is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -451,26 +451,40 @@ call_user_func(function() {
 
 	if (file_exists($totalFile) && file_exists($langFile) && ($time = filemtime($totalFile)) != filemtime($langFile) && is_writable($langFile)) {
 		// regenerate
-		$totalLanguages = require $totalFile;
+
+		// test require, check if file has a parse error etc.
+		require $totalFile;
 
 		// get copyright
-		$copyright = file_get_contents($totalFile);
-		if (!preg_match('!(//.*\r?\n)+!', $copyright, $matches)) {
+		$content = file_get_contents($totalFile);
+		if (!preg_match('!(//.*\r?\n)+!', $content, $matches)) {
 			throw new moodle_exception('copyright not found');
-		} else {
-			$copyright = $matches[0];
 		}
+
+		$copyright = $matches[0];
+		$content = str_replace($copyright, '', $content);
+
+		$content = preg_replace_callback('!^(?<comment>\s*//\s*.*)!m', function($matches) {
+			return var_export(preg_replace('!^[ \t]+!m', '', $matches['comment']), true).',';
+		}, $content);
+
+		$totalLanguages = eval('?>'.$content);
 
 		$byLang = [];
 
 		foreach ($totalLanguages as $key => $langs) {
+			if (is_int($key)) {
+				$byLang['de'][] = $langs;
+				$byLang['en'][] = $langs;
+				continue;
+			}
 			if (!$langs) {
 				$byLang['de'][$key] = null;
 				$byLang['en'][$key] = null;
 				continue;
 			}
 			foreach ($langs as $lang => $value) {
-				$byLang[$lang][$key] = $value;
+				$byLang[$lang == 0 ? 'de' : ($lang == 1 ? 'en' : $lang)][$key] = $value;
 			}
 		}
 
@@ -478,9 +492,12 @@ call_user_func(function() {
 			$output = '<?php'."\n{$copyright}\n";
 
 			foreach ($strings as $key=>$value) {
-				if (strpos($key, '===') === 0) {
+				if (is_int($key)) {
+					$output .= $value."\n";
+				} elseif (strpos($key, '===') === 0) {
 					// group
 					$output .= "\n\n// ".trim($key, ' =')."\n";
+				} elseif ($value === null) {
 				} else {
 					$output .= '$string['.var_export($key, true).'] = '.var_export($value, true).";\n";
 				}

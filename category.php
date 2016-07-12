@@ -28,15 +28,32 @@ $url = '/blocks/exaport/category.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
 // Get userlist for sharing category
-if (optional_param('action', '', PARAM_ALPHA) == 'userlist' || optional_param('action', '', PARAM_ALPHA) == 'structureuserlist') {
-	require_once __DIR__.'/lib/sharelib.php';
+if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {
 	echo json_encode(exaport_get_shareable_courses_with_users(''));
 	exit;
 }
 // Get grouplist for sharing category
-if (optional_param('action', '', PARAM_ALPHA) == 'grouplist' || optional_param('action', '', PARAM_ALPHA) == 'structuregrouplist') {
-	require_once __DIR__.'/lib/sharelib.php';
-	echo json_encode(exaport_get_shareable_courses_with_groups(''));
+if (optional_param('action', '', PARAM_ALPHA) == 'grouplist') {
+	$id = required_param('id', PARAM_INT);
+
+	$category = $DB->get_record("block_exaportcate", array(
+		'id' => $id,
+		'userid' => $USER->id
+	));
+	if (!$category) {
+		throw new \block_exaport\moodle_exception('category_not_found');
+	}
+
+	$group_groups = block_exaport_get_shareable_groups_for_json();
+	foreach ($group_groups as $group_group) {
+		foreach ($group_group->groups as $group) {
+			$group->shared_to = $DB->record_exists('block_exaportcatgroupshar', [
+				'catid' => $category->id,
+				'groupid' => $group->id
+			]);
+		}
+	}
+	echo json_encode($group_groups);
 	exit;
 }
 
@@ -75,7 +92,9 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 		'id' => $id,
 		'userid' => $USER->id
 	));
-	if (!$category) die(block_exaport_get_string('category_not_found'));
+	if (!$category) {
+		throw new \block_exaport\moodle_exception('category_not_found');
+	}
 	
 	if (optional_param('confirm', 0, PARAM_INT)) {
 		confirm_sesskey();
@@ -122,10 +141,10 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 		'categoryid' => optional_param('back', '', PARAM_TEXT)=='same' ? $category->id : $category->pid
 	);
 	
-	$strbookmarks = get_string("mybookmarks", "block_exaport");
+	$strbookmarks = get_string("myportfolio", "block_exaport");
 	$strcat = get_string("categories", "block_exaport");
 
-	block_exaport_print_header("bookmarks");
+	block_exaport_print_header("myportfolio");
 	
 	echo '<br />';
 	echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport", $category), new moodle_url('category.php', $optionsyes), new moodle_url('view_items.php', $optionsno));
@@ -147,14 +166,13 @@ class simplehtml_form extends moodleform {
 
 		$id = optional_param('id', 0, PARAM_INT);
 		$category = $DB->get_record_sql('
-			SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.structure_share, c.structure_shareall
+			SELECT c.id, c.name, c.pid, c.internshare, c.shareall
 			FROM {block_exaportcate} c
 			WHERE c.userid = ? AND id = ?
 			', array($USER->id, $id));
 		if (!$category) {	
 			$category = new stdClass;
 			$category->shareall = 0;
-			$category->structure_shareall = 0;
 			$category->id = 0;
 		};
 		
@@ -214,64 +232,11 @@ class simplehtml_form extends moodleform {
 			$mform->addElement('html', '<input type="radio" name="shareall" value="2"'.($category->shareall==2 ? ' checked="checked"' : '').'/>');
 			$mform->addElement('html', '</td><td>'.get_string('internalaccessgroups', 'block_exaport').'</td></tr>');
 			$mform->addElement('html', '</td></tr>');
-			if ($category->id > 0) {
-				$sharedUsers = $DB->get_records_menu('block_exaportcatgroupshar', array("catid" => $category->id), null, 'groupid, groupid AS tmp');
-				$mform->addElement('html', '<script> var sharedgroupsarr = [];');
-				foreach($sharedUsers as $i => $user)
-					$mform->addElement('html', 'sharedgroupsarr['.$i.'] = '.$user.';');
-				$mform->addElement('html', '</script>');
-			}/**/
-			$mform->addElement('html', '<tr id="internaccess-groups"><td></td><td><div id="sharing-grouplist">grouplist</div></td></tr>');			
+			$mform->addElement('html', '<tr id="internaccess-groups"><td></td><td><div id="sharing-grouplist">grouplist</div></td></tr>');
 			$mform->addElement('html', '</table></div>');
 			$mform->addElement('html', '</div></div>');
 		};
 		
-		// sharing as a structure
-		if (1) {
-			$mform->addElement('checkbox', 'structure_share', get_string('share_structure', 'block_exaport'), get_string('share_structure_description', 'block_exaport'));
-			$mform->setType('structure_share', PARAM_INT);
-			$mform->addElement('html', '<div id="structureshare-settings" class="fitem""><div class="fitemtitle"></div><div class="felement">');
-			
-			$mform->addElement('html', '<div style="padding: 4px 0;"><table width=100%>');
-			// share to all
-			if (block_exaport_shareall_enabled()) {
-				$mform->addElement('html', '<tr><td>');
-				$mform->addElement('html', '<input type="radio" name="structure_shareall" value="1"'.($category->structure_shareall==1 ? ' checked="checked"' : '').'/>');
-				$mform->addElement('html', '</td><td>'.get_string('internalaccessall', 'block_exaport').'</td></tr>');
-				$mform->setType('shareall', PARAM_INT);
-				$mform->addElement('html', '</td></tr>');
-			}
-			// share to users
-			$mform->addElement('html', '<tr><td>');
-			$mform->addElement('html', '<input type="radio" name="structure_shareall" value="0"'.(!$category->structure_shareall ? ' checked="checked"' : '').'/>');
-			$mform->addElement('html', '</td><td>'.get_string('internalaccessusers', 'block_exaport').'</td></tr>');
-			$mform->addElement('html', '</td></tr>');
-			if ($category->id > 0) {
-				$sharedUsers = $DB->get_records_menu('block_exaportcat_structshar', array("catid" => $category->id), null, 'userid, userid AS tmp');
-				$mform->addElement('html', '<script> var structure_sharedusersarr = [];');
-				foreach($sharedUsers as $i => $user)
-					$mform->addElement('html', 'structure_sharedusersarr['.$i.'] = '.$user.';');
-				$mform->addElement('html', '</script>');
-			}
-			$mform->addElement('html', '<tr id="structure_sharing-users"><td></td><td><div id="structure_sharing-userlist">userlist</div></td></tr>');
-			// share to groups
-			$mform->addElement('html', '<tr><td>');
-			$mform->addElement('html', '<input type="radio" name="structure_shareall" value="2"'.($category->structure_shareall==2 ? ' checked="checked"' : '').'/>');
-			$mform->addElement('html', '</td><td>'.get_string('internalaccessgroups', 'block_exaport').'</td></tr>');
-			$mform->addElement('html', '</td></tr>');
-			if ($category->id > 0) {
-				$sharedUsers = $DB->get_records_menu('block_exaportcat_strgrshar', array("catid" => $category->id), null, 'groupid, groupid AS tmp');
-				$mform->addElement('html', '<script> var structure_sharedgroupsarr = [];');
-				foreach($sharedUsers as $i => $user)
-					$mform->addElement('html', 'structure_sharedgroupsarr['.$i.'] = '.$user.';');
-				$mform->addElement('html', '</script>');
-			}/**/
-			$mform->addElement('html', '<tr id="structure_sharing-groups"><td></td><td><div id="structure_sharing-grouplist">grouplist</div></td></tr>');			
-			
-			$mform->addElement('html', '</table></div>');
-			$mform->addElement('html', '</div></div>');
-		};
-
 		$this->add_action_buttons();
 	}
 	//Custom validation should be added here
@@ -295,33 +260,18 @@ if ($mform->is_cancelled()) {
 	} else {
 		$newEntry->internshare = 0;
 	}
-	// structure share
-	$newEntry->structure_shareall = optional_param('structure_shareall', 0, PARAM_INT);
-	if (optional_param('structure_share', 0, PARAM_INT) > 0) {
-		$newEntry->structure_share = optional_param('structure_share', 0, PARAM_INT);
-	} else {
-		$newEntry->structure_share = 0;
-		$newEntry->structure_shareall = 0;
-	}
 
 	if ($newEntry->id) {
 		$DB->update_record("block_exaportcate", $newEntry);
 	} else {
 		$newEntry->id = $DB->insert_record("block_exaportcate", $newEntry);
 	}
-	// SHARE
-	// Share to users.
-	if (!empty($_POST["shareusers"])){
-		$shareusers = $_POST["shareusers"];
-		if (function_exists("clean_param_array")) 
-			$shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
-	} else {
-		$shareusers = "";
-	}	
+
 	// delete all shared users
 	$DB->delete_records("block_exaportcatshar", array('catid' => $newEntry->id));
 	// add new shared users
-	if ($newEntry->internshare && !$newEntry->shareall && is_array($shareusers)) {
+	if ($newEntry->internshare && !$newEntry->shareall) {
+		$shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
 		foreach ($shareusers as $shareuser) {
 			$shareuser = clean_param($shareuser, PARAM_INT);
 			$shareItem = new stdClass();
@@ -330,68 +280,26 @@ if ($mform->is_cancelled()) {
 			$DB->insert_record("block_exaportcatshar", $shareItem);
 		};
 	};
-	// Share to groups.
-	if (!empty($_POST["sharegroups"])){
-		$sharegroups = $_POST["sharegroups"];
-		if (function_exists("clean_param_array")) 
-			$sharegroups=clean_param_array($sharegroups,PARAM_SEQUENCE,false);
-	} else {
-		$sharegroups = "";
-	}	
-	// delete all shared users
+
+	// delete all shared groups
 	$DB->delete_records("block_exaportcatgroupshar", array('catid' => $newEntry->id));
 	// add new shared groups
-	if ($newEntry->internshare && $newEntry->shareall==2 && is_array($sharegroups)) {
-		foreach ($sharegroups as $sharegroup) {
-			$sharegroup = clean_param($sharegroup, PARAM_INT);
-			$shareItem = new stdClass();
-			$shareItem->catid = $newEntry->id;
-			$shareItem->groupid = $sharegroup;
-			$DB->insert_record("block_exaportcatgroupshar", $shareItem);
-		};
-	};
-	
-	// Structure SHARE
-	if (!empty($_POST["structure_shareusers"])){
-		$structure_shareusers = $_POST["structure_shareusers"];
-		if (function_exists("clean_param_array")) 
-			$structure_shareusers=clean_param_array($structure_shareusers,PARAM_SEQUENCE,false);
-	} else {
-		$structure_shareusers = "";
-	}	
-	// delete all shared users
-	$DB->delete_records("block_exaportcat_structshar", array('catid' => $newEntry->id));
-	// add new shared users
-	if ($newEntry->structure_share && !$newEntry->structure_shareall && is_array($structure_shareusers)) {
-		foreach ($structure_shareusers as $shareuser) {
-			$shareuser = clean_param($shareuser, PARAM_INT);
-			$shareItem = new stdClass();
-			$shareItem->catid = $newEntry->id;
-			$shareItem->userid = $shareuser;
-			$DB->insert_record("block_exaportcat_structshar", $shareItem);
-		};
-	};
- 	// Share to groups.
-	if (!empty($_POST["structure_sharegroups"])){
-		$structure_sharegroups = $_POST["structure_sharegroups"];
-		if (function_exists("clean_param_array")) 
-			$structure_sharegroups=clean_param_array($structure_sharegroups,PARAM_SEQUENCE,false);
-	} else {
-		$structure_sharegroups = "";
-	}	
-	//  delete all shared groups
-	$DB->delete_records("block_exaportcat_strgrshar", array('catid' => $newEntry->id));
-	// add new shared groups
-	if ($newEntry->structure_share && $newEntry->structure_shareall==2 && is_array($structure_sharegroups)) {
-		foreach ($structure_sharegroups as $sharegroup) {
-			$sharegroup = clean_param($sharegroup, PARAM_INT);
-			$shareItem = new stdClass();
-			$shareItem->catid = $newEntry->id;
-			$shareItem->groupid = $sharegroup;
-			$DB->insert_record("block_exaportcat_strgrshar", $shareItem);
-		};
-	}; 
-	
+	if ($newEntry->internshare && $newEntry->shareall==2) {
+		$sharegroups = \block_exaport\param::optional_array('sharegroups', PARAM_INT);
+		$usergroups = block_exaport_get_user_cohorts();
+
+		foreach ($sharegroups as $groupid) {
+			if (!isset($usergroups[$groupid])) {
+				// not allowed
+				continue;
+			}
+			$DB->insert_record("block_exaportcatgroupshar", [
+				'catid' => $newEntry->id,
+				'groupid' => $groupid,
+			]);
+		}
+	}
+
 	// icon for item
 	$context = context_user::instance($USER->id);
 	$upload_filesizes = block_exaport_get_filesize_by_draftid($newEntry->iconfile);
@@ -467,12 +375,12 @@ if ($mform->is_cancelled()) {
 	redirect('view_items.php?courseid='.$courseid.'&categoryid='.
 		($newEntry->back=='same' ? $newEntry->id : $newEntry->pid));
 } else {
-	block_exaport_print_header("bookmarks");
+	block_exaport_print_header("myportfolio");
 	
 	$category = null;
 	if ($id = optional_param('id', 0, PARAM_INT)) {
 		$category = $DB->get_record_sql('
-			SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.structure_share, c.structure_shareall
+			SELECT c.id, c.name, c.pid, c.internshare, c.shareall
 			FROM {block_exaportcate} c
 			WHERE c.userid = ? AND id = ?
 		', array($USER->id, $id));
@@ -501,7 +409,7 @@ $PAGE->requires->js('/blocks/exaport/javascript/category.js', true);
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-	'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
+	'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
 	'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs', 'notify',
 	'checkall',
 );

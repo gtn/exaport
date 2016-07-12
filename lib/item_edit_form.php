@@ -52,6 +52,9 @@ class block_exaport_comment_edit_form extends moodleform {
 
 		$mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null, array('subdirs' => 0, 'maxfiles' => 1));
 
+		/*
+		fjungwirth: hide grading at this stage (meeting LS 4.7.16)
+		
 		if ($this->_customdata['gradingpermission']) {
 			$mform->addElement('header', 'itemgrading', get_string("itemgrading", "block_exaport"));
 			$itemgrade = $this->_customdata['itemgrade'];
@@ -61,6 +64,7 @@ class block_exaport_comment_edit_form extends moodleform {
 			$slider = '<div id="slider"></div>';
 			$mform->addElement('html',$slider);
 		}
+		*/
 		
 		$this->add_action_buttons(false, get_string('add'));
 		
@@ -166,15 +170,16 @@ class block_exaport_item_edit_form extends moodleform {
 		$mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null, array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'accepted_types' => array('image', 'web_image')));
 
 		// Tags.
-		if (!empty($CFG->usetags)) {
-			include_once($CFG->dirroot.'/tag/lib.php');
+		if (!empty($CFG->usetags)) { 		
+			// include_once($CFG->dirroot.'/tag/lib.php');
             // $mform->addElement('header', 'tagshdr', get_string('tags', 'tag'));
-            $mform->addElement('tags', 'tags', get_string('tags'));
-		};
+            
+			$mform->addElement('tags', 'tags', get_string('tags'), array('itemtype' => 'block_exaportitem', 'component' => 'block_exaport'));
+		}
 		
 		// $mform->addRule('iconfile', null, 'required', null, 'client');
 		if(!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {
-			$this->add_action_buttons();
+			$this->add_action_buttons($cancel = true, $submitlabel= get_string('submititem','block_exaport'));
 		} else {
 			$exampleid = $DB->get_field('block_exacompitemexample', 'exampleid', array('itemid' => $this->_customdata['current']->id));
 			$url = new moodle_url("/blocks/exacomp/example_submission.php",array("courseid"=>$this->_customdata['course']->id,"newsubmission"=>true,"exampleid"=>$exampleid));
@@ -226,7 +231,7 @@ function rek_category_select_setup($outercategories, $entryname, $categories){
 		$conditions = array("userid" => $USER->id, "pid" => $curcategory->id);
 		$inner_categories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
 		if ($inner_categories) {
-			$categories = rek_category_select_setup($inner_categories, $name.' &rArr; ', $categories);
+			$categories = rek_category_select_setup($inner_categories, $name.' &rarr; ', $categories);
 		}
 	}
 	return $categories;

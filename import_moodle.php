@@ -37,7 +37,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }
 $url = '/blocks/exaport/import_moodle.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
-block_exaport_print_header("exportimport", "exportimportmoodleimport");
+block_exaport_print_header("importexport", "exportimportmoodleimport");
 
 $modassign=block_exaport_assignmentversion();
 if ($modassign->new) {

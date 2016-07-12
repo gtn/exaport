@@ -357,7 +357,8 @@ var exaportViewEdit = {};
 		
 		filterItemsByTitle: function() {
 			// reset filter by tag;
-			$('.tagfilter')[0].selectedIndex = 0;
+			if ($('.tagfilter').length)
+				$('.tagfilter')[0].selectedIndex = 0;
 			var text = $('#blockform #filterByTitle').val().toLowerCase();
  			$('div.add-item-category').hide();
 			$('div.add-item').show();
@@ -391,7 +392,8 @@ var exaportViewEdit = {};
 		},
 		
 		clearItemFilters: function() {
-			$('.tagfilter')[0].selectedIndex = 0;
+			if ($('.tagfilter').length)
+				$('.tagfilter')[0].selectedIndex = 0;
 			$('#blockform #filterByTitle').val('');
 			exaportViewEdit.filterItemsByTitle();
 		}

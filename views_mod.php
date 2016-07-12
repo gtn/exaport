@@ -18,7 +18,6 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 require_once __DIR__.'/inc.php';
-require_once __DIR__.'/lib/sharelib.php';
 require_once __DIR__.'/blockmediafunc.php';
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -28,25 +27,6 @@ $id = optional_param('id', 0, PARAM_INT);
 $type = optional_param('type', 'content', PARAM_ALPHA);
 if ($action=="add")
 	$type="title";
-
-//if (function_exists("clean_param_array")) $shareusers=clean_param_array($_POST["shareusers"],PARAM_SEQUENCE,true);
-//else 
-if (!empty($_POST["shareusers"])){
-	$shareusers = $_POST["shareusers"];
-	if (function_exists("clean_param_array")) 
-		$shareusers=clean_param_array($shareusers,PARAM_SEQUENCE,false);
-} else {
-	$shareusers = "";
-}
-
-if (!empty($_POST["sharegroups"])){
-	$sharegroups = $_POST["sharegroups"];
-	if (function_exists("clean_param_array")) 
-		$sharegroups=clean_param_array($sharegroups, PARAM_SEQUENCE, false);
-} else {
-	$sharegroups = "";
-}
-
 
 if (!confirm_sesskey()) {
 	print_error("badsessionkey","block_exaport");		
@@ -88,7 +68,15 @@ if ($view && $action == 'userlist') {
 }
 
 if ($view && $action == 'grouplist') {
-	echo json_encode(exaport_get_shareable_courses_with_groups_for_view($view->id));
+	$sharedGroups = exaport_get_view_shared_groups($view->id);
+
+	$group_groups = block_exaport_get_shareable_groups_for_json();
+	foreach ($group_groups as $group_group) {
+		foreach ($group_group->groups as $group) {
+			$group->shared_to = isset($sharedGroups[$group->id]);
+		}
+	}
+	echo json_encode($group_groups);
 	exit;
 }
 
@@ -177,18 +165,18 @@ class block_exaport_view_edit_form extends moodleform {
 									if ($this->_customdata['view']->id > 0) {
 										foreach ($artefacts as $artefact) {
 											$allartefacts[] = $artefact->id;
-										};
+										}
 										$filledartefacts = explode(',', $this->_customdata['view']->autofill_artefacts);
 										sort($filledartefacts);
 										sort($allartefacts);
 										$diff = array_diff($allartefacts, $filledartefacts);
 										if (count($diff)>0) {
-											$mform->addElement('checkbox', 'autofill_add', '', get_string('autofillview_addartefacts', 'block_exaport'));
-										};
+											$mform->addElement('checkbox', 'autofill_add', '', get_string('autofillview', 'block_exaport'));
+										}
 									} else {
 										$mform->addElement('checkbox', 'autofill', '', get_string('autofillview', 'block_exaport'));
-									};
-								};
+									}
+								}
 								// Share to cheacher checkbox.
 								$allteachers = block_exaport_get_course_teachers();
 								// If view is editing.
@@ -197,12 +185,12 @@ class block_exaport_view_edit_form extends moodleform {
 									$diff = array_diff($allteachers, $allsharedusers);
 									// If there is teacher which does not share.
 									if ((count($allteachers) > 0) && (count($diff) > 0)) {
-										$mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher_add', 'block_exaport'));
-									};
+										$mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher', 'block_exaport'));
+									}
 								} else { // If view is adding.
 										$mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher', 'block_exaport'));
-								};
-							};
+								}
+							}
 
 							if (block_exaport_course_has_desp()) {
 								$langcode=get_string("langcode","block_desp");
@@ -237,14 +225,14 @@ class block_exaport_view_edit_form extends moodleform {
 							if (block_exaport_shareall_enabled()) {
 								$mform->addElement('text', 'shareall');
 								$mform->setType('shareall', PARAM_INT);							
-							};
+							}
 							
 							$mform->addElement('checkbox', 'sharedemails');
 							$mform->setType('sharedemails', PARAM_INT);
 							
 						break;
 			default: break;
-		};		
+		}		
 		if ($this->_customdata['view'])
 			$this->add_action_buttons(false, get_string('savechanges'));
 		else
@@ -284,7 +272,7 @@ if ($editform->is_cancelled()) {
 	//no_submit_button_actions($editform, $sitecontext);
 } else if ($formView = $editform->get_data()) {
 	if ($type=='title' or $action=='add') {
-		//if (!$view) {$view = new stdClass(); $view->id = -1;};			
+		//if (!$view) {$view = new stdClass(); $view->id = -1;}			
 		$formView = file_postupdate_standard_editor($formView, 'description', $textfieldoptions, context_user::instance($USER->id), 'block_exaport', 'view', $view->id);
 	}
 
@@ -331,7 +319,7 @@ if ($editform->is_cancelled()) {
 				// Auto Share to the teachers.
 				if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
 					block_exaport_share_view_to_teachers($dbView->id);
-				};
+				}
 				block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'views_mod.php?courseid='.$courseid.'&id='.$dbView->id.'&action=add', $dbView->name);
 			} else {
 				print_error('addposterror', 'block_exaport', $returnurl);
@@ -349,16 +337,16 @@ if ($editform->is_cancelled()) {
 					$dbView->layout=2;
 				else 
 					$dbView->layout=$view->layout;
-			};
+			}
 			// Add new artefacts if selected.
 			if (isset($dbView->autofill_add) and $dbView->autofill_add == 1) {
 					$filledartefacts = fill_view_with_artefacts($dbView->id, $dbView->autofill_artefacts);
 					$dbView->autofill_artefacts = $filledartefacts;
-			};
+			}
 			// Auto Share to the teachers.
 			if (isset($dbView->sharetoteacher) and $dbView->sharetoteacher == 1) {
 				block_exaport_share_view_to_teachers($dbView->id);
-			};
+			}
 			if ($DB->update_record('block_exaportview', $dbView)) {
 				block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid='.$courseid.'&id='.$dbView->id.'&action=edit', $dbView->name);
 			} else {
@@ -382,11 +370,8 @@ if ($editform->is_cancelled()) {
 			$blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id, 
 							array('trusttext'=>true, 'subdirs'=>true, 'maxfiles'=>99, 'context'=>context_user::instance($USER->id), 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), 
 							$formView->blocks);
-			$blocks = json_decode($blocks);	
+			$blocks = json_decode($blocks) ?: [];
 		
-			if(!$blocks)
-				print_error("noentry","block_exaport");
-			
 			foreach ($blocks as $block) {
 				$block->viewid = $dbView->id;
 
@@ -435,14 +420,16 @@ if ($editform->is_cancelled()) {
 			// delete all shared users
 			$DB->delete_records("block_exaportviewshar", array('viewid'=>$dbView->id));
 			// add new shared users
-			if ($dbView->internaccess && !$dbView->shareall && is_array($shareusers)) {
+			if ($dbView->internaccess && !$dbView->shareall) {
+				$shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+
 				foreach ($shareusers as $shareuser) {
 					$shareuser = clean_param($shareuser, PARAM_INT);
 					$shareItem = new stdClass();
 					$shareItem->viewid = $dbView->id;
 					$shareItem->userid = $shareuser;
 					$DB->insert_record("block_exaportviewshar", $shareItem);
-				};
+				}
 				// message users, if they have shared
 				//$notifyusers = optional_param('notifyusers', '', PARAM_RAW);
 				if (isset($_POST['notifyusers'])) {
@@ -469,18 +456,25 @@ if ($editform->is_cancelled()) {
 					}
 				}
 			}
+
 			// delete all shared groups
 			$DB->delete_records("block_exaportviewgroupshar", array('viewid'=>$dbView->id));
 			// Add new groups sharing. shareall == 0 - users sharing; 1 - share for all; 2 - groups sharing.
-			if ($dbView->internaccess && $dbView->shareall == 2 && is_array($sharegroups)) {
-				foreach ($sharegroups as $sharegroup) {
-					$sharegroup = clean_param($sharegroup, PARAM_INT);
-					$shareItem = new stdClass();
-					$shareItem->viewid = $dbView->id;
-					$shareItem->groupid = $sharegroup;
-					$DB->insert_record("block_exaportviewgroupshar", $shareItem);
-				};
-			};
+			if ($dbView->internaccess && $dbView->shareall == 2) {
+				$sharegroups = \block_exaport\param::optional_array('sharegroups', PARAM_INT);
+				$usergroups = block_exaport_get_user_cohorts();
+
+				foreach ($sharegroups as $groupid) {
+					if (!isset($usergroups[$groupid])) {
+						// not allowed
+						continue;
+					}
+					$DB->insert_record("block_exaportviewgroupshar", [
+						'viewid' => $dbView->id,
+						'groupid' => $groupid,
+					]);
+				}
+			}
 			
 			if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
 				// search button pressed -> redirect to search form
@@ -514,19 +508,19 @@ if ($editform->is_cancelled()) {
 								} else {
 									// insert share with old hash
 									$insertData->hash = $oldemailshares[$email];
-								};
+								}
 								$DB->insert_record('block_exaportviewemailshar', $insertData);
 								$hashesforemails[$email] = $insertData->hash;
 							}
-						};
+						}
 						// send messages
 						block_exaport_emailaccess_sendemails($view, $oldemails, $newemails, $hashesforemails);
-					};
-				};
-			};
+					}
+				}
+			}
 			break;
 		default: break;
-	};
+	}
 
 /*	if ($action=="add")
 		redirect($returnurl_to_list);
@@ -630,13 +624,13 @@ if ($type<>'title') {// for delete php notes
 	echo $form['javascript'];
 	echo '<form'.$form['attributes'].'><div id="exaport-view-mod">';
 	echo $form['html_hidden_fields'];
-};
+}
 	
 
 // Translations
 $translations = array(
 	'name', 'role', 'nousersfound',
-	'internalaccessgroups', 'grouptitle', 'membersnumber', 'nogroupsfound', 
+	'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
 	'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media', 'view_specialitem_badge', 'view_specialitem_text_defaulttext',
 	'viewitem', 'comments', 'category','link', 'type','personalinformation',
 	'delete', 'viewand',
@@ -660,7 +654,7 @@ $portfolioshareditems = array();
 foreach ($allpotentialitems as $item) {
 	if (!array_key_exists($item->itemid, $portfolioItems))
 		$portfolioItems = $portfolioItems + block_exaport_get_portfolio_items(0, $item->itemid);
-};
+}
 
 ?>
 <script type="text/javascript">
@@ -760,7 +754,7 @@ echo '<div class="view-middle">';
 				echo '<ul class="portfolioDesignBlocks">';
 				echo '</ul>';
 				echo '</td>';
-			};
+			}
 //			echo '<ul class="portfolioDesignBlocks portfolioDesignBlocks-left">';
 			echo '</tr></table>';
 		echo '</div>';
@@ -784,13 +778,13 @@ break;
 			if (isset($view) and $view->id>0) {
 				$data->description = $view->description;
 				$data->descriptionformat = FORMAT_HTML;
-			};
+			}
 			if ($data->description) {
 				$draftid_editor = file_get_submitted_draft_itemid('description');
 				$currenttext = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, "block_exaport", "view", $view->id, array('subdirs'=>true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $data->description);	
 				$data->description = file_rewrite_pluginfile_urls($data->description, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor);								
 				$data->description_editor = array('text'=>$data->description, 'format'=>$data->descriptionformat, 'itemid'=>$draftid_editor);
-			};
+			}
 			$data->cataction = 'save';
 			$data->edit = 1;
 //			if (isset($view))
@@ -952,10 +946,10 @@ break;
 					if ($view) {
 						$view->emailsforshare = implode(';', exaport_get_view_shared_emails($view->id));
 						echo '<tr id="emailaccess-settings"><td></td><td>';
-						echo '<textarea name="emailsforshare">'.str_replace(';', "\r\n", $view->emailsforshare).'</textarea><br>';
 						echo get_string("emailaccessdescription", "block_exaport");
+						echo '<textarea name="emailsforshare">'.str_replace(';', "\r\n", $view->emailsforshare).'</textarea><br>';
 						echo '</td></tr>';
-					};
+					}
 						
 				echo '</table></div>';
 			echo '</div>';
@@ -969,7 +963,7 @@ if ($type!='title') {
 	echo $form['elements_by_name']['submitbutton']['html'];
 	echo '</div>';
 	echo '</div></form>';
-};
+}
 
 	echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();

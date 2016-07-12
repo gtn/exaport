@@ -33,23 +33,42 @@ require_once __DIR__.'/common.php';
 
 use block_exaport\globals as g;
 
-require 'lib.exaport.php';
-
+require_once __DIR__.'/lib.exaport.php';
+require_once __DIR__.'/sharelib.php';
 /*** FILE FUNCTIONS **********************************************************************/
 
-function block_exaport_get_item_file($item) {
+/**
+ * @param $item
+ * @param $type
+ * @return stored_file
+ */
+function block_exaport_get_file($item, $type) {
 	$fs = get_file_storage();
-	
-	// list all files, excluding directories!
-	$areafiles = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id, 'itemid', false);
-	
-	// file found?
-	if (empty($areafiles))
-		return null;
-	else
-		// return first file (there should be only one file anyway)
-		return reset($areafiles);
+	$files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
+
+	// return first file
+	return reset($files);
 }
+
+function block_exaport_get_item_file($item) {
+	return block_exaport_get_file($item, 'item_file');
+}
+
+function block_exaport_get_category_icon($category) {
+	$fs = get_file_storage();
+
+	$file = current($fs->get_area_files(context_user::instance($category->userid)->id, 'block_exaport', 'category_icon', $category->id, 'itemid', false));
+	if ($file) {
+		// hack, this logic doesn't work for other users for now
+		if ($category->userid !== g::$USER->id) {
+			return;
+		}
+		return g::$CFG->wwwroot.'/pluginfile.php/'.$file->get_contextid().'/block_exaport/category_icon/'.$file->get_itemid().'/'.$file->get_filename();
+	} else {
+		return null;
+	}
+}
+
 
 /**
  * @param $itemcomment
@@ -259,18 +278,16 @@ function block_exaport_init_js_css() {
 function block_exaport_print_header($item_identifier, $sub_item_identifier = null) {
 
 	if (!is_string($item_identifier)) {
-		echo 'noch nicht unterst�tzt';
+		throw new moodle_exception('not supported');
 	}
 
-	global $CFG, $COURSE, $PAGE, $USER;
+	global $CFG, $COURSE, $PAGE;
 
 	block_exaport_init_js_css();
 
-	$strbookmarks = block_exaport_get_string("mybookmarks");
-
 	// navigationspfad
 	$navlinks = array();
-	$navlinks[] = array('name' => $strbookmarks, 'link' => "view.php?courseid=" . $COURSE->id, 'type' => 'title');
+	$navlinks[] = array('name' => block_exaport_get_string("blocktitle"), 'link' => "view.php?courseid=" . $COURSE->id, 'type' => 'title');
 	$nav_item_identifier = $item_identifier;
 
 	$icon = $item_identifier;
@@ -283,23 +300,19 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 		$tabs['back'] = new tabobject('back', $CFG->wwwroot . '/blocks/desp/index.php?courseid=' . $COURSE->id, get_string("back_to_desp", "block_exaport"), '', true);
 	}
 
-	$tabs['personal'] = new tabobject('personal', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("personal", "block_exaport"), '', true);
+	$tabs['resume_my'] = new tabobject('resume_my', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("resume_my", "block_exaport"), '', true);
 	// $tabs[] = new tabobject('categories', $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $COURSE->id, get_string("categories", "block_exaport"), '', true);
-	$tabs['bookmarks'] = new tabobject('bookmarks', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("bookmarks"), '', true);
+	$tabs['myportfolio'] = new tabobject('myportfolio', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("myportfolio"), '', true);
 	$tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
-	$tabs['exportimport'] = new tabobject('exportimport', $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $COURSE->id, get_string("exportimport", "block_exaport"), '', true);
-	$tabs['sharedbookmarks'] = new tabobject('sharedbookmarks', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedbookmarks"), '', true);
-	if (has_sharablestructure($USER->id))
-		$tabs['sharedstructures'] = new tabobject('sharedstructures', $CFG->wwwroot . '/blocks/exaport/shared_structures.php?courseid=' . $COURSE->id, block_exaport_get_string("sharedstructures"), '', true);
-
-	$tabs['personal']->subtree[] = new tabobject('personalinfo', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("explainpersonal", "block_exaport"), '', true);
-	$tabs['personal']->subtree[] = new tabobject('resume', s($CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id), get_string("resume", "block_exaport"), '', true);
+	$tabs['shared_views'] = new tabobject('shared_views', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("shared_views"), '', true);
+	$tabs['shared_categories'] = new tabobject('shared_categories', $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $COURSE->id, block_exaport_get_string("shared_categories"), '', true);
+	$tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id, get_string("importexport", "block_exaport"), '', true);
 
 	$tab_item_identifier = preg_replace('!_.*!', '', $item_identifier);
 	$tab_sub_item_identifier = preg_replace('!_.*!', '', $sub_item_identifier);
 
 	if (strpos($tab_item_identifier, 'bookmarks') === 0) {
-		$tab_item_identifier = 'bookmarks';
+		$tab_item_identifier = 'myportfolio';
 	}
 
 	// kind of hacked here, find another solution
@@ -342,7 +355,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
  
 	 // header
 	global $OUTPUT;
-	
+
   	echo $OUTPUT->header();
 	echo block_exaport_wrapperdivstart();
 	if (block_exaport_course_has_desp()) {
@@ -352,7 +365,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
 	echo $OUTPUT->render($tabtree);
 
-	if (block_exaport_course_has_desp() && (strpos($currenttab,'bookmarks') === 0) ) {
+	if (block_exaport_course_has_desp() && (strpos($currenttab,'myportfolio') === 0) ) {
 		echo '<div id="messageboxses1"';
 		//if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
 		echo '>
@@ -367,7 +380,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
 function block_exaport_get_string($string, $param=null) {
 	$manager = get_string_manager();
-	
+
 	if (block_exaport_course_has_desp() && $manager->string_exists('desp_'.$string, 'block_exaport'))
 		return $manager->get_string('desp_'.$string, 'block_exaport', $param);
 
@@ -386,8 +399,7 @@ function todo_string($string) {
 }
 
 function block_exaport_print_footer() {
-	global $COURSE;
-	print_footer($COURSE);
+	echo g::$OUTPUT->footer();
 }
 
 /**
@@ -530,13 +542,10 @@ function block_exaport_check_competence_interaction() {
 		class_exists('\block_exacomp\api') && \block_exacomp\api::active();
 }
 
-function block_exaport_check_item_competences($item) {
-	return (bool)\block_exacomp\api::get_active_comp_for_exaport_item($item->id);
-}
-
 function block_exaport_build_comp_table($item, $role="teacher") {
 	global $DB;
 
+	// TODO: refactor: use block_exaport_get_active_comps_for_item instead
 	$sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompcompactiv_mm} da WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
 	$descriptors = $DB->get_records_sql($sql, array($item->id));
 	$content = "<table class='compstable flexible boxaligncenter generaltable'>
@@ -601,13 +610,23 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
 		$DB->insert_record('block_exacompcompuser_mm', $data);
 	}
 }
-function block_exaport_get_active_compids($item) {
-	return \block_exacomp\api::get_active_comp_for_exaport_item($item->id);
+
+/**
+ * @deprecated refactor to use block_exaport_get_active_comps_for_item
+ */
+function block_exaport_get_active_compids_for_item($item) {
+	$ids = array_keys(block_exaport_get_active_comps_for_item($item));
+	return array_combine($ids, $ids);
 }
 
-function block_exaport_get_comp_output($item) {
-	$compids = block_exaport_get_active_compids($item);
+function block_exaport_check_item_competences($item) {
+	return (bool)block_exaport_get_active_comps_for_item($item);
 }
+
+function block_exaport_get_active_comps_for_item($item) {
+	return \block_exacomp\api::get_active_comps_for_exaport_item($item->id);
+}
+
 function block_exaport_build_comp_tree($type, $item_or_resume, $allowEdit = true) {
 	global $CFG, $USER;
 
@@ -770,8 +789,9 @@ function block_exaport_get_root_category() {
 	global $DB, $USER;
 	return (object) array(
 		'id' => 0,
-		'pid' => -999,
+		'pid' => 0,
 		'name' => block_exaport_get_string('root_category'),
+		'url' => g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id,
 		'item_cnt' => $DB->get_field_sql('
 			SELECT COUNT(i.id) AS item_cnt
 			FROM {block_exaportitem} i
@@ -785,9 +805,10 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
 	global $DB, $USER;
 	return (object) array(
 		'id' => -1,
-		'pid' => 0,
+		'pid' => -123, // not parent available
 		'name' => $name != null ? $name : block_exaport_get_string('shareditems_category'),
 		'item_cnt' => '',
+		'url' => g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id.'&type=shared&userid='.$userid,
 		'userid' => $userid ? $userid : ''
 /* 		'item_cnt' => $DB->get_field_sql('
 			SELECT COUNT(i.id) AS item_cnt
@@ -820,7 +841,7 @@ function block_exaport_get_all_user_badges() {
 			$records = badges_get_user_badges($USER->id);
 			return $records;
 			// old code
-			print_error("please update exabis competencies to latest version");
+			print_error("please update Exabis Competence Grid to latest version");
 			exit;
 		}else
 			return block_exacomp_get_all_user_badges();
@@ -1058,7 +1079,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 
 		$comp = block_exaport_check_competence_interaction();
 		if($comp){
-			$compids = block_exaport_get_active_compids($item);
+			$compids = block_exaport_get_active_compids_for_item($item);
 
 			if($compids){
 				$competences = "";
@@ -1196,60 +1217,38 @@ function block_exaport_is_valid_media_by_filename ($filename) {
 	}
 }
 
-// do user has sharable structures or do not
-function has_sharablestructure($userid) {
-	global $DB, $USER;
-	// shared to all
-	if ($DB->get_records_sql('SELECT * FROM {block_exaportcate} WHERE structure_share=1 AND structure_shareall=1 AND userid<>'.$USER->id))
-		return true;
-	// shared to user
-	if ($DB->get_records_sql('SELECT * FROM {block_exaportcat_structshar} WHERE userid='.$userid.' AND userid<>'.$USER->id))
-		return true;
-	// shared to user's group
-	$usergroups = $DB->get_records('groups_members', array('userid' => $userid), '', 'groupid');
-	if ((is_array($usergroups)) && (count($usergroups) > 0)) { 
-		foreach ($usergroups as $id => $group) {
-			$usergroups[$id] = $group->groupid;
-		};
-		$usergroups_list = implode(',', $usergroups);
-		$userstructures = $DB->get_records_sql('SELECT cs.* FROM {block_exaportcat_strgrshar} cs LEFT JOIN {block_exaportcate} c ON cs.catid=c.id WHERE c.userid<>'.$USER->id.' AND groupid IN ('.$usergroups_list.')');
-		if (count($userstructures) > 0) 
-			return true;
-	}; 
-	
-	return false;
-}
 function block_exaport_item_is_editable($itemid) {
 	global $CFG, $DB, $USER;
-	
-	if(!block_exaport_item_is_resubmitable($itemid))
-		return false;
-	
-	$allowEdit = true;
 
-	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid));
-	
-	if(!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
+	if (!block_exaport_item_is_resubmitable($itemid)) {
+		return false;
+	}
+
+	if (!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
+		$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE, array("itemid" => $itemid));
+
 		//check item grading and teacher comment
-		if(isset($itemExample)) {
-			if(isset($itemExample->teachervalue) && $itemExample->teachervalue != null) {
-				$allowEdit = false;
-			}else {
-				$itemcomments = $DB->get_records ( 'block_exaportitemcomm', array (
-						'itemid' => $itemid
-				), 'timemodified ASC', 'entry, userid', 0, 2 );
-				if ($itemcomments) {
-					foreach ( $itemcomments as $itemcomment ) {
-						if ($USER->id != $itemcomment->userid) {
-							$allowEdit = false;
-						}
+		if ($itemExample) {
+			if ($itemExample->teachervalue) {
+				// lehrerbewertung da
+				return false;
+			} else {
+				$itemcomments = $DB->get_records('block_exaportitemcomm', array(
+					'itemid' => $itemid,
+				), 'timemodified ASC', 'entry, userid', 0, 2);
+				foreach ($itemcomments as $itemcomment) {
+					if ($USER->id != $itemcomment->userid) {
+						// somebody commented on this item -> must be teacher
+						return false;
 					}
 				}
 			}
 		}
 	}
-	return $allowEdit;
+
+	return true;
 }
+
 function block_exaport_item_is_resubmitable($itemid) {
 	global $DB, $USER, $COURSE;
 
@@ -1288,51 +1287,97 @@ function block_exaport_has_grading_permission($itemid) {
 	return has_capability('block/exacomp:teacher', $coursecontext);
 }
 
-function block_exaport_delete_user_data($userid){
-	global $DB;
-
-	$result = $DB->delete_records('block_exaportcate', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportcatshar', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportcat_structshar', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportitem', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportitemcomm', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportitemshar', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportview', array('userid'=>$userid));
-	$result = $DB->delete_records('block_exaportviewshar', array('userid'=>$userid));
-
-	$result = $DB->delete_records('block_exaportresume', array('user_id'=>$userid));
-	$result = $DB->delete_records('block_exaportuser', array('user_id'=>$userid));
-}
-
 function block_exaport_get_item_tags($itemid, $orderBy = '') {
-	global $DB;
-	$tags = array();
+	global $DB, $CFG;
+	$tags = array();	
 	if (is_array($itemid)) {
 		// Tags for a few items.
 		if (count($itemid)>0) {
 			list($whereItems, $paramItems) = $DB->get_in_or_equal($itemid, SQL_PARAMS_NAMED);
 			$result = $DB->get_records_sql('SELECT DISTINCT rawname 			
 									FROM {tag_instance} ti LEFT JOIN {tag} t ON t.id=ti.tagid 
-									WHERE component=\'block_exaport\' AND itemtype=\'exaport_item\' AND itemid '.$whereItems.' '.
+									WHERE component=\'block_exaport\' AND itemtype=\'block_exaportitem\' AND itemid '.$whereItems.' '.
 									($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
-								$paramItems);	
-		};
+								$paramItems);									
+		}
 	} else {
 		// Tags for one item.
 		$result = $DB->get_records_sql('SELECT * 
 									FROM {tag_instance} ti LEFT JOIN {tag} t ON t.id=ti.tagid 
-									WHERE component=\'block_exaport\' AND itemtype=\'exaport_item\' AND itemid = ?'.
+									WHERE component=\'block_exaport\' AND itemtype=\'block_exaportitem\' AND itemid = ?'.
 									($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
 								array($itemid));			
 	}
 	if (!$result) {
 		$result = array();
-	};	
+	}
 	foreach ($result as &$tag) {
 		$tags[] = $tag->rawname;
 	}
 	return $tags;
 }
+
+/**
+ * Returns artefacts tagged with a specified tag.
+ *
+ * This is a callback used by the tag area block_exaport/block_exaportitem to search for artefacts
+ * tagged with a specific tag.
+ *
+ * @param core_tag_tag $tag
+ * @param bool $exclusivemode if set to true it means that no other entities tagged with this tag
+ *             are displayed on the page and the per-page limit may be bigger
+ * @param int $fromctx context id where the link was displayed, may be used by callbacks
+ *            to display items in the same context first
+ * @param int $ctx context id where to search for records
+ * @param bool $rec search in subcontexts as well
+ * @param int $page 0-based number of page being displayed
+ * @return \core_tag\output\tagindex
+ */
+function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx = 0, $ctx = 0, $rec = 1, $page = 0) {
+    global $OUTPUT;
+    $perpage = $exclusivemode ? 20 : 5;
+
+    // Build the SQL query.
+    // $ctxselect = context_helper::get_preload_record_columns_sql('ctx');
+    $query = "SELECT i.id, i.name, i.type, i.userid, cat.name AS categoryname, i.categoryid
+                FROM {block_exaportitem} i
+                LEFT JOIN {block_exaportcate} cat ON i.categoryid = cat.id
+                JOIN {tag_instance} tt ON i.id = tt.itemid
+				WHERE tt.itemtype = :itemtype AND tt.tagid = :tagid AND tt.component = :component AND i.id %ITEMFILTER%";
+
+    $params = array('itemtype' => 'block_exaportitem', 'tagid' => $tag->id, 'component' => 'block_exaport');
+
+       $totalpages = $page + 1;
+
+    // Use core_tag_index_builder to build and filter the list of items.
+    $builder = new core_tag_index_builder('block_exaport', 'block_exaportitem', $query, $params, $page * $perpage, $perpage + 1);
+    $items = $builder->get_items();
+    if (count($items) > $perpage) {
+        $totalpages = $page + 2; // We don't need exact page count, just indicate that the next page exists.
+        array_pop($items);
+    }
+
+    // Build the display contents.
+    if ($items) {
+        $tagfeed = new core_tag\output\tagfeed();
+        foreach ($items as $item) {
+            $itemurl = new moodle_url('/blocks/exaport/shared_item.php', array('itemid' => $item->id, 'access' => 'portfolio/id/'.$item->userid));
+            $itemname = format_string($item->name, true);
+            $itemname = html_writer::link($itemurl, $itemname);
+			$categoryname = $item->categoryname;
+			$iconsrc = new moodle_url('/blocks/exaport/item_thumb.php', array('item_id' => $item->id));
+            $icon = html_writer::link($itemurl, html_writer::empty_tag('img', array('src' => $iconsrc)));
+            $tagfeed->add($icon, $itemname, $categoryname);
+        }
+
+        $content = $OUTPUT->render_from_template('core_tag/tagfeed',
+                $tagfeed->export_for_template($OUTPUT));
+
+        return new core_tag\output\tagindex($tag, 'block_exaport', 'block_exaportitem', $content,
+                $exclusivemode, $fromctx, $ctx, $rec, $page, $totalpages);
+    }
+}
+
 
 function block_exaport_securephrase_viewemail(&$view, $email)
 {

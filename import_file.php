@@ -18,7 +18,6 @@
 // This copyright notice MUST APPEAR in all copies of the script!
 
 require_once __DIR__.'/inc.php';
-require_once __DIR__.'/lib/sharelib.php';
 require_once __DIR__.'/lib/edit_form.php';
 require_once __DIR__.'/lib/minixml.inc.php';
 require_once __DIR__.'/lib/class.scormparser.php';
@@ -44,7 +43,7 @@ $PAGE->set_url($url, ['courseid' => $courseid]);
 
 $strimport = get_string("import", "block_exaport");
 $imported = false;
-$returnurl = $CFG->wwwroot . '/blocks/exaport/exportimport.php?courseid=' . $courseid;
+$returnurl = $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $courseid;
 
 $exteditform = new block_exaport_scorm_upload_form(null, null);
 if ($exteditform->is_cancelled()) {
@@ -54,7 +53,7 @@ if ($exteditform->is_cancelled()) {
 	//no_submit_button_actions($exteditform, $sitecontext);
 }
 
-block_exaport_print_header("exportimport", "exportimportimport");
+block_exaport_print_header("importexport", "exportimportimport");
 
 ////////
 if ($fromform = $exteditform->get_data()) {

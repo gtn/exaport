@@ -376,7 +376,7 @@ $string['desp_categories'] = '
 	 - Gruppenarbeit
 	 - Partnerarbeit
 ';
-
+$string['desp_explaining'] = 'Meine Artefakte';
 
 // === Config ===
 $string['config_feature_copy_to_course'] = 'Schüler dürfen Dateien in den Kurs kopieren';

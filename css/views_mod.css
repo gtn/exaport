@@ -343,7 +343,6 @@
 #exaport #add-items-list .add-item {
 	cursor: pointer;
 	padding: 3px;
-	margin: 1px;
 }
 #exaport #add-items-list .add-item * {
 	cursor: pointer;
@@ -358,9 +357,11 @@
 	background: #DEFEDE;
 }
 #exaport #add-items-list .add-item-category {
-	padding: 3px;
-	margin: 20px 1px 6px 1px;
+	padding: 10px 3px 0 3px;
 	font-weight: bold;
+}
+#exaport #add-items-list .add-item-sub .add-item-category {
+	padding-top: 0;
 }
 #exaport #add-items-list .add-item-sub {
 	margin-left: 30px;

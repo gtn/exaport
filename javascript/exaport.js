@@ -297,6 +297,8 @@ window.block_exaport = window.ExabisEportfolio = $E = {
 
 		popup.$body = $(popup.bodyNode.getDOMNode());
 		popup.$body.css('overflow', 'auto');
+		// add id exaport, needed for css
+		popup.$body.attr('id', 'exaport');
 
 		// body mit jquery injecten, dadurch werden z.b. auch javascripts ausgeführt
 		// bei anabe im popup constructor eben nicht

@@ -205,7 +205,7 @@ function get_form_items($id, $block_data=array()) {
 
 	$content .= '</td></tr>';		
 	// Shared artefacts for this user
-	$sharedartefacts = exaport_get_shared_items_for_user($USER->id);
+	$sharedartefacts = block_exaport_get_items_shared_to_user($USER->id);
 	if (count($sharedartefacts) > 0) {
 		$content .= '<tr class="sharedArtefacts"><td><hr width=95% style="margin: 3px auto;">';	
 		$content .= get_string('sharedArtefacts', 'block_exaport');

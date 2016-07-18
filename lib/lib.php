@@ -1041,7 +1041,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 	}
 
 	// add shared items
-	$shared_items = exaport_get_shared_items_for_user($USER->id, true);
+	$shared_items = block_exaport_get_items_shared_to_user($USER->id, true);
 	$portfolioItems = $portfolioItems + $shared_items;
 
 	foreach ($portfolioItems as &$item) {
@@ -1220,7 +1220,7 @@ function block_exaport_is_valid_media_by_filename ($filename) {
 function block_exaport_item_is_editable($itemid) {
 	global $CFG, $DB, $USER;
 
-	if (!block_exaport_item_is_resubmitable($itemid)) {
+	if (block_exaport_check_competence_interaction() && !block_exaport_item_is_resubmitable($itemid)) {
 		return false;
 	}
 
@@ -1249,6 +1249,11 @@ function block_exaport_item_is_editable($itemid) {
 	return true;
 }
 
+/**
+ * checks if exacomp is installed and the item can be resubmitted there
+ * @param $itemid
+ * @return bool
+ */
 function block_exaport_item_is_resubmitable($itemid) {
 	global $DB, $USER, $COURSE;
 

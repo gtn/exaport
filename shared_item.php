@@ -75,10 +75,15 @@ $PAGE->set_url($url);
 
 if ($item->allowComments) {
 	require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
+
+	if (block_exaport_check_competence_interaction()) {
+		$itemExample = $DB->get_record('block_exacompitemexample', array('itemid' => $itemid));
+		$teacherValue = $itemExample ? $itemExample->teachervalue : 0;
+	} else {
+		$teacherValue = 0;
+	}
 	
-	$itemExample = $DB->get_record('block_exacompitemexample', array('itemid' => $itemid));
-	
-	$commentseditform = new block_exaport_comment_edit_form($PAGE->url,array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade'=>($itemExample && $itemExample->teachervalue) ? $itemExample->teachervalue : 0));
+	$commentseditform = new block_exaport_comment_edit_form($PAGE->url,array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade'=>$teacherValue));
 
 	if ($commentseditform->is_cancelled()
 		);

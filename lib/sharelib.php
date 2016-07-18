@@ -266,7 +266,7 @@ namespace {
 				// item not linked to view -> no rights
 			}
 			// share artefact can not only owner. So we find did share item to others users. If shared - take owner and insert into select.
-			$sharable = is_sharableitem($view->userid, $itemid);
+			$sharable = block_exaport_can_user_access_shared_item($view->userid, $itemid);
 			if ($sharable) {
 				$ownerid = $sharable;
 			} else {
@@ -306,18 +306,14 @@ namespace {
 			} else {
 				// intern
 				// shared artefacts.
-				$sharable = is_sharableitem($USER->id, $itemid);
+				$sharable = block_exaport_can_user_access_shared_item($USER->id, $itemid);
 				if ($sharable) {
-					$viewerid = $sharable;
+					$ownerid = $sharable;
 				} else {
-					$viewerid = $USER->id;
-				};
-				$item = $DB->get_record_sql("SELECT i.* FROM {block_exaportitem} i".
-					" LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid=?".
-					" WHERE i.id=? AND".
-					" ((i.userid=?)". // myself
-					"  OR (i.shareall=1 AND ishar.userid IS NULL)". // all and ishar not set?
-					"  OR (i.shareall=0 AND ishar.userid IS NOT NULL))", array($USER->id, $itemid, $viewerid)); // nobody, but me
+					$ownerid = $USER->id;
+				}
+
+				$item = $DB->get_record('block_exaportitem', ['userid' => $ownerid, 'id' => $itemid]);
 				if (!$item) {
 					// item not found
 					return;
@@ -595,39 +591,7 @@ namespace {
 		", [$userid]);
 	}
 
-	function exaport_get_extern_access($userid) {
-		$userpreferences = block_exaport_get_user_preferences($userid);
-
-		return "extern.php?id={$userpreferences->user_hash}";
-	}
-
-	function exaport_print_js() {
-		echo "<script type=\"text/javascript\">\n";
-		echo "<!--\n";
-		echo "function SetAllCheckBoxes(FormName, FieldName, CheckValue)\n";
-		echo "{\n";
-		echo "	if(!document.getElementById(FormName))\n";
-		echo "		return;\n";
-		echo "	var objCheckBoxes = document.getElementById(FormName).elements[FieldName];\n";
-		echo "	if(!objCheckBoxes)\n";
-		echo "		return;\n";
-		echo "	var countCheckBoxes = objCheckBoxes.length;\n";
-		echo "	if(!countCheckBoxes)\n";
-		echo "		objCheckBoxes.checked = CheckValue;\n";
-		echo "	else\n";
-		echo "		// set the check value for all check boxes\n";
-		echo "		for(var i = 0; i < countCheckBoxes; i++)\n";
-		echo "			objCheckBoxes[i].checked = CheckValue;\n";
-		echo "	  if (CheckValue == true)\n";
-		echo "			  document.getElementById(FormName).selectall.value = \"1\";\n";
-		echo "	  else\n";
-		echo "			  document.getElementById(FormName).selectall.value = \"0\";\n";
-		echo "}\n";
-		echo "// -->\n";
-		echo "</script>\n";
-	}
-
-	function exaport_get_shared_items_for_user($userid, $onlyitems = false) {
+	function block_exaport_get_items_shared_to_user($userid, $onlyitems = false) {
 		global $DB;
 
 		// Categories for user groups
@@ -662,15 +626,26 @@ namespace {
 				$shared_users[] = $categorie->userid;
 			if (!in_array($categorie->id, $shared_categories))
 				$shared_categories[] = $categorie->id;
-		};
+		}
+
+		// get sub categories (recursively)
+		for ($i = 0; $i < count($shared_categories); $i++) {
+			$sub_categories = $DB->get_records_menu('block_exaportcate', ['pid' => $shared_categories[$i]], null, 'id, id as tmp');
+			foreach ($sub_categories as $categoryid) {
+				if (!in_array($categoryid, $shared_categories)) {
+					$shared_categories[] = $categoryid;
+				}
+			}
+		}
 
 		// Get items for every user
 		$shared_categories_list = implode(',', $shared_categories);
-		$shared_artefacts = array();
-		foreach ($shared_users as $key => $user) {
-			if ($onlyitems) {
-				// Only items for customise blocks. for views_mod.php. Or for check is sharable
-				$addwhere = 'AND categoryid IN ('.$shared_categories_list.')';
+
+		if ($onlyitems) {
+			$shared_items = [];
+
+			foreach ($shared_users as $key => $userid) {
+				// Only items for customise blocks. for views_mod.php. Or for check is shared
 				$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
 					" from {block_exaportitem} i".
 					" left join {block_exaportcate} ic on i.categoryid = ic.id".
@@ -679,27 +654,36 @@ namespace {
 					" where i.userid=? AND categoryid IN (".$shared_categories_list.")".
 					" GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
 					" ORDER BY i.name";
-				//echo $query."<br><br>";
-				$user_items = $DB->get_records_sql($query, array($user));
-				$shared_artefacts = $shared_artefacts + $user_items;
-			} else {
 
-				$shared_artefacts[$key]['userid'] = $user;
-				$shared_artefacts[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $user)));
-				$shared_artefacts[$key]['items'] = $DB->get_records_sql('SELECT * FROM {block_exaportitem} WHERE userid=? AND categoryid IN ('.$shared_categories_list.')', array('id' => $user));
+				$user_items = $DB->get_records_sql($query, array($userid));
+				$shared_items = $shared_items + $user_items;
+			}
+
+			return $shared_items;
+		} else {
+			$shared_artefacts_by_user = array();
+			foreach ($shared_users as $key => $userid) {
+				$shared_artefacts_by_user[$key]['userid'] = $userid;
+				$shared_artefacts_by_user[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $userid)));
+				$shared_artefacts_by_user[$key]['items'] = $DB->get_records_sql('SELECT * FROM {block_exaportitem} WHERE userid=? AND categoryid IN ('.$shared_categories_list.')', array('id' => $userid));
 				// delete empty categories
-				if (count($shared_artefacts[$key]['items']) == 0) {
-					unset($shared_artefacts[$key]);
+				if (count($shared_artefacts_by_user[$key]['items']) == 0) {
+					unset($shared_artefacts_by_user[$key]);
 				}
-			};
-		}
+			}
 
-		return $shared_artefacts;
+			return $shared_artefacts_by_user;
+		}
 	}
 
-	// returns owners id
-	function is_sharableitem($userid, $itemid) {
-		$itemsforuser = exaport_get_shared_items_for_user($userid, true);
+	/**
+	 * checks if user can access shared item
+	 * @param $userid
+	 * @param $itemid
+	 * @return bool
+	 */
+	function block_exaport_can_user_access_shared_item($userid, $itemid) {
+		$itemsforuser = block_exaport_get_items_shared_to_user($userid, true);
 		if (array_key_exists($itemid, $itemsforuser)) {
 			return $itemsforuser[$itemid]->userid;
 		} else {

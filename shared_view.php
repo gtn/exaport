@@ -69,7 +69,7 @@ foreach ($blocks as $block) {
 			}
 			$item->intro = process_media_url($item->intro, $block->width, $block->height);
 			// Add checking on sharable item.
-			if ($sharable = is_sharableitem($view->userid, $item->id) || $view->userid == $item->userid) {
+			if ($sharable = block_exaport_can_user_access_shared_item($view->userid, $item->id) || $view->userid == $item->userid) {
 				$block->item = $item;
 			} else {
 				continue; // Hide unshared items

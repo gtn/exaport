@@ -28,7 +28,7 @@ $item = null;
 // thumbnails for BackEnd (editing the view part)
 if ($access == '') {
 	echo $access;
-	if ($sharable = is_sharableitem($USER->id, $item_id)) {
+	if ($sharable = block_exaport_can_user_access_shared_item($USER->id, $item_id)) {
 		// Get thumbnails if item was shared for current user
 		$item = $DB->get_record('block_exaportitem', array('id'=>$item_id));
 	} else {
@@ -42,7 +42,7 @@ if ($access == '') {
 	$view_id = $view->id;
 	$view_ownerid = $view->userid;
 	$item = $DB->get_record('block_exaportitem', array('id'=>$item_id));
-	$sharable = is_sharableitem($view_ownerid, $item_id);
+	$sharable = block_exaport_can_user_access_shared_item($view_ownerid, $item_id);
 	if ($view_ownerid != $item->userid && !$sharable) {
 		throw new moodle_exception('item not found');
 	}

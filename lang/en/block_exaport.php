@@ -395,7 +395,7 @@ $string['desp_categories'] = '
 	 - partner work
 	 - group work
 ';
-$string['desp_explaining'] = 'My artefacts';
+
 
 // === Config ===
 $string['config_feature_copy_to_course'] = 'Allow students to copy ePortfolio files to their courses';

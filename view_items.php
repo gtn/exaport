@@ -139,7 +139,7 @@ if ($type == 'shared') {
 		} else {
 			$parentCategory = (object)[
 				'id' => 0,
-				'url' => new moodle_url('shared_categories.php', ['courseid'=>2]),
+				'url' => new moodle_url('shared_categories.php', ['courseid'=>$COURSE->id]),
 				'name' => '',
 			];
 		}

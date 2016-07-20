@@ -167,7 +167,7 @@ for ($i = 1; $i <= $cols_layout[$view->layout]; $i++) {
 					if ($file = $DB->get_record_select('files', $select, null, 'id, filename, mimetype, filesize')) {
 						if (strpos($file->mimetype, "image") !== false) {
 							$img_src = $CFG->wwwroot."/pluginfile.php/".context_user::instance($item->userid)->id."/".'block_exaport'."/".'item_file'."/view/".$access."/itemid/".$item->id."/".$file->filename;
-							echo '<div class="view-item-image"><img height="100" src="'.$img_src.'" alt=""/></div>';
+							echo '<div class="view-item-image"><img src="'.$img_src.'" alt=""/></div>';
 						} else {
 							// Link to file.
 							$ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access."&itemid=".$item->id);

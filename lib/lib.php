@@ -19,14 +19,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once $CFG->libdir . '/filelib.php';
+require_once $CFG->libdir.'/filelib.php';
 
-if (block_exaport_check_competence_interaction()){
+if (block_exaport_check_competence_interaction()) {
 	// TODO: don't use any of the exacomp functions, use \block_exacomp\api::method() instead!
-	if(file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php'))
-		require_once $CFG->dirroot . '/blocks/exacomp/lib/lib.php';
-	else
-		require_once $CFG->dirroot . '/blocks/exacomp/lib/div.php';
+	if (file_exists($CFG->dirroot.'/blocks/exacomp/lib/lib.php')) {
+		require_once $CFG->dirroot.'/blocks/exacomp/lib/lib.php';
+	} else {
+		require_once $CFG->dirroot.'/blocks/exacomp/lib/div.php';
+	}
 }
 
 require_once __DIR__.'/common.php';
@@ -63,6 +64,7 @@ function block_exaport_get_category_icon($category) {
 		if ($category->userid !== g::$USER->id) {
 			return;
 		}
+
 		return g::$CFG->wwwroot.'/pluginfile.php/'.$file->get_contextid().'/block_exaport/category_icon/'.$file->get_itemid().'/'.$file->get_filename();
 	} else {
 		return null;
@@ -81,20 +83,21 @@ function block_exaport_get_item_comment_file($commentid) {
 	// list all files, excluding directories!
 	$areafiles = $fs->get_area_files(context_system::instance()->id, 'block_exaport', 'item_comment_file', $commentid, null, false);
 
-	if (empty($areafiles))
+	if (empty($areafiles)) {
 		return null;
-	else
+	} else {
 		return reset($areafiles);
+	}
 }
 
-function block_exaport_add_to_log($courseid, $module, $action, $url='', $info='', $cm=0, $user=0) {
+function block_exaport_add_to_log($courseid, $module, $action, $url = '', $info = '', $cm = 0, $user = 0) {
 	if (!function_exists('get_log_manager')) {
 		// old style
-		return add_to_log($courseid, $module, $action, $url='', $info='', $cm=0, $user=0);
+		return add_to_log($courseid, $module, $action, $url = '', $info = '', $cm = 0, $user = 0);
 	}
-	
+
 	// hack for new style
-	
+
 	// This is a nasty hack that allows us to put all the legacy stuff into legacy storage,
 	// this way we may move all the legacy settings there too.
 	$manager = get_log_manager();
@@ -130,63 +133,73 @@ function block_exaport_require_login($courseid) {
 
 function block_exaport_shareall_enabled() {
 	global $CFG;
+
 	return empty($CFG->block_exaport_disable_shareall);
 }
 
 function block_exaport_external_comments_enabled() {
 	global $CFG;
+
 	return empty($CFG->block_exaport_disable_external_comments);
 }
 
 function block_exaport_setup_default_categories() {
-	global $DB, $USER,$CFG;
-	if (block_exaport_course_has_desp() && !$DB->record_exists('block_exaportcate', array('userid'=>$USER->id))
-		&& !empty($CFG->block_exaport_create_desp_categories)) {
+	global $DB, $USER, $CFG;
+	if (block_exaport_course_has_desp() && !$DB->record_exists('block_exaportcate', array('userid' => $USER->id))
+		&& !empty($CFG->block_exaport_create_desp_categories)
+	) {
 		block_exaport_import_categories("desp_categories");
 	}
 }
-function block_exaport_import_categories($categoriesSTR){
+
+function block_exaport_import_categories($categoriesSTR) {
 	global $DB, $USER;
 	$categories = trim(get_string($categoriesSTR, "block_exaport"));
-	
-	if (!$categories) return;
-	
+
+	if (!$categories) {
+		return;
+	}
+
 	$categories = explode("\n", $categories);
 	$categories = array_map('trim', $categories);
-	
+
 	$newentry = new stdClass();
 	$newentry->timemodified = time();
 	$newentry->userid = $USER->id;
 	$newentry->pid = 0;
-	
+
 	$lastMainId = null;
 	foreach ($categories as $category) {
-		
+
 		if ($category[0] == '-' && $lastMainId) {
 			// subcategory
 			$newentry->name = trim($category, '-');
 			$newentry->pid = $lastMainId;
 			//$categoryDB = $DB->get_records('block_exaportcate', array("name"=>trim($category,'-')));
-			if(!$DB->record_exists('block_exaportcate', array("name"=>trim($category,'-'))))
+			if (!$DB->record_exists('block_exaportcate', array("name" => trim($category, '-')))) {
 				$DB->insert_record("block_exaportcate", $newentry);
+			}
 		} else {
 			$newentry->name = $category;
 			$newentry->pid = 0;
 			//$categoryDB = $DB->get_records('block_exaportcate', array("name"=>$category));
-			if(!$DB->record_exists('block_exaportcate', array("name"=>$category)))
+			if (!$DB->record_exists('block_exaportcate', array("name" => $category))) {
 				$lastMainId = $DB->insert_record("block_exaportcate", $newentry);
-			else {
-				$lastMainId = $DB->get_field('block_exaportcate', 'id', array("name"=>$category));
+			} else {
+				$lastMainId = $DB->get_field('block_exaportcate', 'id', array("name" => $category));
 			}
 		}
 	}
 }
+
 function block_exaport_feature_enabled($feature) {
 	global $CFG;
-	if ($feature == 'views')
+	if ($feature == 'views') {
 		return true;
-	if ($feature == 'copy_to_course')
+	}
+	if ($feature == 'copy_to_course') {
 		return !empty($CFG->block_exaport_feature_copy_to_course);
+	}
 	die('wrong feature');
 }
 
@@ -204,40 +217,44 @@ function block_exaport_has_categories($userid) {
 function block_exaport_moodleimport_file_area_name($userid, $assignmentid, $courseid) {
 	global $CFG;
 
-	return $courseid . '/' . $CFG->moddata . '/assignment/' . $assignmentid . '/' . $userid;
+	return $courseid.'/'.$CFG->moddata.'/assignment/'.$assignmentid.'/'.$userid;
 }
 
 function block_exaport_print_file(stored_file $file) {
 	global $CFG, $OUTPUT;
 
-	$url = moodle_url::make_pluginfile_url ( $file->get_contextid (), $file->get_component (), $file->get_filearea (), $file->get_itemid (), $file->get_filepath (), $file->get_filename () );
+	$url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(), $file->get_itemid(), $file->get_filepath(), $file->get_filename());
 
 	$icon = new pix_icon(file_mimetype_icon($file->get_mimetype()), '');
-	if (in_array($file->get_mimetype(), array('image/gif', 'image/jpeg', 'image/png'))) {	// Image attachments don't get printed as links
-		return "<img src=\"$url\" alt=\"" . s($file->get_filename()) . "\" />";
+	if (in_array($file->get_mimetype(), array('image/gif', 'image/jpeg', 'image/png'))) {    // Image attachments don't get printed as links
+		return "<img src=\"$url\" alt=\"".s($file->get_filename())."\" />";
 	} else {
-		return '<p><img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.gif" class="icon" alt="' . $icon->pix . '" />&nbsp;' . $OUTPUT->action_link($url, $file->get_filename()) . "</p>";
+		return '<p><img src="'.$CFG->wwwroot.'/pix/'.$icon->pix.'.gif" class="icon" alt="'.$icon->pix.'" />&nbsp;'.$OUTPUT->action_link($url, $file->get_filename())."</p>";
 	}
 }
 
 function block_exaport_course_has_desp() {
 	global $COURSE, $DB;
-	
-	if (isset($COURSE->has_desp))
+
+	if (isset($COURSE->has_desp)) {
 		return $COURSE->has_desp;
-	
+	}
+
 	// desp block installed?
-	if (!is_dir(__DIR__.'/../../desp'))
+	if (!is_dir(__DIR__.'/../../desp')) {
 		return $COURSE->has_desp = false;
+	}
 
 	$context = context_course::instance($COURSE->id);
-	
-	return $COURSE->has_desp = $DB->record_exists('block_instances', array('blockname'=>'desp', 'parentcontextid'=>$context->id));
+
+	return $COURSE->has_desp = $DB->record_exists('block_instances', array('blockname' => 'desp', 'parentcontextid' => $context->id));
 }
-function block_exaport_wrapperdivstart(){
-	return html_writer::start_tag('div',array('id'=>'exaport'));
+
+function block_exaport_wrapperdivstart() {
+	return html_writer::start_tag('div', array('id' => 'exaport'));
 }
-function block_exaport_wrapperdivend(){
+
+function block_exaport_wrapperdivend() {
 	return html_writer::end_tag('div');
 }
 
@@ -246,7 +263,9 @@ function block_exaport_init_js_css() {
 
 	// only allowed to be called once
 	static $js_inited = false;
-	if ($js_inited) return;
+	if ($js_inited) {
+		return;
+	}
 	$js_inited = true;
 
 	// $PAGE->requires->css('/blocks/exaport/css/jquery-ui.css');
@@ -263,10 +282,12 @@ function block_exaport_init_js_css() {
 
 
 	$scriptName = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
-	if (file_exists($CFG->dirroot.'/blocks/exaport/css/'.$scriptName.'.css'))
+	if (file_exists($CFG->dirroot.'/blocks/exaport/css/'.$scriptName.'.css')) {
 		$PAGE->requires->css('/blocks/exaport/css/'.$scriptName.'.css');
-	if (file_exists($CFG->dirroot.'/blocks/exaport/javascript/'.$scriptName.'.js'))
+	}
+	if (file_exists($CFG->dirroot.'/blocks/exaport/javascript/'.$scriptName.'.js')) {
 		$PAGE->requires->js('/blocks/exaport/javascript/'.$scriptName.'.js', true);
+	}
 
 }
 
@@ -287,7 +308,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
 	// navigationspfad
 	$navlinks = array();
-	$navlinks[] = array('name' => block_exaport_get_string("blocktitle"), 'link' => "view.php?courseid=" . $COURSE->id, 'type' => 'title');
+	$navlinks[] = array('name' => block_exaport_get_string("blocktitle"), 'link' => "view.php?courseid=".$COURSE->id, 'type' => 'title');
 	$nav_item_identifier = $item_identifier;
 
 	$icon = $item_identifier;
@@ -297,16 +318,16 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	$tabs = array();
 
 	if (block_exaport_course_has_desp()) {
-		$tabs['back'] = new tabobject('back', $CFG->wwwroot . '/blocks/desp/index.php?courseid=' . $COURSE->id, get_string("back_to_desp", "block_exaport"), '', true);
+		$tabs['back'] = new tabobject('back', $CFG->wwwroot.'/blocks/desp/index.php?courseid='.$COURSE->id, get_string("back_to_desp", "block_exaport"), '', true);
 	}
 
-	$tabs['resume_my'] = new tabobject('resume_my', $CFG->wwwroot . '/blocks/exaport/view.php?courseid=' . $COURSE->id, get_string("resume_my", "block_exaport"), '', true);
+	$tabs['resume_my'] = new tabobject('resume_my', $CFG->wwwroot.'/blocks/exaport/view.php?courseid='.$COURSE->id, get_string("resume_my", "block_exaport"), '', true);
 	// $tabs[] = new tabobject('categories', $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $COURSE->id, get_string("categories", "block_exaport"), '', true);
-	$tabs['myportfolio'] = new tabobject('myportfolio', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id, block_exaport_get_string("myportfolio"), '', true);
-	$tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id, get_string("views", "block_exaport"), '', true);
-	$tabs['shared_views'] = new tabobject('shared_views', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id, block_exaport_get_string("shared_views"), '', true);
-	$tabs['shared_categories'] = new tabobject('shared_categories', $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $COURSE->id, block_exaport_get_string("shared_categories"), '', true);
-	$tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id, get_string("importexport", "block_exaport"), '', true);
+	$tabs['myportfolio'] = new tabobject('myportfolio', $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$COURSE->id, block_exaport_get_string("myportfolio"), '', true);
+	$tabs['views'] = new tabobject('views', $CFG->wwwroot.'/blocks/exaport/views_list.php?courseid='.$COURSE->id, get_string("views", "block_exaport"), '', true);
+	$tabs['shared_views'] = new tabobject('shared_views', $CFG->wwwroot.'/blocks/exaport/shared_views.php?courseid='.$COURSE->id, block_exaport_get_string("shared_views"), '', true);
+	$tabs['shared_categories'] = new tabobject('shared_categories', $CFG->wwwroot.'/blocks/exaport/shared_categories.php?courseid='.$COURSE->id, block_exaport_get_string("shared_categories"), '', true);
+	$tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot.'/blocks/exaport/importexport.php?courseid='.$COURSE->id, get_string("importexport", "block_exaport"), '', true);
 
 	$tab_item_identifier = preg_replace('!_.*!', '', $item_identifier);
 	$tab_sub_item_identifier = preg_replace('!_.*!', '', $sub_item_identifier);
@@ -318,12 +339,12 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	// kind of hacked here, find another solution
 	if ($tab_item_identifier == 'views') {
 		$id = optional_param('id', 0, PARAM_INT);
-		if ($id>0) {
-			$tabs['views']->subtree[] = new tabobject('title', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'),get_string("viewtitle", "block_exaport"), '', true);
-			$tabs['views']->subtree[] = new tabobject('layout', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'),get_string("viewlayout", "block_exaport"), '', true);
-			$tabs['views']->subtree[] = new tabobject('content', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'),get_string("viewcontent", "block_exaport"), '', true);
+		if ($id > 0) {
+			$tabs['views']->subtree[] = new tabobject('title', s($CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=title&action=edit'), get_string("viewtitle", "block_exaport"), '', true);
+			$tabs['views']->subtree[] = new tabobject('layout', s($CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=layout&action=edit'), get_string("viewlayout", "block_exaport"), '', true);
+			$tabs['views']->subtree[] = new tabobject('content', s($CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&action=edit'), get_string("viewcontent", "block_exaport"), '', true);
 			if (has_capability('block/exaport:shareextern', context_system::instance()) || has_capability('block/exaport:shareintern', context_system::instance())) {
-				$tabs['views']->subtree[] = new tabobject('share', s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'),get_string("viewshare", "block_exaport"), '', true);
+				$tabs['views']->subtree[] = new tabobject('share', s($CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$COURSE->id.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit'), get_string("viewshare", "block_exaport"), '', true);
 			}
 		}
 	}
@@ -341,22 +362,23 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	}
 
 	$item_name = get_string($nav_item_identifier, "block_exaport");
-	if ($item_name[0] == '[')
+	if ($item_name[0] == '[') {
 		$item_name = get_string($nav_item_identifier);
+	}
 	$navlinks[] = array('name' => $item_name, 'link' => null, 'type' => 'misc');
 
 	//$navigation = build_navigation($navlinks);
-	foreach($navlinks as $navlink){
+	foreach ($navlinks as $navlink) {
 		$PAGE->navbar->add($navlink["name"], $navlink["link"]);
 	}
-	
+
 	$PAGE->set_title($item_name);
-   	$PAGE->set_heading(get_string(block_exaport_course_has_desp()?"desp_pluginname":'pluginname', "block_exaport"));
- 
-	 // header
+	$PAGE->set_heading(get_string(block_exaport_course_has_desp() ? "desp_pluginname" : 'pluginname', "block_exaport"));
+
+	// header
 	global $OUTPUT;
 
-  	echo $OUTPUT->header();
+	echo $OUTPUT->header();
 	echo block_exaport_wrapperdivstart();
 	if (block_exaport_course_has_desp()) {
 		// include the desp css
@@ -365,7 +387,7 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 
 	echo $OUTPUT->render($tabtree);
 
-	if (block_exaport_course_has_desp() && (strpos($currenttab,'myportfolio') === 0) ) {
+	if (block_exaport_course_has_desp() && (strpos($currenttab, 'myportfolio') === 0)) {
 		echo '<div id="messageboxses1"';
 		//if (file_exists("../desp/images/message_ses1.gif")){ echo ' style="min-height:145px; background: url(\'../desp/images/message_ses1.gif\') no-repeat left top; "';}
 		echo '>
@@ -378,24 +400,28 @@ function block_exaport_print_header($item_identifier, $sub_item_identifier = nul
 	}
 }
 
-function block_exaport_get_string($string, $param=null) {
+function block_exaport_get_string($string, $param = null) {
 	$manager = get_string_manager();
 
-	if (block_exaport_course_has_desp() && $manager->string_exists('desp_'.$string, 'block_exaport'))
+	if (block_exaport_course_has_desp() && $manager->string_exists('desp_'.$string, 'block_exaport')) {
 		return $manager->get_string('desp_'.$string, 'block_exaport', $param);
+	}
 
-	if ($manager->string_exists($string, "block_exaport"))
+	if ($manager->string_exists($string, "block_exaport")) {
 		return $manager->get_string($string, 'block_exaport', $param);
+	}
 
-	return $manager->get_string($string, '', $param);	
+	return $manager->get_string($string, '', $param);
 }
+
 function todo_string($string) {
 	$manager = get_string_manager();
-	
-	if ($manager->string_exists($string, "block_exaport"))
-		return $manager->get_string($string, 'block_exaport');
 
-	return '[['.$string.']]';	
+	if ($manager->string_exists($string, "block_exaport")) {
+		return $manager->get_string($string, 'block_exaport');
+	}
+
+	return '[['.$string.']]';
 }
 
 function block_exaport_print_footer() {
@@ -409,10 +435,11 @@ function block_exaport_print_footer() {
  * @return string correct type
  */
 function block_exaport_check_item_type($type, $all_allowed) {
-	if (in_array($type, Array('link', 'file', 'note')))
+	if (in_array($type, Array('link', 'file', 'note'))) {
 		return $type;
-	else
+	} else {
 		return $all_allowed ? 'all' : false;
+	}
 }
 
 /**
@@ -421,7 +448,7 @@ function block_exaport_check_item_type($type, $all_allowed) {
  * @return string Plural. E.g. file->files, note->notes, all->all (has no plural)
  */
 function block_exaport_get_plural_item_type($type) {
-	return $type == 'all' ? $type : $type . 's';
+	return $type == 'all' ? $type : $type.'s';
 }
 
 /**
@@ -430,8 +457,9 @@ function block_exaport_get_plural_item_type($type) {
  * @return Array(sortcolumn, asc|desc)
  */
 function block_exaport_parse_sort($sort, array $allowedSorts, array $defaultSort = null) {
-	if (!is_array($sort))
+	if (!is_array($sort)) {
 		$sort = explode('.', $sort);
+	}
 
 	$column = $sort[0];
 	$order = isset($sort[1]) ? $sort[1] : '';
@@ -445,18 +473,21 @@ function block_exaport_parse_sort($sort, array $allowedSorts, array $defaultSort
 	}
 
 	// sortorder never desc allowed!
-	if ($column == 'sortorder')
+	if ($column == 'sortorder') {
 		return array($column, 'asc');
+	}
 
-	if ($order != "desc")
+	if ($order != "desc") {
 		$order = "asc";
+	}
 
 	return array($column, $order);
 }
 
 function block_exaport_parse_item_sort($sort, $catsortallowed) {
-	if($catsortallowed)
+	if ($catsortallowed) {
 		return block_exaport_parse_sort($sort, array('date', 'name', 'category', 'type'), array('date', 'desc'));
+	}
 
 	return block_exaport_parse_sort($sort, array('date', 'name', 'type'), array('date', 'desc'));
 }
@@ -468,14 +499,14 @@ function block_exaport_item_sort_to_sql($sort, $catsortallowed) {
 	$order = $sort[1];
 
 	if ($column == "date") {
-		$sql_sort = "i.timemodified " . $order;
+		$sql_sort = "i.timemodified ".$order;
 	} elseif ($column == "category") {
-		$sql_sort = "cname " . $order . ", i.timemodified";
+		$sql_sort = "cname ".$order.", i.timemodified";
 	} else {
-		$sql_sort = "i." . $column . " " . $order . ", i.timemodified";
+		$sql_sort = "i.".$column." ".$order.", i.timemodified";
 	}
 
-	return ' order by ' . $sql_sort;
+	return ' order by '.$sql_sort;
 }
 
 function block_exaport_parse_view_sort($sort, $for_shared = false) {
@@ -483,23 +514,23 @@ function block_exaport_parse_view_sort($sort, $for_shared = false) {
 }
 
 function block_exaport_view_sort_to_sql($sort) {
-   	global $CFG;
+	global $CFG;
 	$sort = block_exaport_parse_view_sort($sort);
 
 	$column = $sort[0];
 	$order = $sort[1];
-	
-	if((strcmp($column, "name")==0) && (strcmp($CFG->dbtype, "sqlsrv")==0)){
+
+	if ((strcmp($column, "name") == 0) && (strcmp($CFG->dbtype, "sqlsrv") == 0)) {
 		$sql_sort = "cast(v.".$column." AS varchar(max)) ".$order.", v.timemodified DESC";
-	}
-	else if((strcmp($column, "timemodified")==0) && (strcmp($CFG->dbtype, "sqlsrv")==0)){
-		$sql_sort = "v.timemodified DESC";
-	}
-	else{
-		$sql_sort = "v." . $column . " " . $order . ", v.timemodified DESC";
+	} else {
+		if ((strcmp($column, "timemodified") == 0) && (strcmp($CFG->dbtype, "sqlsrv") == 0)) {
+			$sql_sort = "v.timemodified DESC";
+		} else {
+			$sql_sort = "v.".$column." ".$order.", v.timemodified DESC";
+		}
 	}
 
-	return ' order by ' . $sql_sort;
+	return ' order by '.$sql_sort;
 }
 
 function block_exaport_get_user_preferences_record($userid = null) {
@@ -510,6 +541,7 @@ function block_exaport_get_user_preferences_record($userid = null) {
 		$userid = $USER->id;
 	}
 	$conditions = array("user_id" => $userid);
+
 	return $DB->get_record('block_exaportuser', $conditions);
 }
 
@@ -539,26 +571,26 @@ function block_exaport_check_competence_interaction() {
 	global $CFG;
 
 	return !empty($CFG->block_exaport_enable_interaction_competences) &&
-		class_exists('\block_exacomp\api') && \block_exacomp\api::active();
+	class_exists('\block_exacomp\api') && \block_exacomp\api::active();
 }
 
-function block_exaport_build_comp_table($item, $role="teacher") {
+function block_exaport_build_comp_table($item, $role = "teacher") {
 	global $DB;
 
 	// TODO: refactor: use block_exaport_get_active_comps_for_item instead
 	$sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id FROM {block_exacompdescriptors} d, {block_exacompcompactiv_mm} da WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
 	$descriptors = $DB->get_records_sql($sql, array($item->id));
 	$content = "<table class='compstable flexible boxaligncenter generaltable'>
-				<tr><td><h2>" . $item->name . "</h2></td></tr>";
-	
-	if($role == "teacher") {
+				<tr><td><h2>".$item->name."</h2></td></tr>";
+
+	if ($role == "teacher") {
 		$dis_teacher = " ";
 		$dis_student = " disabled ";
 	} else {
 		$dis_teacher = " disabled ";
 		$dis_student = " ";
 	}
-	
+
 	$trclass = "even";
 	foreach ($descriptors as $descriptor) {
 		if ($trclass == "even") {
@@ -568,7 +600,7 @@ function block_exaport_build_comp_table($item, $role="teacher") {
 			$trclass = "even";
 			$bgcolor = ' style="background-color:#ffffff" ';
 		}
-		$content .= '<tr '. $bgcolor .'><td>' . $descriptor->title . '</td></tr>';
+		$content .= '<tr '.$bgcolor.'><td>'.$descriptor->title.'</td></tr>';
 		/*<td>
 			<input'.$dis_teacher.'type="checkbox" name="data[' . $descriptor->id . ']" checked="###checked' . $descriptor->id . '###" />
 			</td>
@@ -592,11 +624,12 @@ function block_exaport_build_comp_table($item, $role="teacher") {
 	*/
 	echo $content;
 }
-function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
+
+function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
 	global $DB;
 
-	$DB->delete_records('block_exacompcompuser_mm',array("activityid"=>$item->id, "eportfolioitem"=>1, "role"=>$role, "userid"=>$item->userid));
-	
+	$DB->delete_records('block_exacompcompuser_mm', array("activityid" => $item->id, "eportfolioitem" => 1, "role" => $role, "userid" => $item->userid));
+
 	foreach ($values as $value) {
 		$data = array(
 			"activityid" => $item->id,
@@ -604,7 +637,7 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
 			"compid" => $value,
 			"userid" => $item->userid,
 			"reviewerid" => $reviewerid,
-			"role" => $role
+			"role" => $role,
 		);
 		print_r($data);
 		$DB->insert_record('block_exacompcompuser_mm', $data);
@@ -616,6 +649,7 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role=1 ) {
  */
 function block_exaport_get_active_compids_for_item($item) {
 	$ids = array_keys(block_exaport_get_active_comps_for_item($item));
+
 	return array_combine($ids, $ids);
 }
 
@@ -651,7 +685,9 @@ function block_exaport_build_comp_tree($type, $item_or_resume, $allowEdit = true
 	}
 
 	$print_tree = function($items, $level = 0) use (&$print_tree, $forresume, $active_descriptors, $allowEdit) {
-		if (!$items) return '';
+		if (!$items) {
+			return '';
+		}
 
 		$content = '';
 		if ($level == 0) {
@@ -669,12 +705,12 @@ function block_exaport_build_comp_tree($type, $item_or_resume, $allowEdit = true
 
 			$content .= '<li>';
 			if ($item instanceof \block_exacomp\descriptor) {
-				$content .= '<input type="checkbox" name="desc' . ($forresume ? '[]' : '') . '" ' . $checked . ' value="' . $item->id . '" '.(!$allowEdit?'disabled="disabled"':'').'>';
+				$content .= '<input type="checkbox" name="desc'.($forresume ? '[]' : '').'" '.$checked.' value="'.$item->id.'" '.(!$allowEdit ? 'disabled="disabled"' : '').'>';
 			}
 			$content .=
 				$item->title.
 				($item->achieved ? ' '.g::$OUTPUT->pix_icon("i/badge", block_exaport\trans(['de:Erreichte Kompetenz', 'en:Achieved Competency'])) : '').
-				$print_tree($item->get_subs(), $level+1).
+				$print_tree($item->get_subs(), $level + 1).
 				'</li>';
 		}
 
@@ -724,22 +760,25 @@ function block_exaport_build_comp_tree($type, $item_or_resume, $allowEdit = true
 
 	return $content;
 }
-function block_exaport_assignmentversion(){
+
+function block_exaport_assignmentversion() {
 	global $DB;
-	$modassign=new stdClass();
-	if($DB->record_exists('modules', array('name'=>'assign', 'visible'=>1))){
-		$modassign->new=1;
-		$modassign->title="assign";
-		$modassign->filearea="submission_files";
-		$modassign->component="assignsubmission_file";
-	}else{
-		$modassign->new=0;
-		$modassign->title="assignment";
-		$modassign->filearea="submission";
-		$modassign->component='mod_assignment';
+	$modassign = new stdClass();
+	if ($DB->record_exists('modules', array('name' => 'assign', 'visible' => 1))) {
+		$modassign->new = 1;
+		$modassign->title = "assign";
+		$modassign->filearea = "submission_files";
+		$modassign->component = "assignsubmission_file";
+	} else {
+		$modassign->new = 0;
+		$modassign->title = "assignment";
+		$modassign->filearea = "submission";
+		$modassign->component = 'mod_assignment';
 	};
+
 	return $modassign;
 }
+
 function block_exaport_set_user_preferences($userid, $preferences = null) {
 	global $DB;
 
@@ -754,7 +793,7 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
 	if (is_object($preferences)) {
 		$newuserpreferences = $preferences;
 	} elseif (is_array($preferences)) {
-		$newuserpreferences = (object) $preferences;
+		$newuserpreferences = (object)$preferences;
 	} else {
 		echo 'error #fjklfdsjkl';
 	}
@@ -775,19 +814,21 @@ function block_exaport_get_item_where() {
 
 function block_exaport_get_category($id) {
 	global $USER, $DB;
-	
-	if ($id == 0)
+
+	if ($id == 0) {
 		return block_exaport_get_root_category();
-		
+	}
+
 	return $DB->get_record("block_exaportcate", array(
 		'id' => $id,
-		'userid' => $USER->id
+		'userid' => $USER->id,
 	));
 }
 
 function block_exaport_get_root_category() {
 	global $DB, $USER;
-	return (object) array(
+
+	return (object)array(
 		'id' => 0,
 		'pid' => 0,
 		'name' => block_exaport_get_string('root_category'),
@@ -796,25 +837,26 @@ function block_exaport_get_root_category() {
 			SELECT COUNT(i.id) AS item_cnt
 			FROM {block_exaportitem} i
 			WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
-		', array($USER->id))
+		', array($USER->id)),
 
 	);
 }
 
 function block_exaport_get_shareditems_category($name = null, $userid = null) {
 	global $DB, $USER;
-	return (object) array(
+
+	return (object)array(
 		'id' => -1,
 		'pid' => -123, // not parent available
 		'name' => $name != null ? $name : block_exaport_get_string('shareditems_category'),
 		'item_cnt' => '',
 		'url' => g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id.'&type=shared&userid='.$userid,
 		'userid' => $userid ? $userid : ''
-/* 		'item_cnt' => $DB->get_field_sql('
-			SELECT COUNT(i.id) AS item_cnt
-			FROM {block_exaportitem} i
-			WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
-		', array($USER->id))  */
+		/* 		'item_cnt' => $DB->get_field_sql('
+					SELECT COUNT(i.id) AS item_cnt
+					FROM {block_exaportitem} i
+					WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
+				', array($USER->id))  */
 	);
 }
 
@@ -823,43 +865,54 @@ function block_exaport_badges_enabled() {
 	// checking with exacomp
 	if (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled()) {
 		return true;
-	} else if (version_compare($CFG->release, '2.5') >= 0) {
-		// For working badges without exacomp installation:
-		require_once($CFG->libdir . '/badgeslib.php');
-		require_once($CFG->dirroot . '/badges/lib/awardlib.php');
-		return true;
+	} else {
+		if (version_compare($CFG->release, '2.5') >= 0) {
+			// For working badges without exacomp installation:
+			require_once($CFG->libdir.'/badgeslib.php');
+			require_once($CFG->dirroot.'/badges/lib/awardlib.php');
+
+			return true;
+		}
 	};
+
 	return false;
 }
 
 function block_exaport_get_all_user_badges() {
 	global $USER;
 	if (block_exaport_badges_enabled()) {
-		if (!function_exists('block_exacomp_get_all_user_badges')){
-			
+		if (!function_exists('block_exacomp_get_all_user_badges')) {
+
 			// for using badges without exacomp installation
 			$records = badges_get_user_badges($USER->id);
+
 			return $records;
 			// old code
 			print_error("please update Exabis Competence Grid to latest version");
 			exit;
-		}else
+		} else {
 			return block_exacomp_get_all_user_badges();
-	} else
+		}
+	} else {
 		return null;
+	}
 }
+
 function block_exaport_get_user_category($title, $userid) {
 	global $DB;
-	
-	return $DB->get_record('block_exaportcate', array('userid'=>$userid,'name'=>$title));
+
+	return $DB->get_record('block_exaportcate', array('userid' => $userid, 'name' => $title));
 }
+
 function block_exaport_create_user_category($title, $userid, $parentid = 0) {
 	global $DB;
-	
-	if(!$DB->record_exists('block_exaportcate', array('userid'=>$userid,'name'=>$title,'pid'=>$parentid))) {
-		$id = $DB->insert_record('block_exaportcate',array('userid'=>$userid,'name'=>$title,'pid'=>$parentid));
-		return $DB->get_record('block_exaportcate',array('id'=>$id));
+
+	if (!$DB->record_exists('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid))) {
+		$id = $DB->insert_record('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid));
+
+		return $DB->get_record('block_exaportcate', array('id' => $id));
 	}
+
 	return false;
 }
 
@@ -869,18 +922,18 @@ function block_exaport_create_user_category($title, $userid, $parentid = 0) {
  * @param string $existingartefacts
  * @return string Artefacts
  */
-function fill_view_with_artefacts($viewid, $existingartefacts='') {
+function fill_view_with_artefacts($viewid, $existingartefacts = '') {
 	global $DB, $USER;
 
 	$artefacts = block_exaport_get_portfolio_items(1);
-	if ($existingartefacts<>'') {
+	if ($existingartefacts <> '') {
 		$existingartefactsarray = explode(',', $existingartefacts);
 		$filledartefacts = $existingartefacts;
 	} else {
 		$existingartefactsarray = array();
 		$filledartefacts = '';
 	}
-	if (count($artefacts)>0) {
+	if (count($artefacts) > 0) {
 		$y = 1;
 		foreach ($artefacts as $artefact) {
 			if (!in_array($artefact->id, $existingartefactsarray)) {
@@ -899,6 +952,7 @@ function fill_view_with_artefacts($viewid, $existingartefacts='') {
 			$filledartefacts = substr($filledartefacts, 1);
 		};
 	}; /**/
+
 	return $filledartefacts;
 }
 
@@ -913,7 +967,7 @@ function block_exaport_share_view_to_teachers($viewid) {
 		$allteachers = block_exaport_get_course_teachers();
 		$allsharedusers = block_exaport_get_shared_users($viewid);
 		$diff = array_diff($allteachers, $allsharedusers);
-		$view = $DB->get_record_sql('SELECT * FROM {block_exaportview} WHERE id = ?', array('id'=>$viewid));
+		$view = $DB->get_record_sql('SELECT * FROM {block_exaportview} WHERE id = ?', array('id' => $viewid));
 		if (!$view->shareall) {
 			$view->shareall = 0;
 		};
@@ -946,29 +1000,31 @@ function block_exaport_get_view_blocks($view) {
 	$badges = block_exaport_get_all_user_badges();
 
 	$query = "select b.*".
-			" from {block_exaportviewblock} b".
-			" where b.viewid = ? ORDER BY b.positionx, b.positiony";
+		" from {block_exaportviewblock} b".
+		" where b.viewid = ? ORDER BY b.positionx, b.positiony";
 
 	$allBlocks = $DB->get_records_sql($query, array($view->id));
 	$blocks = array();
 
 	foreach ($allBlocks as $block) {
-		if ($block->type == 'item') {					
+		if ($block->type == 'item') {
 			if (!isset($portfolioItems[$block->itemid])) {
 				// Could be shared sometime (because found in block_exaportviewblock with viewid)
 				if (!$potentialitem = $DB->get_record("block_exaportitem", array('id' => $block->itemid))) {
 					// item not found
 					continue;
 				} else {
-					$items = block_exaport_get_portfolio_items(0, $block->itemid);					
+					$items = block_exaport_get_portfolio_items(0, $block->itemid);
 					$portfolioItems[$block->itemid] = $items[$block->itemid];
 					$block->unshared = 1;
 				}
 			}
-			if (!$block->width)
+			if (!$block->width) {
 				$block->width = 320;
-			if (!$block->height)
+			}
+			if (!$block->height) {
 				$block->height = 240;
+			}
 			$portfolioItems[$block->itemid]->intro = process_media_url($portfolioItems[$block->itemid]->intro, $block->width, $block->height);
 			$block->item = $portfolioItems[$block->itemid];
 		} elseif ($block->type == 'badge') {
@@ -984,14 +1040,14 @@ function block_exaport_get_view_blocks($view) {
 				// badge not found
 				continue;
 			}
-				
+
 			if (!$badge->courseid) { // For badges with courseid = NULL
 				$badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
 			} else {
-				$context = context_course::instance($badge->courseid);	
+				$context = context_course::instance($badge->courseid);
 				$badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
 			}
-			
+
 
 			$block->badge = $badge;
 		} else {
@@ -1022,18 +1078,18 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 	};
 	// only needed item by id
 	if ($itemid) {
-		$where = ' i.id = '.$itemid;	
+		$where = ' i.id = '.$itemid;
 	} else {
 		$where = " i.userid=? ".$addwhere;
 	}
 	$query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
-			" from {block_exaportitem} i".
-			" left join {block_exaportcate} ic on i.categoryid = ic.id".
-			" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-			" left join {block_exaportitemcomm} com on com.itemid = i.id".
-			" where ".$where.
-			" GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
-			" ORDER BY i.name";
+		" from {block_exaportitem} i".
+		" left join {block_exaportcate} ic on i.categoryid = ic.id".
+		" left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+		" left join {block_exaportitemcomm} com on com.itemid = i.id".
+		" where ".$where.
+		" GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
+		" ORDER BY i.name";
 	//echo $query."<br><br>";
 	$portfolioItems = $DB->get_records_sql($query, array($USER->id));
 	if (!$portfolioItems) {
@@ -1044,29 +1100,30 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 	$shared_items = block_exaport_get_items_shared_to_user($USER->id, true);
 	$portfolioItems = $portfolioItems + $shared_items;
 
-	foreach ($portfolioItems as &$item) {
+	foreach ($portfolioItems as $item) {
 		if (null == $item->cname) {
 			$item->category = format_string(block_exaport_get_root_category()->name);
 			$item->catid = 0;
 		} elseif (null == $item->cname_parent) {
 			$item->category = format_string($item->cname);
 		} else {
-			//$item->category = format_string($item->cname_parent) . " &rArr; " . format_string($item->cname);
-			$catid= $item->catid;
-			$catname = $item->cname;
+			$catid = $item->catid;
 			$item->category = "";
-			do{
-				$conditions = array("userid" => $USER->id, "id" => $catid);
-				$cats=$DB->get_records_select("block_exaportcate", "userid = ? AND id = ?",$conditions, "name ASC");
-				foreach($cats as $cat){
-					if($item->category == "")
-						$item->category =format_string($cat->name);
-					else
-						$item->category =format_string($cat->name)." &rArr; ".$item->category;
-					$catid = $cat->pid;
-				}
+			while ($catid) {
+				$cat = $DB->get_record("block_exaportcate", ["userid" => $item->userid, "id" => $catid]);
 
-			}while ($cat->pid != 0);
+				if ($cat) {
+					if (!$item->category) {
+						$item->category = format_string($cat->name);
+					} else {
+						$item->category = format_string($cat->name)." &rArr; ".$item->category;
+					}
+
+					$catid = $cat->pid;
+				} else {
+					break;
+				}
+			}
 		}
 
 		if ($item->intro) {
@@ -1078,16 +1135,16 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 		$item->userid = $USER->id;
 
 		$comp = block_exaport_check_competence_interaction();
-		if($comp){
+		if ($comp) {
 			$compids = block_exaport_get_active_compids_for_item($item);
 
-			if($compids){
+			if ($compids) {
 				$competences = "";
-				foreach($compids as $compid){
+				foreach ($compids as $compid) {
 					$conditions = array("id" => $compid);
-					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields='*', $strictness=IGNORE_MISSING);
+					$competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields = '*', $strictness = IGNORE_MISSING);
 
-					if($competencesdb != null){
+					if ($competencesdb != null) {
 						$competences .= $competencesdb->title.'<br>';
 					}
 				}
@@ -1095,7 +1152,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 				$competences = str_replace("\n", "", $competences);
 				$competences = str_replace("\"", "&quot;", $competences);
 				$competences = str_replace("'", "&prime;", $competences);
-					
+
 				$item->competences = $competences;
 			}
 		}
@@ -1105,6 +1162,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
 		unset($item->cname);
 		unset($item->cname_parent);
 	}
+
 	//	print_r($portfolioItems);
 
 	return $portfolioItems;
@@ -1128,7 +1186,7 @@ function block_exaport_get_course_teachers($exceptMyself = true) {
 	$exastudTeachers = $DB->get_records_sql($query, [$context->id]);
 
 	// if exacomp is not installed this function returns an emtpy array
-	$exacompTeachers = get_enrolled_users($context,'block/exacomp:teacher');
+	$exacompTeachers = get_enrolled_users($context, 'block/exacomp:teacher');
 
 	$teachers = $exastudTeachers + $exacompTeachers;
 
@@ -1148,35 +1206,39 @@ function block_exaport_get_course_teachers($exceptMyself = true) {
  */
 function block_exaport_get_shared_users($viewid) {
 	global $DB, $USER;
-	$sharedusers = array ();
+	$sharedusers = array();
 	if ($viewid > 0) {
 		$query = "SELECT userid FROM {block_exaportviewshar} s WHERE s.viewid=".$viewid;
 		$users = $DB->get_records_sql($query);
-		foreach($users as $user) {
+		foreach ($users as $user) {
 			$sharedusers[] = $user->userid;
 		};
 	};
 	sort($sharedusers);
-	return $sharedusers;
-};
 
-function block_exaport_file_userquotecheck($addingfiles = 0, $id=0) {
+	return $sharedusers;
+}
+
+;
+
+function block_exaport_file_userquotecheck($addingfiles = 0, $id = 0) {
 	global $DB, $USER, $CFG;
 	$result = $DB->get_record_sql("SELECT SUM(filesize) as allfilesize FROM {files} WHERE contextid = ? and component='block_exaport'", array(context_user::instance($USER->id)->id));
 	if ($result->allfilesize + $addingfiles > $CFG->block_exaport_userquota) {
 		$courseid = optional_param('courseid', 0, PARAM_INT);
 		$categoryid = optional_param('categoryid', 0, PARAM_INT);
 		$type = optional_param('type', 0, PARAM_RAW);
-		print_error('userquotalimit', '', new moodle_url('/blocks/exaport/item.php', 
-				array('sesskey' => sesskey(),
-						'courseid' => $courseid,
-						'action' => 'edit',
-						'type' => $type,
-						'id' => $id, 
-						'categoryid' => $categoryid)), null);
+		print_error('userquotalimit', '', new moodle_url('/blocks/exaport/item.php',
+			array('sesskey' => sesskey(),
+				'courseid' => $courseid,
+				'action' => 'edit',
+				'type' => $type,
+				'id' => $id,
+				'categoryid' => $categoryid)), null);
 		//throw new file_exception('userquotalimit');
-	}		
-	return true;	
+	}
+
+	return true;
 }
 
 function block_exaport_get_filesize_by_draftid($draftid = 0) {
@@ -1195,11 +1257,12 @@ function block_exaport_get_maxfilesize_by_draftid_check($draftid = 0) {
 	if (($CFG->block_exaport_max_uploadfile_size > 0) && ($result->maxfilesize > $CFG->block_exaport_max_uploadfile_size)) {
 		print_error('maxbytes', 'exaport', 'blocks/exaport/view_items.php', null);
 		//throw new file_exception('maxbytes');
-	}		
-	return true;	
+	}
+
+	return true;
 }
 
-function block_exaport_is_valid_media_by_filename ($filename) {
+function block_exaport_is_valid_media_by_filename($filename) {
 	global $DB, $USER, $CFG;
 	$path_parts = pathinfo($filename);
 	switch ($path_parts['extension']) {
@@ -1213,7 +1276,8 @@ function block_exaport_is_valid_media_by_filename ($filename) {
 		case 'webm':
 		case 'ogg':
 			return true;
-		default: return false;
+		default:
+			return false;
 	}
 }
 
@@ -1261,57 +1325,60 @@ function block_exaport_item_is_resubmitable($itemid) {
 		return false;
 	}
 
-	if(	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid)) ) {
-		if($eval = $DB->get_record(\block_exacomp\DB_EXAMPLEEVAL, array('exampleid'=>$itemExample->exampleid,'studentid'=>$USER->id,'courseid'=>$COURSE->id))) {
-			if(!$eval->resubmission)
+	if ($itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE, array("itemid" => $itemid))) {
+		if ($eval = $DB->get_record(\block_exacomp\DB_EXAMPLEEVAL, array('exampleid' => $itemExample->exampleid, 'studentid' => $USER->id, 'courseid' => $COURSE->id))) {
+			if (!$eval->resubmission) {
 				return false;
+			}
 		}
 	}
-	
+
 	return true;
 }
+
 function block_exaport_has_grading_permission($itemid) {
 	global $DB;
-	
+
 	if (!block_exaport_check_competence_interaction()) {
 		return false;
 	}
 
 	// check if item is a submission for an exacomp example
-	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE,array("itemid" => $itemid));
+	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE, array("itemid" => $itemid));
 	if (!$itemExample) {
 		return false;
 	}
 
-	$item = $DB->get_record('block_exaportitem', array('id'=>$itemid));
+	$item = $DB->get_record('block_exaportitem', array('id' => $itemid));
 	if (!$item || !$item->courseid) {
 		return false;
 	}
 
 	$coursecontext = context_course::instance($item->courseid);
+
 	return has_capability('block/exacomp:teacher', $coursecontext);
 }
 
 function block_exaport_get_item_tags($itemid, $orderBy = '') {
 	global $DB, $CFG;
-	$tags = array();	
+	$tags = array();
 	if (is_array($itemid)) {
 		// Tags for a few items.
-		if (count($itemid)>0) {
+		if (count($itemid) > 0) {
 			list($whereItems, $paramItems) = $DB->get_in_or_equal($itemid, SQL_PARAMS_NAMED);
 			$result = $DB->get_records_sql('SELECT DISTINCT rawname 			
 									FROM {tag_instance} ti LEFT JOIN {tag} t ON t.id=ti.tagid 
 									WHERE component=\'block_exaport\' AND itemtype=\'block_exaportitem\' AND itemid '.$whereItems.' '.
-									($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
-								$paramItems);									
+				($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
+				$paramItems);
 		}
 	} else {
 		// Tags for one item.
 		$result = $DB->get_records_sql('SELECT * 
 									FROM {tag_instance} ti LEFT JOIN {tag} t ON t.id=ti.tagid 
 									WHERE component=\'block_exaport\' AND itemtype=\'block_exaportitem\' AND itemid = ?'.
-									($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
-								array($itemid));			
+			($orderBy != '' ? ' ORDER BY '.$orderBy : ''),
+			array($itemid));
 	}
 	if (!$result) {
 		$result = array();
@@ -1319,6 +1386,7 @@ function block_exaport_get_item_tags($itemid, $orderBy = '') {
 	foreach ($result as &$tag) {
 		$tags[] = $tag->rawname;
 	}
+
 	return $tags;
 }
 
@@ -1339,53 +1407,52 @@ function block_exaport_get_item_tags($itemid, $orderBy = '') {
  * @return \core_tag\output\tagindex
  */
 function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx = 0, $ctx = 0, $rec = 1, $page = 0) {
-    global $OUTPUT;
-    $perpage = $exclusivemode ? 20 : 5;
+	global $OUTPUT;
+	$perpage = $exclusivemode ? 20 : 5;
 
-    // Build the SQL query.
-    // $ctxselect = context_helper::get_preload_record_columns_sql('ctx');
-    $query = "SELECT i.id, i.name, i.type, i.userid, cat.name AS categoryname, i.categoryid
+	// Build the SQL query.
+	// $ctxselect = context_helper::get_preload_record_columns_sql('ctx');
+	$query = "SELECT i.id, i.name, i.type, i.userid, cat.name AS categoryname, i.categoryid
                 FROM {block_exaportitem} i
                 LEFT JOIN {block_exaportcate} cat ON i.categoryid = cat.id
                 JOIN {tag_instance} tt ON i.id = tt.itemid
 				WHERE tt.itemtype = :itemtype AND tt.tagid = :tagid AND tt.component = :component AND i.id %ITEMFILTER%";
 
-    $params = array('itemtype' => 'block_exaportitem', 'tagid' => $tag->id, 'component' => 'block_exaport');
+	$params = array('itemtype' => 'block_exaportitem', 'tagid' => $tag->id, 'component' => 'block_exaport');
 
-       $totalpages = $page + 1;
+	$totalpages = $page + 1;
 
-    // Use core_tag_index_builder to build and filter the list of items.
-    $builder = new core_tag_index_builder('block_exaport', 'block_exaportitem', $query, $params, $page * $perpage, $perpage + 1);
-    $items = $builder->get_items();
-    if (count($items) > $perpage) {
-        $totalpages = $page + 2; // We don't need exact page count, just indicate that the next page exists.
-        array_pop($items);
-    }
+	// Use core_tag_index_builder to build and filter the list of items.
+	$builder = new core_tag_index_builder('block_exaport', 'block_exaportitem', $query, $params, $page * $perpage, $perpage + 1);
+	$items = $builder->get_items();
+	if (count($items) > $perpage) {
+		$totalpages = $page + 2; // We don't need exact page count, just indicate that the next page exists.
+		array_pop($items);
+	}
 
-    // Build the display contents.
-    if ($items) {
-        $tagfeed = new core_tag\output\tagfeed();
-        foreach ($items as $item) {
-            $itemurl = new moodle_url('/blocks/exaport/shared_item.php', array('itemid' => $item->id, 'access' => 'portfolio/id/'.$item->userid));
-            $itemname = format_string($item->name, true);
-            $itemname = html_writer::link($itemurl, $itemname);
+	// Build the display contents.
+	if ($items) {
+		$tagfeed = new core_tag\output\tagfeed();
+		foreach ($items as $item) {
+			$itemurl = new moodle_url('/blocks/exaport/shared_item.php', array('itemid' => $item->id, 'access' => 'portfolio/id/'.$item->userid));
+			$itemname = format_string($item->name, true);
+			$itemname = html_writer::link($itemurl, $itemname);
 			$categoryname = $item->categoryname;
 			$iconsrc = new moodle_url('/blocks/exaport/item_thumb.php', array('item_id' => $item->id));
-            $icon = html_writer::link($itemurl, html_writer::empty_tag('img', array('src' => $iconsrc)));
-            $tagfeed->add($icon, $itemname, $categoryname);
-        }
+			$icon = html_writer::link($itemurl, html_writer::empty_tag('img', array('src' => $iconsrc)));
+			$tagfeed->add($icon, $itemname, $categoryname);
+		}
 
-        $content = $OUTPUT->render_from_template('core_tag/tagfeed',
-                $tagfeed->export_for_template($OUTPUT));
+		$content = $OUTPUT->render_from_template('core_tag/tagfeed',
+			$tagfeed->export_for_template($OUTPUT));
 
-        return new core_tag\output\tagindex($tag, 'block_exaport', 'block_exaportitem', $content,
-                $exclusivemode, $fromctx, $ctx, $rec, $page, $totalpages);
-    }
+		return new core_tag\output\tagindex($tag, 'block_exaport', 'block_exaportitem', $content,
+			$exclusivemode, $fromctx, $ctx, $rec, $page, $totalpages);
+	}
 }
 
 
-function block_exaport_securephrase_viewemail(&$view, $email)
-{
+function block_exaport_securephrase_viewemail(&$view, $email) {
 	// secure phrase relates to the email
-	return substr(sha1(rand() . $view->id . $email. time(). rand()), rand(0, 7), 32);
+	return substr(sha1(rand().$view->id.$email.time().rand()), rand(0, 7), 32);
 } 

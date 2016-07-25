@@ -25,7 +25,7 @@ require_login($courseid);
 block_exaport_setup_default_categories();
 
 $url = '/blocks/exaport/category.php';
-$PAGE->set_url($url, ['courseid' => $courseid]);
+$PAGE->set_url($url, ['courseid' => $courseid, 'action' => optional_param('action', '', PARAM_ALPHA), 'id' => optional_param('id', '', PARAM_INT)]);
 
 // Get userlist for sharing category
 if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {

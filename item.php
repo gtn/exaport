@@ -27,6 +27,7 @@ $compids = optional_param('compids', '', PARAM_TEXT);
 $backtype = block_exaport_check_item_type($backtype, true);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
 $descriptorselection = optional_param('descriptorselection',true,PARAM_BOOL);
+$id = optional_param('id', 0, PARAM_INT);
 
 $context = context_system::instance();
 
@@ -34,15 +35,13 @@ require_login($courseid);
 require_capability('block/exaport:use', $context);
 
 $url = '/blocks/exaport/item.php';
-$PAGE->set_url($url, ['courseid' => $courseid]);
+$PAGE->set_url($url, ['courseid' => $courseid, 'id' => $id, 'action'=>$action]);
 
 $conditions = array("id" => $courseid);
 
 if (!$course = $DB->get_record("course", $conditions)) {
 	print_error("invalidcourseid", "block_exaport");
 }
-
-$id = optional_param('id', 0, PARAM_INT);
 
 if ($CFG->branch < 31)
 	include($CFG->dirroot.'/tag/lib.php');

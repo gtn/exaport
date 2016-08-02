@@ -174,7 +174,7 @@ function block_exaport_resume_checkboxeslist_form($resume, $edit, $data) {
 			};
 			$default_values = $DB->get_records('block_exaportresume_'.$edit, array('resumeid' => $resume->id), null, 'badgeid');
 			break;
-	};
+	}
 	
 	$formheader = get_string('edit', "block_exaport").': '.get_string('resume_'.$edit, "block_exaport");
 	$workform = new block_exaport_resume_checkboxlist_form($_SERVER['REQUEST_URI'].'#'.$edit, array('formheader' => $formheader, 'records'=>$records));

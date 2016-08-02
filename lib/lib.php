@@ -878,23 +878,22 @@ function block_exaport_badges_enabled() {
 	return false;
 }
 
-function block_exaport_get_all_user_badges() {
+function block_exaport_get_all_user_badges($userid = null) {
 	global $USER;
+
+	if ($userid == null) {
+		$userid = $USER->id;
+	}
+
 	if (block_exaport_badges_enabled()) {
-		if (!function_exists('block_exacomp_get_all_user_badges')) {
-
-			// for using badges without exacomp installation
-			$records = badges_get_user_badges($USER->id);
-
-			return $records;
-			// old code
-			print_error("please update Exabis Competence Grid to latest version");
-			exit;
+		if (function_exists('block_exacomp_get_all_user_badges')) {
+			return block_exacomp_get_all_user_badges($userid);
 		} else {
-			return block_exacomp_get_all_user_badges();
+			// for using badges without exacomp installation
+			return badges_get_user_badges($userid);
 		}
 	} else {
-		return null;
+		return [];
 	}
 }
 
@@ -997,7 +996,7 @@ function block_exaport_get_view_blocks($view) {
 	global $DB, $USER;
 
 	$portfolioItems = block_exaport_get_portfolio_items();
-	$badges = block_exaport_get_all_user_badges();
+	$badges = block_exaport_get_all_user_badges($view->userid);
 
 	$query = "select b.*".
 		" from {block_exaportviewblock} b".

@@ -49,7 +49,7 @@ $query = "select b.*". // , i.*, i.id as itemid".
 
 $blocks = $DB->get_records_sql($query, array($view->id));
 
-$badges = block_exaport_get_all_user_badges();
+$badges = block_exaport_get_all_user_badges($view->userid);
 
 // read columns
 $columns = array();

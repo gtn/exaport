@@ -440,7 +440,7 @@ return [
 		'No groups found',
 	],
 	'make_it_yours' => [
-		null,
+		'Mach\' es zu deinem Eigenen',
 		'Make it yours',
 	],
 
@@ -810,7 +810,7 @@ return [
 		'User not found (id unknown)',
 	],
 	'nouserforaccess' => [
-		null,
+		'Benutzer nicht gefunden (Zugriffscode unbekannt)',
 		'User not found (access-code unknown)',
 	],
 
@@ -833,11 +833,11 @@ return [
 		'To export all items of a specific view, please select it here',
 	],
 	'export_directory' => [
-		null,
+		'Exportiere Ordnerstruktur',
 		'Export Directory-structure',
 	],
 	'createexport_directory' => [
-		null,
+		'Erstelle Ordnerstruktur',
 		'Create Directory-structure',
 	],
 
@@ -860,11 +860,11 @@ return [
 		'Search Users',
 	],
 	'other_users_course' => [
-		null,
+		'Benutzer, die nicht in meinen Kursen sind',
 		'Users not in my courses',
 	],
 	'other_groups_course' => [
-		null,
+		'Andere Kurse',
 		'Other courses',
 	],
 
@@ -938,7 +938,7 @@ return [
 		'Headline',
 	],
 	'view_specialitem_personal' => [
-		null,
+		'Persönliche Information',
 		'Personal information',
 	],
 	'view_specialitem_text' => [
@@ -950,7 +950,7 @@ return [
 		'Media',
 	],
 	'view_specialitem_badge' => [
-		null,
+		'Badge',
 		'Badge',
 	],
 	'view_specialitem_headline_defaulttext' => [
@@ -1106,7 +1106,7 @@ return [
 		'List of Artefacts',
 	],
 	'listofbadges' => [
-		null,
+		'Liste von Badges',
 		'List of Badges',
 	],
 	'addButton' => [
@@ -1114,7 +1114,7 @@ return [
 		'Add',
 	],
 	'saveButton' => [
-		null,
+		'Speichern',
 		'Save',
 	],
 	'cancelButton' => [
@@ -1190,7 +1190,7 @@ return [
 		'URLs from the following sites are allowed:',
 	],
 	'filterByTag' => [
-		null,
+		'Tag zum Filtern verwenden',
 		'Filter by tag',
 	],
 	'tagarea_block_exaportitem' => [
@@ -1198,11 +1198,11 @@ return [
 		'My Portfolio Artifacts',
 	],
 	'searchByTitle' => [
-		null,
+		'Suchen',
 		'Search',
 	],
 	'clearAllFilers' => [
-		null,
+		'Alle Filter zurücksetzen',
 		'Clear all filters',
 	],
 	'sharedwith' => [
@@ -1222,7 +1222,7 @@ return [
 		'Shared with all users',
 	],
 	'sharedwith_shareexternal' => [
-		null,
+		'Geteilte externe Views',
 		'Shared external',
 	],
 	'sharedwith_group' => [
@@ -1273,7 +1273,7 @@ return [
 		'Choose personal info',
 	],
 	'cofigureblock_badge' => [
-		null,
+		'Badges auswählen',
 		'Choose Badges',
 	],
 
@@ -1284,7 +1284,7 @@ return [
 		'back to language portfolio',
 	],
 	'desp_pluginname' => [
-		null,
+		'Dossier',
 		'Dossier',
 	],
 	'steckbrief' => [
@@ -1445,27 +1445,27 @@ return [
 		'',
 	],
 	'block_exaport_app_externaleportfolio_head' => [
-		'Save files to mahara if checked, save to exaport if not checked',
+		'Dateien in Mahara speichern',
 		'Save files to mahara if checked, save to exaport if not checked',
 	],
 	'block_exaport_app_externaleportfolio_body' => [
-		'For App',
+		'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.',
 		'For App',
 	],
 	'block_exaport_maxbytes' => [
-		null,
+		'Maximale Upload-Dateigröße in Exabis ePortfolio',
 		'Maximum uploaded file size in Exabis ePortfolio',
 	],
 	'block_exaport_maxbytes_body' => [
-		null,
+		'Maximale Dateigröße, die Dateien haben können, die im Exabis ePortfolio hochgeladen werden. <br> Wert für diese Seite ist: {$a->sitemaxbytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
 		'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>',
 	],
 	'block_exaport_userquota' => [
-		null,
+		'Benutzer-Dateikontingent Exabis ePortfolio',
 		'User quota for Exabis ePortfolio',
 	],
 	'block_exaport_userquota_body' => [
-		null,
+		'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
 		'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
 	],
 	'block_exaport_app_alloweditdelete_head' => [
@@ -1477,7 +1477,7 @@ return [
 		'Only useful in combination with Exabis Competence Grid and dakora',
 	],
 	'delete_all_shareall' => [
-		null,
+		'Alle globalen Freigaben "shareall" löschen?',
 		'Delete all shareall?',
 	],
 
@@ -1798,7 +1798,7 @@ return [
 		'Shared Categories',
 	],
 	'nothingstructureshared' => [
-		null,
+		'Keine geteilten Strukturen',
 		'Nobody is sharing a structure with you',
 	],
 	'browsecategory' => [
@@ -1810,11 +1810,11 @@ return [
 		'Copy to my Portfolio',
 	],
 	'sharedArtefacts' => [
-		null,
+		'Gruppe-Portfolios, die mit dir geteilt wurden',
 		'Group portfolios shared with you',
 	],
 	'shareditems_category' => [
-		null,
+		'Gruppen-Portfolios, die mit dir geteilt wurden',
 		'Group portfolios shared with you',
 	],
 	'create_as_note' => [
@@ -1858,7 +1858,7 @@ return [
 		'developed by',
 	],
 	'myfilearea' => [
-		null,
+		'Mein Dateibereich',
 		'My file area',
 	],
 
@@ -1887,7 +1887,7 @@ return [
 		'import standard categories',
 	],
 	'incompatible_video' => [
-		null,
+		'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}',
 		'To view this video please use the direct link: {$a->link}',
 	],
 ];

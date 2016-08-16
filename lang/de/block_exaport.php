@@ -123,6 +123,7 @@ $string['checkall'] = 'Alle auswählen';
 $string['grouptitle'] = 'Gruppentitel';
 $string['membercount'] = 'Anzahl von Mitgliedern';
 $string['nogroupsfound'] = 'Keine Gruppen gefunden';
+$string['make_it_yours'] = 'Mach\' es zu deinem Eigenen';
 
 
 // === export/import ===
@@ -225,6 +226,7 @@ $string['nothingshared'] = 'Kein freigegebenen ePortfolios gefunden';
 
 // === Errors ===
 $string['nouserforid'] = 'Kein Benutzer zu dieser Id!';
+$string['nouserforaccess'] = 'Benutzer nicht gefunden (Zugriffscode unbekannt)';
 
 
 // === Export ===
@@ -232,6 +234,8 @@ $string['export'] = 'Export SCORM-Datei';
 $string['exportepx'] = 'Export EPX-Datei';
 $string['createepxexport'] = 'EPX-Datei erstellen';
 $string['exportviewselect'] = 'Um alle Einträge einer bestimmten View zu exportieren, bitte diese hier w&auml;hlen';
+$string['export_directory'] = 'Exportiere Ordnerstruktur';
+$string['createexport_directory'] = 'Erstelle Ordnerstruktur';
 
 
 // === stuff ===
@@ -239,6 +243,8 @@ $string['type'] = 'Typ';
 $string['share'] = 'Share';
 $string['explainingall'] = 'Alle Eintr&auml;ge im Portfolio';
 $string['share_to_other_users'] = 'Benutzer suchen';
+$string['other_users_course'] = 'Benutzer, die nicht in meinen Kursen sind';
+$string['other_groups_course'] = 'Andere Kurse';
 
 
 // === Item sorting ===
@@ -261,8 +267,10 @@ $string['viewitems'] = 'Deine Eintr&auml;ge';
 $string['viewitem'] = 'Eintrag';
 $string['view_specialitems'] = 'Spezielle Eintr&auml;ge';
 $string['view_specialitem_headline'] = 'Kopfzeile';
+$string['view_specialitem_personal'] = 'Persönliche Information';
 $string['view_specialitem_text'] = 'Text';
 $string['view_specialitem_media'] = 'Medieneintrag';
+$string['view_specialitem_badge'] = 'Badge';
 $string['view_specialitem_headline_defaulttext'] = 'Kopfzeile hier eingeben';
 $string['view_specialitem_text_defaulttext'] = 'Text hier eingeben';
 $string['view_sharing'] = 'Ver&ouml;ffentlichen';
@@ -301,7 +309,9 @@ $string['items'] = 'Artefakte';
 $string['media'] = 'Medieneintrag';
 $string['fieldstoshow'] = 'Anzuzeigende Felder';
 $string['listofartefacts'] = 'W&aumlhle ein Element aus';
+$string['listofbadges'] = 'Liste von Badges';
 $string['addButton'] = 'Hinzufügen';
+$string['saveButton'] = 'Speichern';
 $string['cancelButton'] = 'Abbrechen';
 $string['blocktitle2'] = 'Blocktitel';
 $string['blockcontent'] = 'Blockinhalt';
@@ -320,11 +330,15 @@ $string['mediacontent'] = 'URL oder eingebetteter Code*';
 $string['height'] = 'H&ouml;he';
 $string['width'] = 'Breite';
 $string['media_allowed_notes'] = 'URLs der folgenden Seiten sind erlaubt:';
+$string['filterByTag'] = 'Tag zum Filtern verwenden';
 $string['tagarea_block_exaportitem'] = 'Meine Portfolio Artefakte';
+$string['searchByTitle'] = 'Suchen';
+$string['clearAllFilers'] = 'Alle Filter zurücksetzen';
 $string['sharedwith'] = 'Geteilt mit';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
 $string['sharedwith_shareall'] = 'Mit allen Benutzern geteilt';
+$string['sharedwith_shareexternal'] = 'Geteilte externe Views';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 
 
@@ -339,10 +353,12 @@ $string['cofigureblock_header'] = 'Konfiguration der Kopfzeile';
 $string['cofigureblock_item'] = 'Auswahl der Artefakte';
 $string['cofigureblock_media'] = 'Medieneintrag';
 $string['cofigureblock_personalinfo'] = 'Pers&ouml;nliche Information';
+$string['cofigureblock_badge'] = 'Badges auswählen';
 
 
 // === Desp ===
 $string['back_to_desp'] = 'zurück zum d-ESP';
+$string['desp_pluginname'] = 'Dossier';
 $string['steckbrief'] = 'Steckbrief';
 $string['desp_categories'] = '
 	Erzählungen, Rollenspielszenen, Gedichte, Collagen
@@ -400,10 +416,15 @@ $string['settings_disable_shareall_head'] = 'Mit allen Benutzern teilen deaktivi
 $string['settings_disable_shareall_body'] = 'Klicken Sie <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen';
 $string['settings_disable_external_comments_head'] = 'Teilen von Kommentaren in externen Views deaktivieren';
 $string['settings_disable_external_comments_body'] = '';
-$string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
-$string['block_exaport_app_externaleportfolio_body'] = 'For App';
+$string['block_exaport_app_externaleportfolio_head'] = 'Dateien in Mahara speichern';
+$string['block_exaport_app_externaleportfolio_body'] = 'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.';
+$string['block_exaport_maxbytes'] = 'Maximale Upload-Dateigröße in Exabis ePortfolio';
+$string['block_exaport_maxbytes_body'] = 'Maximale Dateigröße, die Dateien haben können, die im Exabis ePortfolio hochgeladen werden. <br> Wert für diese Seite ist: {$a->sitemaxbytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
+$string['block_exaport_userquota'] = 'Benutzer-Dateikontingent Exabis ePortfolio';
+$string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
+$string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';
 
 
 // === Resume ===
@@ -493,8 +514,11 @@ $string['resume_collaps'] = 'Alles schließen';
 
 // === structure sharing ===
 $string['shared_categories'] = 'Geteilte Kategorien';
+$string['nothingstructureshared'] = 'Keine geteilten Strukturen';
 $string['browsecategory'] = 'Inhalt anzeigen';
 $string['copycategory'] = 'In mein Portfolio kopieren';
+$string['sharedArtefacts'] = 'Gruppe-Portfolios, die mit dir geteilt wurden';
+$string['shareditems_category'] = 'Gruppen-Portfolios, die mit dir geteilt wurden';
 $string['create_as_note'] = 'Als Artefakt hinzufügen';
 $string['category_not_found'] = 'Kategorie nicht gefunden';
 $string['root_category'] = 'Hauptkategorie';
@@ -505,6 +529,7 @@ $string['tiles'] = 'Kacheln';
 $string['category_up'] = 'übergeordnete Kategorie';
 $string['supported'] = 'Projekt wurde unterstützt von';
 $string['developed'] = 'entwickelt von';
+$string['myfilearea'] = 'Mein Dateibereich';
 
 
 // === language categories ===
@@ -517,3 +542,4 @@ $string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit 
 // === Not Used Anymore ===
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';
+$string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';

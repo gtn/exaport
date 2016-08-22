@@ -1283,32 +1283,34 @@ function block_exaport_is_valid_media_by_filename($filename) {
 function block_exaport_item_is_editable($itemid) {
 	global $CFG, $DB, $USER;
 
+	if($CFG->block_exaport_app_alloweditdelete)
+		return true;
+	
 	if (block_exaport_check_competence_interaction() && !block_exaport_item_is_resubmitable($itemid)) {
 		return false;
 	}
-
-	if (!$CFG->block_exaport_app_alloweditdelete && block_exaport_check_competence_interaction()) {
-		$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE, array("itemid" => $itemid));
-
-		//check item grading and teacher comment
-		if ($itemExample) {
-			if ($itemExample->teachervalue) {
-				// lehrerbewertung da
-				return false;
-			} else {
-				$itemcomments = $DB->get_records('block_exaportitemcomm', array(
-					'itemid' => $itemid,
-				), 'timemodified ASC', 'entry, userid', 0, 2);
-				foreach ($itemcomments as $itemcomment) {
-					if ($USER->id != $itemcomment->userid) {
-						// somebody commented on this item -> must be teacher
-						return false;
-					}
+	$itemExample = $DB->get_record ( \block_exacomp\DB_ITEMEXAMPLE, array (
+			"itemid" => $itemid 
+	) );
+	
+	// check item grading and teacher comment
+	if ($itemExample) {
+		if ($itemExample->teachervalue) {
+			// lehrerbewertung da
+			return false;
+		} else {
+			$itemcomments = $DB->get_records ( 'block_exaportitemcomm', array (
+					'itemid' => $itemid 
+			), 'timemodified ASC', 'entry, userid', 0, 2 );
+			foreach ( $itemcomments as $itemcomment ) {
+				if ($USER->id != $itemcomment->userid) {
+					// somebody commented on this item -> must be teacher
+					return false;
 				}
 			}
 		}
 	}
-
+	
 	return true;
 }
 
@@ -1318,23 +1320,35 @@ function block_exaport_item_is_editable($itemid) {
  * @return bool
  */
 function block_exaport_item_is_resubmitable($itemid) {
-	global $DB, $USER, $COURSE;
+	global $CFG, $DB, $USER, $COURSE;
 
+	if($CFG->block_exaport_app_alloweditdelete)
+		return true;
+	
 	if (!block_exaport_check_competence_interaction()) {
 		return false;
 	}
 
 	if ($itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE, array("itemid" => $itemid))) {
-		if ($eval = $DB->get_record(\block_exacomp\DB_EXAMPLEEVAL, array('exampleid' => $itemExample->exampleid, 'studentid' => $USER->id, 'courseid' => $COURSE->id))) {
+		$item = $DB->get_record('block_exaportitem', array('id' => $itemid));
+		if ($eval = $DB->get_record(\block_exacomp\DB_EXAMPLEEVAL, array('exampleid' => $itemExample->exampleid, 'studentid' => $USER->id, 'courseid' => $item->courseid))) {
 			if (!$eval->resubmission) {
 				return false;
 			}
 		}
 	}
-
 	return true;
 }
 
+function block_exaport_example_is_submitable($exampleid) {
+	global $DB, $USER, $COURSE;
+	
+	if ($eval = $DB->get_record(\block_exacomp\DB_EXAMPLEEVAL, array('exampleid' => $exampleid, 'studentid' => $USER->id, 'courseid' => $COURSE->id))) {
+		return $eval->resubmission;
+	}
+	return true;
+	
+}
 function block_exaport_has_grading_permission($itemid) {
 	global $DB;
 

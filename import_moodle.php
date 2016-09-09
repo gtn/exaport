@@ -72,19 +72,18 @@ if ($assignments) {
 		$fs = get_file_storage();
 		$files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid, "filename", false);
 
-		$icons = '';
 		foreach ($files as $file) {
 
-			$icon = new pix_icon(file_mimetype_icon($file->get_mimetype()),'');
+			$icon = $OUTPUT->pix_icon(file_file_icon($file), '');
 
 			$filename = $file->get_filename();
 			$url = moodle_url::make_pluginfile_url ( $file->get_contextid (), $file->get_component (), $file->get_filearea (), $file->get_itemid (), $file->get_filepath (), $file->get_filename () )->out ();
 
-			$icons .= '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid . '&amp;submissionid=' . $assignment->submissionid . '&amp;fileid=' . $file->get_pathnamehash() . '">' .
+			$button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid . '&amp;submissionid=' . $assignment->submissionid . '&amp;fileid=' . $file->get_pathnamehash() . '">' .
 					get_string("add_this_file", "block_exaport") . '</a>';
 
-			$table->data[] = array($assignment->name, userdate($assignment->timemodified), '<img src="' . $CFG->wwwroot . '/pix/' . $icon->pix . '.png" class="icon" alt="' . $icon->pix . '" />' .
-				'<a href="' . s($url) . '" >' . $filename . '</a><br />', $assignment->coursename, $icons);
+			$table->data[] = array($assignment->name, userdate($assignment->timemodified), $icon .
+				' <a href="' . s($url) . '" >' . $filename . '</a><br />', $assignment->coursename, $button);
 		
 		}
 		

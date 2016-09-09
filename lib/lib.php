@@ -226,10 +226,11 @@ function block_exaport_print_file(stored_file $file) {
 	$url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(), $file->get_itemid(), $file->get_filepath(), $file->get_filename());
 
 	$icon = new pix_icon(file_mimetype_icon($file->get_mimetype()), '');
-	if (in_array($file->get_mimetype(), array('image/gif', 'image/jpeg', 'image/png'))) {    // Image attachments don't get printed as links
+	if ($file->is_valid_image()) {
 		return "<img src=\"$url\" alt=\"".s($file->get_filename())."\" />";
 	} else {
-		return '<p><img src="'.$CFG->wwwroot.'/pix/'.$icon->pix.'.gif" class="icon" alt="'.$icon->pix.'" />&nbsp;'.$OUTPUT->action_link($url, $file->get_filename())."</p>";
+		$icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+		return '<p>'.$icon.' '.$OUTPUT->action_link($url, $file->get_filename())."</p>";
 	}
 }
 
@@ -1289,23 +1290,26 @@ function block_exaport_item_is_editable($itemid) {
 	if (block_exaport_check_competence_interaction() && !block_exaport_item_is_resubmitable($itemid)) {
 		return false;
 	}
-	$itemExample = $DB->get_record ( \block_exacomp\DB_ITEMEXAMPLE, array (
-			"itemid" => $itemid 
-	) );
-	
-	// check item grading and teacher comment
-	if ($itemExample) {
-		if ($itemExample->teachervalue) {
-			// lehrerbewertung da
-			return false;
-		} else {
-			$itemcomments = $DB->get_records ( 'block_exaportitemcomm', array (
-					'itemid' => $itemid 
-			), 'timemodified ASC', 'entry, userid', 0, 2 );
-			foreach ( $itemcomments as $itemcomment ) {
-				if ($USER->id != $itemcomment->userid) {
-					// somebody commented on this item -> must be teacher
-					return false;
+
+	if (block_exaport_check_competence_interaction()) {
+		$itemExample = $DB->get_record ( \block_exacomp\DB_ITEMEXAMPLE, array (
+				"itemid" => $itemid
+		) );
+
+		// check item grading and teacher comment
+		if ($itemExample) {
+			if ($itemExample->teachervalue) {
+				// lehrerbewertung da
+				return false;
+			} else {
+				$itemcomments = $DB->get_records ( 'block_exaportitemcomm', array (
+						'itemid' => $itemid
+				), 'timemodified ASC', 'entry, userid', 0, 2 );
+				foreach ( $itemcomments as $itemcomment ) {
+					if ($USER->id != $itemcomment->userid) {
+						// somebody commented on this item -> must be teacher
+						return false;
+					}
 				}
 			}
 		}

@@ -67,7 +67,11 @@ switch ($item->type) {
 			exit;
 		}
 
-		header('Location: pix/file_tile.png');
+		// needed for pix_url
+		$PAGE->set_context(context_system::instance());
+		$icon = $OUTPUT->pix_url(file_file_icon($file, 90));
+
+		header('Location: '.$icon);
 		break;
 
 	case "link":

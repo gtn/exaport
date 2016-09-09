@@ -30,7 +30,7 @@ function block_exaport_get_user_from_hash($hash)
 }
 
 function block_exaport_print_extern_item($item, $access) {
-	global $CFG, $OUTPUT, $PAGE;
+	global $CFG, $OUTPUT;
 
 	echo $OUTPUT->heading(format_string($item->name));
 
@@ -42,7 +42,8 @@ function block_exaport_print_extern_item($item, $access) {
 			$box_content .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . s ( $item->name ) . "\" /></div>";
 		} else {
 			// echo $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $link));
-			$box_content .= "<p class=\"filelink\">" . $OUTPUT->action_link ( $ffurl, format_string ( $item->name ), new popup_action ( 'click', $ffurl ) ) . "</p>";
+			$icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+			$box_content .= "<p class=\"filelink\">" .$icon.' '.$OUTPUT->action_link ( $ffurl, format_string ( $item->name ), new popup_action ( 'click', $ffurl ) ) . "</p>";
 			if (block_exaport_is_valid_media_by_filename ( $file->get_filename () )) {
 				// Videoblock
 				$box_content .= '

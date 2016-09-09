@@ -261,10 +261,11 @@ switch ($action) {
 				$ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $post->userid . "&itemid=" . $post->id;
 
 				$extra_content = "<div class='block_eportfolio_center'>\n";
-				if ($file->is_valid_image()) {	// Image attachments don't get printed as links
+				if ($file->is_valid_image()) {
 					$extra_content .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . format_string($post->name) . "\" /></div>";
 				} else {
-					$extra_content .= "<p>" . $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
+					$icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+					$extra_content .= "<p>".$icon.' '.$OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
 				}
 				$extra_content .= "</div>";
 				

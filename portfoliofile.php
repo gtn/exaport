@@ -52,6 +52,27 @@ $wstoken = optional_param('wstoken', $token, PARAM_ALPHANUM);
 $epopaccess=false;
 
 //authenticate the user
+if ($token) {
+        // keep code for eLove - needed for teacher access to submitted files
+
+        $webservicelib = new webservice();
+        $authenticationinfo = $webservicelib->authenticate_user($token);
+        $accessPath = explode('/', $access);
+
+        if(strpos($accessPath[2],'-'))
+                $accessPath[2] = (explode('-', $accessPath[2])[0]);
+
+        $item = block_exaport_get_elove_item($itemid, $accessPath[2], $authenticationinfo);
+        if(!$item)
+                print_error("viewnotfound", "block_exaport");
+
+        if ($file = block_exaport_get_item_file($item)) {
+                send_stored_file($file);
+        } else {
+                not_found();
+        }
+        exit;
+}
 
 $authenticationinfo = null;
 if ($wstoken) {

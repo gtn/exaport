@@ -863,20 +863,13 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
 
 function block_exaport_badges_enabled() {
 	global $CFG;
-	// checking with exacomp
-	if (block_exaport_check_competence_interaction() && block_exacomp_moodle_badges_enabled()) {
-		return true;
-	} else {
-		if (version_compare($CFG->release, '2.5') >= 0) {
-			// For working badges without exacomp installation:
-			require_once($CFG->libdir.'/badgeslib.php');
-			require_once($CFG->dirroot.'/badges/lib/awardlib.php');
 
-			return true;
-		}
-	};
+	if ($CFG->enablebadges) {
+		require_once($CFG->libdir.'/badgeslib.php');
+		require_once($CFG->dirroot.'/badges/lib/awardlib.php');
+	}
 
-	return false;
+	return $CFG->enablebadges;
 }
 
 function block_exaport_get_all_user_badges($userid = null) {
@@ -886,15 +879,13 @@ function block_exaport_get_all_user_badges($userid = null) {
 		$userid = $USER->id;
 	}
 
-	if (block_exaport_badges_enabled()) {
-		if (function_exists('block_exacomp_get_all_user_badges')) {
-			return block_exacomp_get_all_user_badges($userid);
-		} else {
-			// for using badges without exacomp installation
-			return badges_get_user_badges($userid);
-		}
-	} else {
+	if (!block_exaport_badges_enabled()) {
 		return [];
+	} elseif (function_exists('block_exacomp_get_all_user_badges')) {
+		return block_exacomp_get_all_user_badges($userid);
+	} else {
+		// for using badges without exacomp installation
+		return badges_get_user_badges($userid);
 	}
 }
 

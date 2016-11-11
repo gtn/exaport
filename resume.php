@@ -368,7 +368,7 @@ if ($show_information) {
 	echo block_exaport_form_resume_part($courseid, 'certif', get_string('resume_certif', 'block_exaport'), $certificationhistory, 'add', $type);
 	
 	// Badges
-	if ($CFG->enablebadges && block_exaport_badges_enabled()) {
+	if (block_exaport_badges_enabled()) {
 		$conditions = array('resumeid' => $resume->id);
 		$badges = block_exaport_resume_get_mm_records('badges', $conditions);
 		$badgesrecords = block_exaport_resume_templating_mm_records($courseid, 'badges', 'title', $badges, 0, 0, 0);

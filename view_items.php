@@ -99,7 +99,7 @@ if ($type == 'shared') {
 			FROM {block_exaportcate} c
 			LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
 			WHERE c.userid = ?
-			GROUP BY c.id, c.name, c.pid
+			GROUP BY c.id, c.userid, c.name, c.pid, c.shareall, c.internshare, c.structure_shareall, c.structure_share
 			ORDER BY c.name ASC
 		', array($selectedUser->id));
 
@@ -170,7 +170,7 @@ if ($type == 'shared') {
 		FROM {block_exaportcate} c
 		LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
 		WHERE c.userid = ?
-		GROUP BY c.id, c.name, c.pid
+		GROUP BY c.id, c.userid, c.name, c.pid, c.shareall, c.internshare, c.structure_shareall, c.structure_share
 		ORDER BY c.name ASC
 	', array($USER->id));
 

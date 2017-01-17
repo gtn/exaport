@@ -1283,7 +1283,7 @@ function block_exaport_item_is_editable($itemid) {
 	}
 
 	if (block_exaport_check_competence_interaction()) {
-		$itemExample = $DB->get_record ( \block_exacomp\DB_ITEMEXAMPLE, array (
+		$itemExample = $DB->get_record ( BLOCK_EXACOMP_DB_ITEMEXAMPLE, array (
 				"itemid" => $itemid
 		) );
 
@@ -1324,9 +1324,9 @@ function block_exaport_item_is_resubmitable($itemid) {
 		return false;
 	}
 
-	if ($itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE, array("itemid" => $itemid))) {
+	if ($itemExample = $DB->get_record(BLOCK_EXACOMP_DB_ITEMEXAMPLE, array("itemid" => $itemid))) {
 		$item = $DB->get_record('block_exaportitem', array('id' => $itemid));
-		if ($eval = $DB->get_record(\block_exacomp\DB_EXAMPLEEVAL, array('exampleid' => $itemExample->exampleid, 'studentid' => $USER->id, 'courseid' => $item->courseid))) {
+		if ($eval = $DB->get_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL, array('exampleid' => $itemExample->exampleid, 'studentid' => $USER->id, 'courseid' => $item->courseid))) {
 			if (!$eval->resubmission) {
 				return false;
 			}
@@ -1338,7 +1338,7 @@ function block_exaport_item_is_resubmitable($itemid) {
 function block_exaport_example_is_submitable($exampleid) {
 	global $DB, $USER, $COURSE;
 	
-	if ($eval = $DB->get_record(\block_exacomp\DB_EXAMPLEEVAL, array('exampleid' => $exampleid, 'studentid' => $USER->id, 'courseid' => $COURSE->id))) {
+	if ($eval = $DB->get_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL, array('exampleid' => $exampleid, 'studentid' => $USER->id, 'courseid' => $COURSE->id))) {
 		return $eval->resubmission;
 	}
 	return true;
@@ -1352,7 +1352,7 @@ function block_exaport_has_grading_permission($itemid) {
 	}
 
 	// check if item is a submission for an exacomp example
-	$itemExample = $DB->get_record(\block_exacomp\DB_ITEMEXAMPLE, array("itemid" => $itemid));
+	$itemExample = $DB->get_record(BLOCK_EXACOMP_DB_ITEMEXAMPLE, array("itemid" => $itemid));
 	if (!$itemExample) {
 		return false;
 	}

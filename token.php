@@ -30,9 +30,20 @@ function block_exaport_load_service($service) {
 	}
 }
 
+// Allow CORS requests.
+header('Access-Control-Allow-Origin: *');
+echo $OUTPUT->header();
+
+if (optional_param('testconnection', false, PARAM_BOOL)) {
+	echo json_encode([
+		'moodleName' => $DB->get_field('course', 'fullname', ['id' => 1]),
+	], JSON_PRETTY_PRINT);
+	exit;
+}
+
 $block_exaport_tokens = [];
 
-$services = optional_param('services', 'moodle_mobile_app', PARAM_TEXT);
+$services = optional_param('services', '', PARAM_TEXT);
 $services = array_keys(
 	['moodle_mobile_app' => 1, 'exaportservices' => 1] // default services
 	+ ($services ? array_flip(explode(',', $services)) : []));

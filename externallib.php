@@ -128,11 +128,11 @@ class block_exaport_external extends external_api {
 		$item->isimage = false;
 		$item->filename = "";
 		$item->mimetype = "";
-		$item->intro = strip_tags($item->intro);
+		$item->intro = format_text($item->intro, FORMAT_HTML);
 
 		if ($item->type == 'file') {
 			if ($file = block_exaport_get_item_file($item)) {
-				$item->file = ("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$USER->id."&itemid=".$item->id);
+				$item->file = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$USER->id."&itemid=".$item->id."&wstoken=".static::wstoken();
 				$item->isimage = $file->is_valid_image();
 				$item->filename = $file->get_filename();
 				$item->mimetype = $file->get_mimetype();
@@ -758,6 +758,32 @@ class block_exaport_external extends external_api {
 		);
 	}
 
+	private static function wstoken() {
+		return optional_param('wstoken', null, PARAM_ALPHANUM);
+	}
+
+	static function get_items_for_category($category_id) {
+		$items = g::$DB->get_records("block_exaportitem", array("userid" => g::$USER->id, "categoryid" => $category_id));
+		foreach ($items as $item) {
+			$item->file = "";
+			$item->isimage = false;
+			$item->filename = "";
+			$item->mimetype = "";
+			$item->intro = format_text($item->intro, FORMAT_HTML);
+
+			if ($item->type == 'file') {
+				if ($file = block_exaport_get_item_file($item)) {
+					$item->file = g::$CFG->wwwroot."/blocks/exaport/portfoliofile.php?access=portfolio/id/".g::$USER->id."&itemid=".$item->id."&wstoken=".static::wstoken();
+					$item->isimage = $file->is_valid_image();
+					$item->filename = $file->get_filename();
+					$item->mimetype = $file->get_mimetype();
+				}
+			}
+		}
+
+		return $items;
+	}
+
 	/**
 	 * Return all items, independent from level
 	 *
@@ -765,45 +791,22 @@ class block_exaport_external extends external_api {
 	 * @return all items available
 	 */
 	public static function get_all_items() {
-		global $CFG, $DB, $USER;
+		global $DB, $USER;
 
 		$categories = $DB->get_records("block_exaportcate", array("userid" => $USER->id));
 
-		$itemstree = array();
-		$maincategory = $DB->get_records("block_exaportitem", array("userid" => $USER->id, "categoryid" => 0));
-
-		$itemstree[0] = new stdClass();
-		$itemstree[0]->id = 0;
-		$itemstree[0]->pid = 0;
-		$itemstree[0]->name = "Hauptkategorie";
-		$items_temp = array();
-		foreach ($maincategory as $item) {
-			$item_temp = new stdClass();
-			$item_temp->id = $item->id;
-			$item_temp->name = $item->name;
-			$items_temp[] = $item_temp;
-		}
-		$itemstree[0]->items = $items_temp;
+		$rootCategory = new stdClass();
+		$rootCategory->id = 0;
+		$rootCategory->pid = 0;
+		$rootCategory->name = "Hauptkategorie";
+		$rootCategory->items = static::get_items_for_category(0);
+		array_unshift($categories, $rootCategory);
 
 		foreach ($categories as $category) {
-			$categoryitems = $DB->get_records("block_exaportitem", array("userid" => $USER->id, "categoryid" => $category->id));
-
-			$itemstree[$category->id] = new stdClass();
-			$itemstree[$category->id]->id = $category->id;
-			$itemstree[$category->id]->pid = $category->pid;
-			$itemstree[$category->id]->name = $category->name;
-
-			$items_temp = array();
-			foreach ($categoryitems as $item) {
-				$item_temp = new stdClass();
-				$item_temp->id = $item->id;
-				$item_temp->name = $item->name;
-				$items_temp[] = $item_temp;
-			}
-			$itemstree[$category->id]->items = $items_temp;
+			$category->items = static::get_items_for_category($category->id);
 		}
 
-		return $itemstree;
+		return $categories;
 	}
 
 	/**
@@ -822,6 +825,13 @@ class block_exaport_external extends external_api {
 							array(
 								'id' => new external_value(PARAM_INT, 'id of item'),
 								'name' => new external_value(PARAM_TEXT, 'name of item'),
+								'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'),
+								'url' => new external_value(PARAM_TEXT, 'url'),
+								'intro' => new external_value(PARAM_RAW, 'description of item'),
+								'filename' => new external_value(PARAM_TEXT, 'title of item'),
+								'file' => new external_value(PARAM_URL, 'file url'),
+								'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
+								'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
 							)
 						)
 					),
@@ -1392,6 +1402,7 @@ class block_exaport_external extends external_api {
 	 * @return array
 	 */
 	public static function get_user_information() {
+		require_once(g::$CFG->dirroot."/user/lib.php");
 		$data = user_get_user_details(g::$USER);
 		unset($data['enrolledcourses']);
 		unset($data['preferences']);

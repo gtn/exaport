@@ -34,6 +34,9 @@ function block_exaport_load_service($service) {
 header('Access-Control-Allow-Origin: *');
 echo $OUTPUT->header();
 
+required_param('app', PARAM_TEXT);
+required_param('app_version', PARAM_TEXT);
+
 if (optional_param('testconnection', false, PARAM_BOOL)) {
 	echo json_encode([
 		'moodleName' => $DB->get_field('course', 'fullname', ['id' => 1]),

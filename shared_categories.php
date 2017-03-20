@@ -19,6 +19,8 @@
 
 require_once __DIR__.'/inc.php';
 
+use block_exaport\globals as g;
+
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
 $action = optional_param('action', 'list', PARAM_TEXT);
@@ -47,22 +49,25 @@ if ($parsedsort[0] == 'category') {
 // Categories for user groups
 $usercats = block_exaport_get_group_share_categories($USER->id);
 
-$categories = $DB->get_records_sql(
-	"SELECT c.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
-	" FROM {user} u" .
-	" JOIN {block_exaportcate} c ON (u.id=c.userid AND c.userid!=?)" .
-	" LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?".
-
-	" LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid ".
-	" LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid " .
-	" WHERE (".
-		"(".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) ".  // only show shared all, if enabled
-	 // Shared for you group
-	 ($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") ": ""). // Add group shareing categories
-	")".
-	" AND internshare = 1 ".
-	" GROUP BY c.id, c.userid, c.name, c.description, c.timemodified, u.firstname, u.lastname, u.picture".
-	" $sql_sort", array($USER->id, $USER->id));
+$category_columns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+$categories = $DB->get_records_sql("
+	SELECT
+		{$category_columns}, u.firstname, u.lastname, u.picture
+		, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups
+	FROM {user} u
+	JOIN {block_exaportcate} c ON (u.id=c.userid AND c.userid!=?)
+	LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?
+	LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid
+	LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid
+	WHERE (
+		(".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) -- only show shared all, if enabled
+		-- Shared for you group
+		".($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") ": "")."
+		)
+		AND internshare = 1
+	GROUP BY
+		{$category_columns}, u.firstname, u.lastname, u.picture
+	$sql_sort", array($USER->id, $USER->id));
 
 if ($action == 'copy') {
 	$categoryid = optional_param('categoryid', 0, PARAM_INT);

@@ -19,6 +19,8 @@
 
 require_once __DIR__.'/inc.php';
 
+use block_exaport\globals as g;
+
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
 $access = optional_param('access', 0, PARAM_TEXT);
@@ -61,8 +63,11 @@ echo "<div class='block_eportfolio_center'>\n";
 // Views for user groups
 $userviews = block_exaport_get_group_share_views($USER->id);
 
+$view_columns = g::$DB->get_column_names_prefixed('block_exaportview', 'v');
 $views = $DB->get_records_sql("
-	SELECT v.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT vshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT vgshar.groupid) AS cnt_shared_groups
+	SELECT
+		{$view_columns}, u.firstname, u.lastname, u.picture
+		, COUNT(DISTINCT vshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT vgshar.groupid) AS cnt_shared_groups
 	FROM {user} u
 	JOIN {block_exaportview} v ON u.id=v.userid
 	LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?
@@ -76,7 +81,8 @@ $views = $DB->get_records_sql("
 	  	)
 		AND v.userid!=? -- don't show my own views
 		".($userid ? "AND v.userid=".$userid : '')." -- user filter
-	GROUP BY v.id, v.userid, v.name, v.description, v.timemodified, v.shareall, v.externaccess, v.externcomment, v.hash, v.langid, v.layout, u.firstname, u.lastname, u.picture
+	GROUP BY
+		{$view_columns}, u.firstname, u.lastname, u.picture
 	$sql_sort", [$USER->id, $USER->id]);
 
 function exaport_search_views($views, $column, $value) {

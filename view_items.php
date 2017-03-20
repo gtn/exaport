@@ -19,6 +19,8 @@
 
 require_once __DIR__.'/inc.php';
 
+use block_exaport\globals as g;
+
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
@@ -94,14 +96,18 @@ if ($type == 'shared') {
 	if (!$selectedUser || !$categoryid) {
 		throw new moodle_exception('wrong category/userid');
 	} else {
-		$categories = $DB->get_records_sql('
-			SELECT c.id, c.userid, c.name, c.pid, c.shareall, c.internshare, c.structure_shareall, c.structure_share, COUNT(i.id) AS item_cnt
+		$category_columns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+		$categories = $DB->get_records_sql("
+			SELECT
+				{$category_columns}
+				, COUNT(i.id) AS item_cnt
 			FROM {block_exaportcate} c
-			LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
+			LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND ".block_exaport_get_item_where()."
 			WHERE c.userid = ?
-			GROUP BY c.id, c.userid, c.name, c.pid, c.shareall, c.internshare, c.structure_shareall, c.structure_share
+			GROUP BY
+				{$category_columns}
 			ORDER BY c.name ASC
-		', array($selectedUser->id));
+		", array($selectedUser->id));
 
 		function category_allowed($selectedUser, $categories, $category) {
 			while ($category) {
@@ -165,14 +171,18 @@ if ($type == 'shared') {
 
 } else {
 	// read all categories
-	$categories = $DB->get_records_sql('
-		SELECT c.id, c.userid, c.name, c.pid, c.shareall, c.internshare, c.structure_shareall, c.structure_share, COUNT(i.id) AS item_cnt
+	$category_columns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+	$categories = $DB->get_records_sql("
+		SELECT
+			{$category_columns}
+			, COUNT(i.id) AS item_cnt
 		FROM {block_exaportcate} c
-		LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND '.block_exaport_get_item_where().'
+		LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND ".block_exaport_get_item_where()."
 		WHERE c.userid = ?
-		GROUP BY c.id, c.userid, c.name, c.pid, c.shareall, c.internshare, c.structure_shareall, c.structure_share
+		GROUP BY
+			{$category_columns}
 		ORDER BY c.name ASC
-	', array($USER->id));
+	", array($USER->id));
 
 	foreach ($categories as $category) {
 		$category->url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id;

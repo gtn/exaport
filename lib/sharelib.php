@@ -598,8 +598,9 @@ namespace {
 		$usercats = block_exaport_get_group_share_categories($userid);
 
 		// All categories and users who shared.
+		$category_columns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
 		$categories = $DB->get_records_sql(
-			"SELECT c.*, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
+			"SELECT $category_columns, u.firstname, u.lastname, u.picture, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
 			" FROM {user} u".
 			" JOIN {block_exaportcate} c ON u.id=c.userid".
 			" LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?".
@@ -613,7 +614,7 @@ namespace {
 			")".
 			" AND c.userid!=? ". // don't show my own categories
 			" AND internshare = 1 ".
-			" GROUP BY c.id, c.userid, c.name, c.timemodified, c.shareall, u.firstname, u.lastname, u.picture".
+			" GROUP BY $category_columns, u.firstname, u.lastname, u.picture".
 			" ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
 
 		//$sharedcategories = $DB->get_records_menu('block_exaportcatshar', array("userid" => $userid), null, 'id, id AS tmp');

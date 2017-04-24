@@ -1,4 +1,7 @@
-current Version 4.5.1
+Version 4.6
+* bugfixes
+
+Version 4.5.1
 * bugfixes
 
 2016-09-21 Version 4.5.0:

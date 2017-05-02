@@ -1398,7 +1398,6 @@ class block_exaport_external extends external_api {
 
 	/**
 	 *
-	 * @ws-type-read
 	 * @return array
 	 */
 	public static function get_user_information() {
@@ -1412,7 +1411,6 @@ class block_exaport_external extends external_api {
 
 	/**
 	 *
-	 * @ws-type-read
 	 * @return array
 	 */
 	public static function login() {

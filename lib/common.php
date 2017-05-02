@@ -561,6 +561,11 @@ namespace block_exaport\common {
 				touch($langDir.'/'.$lang.'/'._plugin_name().'.php', $time);
 			}
 		}
+
+		// include other developer scripts
+		if (file_exists(__DIR__.'/../build/developermode.php')) {
+			require __DIR__.'/../build/developermode.php';
+		}
 	});
 
 	/**

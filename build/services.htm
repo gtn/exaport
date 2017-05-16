@@ -135,4 +135,29 @@
 ]</pre><h2>block_exaport_export_file_to_externalportfolio</h2><div>Export file to external portfolio</div><div>type: write</div>Params: <table><tr><td>component<td>raw<td>null<td>required<td><td>filestorage - component<tr><td>filearea<td>raw<td>null<td>required<td><td>filestorage - filearea<tr><td>filename<td>raw<td>null<td>required<td><td>filestorage - filename<tr><td>filepath<td>raw<td>null<td>required<td><td>filestorage - filepath<tr><td>itemid<td>int<td>null<td>required<td><td>filestorage - itemid</table>Returns:<pre>{
     "success": "text null (status)",
     "linktofile": "text null (link to file)"
+}</pre><h2>block_exaport_login</h2><div>webservice called through token.php</div><div>type: read</div>Params: <table><tr><td>app<td>int<td>null<td>required<td><td>app accessing this service (eg. dakora)<tr><td>app_version<td>int<td>null<td>required<td><td>version of the app (eg. 4.6.0)<tr><td>services<td>int<td>null<td><td>default: moodle_mobile_app,exaportservices<td>wanted webservice tokens (eg. exacomp,exaport)</table>Returns:<pre>{
+    "user": {
+        "id": "int null (ID of the user)",
+        "username": "raw null (The username)",
+        "firstname": "notags null (The first name(s) of the user)",
+        "lastname": "notags null (The family name of the user)",
+        "fullname": "notags null (The fullname of the user)",
+        "email": "text null (An email address - allow email as root@localhost)",
+        "firstaccess": "int null (first access to the site (0 if never))",
+        "lastaccess": "int null (last access to the site (0 if never))",
+        "auth": "plugin null (Auth plugins include manual, ldap, imap, etc)",
+        "confirmed": "int null (Active user: 1 if confirmed, 0 otherwise)",
+        "lang": "safedir null (Language code such as \"en\", must exist on server)",
+        "url": "url null (URL of the user)",
+        "profileimageurlsmall": "url null (User image profile URL - small version)",
+        "profileimageurl": "url null (User image profile URL - big version)"
+    },
+    "config": [],
+    "tokens": [
+        {
+            "service": "text null (name of service)",
+            "token": "text null (token of the service)"
+        },
+        "..."
+    ]
 }</pre>

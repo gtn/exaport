@@ -1396,6 +1396,10 @@ class block_exaport_external extends external_api {
 		);
 	}
 
+	public static function get_user_information_parameters() {
+		return new external_function_parameters (array());
+	}
+
 	/**
 	 *
 	 * @return array
@@ -1409,8 +1413,53 @@ class block_exaport_external extends external_api {
 		return $data;
 	}
 
+	public static function get_user_information_returns() {
+		return new external_single_structure (array(
+			'id' => new external_value(PARAM_INT, 'ID of the user'),
+			'username' => new external_value(PARAM_RAW, 'The username', VALUE_OPTIONAL),
+			'firstname' => new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL),
+			'lastname' => new external_value(PARAM_NOTAGS, 'The family name of the user', VALUE_OPTIONAL),
+			'fullname' => new external_value(PARAM_NOTAGS, 'The fullname of the user'),
+			'email' => new external_value(PARAM_TEXT, 'An email address - allow email as root@localhost', VALUE_OPTIONAL),
+			'firstaccess' => new external_value(PARAM_INT, 'first access to the site (0 if never)', VALUE_OPTIONAL),
+			'lastaccess' => new external_value(PARAM_INT, 'last access to the site (0 if never)', VALUE_OPTIONAL),
+			'auth' => new external_value(PARAM_PLUGIN, 'Auth plugins include manual, ldap, imap, etc', VALUE_OPTIONAL),
+			'confirmed' => new external_value(PARAM_INT, 'Active user: 1 if confirmed, 0 otherwise', VALUE_OPTIONAL),
+			'lang' => new external_value(PARAM_SAFEDIR, 'Language code such as "en", must exist on server', VALUE_OPTIONAL),
+			'url' => new external_value(PARAM_URL, 'URL of the user', VALUE_OPTIONAL),
+			'profileimageurlsmall' => new external_value(PARAM_URL, 'User image profile URL - small version'),
+			'profileimageurl' => new external_value(PARAM_URL, 'User image profile URL - big version'),
+		));
+	}
+
+	public static function login_parameters() {
+		return new external_function_parameters(array(
+			'app' => new external_value (PARAM_INT, 'app accessing this service (eg. dakora)'),
+			'app_version' => new external_value (PARAM_INT, 'version of the app (eg. 4.6.0)'),
+			'services' => new external_value (PARAM_INT, 'wanted webservice tokens (eg. exacomp,exaport)', VALUE_DEFAULT, 'moodle_mobile_app,exaportservices'),
+		));
+	}
+
 	/**
+	 * Returns description of method return values
 	 *
+	 * @return external_multiple_structure
+	 */
+	public static function login_returns() {
+		return new external_single_structure ([
+			'user' => static::get_user_information_returns(),
+			'config' => new external_single_structure([]),
+			'tokens' => new external_multiple_structure (new external_single_structure ([
+				'service' => new external_value (PARAM_TEXT, 'name of service'),
+				'token' => new external_value (PARAM_TEXT, 'token of the service'),
+			]), 'requested tokens'),
+		]);
+	}
+
+	/**
+	 * webservice called through token.php
+	 *
+	 * @ws-type-read
 	 * @return array
 	 */
 	public static function login() {

@@ -193,6 +193,14 @@ $functions = array (
     'description' => 'Export file to external portfolio',
     'type' => 'write',
   ),
+  'block_exaport_login' => 
+  array (
+    'classname' => 'block_exaport_external',
+    'methodname' => 'login',
+    'classpath' => 'blocks/exaport/externallib.php',
+    'description' => 'webservice called through token.php',
+    'type' => 'read',
+  ),
 );
 
 $services = array (
@@ -228,6 +236,7 @@ $services = array (
       21 => 'block_exaport_get_competencies_by_item',
       22 => 'block_exaport_get_users_by_view',
       23 => 'block_exaport_export_file_to_externalportfolio',
+      24 => 'block_exaport_login',
     ),
   ),
 );

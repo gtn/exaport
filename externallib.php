@@ -172,7 +172,7 @@ class block_exaport_external extends external_api {
 			array('title' => new external_value(PARAM_TEXT, 'item title'),
 				'categoryid' => new external_value(PARAM_INT, 'categoryid'),
 				'url' => new external_value(PARAM_URL, 'url'),
-				'intro' => new external_value(PARAM_TEXT, 'introduction'),
+				'intro' => new external_value(PARAM_RAW, 'introduction'),
 				'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
 				'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'),
 				'fileitemid' => new external_value(PARAM_INT, 'itemid for draft-area files; for "private" files is ignored'))
@@ -239,7 +239,7 @@ class block_exaport_external extends external_api {
 			array('id' => new external_value(PARAM_INT, 'item id'),
 				'title' => new external_value(PARAM_TEXT, 'item title'),
 				'url' => new external_value(PARAM_TEXT, 'url'),
-				'intro' => new external_value(PARAM_TEXT, 'introduction'),
+				'intro' => new external_value(PARAM_RAW, 'introduction'),
 				'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
 				'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'))
 		);

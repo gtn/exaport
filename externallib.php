@@ -168,16 +168,15 @@ class block_exaport_external extends external_api {
 	 * @return external_function_parameters
 	 */
 	public static function add_item_parameters() {
-		return new external_function_parameters(
-			array('title' => new external_value(PARAM_TEXT, 'item title'),
-				'categoryid' => new external_value(PARAM_INT, 'categoryid'),
-				'url' => new external_value(PARAM_URL, 'url'),
-				'intro' => new external_value(PARAM_RAW, 'introduction'),
-				'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
-				'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'),
-				'fileitemid' => new external_value(PARAM_INT, 'itemid for draft-area files; for "private" files is ignored'))
-		);
-
+		return new external_function_parameters([
+			'title' => new external_value(PARAM_TEXT, 'item title'),
+			'categoryid' => new external_value(PARAM_INT, 'categoryid'),
+			'url' => new external_value(PARAM_URL, 'url'),
+			'intro' => new external_value(PARAM_RAW, 'introduction'),
+			'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link)', VALUE_DEFAULT, ''),
+			'fileitemid' => new external_value(PARAM_INT, 'itemid for draft-area files; for "private" files is ignored', VALUE_DEFAULT, null),
+			'filename' => new external_value (PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT, ''),
+		]);
 	}
 
 	/**
@@ -187,35 +186,45 @@ class block_exaport_external extends external_api {
 	 * @param int itemid
 	 * @return array of course subjects
 	 */
-	public static function add_item($title, $categoryid, $url, $intro, $filename, $type, $fileitemid) {
-		global $CFG, $DB, $USER;
+	public static function add_item($title, $categoryid, $url, $intro, $type, $fileitemid, $filename) {
+		global $DB, $USER;
 
-		$params = self::validate_parameters(self::add_item_parameters(), array('title' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro, 'filename' => $filename, 'type' => $type, 'fileitemid' => $fileitemid));
+		$params = self::validate_parameters(self::add_item_parameters(), array('title' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro, 'type' => $type, 'fileitemid' => $fileitemid, 'filename' => $filename));
+
+		$context = context_user::instance($USER->id);
+		$fs = get_file_storage();
+		$file = null;
+
+		if (!$file && $fileitemid) {
+			$file = reset($fs->get_area_files($context->id, "user", "draft", $fileitemid, null, false));
+		}
+		if (!$file && $filename) {
+			$file = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
+		}
+
+		if (!$type) {
+			if ($file) {
+				$type = 'file';
+			} elseif ($url) {
+				$type = 'link';
+			} else {
+				$type = 'note';
+			}
+		}
 
 		$itemid = $DB->insert_record("block_exaportitem", array('userid' => $USER->id, 'name' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro, 'type' => $type, 'timemodified' => time()));
 
 		//if a file is added we need to copy the file from the user/private filearea to block_exaport/item_file with the itemid from above
-		if ($type == "file") {
-			$context = context_user::instance($USER->id);
-			$fs = get_file_storage();
-			try {
-				$old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
-				if (!$old) {
-					$old = $fs->get_file($context->id, "user", "draft", $fileitemid, "/", $filename);
-				}
-
-				if ($old) {
-					$file_record = array('contextid' => $context->id, 'component' => 'block_exaport', 'filearea' => 'item_file',
-						'itemid' => $itemid, 'filepath' => '/', 'filename' => $old->get_filename(),
-						'timecreated' => time(), 'timemodified' => time());
-					$fs->create_file_from_storedfile($file_record, $old->get_id());
-				}
-			} catch (Exception $e) {
-				//some problem with the file occured
-			}
+		if ($file) {
+			$fs->create_file_from_storedfile(array(
+				'contextid' => $context->id,
+				'component' => 'block_exaport',
+				'filearea' => 'item_file',
+				'itemid' => $itemid,
+			), $file);
 		}
 
-		return array("success" => true);
+		return ["success" => true];
 	}
 
 	/**
@@ -235,15 +244,16 @@ class block_exaport_external extends external_api {
 	 * @return external_function_parameters
 	 */
 	public static function update_item_parameters() {
-		return new external_function_parameters(
-			array('id' => new external_value(PARAM_INT, 'item id'),
-				'title' => new external_value(PARAM_TEXT, 'item title'),
-				'url' => new external_value(PARAM_TEXT, 'url'),
-				'intro' => new external_value(PARAM_RAW, 'introduction'),
-				'filename' => new external_value(PARAM_TEXT, 'filename, used to look up file and create a new one in the exaport file area'),
-				'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'))
-		);
-
+		return new external_function_parameters([
+			'id' => new external_value(PARAM_INT, 'item id'),
+			'title' => new external_value(PARAM_TEXT, 'item title'),
+			// TODO: categoryid for later?
+			'url' => new external_value(PARAM_TEXT, 'url'),
+			'intro' => new external_value(PARAM_RAW, 'introduction'),
+			'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link)', VALUE_DEFAULT, ''),
+			'fileitemid' => new external_value(PARAM_INT, 'itemid for draft-area files; for "private" files is ignored, use \'0\' to delete the file', VALUE_DEFAULT, null),
+			'filename' => new external_value (PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT, ''),
+		]);
 	}
 
 	/**
@@ -253,40 +263,56 @@ class block_exaport_external extends external_api {
 	 * @param int itemid
 	 * @return array of course subjects
 	 */
-	public static function update_item($id, $title, $url, $intro, $filename, $type) {
-		global $CFG, $DB, $USER;
+	public static function update_item($id, $title, $url, $intro, $type, $fileitemid, $filename) {
+		global $DB, $USER;
 
-		$params = self::validate_parameters(self::update_item_parameters(), array('id' => $id, 'title' => $title, 'url' => $url, 'intro' => $intro, 'filename' => $filename, 'type' => $type));
+		$params = self::validate_parameters(self::update_item_parameters(), array('id' => $id, 'title' => $title, 'url' => $url, 'intro' => $intro, 'type' => $type, 'fileitemid' => $fileitemid, 'filename' => $filename));
+
+		$context = context_user::instance($USER->id);
+		$fs = get_file_storage();
+		$file = null;
+
+		if (!$file && $fileitemid) {
+			$file = reset($fs->get_area_files($context->id, "user", "draft", $fileitemid, null, false));
+		}
+		if (!$file && $filename) {
+			$file = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
+		}
+
+		if (!$type) {
+			if ($file) {
+				$type = 'file';
+			} elseif ($url) {
+				$type = 'link';
+			} else {
+				$type = 'note';
+			}
+		}
 
 		$record = new stdClass();
 		$record->id = $id;
 		$record->name = $title;
-		$record->categoryid = $DB->get_field("block_exaportitem", "categoryid", array("id" => $id));
+		// $record->categoryid = $DB->get_field("block_exaportitem", "categoryid", array("id" => $id));
 		$record->url = $url;
 		$record->intro = $intro;
 		$record->type = $type;
 
-		block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
 		$DB->update_record("block_exaportitem", $record);
 
-		//if a file is added we need to copy the file from the user/private filearea to block_exaport/item_file with the itemid from above
-		if ($type == "file") {
-			$context = context_user::instance($USER->id);
-			$fs = get_file_storage();
-			try {
-				$old = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
+		if ($file) {
+			block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
 
-				if ($old) {
-					$file_record = array('contextid' => $context->id, 'component' => 'block_exaport', 'filearea' => 'item_file',
-						'itemid' => $id, 'filepath' => '/', 'filename' => $old->get_filename(),
-						'timecreated' => time(), 'timemodified' => time());
-					$fs->create_file_from_storedfile($file_record, $old->get_id());
-				}
-			} catch (Exception $e) {
-			}
+			$fs->create_file_from_storedfile(array(
+				'contextid' => $context->id,
+				'component' => 'block_exaport',
+				'filearea' => 'item_file',
+				'itemid' => $id,
+			), $file);
+		} elseif ($fileitemid === 0) {
+			block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
 		}
 
-		return array("success" => true);
+		return ["success" => true];
 	}
 
 	/**

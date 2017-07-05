@@ -56,6 +56,8 @@ if ($iconfile = block_exaport_get_file($item, 'item_iconfile')) {
 	exit;
 }
 
+$output = block_exaport_get_renderer();
+
 switch ($item->type) {
 	case "file": 
 		// thumbnail of file
@@ -69,7 +71,7 @@ switch ($item->type) {
 
 		// needed for pix_url
 		$PAGE->set_context(context_system::instance());
-		$icon = $OUTPUT->pix_url(file_file_icon($file, 90));
+		$icon = $output->image_url(file_file_icon($file, 90));
 
 		header('Location: '.$icon);
 		break;

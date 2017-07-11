@@ -17,10 +17,20 @@
 //
 // This copyright notice MUST APPEAR in all copies of the script!
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
+require_once __DIR__.'/inc.php';
 
-$plugin->component = 'block_exaport';
-$plugin->release = '4.6.1.experimental';
-$plugin->version   = 2017071700;
-$plugin->requires  = 2015051100;
-$plugin->maturity = MATURITY_STABLE;
+use block_exaport\globals as g;
+
+class block_exaport_renderer extends plugin_renderer_base {
+	/**
+	 * in moodle33 pix_url was renamed to image_url
+	 */
+	public function image_url($imagename, $component = 'moodle') {
+		if (method_exists(get_parent_class($this), 'image_url')) {
+			return call_user_func_array(['parent', 'image_url'], func_get_args());
+		} else {
+			return call_user_func_array(['parent', 'pix_url'], func_get_args());
+		}
+	}
+}

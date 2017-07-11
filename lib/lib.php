@@ -90,6 +90,16 @@ function block_exaport_get_item_comment_file($commentid) {
 	}
 }
 
+/**
+ * wrote own function, so eclipse knows which type the output renderer is
+ * @return block_exaport_renderer
+ */
+function block_exaport_get_renderer() {
+	global $PAGE;
+
+	return $PAGE->get_renderer('block_exaport');
+}
+
 function block_exaport_add_to_log($courseid, $module, $action, $url = '', $info = '', $cm = 0, $user = 0) {
 	if (!function_exists('get_log_manager')) {
 		// old style

@@ -21,6 +21,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_exaport';
 $plugin->release = '4.6.1.experimental';
-$plugin->version   = 2017071700;
+$plugin->version   = 2017071700.01;
 $plugin->requires  = 2015051100;
 $plugin->maturity = MATURITY_STABLE;

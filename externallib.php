@@ -131,7 +131,19 @@ class block_exaport_external extends external_api {
 				$item->mimetype = $file->get_mimetype();
 			}
 		}
+<<<<<<< HEAD
 			
+=======
+
+
+		$item->comments = g::$DB->get_records('block_exaportitemcomm', ['itemid' => $item->id], 'timemodified ASC');
+		foreach ($item->comments as $comment) {
+			// TODO: optimize: read user only once, or maybe add to sql statement?
+			$user = $DB->get_record('user', ['id' => $comment->userid]);
+			$comment->userfullname = $user ? fullname($user) : '';
+		}
+
+>>>>>>> 06d7a6a... add item comment webservices
 		return $item;
 	}
 
@@ -141,6 +153,7 @@ class block_exaport_external extends external_api {
 	 */
 	public static function get_item_returns() {
 		return new external_single_structure(
+<<<<<<< HEAD
 				array(
 						'id' => new external_value(PARAM_INT, 'id of item'),
 						'name' => new external_value(PARAM_TEXT, 'title of item'),
@@ -153,6 +166,31 @@ class block_exaport_external extends external_api {
 						'isimage' => new external_value(PARAM_BOOL,'true if file is image'),
 						'mimetype' => new external_value(PARAM_TEXT, 'mimetype')
 				)
+=======
+			array(
+				'id' => new external_value(PARAM_INT, 'id of item'),
+				'name' => new external_value(PARAM_TEXT, 'title of item'),
+				'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'),
+				'category' => new external_value(PARAM_TEXT, 'title of category'),
+				'url' => new external_value(PARAM_TEXT, 'url'),
+				'intro' => new external_value(PARAM_RAW, 'description of item'),
+				'filename' => new external_value(PARAM_TEXT, 'title of item'),
+				'file' => new external_value(PARAM_URL, 'file url'),
+				'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
+				'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
+				'comments' => new external_multiple_structure(
+					new external_single_structure(
+						array(
+							'id' => new external_value(PARAM_INT),
+							'userid' => new external_value(PARAM_INT),
+							'userfullname' => new external_value(PARAM_TEXT),
+							'timemodified' => new external_value(PARAM_INT),
+							'entry' => new external_value(PARAM_TEXT),
+						)
+					)
+				),
+			)
+>>>>>>> 06d7a6a... add item comment webservices
 		);
 	}
 
@@ -333,6 +371,42 @@ class block_exaport_external extends external_api {
 				)
 		);
 	}
+<<<<<<< HEAD
+=======
+
+	public static function add_item_comment_parameters() {
+		return new external_function_parameters([
+			'itemid' => new external_value(PARAM_INT),
+			'entry' => new external_value(PARAM_RAW),
+		]);
+	}
+
+	/**
+	 * Add a comment to an item
+	 * @ws-type-read
+	 */
+	public static function add_item_comment($itemid, $entry) {
+		$params = self::validate_parameters(self::add_item_comment_parameters(), ['itemid' => $itemid, 'entry' => $entry]);
+
+		// TODO: check if can add comment
+
+		g::$DB->insert_record("block_exaportitemcomm", [
+			'itemid' => $itemid,
+			'userid' => g::$USER->id,
+			'entry' => $entry,
+			'timemodified' => time(),
+		]);
+
+		return ["success" => true];
+	}
+
+	public static function add_item_comment_returns() {
+		return new external_single_structure([
+			'success' => new external_value(PARAM_BOOL, 'status'),
+		]);
+	}
+
+>>>>>>> 06d7a6a... add item comment webservices
 	/**
 	 * Returns description of method parameters
 	 * @return external_function_parameters
@@ -774,6 +848,7 @@ class block_exaport_external extends external_api {
 	 */
 	public static function get_all_items_returns() {
 		return new external_multiple_structure(
+<<<<<<< HEAD
 				new external_single_structure(
 						array(
 								'id' => new external_value(PARAM_INT, 'id of category'),
@@ -786,6 +861,26 @@ class block_exaport_external extends external_api {
 												)
 										)
 								)
+=======
+			new external_single_structure(
+				array(
+					'id' => new external_value(PARAM_INT, 'id of category'),
+					'pid' => new external_value(PARAM_TEXT, 'parentid'),
+					'name' => new external_value(PARAM_TEXT, 'title of category'),
+					'items' => new external_multiple_structure(
+						new external_single_structure(
+							array(
+								'id' => new external_value(PARAM_INT, 'id of item'),
+								'name' => new external_value(PARAM_TEXT, 'title of item'),
+								'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'),
+								'url' => new external_value(PARAM_TEXT, 'url'),
+								'intro' => new external_value(PARAM_RAW, 'description of item'),
+								'filename' => new external_value(PARAM_TEXT, 'title of item'),
+								'file' => new external_value(PARAM_URL, 'file url'),
+								'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
+								'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
+							)
+>>>>>>> 06d7a6a... add item comment webservices
 						)
 				)
 		);

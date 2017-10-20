@@ -746,7 +746,7 @@ echo '<label><input type="checkbox" name="with_directory" value="1" />'.get_stri
 echo ' </div>';
 
 echo '<input type="hidden" name="confirm" value="1" />';
-echo '<input type="submit" name="export" value="' . get_string("createexport", "block_exaport") . '" />';
+echo '<input type="submit" name="export" value="' . get_string("createexport", "block_exaport") . '" class="btn btn-default"/>';
 echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
 echo '<input type="hidden" name="courseid" value="' . $courseid . '" />';
 echo '</fieldset>';

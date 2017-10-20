@@ -36,6 +36,24 @@ $PAGE->set_context($context);
 
 require_login($courseid);
 
+//
+require_once $CFG->libdir.'/formslib.php';
+class temporary_form extends moodleform {
+	function definition() {
+
+		global $CFG;
+		$mform	=& $this->_form;
+		$property_name = $this->_customdata['property_name'];
+
+		$mform->addElement('editor', $property_name, 'temp', null,
+			array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+	}
+}
+
+
+// --------------
+
+
 
 $type = $_POST['type_block'];
 $id = optional_param('item_id', -1, PARAM_INT);
@@ -52,20 +70,54 @@ if ($id != -1) {
 $message = array();
 
 switch($type) {
-	case 'item': $message["html"] = get_form_items($id, $block_data);
+	case 'item':
+				$message["html"] = get_form_items($id, $block_data);
+				$message["modalTitle"] = get_string('cofigureblock_item','block_exaport');
 		break;
-	case 'personal_information': $message["html"] = get_form_personalinfo($id, $block_data);
+	case 'personal_information':
+				$message["html"] = get_form_personalinfo($id, $block_data);
+				$message["modalTitle"] = get_string('cofigureblock_personalinfo','block_exaport');
 		break;
-	case 'text': $message["html"] = get_form_text($id, $block_data);
+	case 'text':
+				$message["html"] = get_form_text($id, $block_data);
+				$message["modalTitle"] = get_string('cofigureblock_text','block_exaport');
+				//$message['script'] = htmlEditor_enable_script('block_text');
 		break;		
-	case 'headline': $message["html"] = get_form_headline($id, $block_data);
+	case 'headline':
+				$message["html"] = get_form_headline($id, $block_data);
+				$message["modalTitle"] = get_string('cofigureblock_header','block_exaport');
 		break;		
-	case 'media': $message["html"] = get_form_media($id, $block_data);
+	case 'media':
+				$message["html"] = get_form_media($id, $block_data);
+				$message["modalTitle"] = get_string('cofigureblock_media','block_exaport');
 		break;		
-	case 'badge': $message["html"] = get_form_badge($id, $block_data);
+	case 'badge':
+				$message["html"] = get_form_badge($id, $block_data);
+				$message["modalTitle"] = get_string('cofigureblock_badge','block_exaport');
 		break;		
 	default: break;
 }
+
+
+$message["script"] = '';
+$scripts = '';
+// get javascripts and configurations for working HTML editors. This code is searching and cutting the javascript from standart generated page
+$header = $OUTPUT->header();
+$dom = new DOMDocument('1.0', 'utf-8');
+$dom->loadHTML($header);
+// get all <script> from header
+$xpath = new DOMXPath($dom);
+foreach ($xpath->query('/html/head/script') as $script) {
+	$scripts .= $script->nodeValue;
+}
+// disable things, which will broke JS moddle layer
+$scripts = str_replace('M = ', 'M2 = ', $scripts);
+$scripts = str_replace('M.yui = ', 'M2.yui = ', $scripts);
+$scripts = str_replace('M.pageloadstarttime', 'M2.pageloadstarttime', $scripts);
+$scripts = str_replace('M.cfg', 'M2.cfg', $scripts);
+$scripts = str_replace('M.yui.loader', 'M2.yui.loader', $scripts);
+
+$message['script'] .= $scripts;
 
 echo json_encode($message);
 exit;
@@ -173,7 +225,7 @@ function get_form_items($id, $block_data=array()) {
 				if (count($item->tags)>0)
 					$tags = 'data-tags=\''.json_encode($item->tags, JSON_UNESCAPED_UNICODE).'\'';  // JSON_UNESCAPED_UNICODE --> PHP 5.4
 				$content .= '<div class="add-item" '.$tags.' data-category="'.$category->id.'">';
-				$content .= '<input type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
+				$content .= '<input class="add-item-checkbox" type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
 				$content .= $item->name;
 				$content .= '</div>';
 			}
@@ -194,10 +246,7 @@ function get_form_items($id, $block_data=array()) {
 		?>
 	</div>
 	<script type="text/javascript">
-	//<![CDATA[
-		exaportViewEdit.setPopupTitle(<?php echo json_encode(get_string('cofigureblock_item','block_exaport')); ?>);
-		exaportViewEdit.initAddItems();
-	//]]>
+			exaportViewEdit.initAddItems();
 	</script>
 	<?php
 	$content .= ob_get_clean();
@@ -220,7 +269,7 @@ function get_form_items($id, $block_data=array()) {
 					if (count($item->tags)>0)
 						$tags = 'data-tags=\''.json_encode($item->tags, JSON_UNESCAPED_UNICODE).'\'';  // JSON_UNESCAPED_UNICODE --> PHP 5.4
 					$content .= '<div class="add-item" '.$tags.' data-category="sharedFromUser">';
-					$content .= '<input type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
+					$content .= '<input class="add-item-checkbox" type="checkbox" name="add_items[]" value="'.$item->id.'" /> ';
 					$content .= $item->name;
 					$content .= '</div>';							
 				}
@@ -229,8 +278,8 @@ function get_form_items($id, $block_data=array()) {
 		$content .= '</td></tr>';
 	}
 	$content .= '<tr><td>';	
-	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit btn btn-default" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';	
 	$content .= '</form>';
@@ -263,18 +312,16 @@ function get_form_text($id, $block_data=array()) {
 	$content .= '<label for="text">'.get_string('blockcontent','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
-	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="block_text" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.$text.'</textarea>';
+	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="id_block_text" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.$text.'</textarea>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';
-	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit btn btn-default" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
-	// change the title of block
-	$content .= '<script type="text/javascript">exaportViewEdit.setPopupTitle("'.get_string('cofigureblock_text','block_exaport').'")</script>';
 
-	$content .= tinyMCE_enable_script('block_text');
+	$content .= htmlEditor_enable_script('block_text');
 
 	return $content;
 }
@@ -292,13 +339,11 @@ function get_form_headline($id, $block_data=array()) {
 	$content .= '<div for="headline" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
-	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit btn btn-default" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
-	// change the title of block
-	$content .= '<script type="text/javascript">exaportViewEdit.setPopupTitle("'.get_string('cofigureblock_header','block_exaport').'"); </script>';
 
 	return $content;
 }
@@ -372,17 +417,15 @@ if ($USER->picture) {
 	$content .= '<label for="text">'.get_string('aboutme','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
-	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="block_intro" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.s($text).'</textarea>';
+	$content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="id_block_intro" class="mceEditor" cols="10" rows="15" aria-hidden="true">'.s($text).'</textarea>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';
-	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit btn btn-default" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
-	// change the title of block
-	$content .= '<script type="text/javascript">exaportViewEdit.setPopupTitle("'.get_string('cofigureblock_personalinfo','block_exaport').'"); </script>';
 
-	$content .= tinyMCE_enable_script('block_intro');
+	$content .= htmlEditor_enable_script('block_intro');
 	
 	return $content;
 }
@@ -436,13 +479,11 @@ function get_form_media($id, $block_data=array()) {
 	$content .= ' <input type="text" tabindex="1" name="height" value="'.s($block_data->height?$block_data->height:"").'" id="block_height">';			
 	$content .= '</td></tr>';			
 	$content .= '<tr><td>';
-	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_media" name="submit_block" class="submit" />';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_media" name="submit_block" class="submit btn btn-default" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';
 	$content .= '</form>';
-	// change the title of block
-	$content .= '<script type="text/javascript">exaportViewEdit.setPopupTitle("'.get_string('cofigureblock_media','block_exaport').'")</script>';
 	return $content;
 }
 
@@ -475,10 +516,7 @@ function get_form_badge($id, $block_data=array()) {
 		?>
 	</div>
 	<script type="text/javascript">
-	//<![CDATA[
-		exaportViewEdit.setPopupTitle(<?php echo json_encode(get_string('cofigureblock_badge','block_exaport')); ?>);
-		exaportViewEdit.initAddItems();
-	//]]>
+			exaportViewEdit.initAddItems();
 	</script>
 	<?php
 	$content .= ob_get_clean();
@@ -486,8 +524,8 @@ function get_form_badge($id, $block_data=array()) {
 
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
-	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit" />';
-	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" class="submit btn btn-default" />';
+	$content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
 	$content .= '</td></tr>';
 	$content .= '</table>';	
 	$content .= '</form>';
@@ -495,26 +533,46 @@ function get_form_badge($id, $block_data=array()) {
 	return $content;
 };
 
-function tinyMCE_enable_script($element_id) {
-	global $CFG;
-	
+function htmlEditor_enable_script($element_id) {
+	global $CFG, $PAGE, $OUTPUT;
+	$content = '';
+
+	$content .= '<script type="text/javascript">';
+	$tempform = new temporary_form(null, ['property_name' => $element_id]);
+	$temp_content = $tempform->render();
+	// get code from footer
+	$footercode = $PAGE->requires->get_end_code();
+	// get from footer code JS code only with html editor parts
+	$footerlines = preg_split ('/\R/', $footercode);
+	$prev_line = '';
+	foreach ($footerlines as $line) {
+		if (    strpos($line, $element_id) !== false
+			||  strpos($line, 'M.str =') !== false
+			||  strpos($line, '\'core_filepicker\'') !== false
+			) {
+			if (strpos($line, 'module.enhance') !== false) {
+				$content .= "\r\n".
+					$prev_line."\r\n".
+					$line.
+					(trim($prev_line) != '' ? "}); " : "");
+			}
+			else
+				$content .= "\r\n".$line;
+		}
+		$prev_line = $line;
+	}
+	// for atto, tinyMCEor another editor can be different settings/scripts. So we need to search this cases
+	$atto = false;
+	if (strpos($content, 'atto') !== false)
+		$atto = true;
+	if ($atto) { // code only for Atto editor
+		$content .= '});';
+	}
+	// change itemid to draft!!
 	$draft_itemid = (int)file_get_submitted_draft_itemid('text');
-
-	$directionality = get_string('thisdirection', 'langconfig');
-	$lang		   = current_language();
-	$rev = theme_get_revision();
-
-	$content = '
-	<script type="text/javascript">
-	//<![CDATA[
-	YUI().use(\'node\', function(Y) {
-	M.util.load_flowplayer();
-	Y.on(\'domready\', function() { Y.use(\'core_filepicker\', function(Y) { M.core_filepicker.set_templates(Y, {"generallayout":"\n<div class=\"file-picker fp-generallayout\">\n <div class=\"fp-repo-area\">\n <ul class=\"fp-list\">\n <li class=\"fp-repo\"><a href=\"#\"><img class=\"fp-repo-icon\" width=\"16\" height=\"16\" \/>&nbsp;<span class=\"fp-repo-name\"><\/span><\/a><\/li>\n <\/ul>\n <\/div>\n <div class=\"fp-repo-items\">\n <div class=\"fp-navbar\">\n <div>\n <div class=\"fp-toolbar\">\n <div class=\"fp-tb-back\"><a href=\"#\">&laquo; Back<\/a><\/div>\n <div class=\"fp-tb-search\"><form><\/form><\/div>\n <div class=\"fp-tb-refresh\"><a href=\"#\"><img src=\"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/core\/'.$rev.'\/a\/refresh\" \/><\/a><\/div>\n <div class=\"fp-tb-logout\"><img src=\"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/core\/'.$rev.'\/a\/logout\" \/><a href=\"#\"><\/a><\/div>\n <div class=\"fp-tb-manage\"><a href=\"#\"><img src=\"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/core\/'.$rev.'\/a\/setting\" \/> Manage<\/a><\/div>\n <div class=\"fp-tb-help\"><a href=\"#\"><img src=\"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/core\/'.$rev.'\/a\/help\" \/> Help<\/a><\/div>\n <div class=\"fp-tb-message\"><\/div>\n <\/div>\n <div class=\"fp-viewbar\">\n <a class=\"fp-vb-icons\" href=\"#\"><\/a>\n <a class=\"fp-vb-details\" href=\"#\"><\/a>\n <a class=\"fp-vb-tree\" href=\"#\"><\/a>\n <\/div>\n <div class=\"fp-clear-left\"><\/div>\n <\/div>\n <div class=\"fp-pathbar\">\n <span class=\"fp-path-folder\"><a class=\"fp-path-folder-name\" href=\"#\"><\/a><\/span>\n <\/div>\n <\/div>\n <div class=\"fp-content\"><\/div>\n <\/div>\n<\/div>","iconfilename":"\n<a class=\"fp-file\" href=\"#\" >\n <div style=\"position:relative;\">\n <div class=\"fp-thumbnail\"><\/div>\n <div class=\"fp-reficons1\"><\/div>\n <div class=\"fp-reficons2\"><\/div>\n <\/div>\n <div class=\"fp-filename-field\">\n <p class=\"fp-filename\"><\/p>\n <\/div>\n<\/a>","listfilename":"\n<span class=\"fp-filename-icon\">\n <a href=\"#\">\n <span class=\"fp-icon\"><\/span>\n <span class=\"fp-filename\"><\/span>\n <\/a>\n<\/span>","nextpage":"\n<div class=\"fp-nextpage\">\n <div class=\"fp-nextpage-link\"><a href=\"#\">more<\/a><\/div>\n <div class=\"fp-nextpage-loading\">\n <img src=\"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/core\/'.$rev.'\/i\/loading_small\" \/>\n <\/div>\n<\/div>","selectlayout":"\n<div class=\"file-picker fp-select\">\n <div class=\"fp-select-loading\">\n <img src=\"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/core\/'.$rev.'\/i\/loading_small\" \/>\n <\/div>\n <form>\n <table>\n <tr class=\"fp-linktype-2\">\n <td class=\"mdl-right\"><\/td>\n <td class=\"mdl-left\"><input type=\"radio\"\/><label>&nbsp;Make a copy of the file<\/label><\/td><\/tr>\n <tr class=\"fp-linktype-1\">\n <td class=\"mdl-right\"><\/td>\n <td class=\"mdl-left\"><input type=\"radio\"\/><label>&nbsp;Link to the file directly<\/label><\/td><\/tr>\n <tr class=\"fp-linktype-4\">\n <td class=\"mdl-right\"><\/td>\n <td class=\"mdl-left\"><input type=\"radio\"\/><label>&nbsp;Create an alias\/shortcut to the file<\/label><\/td><\/tr>\n <tr class=\"fp-saveas\">\n <td class=\"mdl-right\"><label>Save as<\/label>:<\/td>\n <td class=\"mdl-left\"><input type=\"text\"\/><\/td><\/tr>\n <tr class=\"fp-setauthor\">\n <td class=\"mdl-right\"><label>Author<\/label>:<\/td>\n <td class=\"mdl-left\"><input type=\"text\" \/><\/td><\/tr>\n <tr class=\"fp-setlicense\">\n <td class=\"mdl-right\"><label>Choose license<\/label>:<\/td>\n <td class=\"mdl-left\"><select><\/select><\/td><\/tr>\n <\/table>\n <div class=\"fp-select-buttons\">\n <button class=\"fp-select-confirm\">Select this file<\/button>\n <button class=\"fp-select-cancel\">Cancel<\/button>\n <\/div>\n <\/form>\n <div class=\"fp-info\">\n <div class=\"fp-hr\"><\/div>\n <p class=\"fp-thumbnail\"><\/p>\n <div class=\"fp-fileinfo\">\n <div class=\"fp-datemodified\">Last modified: <span class=\"fp-value\"><\/span><\/div>\n <div class=\"fp-datecreated\">Created: <span class=\"fp-value\"><\/span><\/div>\n <div class=\"fp-size\">Size: <span class=\"fp-value\"><\/span><\/div>\n <div class=\"fp-license\">Licence: <span class=\"fp-value\"><\/span><\/div>\n <div class=\"fp-author\">Author: <span class=\"fp-value\"><\/span><\/div>\n <div class=\"fp-dimensions\">Dimensions: <span class=\"fp-value\"><\/span><\/div>\n <\/div>\n <div>\n<\/div>","uploadform":"\n<div class=\"fp-upload-form mdl-align\">\n <div class=\"fp-content-center\">\n <form enctype=\"multipart\/form-data\" method=\"POST\">\n <table >\n <tr class=\"fp-file\">\n <td class=\"mdl-right\"><label>Attachment<\/label>:<\/td>\n <td class=\"mdl-left\"><input type=\"file\"\/><\/td><\/tr>\n <tr class=\"fp-saveas\">\n <td class=\"mdl-right\"><label>Save as<\/label>:<\/td>\n <td class=\"mdl-left\"><input type=\"text\"\/><\/td><\/tr>\n <tr class=\"fp-setauthor\">\n <td class=\"mdl-right\"><label>Author<\/label>:<\/td>\n <td class=\"mdl-left\"><input type=\"text\"\/><\/td><\/tr>\n <tr class=\"fp-setlicense\">\n <td class=\"mdl-right\"><label>Choose license<\/label>:<\/td>\n <td class=\"mdl-left\"><select><\/select><\/td><\/tr>\n <\/table>\n <\/form>\n <div><button class=\"fp-upload-btn\">Upload this file<\/button><\/div>\n <\/div>\n<\/div> ","loading":"\n<div class=\"fp-content-loading\">\n <div class=\"fp-content-center\">\n <img src=\"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/core\/'.$rev.'\/i\/loading_small\" \/>\n <\/div>\n<\/div>","error":"\n<div class=\"fp-content-error\" ><div class=\"fp-error\"><\/div><\/div>","message":"\n<div class=\"file-picker fp-msg\">\n <p class=\"fp-msg-text\"><\/p>\n <button class=\"fp-msg-butok\">OK<\/button>\n<\/div>","processexistingfile":"\n<div class=\"file-picker fp-dlg\">\n <p class=\"fp-dlg-text\"><\/p>\n <div class=\"fp-dlg-buttons\">\n <button class=\"fp-dlg-butoverwrite\">Overwrite<\/button>\n <button class=\"fp-dlg-butrename\"><\/button>\n <button class=\"fp-dlg-butcancel\">Cancel<\/button>\n <\/div>\n<\/div>","processexistingfilemultiple":"\n<div class=\"file-picker fp-dlg\">\n <p class=\"fp-dlg-text\"><\/p>\n <a class=\"fp-dlg-butoverwrite fp-panel-button\" href=\"#\">Overwrite<\/a>\n <a class=\"fp-dlg-butcancel fp-panel-button\" href=\"#\">Cancel<\/a>\n <a class=\"fp-dlg-butrename fp-panel-button\" href=\"#\"><\/a>\n <br\/>\n <a class=\"fp-dlg-butoverwriteall fp-panel-button\" href=\"#\">Overwrite all<\/a>\n <a class=\"fp-dlg-butrenameall fp-panel-button\" href=\"#\">Rename all<\/a>\n<\/div>","loginform":"\n<div class=\"fp-login-form\">\n <div class=\"fp-content-center\">\n <form>\n <table >\n <tr class=\"fp-login-popup\">\n <td colspan=\"2\">\n <label>Click \"Login\" button to login<\/label>\n <p class=\"fp-popup\"><button class=\"fp-login-popup-but\">Login<\/button><\/p><\/td><\/tr>\n <tr class=\"fp-login-textarea\">\n <td colspan=\"2\"><p><textarea><\/textarea><\/p><\/td><\/tr>\n <tr class=\"fp-login-select\">\n <td align=\"right\"><label><\/label><\/td>\n <td align=\"left\"><select><\/select><\/td><\/tr>\n <tr class=\"fp-login-input\">\n <td class=\"label\"><label><\/label><\/td>\n <td class=\"input\"><input\/><\/td><\/tr>\n <tr class=\"fp-login-radiogroup\">\n <td align=\"right\" width=\"30%\" valign=\"top\"><label><\/label><\/td>\n <td align=\"left\" valign=\"top\"><p class=\"fp-login-radio\"><input \/> <label><\/label><\/p><\/td><\/tr>\n <\/table>\n <p><button class=\"fp-login-submit\">Submit<\/button><\/p>\n <\/form>\n <\/div>\n<\/div>"}); }); });
-	Y.on(\'domready\', function() { Y.use(\'editor_tinymce\', function(Y) { M.editor_tinymce.init_editor(Y, "'.$element_id.'", {"mode":"exact","elements":"'.$element_id.'","relative_urls":false,"document_base_url":"'.$CFG->wwwroot.'","moodle_plugin_base":"'.$CFG->wwwroot.'\/lib\/editor\/tinymce\/plugins\/","content_css":"'.$CFG->wwwroot.'\/theme\/styles.php\/standard\/'.$rev.'\/editor","language":"'.$lang.'","directionality":"'.$directionality.'","plugin_insertdate_dateFormat ":"%A, %d %B %Y","plugin_insertdate_timeFormat ":"%I:%M %p","theme":"advanced","skin":"o2k7","skin_variant":"silver","apply_source_formatting":true,"remove_script_host":false,"entity_encoding":"raw","plugins":"safari,table,style,layer,advhr,advlink,emotions,inlinepopups,searchreplace,paste,directionality,fullscreen,nonbreaking,contextmenu,insertdatetime,save,iespell,preview,print,noneditable,visualchars,xhtmlxtras,template,pagebreak,-moodlenolink,-spellchecker,-moodleimage,-moodlemedia","theme_advanced_font_sizes":"1,2,3,4,5,6,7","theme_advanced_layout_manager":"SimpleLayout","theme_advanced_toolbar_align":"left","theme_advanced_fonts":"Trebuchet=Trebuchet MS,Verdana,Arial,Helvetica,sans-serif;Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;Georgia=georgia,times new roman,times,serif;Tahoma=tahoma,arial,helvetica,sans-serif;Times New Roman=times new roman,times,serif;Verdana=verdana,arial,helvetica,sans-serif;Impact=impact;Wingdings=wingdings","theme_advanced_resize_horizontal":true,"theme_advanced_resizing":true,"theme_advanced_resizing_min_height":30,"min_height":30,"theme_advanced_toolbar_location":"top","theme_advanced_statusbar_location":"bottom","language_load":false,"langrev":-1,"theme_advanced_buttons1":"fontselect,fontsizeselect,formatselect,|,undo,redo,|,search,replace,|,fullscreen","theme_advanced_buttons2":"bold,italic,underline,strikethrough,sub,sup,|,justifyleft,justifycenter,justifyright,|,cleanup,removeformat,pastetext,pasteword,|,forecolor,backcolor,|,ltr,rtl","theme_advanced_buttons3":"bullist,numlist,outdent,indent,|,link,unlink,moodlenolink,|,image,moodlemedia,nonbreaking,charmap,table,|,code,spellchecker","extended_valid_elements":"nolink,tex,algebra,lang[lang]","custom_elements":"nolink,~tex,~algebra,lang","init_instance_callback":"M.editor_tinymce.onblur_event","moodle_init_plugins":"moodlenolink:loader.php\/moodlenolink\/2012112900\/editor_plugin.js,spellchecker:loader.php\/spellchecker\/2012112900\/editor_plugin.js,moodleimage:loader.php\/moodleimage\/2012112900\/editor_plugin.js,moodlemedia:loader.php\/moodlemedia\/2012112900\/editor_plugin.js","spellchecker_rpc_url":"'.$CFG->wwwroot.'\/lib\/editor\/tinymce\/plugins\/spellchecker\/rpc.php","spellchecker_languages":"+English=en,Danish=da,Dutch=nl,Finnish=fi,French=fr,German=de,Italian=it,Polish=pl,Portuguese=pt,Spanish=es,Swedish=sv","file_browser_callback":"M.editor_tinymce.filepicker"}); }); });
-	Y.on(\'domready\', function() { Y.use(\'editor_tinymce\', function(Y) { M.editor_tinymce.init_filepicker(Y, "'.$element_id.'", {"image":{"defaultlicense":"allrightsreserved","licenses":[{"shortname":"unknown","fullname":"Other"},{"shortname":"allrightsreserved","fullname":"All rights reserved"},{"shortname":"public","fullname":"Public domain"},{"shortname":"cc","fullname":"Creative Commons"},{"shortname":"cc-nd","fullname":"Creative Commons - NoDerivs"},{"shortname":"cc-nc-nd","fullname":"Creative Commons - No Commercial NoDerivs"},{"shortname":"cc-nc","fullname":"Creative Commons - No Commercial"},{"shortname":"cc-nc-sa","fullname":"Creative Commons - No Commercial ShareAlike"},{"shortname":"cc-sa","fullname":"Creative Commons - ShareAlike"}],"author":"Ras Razawa","repositories":{"1":{"id":"1","name":"Server files","type":"local","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_local\/'.$rev.'\/icon","supported_types":[],"return_types":6,"sortorder":1},"2":{"id":"2","name":"Recent files","type":"recent","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_recent\/'.$rev.'\/icon","supported_types":[],"return_types":2,"sortorder":2},"3":{"id":"3","name":"Upload a file","type":"upload","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_upload\/'.$rev.'\/icon","supported_types":[],"return_types":2,"sortorder":3},"4":{"id":"4","name":"URL downloader","type":"url","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_url\/'.$rev.'\/icon","supported_types":[".gif",".jpe",".jpeg",".jpg",".png",".svg",".svgz"],"return_types":3,"sortorder":4},"5":{"id":"5","name":"Private files","type":"user","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_user\/'.$rev.'\/icon","supported_types":[],"return_types":6,"sortorder":5},"6":{"id":"6","name":"Wikimedia","type":"wikimedia","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_wikimedia\/'.$rev.'\/icon","supported_types":[],"return_types":3,"sortorder":6}},"externallink":true,"userprefs":{"recentrepository":"3","recentlicense":"public","recentviewmode":""},"accepted_types":[".gif",".jpe",".jpeg",".jpg",".png",".svg",".svgz"],"return_types":7,"context":{"id":"5","contextlevel":30,"instanceid":"2","path":"\/1\/5","depth":"2"},"client_id":"512105b0bb58c","maxbytes":0,"areamaxbytes":-1,"env":"editor","itemid":'.$draft_itemid.'},"media":{"defaultlicense":"allrightsreserved","licenses":[{"shortname":"unknown","fullname":"Other"},{"shortname":"allrightsreserved","fullname":"All rights reserved"},{"shortname":"public","fullname":"Public domain"},{"shortname":"cc","fullname":"Creative Commons"},{"shortname":"cc-nd","fullname":"Creative Commons - NoDerivs"},{"shortname":"cc-nc-nd","fullname":"Creative Commons - No Commercial NoDerivs"},{"shortname":"cc-nc","fullname":"Creative Commons - No Commercial"},{"shortname":"cc-nc-sa","fullname":"Creative Commons - No Commercial ShareAlike"},{"shortname":"cc-sa","fullname":"Creative Commons - ShareAlike"}],"author":"Ras Razawa","repositories":{"1":{"id":"1","name":"Server files","type":"local","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_local\/'.$rev.'\/icon","supported_types":[],"return_types":6,"sortorder":1},"2":{"id":"2","name":"Recent files","type":"recent","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_recent\/'.$rev.'\/icon","supported_types":[],"return_types":2,"sortorder":2},"3":{"id":"3","name":"Upload a file","type":"upload","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_upload\/'.$rev.'\/icon","supported_types":[],"return_types":2,"sortorder":3},"5":{"id":"5","name":"Private files","type":"user","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_user\/'.$rev.'\/icon","supported_types":[],"return_types":6,"sortorder":5},"6":{"id":"6","name":"Wikimedia","type":"wikimedia","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_wikimedia\/'.$rev.'\/icon","supported_types":[],"return_types":3,"sortorder":6},"7":{"id":"7","name":"Youtube videos","type":"youtube","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_youtube\/'.$rev.'\/icon","supported_types":[".3gp",".avi",".dv",".dif",".flv",".f4v",".mov",".movie",".mp4",".m4v",".mpeg",".mpe",".mpg",".ogv",".qt",".rmvb",".rv",".swf",".swfl",".webm",".wmv",".asf"],"return_types":1,"sortorder":7}},"externallink":true,"userprefs":{"recentrepository":"3","recentlicense":"public","recentviewmode":""},"accepted_types":[".3gp",".avi",".dv",".dif",".flv",".f4v",".mov",".movie",".mp4",".m4v",".mpeg",".mpe",".mpg",".ogv",".qt",".rmvb",".rv",".swf",".swfl",".webm",".wmv",".asf",".aac",".aif",".aiff",".aifc",".au",".m3u",".mp3",".m4a",".oga",".ogg",".ra",".ram",".rm",".wav"],"return_types":7,"context":{"id":"5","contextlevel":30,"instanceid":"2","path":"\/1\/5","depth":"2"},"client_id":"512105b0c60f3","maxbytes":0,"areamaxbytes":-1,"env":"editor","itemid":'.$draft_itemid.'},"link":{"defaultlicense":"allrightsreserved","licenses":[{"shortname":"unknown","fullname":"Other"},{"shortname":"allrightsreserved","fullname":"All rights reserved"},{"shortname":"public","fullname":"Public domain"},{"shortname":"cc","fullname":"Creative Commons"},{"shortname":"cc-nd","fullname":"Creative Commons - NoDerivs"},{"shortname":"cc-nc-nd","fullname":"Creative Commons - No Commercial NoDerivs"},{"shortname":"cc-nc","fullname":"Creative Commons - No Commercial"},{"shortname":"cc-nc-sa","fullname":"Creative Commons - No Commercial ShareAlike"},{"shortname":"cc-sa","fullname":"Creative Commons - ShareAlike"}],"author":"Ras Razawa","repositories":{"1":{"id":"1","name":"Server files","type":"local","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_local\/'.$rev.'\/icon","supported_types":[],"return_types":6,"sortorder":1},"2":{"id":"2","name":"Recent files","type":"recent","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_recent\/'.$rev.'\/icon","supported_types":[],"return_types":2,"sortorder":2},"3":{"id":"3","name":"Upload a file","type":"upload","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_upload\/'.$rev.'\/icon","supported_types":[],"return_types":2,"sortorder":3},"4":{"id":"4","name":"URL downloader","type":"url","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_url\/'.$rev.'\/icon","supported_types":[".gif",".jpe",".jpeg",".jpg",".png",".svg",".svgz"],"return_types":3,"sortorder":4},"5":{"id":"5","name":"Private files","type":"user","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_user\/'.$rev.'\/icon","supported_types":[],"return_types":6,"sortorder":5},"6":{"id":"6","name":"Wikimedia","type":"wikimedia","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_wikimedia\/'.$rev.'\/icon","supported_types":[],"return_types":3,"sortorder":6},"7":{"id":"7","name":"Youtube videos","type":"youtube","icon":"'.$CFG->wwwroot.'\/theme\/image.php\/standard\/repository_youtube\/'.$rev.'\/icon","supported_types":[".3gp",".avi",".dv",".dif",".flv",".f4v",".mov",".movie",".mp4",".m4v",".mpeg",".mpe",".mpg",".ogv",".qt",".rmvb",".rv",".swf",".swfl",".webm",".wmv",".asf"],"return_types":1,"sortorder":7}},"externallink":true,"userprefs":{"recentrepository":"3","recentlicense":"public","recentviewmode":""},"accepted_types":[],"return_types":7,"context":{"id":"5","contextlevel":30,"instanceid":"2","path":"\/1\/5","depth":"2"},"client_id":"512105b0ceec7","maxbytes":0,"areamaxbytes":-1,"env":"editor","itemid":'.$draft_itemid.'}}); }); });
-	});
-	//]]>
-	</script>';
-
+	$content .= "\r\n".' var dr = '.$draft_itemid.';';
+	$content = preg_replace('/("itemid":[[:digit:]]*)/', '"itemid":'.$draft_itemid, $content);
+	$content .= '</script>';
 	return $content;
+
 }

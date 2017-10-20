@@ -22,6 +22,8 @@ require_once __DIR__.'/inc.php';
 $item_id = optional_param('item_id', -1, PARAM_INT);
 $access = optional_param('access', '', PARAM_TEXT);
 
+ini_set("display_errors", 0);
+
 //require_login(0, true);
 $item = null;
 
@@ -56,19 +58,17 @@ if ($iconfile = block_exaport_get_file($item, 'item_iconfile')) {
 	exit;
 }
 
-$output = block_exaport_get_renderer();
-
 switch ($item->type) {
 	case "file": 
 		// thumbnail of file
 		$file = block_exaport_get_item_file($item);
-		
 		// serve file
 		if ($file && $file->is_valid_image()) {
 			send_stored_file($file, 1);
 			exit;
 		}
 
+		$output = block_exaport_get_renderer();
 		// needed for pix_url
 		$PAGE->set_context(context_system::instance());
 		$icon = $output->image_url(file_file_icon($file, 90));

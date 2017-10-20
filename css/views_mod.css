@@ -326,44 +326,44 @@
 	cursor: pointer;
 }
 
-#exaport .not-empty-check {
+#blockform .not-empty-check {
 	color: red;
 	display: none;
 	padding: 5px;
 }
 
-#exaport input[name=block_title], #exaport input[name=headline] {
+#blockform input[name=block_title], #exaport input[name=headline] {
 	width: 95%
 }
 
-#exaport #add-items-list {
+#blockform #add-items-list {
 	max-height: 400px;
 	overflow: auto;
 }
-#exaport #add-items-list .add-item {
+#blockform #add-items-list .add-item {
 	cursor: pointer;
 	padding: 3px;
 }
-#exaport #add-items-list .add-item * {
+#blockform #add-items-list .add-item * {
 	cursor: pointer;
 }
-#exaport #add-items-list .add-item:hover {
-	padding: 2px;
-	border: 1px solid black;
+#blockform #add-items-list .add-item:hover {
+	padding: 3px;
+	/*border: 1px solid black;*/
 }
-#exaport #add-items-list .add-item.checked {
-	padding: 2px;
-	border: 1px solid #00C000;
+#blockform #add-items-list .add-item.checked {
+	padding: 3px;
+	/*border: 1px solid #00C000;*/
 	background: #DEFEDE;
 }
-#exaport #add-items-list .add-item-category {
+#blockform #add-items-list .add-item-category {
 	padding: 10px 3px 0 3px;
 	font-weight: bold;
 }
-#exaport #add-items-list .add-item-sub .add-item-category {
+#blockform #add-items-list .add-item-sub .add-item-category {
 	padding-top: 0;
 }
-#exaport #add-items-list .add-item-sub {
+#blockform #add-items-list .add-item-sub {
 	margin-left: 30px;
 }
 

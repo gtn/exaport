@@ -176,7 +176,7 @@ echo "<form action=\"{$CFG->wwwroot}/blocks/exaport/views_mod.php?sesskey=".sess
 		  <input type=\"hidden\" name=\"action\" value=\"add\"/>
 		  <input type=\"hidden\" name=\"courseid\" value=\"$courseid\"/>";
 
-echo "<input type=\"submit\" value=\"" . get_string("newview", "block_exaport"). "\"/>";
+echo "<input type=\"submit\" value=\"" . get_string("newview", "block_exaport"). "\" class=\"btn btn-default\"/>";
 
 echo "</fieldset>
 	  </form>";

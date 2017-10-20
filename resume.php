@@ -81,8 +81,8 @@ if ($action == 'xmleuropass') {
 	echo '<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/europass.png" height="50"><br/>';
 	echo get_string("resume_exportto_europass_intro", "block_exaport");
 	echo '<form action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=xmleuropass_export" method="post">';
-	echo '<input type="submit" value="'.get_string("resume_exportto_europass_getXML", "block_exaport").'">';
-	echo '</form>';
+	echo '<input type="submit" value="'.get_string("resume_exportto_europass_getXML", "block_exaport").'" class="btn btn-default">';
+	echo '</form><br>';
 	$show_information = false;
 }
 
@@ -332,7 +332,7 @@ if ($show_information) {
 	echo '<form method="post" action="' . $CFG->wwwroot . '/blocks/exaport/personal_information.php?courseid=' . $courseid . '">';
 	echo '<fieldset class="hidden">';
 	echo '<input type="hidden" name="edit" value="1" />';
-	echo '<input type="submit" value="' . get_string("edit") . '" />';
+	echo '<input type="submit" value="' . get_string("edit") . '" class="btn btn-default" />';
 	echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
 
 	echo '</fieldset>';
@@ -419,10 +419,10 @@ function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '',
 	$resume_part .= '<div>'.$content.'</div>';
 	switch ($buttons) {
 		case 'edit':
-				$resume_part .= '<input type="submit" value="' . get_string("edit") . '" />';
+				$resume_part .= '<input type="submit" value="' . get_string("edit") . '" class="btn btn-default" />';
 				break;
 		case 'add':
-				$resume_part .= '<input type="submit" value="' . get_string("add") . '" />';
+				$resume_part .= '<input type="submit" value="' . get_string("add") . '" class="btn btn-default" />';
 				break;
 		default :
 				$resume_part .= '';

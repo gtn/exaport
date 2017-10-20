@@ -559,7 +559,6 @@ namespace {
 
 	function block_exaport_get_shareable_groups_for_json() {
 		$cohorts = block_exaport_get_user_cohorts();
-
 		if (!$cohorts) {
 			return [];
 		}

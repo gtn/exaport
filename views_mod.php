@@ -45,6 +45,10 @@ if (!$COURSE) {
    print_error("invalidcourseid","block_exaport");
 }
 
+// include JS script
+$PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
+//$PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
+
 if ($id) {
 	$conditions = array("id" => $id, "userid" => $USER->id);
 	if (!$view = $DB->get_record('block_exaportview', $conditions)) {
@@ -361,7 +365,7 @@ if ($editform->is_cancelled()) {
 	}
 	
 
-// processing for blocks and shares	
+// processing for blocks and shares
 	switch ($type) {
 		case 'content':
 			// delete all blocks
@@ -669,10 +673,10 @@ $rev = theme_get_revision();
 echo "<!--[if IE]> <style> #link_thumbnail{ zoom: 0.2; } </style> <![endif]--> ";
 switch ($type) {
 	case 'content' :
+		//			jQueryExaport(exaportViewEdit.initContentEdit);
 		?>
 		<script type="text/javascript">
 		//<![CDATA[
-			jQueryExaport(exaportViewEdit.initContentEdit);
 			M.yui.add_module({"editor_tinymce":{"name":"editor_tinymce","fullpath":"<?php echo $CFG->wwwroot;?>/lib/javascript.php/<?php echo $rev;?>/lib/editor/tinymce/module.js","requires":[]}});
 		//]]>
 		</script>

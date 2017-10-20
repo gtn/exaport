@@ -285,7 +285,8 @@ function block_exaport_init_js_css() {
 	$PAGE->requires->jquery_plugin('ui');
 	$PAGE->requires->jquery_plugin('ui-css');
 
-	$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+	//$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+	//$PAGE->requires->js_call_amd('block_exaport/json', 'initialise');
 
 	$PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
@@ -998,7 +999,11 @@ function block_exaport_get_view_blocks($view) {
 	global $DB, $USER;
 
 	$portfolioItems = block_exaport_get_portfolio_items();
-	$badges = block_exaport_get_all_user_badges($view->userid);
+	if (isset($view->userid))
+		$userid = $view->userid;
+	else
+		$userid = $USER->id;
+	$badges = block_exaport_get_all_user_badges($userid);
 
 	$query = "select b.*".
 		" from {block_exaportviewblock} b".
@@ -1058,7 +1063,7 @@ function block_exaport_get_view_blocks($view) {
 
 		// clean html texts for output
 		if (isset($block->print_text) && $block->print_text) {
-			$block->print_text = format_text($block->print_text, FORMAT_HTML);
+			$block->print_text = format_text($block->print_text, FORMAT_HTML, array('filter' => false)); // TODO: $options['filter']=false - not very good solution
 		}
 		if (isset($block->intro) && $block->intro) {
 			$block->intro = format_text($block->intro, FORMAT_HTML);

@@ -68,7 +68,8 @@ function block_exaport_print_extern_item($item, $access) {
 			;
 		}
 	}
-	if (! $box_content) {
+
+	if (!$box_content && !$item->url) {
 		$box_content = 'File not found';
 	}
 

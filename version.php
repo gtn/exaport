@@ -20,12 +20,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_exaport';
-<<<<<<< HEAD
+
 $plugin->release = '4.6.0';
-$plugin->version   = 2017071000;
-=======
-$plugin->release = '4.6.1.experimental';
-$plugin->version   = 2017071700.01;
->>>>>>> 06d7a6a... add item comment webservices
+$plugin->version   = 2017071001;
+
 $plugin->requires  = 2015051100;
 $plugin->maturity = MATURITY_STABLE;

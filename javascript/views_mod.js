@@ -18,9 +18,6 @@
 
 var exaportViewEdit = {};
 
-// preload M.core.dialogue
-Y.use('moodle-core-notification-dialogue');
-
 (function($){
 
 	var $E = window.block_exaport;

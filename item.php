@@ -277,7 +277,7 @@ switch ($action) {
 				$post->file = $draftitemid;   
 			}
 				
-			if (!$extra_content && !$post->url) {
+			if (!$extra_content) {
 				$extra_content = 'File not found';
 			}
 		}

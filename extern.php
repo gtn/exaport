@@ -17,4 +17,5 @@
 //
 // This copyright notice MUST APPEAR in all copies of the script!
 
-header('Location: shared_portfolio.php?access=hash/'.$_REQUEST['id']);
+$id = optional_param('id', '', PARAM_RAW);
+header('Location: shared_portfolio.php?access=hash/'.$id);

@@ -22,8 +22,9 @@
 // portfoliofile.php/files/$userid/$portfolioid/filename.ext
 // Exported SCORM-File (user has to be logged in)
 // portfoliofile.php/temp/export/$userid/filename.ext
-
-if (!empty($_GET['token']) || !empty($_GET['wstoken'])) {
+$token = optional_param('token', null, PARAM_RAW);
+$wstoken = optional_param('token', null, PARAM_RAW);
+if (!$token || !$wstoken) {
 	// automatisches einloggen beim öffnen mit token (vom webservice) verhindern
 	define('NO_MOODLE_COOKIES', true);
 }

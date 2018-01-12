@@ -17,7 +17,7 @@
 //
 // This copyright notice MUST APPEAR in all copies of the script!
 
-error_reporting(E_ALL);
+//error_reporting(E_ALL);
 require_once __DIR__.'/inc.php';
 global $DB,$USER,$COURSE,$CFG;
  

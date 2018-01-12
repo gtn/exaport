@@ -19,7 +19,7 @@
 
 require_once __DIR__.'/inc.php';
 // for ajax - stop errors/notices reporting
-error_reporting (0);
+//error_reporting (0);
 
 require_once $CFG->libdir.'/editor/tinymce/lib.php';
 $tinymce = new tinymce_texteditor();
@@ -53,9 +53,7 @@ class temporary_form extends moodleform {
 
 // --------------
 
-
-
-$type = $_POST['type_block'];
+$type = optional_param('type_block', '', PARAM_RAW);
 $id = optional_param('item_id', -1, PARAM_INT);
 
 $block_data = new stdClass();
@@ -104,6 +102,7 @@ $scripts = '';
 // get javascripts and configurations for working HTML editors. This code is searching and cutting the javascript from standart generated page
 $header = $OUTPUT->header();
 $dom = new DOMDocument('1.0', 'utf-8');
+libxml_use_internal_errors(true);
 $dom->loadHTML($header);
 // get all <script> from header
 $xpath = new DOMXPath($dom);
@@ -203,9 +202,10 @@ function get_form_items($id, $block_data=array()) {
 	function block_exaport_blocks_json_print_categories_recursive($category, $categoriesByParent, $itemsByCategory) {
 	
 		$subContent = '';
-		
-		foreach ($categoriesByParent[$category->id] as $subCategory) {
-			$subContent .= block_exaport_blocks_json_print_categories_recursive($subCategory, $categoriesByParent, $itemsByCategory);
+		if (isset($categoriesByParent[$category->id])) {
+			foreach ($categoriesByParent[$category->id] as $subCategory) {
+				$subContent .= block_exaport_blocks_json_print_categories_recursive($subCategory, $categoriesByParent, $itemsByCategory);
+			}
 		}
 
 		if (!$subContent && empty($itemsByCategory[$category->id])) {
@@ -291,7 +291,7 @@ function get_form_text($id, $block_data=array()) {
 	global $CFG, $tinymce, $PAGE, $USER;
 	
 	$draftid_editor = file_get_submitted_draft_itemid('text');
-	if ($block_data->text) {
+	if (isset($block_data->text) && $block_data->text) {
 		$text = $block_data->text;
 		$text = file_rewrite_pluginfile_urls($text, 'draftfile.php', context_user::instance($USER->id)->id, 'user', 'draft', $draftid_editor);
 	} else {
@@ -306,7 +306,7 @@ function get_form_text($id, $block_data=array()) {
 	$content .= '<label for="block_title">'.get_string('blocktitle2','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';
-	$content .= '<input type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
+	$content .= '<input type="text" name="block_title" value="'.s(isset($block_data->block_title) && $block_data->block_title ? $block_data->block_title : "").'" id="block_title">';
 	$content .= '</td></tr>';	
 	$content .= '<tr><th>';
 	$content .= '<label for="text">'.get_string('blockcontent','block_exaport').'</label>';
@@ -335,7 +335,7 @@ function get_form_headline($id, $block_data=array()) {
 	$content .= '<label for="headline">'.get_string('view_specialitem_headline', 'block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
-	$content .= '<input name="headline" id="headline" type="text" value="'.s($block_data->text?$block_data->text:"").'" default-text="'.get_string('view_specialitem_headline_defaulttext', 'block_exaport').'" /></div>';
+	$content .= '<input name="headline" id="headline" type="text" value="'.s(isset($block_data->text) && $block_data->text ? $block_data->text : "").'" default-text="'.get_string('view_specialitem_headline_defaulttext', 'block_exaport').'" /></div>';
 	$content .= '<div for="headline" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><td>';	
@@ -349,7 +349,7 @@ function get_form_headline($id, $block_data=array()) {
 }
 
 function get_form_personalinfo($id, $block_data=array()) {
-global $OUTPUT, $DB, $USER, $PAGE;
+global $OUTPUT, $DB, $USER, $PAGE, $CFG;
 
 if ($USER->picture) {
 	$user_picture = new user_picture($USER);
@@ -361,7 +361,7 @@ if ($USER->picture) {
 
 	$draftid_editor = file_get_submitted_draft_itemid('text');
 	
-	if ($block_data->text) {
+	if (isset($block_data->text) && $block_data->text) {
 		$text = $block_data->text;
 
 		$text = file_prepare_draft_area($draftid_editor, context_user::instance($USER->id)->id, 'block_exaport', 'view_content',
@@ -381,22 +381,22 @@ if ($USER->picture) {
 	$content .= '<label for="block_title">'.get_string('blocktitle2', 'block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';
-	$content .= '<input type="text" name="block_title" value="'.s($block_data->block_title).'" id="block_title">';
+	$content .= '<input type="text" name="block_title" value="'.(isset($block_data->block_title) ? s($block_data->block_title) : '').'" id="block_title">';
 	$content .= '</td></tr>';
 	$content .= '<tr><th>';
 	$content .= '<label>'.get_string('fieldstoshow','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
-	$content .= '<input type="checkbox" name="fields[firstname]" id="firstname" value="'.$USER->firstname.'" '.($block_data->firstname==$USER->firstname?'checked="checked"':'').'> '.get_string('firstname','block_exaport').'</input><br>';
-	$content .= '<input type="checkbox" name="fields[lastname]" id="lastname" value="'.$USER->lastname.'" '.($block_data->lastname==$USER->lastname?'checked="checked"':'').'> '.get_string('lastname','block_exaport').'</input>';
+	$content .= '<input type="checkbox" name="fields[firstname]" id="firstname" value="'.$USER->firstname.'" '.(isset($block_data->firstname) && $block_data->firstname == $USER->firstname ? 'checked="checked"':'').'> '.get_string('firstname','block_exaport').'</input><br>';
+	$content .= '<input type="checkbox" name="fields[lastname]" id="lastname" value="'.$USER->lastname.'" '.(isset($block_data->lastname) && $block_data->lastname == $USER->lastname ? 'checked="checked"':'').'> '.get_string('lastname','block_exaport').'</input>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><th>';
 	$content .= '<label>'.get_string('profilepicture','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';		
 	if ($USER->picture) {	
-		$content .= '<input type="radio" name="picture" value="" '.($block_data->picture==$picture_src?'':'checked="checked"').'> '.get_string('nopicture','block_exaport').'</input><br>';
-		$content .= '<input type="radio" name="picture" value="'.$picture_src.'" '.($block_data->picture==$picture_src?'checked="checked"':'').'> <img src="'.$user_picture->get_url($PAGE).'"></input>';
+		$content .= '<input type="radio" name="picture" value="" '.(isset($block_data->picture) && $block_data->picture == $picture_src ? '' : 'checked="checked"').'> '.get_string('nopicture','block_exaport').'</input><br>';
+		$content .= '<input type="radio" name="picture" value="'.$picture_src.'" '.(isset($block_data->picture) && $block_data->picture == $picture_src ? 'checked="checked"' : '').'> <img src="'.$user_picture->get_url($PAGE).'"></input>';
 	}
 	else 
 		$content .= get_string('noprofilepicture','block_exaport');
@@ -406,8 +406,8 @@ if ($USER->picture) {
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
 	if ($USER->email) {		
-		$content .= '<input type="radio" name="email" value="" '.($block_data->email==$USER->email?'':'checked="checked"').'> '.get_string('nomail','block_exaport').'</input><br>';
-		$content .= '<input type="radio" name="email" value="'.$USER->email.'" '.($block_data->email==$USER->email?'checked="checked"':'').'> '.$USER->email.'</input>';
+		$content .= '<input type="radio" name="email" value="" '.(isset($block_data->email) && $block_data->email == $USER->email ? '' : 'checked="checked"').'> '.get_string('nomail','block_exaport').'</input><br>';
+		$content .= '<input type="radio" name="email" value="'.$USER->email.'" '.(isset($block_data->email) && $block_data->email == $USER->email ? 'checked="checked"' : '').'> '.$USER->email.'</input>';
 	}
 	else
 		$content .= get_string('noemails','block_exaport');
@@ -442,14 +442,14 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '<label for="block_title">'.get_string('blocktitle2','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';
-	$content .= '<input tabindex="1" type="text" name="block_title" value="'.s($block_data->block_title?$block_data->block_title:"").'" id="block_title">';
+	$content .= '<input tabindex="1" type="text" name="block_title" value="'.s(isset($block_data->block_title) && $block_data->block_title ? $block_data->block_title : "").'" id="block_title">';
 	$content .= '<div for="block_title" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
 	$content .= '</td></tr>';	
 	$content .= '<tr><th>';
 	$content .= '<label for="mediacontent">'.get_string('mediacontent','block_exaport').'</label>';
 	$content .= '</th></tr>';
 	$content .= '<tr><td>';	
-	$content .= '<textarea tabindex="1" style="height: 100px; width: 100%;" name="mediacontent" id="block_media" cols="10" rows="15" aria-hidden="true">'.$block_data->contentmedia.'</textarea>';
+	$content .= '<textarea tabindex="1" style="height: 100px; width: 100%;" name="mediacontent" id="block_media" cols="10" rows="15" aria-hidden="true">'.(isset($block_data->contentmedia) ? $block_data->contentmedia : '').'</textarea>';
 	$content .= '</td></tr>';		
 	$content .= '<tr><th>';
 	$content .= get_string('media_allowed_notes','block_exaport');
@@ -474,9 +474,9 @@ function get_form_media($id, $block_data=array()) {
 	$content .= '</td></tr>';
 	$content .= '<tr><th>';
 	$content .= '<label for="width">'.get_string('width','block_exaport').'</label>';	
-	$content .= ' <input type="text" tabindex="1" name="width" value="'.s($block_data->width?$block_data->width:"").'" id="block_width">';		
+	$content .= ' <input type="text" tabindex="1" name="width" value="'.s(isset($block_data->width) && $block_data->width ? $block_data->width : "").'" id="block_width">';
 	$content .= '&nbsp;&nbsp;&nbsp;<label for="height">'.get_string('height','block_exaport').'</label>';	
-	$content .= ' <input type="text" tabindex="1" name="height" value="'.s($block_data->height?$block_data->height:"").'" id="block_height">';			
+	$content .= ' <input type="text" tabindex="1" name="height" value="'.s(isset($block_data->height) && $block_data->height ? $block_data->height : "").'" id="block_height">';
 	$content .= '</td></tr>';			
 	$content .= '<tr><td>';
 	$content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_media" name="submit_block" class="submit btn btn-default" />';

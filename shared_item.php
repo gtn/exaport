@@ -58,7 +58,8 @@ if ($comment_delete) {
 		//parse_str($_SERVER['QUERY_STRING'], $params);
 		//redirect($_SERVER['PHP_SELF'] . '?' . http_build_query(array('comment_delete' => null, 'commentid' => null, 'sesskey' => null) + (array) $params));
 	} else {
-		if(!isset($_POST['action'])){ //if comment_delete is set and form is submitted, comment was immediatly deleted and cant be deleted anymore, no error
+		$actionIs = optional_param('action', 0, PARAM_BOOL);
+		if(!$actionIs){ //if comment_delete is set and form is submitted, comment was immediatly deleted and cant be deleted anymore, no error
 			print_error("commentnotfound", "block_exaport");
 			//redirect($_SERVER['REQUEST_URI']);
 		}
@@ -121,9 +122,10 @@ if ($item->access->page == 'view') {
 echo block_exaport_wrapperdivstart();
 
 //IF FORM DATA -> INSERT
-if(isset($_POST['data'])) {
-	foreach ($_POST['data'] as $key => $desc) {
-		if (!empty($_POST['data'][$key])) {
+$data = optional_param_array('data', array(), PARAM_RAW);
+if(count($data) > 0) {
+	foreach ($data as $key => $desc) {
+		if (!empty($data[$key])) {
 				// Die Einträge in ein Array speichern
 				$values[] = $key;
 		}

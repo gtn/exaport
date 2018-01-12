@@ -22,7 +22,7 @@ require_once __DIR__.'/inc.php';
 $item_id = optional_param('item_id', -1, PARAM_INT);
 $access = optional_param('access', '', PARAM_TEXT);
 
-ini_set("display_errors", 0);
+//ini_set("display_errors", 0);
 
 //require_login(0, true);
 $item = null;

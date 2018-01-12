@@ -333,13 +333,14 @@ namespace block_exaport\common {
 
 		public static function get_param($parname) {
 			// POST has precedence.
-			if (isset($_POST[$parname])) {
+			return optional_param($parname, null, PARAM_RAW);
+			/*if (isset($_POST[$parname])) {
 				return $_POST[$parname];
 			} elseif (isset($_GET[$parname])) {
 				return $_GET[$parname];
 			} else {
 				return null;
-			}
+			}*/
 		}
 
 		public static function get_required_param($parname) {

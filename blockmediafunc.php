@@ -23,12 +23,12 @@ $httpstr = 'http';
 $iframe_sources = array(
 		// glogster
 		array(
-			'match' => '/https?:\/\/([^.]*(\.edu)?)\.glogster\.com\/([a-zA-Z0-9\-_+\/]*).*/',
-			'url'   => 'http://$1.glogster.com/$3',
+			'match' => '/http(s?):\/\/([^.]*(\.edu)?)\.glogster\.com\/([a-zA-Z0-9\-_+\/]*).*/',
+			'url'   => $httpstr . '$1://$1.glogster.com/$4',
 		),
 		array(
-			'match' => '/https?:\/\/(?:(?:www|edu)\.)?glogster\.com\/([a-zA-Z0-9_\/-]*?)\/g-([a-zA-Z0-9_-]*).*/',
-			'url'   => 'http://www.glogster.com/glog/$2',
+			'match' => '/http(s?):\/\/(?:(?:www|edu)\.)?glogster\.com\/([a-zA-Z0-9_\/-]*?)\/g-([a-zA-Z0-9_-]*).*/',
+			'url'   => $httpstr . '$1://www.glogster.com/glog/$3',
 		),
 
 		// google video
@@ -39,12 +39,12 @@ $iframe_sources = array(
 
 		// prezi
 		array(
-			'match' => '/https?:\/\/(www\.)?prezi\.com\/embed\/([a-zA-Z0-9\-_+\?\/=\&;]*).*/',
-			'url'   => $httpstr . '://prezi.com/embed/$2',
+			'match' => '/http(s?):\/\/(www\.)?prezi\.com\/embed\/([a-zA-Z0-9\-_+\?\/=\&;]*).*/',
+			'url'   => $httpstr . '$1://prezi.com/embed/$3',
 		),
 		array(
-			'match' => '/https?:\/\/prezi\.com\/([a-zA-Z0-9\-_]+)\/.*/',
-			'url'   => $httpstr . '://prezi.com/embed/$1/?bgcolor=ffffff&amp;lock_to_path=0&amp;autoplay=0&amp;autohide_ctrls=0&amp;features=undefined&amp;disabled_features=undefined',
+			'match' => '/http(s?):\/\/prezi\.com\/([a-zA-Z0-9\-_]+)\/.*/',
+			'url'   => $httpstr . '$1://prezi.com/embed/$2/?bgcolor=ffffff&amp;lock_to_path=0&amp;autoplay=0&amp;autohide_ctrls=0&amp;features=undefined&amp;disabled_features=undefined',
 		),
 
 		// scivee
@@ -59,8 +59,8 @@ $iframe_sources = array(
 
 		// slideshare
 		array(
-			'match' => '/https?:\/\/(www\.)?slideshare\.net\/(?!slideshow\/)([^\/]+)\/([^\/?&#]+).*/',
-			'url'   => 'http://www.slideshare.net/$2/$3',
+			'match' => '/http(s?):\/\/(www\.)?slideshare\.net\/(?!slideshow\/)([^\/]+)\/([^\/?&#]+).*/',
+			'url'   => $httpstr . '$1://www.slideshare.net/$3/$4',
 		),
 
 		// teachertube
@@ -79,18 +79,18 @@ $iframe_sources = array(
 			'url'   => $httpstr . '://player.vimeo.com/video/$1'
 		),
 		array(
-			'match' => '/https?:\/\/(www\.|secure\.)?vimeo\.com\/([0-9]+)/',
-			'url'   => $httpstr . '://player.vimeo.com/video/$2'
+			'match' => '/http(s?):\/\/(www\.|secure\.)?vimeo\.com\/([0-9]+)/',
+			'url'   => $httpstr . '$1://player.vimeo.com/video/$3'
 		),
 
 		// voicethread   --- not tested
 		array(
-			'match' => '/https?:\/\/(www\.)?voicethread\.com\/share\/([0-9]+).*/',
-			'url'   => $httpstr . '://voicethread.com/book.swf?b=$2',
+			'match' => '/http(s?):\/\/(www\.)?voicethread\.com\/share\/([0-9]+).*/',
+			'url'   => $httpstr . '$1://voicethread.com/book.swf?b=$3',
 		),
 		array(
-			'match' => '/https?:\/\/(www\.)?voicethread\.com\/\??#q\.b([0-9]+).*/',
-			'url'   => $httpstr . '://voicethread.com/book.swf?b=$2',
+			'match' => '/http(s?):\/\/(www\.)?voicethread\.com\/\??#q\.b([0-9]+).*/',
+			'url'   => $httpstr . '$1://voicethread.com/book.swf?b=$3',
 		),
 
 		// voki	--- not tested
@@ -109,26 +109,26 @@ $iframe_sources = array(
 
 		// wikieducator
 		array(
-			'match' => '/https?:\/\/(www\.)?wikieducator\.org\/index\.php\?(old|cur)id=([0-9]+).*/',
-			'url'   => 'http://wikieducator.org/index.php?$2id=$3',
+			'match' => '/http(s?):\/\/(www\.)?wikieducator\.org\/index\.php\?(old|cur)id=([0-9]+).*/',
+			'url'   => $httpstr . '$1://wikieducator.org/index.php?$2id=$4',
 		),
 		array(
-			'match' => '/https?:\/\/(www\.)?wikieducator\.org\/([a-zA-Z0-9_\-+:%\/]+).*/',
-			'url'   => 'http://wikieducator.org/$2',
+			'match' => '/http(s?):\/\/(www\.)?wikieducator\.org\/([a-zA-Z0-9_\-+:%\/]+).*/',
+			'url'   => $httpstr . '$1://wikieducator.org/$3',
 		),
 
 		// youtube
 		array(
-			'match' => '/https?:\/\/(www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_=-]+).*/',
-			'url'   => $httpstr . '://www.youtube.com/embed/$2'
+			'match' => '/http(s?):\/\/(www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_=-]+).*/',
+			'url'   => $httpstr . '$1://www.youtube.com/embed/$3'
 		),
 		array(
-			'match' => '/https?:\/\/(www\.)?youtube\.com\/embed\/([a-zA-Z0-9\-_+]*).*/',
-			'url'   => $httpstr . '://www.youtube.com/embed/$2',
+			'match' => '/http(s?):\/\/(www\.)?youtube\.com\/embed\/([a-zA-Z0-9\-_+]*).*/',
+			'url'   => $httpstr . '$1://www.youtube.com/embed/$3',
 		),
 		array(
-			'match' => '/https?:\/\/(www\.)?youtu\.be\/([a-zA-Z0-9\-_+]*)/',
-			'url'   => $httpstr . '://www.youtube.com/embed/$2',
+			'match' => '/http(s?):\/\/(www\.)?youtu\.be\/([a-zA-Z0-9\-_+]*)/',
+			'url'   => $httpstr . '$1://www.youtube.com/embed/$3',
 		),
 );/**/
 

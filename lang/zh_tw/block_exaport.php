@@ -399,13 +399,13 @@ $string['desp_einleitung'] = '這是人鐵檔案袋. 你可以向別人展示你
 $string['settings_interaktion_exacomp_head'] = 'exabis ePortfolio - Exabis Competence Grid交互';
 $string['settings_interaktion_exacomp_body'] = '如果有安裝Exabis Competence Grid版塊則交互';
 $string['settings_allow_loginas_head'] = '允許登錄為';
-$string['settings_allow_loginas_body'] = ;
+$string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = '創建資源共享平台分類';
-$string['settings_create_desp_categories_body'] = ;
+$string['settings_create_desp_categories_body'] = '';
 $string['settings_disable_shareall_head'] = '禁止與所有用戶分享';
 $string['settings_disable_shareall_body'] = '點擊 這裡, 移除所有全局分享';
 $string['settings_disable_external_comments_head'] = '禁止在外部視圖中的注釋分享';
-$string['settings_disable_external_comments_body'] = ;
+$string['settings_disable_external_comments_body'] = '';
 
 $string['delete_all_shareall'] = '刪除所有分享?';
 

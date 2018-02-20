@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>lib/classes</location>
+        <name>MiniXML</name>
+        <license>GNU</license>
+        <version></version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>lib/minixml.inc.php</location>
+        <name>MiniXML</name>
+        <license>GNU</license>
+        <version></version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>javascript/wz_tooltip.js</location>
+        <name>wz_tooltip.js</name>
+        <license>LGPL</license>
+        <version></version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>testclient/curl.php</location>
+        <name>cURL class</name>
+        <license>GNU</license>
+        <version></version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>css/colorbox.css</location>
+        <name>Colorbox Core Style</name>
+        <license>GNU</license>
+        <version></version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>javascript/jquery.colorbox.js</location>
+        <name>Colorbox</name>
+        <license>MIT</license>
+        <version>1.6.3</version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>javascript/jquery.json.js</location>
+        <name>JSON library</name>
+        <license>MIT</license>
+        <version>1.6.3</version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>javascript/vedeo-js/video.js</location>
+        <name>Video.js</name>
+        <license>Apache License</license>
+        <version>2.0</version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>javascript/vedeo-js/video-js.css</location>
+        <name>Video.js css</name>
+        <license>Apache License</license>
+        <version>2.0</version>
+        <licenseversion></licenseversion>
+    </library>
+</libraries>

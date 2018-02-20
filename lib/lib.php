@@ -1188,7 +1188,7 @@ function block_exaport_get_course_teachers($exceptMyself = true) {
 	$query = "SELECT u.id as userid, u.id AS tmp
 	FROM {user} u
 	JOIN {role_assignments} ra ON ra.userid = u.id
-	WHERE ra.contextid=? AND ra.roleid = '3'";
+	WHERE ra.contextid=? AND ra.roleid = '3' AND u.deleted = 0 ";
 	$exastudTeachers = $DB->get_records_sql($query, [$context->id]);
 
 	// if exacomp is not installed this function returns an emtpy array

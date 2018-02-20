@@ -613,6 +613,7 @@ namespace {
 			")".
 			" AND c.userid!=? ". // don't show my own categories
 			" AND internshare = 1 ".
+            " AND u.deleted = 0 ".
 			" GROUP BY $category_columns, u.firstname, u.lastname, u.picture".
 			" ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
 
@@ -742,6 +743,7 @@ namespace block_exaport {
 			")".
 			" AND c.userid!=? ". // don't show my own categories
 			" AND internshare = 1 ".
+            " AND u.deleted = 0 ".
 			" GROUP BY c.id, c.userid, c.name, c.timemodified, c.shareall, u.firstname, u.lastname, u.picture".
 			" ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
 

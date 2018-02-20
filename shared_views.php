@@ -80,7 +80,8 @@ $views = $DB->get_records_sql("
 			OR v.id IN (".join(',', array_merge([0], array_keys($userviews))).") -- Add group shareing views
 	  	)
 		AND v.userid!=? -- don't show my own views
-		".($userid ? "AND v.userid=".$userid : '')." -- user filter
+		AND u.deleted = 0
+		".($userid ? " AND v.userid=".$userid : '')." -- user filter
 	GROUP BY
 		{$view_columns}, u.firstname, u.lastname, u.picture
 	$sql_sort", [$USER->id, $USER->id]);

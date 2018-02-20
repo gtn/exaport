@@ -331,9 +331,13 @@ namespace block_exaport\common {
 			}
 		}
 
-		public static function get_param($parname) {
+		public static function get_param($parname, $isarray = false) {
 			// POST has precedence.
-			return optional_param($parname, null, PARAM_RAW);
+            if ($isarray) {
+                return optional_param_array($parname, null, PARAM_RAW);
+            } else {
+                return optional_param($parname, null, PARAM_RAW);
+            }
 			/*if (isset($_POST[$parname])) {
 				return $_POST[$parname];
 			} elseif (isset($_GET[$parname])) {
@@ -354,7 +358,7 @@ namespace block_exaport\common {
 		}
 
 		public static function optional_array($parname, $definition) {
-			$param = static::get_param($parname);
+			$param = static::get_param($parname, true);
 
 			if ($param === null) {
 				return array();

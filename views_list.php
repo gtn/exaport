@@ -136,7 +136,7 @@ if (!$views) {
 			// read users
 			$query = "SELECT ".$DB->sql_fullname()." AS name".
 				" FROM {user} u,".
-				" {block_exaportviewshar} vshar WHERE u.id=vshar.userid AND vshar.viewid=?".
+				" {block_exaportviewshar} vshar WHERE u.id=vshar.userid AND vshar.viewid=? AND u.deleted = 0".
 				" ORDER BY name";
 			$users = $DB->get_records_sql($query, array($view->id));
 			

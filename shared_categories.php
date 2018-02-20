@@ -65,6 +65,7 @@ $categories = $DB->get_records_sql("
 		".($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") ": "")."
 		)
 		AND internshare = 1
+		AND u.deleted = 0
 	GROUP BY
 		{$category_columns}, u.firstname, u.lastname, u.picture
 	$sql_sort", array($USER->id, $USER->id));

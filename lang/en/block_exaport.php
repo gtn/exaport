@@ -1,32 +1,29 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 $string['translation:language'] = 'English';
 $string['translation:person'] = 'Andreas Riepl';
 $string['translation:organisation'] = 'IZ Steyr';
 $string['translation:email'] = 'ariepl.work@gmail.com';
 
-
 // === Main ===
-// shown in admin plugin list
+// Shown in admin plugin list.
 $string['pluginname'] = 'Exabis ePortfolio';
-// shown in block title and all headers
+// === Shown in block title and all headers.
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Use allowed';
 $string['exaport:addinstance'] = 'add Exabis ePortfolio to the course';
@@ -128,8 +125,7 @@ $string['membercount'] = 'Number of members';
 $string['nogroupsfound'] = 'No groups found';
 $string['make_it_yours'] = 'Make it yours';
 
-
-// === export/import ===
+// === Export/import.
 $string['import'] = 'Import';
 $string['explainexport'] = 'Export your portfolio here.';
 $string['createexport'] = 'Create SCORM-File';
@@ -158,13 +154,12 @@ $string['itemgrading'] = 'Grading';
 $string['gradeitem'] = 'Grade the item';
 $string['submititem'] = 'Submit';
 
-// === Notes ===
+// === Notes.
 $string['deletenoteconfirm'] = 'Do you really want to delete this note?';
 $string['deletelinkconfirm'] = 'Do you really want to delete this link?';
 $string['deletefileconfirm'] = 'Do you really want to delete this file?';
 
-
-// === Different ===
+// === Different.
 $string['couldninsertcomment'] = 'Couldn\'t insert comment!';
 $string['importedcommentsstart'] = 'Imported comments:<br /><br />';
 $string['importedcommentsend'] = 'End of imported comments';
@@ -221,18 +216,15 @@ $string['viewcategories'] = 'manage categories';
 $string['updownarrow'] = 'updown arrow';
 $string['comment_delete_confirmation'] = 'Do you really want to delete this comment?';
 
-
-// === Shared portfolios ===
+// Shared portfolios.
 $string['nocoursetogether'] = 'No Course';
 $string['nothingshared'] = 'Nobody is sharing a portfolio with you';
 
-
-// === Errors ===
+// === Errors.
 $string['nouserforid'] = 'User not found (id unknown)';
 $string['nouserforaccess'] = 'User not found (access-code unknown)';
 
-
-// === Export ===
+// === Export.
 $string['export'] = 'Export SCORM-File';
 $string['exportepx'] = 'Export EPX-File';
 $string['createepxexport'] = 'Create EPX-File';
@@ -240,8 +232,7 @@ $string['exportviewselect'] = 'To export all items of a specific view, please se
 $string['export_directory'] = 'Export Directory-structure';
 $string['createexport_directory'] = 'Create Directory-structure';
 
-
-// === stuff ===
+// === Stuff.
 $string['type'] = 'Type';
 $string['share'] = 'Share';
 $string['explainingall'] = 'All Items in your portfolio';
@@ -249,14 +240,12 @@ $string['share_to_other_users'] = 'Search Users';
 $string['other_users_course'] = 'Users not in my courses';
 $string['other_groups_course'] = 'Other courses';
 
-
-// === Item sorting ===
+// === Item sorting.
 $string['userdefinedsort'] = 'Define your own search';
 $string['movetop'] = 'Move top';
 $string['movebottom'] = 'Move bottom';
 
-
-// === Views ===
+// === Views.
 $string['view'] = 'View';
 $string['views'] = 'My Views';
 $string['explainingviews'] = 'Manage your views.';
@@ -344,8 +333,7 @@ $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedwith_group'] = 'Shared with my group';
 
-
-// === Copy to course ===
+// === Copy to course.
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';
 $string['copyitemtocourse'] = 'Copy to course';
 $string['desp_language'] = 'Desp Language';
@@ -358,46 +346,44 @@ $string['cofigureblock_media'] = 'Choose media';
 $string['cofigureblock_personalinfo'] = 'Choose personal info';
 $string['cofigureblock_badge'] = 'Choose Badges';
 
-
-// === Desp ===
+// === Desp.
 $string['back_to_desp'] = 'back to language portfolio';
 $string['desp_pluginname'] = 'Dossier';
 $string['steckbrief'] = 'Profile';
 $string['desp_categories'] = '
-	stories, roleplays, essays, collagen
-	curriculum vitae
-	reviews of theatre productions, exhibitions
-	project reports and reflections
-	audio- and videoclips
-	encounters with other nationalities
-	thoughts about your language skills
-	report cards
-	certificates
-	acknowledgements
-	listening
-	 - individual work
-	 - partner work
-	 - group work
-	reading
-	 - individual work
-	 - partner work
-	 - group work
-	participating in conversations
-	 - individual work
-	 - partner work
-	 - group work
-	speaking fluently
-	 - individual work
-	 - partner work
-	 - group work
-	writing
-	 - individual work
-	 - partner work
-	 - group work
+    stories, roleplays, essays, collagen
+    curriculum vitae
+    reviews of theatre productions, exhibitions
+    project reports and reflections
+    audio- and videoclips
+    encounters with other nationalities
+    thoughts about your language skills
+    report cards
+    certificates
+    acknowledgements
+    listening
+     - individual work
+     - partner work
+     - group work
+    reading
+     - individual work
+     - partner work
+     - group work
+    participating in conversations
+     - individual work
+     - partner work
+     - group work
+    speaking fluently
+     - individual work
+     - partner work
+     - group work
+    writing
+     - individual work
+     - partner work
+     - group work
 ';
 
-
-// === Config ===
+// === Config.
 $string['config_feature_copy_to_course'] = 'Allow students to copy ePortfolio files to their courses';
 $string['competenceinteraction'] = 'Allow interaction with block Exabis Competence Grid, in case it is installed';
 $string['opencomps'] = 'Choose your competences';
@@ -429,8 +415,7 @@ $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edi
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';
 
-
-// === Resume ===
+// === Resume.
 $string['resume_template_newresume'] = '<h2>My new CV</h2>';
 $string['resume_my'] = 'My CV';
 $string['resume_cover'] = 'Cover letter';
@@ -500,21 +485,20 @@ $string['resume_skillscomp'] = 'Educational standards';
 $string['resume_badges'] = 'Badges';
 $string['resume_exportto_europass'] = 'Export to Europass';
 $string['resume_exportto_europass_intro'] = 'You can generate your Curriculum Vitae from your Exaport resume<br>
-	The generated XML-file has to be inserted into the <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">online europass CV editor</a><br><br>
-	Some notes:<br>
-	<ul><li>You definitely need to check out the resulting CV</li>
-		<li>Your personal data will be taken from your Moodle account</li>
-		<li>Please check all dates</li>
-		<li>Images from the HTML-editors will not be exported</li>
-		<li>Most texts from the HTML-editors need to be reformatted</li>
-		<li>Requirements for attached files: accepted formats: PDF, PNG, JPG; size limit: 2.5MB.</li>
-	</ul>';
+    The generated XML-file has to be inserted into the <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">online europass CV editor</a><br><br>
+    Some notes:<br>
+    <ul><li>You definitely need to check out the resulting CV</li>
+        <li>Your personal data will be taken from your Moodle account</li>
+        <li>Please check all dates</li>
+        <li>Images from the HTML-editors will not be exported</li>
+        <li>Most texts from the HTML-editors need to be reformatted</li>
+        <li>Requirements for attached files: accepted formats: PDF, PNG, JPG; size limit: 2.5MB.</li>
+    </ul>';
 $string['resume_exportto_europass_getXML'] = 'Download XML';
 $string['resume_expand'] = 'Expand all';
 $string['resume_collaps'] = 'Collaps all';
 
-
-// === structure sharing ===
+// === Structure sharing.
 $string['shared_categories'] = 'Shared Categories';
 $string['nothingstructureshared'] = 'Nobody is sharing a structure with you';
 $string['browsecategory'] = 'Browse this category';
@@ -533,16 +517,13 @@ $string['supported'] = 'supported by';
 $string['developed'] = 'developed by';
 $string['myfilearea'] = 'My file area';
 
-
-// === language categories ===
+// === Language categories.
 $string['lang_categories'] = '';
 
-
-// === Message ===
+// === Message.
 $string['messageprovider:sharing'] = 'Sharing notifications';
 
-
-// === Not Used Anymore ===
+// === Not Used Anymore.
 $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';
 $string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';

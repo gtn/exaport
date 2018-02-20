@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'Basque';
 $string['translation:person'] = 'Juan Ezeiza';
 $string['translation:organisation'] = 'Axular Lizeoa';
 $string['translation:email'] = 'jezeiza@axular.net';
 
-// Main
+// Main.
 $string['blocktitle'] = 'Paper-zorroa';
 $string['exaport:use'] = 'Erabilpen baimendua';
 $string['exaport:export'] = 'SCORM-fitxategien esportazioa';
@@ -120,7 +118,7 @@ $string['nomoodleimportyet'] = 'Oraingoz ez duzu bidalketarik zure zereginetan!'
 $string['deletecategoryconfirm'] = 'Kategoria hau benetan ezabatu nahi al duzu? Kategoria honetako sarrera guztiak ezabatu egingo dira!';
 $string['name'] = 'Izena';
 
-// export/import
+// Export/import.
 $string['import'] = 'Inportatu';
 $string['explainexport'] = 'Zure paper-zorroa hona esportatu.';
 $string['createexport'] = 'SCORM-Fitxategia sortu';
@@ -145,12 +143,12 @@ $string['comments'] = 'Iruzkinak';
 $string['addcomment'] = 'Iruzkina gehitu';
 $string['externcomment'] = 'Iruzkinak kanpoko paper-zorro batean partekatu';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = 'Ohar hau ezabatu nahi duzula ziur al zaude?';
 $string['deletelinkconfirm'] = 'Esteka hau ezabatu nahi duzula ziur al zaude?';
 $string['deletefileconfirm'] = 'Fitxategi hau ezabatu nahi duzula ziur al zaude?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'Ezin izan da iruzkina gorde!';
 $string['importedcommentsstart'] = 'Inportaturiko iruzkinak:<br /><br />';
 $string['importedcommentsend'] = 'Inportaturiko iruzkinen bukaera';
@@ -206,31 +204,30 @@ $string['publishedportfolios'] = 'Argitaratutako paper-zorroak';
 $string['viewcategories'] = 'kategoriak kudeatu';
 $string['updownarrow'] = 'goitik beherako gezia';
 
-// Shared portfolios
-$string['nocoursetogether'] = NULL;
-$string['nothingshared'] = NULL;
+// Shared portfolios.
+$string['nocoursetogether'] = null;
+$string['nothingshared'] = null;
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'Id honetarako erabiltzailerik ez!';
-$string['nouserforaccess'] = NULL;
+$string['nouserforaccess'] = null;
 
-// Export
+// Export.
 $string['export'] = 'Esportatu';
 $string['exportepx'] = 'EPX-Fitxategia esportatu';
 $string['createepxexport'] = 'EPX-Fitxategia sortu';
 $string['exportviewselect'] = 'Ikuspen zehatzeko elementu guztiak esportatzeko, hemen aukeratu';
 
-// 
 $string['type'] = 'Mota';
 $string['share'] = 'Partekatu';
 $string['explainingall'] = 'Zure paper-zorroaren elementu guztiak';
 
-// Item sorting
+// Item sorting.
 $string['userdefinedsort'] = 'Zure bilaketa definitu';
 $string['movetop'] = 'Gora mugitu';
 $string['movebottom'] = 'Behera mugitu';
 
-// Views
+// Views.
 $string['view'] = 'Ikuspena';
 $string['views'] = 'Ikuspenak';
 $string['explainingviews'] = 'Zure ikuspenak kudeatu.';
@@ -252,25 +249,25 @@ $string['view_sharing'] = 'Partekatua';
 $string['viewand'] = 'eta';
 $string['view_sharing_noaccess'] = 'Sarbiderik ez';
 
-// Copy to course
-$string['filecopiedtocourse'] = NULL;
-$string['copyitemtocourse'] = NULL;
+// Copy to course.
+$string['filecopiedtocourse'] = null;
+$string['copyitemtocourse'] = null;
 
-// Config
+// Config.
 $string['config_version_3'] = 'Paper-zorroaren ezarpen berria: ikuspenak, eta abar barne direlarik.';
 $string['config_version_2'] = 'Paper-zorroaren ezarpen zaharra';
-$string['config_feature_copy_to_course'] = NULL;
-$string['version_5.2.0_needed'] = NULL;
+$string['config_feature_copy_to_course'] = null;
+$string['version_5.2.0_needed'] = null;
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(oraindik ez dago lastermarkarik)';
-$stringNotUsed['explainingexternal'] = 'Kanpoko estekak. Estekok baimendutako ikastaro-partaide guztiekin parteka daitezke.';
-$stringNotUsed['newexternal'] = 'Kanpoko esteka berri bat gehitu';
-$stringNotUsed['nobookmarksexternal'] = '(oraindik ez dago kanpoko estekarik)';
-$stringNotUsed['bookmarksexternal'] = 'Kanpoko estekak';
-$stringNotUsed['deleteextconfirm'] = 'Esteka hau ezabatu nahi duzula ziur al zaude?';
-$stringNotUsed['externallink'] = 'Kanpoko esteka';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(oraindik ez dago lastermarkarik)';
+$stringnotused['explainingexternal'] = 'Kanpoko estekak. Estekok baimendutako ikastaro-partaide guztiekin parteka daitezke.';
+$stringnotused['newexternal'] = 'Kanpoko esteka berri bat gehitu';
+$stringnotused['nobookmarksexternal'] = '(oraindik ez dago kanpoko estekarik)';
+$stringnotused['bookmarksexternal'] = 'Kanpoko estekak';
+$stringnotused['deleteextconfirm'] = 'Esteka hau ezabatu nahi duzula ziur al zaude?';
+$stringnotused['externallink'] = 'Kanpoko esteka';
 $string['steckbrief'] = 'Profile';
 
 $string['view_specialitem_personal'] = 'Personal information';

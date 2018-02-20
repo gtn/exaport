@@ -1,24 +1,22 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-//$token = '6f8233ff407d082557f51006bd494489'; //flo
-$token = '41ec1df3194f653a072a68ac9241b537'; //michy
+// $token = '6f8233ff407d082557f51006bd494489'; // Flo.
+$token = '41ec1df3194f653a072a68ac9241b537'; // Michy.
 $domainname = 'http://localhost/moodle271/';
 
 require_once('./curl.php');
@@ -30,21 +28,19 @@ $serverurl = 'http://localhost/moodle271/login/token.php?username=schueler&passw
 $resp = $curl->get($serverurl);
 $resp = json_decode($resp)->token;
 $token = $resp;
-print_r($token);
-
+// print_r($token);
 
 $functionname = 'block_exaport_get_items';
 
 $params = new stdClass();
 $params->level = 0;
 
-
 header('Content-Type: text/plain');
-$serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
+$serverurl = $domainname.'/webservice/rest/server.php'.'?wstoken='.$token.'&wsfunction='.$functionname;
 require_once('./curl.php');
 $curl = new curl;
-$resp = $curl->post($serverurl . $restformat, $params);
-print_r($resp);
+$resp = $curl->post($serverurl.$restformat, $params);
+// print_r($resp);
 echo "
 
 
@@ -54,12 +50,12 @@ echo "
 $functionname = 'block_exaport_get_competencies_by_item';
 $params = new stdClass();
 $params->itemid = 2;
-$restformat="";
-$serverurl = $domainname . '/webservice/rest/server.php'. '?wstoken=' . $token . '&wsfunction='.$functionname;
+$restformat = "";
+$serverurl = $domainname.'/webservice/rest/server.php'.'?wstoken='.$token.'&wsfunction='.$functionname;
 require_once('./curl.php');
 $curl = new curl;
-$resp = $curl->post($serverurl . $restformat, $params);
-print_r($resp);
+$resp = $curl->post($serverurl.$restformat, $params);
+// print_r($resp);
 /*
 $functionname = 'block_exaport_add_item';
 
@@ -83,7 +79,6 @@ echo "
 
 
 ";*/
-
 
 /*$functionname = 'block_exaport_get_item';
 $params = new stdClass();

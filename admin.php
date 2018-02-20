@@ -45,8 +45,8 @@ if ($action == 'remove_shareall') {
 
     echo '<br />';
     echo $OUTPUT->confirm(block_exaport_get_string("delete_all_shareall"),
-        new moodle_url('admin.php', array('action' => $action, 'confirm' => 1, 'sesskey' => sesskey())),
-        $backurl);
+            new moodle_url('admin.php', array('action' => $action, 'confirm' => 1, 'sesskey' => sesskey())),
+            $backurl);
     echo block_exaport_wrapperdivend();
     $OUTPUT->footer();
 
@@ -54,5 +54,3 @@ if ($action == 'remove_shareall') {
 }
 
 die('error');
-
-

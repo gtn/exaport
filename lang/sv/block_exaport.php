@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'Swedish';
 $string['translation:person'] = 'Peter Lissenko';
-$string['translation:organisation'] = NULL;
+$string['translation:organisation'] = null;
 $string['translation:email'] = 'peter.lissenko@gmail.com';
 
-// Main
+// Main.
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Använd tillåten';
 $string['exaport:export'] = 'Export av SCORM-Filer';
@@ -68,7 +66,7 @@ $string['dontincludeurl'] = 'Klicka i denna box för att ta bort bokmärket med 
 $string['duplicatedurl'] = 'Du har redan bokmärkt denna URL.';
 $string['editcategories'] = 'redigera kategorier';
 $string['explaining'] = 'Portfolion kan användas för att spara webbadresser, filer, precis som egna anteckningar.';
-$string['explaininglink'] = NULL;
+$string['explaininglink'] = null;
 $string['explainingfile'] = 'Filer. Dessa filer kan delas med andra deltagare på kursen.';
 $string['explainingnote'] = 'Anteckningar. Dessa anteckningar kan delas med andra deltagare på kursen.';
 $string['explainingshare'] = 'För att tillåta en annan deltagare att se länken: klicka först på namnet och sedan på Spara ändringar. Du kan välja fler än en deltagare.';
@@ -86,7 +84,7 @@ $string['myportfolio'] = 'Min portfolio';
 $string['myportfoliotitle'] = 'Exabis ePortfoliomodul: Lägg till dina länkar och filer här.';
 $string['mydialogues'] = 'Mina dialoger';
 $string['mymoodle'] = 'Mitt Moodle';
-$string['newlink'] = NULL;
+$string['newlink'] = null;
 $string['newfile'] = 'Lägg till ny fil';
 $string['newnote'] = 'Lägg till ny anteckning';
 $string['nocategories'] = '(inga kategorier ännu)';
@@ -120,7 +118,7 @@ $string['nomoodleimportyet'] = 'För tillfället har du inga inlämnade uppgifte
 $string['deletecategoryconfirm'] = 'Vill du verkligen ta bort denna kategori? Alla inlägg i denna kategori kommer att tas bort!';
 $string['name'] = 'Namn';
 
-// export/import
+// Export/import.
 $string['import'] = 'Importera';
 $string['explainexport'] = 'Exportera din portfolio här.';
 $string['createexport'] = 'Skapa SCORM-fil';
@@ -145,12 +143,12 @@ $string['comments'] = 'Kommentarer';
 $string['addcomment'] = 'Lägg till kommentar';
 $string['externcomment'] = 'Dela kommentarer i extern portfolio';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = 'Vill du verkligen ta bort denna anteckning?';
 $string['deletelinkconfirm'] = 'Vill du verkligen ta bort denna länk?';
 $string['deletefileconfirm'] = 'Vill du verkligen ta bort denna fil?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'Misslyckades med att lägga till kommentar!';
 $string['importedcommentsstart'] = 'Importerad kommentar:<br /><br />';
 $string['importedcommentsend'] = 'Slut på importerade kommentarer';
@@ -206,31 +204,30 @@ $string['publishedportfolios'] = 'Publicerade portfolior';
 $string['viewcategories'] = 'handha kategorier';
 $string['updownarrow'] = 'Pil för uppladdning';
 
-// Shared portfolios
-$string['nocoursetogether'] = NULL;
-$string['nothingshared'] = NULL;
+// Shared portfolios.
+$string['nocoursetogether'] = null;
+$string['nothingshared'] = null;
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'Ingen användare med detta ID!';
-$string['nouserforaccess'] = NULL;
+$string['nouserforaccess'] = null;
 
-// Export
+// Export.
 $string['export'] = 'Exportera';
 $string['exportepx'] = 'Exportera EPX-Fil';
 $string['createepxexport'] = 'skapa EPX-Fil';
 $string['exportviewselect'] = 'för att exportera alla artiklar i en speciell vy, var vänlig och välj den här';
 
-// 
 $string['type'] = 'Typ';
 $string['share'] = 'Dela';
 $string['explainingall'] = 'Alla artiklar i din portfolio';
 
-// Item sorting
+// Item sorting.
 $string['userdefinedsort'] = 'Definiera din egen sökning';
 $string['movetop'] = 'Flytta upp';
 $string['movebottom'] = 'Flytta ned';
 
-// Views
+// Views.
 $string['view'] = 'Visa';
 $string['views'] = 'Visningar';
 $string['explainingviews'] = 'Handha dina visningar';
@@ -252,25 +249,25 @@ $string['view_sharing'] = 'Delade';
 $string['viewand'] = 'och';
 $string['view_sharing_noaccess'] = 'Imgen tillgång';
 
-// Copy to course
-$string['filecopiedtocourse'] = NULL;
-$string['copyitemtocourse'] = NULL;
+// Copy to course.
+$string['filecopiedtocourse'] = null;
+$string['copyitemtocourse'] = null;
 
-// Config
+// Config.
 $string['config_version_3'] = 'Ny ePortfoliolayout: inkluderar vyer, etc.';
 $string['config_version_2'] = 'Gammal ePortfoliolayout';
-$string['config_feature_copy_to_course'] = NULL;
-$string['version_5.2.0_needed'] = NULL;
+$string['config_feature_copy_to_course'] = null;
+$string['version_5.2.0_needed'] = null;
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(inga bokmärken ännu)';
-$stringNotUsed['bookmarksexternal'] = 'Externa länkar';
-$stringNotUsed['deleteextconfirm'] = 'Vill du verkligen ta bort denna länk?';
-$stringNotUsed['explainingexternal'] = 'Externa Länkar. Dessa länkar kan delas med andra deltagare på kursen.';
-$stringNotUsed['externallink'] = 'Extern länk';
-$stringNotUsed['newexternal'] = 'Lägg till ny extern länk';
-$stringNotUsed['nobookmarksexternal'] = '(inga externa länkar ännu)';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(inga bokmärken ännu)';
+$stringnotused['bookmarksexternal'] = 'Externa länkar';
+$stringnotused['deleteextconfirm'] = 'Vill du verkligen ta bort denna länk?';
+$stringnotused['explainingexternal'] = 'Externa Länkar. Dessa länkar kan delas med andra deltagare på kursen.';
+$stringnotused['externallink'] = 'Extern länk';
+$stringnotused['newexternal'] = 'Lägg till ny extern länk';
+$stringnotused['nobookmarksexternal'] = '(inga externa länkar ännu)';
 $string['steckbrief'] = 'Profile';
 
 $string['notify'] = 'notify';

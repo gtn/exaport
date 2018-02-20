@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'Dutch';
 $string['translation:person'] = 'Rene van der Weijden';
 $string['translation:organisation'] = 'Gregoriuselo';
 $string['translation:email'] = 'rene@vdweijden.org';
 
-// Main
+// Main.
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Gebruik geoorloofd';
 $string['exaport:export'] = 'Export van SCORM-bestanden';
@@ -120,7 +118,7 @@ $string['nomoodleimportyet'] = 'Op dit ogenblik heb je bij geen enkele opdracht 
 $string['deletecategoryconfirm'] = 'Wil je deze categorie echt verwijderen? Alle inhoud in deze categorie zal verwijderd worden!';
 $string['name'] = 'Naam';
 
-// export/import
+// Export/import.
 $string['import'] = 'Importeer';
 $string['explainexport'] = 'Exporteer hier je portfolio.';
 $string['createexport'] = 'Maak een SCORM-Bestand';
@@ -145,12 +143,12 @@ $string['comments'] = 'Commentaar';
 $string['addcomment'] = 'Voeg commentaar toe';
 $string['externcomment'] = 'Deel commentaren in externe portfolio';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = 'Wil je deze aantekening echt verwijderen?';
 $string['deletelinkconfirm'] = 'Wil je deze link echt verwijderen?';
 $string['deletefileconfirm'] = 'Wil je dit bestand echt verwijderen?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'Kon het commentaar niet toevoegen!';
 $string['importedcommentsstart'] = 'Ge&iuml;mporteerde commentaren:<br /><br />';
 $string['importedcommentsend'] = 'Einde van ge&iuml;mporteerde commentaren';
@@ -206,31 +204,30 @@ $string['publishedportfolios'] = 'Gepubliceerde portfolios';
 $string['viewcategories'] = 'Bewerk categorie&euml;n';
 $string['updownarrow'] = 'opneer pijl';
 
-// Shared portfolios
-$string['nocoursetogether'] = NULL;
-$string['nothingshared'] = NULL;
+// Shared portfolios.
+$string['nocoursetogether'] = null;
+$string['nothingshared'] = null;
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'Geen gebruiker voor deze id!';
-$string['nouserforaccess'] = NULL;
+$string['nouserforaccess'] = null;
 
-// Export
+// Export.
 $string['export'] = 'Exporteer als SCORM-bestand';
 $string['exportepx'] = 'Exporteer als EPX-bestand';
 $string['createepxexport'] = 'Maak EPX-bestand';
 $string['exportviewselect'] = 'Om alle items van een bepaald aanzicht te exporteren, selecteer dit hier aub';
 
-// 
 $string['type'] = 'Type';
 $string['share'] = 'Delen';
 $string['explainingall'] = 'Alle items in je portfolio';
 
-// Item sorting
+// Item sorting.
 $string['userdefinedsort'] = 'Definieer je eigen zoeken';
 $string['movetop'] = 'Ga naar bovenaan';
 $string['movebottom'] = 'Ga naar onderaan';
 
-// Views
+// Views.
 $string['view'] = 'Aanzicht';
 $string['views'] = 'Aanzichten';
 $string['explainingviews'] = 'Beheer je aanzichten';
@@ -252,25 +249,25 @@ $string['view_sharing'] = 'Delen';
 $string['viewand'] = 'en';
 $string['view_sharing_noaccess'] = 'Geen toegang';
 
-// Copy to course
-$string['filecopiedtocourse'] = NULL;
-$string['copyitemtocourse'] = NULL;
+// Copy to course.
+$string['filecopiedtocourse'] = null;
+$string['copyitemtocourse'] = null;
 
-// Config
+// Config.
 $string['config_version_3'] = 'Nieuwe ePortfolio indeling: inclusief aanzichten enz.';
 $string['config_version_2'] = 'Oude ePortfolio indeling';
-$string['config_feature_copy_to_course'] = NULL;
-$string['version_5.2.0_needed'] = NULL;
+$string['config_feature_copy_to_course'] = null;
+$string['version_5.2.0_needed'] = null;
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(nog geen verwijzingen)';
-$stringNotUsed['explainingexternal'] = 'Externe links. Deze links kunnen gedeeld worden met alle cursusleden, die toestemming hebben.';
-$stringNotUsed['newexternal'] = 'Voeg nieuwe externe link toe.';
-$stringNotUsed['nobookmarksexternal'] = '(nog geen externe links)';
-$stringNotUsed['bookmarksexternal'] = 'Externe links';
-$stringNotUsed['deleteextconfirm'] = 'Wil je deze link echt verwijderen?';
-$stringNotUsed['externallink'] = 'Externe link';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(nog geen verwijzingen)';
+$stringnotused['explainingexternal'] = 'Externe links. Deze links kunnen gedeeld worden met alle cursusleden, die toestemming hebben.';
+$stringnotused['newexternal'] = 'Voeg nieuwe externe link toe.';
+$stringnotused['nobookmarksexternal'] = '(nog geen externe links)';
+$stringnotused['bookmarksexternal'] = 'Externe links';
+$stringnotused['deleteextconfirm'] = 'Wil je deze link echt verwijderen?';
+$stringnotused['externallink'] = 'Externe link';
 $string['steckbrief'] = 'Profile';
 $string['view_specialitem_personal'] = 'Personal information';
 $string['createpage'] = 'Drag and drop content blocks from the tabs below to create your page.';

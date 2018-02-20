@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'Hungarian';
 $string['translation:person'] = 'Peter Csaszar';
 $string['translation:organisation'] = 'University of Pecs';
 $string['translation:email'] = 'csaszar.peter@vista.aero';
 
-// Main
+// Main.
 $string['blocktitle'] = 'ePortfolio';
 $string['exaport:use'] = 'Használata megengedett';
 $string['exaport:export'] = 'SCORM állományok exportálása';
@@ -120,7 +118,7 @@ $string['nomoodleimportyet'] = 'Semmilyen feladat hozzárendelése nincsen!';
 $string['deletecategoryconfirm'] = 'Biztos, hogy törölni akarja ezt a kategóriát? Az összes bejegyzés a kategóriában törlődni fog!';
 $string['name'] = 'Név';
 
-// export/import
+// Export/import.
 $string['import'] = 'Import';
 $string['explainexport'] = 'Itt exportálhatja ki a Portfólióját.';
 $string['createexport'] = 'SCORM-állomány készítése';
@@ -145,12 +143,12 @@ $string['comments'] = 'Megjegyzések';
 $string['addcomment'] = 'Megjegyzés hozzáadása';
 $string['externcomment'] = 'Megjegyzések megosztása a külső portfólióban';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = 'Biztos, hogy törölni akarja ezt a feljegyzést?';
 $string['deletelinkconfirm'] = 'Biztos, hogy törölni akarja ezt a hivatkozást?';
 $string['deletefileconfirm'] = 'Biztos, hogy törölni akarja ezt az állományt?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'Megjegyzés beszúrása sikertelen!';
 $string['importedcommentsstart'] = 'Importált megjegyzések:<br /><br />';
 $string['importedcommentsend'] = 'Importált megjegyzések vége';
@@ -206,31 +204,30 @@ $string['publishedportfolios'] = 'Publikált portfóliók';
 $string['viewcategories'] = 'kategóriák kezelése';
 $string['updownarrow'] = 'fel-le mutató nyíl';
 
-// Shared portfolios
-$string['nocoursetogether'] = NULL;
-$string['nothingshared'] = NULL;
+// Shared portfolios.
+$string['nocoursetogether'] = null;
+$string['nothingshared'] = null;
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'Nem tartozik felhasználó ehhez az id -hez!';
-$string['nouserforaccess'] = NULL;
+$string['nouserforaccess'] = null;
 
-// Export
+// Export.
 $string['export'] = 'SCORM-állomány export';
 $string['exportepx'] = 'EPX-állomány export';
 $string['createepxexport'] = 'EPX-állomány készítése';
 $string['exportviewselect'] = 'A specifikus elemek exportálásához, válasszon a listából';
 
-// 
 $string['type'] = 'Típus';
 $string['share'] = 'Megosztás';
 $string['explainingall'] = 'A portfóliója minden eleme';
 
-// Item sorting
+// Item sorting.
 $string['userdefinedsort'] = 'Saját rendezés megadása';
 $string['movetop'] = 'Tetejére mozgat';
 $string['movebottom'] = 'Aljára mozgat';
 
-// Views
+// Views.
 $string['view'] = 'Nézet';
 $string['views'] = 'Nézetek';
 $string['explainingviews'] = 'Nézetek karbantartása';
@@ -252,22 +249,22 @@ $string['view_sharing'] = 'Megosztás';
 $string['viewand'] = 'és';
 $string['view_sharing_noaccess'] = 'Nincs hozzáférési joga';
 
-// Copy to course
-$string['filecopiedtocourse'] = NULL;
-$string['copyitemtocourse'] = NULL;
+// Copy to course.
+$string['filecopiedtocourse'] = null;
+$string['copyitemtocourse'] = null;
 
-// Config
+// Config.
 $string['config_version_3'] = 'Új Portfólió szerkezet:: beleértve a nézeteket stb.';
 $string['config_version_2'] = 'Régi Portfólió szerkezet';
-$string['config_feature_copy_to_course'] = NULL;
-$string['version_5.2.0_needed'] = NULL;
+$string['config_feature_copy_to_course'] = null;
+$string['version_5.2.0_needed'] = null;
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(nincsenek könyvjelzők)';
-$stringNotUsed['nobookmarksexternal'] = '(nincsenek külső hivatkozások)';
-$stringNotUsed['bookmarksexternal'] = 'Külső linkek';
-$stringNotUsed['externallink'] = 'Külső hivatkozás';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(nincsenek könyvjelzők)';
+$stringnotused['nobookmarksexternal'] = '(nincsenek külső hivatkozások)';
+$stringnotused['bookmarksexternal'] = 'Külső linkek';
+$stringnotused['externallink'] = 'Külső hivatkozás';
 $string['steckbrief'] = 'Profile';
 
 $string['view_specialitem_personal'] = 'Personal information';

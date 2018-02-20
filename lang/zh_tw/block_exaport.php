@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = '繁體中文';
 $string['translation:person'] = '葉書含';
 $string['translation:organisation'] = 'GTN';
 $string['translation:email'] = 'hyeh@gtn-solutions.com';
 
-// Main
+// Main.
 $string['blocktitle'] = '電子檔案袋';
 $string['pluginname'] = '電子檔案袋';
 $string['exaport:use'] = '允許使用';
@@ -130,7 +128,7 @@ $string['add'] = '添加';
 $string['edit'] = '編輯';
 $string['checkall'] = '檢查所有';
 
-// export/import
+// Export/import.
 $string['import'] = '導入';
 $string['explainexport'] = '導出你的檔案袋.';
 $string['createexport'] = '創建SCORM文件';
@@ -155,12 +153,12 @@ $string['comments'] = '注釋';
 $string['addcomment'] = '添加注釋';
 $string['externcomment'] = '分享注釋到外部檔案袋';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = '確認是否要刪除該筆記?';
 $string['deletelinkconfirm'] = '確認是否要刪除該連結?';
 $string['deletefileconfirm'] = '確認是否要刪除該文件?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = '不能插入注釋!';
 $string['importedcommentsstart'] = '已導入注釋:
 
@@ -218,33 +216,32 @@ $string['publishedportfolios'] = '發布檔案袋';
 $string['viewcategories'] = '管理分類';
 $string['updownarrow'] = '上下箭頭';
 
-// Shared portfolios
+// Shared portfolios.
 $string['nocoursetogether'] = '沒有課程';
 $string['nothingshared'] = '沒有人分享檔案袋給你';
 
-// Errors
+// Errors.
 $string['nouserforid'] = '用戶未發現 (未知的id)';
 $string['nouserforaccess'] = '用戶未發現 (未知的訪問代碼)';
 
-// Export
+// Export.
 $string['export'] = '導出SCORM文件';
 $string['exportepx'] = '導出EPX文件';
 $string['createepxexport'] = '創建EPX文件';
 $string['exportviewselect'] = '選擇導出所有條目的視圖';
 
-//
 $string['type'] = '類型';
 $string['share'] = '分享';
 $string['explainingall'] = '你的檔案袋中的所有條目';
 $string['share_to_other_users'] = '分享給不在我的課程中的其他用戶';
 $string['other_users_course'] = '不在我的課程中的用戶';
 
-// Item sorting
+// Item sorting.
 $string['userdefinedsort'] = '定義你的檢索';
 $string['movetop'] = '移到頂部';
 $string['movebottom'] = '移到底部';
 
-// Views
+// Views.
 $string['view'] = '視圖';
 $string['views'] = '視圖';
 $string['explainingviews'] = '管理視圖.';
@@ -326,7 +323,7 @@ $string['sharedwith_meand'] = '與我和 {$a} 其他用戶分享';
 $string['sharedwith_onlyme'] = '只與我分享';
 $string['sharedwith_shareall'] = '與所有用戶分享';
 
-// Copy to course
+// Copy to course.
 $string['filecopiedtocourse'] = '名字為 $a->filename 的文件複製到課程 $a->coursename 中 ';
 $string['copyitemtocourse'] = '複製到課程到課程';
 $string['desp_language'] = '資源共享平台的語言';
@@ -339,7 +336,7 @@ $string['cofigureblock_media'] = "選擇媒體";
 $string['cofigureblock_personalinfo'] = "選擇個人信息";
 $string['cofigureblock_badge'] = "選擇徽章";
 
-// Desp
+// Desp.
 $string['back_to_desp'] = '返回資源共享平台';
 $string['desp_pluginname'] = '檔案';
 $string['desp_myportfolio'] = '我的檔案';
@@ -381,7 +378,7 @@ writing
 - group work
 ';
 
-// Config
+// Config.
 $string['config_version_3'] = '新的電子檔案袋布局：包括視圖等.';
 $string['config_version_2'] = '舊的電子檔案袋布局';
 $string['config_feature_copy_to_course'] = '允許學生複製電子檔案袋文件到他們的課程中';
@@ -420,7 +417,7 @@ $string['category'] = '分類';
 $string['category_up'] = '返回父分類';
 $string['supported'] = '支持';
 $string['developed'] = '開發';
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(no bookmarks yet)';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(no bookmarks yet)';
 $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';

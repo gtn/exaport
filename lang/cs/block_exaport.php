@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'Czech';
 $string['translation:person'] = 'Richard Cerveny';
 $string['translation:organisation'] = 'www.podripskaskola.cz';
 $string['translation:email'] = 'richard.cerveny@gmail.com';
 
-// Main
+// Main.
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Použití povoleno';
 $string['exaport:export'] = 'Export souborů SCORM';
@@ -120,7 +118,7 @@ $string['nomoodleimportyet'] = 'V tuto chvíli nemáte žádný návrh v žádn�
 $string['deletecategoryconfirm'] = 'Opravdu chcete smazat tuto kategorii? Všechny složky v této kategorii bude smazáno!';
 $string['name'] = 'Název';
 
-// export/import
+// Export/import.
 $string['import'] = 'Import';
 $string['explainexport'] = 'Export vyšeho portfolia zde.';
 $string['createexport'] = 'Vytvořit soubor SCORM';
@@ -145,12 +143,12 @@ $string['comments'] = 'Komentáře';
 $string['addcomment'] = 'Přidat komemtář';
 $string['externcomment'] = 'Sdílet komentáře v externím portfoliu';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = 'Opravdu chcete smazat tuto poznámku?';
 $string['deletelinkconfirm'] = 'Opravdu chcete smazat tento odkaz?';
 $string['deletefileconfirm'] = 'Opravdu chcete smazat tento soubor?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'Nemohu vložit komnetář!';
 $string['importedcommentsstart'] = 'Importované komentáře:<br /><br />';
 $string['importedcommentsend'] = 'Konec importovaných komentářů';
@@ -206,67 +204,66 @@ $string['publishedportfolios'] = 'Publikovaná portfolia';
 $string['viewcategories'] = 'spravovat kategorie';
 $string['updownarrow'] = 'updown ukazatel';
 
-// Shared portfolios
-$string['nocoursetogether'] = NULL;
-$string['nothingshared'] = NULL;
+// Shared portfolios.
+$string['nocoursetogether'] = null;
+$string['nothingshared'] = null;
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'Žádný uživatel s tímto id!';
-$string['nouserforaccess'] = NULL;
+$string['nouserforaccess'] = null;
 
-// Export
+// Export.
 $string['export'] = 'Export';
-$string['exportepx'] = NULL;
-$string['createepxexport'] = NULL;
-$string['exportviewselect'] = NULL;
+$string['exportepx'] = null;
+$string['createepxexport'] = null;
+$string['exportviewselect'] = null;
 
-// 
-$string['type'] = NULL;
+$string['type'] = null;
 $string['share'] = 'Sdílej';
-$string['explainingall'] = NULL;
+$string['explainingall'] = null;
 
-// Item sorting
+// Item sorting.
 $string['userdefinedsort'] = 'Výchozí nastavení';
 $string['movetop'] = 'Na začátek';
 $string['movebottom'] = 'Na konec';
 
-// Views
-$string['view'] = NULL;
-$string['views'] = NULL;
-$string['explainingviews'] = NULL;
-$string['noviews'] = NULL;
-$string['viewnotfound'] = NULL;
-$string['newview'] = NULL;
-$string['viewinformation'] = NULL;
-$string['viewtitle'] = NULL;
-$string['viewdescription'] = NULL;
-$string['viewdesign'] = NULL;
-$string['viewitems'] = NULL;
-$string['viewitem'] = NULL;
-$string['view_specialitems'] = NULL;
-$string['view_specialitem_headline'] = NULL;
-$string['view_specialitem_text'] = NULL;
-$string['view_specialitem_headline_defaulttext'] = NULL;
-$string['view_specialitem_text_defaulttext'] = NULL;
-$string['view_sharing'] = NULL;
-$string['viewand'] = NULL;
-$string['view_sharing_noaccess'] = NULL;
+// Views.
+$string['view'] = null;
+$string['views'] = null;
+$string['explainingviews'] = null;
+$string['noviews'] = null;
+$string['viewnotfound'] = null;
+$string['newview'] = null;
+$string['viewinformation'] = null;
+$string['viewtitle'] = null;
+$string['viewdescription'] = null;
+$string['viewdesign'] = null;
+$string['viewitems'] = null;
+$string['viewitem'] = null;
+$string['view_specialitems'] = null;
+$string['view_specialitem_headline'] = null;
+$string['view_specialitem_text'] = null;
+$string['view_specialitem_headline_defaulttext'] = null;
+$string['view_specialitem_text_defaulttext'] = null;
+$string['view_sharing'] = null;
+$string['viewand'] = null;
+$string['view_sharing_noaccess'] = null;
 
-// Copy to course
-$string['filecopiedtocourse'] = NULL;
-$string['copyitemtocourse'] = NULL;
+// Copy to course.
+$string['filecopiedtocourse'] = null;
+$string['copyitemtocourse'] = null;
 
-// Config
+// Config.
 $string['config_version_3'] = 'Konfigurace verze 3';
 $string['config_version_2'] = 'Konfigurace verze 2';
-$string['config_feature_copy_to_course'] = NULL;
-$string['version_5.2.0_needed'] = NULL;
+$string['config_feature_copy_to_course'] = null;
+$string['version_5.2.0_needed'] = null;
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(zatím žádné záložky)';
-$stringNotUsed['nobookmarksexternal'] = '(zatím žádné externí odkazy)';
-$stringNotUsed['externallink'] = 'Externí odkaz';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(zatím žádné záložky)';
+$stringnotused['nobookmarksexternal'] = '(zatím žádné externí odkazy)';
+$stringnotused['externallink'] = 'Externí odkaz';
 
 $string['steckbrief'] = 'Profile';
 
@@ -316,7 +313,6 @@ $string['exaport:addinstance'] = 'add Exabis ePortfolio to the course';
 $string['exaport:myaddinstance'] = 'add Exabis ePortfolio on My home';
 
 $string['notify'] = 'notify';
-//$string['share'] = 'share';
 $string['sharejs'] = 'share';
 $string['view_specialitem_media'] = 'Media';
 $string['media'] = "Media";

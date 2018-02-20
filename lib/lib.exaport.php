@@ -1,98 +1,114 @@
 <?php
+// This file is part of Exabis Eportfolio (extension for Moodle)
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 namespace block_exaport;
 
 use block_exaport\globals as g;
 
-// copy shared structure tree to user
+// Copy shared structure tree to user.
 function copy_category_to_myself($categoryid) {
-	$root_cat = g::$DB->get_record("block_exaportcate", array('id' => $categoryid));
-	if (!$root_cat) {
-		throw new moodle_exception('category not found');
-	}
+    $rootcat = g::$DB->get_record("block_exaportcate", array('id' => $categoryid));
+    if (!$rootcat) {
+        throw new moodle_exception('category not found');
+    }
 
-	return _copy_category_to_myself_iterator($root_cat, 0);
+    return _copy_category_to_myself_iterator($rootcat, 0);
 }
 
-function _copy_category_to_myself_iterator($curr_cat, $parentcatid) {
-	global $CFG;
-	$new_cat = new \stdClass();
-	$new_cat->pid = $parentcatid;
-	$new_cat->userid = g::$USER->id;
-	if (!$parentcatid) {
-		$new_cat->name = get_string('copyof', 'badges', $curr_cat->name);
-	} else {
-		$new_cat->name = $curr_cat->name;
-	}
-	$new_cat->timemodified = $curr_cat->timemodified;
-	$new_cat->courseid = g::$COURSE->id;
-	$new_cat->description = $curr_cat->description;
-	$new_cat->id = g::$DB->insert_record("block_exaportcate", $new_cat);
+function _copy_category_to_myself_iterator($currcat, $parentcatid) {
+    global $CFG;
+    $newcat = new \stdClass();
+    $newcat->pid = $parentcatid;
+    $newcat->userid = g::$USER->id;
+    if (!$parentcatid) {
+        $newcat->name = get_string('copyof', 'badges', $currcat->name);
+    } else {
+        $newcat->name = $currcat->name;
+    }
+    $newcat->timemodified = $currcat->timemodified;
+    $newcat->courseid = g::$COURSE->id;
+    $newcat->description = $currcat->description;
+    $newcat->id = g::$DB->insert_record("block_exaportcate", $newcat);
 
-	$children = g::$DB->get_records("block_exaportcate", array('pid' => $curr_cat->id));
-	foreach ($children as $category) {
-		_copy_category_to_myself_iterator($category, $new_cat->id);
-	}
+    $children = g::$DB->get_records("block_exaportcate", array('pid' => $currcat->id));
+    foreach ($children as $category) {
+        _copy_category_to_myself_iterator($category, $newcat->id);
+    }
 
-	$items = g::$DB->get_records('block_exaportitem', ['categoryid' => $curr_cat->id]);
-	foreach ($items as $item) {
-		$new_item = new \stdClass();
-		$new_item->userid = g::$USER->id;
-		$new_item->type = $item->type;
-		$new_item->categoryid = $new_cat->id;
-		$new_item->name = $item->name;
-		$new_item->url = $item->url;
-		$new_item->intro = $item->intro;
-		$new_item->attachment = $item->attachment;
-		$new_item->timemodified = $item->timemodified;
-		$new_item->courseid = g::$COURSE->id;
-		$new_item->sortorder = $item->sortorder;
+    $items = g::$DB->get_records('block_exaportitem', ['categoryid' => $currcat->id]);
+    foreach ($items as $item) {
+        $newitem = new \stdClass();
+        $newitem->userid = g::$USER->id;
+        $newitem->type = $item->type;
+        $newitem->categoryid = $newcat->id;
+        $newitem->name = $item->name;
+        $newitem->url = $item->url;
+        $newitem->intro = $item->intro;
+        $newitem->attachment = $item->attachment;
+        $newitem->timemodified = $item->timemodified;
+        $newitem->courseid = g::$COURSE->id;
+        $newitem->sortorder = $item->sortorder;
 
-		$new_item->id = g::$DB->insert_record('block_exaportitem', $new_item);
+        $newitem->id = g::$DB->insert_record('block_exaportitem', $newitem);
 
-		// files
-		$fs = get_file_storage();
-		if ($file = block_exaport_get_item_file($item)) {
-			$fs->create_file_from_storedfile(array(
-				'contextid' => \context_user::instance(g::$USER->id)->id,
-				'component' => 'block_exaport',
-				'filearea' => 'item_file',
-				'itemid' => $new_item->id,
-			), $file);
-		}
-		if ($file = block_exaport_get_file($item, 'item_iconfile')) {
-			$fs->create_file_from_storedfile(array(
-				'contextid' => \context_user::instance(g::$USER->id)->id,
-				'component' => 'block_exaport',
-				'filearea' => 'item_iconfile',
-				'itemid' => $new_item->id,
-			), $file);
-		}
+        // Files.
+        $fs = get_file_storage();
+        if ($file = block_exaport_get_item_file($item)) {
+            $fs->create_file_from_storedfile(array(
+                    'contextid' => \context_user::instance(g::$USER->id)->id,
+                    'component' => 'block_exaport',
+                    'filearea' => 'item_file',
+                    'itemid' => $newitem->id,
+            ), $file);
+        }
+        if ($file = block_exaport_get_file($item, 'item_iconfile')) {
+            $fs->create_file_from_storedfile(array(
+                    'contextid' => \context_user::instance(g::$USER->id)->id,
+                    'component' => 'block_exaport',
+                    'filearea' => 'item_iconfile',
+                    'itemid' => $newitem->id,
+            ), $file);
+        }
 
-		// comments
-		$comments = g::$DB->get_records("block_exaportitemcomm", ["itemid" => $item->id], 'timemodified DESC');
-		foreach ($comments as $comment) {
-			$new_comment = new \stdClass();
-			$new_comment->itemid = $new_item->id;
-			$new_comment->userid = $comment->userid;
-			$new_comment->entry = $comment->entry;
-			$new_comment->timemodified = $comment->timemodified;
-		}
+        // Comments.
+        $comments = g::$DB->get_records("block_exaportitemcomm", ["itemid" => $item->id], 'timemodified DESC');
+        foreach ($comments as $comment) {
+            $newcomment = new \stdClass();
+            $newcomment->itemid = $newitem->id;
+            $newcomment->userid = $comment->userid;
+            $newcomment->entry = $comment->entry;
+            $newcomment->timemodified = $comment->timemodified;
+        }
 
-		// tags
-		if (!empty($CFG->usetags)) {
-			if ($CFG->branch < 31) {
-				// Moodle before v3.1
-				include_once(g::$CFG->dirroot.'/tag/lib.php');
-				$tags = tag_get_tags_array('block_exaportitem', $item->id);
-				tag_set('block_exaportitem', $new_item->id, $tags, 'block_exaport', \context_user::instance(g::$USER->id)->id);
-			} else {
-				// Moodle v3.1
-				$tags = core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $item->id);	
-				core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $new_item->id, \context_user::instance($USER->id), $tags);
-			}
-		}
-	}
+        // Tags.
+        if (!empty($CFG->usetags)) {
+            if ($CFG->branch < 31) {
+                // Moodle before v3.1.
+                include_once(g::$CFG->dirroot.'/tag/lib.php');
+                $tags = tag_get_tags_array('block_exaportitem', $item->id);
+                tag_set('block_exaportitem', $newitem->id, $tags, 'block_exaport', \context_user::instance(g::$USER->id)->id);
+            } else {
+                // Moodle v3.1.
+                $tags = core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $item->id);
+                core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $newitem->id, \context_user::instance($USER->id),
+                        $tags);
+            }
+        }
+    }
 
-	return $new_cat;
+    return $newcat;
 }

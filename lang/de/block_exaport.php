@@ -1,32 +1,29 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 $string['translation:language'] = 'German';
 $string['translation:person'] = 'Andreas Riepl';
 $string['translation:organisation'] = 'IZ Steyr';
 $string['translation:email'] = 'ariepl.work@gmail.com';
 
-
 // === Main ===
-// shown in admin plugin list
+// Shown in admin plugin list.
 $string['pluginname'] = 'Exabis ePortfolio';
-// shown in block title and all headers
+// === Shown in block title and all headers.
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Nutzung';
 $string['exaport:addinstance'] = 'Exabis ePortfolio zum Kurs hinzuf&uumlgen';
@@ -125,8 +122,7 @@ $string['membercount'] = 'Anzahl von Mitgliedern';
 $string['nogroupsfound'] = 'Keine Gruppen gefunden';
 $string['make_it_yours'] = 'Mach\' es zu deinem Eigenen';
 
-
-// === export/import ===
+// === Export/import.
 $string['import'] = 'Import';
 $string['explainexport'] = '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>';
 $string['createexport'] = 'SCORM-Datei erstellen';
@@ -155,13 +151,12 @@ $string['itemgrading'] = 'Beurteilung';
 $string['gradeitem'] = 'Abgabe beurteilen';
 $string['submititem'] = 'Abgeben';
 
-// === Notes ===
+// === Notes.
 $string['deletenoteconfirm'] = 'Wollen Sie diese Notiz wirklich l&ouml;schen?';
 $string['deletelinkconfirm'] = 'Wollen Sie diesen Link wirklich l&ouml;schen?';
 $string['deletefileconfirm'] = 'Wollen Sie diese Datei wirklich l&ouml;schen?';
 
-
-// === Different ===
+// === Different.
 $string['couldninsertcomment'] = 'Kommentar konnte nicht eingefügt werden!';
 $string['importedcommentsstart'] = 'Importierte Kommentare:<br /><br />';
 $string['importedcommentsend'] = 'Ende importierte Kommentare';
@@ -218,18 +213,15 @@ $string['viewcategories'] = 'Kategorien verwalten';
 $string['updownarrow'] = 'Pfeil nach oben/nach unten';
 $string['comment_delete_confirmation'] = 'Wollen Sie wirklich diesen Kommentar löschen?';
 
-
-// === Shared portfolios ===
+// Shared portfolios.
 $string['nocoursetogether'] = 'Kein Kurs';
 $string['nothingshared'] = 'Kein freigegebenen ePortfolios gefunden';
 
-
-// === Errors ===
+// === Errors.
 $string['nouserforid'] = 'Kein Benutzer zu dieser Id!';
 $string['nouserforaccess'] = 'Benutzer nicht gefunden (Zugriffscode unbekannt)';
 
-
-// === Export ===
+// === Export.
 $string['export'] = 'Export SCORM-Datei';
 $string['exportepx'] = 'Export EPX-Datei';
 $string['createepxexport'] = 'EPX-Datei erstellen';
@@ -237,8 +229,7 @@ $string['exportviewselect'] = 'Um alle Einträge einer bestimmten View zu export
 $string['export_directory'] = 'Exportiere Ordnerstruktur';
 $string['createexport_directory'] = 'Erstelle Ordnerstruktur';
 
-
-// === stuff ===
+// === Stuff.
 $string['type'] = 'Typ';
 $string['share'] = 'Share';
 $string['explainingall'] = 'Alle Eintr&auml;ge im Portfolio';
@@ -246,14 +237,12 @@ $string['share_to_other_users'] = 'Benutzer suchen';
 $string['other_users_course'] = 'Benutzer, die nicht in meinen Kursen sind';
 $string['other_groups_course'] = 'Andere Kurse';
 
-
-// === Item sorting ===
+// === Item sorting.
 $string['userdefinedsort'] = 'Eigene Sortierung vornehmen';
 $string['movetop'] = 'An erste Stelle';
 $string['movebottom'] = 'An letzte Stelle';
 
-
-// === Views ===
+// === Views.
 $string['view'] = 'View';
 $string['views'] = 'Meine Views';
 $string['explainingviews'] = 'View verwalten';
@@ -341,8 +330,7 @@ $string['sharedwith_shareall'] = 'Mit allen Benutzern geteilt';
 $string['sharedwith_shareexternal'] = 'Geteilte externe Views';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 
-
-// === Copy to course ===
+// === Copy to course.
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';
 $string['copyitemtocourse'] = 'In Kurs kopieren';
 $string['desp_language'] = 'Desp Sprache';
@@ -355,46 +343,44 @@ $string['cofigureblock_media'] = 'Medieneintrag';
 $string['cofigureblock_personalinfo'] = 'Pers&ouml;nliche Information';
 $string['cofigureblock_badge'] = 'Badges auswählen';
 
-
-// === Desp ===
+// === Desp.
 $string['back_to_desp'] = 'zurück zum d-ESP';
 $string['desp_pluginname'] = 'Dossier';
 $string['steckbrief'] = 'Steckbrief';
 $string['desp_categories'] = '
-	Erzählungen, Rollenspielszenen, Gedichte, Collagen
-	Lebenslauf
-	Berichte über Theateraufführungen, Ausstellungen
-	Berichte über Projekte, Projektreflexionen
-	Audio- und Videoclips
-	Begegnungen durch Reisen in andere Länder
-	Überlegungen zu deinem Sprachenlernen
-	Zeugnisse
-	Zertifikate
-	Bestätigungen
-	Hören
-	Einzelarbeit
-	Partnerarbeit
-	Gruppenarbeit
-	Lesen
-	Einzelarbeit
-	 - Partnerarbeit
-	 - Gruppenarbeit
-	An Gesprächen teilnehmen
-	 - Einzelarbeit
-	 - Partnerarbeit
-	 - Gruppenarbeit
-	Zusammenhängend sprechen
-	 - Einzelarbeit
-	 - Partnerarbeit
-	 - Gruppenarbeit
-	Schreiben
-	 - Einzelarbeit
-	 - Gruppenarbeit
-	 - Partnerarbeit
+    Erzählungen, Rollenspielszenen, Gedichte, Collagen
+    Lebenslauf
+    Berichte über Theateraufführungen, Ausstellungen
+    Berichte über Projekte, Projektreflexionen
+    Audio- und Videoclips
+    Begegnungen durch Reisen in andere Länder
+    Überlegungen zu deinem Sprachenlernen
+    Zeugnisse
+    Zertifikate
+    Bestätigungen
+    Hören
+    Einzelarbeit
+    Partnerarbeit
+    Gruppenarbeit
+    Lesen
+    Einzelarbeit
+     - Partnerarbeit
+     - Gruppenarbeit
+    An Gesprächen teilnehmen
+     - Einzelarbeit
+     - Partnerarbeit
+     - Gruppenarbeit
+    Zusammenhängend sprechen
+     - Einzelarbeit
+     - Partnerarbeit
+     - Gruppenarbeit
+    Schreiben
+     - Einzelarbeit
+     - Gruppenarbeit
+     - Partnerarbeit
 ';
 
-
-// === Config ===
+// === Config.
 $string['config_feature_copy_to_course'] = 'Schüler dürfen Dateien in den Kurs kopieren';
 $string['competenceinteraction'] = 'Interaktion mit Block Exabis Competence Grid, falls dieser installiert ist, zulassen.';
 $string['opencomps'] = 'Kompetenzen auswählen';
@@ -426,8 +412,7 @@ $string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trot
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 $string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';
 
-
-// === Resume ===
+// === Resume.
 $string['resume_template_newresume'] = '<h2>Mein Lebenslauf</h2>';
 $string['resume_my'] = 'Mein Lebenslauf';
 $string['resume_cover'] = 'Begleit-Informationen';
@@ -497,22 +482,21 @@ $string['resume_skillscomp'] = 'Bildungsstandards';
 $string['resume_badges'] = 'Abzeichen';
 $string['resume_exportto_europass'] = 'Export für Europass';
 $string['resume_exportto_europass_intro'] = 'Ein Lebenslauf kann von der Exportdatei generiert werden, indem man den
-	<a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">Online-Europass CV Editor verwendet</a><br><br>
+    <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">Online-Europass CV Editor verwendet</a><br><br>
 
-	Ein paar Kurznotizen:<br>
-	<ul><li>Der generierte Lebenslauf sollte auf alle Fälle nochmals kontrolliert werden</li>
-		<li>Persönliche Daten werden aus den persönlichen Moodle-Informationen generiert</li>
-		<li>Alle Datumsangaben sollten überprüft werden</li>
-		<li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
-		<li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
-		<li>Voragben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
-	</ul>';
+    Ein paar Kurznotizen:<br>
+    <ul><li>Der generierte Lebenslauf sollte auf alle Fälle nochmals kontrolliert werden</li>
+        <li>Persönliche Daten werden aus den persönlichen Moodle-Informationen generiert</li>
+        <li>Alle Datumsangaben sollten überprüft werden</li>
+        <li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
+        <li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
+        <li>Voragben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
+    </ul>';
 $string['resume_exportto_europass_getXML'] = 'XML herunterladen';
 $string['resume_expand'] = 'Alles öffnen';
 $string['resume_collaps'] = 'Alles schließen';
 
-
-// === structure sharing ===
+// === Structure sharing.
 $string['shared_categories'] = 'Geteilte Kategorien';
 $string['nothingstructureshared'] = 'Keine geteilten Strukturen';
 $string['browsecategory'] = 'Inhalt anzeigen';
@@ -531,15 +515,12 @@ $string['supported'] = 'Projekt wurde unterstützt von';
 $string['developed'] = 'entwickelt von';
 $string['myfilearea'] = 'Mein Dateibereich';
 
+// === Language categories.
 
-// === language categories ===
-
-
-// === Message ===
+// === Message.
 $string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit mir teilt';
 
-
-// === Not Used Anymore ===
+// === Not Used Anymore.
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';

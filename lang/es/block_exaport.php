@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'Español';
 $string['translation:person'] = 'Fernando Sanchez';
 $string['translation:organisation'] = 'TICAL';
 $string['translation:email'] = 'jfesanchez@gmail.com';
 
-// Main
+// Main.
 $string['blocktitle'] = 'E-Portafolio';
 $string['exaport:use'] = 'Uso permitido';
 $string['exaport:export'] = 'Exportar archivos SCORM';
@@ -120,7 +118,7 @@ $string['nomoodleimportyet'] = 'Por el momento no tiene presentación en cualqui
 $string['deletecategoryconfirm'] = 'Estas realmente seguro de borrar esta Categoria? Todas las entradas de esta categoria serán borradas!';
 $string['name'] = 'Nombre';
 
-// export/import
+// Export/import.
 $string['import'] = 'Importar';
 $string['explainexport'] = 'Exportar tu portafolio aquí.';
 $string['createexport'] = 'Crear un archivo SCORM';
@@ -145,12 +143,12 @@ $string['comments'] = 'Commentarios';
 $string['addcomment'] = 'Agregar commentarios';
 $string['externcomment'] = 'Compartir commentarios en portafolio externo';
 
-// Notas
+// Notas.
 $string['deletenoteconfirm'] = '¿Estás seguro que quieres eliminar esta nota?';
 $string['deletelinkconfirm'] = '¿Estás seguro que quieres eliminar este link?';
 $string['deletefileconfirm'] = '¿Estás seguro que quieres eliminar esta archivo?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'No se pudo insertar el comentario!';
 $string['importedcommentsstart'] = 'Comentarios Importados:<br /><br />';
 $string['importedcommentsend'] = 'Fin de la importación de los comentarios';
@@ -206,31 +204,30 @@ $string['publishedportfolios'] = 'Portafolios publicados';
 $string['viewcategories'] = 'Administrar categorías';
 $string['updownarrow'] = 'subir/bajar flechas';
 
-// Shared portfolios
+// Shared portfolios.
 $string['nocoursetogether'] = 'Sin curso';
 $string['nothingshared'] = 'No existe un portafolio compartido con ud';
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'El usuario no se encuentra (desconocido id)';
 $string['nouserforaccess'] = 'Ususario no hallado(codigo de acceso desconocido)';
 
-// Export
+// Export.
 $string['export'] = 'Exportar SCORM';
 $string['exportepx'] = 'Exportar EPX';
 $string['createepxexport'] = 'Crear EPX';
 $string['exportviewselect'] = 'Para exportar todos los elementos de un punto de vista específico, por favor seleccione aquí';
 
-// 
 $string['type'] = 'Tipo';
 $string['share'] = 'Compartir';
 $string['explainingall'] = 'Todos los artículos en su portafolio';
 
-// Item sorting
+// Item sorting.
 $string['userdefinedsort'] = 'Defina su propia búsqueda';
 $string['movetop'] = 'Mover  arriba';
 $string['movebottom'] = 'Mover abajo';
 
-// Views
+// Views.
 $string['view'] = 'Vista';
 $string['views'] = 'Vistas';
 $string['explainingviews'] = 'Administrar sus vistas.';
@@ -252,19 +249,19 @@ $string['view_sharing'] = 'Comportiendo';
 $string['viewand'] = 'y';
 $string['view_sharing_noaccess'] = 'Sin Acceso';
 
-// Copy to course
+// Copy to course.
 $string['filecopiedtocourse'] = 'Archivo copiado al curso $a->coursename bajo el nombre de $a->filename';
 $string['copyitemtocourse'] = 'Copiar al curso';
 
-// Config
+// Config.
 $string['config_version_3'] = 'Nuevo diseño de E-Portafolio : incluyendo vistas, etc.';
 $string['config_version_2'] = 'Antiguo  diseño de ePortfolio ';
 $string['config_feature_copy_to_course'] = 'Permitir a los estudiantes para copiar archivos de E-portafolio a sus cursos';
 $string['version_5.2.0_needed'] = 'Exabis E-portafolio REQUIERE al Menos la version 5.2.0 de PHP';
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(Sin marcas yet)';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(Sin marcas yet)';
 $string['steckbrief'] = 'Profile';
 $string['view_specialitem_personal'] = 'Personal information';
 $string['createpage'] = 'Drag and drop content blocks from the tabs below to create your page.';

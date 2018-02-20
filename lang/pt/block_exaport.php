@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'Portuguese';
 $string['translation:person'] = 'António Soares';
 $string['translation:organisation'] = 'www.esec-arouca.pt';
 $string['translation:email'] = 'amspsoares@gmail.com';
 
-// Main
+// Main.
 $string['blocktitle'] = 'Portef&oacute;lio';
 $string['exaport:use'] = 'Utiliza&ccedil;&atilde;o permitida';
 $string['exaport:export'] = 'Exportar ficheiros SCORM';
@@ -68,7 +66,7 @@ $string['dontincludeurl'] = 'Verifique esta caixa para desassociar o marcador ao
 $string['duplicatedurl'] = 'Este URL(endere&ccedil;o) j&aacute; está marcado.';
 $string['editcategories'] = 'editar categorias';
 $string['explaining'] = 'O Portef&oacute;lio pode ser utilizado para guardar endere&ccedil;os Web, ficheiros, bem como anota&ccedil;&otilde;es que podem conter ideias ou coment&aacute;rios que o utilizador deseje colocar';
-$string['explaininglink'] = NULL;
+$string['explaininglink'] = null;
 $string['explainingfile'] = 'Ficheiros. Estes ficheiros podem ser partilhados com todos os membros do curso autorizados.';
 $string['explainingnote'] = 'Anota&ccedil;&otilde;es. Estas anota&ccedil;&otilde;es podem ser partilhadas com todos os membros do curso autorizados.';
 $string['explainingshare'] = 'Para permitir ao participante ver a liga&ccedil;&atilde;o, clique no seu nome e depois clique em Guardar Altera&ccedil;&otilde;es. Pode escolher mais do que um participante.';
@@ -86,12 +84,12 @@ $string['myportfolio'] = 'O meu portef&oacute;lio';
 $string['myportfoliotitle'] = 'Adicione as suas liga&ccedil;&otilde;es aqui.';
 $string['mydialogues'] = 'Os meus diálogos';
 $string['mymoodle'] = 'O Meu Moodle';
-$string['newlink'] = NULL;
+$string['newlink'] = null;
 $string['newfile'] = 'Adicionar um novo ficheiro';
 $string['newnote'] = 'Adicionar uma nova anota&ccedil;&atilde;o';
 $string['nocategories'] = '(ainda sem categorias)';
-$string['nobookmarksall'] = NULL;
-$string['nobookmarkslink'] = NULL;
+$string['nobookmarksall'] = null;
+$string['nobookmarkslink'] = null;
 $string['nobookmarksfile'] = '(ainda sem ficheiros)';
 $string['nobookmarksnote'] = '(ainda sem anota&ccedil;&otilde;es)';
 $string['note'] = 'Anota&ccedil;&atilde;o';
@@ -109,8 +107,8 @@ $string['subcategory'] = 'Subcategoria';
 $string['accessoptions'] = 'Op&ccedil;&otilde;es de acesso';
 $string['shareallexceptthose'] = 'Acesso para <span class=\'block_eportfolio_bold\'>all</span> (mesmo os que n&atilde;o est&atilde;o listados aqui) excepto os seguintes utilizadores';
 $string['sharenoneexceptthose'] = 'Acesso para <span class=\'block_eportfolio_bold\'>nobody</span> excepto os seguintes utilizadores';
-$string['internalaccessall'] = NULL;
-$string['internalaccessusers'] = NULL;
+$string['internalaccessall'] = null;
+$string['internalaccessusers'] = null;
 $string['externaccess'] = 'liga&ccedil;&atilde;o-ePortef&oacute;lio externa';
 $string['showallusers'] = 'Mostrar os utilizadores de todos os meus cursos';
 $string['showcourseusers'] = 'Mostrar somente os utilizadores do curso';
@@ -120,7 +118,7 @@ $string['nomoodleimportyet'] = 'Actualmente n&atilde;o tem nenhuma submiss&atild
 $string['deletecategoryconfirm'] = 'De certeza que quer apagar esta categoria? Todas as entradas nesta categoria ser&atilde;o apagadas!';
 $string['name'] = 'Nome';
 
-// export/import
+// Export/import.
 $string['import'] = 'Importar';
 $string['explainexport'] = 'Exporte o seu portef&oacute;lio aqui.';
 $string['createexport'] = 'Crie um ficheiro SCORM';
@@ -136,8 +134,8 @@ $string['importexport'] = 'Exportar/Importar';
 $string['explainimport'] = 'Aqui pode importar um ficheiro SCORM-File para o portef&oacute;lio. Se os marcadores das exporta&ccedil;&otilde;es anteriores forem encontrados o importar tenta importar os dados da estrutura de ficheiros existente';
 $string['makeimport'] = 'Importar';
 $string['add_this_file'] = 'adicione este ficheiro';
-$string['bookmarksall'] = NULL;
-$string['bookmarkslinks'] = NULL;
+$string['bookmarksall'] = null;
+$string['bookmarkslinks'] = null;
 $string['bookmarksfiles'] = 'Ficheiros';
 $string['bookmarksnotes'] = 'Anota&ccedil;&otilde;es';
 $string['noguestpost'] = 'Os convidados (Guests) n&atilde;o podem aceder aqui!';
@@ -145,12 +143,12 @@ $string['comments'] = 'Comentários';
 $string['addcomment'] = 'Adicionar comentário';
 $string['externcomment'] = 'Partilhar comentários no portef&oacute;lio externo.';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = 'Quer realmente apagar esta anota&ccedil;&atilde;o?';
-$string['deletelinkconfirm'] = NULL;
+$string['deletelinkconfirm'] = null;
 $string['deletefileconfirm'] = 'Quer realmente apagar este ficheiro?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'N&atilde;o foi poss&iacute;vel inserir o comentário!';
 $string['importedcommentsstart'] = 'Comentários importados:<br /><br />';
 $string['importedcommentsend'] = 'Fim de importa&ccedil;&atilde;o de comentários';
@@ -175,7 +173,7 @@ $string['title'] = 'T&agrave;tulo';
 $string['titlenotemtpy'] = 'Deve introduzir um t&agrave;tulo.';
 $string['intro'] = 'Conte&uacute;do';
 $string['intronotempty'] = 'Deve introduzir um conte&uacute;do.';
-$string['link'] = NULL;
+$string['link'] = null;
 $string['categorynotempty'] = 'Deve escolher uma categoria.';
 $string['urlnotempty'] = 'Deve introduzir um URL.';
 $string['selectall'] = 'Seleccionar todos';
@@ -206,71 +204,70 @@ $string['publishedportfolios'] = 'Portefólios publicados';
 $string['viewcategories'] = 'gerir categorias';
 $string['updownarrow'] = 'seta para cima';
 
-// Shared portfolios
-$string['nocoursetogether'] = NULL;
-$string['nothingshared'] = NULL;
+// Shared portfolios.
+$string['nocoursetogether'] = null;
+$string['nothingshared'] = null;
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'N&atilde;o existe utilizador para este ID!';
-$string['nouserforaccess'] = NULL;
+$string['nouserforaccess'] = null;
 
-// Export
+// Export.
 $string['export'] = 'Exportar';
-$string['exportepx'] = NULL;
-$string['createepxexport'] = NULL;
-$string['exportviewselect'] = NULL;
+$string['exportepx'] = null;
+$string['createepxexport'] = null;
+$string['exportviewselect'] = null;
 
-// 
-$string['type'] = NULL;
-$string['share'] = NULL;
-$string['explainingall'] = NULL;
+$string['type'] = null;
+$string['share'] = null;
+$string['explainingall'] = null;
 
-// Item sorting
-$string['userdefinedsort'] = NULL;
-$string['movetop'] = NULL;
-$string['movebottom'] = NULL;
+// Item sorting.
+$string['userdefinedsort'] = null;
+$string['movetop'] = null;
+$string['movebottom'] = null;
 
-// Views
-$string['view'] = NULL;
-$string['views'] = NULL;
-$string['explainingviews'] = NULL;
-$string['noviews'] = NULL;
-$string['viewnotfound'] = NULL;
-$string['newview'] = NULL;
-$string['viewinformation'] = NULL;
-$string['viewtitle'] = NULL;
-$string['viewdescription'] = NULL;
-$string['viewdesign'] = NULL;
-$string['viewitems'] = NULL;
-$string['viewitem'] = NULL;
-$string['view_specialitems'] = NULL;
-$string['view_specialitem_headline'] = NULL;
-$string['view_specialitem_text'] = NULL;
-$string['view_specialitem_headline_defaulttext'] = NULL;
-$string['view_specialitem_text_defaulttext'] = NULL;
-$string['view_sharing'] = NULL;
-$string['viewand'] = NULL;
-$string['view_sharing_noaccess'] = NULL;
+// Views.
+$string['view'] = null;
+$string['views'] = null;
+$string['explainingviews'] = null;
+$string['noviews'] = null;
+$string['viewnotfound'] = null;
+$string['newview'] = null;
+$string['viewinformation'] = null;
+$string['viewtitle'] = null;
+$string['viewdescription'] = null;
+$string['viewdesign'] = null;
+$string['viewitems'] = null;
+$string['viewitem'] = null;
+$string['view_specialitems'] = null;
+$string['view_specialitem_headline'] = null;
+$string['view_specialitem_text'] = null;
+$string['view_specialitem_headline_defaulttext'] = null;
+$string['view_specialitem_text_defaulttext'] = null;
+$string['view_sharing'] = null;
+$string['viewand'] = null;
+$string['view_sharing_noaccess'] = null;
 
-// Copy to course
-$string['filecopiedtocourse'] = NULL;
-$string['copyitemtocourse'] = NULL;
+// Copy to course.
+$string['filecopiedtocourse'] = null;
+$string['copyitemtocourse'] = null;
 
-// Config
-$string['config_version_3'] = NULL;
-$string['config_version_2'] = NULL;
-$string['config_feature_copy_to_course'] = NULL;
-$string['version_5.2.0_needed'] = NULL;
+// Config.
+$string['config_version_3'] = null;
+$string['config_version_2'] = null;
+$string['config_feature_copy_to_course'] = null;
+$string['version_5.2.0_needed'] = null;
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
-// Not Used Anymore
-$stringNotUsed['explainingexternal'] = 'Liga&ccedil;&otilde;es externas.  Estas liga&ccedil;&otilde;es podem ser partilhadas com todos os membros do curso autorizados.';
-$stringNotUsed['newexternal'] = 'Adicionar uma nova liga&ccedil;&atilde;o externa';
-$stringNotUsed['nobookmarks'] = '(ainda sem anota&ccedil;&otilde;es)';
-$stringNotUsed['nobookmarksexternal'] = '(ainda sem liga&ccedil;&otilde;es externas)';
-$stringNotUsed['bookmarksexternal'] = 'Liga&ccedil;&otilde;es externas';
-$stringNotUsed['deleteextconfirm'] = 'Quer realmente apagar esta liga&ccedil;&atilde;o?';
-$stringNotUsed['externallink'] = 'Liga&ccedil;&atilde;o externa';
+// Not Used Anymore.
+$stringnotused['explainingexternal'] = 'Liga&ccedil;&otilde;es externas.  Estas liga&ccedil;&otilde;es podem ser partilhadas com todos os membros do curso autorizados.';
+$stringnotused['newexternal'] = 'Adicionar uma nova liga&ccedil;&atilde;o externa';
+$stringnotused['nobookmarks'] = '(ainda sem anota&ccedil;&otilde;es)';
+$stringnotused['nobookmarksexternal'] = '(ainda sem liga&ccedil;&otilde;es externas)';
+$stringnotused['bookmarksexternal'] = 'Liga&ccedil;&otilde;es externas';
+$stringnotused['deleteextconfirm'] = 'Quer realmente apagar esta liga&ccedil;&atilde;o?';
+$stringnotused['externallink'] = 'Liga&ccedil;&atilde;o externa';
 $string['steckbrief'] = 'Profile';
 
 $string['view_specialitem_personal'] = 'Personal information';

@@ -1,178 +1,193 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once __DIR__.'/inc.php';
+require_once(__DIR__.'/inc.php');
 
-// called from pluginfile.php
+// Called from pluginfile.php
 // to serve the file of a plugin
 // urlformat:
 // http://localhost/moodle20/pluginfile.php/17/block_exaport/item_content/portfolio/id/2/itemid/3/pic_145.jpg
 // 17/block_exaport/item_content/portfolio/id/2/itemid/3/pic_145.jpg
 // user context id (moodle standard)
-//	moudle name (moodle standard)
-//				  file column name (moodle standard)
-//							   access string according to exaport
-//											  itemid (string)
-//													 itemid
-//													   file name
+// moudle name (moodle standard)
+// file column name (moodle standard)
+// access string according to exaport
+// itemid (string)
+// itemid
+// file name.
 function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
-	global $USER, $CFG, $DB;
+    global $USER, $CFG, $DB;
 
-	// always require login, at least guest
-	require_login();
-	
-	if ($filearea == 'item_file') {
-		$filename = array_pop($args);
-		$id = array_pop($args);
-		if (array_pop($args) != 'itemid') print_error('wrong params');
-		
-		// other params together are the access string
-		$access = join('/', $args);
-		
-		// item exists?
-		$item = block_exaport_get_item($id, $access);
-		if (!$item) print_error('Item not found');
+    // Always require login, at least guest.
+    require_login();
 
-		// get file
-		$fs = get_file_storage();
-		$file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
+    if ($filearea == 'item_file') {
+        $filename = array_pop($args);
+        $id = array_pop($args);
+        if (array_pop($args) != 'itemid') {
+            print_error('wrong params');
+        }
 
-		// serve file
-		if ($file) {
-			send_stored_file($file);
-		} else {
-			return false;
-		}
-	} elseif ($filearea == 'item_content') {
-		$filename = array_pop($args);
-		$id = array_pop($args);
-		if (array_pop($args) != 'itemid') print_error('wrong params');
-		
-		// other params together are the access string
-		$access = join('/', $args);
-		
-		// item exists?
-		$item = block_exaport_get_item($id, $access);
-		if (!$item) print_error('Item not found');
+        // Other params together are the access string.
+        $access = join('/', $args);
 
-		// get file
-		$fs = get_file_storage();
-		$file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
+        // Item exists?
+        $item = block_exaport_get_item($id, $access);
+        if (!$item) {
+            print_error('Item not found');
+        }
 
-		// serve file
-		if ($file) {
-			send_stored_file($file);
-		} else {
-			return false;
-		}
-	} elseif ($filearea == 'view_content') {
-		$filename = array_pop($args);
+        // Get file.
+        $fs = get_file_storage();
+        $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
-		// other params together are the access string
-		$access = join('/', $args);
+        // Serve file.
+        if ($file) {
+            send_stored_file($file);
+        } else {
+            return false;
+        }
+    } else if ($filearea == 'item_content') {
+        $filename = array_pop($args);
+        $id = array_pop($args);
+        if (array_pop($args) != 'itemid') {
+            print_error('wrong params');
+        }
 
-		if (!$view = block_exaport_get_view_from_access($access)) {
-			print_error("viewnotfound", "block_exaport");
-		}
+        // Other params together are the access string.
+        $access = join('/', $args);
 
-		// get file
-		$fs = get_file_storage();
-		$file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
+        // Item exists?
+        $item = block_exaport_get_item($id, $access);
+        if (!$item) {
+            print_error('Item not found');
+        }
 
-		// serve file
-		if ($file) {
-			send_stored_file($file);
-		} else {
-			return false;
-		}
-	} elseif ($filearea == 'personal_information_view') {
-		$filename = array_pop($args);
-		
-		// other params together are the access string
-		$access = join('/', $args);
+        // Get file.
+        $fs = get_file_storage();
+        $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
-		if (!$view = block_exaport_get_view_from_access($access)) {
-			print_error("viewnotfound", "block_exaport");
-		}
-		
-		// view has personal information?
-		$sql = "SELECT b.* FROM {block_exaportviewblock} b".
-				" WHERE b.viewid=? AND".
-				" b.type='personal_information'";
-		if (!$DB->record_exists_sql($sql, array($view->id)))
-			return false;
-								 
-		// get file
-		$fs = get_file_storage();
-		$file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', 'personal_information', $view->userid, '/', $filename);
+        // Serve file.
+        if ($file) {
+            send_stored_file($file);
+        } else {
+            return false;
+        }
+    } else if ($filearea == 'view_content') {
+        $filename = array_pop($args);
 
-		// serve file
-		if ($file) {
-			send_stored_file($file);
-		} else {
-			return false;
-		}
-	} elseif ($filearea == 'personal_information_self') {
-		$filename = join('/', $args);
-		
-		// get file
-		$fs = get_file_storage();
-		$file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/', $filename);
+        // Other params together are the access string.
+        $access = join('/', $args);
 
-		// serve file
-		if ($file) {
-			send_stored_file($file);
-		} else {
-			return false;
-		}
-	} elseif ($filearea == 'category_icon') {
-		$filename = array_pop($args);
-		$category_id = array_pop($args);
-		// $filename = join('/', $args);
-		
-		// get file
-		$fs = get_file_storage();
-		$file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'category_icon', $category_id, '/', $filename);
+        if (!$view = block_exaport_get_view_from_access($access)) {
+            print_error("viewnotfound", "block_exaport");
+        }
 
-		// serve file
-		if ($file) {
-			send_stored_file($file);
-		} else {
-			return false;
-		}
-	} else if (in_array($filearea, array('resume_cover', 'resume_interests', 'resume_edu', 'resume_employ', 'resume_certif', 'resume_public', 'resume_mbrship')) ||
-		in_array($filearea, array('resume_goalspersonal', 'resume_goalsacademic', 'resume_goalscareers', 'resume_skillspersonal', 'resume_skillsacademic', 'resume_skillscareers')) || 
-		in_array($filearea, array('resume_editor_goalspersonal', 'resume_editor_goalsacademic', 'resume_editor_goalscareers', 'resume_editor_skillspersonal', 'resume_editor_skillsacademic', 'resume_editor_skillscareers'))) {
-		$filename = array_pop($args);		
-		$id = array_pop($args);
-		
-		// get file
-		$fs = get_file_storage();
-		$file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', $filearea, $id, '/', $filename);
+        // Get file.
+        $fs = get_file_storage();
+        $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
 
-		// serve file
-		if ($file) {
-			send_stored_file($file);
-		} else {
-			return false;
-		}
-	} else {
-		die('wrong file area');
-	}
+        // Serve file.
+        if ($file) {
+            send_stored_file($file);
+        } else {
+            return false;
+        }
+    } else if ($filearea == 'personal_information_view') {
+        $filename = array_pop($args);
+
+        // Other params together are the access string.
+        $access = join('/', $args);
+
+        if (!$view = block_exaport_get_view_from_access($access)) {
+            print_error("viewnotfound", "block_exaport");
+        }
+
+        // View has personal information?
+        $sql = "SELECT b.* FROM {block_exaportviewblock} b".
+                " WHERE b.viewid=? AND".
+                " b.type='personal_information'";
+        if (!$DB->record_exists_sql($sql, array($view->id))) {
+            return false;
+        }
+
+        // Get file.
+        $fs = get_file_storage();
+        $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', 'personal_information', $view->userid,
+                '/', $filename);
+
+        // Serve file.
+        if ($file) {
+            send_stored_file($file);
+        } else {
+            return false;
+        }
+    } else if ($filearea == 'personal_information_self') {
+        $filename = join('/', $args);
+
+        // Get file.
+        $fs = get_file_storage();
+        $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/',
+                $filename);
+
+        // Serve file.
+        if ($file) {
+            send_stored_file($file);
+        } else {
+            return false;
+        }
+    } else if ($filearea == 'category_icon') {
+        $filename = array_pop($args);
+        $categoryid = array_pop($args);
+
+        // Get file.
+        $fs = get_file_storage();
+        $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'category_icon', $categoryid, '/',
+                $filename);
+
+        // Serve file.
+        if ($file) {
+            send_stored_file($file);
+        } else {
+            return false;
+        }
+    } else if (in_array($filearea,
+                    array('resume_cover', 'resume_interests', 'resume_edu', 'resume_employ', 'resume_certif', 'resume_public',
+                            'resume_mbrship')) ||
+            in_array($filearea,
+                    array('resume_goalspersonal', 'resume_goalsacademic', 'resume_goalscareers', 'resume_skillspersonal',
+                            'resume_skillsacademic', 'resume_skillscareers')) ||
+            in_array($filearea, array('resume_editor_goalspersonal', 'resume_editor_goalsacademic', 'resume_editor_goalscareers',
+                    'resume_editor_skillspersonal', 'resume_editor_skillsacademic', 'resume_editor_skillscareers'))
+    ) {
+        $filename = array_pop($args);
+        $id = array_pop($args);
+
+        // Get file.
+        $fs = get_file_storage();
+        $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', $filearea, $id, '/', $filename);
+
+        // Serve file.
+        if ($file) {
+            send_stored_file($file);
+        } else {
+            return false;
+        }
+    } else {
+        die('wrong file area');
+    }
 }

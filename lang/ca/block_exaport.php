@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'English';
 $string['translation:person'] = 'Andreas Riepl';
 $string['translation:organisation'] = 'IZ Steyr';
 $string['translation:email'] = 'ariepl.work@gmail.com';
 
-// Main
+// Main.
 $string['blocktitle'] = 'Portafoli digital Exabis';
 $string['pluginname'] = 'Portafoli digital Exabis';
 $string['exaport:use'] = 'ÚS permès';
@@ -129,7 +127,7 @@ $string['delete'] = 'Elimina';
 $string['add'] = 'Afegeix';
 $string['edit'] = 'Edita';
 
-// export/import
+// Export/import.
 $string['import'] = 'Importa';
 $string['explainexport'] = 'Exporta el teu portafoli aquí.';
 $string['createexport'] = 'Crea un arxiu SCORM';
@@ -154,12 +152,12 @@ $string['comments'] = 'Comentaris';
 $string['addcomment'] = 'Afegir comentari';
 $string['externcomment'] = 'Compartir els comentaris a un portafoli extern';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = 'Realment vols eliminar aquesta nota?';
 $string['deletelinkconfirm'] = 'Realment vols eliminar aquest enllaç?';
 $string['deletefileconfirm'] = 'Realment vols eliminar aquest arxiu?';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'No s\'ha pogut insertar el comentari!';
 $string['importedcommentsstart'] = 'Comentaris importats:<br /><br />';
 $string['importedcommentsend'] = 'Fi dels comentaris importats';
@@ -215,31 +213,30 @@ $string['publishedportfolios'] = 'Portafolis publicats';
 $string['viewcategories'] = 'Administrar categories';
 $string['updownarrow'] = 'Fletxa amunt i avall';
 
-// Shared portfolios
+// Shared portfolios.
 $string['nocoursetogether'] = 'No hi ha curs';
 $string['nothingshared'] = 'Ningú ha compartit un portafoli amb tu';
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'No s\'ha trobat l\'usuari (identificador desconegut)';
 $string['nouserforaccess'] = 'No s\'ha trobat l\'usuari (codi d\'accés desconegut)';
 
-// Export
+// Export.
 $string['export'] = 'Exportar arxiu SCORM';
 $string['exportepx'] = 'Exportar arxiu EPX';
 $string['createepxexport'] = 'Crear arxiu EPX';
 $string['exportviewselect'] = 'Per exportar tots els elements d\'una vista específica, si us plau seleciona-ho aquí.';
 
-// 
 $string['type'] = 'Tipus';
 $string['share'] = 'Compartir';
 $string['explainingall'] = 'Tots els elements al teu portafoli';
 
-// Item sorting
+// Item sorting.
 $string['userdefinedsort'] = 'Defineix la teva pròpia cerca';
 $string['movetop'] = 'Moure al principi';
 $string['movebottom'] = 'Moure al final';
 
-// Views
+// Views.
 $string['view'] = 'Veure';
 $string['views'] = 'Vistes';
 $string['explainingviews'] = 'Administrar vistes';
@@ -311,7 +308,7 @@ $string['height'] = 'Alçada';
 $string['width'] = 'Amplada';
 $string['media_allowed_notes'] = 'Es permeten URLs dels llocs següents';
 
-// Copy to course
+// Copy to course.
 $string['filecopiedtocourse'] = 'Arxiu copiat al curs $a->coursename amb el nom de $a->filename';
 $string['copyitemtocourse'] = 'Copia al curs';
 $string['desp_language'] = 'Idioma Portafoli Digital Europeu';
@@ -323,7 +320,7 @@ $string['cofigureblock_item'] = "tria item";
 $string['cofigureblock_media'] = "tria recurs";
 $string['cofigureblock_personalinfo'] = "tria informació personal";
 
-// Desp
+// Desp.
 $string['back_to_desp'] = 'torna a la llengua del portafoli';
 $string['desp_pluginname'] = 'Dossier';
 $string['desp_myportfolio'] = 'El meu dossier';
@@ -335,39 +332,39 @@ $string['desp_explaininglink'] = 'Enllaços. Aquests enllaços es poden comparti
 $string['desp_explainingfile'] = 'Arxius. Aquests arxius es poden compartir amb els membres del curs autoritzats.';
 $string['steckbrief'] = 'Perfil';
 $string['desp_categories'] = "
-	Històries, jocs de rol, assaigs, collages
- 	currículum
- 	crítiques de produccions teatrals, exposicions
- 	memòries de projecte i reflexions
- 	clips d'àudio i de vídeo
- 	trobades amb altres nacionalitats
- 	opinions sobre les teves habilitats lingüístiques
- 	targetes per informar
- 	certificats
- 	agraïments
- 	comprensió oral
-  	 - treball individual
-  	 - treball en parella
-  	 - treball en grup
- 	comprensió escrita
-  	 - treball individual
-  	 - treball en parella
-  	 - treball en grup
- 	participació en converses
-  	 - treball individual
-  	 - treball en parella
-  	 - treball en grup
- 	expressió oral fluida
-  	 - treball individual
-  	 - treball en parella
-  	 - treball en grup
- 	expressió escrita
-  	 - treball individual
-  	 - treball en parella
-  	 - treball en grup
+    Històries, jocs de rol, assaigs, collages
+    currículum
+    crítiques de produccions teatrals, exposicions
+    memòries de projecte i reflexions
+    clips d'àudio i de vídeo
+    trobades amb altres nacionalitats
+    opinions sobre les teves habilitats lingüístiques
+    targetes per informar
+    certificats
+    agraïments
+    comprensió oral
+     - treball individual
+     - treball en parella
+     - treball en grup
+    comprensió escrita
+     - treball individual
+     - treball en parella
+     - treball en grup
+    participació en converses
+     - treball individual
+     - treball en parella
+     - treball en grup
+    expressió oral fluida
+     - treball individual
+     - treball en parella
+     - treball en grup
+    expressió escrita
+     - treball individual
+     - treball en parella
+     - treball en grup
 ";
 
-// Config
+// Config.
 $string['config_version_3'] = 'Nova distribució del portafoli digital: inclou vistes, etc.';
 $string['config_version_2'] = 'Distribució antiga del portafoli digital';
 $string['config_feature_copy_to_course'] = 'Permetre als alumnes que copiïn arxius del portafoli digital als seus cursos';
@@ -401,6 +398,6 @@ $string['category_up'] = 'tornar a la categoria mare';
 $string['supported'] = 'amb el recolzament de';
 $string['developed'] = 'desenvolupat per';
 
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(no bookmarks yet)';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(no bookmarks yet)';
 $string['i_shared'] = 'I shared an eportfolio view with you';

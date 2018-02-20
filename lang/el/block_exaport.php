@@ -1,29 +1,27 @@
 <?php
-// This file is part of Exabis Eportfolio
+// This file is part of Exabis Eportfolio (extension for Moodle)
 //
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>
-//
-// Exabis Eportfolio is free software: you can redistribute it and/or modify
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This script is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You can find the GNU General Public License at <http://www.gnu.org/licenses/>.
-//
-// This copyright notice MUST APPEAR in all copies of the script!
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Translation
+// Translation.
 $string['translation:language'] = 'Greek';
 $string['translation:person'] = 'Panayiotis Papaharalambous';
-$string['translation:organisation'] = NULL;
+$string['translation:organisation'] = null;
 $string['translation:email'] = 'ppanosau@yahoo.gr';
 
-// Main
+// Main.
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Use allowed';
 $string['exaport:export'] = 'Export of SCORM-Files';
@@ -93,8 +91,8 @@ $string['newlink'] = 'Προσθήκη νέου εξωτερικού συνδέ�
 $string['newfile'] = 'Προσθήκη νέου αρχείου';
 $string['newnote'] = 'Προσθήκη νέας σημείωσης';
 $string['nocategories'] = '(Δεν έχουν προστεθεί ακόμα κατηγορίες)';
-$string['nobookmarksall'] = NULL;
-$string['nobookmarkslink'] = NULL;
+$string['nobookmarksall'] = null;
+$string['nobookmarkslink'] = null;
 $string['nobookmarksfile'] = '(Δεν έχουν προστεθεί ακόμα αρχεία)';
 $string['nobookmarksnote'] = '(Δεν έχουν προστεθεί ακόμα σημειώσεις)';
 $string['note'] = 'Σημείωση';
@@ -112,8 +110,8 @@ $string['subcategory'] = 'Υπο-κατηγορία';
 $string['accessoptions'] = 'Επιλογές πρόσβασης';
 $string['shareallexceptthose'] = 'Επιτρέπεται η πρόσβαση σε <span class=\'block_eportfolio_bold\'>όλους</span> (ακόμα και σε αυτούς που δεν εμφανίζονται εδώ) εκτός από τους παρακάτω χρήστες';
 $string['sharenoneexceptthose'] = 'Δεν επιτρέπεται η πρόσβαση παρά μόνο στους παρακάτω χρήστες';
-$string['internalaccessall'] = NULL;
-$string['internalaccessusers'] = NULL;
+$string['internalaccessall'] = null;
+$string['internalaccessusers'] = null;
 $string['externaccess'] = 'Σύνδεσμος για το external ePortfolio';
 $string['showallusers'] = 'Εμφάνισε τους χρήστες όλων των μαθημάτων μου';
 $string['showcourseusers'] = 'Εμφάνισε μόνο τους χρήστες αυτού του μαθήματος';
@@ -123,7 +121,7 @@ $string['nomoodleimportyet'] = 'Μέχρι στιγμής δεν έχει γίν
 $string['deletecategoryconfirm'] = 'Θέλετε οπωσδήποτε να διαγράψετε αυτήν την κατηγορία; Όλες οι εγγραφές της κατηγορίας θα διαγραφούν! ';
 $string['name'] = 'Όνομα';
 
-// export/import
+// Export/import.
 $string['import'] = 'Εισαγωγή';
 $string['explainexport'] = 'Εξαγωγή του Portfolio εδώ';
 $string['createexport'] = 'Δημιουργία αρχείου SCORM';
@@ -140,7 +138,7 @@ $string['explainimport'] = 'Here you can import a SCORM-File into the portfolio.
 Εδώ μπορείτε να εισάγετε ένα αρχείο SCORM στο portfolio. Αν βρεθούν δείκτες από προηγούμενη εξαγωγή, κατά την εισαγωγή τα δεδομένα εισάγονται στην υπάρχουσα δομή αρχείων.';
 $string['makeimport'] = 'Εισαγωγή';
 $string['add_this_file'] = 'Προσθήκη αρχείου';
-$string['bookmarksall'] = NULL;
+$string['bookmarksall'] = null;
 $string['bookmarkslinks'] = 'Εξωτερικοί σελιδοδείκτες';
 $string['bookmarksfiles'] = 'Αρχεία';
 $string['bookmarksnotes'] = 'Σημειώσεις';
@@ -149,12 +147,12 @@ $string['comments'] = 'Σχόλια';
 $string['addcomment'] = 'Προσθήκη σχολίου';
 $string['externcomment'] = 'Να επιτραπεί ο διαμοιρασμός των σχολίων στο external ePortfolio';
 
-// Notes
+// Notes.
 $string['deletenoteconfirm'] = 'Θέλετε οπωσδήποτε να διαγράψετε αυτή τη σημείωση;';
 $string['deletelinkconfirm'] = 'Θέλετε οπωσδήποτε να διαγράψετε αυτό το σύνδεσμο;';
 $string['deletefileconfirm'] = 'Θέλετε οπωσδήποτε να διαγράψετε αυτό το αρχείο;';
 
-// Different
+// Different.
 $string['couldninsertcomment'] = 'Δεν μπορεί να γίνει η εισαγωγή του σχόλιου!';
 $string['importedcommentsstart'] = 'Σχόλια που έχουν εισαχθεί:<br /><br />';
 $string['importedcommentsend'] = 'Τέλος σχόλιων που έχουν εισαχθεί';
@@ -179,7 +177,7 @@ $string['title'] = 'Τίτλος';
 $string['titlenotemtpy'] = 'Πρέπει να εισάγετε έναν τίτλο.';
 $string['intro'] = 'Περιεχόμενα';
 $string['intronotempty'] = 'Πρέπει να εισάγετε περιεχόμενο';
-$string['link'] = NULL;
+$string['link'] = null;
 $string['categorynotempty'] = 'Πρέπει να διαλέξετε μία κατηγορία';
 $string['urlnotempty'] = 'Πρέπει να εισάγετε ένα URL.';
 $string['selectall'] = 'Επιλογή όλων';
@@ -210,67 +208,66 @@ $string['publishedportfolios'] = 'Δημοσιευμένα portfolios';
 $string['viewcategories'] = 'Διαχείριση κατηγοριών';
 $string['updownarrow'] = 'Πάνω/κάτω βέλος';
 
-// Shared portfolios
-$string['nocoursetogether'] = NULL;
-$string['nothingshared'] = NULL;
+// Shared portfolios.
+$string['nocoursetogether'] = null;
+$string['nothingshared'] = null;
 
-// Errors
+// Errors.
 $string['nouserforid'] = 'Δεν υπάρχει χρήστης με αυτό το id!';
-$string['nouserforaccess'] = NULL;
+$string['nouserforaccess'] = null;
 
-// Export
+// Export.
 $string['export'] = 'Εξαγωγή';
-$string['exportepx'] = NULL;
-$string['createepxexport'] = NULL;
-$string['exportviewselect'] = NULL;
+$string['exportepx'] = null;
+$string['createepxexport'] = null;
+$string['exportviewselect'] = null;
 
-// 
-$string['type'] = NULL;
-$string['share'] = NULL;
-$string['explainingall'] = NULL;
+$string['type'] = null;
+$string['share'] = null;
+$string['explainingall'] = null;
 
-// Item sorting
-$string['userdefinedsort'] = NULL;
-$string['movetop'] = NULL;
-$string['movebottom'] = NULL;
+// Item sorting.
+$string['userdefinedsort'] = null;
+$string['movetop'] = null;
+$string['movebottom'] = null;
 
-// Views
-$string['view'] = NULL;
-$string['views'] = NULL;
-$string['explainingviews'] = NULL;
-$string['noviews'] = NULL;
-$string['viewnotfound'] = NULL;
-$string['newview'] = NULL;
-$string['viewinformation'] = NULL;
-$string['viewtitle'] = NULL;
-$string['viewdescription'] = NULL;
-$string['viewdesign'] = NULL;
-$string['viewitems'] = NULL;
-$string['viewitem'] = NULL;
-$string['view_specialitems'] = NULL;
-$string['view_specialitem_headline'] = NULL;
-$string['view_specialitem_text'] = NULL;
-$string['view_specialitem_headline_defaulttext'] = NULL;
-$string['view_specialitem_text_defaulttext'] = NULL;
-$string['view_sharing'] = NULL;
-$string['viewand'] = NULL;
-$string['view_sharing_noaccess'] = NULL;
+// Views.
+$string['view'] = null;
+$string['views'] = null;
+$string['explainingviews'] = null;
+$string['noviews'] = null;
+$string['viewnotfound'] = null;
+$string['newview'] = null;
+$string['viewinformation'] = null;
+$string['viewtitle'] = null;
+$string['viewdescription'] = null;
+$string['viewdesign'] = null;
+$string['viewitems'] = null;
+$string['viewitem'] = null;
+$string['view_specialitems'] = null;
+$string['view_specialitem_headline'] = null;
+$string['view_specialitem_text'] = null;
+$string['view_specialitem_headline_defaulttext'] = null;
+$string['view_specialitem_text_defaulttext'] = null;
+$string['view_sharing'] = null;
+$string['viewand'] = null;
+$string['view_sharing_noaccess'] = null;
 
-// Copy to course
-$string['filecopiedtocourse'] = NULL;
-$string['copyitemtocourse'] = NULL;
+// Copy to course.
+$string['filecopiedtocourse'] = null;
+$string['copyitemtocourse'] = null;
 
-// Config
-$string['config_version_3'] = NULL;
-$string['config_version_2'] = NULL;
-$string['config_feature_copy_to_course'] = NULL;
-$string['version_5.2.0_needed'] = NULL;
+// Config.
+$string['config_version_3'] = null;
+$string['config_version_2'] = null;
+$string['config_feature_copy_to_course'] = null;
+$string['version_5.2.0_needed'] = null;
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
-// Not Used Anymore
-$stringNotUsed['nobookmarks'] = '(Δεν έχουν προστεθεί ακόμα σελιδοδείκτες)';
-$stringNotUsed['nobookmarksexternal'] = '(Δεν έχουν προστεθεί ακόμα εξωτερικοί σύνδεσμοι)';
-$stringNotUsed['externallink'] = 'Εξωτερικός σύνδεσμος';
+// Not Used Anymore.
+$stringnotused['nobookmarks'] = '(Δεν έχουν προστεθεί ακόμα σελιδοδείκτες)';
+$stringnotused['nobookmarksexternal'] = '(Δεν έχουν προστεθεί ακόμα εξωτερικοί σύνδεσμοι)';
+$stringnotused['externallink'] = 'Εξωτερικός σύνδεσμος';
 $string['steckbrief'] = 'Profile';
 
 $string['view_specialitem_personal'] = 'Personal information';

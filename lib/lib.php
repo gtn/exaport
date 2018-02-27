@@ -1437,6 +1437,7 @@ function block_exaport_has_grading_permission($itemid) {
 function block_exaport_get_item_tags($itemid, $orderby = '') {
     global $DB, $CFG;
     $tags = array();
+    $result = array();
     if (is_array($itemid)) {
         // Tags for a few items.
         if (count($itemid) > 0) {
@@ -1454,9 +1455,6 @@ function block_exaport_get_item_tags($itemid, $orderby = '') {
                                     ' WHERE component=\'block_exaport\' AND itemtype=\'block_exaportitem\' AND itemid = ? '.
                                     ($orderby != '' ? ' ORDER BY '.$orderby : ''),
                                     array($itemid));
-    }
-    if (!$result) {
-        $result = array();
     }
     foreach ($result as &$tag) {
         $tags[] = $tag->rawname;

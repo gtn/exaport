@@ -678,9 +678,9 @@ namespace {
             foreach ($sharedusers as $key => $userid) {
                 $sharedartefactsbyuser[$key]['userid'] = $userid;
                 $sharedartefactsbyuser[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $userid)));
-                $items = $DB->get_records_sql('SELECT * FROM {block_exaportitem} ".
-                                                " WHERE userid=? AND categoryid IN ('.$sharedcategorieslist.')',
-                                                array('id' => $userid));
+                $items = $DB->get_records_sql('SELECT * FROM {block_exaportitem} '.
+                                                ' WHERE userid=? AND categoryid IN ('.$sharedcategorieslist.')',
+                                                array('userid' => $userid));
                 $sharedartefactsbyuser[$key]['items'] = $items;
                 // Delete empty categories.
                 if (count($sharedartefactsbyuser[$key]['items']) == 0) {

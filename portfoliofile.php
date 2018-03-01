@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+require_once(__DIR__.'/inc.php');
+
 // Syntax:
 // Files in the portfolio:
 // portfoliofile.php/files/$userid/$portfolioid/filename.ext
@@ -27,7 +29,6 @@ if (!$token || !$wstoken) {
     define('NO_MOODLE_COOKIES', true);
 }
 
-require_once(__DIR__.'/inc.php');
 require_once($CFG->dirroot.'/webservice/lib.php');
 
 if (empty($CFG->filelifetime)) {

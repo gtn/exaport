@@ -75,4 +75,8 @@ if ($ADMIN->fulltree) {
             get_string('block_exaport_app_alloweditdelete_head', 'block_exaport'),
             get_string('block_exaport_app_alloweditdelete_body', 'block_exaport'), 1));
 
+    // Teacher can see all artifacts from own students
+    $settings->add(new admin_setting_configcheckbox('block_exaport_teachercanseeartifactsofstudents',
+            get_string('block_exaport_app_teachercanseeartifactsofstudents_head', 'block_exaport'),
+            get_string('block_exaport_app_teachercanseeartifactsofstudents_body', 'block_exaport'), 0));
 }

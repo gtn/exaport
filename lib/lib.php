@@ -870,8 +870,11 @@ function block_exaport_get_category($id) {
     ));
 }
 
-function block_exaport_get_root_category() {
+function block_exaport_get_root_category($userid = null) {
     global $DB, $USER;
+    if ($userid === null) {
+        $userid = $USER->id;
+    }
 
     return (object) array(
             'id' => 0,
@@ -879,10 +882,10 @@ function block_exaport_get_root_category() {
             'name' => block_exaport_get_string('root_category'),
             'url' => g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id,
             'item_cnt' => $DB->get_field_sql('
-            SELECT COUNT(i.id) AS item_cnt
-            FROM {block_exaportitem} i
-            WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
-        ', array($USER->id)),
+                    SELECT COUNT(i.id) AS item_cnt
+                    FROM {block_exaportitem} i
+                    WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
+                ', array($userid)),
 
     );
 }
@@ -1244,6 +1247,61 @@ function block_exaport_get_course_teachers($exceptmyself = true) {
     $teachers = array_keys($teachers);
 
     return $teachers;
+}
+
+// This user is a teacher of any course?
+function block_exaport_user_is_teacher($userid = null) {
+    global $DB, $USER;
+    if ($userid === null) {
+        $userid = $USER->id;
+    }
+    // Role 3 = teacher
+    $query = "SELECT DISTINCT u.id as userid, u.id AS tmp
+      FROM {role_assignments} ra
+      JOIN {user} u ON ra.userid = u.id
+      JOIN {context} c ON c.id = ra.contextid
+      WHERE c.contextlevel = ? AND u.id = ? AND ra.roleid = '3' AND u.deleted = 0 ";
+    $roles = $DB->get_records_sql($query, [CONTEXT_COURSE, $userid]);
+    if (count($roles) > 0) {
+        return true;
+    }
+    return false;
+}
+
+function block_exaport_get_students_for_teacher($userid = null) {
+    global $DB, $USER;
+    if ($userid === null) {
+        $userid = $USER->id;
+    }
+    $students = array();
+    // Across all enrolled cources
+    $query = "SELECT c.id as contextid, c.instanceid as courseid, course.fullname AS coursetitle, u.id as userid
+      FROM {role_assignments} ra
+      JOIN {user} u ON ra.userid = u.id
+      JOIN {context} c ON c.id = ra.contextid
+      JOIN {course} course ON course.id = c.instanceid
+      WHERE c.contextlevel = ? AND u.id = ? AND ra.roleid = '3' AND u.deleted = 0 ";
+    $courses = $DB->get_records_sql($query, [CONTEXT_COURSE, $userid]);
+    foreach ($courses as $course) {
+        // Get students of current course
+        $querystudents = "SELECT u.*
+                  FROM {role_assignments} ra
+                  JOIN {user} u ON ra.userid = u.id
+                  JOIN {context} c ON c.id = ra.contextid
+                  WHERE c.contextlevel = ? AND c.instanceid = ? AND ra.roleid = '5' AND u.deleted = 0 ";
+        $users = $DB->get_records_sql($querystudents, [CONTEXT_COURSE, $course->courseid]);
+        foreach ($users as $user) {
+            if (!array_key_exists($user->id, $students)) {
+                $user->name = fullname($user);
+                $students[$user->id] = $user;
+            }
+            if (!isset($students[$user->id]->courses)) {
+                $students[$user->id]->courses = array();
+            }
+            $students[$user->id]->courses[] = $course->coursetitle;
+        }
+    }
+    return $students;
 }
 
 /**

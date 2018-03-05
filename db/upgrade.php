@@ -205,11 +205,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
             }
 
             $fs->create_file_from_storedfile(array(
-                'contextid' => $matches['contextid'],
-                'component' => 'block_exaport',
-                'filearea' => 'personal_information',
-                'itemid' => $GLOBALS['test_for_userid'],
-                'filename' => $file->get_filename()
+                    'contextid' => $matches['contextid'],
+                    'component' => 'block_exaport',
+                    'filearea' => 'personal_information',
+                    'itemid' => $GLOBALS['test_for_userid'],
+                    'filename' => $file->get_filename()
             ), $file);
 
             return '@@PLUGINFILE@@/';
@@ -406,7 +406,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // Define field view_items_layout to be added to block_exaportuser.
         $table = new xmldb_table('block_exaportitem');
         $field = new xmldb_field('example_url');
-                $field->set_attributes(XMLDB_TYPE_CHAR, '255', null, null, null, null, null);
+        $field->set_attributes(XMLDB_TYPE_CHAR, '255', null, null, null, null, null);
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
@@ -671,7 +671,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-         // Define table block_exaportresume_public to be created.
+        // Define table block_exaportresume_public to be created.
         $table = new xmldb_table('block_exaportresume_public');
         // Adding fields to table block_exaportresume_public.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
@@ -860,6 +860,40 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // for more compatibility with Moodle v3.1.
         $sql = "UPDATE {tag_instance} SET itemtype='block_exaportitem' WHERE itemtype='exaport_item'";
         $DB->execute($sql);
+    }
+
+    if ($oldversion < 2018030517) {
+        // Add new user profile field (checkbox): blockexaporttrustedteacher
+        // for using together with exaport settings parameter: block_exaport_teachercanseeartifactsofstudents
+        // checked user will be able to see all artifacts of own students.
+        $shortfieldname = 'blockexaporttrustedteacher';
+        if (!$DB->get_record('user_info_field', array('shortname' => $shortfieldname))) {
+            $sql = "INSERT INTO {user_info_field} (shortname, name, datatype, description, descriptionformat, categoryid,
+                      sortorder, required, locked, visible, forceunique, signup, defaultdata, defaultdataformat,
+                      param1, param2, param3, param4, param5) 
+                 VALUES ('".$shortfieldname."', 'This teacher is trusted for viewing of all artifacts of own students', 'checkbox', 
+                    '<p>This teacher can see all artifacts of own students.</p><p>Use this option with care!</p>".
+                    "<p>Has sence only if the parameter \"block_exaport_teachercanseeartifactsofstudents\" is enabled ".
+                    "in block_exaport settings</p>',
+                    1, 1, 1, 0, 1, 0, 0, 0, '0', 0, null, null, null, null, null)";
+            $DB->execute($sql);
+            // Set config for auth plugins (TODO: other plugins?).
+            $authplugins = array(
+                    'auth_cas',
+                    'auth_db',
+                    'auth_ldap',
+                    'auth_shibboleth');
+            $options = array(
+                    'field_map_profile_field_' => '',
+                    'field_updatelocal_profile_field_' => 'oncreate',
+                    'field_updateremote_profile_field_' => '0',
+                    'field_lock_profile_field_' => 'locked');
+            foreach ($authplugins as $plugin) {
+                foreach ($options as $optionname => $optionvalue) {
+                    set_config($optionname.$shortfieldname, $optionvalue, $plugin);
+                }
+            }
+        }
     }
 
     // TODO: delete structure fields / tables.

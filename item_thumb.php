@@ -24,7 +24,7 @@ $item = null;
 
 // Thumbnails for BackEnd (editing the view part).
 if ($access == '') {
-    echo $access;
+    // echo $access;
     if ($sharable = block_exaport_can_user_access_shared_item($USER->id, $itemid)) {
         // Get thumbnails if item was shared for current user.
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid));

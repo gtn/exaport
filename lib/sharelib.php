@@ -700,6 +700,16 @@ namespace {
      * @return bool
      */
     function block_exaport_can_user_access_shared_item($userid, $itemid) {
+        global $DB;
+        // At first - check teacher access
+        if (block_exaport_user_can_see_artifacts_of_students()) {
+            // The owner of item is a student of teacher
+            $students = block_exaport_get_students_for_teacher($userid);
+            $itemdata = $DB->get_record('block_exaportitem', array('id' => $itemid));
+            if (array_key_exists($itemdata->userid, $students))
+                return $itemdata->userid;
+        }
+        // Check access by self sharing
         $itemsforuser = block_exaport_get_items_shared_to_user($userid, true);
         if (array_key_exists($itemid, $itemsforuser)) {
             return $itemsforuser[$itemid]->userid;
@@ -730,6 +740,27 @@ namespace {
             SELECT viewid
             FROM {block_exaportviewgroupshar}
             WHERE groupid IN (".join(',', array_keys($usergroups)).")");
+    }
+
+    function block_exaport_user_can_see_artifacts_of_students() {
+        global $CFG, $USER;
+        if ($CFG->block_exaport_teachercanseeartifactsofstudents) {
+            // The $USER->profile['blockexaporttrustedteacher'] is not working, because it is session data
+            // And it is not updating in real time
+            // so, I use the code below with $userclone.
+            $userclone = clone($USER);
+            require_once($CFG->dirroot.'/user/profile/lib.php');
+            require_once($CFG->dirroot.'/user/lib.php');
+            profile_load_data($userclone);
+            // Only if this user is checked as trusted teacher and only if it is a teacher!
+            if (isset($userclone)
+                && isset($userclone->profile_field_blockexaporttrustedteacher)
+                && $userclone->profile_field_blockexaporttrustedteacher == 1
+                && block_exaport_user_is_teacher()) {
+                    return true;
+            }
+        }
+        return false;
     }
 }
 

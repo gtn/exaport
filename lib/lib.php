@@ -1268,7 +1268,7 @@ function block_exaport_user_is_teacher($userid = null) {
     return false;
 }
 
-function block_exaport_get_students_for_teacher($userid = null) {
+function block_exaport_get_students_for_teacher($userid = null, $courseid = 0) {
     global $DB, $USER;
     if ($userid === null) {
         $userid = $USER->id;
@@ -1297,8 +1297,17 @@ function block_exaport_get_students_for_teacher($userid = null) {
             }
             if (!isset($students[$user->id]->courses)) {
                 $students[$user->id]->courses = array();
+                $students[$user->id]->courseids = array();
             }
             $students[$user->id]->courses[] = $course->coursetitle;
+            $students[$user->id]->courseids[] = $course->courseid;
+            // Check needed course
+            if ($courseid > 0) {
+                // delete student if his cources are not needed
+                if (!in_array($courseid, $students[$user->id]->courseids)) {
+                    unset($students[$user->id]);
+                }
+            }
         }
     }
     return $students;

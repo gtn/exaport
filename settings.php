@@ -58,7 +58,7 @@ if ($ADMIN->fulltree) {
     // Maxbytes set to 0 will allow the maximum server limit for uploads.
     $a = new stdClass();
     $a->sitemaxbytes = $maxbytes ? display_size($maxbytes) : reset($maxuploadchoices);
-    $a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies';
+    $a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies#admin-maxbytes';
     $settings->add(new admin_setting_configselect('block_exaport_max_uploadfile_size',
             get_string('block_exaport_maxbytes', 'block_exaport'),
             get_string('block_exaport_maxbytes_body', 'block_exaport', $a), 0, $maxuploadchoices));
@@ -67,7 +67,7 @@ if ($ADMIN->fulltree) {
     $defaultuserquota = 104857600; // 100MB.
     $a = new stdClass();
     $a->bytes = !empty($CFG->userquota) ? $CFG->userquota : $defaultuserquota;
-    $a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies';
+    $a->settingsurl = $CFG->wwwroot.'/admin/settings.php?section=sitepolicies#admin-userquota';
     $settings->add(new admin_setting_configtext('block_exaport_userquota', get_string('block_exaport_userquota', 'block_exaport'),
             get_string('block_exaport_userquota_body', 'block_exaport', $a), $defaultuserquota));
 
@@ -76,7 +76,17 @@ if ($ADMIN->fulltree) {
             get_string('block_exaport_app_alloweditdelete_body', 'block_exaport'), 1));
 
     // Teacher can see all artifacts from own students
+    // check profile fiedl exists
+    if (!$field = $DB->get_record('user_info_field', array('shortname' => 'blockexaporttrustedteacher'))) {
+        $link = $CFG->wwwroot.'/blocks/exaport/admin.php?action=create_trustedteacherproperty';
+        $linktocreateuserproperty = '<a href="'.$link.'" target="_blank">';
+        $linktocreateuserproperty .= get_string('block_exaport_teachercanseeartifactsofstudents_configurationlink',
+                                                'block_exaport');
+        $linktocreateuserproperty .= '</a><br />';
+    } else {
+        $linktocreateuserproperty = '';
+    }
     $settings->add(new admin_setting_configcheckbox('block_exaport_teachercanseeartifactsofstudents',
-            get_string('block_exaport_app_teachercanseeartifactsofstudents_head', 'block_exaport'),
-            get_string('block_exaport_app_teachercanseeartifactsofstudents_body', 'block_exaport'), 0));
+            get_string('block_exaport_teachercanseeartifactsofstudents_head', 'block_exaport'),
+            get_string('block_exaport_teachercanseeartifactsofstudents_body', 'block_exaport', $linktocreateuserproperty), 0));
 }

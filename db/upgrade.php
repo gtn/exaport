@@ -862,40 +862,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $DB->execute($sql);
     }
 
-    if ($oldversion < 2018030517) {
-        // Add new user profile field (checkbox): blockexaporttrustedteacher
-        // for using together with exaport settings parameter: block_exaport_teachercanseeartifactsofstudents
-        // checked user will be able to see all artifacts of own students.
-        $shortfieldname = 'blockexaporttrustedteacher';
-        if (!$DB->get_record('user_info_field', array('shortname' => $shortfieldname))) {
-            $sql = "INSERT INTO {user_info_field} (shortname, name, datatype, description, descriptionformat, categoryid,
-                      sortorder, required, locked, visible, forceunique, signup, defaultdata, defaultdataformat,
-                      param1, param2, param3, param4, param5) 
-                 VALUES ('".$shortfieldname."', 'This teacher is trusted for viewing of all artifacts of own students', 'checkbox', 
-                    '<p>This teacher can see all artifacts of own students.</p><p>Use this option with care!</p>".
-                    "<p>Has sence only if the parameter \"block_exaport_teachercanseeartifactsofstudents\" is enabled ".
-                    "in block_exaport settings</p>',
-                    1, 1, 1, 0, 1, 0, 0, 0, '0', 0, null, null, null, null, null)";
-            $DB->execute($sql);
-            // Set config for auth plugins (TODO: other plugins?).
-            $authplugins = array(
-                    'auth_cas',
-                    'auth_db',
-                    'auth_ldap',
-                    'auth_shibboleth');
-            $options = array(
-                    'field_map_profile_field_' => '',
-                    'field_updatelocal_profile_field_' => 'oncreate',
-                    'field_updateremote_profile_field_' => '0',
-                    'field_lock_profile_field_' => 'locked');
-            foreach ($authplugins as $plugin) {
-                foreach ($options as $optionname => $optionvalue) {
-                    set_config($optionname.$shortfieldname, $optionvalue, $plugin);
-                }
-            }
-        }
-    }
-
     // TODO: delete structure fields / tables.
 
     return $result;

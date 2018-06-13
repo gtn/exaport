@@ -116,10 +116,14 @@ function block_exaport_add_to_log($courseid, $module, $action, $url = '', $info 
     }
 }
 
-function block_exaport_file_remove($item) {
+function block_exaport_file_remove($item, $contextid = null) {
     $fs = get_file_storage();
     // Associated file (if it's a file item).
-    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id);
+    if($contextid != null){
+        $fs->delete_area_files($contextid, 'block_exaport', 'item_file', $item->id);
+    }else{
+        $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id);
+    }
     // Item content (intro) inside the html editor.
     $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content', $item->id);
 }

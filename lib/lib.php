@@ -36,21 +36,30 @@ require_once(__DIR__.'/lib.exaport.php');
 require_once(__DIR__.'/sharelib.php');
 /*** FILE FUNCTIONS **********************************************************************/
 
+
 /**
  * @param $item
  * @param $type
  * @return stored_file
  */
-function block_exaport_get_file($item, $type) {
+    function block_exaport_get_file($item, $type, $contextid = null) {
     $fs = get_file_storage();
-    $files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
+    if($contextid == null){
+        $files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
+    } else {
+        $files = $fs->get_area_files($contextid, 'block_exaport', $type, $item->id, null, false);
+    }
 
     // Return first file.
     return reset($files);
 }
 
-function block_exaport_get_item_file($item) {
-    return block_exaport_get_file($item, 'item_file');
+function block_exaport_get_item_file($item, $contextid = null) {
+    if($contextid == null){
+        return block_exaport_get_file($item, 'item_file');
+    }else {
+        return block_exaport_get_file($item, 'item_file', $contextid);
+    }
 }
 
 function block_exaport_get_category_icon($category) {
@@ -126,6 +135,13 @@ function block_exaport_file_remove($item, $contextid = null) {
     }
     // Item content (intro) inside the html editor.
     $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content', $item->id);
+}
+
+function block_exaport_comment_file_remove($item, $contextid = null) {
+    $fs = get_file_storage();
+    
+    // Associated file (if it's a file item).
+    $fs->delete_area_files($contextid, 'block_exaport', 'item_comment_file', $item->id);
 }
 
 /*** GENERAL FUNCTIONS **********************************************************************/

@@ -84,13 +84,18 @@ function block_exaport_get_category_icon($category) {
  * @param $itemcomment
  * @return stored_file
  * @throws dml_exception
+ * INFO      The commentfile is actually not linked to a comment, but to an exaport item    for now
  */
-function block_exaport_get_item_comment_file($commentid) {
+function block_exaport_get_item_comment_file($comment_itemid, $contextid = null) {
     $fs = get_file_storage();
-
+    
     // List all files, excluding directories!
-    $areafiles = $fs->get_area_files(context_system::instance()->id, 'block_exaport', 'item_comment_file', $commentid, null, false);
-
+    if($contextid == null){
+        $areafiles = $fs->get_area_files(context_system::instance()->id, 'block_exaport', 'item_comment_file', $comment_itemid, null, false);
+    }else {
+        $areafiles = $fs->get_area_files($contextid, 'block_exaport', 'item_comment_file', $comment_itemid, null, false);
+    }
+    
     if (empty($areafiles)) {
         return null;
     } else {

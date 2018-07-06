@@ -209,7 +209,8 @@ namespace {
         global $DB;
         // Check if user is userid or if user is trainer of userid.
         if ($userid == $authenticationinfo['user']->id) {
-            return $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $userid));
+           // return $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $userid));
+            return $DB->get_record('block_exaportitem', array('id' => $itemid));
         } else if ($DB->record_exists(BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS, array('trainerid' => $authenticationinfo['user']->id,
                 'studentid' => $userid))
         ) {

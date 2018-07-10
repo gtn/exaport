@@ -104,23 +104,14 @@ if ($itemid) {
         print_error('Item not found');
     }
 
-    // INFO      The commentfile is actually not linked to a comment, but to an exaport item
     if ($commentid = optional_param('commentid', 0, PARAM_INT)) {
         $comment = $DB->get_record("block_exaportitemcomm", ['itemid' => $item->id, 'id' => $commentid]);
         if (!$comment) {
             not_found();
         }
-        
-        //throw new invalid_parameter_exception ('get comment file');
         $file = block_exaport_get_item_comment_file($comment->id);
     } else {
-        $role = optional_param('role', 0, PARAM_TEXT);
-        if($role==='teacher'){   //actually used code for getting the comment file from the teacher
-            $context = context_user::instance($USER->id);      
-            $file = block_exaport_get_item_comment_file($item->id,$context->id);
-        }else{
-            $file = block_exaport_get_item_file($item);
-        }  
+        $file = block_exaport_get_item_file($item);
     }
 
     if ($file) {

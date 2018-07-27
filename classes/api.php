@@ -54,7 +54,7 @@ class api {
     public static function get_item_comments($itemid) {
         $itemcomments = g::$DB->get_records('block_exaportitemcomm',
             ['itemid' => $itemid],
-            'timemodified ASC', 'id, entry, userid', 0, 2);
+            'timemodified ASC', 'id, entry, userid, timemodified');
 
         foreach ($itemcomments as $comment) {
             $comment->file = block_exaport_get_item_comment_file($comment->id);

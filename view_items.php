@@ -27,7 +27,18 @@ $type = optional_param('type', '', PARAM_TEXT);
 $layout = optional_param('layout', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_TEXT);
 
-block_exaport_require_login($courseid);
+$wstoken = optional_param('wstoken', null, PARAM_RAW);
+
+require_once($CFG->dirroot.'/webservice/lib.php');
+
+$authenticationinfo = null;
+if ($wstoken) {
+    $webservicelib = new webservice();
+    $authenticationinfo = $webservicelib->authenticate_user($wstoken);
+} else {
+     block_exaport_require_login($courseid);
+}
+
 
 $context = context_system::instance();
 

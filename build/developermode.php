@@ -20,13 +20,6 @@ defined('MOODLE_INTERNAL') || die();
 call_user_func(function() {
     $servicesfile = __DIR__.'/../db/services.php';
 
-    // Get copyright. From this file.
-    $thisfile = file_get_contents(__FILE__);
-    if (!preg_match('!(//.*\r?\n)+!', $thisfile, $matches)) {
-        throw new moodle_exception('copyright not found');
-    }
-    $copyright = $matches[0];
-
     if (file_exists($servicesfile)) {
         if (!is_writable($servicesfile)) {
             // No change possible.
@@ -147,7 +140,6 @@ call_user_func(function() {
 
     // Save to services.php.
     $content = "<?php\n";
-    $content .= $copyright."\n";
     $content .= "defined('MOODLE_INTERNAL') || die();\n\n";
     $content .= '$functions = '.var_export($functions, true).";\n\n";
     $content .= '$services = '.var_export($services, true).";\n\n";

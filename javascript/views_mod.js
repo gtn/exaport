@@ -133,7 +133,11 @@ Y.use('moodle-core-notification-dialogue');
             data.type = 'text';
             data.id = id;
             data.block_title = $('#block_title').val();
-            data.text = tinymce.get('block_text').getContent();
+            if (typeof tinymce.get !== 'undefined' && typeof tinymce.get('id_block_text') !== 'undefined') {
+                data.text = tinymce.get('id_block_text').getContent();
+            } else {
+                data.text = $('#id_block_text').val();
+            }
             newItem.data('portfolio', data);
             generateItem('update', $(newItem));
             $E.last_popup.remove();
@@ -176,15 +180,19 @@ Y.use('moodle-core-notification-dialogue');
             data.type = 'personal_information';
             data.id = id;
             data.block_title = $('#block_title').val();
-            if ($('#firstname').attr('checked') == 'checked') {
+            if ($('#firstname').prop('checked')) {
                 data.firstname = $('#firstname').val();
             }
-            if ($('#lastname').attr('checked') == 'checked') {
+            if ($('#lastname').prop('checked')) {
                 data.lastname = $('#lastname').val();
             }
             data.picture = $('form input[name=picture]:checked').val();
             data.email = $('form input[name=email]:checked').val();
-            data.text = tinyMCE.get('block_intro').getContent();
+            if (typeof tinymce.get !== 'undefined' && typeof tinymce.get('id_block_intro') !== 'undefined') {
+                data.text = tinymce.get('id_block_intro').getContent();
+            } else {
+                data.text = $('#id_block_intro').val();
+            }
             newItem.data('portfolio', data);
             generateItem('update', $(newItem));
             $E.last_popup.remove();

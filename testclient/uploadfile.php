@@ -36,6 +36,7 @@ curl_setopt($ch, CURLOPT_URL, $domainname.'/webservice/upload.php');
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 $response = curl_exec($ch);
+// print_r($response);
 
 /* =========================================================================
 

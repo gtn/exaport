@@ -26,9 +26,10 @@ $token = optional_param('token', null, PARAM_RAW);
 $wstoken = optional_param('token', null, PARAM_RAW);
 if (!$token || !$wstoken) {
     // Automatisches einloggen beim öffnen mit token (vom webservice) verhindern.
-    define('NO_MOODLE_COOKIES', true);
+    defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true);
 }
 
+require_once(__DIR__.'/inc.php');
 require_once($CFG->dirroot.'/webservice/lib.php');
 
 if (empty($CFG->filelifetime)) {
@@ -89,7 +90,7 @@ if ($wstoken) {
 } else {
     require_login();
 }
-
+//echo '!!!'; exit;
 if ($itemid) {
     // File storage logic.
     if ($epopaccess) {

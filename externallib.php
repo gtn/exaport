@@ -1542,7 +1542,7 @@ class block_exaport_external extends external_api {
 
         // Script for export.
         require_once($CFG->dirroot.'/blocks/exacomp/upload_externalportfolio.php');
-        // Return variables from Global of upload_externalportfolio.php.
+        // Return variables from Global of upload_externalportfolio.php
         return array('success' => $success, 'linktofile' => $result_querystring);
     }
 

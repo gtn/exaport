@@ -44,7 +44,8 @@ if (!$COURSE) {
 }
 
 // Include JS script.
-$PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
+//$PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
+//$PAGE->requires->js('/blocks/exaport/javascript/views_mod.js', true);
 
 if ($id) {
     $conditions = array("id" => $id, "userid" => $USER->id);
@@ -701,6 +702,7 @@ switch ($type) {
         ?>
         <script type="text/javascript">
             //<![CDATA[
+	    jQueryExaport(exaportViewEdit.initContentEdit);	    
             M.yui.add_module({
                 "editor_tinymce": {
                     "name": "editor_tinymce",

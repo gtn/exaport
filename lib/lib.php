@@ -942,11 +942,11 @@ function block_exaport_get_user_category($title, $userid) {
     return $DB->get_record('block_exaportcate', array('userid' => $userid, 'name' => $title));
 }
 
-function block_exaport_create_user_category($title, $userid, $parentid = 0) {
+function block_exaport_create_user_category($title, $userid, $parentid = 0, $courseid = 0) {
     global $DB;
 
     if (!$DB->record_exists('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid))) {
-        $id = $DB->insert_record('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid));
+        $id = $DB->insert_record('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid, 'courseid' => $courseid));
 
         return $DB->get_record('block_exaportcate', array('id' => $id));
     }

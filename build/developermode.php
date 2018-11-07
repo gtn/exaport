@@ -53,7 +53,17 @@ call_user_func(function() {
 
     $doku = '';
 
-    extract($GLOBALS);
+    //extract($GLOBALS);
+    $CFG = $GLOBALS['CFG'];
+    $OUTPUT = $GLOBALS['OUTPUT'];
+    $DB = $GLOBALS['DB'];
+    $USER = $GLOBALS['USER'];
+    $PAGE = $GLOBALS['PAGE'];
+    $COURSE = $GLOBALS['COURSE'];
+    $SITE = $GLOBALS['SITE'];
+    $ME = $GLOBALS['ME'];
+    $FULLME = $GLOBALS['FULLME'];
+    $SCRIPT = $GLOBALS['SCRIPT'];
     require_once(__DIR__.'/../externallib.php');
 
     $rc = new ReflectionClass('block_exaport_external');

@@ -821,7 +821,7 @@ if ($action == "login") {
 function block_exaport_get_oezcompetencies($exampid) {
     global $DB;
     $comp = array();
-    $descr = $DB->get_records("block_exacompdescrexamp_mm", array("exampid" => $exampid));
+    $descr = $DB->get_records(BLOCK_EXACOMP_DB_DESCEXAMP, array("exampid" => $exampid));
     foreach ($descr as $rs) {
         $comp[] = $rs->descrid;
     }
@@ -831,7 +831,7 @@ function block_exaport_get_oezcompetencies($exampid) {
 function get_examples($descrid) {
     global $DB;
     $inhalt = '';
-    $sql = "SELECT examp.* FROM {block_exacompexamples} examp INNER JOIN {block_exacompdescrexamp_mm} mm ON examp.id=mm.exampid ";
+    $sql = "SELECT examp.* FROM {block_exacompexamples} examp INNER JOIN {".BLOCK_EXACOMP_DB_DESCEXAMP."} mm ON examp.id=mm.exampid ";
     $sql .= " WHERE examp.externalurl<>'' AND mm.descrid=?";
 
     $examples = $DB->get_records_sql($sql, array($descrid));
@@ -1446,7 +1446,7 @@ function block_exaport_installoez($userid, $isupdate = false) {
     $sql .= " INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id ";
     $sql .= " INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id ";
     $sql .= " INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid ";
-    $sql .= " INNER JOIN {block_exacompdescrexamp_mm} emm ON emm.descrid=descr.id ";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_DESCEXAMP."} emm ON emm.descrid=descr.id ";
     $sql .= " INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid ";
     $sql .= " WHERE st.isoez=1 OR st.epop=1 OR subj.epop=1 OR top.epop=1 OR descr.epop=1 OR examp.epop=1 ";
     $sql .= " OR (st.isoez=2 AND examp.source=2) OR (examp.source=3)".$where." ";

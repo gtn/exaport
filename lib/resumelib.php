@@ -835,7 +835,12 @@ function europass_xml($resumeid = 0) {
 
     // PHOTO.
     $fs = get_file_storage();
-    $file = $fs->get_file(context_user::instance($USER->id)->id, 'user', 'icon', 0, '/', 'f3.png');
+    $imgTypes = array('png', 'jpg', 'jpeg');
+    $i = 0;
+    do {
+        $file = $fs->get_file(context_user::instance($USER->id)->id, 'user', 'icon', 0, '/', 'f3.'.$imgTypes[$i]);
+        $i++;
+    } while (!$file && $i < count($imgTypes));
     if ($file) {
         $photo = $dom->createElement('Photo');
         $mimetype = $dom->createElement('MimeType');
@@ -1168,14 +1173,14 @@ function europass_xml_employers_educations($dom, $type, $data) {
 }
 
 // Single Achievement for achievementlist.
-function europass_xml_achievement($dom, $type, $ids = array(), $title, $content) {
+function europass_xml_achievement($dom, $type, $ids = array(), $atitle, $content) {
     global $USER;
     $files = array();
     $fs = get_file_storage();
     $achievement = $dom->createElement('Achievement');
     $title = $dom->createElement('Title');
     $label = $dom->createElement('Label');
-    $text = $dom->createTextNode($title);
+    $text = $dom->createTextNode($atitle);
     $label->appendChild($text);
     $title->appendChild($label);
     $achievement->appendChild($title);

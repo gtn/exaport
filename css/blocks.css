@@ -1,0 +1,59 @@
+#exaport-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    filter:alpha(opacity=50);
+    -moz-opacity:0.5;
+    -khtml-opacity: 0.5;
+    opacity: 0.5;
+    z-index: 2000;
+}
+
+#exaport .block{
+  display: none;
+  border: 7px solid #eee;
+  z-index: 2001;
+  background: #fff;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+ }
+
+#exaport .portfolioElement.ui-draggable{
+    cursor: move;
+}
+
+#exaport .block-controls {
+    display: inline;
+    float: right;
+    margin-left: 10px;
+}
+
+#exaport .block-controls a {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    cursor: pointer;
+    height: 16px;
+    margin: 0 0 0 1px;
+    padding: 0;
+    width: 16px;
+}
+
+#exaport .inlinelist li {
+    display: inline;
+    margin-right: 20px;
+}
+
+.unshared_block {
+    color: #aaa;
+}
+
+.unshared_message {
+    display: block;
+    float: right;
+    margin-right: 10px;
+    color:red;
+}

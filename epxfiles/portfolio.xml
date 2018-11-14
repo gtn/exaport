@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<epx:epx version="1.0" xmlns:epx="https://opensvn.csie.org/epoman/EPX">
+  <epx:portfolio created="2008-05-13T07:58:27.875+02:00" name="Untitled">
+	<epx:information lastedited="2008-05-13T07:58:37.359+02:00">
+	  <epx:username><![CDATA[testname]]></epx:username>
+	  <epx:forename><![CDATA[vorname]]></epx:forename>
+	  <epx:surename><![CDATA[familienname]]></epx:surename>
+	  <epx:description><![CDATA[
+	<p>
+	  asdf
+	</p>
+  ]]>
+	  </epx:description>
+	  <epx:contacts/>
+	  </epx:information>
+	  <epx:categories>
+		<epx:category>
+		  <epx:title><![CDATA[test1]]></epx:title>
+		  <epx:itemref id="file1210658334734N7584"/>
+			<epx:subcategory><epx:title><![CDATA[test2]]></epx:title>
+			<epx:itemref id="note1210658354437N2021"/></epx:subcategory>
+		</epx:category>
+		<epx:category>
+		  <epx:title><![CDATA[test2]]></epx:title>
+		  <epx:itemref id="link1210658363406N2587"/>
+		</epx:category>
+	  </epx:categories>
+	  <epx:items>
+		<epx:item id="file1210658334734N7584" created="2008-05-13T07:58:54.734+02:00" lastedited="2008-05-13T07:59:04.640+02:00" editable="true" visible="true" xsi:type="epx:fileType" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		  <epx:title><![CDATA[test]]></epx:title>
+		  <epx:text><![CDATA[asdfasdf]]></epx:text>
+		  <epx:uri><![CDATA[epx:data/bg.jpg]]></epx:uri>
+		</epx:item>
+		<epx:item id="note1210658354437N2021" created="2008-05-13T07:59:14.437+02:00" lastedited="2008-05-13T07:59:18.609+02:00" editable="true" visible="true" xsi:type="epx:noteType" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		  <epx:title><![CDATA[asdf]]></epx:title>
+		  <epx:text><![CDATA[
+	<p>
+	  asfd
+	</p>
+  ]]></epx:text>
+		</epx:item>
+		<epx:item id="link1210658363406N2587" created="2008-05-13T07:59:23.406+02:00" lastedited="2008-05-13T07:59:27.343+02:00" editable="true" visible="true" xsi:type="epx:linkType" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		<epx:item id="comment1210658371781N9218" created="2008-05-13T07:59:31.781+02:00" lastedited="2008-05-13T07:59:35.828+02:00" visible="true" editable="true" xsi:type="epx:commentType"><epx:item id="comment1210658379687N8603" created="2008-05-13T07:59:39.687+02:00" lastedited="2008-05-13T07:59:43.781+02:00" visible="true" editable="true" xsi:type="epx:commentType">
+		<epx:author/>
+		<epx:title><![CDATA[asdf]]></epx:title>
+		<epx:text><![CDATA[
+	<p>
+	  asfd
+	</p>
+  ]]></epx:text>
+		</epx:item>
+		<epx:author/>
+		<epx:title><![CDATA[asdf]]></epx:title>
+		<epx:text><![CDATA[
+	<p>
+	  asdf
+	</p>
+  ]]></epx:text>
+  </epx:item>
+  <epx:title><![CDATA[asdf]]></epx:title>
+  <epx:description/>
+  <epx:url><![CDATA[http://www.orf.at]]></epx:url>
+  </epx:item>
+  </epx:items>
+</epx:portfolio>
+</epx:epx>

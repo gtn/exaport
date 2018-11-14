@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/exaport/db" VERSION="20150203" COMMENT="XMLDB file for Exabis ePortfolio"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+	<TABLE NAME="block_exaportuser" COMMENT="user in the E-portfolio">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="persinfo_timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="persinfo_externaccess" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="itemsort" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="user_hash" TYPE="char" LENGTH="8" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="user_hash_long" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="oezinstall" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="import_oez_tstamp" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="last time oez update/import"/>
+		<FIELD NAME="view_items_layout" TYPE="char" LENGTH="1000" NOTNULL="false" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		<KEY NAME="user_id" TYPE="foreign-unique" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportcate" COMMENT="categories for e-portfolio items">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="id of the table, please edit me"/>
+		<FIELD NAME="pid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="parent id"/>
+		<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="user id"/>
+		<FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="name"/>
+		<FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="time modified"/>
+		<FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="isoez" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="oez"/>
+		<FIELD NAME="subjid" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="subject id"/>
+		<FIELD NAME="topicid" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="topic id"/>
+		<FIELD NAME="source" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="sourceid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="parent_ids" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent category ids"/>
+		<FIELD NAME="parent_titles" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" COMMENT="list of parent categories, names"/>
+		<FIELD NAME="stid" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="schooltypeid"/>
+		<FIELD NAME="sourcemod" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="modus of category exacomp schooltype=3, subject=5, topic=7"/>
+		<FIELD NAME="name_short" TYPE="char" LENGTH="500" NOTNULL="false" SEQUENCE="false"/>
+	<FIELD NAME="shareall" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="0 - did not share; 1 - shared for all; 2 - shared for groups"/>
+		<FIELD NAME="internshare" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="internal shared"/>
+	<FIELD NAME="structure_shareall" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="for sharing category as structure: 0 - did not share; 1 - shared for all; 2 - shared for groups"/>
+	<FIELD NAME="structure_share" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Sharing category as structure (work with structure_shareall field"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="primary key for bookmark categories"/>
+		<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+		<KEY NAME="pid" TYPE="foreign" FIELDS="pid" REFTABLE="block_exaportcate" REFFIELDS="id"/>
+		<KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportcatshar" COMMENT="information to which categories is shared to other users">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="catid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="userid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportcatgroupshar" COMMENT="information to which categories are shared to groups">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="catid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="groupid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportitem" COMMENT="User items">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="type" TYPE="char" LENGTH="8" NOTNULL="true" DEFAULT="note" SEQUENCE="false"/>
+		<FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="attachment" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="shareall" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="externaccess" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="externcomment" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="sortorder" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="isoez" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="fileurl" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="beispiel_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="exampid" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="if oez, exampleid of source example from exacomp"/>
+		<FIELD NAME="langid" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="for desp"/>
+		<FIELD NAME="beispiel_angabe" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="source" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="sourceid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="iseditable" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="example_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="parentid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+		<KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+		<KEY NAME="categoryid" TYPE="foreign" FIELDS="categoryid" REFTABLE="block_exaportcate" REFFIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportitemshar" COMMENT="block_exaportitemshar table retrofitted from MySQL">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="original" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+		<KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+		<KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
+		<KEY NAME="original" TYPE="foreign" FIELDS="original" REFTABLE="user" REFFIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportitemcomm" COMMENT="comments for the items">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		<FIELD NAME="entry" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+		<KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportview" COMMENT="views">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="name" TYPE="char" LENGTH="1000" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="shareall" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="externaccess" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="externcomment" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="hash" TYPE="char" LENGTH="8" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="langid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="desp language id"/>
+		<FIELD NAME="layout" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="2" SEQUENCE="false"/>
+		<FIELD NAME="sharedemails" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="autofill_artefacts" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="hash" UNIQUE="true" FIELDS="hash"/>
+	  </INDEXES>
+	</TABLE>
+	<TABLE NAME="block_exaportviewblock" COMMENT="Blocks on the view">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="viewid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="positionx" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="positiony" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="type" TYPE="char" LENGTH="1000" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="block_title" TYPE="char" LENGTH="1000" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="firstname" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="lastname" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="email" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="picture" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="contentmedia" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="width" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="height" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		<KEY NAME="view" TYPE="foreign" FIELDS="viewid" REFTABLE="block_exaportview" REFFIELDS="id"/>
+		<KEY NAME="item" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportviewshar" COMMENT="information to which users the view is shared">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="viewid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="userid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		<KEY NAME="view" TYPE="foreign" FIELDS="viewid" REFTABLE="block_exaportview" REFFIELDS="id"/>
+		<KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportviewgroupshar" COMMENT="information to which users the view is shared">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="viewid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="groupid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>	
+	<TABLE NAME="block_exaportresume" COMMENT="users resume">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="courseid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="cover" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="cover of resume"/>
+		<FIELD NAME="interests" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="interests in resume"/>
+		<FIELD NAME="goalspersonal" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="personal goals"/>
+		<FIELD NAME="goalsacademic" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="academic goals"/>
+		<FIELD NAME="goalscareers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="careers goals"/>
+		<FIELD NAME="skillspersonal" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="personal skills"/>
+		<FIELD NAME="skillsacademic" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="academic skills"/>
+		<FIELD NAME="skillscareers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="careers skills"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportresume_certif" COMMENT="users resume certifications">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="date" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of ceritificate"/>
+		<FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="title of certificate"/>
+		<FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="description of certificate"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportresume_edu" COMMENT="users resume educations">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start education"/>
+		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end education"/>
+		<FIELD NAME="institution" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="institution"/>
+		<FIELD NAME="institutionaddress" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="institution address"/>
+		<FIELD NAME="qualtype" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="qualification type"/>
+		<FIELD NAME="qualname" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="qualification name"/>
+		<FIELD NAME="qualdescription" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="qualification description"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportresume_employ" COMMENT="users resume employments">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start work"/>
+		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end work"/>
+		<FIELD NAME="employer" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="employer name"/>
+		<FIELD NAME="employeraddress" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="employer address"/>
+		<FIELD NAME="jobtitle" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="job title"/>
+		<FIELD NAME="positiondescription" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="position description"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportresume_mbrship" COMMENT="users resume memberships">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="startdate" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of start membership"/>
+		<FIELD NAME="enddate" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date of end membership"/>
+		<FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="membership title"/>
+		<FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="membership description"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportresume_public" COMMENT="users resume publications">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="date" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="date of publication"/>
+		<FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="publication title"/>
+		<FIELD NAME="contribution" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="contribution"/>
+		<FIELD NAME="contributiondetails" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="contribution details"/>
+		<FIELD NAME="url" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="url to publication"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportresume_badges" COMMENT="users resume bages">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="resumeid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="badgeid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="sorting" TYPE="int" LENGTH="9" NOTNULL="true" DEFAULT="10" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>		
+	<TABLE NAME="block_exaportcompresume_mm" COMMENT="users resume competence relations">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="compid" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="resumeid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="comptype" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportcat_structshar" COMMENT="block_exaportcat_structshar table retrofitted from MySQL">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="catid" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="userid" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportcat_strgrshar" COMMENT="block_exaportcat_strgrshar table retrofitted from MySQL">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="catid" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="groupid" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+	<TABLE NAME="block_exaportviewemailshar" COMMENT="the view is shared for these emails">
+	  <FIELDS>
+		<FIELD NAME="id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="true"/>
+		<FIELD NAME="viewid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="email" TYPE="char" LENGTH="150" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="hash" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
+	  </FIELDS>
+	  <KEYS>
+		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		<KEY NAME="view" TYPE="foreign" FIELDS="viewid" REFTABLE="block_exaportview" REFFIELDS="id"/>
+	  </KEYS>
+	</TABLE>
+  </TABLES>
+</XMLDB>

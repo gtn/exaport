@@ -1,0 +1,68 @@
+#exaport .view-group {
+    margin-bottom: 25px;
+}
+#exaport .view-group .view-group-content {
+    display: none;
+}
+#exaport .view-group-open .view-group-content {
+    display: block;
+}
+#exaport .view-group-header {
+    text-align: left;
+    padding: 5px;
+    cursor: pointer;
+}
+#exaport .view-group-pic img {
+    vertical-align: middle;
+}
+#exaport .view-group-title {
+    padding-left: 30px;
+    background: url('../pix/group_closed.png') no-repeat 15px 5px;
+}
+#exaport .view-group-open .view-group-title {
+    background-image: url('../pix/group_open.png');
+}
+
+
+#exaport .excomdos_listtable {
+    width: 100%;
+    border: 1px solid #E3DFD4;
+    border-collapse: collapse;
+}
+
+#exaport .excomdos_listtable td, #exaport .excomdos_listtable thead th {
+    padding: 0.5em;
+    border: 1px solid #cacaca;
+    border-collapse: collapse;
+    vertical-align: top;
+}
+
+#exaport .excomdos_listtable thead th {
+    background-color: #E6E6E6;
+    font-size: 0.9rem;
+}
+
+
+#exaport .excomdos_listtable tr:nth-child(2n+2) {
+  background-color: #f9f9f9;
+}
+
+#exaport .excomdos_listtable tr td {
+    vertical-align: middle;
+}
+
+#exaport .excomdos_listtable tr td.excomdos_listlastcol {
+    word-wrap: break-word;.
+    max-width: 300px;
+    min-width: 200px;
+     overflow: hidden;
+     width: 2em;
+}
+
+#exaport .excomdos_subcollast {
+    border-left: none;
+}
+
+#exaport .excomdos_listtable .excomdos_listcomments {
+    padding-right: 1em;
+}

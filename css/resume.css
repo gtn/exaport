@@ -1,0 +1,47 @@
+#exaport .view-group {
+    margin-bottom: 5px;
+}
+#exaport .view-group .view-group-content {
+    display: none;
+}
+#exaport .view-group-open .view-group-content {
+    display: block;
+    margin-bottom: 25px;
+}
+#exaport .view-group-header {
+    text-align: left;
+    padding: 5px;
+    padding-left: 25px;
+    cursor: pointer;
+    background: url('../pix/group_closed.png') no-repeat 10px;
+}
+#exaport .view-group-open .view-group-header {
+    background: url('../pix/group_open.png') no-repeat 10px;
+}
+
+#exaport .view-group-pic img {
+    vertical-align: middle;
+}
+#exaport .view-group-title {
+    padding-left: 30px;
+    background: url('../pix/group_closed.png') no-repeat 15px 5px;
+}
+#exaport .view-group-open .view-group-title {
+    background-image: url('../pix/group_open.png');
+}
+
+#exaport .resumeform  legend, #exaport .resumeform .generaltable {
+    margin-bottom: 5px;
+}
+
+#exaport .resumeform  legend {
+    font-size: 18px;
+}
+
+#exaport .resumeform .generaltable {
+    font-size: 12px;
+}
+
+#exaport .services{
+    text-align: right;
+}

@@ -1,0 +1,702 @@
+<style>
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            border: 1px solid black;
+            padding: 2px 5px;
+        }
+    </style><h2>block_exaport_get_items</h2>
+<div>Returns categories and items for a particular level</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>level</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>id of level/parent category</td>
+</table>
+Returns:<pre>[
+    {
+        "id": "int null (id of item)",
+        "name": "text null (title of item)",
+        "type": "text null (title of item (note,file,link,category))",
+        "parent": "text null (iff item is a cat, parent-cat is returned)",
+        "amount": "int null (iff item is a cat, amount of items in the category, otherwise 0)",
+        "courseid": "int null (id of the course this category belongs to)"
+    },
+    "..."
+]</pre>
+<h2>block_exaport_get_item</h2>
+<div>Returns detailed information for a particular item</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>itemid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>id of item</td>
+</table>
+Returns:<pre>{
+    "id": "int null (id of item)",
+    "name": "text null (title of item)",
+    "type": "text null (type of item (note,file,link,category))",
+    "category": "text null (title of category)",
+    "url": "text null (url)",
+    "intro": "raw null (description of item)",
+    "filename": "text null (title of item)",
+    "file": "url null (file url)",
+    "isimage": "bool null (true if file is image)",
+    "mimetype": "text null (mimetype)",
+    "comments": [
+        {
+            "id": "int null ()",
+            "userid": "int null ()",
+            "userfullname": "text null ()",
+            "timemodified": "int null ()",
+            "entry": "text null ()"
+        },
+        "..."
+    ]
+}</pre>
+<h2>block_exaport_add_item</h2>
+<div>Adds a new item to the users portfolio</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>title</td>
+<td>text</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>item title</td>
+<tr>
+<td>categoryid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>categoryid</td>
+<tr>
+<td>url</td>
+<td>url</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>url</td>
+<tr>
+<td>intro</td>
+<td>raw</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>introduction</td>
+<tr>
+<td>type</td>
+<td>text</td>
+<td>null</td>
+<td>optional</td>
+<td>default: string(0) ""
+</td>
+<td>type of item (note,file,link)</td>
+<tr>
+<td>fileitemid</td>
+<td>int</td>
+<td>null</td>
+<td>optional</td>
+<td>default: NULL
+</td>
+<td>itemid for draft-area files; for "private" files is ignored</td>
+<tr>
+<td>filename</td>
+<td>text</td>
+<td>null</td>
+<td>optional</td>
+<td>default: string(0) ""
+</td>
+<td>deprecated (was used for upload into private files)</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_update_item</h2>
+<div>Edit an item from the users portfolio</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>item id</td>
+<tr>
+<td>title</td>
+<td>text</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>item title</td>
+<tr>
+<td>url</td>
+<td>text</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>url</td>
+<tr>
+<td>intro</td>
+<td>raw</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>introduction</td>
+<tr>
+<td>type</td>
+<td>text</td>
+<td>null</td>
+<td>optional</td>
+<td>default: string(0) ""
+</td>
+<td>type of item (note,file,link)</td>
+<tr>
+<td>fileitemid</td>
+<td>int</td>
+<td>null</td>
+<td>optional</td>
+<td>default: NULL
+</td>
+<td>itemid for draft-area files; for "private" files is ignored, use '0' to delete the file</td>
+<tr>
+<td>filename</td>
+<td>text</td>
+<td>null</td>
+<td>optional</td>
+<td>default: string(0) ""
+</td>
+<td>deprecated (was used for upload into private files)</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_delete_item</h2>
+<div>Delete an item from the users portfolio</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>item id</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_add_item_comment</h2>
+<div>Add a comment to an item</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>itemid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td></td>
+<tr>
+<td>entry</td>
+<td>raw</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td></td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_list_competencies</h2>
+<div>List all available competencies</div>
+<div>type: read</div>
+Params: <table>
+</table>
+Returns:<pre>[
+    {
+        "id": "int null (id of subject)",
+        "name": "text null (title of subject)",
+        "topics": [
+            {
+                "id": "int null (id of topic)",
+                "name": "text null (title of topic)",
+                "descriptors": [
+                    {
+                        "id": "int null (id of descriptor)",
+                        "name": "text null (name of descriptor)"
+                    },
+                    "..."
+                ]
+            },
+            "..."
+        ]
+    },
+    "..."
+]</pre>
+<h2>block_exaport_set_item_competence</h2>
+<div>assign a competence to an item</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>itemid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>item id</td>
+<tr>
+<td>descriptorid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>descriptor id</td>
+<tr>
+<td>val</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>1 to assign, 0 to unassign</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_get_views</h2>
+<div>Return available views</div>
+<div>type: read</div>
+Params: <table>
+</table>
+Returns:<pre>[
+    {
+        "id": "int null (id of view)",
+        "name": "text null (title of view)",
+        "description": "raw null (description of view)"
+    },
+    "..."
+]</pre>
+<h2>block_exaport_get_view</h2>
+<div>Return detailed view</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+</table>
+Returns:<pre>{
+    "id": "int null (id of view)",
+    "name": "text null (title of view)",
+    "description": "raw null (description of view)",
+    "items": [
+        {
+            "id": "int null (id of item)",
+            "name": "text null (title of item)",
+            "type": "text null (title of item (note,file,link,category))"
+        },
+        "..."
+    ]
+}</pre>
+<h2>block_exaport_add_view</h2>
+<div>Add a new view to the users portfolio</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>name</td>
+<td>text</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view title</td>
+<tr>
+<td>description</td>
+<td>text</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>description</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_update_view</h2>
+<div>Edit a view from the users portfolio</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+<tr>
+<td>name</td>
+<td>text</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view title</td>
+<tr>
+<td>description</td>
+<td>text</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>description</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_delete_view</h2>
+<div>Delete a view from the users portfolio</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_get_all_items</h2>
+<div>Return all items, independent from level</div>
+<div>type: read</div>
+Params: <table>
+</table>
+Returns:<pre>[
+    {
+        "id": "int null (id of category)",
+        "pid": "text null (parentid)",
+        "name": "text null (title of category)",
+        "items": [
+            {
+                "id": "int null (id of item)",
+                "name": "text null (title of item)",
+                "type": "text null (type of item (note,file,link,category))",
+                "url": "text null (url)",
+                "intro": "raw null (description of item)",
+                "filename": "text null (title of item)",
+                "file": "url null (file url)",
+                "isimage": "bool null (true if file is image)",
+                "mimetype": "text null (mimetype)"
+            },
+            "..."
+        ]
+    },
+    "..."
+]</pre>
+<h2>block_exaport_add_view_item</h2>
+<div>Add item to a view</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>viewid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+<tr>
+<td>itemid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>item id</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_delete_view_item</h2>
+<div>Remove item from a view</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>viewid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+<tr>
+<td>itemid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>item id</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_view_grant_external_access</h2>
+<div>Grant external access to a view</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+<tr>
+<td>val</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>1 for check, 0 for uncheck</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_view_get_available_users</h2>
+<div>Get users who can get access</div>
+<div>type: read</div>
+Params: <table>
+</table>
+Returns:<pre>[
+    {
+        "id": "int null (id of user)",
+        "firstname": "text null (firstname of user)",
+        "lastname": "text null (lastname of user)"
+    },
+    "..."
+]</pre>
+<h2>block_exaport_view_grant_internal_access_all</h2>
+<div>Grant internal access to a view to all users</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+<tr>
+<td>val</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>1 for check, 0 for uncheck</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_view_grant_internal_access</h2>
+<div>Grant internal access to a view to one user</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>viewid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+<tr>
+<td>userid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>user id</td>
+<tr>
+<td>val</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>1 for check, 0 for uncheck</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_get_category</h2>
+<div>Get category infor</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>categoryid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>cat id</td>
+</table>
+Returns:<pre>{
+    "name": "text null (title of category)",
+    "items": "int null (amount of category items)"
+}</pre>
+<h2>block_exaport_delete_category</h2>
+<div>Delete category</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>categoryid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>cat id</td>
+</table>
+Returns:<pre>{
+    "success": "bool null (status)"
+}</pre>
+<h2>block_exaport_get_competencies_by_item</h2>
+<div>Get competence ids for a ePortfolio item</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>itemid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>item id</td>
+</table>
+Returns:<pre>[
+    {
+        "competenceid": "int null (id of competence)"
+    },
+    "..."
+]</pre>
+<h2>block_exaport_get_users_by_view</h2>
+<div>Get view users</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>viewid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>view id</td>
+</table>
+Returns:<pre>[
+    {
+        "userid": "int null (id of user)"
+    },
+    "..."
+]</pre>
+<h2>block_exaport_export_file_to_externalportfolio</h2>
+<div>Export file to external portfolio</div>
+<div>type: write</div>
+Params: <table>
+<tr>
+<td>component</td>
+<td>raw</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>filestorage - component</td>
+<tr>
+<td>filearea</td>
+<td>raw</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>filestorage - filearea</td>
+<tr>
+<td>filename</td>
+<td>raw</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>filestorage - filename</td>
+<tr>
+<td>filepath</td>
+<td>raw</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>filestorage - filepath</td>
+<tr>
+<td>itemid</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>filestorage - itemid</td>
+</table>
+Returns:<pre>{
+    "success": "text null (status)",
+    "linktofile": "text null (link to file)"
+}</pre>
+<h2>block_exaport_login</h2>
+<div>webservice called through token.php</div>
+<div>type: read</div>
+Params: <table>
+<tr>
+<td>app</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>app accessing this service (eg. dakora)</td>
+<tr>
+<td>app_version</td>
+<td>int</td>
+<td>null</td>
+<td>required</td>
+<td></td>
+<td>version of the app (eg. 4.6.0)</td>
+<tr>
+<td>services</td>
+<td>int</td>
+<td>null</td>
+<td>optional</td>
+<td>default: string(33) "moodle_mobile_app,exaportservices"
+</td>
+<td>wanted webservice tokens (eg. exacomp,exaport)</td>
+</table>
+Returns:<pre>{
+    "user": {
+        "id": "int null (ID of the user)",
+        "username": "raw null (The username)",
+        "firstname": "notags null (The first name(s) of the user)",
+        "lastname": "notags null (The family name of the user)",
+        "fullname": "notags null (The fullname of the user)",
+        "email": "text null (An email address - allow email as root@localhost)",
+        "firstaccess": "int null (first access to the site (0 if never))",
+        "lastaccess": "int null (last access to the site (0 if never))",
+        "auth": "plugin null (Auth plugins include manual, ldap, imap, etc)",
+        "confirmed": "int null (Active user: 1 if confirmed, 0 otherwise)",
+        "lang": "safedir null (Language code such as \"en\", must exist on server)",
+        "url": "url null (URL of the user)",
+        "profileimageurlsmall": "url null (User image profile URL - small version)",
+        "profileimageurl": "url null (User image profile URL - big version)"
+    },
+    "config": [],
+    "tokens": [
+        {
+            "service": "text null (name of service)",
+            "token": "text null (token of the service)"
+        },
+        "... requested tokens ..."
+    ]
+}</pre>

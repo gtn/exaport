@@ -1,0 +1,137 @@
+#exaport #view .view-column {
+    padding-left: 10px;
+}
+
+#exaport #view .view-column-1 {
+    padding-left: 0;
+}
+
+#exaport #view .view-personal-information {
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+#exaport #view .view-header {
+    padding: 14px 8px 3px 8px;
+    margin: 0 0 10px 0;
+}
+
+#exaport #view .view-text {
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    margin-bottom: 10px;
+}
+
+#exaport #view .view-item {
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    margin-bottom: 10px;
+    display: block;
+    cursor: pointer;
+    overflow: hidden;
+    color: #000;
+    text-decoration: none;
+}
+
+#exaport #view .view-item:hover {
+    background: #eee;
+}
+
+#exaport #view .view-item-header {
+    background: url(../pix/bookmarksnotes.png) 0 2px no-repeat;
+    padding-left: 20px;
+    display: block;
+}
+
+#exaport #view .view-item-type-file .view-item-header {
+    background-image: url(../pix/bookmarksfiles.png);
+}
+
+#exaport #view .view-item-type-link .view-item-header {
+    background-image: url(../pix/bookmarkslinks.png);
+}
+
+#exaport #view .view-item-text {
+    padding: 4px 0 0 0;
+    display: block;
+}
+
+#exaport #view .view-item-link {
+    display: block;
+    padding: 4px 8px;
+    text-align: right;
+    font-size: 12px;
+    clear: both;
+}
+
+#exaport #view .view-item:hover .view-item-link {
+    text-decoration: underline;
+}
+
+#exaport #view .view-item-image {
+    float: right;
+    position: relative;
+}
+#exaport #view .view-item-image img {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+/* layouts */
+#exaport .table_layout {
+    width: 100%;
+}
+
+#exaport .table_layout td {
+    vertical-align: top;
+}
+
+#exaport .layout1 td {
+    width: 100%;
+}
+
+#exaport .layout2 td {
+    width: 50%;
+}
+
+#exaport .layout3 .td1 {
+    width: 67%;
+}
+
+#exaport .layout4 .td1 {
+    width: 33%;
+}
+
+#exaport .layout5 td {
+    width: 33%;
+}
+
+#exaport .layout6 .td1, #exaport .layout6 .td3 {
+    width: 25%;
+}
+
+#exaport .layout7 .td1, #exaport .layout7 .td3 {
+    width: 15%;
+}
+
+#exaport .layout8 td {
+    width: 25%;
+}
+
+#exaport .layout9 .td1, #exaport .layout9 .td4 {
+    width: 20%;
+}
+
+#exaport .layout9 .td2, #exaport .layout9 .td3 {
+    width: 30%;
+}
+
+#exaport .layout10 td {
+    width: 20%;
+}
+
+#exaport #view .view-text {
+    overflow: hidden;
+}

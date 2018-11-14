@@ -1,0 +1,64 @@
+#exaport .block_eportfolio_externalview {
+    font-style: italic;
+}
+
+#exaport .block_eportfolio_commentauthor {
+    font-weight: bold;
+}
+
+#exaport .block_eportfolio_bold {
+    font-weight: bold;
+}
+
+#exaport .block_eportfolio_timemodified {
+    font-style: italic;
+    font-size: 10px;
+}
+
+#exaport .block_eportfolio_italic {
+    font-style: italic;
+    font-size: 10px;
+}
+
+#exaport .block_eportfolio_center {
+    text-align: center;
+}
+
+#exaport .block_eportfolio_centerw {
+    text-align: center;
+    width: 100%;
+}
+
+#exaport .block_eportfolio_export {
+    text-align: left;
+    width: 300px;
+    margin: 2em auto;
+}
+
+#exaport .block_eportfolio_bmukk {
+    margin: 30px 10px 10px 10px;
+    float: left;
+}
+
+#exaport .block_eportfolio_exabis {
+    margin: 30px 10px 10px 10px;
+    float: right;
+}
+
+#exaport .block_eportfolio_clear {
+    clear: both;
+}
+
+#exaport .block_eportfolio_categories {
+    text-align: left;
+    width: 300px;
+    margin: 2em auto;
+}
+
+#exaport .block_eportfolio_italic {
+    text-style: italic;
+}
+
+#exaport .block_eportfolio_fieldsetborder {
+    border: 1px solid;
+}

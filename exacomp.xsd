@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:import namespace="http://www.w3.org/2001/XMLSchema" />
+
+	<xs:complexType name="skillType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+	</xs:complexType>
+	<!-- skillType done -->
+	<xs:complexType name="taxonomyType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+			<xs:element name="children" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="taxonomy" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+	</xs:complexType>
+
+	<xs:complexType name="niveautextType">
+		<xs:sequence>
+			<xs:element ref="title" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+		<xs:attribute name="skillid" type="xs:integer" />
+	</xs:complexType>
+
+	<xs:complexType name="niveauType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="niveautext" minOccurs="0" maxOccurs="1" />
+			<xs:element name="children" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="niveau" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+
+	</xs:complexType>
+<!-- niveautexte fehlen -->
+	<xs:complexType name="exampleType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="titleshort" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="description" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="timeframe" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="task" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="solution" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="attachment" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="completefile" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="resources" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="tips" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="externalurl" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="externalsolution" minOccurs="0"
+				maxOccurs="1" />
+			<xs:element ref="externaltask" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+			<!-- edugroup fields how to handle them?-->
+			<xs:element ref="image" minOccurs="0" maxOccurs="1" />
+			<xs:element name="authors" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="author" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="levels" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="level" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element ref="metalink" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="packagelink" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="restorelink" minOccurs="0" maxOccurs="1" />
+			<xs:element name="keywords" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="keyword" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+				<!--tags in database-->
+			</xs:element>
+
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+		<xs:attribute name="taxid" type="xs:integer" />
+	</xs:complexType>
+
+	<xs:complexType name="descriptorType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="description" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="additionalinfo" minOccurs="0" maxOccurs="1" />
+			<xs:element name="children" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="descriptor" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="examples" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="exampleid" minOccurs="1" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:attribute name="id" type="xs:integer" />
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+		<xs:attribute name="skillid" type="xs:integer" />
+		<xs:attribute name="niveauid" type="xs:integer" />
+	</xs:complexType>
+<!-- description und additionalinfo..was ist das? -->
+	<xs:complexType name="topicType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="titleshort" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="description" minOccurs="0" maxOccurs="1" />
+			<xs:element name="children" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="topic" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="descriptors">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="descriptorid" minOccurs="1"
+							maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:attribute name="id" type="xs:integer" />
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<!-- Optional elements for LIS -->
+			<xs:element ref="requirements" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="benefit" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="knowledgecheck" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="Ataxonomy" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="Btaxonomy" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="Ctaxonomy" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="Dtaxonomy" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="Etaxonomy" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="Ftaxonomy" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="cat" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+	</xs:complexType>
+<!-- wie children? -->
+	<xs:complexType name="subjectType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="titleshort" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+			<xs:element name="topics">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="topic" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<!-- Optional elements for LIS -->
+			<xs:element ref="cat" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="number" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+	</xs:complexType>
+<!-- subjectType done -->
+	<xs:complexType name="schooltypeType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+			<xs:element name="subjects">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="subject" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<!-- Optional ePop element -->
+			<xs:element ref="isoez" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+	</xs:complexType>
+<!-- schooltype done -->
+	<xs:complexType name="edulevelType">
+		<xs:sequence>
+			<xs:element ref="title" />
+			<xs:element ref="sorting" minOccurs="0" maxOccurs="1" />
+			<xs:element name="schooltypes">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="schooltype" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" />
+	</xs:complexType>
+<!-- edulevelType done -->
+	<xs:complexType name="exacompType">
+		<xs:sequence>
+			<xs:element name="skills">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="skill" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="niveaus">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="niveau" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="taxonomies">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="taxonomy" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="examples">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="example" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="descriptors">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="descriptor" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="edulevels">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="edulevel" minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- GLOBAL TYPE DEFINITIONS -->
+
+	<xs:element name="edulevel" type="edulevelType" />
+	<xs:element name="schooltype" type="schooltypeType" />
+	<xs:element name="subject" type="subjectType" />
+	<xs:element name="topic" type="topicType" />
+	<xs:element name="descriptor" type="descriptorType" />
+	<xs:element name="example" type="exampleType" />
+	<xs:element name="niveau" type="niveauType" />
+	<xs:element name="niveautext" type="niveautextType" />
+	<xs:element name="taxonomy" type="taxonomyType" />
+	<xs:element name="skill" type="skillType" />
+
+	<xs:element name="title" type="xs:string" />
+	<xs:element name="titleshort" type="xs:string" />
+	<xs:element name="description" type="xs:string" />
+	<xs:element name="image" type="xs:string" />
+	<xs:element name="author" type="xs:string" />
+	<xs:element name="keyword" type="xs:string" />
+	<xs:element name="metalink" type="xs:string" />
+	<xs:element name="packagelink" type="xs:string" />
+	<xs:element name="restorelink" type="xs:string" />
+	<xs:element name="task" type="xs:string" />
+	<xs:element name="solution" type="xs:string" />
+	<xs:element name="attachment" type="xs:string" />
+	<xs:element name="completefile" type="xs:string" />
+	<xs:element name="timeframe" type="xs:string" />
+	<xs:element name="tips" type="xs:string" />
+	<xs:element name="externalurl" type="xs:string" />
+	<xs:element name="externalsolution" type="xs:string" />
+	<xs:element name="externaltask" type="xs:string" />
+	<xs:element name="additionalinfo" type="xs:string" />
+	<xs:element name="resources" type="xs:string" />
+	<xs:element name="sorting" type="xs:integer" />
+
+	<xs:element name="level">
+		<xs:simpleType>
+			<xs:restriction base="xs:integer">
+				<xs:minInclusive value="1" />
+				<xs:maxInclusive value="13" />
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<!-- Optional elements for LIS or EPOP -->
+
+	<xs:element name="requirements" type="xs:string" />
+	<xs:element name="benefit" type="xs:string" />
+	<xs:element name="knowledgecheck" type="xs:string" />
+	<xs:element name="Ataxonomy" type="xs:string" />
+	<xs:element name="Btaxonomy" type="xs:string" />
+	<xs:element name="Ctaxonomy" type="xs:string" />
+	<xs:element name="Dtaxonomy" type="xs:string" />
+	<xs:element name="Etaxonomy" type="xs:string" />
+	<xs:element name="Ftaxonomy" type="xs:string" />
+	<xs:element name="cat" type="xs:integer" />
+	<xs:element name="number" type="xs:integer" />
+	<xs:element name="isoez" type="xs:integer" />
+
+	<!-- KEYS -->
+
+	<xs:element name="skillid" type="xs:integer" />
+	<xs:element name="taxid" type="xs:integer" />
+	<xs:element name="niveauid" type="xs:integer" />
+
+	<xs:element name="exacomp" type="exacompType">
+		<xs:key name="descriptorKey">
+			<xs:selector xpath=".//descriptor" />
+			<xs:field xpath="@id"></xs:field>
+		</xs:key>
+		<xs:key name="exampleKey">
+			<xs:selector xpath=".//example" />
+			<xs:field xpath="@id" />
+		</xs:key>
+		<xs:key name="niveauKey">
+			<xs:selector xpath=".//niveau" />
+			<xs:field xpath="@id" />
+		</xs:key>
+		<xs:key name="skillKey">
+			<xs:selector xpath=".//skill" />
+			<xs:field xpath="@id" />
+		</xs:key>
+		<xs:key name="taxonomyKey">
+			<xs:selector xpath=".//taxonomy" />
+			<xs:field xpath="@id" />
+		</xs:key>
+		<xs:keyref name="TopicRefToDescriptorKey" refer="descriptorKey">
+			<xs:selector xpath=".//topic/descriptors/descriptorid" />
+			<xs:field xpath="@id" />
+		</xs:keyref>
+		<xs:keyref name="NiveauRefToskillKey" refer="skillKey">
+			<xs:selector xpath=".//niveau" />
+			<xs:field xpath="@skillid" />
+		</xs:keyref>
+		<xs:keyref name="DescriptorRefToExampleKey" refer="exampleKey">
+			<xs:selector xpath=".//descriptor/examples/exampleid" />
+			<xs:field xpath="@id" />
+		</xs:keyref>
+		<xs:keyref name="DescriptorRefToskillKey" refer="skillKey">
+			<xs:selector xpath=".//descriptor" />
+			<xs:field xpath="@skillid" />
+		</xs:keyref>
+		<xs:keyref name="DescriptorRefToniveauKey" refer="niveauKey">
+			<xs:selector xpath=".//descriptor" />
+			<xs:field xpath="@niveauid" />
+		</xs:keyref>
+		<xs:keyref name="ExampleRefTotaxonomyKey" refer="taxonomyKey">
+			<xs:selector xpath=".//example" />
+			<xs:field xpath="@taxid" />
+		</xs:keyref>
+	</xs:element>
+</xs:schema>

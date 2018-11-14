@@ -24,7 +24,7 @@
 (function (e) {
     "use strict";
     function r(t, n) {
-        this.opts = e.extend({handleWheel: !0, handleScrollbar: !0, handleKeys: !0, scrollEventKeys: [32, 33, 34, 35, 36, 37, 38, 39, 40]}, n);
+        this.opts = e.extend({handleWheel: !0, handleScrollbar: !0, handleKeys: !0, scrollEventKeys: [/*32, */33, 34, 35, 36, 37, 38, 39, 40]}, n);
         this.$container = t;
         this.$document = e(document);
         this.lockToScrollPos = [0, 0];

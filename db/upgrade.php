@@ -205,11 +205,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
             }
 
             $fs->create_file_from_storedfile(array(
-                    'contextid' => $matches['contextid'],
-                    'component' => 'block_exaport',
-                    'filearea' => 'personal_information',
-                    'itemid' => $GLOBALS['test_for_userid'],
-                    'filename' => $file->get_filename()
+                'contextid' => $matches['contextid'],
+                'component' => 'block_exaport',
+                'filearea' => 'personal_information',
+                'itemid' => $GLOBALS['test_for_userid'],
+                'filename' => $file->get_filename()
             ), $file);
 
             return '@@PLUGINFILE@@/';
@@ -406,7 +406,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // Define field view_items_layout to be added to block_exaportuser.
         $table = new xmldb_table('block_exaportitem');
         $field = new xmldb_field('example_url');
-        $field->set_attributes(XMLDB_TYPE_CHAR, '255', null, null, null, null, null);
+                $field->set_attributes(XMLDB_TYPE_CHAR, '255', null, null, null, null, null);
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
@@ -671,7 +671,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-        // Define table block_exaportresume_public to be created.
+         // Define table block_exaportresume_public to be created.
         $table = new xmldb_table('block_exaportresume_public');
         // Adding fields to table block_exaportresume_public.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);

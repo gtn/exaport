@@ -28,6 +28,7 @@ $serverurl = 'http://localhost/moodle271/login/token.php?username=schueler&passw
 $resp = $curl->get($serverurl);
 $resp = json_decode($resp)->token;
 $token = $resp;
+// print_r($token);
 
 $functionname = 'block_exaport_get_items';
 
@@ -39,6 +40,7 @@ $serverurl = $domainname.'/webservice/rest/server.php'.'?wstoken='.$token.'&wsfu
 require_once('./curl.php');
 $curl = new curl;
 $resp = $curl->post($serverurl.$restformat, $params);
+// print_r($resp);
 echo "
 
 
@@ -53,6 +55,7 @@ $serverurl = $domainname.'/webservice/rest/server.php'.'?wstoken='.$token.'&wsfu
 require_once('./curl.php');
 $curl = new curl;
 $resp = $curl->post($serverurl.$restformat, $params);
+// print_r($resp);
 /*
 $functionname = 'block_exaport_add_item';
 

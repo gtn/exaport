@@ -48,7 +48,7 @@ if (!$sort && $userpreferences && isset($userpreferences->itemsort)) {
     $sort = $userpreferences->itemsort;
 }
 
-if ($type != 'shared' && $type != 'sharedstudent') {
+if ($type != 'shared') {
     $type = 'mine';
 }
 
@@ -76,91 +76,7 @@ $sqlsort = block_exaport_item_sort_to_sql($parsedsort, false);
 
 block_exaport_setup_default_categories();
 
-if ($type == 'sharedstudent') {
-    // Students for Teacher
-    if (block_exaport_user_can_see_artifacts_of_students()) {
-        $students = block_exaport_get_students_for_teacher();
-    } else {
-        throw new moodle_exception('not allowed');
-    }
-
-    $selecteduser = $userid && isset($students[$userid]) ? $students[$userid] : null;
-
-    if (!$selecteduser) {
-        throw new moodle_exception('wrong userid');
-    } else {
-        // Read all categories.
-        $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
-        $categories = $DB->get_records_sql("
-                            SELECT
-                                {$categorycolumns}
-                                , COUNT(i.id) AS item_cnt
-                            FROM {block_exaportcate} c
-                            LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND ".block_exaport_get_item_where()."
-                            WHERE c.userid = ?
-                            GROUP BY
-                                {$categorycolumns}
-                            ORDER BY c.name ASC
-                        ", array($selecteduser->id));
-
-        foreach ($categories as $category) {
-            $category->url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&userid='.$selecteduser->id.
-                                            '&type=sharedstudent&categoryid='.$category->id;
-            $category->icon = block_exaport_get_category_icon($category);
-        }
-
-        // Build a tree according to parent.
-        $categoriesbyparent = array();
-        foreach ($categories as $category) {
-            if (!isset($categoriesbyparent[$category->pid])) {
-                $categoriesbyparent[$category->pid] = array();
-            }
-            $categoriesbyparent[$category->pid][] = $category;
-        }
-
-        // The main root category for student.
-        $rootcategory = block_exaport_get_root_category($selecteduser->id);
-        $rootcategory->url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$COURSE->id.
-                                                    '&type=sharedstudent&userid='.$selecteduser->id;
-        $categories[0] = $rootcategory;
-
-        if (isset($categories[$categoryid])) {
-            $currentcategory = $categories[$categoryid];
-        } else {
-            $currentcategory = $rootcategory;
-        }
-
-        // What's the parent category?.
-        if ($currentcategory->id && isset($categories[$currentcategory->pid])) {
-            $parentcategory = $categories[$currentcategory->pid];
-        } else {
-            // Link to shared categories
-            $parentcategory = (object) [
-                    'id' => 0,
-                    'url' => new moodle_url('shared_categories.php', ['courseid' => $COURSE->id, 'sort' => 'mystudents']),
-                    'name' => '',
-            ];
-        }
-
-        $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
-
-        // Common items.
-        $items = $DB->get_records_sql("
-            SELECT i.*, COUNT(com.id) As comments
-            FROM {block_exaportitem} i
-            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE i.userid = ? AND i.categoryid=?
-                AND ".block_exaport_get_item_where().
-                " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
-            i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-            i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-            i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-            i.iseditable, i.example_url, i.parentid
-            $sqlsort
-        ", [$selecteduser->id, $currentcategory->id]);
-    }
-
-} else if ($type == 'shared') {
+if ($type == 'shared') {
     $rootcategory = (object) [
             'id' => 0,
             'pid' => 0,
@@ -338,7 +254,7 @@ if ($type == 'sharedstudent') {
 
 $PAGE->set_url($currentcategory->url);
 
-block_exaport_print_header($type == 'shared' || $type == 'sharedstudent' ? 'shared_categories' : "myportfolio");
+block_exaport_print_header($type == 'shared' ? 'shared_categories' : "myportfolio");
 
 echo "<div class='box generalbox'>";
 if (block_exaport_course_has_desp()) {
@@ -431,7 +347,7 @@ echo '<div class="excomdos_cat">';
 echo block_exaport_get_string('current_category').': ';
 
 echo '<b>';
-if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser) {
+if ($type == 'shared' && $selecteduser) {
     echo $selecteduser->name.' / ';
 }
 echo $currentcategory->name;
@@ -638,7 +554,7 @@ if ($layout == 'details') {
     foreach ($subcategories as $category) {
         ?>
         <div class="excomdos_tile <?php
-        if ($type == 'shared' || $type == 'sharedstudent') {
+        if ($type == 'shared') {
             echo 'excomdos_tile_fixed';
         }
         ?> excomdos_tile_category id-<?php echo $category->id; ?>">
@@ -656,7 +572,7 @@ if ($layout == 'details') {
                     <?php
                     if ($category->id == -1) {
                         $tempvar = 1; // For code checker.
-                    } else if ($type == 'shared' || $type == 'sharedstudent') {
+                    } else if ($type == 'shared') {
                         ?>
                         <img src="pix/noteitshared.gif" alt="file" title="shared to other users">
                         <?php

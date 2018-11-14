@@ -331,7 +331,8 @@ $string['desp_explainingnote'] = 'Notes. Aquestes notes es poden compartir amb e
 $string['desp_explaininglink'] = 'Enllaços. Aquests enllaços es poden compartir amb els membres del curs autoritzats.';
 $string['desp_explainingfile'] = 'Arxius. Aquests arxius es poden compartir amb els membres del curs autoritzats.';
 $string['steckbrief'] = 'Perfil';
-$string['desp_categories'] = "Històries, jocs de rol, assaigs, collages
+$string['desp_categories'] = "
+    Històries, jocs de rol, assaigs, collages
     currículum
     crítiques de produccions teatrals, exposicions
     memòries de projecte i reflexions

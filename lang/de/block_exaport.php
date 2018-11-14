@@ -35,7 +35,6 @@ $string['exaport:shareintern'] = 'Internal sharing of views';
 $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
-$string['exaport:viewartifactsfromstudents'] = '';
 $string['new'] = 'Neu';
 $string['addbookmark'] = 'Bookmark hinzufügen';
 $string['addcategory'] = 'Kategorie hinzufügen';
@@ -412,12 +411,6 @@ $string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die ein Ben
 $string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 $string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';
-$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Trainer/in hat Zugriff auf alle Artefakte eigene Schüler/innen';
-$string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Vertrauenswürdige Trainer/innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der Teilnehmer/innen für jede/n als vertrauenswürdig definierte/n Trainer/in generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/innen.';
-$string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen';
-$string['block_exaport_confirm_profilefield_create'] = 'Wollen Sie wirklich das Profilfeld für vertrauenswürdige Trainer erstellen?';
-$string['block_exaport_confirm_profilefield_exists'] = 'Das erforderliche Feld existiert bereits';
-$string['block_exaport_profilefield_created'] = 'Das erforderliche Feld wurde hinzugefügt';
 
 // === Resume.
 $string['resume_template_newresume'] = '<h2>Mein Lebenslauf</h2>';
@@ -521,10 +514,6 @@ $string['category_up'] = 'übergeordnete Kategorie';
 $string['supported'] = 'Projekt wurde unterstützt von';
 $string['developed'] = 'entwickelt von';
 $string['myfilearea'] = 'Mein Dateibereich';
-$string['show_mystudents'] = 'Meine Teilnehmer/innen';
-$string['show_sharedbyuser'] = 'von Teilnehmer/innen geteilt';
-$string['enrolled_courses'] = 'mit folgenden Kursen verknüpft';
-$string['browseportfolio'] = 'Inhalt anzeigen';
 
 // === Language categories.
 

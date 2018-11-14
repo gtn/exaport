@@ -52,6 +52,9 @@ class block_exaport_external extends external_api {
 
         $conditions = array("pid" => $level, "userid" => $USER->id);
         $categories = $DB->get_records("block_exaportcate", $conditions);
+        
+        //RW add courseid if there is one:
+        //better: when creating 
 
         $results = array();
 
@@ -61,6 +64,7 @@ class block_exaport_external extends external_api {
             $result->name = $category->name;
             $result->type = "category";
             $result->parent = $category->pid;
+            $result->courseid = $category->courseid ? $category->courseid : 0;
 
             $result->amount = self::block_exaport_count_items($category->id, 0);
 
@@ -69,6 +73,9 @@ class block_exaport_external extends external_api {
 
         $items = $DB->get_records("block_exaportitem", array("userid" => $USER->id, "categoryid" => $level), '',
                 'id,name,type, 0 as parent, 0 as amount');
+//         foreach($items as $item){ //to avoid a missing required key in single structure error
+//             $item->courseid = 0;
+//         }
         $results = array_merge($results, $items);
 
         return $results;
@@ -89,6 +96,7 @@ class block_exaport_external extends external_api {
                                 'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned'),
                                 'amount' => new external_value(PARAM_INT,
                                         'iff item is a cat, amount of items in the category, otherwise 0'),
+                                'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to',VALUE_OPTIONAL)
                         )
                 )
         );

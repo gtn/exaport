@@ -84,6 +84,10 @@ return [
                 'Allow competences',
                 'Allow competences',
         ],
+        'exaport:viewartifactsfromstudents' => [
+                '',
+                'Can see portfolio artifacts of own students',
+        ],
         'new' => [
                 'Neu',
                 'New',
@@ -1466,6 +1470,30 @@ return [
                 'Alle globalen Freigaben "shareall" löschen?',
                 'Delete all shareall?',
         ],
+        'block_exaport_teachercanseeartifactsofstudents_head' => [
+                'Trainer/in hat Zugriff auf alle Artefakte eigene Schüler/innen',
+                'Teacher can see ALL artifacts of own students',
+        ],
+        'block_exaport_teachercanseeartifactsofstudents_body' => [
+                'Vertrauenswürdige Trainer/innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der Teilnehmer/innen für jede/n als vertrauenswürdig definierte/n Trainer/in generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/innen.',
+                'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
+        ],
+        'block_exaport_teachercanseeartifactsofstudents_configurationlink' => [
+                'erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen',
+                'Add required user profile field',
+        ],
+        'block_exaport_confirm_profilefield_create' => [
+                'Wollen Sie wirklich das Profilfeld für vertrauenswürdige Trainer erstellen?',
+                'Do you really want to add the required profile field?',
+        ],
+        'block_exaport_confirm_profilefield_exists' => [
+                'Das erforderliche Feld existiert bereits',
+                'Profile field for trusted teacher already exists',
+        ],
+        'block_exaport_profilefield_created' => [
+                'Das erforderliche Feld wurde hinzugefügt',
+                'Profile field for trusted teacher was added',
+        ],
 
         // === Resume.
         'resume_template_newresume' => [
@@ -1844,6 +1872,22 @@ return [
         'myfilearea' => [
                 'Mein Dateibereich',
                 'My file area',
+        ],
+        'show_mystudents' => [
+                'Meine Teilnehmer/innen',
+                'My students',
+        ],
+        'show_sharedbyuser' => [
+                'von Teilnehmer/innen geteilt',
+                'Shared by users',
+        ],
+        'enrolled_courses' => [
+                'mit folgenden Kursen verknüpft',
+                'Related with courses',
+        ],
+        'browseportfolio' => [
+                'Inhalt anzeigen',
+                'Browse this portfolio',
         ],
 
         // === Language categories.

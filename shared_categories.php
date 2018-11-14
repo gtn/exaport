@@ -23,6 +23,10 @@ $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
 $action = optional_param('action', 'list', PARAM_TEXT);
 
+if ($sort == 'mystudents' && !block_exaport_user_can_see_artifacts_of_students()) {
+    $sort = 'user';
+}
+
 require_login($courseid);
 
 $context = context_system::instance();
@@ -31,7 +35,9 @@ require_capability('block/exaport:use', $context);
 $url = '/blocks/exaport/shared_categories.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
-$parsedsort = block_exaport_parse_sort($sort, array('user', 'category'));
+block_exaport_init_js_css();
+
+$parsedsort = block_exaport_parse_sort($sort, array('user', 'category', 'mystudents'));
 if ($parsedsort[0] == 'category') {
     $sqlsort = " ORDER BY c.name, u.lastname, u.firstname";
     if (strcmp($CFG->dbtype, "sqlsrv") == 0) {
@@ -96,26 +102,41 @@ function exaport_print_structures($categories, $parsedsort) {
     );
 
     if (isset($courses[$COURSE->id])) {
-        $useridsinthiscourse = array_keys($courses[$COURSE->id]->users);
-
-        foreach ($categories as $structure) {
-            if (in_array($structure->userid, $useridsinthiscourse)) {
-                $mainstructuregroups['thiscourse'][] = $structure;
-            } else {
-                $mainstructuregroups['othercourses'][] = $structure;
+        if ($sort == 'mystudents') {
+            $students = block_exaport_get_students_for_teacher();
+            if (count($students) > 0) {
+                foreach ($students as $studentid => $student) {
+                    if (in_array($COURSE->id, $student->courseids)) {
+                        $mainstructuregroups['thiscourse'][$studentid] = $student;
+                    } else {
+                        $mainstructuregroups['othercourses'][$studentid] = $student;
+                    }
+                }
+            }
+        } else {
+            $useridsinthiscourse = array_keys($courses[$COURSE->id]->users);
+            foreach ($categories as $structure) {
+                if (in_array($structure->userid, $useridsinthiscourse)) {
+                    $mainstructuregroups['thiscourse'][] = $structure;
+                } else {
+                    $mainstructuregroups['othercourses'][] = $structure;
+                }
             }
         }
     } else {
-        $mainstructuregroups['othercourses'] = $categories;
+        if ($sort == 'mystudents') {
+            $students = block_exaport_get_students_for_teacher();
+            $mainstructuregroups['othercourses'] = $students;
+        } else {
+            $mainstructuregroups['othercourses'] = $categories;
+        }
     }
-
     if ($courses) {
         echo '<span style="padding-right: 20px;">'.get_string('course').
                 ': <select id="block-exaport-courses" url="shared_categories.php?courseid=%courseid%&sort='.$sort.'">';
-        // Print empty line, if course is not in list.
-        if (!isset($courses[$COURSE->id])) {
-            echo '<option></option>';
-        }
+        // Print empty line for access to all cources in one list
+        echo '<option value="1" '.($COURSE->id == 1 ? ' selected="selected"' : '').'></option>';
+
         foreach ($courses as $c) {
             echo '<option value="'.$c->id.'"'.($c->id == $COURSE->id ? ' selected="selected"' : '').'>'.$c->fullname.'</option>';
         }
@@ -123,14 +144,25 @@ function exaport_print_structures($categories, $parsedsort) {
     }
 
     // Print.
-    if ($categories) {
+    if (block_exaport_user_can_see_artifacts_of_students()) {
+        echo '<span class="mystudents_link">';
+        if ($sort == 'mystudents') {
+            echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=user\">".
+                    get_string('show_sharedbyuser', 'block_exaport')."</a>&nbsp;";
+        } else {
+            echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=mystudents\">".
+                    get_string('show_mystudents', 'block_exaport')."</a>&nbsp;";
+        }
+        echo '</span>';
+    }
+    if ($categories && $sort != 'mystudents') {
         echo get_string('sortby').': ';
         echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=user\"".
                 ($sort == 'user' ? ' style="font-weight: bold;"' : '').">".get_string('user')."</a> | ";
         echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_categories.php?courseid=$courseid&amp;sort=category\"".
                 ($sort == 'category' ? ' style="font-weight: bold;"' : '').">".get_string('category', 'block_exaport')."</a>";
-        echo '</div>';
     }
+    echo '</div>';
 
     foreach ($mainstructuregroups as $mainstructuregroupid => $mainstructuregroup) {
         if (empty($mainstructuregroup) && ($mainstructuregroupid != 'thiscourse')) {
@@ -147,27 +179,107 @@ function exaport_print_structures($categories, $parsedsort) {
             continue;
         }
 
-        if ($sort == 'user') {
-            // Group by user.
-            $categoriesbyuser = array();
-            foreach ($mainstructuregroup as $structure) {
-                if (!isset($categoriesbyuser[$structure->userid])) {
-                    $categoriesbyuser[$structure->userid] = array(
-                            'user' => $DB->get_record('user', array("id" => $structure->userid)),
-                            'structures' => array()
+        switch ($sort) {
+            case 'mystudents':
+                //$students = block_exaport_get_students_for_teacher();
+                if (count($mainstructuregroup) > 0) {
+                    $table = new html_table();
+                    $table->width = "100%";
+                    $table->size = array('1%', '40%', '40%', '20%');
+                    $table->align = array('left', 'left', 'left', 'centre');
+                    $table->head = array(
+                            '',
+                            get_string('user'),
+                            block_exaport_get_string('enrolled_courses', 'block_exaport'),
+                            ''
                     );
+                    $table->data = array();
+                    foreach ($mainstructuregroup as $user) {
+                        $relatedcources = '<div class="related_cources">'.implode(', ', $user->courses).'</div>';
+                        $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=sharedstudent&userid='.
+                                $user->id.'&categoryid=0">
+                                        <img src="pix/folder_32.png" /><br />'.get_string("browseportfolio", "block_exaport").'</a>';
+                        $table->data[] = array(
+                                $OUTPUT->user_picture($user, array("courseid" => $courseid)),
+                                fullname($user),
+                                $relatedcources,
+                                $link
+                        );
+                    }
+                } else {
+                    echo get_string("nothingstructureshared", "block_exaport");
+                }
+                echo html_writer::table($table);
+                break;
+            case 'user':
+                // Group by user.
+                $categoriesbyuser = array();
+                foreach ($mainstructuregroup as $structure) {
+                    if (!isset($categoriesbyuser[$structure->userid])) {
+                        $categoriesbyuser[$structure->userid] = array(
+                                'user' => $DB->get_record('user', array("id" => $structure->userid)),
+                                'structures' => array()
+                        );
+                    }
+
+                    $categoriesbyuser[$structure->userid]['structures'][] = $structure;
                 }
 
-                $categoriesbyuser[$structure->userid]['structures'][] = $structure;
-            }
+                foreach ($categoriesbyuser as $item) {
+                    $curuser = $item['user'];
 
-            foreach ($categoriesbyuser as $item) {
-                $curuser = $item['user'];
+                    $table = new html_table();
+                    $table->width = "100%";
+                    $table->size = array('40%', '20%', '20%', '20%');
+                    $table->head = array(
+                            block_exaport_get_string('category'),
+                            block_exaport_get_string("sharedwith"),
+                            '',
+                            '',
+                    );
+                    $table->data = array();
 
+                    foreach ($item['structures'] as $structure) {
+                        $structurecontent = '<div class="structure_head"><span class="structure_header">';
+                        $structurecontent .= $structure->name;
+                        $structurecontent .= '</span></div>';
+                        $structurecontent .= '<div class="structure_content">';
+                        $structurecontent .= block_exaport_get_structure_content($structure->id);
+                        $structurecontent .= '</div>';
+                        $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
+                                $structure->userid.'&categoryid='.$structure->id.'">
+                                            <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
+                        $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
+                                            <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").
+                                '</a>';
+                        $table->data[] = array(
+                                $structurecontent,
+                                block_exaport_get_shared_with_text($structure),
+                                $link,
+                                $link2,
+                        );
+                    }
+
+                    echo '<div class="view-group">';
+                    echo '<div class="header view-group-header" style="align: right">';
+                    echo '<span class="view-group-pic">'.$OUTPUT->user_picture($curuser, array('link' => false)).'</span>';
+                    echo '<span class="view-group-title">'.fullname($curuser).' ('.count($item['structures']).') </span>';
+                    echo '</div>';
+
+                    echo '<div class="view-group-content">';
+                    echo html_writer::table($table);
+                    echo '</div>';
+
+                    echo '</div>';
+                }
+                break;
+            default:
                 $table = new html_table();
                 $table->width = "100%";
-                $table->size = array('40%', '20%', '20%', '20%');
+                $table->size = array('1%', '20%', '20%', '20%', '20%', '20%');
                 $table->head = array(
+                        '',
+                        get_string('user'),
                         block_exaport_get_string('category'),
                         block_exaport_get_string("sharedwith"),
                         '',
@@ -175,73 +287,25 @@ function exaport_print_structures($categories, $parsedsort) {
                 );
                 $table->data = array();
 
-                foreach ($item['structures'] as $structure) {
-                    $structurecontent = '<div class="structure_head"><span class="structure_header">';
-                    $structurecontent .= $structure->name;
-                    $structurecontent .= '</span></div>';
-                    $structurecontent .= '<div class="structure_content">';
-                    $structurecontent .= block_exaport_get_structure_content($structure->id);
-                    $structurecontent .= '</div>';
+                foreach ($mainstructuregroup as $structure) {
+                    $curuser = $DB->get_record('user', array("id" => $structure->userid));
+                    $structurecontent = '<div class="structure_head"><span class="structure_header">'.$structure->name.'</span></div>';
+                    $structurecontent .= '<div class="structure_content">'.block_exaport_get_structure_content($structure->id).'</div>';
                     $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
                             $structure->userid.'&categoryid='.$structure->id.'">
                                         <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
                     $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
-                                        <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").
-                            '</a>';
+                                        <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").'</a>';
                     $table->data[] = array(
+                            $OUTPUT->user_picture($curuser, array("courseid" => $courseid)),
+                            fullname($curuser),
                             $structurecontent,
                             block_exaport_get_shared_with_text($structure),
                             $link,
                             $link2,
                     );
                 }
-
-                echo '<div class="view-group">';
-                echo '<div class="header view-group-header" style="align: right">';
-                echo '<span class="view-group-pic">'.$OUTPUT->user_picture($curuser, array('link' => false)).'</span>';
-                echo '<span class="view-group-title">'.fullname($curuser).' ('.count($item['structures']).') </span>';
-                echo '</div>';
-
-                echo '<div class="view-group-content">';
                 echo html_writer::table($table);
-                echo '</div>';
-
-                echo '</div>';
-            }
-        } else {
-            $table = new html_table();
-            $table->width = "100%";
-            $table->size = array('1%', '20%', '20%', '20%', '20%', '20%');
-            $table->head = array(
-                    '',
-                    get_string('user'),
-                    block_exaport_get_string('category'),
-                    block_exaport_get_string("sharedwith"),
-                    '',
-                    '',
-            );
-            $table->data = array();
-
-            foreach ($mainstructuregroup as $structure) {
-                $curuser = $DB->get_record('user', array("id" => $structure->userid));
-                $structurecontent = '<div class="structure_head"><span class="structure_header">'.$structure->name.'</span></div>';
-                $structurecontent .= '<div class="structure_content">'.block_exaport_get_structure_content($structure->id).'</div>';
-                $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
-                        $structure->userid.'&categoryid='.$structure->id.'">
-                                    <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
-                $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
-                                    <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").'</a>';
-                $table->data[] = array(
-                        $OUTPUT->user_picture($curuser, array("courseid" => $courseid)),
-                        fullname($curuser),
-                        $structurecontent,
-                        block_exaport_get_shared_with_text($structure),
-                        $link,
-                        $link2,
-                );
-            }
-
-            echo html_writer::table($table);
         }
     }
 }
@@ -249,7 +313,8 @@ function exaport_print_structures($categories, $parsedsort) {
 // List shared structures.
 echo "<div class='block_eportfolio_center'>\n";
 echo '<div style="padding-bottom: 20px;">';
-if (!$categories) {
+$students = block_exaport_get_students_for_teacher();
+if (!$categories && count($students) == 0) {
     echo get_string("nothingstructureshared", "block_exaport");
 } else {
     exaport_print_structures($categories, $parsedsort);

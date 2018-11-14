@@ -35,6 +35,7 @@ $string['exaport:shareintern'] = 'Internal sharing of views';
 $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
+$string['exaport:viewartifactsfromstudents'] = 'Can see portfolio artifacts of own students';
 $string['new'] = 'New';
 $string['addbookmark'] = 'Add bookmark';
 $string['addcategory'] = 'Add category';
@@ -414,6 +415,12 @@ $string['block_exaport_userquota_body'] = 'The maximum number of bytes that a us
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';
+$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Teacher can see ALL artifacts of own students';
+$string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.';
+$string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'Add required user profile field';
+$string['block_exaport_confirm_profilefield_create'] = 'Do you really want to add the required profile field?';
+$string['block_exaport_confirm_profilefield_exists'] = 'Profile field for trusted teacher already exists';
+$string['block_exaport_profilefield_created'] = 'Profile field for trusted teacher was added';
 
 // === Resume.
 $string['resume_template_newresume'] = '<h2>My new CV</h2>';
@@ -516,6 +523,10 @@ $string['category_up'] = 'back to Parent Category';
 $string['supported'] = 'supported by';
 $string['developed'] = 'developed by';
 $string['myfilearea'] = 'My file area';
+$string['show_mystudents'] = 'My students';
+$string['show_sharedbyuser'] = 'Shared by users';
+$string['enrolled_courses'] = 'Related with courses';
+$string['browseportfolio'] = 'Browse this portfolio';
 
 // === Language categories.
 $string['lang_categories'] = '';

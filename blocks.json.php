@@ -283,9 +283,7 @@ function get_form_items($id, $blockdata = array()) {
     $content .= '</form>';
 
     return $content;
-}
-
-;
+};
 
 function get_form_text($id, $blockdata = array()) {
     global $CFG, $tinymce, $PAGE, $USER;
@@ -601,9 +599,7 @@ function get_form_badge($id, $blockdata = array()) {
     $content .= '</form>';
 
     return $content;
-}
-
-;
+};
 
 function htmleditor_enable_script($elementid) {
     global $CFG, $PAGE, $OUTPUT;

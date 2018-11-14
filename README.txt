@@ -2,11 +2,8 @@ exaport_nextgen
 ===============
 GTN-Solutions
 
-
 This block is for Moodle 3.2 to 3.4 versions, it will not work for versions below 2016120505 - please download earlier
-
 versions from here: https://moodle.org/plugins/pluginversions.php?plugin=block_exaport
-For Moodle 3.2 use higher Version.
 
 * exabis ePortfolio Block - Bugs, Feature Requests, and Improvements *
 

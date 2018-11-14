@@ -74,7 +74,7 @@ namespace block_exaport\common {
 
     abstract class event extends \core\event\base {
 
-        protected static function prepareData(array &$data) {
+        protected static function preparedata(array &$data) {
             if (!isset($data['contextid'])) {
                 if (!empty($data['courseid'])) {
                     $data['contextid'] = \context_course::instance($data['courseid'])->id;
@@ -85,7 +85,7 @@ namespace block_exaport\common {
         }
 
         public static function log(array $data) {
-            static::prepareData($data);
+            static::preparedata($data);
 
             return static::create($data)->trigger();
         }
@@ -113,7 +113,7 @@ namespace block_exaport\common {
          * @param mixed $value
          * @return SimpleXMLElement
          */
-        public function addChildWithCDATA($name, $value = null) {
+        public function add_child_with_cdata($name, $value = null) {
             $newchild = $this->addChild($name);
 
             if ($newchild !== null) {
@@ -129,9 +129,9 @@ namespace block_exaport\common {
             return new static('<?xml version="1.0" encoding="UTF-8"?><'.$rootelement.' />');
         }
 
-        public function addChildWithCDATAIfValue($name, $value = null) {
+        public function add_child_with_cdata_if_value($name, $value = null) {
             if ($value) {
-                return $this->addChildWithCDATA($name, $value);
+                return $this->add_child_with_cdata($name, $value);
             } else {
                 return $this->addChild($name, $value);
             }
@@ -153,7 +153,7 @@ namespace block_exaport\common {
             }
         }
 
-        public function asPrettyXML() {
+        public function as_pretty_xml() {
             $dom = dom_import_simplexml($this)->ownerDocument;
             $dom->formatOutput = true;
 
@@ -702,10 +702,9 @@ namespace block_exaport\common {
     }
 }
 
-/**
- * exporting all classes and functions from the common namespace to the plugin namespace
- * the whole part below is done, so eclipse knows the common classes and functions
- */
+// Exporting all classes and functions from the common namespace to the plugin namespace
+// the whole part below is done, so eclipse knows the common classes and functions.
+
 namespace block_exaport {
 
     function _should_export_class($classname) {

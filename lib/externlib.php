@@ -32,18 +32,20 @@ function block_exaport_print_extern_item($item, $access) {
     echo $OUTPUT->heading(format_string($item->name));
 
     $boxcontent = '';
-    if ($file = block_exaport_get_item_file($item)) {
-        $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id);
+    if ($files = block_exaport_get_item_file($item, false)) {
+        if (is_array($files)) {
+            foreach ($files as $fileindex=>$file) {
+                $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id.'&inst='.$fileindex);
 
-        if ($file->is_valid_image()) { // Image attachments don't get printed as links.
-            $boxcontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"".s($item->name)."\" /></div>";
-        } else {
-            $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-            $boxcontent .= "<p class=\"filelink\">".$icon.' '.
-                    $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl))."</p>";
-            if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
-                // Videoblock.
-                $boxcontent .= '
+                if ($file->is_valid_image()) { // Image attachments don't get printed as links.
+                    $boxcontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"".s($item->name)."\" /></div>";
+                } else {
+                    $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+                    $boxcontent .= "<p class=\"filelink\">".$icon.' '.
+                            $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl))."</p>";
+                    if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
+                        // Videoblock.
+                        $boxcontent .= '
                         <div id="video_block">
                             <div id="video_content">
                                 <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
@@ -57,14 +59,16 @@ function block_exaport_print_extern_item($item, $access) {
                                 </video>
                             </div>
                             <div id="video_error" style="display: none;" class="incompatible_video">';
-                $a = new stdClass ();
-                $a->link = $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl));
-                $boxcontent .= get_string('incompatible_video', 'block_exaport', $a);
-                $boxcontent .= '</div>
-                        </div>';
-                $boxcontent .= "
+                        $a = new stdClass ();
+                        $a->link = $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl));
+                        $boxcontent .= get_string('incompatible_video', 'block_exaport', $a);
+                        $boxcontent .= '</div>
+                                        </div>';
+                        $boxcontent .= "
                         <script src=\"".$CFG->wwwroot."/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
-            };
+                    };
+                }
+            }
         }
     }
 

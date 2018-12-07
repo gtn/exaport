@@ -261,26 +261,37 @@ switch ($action) {
         $straction = get_string('edit');
         $post->url = $existing->url;
         if ($type == 'file') {
-            if ($file = block_exaport_get_item_file($post)) {
-                $ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$post->userid."&itemid=".$post->id;
-
+            $file = block_exaport_get_item_file($post, false);
+            $filelimit = 1;
+            if ($CFG->block_exaport_multiple_files_in_item) {
+                $filelimit = 10;
+            }
+            if ($file) {
+                if (!is_array($file)) {
+                    $file = array($file);
+                }
                 $extracontent = "<div class='block_eportfolio_center'>\n";
-                if ($file->is_valid_image()) {
-                    $extracontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"".format_string($post->name).
-                            "\" /></div>";
-                } else {
-                    $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-                    $extracontent .= "<p>".$icon.' '.
-                            $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl))."</p>";
+                foreach($file as $fileindex => $fileobject) {
+                    $ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$post->userid."&itemid=".
+                            $post->id.'&inst='.$fileindex;
+
+                    if ($fileobject->is_valid_image()) {
+                        $extracontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"".format_string($post->name).
+                                "\" /></div>";
+                    } else {
+                        $icon = $OUTPUT->pix_icon(file_file_icon($fileobject), '');
+                        $extracontent .= "<p>".$icon.' '.
+                                $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl))."</p>";
+                    }
+
+                    // Filemanager for editing file.
+                    $draftitemid = file_get_submitted_draft_itemid('file');
+                    $context = context_user::instance($USER->id);
+                    file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
+                            array('subdirs' => false, 'maxfiles' => $filelimit, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+                    $post->file = $draftitemid;
                 }
                 $extracontent .= "</div>";
-
-                // Filemanager for editing file.
-                $draftitemid = file_get_submitted_draft_itemid('file');
-                $context = context_user::instance($USER->id);
-                file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
-                        array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-                $post->file = $draftitemid;
             }
 
             if (!$extracontent && !$post->url) {
@@ -505,7 +516,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
             $post->url = "http://".$post->url;
         }
     }
-    // Insert the new blog entry.
+    // Insert the new entry.
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
         if (!$usetextarea) {
             $post->introformat = FORMAT_HTML;

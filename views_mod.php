@@ -242,6 +242,25 @@ class block_exaport_view_edit_form extends moodleform {
         }
     }
 
+    function add_action_buttons($cancel = true, $submitlabel=null){
+        if (is_null($submitlabel)){
+            $submitlabel = get_string('savechanges');
+        }
+        $mform =& $this->_form;
+        if ($cancel){
+            // When two elements we need a group
+            $buttonarray=array();
+            $buttonarray[] = &$mform->createElement('submit', 'submitbutton', $submitlabel);
+            $buttonarray[] = &$mform->createElement('cancel');
+            $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+            $mform->closeHeaderBefore('buttonar');
+        } else {
+            // No group needed
+            $mform->addElement('submit', 'submitbutton', $submitlabel, ['class' => 'btn btn-default']);
+            $mform->closeHeaderBefore('submitbutton');
+        }
+    }
+
     public function to_array() {
         // Finalize the form definition if not yet done.
         if (!$this->_definition_finalized) {

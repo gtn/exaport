@@ -71,7 +71,10 @@ if ($fromform = $exteditform->get_data()) {
                 }
 
                 if (mkdir($unzipdir)) {
-                    if (unzip_file($dir.'/'.$newfilename, $unzipdir, false)) {
+                    $zip = new ZipArchive();
+                    if ($zip->open($dir.'/'.$newfilename) == TRUE) {
+                        $zip->extractTo($unzipdir);
+                    //if (unzip_file($dir.'/'.$newfilename, $unzipdir, false)) {
                         if (is_file($unzipdir."/itemscomp.xml")) {
                             $xml = simplexml_load_file($unzipdir."/itemscomp.xml");
                         }
@@ -132,7 +135,8 @@ $formdata = new stdClass();
 $formdata->courseid = $courseid;
 $exteditform->set_data($formdata);
 if ($imported) {
-    notify(get_string("success", "block_exaport"));
+    //notify(get_string("success", "block_exaport"));
+    echo $OUTPUT->notification(get_string("success", "block_exaport"), 'success');
 } else {
     $exteditform->display();
 }
@@ -415,55 +419,65 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
     } else if ((($starturl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->')) !== false) &&
             (($startdesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->')) !== false)
     ) {
-        $starturl += strlen('<!--###BOOKMARK_FILE_URL###-->');
-        $startdesc += strlen('<!--###BOOKMARK_FILE_DESC###-->');
-        if ((($endurl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->', $starturl)) !== false) &&
-                (($enddesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startdesc)) !== false)
-        ) {
-            $linkedfilename = block_exaport_clean_path(substr($content, $starturl, $endurl - $starturl));
-            $linkedfilepath = dirname($filepath).'/'.$linkedfilename;
-            if (is_file($linkedfilepath)) {
-                $new = new stdClass();
-                $new->userid = $USER->id;
-                $new->categoryid = $category;
-                $new->name = block_exaport_clean_title($title);
-                $new->intro = block_exaport_clean_text(substr($content, $startdesc, $enddesc - $startdesc));
-                $new->timemodified = time();
-                $new->type = 'file';
-                $new->course = $COURSE->id;
 
-                if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
-                    if (isset($xml) && isset($id)) {
-                        import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
-                    }
-                    $fs = get_file_storage();
+        preg_match_all('/<!--###BOOKMARK_FILE_URL###-->(.*)<!--###BOOKMARK_FILE_URL###-->/m', $content, $matches);
+        $allfiles = $matches[1];
+        $enddesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startdesc);
+        if (is_file(dirname($filepath).'/'.block_exaport_clean_path($allfiles[0]))) {
+            $new = new stdClass();
+            $new->userid = $USER->id;
+            $new->categoryid = $category;
+            $new->name = block_exaport_clean_title($title);
+            $new->intro = block_exaport_clean_text(substr($content, $startdesc, $enddesc - $startdesc));
+            $new->timemodified = time();
+            $new->type = 'file';
+            $new->course = $COURSE->id;
 
-                    // Prepare file record object.
-                    $fileinfo = array(
-                            'contextid' => context_user::instance($USER->id)->id,
-                            'component' => 'block_exaport', // Usually = table name.
-                            'filearea' => 'item_file',     // Usually = table name.
-                            'itemid' => $new->id,          // Usually = ID of row in table.
-                            'filepath' => '/',              // Any path beginning and ending in /.
-                            'filename' => $linkedfilename,
-                            'userid' => $USER->id);
-
-                    // Eindeutige itemid generieren.
-                    if (!$ret = $fs->create_file_from_pathname($fileinfo, $linkedfilepath)) {
-                        $DB->delete_records("block_exaportitem", array("id" => $new->id));
-                        notify(get_string("couldntcopyfile", "block_exaport", $title));
-                    } else {
-                        get_comments($content, $new->id, 'block_exaportitemcomm');
-                    }
-                } else {
-                    notify(get_string("couldntinsert", "block_exaport", $title));
+            if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+                if (isset($xml) && isset($id)) {
+                    import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
                 }
-            } else {
-                notify(get_string("linkedfilenotfound", "block_exaport",
-                        array("filename" => $linkedfilename, "url" => $url, "title" => $title)));
+                $fs = get_file_storage();
+
+                // Prepare file record object.
+                $fileinfo = array(
+                        'contextid' => context_user::instance($USER->id)->id,
+                        'component' => 'block_exaport', // Usually = table name.
+                        'filearea' => 'item_file',     // Usually = table name.
+                        'itemid' => $new->id,          // Usually = ID of row in table.
+                        'filepath' => '/',              // Any path beginning and ending in /.
+                        'filename' => null, // Setup later.
+                        'userid' => $USER->id);
+                // add file instances
+                foreach ($allfiles as $filename) {
+                    //$starturl += strlen('<!--###BOOKMARK_FILE_URL###-->');
+                    //$startdesc += strlen('<!--###BOOKMARK_FILE_DESC###-->');
+                    //if ((($endurl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->', $starturl)) !== false) &&
+                    //        (($enddesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startdesc)) !== false)
+                    //) {
+                    //    $linkedfilename = block_exaport_clean_path(substr($content, $starturl, $endurl - $starturl));
+                    $linkedfilename = block_exaport_clean_path($filename);
+                    $linkedfilepath = dirname($filepath).'/'.$linkedfilename;
+                    if (is_file($linkedfilepath)) {
+                        $fileinfo['filename'] = $linkedfilename;
+                        // Eindeutige itemid generieren.
+                        if (!$ret = $fs->create_file_from_pathname($fileinfo, $linkedfilepath)) {
+                            $DB->delete_records("block_exaportitem", array("id" => $new->id));
+                            notify(get_string("couldntcopyfile", "block_exaport", $title));
+                        } else {
+                            get_comments($content, $new->id, 'block_exaportitemcomm');
+                        }
+                    } else {
+                        notify(get_string("couldntinsert", "block_exaport", $title));
+                    }
+                }
             }
+            //} else {
+            //    notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+            //}
         } else {
-            notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+            notify(get_string("linkedfilenotfound", "block_exaport",
+                    array("filename" => dirname($filepath).'/'.block_exaport_clean_path($allfiles[0]), "url" => $url, "title" => $title)));
         }
     } else if ((($startdesc = strpos($content, '<!--###BOOKMARK_NOTE_DESC###-->')) !== false)) {
         $startdesc += strlen('<!--###BOOKMARK_NOTE_DESC###-->');

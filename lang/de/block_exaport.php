@@ -409,6 +409,8 @@ $string['block_exaport_maxbytes'] = 'Maximale Upload-Dateigröße in Exabis ePor
 $string['block_exaport_maxbytes_body'] = 'Maximale Dateigröße, die Dateien haben können, die im Exabis ePortfolio hochgeladen werden. <br> Wert für diese Seite ist: {$a->sitemaxbytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_userquota'] = 'Benutzer-Dateikontingent Exabis ePortfolio';
 $string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
+$string['block_exaport_multiplefilesinitem'] = 'Multiple files in "File" artifact';
+$string['block_exaport_multiplefilesinitem_body'] = 'limit: 10 files';
 $string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 $string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';

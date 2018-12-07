@@ -43,6 +43,7 @@ if (empty($CFG->filelifetime)) {
 $relativepath = get_file_argument('portfoliofile.php');
 $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
+$inst = optional_param('inst', 0, PARAM_ALPHANUM);
 $userhash = optional_param('hv', 0, PARAM_ALPHANUM);
 // Old elove token - moodle sometimes uses wstoken, sometimes token.
 $token = optional_param('token', null, PARAM_ALPHANUM);
@@ -111,7 +112,10 @@ if ($itemid) {
         }
         $file = block_exaport_get_item_comment_file($comment->id);
     } else {
-        $file = block_exaport_get_item_file($item);
+        $file = block_exaport_get_item_file($item, false);
+        if (is_array($file)) {
+            $file = $file[$inst]; // If multiple files - return file with &inst=X
+        }
     }
 
     if ($file) {
@@ -136,7 +140,6 @@ if ($itemid) {
     if ($args[0] != 'exaport') {
         error('No valid arguments supplied');
     }
-
     if ($args[1] == 'temp') {
         if ($args[2] == 'export') {
             $args[3] = $accessuserid = clean_param($args[3], PARAM_INT);

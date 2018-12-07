@@ -130,7 +130,6 @@ if (count($data) > 0) {
     block_exaport_set_competences($values, $item, $USER->id);
 }
 echo "<div>\n";
-
 block_exaport_print_extern_item($item, $access);
 
 if ($item->allowComments) {
@@ -218,7 +217,7 @@ function block_exaport_show_comments($item, $access) {
 
             echo format_text($comment->entry);
 
-            if ($file = block_exaport_get_item_comment_file($comment->id)) {
+            if ($files = block_exaport_get_item_comment_file($comment->id)) {
                 $fileurl = $CFG->wwwroot.
                         "/blocks/exaport/portfoliofile.php?access={$access}&itemid={$item->id}&commentid={$comment->id}";
                 echo '</td></tr><tr><td class="left side">';

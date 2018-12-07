@@ -336,28 +336,32 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             unset($filecontent);
             unset($filename);
 
-            $fsfile = block_exaport_get_item_file($file);
-            if (!$fsfile) {
+            $fsfiles = block_exaport_get_item_file($file, false);
+            if (!$fsfiles) {
                 continue;
             }
-
-            $i = 0;
-            $contentfilename = $fsfile->get_filename();
-            while (in_array($exportpath.$exportdir.$contentfilename, $existingfilesarray)) {
-                $i++;
-                $contentfilename = $i.'-'.$fsfile->get_filename();
+            $filelinks = '';
+            $j = 0;
+            foreach ($fsfiles as $ind => $fsfile) {
+                $i = 0;
+                $contentfilename = $fsfile->get_filename();
+                while (in_array($exportpath.$exportdir.$contentfilename, $existingfilesarray)) {
+                    $i++;
+                    $contentfilename = $i.'-'.$fsfile->get_filename();
+                }
+                $existingfilesarray[] = $exportpath.$exportdir.$contentfilename;
+                $zip->addFromString($exportpath.$exportdir.$contentfilename, $fsfile->get_content());
+                $filelinks .= '  <div id="url-'.$j.'"><a href="'.spch($contentfilename).'"><!--###BOOKMARK_FILE_URL###-->'.
+                        spch($contentfilename).'<!--###BOOKMARK_FILE_URL###--></a></div>'."\n";
+                $j++;
             }
-            $existingfilesarray[] = $exportpath.$exportdir.$contentfilename;
-
-            $zip->addFromString($exportpath.$exportdir.$contentfilename, $fsfile->get_content());
 
             $filecontent = '';
             $filecontent = create_html_header(spch($file->name), $depth + 1);
             $filecontent .= '<body>'."\n";
             $filecontent .= '<div id="exa_ex">'."\n";
             $filecontent .= '  <h1 id="header">'.spch($file->name).'</h1>'."\n";
-            $filecontent .= '  <div id="url"><a href="'.spch($contentfilename).'"><!--###BOOKMARK_FILE_URL###-->'.
-                    spch($contentfilename).'<!--###BOOKMARK_FILE_URL###--></a></div>'."\n";
+            $filecontent .= $filelinks;
             $filecontent .= '  <div id="description"><!--###BOOKMARK_FILE_DESC###-->'.spch_text($file->intro).
                     '<!--###BOOKMARK_FILE_DESC###--></div>'."\n";
             $filecontent .= add_comments('block_exaportitemcomm', $file->id);

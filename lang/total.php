@@ -1459,11 +1459,11 @@ return [
                 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
         ],
         'block_exaport_multiplefilesinitem' => [
-                'Multiple files in "File" artifact',
+                'Mehrere Dateien in Datei-Artefakt hochladen',
                 'Multiple files in "File" artifact',
         ],
         'block_exaport_multiplefilesinitem_body' => [
-                'limit: 10 files',
+                'limit: 10 Dateien',
                 'limit: 10 files',
         ],
         'block_exaport_app_alloweditdelete_head' => [

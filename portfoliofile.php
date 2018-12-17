@@ -113,8 +113,11 @@ if ($itemid) {
         $file = block_exaport_get_item_comment_file($comment->id);
     } else {
         $file = block_exaport_get_item_file($item, false);
-        if (is_array($file)) {
+        //echo "<pre>debug:<strong>portfoliofile.php:116</strong>\r\n"; print_r($file); echo '</pre>'; exit; // !!!!!!!!!! delete it
+        if (is_array($file) && count($file) > 1) {
             $file = $file[$inst]; // If multiple files - return file with &inst=X
+        } else if (is_array($file)) {
+            $file = array_shift($file);
         }
     }
 
@@ -200,9 +203,10 @@ send_file($filepath, basename($filepath), $lifetime, $CFG->filteruploadedfiles, 
 function not_found($courseid = 0) {
     global $CFG;
     header('HTTP/1.0 404 not found');
-    if ($courseid > 0) {
-        error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); // This is not displayed on IIS?
-    } else {
-        error(get_string('filenotfound', 'error')); // This is not displayed on IIS??
-    }
+    //if ($courseid > 0) {
+        //error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); // This is not displayed on IIS?
+    //} else {
+    //    error(get_string('filenotfound', 'error')); // This is not displayed on IIS??
+    //}
+    print_error("filenotfound", "block_exaport");
 }

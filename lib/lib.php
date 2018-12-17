@@ -976,7 +976,7 @@ function block_exaport_create_user_category($title, $userid, $parentid = 0, $cou
 function fill_view_with_artefacts($viewid, $existingartefacts = '') {
     global $DB, $USER;
 
-    $artefacts = block_exaport_get_portfolio_items(1);
+    $artefacts = block_exaport_get_portfolio_items(1, null, false);
     if ($existingartefacts <> '') {
         $existingartefactsarray = explode(',', $existingartefacts);
         $filledartefacts = $existingartefacts;
@@ -1130,7 +1130,7 @@ function block_exaport_get_view_blocks($view) {
     return $blocks;
 }
 
-function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
+function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $withshareditems = true) {
     global $DB, $USER;
     if ($epopwhere == 1) {
         $addwhere = " AND ".block_exaport_get_item_where();
@@ -1158,8 +1158,10 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
     }
 
     // Add shared items.
-    $shareditems = block_exaport_get_items_shared_to_user($USER->id, true);
-    $portfolioitems = $portfolioitems + $shareditems;
+    if ($withshareditems) {
+        $shareditems = block_exaport_get_items_shared_to_user($USER->id, true);
+        $portfolioitems = $portfolioitems + $shareditems;
+    }
 
     $fs = get_file_storage();
 

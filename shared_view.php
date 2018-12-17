@@ -173,6 +173,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                             } elseif (count($files) > 1) {
                                 $width = 's75';
                             }
+
                             foreach ($files as $file) {
                                 if (strpos($file->mimetype, "image") !== false) {
                                     $imgsrc = $CFG->wwwroot."/pluginfile.php/".context_user::instance($item->userid)->id.
@@ -182,7 +183,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 } else {
                                     // Link to file.
                                     $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access.
-                                            "&itemid=".$item->id);
+                                            "&itemid=".$item->id."&inst=".$file->pathnamehash);
                                     // Human filesize.
                                     $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
                                     $power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;

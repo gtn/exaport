@@ -119,6 +119,15 @@ if ($itemid) {
     }
 
     if ($file) {
+        // TODO: check this code
+        $mimetype = $file->get_mimetype();
+        if (strpos($mimetype, 'html') !== false || strpos($mimetype, 'text') === true) { // clean HTML ; TODO: 'text' - do we need?
+            $tempfilecontent = $file->get_content();
+            $tempfilecontent = clean_text($tempfilecontent, FORMAT_HTML, ['newlines' => false]);
+            readstring_accel($tempfilecontent, $mimetype, false);
+            die;
+        }
+
         send_stored_file($file, 1);
     } else {
         not_found();

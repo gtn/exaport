@@ -1740,3 +1740,14 @@ function block_exaport_mix_images($sourceimages = array()) {
     }
     return true;
 }
+
+/**
+ * clean HTML code for next displaying. Must be modified more and more id need
+ * @param string $content
+ * @param string $format
+ * @return string
+ */
+function block_exaport_html_secure($content = '', $format = FORMAT_HTML) {
+    $content = format_text($content, $format, ['newlines' => false]);
+    return $content;
+}

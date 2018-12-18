@@ -1025,6 +1025,8 @@ function clean_for_external_xml($text = '') {
     $result = $text;
     // Img.
     $result = preg_replace("/<img[^>]+\>/i", "", $result);
+    // html
+    $result = block_exaport_html_secure($result);
     return $result;
 }
 
@@ -1068,12 +1070,12 @@ function europass_xml_employers_educations($dom, $type, $data) {
         case 'WorkExperience':
             $orgname = 'employer';
             $orgaddress = 'employeraddress';
-            $activities = 'positiondescription';
+            $activitiesfield = 'positiondescription';
             break;
         case 'Education':
             $orgname = 'institution';
             $orgaddress = 'institutionaddress';
-            $activities = 'qualdescription';
+            $activitiesfield = 'qualdescription';
             break;
     }
 
@@ -1118,9 +1120,9 @@ function europass_xml_employers_educations($dom, $type, $data) {
             $experienceitem->appendChild($title);
         };
         // Activities.
-        if ($dataitem->{$activities} <> '') {
+        if ($dataitem->{$activitiesfield} <> '') {
             $activities = $dom->createElement('Activities');
-            $text = $dom->createTextNode($dataitem->{$activities});
+            $text = $dom->createTextNode($dataitem->{$activitiesfield});
             $activities->appendChild($text);
             $experienceitem->appendChild($activities);
         };
@@ -1164,8 +1166,12 @@ function europass_xml_employers_educations($dom, $type, $data) {
                 false);
         if (count($files) > 0) {
             $filearray = europass_xml_get_attached_file_contents($files);
-            $documentation = europass_xml_documentation_list($dom, $filearray);
-            $experienceitem->appendChild($documentation);
+            if (count($filearray) > 0) {
+                $documentation = europass_xml_documentation_list($dom, $filearray);
+                if ($documentation) {
+                    $experienceitem->appendChild($documentation);
+                }
+            }
         };
         $experiencelist->appendChild($experienceitem);
     };
@@ -1217,8 +1223,12 @@ function europass_xml_achievement($dom, $type, $ids = array(), $atitle, $content
     };
     if (count($files) > 0) {
         $filearray = europass_xml_get_attached_file_contents($files);
-        $documentation = europass_xml_documentation_list($dom, $filearray);
-        $achievement->appendChild($documentation);
+        if (count($filearray)) {
+            $documentation = europass_xml_documentation_list($dom, $filearray);
+            if ($documentation) {
+                $achievement->appendChild($documentation);
+            }
+        }
     };
     return $achievement;
 }
@@ -1265,6 +1275,7 @@ function list_for_resume_elements($resumeid, $tablename) {
 // fileid => filename.
 function europass_xml_get_attached_file_contents($files) {
     global $attachedfilenames, $attachedfiledatas, $attachedfilemimetypes;
+    $arrayids = array();
     $chars = '123456789';
     $numchars = strlen($chars);
     foreach ($files as $file) {

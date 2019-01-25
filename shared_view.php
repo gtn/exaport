@@ -218,7 +218,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                 $intro = format_text($intro, FORMAT_HTML);
                 echo $fileparams;
                 echo '<div class="view-item-text">';
-                if ($item->url) {
+                if ($item->url && $item->url != "false") {
                     // Link.
                     echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
                 }

@@ -79,7 +79,7 @@ function block_exaport_print_extern_item($item, $access) {
     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                     'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
     $intro = format_text($intro);
-    if ($item->url) {
+    if ($item->url && $item->url != "false") {
         $boxcontent .= '<p><a target="_blank" href="'.s($item->url).'">'.str_replace('http://', '', $item->url).'</a></p>';
     }
     $boxcontent .= $intro;

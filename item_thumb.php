@@ -69,20 +69,27 @@ switch ($item->type) {
                 exit;
             }
             $file = $singleFile;
-        } else if ($file && is_array($file)) {
-            if (count($file) > 1) {
-                $mixedimage = block_exaport_mix_images($file);
-                //$file->is_valid_image()
-                //send_stored_file($file, 1);  // !!!!!!!!!!!!!!! may be make composite of images?
-                echo 'mixed image';
-                exit;
+        } else if ($file) {
+            if (is_array($file)) {
+                if (count($file) > 1) {
+                    $mixedimage = block_exaport_mix_images($file);
+                    //$file->is_valid_image()
+                    //send_stored_file($file, 1);  // !!!!!!!!!!!!!!! may be make composite of images?
+                    echo 'mixed image';
+                    exit;
+                } else {
+                    $singleFile = reset($file);
+                    if ($singleFile->is_valid_image()) {
+                        send_stored_file($singleFile, 1);
+                        exit;
+                    }
+                    $file = $singleFile;
+                }
             } else {
-                $singleFile = reset($file);
-                if ($singleFile->is_valid_image()) {
-                    send_stored_file($singleFile, 1);
+                if ($file->is_valid_image()) {
+                    send_stored_file($file, 1);
                     exit;
                 }
-                $file = $singleFile;
             }
         }
 

@@ -86,7 +86,7 @@ class MiniXMLDoc {
 	** a call to fromString using the XMLSTRING.
 	**
 	*/
-	function MiniXMLDoc ($string=NULL)
+	function __construct($string=NULL)
 	{
 		/* Set up the root element - note that it's name get's translated to a
 		** <? xml version="1.0" ?> string.
@@ -882,7 +882,7 @@ class MiniXMLDoc {
 */
 class MiniXML extends MiniXMLDoc {
 	
-	function MiniXML ()
+	function __construct ()
 	{
 		$this->MiniXMLDoc();
 	}
@@ -890,4 +890,3 @@ class MiniXML extends MiniXMLDoc {
 
 
 
-?>

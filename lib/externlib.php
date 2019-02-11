@@ -33,41 +33,41 @@ function block_exaport_print_extern_item($item, $access) {
 
     $boxcontent = '';
     if ($files = block_exaport_get_item_file($item, false)) {
-        if (is_array($files)) {
-            foreach ($files as $fileindex=>$file) {
-                $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id.'&inst='.$fileindex);
-
-                if ($file->is_valid_image()) { // Image attachments don't get printed as links.
-                    $boxcontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"".s($item->name)."\" /></div>";
-                } else {
-                    $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-                    $boxcontent .= "<p class=\"filelink\">".$icon.' '.
-                            $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl))."</p>";
-                    if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
-                        // Videoblock.
-                        $boxcontent .= '
-                        <div id="video_block">
-                            <div id="video_content">
-                                <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
-                                            controls preload="auto" width="640" height="480"
-                                            data-setup=\'{}\'>
-                                    <source src="'.$ffurl.'" type="video/mp4" />
-                                    <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading
-                                            to a web browser that
-                                            <a href="http://videojs.com/html5-video-support/" target="_blank">
-                                                supports HTML5 video</a></p>
-                                </video>
-                            </div>
-                            <div id="video_error" style="display: none;" class="incompatible_video">';
-                        $a = new stdClass ();
-                        $a->link = $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl));
-                        $boxcontent .= get_string('incompatible_video', 'block_exaport', $a);
-                        $boxcontent .= '</div>
-                                        </div>';
-                        $boxcontent .= "
-                        <script src=\"".$CFG->wwwroot."/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
-                    };
-                }
+        if (!is_array($files)) {
+            $files = array($files->get_filename() => $files);
+        }
+        foreach ($files as $fileindex => $file) {
+            $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id.'&inst='.$fileindex);
+            if ($file->is_valid_image()) { // Image attachments don't get printed as links.
+                $boxcontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"".s($item->name)."\" /></div>";
+            } else {
+                $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+                $boxcontent .= "<p class=\"filelink\">".$icon.' '.
+                        $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl))."</p>";
+                if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
+                    // Videoblock.
+                    $boxcontent .= '
+                    <div id="video_block">
+                        <div id="video_content">
+                            <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
+                                        controls preload="auto" width="640" height="480"
+                                        data-setup=\'{}\'>
+                                <source src="'.$ffurl.'" type="video/mp4" />
+                                <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading
+                                        to a web browser that
+                                        <a href="http://videojs.com/html5-video-support/" target="_blank">
+                                            supports HTML5 video</a></p>
+                            </video>
+                        </div>
+                        <div id="video_error" style="display: none;" class="incompatible_video">';
+                    $a = new stdClass ();
+                    $a->link = $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl));
+                    $boxcontent .= get_string('incompatible_video', 'block_exaport', $a);
+                    $boxcontent .= '</div>
+                                    </div>';
+                    $boxcontent .= "
+                    <script src=\"".$CFG->wwwroot."/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
+                };
             }
         }
     }

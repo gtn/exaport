@@ -260,7 +260,7 @@ function import_user_description($file, $unzipdir) {
                 $newentry = new stdClass();
                 $newentry->description = substr($content, $startdesc, $enddesc - $startdesc);
                 $newentry->persinfo_timemodified = time();
-                $newentry->id = $USER->id;
+                $newentry->user_id = $USER->id;
                 if (!$DB->insert_record('block_exaportuser', $newentry)) {
                     error(get_string("couldntinsertdesc", "block_exaport"));
                 }

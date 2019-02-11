@@ -46,7 +46,6 @@ function block_exaport_get_file($item, $type, $onlyfirst = false) {
     global $CFG;
     $fs = get_file_storage();
     $files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
-
     // Return first file.
     if ($onlyfirst) {
         return reset($files);
@@ -1671,7 +1670,6 @@ function block_exaport_mix_images($sourceimages = array()) {
         $black = imagecolorallocate($resimage, 0, 0, 0);
         imagefill($resimage, 0, 0, $black);
         imagecolortransparent($resimage, imagecolorallocate($resimage, 0, 0, 0));
-//echo "<pre>debug:<strong>lib.php:1641</strong>\r\n"; print_r($tempimages); echo '</pre>'; exit; // !!!!!!!!!! delete it
         /** @var resource tmpimg */
         $copy = 0;
         // subicon sizes

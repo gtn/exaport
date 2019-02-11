@@ -113,7 +113,6 @@ if ($itemid) {
         $file = block_exaport_get_item_comment_file($comment->id);
     } else {
         $file = block_exaport_get_item_file($item, false);
-        //echo "<pre>debug:<strong>portfoliofile.php:116</strong>\r\n"; print_r($file); echo '</pre>'; exit; // !!!!!!!!!! delete it
         if (is_array($file) && count($file) > 1) {
             $file = $file[$inst]; // If multiple files - return file with &inst=X
         } else if (is_array($file)) {

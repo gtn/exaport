@@ -31,4 +31,13 @@ class block_exaport_renderer extends plugin_renderer_base {
             return call_user_func_array(['parent', 'pix_url'], func_get_args());
         }
     }
+
+    public function get_theme_dir() {
+        return $this->get_theme_config()->dir;
+    }
+
+    public function get_theme_config() {
+        return $this->page->theme;
+    }
 }
+

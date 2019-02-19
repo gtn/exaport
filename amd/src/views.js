@@ -416,35 +416,52 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
         }
         if (data.type == 'item' && data.itemid && data.item) {
             var itemData = data.item;
-            var ilink = itemData.link
+            console.log(itemData);
+            var ilink = itemData.link;
             if (ilink != "") {
                 ilink = $E.translate('link') + ': ' + ilink + '<br />';
             }
 
-            if(itemData.competences){
-                var tempString = '<div id="id_holder" style="display:none;"></div> <div class="item_info" style="overflow: hidden;">';
-                tempString += '<div class="header">' + $E.translate('viewitem') + ': ' + itemData.name + '</div>';
-                tempString += '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">';
-                tempString += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + itemData.id + '">';
-                tempString += '</div>';
-                tempString += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(itemData.type) + '<br />';
-                tempString += $E.translate('category') + ': ' + itemData.category + '<br />' + ilink;
-                tempString += $E.translate('comments') + ': ' + itemData.comments + '<div class="exaport-item-intro"></div>';
+            var itemPictures = '';
+            if (itemData.filescount > 1) {
+                var imgWidth = 40;
+                if (itemData.filescount > 3) {
+                    imgWidth = 35;
+                }
+                if (itemData.filescount > 5) {
+                    imgWidth = 30;
+                }
+                itemPictures += '<div class="pictureset" style="float:right; position: relative; text-align: right; max-width: 150px;">';
+                for (var imi = 0; imi < itemData.filescount; imi++) {
+                    if (imi && imi % 5 === 0) {
+                        itemPictures += '<br />';
+                    }
+                    // itemPictures += '<div class="picture" style="float:right; position: relative; height: '+imgWidth+'px; width: '+imgWidth+'px;">';
+                    itemPictures += '<div class="picture" style="float:right; height: '+imgWidth+'px; width: '+imgWidth+'px;">';
+                    itemPictures += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + itemData.id + '&imindex='+imi+'">';
+                    itemPictures += '</div>';
+                }
+                itemPictures += '</div>';
+            } else {
+                itemPictures += '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">';
+                itemPictures += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + itemData.id + '">';
+                itemPictures += '</div>';
+            }
+
+            var tempString = '';
+            tempString += '<div id="id_holder" style="display:none;"></div> ';
+            tempString += '<div class="item_info" style="overflow: hidden;">';
+            tempString += '<div class="header">' + $E.translate('viewitem') + ': ' + itemData.name + '</div>';
+            tempString += itemPictures;
+            tempString += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(itemData.type) + '<br />';
+            tempString += $E.translate('category') + ': ' + itemData.category + '<br />' + ilink;
+            tempString += $E.translate('comments') + ': ' + itemData.comments + '<div class="exaport-item-intro"></div>';
+            if (itemData.competences) {
                 tempString += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + itemData.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
-                tempString += '</div></div>';
-                $item.html(tempString);
-            }else{
-                var tempString = '<div id="id_holder" style="display:none;"></div>';
-                tempString += '<div class="item_info" style="overflow: hidden;">';
-                tempString += '<div class="header">' + $E.translate('viewitem') + ': ' + itemData.name + '</div>';
-                tempString += '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">';
-                tempString += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + itemData.id + '">';
-                tempString += '</div>';
-                tempString += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(itemData.type) + '<br />';
-                tempString += $E.translate('category') + ': ' + itemData.category + '<br />' + ilink;
-                tempString += $E.translate('comments') + ': ' + itemData.comments + '<div class="exaport-item-intro"></div>';
-                tempString += '</div></div>';
-                $item.html(tempString);
+            };
+            tempString += '</div></div>';
+            $item.html(tempString);
+            if (!itemData.competences) {
                 // User html may be malformed, so savely inject it here.
                 $item.find('.exaport-item-intro').html(itemData.intro);
             }

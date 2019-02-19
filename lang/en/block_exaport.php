@@ -412,6 +412,8 @@ $string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis ePortf
 $string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_userquota'] = 'User quota for Exabis ePortfolio';
 $string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_multiplefilesinitem'] = 'Multiple files in "File" artifact';
+$string['block_exaport_multiplefilesinitem_body'] = 'limit: 10 files';
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';

@@ -599,7 +599,7 @@ namespace {
         ", [$userid]);
     }
 
-    function block_exaport_get_items_shared_to_user($userid, $onlyitems = false) {
+    function block_exaport_get_items_shared_to_user($userid, $onlyitems = false, $itemid = null) {
         global $DB;
 
         // Categories for user groups.
@@ -612,6 +612,7 @@ namespace {
                 " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
                 " FROM {user} u".
                 " JOIN {block_exaportcate} c ON u.id=c.userid".
+                ($itemid && $itemid > 0 ? " JOIN {block_exaportitem} i ON c.id = i.categoryid " : "").
                 " LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?".
 
                 " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid ".
@@ -625,6 +626,7 @@ namespace {
                 " AND c.userid!=? ". // Don't show my own categories.
                 " AND internshare = 1 ".
                 " AND u.deleted = 0 ".
+                ($itemid && $itemid > 0 ? " AND i.id = ".intval($itemid) : "").
                 " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture".
                 " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
 
@@ -641,7 +643,7 @@ namespace {
         }
 
         // Get sub categories (recursively).
-        for ($i = 0; $i < count($sharedcategories); $i++) {
+        for ($i = 0, $c = count($sharedcategories); $i < $c; $i++) {
             $subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $sharedcategories[$i]], null, 'id, id as tmp');
             foreach ($subcategories as $categoryid) {
                 if (!in_array($categoryid, $sharedcategories)) {
@@ -658,18 +660,36 @@ namespace {
 
             foreach ($sharedusers as $key => $userid) {
                 // Only items for customise blocks. for views_mod.php. Or for check is shared.
-                $query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ".
-                        " ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
-                        " from {block_exaportitem} i".
-                        " left join {block_exaportcate} ic on i.categoryid = ic.id".
-                        " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-                        " left join {block_exaportitemcomm} com on com.itemid = i.id".
-                        " where i.userid=? AND categoryid IN (".$sharedcategorieslist.")".
-                        " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
-                        " ORDER BY i.name";
+                $selectfunc = function($userid, $catlist) {
+                    global $DB;
+                    if (!$catlist) {
+                        return array();
+                    }
+                    $query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ".
+                            " ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
+                            " from {block_exaportitem} i".
+                            " left join {block_exaportcate} ic on i.categoryid = ic.id".
+                            " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
+                            " left join {block_exaportitemcomm} com on com.itemid = i.id".
+                            " where i.userid=? AND categoryid IN (".$catlist.")".
+                            " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
+                            " ORDER BY i.name";
+                    $useritems = $DB->get_records_sql($query, array($userid));
+                    return $useritems;
+                };
+                if (count($sharedcategories) <= 100 ) {
+                    $useritems = $selectfunc($userid, $sharedcategorieslist);
+                    $shareditems = $shareditems + $useritems;
+                } else {
+                    // divide to many queries: TODO: is it helping?
+                    $newcategories = array_chunk($sharedcategories, 100);
+                    foreach ($newcategories as $sharedcats) {
+                        $sharedcategorieslist = implode(',', $sharedcats);
+                        $useritems = $selectfunc($userid, $sharedcategorieslist);
+                        $shareditems = $shareditems + $useritems;
+                    }
+                }
 
-                $useritems = $DB->get_records_sql($query, array($userid));
-                $shareditems = $shareditems + $useritems;
             }
 
             return $shareditems;
@@ -710,7 +730,7 @@ namespace {
                 return $itemdata->userid;
         }
         // Check access by self sharing
-        $itemsforuser = block_exaport_get_items_shared_to_user($userid, true);
+        $itemsforuser = block_exaport_get_items_shared_to_user($userid, true, $itemid);
         if (array_key_exists($itemid, $itemsforuser)) {
             return $itemsforuser[$itemid]->userid;
         } else {

@@ -329,7 +329,7 @@ if ($showinformation) {
 
     $description = file_rewrite_pluginfile_urls($description,
             'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'personal_information_self', null);
-    echo $description;
+    echo block_exaport_html_secure($description);
 
     echo '</td></tr></table>'."\n\n";
 
@@ -354,6 +354,7 @@ if ($showinformation) {
     // Cover.
     $cover = file_rewrite_pluginfile_urls($resume->cover, 'pluginfile.php',
             context_user::instance($USER->id)->id, 'block_exaport', 'resume_cover', $resume->id);
+    $cover = block_exaport_html_secure($cover);
     echo block_exaport_form_resume_part($courseid, 'cover',
             get_string('resume_cover', 'block_exaport'), $cover, 'edit', $type);
     // Education history.

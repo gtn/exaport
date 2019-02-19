@@ -1458,6 +1458,14 @@ return [
                 'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
                 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
         ],
+        'block_exaport_multiplefilesinitem' => [
+                'Mehrere Dateien in Datei-Artefakt hochladen',
+                'Multiple files in "File" artifact',
+        ],
+        'block_exaport_multiplefilesinitem_body' => [
+                'limit: 10 Dateien',
+                'limit: 10 files',
+        ],
         'block_exaport_app_alloweditdelete_head' => [
                 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen',
                 'Students are allowed to edit and delete items after teacher reviews',

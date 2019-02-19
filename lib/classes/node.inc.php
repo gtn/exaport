@@ -81,7 +81,7 @@ class MiniXMLNode extends MiniXMLTreeComponent {
 	** Constructor.  Creates a new MiniXMLNode object.
 	**
 	*/
-	function MiniXMLNode ($value=NULL, $escapeEntities=NULL)
+	function __construct ($value=NULL, $escapeEntities=NULL)
 	{
 		$this->MiniXMLTreeComponent();
 		$this->xtext = NULL;

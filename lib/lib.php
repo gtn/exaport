@@ -37,20 +37,31 @@ require_once(__DIR__.'/sharelib.php');
 /*** FILE FUNCTIONS **********************************************************************/
 
 /**
- * @param $item
- * @param $type
- * @return stored_file
+ * @param mixed $item
+ * @param string $type
+ * @param bool $onlyfirst
+ * @return mixed
  */
-function block_exaport_get_file($item, $type) {
+function block_exaport_get_file($item, $type, $onlyfirst = false) {
+    global $CFG;
     $fs = get_file_storage();
     $files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
-
     // Return first file.
+    if ($onlyfirst) {
+        return reset($files);
+    }
+    if ($CFG->block_exaport_multiple_files_in_item) {
+        return $files;
+    }
     return reset($files);
 }
 
-function block_exaport_get_item_file($item) {
-    return block_exaport_get_file($item, 'item_file');
+function block_exaport_get_item_file($item, $onlysingle = true) {
+    global $CFG;
+    if ($CFG->block_exaport_multiple_files_in_item && !$onlysingle) {
+        return block_exaport_get_file($item, 'item_file'); // Multiple files
+    }
+    return block_exaport_get_file($item, 'item_file', true); // only one file
 }
 
 function block_exaport_get_category_icon($category) {
@@ -964,7 +975,7 @@ function block_exaport_create_user_category($title, $userid, $parentid = 0, $cou
 function fill_view_with_artefacts($viewid, $existingartefacts = '') {
     global $DB, $USER;
 
-    $artefacts = block_exaport_get_portfolio_items(1);
+    $artefacts = block_exaport_get_portfolio_items(1, null, false);
     if ($existingartefacts <> '') {
         $existingartefactsarray = explode(',', $existingartefacts);
         $filledartefacts = $existingartefacts;
@@ -1118,7 +1129,7 @@ function block_exaport_get_view_blocks($view) {
     return $blocks;
 }
 
-function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
+function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $withshareditems = true) {
     global $DB, $USER;
     if ($epopwhere == 1) {
         $addwhere = " AND ".block_exaport_get_item_where();
@@ -1131,13 +1142,13 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
     } else {
         $where = " i.userid=? ".$addwhere;
     }
-    $query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ic.id AS catid, ".
-            " ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
-            " from {block_exaportitem} i".
-            " left join {block_exaportcate} ic on i.categoryid = ic.id".
-            " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-            " left join {block_exaportitemcomm} com on com.itemid = i.id".
-            " where ".$where.
+    $query = "SELECT i.id, i.name, i.type, i.intro AS intro, i.url AS link, ic.name AS cname, ic.id AS catid, ".
+            " ic2.name AS cname_parent, i.userid, COUNT(com.id) AS comments".
+            " FROM {block_exaportitem} i".
+            " LEFT JOIN {block_exaportcate} ic ON i.categoryid = ic.id".
+            " LEFT JOIN {block_exaportcate} ic2 ON ic.pid = ic2.id".
+            " LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id".
+            " WHERE ".$where.
             " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
             " ORDER BY i.name";
     $portfolioitems = $DB->get_records_sql($query, array($USER->id));
@@ -1146,8 +1157,12 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
     }
 
     // Add shared items.
-    $shareditems = block_exaport_get_items_shared_to_user($USER->id, true);
-    $portfolioitems = $portfolioitems + $shareditems;
+    if ($withshareditems) {
+        $shareditems = block_exaport_get_items_shared_to_user($USER->id, true);
+        $portfolioitems = $portfolioitems + $shareditems;
+    }
+
+    $fs = get_file_storage();
 
     foreach ($portfolioitems as $item) {
         if (null == $item->cname) {
@@ -1171,6 +1186,17 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null) {
                     $catid = $cat->pid;
                 } else {
                     break;
+                }
+            }
+        }
+
+        if ($item->type == 'file') {
+            // if not icon - store information about count of related files
+            if (!($iconfile = block_exaport_get_file($item, 'item_iconfile', true))) {
+                $files = block_exaport_get_item_file($item, false);
+                $item->filescount = 1;
+                if (is_array($files) && count($files) > 1) {
+                    $item->filescount = count($files);
                 }
             }
         }
@@ -1595,4 +1621,133 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
 function block_exaport_securephrase_viewemail(&$view, $email) {
     // Secure phrase relates to the email.
     return substr(sha1(rand().$view->id.$email.time().rand()), rand(0, 7), 32);
+}
+
+function block_exaport_mix_images($sourceimages = array()) {
+    global $PAGE, $CFG;
+    $width = 90;
+    $height = 90;
+    $tempimages = array();
+    //$fs = get_file_storage();
+    $PAGE->set_context(context_system::instance());
+    $output = block_exaport_get_renderer();
+    //$themedir = $output->get_theme_dir();
+    $pixdir = $CFG->dirroot.'/pix/';
+
+    $circlepointcoordinates = function($countallpoints, $currentpoint, $iconwidth, $iconheight) use ($width, $height) {
+        $radius = ceil(min($width, $height) / 4);
+        $alpha = 360 / $countallpoints;
+        $angle = $alpha * $currentpoint;
+        $x = ceil($radius * cos(deg2rad($angle)));
+        $y = ceil($radius * sin(deg2rad($angle)));
+        // with using of image axis
+        $x = $x + ceil($width / 2);
+        $y = $y + ceil($height / 2);
+        // correction by icon sizes
+        $x = $x - ceil($iconwidth / 2);
+        $y = $y - ceil($iconheight / 2);
+        return array($x, $y);
+    };
+
+    foreach ($sourceimages as $image) {
+        //$imagefile = $image->getFile
+        if ($image->is_valid_image()) {
+            //$tempfile = $fs->create_file_from_pathname($image, $image->filepath);
+            $tempimgcontent = $image->get_content();
+        } else {
+            //$tempfile = $output->image_url(file_file_icon($image, 90));
+            $tempfile = $pixdir.file_file_icon($image, $width).'.png';
+            $tempimgcontent = file_get_contents($tempfile);
+        }
+        if ($t = imagecreatefromstring($tempimgcontent)) {
+            $tempimages[] = $t;
+        }
+    }
+    if (count($tempimages) > 0) {
+        $resimage = imagecreatetruecolor($width, $height);
+        //imagesavealpha($resimage, true);
+        //$trans_background = imagecolorallocatealpha($resimage, 0, 0, 0, 127);
+        $black = imagecolorallocate($resimage, 0, 0, 0);
+        imagefill($resimage, 0, 0, $black);
+        imagecolortransparent($resimage, imagecolorallocate($resimage, 0, 0, 0));
+        /** @var resource tmpimg */
+        $copy = 0;
+        // subicon sizes
+        $imagecount = count($tempimages);
+        switch ($imagecount) {
+            case 2:
+                $proportion = 60; break;
+            case 3:
+                $proportion = 50; break;
+            default:
+                $proportion = 40; break;
+        }
+        //$proportion = 40;
+        $newwidth = ceil($width * $proportion / 100);
+        $newheight = ceil($height * $proportion / 100);
+        // round mask
+        $mask = imagecreatetruecolor($newwidth, $newheight);
+        $black = imagecolorallocate($mask, 0, 0, 0);
+        $magenta = imagecolorallocate($mask, 255, 0, 255);
+        $white = imagecolorallocate($mask, 255, 255, 255);
+        $gray = imagecolorallocate($mask, 230, 230, 230);
+        imagefill($mask, 0, 0, $magenta);
+        $r = min($newwidth, $newheight);
+        // with the border
+        imagefilledellipse($mask, ($newwidth / 2), ($newheight / 2), $r, $r, $gray);
+        imagefilledellipse($mask, ($newwidth / 2), ($newheight / 2), $r-2, $r-2, $white);
+        imagefilledellipse($mask, ($newwidth / 2), ($newheight / 2), $r-5, $r-5, $black); // for white circle border
+        imagecolortransparent($mask, $black);
+        foreach ($tempimages as $tmpimg) {
+            $sizex = imagesx($tmpimg);
+            $sizey = imagesy($tmpimg);
+            $centerx = ceil($sizex / 2);
+            $centery = ceil($sizey / 2);
+            $ratio = $sizex / $sizey; // width/height
+            // wee need to have smallest side = newsize ($newwidth or $newheight)
+            if ($sizex > $sizey) {
+                $sizex = ceil($sizex - ($sizey * abs($ratio - $newwidth / $newheight)));
+            } else {
+                $sizey = ceil($sizey - ($sizey * abs($ratio - $newwidth / $newheight)));
+            }
+
+            $newtmpimg = imagecreatetruecolor($newwidth, $newheight);
+            // crop icon to small size (from center)
+            imagecopyresampled($newtmpimg, $tmpimg, 0, 0, ceil($centerx - ($sizex / 2)), ceil($centery - ($sizey / 2)), $newwidth, $newheight, $sizex, $sizey);
+            imagedestroy($tmpimg);
+            $tmpimg = $newtmpimg;
+            imagecolortransparent($tmpimg, imagecolorallocate($tmpimg, 255, 0, 255));
+            imagecopymerge($tmpimg, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
+
+            // position calculating (line)
+            //$posX = ceil($copy * $newwidth / 1.75);
+            //$posY = ceil($copy * $newwidth / 1.75);
+
+            // insert via circle points
+            list ($posX, $posY) = $circlepointcoordinates($imagecount, $copy, $newwidth, $newheight);
+            imagecopy($resimage, $tmpimg, $posX, $posY, 0, 0, $newwidth, $newheight);
+            $copy++;
+        }
+        // return result image
+        header('Content-Type: image/png');
+        imagepng($resimage);
+        // free memory!
+        imagedestroy($resimage);
+        foreach ($tempimages as $tmpimg) {
+            imagedestroy($tmpimg);
+        }
+
+    }
+    return true;
+}
+
+/**
+ * clean HTML code for next displaying. Must be modified more and more id need
+ * @param string $content
+ * @param string $format
+ * @return string
+ */
+function block_exaport_html_secure($content = '', $format = FORMAT_HTML) {
+    $content = format_text($content, $format, ['newlines' => false]);
+    return $content;
 }

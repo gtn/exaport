@@ -19,6 +19,8 @@ require_once(__DIR__.'/inc.php');
 
 $itemid = optional_param('item_id', -1, PARAM_INT);
 $access = optional_param('access', '', PARAM_TEXT);
+// sometimes for artifacts with multiple images
+$imageindex = optional_param('imindex', '', PARAM_INT);
 
 $item = null;
 
@@ -49,7 +51,7 @@ if (empty($item)) {
 }
 
 // Custom Icon file.
-if ($iconfile = block_exaport_get_file($item, 'item_iconfile')) {
+if ($iconfile = block_exaport_get_file($item, 'item_iconfile', true)) {
     send_stored_file($iconfile);
     exit;
 }
@@ -57,11 +59,38 @@ if ($iconfile = block_exaport_get_file($item, 'item_iconfile')) {
 switch ($item->type) {
     case "file":
         // Thumbnail of file.
-        $file = block_exaport_get_item_file($item);
+        $file = block_exaport_get_item_file($item, false);
         // Serve file.
-        if ($file && $file->is_valid_image()) {
-            send_stored_file($file, 1);
-            exit;
+        if ($file && ($imageindex || $imageindex === 0  )) {
+            $filevalues = array_values($file);
+            $singleFile = $filevalues[$imageindex];
+            if ($singleFile->is_valid_image()) {
+                send_stored_file($singleFile, 1);
+                exit;
+            }
+            $file = $singleFile;
+        } else if ($file) {
+            if (is_array($file)) {
+                if (count($file) > 1) {
+                    $mixedimage = block_exaport_mix_images($file);
+                    //$file->is_valid_image()
+                    //send_stored_file($file, 1);  // !!!!!!!!!!!!!!! may be make composite of images?
+                    echo 'mixed image';
+                    exit;
+                } else {
+                    $singleFile = reset($file);
+                    if ($singleFile->is_valid_image()) {
+                        send_stored_file($singleFile, 1);
+                        exit;
+                    }
+                    $file = $singleFile;
+                }
+            } else {
+                if ($file->is_valid_image()) {
+                    send_stored_file($file, 1);
+                    exit;
+                }
+            }
         }
 
         $output = block_exaport_get_renderer();

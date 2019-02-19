@@ -373,11 +373,11 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
         // Title/description block.
         switch ($type) {
             case 'edu':
-                $position = $record->qualname;
+                $position = block_exaport_html_secure($record->qualname, FORMAT_PLAIN);
                 if ($position) {
-                    $position .= ' ('.$record->qualtype.')';
+                    $position .= ' ('.block_exaport_html_secure($record->qualtype, FORMAT_PLAIN).')';
                 } else {
-                    $position .= $record->qualtype;
+                    $position .= block_exaport_html_secure($record->qualtype, FORMAT_PLAIN);
                 };
                 if ($position) {
                     $position .= ' at ';
@@ -386,52 +386,52 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 if ($record->qualdescription) {
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
-                $table->data[$itemindex]['title'] .= $position.$record->institution.'</strong>';
+                $table->data[$itemindex]['title'] .= $position.block_exaport_html_secure($record->institution, FORMAT_PLAIN).'</strong>';
                 if ($record->qualdescription) {
                     $table->data[$itemindex]['title'] .= '</a>';
                 };
-                $table->data[$itemindex]['title'] .= '<div>'.$record->startdate.
-                        (isset($record->enddate) && $record->enddate <> '' ? ' - '.$record->enddate : '').'</div>';
-                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.$record->qualdescription.'</div>';
+                $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->startdate, FORMAT_PLAIN).
+                        (isset($record->enddate) && $record->enddate <> '' ? ' - '.block_exaport_html_secure($record->enddate, FORMAT_PLAIN) : '').'</div>';
+                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->qualdescription).'</div>';
                 break;
             case 'employ':
                 $table->data[$itemindex]['title'] = '<strong>';
                 if ($record->positiondescription) {
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
-                $table->data[$itemindex]['title'] .= $record->jobtitle.': '.$record->employer.'</strong>';
+                $table->data[$itemindex]['title'] .= block_exaport_html_secure($record->jobtitle, FORMAT_PLAIN).': '.block_exaport_html_secure($record->employer, FORMAT_PLAIN).'</strong>';
                 if ($record->positiondescription) {
                     $table->data[$itemindex]['title'] .= '</a>';
                 };
-                $table->data[$itemindex]['title'] .= '<div>'.$record->startdate.
-                        (isset($record->enddate) && $record->enddate <> '' ? ' - '.$record->enddate : '').'</div>';
-                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.$record->positiondescription.'</div>';
+                $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->startdate, FORMAT_PLAIN).
+                        (isset($record->enddate) && $record->enddate <> '' ? ' - '.block_exaport_html_secure($record->enddate, FORMAT_PLAIN) : '').'</div>';
+                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->positiondescription).'</div>';
                 break;
             case 'certif':
                 $table->data[$itemindex]['title'] = '<strong>';
                 if ($record->description) {
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
-                $table->data[$itemindex]['title'] .= $record->title.'</strong>';
+                $table->data[$itemindex]['title'] .= block_exaport_html_secure($record->title, FORMAT_PLAIN).'</strong>';
                 if ($record->description) {
                     $table->data[$itemindex]['title'] .= '</a>';
                 };
-                $table->data[$itemindex]['title'] .= '<div>'.$record->date.'</div>';
-                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.$record->description.'</div>';
+                $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->date, FORMAT_PLAIN).'</div>';
+                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->description).'</div>';
                 break;
             case 'public':
                 $table->data[$itemindex]['title'] = '<strong>';
                 if ($record->contributiondetails) {
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
-                $table->data[$itemindex]['title'] .= $record->title.' ('.$record->contribution.')</strong>';
+                $table->data[$itemindex]['title'] .= block_exaport_html_secure($record->title, FORMAT_PLAIN).' ('.block_exaport_html_secure($record->contribution, FORMAT_PLAIN).')</strong>';
                 if ($record->contributiondetails) {
                     $table->data[$itemindex]['title'] .= '</a>';
                 };
-                $table->data[$itemindex]['title'] .= '<div>'.$record->date.'</div>';
-                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.$record->contributiondetails;
+                $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->date, FORMAT_PLAIN).'</div>';
+                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->contributiondetails);
                 if ($record->url) {
-                    $table->data[$itemindex]['title'] .= '<br><a href="'.$record->url.'">'.$record->url.'</a>';
+                    $table->data[$itemindex]['title'] .= '<br><a href="'.s($record->url).'">'.s($record->url).'</a>';
                 };
                 $table->data[$itemindex]['title'] .= '</div>';
                 break;
@@ -440,13 +440,13 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 if ($record->description) {
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
-                $table->data[$itemindex]['title'] .= $record->title.'</strong>';
+                $table->data[$itemindex]['title'] .= block_exaport_html_secure($record->title, FORMAT_PLAIN).'</strong>';
                 if ($record->description) {
                     $table->data[$itemindex]['title'] .= '</a>';
                 };
-                $table->data[$itemindex]['title'] .= '<div>'.$record->startdate.
-                        (isset($record->enddate) && $record->enddate <> '' ? ' - '.$record->enddate : '').'</div>';
-                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.$record->description.'</div>';
+                $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->startdate, FORMAT_PLAIN).
+                        (isset($record->enddate) && $record->enddate <> '' ? ' - '.block_exaport_html_secure($record->enddate, FORMAT_PLAIN) : '').'</div>';
+                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->description).'</div>';
                 break;
             case 'badges':
                 $badge = $DB->get_record_sql('SELECT b.*, bi.dateissued, bi.uniquehash '.
@@ -457,14 +457,14 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 if ($badge->description) {
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
-                $table->data[$itemindex]['title'] .= $badge->name.'</strong>';
+                $table->data[$itemindex]['title'] .= block_exaport_html_secure($badge->name, FORMAT_PLAIN).'</strong>';
                 if ($badge->description) {
                     $table->data[$itemindex]['title'] .= '</a>';
                 };
                 $dateformat = get_string('strftimedate', 'langconfig');
                 $badgeimage = block_exaport_get_user_badge_image($badge);
                 $table->data[$itemindex]['title'] .= '<div>'.userdate($badge->dateissued, $dateformat).'</div>'.
-                                                '<div class="expandable-text hidden">'.$badge->description.$badgeimage.'</div>';
+                                                '<div class="expandable-text hidden">'.block_exaport_html_secure($badge->description).$badgeimage.'</div>';
                 break;
             default:
                 break;
@@ -596,7 +596,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
         if ($description <> '') {
             $table->data[$itemindex]['title'] = '<a name="'.$type.$element.'"></a><a href="#" class="expandable-head">'.
                     get_string('resume_'.$type.$element, 'block_exaport').'</a>';
-            $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.$description.'</div>';
+            $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($description).'</div>';
         } else {
             $table->data[$itemindex]['title'] = '<a name="'.$type.$element.'"></a>'.
                                                     get_string('resume_'.$type.$element, 'block_exaport');
@@ -1025,6 +1025,8 @@ function clean_for_external_xml($text = '') {
     $result = $text;
     // Img.
     $result = preg_replace("/<img[^>]+\>/i", "", $result);
+    // html
+    $result = block_exaport_html_secure($result);
     return $result;
 }
 
@@ -1068,12 +1070,12 @@ function europass_xml_employers_educations($dom, $type, $data) {
         case 'WorkExperience':
             $orgname = 'employer';
             $orgaddress = 'employeraddress';
-            $activities = 'positiondescription';
+            $activitiesfield = 'positiondescription';
             break;
         case 'Education':
             $orgname = 'institution';
             $orgaddress = 'institutionaddress';
-            $activities = 'qualdescription';
+            $activitiesfield = 'qualdescription';
             break;
     }
 
@@ -1118,9 +1120,9 @@ function europass_xml_employers_educations($dom, $type, $data) {
             $experienceitem->appendChild($title);
         };
         // Activities.
-        if ($dataitem->{$activities} <> '') {
+        if ($dataitem->{$activitiesfield} <> '') {
             $activities = $dom->createElement('Activities');
-            $text = $dom->createTextNode($dataitem->{$activities});
+            $text = $dom->createTextNode($dataitem->{$activitiesfield});
             $activities->appendChild($text);
             $experienceitem->appendChild($activities);
         };
@@ -1164,8 +1166,12 @@ function europass_xml_employers_educations($dom, $type, $data) {
                 false);
         if (count($files) > 0) {
             $filearray = europass_xml_get_attached_file_contents($files);
-            $documentation = europass_xml_documentation_list($dom, $filearray);
-            $experienceitem->appendChild($documentation);
+            if (count($filearray) > 0) {
+                $documentation = europass_xml_documentation_list($dom, $filearray);
+                if ($documentation) {
+                    $experienceitem->appendChild($documentation);
+                }
+            }
         };
         $experiencelist->appendChild($experienceitem);
     };
@@ -1217,8 +1223,12 @@ function europass_xml_achievement($dom, $type, $ids = array(), $atitle, $content
     };
     if (count($files) > 0) {
         $filearray = europass_xml_get_attached_file_contents($files);
-        $documentation = europass_xml_documentation_list($dom, $filearray);
-        $achievement->appendChild($documentation);
+        if (count($filearray)) {
+            $documentation = europass_xml_documentation_list($dom, $filearray);
+            if ($documentation) {
+                $achievement->appendChild($documentation);
+            }
+        }
     };
     return $achievement;
 }
@@ -1265,6 +1275,7 @@ function list_for_resume_elements($resumeid, $tablename) {
 // fileid => filename.
 function europass_xml_get_attached_file_contents($files) {
     global $attachedfilenames, $attachedfiledatas, $attachedfilemimetypes;
+    $arrayids = array();
     $chars = '123456789';
     $numchars = strlen($chars);
     foreach ($files as $file) {

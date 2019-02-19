@@ -161,27 +161,43 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                 if ($item->type == "file") {
                     $select = "contextid='".context_user::instance($item->userid)->id."' ".
                             " AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";
-                    if ($file = $DB->get_record_select('files', $select, null, 'id, filename, mimetype, filesize')) {
-                        if (strpos($file->mimetype, "image") !== false) {
-                            $imgsrc = $CFG->wwwroot."/pluginfile.php/".context_user::instance($item->userid)->id.
-                                    "/".'block_exaport'."/".'item_file'."/view/".$access."/itemid/".$item->id."/".$file->filename;
-                            echo '<div class="view-item-image"><img src="'.$imgsrc.'" alt=""/></div>';
-                        } else {
-                            // Link to file.
-                            $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access.
-                                                        "&itemid=".$item->id);
-                            // Human filesize.
-                            $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-                            $power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
-                            $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',').' '.$units[$power];
-                            // Fileinfo block.
-                            $fileparams = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> '.
-                                    '<span class="filedescription">('.$filesize.')</span></div>';
-                            if (block_exaport_is_valid_media_by_filename($file->filename)) {
-                                echo '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.
-                                        '/blocks/exaport/pix/media.png" alt=""/></div>';
+                    if ($files = $DB->get_records_select('files', $select, null, 'id, filename, mimetype, filesize')) {
+                        if (is_array($files)) {
+                            $width = '';
+                            if (count($files) > 5) {
+                                $width = 's35';
+                            } elseif (count($files) > 3) {
+                                $width = 's40';
+                            } elseif (count($files) > 2) {
+                                $width = 's50';
+                            } elseif (count($files) > 1) {
+                                $width = 's75';
                             }
-                        };
+
+                            foreach ($files as $file) {
+                                if (strpos($file->mimetype, "image") !== false) {
+                                    $imgsrc = $CFG->wwwroot."/pluginfile.php/".context_user::instance($item->userid)->id.
+                                            "/".'block_exaport'."/".'item_file'."/view/".$access."/itemid/".$item->id."/".
+                                            $file->filename;
+                                    echo '<div class="view-item-image"><img src="'.$imgsrc.'" class="'.$width.'" alt=""/></div>';
+                                } else {
+                                    // Link to file.
+                                    $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access.
+                                            "&itemid=".$item->id."&inst=".$file->pathnamehash);
+                                    // Human filesize.
+                                    $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+                                    $power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
+                                    $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',').' '.$units[$power];
+                                    // Fileinfo block.
+                                    $fileparams = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> '.
+                                            '<span class="filedescription">('.$filesize.')</span></div>';
+                                    if (block_exaport_is_valid_media_by_filename($file->filename)) {
+                                        echo '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.
+                                                '/blocks/exaport/pix/media.png" alt=""/></div>';
+                                    }
+                                };
+                            }
+                        }
                     };
                 } else if ($item->type == "link") {
                     echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.
@@ -202,7 +218,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                 $intro = format_text($intro, FORMAT_HTML);
                 echo $fileparams;
                 echo '<div class="view-item-text">';
-                if ($item->url) {
+                if ($item->url && $item->url != "false") {
                     // Link.
                     echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
                 }

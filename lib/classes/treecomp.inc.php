@@ -74,7 +74,7 @@ class MiniXMLTreeComponent {
 	** Constructor.  Creates a new MiniXMLTreeComponent object.
 	**
 	*/
-	function MiniXMLTreeComponent ()
+	function __construct()
 	{
 		$this->xparent = NULL;
 	} /* end MiniXMLTreeComponent constructor */

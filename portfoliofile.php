@@ -43,6 +43,7 @@ if (empty($CFG->filelifetime)) {
 $relativepath = get_file_argument('portfoliofile.php');
 $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
+$inst = optional_param('inst', 0, PARAM_ALPHANUM);
 $userhash = optional_param('hv', 0, PARAM_ALPHANUM);
 // Old elove token - moodle sometimes uses wstoken, sometimes token.
 $token = optional_param('token', null, PARAM_ALPHANUM);
@@ -111,10 +112,24 @@ if ($itemid) {
         }
         $file = block_exaport_get_item_comment_file($comment->id);
     } else {
-        $file = block_exaport_get_item_file($item);
+        $file = block_exaport_get_item_file($item, false);
+        if (is_array($file) && count($file) > 1) {
+            $file = $file[$inst]; // If multiple files - return file with &inst=X
+        } else if (is_array($file)) {
+            $file = array_shift($file);
+        }
     }
 
     if ($file) {
+        // TODO: check this code
+        $mimetype = $file->get_mimetype();
+        if (strpos($mimetype, 'html') !== false || strpos($mimetype, 'text') === true) { // clean HTML ; TODO: 'text' - do we need?
+            $tempfilecontent = $file->get_content();
+            $tempfilecontent = clean_text($tempfilecontent, FORMAT_HTML, ['newlines' => false]);
+            readstring_accel($tempfilecontent, $mimetype, false);
+            die;
+        }
+
         send_stored_file($file, 1);
     } else {
         not_found();
@@ -136,7 +151,6 @@ if ($itemid) {
     if ($args[0] != 'exaport') {
         error('No valid arguments supplied');
     }
-
     if ($args[1] == 'temp') {
         if ($args[2] == 'export') {
             $args[3] = $accessuserid = clean_param($args[3], PARAM_INT);
@@ -188,9 +202,10 @@ send_file($filepath, basename($filepath), $lifetime, $CFG->filteruploadedfiles, 
 function not_found($courseid = 0) {
     global $CFG;
     header('HTTP/1.0 404 not found');
-    if ($courseid > 0) {
-        error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); // This is not displayed on IIS?
-    } else {
-        error(get_string('filenotfound', 'error')); // This is not displayed on IIS??
-    }
+    //if ($courseid > 0) {
+        //error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); // This is not displayed on IIS?
+    //} else {
+    //    error(get_string('filenotfound', 'error')); // This is not displayed on IIS??
+    //}
+    print_error("filenotfound", "block_exaport");
 }

@@ -81,7 +81,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	/* MiniXMLElement NAME
 	** Creates and inits a new MiniXMLElement
 	*/
-	function MiniXMLElement ($name=NULL)
+	function __construct($name=NULL)
 	{
 		$this->MiniXMLTreeComponent();
 		$this->xname = NULL;
@@ -1434,7 +1434,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 
 class MiniXMLElementComment extends MiniXMLElement {
 
-	function MiniXMLElementComment ($name=NULL)
+	function __construct ($name=NULL)
 	{
 		$this->MiniXMLElement('!--');
 	}
@@ -1535,7 +1535,7 @@ class MiniXMLElementCData extends MiniXMLElement {
 		
 	
 	
-	function MiniXMLElementCData ($contents)
+	function __construct ($contents)
 	{
 		
 		$this->MiniXMLElement('CDATA');
@@ -1607,7 +1607,7 @@ class MiniXMLElementDocType extends MiniXMLElement {
 
 	var $dtattr;
 	
-	function MiniXMLElementDocType ($attr)
+	function __construct($attr)
 	{
 		$this->MiniXMLElement('DOCTYPE');
 		$this->dtattr = $attr;
@@ -1698,7 +1698,7 @@ class MiniXMLElementEntity extends MiniXMLElement {
 
 
 	
-	function MiniXMLElementEntity  ($name, $value=NULL)
+	function __construct ($name, $value=NULL)
 	{
 		
 		$this->MiniXMLElement($name);

@@ -157,7 +157,6 @@ namespace {
                     "  OR (v.shareall=0 AND vshar.userid IS NOT NULL) ".
                     ($usergroups ? " OR vgshar.groupid IN (".join(',', array_keys($usergroups)).") " : "").
                     ")", array($USER->id, $userid, $viewid, $USER->id)); // Shared for me.
-
             if (!$view) {
                 // View not found.
                 return;
@@ -191,7 +190,6 @@ namespace {
             $view->access = new stdClass();
             $view->access->request = 'extern';
         }
-
         return $view;
     }
 
@@ -285,7 +283,6 @@ namespace {
 
             $item->access = $view->access;
             $item->access->page = 'view';
-
             // Comments allowed?
             if ($item->access->request == 'extern') {
                 $item->allowComments = false;
@@ -604,7 +601,6 @@ namespace {
 
         // Categories for user groups.
         $usercats = block_exaport_get_group_share_categories($userid);
-
         // All categories and users who shared.
         $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
         $categories = $DB->get_records_sql(
@@ -623,13 +619,13 @@ namespace {
                 // Shared for you group.
                 ($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") " : ""). // Add group shareing categories.
                 ")".
-                " AND c.userid!=? ". // Don't show my own categories.
+                " AND c.userid != ? ". // Don't show my own categories.
                 " AND internshare = 1 ".
                 " AND u.deleted = 0 ".
                 ($itemid && $itemid > 0 ? " AND i.id = ".intval($itemid) : "").
                 " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture".
                 " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
-
+        return array();
         // Get users for grouping later.
         $sharedusers = array();
         $sharedcategories = array();
@@ -641,7 +637,6 @@ namespace {
                 $sharedcategories[] = $categorie->id;
             }
         }
-
         // Get sub categories (recursively).
         for ($i = 0, $c = count($sharedcategories); $i < $c; $i++) {
             $subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $sharedcategories[$i]], null, 'id, id as tmp');
@@ -657,7 +652,6 @@ namespace {
 
         if ($onlyitems) {
             $shareditems = [];
-
             foreach ($sharedusers as $key => $userid) {
                 // Only items for customise blocks. for views_mod.php. Or for check is shared.
                 $selectfunc = function($userid, $catlist) {

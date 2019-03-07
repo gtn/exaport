@@ -862,6 +862,43 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $DB->execute($sql);
     }
 
+    if ($oldversion < 2019030702) {
+        // add indexes
+        $tableswithindexes = array(
+            'block_exaportcate' => array('pid', 'userid', 'shareall', 'internshare', 'structure_shareall', 'structure_share'),
+            'block_exaportcatshar' => array('catid', 'userid'),
+            'block_exaportcatgroupshar' => array('catid', 'groupid'),
+            'block_exaportitem' => array('userid', 'type', 'categoryid', 'shareall'),
+            'block_exaportitemshar' => array('itemid', 'userid'),
+            'block_exaportitemcomm' => array('itemid', 'userid'),
+            'block_exaportview' => array('hash', 'userid', 'shareall'),
+            'block_exaportviewblock' => array('viewid', 'itemid'),
+            'block_exaportviewshar' => array('viewid', 'userid'),
+            'block_exaportviewgroupshar' => array('viewid', 'groupid'),
+            'block_exaportresume' => array('user_id'),
+            'block_exaportresume_certif' => array('resume_id'),
+            'block_exaportresume_edu' => array('resume_id'),
+            'block_exaportresume_employ' => array('resume_id'),
+            'block_exaportresume_mbrship' => array('resume_id'),
+            'block_exaportresume_public' => array('resume_id'),
+            'block_exaportresume_badges' => array('resumeid', 'badgeid'),
+            'block_exaportcompresume_mm' => array('compid', 'resumeid'),
+            'block_exaportcat_structshar' => array('catid', 'userid'),
+            'block_exaportcat_strgrshar' => array('catid', 'groupid'),
+            'block_exaportviewemailshar' => array('viewid'),
+        );
+        foreach ($tableswithindexes as $tablename => $indexes) {
+            $table = new xmldb_table($tablename);
+            foreach ($indexes as $indexname) {
+                $index = new xmldb_index($indexname, XMLDB_INDEX_NOTUNIQUE, array($indexname));
+                if (!$dbman->index_exists($table, $index)) {
+                    $dbman->add_index($table, $index);
+                }
+            }
+        }
+        upgrade_block_savepoint(true, 2019030702, 'exaport');
+    }
+
     // TODO: delete structure fields / tables.
 
     return $result;

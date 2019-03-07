@@ -1048,6 +1048,7 @@ function block_exaport_get_view_blocks($view) {
     global $DB, $USER;
 
     $portfolioitems = block_exaport_get_portfolio_items();
+
     if (isset($view->userid)) {
         $userid = $view->userid;
     } else {

@@ -42,10 +42,10 @@
 		<FIELD NAME="stid" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="schooltypeid"/>
 		<FIELD NAME="sourcemod" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="modus of category exacomp schooltype=3, subject=5, topic=7"/>
 		<FIELD NAME="name_short" TYPE="char" LENGTH="500" NOTNULL="false" SEQUENCE="false"/>
-	<FIELD NAME="shareall" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="0 - did not share; 1 - shared for all; 2 - shared for groups"/>
+		<FIELD NAME="shareall" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="0 - did not share; 1 - shared for all; 2 - shared for groups"/>
 		<FIELD NAME="internshare" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="internal shared"/>
-	<FIELD NAME="structure_shareall" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="for sharing category as structure: 0 - did not share; 1 - shared for all; 2 - shared for groups"/>
-	<FIELD NAME="structure_share" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Sharing category as structure (work with structure_shareall field"/>
+		<FIELD NAME="structure_shareall" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="for sharing category as structure: 0 - did not share; 1 - shared for all; 2 - shared for groups"/>
+		<FIELD NAME="structure_share" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Sharing category as structure (work with structure_shareall field"/>
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="primary key for bookmark categories"/>
@@ -53,6 +53,14 @@
 		<KEY NAME="pid" TYPE="foreign" FIELDS="pid" REFTABLE="block_exaportcate" REFFIELDS="id"/>
 		<KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="pid" UNIQUE="false" FIELDS="pid"/>
+		<INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
+		<INDEX NAME="shareall" UNIQUE="false" FIELDS="shareall"/>
+		<INDEX NAME="internshare" UNIQUE="false" FIELDS="internshare"/>
+		<INDEX NAME="structure_shareall" UNIQUE="false" FIELDS="structure_shareall"/>
+		<INDEX NAME="structure_share" UNIQUE="false" FIELDS="structure_share"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportcatshar" COMMENT="information to which categories is shared to other users">
 	  <FIELDS>
@@ -63,6 +71,10 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="catid" UNIQUE="false" FIELDS="catid"/>
+		<INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportcatgroupshar" COMMENT="information to which categories are shared to groups">
 	  <FIELDS>
@@ -73,6 +85,10 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="catid" UNIQUE="false" FIELDS="catid"/>
+		<INDEX NAME="groupid" UNIQUE="false" FIELDS="groupid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportitem" COMMENT="User items">
 	  <FIELDS>
@@ -108,6 +124,12 @@
 		<KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
 		<KEY NAME="categoryid" TYPE="foreign" FIELDS="categoryid" REFTABLE="block_exaportcate" REFFIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
+		<INDEX NAME="type" UNIQUE="false" FIELDS="type"/>
+		<INDEX NAME="categoryid" UNIQUE="false" FIELDS="categoryid"/>
+		<INDEX NAME="shareall" UNIQUE="false" FIELDS="shareall"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportitemshar" COMMENT="block_exaportitemshar table retrofitted from MySQL">
 	  <FIELDS>
@@ -124,6 +146,10 @@
 		<KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
 		<KEY NAME="original" TYPE="foreign" FIELDS="original" REFTABLE="user" REFFIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
+		<INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportitemcomm" COMMENT="comments for the items">
 	  <FIELDS>
@@ -138,6 +164,10 @@
 		<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
 		<KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
+		<INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportview" COMMENT="views">
 	  <FIELDS>
@@ -161,6 +191,8 @@
 	  </KEYS>
 	  <INDEXES>
 		<INDEX NAME="hash" UNIQUE="true" FIELDS="hash"/>
+		<INDEX NAME="userid" UNIQUE="true" FIELDS="userid"/>
+		<INDEX NAME="shareall" UNIQUE="true" FIELDS="shareall"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportviewblock" COMMENT="Blocks on the view">
@@ -186,6 +218,10 @@
 		<KEY NAME="view" TYPE="foreign" FIELDS="viewid" REFTABLE="block_exaportview" REFFIELDS="id"/>
 		<KEY NAME="item" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
 	  </KEYS>
+      <INDEXES>
+		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
+		<INDEX NAME="itemid" UNIQUE="true" FIELDS="itemid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportviewshar" COMMENT="information to which users the view is shared">
 	  <FIELDS>
@@ -198,6 +234,10 @@
 		<KEY NAME="view" TYPE="foreign" FIELDS="viewid" REFTABLE="block_exaportview" REFFIELDS="id"/>
 		<KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
+		<INDEX NAME="userid" UNIQUE="true" FIELDS="userid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportviewgroupshar" COMMENT="information to which users the view is shared">
 	  <FIELDS>
@@ -208,6 +248,10 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
+		<INDEX NAME="groupid" UNIQUE="true" FIELDS="groupid"/>
+	  </INDEXES>
 	</TABLE>	
 	<TABLE NAME="block_exaportresume" COMMENT="users resume">
 	  <FIELDS>
@@ -226,6 +270,9 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="user_id" UNIQUE="true" FIELDS="user_id"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_certif" COMMENT="users resume certifications">
 	  <FIELDS>
@@ -239,6 +286,9 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_edu" COMMENT="users resume educations">
 	  <FIELDS>
@@ -256,6 +306,9 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_employ" COMMENT="users resume employments">
 	  <FIELDS>
@@ -272,6 +325,9 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_mbrship" COMMENT="users resume memberships">
 	  <FIELDS>
@@ -286,6 +342,9 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_public" COMMENT="users resume publications">
 	  <FIELDS>
@@ -301,6 +360,9 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_badges" COMMENT="users resume bages">
 	  <FIELDS>
@@ -312,6 +374,10 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="resumeid" UNIQUE="true" FIELDS="resumeid"/>
+		<INDEX NAME="badgeid" UNIQUE="true" FIELDS="badgeid"/>
+	  </INDEXES>
 	</TABLE>		
 	<TABLE NAME="block_exaportcompresume_mm" COMMENT="users resume competence relations">
 	  <FIELDS>
@@ -323,6 +389,10 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="compid" UNIQUE="true" FIELDS="compid"/>
+		<INDEX NAME="resumeid" UNIQUE="true" FIELDS="resumeid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportcat_structshar" COMMENT="block_exaportcat_structshar table retrofitted from MySQL">
 	  <FIELDS>
@@ -333,6 +403,10 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="catid" UNIQUE="true" FIELDS="catid"/>
+		<INDEX NAME="userid" UNIQUE="true" FIELDS="userid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportcat_strgrshar" COMMENT="block_exaportcat_strgrshar table retrofitted from MySQL">
 	  <FIELDS>
@@ -343,6 +417,10 @@
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="catid" UNIQUE="true" FIELDS="catid"/>
+		<INDEX NAME="groupid" UNIQUE="true" FIELDS="groupid"/>
+	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportviewemailshar" COMMENT="the view is shared for these emails">
 	  <FIELDS>
@@ -355,6 +433,9 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 		<KEY NAME="view" TYPE="foreign" FIELDS="viewid" REFTABLE="block_exaportview" REFFIELDS="id"/>
 	  </KEYS>
+	  <INDEXES>
+		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
+	  </INDEXES>
 	</TABLE>
   </TABLES>
 </XMLDB>

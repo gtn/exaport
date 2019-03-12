@@ -1056,9 +1056,10 @@ function block_exaport_get_view_blocks($view) {
     }
     $badges = block_exaport_get_all_user_badges($userid);
 
-    $query = "select b.*".
-            " from {block_exaportviewblock} b".
-            " where b.viewid = ? ORDER BY b.positionx, b.positiony";
+    $query = "SELECT b.* 
+              FROM {block_exaportviewblock} b 
+              WHERE b.viewid = ? 
+              ORDER BY b.positionx, b.positiony";
 
     $allblocks = $DB->get_records_sql($query, array($view->id));
     $blocks = array();
@@ -1109,6 +1110,8 @@ function block_exaport_get_view_blocks($view) {
             }
 
             $block->badge = $badge;
+        } else if ($block->type == 'cv_information') {
+            // any doings now
         } else {
             $block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php',
                                     context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);

@@ -296,6 +296,7 @@ $string['viewlayout8'] = 'Equal widths';
 $string['viewlayout9'] = 'Larger centre columns';
 $string['viewlayout10'] = 'Equal widths';
 $string['personalinformation'] = 'Personal Information';
+$string['cvinformation'] = 'CV Information';
 $string['headertext'] = 'Headertext';
 $string['item'] = 'Item';
 $string['items'] = 'Items';
@@ -345,7 +346,17 @@ $string['cofigureblock_header'] = 'Choose headline';
 $string['cofigureblock_item'] = 'Choose item';
 $string['cofigureblock_media'] = 'Choose media';
 $string['cofigureblock_personalinfo'] = 'Choose personal info';
+$string['cofigureblock_cvinfo'] = 'Choose cv info';
 $string['cofigureblock_badge'] = 'Choose Badges';
+$string['cofigureblock_cvinfo_education_history'] = 'Education history';
+$string['cofigureblock_cvinfo_employment_history'] = 'Employment history';
+$string['cofigureblock_cvinfo_certif'] = 'Certifications, accreditations and awards';
+$string['cofigureblock_cvinfo_public'] = 'Books and publications';
+$string['cofigureblock_cvinfo_mbrship'] = 'Professional memberships';
+$string['cofigureblock_cvinfo_goals'] = 'My goals';
+$string['cofigureblock_cvinfo_skills'] = 'My skills';
+$string['cofigureblock_cvinfo_interests'] = 'Interests';
+$string['in'] = 'at';
 
 // === Desp.
 $string['back_to_desp'] = 'back to language portfolio';

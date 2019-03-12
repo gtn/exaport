@@ -269,7 +269,7 @@ function block_exaport_get_resume_params_record($userid = null) {
     return $DB->get_record('block_exaportresume', $conditions);
 }
 
-function block_exaport_get_resume_params($userid = null) {
+function block_exaport_get_resume_params($userid = null, $full = false) {
     global $DB;
     if ($userid === null) {
         global $USER;
@@ -277,6 +277,37 @@ function block_exaport_get_resume_params($userid = null) {
     }
 
     $resumeparams = block_exaport_get_resume_params_record($userid);
+
+    // add related parameters of resume
+    if ($full) {
+        // TODO: add images?
+        // educations
+        $educations = block_exaport_resume_get_educations($resumeparams->id);
+        if ($educations) {
+            $resumeparams->educations = $educations;
+        }
+        // employments
+        $employments = block_exaport_resume_get_employments($resumeparams->id);
+        if ($employments) {
+            $resumeparams->employments = $employments;
+        }
+        // certifications
+        $certifications = block_exaport_resume_get_certificates($resumeparams->id);
+        if ($certifications) {
+            $resumeparams->certifications = $certifications;
+        }
+        // publications
+        $publications = block_exaport_resume_get_publications($resumeparams->id);
+        if ($publications) {
+            $resumeparams->publications = $publications;
+        }
+        // Professional memberships
+        $profmembershipments = block_exaport_resume_get_profmembershipments($resumeparams->id);
+        if ($profmembershipments) {
+            $resumeparams->profmembershipments = $profmembershipments;
+        }
+    }
+
     return $resumeparams;
 }
 
@@ -318,8 +349,34 @@ function block_exaport_set_resume_mm($table, $fromform) {
     return $id;
 }
 
+function block_exaport_resume_get_educations($resumeid) {
+    return block_exaport_resume_get_mm_records('edu', array('resume_id' => $resumeid));
+}
+
+function block_exaport_resume_get_employments($resumeid) {
+    return block_exaport_resume_get_mm_records('employ', array('resume_id' => $resumeid));
+}
+
+function block_exaport_resume_get_certificates($resumeid) {
+    return block_exaport_resume_get_mm_records('certif', array('resume_id' => $resumeid));
+}
+
+function block_exaport_resume_get_badges($resumeid) {
+    return block_exaport_resume_get_mm_records('badges', array('resumeid' => $resumeid));
+}
+
+function block_exaport_resume_get_publications($resumeid) {
+    return block_exaport_resume_get_mm_records('public', array('resume_id' => $resumeid));
+}
+
+function block_exaport_resume_get_profmembershipments($resumeid) {
+    return block_exaport_resume_get_mm_records('mbrship', array('resume_id' => $resumeid));
+}
+
 function block_exaport_resume_get_mm_records($table, $conditions) {
     global $DB;
+    $wherearr = array();
+    $params = array();
     foreach ($conditions as $field => $value) {
         $wherearr[] = $field.' = ? ';
         $params[] = $value;
@@ -380,7 +437,7 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                     $position .= block_exaport_html_secure($record->qualtype, FORMAT_PLAIN);
                 };
                 if ($position) {
-                    $position .= ' at ';
+                    $position .= ' '.get_string('in', 'block_exaport').' ';
                 }
                 $table->data[$itemindex]['title'] = '<strong>';
                 if ($record->qualdescription) {

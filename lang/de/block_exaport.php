@@ -293,6 +293,7 @@ $string['viewlayout8'] = 'Gleiche Breite';
 $string['viewlayout9'] = 'Mittlere Spalte breiter';
 $string['viewlayout10'] = 'Gleiche Breite';
 $string['personalinformation'] = 'Persönliche Information';
+$string['cvinformation'] = 'Lebenslauf Information';
 $string['headertext'] = 'Kopfzeile';
 $string['item'] = 'Artefakt';
 $string['items'] = 'Artefakte';
@@ -342,7 +343,17 @@ $string['cofigureblock_header'] = 'Konfiguration der Kopfzeile';
 $string['cofigureblock_item'] = 'Auswahl der Artefakte';
 $string['cofigureblock_media'] = 'Medieneintrag';
 $string['cofigureblock_personalinfo'] = 'Pers&ouml;nliche Information';
+$string['cofigureblock_cvinfo'] = 'Lebenslauf Information';
 $string['cofigureblock_badge'] = 'Badges auswählen';
+$string['cofigureblock_cvinfo_education_history'] = 'Bildungs-Karriere';
+$string['cofigureblock_cvinfo_employment_history'] = 'Bildungs-Karriere';
+$string['cofigureblock_cvinfo_certif'] = 'Zertifikate, Akkreditierungen, Auszeichnungen';
+$string['cofigureblock_cvinfo_public'] = 'Bücher und Publikationen';
+$string['cofigureblock_cvinfo_mbrship'] = 'Mitgliedschaften';
+$string['cofigureblock_cvinfo_goals'] = 'Meine Ziele';
+$string['cofigureblock_cvinfo_skills'] = 'Meine Kompetenzen';
+$string['cofigureblock_cvinfo_interests'] = 'Interessen';
+$string['in'] = 'at';
 
 // === Desp.
 $string['back_to_desp'] = 'zurück zum d-ESP';

@@ -212,6 +212,7 @@
 		<FIELD NAME="contentmedia" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
 		<FIELD NAME="width" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
 		<FIELD NAME="height" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="resume_itemtype" TYPE="char" LENGTH="15" NOTNULL="false" SEQUENCE=""/>
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>

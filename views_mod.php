@@ -212,6 +212,8 @@ class block_exaport_view_edit_form extends moodleform {
             case "content" :
                 $mform->addElement('hidden', 'blocks');
                 $mform->setType('blocks', PARAM_RAW);
+                $mform->addElement('hidden', 'resume');
+                $mform->setType('resume', PARAM_RAW);
                 break;
             case "share" :
                 $mform->addElement('checkbox', 'externaccess');
@@ -654,6 +656,8 @@ switch ($action) {
 
 if ($view) {
     $postview->blocks = json_encode(block_exaport_get_view_blocks($view));
+    require_once(__DIR__.'/lib/resumelib.php');
+    $postview->resume = json_encode(block_exaport_get_resume_params($USER->id, true));
 }
 
 require_once($CFG->libdir.'/editor/tinymce/lib.php');
@@ -678,6 +682,11 @@ $translations = array(
         'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media',
         'view_specialitem_badge', 'view_specialitem_text_defaulttext',
         'viewitem', 'comments', 'category', 'link', 'type', 'personalinformation',
+        'cvinformation', 'cofigureblock_cvinfo_education_history', 'cofigureblock_cvinfo_employment_history',
+        'cofigureblock_cvinfo_certif', 'cofigureblock_cvinfo_public', 'cofigureblock_cvinfo_mbrship',
+        'cofigureblock_cvinfo_goals', 'cofigureblock_cvinfo_skills', 'cofigureblock_cvinfo_interests',
+        'resume_goalspersonal', 'resume_goalsacademic', 'resume_goalscareers',
+        'resume_skillspersonal', 'resume_skillsacademic', 'resume_skillscareers',
         'delete', 'viewand',
         'file', 'note', 'link',
         'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
@@ -704,10 +713,14 @@ foreach ($allpotentialitems as $item) {
     }
 }
 
+// add resume items
+$resumeitems = block_exaport_get_resume_params($USER->id, true);
+
 ?>
     <script type="text/javascript">
         //<![CDATA[
         var portfolioItems = <?php echo json_encode($portfolioitems); ?>;
+        var resumeItems = <?php echo json_encode($resumeitems); ?>;
         ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
         //]]>
     </script>
@@ -746,6 +759,13 @@ switch ($type) {
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/personal_info.png" />
             <h4 class="blocktype-title js-hidden">'.get_string('personalinformation', 'block_exaport').'</h4>
             <div class="blocktype-description js-hidden">'.get_string('personalinformation', 'block_exaport').'</div>
+        </div>
+    </li>
+    <li class="portfolioElement" title="'.get_string('cvinformation', 'block_exaport').'" block-type="cv_information">
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/cv_info.png" />
+            <h4 class="blocktype-title js-hidden">'.get_string('cvinformation', 'block_exaport').'</h4>
+            <div class="blocktype-description js-hidden">'.get_string('cvinformation', 'block_exaport').'</div>
         </div>
     </li>
     <li class="portfolioElement" title="'.get_string('headertext', 'block_exaport').'" block-type="headline">

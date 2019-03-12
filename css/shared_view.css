@@ -13,6 +13,20 @@
     overflow: hidden;
 }
 
+#exaport #view .view-cv-information {
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+#exaport #view .view-cv-information .edu_qualdescription,
+#exaport #view .view-cv-information .employ_positiondescription,
+#exaport #view .view-cv-information .certif_description,
+#exaport #view .view-cv-information .mbrship_description {
+    display: block;
+}
+
 #exaport #view .view-header {
     padding: 14px 8px 3px 8px;
     margin: 0 0 10px 0;

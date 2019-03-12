@@ -1074,6 +1074,10 @@ return [
                 'Persönliche Information',
                 'Personal Information',
         ],
+        'cvinformation' => [
+                'Lebenslauf Information',
+                'CV Information',
+        ],
         'headertext' => [
                 'Kopfzeile',
                 'Headertext',
@@ -1264,9 +1268,49 @@ return [
                 'Pers&ouml;nliche Information',
                 'Choose personal info',
         ],
+        'cofigureblock_cvinfo' => [
+                'Lebenslauf Information',
+                'Choose cv info',
+        ],
         'cofigureblock_badge' => [
                 'Badges auswählen',
                 'Choose Badges',
+        ],
+        'cofigureblock_cvinfo_education_history' => [
+                'Bildungs-Karriere',
+                'Education history',
+        ],
+        'cofigureblock_cvinfo_employment_history' => [
+                'Bildungs-Karriere',
+                'Employment history',
+        ],
+        'cofigureblock_cvinfo_certif' => [
+                'Zertifikate, Akkreditierungen, Auszeichnungen',
+                'Certifications, accreditations and awards',
+        ],
+        'cofigureblock_cvinfo_public' => [
+                'Bücher und Publikationen',
+                'Books and publications',
+        ],
+        'cofigureblock_cvinfo_mbrship' => [
+                'Mitgliedschaften',
+                'Professional memberships',
+        ],
+        'cofigureblock_cvinfo_goals' => [
+                'Meine Ziele',
+                'My goals',
+        ],
+        'cofigureblock_cvinfo_skills' => [
+                'Meine Kompetenzen',
+                'My skills',
+        ],
+        'cofigureblock_cvinfo_interests' => [
+                'Interessen',
+                'Interests',
+        ],
+        'in' => [
+                'at',
+                'at',
         ],
 
         // === Desp.

@@ -358,45 +358,39 @@ if ($showinformation) {
     echo block_exaport_form_resume_part($courseid, 'cover',
             get_string('resume_cover', 'block_exaport'), $cover, 'edit', $type);
     // Education history.
-    $conditions = array('resume_id' => $resume->id);
-    $educations = block_exaport_resume_get_mm_records('edu', $conditions);
+    $educations = block_exaport_resume_get_educations($resume->id);
     $educationhistory = block_exaport_resume_templating_mm_records($courseid, 'edu', 'qualification', $educations);
     echo block_exaport_form_resume_part($courseid, 'edu',
             get_string('resume_eduhistory', 'block_exaport'), $educationhistory, 'add', $type);
 
     // Employment history.
-    $conditions = array('resume_id' => $resume->id);
-    $employments = block_exaport_resume_get_mm_records('employ', $conditions);
+    $employments = block_exaport_resume_get_employments($resume->id);
     $employmenthistory = block_exaport_resume_templating_mm_records($courseid, 'employ', 'position', $employments);
     echo block_exaport_form_resume_part($courseid, 'employ',
             get_string('resume_employhistory', 'block_exaport'), $employmenthistory, 'add', $type);
 
     // Certifications, accreditations and awards.
-    $conditions = array('resume_id' => $resume->id);
-    $certifications = block_exaport_resume_get_mm_records('certif', $conditions);
+    $certifications = block_exaport_resume_get_certificates($resume->id);
     $certificationhistory = block_exaport_resume_templating_mm_records($courseid, 'certif', 'title', $certifications);
     echo block_exaport_form_resume_part($courseid, 'certif',
             get_string('resume_certif', 'block_exaport'), $certificationhistory, 'add', $type);
 
     // Badges.
     if (block_exaport_badges_enabled()) {
-        $conditions = array('resumeid' => $resume->id);
-        $badges = block_exaport_resume_get_mm_records('badges', $conditions);
+        $badges = block_exaport_resume_get_badges($resume->id);
         $badgesrecords = block_exaport_resume_templating_mm_records($courseid, 'badges', 'title', $badges, 0, 0, 0);
         echo block_exaport_form_resume_part($courseid, 'badges',
                 get_string('resume_badges', 'block_exaport'), $badgesrecords, 'edit', $type);
     };
 
     // Books and publications.
-    $conditions = array('resume_id' => $resume->id);
-    $publications = block_exaport_resume_get_mm_records('public', $conditions);
+    $publications = block_exaport_resume_get_publications($resume->id);
     $publicationhistory = block_exaport_resume_templating_mm_records($courseid, 'public', 'title', $publications);
     echo block_exaport_form_resume_part($courseid, 'public',
             get_string('resume_public', 'block_exaport'), $publicationhistory, 'add', $type);
 
     // Professional memberships.
-    $conditions = array('resume_id' => $resume->id);
-    $memberships = block_exaport_resume_get_mm_records('mbrship', $conditions);
+    $memberships = block_exaport_resume_get_profmembershipments($resume->id);
     $membershiphistory = block_exaport_resume_templating_mm_records($courseid, 'mbrship', 'title', $memberships);
     echo block_exaport_form_resume_part($courseid, 'mbrship',
             get_string('resume_mbrship', 'block_exaport'), $membershiphistory, 'add', $type);

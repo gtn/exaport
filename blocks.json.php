@@ -50,9 +50,9 @@ $id = optional_param('item_id', -1, PARAM_INT);
 
 $blockdata = new stdClass();
 if ($id != -1) {
-    $query = "select type, itemid, text, block_title, firstname, lastname, email, picture, contentmedia, width, height ".
-            " from {block_exaportviewblock}".
-            " where id=?";
+    $query = "SELECT type, itemid, text, block_title, firstname, lastname, email, picture, contentmedia, width, height ".
+            " FROM {block_exaportviewblock}".
+            " WHERE id=?";
     $blockdata = $DB->get_record_sql($query, array($id));
     $type = $blockdata->type;
 };
@@ -67,6 +67,10 @@ switch ($type) {
     case 'personal_information':
         $message["html"] = get_form_personalinfo($id, $blockdata);
         $message["modalTitle"] = get_string('cofigureblock_personalinfo', 'block_exaport');
+        break;
+    case 'cv_information':
+        $message["html"] = get_form_cvinfo($id, $blockdata);
+        $message["modalTitle"] = get_string('cofigureblock_cvinfo', 'block_exaport');
         break;
     case 'text':
         $message["html"] = get_form_text($id, $blockdata);
@@ -470,6 +474,155 @@ function get_form_personalinfo($id, $blockdata = array()) {
     $content .= '</table>';
 
     $content .= htmleditor_enable_script('block_intro');
+
+    return $content;
+}
+
+function get_form_cvinfo($id, $blockdata = array()) {
+    global $OUTPUT, $DB, $USER, $PAGE, $CFG;
+
+    require_once(__DIR__.'/lib/resumelib.php');
+    $resume = block_exaport_get_resume_params();
+
+    $content = "";
+
+    $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" '.
+            ' class="pieform" onsubmit="exaportViewEdit.addCvInfo('.$id.'); return false;">';
+    $content .= '<input type="hidden" name="item_id" value="'.$id.'">';
+    $content .= '<table style="width: 100%;">';
+    // block title
+    /*$content .= '<tr><th>';
+    $content .= '<label for="block_title">'.get_string('blocktitle2', 'block_exaport').'</label>';
+    $content .= '</th></tr>';
+    $content .= '<tr><td>';
+    $content .= '<input type="text" name="block_title" value="'.
+            (isset($blockdata->block_title) ? s($blockdata->block_title) : '').
+            '" id="block_title">';
+    $content .= '</td></tr>';*/
+    // educations
+    $usereducaitons = block_exaport_resume_get_educations($resume->id);
+    if ($usereducaitons) {
+        $content .= '<tr><th>';
+        $content .= '<label>'.get_string('cofigureblock_cvinfo_education_history', 'block_exaport').'</label>';
+        $content .= '</th></tr>';
+        $content .= '<tr><td>';
+        foreach ($usereducaitons as $edu) {
+            $content .= '<div class="add-item">';
+            $content .= '<input class="add-cvitem-checkbox" data-cvtype="edu" type="checkbox" name="add_edu_items[]" value="'.$edu->id.'" /> ';
+            $position = $edu->qualname;
+            if ($position) {
+                $position .= ' ('.$edu->qualtype.')';
+            } else {
+                $position .= $edu->qualtype;
+            }
+            if ($position) {
+                $position .= ' '.get_string('in', 'block_exaport').' ';
+            }
+            $content .= $position.$edu->institution.($edu->startdate || $edu->enddate ? ' ('.$edu->startdate.($edu->enddate ? ' - '.$edu->enddate : '').')' : '');
+            $content .= '</div>';
+        }
+        $content .= '</td></tr>';
+    }
+    // employments
+    $useremployments = block_exaport_resume_get_employments($resume->id);
+    if ($useremployments) {
+        $content .= '<tr><th>';
+        $content .= '<label>'.get_string('cofigureblock_cvinfo_employment_history', 'block_exaport').'</label>';
+        $content .= '</th></tr>';
+        $content .= '<tr><td>';
+        foreach ($useremployments as $employ) {
+            $content .= '<div class="add-item">';
+            $content .= '<input class="add-cvitem-checkbox" data-cvtype="employ" type="checkbox" name="add_employ_items[]" value="'.$employ->id.'" /> ';
+            $content .= $employ->jobtitle.':'.$employ->employer.($employ->startdate || $employ->enddate ? ' ('.$employ->startdate.($employ->enddate ? ' - '.$employ->enddate : '').')' : '');
+            $content .= '</div>';
+        }
+        $content .= '</td></tr>';
+    }
+    // Certifications, accreditations and awards
+    $usercertifs = block_exaport_resume_get_certificates($resume->id);
+    if ($usercertifs) {
+        $content .= '<tr><th>';
+        $content .= '<label>'.get_string('cofigureblock_cvinfo_certif', 'block_exaport').'</label>';
+        $content .= '</th></tr>';
+        $content .= '<tr><td>';
+        foreach ($usercertifs as $certif) {
+            $content .= '<div class="add-item">';
+            $content .= '<input class="add-cvitem-checkbox" data-cvtype="certif" type="checkbox" name="add_certif_items[]" value="'.$certif->id.'" /> ';
+            $content .= $certif->title.($certif->date ? ' ('.$certif->date.')' : '');
+            $content .= '</div>';
+        }
+        $content .= '</td></tr>';
+    }
+    // Books and publications
+    $userpublics = block_exaport_resume_get_publications($resume->id);
+    if ($userpublics) {
+        $content .= '<tr><th>';
+        $content .= '<label>'.get_string('cofigureblock_cvinfo_public', 'block_exaport').'</label>';
+        $content .= '</th></tr>';
+        $content .= '<tr><td>';
+        foreach ($userpublics as $public) {
+            $content .= '<div class="add-item">';
+            $content .= '<input class="add-cvitem-checkbox" data-cvtype="public" type="checkbox" name="add_public_items[]" value="'.$public->id.'" /> ';
+            $content .= $public->title.($public->date ? ' ('.$public->date.')' : '');
+            $content .= '</div>';
+        }
+        $content .= '</td></tr>';
+    }
+    // Professional memberships
+    $usermbrships = block_exaport_resume_get_profmembershipments($resume->id);
+    if ($usermbrships) {
+        $content .= '<tr><th>';
+        $content .= '<label>'.get_string('cofigureblock_cvinfo_mbrship', 'block_exaport').'</label>';
+        $content .= '</th></tr>';
+        $content .= '<tr><td>';
+        foreach ($usermbrships as $mbrship) {
+            $content .= '<div class="add-item">';
+            $content .= '<input class="add-cvitem-checkbox" data-cvtype="mbrship" type="checkbox" name="add_mbrship_items[]" value="'.$mbrship->id.'" /> ';
+            $content .= $mbrship->title.($mbrship->startdate || $mbrship->enddate ? ' ('.$mbrship->startdate.($mbrship->enddate ? ' - '.$mbrship->enddate : '').')' : '');
+            $content .= '</div>';
+        }
+        $content .= '</td></tr>';
+    }
+    // My goals
+    $content .= '<tr><th>';
+    $content .= '<label>'.get_string('cofigureblock_cvinfo_goals', 'block_exaport').'</label>';
+    $content .= '</th></tr>';
+    $content .= '<tr><td>';
+    $goalTypes = array('personal', 'academic', 'careers');
+    foreach ($goalTypes as $goal) {
+        $content .= '<div class="add-item">';
+        $content .= '<input class="add-cvitem-checkbox" data-cvtype="goals'.$goal.'" type="checkbox" name="add_goal_items[]" value="1" /> ';
+        $content .= get_string('resume_goals'.$goal, 'block_exaport');
+        $content .= '</div>';
+    }
+    $content .= '</td></tr>';
+    // My skills
+    $content .= '<tr><th>';
+    $content .= '<label>'.get_string('cofigureblock_cvinfo_skills', 'block_exaport').'</label>';
+    $content .= '</th></tr>';
+    $content .= '<tr><td>';
+    $skillTypes = array('personal', 'academic', 'careers');
+    foreach ($skillTypes as $skill) {
+        $content .= '<div class="add-item">';
+        $content .= '<input class="add-cvitem-checkbox" data-cvtype="skills'.$skill.'" type="checkbox" name="add_skill_items[]" value="1" /> ';
+        $content .= get_string('resume_skills'.$skill, 'block_exaport');
+        $content .= '</div>';
+    }
+    $content .= '</td></tr>';
+    // Interests
+    $content .= '<tr><th>';
+    $content .= '<label>';
+    $content .= '<input class="add-cvitem-checkbox" data-cvtype="interests" type="checkbox" name="add_interests" value="1" /> ';
+    $content .= get_string('cofigureblock_cvinfo_interests', 'block_exaport').'</label>';
+    $content .= '</th></tr>';
+
+    $content .= '<tr><td>';
+    $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" '.
+            ' class="submit btn btn-default" />';
+    $content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" '.
+            ' class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+    $content .= '</td></tr>';
+    $content .= '</table>';
 
     return $content;
 }

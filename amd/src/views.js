@@ -23,6 +23,10 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                 if (blocks) {
                     blocks = $.parseJSON(blocks);
                 }
+                var myresume = $('form :input[name=myresume]').val();
+                if (myresume) {
+                    myresume = $.parseJSON(myresume);
+                }
                 if (!blocks) {
                     // Start with headline.
                     blocks = [{
@@ -69,11 +73,15 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                 data.type = 'personal_information';
                 data.id = id;
                 data.block_title = $('#block_title').val();
-                if ($('#firstname').attr('checked') == 'checked') {
-                    data.firstname = $('#firstname').val();
+                // if ($('#firstname').attr('checked') == 'checked') {
+                var fncheckbox = $('.pieform input[name="fields\[firstname\]"]').first();
+                if (fncheckbox !== undefined && fncheckbox.is(':checked')) {
+                    data.firstname = fncheckbox.val();
                 }
-                if ($('#lastname').attr('checked') == 'checked') {
-                    data.lastname = $('#lastname').val();
+                // if ($('#lastname').attr('checked') == 'checked') {
+                var lncheckbox = $('.pieform input[name="fields\[lastname\]"]').first();
+                if (lncheckbox.is(':checked')) {
+                    data.lastname = lncheckbox.val();
                 }
                 data.picture = $('form input[name=picture]:checked').val();
                 data.email = $('form input[name=email]:checked').val();
@@ -160,6 +168,38 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                     data = {};
                     data.type = 'item';
                     data.itemid = $(this).val();
+                    newItem.data('portfolio', data);
+                    generateItem('update', $(newItem));
+                });
+                dialogue.hide();
+                newItem = null;
+                saveBlockData();
+            },
+
+            addCvInfo: function(id) {
+                if (!this.checkFields()) {
+                    return;
+                }
+                if (id != -1) {
+                    newItem = lastclicked;
+                }
+                var i = 0;
+                $('#blockform input.add-cvitem-checkbox:checked').each(function () {
+                    i = i + 1;
+                    if (i > 1) {
+                        var clone = $(newItem).clone();
+                        newItem.after(clone);
+                        newItem = clone;
+                    }
+                    data = {};
+                    data.type = 'cv_information';
+                    data.itemid = $(this).val();
+                    data.resume_itemtype = $(this).attr('data-cvtype');
+                    var goalsSkills = ['goalspersonal', 'goalsacademic', 'goalcareers',
+                                       'skillspersonal', 'skillsacademic', 'skillscareers'];
+                    if (goalsSkills.indexOf(data.resume_itemtype) > -1) {
+                        data.itemid = null;
+                    }
                     newItem.data('portfolio', data);
                     generateItem('update', $(newItem));
                 });
@@ -410,13 +450,11 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
         }.
         */
         var header_content = '';
-
         if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
             data.item = portfolioItems[data.itemid];
         }
         if (data.type == 'item' && data.itemid && data.item) {
             var itemData = data.item;
-            console.log(itemData);
             var ilink = itemData.link;
             if (ilink != "") {
                 ilink = $E.translate('link') + ': ' + ilink + '<br />';
@@ -515,6 +553,155 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                                     */
                 $item.html(tempString);
             }
+        } else if (data.type == 'cv_information') {
+            data.item = null;
+            var bodyContent = '';
+            var titleContent = '';
+            var addToHeader = '';
+            switch(data.resume_itemtype) {
+                case 'edu':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_education_history');
+                    if (data.itemid && resumeItems && resumeItems.educations[data.itemid]) {
+                        itemData = resumeItems.educations[data.itemid];
+                        var description = '';
+                        description += '<span class="edu_institution">' + itemData.institution + ':</span> ';
+                        description += '<span class="edu_qualname">' + itemData.qualname + '</span>';
+                        if (itemData.startdate != '' || itemData.enddate != '') {
+                            description += ' (';
+                            if (itemData.startdate != '') {
+                                description += '<span class="edu_startdate">' + itemData.startdate + '</span>';
+                            }
+                            if (itemData.enddate != '') {
+                                description += '<span class="edu_enddate"> - ' + itemData.enddate + '</span>';
+                            }
+                            description += ')';
+                        }
+                        if (itemData.qualdescription != '') {
+                            description += '<span class="edu_qualdescription">' + itemData.qualdescription + '</span>';
+                        }
+                        bodyContent = description;
+                    }
+                    break;
+                case 'employ':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_employment_history');
+                    if (data.itemid && resumeItems && resumeItems.employments[data.itemid]) {
+                        itemData = resumeItems.employments[data.itemid];
+                        var description = '';
+                        description += '<span class="employ_jobtitle">' + itemData.jobtitle + ':</span> ';
+                        description += '<span class="employ_employer">' + itemData.employer + '</span>';
+                        if (itemData.startdate != '' || itemData.enddate != '') {
+                            description += ' (';
+                            if (itemData.startdate != '') {
+                                description += '<span class="employ_startdate">' + itemData.startdate + '</span>';
+                            }
+                            if (itemData.enddate != '') {
+                                description += '<span class="employ_enddate"> - ' + itemData.enddate + '</span>';
+                            }
+                            description += ')';
+                        }
+                        if (itemData.positiondescription != '') {
+                            description += '<span class="employ_positiondescription">' + itemData.positiondescription + '</span>';
+                        }
+                        bodyContent = description;
+                    }
+                    break;
+                case 'certif':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_certif');
+                    if (data.itemid && resumeItems && resumeItems.certifications[data.itemid]) {
+                        itemData = resumeItems.certifications[data.itemid];
+                        var description = '';
+                        description += '<span class="certif_title">' + itemData.title + '</span> ';
+                        if (itemData.date != '') {
+                            description += '<span class="certif_date">(' + itemData.date + ')</span>';
+                        }
+                        if (itemData.description != '') {
+                            description += '<span class="certif_description">' + itemData.description + '</span>';
+                        }
+                        bodyContent = description;
+                    }
+                    break;
+                case 'public':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_public');
+                    if (data.itemid && resumeItems && resumeItems.publications[data.itemid]) {
+                        itemData = resumeItems.publications[data.itemid];
+                        var description = '';
+                        description += '<span class="public_title">' + itemData.title;
+                        if (itemData.contribution != '') {
+                            description += ' (' + itemData.contribution + ')';
+                        }
+                        description += '</span> ';
+                        if (itemData.date != '') {
+                            description += '<span class="public_date">(' + itemData.date + ')</span>';
+                        }
+                        if (itemData.contributiondetails != '' || itemData.url != '') {
+                            description += '<span class="public_description">';
+                            if (itemData.contributiondetails != '') {
+                                description += itemData.contributiondetails;
+                            }
+                            if (itemData.url != '') {
+                                description += '<br /><a href="' + itemData.url + '" class="public_url" target="_blank">' + itemData.url + '</a>';
+                            }
+                            description += '</span>';
+                        }
+                        bodyContent = description;
+                    }
+                    break;
+                case 'mbrship':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_mbrship');
+                    if (data.itemid && resumeItems && resumeItems.profmembershipments[data.itemid]) {
+                        itemData = resumeItems.profmembershipments[data.itemid];
+                        var description = '';
+                        description += '<span class="mbrship_title">' + itemData.title + '</span> ';
+                        if (itemData.startdate != '' || itemData.enddate != '') {
+                            description += ' (';
+                            if (itemData.startdate != '') {
+                                description += '<span class="mbrship_startdate">' + itemData.startdate + '</span>';
+                            }
+                            if (itemData.enddate != '') {
+                                description += '<span class="mbrship_enddate"> - ' + itemData.enddate + '</span>';
+                            }
+                            description += ')';
+                        }
+                        if (itemData.description != '') {
+                            description += '<span class="mbrship_description">' + itemData.description + '</span>';
+                        }
+                        bodyContent = description;
+                    }
+                    break;
+                case 'goalspersonal':
+                case 'goalsacademic':
+                case 'goalscareers':
+                case 'skillspersonal':
+                case 'skillsacademic':
+                case 'skillscareers':
+                    addToHeader = $E.translate('resume_' + data.resume_itemtype);
+                    var description = '';
+                    if (resumeItems['' + data.resume_itemtype]) {
+                        description += '<span class="' + data.resume_itemtype + '_text">' + resumeItems['' + data.resume_itemtype] + '</span> ';
+                    }
+                    bodyContent = description;
+                    break;
+                case 'interests':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_interests');
+                    var description = '';
+                    if (resumeItems.interests != '') {
+                        description += '<span class="interests">' + resumeItems.interests + '</span> ';
+                    }
+                    bodyContent = description;
+                    break;
+                default:
+                    break;
+            }
+            console.log('!!!!!');
+            console.log(bodyContent);
+            var tempString = '<div id="id_holder" style="display:none;"></div>';
+            tempString += '<div class="cv_info" style="overflow: hidden;">';
+            tempString += '<div class="header">' + $E.translate('cvinformation') + ': ' + addToHeader + '</div>';
+            tempString += '<div class="body">' + bodyContent + '</div>';
+            tempString += '</div>';
+            // tempString += '<div class="title">' + titleContent + '</div>';
+            console.log(tempString);
+            $item.html(tempString);
         } else {
             data.type = 'text';
             var tempString = '<div id="id_holder" style="display:none;"></div>';
@@ -540,8 +727,10 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
         $item.find('div#id_holder').append(data.id);
 
         if (type == 'new') {
-            if ((data.type != 'item') && (data.type != 'badge')) {
-                // No edit button for items and badges.
+            // No edit button for items, badges and resume items.
+            var typesWithoutEditButton = ['item', 'badge', 'cv_information'];
+            // if ((data.type != 'item') && (data.type != 'badge')) {
+            if (!(typesWithoutEditButton.indexOf(data.type) > -1)) {
                 $('<a class="edit" title="Edit"><span>Edit</span></a>').prependTo($item).click(editItemClick);
             }
         }

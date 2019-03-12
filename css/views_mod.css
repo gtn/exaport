@@ -376,3 +376,11 @@
 #exaport .course-group-open .course-group-content {
     display: block;
 }
+
+#exaport .edu_qualdescription,
+#exaport .employ_positiondescription,
+#exaport .certif_description,
+#exaport .public_description,
+#exaport .mbrship_description {
+    display: block;
+}

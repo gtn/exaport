@@ -111,6 +111,9 @@ if ($view->access->request == 'intern') {
 
 $comp = block_exaport_check_competence_interaction();
 
+require_once(__DIR__.'/lib/resumelib.php');
+$resume = block_exaport_get_resume_params($view->userid, true);
+
 $colslayout = array(
         "1" => 1, "2" => 2, "3" => 2, "4" => 2, "5" => 3, "6" => 3, "7" => 3, "8" => 4, "9" => 4, "10" => 5,
 );
@@ -129,181 +132,326 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                 $block->text = format_text($block->text, FORMAT_HTML);
             }
 
-            if ($block->type == 'item') {
-                $item = $block->item;
-                $competencies = null;
+            switch ($block->type) {
+                case 'item':
+                    $item = $block->item;
+                    $competencies = null;
 
-                if ($comp) {
-                    $competencies = block_exaport_get_active_comps_for_item($item);
+                    if ($comp) {
+                        $competencies = block_exaport_get_active_comps_for_item($item);
 
-                    if ($competencies) {
-                        $competenciesoutput = "";
-                        foreach ($competencies as $competence) {
-                            $competenciesoutput .= $competence->title.'<br>';
+                        if ($competencies) {
+                            $competenciesoutput = "";
+                            foreach ($competencies as $competence) {
+                                $competenciesoutput .= $competence->title.'<br>';
+                            }
+
+                            // TODO: still needed?
+                            $competenciesoutput = str_replace("\r", "", $competenciesoutput);
+                            $competenciesoutput = str_replace("\n", "", $competenciesoutput);
+                            $competenciesoutput = str_replace("\"", "&quot;", $competenciesoutput);
+                            $competenciesoutput = str_replace("'", "&prime;", $competenciesoutput);
+
+                            $item->competences = $competenciesoutput;
                         }
 
-                        // TODO: still needed?
-                        $competenciesoutput = str_replace("\r", "", $competenciesoutput);
-                        $competenciesoutput = str_replace("\n", "", $competenciesoutput);
-                        $competenciesoutput = str_replace("\"", "&quot;", $competenciesoutput);
-                        $competenciesoutput = str_replace("'", "&prime;", $competenciesoutput);
-
-                        $item->competences = $competenciesoutput;
                     }
 
-                }
+                    $href = 'shared_item.php?access=view/'.$access.'&itemid='.$item->id.'&att='.$item->attachment;
 
-                $href = 'shared_item.php?access=view/'.$access.'&itemid='.$item->id.'&att='.$item->attachment;
+                    echo '<div class="view-item view-item-type-'.$item->type.'">';
+                    // Thumbnail of item.
+                    $fileparams = '';
+                    if ($item->type == "file") {
+                        $select = "contextid='".context_user::instance($item->userid)->id."' ".
+                                " AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";
+                        if ($files = $DB->get_records_select('files', $select, null, 'id, filename, mimetype, filesize')) {
+                            if (is_array($files)) {
+                                $width = '';
+                                if (count($files) > 5) {
+                                    $width = 's35';
+                                } elseif (count($files) > 3) {
+                                    $width = 's40';
+                                } elseif (count($files) > 2) {
+                                    $width = 's50';
+                                } elseif (count($files) > 1) {
+                                    $width = 's75';
+                                }
 
-                echo '<div class="view-item view-item-type-'.$item->type.'">';
-                // Thumbnail of item.
-                $fileparams = '';
-                if ($item->type == "file") {
-                    $select = "contextid='".context_user::instance($item->userid)->id."' ".
-                            " AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";
-                    if ($files = $DB->get_records_select('files', $select, null, 'id, filename, mimetype, filesize')) {
-                        if (is_array($files)) {
-                            $width = '';
-                            if (count($files) > 5) {
-                                $width = 's35';
-                            } elseif (count($files) > 3) {
-                                $width = 's40';
-                            } elseif (count($files) > 2) {
-                                $width = 's50';
-                            } elseif (count($files) > 1) {
-                                $width = 's75';
+                                foreach ($files as $file) {
+                                    if (strpos($file->mimetype, "image") !== false) {
+                                        $imgsrc = $CFG->wwwroot."/pluginfile.php/".context_user::instance($item->userid)->id.
+                                                "/".'block_exaport'."/".'item_file'."/view/".$access."/itemid/".$item->id."/".
+                                                $file->filename;
+                                        echo '<div class="view-item-image"><img src="'.$imgsrc.'" class="'.$width.'" alt=""/></div>';
+                                    } else {
+                                        // Link to file.
+                                        $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access.
+                                                "&itemid=".$item->id."&inst=".$file->pathnamehash);
+                                        // Human filesize.
+                                        $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+                                        $power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
+                                        $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',').' '.$units[$power];
+                                        // Fileinfo block.
+                                        $fileparams = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> '.
+                                                '<span class="filedescription">('.$filesize.')</span></div>';
+                                        if (block_exaport_is_valid_media_by_filename($file->filename)) {
+                                            echo '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.
+                                                    '/blocks/exaport/pix/media.png" alt=""/></div>';
+                                        }
+                                    };
+                                }
                             }
-
-                            foreach ($files as $file) {
-                                if (strpos($file->mimetype, "image") !== false) {
-                                    $imgsrc = $CFG->wwwroot."/pluginfile.php/".context_user::instance($item->userid)->id.
-                                            "/".'block_exaport'."/".'item_file'."/view/".$access."/itemid/".$item->id."/".
-                                            $file->filename;
-                                    echo '<div class="view-item-image"><img src="'.$imgsrc.'" class="'.$width.'" alt=""/></div>';
-                                } else {
-                                    // Link to file.
-                                    $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access.
-                                            "&itemid=".$item->id."&inst=".$file->pathnamehash);
-                                    // Human filesize.
-                                    $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-                                    $power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
-                                    $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',').' '.$units[$power];
-                                    // Fileinfo block.
-                                    $fileparams = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> '.
-                                            '<span class="filedescription">('.$filesize.')</span></div>';
-                                    if (block_exaport_is_valid_media_by_filename($file->filename)) {
-                                        echo '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.
-                                                '/blocks/exaport/pix/media.png" alt=""/></div>';
-                                    }
-                                };
-                            }
-                        }
+                        };
+                    } else if ($item->type == "link") {
+                        echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.
+                                $href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.
+                                '/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'" alt=""/></a></div>';
                     };
-                } else if ($item->type == "link") {
-                    echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.
-                            $href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.
-                            '/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'" alt=""/></a></div>';
-                };
-                echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
-                // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.
-                if ($comp && has_capability('block/exaport:competences', $context)) {
-                    if ($competencies) {
-                        echo '<img align="right" src="'.$CFG->wwwroot.
-                                '/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
-                    }
-                }
-                echo '</div>';
-                $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
-                        'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
-                $intro = format_text($intro, FORMAT_HTML);
-                echo $fileparams;
-                echo '<div class="view-item-text">';
-                if ($item->url && $item->url != "false") {
-                    // Link.
-                    echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
-                }
-                echo $intro.'</div>';
-                if ($competencies) {
-                    echo '<div class="view-item-competences">'.
-                            '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>'.
-                            '<a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()">'.
-                            '<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/comp.png" class="iconsmall" alt="'.'competences'.'" />'.
-                            '</a></div>';
-                }
-                echo '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
-                echo '</div>';
-            } else if ($block->type == 'personal_information') {
-                echo '<div class="header">'.$block->block_title.'</div>';
-                echo '<div class="view-personal-information">';
-                if (isset($block->picture)) {
-                    echo '<div class="picture" style="float:right; position: relative;"><img src="'.$block->picture.
-                            '" alt=""/></div>';
-                }
-                if (isset($block->firstname) or isset($block->lastname)) {
-                    echo '<div class="name">';
-                    if (isset($block->firstname)) {
-                        echo $block->firstname;
-                    }
-                    if (isset($block->lastname)) {
-                        echo ' '.$block->lastname;
+                    echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
+                    // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.
+                    if ($comp && has_capability('block/exaport:competences', $context)) {
+                        if ($competencies) {
+                            echo '<img align="right" src="'.$CFG->wwwroot.
+                                    '/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
+                        }
                     }
                     echo '</div>';
-                };
-                if (isset($block->email)) {
-                    echo '<div class="email">'.$block->email.'</div>';
-                }
-                if (isset($block->text)) {
-                    echo '<div class="body">'.$block->text.'</div>';
-                }
-                echo '</div>';
-            } else if ($block->type == 'headline') {
-                echo '<div class="header view-header">'.nl2br($block->text).'</div>';
-            } else if ($block->type == 'media') {
-                echo '<div class="header view-header">'.nl2br($block->block_title).'</div>';
-                echo '<div class="view-media">';
-                if (!empty($block->contentmedia)) {
-                    echo $block->contentmedia;
-                }
-                echo '</div>';
-
-            } else if ($block->type == 'badge') {
-                if (count($badges) == 0) {
-                    continue;
-                }
-                $badge = null;
-                foreach ($badges as $tmp) {
-                    if ($tmp->id == $block->itemid) {
-                        $badge = $tmp;
-                        break;
+                    $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
+                            'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
+                    $intro = format_text($intro, FORMAT_HTML);
+                    echo $fileparams;
+                    echo '<div class="view-item-text">';
+                    if ($item->url && $item->url != "false") {
+                        // Link.
+                        echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
+                    }
+                    echo $intro.'</div>';
+                    if ($competencies) {
+                        echo '<div class="view-item-competences">'.
+                                '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>'.
+                                '<a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()">'.
+                                '<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/comp.png" class="iconsmall" alt="'.'competences'.'" />'.
+                                '</a></div>';
+                    }
+                    echo '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
+                    echo '</div>';
+                    break;
+                case 'personal_information':
+                    echo '<div class="header">'.$block->block_title.'</div>';
+                    echo '<div class="view-personal-information">';
+                    if (isset($block->picture)) {
+                        echo '<div class="picture" style="float:right; position: relative;"><img src="'.$block->picture.
+                                '" alt=""/></div>';
+                    }
+                    if (isset($block->firstname) or isset($block->lastname)) {
+                        echo '<div class="name">';
+                        if (isset($block->firstname)) {
+                            echo $block->firstname;
+                        }
+                        if (isset($block->lastname)) {
+                            echo ' '.$block->lastname;
+                        }
+                        echo '</div>';
                     };
-                };
-                if (!$badge) {
-                    // Badge not found.
-                    continue;
-                }
-                echo '<div class="header">'.nl2br($badge->name).'</div>';
-                echo '<div class="view-text">';
-                echo '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
-                if (!$badge->courseid) { // For badges with courseid = NULL.
-                    $badge->imageUrl = (string) moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage',
-                                                                                $badge->id, '/', 'f1', false);
-                } else {
-                    $context = context_course::instance($badge->courseid);
-                    $badge->imageUrl = (string) moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage',
-                                                                                $badge->id, '/', 'f1', false);
-                }
-                echo '<img src="'.$badge->imageUrl.'">';
-                echo '</div>';
-                echo '<div class="badge-description">';
-                echo format_text($badge->description, FORMAT_HTML);
-                echo '</div>';
-                echo '</div>';
-            } else {
-                // Text.
-                echo '<div class="header">'.$block->block_title.'</div>';
-                echo '<div class="view-text">';
-                echo format_text($block->text, FORMAT_HTML);
-                echo '</div>';
+                    if (isset($block->email)) {
+                        echo '<div class="email">'.$block->email.'</div>';
+                    }
+                    if (isset($block->text)) {
+                        echo '<div class="body">'.$block->text.'</div>';
+                    }
+                    echo '</div>';
+                    break;
+                case 'headline':
+                    echo '<div class="header view-header">'.nl2br($block->text).'</div>';
+                    break;
+                case 'media':
+                    echo '<div class="header view-header">'.nl2br($block->block_title).'</div>';
+                    echo '<div class="view-media">';
+                    if (!empty($block->contentmedia)) {
+                        echo $block->contentmedia;
+                    }
+                    echo '</div>';
+                    break;
+                case 'badge':
+                    if (count($badges) == 0) {
+                        continue;
+                    }
+                    $badge = null;
+                    foreach ($badges as $tmp) {
+                        if ($tmp->id == $block->itemid) {
+                            $badge = $tmp;
+                            break;
+                        };
+                    };
+                    if (!$badge) {
+                        // Badge not found.
+                        continue;
+                    }
+                    echo '<div class="header">'.nl2br($badge->name).'</div>';
+                    echo '<div class="view-text">';
+                    echo '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
+                    if (!$badge->courseid) { // For badges with courseid = NULL.
+                        $badge->imageUrl = (string) moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage',
+                                                                                    $badge->id, '/', 'f1', false);
+                    } else {
+                        $context = context_course::instance($badge->courseid);
+                        $badge->imageUrl = (string) moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage',
+                                                                                    $badge->id, '/', 'f1', false);
+                    }
+                    echo '<img src="'.$badge->imageUrl.'">';
+                    echo '</div>';
+                    echo '<div class="badge-description">';
+                    echo format_text($badge->description, FORMAT_HTML);
+                    echo '</div>';
+                    echo '</div>';
+                    break;
+                case 'cv_information':
+                    $bodyContent = '';
+                    switch ($block->resume_itemtype) {
+                        case 'edu':
+                            if ($block->itemid && $resume && $resume->educations[$block->itemid]) {
+                                $itemData = $resume->educations[$block->itemid];
+                                $description = '';
+                                $description .= '<span class="edu_institution">'.$itemData->institution.':</span> ';
+                                $description .= '<span class="edu_qualname">'.$itemData->qualname.'</span>';
+                                if ($itemData->startdate != '' || $itemData->enddate != '') {
+                                    $description .= ' (';
+                                    if ($itemData->startdate != '') {
+                                        $description .= '<span class="edu_startdate">'.$itemData->startdate.'</span>';
+                                    }
+                                    if ($itemData->enddate != '') {
+                                        $description .= '<span class="edu_enddate"> - '.$itemData->enddate.'</span>';
+                                    }
+                                    $description .= ')';
+                                }
+                                if ($itemData->qualdescription != '') {
+                                    $description .= '<span class="edu_qualdescription">'.$itemData->qualdescription.'</span>';
+                                }
+                                $bodyContent .= $description;
+                            }
+                            break;
+                        case 'employ':
+                            if ($block->itemid && $resume && $resume->employments[$block->itemid]) {
+                                $itemData = $resume->employments[$block->itemid];
+                                $description = '';
+                                $description .= '<span class="employ_jobtitle">'.$itemData->jobtitle.':</span> ';
+                                $description .= '<span class="employ_employer">'.$itemData->employer.'</span>';
+                                if ($itemData->startdate != '' || $itemData->enddate != '') {
+                                    $description .= ' (';
+                                    if ($itemData->startdate != '') {
+                                        $description .= '<span class="employ_startdate">'.$itemData->startdate.'</span>';
+                                    }
+                                    if ($itemData->enddate != '') {
+                                        $description .= '<span class="employ_enddate"> - '.$itemData->enddate.'</span>';
+                                    }
+                                    $description .= ')';
+                                }
+                                if ($itemData->positiondescription != '') {
+                                    $description .= '<span class="employ_positiondescription">'.$itemData->positiondescription.'</span>';
+                                }
+                                $bodyContent .= $description;
+                            }
+                            break;
+                        case 'certif':
+                            if ($block->itemid && $resume && $resume->certifications[$block->itemid]) {
+                                $itemData = $resume->certifications[$block->itemid];
+                                $description = '';
+                                $description .= '<span class="certif_title">'.$itemData->title.'</span> ';
+                                if ($itemData->date != '') {
+                                    $description .= '<span class="certif_date">('.$itemData->date.')</span>';
+                                }
+                                if ($itemData->description != '') {
+                                    $description .= '<span class="certif_description">'.$itemData->description.'</span>';
+                                }
+                                $bodyContent = $description;
+                            }
+                            break;
+                        case 'public':
+                            if ($block->itemid && $resume && $resume->publications[$block->itemid]) {
+                                $itemData = $resume->publications[$block->itemid];
+                                $description = '';
+                                $description .= '<span class="public_title">'.$itemData->title;
+                                if ($itemData->contribution != '') {
+                                    $description .= ' ('.$itemData->contribution.')';
+                                }
+                                $description .= '</span> ';
+                                if ($itemData->date != '') {
+                                    $description .= '<span class="public_date">('.$itemData->date.')</span>';
+                                }
+                                if ($itemData->contributiondetails != '' || $itemData->url != '') {
+                                    $description .= '<span class="public_description">';
+                                    if ($itemData->contributiondetails != '') {
+                                        $description .= $itemData->contributiondetails;
+                                    }
+                                    if ($itemData->url != '') {
+                                        $description .= '<br /><a href="'.$itemData->url.'" class="public_url" target="_blank">'.$itemData->url.'</a>';
+                                    }
+                                    $description .= '</span>';
+                                }
+                                $bodyContent = $description;
+                            }
+                            break;
+                        case 'mbrship':
+                            if ($block->itemid && $resume && $resume->profmembershipments[$block->itemid]) {
+                                $itemData = $resume->profmembershipments[$block->itemid];
+                                $description = '';
+                                $description .= '<span class="mbrship_title">'.$itemData->title.'</span> ';
+                                if ($itemData->startdate != '' || $itemData->enddate != '') {
+                                    $description .= ' (';
+                                    if ($itemData->startdate != '') {
+                                        $description .= '<span class="mbrship_startdate">'.$itemData->startdate.'</span>';
+                                    }
+                                    if ($itemData->enddate != '') {
+                                        $description .= '<span class="mbrship_enddate"> - '.$itemData->enddate.'</span>';
+                                    }
+                                    $description .= ')';
+                                }
+                                if ($itemData->description != '') {
+                                    $description .= '<span class="mbrship_description">'.$itemData->description.'</span>';
+                                }
+                                $bodyContent = $description;
+                            }
+                            break;
+                        case 'goalspersonal':
+                        case 'goalsacademic':
+                        case 'goalscareers':
+                        case 'skillspersonal':
+                        case 'skillsacademic':
+                        case 'skillscareers':
+                            $description = '';
+                            if ($resume && $resume->{$block->resume_itemtype}) {
+                                $description .= '<span class="'.$block->resume_itemtype.'_text">'.$resume->{$block->resume_itemtype}.'</span> ';
+                            }
+                            $bodyContent = $description;
+                            break;
+                        case 'interests':
+                            $description = '';
+                            if ($resume->interests != '') {
+                                $description .= '<span class="interests">'.$resume->interests.'</span> ';
+                            }
+                            $bodyContent = $description;
+                            break;
+                        default:
+                            echo '!!! '.$block->resume_itemtype.' !!!';
+                    }
+                    // if the resume item is empty - do not show
+                    if ($bodyContent != '') {
+                        echo '<div class="view-cv-information">';
+                        /*if (isset($block->picture)) {
+                            echo '<div class="picture" style="float:right; position: relative;"><img src="'.$block->picture.
+                                    '" alt=""/></div>';
+                        }*/
+                        echo $bodyContent;
+                        echo '</div>';
+                    }
+                    break;
+                default:
+                    // Text.
+                    echo '<div class="header">'.$block->block_title.'</div>';
+                    echo '<div class="view-text">';
+                    echo format_text($block->text, FORMAT_HTML);
+                    echo '</div>';
             }
         }
     }

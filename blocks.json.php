@@ -508,6 +508,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '<tr><td>';
         foreach ($usereducaitons as $edu) {
             $content .= '<div class="add-item">';
+            $content .= '<label>';
             $content .= '<input class="add-cvitem-checkbox" data-cvtype="edu" type="checkbox" name="add_edu_items[]" value="'.$edu->id.'" /> ';
             $position = $edu->qualname;
             if ($position) {
@@ -519,6 +520,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
                 $position .= ' '.get_string('in', 'block_exaport').' ';
             }
             $content .= $position.$edu->institution.($edu->startdate || $edu->enddate ? ' ('.$edu->startdate.($edu->enddate ? ' - '.$edu->enddate : '').')' : '');
+            $content .= '</label>';
             $content .= '</div>';
         }
         $content .= '</td></tr>';
@@ -532,8 +534,10 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '<tr><td>';
         foreach ($useremployments as $employ) {
             $content .= '<div class="add-item">';
+            $content .= '<label>';
             $content .= '<input class="add-cvitem-checkbox" data-cvtype="employ" type="checkbox" name="add_employ_items[]" value="'.$employ->id.'" /> ';
             $content .= $employ->jobtitle.':'.$employ->employer.($employ->startdate || $employ->enddate ? ' ('.$employ->startdate.($employ->enddate ? ' - '.$employ->enddate : '').')' : '');
+            $content .= '</label>';
             $content .= '</div>';
         }
         $content .= '</td></tr>';
@@ -547,8 +551,10 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '<tr><td>';
         foreach ($usercertifs as $certif) {
             $content .= '<div class="add-item">';
+            $content .= '<label>';
             $content .= '<input class="add-cvitem-checkbox" data-cvtype="certif" type="checkbox" name="add_certif_items[]" value="'.$certif->id.'" /> ';
             $content .= $certif->title.($certif->date ? ' ('.$certif->date.')' : '');
+            $content .= '</label>';
             $content .= '</div>';
         }
         $content .= '</td></tr>';
@@ -562,8 +568,10 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '<tr><td>';
         foreach ($userpublics as $public) {
             $content .= '<div class="add-item">';
+            $content .= '<label>';
             $content .= '<input class="add-cvitem-checkbox" data-cvtype="public" type="checkbox" name="add_public_items[]" value="'.$public->id.'" /> ';
             $content .= $public->title.($public->date ? ' ('.$public->date.')' : '');
+            $content .= '</label>';
             $content .= '</div>';
         }
         $content .= '</td></tr>';
@@ -577,8 +585,10 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '<tr><td>';
         foreach ($usermbrships as $mbrship) {
             $content .= '<div class="add-item">';
+            $content .= '<label>';
             $content .= '<input class="add-cvitem-checkbox" data-cvtype="mbrship" type="checkbox" name="add_mbrship_items[]" value="'.$mbrship->id.'" /> ';
             $content .= $mbrship->title.($mbrship->startdate || $mbrship->enddate ? ' ('.$mbrship->startdate.($mbrship->enddate ? ' - '.$mbrship->enddate : '').')' : '');
+            $content .= '</label>';
             $content .= '</div>';
         }
         $content .= '</td></tr>';
@@ -591,8 +601,10 @@ function get_form_cvinfo($id, $blockdata = array()) {
     $goalTypes = array('personal', 'academic', 'careers');
     foreach ($goalTypes as $goal) {
         $content .= '<div class="add-item">';
+        $content .= '<label>';
         $content .= '<input class="add-cvitem-checkbox" data-cvtype="goals'.$goal.'" type="checkbox" name="add_goal_items[]" value="1" /> ';
         $content .= get_string('resume_goals'.$goal, 'block_exaport');
+        $content .= '</label>';
         $content .= '</div>';
     }
     $content .= '</td></tr>';
@@ -604,8 +616,10 @@ function get_form_cvinfo($id, $blockdata = array()) {
     $skillTypes = array('personal', 'academic', 'careers');
     foreach ($skillTypes as $skill) {
         $content .= '<div class="add-item">';
+        $content .= '<label>';
         $content .= '<input class="add-cvitem-checkbox" data-cvtype="skills'.$skill.'" type="checkbox" name="add_skill_items[]" value="1" /> ';
         $content .= get_string('resume_skills'.$skill, 'block_exaport');
+        $content .= '</label>';
         $content .= '</div>';
     }
     $content .= '</td></tr>';

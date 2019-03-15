@@ -45,6 +45,8 @@ if (!$COURSE) {
 
 // Include JS script.
 $PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
+//$PAGE->requires->js_call_amd('block_exaport/config', 'initialise');
+$PAGE->requires->css('/blocks/exaport/css/preloadinator.css', true);
 
 if ($id) {
     $conditions = array("id" => $id, "userid" => $USER->id);
@@ -744,6 +746,7 @@ switch ($type) {
         </script>
         <script type="text/javascript"
                 src="<?php echo $CFG->wwwroot;?>/lib/editor/tinymce/tiny_mce/<?php echo $tinymce->version; ?>/tiny_mce.js"></script>
+
         <?php
         // View data form.
         echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');

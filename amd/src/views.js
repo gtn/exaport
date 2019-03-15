@@ -1,7 +1,12 @@
 var exaportViewEdit;
 var newItem = null, lastclicked = null;
 
-define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory', 'core/modal_events'], function($, json, jqui, modalFactory, modalEvents) {
+define(['jquery',
+        'block_exaport/jquery.json',
+        'jqueryui',
+        'core/modal_factory',
+        'core/modal_events'],
+        function($, json, jqui, modalFactory, modalEvents) {
 
     var dialogue;
     var last_popup;
@@ -692,15 +697,11 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                 default:
                     break;
             }
-            console.log('!!!!!');
-            console.log(bodyContent);
             var tempString = '<div id="id_holder" style="display:none;"></div>';
             tempString += '<div class="cv_info" style="overflow: hidden;">';
             tempString += '<div class="header">' + $E.translate('cvinformation') + ': ' + addToHeader + '</div>';
             tempString += '<div class="body">' + bodyContent + '</div>';
             tempString += '</div>';
-            // tempString += '<div class="title">' + titleContent + '</div>';
-            console.log(tempString);
             $item.html(tempString);
         } else {
             data.type = 'text';
@@ -748,7 +749,6 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
             $item_header = $item.find('div.header').html();
             $item.find('div.header').html($item_header + '<span class="unshared_message">Unshared</span>');
         }
-
         return $item;
     }
 
@@ -763,6 +763,7 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
     function saveBlockData() {
         var data = $('form#view_edit_form').serializeArray();
         data.push({name: 'ajax', value: 1});
+        showPreloadinator($('#view-preview'), '', true);
         $.ajax({
             url: document.location.href,
             type: 'POST',
@@ -771,6 +772,7 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                 var data = JSON.parse(res);
                 $('form :input[name=blocks]').val(data.blocks);
                 exaportViewEdit.resetViewContent();
+                hidePreloadinator($('#view-preview'), '');
             }
         });
     }
@@ -779,7 +781,7 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
     {
         var item_id = $(this).parent().find("#id_holder").html();
         lastclicked = $(this).parent();
-
+        showPreloadinator(lastclicked, '', false);
         $.ajax({
             url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
             type: 'POST',
@@ -794,7 +796,6 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                 var data = JSON.parse(res);
 
                 showDialog(data.modalTitle, data.html);
-
                 // Focus first element.
                 // ...popup.$body.find('input:visible:first').focus();.
 
@@ -813,10 +814,12 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                 newItem = ui.item;
             },
             receive: function(e, ui){
+
+console.log('start to modal!');
+
                 // Get ajax only for item from the top block.
                 var uiattr = $(ui.item[0]).closest('ul').prop("className");
                 if (uiattr.search("portfolioDesignBlocks") == -1) {
-
                     $.ajax({
                         url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
                         type: 'POST',
@@ -842,7 +845,7 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                             $('#temp_javascript').remove();
                             var script = document.createElement('script');
                             $(script).attr('id', 'temp_javascript');
-                            console.log(data.script);
+                            // console.log(data.script);
                             script.textContent = data.script;
                             document.body.appendChild(script);
 
@@ -883,9 +886,35 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
             forcePlaceholderSize: true,
             helper: "clone",
             stop: function(e, ui){
+                showPreloadinator($(ui.helper), '', false);
             }
         });
     } // End initContentEdit.
+
+    function showPreloadinator(element, tohide, fixedposition) {
+        var id = 'preloader' + $.now();
+        var preloadinatorTemplate = '<div id="' + id + '" class="preloader ' + (fixedposition ? 'preloader-fixed' : '') + ' js-preloader flex-center">' +
+                '<div class="dots">'+
+                    '<div class="dot"></div>'+
+                    '<div class="dot"></div>'+
+                    '<div class="dot"></div>'+
+                '</div>'+
+            '</div>';
+        if (tohide != '') {
+            element.find(tohide).hide();
+        }
+        element.append(preloadinatorTemplate);
+        // hide element on very long requests
+        setTimeout('$(\'#' + id + '\').remove();', 15000); // 15 seconds
+
+    } // End showPreloadinator
+
+    function hidePreloadinator(element, toshow) {
+        if (toshow != '') {
+            $(element).find('.blocktype').show();
+        }
+        $(element).find('.preloader').remove();
+    } // End hidePreloadinator
 
     function showDialog(title, body) {
         if (dialogue) {
@@ -907,10 +936,16 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
                     dialogue.setTitle(data.modalTitle);
                     dialogue.setBody(data.html);
                 });*/
+                // On show handler. (for slow requests)
+                dialogue.getRoot().on(modalEvents.shown, function () {
+                    hidePreloadinator(newItem, '.blocktype');
+                    hidePreloadinator(lastclicked, '');
+                    console.log('modal is shown');
+                });
                 // On hide handler.
                 dialogue.getRoot().on(modalEvents.hidden, function () {
                     // Empty modal contents when it's hidden.
-                    console.log('modal is hidden');
+                    // console.log('modal is hidden');
                     dialogue.setBody('');
                     // Hide handler.
                     if (newItem) {
@@ -991,7 +1026,7 @@ define(['jquery', 'block_exaport/jquery.json', 'jqueryui', 'core/modal_factory',
     // MAIN code of MODULE.
     return {
         initialise: function ($params) {
-            console.log('exaport AMD loaded');
+            // console.log('exaport AMD loaded');
             initContentEdit();
             // For sharing of views
             // changing the checkboxes / radiobuttons update the sharing text, visible options, etc.

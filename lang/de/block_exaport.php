@@ -354,6 +354,7 @@ $string['cofigureblock_cvinfo_goals'] = 'Meine Ziele';
 $string['cofigureblock_cvinfo_skills'] = 'Meine Kompetenzen';
 $string['cofigureblock_cvinfo_interests'] = 'Interessen';
 $string['in'] = 'at';
+$string['cofigureblock_cvinfo_withfiles'] = 'With attachment files';
 
 // === Desp.
 $string['back_to_desp'] = 'zurück zum d-ESP';

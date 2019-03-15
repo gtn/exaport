@@ -199,6 +199,11 @@ define(['jquery',
                     data = {};
                     data.type = 'cv_information';
                     data.itemid = $(this).val();
+                    if ($('#blockform [name="add_withfiles"]').is(":checked")) {
+                        data.resume_withfiles = 1;
+                    } else {
+                        data.resume_withfiles = 0;
+                    }
                     data.resume_itemtype = $(this).attr('data-cvtype');
                     var goalsSkills = ['goalspersonal', 'goalsacademic', 'goalcareers',
                                        'skillspersonal', 'skillsacademic', 'skillscareers'];
@@ -563,11 +568,13 @@ define(['jquery',
             var bodyContent = '';
             var titleContent = '';
             var addToHeader = '';
-            switch(data.resume_itemtype) {
+            var attachments = [];
+            switch (data.resume_itemtype) {
                 case 'edu':
                     addToHeader = $E.translate('cofigureblock_cvinfo_education_history');
                     if (data.itemid && resumeItems && resumeItems.educations[data.itemid]) {
                         itemData = resumeItems.educations[data.itemid];
+                        attachments = itemData.attachments;
                         var description = '';
                         description += '<span class="edu_institution">' + itemData.institution + ':</span> ';
                         description += '<span class="edu_qualname">' + itemData.qualname + '</span>';
@@ -591,6 +598,7 @@ define(['jquery',
                     addToHeader = $E.translate('cofigureblock_cvinfo_employment_history');
                     if (data.itemid && resumeItems && resumeItems.employments[data.itemid]) {
                         itemData = resumeItems.employments[data.itemid];
+                        attachments = itemData.attachments;
                         var description = '';
                         description += '<span class="employ_jobtitle">' + itemData.jobtitle + ':</span> ';
                         description += '<span class="employ_employer">' + itemData.employer + '</span>';
@@ -614,6 +622,7 @@ define(['jquery',
                     addToHeader = $E.translate('cofigureblock_cvinfo_certif');
                     if (data.itemid && resumeItems && resumeItems.certifications[data.itemid]) {
                         itemData = resumeItems.certifications[data.itemid];
+                        attachments = itemData.attachments;
                         var description = '';
                         description += '<span class="certif_title">' + itemData.title + '</span> ';
                         if (itemData.date != '') {
@@ -629,6 +638,7 @@ define(['jquery',
                     addToHeader = $E.translate('cofigureblock_cvinfo_public');
                     if (data.itemid && resumeItems && resumeItems.publications[data.itemid]) {
                         itemData = resumeItems.publications[data.itemid];
+                        attachments = itemData.attachments;
                         var description = '';
                         description += '<span class="public_title">' + itemData.title;
                         if (itemData.contribution != '') {
@@ -655,6 +665,7 @@ define(['jquery',
                     addToHeader = $E.translate('cofigureblock_cvinfo_mbrship');
                     if (data.itemid && resumeItems && resumeItems.profmembershipments[data.itemid]) {
                         itemData = resumeItems.profmembershipments[data.itemid];
+                        attachments = itemData.attachments;
                         var description = '';
                         description += '<span class="mbrship_title">' + itemData.title + '</span> ';
                         if (itemData.startdate != '' || itemData.enddate != '') {
@@ -679,6 +690,9 @@ define(['jquery',
                 case 'skillspersonal':
                 case 'skillsacademic':
                 case 'skillscareers':
+                    attachments = resumeItems[data.resume_itemtype + '_attachments'];
+                    console.log(resumeItems);
+                    console.log(data.resume_itemtype + '_attachments');
                     addToHeader = $E.translate('resume_' + data.resume_itemtype);
                     var description = '';
                     if (resumeItems['' + data.resume_itemtype]) {
@@ -697,6 +711,15 @@ define(['jquery',
                 default:
                     break;
             }
+
+            if (data.resume_withfiles == "1" && attachments && attachments.length) {
+                bodyContent += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
+                $.each(attachments, function (k, file) {
+                    bodyContent += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
+                })
+                bodyContent += '</ul>';
+            }
+
             var tempString = '<div id="id_holder" style="display:none;"></div>';
             tempString += '<div class="cv_info" style="overflow: hidden;">';
             tempString += '<div class="header">' + $E.translate('cvinformation') + ': ' + addToHeader + '</div>';

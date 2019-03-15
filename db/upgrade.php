@@ -909,6 +909,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2019030703, 'exaport');
     }
 
+    if ($oldversion < 2019031500) {
+        $table = new xmldb_table('block_exaportviewblock');
+        $field = new xmldb_field('resume_withfiles', XMLDB_TYPE_INTEGER, '2', null, null, null, 0, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_block_savepoint(true, 2019031500, 'exaport');
+    }
+
     // TODO: delete structure fields / tables.
 
     return $result;

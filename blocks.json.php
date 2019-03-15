@@ -499,6 +499,12 @@ function get_form_cvinfo($id, $blockdata = array()) {
             (isset($blockdata->block_title) ? s($blockdata->block_title) : '').
             '" id="block_title">';
     $content .= '</td></tr>';*/
+    // with files
+    $content .= '<tr><th>';
+    $content .= '<label>';
+    $content .= '<input class="add-checkbox" type="checkbox" name="add_withfiles" value="1" /> ';
+    $content .= get_string('cofigureblock_cvinfo_withfiles', 'block_exaport').'</label>';
+    $content .= '</th></tr>';
     // educations
     $usereducaitons = block_exaport_resume_get_educations($resume->id);
     if ($usereducaitons) {

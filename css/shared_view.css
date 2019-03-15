@@ -169,3 +169,7 @@
 #exaport #view .view-text {
     overflow: hidden;
 }
+
+#exaport .resume_attachments li {
+    list-style: none;
+}

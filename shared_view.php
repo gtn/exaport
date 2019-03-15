@@ -131,7 +131,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         'block_exaport', 'view_content', $access);
                 $block->text = format_text($block->text, FORMAT_HTML);
             }
-
+            $attachments = array();
             switch ($block->type) {
                 case 'item':
                     $item = $block->item;
@@ -312,6 +312,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         case 'edu':
                             if ($block->itemid && $resume && $resume->educations[$block->itemid]) {
                                 $itemData = $resume->educations[$block->itemid];
+                                $attachments = $itemData->attachments;
                                 $description = '';
                                 $description .= '<span class="edu_institution">'.$itemData->institution.':</span> ';
                                 $description .= '<span class="edu_qualname">'.$itemData->qualname.'</span>';
@@ -334,6 +335,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         case 'employ':
                             if ($block->itemid && $resume && $resume->employments[$block->itemid]) {
                                 $itemData = $resume->employments[$block->itemid];
+                                $attachments = $itemData->attachments;
                                 $description = '';
                                 $description .= '<span class="employ_jobtitle">'.$itemData->jobtitle.':</span> ';
                                 $description .= '<span class="employ_employer">'.$itemData->employer.'</span>';
@@ -356,6 +358,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         case 'certif':
                             if ($block->itemid && $resume && $resume->certifications[$block->itemid]) {
                                 $itemData = $resume->certifications[$block->itemid];
+                                $attachments = $itemData->attachments;
                                 $description = '';
                                 $description .= '<span class="certif_title">'.$itemData->title.'</span> ';
                                 if ($itemData->date != '') {
@@ -370,6 +373,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         case 'public':
                             if ($block->itemid && $resume && $resume->publications[$block->itemid]) {
                                 $itemData = $resume->publications[$block->itemid];
+                                $attachments = $itemData->attachments;
                                 $description = '';
                                 $description .= '<span class="public_title">'.$itemData->title;
                                 if ($itemData->contribution != '') {
@@ -395,6 +399,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         case 'mbrship':
                             if ($block->itemid && $resume && $resume->profmembershipments[$block->itemid]) {
                                 $itemData = $resume->profmembershipments[$block->itemid];
+                                $attachments = $itemData->attachments;
                                 $description = '';
                                 $description .= '<span class="mbrship_title">'.$itemData->title.'</span> ';
                                 if ($itemData->startdate != '' || $itemData->enddate != '') {
@@ -419,6 +424,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         case 'skillspersonal':
                         case 'skillsacademic':
                         case 'skillscareers':
+                            $attachments = @$resume->{$block->resume_itemtype.'_attachments'};
                             $description = '';
                             if ($resume && $resume->{$block->resume_itemtype}) {
                                 $description .= '<span class="'.$block->resume_itemtype.'_text">'.$resume->{$block->resume_itemtype}.'</span> ';
@@ -435,6 +441,15 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         default:
                             echo '!!! '.$block->resume_itemtype.' !!!';
                     }
+
+                    if (count($attachments) > 0 && $block->resume_withfiles) {
+                        $bodyContent .= '<ul class="resume_attachments '.$block->resume_itemtype.'_attachments">';
+                        foreach($attachments as $attachm) {
+                            $bodyContent .= '<li><a href="'.$attachm['fileurl'].'" target="_blank">'.$attachm['filename'].'</a></li>';
+                        }
+                        $bodyContent .= '</ul>';
+                    }
+
                     // if the resume item is empty - do not show
                     if ($bodyContent != '') {
                         echo '<div class="view-cv-information">';

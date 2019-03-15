@@ -213,6 +213,7 @@
 		<FIELD NAME="width" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
 		<FIELD NAME="height" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
 		<FIELD NAME="resume_itemtype" TYPE="char" LENGTH="15" NOTNULL="false" SEQUENCE=""/>
+		<FIELD NAME="resume_withfiles" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE=""/>
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>

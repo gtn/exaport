@@ -384,3 +384,8 @@
 #exaport .mbrship_description {
     display: block;
 }
+
+#exaport .resume_attachments li {
+    border: none;
+    margin: 0px;
+}

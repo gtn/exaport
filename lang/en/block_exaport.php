@@ -357,6 +357,7 @@ $string['cofigureblock_cvinfo_goals'] = 'My goals';
 $string['cofigureblock_cvinfo_skills'] = 'My skills';
 $string['cofigureblock_cvinfo_interests'] = 'Interests';
 $string['in'] = 'at';
+$string['cofigureblock_cvinfo_withfiles'] = 'With attachment files';
 
 // === Desp.
 $string['back_to_desp'] = 'back to language portfolio';

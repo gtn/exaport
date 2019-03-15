@@ -270,7 +270,7 @@ function block_exaport_get_resume_params_record($userid = null) {
 }
 
 function block_exaport_get_resume_params($userid = null, $full = false) {
-    global $DB;
+    global $DB, $CFG;
     if ($userid === null) {
         global $USER;
         $userid = $USER->id;
@@ -281,30 +281,68 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
     // add related parameters of resume
     if ($full) {
         // TODO: add images?
+        $fs = get_file_storage();
+        $context = context_user::instance($userid);
+        $importAttachments = function($type, $recordid) use ($fs, $context, $CFG) {
+            $result = null;
+            $files = $fs->get_area_files($context->id, 'block_exaport', 'resume_'.$type, $recordid, 'filename', false);
+            if (count($files) > 0) {
+                $result = array();
+                foreach ($files as $file) {
+                    $filename = $file->get_filename();
+                    $url = $CFG->wwwroot.'/pluginfile.php/'.$file->get_contextid().'/block_exaport/resume_'.$type.'/'.$file->get_itemid().
+                            '/'.$filename;
+                    $result[] = array('filename' => $filename, 'fileurl' => $url);
+                };
+            }
+            return $result;
+        };
+
         // educations
         $educations = block_exaport_resume_get_educations($resumeparams->id);
         if ($educations) {
+            foreach ($educations as $education) {
+                $education->attachments = $importAttachments('edu', $education->id);
+            }
             $resumeparams->educations = $educations;
         }
         // employments
         $employments = block_exaport_resume_get_employments($resumeparams->id);
         if ($employments) {
+            foreach ($employments as $employment) {
+                $employment->attachments = $importAttachments('employ', $employment->id);
+            }
             $resumeparams->employments = $employments;
         }
         // certifications
         $certifications = block_exaport_resume_get_certificates($resumeparams->id);
         if ($certifications) {
+            foreach ($certifications as $certification) {
+                $certification->attachments = $importAttachments('certif', $certification->id);
+            }
             $resumeparams->certifications = $certifications;
         }
         // publications
         $publications = block_exaport_resume_get_publications($resumeparams->id);
         if ($publications) {
+            foreach ($publications as $publication) {
+                $publication->attachments = $importAttachments('public', $publication->id);
+            }
             $resumeparams->publications = $publications;
         }
         // Professional memberships
         $profmembershipments = block_exaport_resume_get_profmembershipments($resumeparams->id);
         if ($profmembershipments) {
+            foreach ($profmembershipments as $profmembershipment) {
+                $profmembershipment->attachments = $importAttachments('mbrship', $profmembershipment->id);
+            }
             $resumeparams->profmembershipments = $profmembershipments;
+        }
+        // add files to skills and goals
+        $elements = array('personal', 'academic', 'careers');
+        foreach ($elements as $element) {
+            $resumeparams->{'goals'.$element.'_attachments'} = $importAttachments('goals'.$element, $resumeparams->id);
+            $resumeparams->{'skills'.$element.'_attachments'} = $importAttachments('skills'.$element, $resumeparams->id);
         }
     }
 

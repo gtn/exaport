@@ -1312,6 +1312,10 @@ return [
                 'at',
                 'at',
         ],
+        'cofigureblock_cvinfo_withfiles' => [
+                'With attachment files',
+                'With attachment files',
+        ],
 
         // === Desp.
         'back_to_desp' => [

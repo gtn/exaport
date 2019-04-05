@@ -45,6 +45,7 @@ if (!$COURSE) {
 
 // Include JS script.
 $PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
+//$PAGE->requires->js(new moodle_url($CFG->wwwroot.'/blocks/exaport/javascript/jquery.ui.touch-punch.min.js'), false);
 //$PAGE->requires->js_call_amd('block_exaport/config', 'initialise');
 $PAGE->requires->css('/blocks/exaport/css/preloadinator.css', true);
 

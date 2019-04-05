@@ -4,9 +4,10 @@ var newItem = null, lastclicked = null;
 define(['jquery',
         'block_exaport/jquery.json',
         'jqueryui',
+        'block_exaport/touchpunch',
         'core/modal_factory',
         'core/modal_events'],
-        function($, json, jqui, modalFactory, modalEvents) {
+        function($, json, jqui, jquitp, modalFactory, modalEvents) {
 
     var dialogue;
     var last_popup;

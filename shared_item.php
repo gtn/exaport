@@ -217,7 +217,7 @@ function block_exaport_show_comments($item, $access) {
 
             echo format_text($comment->entry);
 
-            if ($files = block_exaport_get_item_comment_file($comment->id)) {
+            if ($file = block_exaport_get_item_comment_file($comment->id)) {
                 $fileurl = $CFG->wwwroot.
                         "/blocks/exaport/portfoliofile.php?access={$access}&itemid={$item->id}&commentid={$comment->id}";
                 echo '</td></tr><tr><td class="left side">';

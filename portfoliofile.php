@@ -68,6 +68,7 @@ if ($token) {
         print_error("viewnotfound", "block_exaport");
     }
 
+
     if ($file = block_exaport_get_item_file($item)) {
         send_stored_file($file);
     } else {
@@ -105,16 +106,27 @@ if ($itemid) {
         print_error('Item not found');
     }
 
+
     if ($commentid = optional_param('commentid', 0, PARAM_INT)) {
         $comment = $DB->get_record("block_exaportitemcomm", ['itemid' => $item->id, 'id' => $commentid]);
         if (!$comment) {
             not_found();
         }
         $file = block_exaport_get_item_comment_file($comment->id);
+
     } else {
         $file = block_exaport_get_item_file($item, false);
         if (is_array($file) && count($file) > 1) {
-            $file = $file[$inst]; // If multiple files - return file with &inst=X
+            $counter = 0; //accessing the file by index is not possible because it is private... solution is a foreach + counter
+            foreach($file as $onefile){
+                if($counter == $inst){
+                    $file = $onefile;
+                }
+                $counter++;
+            }
+//            $file = $file[$inst]; // If multiple files - return file with &inst=X this does not work...
+//            var_dump($file);
+//            die();
         } else if (is_array($file)) {
             $file = array_shift($file);
         }

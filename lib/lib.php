@@ -58,6 +58,7 @@ function block_exaport_get_file($item, $type, $onlyfirst = false) {
 
 function block_exaport_get_item_file($item, $onlysingle = true) {
     global $CFG;
+
     if ($CFG->block_exaport_multiple_files_in_item && !$onlysingle) {
         return block_exaport_get_file($item, 'item_file'); // Multiple files
     }

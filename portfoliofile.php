@@ -117,14 +117,14 @@ if ($itemid) {
     } else {
         $file = block_exaport_get_item_file($item, false);
         if (is_array($file) && count($file) > 1) {
-            $counter = 0; //accessing the file by index is not possible because it is private... solution is a foreach + counter
-            foreach($file as $onefile){
-                if($counter == $inst){
-                    $file = $onefile;
-                }
-                $counter++;
-            }
-//            $file = $file[$inst]; // If multiple files - return file with &inst=X this does not work...
+//            $counter = 0; //accessing the file by index is not possible because it is private... solution is a foreach + counter
+//            foreach($file as $onefile){
+//                if($counter == $inst){
+//                    $file = $onefile;
+//                }
+//                $counter++;
+//            }
+            $file = $file[$inst]; // If multiple files - return file with &inst=X this does not work...
 //            var_dump($file);
 //            die();
         } else if (is_array($file)) {

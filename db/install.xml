@@ -212,8 +212,8 @@
 		<FIELD NAME="contentmedia" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
 		<FIELD NAME="width" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
 		<FIELD NAME="height" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-		<FIELD NAME="resume_itemtype" TYPE="char" LENGTH="15" NOTNULL="false" SEQUENCE=""/>
-		<FIELD NAME="resume_withfiles" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE=""/>
+		<FIELD NAME="resume_itemtype" TYPE="char" LENGTH="15" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="resume_withfiles" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -254,7 +254,7 @@
 		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
 		<INDEX NAME="groupid" UNIQUE="true" FIELDS="groupid"/>
 	  </INDEXES>
-	</TABLE>	
+	</TABLE>
 	<TABLE NAME="block_exaportresume" COMMENT="users resume">
 	  <FIELDS>
 		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -380,7 +380,7 @@
 		<INDEX NAME="resumeid" UNIQUE="true" FIELDS="resumeid"/>
 		<INDEX NAME="badgeid" UNIQUE="true" FIELDS="badgeid"/>
 	  </INDEXES>
-	</TABLE>		
+	</TABLE>
 	<TABLE NAME="block_exaportcompresume_mm" COMMENT="users resume competence relations">
 	  <FIELDS>
 		<FIELD NAME="id" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="true"/>

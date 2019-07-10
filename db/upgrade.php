@@ -901,7 +901,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     if ($oldversion < 2019030703) {
         $table = new xmldb_table('block_exaportviewblock');
-        $field = new xmldb_field('resume_itemtype', XMLDB_TYPE_CHAR, '15', null, null, null, null, null);
+        $field = new xmldb_field('resume_itemtype', XMLDB_TYPE_CHAR, '15', null, null, false, null, null);
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
@@ -911,7 +911,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     if ($oldversion < 2019031500) {
         $table = new xmldb_table('block_exaportviewblock');
-        $field = new xmldb_field('resume_withfiles', XMLDB_TYPE_INTEGER, '2', null, null, null, 0, null);
+        $field = new xmldb_field('resume_withfiles', XMLDB_TYPE_INTEGER, '2', null, null, false, 0, null);
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }

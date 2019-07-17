@@ -506,7 +506,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
     $content .= get_string('cofigureblock_cvinfo_withfiles', 'block_exaport').'</label>';
     $content .= '</th></tr>';
     // educations
-    $usereducaitons = block_exaport_resume_get_educations($resume->id);
+    $usereducaitons = block_exaport_resume_get_educations(@$resume->id);
     if ($usereducaitons) {
         $content .= '<tr><th>';
         $content .= '<label>'.get_string('cofigureblock_cvinfo_education_history', 'block_exaport').'</label>';
@@ -532,7 +532,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '</td></tr>';
     }
     // employments
-    $useremployments = block_exaport_resume_get_employments($resume->id);
+    $useremployments = block_exaport_resume_get_employments(@$resume->id);
     if ($useremployments) {
         $content .= '<tr><th>';
         $content .= '<label>'.get_string('cofigureblock_cvinfo_employment_history', 'block_exaport').'</label>';
@@ -549,7 +549,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '</td></tr>';
     }
     // Certifications, accreditations and awards
-    $usercertifs = block_exaport_resume_get_certificates($resume->id);
+    $usercertifs = block_exaport_resume_get_certificates(@$resume->id);
     if ($usercertifs) {
         $content .= '<tr><th>';
         $content .= '<label>'.get_string('cofigureblock_cvinfo_certif', 'block_exaport').'</label>';
@@ -566,7 +566,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '</td></tr>';
     }
     // Books and publications
-    $userpublics = block_exaport_resume_get_publications($resume->id);
+    $userpublics = block_exaport_resume_get_publications(@$resume->id);
     if ($userpublics) {
         $content .= '<tr><th>';
         $content .= '<label>'.get_string('cofigureblock_cvinfo_public', 'block_exaport').'</label>';
@@ -583,7 +583,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
         $content .= '</td></tr>';
     }
     // Professional memberships
-    $usermbrships = block_exaport_resume_get_profmembershipments($resume->id);
+    $usermbrships = block_exaport_resume_get_profmembershipments(@$resume->id);
     if ($usermbrships) {
         $content .= '<tr><th>';
         $content .= '<label>'.get_string('cofigureblock_cvinfo_mbrship', 'block_exaport').'</label>';

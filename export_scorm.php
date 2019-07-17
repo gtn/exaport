@@ -340,6 +340,9 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             if (!$fsfiles) {
                 continue;
             }
+            if (!is_array($fsfiles)) {
+                $fsfiles = array($fsfiles);
+            }
             $filelinks = '';
             $j = 0;
             foreach ($fsfiles as $ind => $fsfile) {

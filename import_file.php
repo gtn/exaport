@@ -234,7 +234,7 @@ function import_user_image($unzipdir, $url) {
 
             $DB->delete_records("block_exaportitem", array("id" => $new->id));
         } else {
-            notify(get_string("linkedfilenotfound", "block_exaport", array("url" => $url, "title" => "test")));
+            $OUTPUT->notification(get_string("linkedfilenotfound", "block_exaport", array("url" => $url, "title" => "test")));
         }
     }
 }
@@ -270,7 +270,7 @@ function import_user_description($file, $unzipdir) {
 }
 
 function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null, $previd = null) {
-    global $USER, $COURSE, $DB;
+    global $USER, $COURSE, $DB, $OUTPUT;
     foreach ($structures as $structure) {
         if (isset($structure["data"])) {
             if (isset($structure["data"]["title"])
@@ -296,7 +296,7 @@ function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null,
                         $newentry->userid = $USER->id;
 
                         if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
-                            notify("Could not insert category!");
+                            $OUTPUT->notification("Could not insert category!");
                         }
                     } else {
                         $entry = $DB->get_record_select("block_exaportcate",
@@ -317,7 +317,7 @@ function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null,
                         $newentry->pid = $previd;
 
                         if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
-                            notify("Could not insert category!");
+                            $OUTPUT->notification("Could not insert category!");
                         }
                     } else {
                         $entry = $DB->get_record_select("block_exaportcate",
@@ -383,7 +383,7 @@ function block_exaport_clean_path($text) {
 }
 
 function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null, $id = null) {
-    global $USER, $CFG, $COURSE, $DB;
+    global $USER, $CFG, $COURSE, $DB, $OUTPUT;
     $filepath = $unzipdir.'/'.$url;
     $content = file_get_contents($filepath);
 
@@ -411,10 +411,10 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
                 }
                 get_comments($content, $new->id, 'block_exaportitemcomm');
             } else {
-                notify(get_string("couldntinsert", "block_exaport", $title));
+                $OUTPUT->notification(get_string("couldntinsert", "block_exaport", $title));
             }
         } else {
-            notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+            $OUTPUT->notification(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
         }
     } else if ((($starturl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->')) !== false) &&
             (($startdesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->')) !== false)
@@ -463,12 +463,12 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
                         // Eindeutige itemid generieren.
                         if (!$ret = $fs->create_file_from_pathname($fileinfo, $linkedfilepath)) {
                             $DB->delete_records("block_exaportitem", array("id" => $new->id));
-                            notify(get_string("couldntcopyfile", "block_exaport", $title));
+                            $OUTPUT->notification(get_string("couldntcopyfile", "block_exaport", $title));
                         } else {
                             get_comments($content, $new->id, 'block_exaportitemcomm');
                         }
                     } else {
-                        notify(get_string("couldntinsert", "block_exaport", $title));
+                        $OUTPUT->notification(get_string("couldntinsert", "block_exaport", $title));
                     }
                 }
             }
@@ -476,7 +476,7 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
             //    notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
             //}
         } else {
-            notify(get_string("linkedfilenotfound", "block_exaport",
+            $OUTPUT->notification(get_string("linkedfilenotfound", "block_exaport",
                     array("filename" => dirname($filepath).'/'.block_exaport_clean_path($allfiles[0]), "url" => $url, "title" => $title)));
         }
     } else if ((($startdesc = strpos($content, '<!--###BOOKMARK_NOTE_DESC###-->')) !== false)) {
@@ -497,18 +497,18 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
                 }
                 get_comments($content, $new->id, 'block_exaportitemcomm');
             } else {
-                notify(get_string("couldntinsert", "block_exaport", $title));
+                $OUTPUT->notification(get_string("couldntinsert", "block_exaport", $title));
             }
         } else {
-            notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+            $OUTPUT->notification(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
         }
     } else {
-        notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+        $OUTPUT->notification(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
     }
 }
 
 function get_comments($content, $bookmarkid, $table) {
-    global $USER, $DB;
+    global $USER, $DB, $OUTPUT;
     $i = 1;
     $comment = "";
     while ((($startauthor = strpos($content, '<!--###BOOKMARK_COMMENT('.$i.')_AUTHOR###-->')) !== false) &&
@@ -530,7 +530,7 @@ function get_comments($content, $bookmarkid, $table) {
             $comment .= '<span class="block_eportfolio_commentauthor">'.$commentauthor.'</span> '.$commenttime.'<br />'.
                     $commentcontent.'<br /><br />';
         } else {
-            notify(get_string("couldninsertcomment", "block_exaport"));
+            $OUTPUT->notification(get_string("couldninsertcomment", "block_exaport"));
         }
         $i++;
     }
@@ -542,7 +542,7 @@ function get_comments($content, $bookmarkid, $table) {
         $new->entry = get_string("importedcommentsstart", "block_exaport").
                 $comment.get_string("importedcommentsend", "block_exaport");
         if (!$DB->insert_record($table, $new)) {
-            notify(get_string("couldninsertcomment", "block_exaport"));
+            $OUTPUT->notification(get_string("couldninsertcomment", "block_exaport"));
         }
     }
 }

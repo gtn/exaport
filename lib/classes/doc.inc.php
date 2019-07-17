@@ -4,32 +4,39 @@
 /***************************************************************************************************
 ****************************************************************************************************
 *****
-*****	  MiniXML - PHP class library for generating and parsing XML.
-*****											
-*****	  Copyright (C) 2002-2005 Patrick Deegan, Psychogenic.com
-*****	  All rights reserved.
+*****      MiniXML - PHP class library for generating and parsing XML.
+*****                                    
+*****      http://minixml.psychogenic.com    
+*****                                          
 *****
-*****	  http://minixml.psychogenic.com	
-*****													   
-*****   This program is free software; you can redistribute 
-*****   it and/or modify it under the terms of the GNU	  
-*****   General Public License as published by the Free	 
-*****   Software Foundation; either version 2 of the		
-*****   License, or (at your option) any later version.	 
-*****													   
-*****   This program is distributed in the hope that it will
-*****   be useful, but WITHOUT ANY WARRANTY; without even   
-*****   the implied warranty of MERCHANTABILITY or FITNESS  
-*****   FOR A PARTICULAR PURPOSE.  See the GNU General	  
-*****   Public License for more details.					
-*****													   
-*****   You should have received a copy of the GNU General  
-*****   Public License along with this program; if not,	 
-*****   write to the Free Software Foundation, Inc., 675	
-*****   Mass Ave, Cambridge, MA 02139, USA.
+*****   This module is part of the miniXML XML parser/generator package.
+*****   Copyright (C) 2002-2008 Patrick Deegan
+*****   All rights reserved
+*****   
+*****   
+*****   This library is released under the terms of the GNU GPL version 3, making it available only for 
+*****   free programs ("free" here being used in the sense of the GPL, see http://www.gnu.org for more details). 
+*****   Anyone wishing to use this library within a proprietary or otherwise non-GPLed program MUST contact psychogenic.com to 
+*****   acquire a distinct license for their application.  This approach encourages the use of free software 
+*****   while allowing for proprietary solutions that support further development.
+*****   
+*****   
+*****   
+*****   miniXML is free software: you can redistribute it and/or modify
+*****   it under the terms of the GNU General Public License as published by
+*****   the Free Software Foundation, either version 3 of the License, or
+*****   (at your option) any later version.
 *****
+*****   miniXML is distributed in the hope that it will be useful,
+*****   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*****   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*****   GNU General Public License for more details.
 *****
-*****   You may contact the author, Pat Deegan, through the	 
+*****   You should have received a copy of the GNU General Public License
+*****   along with miniXML.  If not, see <http://www.gnu.org/licenses/>.
+*****   
+*****   
+*****   You may contact the author, Pat Deegan, through the     
 *****   contact section at http://www.psychogenic.com
 *****
 *****   Much more information on using this API can be found on the
@@ -45,15 +52,15 @@
 #define("MINIXML_COMPLETE_REGEX",'/<\s*([^\s>]+)([^>]+)?>(.*?)<\s*\/\\1\s*>\s*([^<]+)?(.*)|\s*<!--(.+?)-->\s*|^\s*<\s*([^\s>]+)([^>]*)\/\s*>\s*([^<>]+)?|<!\[CDATA\s*\[(.*?)\]\]\s*>|<!DOCTYPE\s*([^\[]*)\[(.*?)\]\s*>|<!ENTITY\s*([^"\'>]+)\s*(["\'])([^\14]+)\14\s*>|^([^<]+)(.*)/smi');
 */
 
-define("MINIXML_COMPLETE_REGEX",'/^\s*<\s*([^\s>]+)(\s+[^>]+)?>(.*?)<\s*\/\1\s*>\s*([^<]+)?(.*)|^\s*<!--(.+?)-->\s*(.*)|^\s*<\s*([^\s>]+)([^>]+)\/\s*>\s*(.*)|^\s*<!\[CDATA\s*\[(.*?)\]\]\s*>\s*(.*)|^\s*<!DOCTYPE\s*([^\[]*)\[(.*?)\]\s*>\s*(.*)|^\s*<!ENTITY\s*([^"\'>]+)\s*(["\'])([^\17]+)\17\s*>\s*(.*)|^([^<]+)(.*)/smi');
+define("MINIXML_COMPLETE_REGEX",'/^\s*<\s*([^\s>]+)(\s+[^>]+)?>(.*?)<\s*\/\1\s*>\s*([^<]+)?(.*)|^\s*<!--(.+?)-->\s*(.*)|^\s*<\s*([^\s>]+)([^>]*)\/\s*>\s*(.*)|^\s*<!\[CDATA\s*\[(.*?)\]\]\s*>\s*(.*)|^\s*<!DOCTYPE\s*([^\[]*)\[(.*?)\]\s*>\s*(.*)|^\s*<!ENTITY\s*([^"\'>]+)\s*(["\'])([^\17]+)\17\s*>\s*(.*)|^([^<]+)(.*)/smi');
 
 /*
 #define("MINIXML_SIMPLE_REGEX",
-# //		 1		 2	  3					4	   5		  6				   7		  8			 9		  #10	 11
+# //         1         2      3                    4       5          6                   7          8             9          #10     11
 #'/\s*<\s*([^\s>]+)([^>]+)?>(.*?)<\s*\/\\1\s*>\s*([^<]+)?(.*)|\s*<!--(.+?)-->\s*|\s*<\s*([^\s>]+)([^>]*)\/\s*>\s*([^<>]+)?|^([^<]+)(.*)/smi');
 
 */
-define("MINIXML_SIMPLE_REGEX",'/^\s*<\s*([^\s>]+)(\s+[^>]+)?>(.*?)<\s*\/\1\s*>\s*([^<]+)?(.*)|^\s*<!--(.+?)-->\s*(.*)|^\s*<\s*([^\s>]+)([^>]+)\/\s*>\s*(.*)|^([^<]+)(.*)/smi');
+define("MINIXML_SIMPLE_REGEX",'/^\s*<\s*([^\s>]+)(\s+[^>]+)?>(.*?)<\s*\/\1\s*>\s*([^<]+)?(.*)|^\s*<!--(.+?)-->\s*(.*)|^\s*<\s*([^\s>]+)([^>]*)\/\s*>\s*(.*)|^([^<]+)(.*)/smi');
 
 
 require_once(MINIXML_CLASSDIR . "/element.inc.php");
@@ -78,6 +85,7 @@ class MiniXMLDoc {
 	var $xxmlDoc;
 	var $xuseSimpleRegex;
 	var $xRegexIndex;
+	var $xRegex;
 	
 	/* MiniXMLDoc [XMLSTRING]
 	** Constructor, create and init a MiniXMLDoc object.
@@ -86,6 +94,7 @@ class MiniXMLDoc {
 	** a call to fromString using the XMLSTRING.
 	**
 	*/
+	//function MiniXMLDoc ($string=NULL)
 	function __construct($string=NULL)
 	{
 		/* Set up the root element - note that it's name get's translated to a
@@ -228,13 +237,13 @@ class MiniXMLDoc {
 	**	  </vendor>
 	**	  <partList>
 	**	   <partNum>
-	**		DA42
+	**	    DA42
 	**	   </partNum>
 	**	   <partNum>
-	**		D99983FFF
+	**	    D99983FFF
 	**	   </partNum>
 	**	   <partNum>
-	**		ss-839uent
+	**	    ss-839uent
 	**	   </partNum>
 	**	  </partList>
 	**	 </partRateRequest>
@@ -413,8 +422,13 @@ class MiniXMLDoc {
 				);
 			$regex = MINIXML_COMPLETE_REGEX;
 		}
-			
-		$this->fromSubString($this->xxmlDoc, $XMLString, $regex);
+		
+		$this->xRegex = $regex;
+		
+		$XMLString = preg_replace('/.*<\?\s*xml[^>]+>/', '', $XMLString);
+		
+		
+		$this->fromSubString($this->xxmlDoc, $XMLString);
 		
 		$this->xuseSimpleRegex = $useSimpleFlag;
 		
@@ -560,8 +574,8 @@ class MiniXMLDoc {
 		if ( 
 			( array_key_exists($pname, $params['attributes']) && is_array($params['attributes'][$pname])
 			  && array_key_exists($name, $params['attributes'][$pname]) && $params['attributes'][$pname][$name])
-			 || ( 
-			 	  array_key_exists('-all', $params['attributes']) && is_array($params['attributes']['-all']) 
+		     || ( 
+		     	  array_key_exists('-all', $params['attributes']) && is_array($params['attributes']['-all']) 
 			  && array_key_exists($name, $params['attributes']['-all']) && $params['attributes']['-all'][$name])
 		   )
 		{
@@ -584,7 +598,7 @@ class MiniXMLDoc {
 	}
 	// fromSubString PARENTMINIXMLELEMENT XMLSUBSTRING
 	// private method, called recursively to parse the XMLString in little sub-chunks.
-	function fromSubString (&$parentElement, &$XMLString, &$regex)
+	function fromSubString (&$parentElement, &$XMLString)
 	{
 		//$this->time('fromSubStr');
 		
@@ -597,46 +611,48 @@ class MiniXMLDoc {
 			_MiniXMLLog("Called fromSubString() with parent '" . $parentElement->name() . "'\n");
 		}
 		
-		$matches = array();
-		if (preg_match_all(  $regex, $XMLString, $matches))
+		if ($this->xuseSimpleRegex)
 		{
-			// $this->time('a match');
+			$tailEndIndexes = array(5, 7, 10, 12);
+		} else {
+			$tailEndIndexes = array(5, 7, 10, 12, 15, 19, 21);
+		}
 		
-			$mcp = $matches;
+		$numTailEndIndexes = count($tailEndIndexes);
+		
+		$mcp = array();		
+		if (preg_match_all($this->xRegex, $XMLString, $mcp))
+		{
 			
 			$numMatches = count($mcp[0]);
-			
+			unset($mcp[0]); // no longer need the 0th array
 			for($i=0; $i < $numMatches; $i++)
 			{
-				if (MINIXML_DEBUG > 1)
-				{
-					_MiniXMLLog ("Got $numMatches CHECKING: ". $mcp[0][$i] . "\n"); 
-				}
-		
+
 				$uname = $mcp[$this->xRegexIndex['uname']][$i];
 				$comment = $mcp[$this->xRegexIndex['comment']][$i];
+				
 				if ($this->xuseSimpleRegex)
 				{
 					$cdata = NULL;
 					$doctypecont = NULL;
 					$entityname = NULL;
 					
-					$tailEndIndexes = array(5, 7, 10, 12);
 				} else {
 				
 					$cdata = $mcp[$this->xRegexIndex['cdata']][$i];
 					$doctypecont = $mcp[$this->xRegexIndex['doctypecont']][$i];
 					$entityname = $mcp[$this->xRegexIndex['entityname']][$i];
 					
-					$tailEndIndexes = array(5, 7, 10, 12, 15, 19, 21);
 				}
+				
 				
 				$plaintext = $mcp[$this->xRegexIndex['plaintxt']][$i];
 				
 				// check all the 'tailend' (i.e. rest of string) matches for more content
 				$moreContent = '';
 				$idx = 0;
-				while (empty($moreContent) && ($idx < count($tailEndIndexes)))
+				while (empty($moreContent) && ($idx < $numTailEndIndexes))
 				{
 					if (! empty($mcp[$tailEndIndexes[$idx]][$i]))
 					{
@@ -653,6 +669,7 @@ class MiniXMLDoc {
 					// _MiniXMLLog ("Got UNARY $uname");
 					$newElement =& $parentElement->createChild($uname);
 					$this->_extractAttributesFromString($newElement, $mcp[$this->xRegexIndex['uattr']][$i]);
+					unset($newElement);
 	
 				} elseif ($comment) {
 					//_MiniXMLLog ("Got comment $comment");
@@ -660,18 +677,25 @@ class MiniXMLDoc {
 					
 				} elseif ($cdata) {
 					//_MiniXMLLog ("Got cdata $cdata");
-					$newElement = new MiniXMLElementCData($cdata);
-					$parentElement->appendChild($newElement);
+					$parentElement->appendChild(new MiniXMLElementCData($cdata));
+					
 				} elseif ($doctypecont) {
 					//_MiniXMLLog ("Got doctype $doctypedef '" . $mcp[11][$i] . "'");
 					$newElement = new MiniXMLElementDocType($mcp[$this->xRegexIndex['doctypedef']][$i]);
 					$appendedChild =& $parentElement->appendChild($newElement);
-					$this->fromSubString($appendedChild, $doctypecont, $regex);
+					
+					unset($newElement);
+					
+					$this->fromSubString($appendedChild, $doctypecont);
+					
+					unset($appendedChild);
 					
 				} elseif ($entityname ) {
 					//_MiniXMLLog ("Got entity $entityname");
 					$newElement = new MiniXMLElementEntity ($entityname, $mcp[$this->xRegexIndex['entitydef']][$i]);
 					$parentElement->appendChild($newElement);
+					
+					unset($newElement);
 					
 				} elseif ($plaintext) {
 				
@@ -688,6 +712,7 @@ class MiniXMLDoc {
 					$finaltxt = $mcp[$this->xRegexIndex['biendtxt']][$i];
 					
 					$newElement =& $parentElement->createChild($mcp[$this->xRegexIndex['biname']][$i]);
+					
 					$this->_extractAttributesFromString($newElement, $mcp[$this->xRegexIndex['biattr']][$i]);
 					
 					
@@ -704,8 +729,11 @@ class MiniXMLDoc {
 
 					if ($nencl && !preg_match('/^\s*$/', $nencl))
 					{
-						$this->fromSubString($newElement, $nencl, $regex);
+						$this->fromSubString($newElement, $nencl);
 					}
+					
+					
+					unset($newElement);
 					
 					if ($finaltxt)
 					{
@@ -717,12 +745,13 @@ class MiniXMLDoc {
 				
 				if (! empty($moreContent))
 				{
-					$this->fromSubString($parentElement, $moreContent, $regex);
+					$this->fromSubString($parentElement, $moreContent);
 				}
 			
 				
 			} /* end loop over all matches */
 			
+			unset($parentElement);
 			
 		} /* end if there was a match */
 		
@@ -834,8 +863,9 @@ class MiniXMLDoc {
 		// Set the attribs 
 		preg_match_all('/([^\s]+)\s*=\s*([\'"])([^\2]*?)\2/sm', $attrString, $attribs);
 		
+		$numAttribs = count($attribs[0]);
 		
-		for ($i = 0; $i < count($attribs[0]); $i++)
+		for ($i = 0; $i < $numAttribs; $i++)
 		{
 			$attrname = $attribs[1][$i];
 			$attrval = $attribs[3][$i];
@@ -882,11 +912,13 @@ class MiniXMLDoc {
 */
 class MiniXML extends MiniXMLDoc {
 	
+	//function MiniXML ()
 	function __construct ()
 	{
-		$this->MiniXMLDoc();
+		parent::__construct();
+		//$this->MiniXMLDoc();
 	}
 }
 
 
-
+?>

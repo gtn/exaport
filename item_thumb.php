@@ -31,6 +31,7 @@ if ($access == '') {
         // Get thumbnails if item was shared for current user.
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
     } else {
+        // Get only for self (owner).
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $USER->id));
     }
 } else {

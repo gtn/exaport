@@ -264,7 +264,7 @@ class simplehtml_form extends moodleform {
 }
 
 // Instantiate simplehtml_form.
-$mform = new simplehtml_form();
+$mform = new simplehtml_form(null, null, 'post', '', ['id' => 'categoryform']);
 
 // Form processing and displaying is done here.
 if ($mform->is_cancelled()) {

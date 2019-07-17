@@ -3,32 +3,37 @@
 /***************************************************************************************************
 ****************************************************************************************************
 *****
-*****	  MiniXML - PHP class library for generating and parsing XML.
-*****											
-*****	  Copyright (C) 2002-2005 Patrick Deegan, Psychogenic.com
-*****	  All rights reserved.
+*****      MiniXML - PHP class library for generating and parsing XML.
+*****                                            
+*****      Copyright (C) 2002-2005 Patrick Deegan, Psychogenic.com
+*****      All rights reserved.
 *****
-*****	  http://minixml.psychogenic.com	
-*****													   
-*****   This program is free software; you can redistribute 
-*****   it and/or modify it under the terms of the GNU	  
-*****   General Public License as published by the Free	 
-*****   Software Foundation; either version 2 of the		
-*****   License, or (at your option) any later version.	 
-*****													   
-*****   This program is distributed in the hope that it will
-*****   be useful, but WITHOUT ANY WARRANTY; without even   
-*****   the implied warranty of MERCHANTABILITY or FITNESS  
-*****   FOR A PARTICULAR PURPOSE.  See the GNU General	  
-*****   Public License for more details.					
-*****													   
-*****   You should have received a copy of the GNU General  
-*****   Public License along with this program; if not,	 
-*****   write to the Free Software Foundation, Inc., 675	
-*****   Mass Ave, Cambridge, MA 02139, USA.
+*****      http://minixml.psychogenic.com    
+*****                                 
+*****   
+*****   This library is released under the terms of the GNU GPL version 3, making it available only for 
+*****   free programs ("free" here being used in the sense of the GPL, see http://www.gnu.org for more details). 
+*****   Anyone wishing to use this library within a proprietary or otherwise non-GPLed program MUST contact psychogenic.com to 
+*****   acquire a distinct license for their application.  This approach encourages the use of free software 
+*****   while allowing for proprietary solutions that support further development.
+*****   
+*****   
+*****   
+*****   miniXML is free software: you can redistribute it and/or modify
+*****   it under the terms of the GNU General Public License as published by
+*****   the Free Software Foundation, either version 3 of the License, or
+*****   (at your option) any later version.
 *****
+*****   miniXML is distributed in the hope that it will be useful,
+*****   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*****   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*****   GNU General Public License for more details.
 *****
-*****   You may contact the author, Pat Deegan, through the	 
+*****   You should have received a copy of the GNU General Public License
+*****   along with miniXML.  If not, see <http://www.gnu.org/licenses/>.
+*****   
+*****   
+*****   You may contact the author, Pat Deegan, through the     
 *****   contact section at http://www.psychogenic.com
 *****
 *****   Much more information on using this API can be found on the
@@ -74,6 +79,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	var $xchildren;
 	var $xnumChildren;
 	var $xnumElementChildren;
+	var $iselement;
 
 	var $xavoidLoops = MINIXML_AVOIDLOOPS;
 	
@@ -81,9 +87,12 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	/* MiniXMLElement NAME
 	** Creates and inits a new MiniXMLElement
 	*/
-	function __construct($name=NULL)
+	//function MiniXMLElement ($name=NULL)
+	function __construct ($name=NULL)
 	{
-		$this->MiniXMLTreeComponent();
+	    parent::__construct();
+		//$this->MiniXMLTreeComponent();
+		$this->iselement = 1;
 		$this->xname = NULL;
 		$this->xattributes = array();
 		$this->xchildren = array();
@@ -268,10 +277,9 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	*/
 	function & comment ($contents)
 	{
-		$newEl = new MiniXMLElementComment();
-		
-		$appendedComment =& $this->appendChild($newEl);
+		$appendedComment =& $this->appendChild(new MiniXMLElementComment());
 		$appendedComment->text($contents);
+		
 		
 		return $appendedComment;
 		
@@ -298,9 +306,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	
 	function & docType ($definition)
 	{
-		
-		$newElement = new MiniXMLElementDocType($definition);
-		$appendedElement =& $this->appendChild($newElement);
+		$appendedElement =& $this->appendChild(new MiniXMLElementDocType($definition));
 		
 		return $appendedElement;
 	}
@@ -314,9 +320,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	*/
 	function & entity ($name,$value)
 	{
-		
-		$newElement = new MiniXMLElementEntity($name, $value);
-		$appendedEl =& $this->appendChild($newElement);
+		$appendedEl =& $this->appendChild(new MiniXMLElementEntity($name, $value));
 		
 		return $appendedEl;
 	}
@@ -332,8 +336,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	
 	function & cdata ($contents)
 	{
-		$newElement = new MiniXMLElementCData($contents);
-		$appendedChild =& $this->appendChild($newElement);
+		$appendedChild =& $this->appendChild(new MiniXMLElementCData($contents));
 		
 		return $appendedChild;
 	}
@@ -404,7 +407,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		*** <tag>
 		***  <nested>
 		***   <nested>
-		***	 Can't get here from tag or from the first 'nested'
+		***     Can't get here from tag or from the first 'nested'
 		***   </nested>
 		***  </nested>
 		*** </tag>
@@ -471,7 +474,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		}
 		
 		/* Not found */
-		return NULL;
+		return _MiniXMLReturnNullByRef();
 		
 		
 	}  /* end method getElement */
@@ -490,13 +493,13 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	**	  </vendor>
 	**	  <partList>
 	**	   <partNum>
-	**		DA42
+	**	    DA42
 	**	   </partNum>
 	**	   <partNum>
-	**		D99983FFF
+	**	    D99983FFF
 	**	   </partNum>
 	**	   <partNum>
-	**		ss-839uent
+	**	    ss-839uent
 	**	   </partNum>
 	**	  </partList>
 	**	 </partRateRequest>
@@ -518,7 +521,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	*/
 	function &getElementByPath($path)
 	{
-		$names = explode ("/", $path);
+		$names = split ("/", $path);
 		
 		$element = $this;
 		foreach ($names as $elementName)
@@ -648,7 +651,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 			{
 				$idx = $lastIdx + 1;
 			}
-			$this->xchildren[$idx] = $child;
+			$this->xchildren[$idx] =& $child;
 			$this->xnumChildren++;
 			if ($this->isElement($child))
 			{
@@ -711,7 +714,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		if (! $this->_validateChild($child))
 		{
 			_MiniXMLLog("MiniXMLElement::appendChild() Could not validate child, aborting append");
-			return NULL;
+			return _MiniXMLReturnNullByRef();
 		}
 		
 		/* Set the parent for the child element to this element if 
@@ -756,7 +759,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		if (! $this->_validateChild($child))
 		{
 			_MiniXMLLog("MiniXMLElement::prependChild - Could not validate child, aborting.");
-			return NULL;
+			return _MiniXMLReturnNullByRef();
 		}
 		
 		/* Set the parent for the child element to this element if 
@@ -792,7 +795,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 			return  _MiniXMLError("MiniXMLElement::_validateChild() need to pass a non-NULL MiniXMLElement child.");
 		}
 		
-		if (! method_exists($child, 'MiniXMLElement'))
+		if (!$child->iselement)
 		{
 			return _MiniXMLError("MiniXMLElement::_validateChild() must pass a MiniXMLElement object to _validateChild.");
 		}
@@ -848,10 +851,9 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		{
 			return _MiniXMLError("MiniXMLElement::createChild() Name of child must be a STRING");
 		}
-		
-		$child = new MiniXMLElement($name);
-		
-		$appendedChild =& $this->appendChild($child);
+
+		$tX = new MiniXMLElement($name);
+		$appendedChild =& $this->appendChild($tX);
 		
 		if (! $appendedChild )
 		{
@@ -951,6 +953,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 			unset ($retList[$idx++]->xparent);
 		}
 		
+		unset($this->xchildren);
 		$this->xchildren = array();
 		$this->xnumElementChildren = 0;
 		$this->xnumChildren = 0;
@@ -1117,7 +1120,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		if ($onlyTxtChild)
 		{
 			$nextDepth = 0;
-			$retString .= "> ";
+			$retString .= ">";
 		} else {
 			$nextDepth = $depth+1;
 			$retString .= ">\n";
@@ -1153,7 +1156,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		/* add the indented closing tag */
 		if ($onlyTxtChild)
 		{
-			$retString .= " </$elementName>\n";
+			$retString .= "</$elementName>\n";
 		} else {
 			$retString .= "$spaces</$elementName>\n";
 		}
@@ -1349,12 +1352,10 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	*/
 	function & createNode (&$value, $escapeEntities=NULL)
 	{
-		
-		$newNode = new MiniXMLNode($value, $escapeEntities);
-		
-		$appendedNode =& $this->appendNode($newNode);
-		
-		return $appendedNode;
+
+		$tmX = new MiniXMLNode($value, $escapeEntities);
+		return $this->appendNode($tmX);
+
 	}
 		
 	
@@ -1377,7 +1378,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		}
 		
 		
-		if (! method_exists($node, 'MiniXMLNode'))
+		if (! $node->isnode)
 		{
 			return _MiniXMLError("MiniXMLElement::appendNode() must pass a MiniXMLNode object to appendNode.");
 		}
@@ -1394,7 +1395,7 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 		
 		
 		$idx = $this->xnumChildren++;
-		$this->xchildren[$idx] = $node;
+		$this->xchildren[$idx] =& $node;
 		
 		return $this->xchildren[$idx];
 		
@@ -1405,7 +1406,11 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 	function __destruct()
 	{
 		for ($i = 0; $i < count($this->xchildren); ++$i)
-			$this->xchildren[$i]->xparent = null;
+		{
+			// $this->xchildren[$i]->xparent = NULL;
+			unset($this->xchildren[$i]);
+		}
+		unset($this->xchildren);
 	}
 	
 	
@@ -1434,9 +1439,11 @@ class MiniXMLElement extends MiniXMLTreeComponent {
 
 class MiniXMLElementComment extends MiniXMLElement {
 
+	//function MiniXMLElementComment ($name=NULL)
 	function __construct ($name=NULL)
 	{
-		$this->MiniXMLElement('!--');
+	    parent::__construct('!--');
+		//$this->MiniXMLElement('!--');
 	}
 	
 	
@@ -1535,10 +1542,12 @@ class MiniXMLElementCData extends MiniXMLElement {
 		
 	
 	
+	//function MiniXMLElementCData ($contents)
 	function __construct ($contents)
 	{
 		
-		$this->MiniXMLElement('CDATA');
+		parent::__construct('CDATA');
+		//$this->MiniXMLElement('CDATA');
 		if (! is_null($contents))
 		{
 			$this->createNode($contents, 0) ;
@@ -1607,9 +1616,11 @@ class MiniXMLElementDocType extends MiniXMLElement {
 
 	var $dtattr;
 	
-	function __construct($attr)
+	function __construct ($attr)
+	//function MiniXMLElementDocType ($attr)
 	{
-		$this->MiniXMLElement('DOCTYPE');
+		parent::__construct('DOCTYPE');
+		//$this->MiniXMLElement('DOCTYPE');
 		$this->dtattr = $attr;
 	}
 	function toString ($depth=0)
@@ -1699,9 +1710,11 @@ class MiniXMLElementEntity extends MiniXMLElement {
 
 	
 	function __construct ($name, $value=NULL)
+	//function MiniXMLElementEntity  ($name, $value=NULL)
 	{
-		
-		$this->MiniXMLElement($name);
+
+	    parent::__construct($name);
+		//$this->MiniXMLElement($name);
 		
 		if (! is_null ($value))
 		{

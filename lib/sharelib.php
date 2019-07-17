@@ -625,7 +625,7 @@ namespace {
                 ($itemid && $itemid > 0 ? " AND i.id = ".intval($itemid) : "").
                 " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture".
                 " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
-        return array();
+        //return array();
         // Get users for grouping later.
         $sharedusers = array();
         $sharedcategories = array();
@@ -715,7 +715,7 @@ namespace {
      */
     function block_exaport_can_user_access_shared_item($userid, $itemid) {
         global $DB;
-        // At first - check teacher access
+        // At first - check teacher access.
         if (block_exaport_user_can_see_artifacts_of_students()) {
             // The owner of item is a student of teacher
             $students = block_exaport_get_students_for_teacher($userid);

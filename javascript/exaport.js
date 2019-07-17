@@ -169,8 +169,8 @@
                 if (typeof sharedusersarr != 'undefined') { // In view sharing this array is undefined.
                     if (sharedusersarr.length > 0) {
                         $.each(sharedusersarr, function (tmp, userid) {
-                            $('#mform1 #internaccess-users input:checkbox[value=' + userid + ']').attr("checked", true);
-                        })
+                            $('form #internaccess-users input:checkbox[value=' + userid + ']').attr("checked", true);
+                        });
                     }
                 }
                 // CHECK ALL buttons.

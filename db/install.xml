@@ -190,9 +190,9 @@
 		<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="hash" UNIQUE="true" FIELDS="hash"/>
-		<INDEX NAME="userid" UNIQUE="true" FIELDS="userid"/>
-		<INDEX NAME="shareall" UNIQUE="true" FIELDS="shareall"/>
+		<INDEX NAME="hash" UNIQUE="false" FIELDS="hash"/>
+		<INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
+		<INDEX NAME="shareall" UNIQUE="false" FIELDS="shareall"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportviewblock" COMMENT="Blocks on the view">
@@ -221,8 +221,8 @@
 		<KEY NAME="item" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
 	  </KEYS>
       <INDEXES>
-		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
-		<INDEX NAME="itemid" UNIQUE="true" FIELDS="itemid"/>
+		<INDEX NAME="viewid" UNIQUE="false" FIELDS="viewid"/>
+		<INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportviewshar" COMMENT="information to which users the view is shared">
@@ -237,8 +237,8 @@
 		<KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
-		<INDEX NAME="userid" UNIQUE="true" FIELDS="userid"/>
+		<INDEX NAME="viewid" UNIQUE="false" FIELDS="viewid"/>
+		<INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportviewgroupshar" COMMENT="information to which users the view is shared">
@@ -251,8 +251,8 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
-		<INDEX NAME="groupid" UNIQUE="true" FIELDS="groupid"/>
+		<INDEX NAME="viewid" UNIQUE="false" FIELDS="viewid"/>
+		<INDEX NAME="groupid" UNIQUE="false" FIELDS="groupid"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume" COMMENT="users resume">
@@ -273,7 +273,7 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="user_id" UNIQUE="true" FIELDS="user_id"/>
+		<INDEX NAME="user_id" UNIQUE="false" FIELDS="user_id"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_certif" COMMENT="users resume certifications">
@@ -289,7 +289,7 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+		<INDEX NAME="resume_id" UNIQUE="false" FIELDS="resume_id"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_edu" COMMENT="users resume educations">
@@ -309,7 +309,7 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+		<INDEX NAME="resume_id" UNIQUE="false" FIELDS="resume_id"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_employ" COMMENT="users resume employments">
@@ -328,7 +328,7 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+		<INDEX NAME="resume_id" UNIQUE="false" FIELDS="resume_id"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_mbrship" COMMENT="users resume memberships">
@@ -345,7 +345,7 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+		<INDEX NAME="resume_id" UNIQUE="false" FIELDS="resume_id"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_public" COMMENT="users resume publications">
@@ -363,7 +363,7 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="resume_id" UNIQUE="true" FIELDS="resume_id"/>
+		<INDEX NAME="resume_id" UNIQUE="false" FIELDS="resume_id"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportresume_badges" COMMENT="users resume bages">
@@ -377,8 +377,8 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="resumeid" UNIQUE="true" FIELDS="resumeid"/>
-		<INDEX NAME="badgeid" UNIQUE="true" FIELDS="badgeid"/>
+		<INDEX NAME="resumeid" UNIQUE="false" FIELDS="resumeid"/>
+		<INDEX NAME="badgeid" UNIQUE="false" FIELDS="badgeid"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportcompresume_mm" COMMENT="users resume competence relations">
@@ -392,8 +392,8 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="compid" UNIQUE="true" FIELDS="compid"/>
-		<INDEX NAME="resumeid" UNIQUE="true" FIELDS="resumeid"/>
+		<INDEX NAME="compid" UNIQUE="false" FIELDS="compid"/>
+		<INDEX NAME="resumeid" UNIQUE="false" FIELDS="resumeid"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportcat_structshar" COMMENT="block_exaportcat_structshar table retrofitted from MySQL">
@@ -406,8 +406,8 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="catid" UNIQUE="true" FIELDS="catid"/>
-		<INDEX NAME="userid" UNIQUE="true" FIELDS="userid"/>
+		<INDEX NAME="catid" UNIQUE="false" FIELDS="catid"/>
+		<INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportcat_strgrshar" COMMENT="block_exaportcat_strgrshar table retrofitted from MySQL">
@@ -420,8 +420,8 @@
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="catid" UNIQUE="true" FIELDS="catid"/>
-		<INDEX NAME="groupid" UNIQUE="true" FIELDS="groupid"/>
+		<INDEX NAME="catid" UNIQUE="false" FIELDS="catid"/>
+		<INDEX NAME="groupid" UNIQUE="false" FIELDS="groupid"/>
 	  </INDEXES>
 	</TABLE>
 	<TABLE NAME="block_exaportviewemailshar" COMMENT="the view is shared for these emails">
@@ -436,7 +436,7 @@
 		<KEY NAME="view" TYPE="foreign" FIELDS="viewid" REFTABLE="block_exaportview" REFFIELDS="id"/>
 	  </KEYS>
 	  <INDEXES>
-		<INDEX NAME="viewid" UNIQUE="true" FIELDS="viewid"/>
+		<INDEX NAME="viewid" UNIQUE="false" FIELDS="viewid"/>
 	  </INDEXES>
 	</TABLE>
   </TABLES>

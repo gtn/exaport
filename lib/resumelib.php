@@ -279,7 +279,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
     $resumeparams = block_exaport_get_resume_params_record($userid);
 
     // add related parameters of resume
-    if ($full) {
+    if ($full && $resumeparams) {
         // TODO: add images?
         $fs = get_file_storage();
         $context = context_user::instance($userid);
@@ -299,7 +299,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         };
 
         // educations
-        $educations = block_exaport_resume_get_educations($resumeparams->id);
+        $educations = block_exaport_resume_get_educations(@$resumeparams->id);
         if ($educations) {
             foreach ($educations as $education) {
                 $education->attachments = $importAttachments('edu', $education->id);
@@ -307,7 +307,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
             $resumeparams->educations = $educations;
         }
         // employments
-        $employments = block_exaport_resume_get_employments($resumeparams->id);
+        $employments = block_exaport_resume_get_employments(@$resumeparams->id);
         if ($employments) {
             foreach ($employments as $employment) {
                 $employment->attachments = $importAttachments('employ', $employment->id);
@@ -315,7 +315,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
             $resumeparams->employments = $employments;
         }
         // certifications
-        $certifications = block_exaport_resume_get_certificates($resumeparams->id);
+        $certifications = block_exaport_resume_get_certificates(@$resumeparams->id);
         if ($certifications) {
             foreach ($certifications as $certification) {
                 $certification->attachments = $importAttachments('certif', $certification->id);
@@ -323,7 +323,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
             $resumeparams->certifications = $certifications;
         }
         // publications
-        $publications = block_exaport_resume_get_publications($resumeparams->id);
+        $publications = block_exaport_resume_get_publications(@$resumeparams->id);
         if ($publications) {
             foreach ($publications as $publication) {
                 $publication->attachments = $importAttachments('public', $publication->id);
@@ -331,7 +331,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
             $resumeparams->publications = $publications;
         }
         // Professional memberships
-        $profmembershipments = block_exaport_resume_get_profmembershipments($resumeparams->id);
+        $profmembershipments = block_exaport_resume_get_profmembershipments(@$resumeparams->id);
         if ($profmembershipments) {
             foreach ($profmembershipments as $profmembershipment) {
                 $profmembershipment->attachments = $importAttachments('mbrship', $profmembershipment->id);

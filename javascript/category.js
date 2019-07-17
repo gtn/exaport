@@ -24,9 +24,9 @@ jQueryExaport(function ($) {
     // Sharing.
     function update_sharing() {
         var share_text = '';
-        var $form = $('#mform1');
+        var $form = $('#categoryform');
 
-        if ($form.find(':input[name=internshare]').is(':checked')) {
+        if ($form.find(':input[name="internshare"]').is(':checked')) {
             $('#internaccess-settings').show();
             $('#internaccess-groups').hide();
 
@@ -49,7 +49,9 @@ jQueryExaport(function ($) {
 
     $(function () {
         // Changing the checkboxes / radiobuttons update the sharing text, visible options, etc.
-        $('#mform1 input[type=checkbox], #mform1 input[type=radio]').click(update_sharing);
+        $('#categoryform input[type="checkbox"], #categoryform input[type="radio"]').on('click', function () {
+            update_sharing();
+        });
         update_sharing();
     });
 });

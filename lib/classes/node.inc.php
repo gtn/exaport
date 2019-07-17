@@ -4,32 +4,38 @@
 /***************************************************************************************************
 ****************************************************************************************************
 *****
-*****	  MiniXML - PHP class library for generating and parsing XML.
-*****											
-*****	  Copyright (C) 2002-2005 Patrick Deegan, Psychogenic.com
-*****	  All rights reserved.
+*****      MiniXML - PHP class library for generating and parsing XML.
+*****                                            
+*****      Copyright (C) 2002-2005 Patrick Deegan, Psychogenic.com
+*****      All rights reserved.
 *****
-*****	  http://minixml.psychogenic.com	
-*****													   
-*****   This program is free software; you can redistribute 
-*****   it and/or modify it under the terms of the GNU	  
-*****   General Public License as published by the Free	 
-*****   Software Foundation; either version 2 of the		
-*****   License, or (at your option) any later version.	 
-*****													   
-*****   This program is distributed in the hope that it will
-*****   be useful, but WITHOUT ANY WARRANTY; without even   
-*****   the implied warranty of MERCHANTABILITY or FITNESS  
-*****   FOR A PARTICULAR PURPOSE.  See the GNU General	  
-*****   Public License for more details.					
-*****													   
-*****   You should have received a copy of the GNU General  
-*****   Public License along with this program; if not,	 
-*****   write to the Free Software Foundation, Inc., 675	
-*****   Mass Ave, Cambridge, MA 02139, USA.
+*****      http://minixml.psychogenic.com    
 *****
+*****   
+*****   This library is released under the terms of the GNU GPL version 3, making it available only for 
+*****   free programs ("free" here being used in the sense of the GPL, see http://www.gnu.org for more details). 
+*****   Anyone wishing to use this library within a proprietary or otherwise non-GPLed program MUST contact psychogenic.com to 
+*****   acquire a distinct license for their application.  This approach encourages the use of free software 
+*****   while allowing for proprietary solutions that support further development.
+*****   
+*****   
+*****   
+*****   miniXML is free software: you can redistribute it and/or modify
+*****   it under the terms of the GNU General Public License as published by
+*****   the Free Software Foundation, either version 3 of the License, or
+*****   (at your option) any later version.
 *****
-*****   You may contact the author, Pat Deegan, through the	 
+*****   miniXML is distributed in the hope that it will be useful,
+*****   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*****   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*****   GNU General Public License for more details.
+*****
+*****   You should have received a copy of the GNU General Public License
+*****   along with miniXML.  If not, see <http://www.gnu.org/licenses/>.
+*****   
+*****   
+*****
+*****   You may contact the author, Pat Deegan, through the     
 *****   contact section at http://www.psychogenic.com
 *****
 *****   Much more information on using this API can be found on the
@@ -76,16 +82,20 @@ class MiniXMLNode extends MiniXMLTreeComponent {
 	
 	var $xtext;
 	var $xnumeric;
+	var $xisnode;
 
 	/* MiniXMLNode [CONTENTS]
 	** Constructor.  Creates a new MiniXMLNode object.
 	**
 	*/
 	function __construct ($value=NULL, $escapeEntities=NULL)
+	//function MiniXMLNode ($value=NULL, $escapeEntities=NULL)
 	{
-		$this->MiniXMLTreeComponent();
+		parent::__construct();
+		//$this->MiniXMLTreeComponent();
 		$this->xtext = NULL;
 		$this->xnumeric = NULL;
+		$this->isnode = 1;
 		
 		/* If we were passed a value, save it as the 
 		** appropriate type
@@ -107,15 +117,11 @@ class MiniXMLNode extends MiniXMLTreeComponent {
 					$value = rtrim($value);
 				}
 				
-				if (! is_null($escapeEntities))
+				if ($escapeEntities || (MINIXML_AUTOESCAPE_ENTITIES > 0))
 				{
-					if ($escapeEntities)
-					{
-						$value = htmlspecialchars($value, ENT_NOQUOTES, 'utf-8');
-					}
-				} elseif (MINIXML_AUTOESCAPE_ENTITIES > 0) {
-					$value = htmlspecialchars($value, ENT_NOQUOTES, 'utf-8');
-				} 
+					$value = htmlentities($value);
+				
+				}
 				
 				if (MINIXML_DEBUG > 0)
 				{
@@ -191,7 +197,7 @@ class MiniXMLNode extends MiniXMLTreeComponent {
 			
 			if (MINIXML_AUTOESCAPE_ENTITIES > 0)
 			{
-				$setTo = $value = htmlspecialchars($setTo, ENT_NOQUOTES, 'utf-8');
+				$setTo = htmlentities($setTo);
 			} 
 			
 			
@@ -315,7 +321,5 @@ class MiniXMLNode extends MiniXMLTreeComponent {
 	
 	
 } /* end class definition */
-
-
 
 ?>

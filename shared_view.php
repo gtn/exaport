@@ -442,7 +442,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                             echo '!!! '.$block->resume_itemtype.' !!!';
                     }
 
-                    if (count($attachments) > 0 && $block->resume_withfiles) {
+                    if ($attachments && is_array($attachments) && count($attachments) > 0 && $block->resume_withfiles) {
                         $bodyContent .= '<ul class="resume_attachments '.$block->resume_itemtype.'_attachments">';
                         foreach($attachments as $attachm) {
                             $bodyContent .= '<li><a href="'.$attachm['fileurl'].'" target="_blank">'.$attachm['filename'].'</a></li>';

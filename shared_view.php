@@ -15,12 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+use Dompdf\Adapter\CPDF;
+use Dompdf\Dompdf;
+use Dompdf\Exception;
+
 require_once(__DIR__.'/inc.php');
 require_once(__DIR__.'/blockmediafunc.php');
 
 $access = optional_param('access', 0, PARAM_TEXT);
 
 require_login(0, true);
+
+// main content:
+$generalContent = '';
 
 $url = '/blocks/exaport/shared_view.php';
 $PAGE->set_url($url);
@@ -30,6 +37,8 @@ $PAGE->set_context($context);
 if (!$view = block_exaport_get_view_from_access($access)) {
     print_error("viewnotfound", "block_exaport");
 }
+
+$isPdf = optional_param('ispdf', 0, PARAM_INT);
 
 $conditions = array("id" => $view->userid);
 if (!$user = $DB->get_record("user", $conditions)) {
@@ -79,18 +88,21 @@ foreach ($blocks as $block) {
 
 block_exaport_init_js_css();
 
-if ($view->access->request == 'intern') {
-    block_exaport_print_header("shared_views");
-} else {
-    $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
-    $PAGE->set_title(get_string("externaccess", "block_exaport"));
-    $PAGE->set_heading(get_string("externaccess", "block_exaport")." ".fullname($user, $user->id));
+if (!$isPdf) {
+    if ($view->access->request == 'intern') {
+        block_exaport_print_header("shared_views");
+    } else {
+        $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
+        $PAGE->set_title(get_string("externaccess", "block_exaport"));
+        $PAGE->set_heading(get_string("externaccess", "block_exaport")." ".fullname($user, $user->id));
 
-    echo $OUTPUT->header();
-    echo block_exaport_wrapperdivstart();
+        $generalContent .= $OUTPUT->header();
+        $generalContent .= block_exaport_wrapperdivstart();
+    }
 }
 
-?>
+if (!$isPdf) {
+    ?>
     <script type="text/javascript">
         //<![CDATA[
         jQueryExaport(function ($) {
@@ -107,7 +119,8 @@ if ($view->access->request == 'intern') {
         });
         //]]>
     </script>
-<?php
+    <?php
+}
 
 $comp = block_exaport_check_competence_interaction();
 
@@ -120,12 +133,15 @@ $colslayout = array(
 if (!isset($view->layout) || $view->layout == 0) {
     $view->layout = 2;
 }
-echo '<div id="view">';
-echo '<table class="table_layout layout'.$view->layout.'"><tr>';
+$generalContent .= '<div id="view">';
+$generalContent .= '<table class="table_layout layout'.$view->layout.'""><tr>';
+$dataForPdf = array();
 for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
-    echo '<td class="view-column td'.$i.'">';
+    $dataForPdf[$i] = array();
+    $generalContent .= '<td class="view-column td'.$i.'">';
     if (isset($columns[$i])) {
         foreach ($columns[$i] as $block) {
+            $blockForPdf = '<div class="view-block">';
             if ($block->text) {
                 $block->text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', context_user::instance($USER->id)->id,
                         'block_exaport', 'view_content', $access);
@@ -159,7 +175,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
 
                     $href = 'shared_item.php?access=view/'.$access.'&itemid='.$item->id.'&att='.$item->attachment;
 
-                    echo '<div class="view-item view-item-type-'.$item->type.'">';
+                    $generalContent .= '<div class="view-item view-item-type-'.$item->type.'">';
                     // Thumbnail of item.
                     $fileparams = '';
                     if ($item->type == "file") {
@@ -183,7 +199,17 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                         $imgsrc = $CFG->wwwroot."/pluginfile.php/".context_user::instance($item->userid)->id.
                                                 "/".'block_exaport'."/".'item_file'."/view/".$access."/itemid/".$item->id."/".
                                                 $file->filename;
-                                        echo '<div class="view-item-image"><img src="'.$imgsrc.'" class="'.$width.'" alt=""/></div>';
+                                        $generalContent .= '<div class="view-item-image"><img src="'.$imgsrc.'" class="'.$width.'" alt=""/></div>';
+                                        if ($isPdf) {
+                                            $imgsrc .= '/forPdf/'.$view->hash.'/'.$view->id.'/'.$USER->id;
+                                        }
+                                        $blockForPdf .= '<div class="view-item-image">
+                                                            <img align = "right"
+                                                                border = "0"
+                                                                src = "'.$imgsrc.'" 
+                                                                width = "'.((int)filter_var($width, FILTER_SANITIZE_NUMBER_INT) ?: '100').'" 
+                                                                alt = ""/>
+                                                         </div>';
                                     } else {
                                         // Link to file.
                                         $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access.
@@ -196,82 +222,107 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                         $fileparams = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> '.
                                                 '<span class="filedescription">('.$filesize.')</span></div>';
                                         if (block_exaport_is_valid_media_by_filename($file->filename)) {
-                                            echo '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.
+                                            $generalContent .= '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.
                                                     '/blocks/exaport/pix/media.png" alt=""/></div>';
+                                            $blockForPdf .= '<img height="60" src="'.$CFG->wwwroot. '/blocks/exaport/pix/media.png" align="right"/>';
                                         }
                                     };
                                 }
                             }
                         };
                     } else if ($item->type == "link") {
-                        echo '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.
+                        $generalContent .= '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.
                                 $href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.
                                 '/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'" alt=""/></a></div>';
+                        $blockForPdf .= '<img align="right" 
+                                                style="" height="100"
+                                                src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'&ispdf=1&vhash='.$view->hash.'&vid='.$view->id.'&uid='.$USER->id.'" 
+                                                alt=""/>';
                     };
-                    echo '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
+                    $generalContent .= '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
                     // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.
                     if ($comp && has_capability('block/exaport:competences', $context)) {
                         if ($competencies) {
-                            echo '<img align="right" src="'.$CFG->wwwroot.
+                            $generalContent .= '<img align="right" src="'.$CFG->wwwroot.
                                     '/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
                         }
                     }
-                    echo '</div>';
+                    $generalContent .= '</div>';
+                    $blockForPdf .= '<h4>'.$item->name.'</h4>';
+                    $generalContent .= $fileparams;
+                    $blockForPdf .= $fileparams;
                     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                             'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
                     $intro = format_text($intro, FORMAT_HTML);
-                    echo $fileparams;
-                    echo '<div class="view-item-text">';
+                    $generalContent .= '<div class="view-item-text">';
+                    $blockForPdf .= '<div class="view-item-text">';
                     if ($item->url && $item->url != "false") {
                         // Link.
-                        echo '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
+                        $generalContent .= '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
+                        $blockForPdf .= '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
                     }
-                    echo $intro.'</div>';
+                    $generalContent .= $intro.'</div>';
+                    $blockForPdf .= $intro.'</div>';
                     if ($competencies) {
-                        echo '<div class="view-item-competences">'.
+                        $generalContent .= '<div class="view-item-competences">'.
                                 '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>'.
                                 '<a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()">'.
                                 '<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/comp.png" class="iconsmall" alt="'.'competences'.'" />'.
                                 '</a></div>';
                     }
-                    echo '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
-                    echo '</div>';
+                    $generalContent .= '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
+                    $generalContent .= '</div>';
                     break;
                 case 'personal_information':
-                    echo '<div class="header">'.$block->block_title.'</div>';
-                    echo '<div class="view-personal-information">';
-                    if (isset($block->picture)) {
-                        echo '<div class="picture" style="float:right; position: relative;"><img src="'.$block->picture.
-                                '" alt=""/></div>';
+                    $generalContent .= '<div class="header">'.$block->block_title.'</div>';
+                    if ($block->block_title) {
+                        $blockForPdf .= '<h4>'.$block->block_title.'</h4>';
                     }
+                    $generalContent .= '<div class="view-personal-information">';
+                    $blockForPdf .= '<div class="view-personal-information">';
+                    if (isset($block->picture)) {
+                        $generalContent .= '<div class="picture" style="float:right; position: relative;"><img src="'.$block->picture.
+                                '" alt=""/></div>';
+                        $blockForPdf .= '<img src="'.$block->picture.'" align="right" />';
+                    }
+                    $personInfo = '';
                     if (isset($block->firstname) or isset($block->lastname)) {
-                        echo '<div class="name">';
+                        $personInfo .= '<div class="name">';
                         if (isset($block->firstname)) {
-                            echo $block->firstname;
+                            $personInfo .= $block->firstname;
                         }
                         if (isset($block->lastname)) {
-                            echo ' '.$block->lastname;
+                            $personInfo .= ' '.$block->lastname;
                         }
-                        echo '</div>';
+                        $personInfo .= '</div>';
                     };
                     if (isset($block->email)) {
-                        echo '<div class="email">'.$block->email.'</div>';
+                        $personInfo .= '<div class="email">'.$block->email.'</div>';
                     }
                     if (isset($block->text)) {
-                        echo '<div class="body">'.$block->text.'</div>';
+                        $personInfo .= '<div class="body">'.$block->text.'</div>';
                     }
-                    echo '</div>';
+                    $generalContent .= $personInfo;
+                    $generalContent .= '</div>';
+                    $blockForPdf .= $personInfo;
+                    $blockForPdf .= '</div>';
                     break;
                 case 'headline':
-                    echo '<div class="header view-header">'.nl2br($block->text).'</div>';
+                    $generalContent .= '<div class="header view-header">'.nl2br($block->text).'</div>';
+                    $blockForPdf .= '<h4>'.nl2br($block->text).'</h4>';
                     break;
                 case 'media':
-                    echo '<div class="header view-header">'.nl2br($block->block_title).'</div>';
-                    echo '<div class="view-media">';
-                    if (!empty($block->contentmedia)) {
-                        echo $block->contentmedia;
+                    $generalContent .= '<div class="header view-header">'.nl2br($block->block_title).'</div>';
+                    if ($block->block_title) {
+                        $blockForPdf .= '<h4>'.nl2br($block->block_title).'</h4>';
                     }
-                    echo '</div>';
+                    $generalContent .= '<div class="view-media">';
+                    if (!empty($block->contentmedia)) {
+                        $generalContent .= $block->contentmedia;
+                    }
+                    $generalContent .= '</div>';
+                    $blockForPdf .= '----media----';
+                    $blockForPdf .= '</div>';
                     break;
                 case 'badge':
                     if (count($badges) == 0) {
@@ -288,9 +339,10 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         // Badge not found.
                         continue;
                     }
-                    echo '<div class="header">'.nl2br($badge->name).'</div>';
-                    echo '<div class="view-text">';
-                    echo '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
+                    $generalContent .= '<div class="header">'.nl2br($badge->name).'</div>';
+                    $blockForPdf .= '<h4>'.nl2br($badge->name).'</h4>';
+                    $generalContent .= '<div class="view-text">';
+                    $generalContent .= '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
                     if (!$badge->courseid) { // For badges with courseid = NULL.
                         $badge->imageUrl = (string) moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage',
                                                                                     $badge->id, '/', 'f1', false);
@@ -299,12 +351,15 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         $badge->imageUrl = (string) moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage',
                                                                                     $badge->id, '/', 'f1', false);
                     }
-                    echo '<img src="'.$badge->imageUrl.'">';
-                    echo '</div>';
-                    echo '<div class="badge-description">';
-                    echo format_text($badge->description, FORMAT_HTML);
-                    echo '</div>';
-                    echo '</div>';
+                    $generalContent .= '<img src="'.$badge->imageUrl.'">';
+                    $generalContent .= '</div>';
+                    $generalContent .= '<div class="badge-description">';
+                    $generalContent .= format_text($badge->description, FORMAT_HTML);
+                    $generalContent .= '</div>';
+                    $generalContent .= '</div>';
+                    $blockForPdf .= '<p>'.format_text($badge->description, FORMAT_HTML).'</p>';
+                    $blockForPdf .= '<img align="right" src="'.$badge->imageUrl.'">';
+                    $blockForPdf .= '</div>';
                     break;
                 case 'cv_information':
                     $bodyContent = '';
@@ -439,7 +494,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                             $bodyContent = $description;
                             break;
                         default:
-                            echo '!!! '.$block->resume_itemtype.' !!!';
+                            $generalContent .= '!!! '.$block->resume_itemtype.' !!!';
                     }
 
                     if ($attachments && is_array($attachments) && count($attachments) > 0 && $block->resume_withfiles) {
@@ -452,33 +507,132 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
 
                     // if the resume item is empty - do not show
                     if ($bodyContent != '') {
-                        echo '<div class="view-cv-information">';
+                        $generalContent .= '<div class="view-cv-information">';
                         /*if (isset($block->picture)) {
                             echo '<div class="picture" style="float:right; position: relative;"><img src="'.$block->picture.
                                     '" alt=""/></div>';
                         }*/
-                        echo $bodyContent;
-                        echo '</div>';
+                        $generalContent .= $bodyContent;
+                        $generalContent .= '</div>';
+                        $blockForPdf .= $bodyContent;
                     }
                     break;
                 default:
                     // Text.
-                    echo '<div class="header">'.$block->block_title.'</div>';
-                    echo '<div class="view-text">';
-                    echo format_text($block->text, FORMAT_HTML);
-                    echo '</div>';
+                    $generalContent .= '<div class="header">'.$block->block_title.'</div>';
+                    $generalContent .= '<div class="view-text">';
+                    $generalContent .= format_text($block->text, FORMAT_HTML);
+                    $generalContent .= '</div>';
+                    if ($block->block_title) {
+                        $blockForPdf = '<h4>'.$block->block_title.'</h4>';
+                    }
+                    $blockForPdf .= '<div>'.format_text($block->text, FORMAT_HTML).'</div>';
             }
+            $blockForPdf .= '</div>';
+            $dataForPdf[$i][] = $blockForPdf;
         }
     }
-    echo '</td>';
+    $generalContent .= '</td>';
 }
-echo '</tr></table>';
-echo '</div>';
 
-echo "<br />";
+$generalContent .= '</tr></table>';
+$generalContent .= '</div>';
 
-echo "<div class='block_eportfolio_center'>\n";
+$generalContent .= "<br />";
 
-echo "</div>\n";
-echo block_exaport_wrapperdivend();
-echo $OUTPUT->footer();
+$generalContent .= "<div class='block_eportfolio_center'>\n";
+
+$generalContent .= "</div>\n";
+if (!$isPdf) {
+    $generalContent .= block_exaport_wrapperdivend();
+    $generalContent .= $OUTPUT->footer();
+}
+
+if ($isPdf) {
+    require_once __DIR__.'/lib/classes/dompdf/autoload.inc.php';
+    $options = new \Dompdf\Options();
+    $options->set('isRemoteEnabled', true);
+    $dompdf = new Dompdf($options);
+    $dompdf->setPaper('A4', 'landscape');
+    /*$context = stream_context_create([
+            'ssl' => [
+                    'verify_peer' => FALSE,
+                    'verify_peer_name' => FALSE,
+                    'allow_self_signed'=> TRUE
+            ]
+    ]);
+    $dompdf->setHttpContext($context);*/
+    $generalContent = pdfView($view, $colslayout, $dataForPdf);
+    $dompdf->loadHtml($generalContent);
+    $dompdf->render();
+    $dompdf->stream('view.pdf'); //To popup pdf as download
+    exit;
+}
+
+echo $generalContent;
+
+
+function pdfView($view, $colslayout, $dataForPdf) {
+    $pdfContent = '<html>';
+    $pdfContent .= '<body>';
+    $pdfContent .= '<style>
+        body {
+            font-family: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+        }
+        .view-table td {
+            padding: 5px;
+        }
+        h4 {
+            margin: 15px 0 0;
+        }
+        div.view-block {
+            position: relative;
+            height: auto;        
+            clear: both;
+            /*background-color: #fefefe;*/
+            border-top: 1px solid #eeeeee;                       
+        }        
+        </style>';
+    $pdfContent .= '<table border="0" width="100%" class="view-table">';
+    $pdfContent .= '<tr>';
+    $maxRows = 0;
+    //echo "<pre>debug:<strong>shared_view.php:526</strong>\r\n"; print_r($dataForPdf); echo '</pre>'; exit; // !!!!!!!!!! delete it
+    foreach ($dataForPdf as $col => $blocks) {
+        $maxRows = max(count($blocks), $maxRows);
+    }
+    for ($colI = 1; $colI <= $colslayout[$view->layout]; $colI++) {
+        $pdfContent .= '<td width="'.(round(100 / $colslayout[$view->layout]) - 1).'%" valign="top">';
+        if (array_key_exists($colI, $dataForPdf)) {
+            $pdfContent .= '<table width="100%">';
+            foreach ($dataForPdf[$colI] as $block) {
+                $pdfContent .= '<tr><td>';
+                $pdfContent .= $block;
+                $pdfContent .= '</td></tr>';
+            }
+            $pdfContent .= '</table>';
+        }
+
+        $pdfContent .= '</td>';
+    }
+    /*for ($rowI = 0; $rowI < $maxRows; $rowI++) {
+        $pdfContent .= '<tr>';
+
+        for ($colI = 1; $colI <= $colslayout[$view->layout]; $colI++) {
+            $pdfContent .= '<td width="'.(round(100 / $colslayout[$view->layout]) - 1).'%">';
+            if (array_key_exists($colI, $dataForPdf)) {
+                if (array_key_exists($rowI, $dataForPdf[$colI])) {
+                    $pdfContent .= $dataForPdf[$colI][$rowI];
+                }
+            }
+            $pdfContent .= '</td>';
+        }
+        $pdfContent .= '</tr>';
+    }*/
+    $pdfContent .= '</tr>';
+    $pdfContent .= '</table>';
+    $pdfContent .= '</body>';
+    $pdfContent .= '</html>';
+    //echo $pdfContent; exit;
+    return $pdfContent;
+}

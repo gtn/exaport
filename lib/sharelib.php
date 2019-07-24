@@ -88,7 +88,7 @@ namespace {
         }
     }
 
-    function block_exaport_get_view_from_access($access) {
+    function block_exaport_get_view_from_access($access, $pdfaccess = false, $pdfforuserid = 0) {
         global $USER, $DB;
 
         if (!block_exaport_feature_enabled('views')) {
@@ -129,8 +129,9 @@ namespace {
             // Guest not allowed.
             // require exaport:use -> guest hasn't this right.
             $context = context_system::instance();
-            require_capability('block/exaport:use', $context);
-
+            if (!$pdfaccess) {
+                require_capability('block/exaport:use', $context);
+            }
             // Groups for user.
             $usergroups = block_exaport_get_user_cohorts();
 
@@ -141,22 +142,28 @@ namespace {
                 return;
             }
 
-            $userid = clean_param($hash[0], PARAM_INT);
+            if ($pdfaccess && $pdfforuserid > 0) {
+                $userid = $pdfforuserid;
+                $myuserid = $pdfforuserid;
+            } else {
+                $userid = clean_param($hash[0], PARAM_INT);
+                $myuserid = $USER->id;
+            }
             $viewid = clean_param($hash[1], PARAM_INT);
 
             $tempjoin = '';
             if (is_array($usergroups) && count($usergroups) > 0) {
-                $tempjoin .= "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid ";
+                $tempjoin .= "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id = vgshar.viewid ";
             }
             $view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v".
-                    " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?".
+                    " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid = ?".
                     $tempjoin.
-                    " WHERE v.userid=? AND v.id=? AND".
-                    " ((v.userid=?)". // Myself.
-                    "  OR (v.shareall=1)". // Shared all.
-                    "  OR (v.shareall=0 AND vshar.userid IS NOT NULL) ".
+                    " WHERE v.userid = ? AND v.id = ? AND".
+                    " ((v.userid = ?)". // Myself.
+                    "  OR (v.shareall = 1)". // Shared all.
+                    "  OR (v.shareall = 0 AND vshar.userid IS NOT NULL) ".
                     ($usergroups ? " OR vgshar.groupid IN (".join(',', array_keys($usergroups)).") " : "").
-                    ")", array($USER->id, $userid, $viewid, $USER->id)); // Shared for me.
+                    ")", array($myuserid, $userid, $viewid, $myuserid)); // Shared for me.
             if (!$view) {
                 // View not found.
                 return;
@@ -238,7 +245,7 @@ namespace {
         }
     }
 
-    function block_exaport_get_item($itemid, $access, $epopaccess = false) {
+    function block_exaport_get_item($itemid, $access, $epopaccess = false, $pdfaccess = false, $pdfforuserid = 0) {
         global $CFG, $USER, $DB;
 
         $itemid = clean_param($itemid, PARAM_INT);
@@ -246,8 +253,7 @@ namespace {
         $item = null;
         if (preg_match('!^view/(.+)$!', $access, $matches)) {
             // In view mode.
-
-            if (!$view = block_exaport_get_view_from_access($matches[1])) {
+            if (!$view = block_exaport_get_view_from_access($matches[1], $pdfaccess, $pdfforuserid)) {
                 throw new \block_exacomp\permission_exception("viewnotfound", "block_exaport");
             }
             // Parameter richtig?!
@@ -280,7 +286,6 @@ namespace {
                 // Item not found.
                 return;
             }
-
             $item->access = $view->access;
             $item->access->page = 'view';
             // Comments allowed?

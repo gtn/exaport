@@ -22,6 +22,19 @@ $access = optional_param('access', '', PARAM_TEXT);
 // sometimes for artifacts with multiple images
 $imageindex = optional_param('imindex', '', PARAM_INT);
 
+$ispdf = optional_param('ispdf', 0, PARAM_INT);
+$isforpdf = false;
+$pdfuserid = 0;
+if ($ispdf) {
+    $vhash = optional_param('vhash', 0, PARAM_RAW);
+    $vid = optional_param('vid', 0, PARAM_INT);
+    $pdfuserid = optional_param('uid', 0, PARAM_INT);
+    $view = $DB->get_record('block_exaportview', ['id' => $vid]);
+    if ($view && $view->hash == $vhash && $pdfuserid > 0) {
+        $isforpdf = true;
+    }
+}
+
 $item = null;
 
 // Thumbnails for BackEnd (editing the view part).
@@ -36,7 +49,7 @@ if ($access == '') {
     }
 } else {
     // Checking access to item by access to view.
-    if (!$view = block_exaport_get_view_from_access($access)) {
+    if (!$view = block_exaport_get_view_from_access($access, $isforpdf, $pdfuserid)) {
         die("view not found");
     }
     $viewid = $view->id;
@@ -132,11 +145,11 @@ switch ($item->type) {
                 break;
             }
             header("Content-type: ".$type);
+
             echo $imgstr;
 
             exit;
         }
-
         header('Location: pix/link_tile.png');
         break;
 

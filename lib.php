@@ -32,8 +32,26 @@ require_once(__DIR__.'/inc.php');
 function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $USER, $CFG, $DB;
 
-    // Always require login, at least guest.
-    require_login();
+    $isForPdf = false;
+    $pdfforuserid = 0;
+    if ($p = array_search('forPdf', $args) ) {
+        // added to link of the file: /forPdf/--hash--/--viewid--/--curruserid--
+        $pdfforuserid = array_pop($args);
+        $viewid = array_pop($args);
+        $pdfHash = array_pop($args);
+        $view = $DB->get_record('block_exaportview', ['id' => $viewid]);
+        if ($view && $view->hash == $pdfHash) {
+            $isForPdf = true;
+        }
+        unset($args[$p]);
+    }
+
+    if (!$isForPdf) {
+        // Always require login, at least guest.
+        require_login();
+    } else {
+        // login is not required if it it for PDF generation (accessible only from php)
+    }
 
     if ($filearea == 'item_file') {
         $filename = array_pop($args);
@@ -41,12 +59,11 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         if (array_pop($args) != 'itemid') {
             print_error('wrong params');
         }
-
         // Other params together are the access string.
         $access = join('/', $args);
 
         // Item exists?
-        $item = block_exaport_get_item($id, $access);
+        $item = block_exaport_get_item($id, $access, false, $isForPdf, $pdfforuserid);
         if (!$item) {
             print_error('Item not found');
         }

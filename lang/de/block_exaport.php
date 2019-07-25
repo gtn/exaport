@@ -64,6 +64,7 @@ $string['explainingshared'] = 'Folgende TeilnehmerInnen haben ver&ouml;ffentlich
 $string['explainingsharefile'] = 'Um einem/einer anderen TeilnehmerIn die Datei zu ver&ouml;ffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die &Auml;nderungen.  Sie k&ouml;nnen mehr als eine/n TeilnehmerIn ausw&auml;hlen.';
 $string['explainingsharenote'] = 'Um einem/einer anderen TeilnehmerIn die Notiz zu ver&ouml;ffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die &Auml;nderungen.  Sie k&ouml;nnen mehr als eine/n TeilnehmerIn ausw&auml;hlen.';
 $string['file'] = 'Datei';
+$string['iconfile_merge_description'] = 'Symbol-Bild mit Ordner-Bild verknüpfen';
 $string['firstnameshared'] = 'Familienname';
 $string['go'] = 'Go!';
 $string['hidesummary'] = '(Gesamtaufstellung ausblenden)';
@@ -151,6 +152,7 @@ $string['externcomment'] = 'Kommentare mitver&ouml;ffentlichen';
 $string['itemgrading'] = 'Beurteilung';
 $string['gradeitem'] = 'Abgabe beurteilen';
 $string['submititem'] = 'Abgeben';
+$string['saveitem'] = 'Speichern';
 
 // === Notes.
 $string['deletenoteconfirm'] = 'Wollen Sie diese Notiz wirklich l&ouml;schen?';
@@ -354,7 +356,7 @@ $string['cofigureblock_cvinfo_goals'] = 'Meine Ziele';
 $string['cofigureblock_cvinfo_skills'] = 'Meine Kompetenzen';
 $string['cofigureblock_cvinfo_interests'] = 'Interessen';
 $string['in'] = 'at';
-$string['cofigureblock_cvinfo_withfiles'] = 'With attachment files';
+$string['cofigureblock_cvinfo_withfiles'] = 'Datei-Anhänge mitpublizieren';
 
 // === Desp.
 $string['back_to_desp'] = 'zurück zum d-ESP';

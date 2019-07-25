@@ -188,7 +188,7 @@ class block_exaport_item_edit_form extends moodleform {
         }
 
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {
-            $this->add_action_buttons($cancel = true, $submitlabel = get_string('submititem', 'block_exaport'));
+            $this->add_action_buttons($cancel = true, $submitlabel = get_string('saveitem', 'block_exaport'));
         } else {
             $exampleid = $DB->get_field('block_exacompitemexample',
                                 'exampleid',

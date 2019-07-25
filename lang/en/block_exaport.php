@@ -154,6 +154,7 @@ $string['externcomment'] = 'Share comments in external portfolio';
 $string['itemgrading'] = 'Grading';
 $string['gradeitem'] = 'Grade the item';
 $string['submititem'] = 'Submit';
+$string['saveitem'] = 'Save';
 
 // === Notes.
 $string['deletenoteconfirm'] = 'Do you really want to delete this note?';

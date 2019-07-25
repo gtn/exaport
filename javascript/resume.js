@@ -25,12 +25,14 @@ jQueryExaport(function ($) {
         $(this).parents('.view-group').toggleClass('view-group-open');
     });
 
-    $('.collapsible-actions .expandall').on('click', function () {
+    $('.collapsible-actions .expandall').on('click', function (e) {
+        e.preventDefault();
         $('.view-group').addClass('view-group-open');
         $('.collapsible-actions a').toggleClass('hidden');
     });
 
-    $('.collapsible-actions .collapsall').on('click', function () {
+    $('.collapsible-actions .collapsall').on('click', function (e) {
+        e.preventDefault();
         $('.view-group-open').removeClass('view-group-open');
         $('.collapsible-actions a').toggleClass('hidden');
     });

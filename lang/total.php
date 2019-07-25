@@ -209,7 +209,7 @@ return [
                 'Merge this icon picture with the folder icon',
         ],
         'iconfile_merge_description' => [
-                null,
+                'Symbol-Bild mit Ordner-Bild verknüpfen',
                 'Icon picture will try (without any guarantee) to merge with standard folder icon. The icon will be replaced with the new image.',
         ],
         'firstnameshared' => [
@@ -553,6 +553,10 @@ return [
         'submititem' => [
                 'Abgeben',
                 'Submit',
+        ],
+        'saveitem' => [
+                'Speichern',
+                'Save',
         ],
 
         // === Notes.
@@ -1313,7 +1317,7 @@ return [
                 'at',
         ],
         'cofigureblock_cvinfo_withfiles' => [
-                'With attachment files',
+                'Datei-Anhänge mitpublizieren',
                 'With attachment files',
         ],
 

@@ -991,7 +991,7 @@ function europass_xml($resumeid = 0) {
         $competencesdb = $DB->get_record('block_exacompdescriptors', array('id' => $competence->compid), $fields = '*',
                 $strictness = IGNORE_MISSING);
         if ($competencesdb != null) {
-            $skillscontent .= $competencesdb->title.'<br>';
+            $skillscontent .= '<p>'.$competencesdb->title.'</p>';
         };
     };
     $text = $dom->createTextNode(clean_for_external_xml($skillscontent));

@@ -421,7 +421,7 @@ function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '',
     $resumepart .= '<input type="hidden" name="action" value="edit" />';
     $resumepart .= '<input type="hidden" name="type" value="'.$type.'" />';
     $resumepart .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-    $resumepart .= '<fieldset class="clearfix view-group'.($opened == $type ? '-open' : '').'">';
+    $resumepart .= '<fieldset class="clearfix view-group'.(''.$opened == ''.$type ? '-open' : '').'">';
     $resumepart .= '<legend class="view-group-header">'.$header.'</legend>';
     $resumepart .= '<a name="'.$type.'"></a>';
     $resumepart .= '<div class="view-group-content clearfix">';
@@ -451,11 +451,11 @@ function block_exaport_resume_header() {
     return $content;
 }
 
-echo "<span class=\"left\">".get_string("supported", "block_exaport")."<br/>";
-echo "<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/bmukk.png\" width=\"63\" height=\"24\" alt=\"bmukk\" /></span>";
+/*echo "<span class=\"left\">".get_string("supported", "block_exaport")."<br/>";
+echo "<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/bmukk.png\" width=\"63\" height=\"24\" alt=\"bmukk\" /></span>";*/
 echo "<span class=\"right\">".get_string("developed", "block_exaport");
 echo "<br/><a href=\"http://www.gtn-solutions.com/\">";
-echo "<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/gtn.png\" width=\"89\" height=\"40\" alt=\"gtn-solutions\"/></a></span>";
+echo "<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/gtn.png\" height=\"25\" alt=\"gtn-solutions\"/></a></span>";
 echo "<div class=\"block_eportfolio_clear\" />";
 echo "</div>";
 echo block_exaport_wrapperdivend();

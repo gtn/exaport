@@ -157,7 +157,7 @@ class block_exaport_view_edit_form extends moodleform {
 
                 if ($this->_customdata['view']) {
                     // Auto generate view with the artefacts checkbox.
-                    $artefacts = block_exaport_get_portfolio_items(1);
+                    $artefacts = block_exaport_get_portfolio_items(1, null, true, true);
                     if (count($artefacts) > 0) {
                         if ($this->_customdata['view']->id > 0) {
                             foreach ($artefacts as $artefact) {
@@ -703,18 +703,33 @@ foreach ($translations as $key => &$value) {
 }
 unset($value);
 
-$portfolioitems = block_exaport_get_portfolio_items();
-// Add potential sometime shared items (there is in {block_exaportviewblock} but now is NOT shared).
-$query = "SELECT b.* FROM {block_exaportviewblock} b, {block_exaportitem} i".
-          " WHERE b.viewid = ? AND b.itemid = i.id AND i.userid<>? ".
-          " ORDER BY b.positionx, b.positiony ";
-$allpotentialitems = $DB->get_records_sql($query, array($view->id, $USER->id));
-$portfolioshareditems = array();
-foreach ($allpotentialitems as $item) {
-    if (!array_key_exists($item->itemid, $portfolioitems)) {
-        $portfolioitems = $portfolioitems + block_exaport_get_portfolio_items(0, $item->itemid);
+$portfolioitems = array();
+if ($view->id) {
+    $portfolioitems = block_exaport_get_portfolio_items();
+    // Add potential sometime shared items (there is in {block_exaportviewblock} but now is NOT shared).
+    $addwhere = '';
+    if (isset($portfolioitems) && count($portfolioitems) > 0) {
+        $addwhere .= ' AND i.id NOT IN ('.implode(',', array_keys($portfolioitems)).' ';
+    }
+    $query = " SELECT b.* ".
+            " FROM {block_exaportviewblock} b, {block_exaportitem} i".
+            " WHERE b.viewid = ? AND b.itemid = i.id AND i.userid <> ? ".
+            $addwhere.
+            " ORDER BY b.positionx, b.positiony ";
+    $allpotentialitems = $DB->get_records_sql($query, array($view->id, $USER->id));
+    $portfolioshareditems = array();
+    $allpotentialitemsids = array();
+    foreach ($allpotentialitems as $item) {
+        $allpotentialitemsids[] = $item->itemid;
+        //if (!array_key_exists($item->itemid, $portfolioitems)) {
+        //$portfolioitems = $portfolioitems + block_exaport_get_portfolio_items(0, $item->itemid);
+        //}
+    }
+    if (count($allpotentialitemsids) > 0) {
+        $portfolioitems = $portfolioitems + block_exaport_get_portfolio_items(0, $allpotentialitemsids);
     }
 }
+//echo "<pre>debug:<strong>views_mod.php:718</strong>\r\n"; print_r($portfolioitems); echo '</pre>'; exit; // !!!!!!!!!! delete it
 
 // add resume items
 $resumeitems = block_exaport_get_resume_params($USER->id, true);

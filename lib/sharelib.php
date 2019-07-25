@@ -608,26 +608,34 @@ namespace {
         $usercats = block_exaport_get_group_share_categories($userid);
         // All categories and users who shared.
         $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+        $itemwhere = '';
+        if ($itemid) {
+            if (is_array($itemid) && count($itemid) > 0) {
+                $itemwhere = ' AND i.id IN ('.implode(',', $itemid).') ';
+            } elseif ($itemid > 0) {
+                $itemwhere = ' AND i.id = '.intval($itemid).' ';
+            }
+        }
         $categories = $DB->get_records_sql(
                 "SELECT $categorycolumns, u.firstname, u.lastname, u.picture, ".
                 " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
-                " FROM {user} u".
-                " JOIN {block_exaportcate} c ON u.id=c.userid".
-                ($itemid && $itemid > 0 ? " JOIN {block_exaportitem} i ON c.id = i.categoryid " : "").
-                " LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?".
+                " FROM {user} u ".
+                " JOIN {block_exaportcate} c ON u.id = c.userid ".
+                ($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
+                " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?".
 
-                " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid ".
-                " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid ".
+                " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid ".
+                " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid ".
                 " WHERE (".
-                "(".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) ".
+                "(".(block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '')." cshar.userid IS NOT NULL) ".
                 // Only show shared all, if enabled.
                 // Shared for you group.
-                ($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") " : ""). // Add group shareing categories.
+                (count($usercats) > 0 ? " OR c.id IN (".implode(',', array_keys($usercats)).") " : ""). // Add group shareing categories.
                 ")".
                 " AND c.userid != ? ". // Don't show my own categories.
                 " AND internshare = 1 ".
                 " AND u.deleted = 0 ".
-                ($itemid && $itemid > 0 ? " AND i.id = ".intval($itemid) : "").
+                $itemwhere.
                 " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture".
                 " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
         //return array();
@@ -642,6 +650,7 @@ namespace {
                 $sharedcategories[] = $categorie->id;
             }
         }
+
         // Get sub categories (recursively).
         for ($i = 0, $c = count($sharedcategories); $i < $c; $i++) {
             $subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $sharedcategories[$i]], null, 'id, id as tmp');
@@ -654,35 +663,39 @@ namespace {
 
         // Get items for every user.
         $sharedcategorieslist = implode(',', $sharedcategories);
+        if (count($sharedcategories) > 100) {
+            $sharedcategorieslistchunked = array_chunk($sharedcategories, 100);
+        } else {
+            $sharedcategorieslistchunked = $sharedcategorieslist;
+        }
 
         if ($onlyitems) {
             $shareditems = [];
+            // Only items for customise blocks. for views_mod.php. Or for check is shared.
+            $selectfunc = function($userid, $catlist) {
+                global $DB;
+                if (!$catlist) {
+                    return array();
+                }
+                $query = "SELECT DISTINCT i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ".
+                        " ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
+                        " FROM {block_exaportitem} i".
+                        " LEFT JOIN {block_exaportcate} ic on i.categoryid = ic.id".
+                        " LEFT JOIN {block_exaportcate} ic2 on ic.pid = ic2.id".
+                        " LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id".
+                        " WHERE i.userid=? AND categoryid IN (".$catlist.")".
+                        " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
+                        " ORDER BY i.name";
+                $useritems = $DB->get_records_sql($query, array($userid));
+                return $useritems;
+            };
             foreach ($sharedusers as $key => $userid) {
-                // Only items for customise blocks. for views_mod.php. Or for check is shared.
-                $selectfunc = function($userid, $catlist) {
-                    global $DB;
-                    if (!$catlist) {
-                        return array();
-                    }
-                    $query = "select i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ".
-                            " ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
-                            " from {block_exaportitem} i".
-                            " left join {block_exaportcate} ic on i.categoryid = ic.id".
-                            " left join {block_exaportcate} ic2 on ic.pid = ic2.id".
-                            " left join {block_exaportitemcomm} com on com.itemid = i.id".
-                            " where i.userid=? AND categoryid IN (".$catlist.")".
-                            " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
-                            " ORDER BY i.name";
-                    $useritems = $DB->get_records_sql($query, array($userid));
-                    return $useritems;
-                };
                 if (count($sharedcategories) <= 100 ) {
                     $useritems = $selectfunc($userid, $sharedcategorieslist);
                     $shareditems = $shareditems + $useritems;
                 } else {
                     // divide to many queries: TODO: is it helping?
-                    $newcategories = array_chunk($sharedcategories, 100);
-                    foreach ($newcategories as $sharedcats) {
+                    foreach ($sharedcategorieslistchunked as $sharedcats) {
                         $sharedcategorieslist = implode(',', $sharedcats);
                         $useritems = $selectfunc($userid, $sharedcategorieslist);
                         $shareditems = $shareditems + $useritems;

@@ -146,10 +146,11 @@ if ($type == 'sharedstudent') {
 
         // Common items.
         $items = $DB->get_records_sql("
-            SELECT i.*, COUNT(com.id) As comments
+            SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE i.userid = ? AND i.categoryid=?
+            WHERE i.userid = ? 
+                AND i.categoryid=?
                 AND ".block_exaport_get_item_where().
                 " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
             i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
@@ -258,10 +259,11 @@ if ($type == 'sharedstudent') {
         }
 
         $items = $DB->get_records_sql("
-            SELECT i.*, COUNT(com.id) As comments
+            SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE i.categoryid=?
+            WHERE i.categoryid = ?
+                AND i.userid = ?
                 AND ".block_exaport_get_item_where().
             " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
             i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
@@ -269,7 +271,7 @@ if ($type == 'sharedstudent') {
             i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
             i.iseditable, i.example_url, i.parentid
             $sqlsort
-        ", [$currentcategory->id]);
+        ", [$currentcategory->id, $selecteduser->id]);
     }
 
 } else {
@@ -322,7 +324,7 @@ if ($type == 'sharedstudent') {
 
     // Common items.
     $items = $DB->get_records_sql("
-            SELECT i.*, COUNT(com.id) As comments
+            SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
             WHERE i.userid = ? AND i.categoryid=?

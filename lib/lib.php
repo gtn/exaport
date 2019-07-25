@@ -1134,7 +1134,15 @@ function block_exaport_get_view_blocks($view) {
     return $blocks;
 }
 
-function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $withshareditems = true) {
+/**
+ * @param int $epopwhere
+ * @param null $itemid
+ * @param bool $withshareditems
+ * @param bool $onlyexisting for performance: checking at least one item
+ * @return array
+ * @throws dml_exception
+ */
+function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $withshareditems = true, $onlyexisting = false) {
     global $DB, $USER;
     if ($epopwhere == 1) {
         $addwhere = " AND ".block_exaport_get_item_where();
@@ -1143,9 +1151,13 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
     };
     // Only needed item by id.
     if ($itemid) {
-        $where = ' i.id = '.$itemid;
+        if (is_array($itemid) && count($itemid) > 0) {
+            $where = ' i.id IN ('.implode(',', $itemid).') ';
+        } else {
+            $where = ' i.id = '.intval($itemid).' ';
+        }
     } else {
-        $where = " i.userid=? ".$addwhere;
+        $where = " i.userid = ? ".$addwhere;
     }
     $query = "SELECT i.id, i.name, i.type, i.intro AS intro, i.url AS link, ic.name AS cname, ic.id AS catid, ".
             " ic2.name AS cname_parent, i.userid, COUNT(com.id) AS comments".
@@ -1160,11 +1172,17 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
     if (!$portfolioitems) {
         $portfolioitems = array();
     }
+    if ($onlyexisting && count($portfolioitems) > 0) {
+        return $portfolioitems;
+    }
 
     // Add shared items.
     if ($withshareditems) {
-        $shareditems = block_exaport_get_items_shared_to_user($USER->id, true);
+        $shareditems = block_exaport_get_items_shared_to_user($USER->id, true, $itemid);
         $portfolioitems = $portfolioitems + $shareditems;
+    }
+    if ($onlyexisting && count($portfolioitems) > 0) {
+        return $portfolioitems;
     }
 
     $fs = get_file_storage();

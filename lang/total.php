@@ -1971,4 +1971,8 @@ return [
                 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}',
                 'To view this video please use the direct link: {$a->link}',
         ],
+        'download_pdf' => [
+            'Download as Pdf',
+            'Download as Pdf',
+        ],
 ];

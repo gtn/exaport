@@ -539,6 +539,16 @@ $generalContent .= '</tr></table>';
 $generalContent .= '</div>';
 
 $generalContent .= "<br />";
+$generalContent .= "<div class=''>\n";
+$pdflink = $PAGE->url;
+$pdflink->params(array(
+        'courseid' => optional_param('courseid', 1, PARAM_TEXT),
+        'access' => optional_param('access', 0, PARAM_TEXT),
+        'ispdf' => 1
+));
+$generalContent .= '<button class="btn btn-default" onclick="location.href=\''.$pdflink.'\'" type="button">'.block_exaport_get_string('download_pdf').' </button>';
+
+$generalContent .= "</div>\n";
 
 $generalContent .= "<div class='block_eportfolio_center'>\n";
 
@@ -552,6 +562,7 @@ if ($isPdf) {
     require_once __DIR__.'/lib/classes/dompdf/autoload.inc.php';
     $options = new \Dompdf\Options();
     $options->set('isRemoteEnabled', true);
+    $options->set('defaultFont', 'dejavu sans');
     $dompdf = new Dompdf($options);
     $dompdf->setPaper('A4', 'landscape');
     /*$context = stream_context_create([

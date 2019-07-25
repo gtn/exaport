@@ -549,3 +549,4 @@ $string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit 
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
+$string['download_pdf'] = 'Download as Pdf';

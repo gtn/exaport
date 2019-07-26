@@ -43,6 +43,7 @@ $string['attachment'] = 'Anhang';
 $string['attachincluded'] = 'Anhang?';
 $string['awaiting'] = '(\\$a wartend)';
 $string['back'] = 'zurück';
+$string['close'] = 'Schließen';
 $string['backtocourse'] = 'zurück zum Kurs';
 $string['categories'] = 'Kategorien';
 $string['explaincategories'] = '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier können Sie die Kategorien einsehen und bearbeiten.';
@@ -64,8 +65,8 @@ $string['explainingshared'] = 'Folgende TeilnehmerInnen haben ver&ouml;ffentlich
 $string['explainingsharefile'] = 'Um einem/einer anderen TeilnehmerIn die Datei zu ver&ouml;ffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die &Auml;nderungen.  Sie k&ouml;nnen mehr als eine/n TeilnehmerIn ausw&auml;hlen.';
 $string['explainingsharenote'] = 'Um einem/einer anderen TeilnehmerIn die Notiz zu ver&ouml;ffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die &Auml;nderungen.  Sie k&ouml;nnen mehr als eine/n TeilnehmerIn ausw&auml;hlen.';
 $string['file'] = 'Datei';
-$string['iconfile_merge'] = 'Symbol-Bild mit Ordner-Bild verknüpfen';
-$string['iconfile_merge_description'] = 'Symbol-Bild mit Ordner-Bild verknüpfen';
+$string['iconfile_merge'] = 'Symbol mit Ordner-Symbol kombinieren';
+$string['iconfile_merge_description'] = 'Symbolbild verknüpft sich mit dem Ordner-Symbol.';
 $string['firstnameshared'] = 'Familienname';
 $string['go'] = 'Go!';
 $string['hidesummary'] = '(Gesamtaufstellung ausblenden)';
@@ -357,7 +358,7 @@ $string['cofigureblock_cvinfo_goals'] = 'Meine Ziele';
 $string['cofigureblock_cvinfo_skills'] = 'Meine Kompetenzen';
 $string['cofigureblock_cvinfo_interests'] = 'Interessen';
 $string['in'] = 'at';
-$string['cofigureblock_cvinfo_withfiles'] = 'Datei-Anhänge mitpublizieren';
+$string['cofigureblock_cvinfo_withfiles'] = 'mit Anhängen publizieren';
 
 // === Desp.
 $string['back_to_desp'] = 'zurück zum d-ESP';

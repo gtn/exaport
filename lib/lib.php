@@ -312,6 +312,8 @@ function block_exaport_init_js_css() {
         $PAGE->requires->js('/blocks/exaport/javascript/'.$scriptname.'.js', true);
     }
 
+    // language strings
+    $PAGE->requires->string_for_js('close', 'block_exaport');
 }
 
 /**

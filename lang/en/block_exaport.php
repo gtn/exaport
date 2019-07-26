@@ -43,6 +43,7 @@ $string['attachment'] = 'Attachment';
 $string['attachincluded'] = 'Attachment?';
 $string['awaiting'] = '($a awaiting)';
 $string['back'] = 'Back';
+$string['close'] = 'close';
 $string['backtocourse'] = 'Back to course';
 $string['categories'] = 'Categories';
 $string['explaincategories'] = 'Categories: here you can create and modify categories';

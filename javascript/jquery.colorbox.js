@@ -455,7 +455,9 @@
 			}).show();
 
 			if (settings.get('closeButton')) {
-				$close.html(settings.get('close')).appendTo($content);
+				// $close.html(settings.get('close')).appendTo($content);
+                closeButtonTitle = M.util.get_string('close', 'block_exaport');
+				$close.html(closeButtonTitle).appendTo($content);
 			} else {
 				$close.appendTo('<div/>'); // replace with .detach() when dropping jQuery < 1.4
 			}

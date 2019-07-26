@@ -116,6 +116,10 @@ return [
                 'zurück',
                 'Back',
         ],
+        'close' => [
+            'Schließen',
+            'close',
+        ],
         'backtocourse' => [
                 'zurück zum Kurs',
                 'Back to course',
@@ -205,11 +209,11 @@ return [
                 'Icon picture',
         ],
         'iconfile_merge' => [
-                'Symbol-Bild mit Ordner-Bild verknüpfen',
+                'Symbol mit Ordner-Symbol kombinieren',
                 'Merge this icon picture with the folder icon',
         ],
         'iconfile_merge_description' => [
-                'Symbol-Bild mit Ordner-Bild verknüpfen',
+                'Symbolbild verknüpft sich mit dem Ordner-Symbol.',
                 'Icon picture will try (without any guarantee) to merge with standard folder icon. The icon will be replaced with the new image.',
         ],
         'firstnameshared' => [
@@ -1317,7 +1321,7 @@ return [
                 'at',
         ],
         'cofigureblock_cvinfo_withfiles' => [
-                'Datei-Anhänge mitpublizieren',
+                'mit Anhängen publizieren',
                 'With attachment files',
         ],
 

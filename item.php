@@ -293,7 +293,6 @@ switch ($action) {
                 }
                 $extracontent .= "</div>";
             }
-
             if (!$extracontent && !$post->url) {
                 $extracontent = 'File not found';
             }
@@ -319,6 +318,8 @@ if ($exacompactive) {
     $PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
     $PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
 
+    $PAGE->requires-> js('/blocks/exaport/javascript/jquery.colorbox.js', true);
+    //$PAGE->
     $PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
     $PAGE->requires->css('/blocks/exaport/css/colorbox.css');
 }

@@ -73,7 +73,9 @@ function block_exaport_print_extern_item($item, $access) {
     }
 
     if (!$boxcontent && !$item->url) {
-        $boxcontent = 'File not found';
+        if ($item->type != 'note') { // notes can be without files
+            $boxcontent = block_exaport_get_string('filenotfound');
+        }
     }
 
     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,

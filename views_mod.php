@@ -709,7 +709,7 @@ if ($view->id) {
     // Add potential sometime shared items (there is in {block_exaportviewblock} but now is NOT shared).
     $addwhere = '';
     if (isset($portfolioitems) && count($portfolioitems) > 0) {
-        $addwhere .= ' AND i.id NOT IN ('.implode(',', array_keys($portfolioitems)).' ';
+        $addwhere .= ' AND i.id NOT IN ('.implode(',', array_keys($portfolioitems)).') ';
     }
     $query = " SELECT b.* ".
             " FROM {block_exaportviewblock} b, {block_exaportitem} i".

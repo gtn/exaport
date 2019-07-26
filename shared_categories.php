@@ -100,7 +100,6 @@ function exaport_print_structures($categories, $parsedsort) {
             'thiscourse' => array(),
             'othercourses' => array()
     );
-
     if (isset($courses[$COURSE->id])) {
         if ($sort == 'mystudents') {
             $students = block_exaport_get_students_for_teacher();

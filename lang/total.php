@@ -205,7 +205,7 @@ return [
                 'Icon picture',
         ],
         'iconfile_merge' => [
-                null,
+                'Symbol-Bild mit Ordner-Bild verknüpfen',
                 'Merge this icon picture with the folder icon',
         ],
         'iconfile_merge_description' => [

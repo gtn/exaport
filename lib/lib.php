@@ -62,7 +62,7 @@ function block_exaport_get_item_file($item, $onlysingle = true) {
     if ($CFG->block_exaport_multiple_files_in_item && !$onlysingle) {
         return block_exaport_get_file($item, 'item_file'); // Multiple files
     }
-    return block_exaport_get_file($item, 'item_file', true); // only one file
+    return array(block_exaport_get_file($item, 'item_file', true)); // only one file.. but in array, to make sure no bugs occur later in foreach-loops
 }
 
 function block_exaport_get_category_icon($category) {

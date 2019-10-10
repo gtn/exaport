@@ -919,7 +919,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2019031500, 'exaport');
     }
 
-    if ($oldversion < 2019071603) {
+    if ($oldversion < 2019101005) {
         // change indexes again
         $tableswithindexes = array(
                 'block_exaportcate' => array('pid', 'userid', 'shareall', 'internshare', 'structure_shareall', 'structure_share'),
@@ -947,10 +947,12 @@ function xmldb_block_exaport_upgrade($oldversion) {
         foreach ($tableswithindexes as $tablename => $indexes) {
             $table = new xmldb_table($tablename);
             // delete all existing indexes
-            $existingindexes = array_keys($DB->get_indexes($tablename));
-            foreach ($existingindexes as $eindex) {
-                if (trim(strtolower($eindex)) != 'primary') {
-                    $DB->execute('DROP INDEX '.$eindex.' ON '.$DB->get_prefix().$tablename.' ');
+            $existingindexes = $DB->get_indexes($tablename);
+            foreach ($existingindexes as $indexname => $eindex) {
+                if (trim(strtolower($indexname)) != 'primary') {
+                    $index = new xmldb_index($indexname, XMLDB_INDEX_NOTUNIQUE, $eindex['columns']);
+                    $dbman->drop_index($table, $index);
+                    //$DB->execute('DROP INDEX '.$eindex.' ON '.$DB->get_prefix().$tablename.' ');
                 }
             }
             foreach ($indexes as $indexname) {
@@ -960,7 +962,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 }
             }
         }
-        upgrade_block_savepoint(true, 2019071603, 'exaport');
+        upgrade_block_savepoint(true, 2019101005, 'exaport');
     }
 
     // TODO: delete structure fields / tables.

@@ -28,7 +28,6 @@ function block_exaport_get_user_from_hash($hash) {
 
 function block_exaport_print_extern_item($item, $access) {
     global $CFG, $OUTPUT;
-
     echo $OUTPUT->heading(format_string($item->name));
 
     $boxcontent = '';
@@ -36,7 +35,11 @@ function block_exaport_print_extern_item($item, $access) {
         if (!is_array($files)) {
             $files = array($files->get_filename() => $files);
         }
+
         foreach ($files as $fileindex => $file) {
+            if (!$file) {
+                continue; // Is here possible that $file is null?
+            }
             $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id.'&inst='.$fileindex);
             if ($file->is_valid_image()) { // Image attachments don't get printed as links.
                 $boxcontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"".s($item->name)."\" /></div>";
@@ -78,14 +81,21 @@ function block_exaport_print_extern_item($item, $access) {
         }
     }
 
-    $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
-                    'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
+    $intro = $item->intro;
+    $intro = file_rewrite_pluginfile_urls($intro, 'pluginfile.php', context_user::instance($item->userid)->id,
+                'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
     $intro = format_text($intro);
+    $templateTextToHtml = text_to_html('');
+    $intro = trim($intro);
+    if ($intro && $intro == $templateTextToHtml && strpos($item->intro, '<iframe') !== false) {
+        // TODO: test - if the intro is empty - it will have wrapper template (Moodle api)
+        // in this case it is possible that it is cleaned media link. Get it again
+        $intro = $item->intro;
+    }
     if ($item->url && $item->url != "false") {
         $boxcontent .= '<p><a target="_blank" href="'.s($item->url).'">'.str_replace('http://', '', $item->url).'</a></p>';
     }
     $boxcontent .= $intro;
-
     echo $OUTPUT->box($boxcontent);
 }
 

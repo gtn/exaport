@@ -30,7 +30,7 @@ function copy_category_to_myself($categoryid) {
 }
 
 function _copy_category_to_myself_iterator($currcat, $parentcatid) {
-    global $CFG;
+    global $CFG, $USER;
     $newcat = new \stdClass();
     $newcat->pid = $parentcatid;
     $newcat->userid = g::$USER->id;
@@ -68,6 +68,9 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         // Files.
         $fs = get_file_storage();
         if ($file = block_exaport_get_item_file($item, false)) {
+            if (is_array($file)) {
+                $file = reset($file);
+            }
             $fs->create_file_from_storedfile(array(
                     'contextid' => \context_user::instance(g::$USER->id)->id,
                     'component' => 'block_exaport',
@@ -103,8 +106,8 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
                 tag_set('block_exaportitem', $newitem->id, $tags, 'block_exaport', \context_user::instance(g::$USER->id)->id);
             } else {
                 // Moodle v3.1.
-                $tags = core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $item->id);
-                core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $newitem->id, \context_user::instance($USER->id),
+                $tags = \core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $item->id);
+                \core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $newitem->id, \context_user::instance($USER->id),
                         $tags);
             }
         }

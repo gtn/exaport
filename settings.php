@@ -90,7 +90,7 @@ if ($ADMIN->fulltree) {
             get_string('block_exaport_teachercanseeartifactsofstudents_head', 'block_exaport'),
             get_string('block_exaport_teachercanseeartifactsofstudents_body', 'block_exaport', $linktocreateuserproperty), 0));
 
-    // Items with multiply files
+    // Items with multiple files
     $settings->add(new admin_setting_configcheckbox('block_exaport_multiple_files_in_item',
             get_string('block_exaport_multiplefilesinitem', 'block_exaport'),
             get_string('block_exaport_multiplefilesinitem_body', 'block_exaport'), 0));

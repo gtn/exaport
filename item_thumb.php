@@ -78,7 +78,7 @@ switch ($item->type) {
         if ($file && ($imageindex || $imageindex === 0  )) {
             $filevalues = array_values($file);
             $singleFile = $filevalues[$imageindex];
-            if ($singleFile->is_valid_image()) {
+            if ($singleFile && $singleFile->is_valid_image()) {
                 send_stored_file($singleFile, 1);
                 exit;
             }

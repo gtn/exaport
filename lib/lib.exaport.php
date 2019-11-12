@@ -68,15 +68,17 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         // Files.
         $fs = get_file_storage();
         if ($file = block_exaport_get_item_file($item, false)) {
-            if (is_array($file)) {
-                $file = reset($file);
+            if (!is_array($file)) {
+                $file = array($file);
             }
-            $fs->create_file_from_storedfile(array(
-                    'contextid' => \context_user::instance(g::$USER->id)->id,
-                    'component' => 'block_exaport',
-                    'filearea' => 'item_file',
-                    'itemid' => $newitem->id,
-            ), $file);
+            foreach($file as $fileindex => $fileobject) {
+                $fs->create_file_from_storedfile(array(
+                        'contextid' => \context_user::instance(g::$USER->id)->id,
+                        'component' => 'block_exaport',
+                        'filearea' => 'item_file',
+                        'itemid' => $newitem->id,
+                ), $fileobject);
+            }
         }
         if ($file = block_exaport_get_file($item, 'item_iconfile', true)) {
             $fs->create_file_from_storedfile(array(

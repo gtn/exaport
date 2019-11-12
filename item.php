@@ -229,7 +229,6 @@ switch ($action) {
         $post->categoryid = $categoryid;
 
         $straction = get_string('new');
-
         break;
     case 'edit':
         if (!$existing) {
@@ -272,6 +271,9 @@ switch ($action) {
                 }
                 $extracontent = "<div class='block_eportfolio_center'>\n";
                 foreach($file as $fileindex => $fileobject) {
+                    if (!$fileobject) {
+                        continue;
+                    }
                     $ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$post->userid."&itemid=".
                             $post->id.'&inst='.$fileindex;
 

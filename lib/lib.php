@@ -242,7 +242,9 @@ function block_exaport_moodleimport_file_area_name($userid, $assignmentid, $cour
 
 function block_exaport_print_file(stored_file $file) {
     global $CFG, $OUTPUT;
-
+    if (!$file) {
+        return '';
+    }
     $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
             $file->get_itemid(), $file->get_filepath(), $file->get_filename());
 
@@ -1675,6 +1677,9 @@ function block_exaport_mix_images($sourceimages = array()) {
     };
 
     foreach ($sourceimages as $image) {
+        if (!$image) {
+            continue;
+        }
         //$imagefile = $image->getFile
         if ($image->is_valid_image()) {
             //$tempfile = $fs->create_file_from_pathname($image, $image->filepath);

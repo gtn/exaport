@@ -143,11 +143,16 @@ class block_exaport_external extends external_api {
 
         if ($item->type == 'file') {
             if ($file = block_exaport_get_item_file($item)) {
-                $item->file = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$USER->id.
-                                "&itemid=".$item->id."&wstoken=".static::wstoken();
-                $item->isimage = $file->is_valid_image();
-                $item->filename = $file->get_filename();
-                $item->mimetype = $file->get_mimetype();
+                if (is_array($file)) {
+                    $file = reset($file);
+                }
+                if ($file) {
+                    $item->file = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$USER->id.
+                            "&itemid=".$item->id."&wstoken=".static::wstoken();
+                    $item->isimage = $file->is_valid_image();
+                    $item->filename = $file->get_filename();
+                    $item->mimetype = $file->get_mimetype();
+                }
             }
         }
 
@@ -915,11 +920,16 @@ class block_exaport_external extends external_api {
 
             if ($item->type == 'file') {
                 if ($file = block_exaport_get_item_file($item)) {
-                    $item->file = g::$CFG->wwwroot."/blocks/exaport/portfoliofile.php?access=portfolio/id/".g::$USER->id."&itemid=".
-                            $item->id."&wstoken=".static::wstoken();
-                    $item->isimage = $file->is_valid_image();
-                    $item->filename = $file->get_filename();
-                    $item->mimetype = $file->get_mimetype();
+                    if (is_array($file)) {
+                        $file = reset($file);
+                    }
+                    if ($file) {
+                        $item->file = g::$CFG->wwwroot."/blocks/exaport/portfoliofile.php?access=portfolio/id/".g::$USER->id."&itemid=".
+                                $item->id."&wstoken=".static::wstoken();
+                        $item->isimage = $file->is_valid_image();
+                        $item->filename = $file->get_filename();
+                        $item->mimetype = $file->get_mimetype();
+                    }
                 }
             }
         }

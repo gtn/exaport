@@ -616,29 +616,38 @@ namespace {
                 $itemwhere = ' AND i.id = '.intval($itemid).' ';
             }
         }
-        $categories = $DB->get_records_sql(
-                "SELECT $categorycolumns, u.firstname, u.lastname, u.picture, ".
-                " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
-                " FROM {user} u ".
-                " JOIN {block_exaportcate} c ON u.id = c.userid ".
-                ($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
-                " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?".
+        $getCategories = function ($itemwhere) use ($DB, $categorycolumns, $usercats, $userid) {
+            $categories = $DB->get_records_sql(
+                    "SELECT $categorycolumns, u.firstname, u.lastname, u.picture, ".
+                    " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
+                    " FROM {user} u ".
+                    " JOIN {block_exaportcate} c ON u.id = c.userid ".
+                    ($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
+                    " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?".
 
-                " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid ".
-                " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid ".
-                " WHERE (".
-                "(".(block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '')." cshar.userid IS NOT NULL) ".
-                // Only show shared all, if enabled.
-                // Shared for you group.
-                (count($usercats) > 0 ? " OR c.id IN (".implode(',', array_keys($usercats)).") " : ""). // Add group shareing categories.
-                ")".
-                " AND c.userid != ? ". // Don't show my own categories.
-                " AND internshare = 1 ".
-                " AND u.deleted = 0 ".
-                $itemwhere.
-                " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture".
-                " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
-        //return array();
+                    " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid ".
+                    " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid ".
+                    " WHERE (".
+                    "(".(block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '')." cshar.userid IS NOT NULL) ".
+                    // Only show shared all, if enabled.
+                    // Shared for you group.
+                    (count($usercats) > 0 ? " OR c.id IN (".implode(',', array_keys($usercats)).") " : "").
+                    // Add group shareing categories.
+                    ")".
+                    " AND c.userid != ? ". // Don't show my own categories.
+                    " AND internshare = 1 ".
+                    " AND u.deleted = 0 ".
+                    $itemwhere.
+                    " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture".
+                    " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
+            return $categories;
+        };
+        $categories = $getCategories($itemwhere);
+        if ($itemid && count($categories) == 0) {
+            // the item for access is in the SUB-category. Use subcategories later
+            // TODO: another way?
+            $categories = $getCategories('');
+        }
         // Get users for grouping later.
         $sharedusers = array();
         $sharedcategories = array();
@@ -660,7 +669,6 @@ namespace {
                 }
             }
         }
-
         // Get items for every user.
         $sharedcategorieslist = implode(',', $sharedcategories);
         if (count($sharedcategories) > 100) {
@@ -689,6 +697,7 @@ namespace {
                 $useritems = $DB->get_records_sql($query, array($userid));
                 return $useritems;
             };
+            
             foreach ($sharedusers as $key => $userid) {
                 if (count($sharedcategories) <= 100 ) {
                     $useritems = $selectfunc($userid, $sharedcategorieslist);

@@ -482,7 +482,7 @@ if ($editform->is_cancelled()) {
                         // Only notify if he also is shared.
                         if (isset($shareusers[$notifyuser])) {
                             // Notify.
-                            $notificationdata = new stdClass();
+                            $notificationdata = new \core\message\message();
                             $notificationdata->component = 'block_exaport';
                             $notificationdata->name = 'sharing';
                             $notificationdata->userfrom = $USER;
@@ -1091,7 +1091,7 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
                 $userconditions = array('email' => $email);
                 if ($touser = $DB->get_record("user", $userconditions, '*')) {
                     // Send moodle message if the user exists.
-                    $message = new stdClass();
+                    $message = new \core\message\message();
                     $message->component = 'block_exaport';
                     $message->name = 'sharing';
                     $message->userfrom = $userfrom;

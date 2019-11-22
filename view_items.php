@@ -193,8 +193,10 @@ if ($type == 'sharedstudent') {
         $items = [];
     }
     */
-    if (!$selecteduser || !$categoryid) {
-        throw new moodle_exception('wrong category/userid');
+    if (!$categoryid) {
+        throw new moodle_exception('wrong category');
+    } elseif (!$selecteduser) {
+        throw new moodle_exception('wrong userid');
     } else {
         $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
         $categories = $DB->get_records_sql("

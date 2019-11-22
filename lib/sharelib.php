@@ -837,6 +837,16 @@ namespace block_exaport {
                 " GROUP BY c.id, c.userid, c.name, c.timemodified, c.shareall, u.firstname, u.lastname, u.picture".
                 " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
 
+        // add subcategories (TODO: check!)
+        foreach ($categories as $cuid => $cat) {
+            $subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $cuid], null, 'id, id as tmp');
+            foreach ($subcategories as $categoryid) {
+                if (!array_key_exists($categoryid, $categories)) {
+                    $categories[$categoryid] = $DB->get_record('block_exaportcate', ['id' => $categoryid]);
+                }
+            }
+        }
+
         $tree = [];
         foreach ($categories as $category) {
             if (!isset($tree[$category->userid])) {
@@ -855,7 +865,6 @@ namespace block_exaport {
 
             $user->categories[$category->id] = $category;
         }
-
         return $tree;
     }
 }

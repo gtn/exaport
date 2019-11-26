@@ -810,7 +810,7 @@ namespace block_exaport {
     use block_exaport\globals as g;
 
     function get_categories_shared_to_user($userid) {
-        global $DB;
+        global $DB, $USER;
 
         // Categories for user groups.
         $usercats = block_exaport_get_group_share_categories($userid);
@@ -821,7 +821,7 @@ namespace block_exaport {
                 " COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
                 " FROM {user} u".
                 " JOIN {block_exaportcate} c ON u.id=c.userid".
-                " LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?".
+                " LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid = ?".
 
                 " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid ".
                 " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid ".
@@ -831,11 +831,11 @@ namespace block_exaport {
                 // Shared for you group.
                 ($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") " : ""). // Add group shareing categories.
                 ")".
-                " AND c.userid!=? ". // Don't show my own categories.
+                " AND c.userid != ? ". // Don't show my own categories.
                 " AND internshare = 1 ".
                 " AND u.deleted = 0 ".
                 " GROUP BY c.id, c.userid, c.name, c.timemodified, c.shareall, u.firstname, u.lastname, u.picture".
-                " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
+                " ORDER BY u.lastname, u.firstname, c.name", array($userid, $USER->id));
 
         // add subcategories (TODO: check!)
         foreach ($categories as $cuid => $cat) {

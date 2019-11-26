@@ -817,25 +817,21 @@ namespace block_exaport {
 
         // All categories and users who shared.
         $categories = $DB->get_records_sql(
-                "SELECT c.*, COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, ".
-                " COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
-                " FROM {user} u".
-                " JOIN {block_exaportcate} c ON u.id=c.userid".
-                " LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid = ?".
-
-                " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid ".
-                " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid ".
-                " WHERE (".
-                "(".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) ".
-                // Only show shared all, if enabled
-                // Shared for you group.
-                ($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") " : ""). // Add group shareing categories.
-                ")".
-                " AND c.userid != ? ". // Don't show my own categories.
-                " AND internshare = 1 ".
-                " AND u.deleted = 0 ".
-                " GROUP BY c.id, c.userid, c.name, c.timemodified, c.shareall, u.firstname, u.lastname, u.picture".
-                " ORDER BY u.lastname, u.firstname, c.name", array($userid, $USER->id));
+                ' SELECT c.* 
+                    FROM {block_exaportcate} c 
+                      JOIN {user} u ON u.id = c.userid                      
+                      LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?
+                      LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid 
+                    WHERE (
+                        ('.(block_exaport_shareall_enabled() ? ' c.shareall = 1 OR ' : '').' cshar.userid IS NOT NULL) '.
+                        // Only show shared all, if enabled
+                        // Shared for you group.
+                        ($usercats ? ' OR c.id IN ('.join(',', array_keys($usercats)).') ' : ''). // Add group sharing categories.
+                        ') 
+                          AND c.userid != ? '. // Don't show my own categories.
+                        ' AND internshare = 1 
+                          AND u.deleted = 0 
+                    ORDER BY u.lastname, u.firstname, c.name', array($userid, $USER->id));
 
         // add subcategories (TODO: check!)
         foreach ($categories as $cuid => $cat) {
@@ -860,7 +856,7 @@ namespace block_exaport {
             }
 
             $category->url = g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id.
-                                '&type=shared&userid='.$user->id.'&categoryid='.$category->id;
+                    '&type=shared&userid='.$user->id.'&categoryid='.$category->id;
             $category->icon = block_exaport_get_category_icon($category);
 
             $user->categories[$category->id] = $category;

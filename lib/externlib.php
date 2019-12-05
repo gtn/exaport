@@ -81,9 +81,8 @@ function block_exaport_print_extern_item($item, $access) {
         }
     }
 
-    $intro = $item->intro;
-    $intro = file_rewrite_pluginfile_urls($intro, 'pluginfile.php', context_user::instance($item->userid)->id,
-                'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
+    $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
+                    'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
     $intro = format_text($intro);
     $templateTextToHtml = text_to_html('');
     $intro = trim($intro);

@@ -164,7 +164,7 @@ call_user_func(function() {
     // For moodle code checker.
     $content = preg_replace('/=>\s*\n\s*array\s*\(/', '=> array (', $content);
     file_put_contents($servicesfile, $content);
-    touch($servicesfile, $time);
+    @touch($servicesfile, $time);
 
     // Save doku.
     $doku = '<style>
@@ -178,5 +178,5 @@ call_user_func(function() {
     </style>'.$doku;
 
     file_put_contents(__DIR__.'/services.htm', $doku);
-    touch(__DIR__.'/services.htm', $time);
+    @touch(__DIR__.'/services.htm', $time);
 });

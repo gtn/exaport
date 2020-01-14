@@ -546,7 +546,7 @@ namespace block_exaport\common {
                 }
 
                 file_put_contents($langdir.'/'.$lang.'/'._plugin_name().'.php', $output);
-                touch($langdir.'/'.$lang.'/'._plugin_name().'.php', $time);
+                @touch($langdir.'/'.$lang.'/'._plugin_name().'.php', $time);
             }
         }
 

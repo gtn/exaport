@@ -133,7 +133,7 @@ $iframesources = array(
         ),
 );
 
-function process_media_url($input, $width=0, $height=0) {
+function process_media_url($input, $width = 0, $height = 0) {
     global $iframesources;
     $src = $input;
     $arraym = array();
@@ -149,7 +149,7 @@ function process_media_url($input, $width=0, $height=0) {
     foreach ($iframesources as $source) {
         if (preg_match($source['match'], $src, $matches)) {
             $iframe = '<iframe width="'.$width.'" height="'.$height.'" '.
-                        ' src="'.preg_replace($source['match'], $source['url'], $matches[0]).'" frameborder=0>'.
+                        ' src="'.preg_replace($source['match'], $source['url'], $matches[0]).'" frameborder="0">'.
                         '</iframe>';
             $output = preg_replace($source['match'], $iframe, $output);
             return $output;

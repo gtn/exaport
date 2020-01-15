@@ -253,7 +253,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $blockForPdf .= $fileparams;
                     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                             'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
-                    $intro = format_text($intro, FORMAT_HTML);
+                    $intro = format_text($intro, FORMAT_HTML, ['noclean' => true]);
                     $generalContent .= '<div class="view-item-text">';
                     $blockForPdf .= '<div class="view-item-text">';
                     if ($item->url && $item->url != "false") {

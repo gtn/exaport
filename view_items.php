@@ -619,6 +619,7 @@ if ($layout == 'details') {
     echo html_writer::table($table);
 } else {
     echo '<div class="excomdos_tiletable">';
+    echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
 
     if ($parentcategory) {
         ?>

@@ -1231,7 +1231,11 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
         if ($item->intro) {
             $item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                     'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
-            $item->intro = format_text($item->intro, FORMAT_HTML);
+            if (strpos($item->intro, '<iframe') !== false) {
+                $item->intro = format_text($item->intro, FORMAT_HTML, ['noclean' => true]);
+            } else {
+                $item->intro = format_text($item->intro, FORMAT_HTML);
+            }
         }
 
         // Get competences of the item.

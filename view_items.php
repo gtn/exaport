@@ -589,7 +589,11 @@ if ($layout == 'details') {
         };
 
         if (isset($item->comments) && $item->comments > 0) {
-            $icons .= '<span class="excomdos_listcomments">'.$item->comments.'<img src="pix/comments.png" alt="file"></span>';
+            $icons .= '<span class="excomdos_listcomments">
+                            <a href="'.$url.'" > 
+                        '.$item->comments.'<img src="pix/comments.png" alt="file">
+                            </a>
+                        </span>';
         }
 
         $icons .= block_exaport_get_item_comp_icon($item);

@@ -322,7 +322,7 @@ if ($mform->is_cancelled()) {
 
     // Icon for item.
     $context = context_user::instance($USER->id);
-    $uploadfilesizes = block_exaport_get_filesize_by_draftid($newentry->iconfile);
+    $uploadfilesizes = block_exaport_get_filessize_by_draftid($newentry->iconfile);
     // Merge with folder icon.
     if (isset($newentry->iconmerge) && $newentry->iconmerge == 1 && $uploadfilesizes > 0) {
         $fs = get_file_storage();

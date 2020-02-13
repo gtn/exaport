@@ -40,29 +40,34 @@ require_once(__DIR__.'/sharelib.php');
  * @param mixed $item
  * @param string $type
  * @param bool $onlyfirst
- * @return mixed
+ * @return array
  */
-function block_exaport_get_file($item, $type, $onlyfirst = false) {
-    global $CFG;
+function block_exaport_get_files($item, $type) {
     $fs = get_file_storage();
     $files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
-    // Return first file.
-    if ($onlyfirst) {
-        return reset($files);
-    }
-    if ($CFG->block_exaport_multiple_files_in_item) {
-        return $files;
-    }
-    return reset($files);
+
+    return $files;
 }
 
-function block_exaport_get_item_file($item, $onlysingle = true) {
+function block_exaport_get_item_files($item) {
     global $CFG;
 
-    if ($CFG->block_exaport_multiple_files_in_item && !$onlysingle) {
-        return block_exaport_get_file($item, 'item_file'); // Multiple files
+    if ($CFG->block_exaport_multiple_files_in_item) {
+        return block_exaport_get_files($item, 'item_file'); // Multiple files
     }
-    return array(block_exaport_get_file($item, 'item_file', true)); // only one file.. but in array, to make sure no bugs occur later in foreach-loops
+
+    // only one file.. but in array, to make sure no bugs occur later in foreach-loops
+    return [ block_exaport_get_single_file($item, 'item_file') ];
+}
+
+function block_exaport_get_single_file($item, $type) {
+	$file = block_exaport_get_files($item, $type);
+
+	return reset($file);
+}
+
+function block_exaport_get_item_single_file($item) {
+	return block_exaport_get_single_file($item, 'item_file');
 }
 
 function block_exaport_get_category_icon($category) {
@@ -1219,12 +1224,9 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
 
         if ($item->type == 'file') {
             // if not icon - store information about count of related files
-            if (!($iconfile = block_exaport_get_file($item, 'item_iconfile', true))) {
-                $files = block_exaport_get_item_file($item, false);
-                $item->filescount = 1;
-                if (is_array($files) && count($files) > 1) {
-                    $item->filescount = count($files);
-                }
+            if (!block_exaport_get_single_file($item, 'item_iconfile')) {
+                $files = block_exaport_get_item_files($item);
+                $item->filescount = count($files);
             }
         }
 
@@ -1412,7 +1414,7 @@ function block_exaport_file_userquotecheck($addingfiles = 0, $id = 0) {
     return true;
 }
 
-function block_exaport_get_filesize_by_draftid($draftid = 0) {
+function block_exaport_get_filessize_by_draftid($draftid = 0) {
     global $DB, $USER, $CFG;
     $result = $DB->get_record_sql("SELECT SUM(filesize) AS allfilesize FROM {files} ".
                                     " WHERE contextid = ? AND component = 'user' AND filearea='draft' AND itemid = ?",

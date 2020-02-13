@@ -31,11 +31,7 @@ function block_exaport_print_extern_item($item, $access) {
     echo $OUTPUT->heading(format_string($item->name));
 
     $boxcontent = '';
-    if ($files = block_exaport_get_item_file($item, false)) {
-        if (!is_array($files)) {
-            $files = array($files->get_filename() => $files);
-        }
-
+    if ($files = block_exaport_get_item_files($item)) {
         foreach ($files as $fileindex => $file) {
             if (!$file) {
                 continue; // Is here possible that $file is null?

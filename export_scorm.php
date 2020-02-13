@@ -336,12 +336,9 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             unset($filecontent);
             unset($filename);
 
-            $fsfiles = block_exaport_get_item_file($file, false);
+            $fsfiles = block_exaport_get_item_files($file);
             if (!$fsfiles) {
                 continue;
-            }
-            if (!is_array($fsfiles)) {
-                $fsfiles = array($fsfiles);
             }
             $filelinks = '';
             $j = 0;

@@ -156,7 +156,7 @@ if ($action == 'edit') {
                 // Files.
                 if ($withfiles) {
                     // Checking userquoata.
-                    $uploadfilesizes = block_exaport_get_filesize_by_draftid($fromform->attachments);
+                    $uploadfilesizes = block_exaport_get_filessize_by_draftid($fromform->attachments);
                     if (block_exaport_file_userquotecheck($uploadfilesizes) &&
                             block_exaport_get_maxfilesize_by_draftid_check($fromform->attachments)
                     ) {

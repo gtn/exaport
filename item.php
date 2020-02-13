@@ -260,7 +260,7 @@ switch ($action) {
         $straction = get_string('edit');
         $post->url = $existing->url;
         if ($type == 'file') {
-            $file = block_exaport_get_item_file($post, false);
+            $file = block_exaport_get_item_filess($post, false);
             $filelimit = 1;
             if ($CFG->block_exaport_multiple_files_in_item) {
                 $filelimit = 10;
@@ -439,7 +439,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     // Updating file.
     if ($post->type == 'file') {
         // Checking userquoata.
-        $uploadfilesizes = block_exaport_get_filesize_by_draftid($post->file);
+        $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->file);
         if (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
                 block_exaport_get_maxfilesize_by_draftid_check($post->file)
         ) {
@@ -450,7 +450,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 
     // Icon for item.
     // Checking userquoata.
-    $uploadfilesizes = block_exaport_get_filesize_by_draftid($post->iconfile);
+    $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->iconfile);
     if (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
             block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)
     ) {
@@ -532,7 +532,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
         if ($post->type == 'file') {
             // Save uploaded file in user filearea
             // checking userquoata.
-            $uploadfilesizes = block_exaport_get_filesize_by_draftid($post->file);
+            $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->file);
             if (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
                     block_exaport_get_maxfilesize_by_draftid_check($post->file)
             ) {
@@ -544,7 +544,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
         // Icon picture.
         if ($post->iconfile) {
             // Checking userquoata.
-            $uploadfilesizes = block_exaport_get_filesize_by_draftid($post->iconfile);
+            $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->iconfile);
             if (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
                     block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)
             ) {

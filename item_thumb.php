@@ -65,7 +65,7 @@ if (empty($item)) {
 }
 
 // Custom Icon file.
-if ($iconfile = block_exaport_get_file($item, 'item_iconfile', true)) {
+if ($iconfile = block_exaport_get_filess($item, 'item_iconfile', true)) {
     send_stored_file($iconfile);
     exit;
 }
@@ -73,7 +73,7 @@ if ($iconfile = block_exaport_get_file($item, 'item_iconfile', true)) {
 switch ($item->type) {
     case "file":
         // Thumbnail of file.
-        $file = block_exaport_get_item_file($item, false);
+        $file = block_exaport_get_item_files($item);
         // Serve file.
         if ($file && ($imageindex || $imageindex === 0  )) {
             $filevalues = array_values($file);

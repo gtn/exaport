@@ -69,7 +69,7 @@ if ($token) {
     }
 
 
-    if ($file = block_exaport_get_item_file($item)) {
+    if ($file = block_exaport_get_item_single_file($item)) {
         send_stored_file($file);
     } else {
         not_found();
@@ -115,7 +115,7 @@ if ($itemid) {
         $file = block_exaport_get_item_comment_file($comment->id);
 
     } else {
-        $file = block_exaport_get_item_file($item, false);
+        $file = block_exaport_get_item_files($item);
         if (is_array($file) && count($file) > 1) {
 //            $counter = 0; //accessing the file by index is not possible because it is private... solution is a foreach + counter
 //            foreach($file as $onefile){

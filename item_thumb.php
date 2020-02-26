@@ -65,7 +65,7 @@ if (empty($item)) {
 }
 
 // Custom Icon file.
-if ($iconfile = block_exaport_get_filess($item, 'item_iconfile', true)) {
+if ($iconfile = block_exaport_get_files($item, 'item_iconfile', true)) {
     send_stored_file($iconfile);
     exit;
 }

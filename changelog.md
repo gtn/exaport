@@ -1,3 +1,17 @@
+v4.6.4 (2020011700)
+		Upgrade-bugfix
+		minor adjustments for Dakora-app
+		changes of wording
+		ipad-view optimization
+		updates for Moodle 3.8
+		shared category bugfix
+
+v4.6.3
+		update of javascript library to use dynamic drag&drop in views
+		bug correction in automatic adding of artifacts to views
+		update of export to Europass
+		multiple files in "file" artifact are now possible
+		
 v4.6.1
 * new Webservice token.php
 

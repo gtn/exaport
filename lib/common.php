@@ -481,6 +481,12 @@ namespace block_exaport\common {
         if (file_exists($totalfile) && file_exists($langfile) && ($time = filemtime($totalfile)) != filemtime($langfile) &&
                 is_writable($langfile)
         ) {
+            // Regenerate must be enabled by developer with uncommenting below code.
+            // It is needed for security reasons
+
+            /*
+            // uncomment from here
+
             // Regenerate.
 
             // Test require, check if file has a parse error etc.
@@ -495,7 +501,7 @@ namespace block_exaport\common {
             $copyright = $matches[0];
             $content = str_replace($copyright, '', $content);
 
-            $content = preg_replace_callback('!^(?<comment>\s*//\s*.*)!m', function($matches) {
+            $content = preg_replace_callback('!^(?<comment>\s*\/\/\s*.*)!m', function($matches) { // also may be '//' instead of '\/\/';
                 return var_export(preg_replace('!^[ \t]+!m', '', $matches['comment']), true).',';
             }, $content);
 
@@ -548,6 +554,8 @@ namespace block_exaport\common {
                 file_put_contents($langdir.'/'.$lang.'/'._plugin_name().'.php', $output);
                 @touch($langdir.'/'.$lang.'/'._plugin_name().'.php', $time);
             }
+
+            /* Uncomment to here for language file changing */
         }
 
         // Include other developer scripts.
@@ -713,13 +721,13 @@ namespace block_exaport {
 
     function _export_function($function) {
         if (!function_exists(__NAMESPACE__.'\\'.$function)) {
-            eval('
-            namespace '.__NAMESPACE__.' {
-                function '.$function.'() {
-                    return call_user_func_array(\'\\'.__NAMESPACE__.'\common\\'.$function.'\', func_get_args());
+            /*eval('
+                namespace '.__NAMESPACE__.' {
+                    function '.$function.'() {
+                        return call_user_func_array(\'\\'.__NAMESPACE__.'\common\\'.$function.'\', func_get_args());
+                    }
                 }
-            }
-        ');
+            ');*/
         }
 
         return false;
@@ -767,7 +775,7 @@ namespace block_exaport {
 
 namespace {
     function _block_exaport_export_function($function) {
-        $type = basename(dirname(dirname(__DIR__)));
+/*        $type = basename(dirname(dirname(__DIR__)));
         if ($type == 'blocks') {
             $type = 'block';
         }
@@ -779,7 +787,7 @@ namespace {
                 return call_user_func_array(\'\\'.$namespace.'\\'.$function.'\', func_get_args());
             }
         ');
-        }
+        }*/
 
         return false;
     }

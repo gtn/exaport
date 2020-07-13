@@ -18,6 +18,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 call_user_func(function() {
+
+    // Next functinality is using only after changes in services functions. (Only for exaport developers)
+    // So, use (uncomment it) only after such changes.
+    // For productive installtion it must be commented!
+
+    /*
     $servicesfile = __DIR__.'/../db/services.php';
 
     // Get copyright. From this file.
@@ -33,10 +39,10 @@ call_user_func(function() {
             return;
         }
         $time = filemtime(__DIR__.'/../externallib.php');
-        /* if (filemtime($servicesfile) == ($time)) {
+        //if (filemtime($servicesfile) == ($time)) {
             // No change required
             // return.
-        }*/
+        //}
     }
 
     $services = array(
@@ -78,12 +84,12 @@ call_user_func(function() {
 
         $func = 'block_exaport_'.$method->getName();
 
-        $functions[$func] = [                             // Web service function name.
-            'classname' => 'block_exaport_external',         // Class containing the external function.
-            'methodname' => $method->getName(), // External function name, strip block_exacomp_ for function name.
-            'classpath' => 'blocks/exaport/externallib.php', // File containing the class/external function.
-            'description' => $description,                   // Human readable description of the web service function.
-            'type' => $matches[1],                   // Database rights of the web service function (read, write).
+        $functions[$func] = [                                   // Web service function name.
+            'classname' => 'block_exaport_external',            // Class containing the external function.
+            'methodname' => $method->getName(),                 // External function name, strip block_exacomp_ for function name.
+            'classpath' => 'blocks/exaport/externallib.php',    // File containing the class/external function.
+            'description' => $description,                      // Human readable description of the web service function.
+            'type' => $matches[1],                              // Database rights of the web service function (read, write).
         ];
 
         $services['exaportservices']['functions'][] = $func;
@@ -94,7 +100,7 @@ call_user_func(function() {
         $doku .= "<div>type: $matches[1]</div>\n";
 
         $parammethod = $rc->getMethod($method->getName().'_parameters');
-        /** @var external_function_parameters $params */
+        // * @var external_function_parameters $params
         $params = $parammethod->invoke(null)->keys;
         $doku .= "Params: <table>\n";
         foreach ($params as $paramname => $paraminfo) {
@@ -116,7 +122,7 @@ call_user_func(function() {
         $doku .= "</table>\n";
 
         $returnmethod = $rc->getMethod($method->getName().'_returns');
-        /** @var external_description $returns */
+        // * @var external_description $returns
         $returns = $returnmethod->invoke(null);
 
         $recursor = function($o) use (&$recursor) {
@@ -179,4 +185,5 @@ call_user_func(function() {
 
     file_put_contents(__DIR__.'/services.htm', $doku);
     @touch(__DIR__.'/services.htm', $time);
+    */
 });

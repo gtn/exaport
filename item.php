@@ -260,7 +260,7 @@ switch ($action) {
         $straction = get_string('edit');
         $post->url = $existing->url;
         if ($type == 'file') {
-            $file = block_exaport_get_item_filess($post, false);
+            $file = block_exaport_get_item_files($post, false);
             $filelimit = 1;
             if ($CFG->block_exaport_multiple_files_in_item) {
                 $filelimit = 10;

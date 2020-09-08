@@ -157,12 +157,12 @@ if (!$views) {
         }
 
         $icons = '';
-        $icons .= '<a title="Editieren" href="'.
+        $icons .= '<a title="'.get_string("edit", "block_exaport").'" href="'.
                 s(dirname($_SERVER['PHP_SELF']).'/views_mod.php?courseid='.$courseid.'&id='.$view->id.'&sesskey='.sesskey().
                         '&action=edit').'"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/editview.png" class="iconsmall" alt="'.
                 get_string("edit").'" /></a> ';
 
-        $icons .= '<a title="L&ouml;schen" href="'.
+        $icons .= '<a title="'.get_string("delete", "block_exaport").'" href="'.
                 s(dirname($_SERVER['PHP_SELF']).'/views_mod.php?courseid='.$courseid.'&id='.$view->id.'&sesskey='.sesskey().
                         '&action=delete&confirm=1').'"><img src="'.$CFG->wwwroot.
                 '/blocks/exaport/pix/deleteview.png" class="iconsmall" alt="'.get_string("delete").'"/></a> ';

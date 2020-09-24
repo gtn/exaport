@@ -204,9 +204,11 @@ function block_exaport_show_comments($item, $access) {
             $by->date = userdate($comment->timemodified);
             print_string('bynameondate', 'forum', $by);
 
+
+
             if ($comment->userid == $USER->id) {
                 echo ' - <a href="'.s($_SERVER['REQUEST_URI'].'&commentid='.$comment->id.'&comment_delete=1&sesskey='.sesskey()).
-                        '" onclick="'.s('return confirm('.json_encode(block_exaport\get_string('comment_delete_confirmation')).')').
+                        '" onclick="'.s('return confirm('.json_encode(get_string('comment_delete_confirmation')).')').
                         '">'.get_string('delete').'</a>';
             }
             echo '</div></td></tr>';

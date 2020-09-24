@@ -69,6 +69,7 @@ namespace {
 
             $conditions = array("user_id" => $userid);
             if (!$portfoliouser = $DB->get_record("block_exaportuser", $conditions)) {
+                // TODO: why is this needed?
                 // No portfolio user with this id.
                 return;
             }
@@ -320,6 +321,7 @@ namespace {
                 }
 
                 $item = $DB->get_record('block_exaportitem', ['userid' => $ownerid, 'id' => $itemid]);
+
                 if (!$item) {
                     // Item not found.
                     return;

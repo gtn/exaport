@@ -190,7 +190,7 @@ class block_exaport_item_edit_form extends moodleform {
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {
             $this->add_action_buttons($cancel = true, $submitlabel = get_string('saveitem', 'block_exaport'));
         } else {
-            $exampleid = $DB->get_field('block_exacompitem_mm',
+            $exampleid = $DB->get_field(BLOCK_EXACOMP_DB_ITEM_MM,
                                 'exampleid',
                                 array('itemid' => $this->_customdata['current']->id));
             $url = new moodle_url("/blocks/exacomp/example_submission.php",

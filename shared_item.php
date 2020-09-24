@@ -74,7 +74,7 @@ if ($item->allowComments) {
     require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
     if (block_exaport_check_competence_interaction()) {
-        $itemexample = $DB->get_record('block_exacompitemexample', array('itemid' => $itemid));
+        $itemexample = $DB->get_record('block_exacompitem_mm', array('itemid' => $itemid));
         $teachervalue = $itemexample ? $itemexample->teachervalue : 0;
     } else {
         $teachervalue = 0;
@@ -241,10 +241,10 @@ function block_exaport_do_add_comment($item, $post) {
     $post->entry = $post->entry["text"];
 
     if (block_exaport_has_grading_permission($item->id) && isset($post->itemgrade)) {
-        $itemexample = $DB->get_record('block_exacompitemexample', array('itemid' => $item->id));
+        $itemexample = $DB->get_record('block_exacompitem_mm', array('itemid' => $item->id));
         if ($itemexample) {
             $itemexample->teachervalue = $post->itemgrade;
-            $DB->update_record('block_exacompitemexample', $itemexample);
+            $DB->update_record('block_exacompitem_mm', $itemexample);
 
             // Check for example additional info and set it.
             $exampleeval = $DB->get_record('block_exacompexameval',

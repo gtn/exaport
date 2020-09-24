@@ -1469,7 +1469,7 @@ function block_exaport_item_is_editable($itemid) {
     }
 
     if (block_exaport_check_competence_interaction()) {
-        $itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEMEXAMPLE, array(
+        $itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEM_MM, array(
                 "itemid" => $itemid
         ));
 
@@ -1512,7 +1512,7 @@ function block_exaport_item_is_resubmitable($itemid) {
         return false;
     }
 
-    if ($itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEMEXAMPLE, array("itemid" => $itemid))) {
+    if ($itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEM_MM, array("itemid" => $itemid))) {
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
         if ($eval = $DB->get_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL,
                 array('exampleid' => $itemexample->exampleid, 'studentid' => $USER->id, 'courseid' => $item->courseid))
@@ -1545,7 +1545,7 @@ function block_exaport_has_grading_permission($itemid) {
     }
 
     // Check if item is a submission for an exacomp example.
-    $itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEMEXAMPLE, array("itemid" => $itemid));
+    $itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEM_MM, array("itemid" => $itemid));
     if (!$itemexample) {
         return false;
     }

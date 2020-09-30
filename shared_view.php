@@ -326,7 +326,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     break;
                 case 'badge':
                     if (count($badges) == 0) {
-                        continue;
+                        continue 2;
                     }
                     $badge = null;
                     foreach ($badges as $tmp) {
@@ -337,7 +337,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     };
                     if (!$badge) {
                         // Badge not found.
-                        continue;
+                        continue 2;
                     }
                     $generalContent .= '<div class="header">'.nl2br($badge->name).'</div>';
                     $blockForPdf .= '<h4>'.nl2br($badge->name).'</h4>';
@@ -574,6 +574,7 @@ if ($isPdf) {
     ]);
     $dompdf->setHttpContext($context);*/
     $generalContent = pdfView($view, $colslayout, $dataForPdf);
+//    echo $generalContent;exit;
     $dompdf->loadHtml($generalContent);
     $dompdf->render();
     $dompdf->stream('view.pdf'); //To popup pdf as download
@@ -605,7 +606,7 @@ function pdfView($view, $colslayout, $dataForPdf) {
             border-top: 1px solid #eeeeee;                       
         }        
         </style>';
-    $pdfContent .= '<table border="0" width="100%" class="view-table">';
+    $pdfContent .= '<table border="0" width="100%" class="view-table" style="table-layout:fixed;">';
     $pdfContent .= '<tr>';
     $maxRows = 0;
     //echo "<pre>debug:<strong>shared_view.php:526</strong>\r\n"; print_r($dataForPdf); echo '</pre>'; exit; // !!!!!!!!!! delete it
@@ -615,7 +616,7 @@ function pdfView($view, $colslayout, $dataForPdf) {
     for ($colI = 1; $colI <= $colslayout[$view->layout]; $colI++) {
         $pdfContent .= '<td width="'.(round(100 / $colslayout[$view->layout]) - 1).'%" valign="top">';
         if (array_key_exists($colI, $dataForPdf)) {
-            $pdfContent .= '<table width="100%">';
+            $pdfContent .= '<table width="100%" style="word-wrap: break-word !important;">';
             foreach ($dataForPdf[$colI] as $block) {
                 $pdfContent .= '<tr><td>';
                 $pdfContent .= $block;

@@ -62,8 +62,10 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
         $fs = get_file_storage();
 
         // Save files to first category, so read that id.
-        $categoryid = $DB->get_field_sql("SELECT id FROM {block_exaportcate} ".
-                                            " WHERE userid = ? ORDER BY name LIMIT 1", array($USER->id));
+//        $categoryid = $DB->get_field_sql("SELECT id FROM {block_exaportcate} ".
+//                                            " WHERE userid = ? ORDER BY name LIMIT 1", array($USER->id));
+        // Save to main category. SZ: 30.09.2020
+        $categoryid = 0;
 
         foreach ($files as $file) {
 

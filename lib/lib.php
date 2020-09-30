@@ -634,7 +634,7 @@ function block_exaport_build_comp_table($item, $role = "teacher") {
 
     // TODO: refactor: use block_exaport_get_active_comps_for_item instead.
     $sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id ".
-            " FROM {block_exacompdescriptors} d, {block_exacompcompactiv_mm} da ".
+            " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY."} da ".
             " WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
     $descriptors = $DB->get_records_sql($sql, array($item->id));
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
@@ -687,7 +687,7 @@ function block_exaport_build_comp_table($item, $role = "teacher") {
 function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
     global $DB;
 
-    $DB->delete_records('block_exacompcompuser_mm',
+    $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
             array("activityid" => $item->id, "eportfolioitem" => 1, "role" => $role, "userid" => $item->userid));
 
     foreach ($values as $value) {
@@ -699,7 +699,7 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
                 "reviewerid" => $reviewerid,
                 "role" => $role,
         );
-        $DB->insert_record('block_exacompcompuser_mm', $data);
+        $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM, $data);
     }
 }
 
@@ -771,7 +771,7 @@ function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) 
             }
             $content .= $item->title.
                     ($item->achieved ? ' '.g::$OUTPUT->pix_icon("i/badge",
-                                    block_exaport\trans(['de:Erreichte Kompetenz', 'en:Achieved Competency'])) : '').
+                                    block_exaport_get_string('selected_competencies')) : '').
                     $printtree($item->get_subs(), $level + 1).
                     '</li>';
         }
@@ -1251,7 +1251,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
                 $competences = "";
                 foreach ($compids as $compid) {
                     $conditions = array("id" => $compid);
-                    $competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields = '*',
+                    $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*',
                                                         $strictness = IGNORE_MISSING);
 
                     if ($competencesdb != null) {

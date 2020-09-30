@@ -89,8 +89,8 @@ if ($action == "login") {
             $competencecategory = "";
             if (block_exaport_check_competence_interaction()) {
                 $sql = "SELECT st.id,st.title FROM {block_exaportcate} cat ".
-                        " INNER JOIN {block_exacompsubjects} s ON s.id=cat.subjid ".
-                        " INNER JOIN {block_exacompschooltypes} st ON st.id=s.stid ";
+                        " INNER JOIN {".BLOCK_EXACOMP_DB_SUBJECTS."} s ON s.id=cat.subjid ".
+                        " INNER JOIN {".BLOCK_EXACOMP_DB_SCHOOLTYPES."} st ON st.id=s.stid ";
                 $sql .= "WHERE cat.id=?";
                 if ($schoolt = $DB->get_record_sql($sql, array($catid))) {
                     if ($schoolt->title == "Soziale Kompetenzen") {
@@ -201,10 +201,10 @@ if ($action == "login") {
         $subjectid2 = optional_param('subject_id', '0', PARAM_INT);
 
         // Die kompetenzen werden nach subject gruppiert angezeigt, daher nur diese gruppe l�schen.
-        $sql = "SELECT descr.id FROM {block_exacompsubjects} subj ".
-                "INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id ".
-                "INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id ".
-                "INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid";
+        $sql = "SELECT descr.id FROM {".BLOCK_EXACOMP_DB_SUBJECTS."} subj ".
+                "INNER JOIN {".BLOCK_EXACOMP_DB_TOPICS."} top ON top.subjid=subj.id ".
+                "INNER JOIN {".BLOCK_EXACOMP_DB_DESCTOPICS."} tmm ON tmm.topicid=top.id ".
+                "INNER JOIN {".BLOCK_EXACOMP_DB_DESCRIPTORS."} descr ON descr.id=tmm.descrid";
         if ($subjectid2 > 0) {
             $sql .= " WHERE subj.id=".$subjectid2;
         }
@@ -218,10 +218,10 @@ if ($action == "login") {
             $select .= ' AND compid IN ('.$dlist.')';
         }
 
-        $DB->delete_records_select("block_exacompcompactiv_mm", $select);
+        $DB->delete_records_select(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, $select);
         foreach ($competences as $k => $v) {
             if (is_numeric($v)) {
-                $DB->insert_record('block_exacompcompactiv_mm',
+                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
                         array("activityid" => $itemid3, "eportfolioitem" => "1", "compid" => $v, "activitytitle" => "",
                                 "coursetitle" => ""));
             }
@@ -272,8 +272,8 @@ if ($action == "login") {
         echo "invalid hash";
     } else {
         $itemid = optional_param('itemid', ' ', PARAM_INT);
-        $result = $DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $itemid));
-        $result = $DB->delete_records('block_exacompcompuser_mm', array("activityid" => $itemid));
+        $result = $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $itemid));
+        $result = $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM, array("activityid" => $itemid));
         $sql = "SELECT f.* FROM {block_exaportitem} i INNER JOIN {files} f ON i.id=f.itemid
         WHERE i.id=?";
         if ($resu = $DB->get_records_sql($sql, array($itemid))) {
@@ -418,8 +418,8 @@ if ($action == "login") {
         echo "invalid hash";
     } else {
         $sql = "SELECT t.id,t.title ";
-        $sql .= " FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, ";
-        $sql .= " {block_exacompsubjects} s, {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt ";
+        $sql .= " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_MDLTYPES."} mt, {".BLOCK_EXACOMP_DB_TOPICS."} t, ";
+        $sql .= " {".BLOCK_EXACOMP_DB_SUBJECTS."} s, {".BLOCK_EXACOMP_DB_SCHOOLTYPES."} ty, {".BLOCK_EXACOMP_DB_DESCTOPICS."} dt ";
         $sql .= " WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id ";
         $sql .= " AND dt.descrid=d.id AND (ty.isoez=1)";
         $sql .= " GROUP BY t.id,t.title";
@@ -441,9 +441,9 @@ if ($action == "login") {
         echo "invalid hash";
     } else {
         $itemid = optional_param('itemid', 0, PARAM_INT);
-        $sql = "SELECT s.id,s.title FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, ";
-        $sql .= " {block_exacomptopics} t, {block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, ";
-        $sql .= " {block_exacompschooltypes} ty, {block_exacompdescrtopic_mm} dt ";
+        $sql = "SELECT s.id,s.title FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_MDLTYPES."} mt, ";
+        $sql .= " {".BLOCK_EXACOMP_DB_TOPICS."} t, {".BLOCK_EXACOMP_DB_COURSETOPICS."} ctt, {".BLOCK_EXACOMP_DB_SUBJECTS."} s, ";
+        $sql .= " {".BLOCK_EXACOMP_DB_SCHOOLTYPES."} ty, {".BLOCK_EXACOMP_DB_DESCTOPICS."} dt ";
         $sql .= " WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id ";
         $sql .= "   AND ctt.topicid=t.id AND dt.descrid=d.id AND (ty.isoez=1)";
         $sql .= " GROUP BY s.id,s.title";
@@ -480,7 +480,7 @@ if ($action == "login") {
             $subjectid = optional_param('subjectid', 0, PARAM_INT);
             $clist = ",";
             if ($itemid > 0) {
-                $compok = $DB->get_records("block_exacompcompactiv_mm", array("activityid" => $itemid));
+                $compok = $DB->get_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $itemid));
                 foreach ($compok as $k => $v) {
                     $clist .= $v->compid.",";
                 }
@@ -494,9 +494,9 @@ if ($action == "login") {
             // - AND dt.descrid=d.id AND (ty.isoez=1)";
             // Neu am 20.5.2014 weil descriptoren mehrfach vorkommen.
             $sql = "SELECT CONCAT(dt.id,'_',ctt.id) as uniqueid,dt.id as dtid,d.id, d.title, t.title as topic, s.title as subject ";
-            $sql .= " FROM {block_exacompdescriptors} d, {block_exacompmdltype_mm} mt, {block_exacomptopics} t, ";
-            $sql .= " {block_exacompcoutopi_mm} ctt, {block_exacompsubjects} s, {block_exacompschooltypes} ty, ";
-            $sql .= " {block_exacompdescrtopic_mm} dt ";
+            $sql .= " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_MDLTYPES."} mt, {".BLOCK_EXACOMP_DB_TOPICS."} t, ";
+            $sql .= " {".BLOCK_EXACOMP_DB_COURSETOPICS."} ctt, {".BLOCK_EXACOMP_DB_SUBJECTS."} s, {".BLOCK_EXACOMP_DB_SCHOOLTYPES."} ty, ";
+            $sql .= " {".BLOCK_EXACOMP_DB_DESCTOPICS."} dt ";
             $sql .= " WHERE mt.stid = ty.id AND s.stid = ty.id AND t.subjid = s.id AND dt.topicid=t.id AND ctt.topicid=t.id ";
             $sql .= " AND dt.descrid=d.id AND (ty.isoez=1)";
             if ($subjectid > 0 && $action == "getCompetences") {
@@ -831,7 +831,7 @@ function block_exaport_get_oezcompetencies($exampid) {
 function get_examples($descrid) {
     global $DB;
     $inhalt = '';
-    $sql = "SELECT examp.* FROM {block_exacompexamples} examp INNER JOIN {".BLOCK_EXACOMP_DB_DESCEXAMP."} mm ON examp.id=mm.exampid ";
+    $sql = "SELECT examp.* FROM {".BLOCK_EXACOMP_DB_EXAMPLES."} examp INNER JOIN {".BLOCK_EXACOMP_DB_DESCEXAMP."} mm ON examp.id=mm.exampid ";
     $sql .= " WHERE examp.externalurl<>'' AND mm.descrid=?";
 
     $examples = $DB->get_records_sql($sql, array($descrid));
@@ -902,8 +902,8 @@ function create_autologin_moodle_example_link($url) {
 
 function block_exaport_delete_competences($itemid, $userid) {
     global $DB;
-    $result = $DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $itemid));
-    $result = $DB->delete_records('block_exacompcompuser_mm', array("activityid" => $itemid));
+    $result = $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $itemid));
+    $result = $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM, array("activityid" => $itemid));
 }
 
 function block_exaport_save_competences($competences, $new, $userid, $aname) {
@@ -911,9 +911,9 @@ function block_exaport_save_competences($competences, $new, $userid, $aname) {
     if (count($competences) > 0) {
         foreach ($competences as $k => $v) {
             if (is_numeric($v)) {
-                $DB->insert_record('block_exacompcompactiv_mm',
+                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
                         array("compid" => $v, "activityid" => $new->id, "eportfolioitem" => 1, "activitytitle" => $aname));
-                $DB->insert_record('block_exacompcompuser_mm',
+                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
                         array("compid" => $v, "activityid" => $new->id, "userid" => $userid, "reviewerid" => $userid,
                                 "eportfolioitem" => 1, "role" => 0));
             }
@@ -1153,27 +1153,27 @@ function write_xml_categories($conditions, $catid, $userid) {
     header("Content-Type:text/xml");
     $catkomparr = array();
     if ($categories = $DB->get_records("block_exaportcate", $conditions, " isoez DESC")) {
-        if ($sozkomp = $DB->get_records("block_exacompschooltypes", array("title" => "Soziale Kompetenzen"))) {
+        if ($sozkomp = $DB->get_records(BLOCK_EXACOMP_DB_SCHOOLTYPES, array("title" => "Soziale Kompetenzen"))) {
             foreach ($sozkomp as $ks) {
-                if ($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid" => $ks->id))) {
+                if ($sozsubjs = $DB->get_records(BLOCK_EXACOMP_DB_SUBJECTS, array("stid" => $ks->id))) {
                     foreach ($sozsubjs as $k => $v) {
                         $catkomparr[$v->id] = "sozial";
                     }
                 }
             }
         }
-        if ($sozkomp = $DB->get_records("block_exacompschooltypes", array("title" => "Personale Kompetenzen"))) {
+        if ($sozkomp = $DB->get_records(BLOCK_EXACOMP_DB_SCHOOLTYPES, array("title" => "Personale Kompetenzen"))) {
             foreach ($sozkomp as $ks) {
-                if ($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid" => $ks->id))) {
+                if ($sozsubjs = $DB->get_records(BLOCK_EXACOMP_DB_SUBJECTS, array("stid" => $ks->id))) {
                     foreach ($sozsubjs as $k => $v) {
                         $catkomparr[$v->id] = "personal";
                     }
                 }
             }
         }
-        if ($sozkomp = $DB->get_records("block_exacompschooltypes", array("title" => "Digitale Kompetenzen"))) {
+        if ($sozkomp = $DB->get_records(BLOCK_EXACOMP_DB_SCHOOLTYPES, array("title" => "Digitale Kompetenzen"))) {
             foreach ($sozkomp as $ks) {
-                if ($sozsubjs = $DB->get_records("block_exacompsubjects", array("stid" => $ks->id))) {
+                if ($sozsubjs = $DB->get_records(BLOCK_EXACOMP_DB_SUBJECTS, array("stid" => $ks->id))) {
                     foreach ($sozsubjs as $k => $v) {
                         $catkomparr[$v->id] = "digital";
                     }
@@ -1364,11 +1364,11 @@ function sauber($wert) {
 
 function block_exaport_competence_selected($subjid, $userid, $itemid) {
     global $DB;
-    $sql = "SELECT CONCAT(dmm.id,'_',descr.id,'_',item.id) as uniqueid, dmm.id,descr.id FROM {block_exacompsubjects} subj";
-    $sql .= " INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id ";
-    $sql .= " INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id ";
-    $sql .= " INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid ";
-    $sql .= " INNER JOIN {block_exacompcompactiv_mm} dmm ON dmm.compid=descr.id ";
+    $sql = "SELECT CONCAT(dmm.id,'_',descr.id,'_',item.id) as uniqueid, dmm.id,descr.id FROM {".BLOCK_EXACOMP_DB_SUBJECTS."} subj";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_TOPICS."} top ON top.subjid=subj.id ";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_DESCTOPICS."} tmm ON tmm.topicid=top.id ";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_DESCRIPTORS."} descr ON descr.id=tmm.descrid ";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY."} dmm ON dmm.compid=descr.id ";
     $sql .= " INNER JOIN {block_exaportitem} item ON item.id=dmm.activityid AND eportfolioitem=1 AND dmm.comptype = 0 ";
     $sql .= " WHERE dmm.comptype = 0 AND subj.id=".$subjid." AND item.userid=".$userid;
     if ($itemid > 0) {
@@ -1383,7 +1383,7 @@ function block_exaport_competence_selected($subjid, $userid, $itemid) {
 
 function block_exaport_checkifupdate($userid) {
     global $DB;
-    $sql = "SELECT * FROM {block_exacompsettings} WHERE courseid=0 AND activities='importxml'";
+    $sql = "SELECT * FROM {".BLOCK_EXACOMP_DB_SETTINGS."} WHERE courseid=0 AND activities='importxml'";
     if ($modsetting = $DB->get_record_sql($sql)) {
         if ($usersetting = $DB->get_record("block_exaportuser", array("user_id" => $userid))) {
             if (!empty($usersetting->import_oez_tstamp)) {
@@ -1442,12 +1442,12 @@ function block_exaport_installoez($userid, $isupdate = false) {
     $sql .= " top.sourceid as topsourceid, examp.title as item,examp.titleshort as items,examp.description as exampdescription, ";
     $sql .= " examp.externalurl,examp.externaltask,examp.task,examp.source as sourceexamp,examp.id as exampid,examp.completefile, ";
     $sql .= " examp.iseditable,examp.source,examp.sourceid,examp.parentid,examp.solution";
-    $sql .= " FROM {block_exacompschooltypes} st INNER JOIN {block_exacompsubjects} subj ON subj.stid=st.id ";
-    $sql .= " INNER JOIN {block_exacomptopics} top ON top.subjid=subj.id ";
-    $sql .= " INNER JOIN {block_exacompdescrtopic_mm} tmm ON tmm.topicid=top.id ";
-    $sql .= " INNER JOIN {block_exacompdescriptors} descr ON descr.id=tmm.descrid ";
+    $sql .= " FROM {".BLOCK_EXACOMP_DB_SCHOOLTYPES."} st INNER JOIN {".BLOCK_EXACOMP_DB_SUBJECTS."} subj ON subj.stid=st.id ";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_TOPICS."} top ON top.subjid=subj.id ";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_DESCTOPICS."} tmm ON tmm.topicid=top.id ";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_DESCRIPTORS."} descr ON descr.id=tmm.descrid ";
     $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_DESCEXAMP."} emm ON emm.descrid=descr.id ";
-    $sql .= " INNER JOIN {block_exacompexamples} examp ON examp.id=emm.exampid ";
+    $sql .= " INNER JOIN {".BLOCK_EXACOMP_DB_EXAMPLES."} examp ON examp.id=emm.exampid ";
     $sql .= " WHERE st.isoez=1 OR st.epop=1 OR subj.epop=1 OR top.epop=1 OR descr.epop=1 OR examp.epop=1 ";
     $sql .= " OR (st.isoez=2 AND examp.source=2) OR (examp.source=3)".$where." ";
     $sql .= " ORDER BY st.id,subj.id,top.id";

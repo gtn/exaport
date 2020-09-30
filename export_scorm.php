@@ -251,7 +251,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                     foreach ($compids as $compid) {
 
                         $conditions = array("id" => $compid);
-                        $competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields = '*',
+                        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*',
                                 $strictness = IGNORE_MISSING);
                         if ($competencesdb != null) {
                             $competences .= $competencesdb->title.'<br />';
@@ -318,7 +318,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                     foreach ($compids as $compid) {
 
                         $conditions = array("id" => $compid);
-                        $competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields = '*',
+                        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*',
                                 $strictness = IGNORE_MISSING);
                         if ($competencesdb != null) {
                             $competences .= $competencesdb->title.'<br />';
@@ -400,7 +400,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                     foreach ($compids as $compid) {
 
                         $conditions = array("id" => $compid);
-                        $competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields = '*',
+                        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*',
                                 $strictness = IGNORE_MISSING);
                         if ($competencesdb != null) {
                             $competences .= $competencesdb->title.'<br />';

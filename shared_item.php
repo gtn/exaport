@@ -249,11 +249,11 @@ function block_exaport_do_add_comment($item, $post) {
             $DB->update_record(BLOCK_EXACOMP_DB_ITEM_MM, $itemexample);
 
             // Check for example additional info and set it.
-            $exampleeval = $DB->get_record('block_exacompexameval',
+            $exampleeval = $DB->get_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL,
                     array('courseid' => $item->courseid, 'exampleid' => $itemexample->exampleid, 'studentid' => $item->userid));
             if ($exampleeval) {
                 $exampleeval->additionalinfo = $post->itemgrade;
-                $DB->update_record('block_exacompexameval', $exampleeval);
+                $DB->update_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL, $exampleeval);
             }
         }
     }

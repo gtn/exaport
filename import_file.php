@@ -342,7 +342,7 @@ function import_item_competences($newid, $oldid, &$xml, $dir, $title) {
         if ($oldid == $id) {
             foreach ($item->comp as $comp) {
                 $compid = (int) $comp->attributes()->identifier[0];
-                $desc = $DB->get_record('block_exacompdescriptors', array("sourceid" => $compid));
+                $desc = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, array("sourceid" => $compid));
                 $newentry = new stdClass();
                 $newentry->activityid = $newid;
                 $newentry->compid = $desc->id;
@@ -351,7 +351,7 @@ function import_item_competences($newid, $oldid, &$xml, $dir, $title) {
                 $newentry->role = 0;
                 $newentry->eportfolioitem = 1;
                 $newentry->wert = 0;
-                $DB->insert_record("block_exacompcompuser_mm", $newentry);
+                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM, $newentry);
 
                 $newentry2 = new stdClass();
                 $newentry2->compid = $desc->id;
@@ -359,7 +359,7 @@ function import_item_competences($newid, $oldid, &$xml, $dir, $title) {
                 $newentry2->eportfolioitem = 1;
                 $newentry2->activitytitle = $title;
                 $newentry2->coursetitle = $COURSE->shortname;
-                $DB->insert_record("block_exacompcompactiv_mm", $newentry2);
+                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, $newentry2);
             }
         }
     }

@@ -628,7 +628,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
     // Competencies.
     if (block_exaport_check_competence_interaction()) {
         $dbman = $DB->get_manager();
-        if (!$dbman->table_exists('block_exacompdescriptors')) {
+        if (!$dbman->table_exists(BLOCK_EXACOMP_DB_DESCRIPTORS)) {
             $table->data[$itemindex]['title'] = get_string('resume_'.$type.'comp', 'block_exaport').
                     ' / <span style="color:red;">Error: Please install latest version of Exabis Competence Grid</span>';
             $table->data[$itemindex]['files'] = '';
@@ -637,7 +637,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
             $comptitles = '';
             $competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
             foreach ($competences as $competence) {
-                $competencesdb = $DB->get_record('block_exacompdescriptors', array('id' => $competence->compid), $fields = '*',
+                $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, array('id' => $competence->compid), $fields = '*',
                         $strictness = IGNORE_MISSING);
                 if ($competencesdb != null) {
                     $comptitles .= $competencesdb->title.'<br>';
@@ -988,7 +988,7 @@ function europass_xml($resumeid = 0) {
     $skillscontent = $resume->skillscareers.$resume->skillsacademic.$resume->skillspersonal;
     $competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => 'skills'));
     foreach ($competences as $competence) {
-        $competencesdb = $DB->get_record('block_exacompdescriptors', array('id' => $competence->compid), $fields = '*',
+        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, array('id' => $competence->compid), $fields = '*',
                 $strictness = IGNORE_MISSING);
         if ($competencesdb != null) {
             $skillscontent .= '<p>'.$competencesdb->title.'</p>';
@@ -1037,7 +1037,7 @@ function europass_xml($resumeid = 0) {
     $goalsstring = $resume->goalspersonal.'<br>'.$resume->goalsacademic.'<br>'.$resume->goalscareers;
     $competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => 'goals'));
     foreach ($competences as $competence) {
-        $competencesdb = $DB->get_record('block_exacompdescriptors', array('id' => $competence->compid), $fields = '*',
+        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, array('id' => $competence->compid), $fields = '*',
                 $strictness = IGNORE_MISSING);
         if ($competencesdb != null) {
             $goalsstring .= $competencesdb->title.'<br>';

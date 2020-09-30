@@ -249,9 +249,9 @@ function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile) 
 
         // Kompetenzen checken und erneut speichern.
         // TODO Test if missing activitytype = 1 has influence.
-        $comps = $DB->get_records('block_exacompcompactiv_mm', array("activityid" => $cm->id));
+        $comps = $DB->get_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $cm->id));
         foreach ($comps as $comp) {
-            $DB->insert_record('block_exacompcompactiv_mm',
+            $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
                     array("activityid" => $post->id, "eportfolioitem" => 1, "compid" => $comp->descrid,
                             "activitytitle" => $post->name, "coursetitle" => $COURSE->shortname));
         }

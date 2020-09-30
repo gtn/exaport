@@ -788,7 +788,7 @@ function block_exaport_get_item_comp_icon($item) {
     foreach ($compids as $compid) {
 
         $conditions = array("id" => $compid);
-        $competencesdb = $DB->get_record('block_exacompdescriptors', $conditions, $fields = '*', $strictness = IGNORE_MISSING);
+        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*', $strictness = IGNORE_MISSING);
 
         if ($competencesdb != null) {
             $competences .= $competencesdb->title.'<br>';

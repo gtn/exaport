@@ -401,8 +401,8 @@ class block_exaport_external extends external_api {
 
         $interaction = block_exaport_check_competence_interaction();
         if ($interaction) {
-            $DB->delete_records('block_exacompcompactiv_mm', array("activityid" => $id, "eportfolioitem" => 1));
-            $DB->delete_records('block_exacompcompuser_mm',
+            $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $id, "eportfolioitem" => 1));
+            $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
                     array("activityid" => $id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
         }
 
@@ -484,8 +484,8 @@ class block_exaport_external extends external_api {
             if (is_enrolled($context, $USER)) {
                 $query = "SELECT t.id as topdescrid, d.id,d.title,tp.title as topic,tp.id as topicid,".
                             " s.title as subject,s.id as subjectid,d.niveauid ".
-                            " FROM {block_exacompdescriptors} d, {block_exacompcoutopi_mm} c, {block_exacompdescrtopic_mm} t, ".
-                            " {block_exacomptopics} tp, {block_exacompsubjects} s ".
+                            " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COURSETOPICS."} c, {".BLOCK_EXACOMP_DB_DESCTOPICS."} t, ".
+                            " {".BLOCK_EXACOMP_DB_TOPICS."} tp, {".BLOCK_EXACOMP_DB_SUBJECTS."} s ".
                             " WHERE d.id=t.descrid AND t.topicid = c.topicid AND t.topicid=tp.id AND tp.subjid = s.id ".
                             " AND c.courseid = ?";
 
@@ -592,17 +592,17 @@ class block_exaport_external extends external_api {
         if ($val == 1) {
             $item = $DB->get_record("block_exaportitem", array("id" => $itemid));
             $course = $DB->get_record("course", array("id" => $item->courseid));
-            $DB->insert_record("block_exacompcompactiv_mm",
+            $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
                     array('compid' => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1, 'activitytitle' => $item->name,
                             'coursetitle' => $course->shortname, 'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
-            $DB->insert_record('block_exacompcompuser_mm',
+            $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
                     array("compid" => $descriptorid, "activityid" => $itemid, "eportfolioitem" => 1, "reviewerid" => $USER->id,
                             "userid" => $USER->id, "role" => 0, 'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
         } else if ($val == 0) {
-            $DB->delete_records("block_exacompcompactiv_mm",
+            $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
                     array('compid' => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1,
                             'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
-            $DB->delete_records("block_exacompcompuser_mm",
+            $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
                     array("compid" => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1,
                             'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
         }
@@ -1410,7 +1410,7 @@ class block_exaport_external extends external_api {
         global $CFG, $DB, $USER;
         $params = self::validate_parameters(self::get_competencies_by_item_parameters(), array('itemid' => $itemid));
 
-        return $DB->get_records("block_exacompcompactiv_mm",
+        return $DB->get_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
                 array("activityid" => $itemid, "eportfolioitem" => 1, "comptype" => BLOCK_EXACOMP_TYPE_DESCRIPTOR), "",
                 "compid as competenceid");
     }

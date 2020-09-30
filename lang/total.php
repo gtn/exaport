@@ -1983,4 +1983,8 @@ return [
             'Download as Pdf',
             'Download as Pdf',
         ],
+        'selected_competencies' => [
+            'Erreichte Kompetenz',
+            'Achieved Competency'
+        ],
 ];

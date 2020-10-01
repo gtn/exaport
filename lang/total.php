@@ -2000,7 +2000,7 @@ return [
             'View saved',
         ],
         'view_sharing_updated' => [
-            'Ver&ouml;ffentlichen gespeichert',
+            'Ver&ouml;ffentlichung gespeichert',
             'View sharing updated',
         ],
 ];

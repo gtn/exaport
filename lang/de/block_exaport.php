@@ -558,4 +558,4 @@ $string['selected_competencies'] = 'Erreichte Kompetenz';
 $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = 'Titel help text';
 $string['view_saved'] = 'View gespeichert';
-$string['view_sharing_updated'] = 'Ver&ouml;ffentlichen gespeichert';
+$string['view_sharing_updated'] = 'Ver&ouml;ffentlichung gespeichert';

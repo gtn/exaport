@@ -451,8 +451,8 @@ return [
 
         // === Export/import.
         'import' => [
-                'Import',
-                'Import',
+                'Import SCORM-Datei',
+                'Import SCORM-File',
         ],
         'explainexport' => [
                 '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>',
@@ -1817,11 +1817,11 @@ return [
                 'Careers skills saved',
         ],
         'resume_goalscomp' => [
-                'Bildungsstandards',
+                'Kompetenzen',
                 'Educational standards',
         ],
         'resume_skillscomp' => [
-                'Bildungsstandards',
+                'Kompetenzen',
                 'Educational standards',
         ],
         'resume_badges' => [
@@ -1842,7 +1842,7 @@ return [
         <li>Alle Datumsangaben sollten überprüft werden</li>
         <li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
         <li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
-        <li>Voragben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
+        <li>Vorgaben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
     </ul>',
                 'You can generate your Curriculum Vitae from your Exaport resume<br>
     The generated XML-file has to be inserted into the <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">online europass CV editor</a><br><br>
@@ -1994,5 +1994,13 @@ return [
         'forms.item.title_help' => [
             'Titel help text',
             'Title help text',
-        ]
+        ],
+        'view_saved' => [
+            'View gespeichert',
+            'View saved',
+        ],
+        'view_sharing_updated' => [
+            'Ver&ouml;ffentlichen gespeichert',
+            'View sharing updated',
+        ],
 ];

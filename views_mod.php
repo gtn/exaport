@@ -309,6 +309,8 @@ $textfieldoptions = array('trusttext' => true,
 $editform = new block_exaport_view_edit_form($_SERVER['REQUEST_URI'],
         array('view' => $view, 'course' => $COURSE->id, 'action' => $action, 'type' => $type));
 
+$message = '';
+
 if ($editform->is_cancelled()) {
     redirect($returnurltolist);
 } else if ($editform->no_submit_button_pressed()) {
@@ -472,6 +474,8 @@ if ($editform->is_cancelled()) {
                 exit;
             }
 
+            $message = block_exaport_get_string('view_saved');
+
             break;
         case 'share':
             // Delete all shared users.
@@ -577,6 +581,7 @@ if ($editform->is_cancelled()) {
                     }
                 }
             }
+            $message = block_exaport_get_string('view_sharing_updated');
             break;
         default:
             break;
@@ -585,7 +590,7 @@ if ($editform->is_cancelled()) {
     $returnurl = $CFG->wwwroot.'/blocks/exaport/views_mod.php?courseid='.$courseid.'&id='.$dbview->id.'&sesskey='.sesskey().
             '&action=edit';
 
-    redirect($returnurl);
+    redirect($returnurl, $message);
 }
 
 // Gui setup.

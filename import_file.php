@@ -286,8 +286,8 @@ function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null,
             } else if (isset($structure["data"]["title"])) {
                 if (is_null($previd)) {
                     if ($DB->count_records_select("block_exaportcate",
-                                    "name='".block_exaport_clean_title($structure["data"]["title"]).
-                                    "' AND userid='$USER->id' AND pid=0") == 0
+                                    "name = ? AND userid = ? AND pid = 0",
+                            [$structure["data"]["title"], $USER->id]) == 0
                     ) {
                         $newentry = new stdClass();
                         $newentry->name = block_exaport_clean_title($structure["data"]["title"]);
@@ -300,14 +300,14 @@ function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null,
                         }
                     } else {
                         $entry = $DB->get_record_select("block_exaportcate",
-                                "name='".block_exaport_clean_title($structure["data"]["title"]).
-                                "' AND userid='$USER->id' AND pid=0");
+                                    "name = ? AND userid = ? AND pid = 0",
+                                    [$structure["data"]["title"], $USER->id]);
                         $entryid = $entry->id;
                     }
                 } else {
                     if ($DB->count_records_select("block_exaportcate",
-                                    "name='".block_exaport_clean_title($structure["data"]["title"]).
-                                    "' AND userid='$USER->id' AND pid='$previd'") == 0
+                                    "name = ? AND userid = ? AND pid = ? ",
+                                    [$structure["data"]["title"], $USER->id, $previd]) == 0
                     ) {
                         $newentry = new stdClass();
                         $newentry->name = block_exaport_clean_title($structure["data"]["title"]);
@@ -321,8 +321,8 @@ function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null,
                         }
                     } else {
                         $entry = $DB->get_record_select("block_exaportcate",
-                                "name='".block_exaport_clean_title($structure["data"]["title"]).
-                                "' AND userid='$USER->id' AND pid='$previd'");
+                                "name = ? AND userid = ? AND pid = ? ",
+                            [$structure["data"]["title"], $USER->id, $previd]);
                         $entryid = $entry->id;
                     }
                 }

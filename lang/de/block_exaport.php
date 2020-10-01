@@ -127,7 +127,7 @@ $string['nogroupsfound'] = 'Keine Gruppen gefunden';
 $string['make_it_yours'] = 'Mach\' es zu deinem Eigenen';
 
 // === Export/import.
-$string['import'] = 'Import';
+$string['import'] = 'Import SCORM-Datei';
 $string['explainexport'] = '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>';
 $string['createexport'] = 'SCORM-Datei erstellen';
 $string['clicktodownloadscorm'] = 'Folgenden Button drücken, um SCORM-Datei herunterzuladen:';
@@ -502,8 +502,8 @@ $string['resume_skillscareers'] = 'Karriere-Kompetenzen';
 $string['resume_skillspersonalsaved'] = 'Persönliche Kompetenzen gespeichert';
 $string['resume_skillsacademicsaved'] = 'Bildungs-Kompetenzen gespeichert';
 $string['resume_skillscareerssaved'] = 'Karriere-Kompetenzen gespeichert';
-$string['resume_goalscomp'] = 'Bildungsstandards';
-$string['resume_skillscomp'] = 'Bildungsstandards';
+$string['resume_goalscomp'] = 'Kompetenzen';
+$string['resume_skillscomp'] = 'Kompetenzen';
 $string['resume_badges'] = 'Abzeichen';
 $string['resume_exportto_europass'] = 'Export für Europass';
 $string['resume_exportto_europass_intro'] = 'Ein Lebenslauf kann von der Exportdatei generiert werden, indem man den
@@ -515,7 +515,7 @@ $string['resume_exportto_europass_intro'] = 'Ein Lebenslauf kann von der Exportd
         <li>Alle Datumsangaben sollten überprüft werden</li>
         <li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
         <li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
-        <li>Voragben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
+        <li>Vorgaben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
     </ul>';
 $string['resume_exportto_europass_getXML'] = 'XML herunterladen';
 $string['resume_expand'] = 'Alles öffnen';
@@ -557,3 +557,5 @@ $string['download_pdf'] = 'Download as Pdf';
 $string['selected_competencies'] = 'Erreichte Kompetenz';
 $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = 'Titel help text';
+$string['view_saved'] = 'View gespeichert';
+$string['view_sharing_updated'] = 'Ver&ouml;ffentlichen gespeichert';

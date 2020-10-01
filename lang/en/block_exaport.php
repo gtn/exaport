@@ -128,7 +128,7 @@ $string['nogroupsfound'] = 'No groups found';
 $string['make_it_yours'] = 'Make it yours';
 
 // === Export/import.
-$string['import'] = 'Import';
+$string['import'] = 'Import SCORM-File';
 $string['explainexport'] = 'Export your portfolio here.';
 $string['createexport'] = 'Create SCORM-File';
 $string['clicktodownloadscorm'] = 'Press button to download the SCORM file:';
@@ -558,3 +558,5 @@ $string['download_pdf'] = 'Download as Pdf';
 $string['selected_competencies'] = 'Achieved Competency';
 $string['forms.item.title'] = 'Title';
 $string['forms.item.title_help'] = 'Title help text';
+$string['view_saved'] = 'View saved';
+$string['view_sharing_updated'] = 'View sharing updated';

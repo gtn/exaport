@@ -17,7 +17,7 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
-class block_exaport_personal_information_form extends moodleform {
+class block_exaport_personal_information_form extends block_exaport_moodleform {
 
     public function definition() {
 
@@ -26,6 +26,7 @@ class block_exaport_personal_information_form extends moodleform {
 
         $mform->addElement('editor', 'description_editor', get_string('steckbrief', 'block_exaport'), null,
                 array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+        $mform->addExaportHelpButton('description_editor', 'forms.personal_info.description_editor');
 
         $mform->addElement('hidden', 'cataction');
         $mform->setType('cataction', PARAM_ALPHA);

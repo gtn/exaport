@@ -120,7 +120,7 @@ if ($view) {
 
 require_once($CFG->libdir.'/formslib.php');
 
-class block_exaport_view_edit_form extends moodleform {
+class block_exaport_view_edit_form extends block_exaport_moodleform {
 
     public function definition() {
         global $CFG, $USER, $DB;
@@ -149,11 +149,13 @@ class block_exaport_view_edit_form extends moodleform {
                 $mform->addElement('text', 'name', get_string("title", "block_exaport"), 'maxlength="255" size="60"');
                 $mform->setType('name', PARAM_TEXT);
                 $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
+                $mform->addExaportHelpButton('name', 'forms.view.name');
 
                 $mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'),
                         array('rows' => '20', 'cols' => '5'),
                         array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
                 $mform->setType('description', PARAM_RAW);
+                $mform->addExaportHelpButton('description_editor', 'forms.view.description_editor');
 
                 if ($this->_customdata['view']) {
                     // Auto generate view with the artefacts checkbox.
@@ -169,9 +171,11 @@ class block_exaport_view_edit_form extends moodleform {
                             $diff = array_diff($allartefacts, $filledartefacts);
                             if (count($diff) > 0) {
                                 $mform->addElement('checkbox', 'autofill_add', '', get_string('autofillview', 'block_exaport'));
+                                $mform->addExaportHelpButton('autofill_add', 'forms.view.autofill_add');
                             }
                         } else {
                             $mform->addElement('checkbox', 'autofill', '', get_string('autofillview', 'block_exaport'));
+                            $mform->addExaportHelpButton('autofill', 'forms.view.autofill');
                         }
                     }
                     // Share to cheacher checkbox.
@@ -183,9 +187,11 @@ class block_exaport_view_edit_form extends moodleform {
                         // If there is teacher which does not share.
                         if ((count($allteachers) > 0) && (count($diff) > 0)) {
                             $mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher', 'block_exaport'));
+                            $mform->addExaportHelpButton('sharetoteacher', 'forms.view.sharetoteacher');
                         }
                     } else { // If view is adding.
                         $mform->addElement('checkbox', 'sharetoteacher', '', get_string('sharetoteacher', 'block_exaport'));
+                        $mform->addExaportHelpButton('sharetoteacher', 'forms.view.sharetoteacher');
                     }
                 }
 
@@ -203,6 +209,7 @@ class block_exaport_view_edit_form extends moodleform {
                     asort($languages);
                     $mform->addElement('select', 'langid', get_string("desp_language", "block_exaport"), $languages);
                     $mform->setType('langid', PARAM_INT);
+                    $mform->addExaportHelpButton('langid', 'forms.view.langid');
                 }
                 break;
             case "layout":
@@ -221,20 +228,25 @@ class block_exaport_view_edit_form extends moodleform {
             case "share" :
                 $mform->addElement('checkbox', 'externaccess');
                 $mform->setType('externaccess', PARAM_INT);
+                $mform->addExaportHelpButton('externaccess', 'forms.view.externaccess');
 
                 $mform->addElement('checkbox', 'internaccess');
                 $mform->setType('internaccess', PARAM_INT);
+                $mform->addExaportHelpButton('internaccess', 'forms.view.internaccess');
 
                 $mform->addElement('checkbox', 'externcomment');
                 $mform->setType('externcomment', PARAM_INT);
+                $mform->addExaportHelpButton('externcomment', 'forms.view.externcomment');
 
                 if (block_exaport_shareall_enabled()) {
                     $mform->addElement('text', 'shareall');
                     $mform->setType('shareall', PARAM_INT);
+                    $mform->addExaportHelpButton('shareall', 'forms.view.shareall');
                 }
 
                 $mform->addElement('checkbox', 'sharedemails');
                 $mform->setType('sharedemails', PARAM_INT);
+                $mform->addExaportHelpButton('sharedemails', 'forms.view.sharedemails');
 
                 break;
             default:

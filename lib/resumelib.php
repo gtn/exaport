@@ -22,7 +22,7 @@ $attachedfilenames = array();
 $attachedfiledatas = array();
 $attachedfilemimetypes = array();
 
-class block_exaport_resume_editor_form extends moodleform {
+class block_exaport_resume_editor_form extends block_exaport_moodleform {
 
     public function definition() {
 
@@ -39,10 +39,12 @@ class block_exaport_resume_editor_form extends moodleform {
 
         $mform->addElement('editor', $param.'_editor', get_string('resume_'.$param, 'block_exaport'), null,
                 array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+        $mform->addExaportHelpButton($param.'_editor', 'forms.resume.'.$param.'_editor');
 
         if ($withfiles) {
             $mform->addElement('filemanager', 'attachments', get_string('resume_files', 'block_exaport'), null,
                     array('subdirs' => false, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'maxfiles' => 5));
+            $mform->addExaportHelpButton('attachments', 'forms.resume.attachments');
         }
 
         $mform->addElement('hidden', 'courseid');
@@ -59,7 +61,7 @@ class block_exaport_resume_editor_form extends moodleform {
 
 }
 
-class block_exaport_resume_multifields_form extends moodleform {
+class block_exaport_resume_multifields_form extends block_exaport_moodleform {
 
     public function definition() {
 
@@ -81,15 +83,18 @@ class block_exaport_resume_multifields_form extends moodleform {
                     case 'text' :
                         $mform->addElement('text', $fieldname, get_string('resume_'.$fieldname, 'block_exaport'), $attributestext);
                         $mform->setType($fieldname, PARAM_RAW);
+                        $mform->addExaportHelpButton($fieldname, 'forms.resume.'.$fieldname);
                         break;
                     case 'textarea' :
                         $mform->addElement('textarea', $fieldname, get_string('resume_'.$fieldname, 'block_exaport'),
                                 $attributestextarea);
                         $mform->setType($fieldname, PARAM_RAW);
+                        $mform->addExaportHelpButton($fieldname, 'forms.resume.'.$fieldname);
                         break;
                     case 'filearea' :
                         $mform->addElement('filemanager', 'attachments', get_string('resume_'.$fieldname, 'block_exaport'), null,
                                 array('subdirs' => false, 'maxfiles' => 5, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+                        $mform->addExaportHelpButton('attachments', 'forms.resume.attachments_'.$fieldname);
                         break;
                 };
                 // Required field.
@@ -119,7 +124,7 @@ class block_exaport_resume_multifields_form extends moodleform {
 
 }
 
-class block_exaport_resume_checkboxlist_form extends moodleform {
+class block_exaport_resume_checkboxlist_form extends block_exaport_moodleform {
 
     public function definition() {
 

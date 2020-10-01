@@ -1987,4 +1987,12 @@ return [
             'Erreichte Kompetenz',
             'Achieved Competency'
         ],
+        'forms.item.title' => [
+            'Titel',
+            'Title',
+        ],
+        'forms.item.title_help' => [
+            'Titel help text',
+            'Title help text',
+        ]
 ];

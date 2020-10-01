@@ -1787,3 +1787,81 @@ function block_exaport_html_secure($content = '', $format = FORMAT_HTML) {
     $content = format_text($content, $format, ['newlines' => false]);
     return $content;
 }
+
+require_once($CFG->libdir.'/formslib.php');
+
+class BlockExaportMoodleQuickForm extends MoodleQuickForm {
+
+    function addExaportHelpButton($elementname, $identifier, $component = 'block_exaport', $linktext = '', $suppresscheck = false) {
+        $sm = get_string_manager();
+        if (!$sm->string_exists($identifier.'_help', 'block_exaport')) {
+            $element = $this->_elements[$this->_elementIndex[$elementname]];
+            $element->_helpbutton = '<span class="exaportHelpButtonMarker" style="display: none;">'.$identifier.'_help ==and== '.$identifier.'</span>';
+        } else {
+            return parent::addHelpButton($elementname, $identifier, $component, $linktext, $suppresscheck);
+        }
+    }
+
+}
+
+
+abstract class block_exaport_moodleform extends moodleform {
+
+    // copy of original __constract, but changed _form class (merged from Moodle 3.2 and 3.9)
+    public function __construct($action=null, $customdata=null, $method='post', $target='', $attributes=null, $editable=true,
+                                $ajaxformdata=null) {
+        global $CFG, $FULLME;
+        // no standard mform in moodle should allow autocomplete with the exception of user signup
+        if (empty($attributes)) {
+            $attributes = array('autocomplete'=>'off');
+        } else if (is_array($attributes)) {
+            $attributes['autocomplete'] = 'off';
+        } else {
+            if (strpos($attributes, 'autocomplete') === false) {
+                $attributes .= ' autocomplete="off" ';
+            }
+        }
+
+
+        if (empty($action)){
+            // do not rely on PAGE->url here because dev often do not setup $actualurl properly in admin_externalpage_setup()
+            $action = strip_querystring($FULLME);
+            if (!empty($CFG->sslproxy)) {
+                // return only https links when using SSL proxy
+                $action = preg_replace('/^http:/', 'https:', $action, 1);
+            }
+            //TODO: use following instead of FULLME - see MDL-33015
+            //$action = strip_querystring(qualified_me());
+        }
+        // Assign custom data first, so that get_form_identifier can use it.
+        $this->_customdata = $customdata;
+        $this->_formname = $this->get_form_identifier();
+        $this->_ajaxformdata = $ajaxformdata;
+        // CUSTOM MoodleQuickForm
+        $this->_form = new BlockExaportMoodleQuickForm($this->_formname, $method, $action, $target, $attributes, $ajaxformdata);
+//        $this->_form = new MoodleQuickForm($this->_formname, $method, $action, $target, $attributes, $ajaxformdata);
+        if (!$editable){
+            $this->_form->hardFreeze();
+        }
+
+        $this->definition();
+
+        $this->_form->addElement('hidden', 'sesskey', null); // automatic sesskey protection
+        $this->_form->setType('sesskey', PARAM_RAW);
+        $this->_form->setDefault('sesskey', sesskey());
+        $this->_form->addElement('hidden', '_qf__'.$this->_formname, null);   // form submission marker
+        $this->_form->setType('_qf__'.$this->_formname, PARAM_RAW);
+        $this->_form->setDefault('_qf__'.$this->_formname, 1);
+        $this->_form->_setDefaultRuleMessages();
+
+        // Hook to inject logic after the definition was provided.
+        if (method_exists($this, 'after_definition')) {
+            $this->after_definition();
+        }
+
+        // we have to know all input types before processing submission ;-)
+        $this->_process_submission($method);
+    }
+
+}
+

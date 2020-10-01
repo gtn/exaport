@@ -34,7 +34,7 @@ require_login($courseid);
 
 require_once($CFG->libdir.'/formslib.php');
 
-class temporary_form extends moodleform {
+class temporary_form extends block_exaport_moodleform {
     public function definition() {
         global $CFG;
         $mform =& $this->_form;
@@ -42,6 +42,7 @@ class temporary_form extends moodleform {
 
         $mform->addElement('editor', $propertyname, 'temp', null,
                 array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+        $mform->addExaportHelpButton($propertyname, 'forms.temp.'.$propertyname);
     }
 }
 

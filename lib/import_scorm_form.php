@@ -17,7 +17,7 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
-class block_exaport_import_scorm_form extends moodleform {
+class block_exaport_import_scorm_form extends block_exaport_moodleform {
 
     public function definition() {
         global $CFG, $USER, $DB;
@@ -26,6 +26,7 @@ class block_exaport_import_scorm_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string("file", "block_exaport"));
         $mform->addElement('filepicker', 'attachment', get_string('file', 'block_exaport'), null, null);
+        $mform->addExaportHelpButton('attachment', 'forms.import_scrom.file');
         $this->add_action_buttons();
     }
 

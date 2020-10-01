@@ -154,7 +154,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 
 require_once("$CFG->libdir/formslib.php");
 
-class simplehtml_form extends moodleform {
+class simplehtml_form extends block_exaport_moodleform {
     // Add elements to form.
     public function definition() {
         global $CFG;
@@ -187,6 +187,7 @@ class simplehtml_form extends moodleform {
         $mform->addElement('text', 'name', get_string('name'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', block_exaport_get_string('titlenotemtpy'), 'required', null, 'client');
+        $mform->addExaportHelpButton('name', 'forms.category.name');
 
         $mform->addElement('filemanager',
                 'iconfile',
@@ -196,18 +197,21 @@ class simplehtml_form extends moodleform {
                         'maxfiles' => 1,
                         'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
                         'accepted_types' => array('image', 'web_image')));
+        $mform->addExaportHelpButton('iconfile', 'forms.category.iconfile');
 
         if (extension_loaded('gd') && function_exists('gd_info')) {
             $mform->addElement('checkbox',
                     'iconmerge',
                     get_string('iconfile_merge', 'block_exaport'),
                     get_string('iconfile_merge_description', 'block_exaport'));
+            $mform->addExaportHelpButton('iconmerge', 'forms.category.iconmerge');
         };
 
         // Sharing.
         if (has_capability('block/exaport:shareintern', context_system::instance())) {
             $mform->addElement('checkbox', 'internshare', get_string('share', 'block_exaport'));
             $mform->setType('internshare', PARAM_INT);
+            $mform->addExaportHelpButton('internshare', 'forms.category.internshare');
             $mform->addElement('html', '<div id="internaccess-settings" class="fitem"">'.
                     '<div class="fitemtitle"></div><div class="felement">');
 

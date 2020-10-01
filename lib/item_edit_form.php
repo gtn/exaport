@@ -17,7 +17,7 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
-class block_exaport_comment_edit_form extends moodleform {
+class block_exaport_comment_edit_form extends block_exaport_moodleform {
 
     public function definition() {
         global $CFG, $USER, $DB;
@@ -46,9 +46,11 @@ class block_exaport_comment_edit_form extends moodleform {
                 array('rows' => 10, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
         $mform->setType('entry', PARAM_TEXT);
         $mform->addRule('entry', get_string("commentshouldnotbeempty", "block_exaport"), 'required', null, 'client');
+        $mform->addExaportHelpButton('entry', 'forms.items_comment.entry');
 
         $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null,
                 array('subdirs' => 0, 'maxfiles' => 1));
+        $mform->addExaportHelpButton('file', 'forms.items_comment.file');
 
         /*
         fjungwirth: hide grading at this stage (meeting LS 4.7.16)
@@ -70,7 +72,7 @@ class block_exaport_comment_edit_form extends moodleform {
 
 }
 
-class block_exaport_item_edit_form extends moodleform {
+class block_exaport_item_edit_form extends block_exaport_moodleform {
 
     public function definition() {
         global $CFG, $USER, $DB;
@@ -99,11 +101,13 @@ class block_exaport_item_edit_form extends moodleform {
         $mform->addElement('text', 'name', get_string("title", "block_exaport"), 'maxlength="255" size="60"');
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
+        $mform->addExaportHelpButton('name', 'forms.item.title');
 
         $mform->addElement('select', 'categoryid', get_string("category", "block_exaport"), array());
         $mform->addRule('categoryid', get_string("categorynotempty", "block_exaport"), 'required', null, 'client');
         $mform->setDefault('categoryid', 0);
         $this->category_select_setup();
+        $mform->addExaportHelpButton('categoryid', 'forms.item.categoryid');
 
         if ($type == 'link') {
             $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="http://"');
@@ -113,6 +117,7 @@ class block_exaport_item_edit_form extends moodleform {
             $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
             $mform->setType('url', PARAM_TEXT);
         }
+        $mform->addExaportHelpButton('url', 'forms.item.url');
 
         if ($type == 'link') {
             // For code checker.
@@ -138,6 +143,7 @@ class block_exaport_item_edit_form extends moodleform {
                 $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null,
                         array('subdirs' => false, 'maxfiles' => $filelimits, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
                 $mform->addRule('file', null, 'required', null, 'client');
+                $mform->addExaportHelpButton('file', 'forms.item.file');
             }
         }
 
@@ -155,6 +161,7 @@ class block_exaport_item_edit_form extends moodleform {
             asort($languages);
             $mform->addElement('select', 'langid', get_string("desp_language", "block_exaport"), $languages);
             $mform->setType('langid', PARAM_INT);
+            $mform->addExaportHelpButton('langid', 'forms.item.langid');
         }
 
         if (isset($this->_customdata['useTextarea']) && $this->_customdata['useTextarea']) {
@@ -164,6 +171,7 @@ class block_exaport_item_edit_form extends moodleform {
             if ($type == 'note') {
                 $mform->addRule('intro', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
             }
+            $mform->addExaportHelpButton('intro', 'forms.item.intro');
         } else {
             if (!isset($this->_customdata['textfieldoptions'])) {
                 $this->_customdata['textfieldoptions'] = array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99,
@@ -175,16 +183,19 @@ class block_exaport_item_edit_form extends moodleform {
             if ($type == 'note') {
                 $mform->addRule('intro_editor', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
             }
+            $mform->addExaportHelpButton('intro_editor', 'forms.item.intro_editor');
         }
 
         $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,
                 array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
                         'accepted_types' => array('image', 'web_image')));
+        $mform->addExaportHelpButton('iconfile', 'forms.item.iconfile');
 
         // Tags.
         if (!empty($CFG->usetags)) {
             $mform->addElement('tags', 'tags', get_string('tags'),
                     array('itemtype' => 'block_exaportitem', 'component' => 'block_exaport'));
+            $mform->addExaportHelpButton('tags', 'forms.item.tags');
         }
 
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {

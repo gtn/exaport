@@ -555,3 +555,6 @@ $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';
 $string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';
+$string['selected_competencies'] = 'Achieved Competency';
+$string['forms.item.title'] = 'Title';
+$string['forms.item.title_help'] = 'Title help text';

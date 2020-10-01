@@ -484,8 +484,8 @@ namespace block_exaport\common {
             // Regenerate must be enabled by developer with uncommenting below code.
             // It is needed for security reasons
 
-            /*
             // uncomment from here
+            /*
 
             // Regenerate.
 

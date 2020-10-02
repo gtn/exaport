@@ -1633,11 +1633,11 @@ return [
                 'End date',
         ],
         'resume_institution' => [
-                'Firma',
+                'Bildungseinrichtung',
                 'Institution ',
         ],
         'resume_institutionaddress' => [
-                'Firmenadresse',
+                'Adresse der Bildungseinrichtung',
                 'Institution address',
         ],
         'resume_qualification' => [

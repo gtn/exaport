@@ -37,22 +37,8 @@ $PAGE->set_url($url, ['courseid' => $courseid]);
 block_exaport_print_header("importexport", "exportimportmoodleimport");
 
 $modassign = block_exaport_assignmentversion();
-if ($modassign->new) {
-    $assignments = $DB->get_records_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified,".
-                                " a.name, a.course, c.fullname AS coursename".
-                                " FROM {assignsubmission_file} sf ".
-                                " INNER JOIN {assign_submission} s ON sf.submission=s.id ".
-                                " INNER JOIN {assign} a ON s.assignment=a.id ".
-                                " LEFT JOIN {course} c on a.course = c.id ".
-                                " WHERE s.userid=?", array($USER->id));
-} else {
-    $assignments = $DB->get_records_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified,".
-                                " a.name, a.course, a.assignmenttype, c.fullname AS coursename ".
-                                " FROM {assignment_submissions} s ".
-                                " JOIN {assignment} a ON s.assignment=a.id ".
-                                " LEFT JOIN {course} c on a.course = c.id ".
-                                " WHERE s.userid=?", array($USER->id));
-}
+$assignments = block_exaport_get_assignments_for_import($modassign);
+
 $table = new html_table();
 $table->head = array(get_string("modulename", $modassign->title), get_string("time"), get_string("file"),
         get_string("course", "block_exaport"), get_string("action"));

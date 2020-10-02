@@ -54,10 +54,14 @@ if (has_capability('block/exaport:import', $context)) {
 }
 
 if (has_capability('block/exaport:importfrommoodle', $context)) {
-    echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='".
-            get_string("moodleimport", "block_exaport")."' /> <a title=\"".get_string("moodleimport", "block_exaport").
-            "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_moodle.php?courseid=".$courseid."\">".
-            get_string("moodleimport", "block_exaport")."</a></p>";
+    $modassign = block_exaport_assignmentversion();
+    $assignments = block_exaport_get_assignments_for_import($modassign);
+    if ($assignments) {
+        echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='" .
+            get_string("moodleimport", "block_exaport") . "' /> <a title=\"" . get_string("moodleimport", "block_exaport") .
+            "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_moodle.php?courseid=" . $courseid . "\">" .
+            get_string("moodleimport", "block_exaport") . "</a></p>";
+    }
 }
 
 echo "</div>";

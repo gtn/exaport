@@ -330,7 +330,6 @@ namespace {
 
             $item->access = $user->access;
             $item->access->page = 'portfolio';
-
             // Comments allowed?
             if ($item->access->request == 'extern') {
                 $item->allowComments = false;
@@ -501,12 +500,12 @@ namespace {
 
             $courses[$course->id] = $course;
         }
-
         // Move active course to first position.
         if (isset($courses[$COURSE->id]) && ($type != 'shared_views')) {
             $course = $courses[$COURSE->id];
             unset($courses[$COURSE->id]);
-            $courses = array_merge(array($course->id => $course), $courses);
+//            $courses = array_merge(array($course->id => $course), $courses);
+            $courses = array($course->id => $course) + $courses;
         }
 
         // Test courses.

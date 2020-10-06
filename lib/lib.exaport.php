@@ -69,12 +69,14 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         $fs = get_file_storage();
         if ($file = block_exaport_get_item_files($item)) {
             foreach($file as $fileindex => $fileobject) {
-                $fs->create_file_from_storedfile(array(
+                if ($fileobject) {
+                    $fs->create_file_from_storedfile(array(
                         'contextid' => \context_user::instance(g::$USER->id)->id,
                         'component' => 'block_exaport',
                         'filearea' => 'item_file',
                         'itemid' => $newitem->id,
-                ), $fileobject);
+                    ), $fileobject);
+                }
             }
         }
         if ($file = block_exaport_get_single_file($item, 'item_iconfile')) {

@@ -141,8 +141,8 @@ if ($itemid) {
             readstring_accel($tempfilecontent, $mimetype, false);
             die;
         }
-
-        send_stored_file($file, 1);
+//        send_stored_file($file, 1);
+        send_stored_file($file, null, 0, true);
     } else {
         not_found();
     }
@@ -151,7 +151,7 @@ if ($itemid) {
     if (!$relativepath) {
         error('No valid arguments supplied or incorrect server configuration');
     } else {
-        if ($relativepath{0} != '/') {
+        if ($relativepath[0] != '/') {
             error('No valid arguments supplied, path does not start with slash!');
         }
     }

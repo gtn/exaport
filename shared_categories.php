@@ -93,7 +93,8 @@ block_exaport_print_header("shared_categories");
 function exaport_print_structures($categories, $parsedsort) {
     global $CFG, $courseid, $COURSE, $OUTPUT, $DB;
 
-    $courses = exaport_get_shareable_courses_with_users('shared_views');
+//    $courses = exaport_get_shareable_courses_with_users('shared_views');
+    $courses = exaport_get_shareable_courses_with_users('shared_categories');
     $sort = $parsedsort[0];
 
     $mainstructuregroups = array(
@@ -115,7 +116,8 @@ function exaport_print_structures($categories, $parsedsort) {
         } else {
             $useridsinthiscourse = array_keys($courses[$COURSE->id]->users);
             foreach ($categories as $structure) {
-                if (in_array($structure->userid, $useridsinthiscourse)) {
+//                if (in_array($structure->userid, $useridsinthiscourse)) {
+                if ($COURSE->id == $structure->courseid) {
                     $mainstructuregroups['thiscourse'][] = $structure;
                 } else {
                     $mainstructuregroups['othercourses'][] = $structure;

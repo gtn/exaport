@@ -11,3 +11,11 @@ div.item-detail-image img {
     max-width: 800px;
     max-height: 600px;
 }
+
+.generaltable .exaport-shared-list {
+    font-size: 0.75em;
+}
+
+.generaltable .exaport-shared-list li {
+    list-style: none;
+}

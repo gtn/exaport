@@ -24,6 +24,7 @@ $backtype = optional_param('backtype', 'all', PARAM_ALPHA);
 $compids = optional_param('compids', '', PARAM_TEXT);
 $backtype = block_exaport_check_item_type($backtype, true);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
+$cattype = optional_param('cattype', '', PARAM_ALPHA);
 $descriptorselection = optional_param('descriptorselection', true, PARAM_BOOL);
 $id = optional_param('id', 0, PARAM_INT);
 
@@ -121,7 +122,12 @@ if ($existing && $exacompactive) {
     // For form.
     $existing->compids = join(',', $existing->compids_array);
 }
-$returnurl = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid."&categoryid=".$categoryid;
+$cattypeParams = '';
+if ($cattype) {
+    $catuser = $DB->get_field('block_exaportcate', 'userid', ['id'=>$categoryid]);
+    $cattypeParams = '&type=shared&userid='.$catuser;
+}
+$returnurl = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid."&categoryid=".$categoryid.$cattypeParams;
 
 // Delete item.
 if ($action == 'delete' && $allowedit) {
@@ -137,6 +143,12 @@ if ($action == 'delete' && $allowedit) {
                 'sesskey' => sesskey(), 'courseid' => $courseid);
         $optionsno = array('userid' => $existing->userid, 'courseid' => $courseid, 'type' => $backtype,
                 'categoryid' => $categoryid);
+        if ($cattype == 'shared') {
+            $optionsyes['cattype'] = 'shared';
+            $optionsno['type'] = 'shared';
+            // change user to category owner
+            $optionsno['userid'] = $catuser;
+        }
 
         block_exaport_print_header("bookmarks".block_exaport_get_plural_item_type($backtype), $action);
         // Ev. noch eintrag anzeigen!!!
@@ -180,9 +192,13 @@ if ($existing && $existing->intro && preg_match('!<iframe!i', $existing->intro))
     $usetextarea = true;
 }
 
+$categoryidforform = $categoryid;
+if ($cattype == 'shared' && $categoryid === 0) {
+    $categoryidforform = $existing->categoryid;
+}
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'].'&type='.$type,
         Array('current' => $existing, 'useTextarea' => $usetextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
-                'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission));
+                'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission, 'cattype' => $cattype, 'catid' => $categoryidforform));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);

@@ -321,7 +321,6 @@ namespace {
                 }
 
                 $item = $DB->get_record('block_exaportitem', ['userid' => $ownerid, 'id' => $itemid]);
-
                 if (!$item) {
                     // Item not found.
                     return;
@@ -752,7 +751,7 @@ namespace {
      * @return bool
      */
     function block_exaport_can_user_access_shared_item($userid, $itemid) {
-        global $DB;
+        global $DB, $USER;
         // At first - check teacher access.
         if (block_exaport_user_can_see_artifacts_of_students()) {
             // The owner of item is a student of teacher
@@ -765,9 +764,26 @@ namespace {
         $itemsforuser = block_exaport_get_items_shared_to_user($userid, true, $itemid);
         if (array_key_exists($itemid, $itemsforuser)) {
             return $itemsforuser[$itemid]->userid;
-        } else {
-            return false;
         }
+        // Check items in self category (other users can put items to my category
+        if ($item = $DB->get_record('block_exaportitem', ['id' => $itemid])) {
+            $itemcat = $DB->get_record('block_exaportcate', ['id' => $item->categoryid]);
+            if ($itemcat->userid == $USER->id) {
+                return $item->userid;
+            }
+            // if I also have the same shared category - I can see items in this category
+            $sharedcatids = [];
+            $sharedcategories = \block_exaport\get_categories_shared_to_user($USER->id);
+            if ($sharedcategories) {
+                foreach ($sharedcategories as $shcat) {
+                    $sharedcatids = array_merge($sharedcatids, array_keys($shcat->categories));
+                }
+            }
+            if (in_array($item->categoryid, $sharedcatids)) {
+                return $item->userid;
+            }
+        }
+        return false;
     }
 
     function block_exaport_get_group_share_categories($userid) {
@@ -777,7 +793,7 @@ namespace {
         }
 
         return g::$DB->get_records_sql("
-            SELECT catid
+            SELECT DISTINCT catid
             FROM {block_exaportcatgroupshar}
             WHERE groupid IN (".join(',', array_keys($usergroups)).")");
     }

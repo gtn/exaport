@@ -336,6 +336,7 @@ $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedwith_group'] = 'Shared with my group';
+$string['sharedwith_group_cnt'] = 'Shared with {$a} group';
 
 // === Copy to course.
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';
@@ -549,6 +550,8 @@ $string['lang_categories'] = '';
 
 // === Message.
 $string['messageprovider:sharing'] = 'Sharing notifications';
+
+$string['list'] = 'List';
 
 // === Not Used Anymore.
 $string['i_shared'] = 'I shared an eportfolio view with you';

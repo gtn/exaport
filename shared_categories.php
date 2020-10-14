@@ -56,13 +56,14 @@ $usercats = block_exaport_get_group_share_categories($USER->id);
 $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
 $categories = $DB->get_records_sql("
     SELECT
-        {$categorycolumns}, u.firstname, u.lastname, u.picture
-        , COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups
+        {$categorycolumns}, u.firstname, u.lastname, u.picture,
+        COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, 
+        COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups
     FROM {user} u
-    JOIN {block_exaportcate} c ON (u.id=c.userid AND c.userid!=?)
+    JOIN {block_exaportcate} c ON (u.id = c.userid AND c.userid != ?)
     LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?
-    LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id=cgshar.groupid
-    LEFT JOIN {block_exaportcatshar} cshar_total ON c.id=cshar_total.catid
+    LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid
+    LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid
     WHERE (
         (".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) -- only shared all, if enabled
         -- Shared for you group
@@ -74,7 +75,8 @@ $categories = $DB->get_records_sql("
         {$categorycolumns}, u.firstname, u.lastname, u.picture
     $sqlsort", array($USER->id, $USER->id));
 
-if ($action == 'copy') {
+// copying is disabled: SZ 13.10.2020
+if (11==22 && $action == 'copy') {
     $categoryid = optional_param('categoryid', 0, PARAM_INT);
 
     // Check if category can be accessed.
@@ -231,7 +233,8 @@ function exaport_print_structures($categories, $parsedsort) {
 
                     $table = new html_table();
                     $table->width = "100%";
-                    $table->size = array('40%', '20%', '20%', '20%');
+//                    $table->size = array('40%', '20%', '20%', '20%'); // with copying
+                    $table->size = array('40%', '30%', '30%'); // without copying
                     $table->head = array(
                             block_exaport_get_string('category'),
                             block_exaport_get_string("sharedwith"),
@@ -250,14 +253,15 @@ function exaport_print_structures($categories, $parsedsort) {
                         $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
                                 $structure->userid.'&categoryid='.$structure->id.'">
                                             <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
-                        $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
+                        // copying is disbled: SZ 13.10.2020
+                        /*$link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
                                             <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").
-                                '</a>';
+                                '</a>';*/
                         $table->data[] = array(
                                 $structurecontent,
-                                block_exaport_get_shared_with_text($structure),
+                                block_exaport_get_shared_with_text($structure, 'categories'),
                                 $link,
-                                $link2,
+//                                $link2,
                         );
                     }
 
@@ -277,7 +281,8 @@ function exaport_print_structures($categories, $parsedsort) {
             default:
                 $table = new html_table();
                 $table->width = "100%";
-                $table->size = array('1%', '20%', '20%', '20%', '20%', '20%');
+//                $table->size = array('1%', '20%', '20%', '20%', '20%', '20%'); // with copying
+                $table->size = array('1%', '25%', '25%', '25%', '25%'); // without copying
                 $table->head = array(
                         '',
                         get_string('user'),
@@ -295,15 +300,16 @@ function exaport_print_structures($categories, $parsedsort) {
                     $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
                             $structure->userid.'&categoryid='.$structure->id.'">
                                         <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
-                    $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
-                                        <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").'</a>';
+                    // copying is disbled: SZ 13.10.2020
+                    /*$link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
+                                        <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").'</a>';*/
                     $table->data[] = array(
                             $OUTPUT->user_picture($curuser, array("courseid" => $courseid)),
                             fullname($curuser),
                             $structurecontent,
-                            block_exaport_get_shared_with_text($structure),
+                            block_exaport_get_shared_with_text($structure, 'categories'),
                             $link,
-                            $link2,
+//                            $link2,
                     );
                 }
                 echo html_writer::table($table);
@@ -325,16 +331,77 @@ echo "</div>";
 echo block_exaport_wrapperdivend();
 echo block_exaport_print_footer();
 
-function block_exaport_get_shared_with_text($structure) {
+function block_exaport_get_shared_with_text($structure, $target = '') {
+    global $DB;
+    static $jsCode = null;
     $shared = "";
-    if ($structure->shareall) {
-        $shared = block_exaport_get_string('sharedwith_shareall');
-    } else if ($structure->cnt_shared_groups) {
-        $shared = block_exaport_get_string('sharedwith_group');
-    } else if ($structure->cnt_shared_users > 1) {
-        $shared = block_exaport_get_string('sharedwith_user_cnt', $structure->cnt_shared_users);
+    if ($jsCode === null) {
+        if ($target == 'categories') {
+            $jsCode = '
+                <script>
+                function toggleUsersList(elId) {                                                              
+                    var x = document.getElementById(elId);
+                    if (x.style.display === "none") {
+                        x.style.display = "block";
+                    } else {
+                        x.style.display = "none";
+                    };
+                    return false;
+                }
+                </script>
+            ';
+            $shared .= $jsCode;
+        }
+    }
+
+    if ($structure->cnt_shared_groups == 1) {
+        $shared .= block_exaport_get_string('sharedwith_group');
+    } else if ($structure->cnt_shared_groups > 1) {
+        $shared .= block_exaport_get_string('sharedwith_group_cnt', $structure->cnt_shared_groups);
+        if ($target == 'categories') {
+            $shared .= '&nbsp;(<a onClick="return toggleUsersList(\'groupList' . $structure->id . '\')" href="">';
+            $shared .= block_exaport_get_string('list');
+            $shared .= '</a>)';
+            // add list of shared users
+            $sharedgroups = $DB->get_records_sql(
+                'SELECT c.* 
+                FROM {block_exaportcatgroupshar} cgmm 
+                LEFT JOIN {cohort} c ON c.id = cgmm.groupid
+                WHERE cgmm.catid = ?
+                ORDER BY c.name',
+                [$structure->id]
+            );
+            $shared .= '<ul class="exaport-shared-list" style="display: none;" id="groupList' . $structure->id . '">';
+            foreach ($sharedgroups as $group) {
+                $shared .= '<li>' . $group->name . '</li>';
+            }
+            $shared .= '</ul>';
+        }
+    } else if ($structure->shareall) {
+        $shared .= block_exaport_get_string('sharedwith_shareall');
+    } else  if ($structure->cnt_shared_users > 1) {
+        $shared .= block_exaport_get_string('sharedwith_user_cnt', $structure->cnt_shared_users);
+        if ($target == 'categories') {
+            $shared .= '&nbsp;(<a onClick="return toggleUsersList(\'usersList' . $structure->id . '\')" href="">';
+            $shared .= block_exaport_get_string('list');
+            $shared .= '</a>)';
+            // add list of shared users
+            $sharedusers = $DB->get_records_sql(
+                'SELECT u.* 
+                FROM {block_exaportcatshar} csmm 
+                LEFT JOIN {user} u ON u.id = csmm.userid
+                WHERE csmm.catid = ?
+                ORDER BY u.firstname, u.lastname',
+                [$structure->id]
+            );
+            $shared .= '<ul class="exaport-shared-list" style="display: none;" id="usersList' . $structure->id . '">';
+            foreach ($sharedusers as $user) {
+                $shared .= '<li>' . fullname($user) . '</li>';
+            }
+            $shared .= '</ul>';
+        }
     } else if ($structure->cnt_shared_users) {
-        $shared = block_exaport_get_string('sharedwith_onlyme');
+        $shared .= block_exaport_get_string('sharedwith_onlyme');
     }
     return $shared;
 }

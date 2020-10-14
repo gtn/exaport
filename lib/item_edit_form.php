@@ -106,7 +106,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->addElement('select', 'categoryid', get_string("category", "block_exaport"), array());
         $mform->addRule('categoryid', get_string("categorynotempty", "block_exaport"), 'required', null, 'client');
         $mform->setDefault('categoryid', 0);
-        $this->category_select_setup();
+        $this->category_select_setup($this->_customdata['cattype'], $this->_customdata['catid']);
         $mform->addExaportHelpButton('categoryid', 'forms.item.categoryid');
 
         if ($type == 'link') {
@@ -228,14 +228,32 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         }
     }
 
-    public function category_select_setup() {
+    public function category_select_setup($categorytype = '', $selectedcat = 0) {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;
         $categorysselect = &$mform->getElement('categoryid');
         $categorysselect->removeOptions();
 
-        $conditions = array("userid" => $USER->id, "pid" => 0);
-        $outercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
+        if ($categorytype == 'shared') {
+            // only shared categories
+            $sharedcatids = [];
+            $sharedcategories = \block_exaport\get_categories_shared_to_user($USER->id);
+            if ($sharedcategories) {
+                foreach ($sharedcategories as $shcat) {
+                    $sharedcatids = array_merge($sharedcatids, array_keys($shcat->categories));
+                }
+            }
+            if (in_array($selectedcat, $sharedcatids)) {
+                $conditions = array($selectedcat);
+                $outercategories = $DB->get_records_select("block_exaportcate", "id = ?", $conditions, "name asc");
+            } else {
+                $outercategories = null;
+            }
+        } else {
+            // only MY categories
+            $conditions = array("userid" => $USER->id, "pid" => 0);
+            $outercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
+        }
         $categories = array(
                 0 => block_exaport_get_root_category()->name
         );

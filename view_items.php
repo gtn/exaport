@@ -260,12 +260,17 @@ if ($type == 'sharedstudent') {
             throw new moodle_exception('not allowed');
         }
 
+        $usercondition = ' i.userid = '.intval($selecteduser->id). ' ';
+        if ($type == 'shared') {
+            $usercondition = ' i.userid > 0 ';
+        }
+
         $items = $DB->get_records_sql("
             SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
             WHERE i.categoryid = ?
-                AND i.userid = ?
+                AND ".$usercondition."
                 AND ".block_exaport_get_item_where().
             " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
             i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
@@ -273,7 +278,7 @@ if ($type == 'sharedstudent') {
             i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
             i.iseditable, i.example_url, i.parentid
             $sqlsort
-        ", [$currentcategory->id, $selecteduser->id]);
+        ", [$currentcategory->id]);
     }
 
 } else {
@@ -325,11 +330,12 @@ if ($type == 'sharedstudent') {
     $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
 
     // Common items.
+    // SZ 14.10.2020 - shows not only own items. here can be items from other users if the folder was shared
     $items = $DB->get_records_sql("
             SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE i.userid = ? AND i.categoryid=?
+            WHERE "/*i.userid = ? AND*/." i.categoryid = ?
                 AND ".block_exaport_get_item_where().
             " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
             i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
@@ -337,7 +343,7 @@ if ($type == 'sharedstudent') {
             i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
             i.iseditable, i.example_url, i.parentid
             $sqlsort
-        ", [$USER->id, $currentcategory->id]);
+        ", [/*$USER->id, */$currentcategory->id]);
 }
 
 $PAGE->set_url($currentcategory->url);
@@ -393,24 +399,32 @@ if ($type == 'mine') {
 }
 
 echo '<div class="excomdos_additem">';
-if ($type == 'mine') {
+if (in_array($type, ['mine', 'shared'])) {
+    $cattype = '';
+    if ($type == 'shared') {
+        $cattype = '&cattype=shared';
+    }
     echo '<div class="excomdos_additem_content">';
-    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?action=add&courseid='.$courseid.'&pid='.$categoryid.'">'.
-            '<img src="pix/folder_new_32.png" /><br />'.get_string("category", "block_exaport")."</a></span>";
-    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.
+    if ($type == 'mine') {
+        echo '<span><a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid . '">' .
+            '<img src="pix/folder_new_32.png" /><br />' . get_string("category", "block_exaport") . "</a></span>";
+    }
+    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
             '&type=link">'.
             '<img src="pix/link_new_32.png" /><br />'.get_string("link", "block_exaport")."</a></span>";
-    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.
+    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
             '&type=file">'.
             '<img src="pix/file_new_32.png" /><br />'.get_string("file", "block_exaport")."</a></span>";
-    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.
+    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
             '&type=note">'.
             '<img src="pix/note_new_32.png" /><br />'.get_string("note", "block_exaport")."</a></span>";
     // Anzeigen wenn kategorien vorhanden zum importieren aus sprachfile.
-    $categories = trim(get_string("lang_categories", "block_exaport"));
-    if ($categories) {
-        echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?action=addstdcat&courseid='.$courseid.'">'.
-                '<img src="pix/folder_new_32.png" /><br />'.get_string("addstdcat", "block_exaport")."</a></span>";
+    if ($type == 'mine') {
+        $categories = trim(get_string("lang_categories", "block_exaport"));
+        if ($categories) {
+            echo '<span><a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?action=addstdcat&courseid=' . $courseid . '">' .
+                '<img src="pix/folder_new_32.png" /><br />' . get_string("addstdcat", "block_exaport") . "</a></span>";
+        }
     }
     echo '</div>';
 }
@@ -730,20 +744,34 @@ if ($layout == 'details') {
                         }
                         echo block_exaport_get_item_comp_icon($item);
 
-                        if ($type == 'mine') {
-                            ?>
-                            <a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.
-                                    '&action=edit'; ?>"><img src="pix/edit.png" alt="file"></a>
-                            <?php
-                            if ($allowedit = block_exaport_item_is_editable($item->id)) {
-                            ?>
-                                <a href="<?php echo $CFG->wwwroot.'/blocks/exaport/item.php?courseid='.$courseid.'&id='.$item->id.
-                                        '&action=delete&categoryid='.$categoryid; ?>"><img src="pix/del.png" alt="file"></a>
-                            <?php
-                            } else {
-                            ?>
-                                <img src="pix/deleteview.png" alt="file">
-                            <?php
+                        if (in_array($type, ['mine', 'shared'])) {
+                            $cattype = '';
+                            if ($type == 'shared') {
+                                $cattype = '&cattype=shared';
+                            }
+                            if ($item->userid == $USER->id) { // only for self!
+                                echo '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id .
+                                    '&action=edit'.$cattype.'"><img src="pix/edit.png" alt="file"></a>';
+                            }
+                            if (($type == 'mine' && $allowedit = block_exaport_item_is_editable($item->id)) // strange condition. If exacomp is not used - always allowed!
+                                    || $item->userid == $USER->id) {
+                                if ($item->userid == $USER->id) {
+                                    echo '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id .
+                                        '&action=delete&categoryid=' . $categoryid . $cattype . '"><img src="pix/del.png" alt="file"></a>';
+                                }
+                            } else if (!$allowedit = block_exaport_item_is_editable($item->id)) {
+                                echo '<img src="pix/deleteview.png" alt="file">';
+                            }
+                            if ($item->userid != $USER->id) {
+                                $itemuser = $DB->get_record('user', ['id' => $item->userid]);
+                                // user icon
+                                echo '<a class="" role="button" data-container="body" 
+                                            './*data-toggle="popover" data-placement="bottom" // popover does not work in Firefox
+                                            data-content="'.fullname($itemuser).'" tabindex="0" data-trigger="hover".*/'
+                                            title="'.fullname($itemuser).'">
+                                        <img src="pix/personal.png">
+                                      </a>';
+//                                echo '<img src="pix/personal.png" alt="'.fullname($itemuser).'" title="'.fullname($itemuser).'">';
                             }
                         }
                     }

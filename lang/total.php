@@ -1234,6 +1234,10 @@ return [
                 'Mit meiner Gruppe geteilt',
                 'Shared with my group',
         ],
+        'sharedwith_group_cnt' => [
+            'Mit {$a} Gruppe geteilt',
+            'Shared with {$a} groups',
+        ],
 
         // === Copy to course.
         'filecopiedtocourse' => [
@@ -2003,4 +2007,8 @@ return [
             'Ver&ouml;ffentlichung gespeichert',
             'View sharing updated',
         ],
+        'list' => [
+            'Liste',
+            'List',
+        ]
 ];

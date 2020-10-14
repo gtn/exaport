@@ -335,6 +335,7 @@ $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
 $string['sharedwith_shareall'] = 'Mit allen Benutzern geteilt';
 $string['sharedwith_shareexternal'] = 'Geteilte externe Views';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
+$string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
 
 // === Copy to course.
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';
@@ -548,6 +549,8 @@ $string['browseportfolio'] = 'Inhalt anzeigen';
 
 // === Message.
 $string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit mir teilt';
+
+$string['list'] = 'Liste';
 
 // === Not Used Anymore.
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';

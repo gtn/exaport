@@ -1983,8 +1983,6 @@ return [
             'Download as Pdf',
             'Download as Pdf',
         ],
-<<<<<<< HEAD
-=======
         'selected_competencies' => [
             'Erreichte Kompetenz',
             'Achieved Competency'
@@ -2005,5 +2003,4 @@ return [
             'Ver&ouml;ffentlichen gespeichert',
             'View sharing updated',
         ],
->>>>>>> e4c27a2... import bugs and wordings
 ];

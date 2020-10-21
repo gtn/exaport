@@ -554,11 +554,11 @@ $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';
-<<<<<<< HEAD
-=======
+
+
 $string['selected_competencies'] = 'Erreichte Kompetenz';
 $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = 'Titel help text';
 $string['view_saved'] = 'View gespeichert';
 $string['view_sharing_updated'] = 'Ver&ouml;ffentlichen gespeichert';
->>>>>>> e4c27a2... import bugs and wordings
+

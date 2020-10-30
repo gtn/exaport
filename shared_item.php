@@ -208,8 +208,8 @@ function block_exaport_show_comments($item, $access) {
 
             if ($comment->userid == $USER->id) {
                 echo ' - <a href="'.s($_SERVER['REQUEST_URI'].'&commentid='.$comment->id.'&comment_delete=1&sesskey='.sesskey()).
-                        '" onclick="'.s('return confirm('.json_encode(get_string('comment_delete_confirmation')).')').
-                        '">'.get_string('delete').'</a>';
+                        '" onclick="'.s('return confirm('.json_encode(block_exaport_get_string('comment_delete_confirmation')).')').
+                        '">'.block_exaport_get_string('delete').'</a>';
             }
             echo '</div></td></tr>';
 

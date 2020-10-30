@@ -767,9 +767,11 @@ namespace {
         }
         // Check items in self category (other users can put items to my category
         if ($item = $DB->get_record('block_exaportitem', ['id' => $itemid])) {
-            $itemcat = $DB->get_record('block_exaportcate', ['id' => $item->categoryid]);
-            if ($itemcat->userid == $USER->id) {
-                return $item->userid;
+            if ($item->categoryid > 0) { // not root category
+                $itemcat = $DB->get_record('block_exaportcate', ['id' => $item->categoryid]);
+                if ($itemcat->userid == $USER->id) {
+                    return $item->userid;
+                }
             }
             // if I also have the same shared category - I can see items in this category
             $sharedcatids = [];

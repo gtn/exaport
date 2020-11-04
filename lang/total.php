@@ -459,7 +459,7 @@ return [
                 'Import',
         ],
         'explainexport' => [
-                '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>',
+                '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>',
                 'Export your portfolio here.',
         ],
         'createexport' => [

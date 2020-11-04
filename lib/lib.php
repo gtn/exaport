@@ -368,12 +368,12 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
                                     $CFG->wwwroot.'/blocks/exaport/shared_categories.php?courseid='.$COURSE->id,
                                     block_exaport_get_string("shared_categories"), '', true);
     $tabtitle = get_string("importexport", "block_exaport");
-    $scriptname = basename($_SERVER['SCRIPT_NAME']);
+    /*$scriptname = basename($_SERVER['SCRIPT_NAME']);
     if ($scriptname == 'export_scorm.php') {
         $tabtitle = get_string("export_short", "block_exaport");
     } elseif ($scriptname == 'import_file.php') {
         $tabtitle = get_string("import_short", "block_exaport");
-    }
+    }*/
     $tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot.'/blocks/exaport/importexport.php?courseid='.$COURSE->id,
         $tabtitle, '', true);
 

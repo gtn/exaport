@@ -97,7 +97,7 @@ $string['summary'] = 'Summary (optional)';
 $string['url'] = 'URL';
 $string['maincategory'] = 'Main category';
 $string['subcategory'] = 'Sub category';
-$string['accessoptions'] = 'Access options';
+$string['accessoptions'] = 'Who has access?';
 $string['shareallexceptthose'] = 'Access for <span class=\'block_eportfolio_bold\'>all</span> (even those who aren\'t listed here) except the following users';
 $string['sharenoneexceptthose'] = 'Access for <span class=\'block_eportfolio_bold\'>nobody</span> except the following users';
 $string['internalaccessall'] = 'Access for <span class=\'block_eportfolio_bold\'>all</span>';
@@ -129,6 +129,7 @@ $string['make_it_yours'] = 'Make it yours';
 
 // === Export/import.
 $string['import'] = 'Import SCORM-File';
+$string['import_short'] = 'Import';
 $string['explainexport'] = 'Export your portfolio here.';
 $string['createexport'] = 'Create SCORM-File';
 $string['clicktodownloadscorm'] = 'Press button to download the SCORM file:';
@@ -229,6 +230,7 @@ $string['nouserforaccess'] = 'User not found (access-code unknown)';
 
 // === Export.
 $string['export'] = 'Export SCORM-File';
+$string['export_short'] = 'Export';
 $string['exportepx'] = 'Export EPX-File';
 $string['createepxexport'] = 'Create EPX-File';
 $string['exportviewselect'] = 'To export all items of a specific view, please select it here';
@@ -336,7 +338,7 @@ $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedwith_group'] = 'Shared with my group';
-$string['sharedwith_group_cnt'] = 'Shared with {$a} group';
+$string['sharedwith_group_cnt'] = 'Shared with {$a} groups';
 
 // === Copy to course.
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';
@@ -551,8 +553,6 @@ $string['lang_categories'] = '';
 // === Message.
 $string['messageprovider:sharing'] = 'Sharing notifications';
 
-$string['list'] = 'List';
-
 // === Not Used Anymore.
 $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';
@@ -563,3 +563,4 @@ $string['forms.item.title'] = 'Title';
 $string['forms.item.title_help'] = 'Title help text';
 $string['view_saved'] = 'View saved';
 $string['view_sharing_updated'] = 'View sharing updated';
+$string['list'] = 'List';

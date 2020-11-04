@@ -96,7 +96,7 @@ $string['summary'] = 'Gesamtaufstellung (optional)';
 $string['url'] = 'URL';
 $string['maincategory'] = 'Hauptkategorie';
 $string['subcategory'] = 'Unterkategorie';
-$string['accessoptions'] = 'Zugriffsoptionen';
+$string['accessoptions'] = 'Wer hat Zugriff?';
 $string['shareallexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern';
 $string['sharenoneexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer';
 $string['internalaccessall'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span>';
@@ -128,6 +128,7 @@ $string['make_it_yours'] = 'Mach\' es zu deinem Eigenen';
 
 // === Export/import.
 $string['import'] = 'Import SCORM-Datei';
+$string['import_short'] = 'Import';
 $string['explainexport'] = '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>';
 $string['createexport'] = 'SCORM-Datei erstellen';
 $string['clicktodownloadscorm'] = 'Folgenden Button drücken, um SCORM-Datei herunterzuladen:';
@@ -228,6 +229,7 @@ $string['nouserforaccess'] = 'Benutzer nicht gefunden (Zugriffscode unbekannt)';
 
 // === Export.
 $string['export'] = 'Export SCORM-Datei';
+$string['export_short'] = 'Export';
 $string['exportepx'] = 'Export EPX-Datei';
 $string['createepxexport'] = 'EPX-Datei erstellen';
 $string['exportviewselect'] = 'Um alle Einträge einer bestimmten View zu exportieren, bitte diese hier w&auml;hlen';
@@ -550,8 +552,6 @@ $string['browseportfolio'] = 'Inhalt anzeigen';
 // === Message.
 $string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit mir teilt';
 
-$string['list'] = 'Liste';
-
 // === Not Used Anymore.
 $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';
@@ -562,3 +562,4 @@ $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = 'Titel help text';
 $string['view_saved'] = 'View gespeichert';
 $string['view_sharing_updated'] = 'Ver&ouml;ffentlichung gespeichert';
+$string['list'] = 'Liste';

@@ -333,8 +333,8 @@ return [
                 'Sub category',
         ],
         'accessoptions' => [
-                'Zugriffsoptionen',
-                'Access options',
+                'Wer hat Zugriff?',
+                'Who has access?',
         ],
         'shareallexceptthose' => [
                 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern',
@@ -453,6 +453,10 @@ return [
         'import' => [
                 'Import SCORM-Datei',
                 'Import SCORM-File',
+        ],
+        'import_short' => [
+                'Import',
+                'Import',
         ],
         'explainexport' => [
                 '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export/Import:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>',
@@ -823,6 +827,10 @@ return [
         'export' => [
                 'Export SCORM-Datei',
                 'Export SCORM-File',
+        ],
+        'export_short' => [
+                'Export',
+                'Export',
         ],
         'exportepx' => [
                 'Export EPX-Datei',

@@ -485,7 +485,7 @@ namespace block_exaport\common {
             // It is needed for security reasons
 
             // uncomment from here
-            /*
+
 
             // Regenerate.
 

@@ -1314,7 +1314,7 @@ return [
         ],
         'cofigureblock_cvinfo_mbrship' => [
                 'Mitgliedschaften',
-                'Professional memberships',
+                'Memberships',
         ],
         'cofigureblock_cvinfo_goals' => [
                 'Meine Ziele',
@@ -1582,7 +1582,7 @@ return [
         ],
         'resume_cover' => [
                 'Begleit-Informationen',
-                'Cover letter',
+                'Personal information',
         ],
         'resume_coversaved' => [
                 'Begleit-Informationen gespeichert',
@@ -1750,7 +1750,7 @@ return [
         ],
         'resume_mbrship' => [
                 'Mitgliedschaften',
-                'Professional memberships',
+                'Memberships',
         ],
         'resume_mbrshipsaved' => [
                 'Mitgliedschaften gespeichert',
@@ -1837,7 +1837,7 @@ return [
                 'Educational standards',
         ],
         'resume_badges' => [
-                'Abzeichen',
+                'Moodle-Auszeichnungen',
                 'Badges',
         ],
         'resume_exportto_europass' => [

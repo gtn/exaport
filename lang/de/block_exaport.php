@@ -507,7 +507,7 @@ $string['resume_skillsacademicsaved'] = 'Bildungs-Kompetenzen gespeichert';
 $string['resume_skillscareerssaved'] = 'Karriere-Kompetenzen gespeichert';
 $string['resume_goalscomp'] = 'Kompetenzen';
 $string['resume_skillscomp'] = 'Kompetenzen';
-$string['resume_badges'] = 'Abzeichen';
+$string['resume_badges'] = 'Moodle-Auszeichnungen';
 $string['resume_exportto_europass'] = 'Export für Europass';
 $string['resume_exportto_europass_intro'] = 'Ein Lebenslauf kann von der Exportdatei generiert werden, indem man den
     <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">Online-Europass CV Editor verwendet</a><br><br>

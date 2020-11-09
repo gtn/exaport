@@ -378,6 +378,10 @@ if ($exacompactive) {
                 // Prevent item open/close.
                 e.stopPropagation();
             });
+
+            var $compids = $('input[name=compids]');
+            var $descriptors = $('#treeform :checkbox');
+
             $(".competences").colorbox({
                 width: "75%", height: "75%", inline: true, href: "#inline_comp_tree", onClosed: function () {
                     // Save ids to input field.
@@ -391,9 +395,6 @@ if ($exacompactive) {
                 }
             });
             ddtreemenu.createTree("comptree", true);
-
-            var $compids = $('input[name=compids]');
-            var $descriptors = $('#treeform :checkbox');
 
             function build_competence_output() {
                 var $tree = $('#comptree').clone();

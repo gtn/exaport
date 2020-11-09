@@ -335,7 +335,7 @@ if ($type == 'sharedstudent') {
             SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE "/*i.userid = ? AND*/." i.categoryid = ?
+            WHERE "/*i.userid = ? AND*/." i.categoryid = ? ".($currentcategory->id > 0 ? "" : " AND i.userid = ? " )."
                 AND ".block_exaport_get_item_where().
             " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
             i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
@@ -343,7 +343,7 @@ if ($type == 'sharedstudent') {
             i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
             i.iseditable, i.example_url, i.parentid
             $sqlsort
-        ", [/*$USER->id, */$currentcategory->id]);
+        ", [$currentcategory->id, $USER->id]);
 }
 
 $PAGE->set_url($currentcategory->url);
@@ -363,7 +363,6 @@ echo "</div>";
 block_exaport_set_user_preferences(array('itemsort' => $sort, 'view_items_layout' => $layout));
 
 echo '<div class="excomdos_cont excomdos_cont-type-'.$type.'">';
-
 if ($type == 'mine') {
     echo get_string("categories", "block_exaport").": ";
     echo '<select onchange="document.location.href=\''.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.

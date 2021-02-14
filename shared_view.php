@@ -589,7 +589,8 @@ function pdfView($view, $colslayout, $dataForPdf) {
     $pdfContent .= '<body>';
     $pdfContent .= '<style>
         body {
-            font-family: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+            /* only dejavu sans supports greek characters, but chinese is not working */
+            font-family: "dejavu sans";
             font-size: 14px;
         }
         .view-table td {

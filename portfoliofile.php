@@ -37,7 +37,8 @@ if (empty($CFG->filelifetime)) {
     $lifetime = $CFG->filelifetime;
 }
 
-// Disable moodle specific debug messages.
+// needed, because diggr-plus is loading files via xhr
+header("Access-Control-Allow-Origin: *");
 
 // The check of the parameter to PARAM_PATH is executed inside get_file_argument.
 $relativepath = get_file_argument('portfoliofile.php');

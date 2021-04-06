@@ -648,6 +648,7 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences) 
 
     //RW 2021.04.06 using block_exaport_get_active_comps_for_item
     $descriptors = $competences["descriptors"];
+    $topics = $competences["topics"];
 
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
                 <tr><td><h2>".$item->name."</h2></td></tr>";
@@ -670,6 +671,21 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences) 
             $bgcolor = ' style="background-color:#ffffff" ';
         }
         $content .= '<tr '.$bgcolor.'><td>'.$descriptor->title.'</td></tr>';
+        /* <td>
+        <input'.$dis_teacher.'type="checkbox" name="data[' . $descriptor->id . ']" checked="###checked' . $descriptor->id . '###" />
+        </td>
+        <td><input'.$dis_student.'type="checkbox" name="eval[' . $descriptor->id . ']" checked="###eval' . $descriptor->id . '###"/>
+        </td></tr>';*/
+    }
+    foreach ($topics as $topic) {
+        if ($trclass == "even") {
+            $trclass = "odd";
+            $bgcolor = ' style="background-color:#efefef" ';
+        } else {
+            $trclass = "even";
+            $bgcolor = ' style="background-color:#ffffff" ';
+        }
+        $content .= '<tr '.$bgcolor.'><td>'.$topic->title.'</td></tr>';
         /* <td>
         <input'.$dis_teacher.'type="checkbox" name="data[' . $descriptor->id . ']" checked="###checked' . $descriptor->id . '###" />
         </td>

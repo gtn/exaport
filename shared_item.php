@@ -162,10 +162,10 @@ if ($item->access->page == 'view') {
 
 if (block_exaport_check_competence_interaction()) {
     // Begin.
-    $hascompetences = block_exaport_check_item_competences($item);
-    if ($hascompetences) {
+    $competences = block_exaport_get_active_comps_for_item($item);
+    if ($competences) {
         // Für alle rollen? Keine interaktion?
-        block_exaport_build_comp_table($item);
+        block_exaport_build_comp_table($item, null, $competences);
     }
     // End.
 } else {

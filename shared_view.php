@@ -154,7 +154,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $competencies = null;
 
                     if ($comp) {
-                        $competencies = block_exaport_get_active_comps_for_item($item);
+                        $competencies = block_exaport_get_active_comps_for_item($item)["descriptors"];
 
                         if ($competencies) {
                             $competenciesoutput = "";

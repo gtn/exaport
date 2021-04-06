@@ -804,22 +804,19 @@ function block_exaport_get_item_comp_icon($item) {
         return;
     }
 
-    $compids = block_exaport_get_active_compids_for_item($item);
+    $comps = block_exaport_get_active_comps_for_item($item);
 
-    if (!$compids) {
+    if (!$comps) {
         return;
     }
 
     // If item is assoziated with competences display them.
     $competences = "";
-    foreach ($compids as $compid) {
-
-        $conditions = array("id" => $compid);
-        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*', $strictness = IGNORE_MISSING);
-
-        if ($competencesdb != null) {
-            $competences .= $competencesdb->title.'<br>';
-        }
+    foreach ($comps["descriptors"] as $comp) {
+        $competences .= $comp->title.'<br>';
+    }
+    foreach ($comps["topics"] as $comp) {
+        $competences .= $comp->title.'<br>';
     }
     $competences = str_replace("\r", "", $competences);
     $competences = str_replace("\n", "", $competences);

@@ -637,14 +637,18 @@ function block_exaport_check_competence_interaction() {
             class_exists('\block_exacomp\api') && \block_exacomp\api::active();
 }
 
-function block_exaport_build_comp_table($item, $role = "teacher") {
+function block_exaport_build_comp_table($item, $role = "teacher", $competences) {
     global $DB;
 
     // TODO: refactor: use block_exaport_get_active_comps_for_item instead.
-    $sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id ".
-            " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY."} da ".
-            " WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
-    $descriptors = $DB->get_records_sql($sql, array($item->id));
+//    $sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id ".
+//            " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY."} da ".
+//            " WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
+//    $descriptors = $DB->get_records_sql($sql, array($item->id));
+
+    //RW 2021.04.06 using block_exaport_get_active_comps_for_item
+    $descriptors = $competences["descriptors"];
+
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
                 <tr><td><h2>".$item->name."</h2></td></tr>";
 
@@ -715,17 +719,17 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
  * @deprecated refactor to use block_exaport_get_active_comps_for_item
  */
 function block_exaport_get_active_compids_for_item($item) {
-    $ids = array_keys(block_exaport_get_active_comps_for_item($item));
+    $ids = array_keys(block_exaport_get_active_comps_for_item($item)["descriptors"]); //TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
 
     return array_combine($ids, $ids);
 }
 
 function block_exaport_check_item_competences($item) {
-    return (bool) block_exaport_get_active_comps_for_item($item);
+    return (bool) block_exaport_get_active_comps_for_item($item)["descriptors"];
 }
 
 function block_exaport_get_active_comps_for_item($item) {
-    return \block_exacomp\api::get_active_comps_for_exaport_item($item->id);
+    return \block_exacomp\api::get_active_comps_for_exaport_item($item->id, $item->userid, $item->courseid);
 }
 
 function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) {

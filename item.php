@@ -118,7 +118,11 @@ if ($existing) {
 $exacompactive = block_exaport_check_competence_interaction();
 if ($existing && $exacompactive) {
     // For the tree.
-    $existing->compids_array = array_keys(block_exaport_get_active_comps_for_item($existing)["descriptors"]);
+    if ($compstmp = block_exaport_get_active_comps_for_item($existing) && is_array($compstmp) && array_key_exists('descriptors', $compstmp) ) {
+        $existing->compids_array = array_keys($compstmp['descriptors']);
+    } else {
+        $existing->compids_array = [];
+    }
     // For form.
     $existing->compids = join(',', $existing->compids_array);
 }

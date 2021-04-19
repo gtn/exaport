@@ -29,6 +29,8 @@ function block_exaport_get_user_from_hash($hash) {
 function block_exaport_print_extern_item($item, $access) {
     global $CFG, $OUTPUT;
     echo $OUTPUT->heading(format_string($item->name));
+    $tags = \core_tag_tag::get_item_tags('block_exaport', 'block_exaportitem', $item->id);
+    echo $OUTPUT->tag_list($tags, null, 'exaport-artifact-tags', 0, null, false);
 
     $boxcontent = '';
     if ($files = block_exaport_get_item_files($item)) {

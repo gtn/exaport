@@ -735,8 +735,11 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
  * @deprecated refactor to use block_exaport_get_active_comps_for_item
  */
 function block_exaport_get_active_compids_for_item($item) {
-    $ids = array_keys(block_exaport_get_active_comps_for_item($item)["descriptors"]); //TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
-
+    if ($comps = block_exaport_get_active_comps_for_item($item) && is_array($comps) && array_key_exists('descriptors', $comps)) {
+        $ids = array_keys($comps); //TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
+    } else {
+        $ids = [];
+    }
     return array_combine($ids, $ids);
 }
 
@@ -745,7 +748,7 @@ function block_exaport_check_item_competences($item) {
 }
 
 function block_exaport_get_active_comps_for_item($item) {
-    return \block_exacomp\api::get_active_comps_for_exaport_item($item->id, $item->userid, $item->courseid);
+    return \block_exacomp\api::get_active_comps_for_exaport_item($item->id, $item->userid, @$item->courseid);
 }
 
 function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) {
@@ -1655,12 +1658,13 @@ function block_exaport_get_item_tags($itemid, $orderby = '') {
  * @return \core_tag\output\tagindex
  */
 function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx = 0, $ctx = 0, $rec = 1, $page = 0) {
-    global $OUTPUT;
+    global /*$OUTPUT, */$USER;
+    $OUTPUT = block_exaport_get_renderer();
     $perpage = $exclusivemode ? 20 : 5;
 
     // Build the SQL query.
     /* $ctxselect = context_helper::get_preload_record_columns_sql('ctx'); */
-    $query = "SELECT i.id, i.name, i.type, i.userid, cat.name AS categoryname, i.categoryid
+    $query = "SELECT i.id, i.name, i.type, i.userid, cat.name AS categoryname, i.categoryid, i.courseid
                 FROM {block_exaportitem} i
                 LEFT JOIN {block_exaportcate} cat ON i.categoryid = cat.id
                 JOIN {tag_instance} tt ON i.id = tt.itemid
@@ -1672,6 +1676,35 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
 
     // Use core_tag_index_builder to build and filter the list of items.
     $builder = new core_tag_index_builder('block_exaport', 'block_exaportitem', $query, $params, $page * $perpage, $perpage + 1);
+    $shareditems = block_exaport_get_items_shared_to_user($USER->id, true, null);
+    if ($shareditems && is_array($shareditems)) {
+        $shareditemuids = array_keys($shareditems);
+    } else {
+        $shareditemuids = [];
+    }
+    // access rules
+    while ($item = $builder->has_item_that_needs_access_check()) {
+        context_helper::preload_from_record($item);
+        $courseid = $item->courseid;
+        if (!$builder->can_access_course($courseid)) {
+            $builder->set_accessible($item, false);
+            continue;
+        }
+        $modinfo = get_fast_modinfo($builder->get_course($courseid));
+        // Set accessibility of this item and all other items in the same course.
+        $builder->walk(function ($taggeditem) use ($courseid, $modinfo, $builder, $item, $shareditemuids, $USER) {
+//            if ($taggeditem->courseid == $courseid) {
+                $accessible = false;
+                // TODO: check rules: courseid?,...
+                if ($taggeditem->userid == $USER->id // owner of artifact
+                    || in_array($taggeditem->id, $shareditemuids) // shared items
+                ) {
+                   $accessible = true;
+                }
+                $builder->set_accessible($taggeditem, $accessible);
+//            }
+        });
+    }
     $items = $builder->get_items();
     if (count($items) > $perpage) {
         $totalpages = $page + 2; // We don't need exact page count, just indicate that the next page exists.
@@ -1688,7 +1721,7 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
             $itemname = html_writer::link($itemurl, $itemname);
             $categoryname = $item->categoryname;
             $iconsrc = new moodle_url('/blocks/exaport/item_thumb.php', array('item_id' => $item->id));
-            $icon = html_writer::link($itemurl, html_writer::empty_tag('img', array('src' => $iconsrc)));
+            $icon = html_writer::link($itemurl, html_writer::empty_tag('img', array('src' => $iconsrc, 'style' => 'height: 100%;')));
             $tagfeed->add($icon, $itemname, $categoryname);
         }
 

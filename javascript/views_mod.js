@@ -758,4 +758,11 @@ Y.use('moodle-core-notification-dialogue');
         update_sharing();
     });
 
+    $('body').on('click', '[data-toggle="popover"]', function(e) {
+        e.preventDefault();
+        $(this).fu_popover();
+        // $(this).fu_popover('show');
+    });
+
+
 })(jQueryExaport);

@@ -45,7 +45,10 @@ if (!$COURSE) {
 
 // Include JS script.
 $PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
-//$PAGE->requires->js(new moodle_url($CFG->wwwroot.'/blocks/exaport/javascript/jquery.ui.touch-punch.min.js'), false);
+//$config = ['paths' => ['block_exaport/popover' => $CFG->wwwroot.'/blocks/exaport/javascript/popover.min']];
+//$requirejs = 'require.config(' . json_encode($config) . ')';
+//$PAGE->requires->js_amd_inline($requirejs);
+$PAGE->requires->js(new moodle_url($CFG->wwwroot.'/blocks/exaport/javascript/popover.min.js'), false);
 //$PAGE->requires->js_call_amd('block_exaport/config', 'initialise');
 $PAGE->requires->css('/blocks/exaport/css/preloadinator.css', true);
 

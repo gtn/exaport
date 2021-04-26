@@ -2,7 +2,7 @@ var exaportViewEdit;
 var newItem = null, lastclicked = null;
 
 define(['jquery',
-        'block_exaport/jquery.json',
+        'block_exaport/jquery-json',
         'jqueryui',
         'block_exaport/touchpunch',
         'core/modal_factory',
@@ -10,6 +10,7 @@ define(['jquery',
         function($, json, jqui, jquitp, modalFactory, modalEvents) {
 
     var dialogue;
+    var helpDialogue;
     var last_popup;
 
     var defaultModalOptions = {
@@ -839,7 +840,7 @@ define(['jquery',
             },
             receive: function(e, ui){
 
-console.log('start to modal!');
+                console.log('start to modal!');
 
                 // Get ajax only for item from the top block.
                 var uiattr = $(ui.item[0]).closest('ul').prop("className");
@@ -913,6 +914,31 @@ console.log('start to modal!');
                 showPreloadinator($(ui.helper), '', false);
             }
         });
+        $('body').on('click', '[data-toggle="gtn-help-modal"]', function(e) {
+            e.preventDefault();
+            var trigger = $(this);
+            var title = $(this).attr('data-title');
+            var content = $(this).attr('data-content');
+            if (helpDialogue) {
+                helpDialogue.setTitle(title);
+                helpDialogue.setBody(content);
+                helpDialogue.show();
+            } else {
+                modalFactory.create({
+                    title: title,
+                    body: content,
+                    footer: '',
+                }, trigger).done(function (modal) {
+                    helpDialogue = modal;
+                    helpDialogue.setTitle(title);
+                    helpDialogue.setBody(content);
+                    // Display the dialogue.
+                    helpDialogue.show();
+                });
+            }
+        });
+
+
     } // End initContentEdit.
 
     function showPreloadinator(element, tohide, fixedposition) {

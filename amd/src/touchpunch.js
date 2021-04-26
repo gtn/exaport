@@ -1,3 +1,3 @@
-define(['block_exaport/config', 'jquery.touchpunch'], function(unused, touchpunch) {
+define(['block_exaport/config', 'block_exaport/touchpunch'], function(unused, touchpunch) {
         return '_';
 });

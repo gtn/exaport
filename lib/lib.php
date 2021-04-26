@@ -304,8 +304,10 @@ function block_exaport_init_js_css() {
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
 
-    /* $PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-    $PAGE->requires->js_call_amd('block_exaport/json', 'initialise'); */
+    // possible problems with $CONF->cachejs = false!
+
+//    $PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+//    $PAGE->requires->js_call_amd('block_exaport/json', 'initialise');
 
     $PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
@@ -735,7 +737,8 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
  * @deprecated refactor to use block_exaport_get_active_comps_for_item
  */
 function block_exaport_get_active_compids_for_item($item) {
-    if ($comps = block_exaport_get_active_comps_for_item($item) && is_array($comps) && array_key_exists('descriptors', $comps)) {
+    $comps = block_exaport_get_active_comps_for_item($item);
+    if ($comps && is_array($comps) && array_key_exists('descriptors', $comps)) {
         $ids = array_keys($comps); //TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
     } else {
         $ids = [];

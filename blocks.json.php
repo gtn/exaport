@@ -649,7 +649,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
 }
 
 function get_form_media($id, $blockdata = array()) {
-    global $CFG, $PAGE, $USER, $action;
+    global $CFG, $PAGE, $USER, $action, $OUTPUT;
 
     $content = "";
     $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" class="pieform" '.
@@ -666,7 +666,12 @@ function get_form_media($id, $blockdata = array()) {
     $content .= '<div for="block_title" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
     $content .= '</td></tr>';
     $content .= '<tr><th>';
-    $content .= '<label for="mediacontent">'.get_string('mediacontent', 'block_exaport').'</label>';
+    $helpicon = $OUTPUT->pix_icon('help', get_string('mediacontent', 'block_exaport'), 'moodle', array('class'=>'iconhelp'));
+    $content .= '<label for="mediacontent">'.get_string('mediacontent', 'block_exaport').'</label>
+                    &nbsp;<span class="exaport-helpicon"
+                            data-toggle="gtn-help-modal" 
+                            data-title="'.block_exaport_get_string('what_is_embed_code_title').'"
+                            data-content="'.block_exaport_get_string('what_is_embed_code_content').'">'.$helpicon.'</span>';
     $content .= '</th></tr>';
     $content .= '<tr><td>';
     $content .= '<textarea tabindex="1" style="height: 100px; width: 100%;" name="mediacontent" id="block_media" '.

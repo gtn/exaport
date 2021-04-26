@@ -389,3 +389,7 @@
     border: none;
     margin: 0px;
 }
+
+.modal .exaport-helpicon {
+    cursor: pointer;
+}

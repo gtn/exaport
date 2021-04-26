@@ -43,7 +43,7 @@
         <licenseversion></licenseversion>
     </library>
     <library>
-        <location>javascript/jquery.json.js</location>
+        <location>javascript/jquery-json.js</location>
         <name>JSON library</name>
         <license>MIT</license>
         <version>1.6.3</version>

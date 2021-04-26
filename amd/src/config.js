@@ -1,12 +1,22 @@
 define([], function () {
     window.requirejs.config({
         paths: {
-            "jquery.touchpunch": M.cfg.wwwroot + '/blocks/exaport/javascript/jquery.ui.touch-punch',
+            "block_exaport/jquery-json": M.cfg.wwwroot + '/blocks/exaport/javascript/jquery-json',
+            "block_exaport/touchpunch": M.cfg.wwwroot + '/blocks/exaport/javascript/jquery.ui.touch-punch',
+            "block_exaport/popover": M.cfg.wwwroot + '/blocks/exaport/javascript/popover',
         },
         shim: {
-            'jquery.touchpunch': {
+            'block_exaport/jquery-json': {
+                deps: ['jquery'],
+                exports: 'json'
+            },
+            'block_exaport/touchpunch': {
                 deps: ['jquery', 'jqueryui'],
-                exports: '$'
+                exports: 'touchpunch'
+            },
+            'block_exaport/popover': {
+                deps: ['jquery'],
+                exports: 'fu_popover',
             },
         }
     });

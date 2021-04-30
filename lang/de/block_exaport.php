@@ -509,8 +509,12 @@ $string['resume_goalscomp'] = 'Kompetenzen';
 $string['resume_skillscomp'] = 'Kompetenzen';
 $string['resume_badges'] = 'Moodle-Auszeichnungen';
 $string['resume_exportto_europass'] = 'Export für Europass';
-$string['resume_exportto_europass_intro'] = 'Ein Lebenslauf kann von der Exportdatei generiert werden, indem man den
-    <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">Online-Europass CV Editor verwendet</a><br><br>
+$string['resume_exportto_europass_intro'] = '<p>Das Tool hilft den Nutzerinnen und Nutzern bei der Ermittlung von Lern- und Karrieremöglichkeiten. Im Hinblick auf Beratung und Service-Angebot ist das Profil auch für Arbeitgeber, Freiwilligenorganisationen, Recruiter/innen, Laufbahnberater/innen, Jugendorganisationen, Bildungseinrichtungen und andere Organisationen interessant.</p>
+        <p>We provide a way for using your CV from Exabis eProtfolio in Europass profile<br>
+            The generated XML-file has to be inserted into the page <a href="https://europa.eu/europass/eportfolio/screen/cv-editor?lang=de" target="_blank">Hier kannst du deinen Lebenslauf erstellen</a><br>
+            (better to be logged in in the Europass previously)<br>
+            Press the button "<strong>Europass-Lebenslauf importieren</strong>" and upload XML-file wich will genareted the button below
+        </p>
 
     Ein paar Kurznotizen:<br>
     <ul><li>Der generierte Lebenslauf sollte auf alle Fälle nochmals kontrolliert werden</li>

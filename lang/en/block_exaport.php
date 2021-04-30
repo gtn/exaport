@@ -510,15 +510,21 @@ $string['resume_goalscomp'] = 'Educational standards';
 $string['resume_skillscomp'] = 'Educational standards';
 $string['resume_badges'] = 'Badges';
 $string['resume_exportto_europass'] = 'Export to Europass';
-$string['resume_exportto_europass_intro'] = 'You can generate your Curriculum Vitae from your Exaport resume<br>
-    The generated XML-file has to be inserted into the <a href="https://europass.cedefop.europa.eu/editors/en/cv-esp/upload" target="_blank">online europass CV editor</a><br><br>
+$string['resume_exportto_europass_intro'] = '<p>The Europass profile can help people to plan their learning and career development. The profile can be used by organisations – employers, volunteer organisations, recruiters, guidance practitioners, youth organisations, education and training institutions and more – as part of the support and services they offer to people.</p>
+        <p>We provide a way for using your CV from Exabis eProtfolio in Europass profile<br>
+            The generated XML-file has to be inserted into the page <a href="https://europa.eu/europass/eportfolio/screen/cv-editor?lang=en" target="_blank">Create your CV</a><br>
+            (better to be logged in in the Europass previously)<br>
+            Press the button "Import Europass CV" and upload XML-file wich will genareted the button below
+        </p>
+    
     Some notes:<br>
-    <ul><li>You definitely need to check out the resulting CV</li>
+    <ul>
+        <li>You definitely need to check out the resulting CV</li>
         <li>Your personal data will be taken from your Moodle account</li>
-        <li>Please check all dates</li>
+        <li>Please check all dates, telephones, addresses</li>
         <li>Images from the HTML-editors will not be exported</li>
         <li>Most texts from the HTML-editors need to be reformatted</li>
-        <li>Requirements for attached files: accepted formats: PDF, PNG, JPG; size limit: 2.5MB.</li>
+        <li>Attached files are not implemented in new version of Europass, so they will not be imported</li>
     </ul>';
 $string['resume_exportto_europass_getXML'] = 'Download XML';
 $string['resume_expand'] = 'Expand all';

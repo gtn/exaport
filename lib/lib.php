@@ -1863,7 +1863,7 @@ function block_exaport_mix_images($sourceimages = array()) {
 }
 
 /**
- * clean HTML code for next displaying. Must be modified more and more id need
+ * clean HTML code for next displaying. Must be modified more and more if need
  * @param string $content
  * @param string $format
  * @return string

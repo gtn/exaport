@@ -52,9 +52,9 @@ class block_exaport_external extends external_api {
 
         $conditions = array("pid" => $level, "userid" => $USER->id);
         $categories = $DB->get_records("block_exaportcate", $conditions);
-        
+
         //RW add courseid if there is one:
-        //better: when creating 
+        //better: when creating
 
         $results = array();
 
@@ -1641,4 +1641,41 @@ class block_exaport_external extends external_api {
                 'config' => (object) [],
         ];
     }
+
+
+
+    public static function dakora_get_shared_categories_parameters() {
+        return new external_function_parameters(array());
+    }
+
+    /**
+     *
+     * @ws-type-read
+     * @return array
+     */
+    public static function dakora_get_shared_categories() {
+        global $CFG, $DB, $USER;
+        static::validate_parameters(static::diggrplus_get_config_parameters(), array());
+
+        // Categories for user groups.
+        $sqlsort = " ORDER BY c.name, u.lastname, u.firstname";
+        $usercats = block_exaport_get_group_share_categories($USER->id);
+        $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+        $categories = block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort);
+
+        return $categories;
+    }
+
+    /**
+     * Returns description of method return values
+     *
+     * @return external_multiple_structure
+     */
+    public static function dakora_get_shared_categories_returns() {
+        return new external_single_structure (array(
+            'exacompversion' => new external_value (PARAM_FLOAT, 'exacomp version number in YYYYMMDDXX format'),
+            'moodleversion' => new external_value (PARAM_FLOAT, 'moodle version number in YYYYMMDDXX format'),
+        ));
+    }
+
 }

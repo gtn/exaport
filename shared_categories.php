@@ -54,26 +54,7 @@ if ($parsedsort[0] == 'category') {
 $usercats = block_exaport_get_group_share_categories($USER->id);
 
 $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
-$categories = $DB->get_records_sql("
-    SELECT
-        {$categorycolumns}, u.firstname, u.lastname, u.picture,
-        COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, 
-        COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups
-    FROM {user} u
-    JOIN {block_exaportcate} c ON (u.id = c.userid AND c.userid != ?)
-    LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?
-    LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid
-    LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid
-    WHERE (
-        (".(block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '')." cshar.userid IS NOT NULL) -- only shared all, if enabled
-        -- Shared for you group
-        ".($usercats ? " OR c.id IN (".join(',', array_keys($usercats)).") " : "")."
-        )
-        AND internshare = 1
-        AND u.deleted = 0
-    GROUP BY
-        {$categorycolumns}, u.firstname, u.lastname, u.picture
-    $sqlsort", array($USER->id, $USER->id));
+$categories = block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort);
 
 // copying is disabled: SZ 13.10.2020
 if (11==22 && $action == 'copy') {

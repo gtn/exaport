@@ -1698,7 +1698,10 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
                 FROM {block_exaportitem} i
                 LEFT JOIN {block_exaportcate} cat ON i.categoryid = cat.id
                 JOIN {tag_instance} tt ON i.id = tt.itemid
-                WHERE tt.itemtype = :itemtype AND tt.tagid = :tagid AND tt.component = :component AND i.id %ITEMFILTER%";
+                WHERE tt.itemtype = :itemtype 
+                    AND tt.tagid = :tagid 
+                    AND tt.component = :component 
+                    AND i.id %ITEMFILTER%";
 
     $params = array('itemtype' => 'block_exaportitem', 'tagid' => $tag->id, 'component' => 'block_exaport');
 
@@ -1712,6 +1715,7 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
     } else {
         $shareditemuids = [];
     }
+    
     // access rules
     while ($item = $builder->has_item_that_needs_access_check()) {
         context_helper::preload_from_record($item);
@@ -1743,8 +1747,17 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
 
     // Build the display contents.
     if ($items) {
+        $content = '';
         $tagfeed = new core_tag\output\tagfeed();
         foreach ($items as $item) {
+            // only accessible items
+            // TODO: check rules: courseid?,...
+            if ($item->userid != $USER->id // owner of artifact
+                && !in_array($item->id, $shareditemuids) // shared items
+            ) {
+                continue;
+            }
+
             $itemurl = new moodle_url('/blocks/exaport/shared_item.php',
                     array('itemid' => $item->id, 'access' => 'portfolio/id/'.$item->userid));
             $itemname = format_string($item->name, true);
@@ -1755,7 +1768,7 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
             $tagfeed->add($icon, $itemname, $categoryname);
         }
 
-        $content = $OUTPUT->render_from_template('core_tag/tagfeed',
+        $content .= $OUTPUT->render_from_template('core_tag/tagfeed',
                 $tagfeed->export_for_template($OUTPUT));
 
         return new core_tag\output\tagindex($tag, 'block_exaport', 'block_exaportitem', $content,

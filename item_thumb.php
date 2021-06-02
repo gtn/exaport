@@ -141,6 +141,9 @@ switch ($item->type) {
 
             $headers = get_headers($firstimg, 1);
             $type = $headers["Content-Type"];
+            if (is_array($type)) {
+                $type = end($type); // TODO: only last or more difficult rule?
+            }
 
             $imgstr = @file_get_contents($firstimg);
             if (strlen($imgstr) < 50) {

@@ -31,7 +31,7 @@ require_once(__DIR__.'/inc.php');
 // file name.
 function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $USER, $CFG, $DB;
-
+echo "<pre>debug:<strong>lib.php:34</strong>\r\n"; print_r('sdfsdf'); echo '</pre>'; exit; // !!!!!!!!!! delete it
     $isForPdf = false;
     $pdfforuserid = 0;
     if ($p = array_search('forPdf', $args) ) {

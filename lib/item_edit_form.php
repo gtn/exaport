@@ -192,9 +192,32 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->addExaportHelpButton('iconfile', 'forms.item.iconfile');
 
         // Tags.
-        if (!empty($CFG->usetags)) {
-            $mform->addElement('tags', 'tags', get_string('tags'),
-                    array('itemtype' => 'block_exaportitem', 'component' => 'block_exaport'));
+        if (!empty($CFG->usetags) && $CFG->usetags) {
+            $tags = \core_tag_tag::get_tags_by_area_in_contexts('block_exaport', 'block_exaportitem', [context_user::instance($USER->id)]);
+            $tagstrings = [];
+            foreach ($tags as $tag) {
+                $tagstrings[$tag->name] = $tag->name;
+            }
+            $showstandard = core_tag_area::get_showstandard('block_exaport', 'block_exaportitem');
+            if ($showstandard != core_tag_tag::HIDE_STANDARD) {
+                $namefield = empty($CFG->keeptagnamecase) ? 'name' : 'rawname';
+                $standardtags = $DB->get_records('tag',
+                    array(
+                        'isstandard' => 1,
+                        'tagcollid' => core_tag_area::get_collection('block_exaport', 'block_exaportitem')
+                    ),
+                    $namefield,
+                    'id,'.$namefield
+                );
+                foreach ($standardtags as $standardtag) {
+                    $tagstrings[$standardtag->$namefield] = $standardtag->$namefield;
+                }
+            }
+            $options = [
+                'tags' => true,
+                'multiple' => true
+            ];
+            $mform->addElement('autocomplete', 'tags', get_string('tags'), $tagstrings, $options);
             $mform->addExaportHelpButton('tags', 'forms.item.tags');
         }
 

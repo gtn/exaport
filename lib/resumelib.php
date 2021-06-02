@@ -776,9 +776,20 @@ function block_exaport_resume_competences_form($resume, $id, $typeblock) {
 }
 
 function block_exaport_get_user_badge_image($badge) {
-    global $USER;
-    $src = '/pluginfile.php/'.context_user::instance($badge->usercreated)->id.'/badges/userbadge/'.$badge->id.'/'.
-            $badge->uniquehash;
+//    $src = '/pluginfile.php/'.context_user::instance($badge->usercreated)->id.'/badges/userbadge/'.$badge->id.'/'.
+//            $badge->uniquehash;
+    // Find badge by id.
+    if (!$badge) {
+        return '';
+    }
+    if (!$badge->courseid) {
+        // For badges with courseid = NULL.
+        $src = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+    } else {
+        $context = context_course::instance($badge->courseid);
+        $src = (string)moodle_url::make_pluginfile_url($context->id,
+            'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+    }
     $img = '<img src="'.$src.'" style="float: left; margin: 0px 10px;">';
     return $img;
 }

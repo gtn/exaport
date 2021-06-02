@@ -118,7 +118,8 @@ if ($existing) {
 $exacompactive = block_exaport_check_competence_interaction();
 if ($existing && $exacompactive) {
     // For the tree.
-    if ($compstmp = block_exaport_get_active_comps_for_item($existing) && is_array($compstmp) && array_key_exists('descriptors', $compstmp) ) {
+    $compstmp = block_exaport_get_active_comps_for_item($existing);
+    if ($compstmp && is_array($compstmp) && array_key_exists('descriptors', $compstmp) ) {
         $existing->compids_array = array_keys($compstmp['descriptors']);
     } else {
         $existing->compids_array = [];
@@ -268,7 +269,7 @@ switch ($action) {
             if ($CFG->branch < 31) {
                 $post->tags = tag_get_tags_array('block_exaportitem', $id);
             } else {
-                $post->tags = core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $post->id);
+                $post->tags = core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $post->id, core_tag_tag::BOTH_STANDARD_AND_NOT);
             }
         }
 

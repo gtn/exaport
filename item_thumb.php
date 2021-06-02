@@ -66,6 +66,9 @@ if (empty($item)) {
 
 // Custom Icon file.
 if ($iconfile = block_exaport_get_files($item, 'item_iconfile', true)) {
+    if (is_array($iconfile)) { // from new moodle version?
+        $iconfile = reset($iconfile);
+    }
     send_stored_file($iconfile);
     exit;
 }

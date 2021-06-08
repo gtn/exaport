@@ -200,6 +200,13 @@ $functions = array (
     'description' => 'webservice called through token.php',
     'type' => 'read',
   ),
+    'block_exaport_get_shared_categories' => array (
+        'classname' => 'block_exaport_external',
+        'methodname' => 'get_shared_categories',
+        'classpath' => 'blocks/exaport/externallib.php',
+        'description' => 'webservice called through token.php',
+        'type' => 'read',
+    ),
 );
 
 $services = array (
@@ -235,6 +242,7 @@ $services = array (
       23 => 'block_exaport_get_users_by_view',
       24 => 'block_exaport_export_file_to_externalportfolio',
       25 => 'block_exaport_login',
+      26 => 'block_exaport_get_shared_categories',
     ),
   ),
 );

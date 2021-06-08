@@ -1644,7 +1644,7 @@ class block_exaport_external extends external_api {
 
 
 
-    public static function dakora_get_shared_categories_parameters() {
+    public static function get_shared_categories_parameters() {
         return new external_function_parameters(array());
     }
 
@@ -1653,9 +1653,11 @@ class block_exaport_external extends external_api {
      * @ws-type-read
      * @return array
      */
-    public static function dakora_get_shared_categories() {
+    public static function get_shared_categories() {
         global $CFG, $DB, $USER;
-        static::validate_parameters(static::diggrplus_get_config_parameters(), array());
+
+        $params = static::validate_parameters(self::get_shared_categories_parameters(), array());
+
 
         // Categories for user groups.
         $sqlsort = " ORDER BY c.name, u.lastname, u.firstname";
@@ -1663,6 +1665,8 @@ class block_exaport_external extends external_api {
         $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
         $categories = block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort);
 
+        var_dump($categories);
+        die;
         return $categories;
     }
 
@@ -1671,7 +1675,7 @@ class block_exaport_external extends external_api {
      *
      * @return external_multiple_structure
      */
-    public static function dakora_get_shared_categories_returns() {
+    public static function get_shared_categories_returns() {
         return new external_single_structure (array(
             'exacompversion' => new external_value (PARAM_FLOAT, 'exacomp version number in YYYYMMDDXX format'),
             'moodleversion' => new external_value (PARAM_FLOAT, 'moodle version number in YYYYMMDDXX format'),

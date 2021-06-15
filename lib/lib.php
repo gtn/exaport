@@ -1358,6 +1358,7 @@ function block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlso
     return $categories;
 }
 
+
 /**
  * Function gets teachers array of course
  *
@@ -1715,7 +1716,7 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
     } else {
         $shareditemuids = [];
     }
-    
+
     // access rules
     while ($item = $builder->has_item_that_needs_access_check()) {
         context_helper::preload_from_record($item);

@@ -32,10 +32,10 @@ class block_exaport_external extends external_api {
      * @return external_function_parameters
      */
     public static function get_items_parameters() {
-        return new external_function_parameters(
-                array('level' => new external_value(PARAM_INT, 'id of level/parent category'))
-        );
-
+        return new external_function_parameters([
+            'level' => new external_value(PARAM_INT, 'id of level/parent category'),
+            'type' => new external_value(PARAM_TEXT, 'shared or own category or all', VALUE_DEFAULT, 'category')
+        ]);
     }
 
     /**
@@ -45,37 +45,88 @@ class block_exaport_external extends external_api {
      * @param int level
      * @return array of course subjects
      */
-    public static function get_items($level) {
-        global $CFG, $DB, $USER;
+    public static function get_items($level, $type) {
+        global $CFG, $DB, $USER, $COURSE;
 
-        $params = self::validate_parameters(self::get_items_parameters(), array('level' => $level));
+        $params = self::validate_parameters(self::get_items_parameters(), array('level' => $level, 'type' => $type));
 
-        $conditions = array("pid" => $level, "userid" => $USER->id);
-        $categories = $DB->get_records("block_exaportcate", $conditions);
-
-        //RW add courseid if there is one:
-        //better: when creating
 
         $results = array();
 
-        foreach ($categories as $category) {
-            $result = new stdClass();
-            $result->id = $category->id;
-            $result->name = $category->name;
-            $result->type = "category";
-            $result->parent = $category->pid;
-            $result->courseid = $category->courseid ? $category->courseid : 0;
+        if($type == "all" || $type == "category" || $level == 0){
+            $conditions = array("pid" => $level, "userid" => $USER->id);
+            $categories = $DB->get_records("block_exaportcate", $conditions);
 
-            $result->amount = self::block_exaport_count_items($category->id, 0);
+            //RW add courseid if there is one:
+            //better: when creating
 
-            $results[] = $result;
-        }
+            foreach ($categories as $category) {
+                $result = new stdClass();
+                $result->id = $category->id;
+                $result->name = $category->name;
+                $result->type = "category";
+                $result->parent = $category->pid;
+                $result->courseid = $category->courseid ? $category->courseid : 0;
 
-        $items = $DB->get_records("block_exaportitem", array("userid" => $USER->id, "categoryid" => $level), '',
+                $result->amount = self::block_exaport_count_items($category->id, 0);
+
+                $results[] = $result;
+            }
+
+            $items = $DB->get_records("block_exaportitem", array("userid" => $USER->id, "categoryid" => $level), '',
                 'id,name,type, 0 as parent, 0 as amount');
 //         foreach($items as $item){ //to avoid a missing required key in single structure error
 //             $item->courseid = 0;
 //         }
+        }
+
+        if($type == "all" || $type == "shared" || $level == 0) {
+            if ($level == 0) {
+                // Shared categories:
+                $sqlsort = " ORDER BY c.name, u.lastname, u.firstname";
+                $usercats = block_exaport_get_group_share_categories($USER->id);
+                $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+                $sharedcategories = block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort);
+
+                foreach ($sharedcategories as $category) {
+                    $result = new stdClass();
+                    $result->id = $category->id;
+                    $result->name = $category->name;
+                    $result->type = "shared";
+                    $result->parent = $category->pid;
+                    $result->courseid = $category->courseid ? $category->courseid : 0;
+                    $result->owneruserid = $category->userid;
+
+                    $result->amount = self::block_exaport_count_items($category->id, 0);
+
+                    $results[] = $result;
+                }
+            } else { // subcategories of the clicked shared category
+                $conditions = array("pid" => $level); // ommit the userid, since it is shared TODO: security?
+                $categories = $DB->get_records("block_exaportcate", $conditions);
+
+                foreach ($categories as $category) {
+                    $result = new stdClass();
+                    $result->id = $category->id;
+                    $result->name = $category->name;
+                    $result->type = "shared";
+                    $result->parent = $category->pid;
+                    $result->courseid = $category->courseid ? $category->courseid : 0;
+                    $result->owneruserid = $category->userid;
+
+                    $result->amount = self::block_exaport_count_items($category->id, 0);
+
+                    $results[] = $result;
+                }
+
+                // same as for "category" but without the userid constraint
+                $items = $DB->get_records("block_exaportitem", array("categoryid" => $level), '',
+                    'id,name,type, 0 as parent, 0 as amount');
+
+            }
+        }
+
+
         $results = array_merge($results, $items);
 
         return $results;
@@ -92,11 +143,12 @@ class block_exaport_external extends external_api {
                         array(
                                 'id' => new external_value(PARAM_INT, 'id of item'),
                                 'name' => new external_value(PARAM_TEXT, 'title of item'),
-                                'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
+                                'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category,shared)'),
                                 'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned'),
                                 'amount' => new external_value(PARAM_INT,
                                         'iff item is a cat, amount of items in the category, otherwise 0'),
-                                'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to',VALUE_OPTIONAL)
+                                'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to',VALUE_OPTIONAL),
+                                'owneruserid' => new external_value(PARAM_INT, 'userid of the owner of this category, if it is a category', VALUE_OPTIONAL)
                         )
                 )
         );
@@ -1665,8 +1717,6 @@ class block_exaport_external extends external_api {
         $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
         $categories = block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort);
 
-        var_dump($categories);
-        die;
         return $categories;
     }
 
@@ -1676,10 +1726,15 @@ class block_exaport_external extends external_api {
      * @return external_multiple_structure
      */
     public static function get_shared_categories_returns() {
-        return new external_single_structure (array(
-            'exacompversion' => new external_value (PARAM_FLOAT, 'exacomp version number in YYYYMMDDXX format'),
-            'moodleversion' => new external_value (PARAM_FLOAT, 'moodle version number in YYYYMMDDXX format'),
-        ));
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'id' => new external_value(PARAM_INT, 'id of item'),
+                    'name' => new external_value(PARAM_TEXT, 'title of item'),
+                    'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to',VALUE_OPTIONAL)
+                )
+            )
+        );
     }
 
 }

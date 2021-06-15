@@ -121,7 +121,7 @@ class block_exaport_external extends external_api {
 
                 // same as for "category" but without the userid constraint
                 $items = $DB->get_records("block_exaportitem", array("categoryid" => $level), '',
-                    'id,name,type, 0 as parent, 0 as amount');
+                    'id,name,type, 0 as parent, 0 as amount, userid as owneruserid');
 
             }
         }
@@ -160,11 +160,12 @@ class block_exaport_external extends external_api {
      * @return external_function_parameters
      */
     public static function get_item_parameters() {
-        return new external_function_parameters(
-                array('itemid' => new external_value(PARAM_INT, 'id of item'))
-        );
-
+        return new external_function_parameters([
+                'itemid' => new external_value(PARAM_INT, 'id of item'),
+                'owneruserid' => new external_value(PARAM_INT, 'id of owner of this file (needed for items in shared categories', VALUE_OPTIONAL),
+        ]);
     }
+
 
     /**
      * Returns detailed information for a particular item
@@ -173,12 +174,18 @@ class block_exaport_external extends external_api {
      * @param int itemid
      * @return array of course subjects
      */
-    public static function get_item($itemid) {
+    public static function get_item($itemid, $owneruserid) {
         global $CFG, $DB, $USER;
 
-        $params = self::validate_parameters(self::get_item_parameters(), array('itemid' => $itemid));
+        $params = self::validate_parameters(self::get_item_parameters(), array('itemid' => $itemid, 'owneruserid' => $owneruserid));
 
-        $conditions = array("id" => $itemid, "userid" => $USER->id);
+        if($owneruserid){
+            $userid = $owneruserid;
+        }else{
+            $userid = $USER->id;
+        }
+
+        $conditions = array("id" => $itemid, "userid" => $userid);
         $item = $DB->get_record("block_exaportitem", $conditions, 'id,userid,type,categoryid,name,intro,url', MUST_EXIST);
         $category = $DB->get_field("block_exaportcate", "name", array("id" => $item->categoryid));
 

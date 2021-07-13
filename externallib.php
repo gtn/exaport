@@ -179,8 +179,12 @@ class block_exaport_external extends external_api {
 
         $params = self::validate_parameters(self::get_item_parameters(), array('itemid' => $itemid, 'owneruserid' => $owneruserid));
 
+        $shared_item = false;
         if($owneruserid){
             $userid = $owneruserid;
+            if($owneruserid != $USER->id){
+                $shared_item = true; // this item is not the Item of the USER, but of somewone who shared it... needed later on
+            }
         }else{
             $userid = $USER->id;
         }
@@ -202,8 +206,14 @@ class block_exaport_external extends external_api {
 
         if ($item->type == 'file') {
             if ($file = block_exaport_get_item_single_file($item)) {
-				$item->file = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$USER->id.
-						"&itemid=".$item->id."&wstoken=".static::wstoken();
+                if($shared_item){
+                    $item->file = "{$CFG->wwwroot}/blocks/exaport/shared_item.php?access=portfolio/id/".$userid.
+                        "&itemid=".$item->id."&wstoken=".static::wstoken();
+                }else{
+                    $item->file = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$userid.
+                        "&itemid=".$item->id."&wstoken=".static::wstoken();
+                }
+
 				$item->isimage = $file->is_valid_image();
 				$item->filename = $file->get_filename();
 				$item->mimetype = $file->get_mimetype();

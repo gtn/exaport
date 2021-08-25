@@ -676,7 +676,7 @@ namespace {
             } else {
                 $items = $itemid;
             }
-            $catFromItems = $DB->get_records_sql_menu(' SELECT categoryid, categoryid as tmp FROM {block_exaportitem} WHERE id IN ('.implode(',', $items).') ');
+            $catFromItems = $DB->get_records_sql_menu(' SELECT DISTINCT categoryid, categoryid as tmp FROM {block_exaportitem} WHERE id IN ('.implode(',', $items).') ');
             $sharedcategories = array_intersect($sharedcategories, $catFromItems);
         }
 

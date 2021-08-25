@@ -43,10 +43,13 @@ require_once(__DIR__.'/sharelib.php');
  * @return array
  */
 function block_exaport_get_files($item, $type) {
-    $fs = get_file_storage();
-    $files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
-
-    return $files;
+    // If the user is still existing
+    if (context_user::instance($item->userid, IGNORE_MISSING)) { // for deleted/miss users
+        $fs = get_file_storage();
+        $files = $fs->get_area_files(context_user::instance($item->userid)->id, 'block_exaport', $type, $item->id, null, false);
+        return $files;
+    }
+    return array();
 }
 
 function block_exaport_get_item_files($item) {

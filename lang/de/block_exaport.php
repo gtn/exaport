@@ -430,6 +430,8 @@ $string['block_exaport_userquota'] = 'Benutzer-Dateikontingent Exabis ePortfolio
 $string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_multiplefilesinitem'] = 'Mehrere Dateien in Datei-Artefakt hochladen';
 $string['block_exaport_multiplefilesinitem_body'] = 'limit: 10 Dateien';
+$string['block_exaport_copytomyportfolio'] = 'Enable "Copy to my portfolio"';
+$string['block_exaport_copytomyportfolio_body'] = 'User will be able copy artifacts from shared category into own portfolio';
 $string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 $string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';

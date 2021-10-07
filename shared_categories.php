@@ -56,8 +56,7 @@ $usercats = block_exaport_get_group_share_categories($USER->id);
 $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
 $categories = block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort);
 
-// copying is disabled: SZ 13.10.2020
-if (11==22 && $action == 'copy') {
+if ($CFG->block_exaport_copy_category_to_my && $action == 'copy') {
     $categoryid = optional_param('categoryid', 0, PARAM_INT);
 
     // Check if category can be accessed.
@@ -234,16 +233,21 @@ function exaport_print_structures($categories, $parsedsort) {
                         $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
                                 $structure->userid.'&categoryid='.$structure->id.'">
                                             <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
-                        // copying is disbled: SZ 13.10.2020
-                        /*$link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
-                                            <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").
-                                '</a>';*/
-                        $table->data[] = array(
-                                $structurecontent,
-                                block_exaport_get_shared_with_text($structure, 'categories'),
-                                $link,
-//                                $link2,
+                        $link2 = '';
+                        if ($CFG->block_exaport_copy_category_to_my) {
+                            $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
+                                                <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").
+                                    '</a>';
+                        }
+                        $tData = array(
+                            $structurecontent,
+                            block_exaport_get_shared_with_text($structure, 'categories'),
+                            $link,
                         );
+                        if ($link2) {
+                            $tData[] = $link2;
+                        }
+                        $table->data[] = $tData;
                     }
 
                     echo '<div class="view-group">';
@@ -281,17 +285,22 @@ function exaport_print_structures($categories, $parsedsort) {
                     $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
                             $structure->userid.'&categoryid='.$structure->id.'">
                                         <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
-                    // copying is disbled: SZ 13.10.2020
-                    /*$link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
-                                        <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").'</a>';*/
-                    $table->data[] = array(
-                            $OUTPUT->user_picture($curuser, array("courseid" => $courseid)),
-                            fullname($curuser),
-                            $structurecontent,
-                            block_exaport_get_shared_with_text($structure, 'categories'),
-                            $link,
-//                            $link2,
+                    $link2 = '';
+                    if ($CFG->block_exaport_copy_category_to_my) {
+                        $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
+                                        <img src="pix/folder_new_32.png" /><br />'.get_string("copycategory", "block_exaport").'</a>';
+                    }
+                    $tData = array(
+                        $OUTPUT->user_picture($curuser, array("courseid" => $courseid)),
+                        fullname($curuser),
+                        $structurecontent,
+                        block_exaport_get_shared_with_text($structure, 'categories'),
+                        $link,
                     );
+                    if ($link2) {
+                        $tData[] = $link2;
+                    }
+                    $table->data[] = $tData;
                 }
                 echo html_writer::table($table);
         }

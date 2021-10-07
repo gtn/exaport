@@ -1534,6 +1534,14 @@ return [
                 'limit: 10 Dateien',
                 'limit: 10 files',
         ],
+        'block_exaport_copytomyportfolio' => [
+                'Enable "Copy to my portfolio"',
+                'Enable "Copy to my portfolio"',
+        ],
+        'block_exaport_copytomyportfolio_body' => [
+                'User will be able copy artifacts from shared category into own portfolio',
+                'User will be able copy artifacts from shared category into own portfolio',
+        ],
         'block_exaport_app_alloweditdelete_head' => [
                 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen',
                 'Students are allowed to edit and delete items after teacher reviews',

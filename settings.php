@@ -94,4 +94,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_multiple_files_in_item',
             get_string('block_exaport_multiplefilesinitem', 'block_exaport'),
             get_string('block_exaport_multiplefilesinitem_body', 'block_exaport'), 0));
+
+    // Enable "Copy shared category to my portfolio" (artifacts)
+    $settings->add(new admin_setting_configcheckbox('block_exaport_copy_category_to_my',
+            get_string('block_exaport_copytomyportfolio', 'block_exaport'),
+            get_string('block_exaport_copytomyportfolio_body', 'block_exaport'), 0));
 }

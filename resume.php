@@ -15,6 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+
+
+echo "hello World";
+die;
+
 require_once(__DIR__.'/inc.php');
 require_once(__DIR__.'/lib/resumelib.php');
 

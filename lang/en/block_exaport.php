@@ -602,3 +602,46 @@ $string['what_is_embed_code_content'] = '<p>Embed code is code that is generated
                 <li>Past this code to exabis E-portfolio textarea field.</li>
             </ol>
             ';
+
+// Privacy metadata.
+$string['privacy:metadata:block_exaportuser'] = 'user in the E-portfolio';
+$string['privacy:metadata:block_exaportuser:user_id'] = 'user id';
+$string['privacy:metadata:block_exaportuser:description'] = 'description';
+
+$string['privacy:metadata:block_exaportcate'] = 'categories for e-portfolio items';
+$string['privacy:metadata:block_exaportcate:userid'] = 'user id';
+$string['privacy:metadata:block_exaportcate:name'] = 'name';
+$string['privacy:metadata:block_exaportcate:courseid'] = 'course id';
+
+$string['privacy:metadata:block_exaportcatshar'] = 'information to which categories is shared to other users';
+$string['privacy:metadata:block_exaportcatshar:userid'] = 'user id';
+
+$string['privacy:metadata:block_exaportitem'] = 'User items';
+$string['privacy:metadata:block_exaportitem:userid'] = 'user id';
+$string['privacy:metadata:block_exaportitem:courseid'] = 'course id';
+$string['privacy:metadata:block_exaportitem:externaccess'] = 'external access';
+$string['privacy:metadata:block_exaportitem:externcomment'] = 'external comment';
+
+$string['privacy:metadata:block_exaportitemshar'] = 'block_exaportitemshar table retrofitted from MySQL';
+$string['privacy:metadata:block_exaportitemshar:itemid'] = 'item id';
+$string['privacy:metadata:block_exaportitemshar:userid'] = 'user id';
+$string['privacy:metadata:block_exaportitemshar:original'] = 'original id';
+$string['privacy:metadata:block_exaportitemshar:courseid'] = 'course id';
+
+$string['privacy:metadata:block_exaportitemcomm'] = 'comments for the items';
+$string['privacy:metadata:block_exaportitemcomm:userid'] = 'user id';
+
+$string['privacy:metadata:block_exaportview'] = 'views';
+$string['privacy:metadata:block_exaportview:userid'] = 'user id';
+$string['privacy:metadata:block_exaportview:externaccess'] = 'external access';
+$string['privacy:metadata:block_exaportview:externcomment'] = 'external comment';
+
+$string['privacy:metadata:block_exaportviewshar'] = 'information to which users the view is shared';
+$string['privacy:metadata:block_exaportviewshar:userid'] = 'user id';
+
+$string['privacy:metadata:block_exaportresume'] = 'users resume';
+$string['privacy:metadata:block_exaportresume:user_id'] = 'user id';
+$string['privacy:metadata:block_exaportresume:courseid'] = 'course id';
+
+$string['privacy:metadata:block_exaportcat_structshar'] = 'block_exaportcat_structshar table retrofitted from MySQL';
+$string['privacy:metadata:block_exaportcat_structshar:userid'] = 'user id';

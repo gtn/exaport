@@ -437,7 +437,7 @@ namespace {
             $extrausers = array();
 
             foreach ($sharedusers as $userid) {
-                $user = $DB->get_record('user', array('id' => $userid), user_picture::fields());
+                $user = $DB->get_record('user', array('id' => $userid), core_user\fields::for_name());
                 if (!$user) {
                     // Doesn't exist anymore.
                     continue;
@@ -478,8 +478,9 @@ namespace {
             $roles = get_roles_used_in_context($context);
 
             foreach ($roles as $role) {
-                $users = get_role_users($role->id, $context, false, user_picture::fields('u'), null, true, '', '', '',
-                        ' deleted=0 AND suspended=0');
+                 $users = get_role_users($role->id, $context, false, core_user\fields::for_name(), null, true, '', '', '',
+                    ' deleted=0 AND suspended=0');
+
                 if (!$users) {
                     continue;
                 }

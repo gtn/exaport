@@ -277,6 +277,7 @@ if ($mform->is_cancelled()) {
     $pid = optional_param('pid', 0, PARAM_INT);
     redirect('view_items.php?courseid='.$courseid.'&categoryid='.($same == 'same' ? $id : $pid));
 } else if ($newentry = $mform->get_data()) {
+    require_sesskey();
     $newentry->userid = $USER->id;
     $newentry->shareall = optional_param('shareall', 0, PARAM_INT);
     if (optional_param('internshare', 0, PARAM_INT) > 0) {

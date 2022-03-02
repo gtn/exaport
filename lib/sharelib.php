@@ -437,7 +437,9 @@ namespace {
             $extrausers = array();
 
             foreach ($sharedusers as $userid) {
-                $user = $DB->get_record('user', array('id' => $userid), core_user\fields::for_name());
+                // since user_picture::fields() uses a deprecated moodle function, this is the workaround:
+                $fields = implode(',', core_user\fields::get_picture_fields());
+                $user = $DB->get_record('user', array('id' => $userid), $fields);
                 if (!$user) {
                     // Doesn't exist anymore.
                     continue;
@@ -478,7 +480,13 @@ namespace {
             $roles = get_roles_used_in_context($context);
 
             foreach ($roles as $role) {
-                 $users = get_role_users($role->id, $context, false, core_user\fields::for_name(), null, true, '', '', '',
+                // since user_picture::fields('u') uses a deprecated moodle function, this is the workaround:
+                $fields = core_user\fields::get_picture_fields();
+                foreach ($fields as $key => $field){
+                    $fields[$key] = 'u.'.$field;
+                }
+                $fields = implode(',', $fields);
+                $users = get_role_users($role->id, $context, false, $fields, null, true, '', '', '',
                     ' deleted=0 AND suspended=0');
 
                 if (!$users) {

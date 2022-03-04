@@ -213,7 +213,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                                                 border = "0"
                                                                 src = "'.$imgsrc.'" 
                                                                 width = "'.((int)filter_var($width, FILTER_SANITIZE_NUMBER_INT) ?: '100').'" 
-                                                                alt = ""/>
+                                                                alt = "" />
                                                          </div>';
                                     } else {
                                         // Link to file.
@@ -229,7 +229,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                         if (block_exaport_is_valid_media_by_filename($file->filename)) {
                                             $generalContent .= '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.
                                                     '/blocks/exaport/pix/media.png" alt=""/></div>';
-                                            $blockForPdf .= '<img height="60" src="'.$CFG->wwwroot. '/blocks/exaport/pix/media.png" align="right"/>';
+                                            $blockForPdf .= '<img height="60" src="'.$CFG->wwwroot. '/blocks/exaport/pix/media.png" align="right" />';
                                         }
                                     };
                                 }
@@ -242,7 +242,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         $blockForPdf .= '<img align="right" 
                                                 style="" height="100"
                                                 src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'&ispdf=1&vhash='.$view->hash.'&vid='.$view->id.'&uid='.$USER->id.'" 
-                                                alt=""/>';
+                                                alt="" />';
                     };
                     $generalContent .= '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
                     // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.
@@ -326,8 +326,8 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         $generalContent .= $block->contentmedia;
                     }
                     $generalContent .= '</div>';
-                    $blockForPdf .= '----media----';
-                    $blockForPdf .= '</div>';
+                    $blockForPdf .= '<p><i>----media----</i></p>';
+//                    $blockForPdf .= '</div>';
                     break;
                 case 'badge':
                     if (count($badges) == 0) {
@@ -356,15 +356,15 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         $badge->imageUrl = (string) moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage',
                                                                                     $badge->id, '/', 'f1', false);
                     }
-                    $generalContent .= '<img src="'.$badge->imageUrl.'">';
+                    $generalContent .= '<img src="'.$badge->imageUrl.'" />';
                     $generalContent .= '</div>';
                     $generalContent .= '<div class="badge-description">';
                     $generalContent .= format_text($badge->description, FORMAT_HTML);
                     $generalContent .= '</div>';
                     $generalContent .= '</div>';
                     $blockForPdf .= '<p>'.format_text($badge->description, FORMAT_HTML).'</p>';
-                    $blockForPdf .= '<img align="right" src="'.$badge->imageUrl.'">';
-                    $blockForPdf .= '</div>';
+                    $blockForPdf .= '<img align="right" src="'.$badge->imageUrl.'" />';
+//                    $blockForPdf .= '</div>';
                     break;
                 case 'cv_information':
                     $bodyContent = '';
@@ -529,12 +529,33 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $generalContent .= format_text($block->text, FORMAT_HTML);
                     $generalContent .= '</div>';
                     if ($block->block_title) {
-                        $blockForPdf = '<h4>'.$block->block_title.'</h4>';
+                        $blockForPdf .= "\r\n".'<h4>'.$block->block_title.'</h4>';
                     }
-                    $blockForPdf .= '<div>'.format_text($block->text, FORMAT_HTML).'</div>';
+                    $pdfText = format_text($block->text, FORMAT_HTML);
+                    // If the text has HTML <img> - it can broke view template. Try to clean it
+                    try {
+                        $dom = new DOMDocument;
+                        $dom->loadHTML($pdfText);
+                        $xpath = new DOMXPath($dom);
+                        $nodes = $xpath->query('//img');
+                        /** @var DOMElement $node */
+                        foreach ($nodes as $node) {
+                            $node->removeAttribute('width');
+                            $node->removeAttribute('height');
+//                            $node->setAttribute('width', '200');
+                            $style = $node->getAttribute('style');
+                            $style .= ';width: 100%;';
+                            $style = $node->setAttribute('style', $style);
+                        }
+                        $pdfText = $dom->saveHTML();
+                    } finally {
+                        // just wrapper
+                    }
+                    $blockForPdf .= "\r\n".'<div>'.$pdfText.'</div>';
             }
             $blockForPdf .= '</div>';
-            $dataForPdf[$i][] = $blockForPdf;
+//            $dataForPdf[$i][] = $blockForPdf;
+            $dataForPdf[$i][] = $block;
         }
     }
     $generalContent .= '</td>';
@@ -570,20 +591,20 @@ if ($isPdf) {
     $options->set('defaultFont', 'dejavu sans');
     $dompdf = new Dompdf($options);
     $dompdf->setPaper('A4', 'landscape');
-    /*$context = stream_context_create([
-            'ssl' => [
-                    'verify_peer' => FALSE,
-                    'verify_peer_name' => FALSE,
-                    'allow_self_signed'=> TRUE
-            ]
-    ]);
-    $dompdf->setHttpContext($context);*/
     $generalContent = pdfView($view, $colslayout, $dataForPdf);
 //    echo $generalContent;exit;
     $dompdf->loadHtml($generalContent);
     $dompdf->render();
     $dompdf->stream('view.pdf'); //To popup pdf as download
     exit;
+/*
+    // generate PDF directly. not as HTML. not done fully yet
+    require_once __DIR__.'/lib/reportlib.php';
+//    $pdf = new ExaportViewPdf();
+//    $pdf->generatePDFview($view->layout, $dataForPdf);
+    $pdf = new ExaportVievPdf($view);
+    $pdf->genarateView($view->layout, $dataForPdf, $access);
+/**/
 }
 
 echo $generalContent;
@@ -654,3 +675,4 @@ function pdfView($view, $colslayout, $dataForPdf) {
     //echo $pdfContent; exit;
     return $pdfContent;
 }
+

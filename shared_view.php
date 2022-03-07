@@ -135,9 +135,11 @@ if (!isset($view->layout) || $view->layout == 0) {
 }
 $generalContent .= '<div id="view">';
 $generalContent .= '<table class="table_layout layout'.$view->layout.'""><tr>';
-$dataForPdf = array();
+$dataForPdf = array(); // for old pdf view
+$dataForPdfBlocks = array(); // for new pdf view
 for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
     $dataForPdf[$i] = array();
+    $dataForPdfBlocks[$i] = array();
     $generalContent .= '<td class="view-column td'.$i.'">';
     if (isset($columns[$i])) {
         foreach ($columns[$i] as $block) {
@@ -554,8 +556,8 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $blockForPdf .= "\r\n".'<div>'.$pdfText.'</div>';
             }
             $blockForPdf .= '</div>';
-//            $dataForPdf[$i][] = $blockForPdf;
-            $dataForPdf[$i][] = $block;
+            $dataForPdf[$i][] = $blockForPdf;
+            $dataForPdfBlocks[$i][] = $block;
         }
     }
     $generalContent .= '</td>';
@@ -603,7 +605,7 @@ if ($isPdf) {
 //    $pdf = new ExaportViewPdf();
 //    $pdf->generatePDFview($view->layout, $dataForPdf);
     $pdf = new ExaportVievPdf($view);
-    $pdf->genarateView($view->layout, $dataForPdf, $access);
+    $pdf->genarateView($view->layout, $dataForPdfBlocks, $access);
 /**/
 }
 

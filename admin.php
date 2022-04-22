@@ -31,8 +31,7 @@ $action = required_param('action', PARAM_TEXT);
 switch ($action) {
     case 'remove_shareall':
         if (optional_param('confirm', 0, PARAM_INT)) {
-            confirm_sesskey();
-
+            require_sesskey();
             $sql = "UPDATE {block_exaportview} SET shareall=0";
             $DB->execute($sql);
 
@@ -52,6 +51,7 @@ switch ($action) {
         exit;
         break;
     case 'create_trustedteacherproperty':
+        require_sesskey();
         // Add new user profile field (checkbox): blockexaporttrustedteacher
         // for using together with exaport settings parameter: block_exaport_teachercanseeartifactsofstudents
         // checked user will be able to see all artifacts of own students.

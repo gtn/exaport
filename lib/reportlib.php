@@ -144,7 +144,7 @@ class ExaportVievPdf {
     private $maxThumbnailHeight = 15;
     private $maxThumbnailWidth = 20;
 
-    private $orientation = 'L';
+    private $orientation = 'P';
     private $format = 'A4';
 
     private $firstPageForMainReportData = 1;
@@ -379,7 +379,7 @@ class ExaportVievPdf {
                                 foreach ($files as $file) {
                                     if (strpos($file->mimetype, "image") !== false) {
                                         $imgsrc = moodle_url::make_pluginfile_url(context_user::instance($item->userid)->id, 'block_exaport', 'item_file/view/'.$access.'/itemid', $item->id, '/', $file->filename, false, false)->out();
-                                        $imgsrc .= '/forPdf/'.$view->hash.'/'.$view->id.'/'.$USER->id; // images are geting from PHP pdf generator, so they are not logged in as FE-user
+                                        $imgsrc .= '/forPdf/'.$view->hash.'/'.$view->id.'/'.$USER->id; // images are got from PHP pdf generator, so they are not logged in as FE-user
                                         // file thumbnail
                                         // get list of images with sizes:
                                         $imgX = $x + $columnWidth - ($maxWidth * $fileIndex);
@@ -416,6 +416,9 @@ class ExaportVievPdf {
                                     $yBlockCurrent = $this->yTopPosition;
                                     $this->currentY = $this->yTopPosition;
                                 }
+                                if ($item->id == 50) {
+                                    $this->pdf->Circle(150, $yBlockCurrent, 2);
+                                }
                                 // add file links (list)
                                 if (count($fileLinks) > 0) {
                                     $linkscontent = '<p>';
@@ -426,8 +429,14 @@ class ExaportVievPdf {
                                     $cellHight = $this->writeHTMLCellReturnHeight($columnWidth, $x, $yBlockCurrent, $linkscontent);
                                     $heightBlockCurrent += $cellHight;
                                     $yBlockCurrent = $this->increaseBlockY($yBlockCurrent, $cellHight);
+                                    if ($item->id == 50) {
+                                        echo "<pre>debug:<strong>reportlib.php:433</strong>\r\n"; print_r($cellHight); echo '</pre>'; exit; // !!!!!!!!!! delete it
+                                    }
                                 }
                             }
+                        }
+                        if ($item->id == 50) {
+                            $this->pdf->Circle(150, $yBlockCurrent, 2);
                         }
                         break;
                     case 'link':
@@ -500,7 +509,7 @@ class ExaportVievPdf {
                     $heightBlockCurrent += $linkHeight;
                 }
 
-                $this->increaseY($heightBlockCurrent);
+//                $this->increaseY($heightBlockCurrent);
                 // bottom block margin
                 $this->increaseY($this->verticalMarginAfterBlock);
                 break;
@@ -817,6 +826,9 @@ class ExaportVievPdf {
 
         }
 
+//        if (@$item->id == 50) {
+//            echo "<pre>debug:<strong>reportlib.php:830</strong>\r\n"; print_r($heightBlockCurrent); echo '</pre>'; exit; // !!!!!!!!!! delete it
+//        }
     }
 
     function cleanHtmlContent($htmlContent = '') {
@@ -856,27 +868,14 @@ class ExaportVievPdf {
         $newY = $currentY + $addY;
 
         if ($newY >= $pageHeight || $this->getWorkingPage() < $this->pdf->getPage()) {
-//echo "<pre>debug:<strong>reportlib.php:846</strong>\r\n"; print_r('---------------'.$this->pdf->getPage().'-----------------'); echo '</pre>'; // !!!!!!!!!! delete it
-//            $this->addDeveloperInfo('x'.round($newY).'x', 0, 0);
-//            echo "<pre>debug:<strong>reportlib.php:848</strong>\r\n"; print_r(round($newY)); echo '</pre>'; // !!!!!!!!!! delete it
 
             $newY = $newY - ($pageHeight - $yBeforeIncreasing); // delete part in the end of first page
-
-//            $this->addDeveloperInfo('x'.round($newY).'x', 20, 0);
-//            echo "<pre>debug:<strong>reportlib.php:848</strong>\r\n"; print_r(round($newY)); echo '</pre>'; // !!!!!!!!!! delete it
 
             $currentPage = $currentPage + floor($newY / $pageHeight);
 
             $newY = $newY - ($pageHeight * floor($newY / $pageHeight)); // delete Remainder of heigh divided by page heigh
 
             $newY = round($newY);
-
-//            $this->addDeveloperInfo('x'.$newY.'x', 100, 0);
-//            echo "<pre>debug:<strong>reportlib.php:848</strong>\r\n"; print_r(round($newY)); echo '</pre>'; // !!!!!!!!!! delete it
-//            echo "<pre>debug:<strong>reportlib.php:863</strong>\r\n"; print_r($pageHeight); echo '</pre>'; // !!!!!!!!!! delete it
-//            echo "<pre>debug:<strong>reportlib.php:863</strong>\r\n"; print_r($currentYBeforeChange); echo '</pre>'; // !!!!!!!!!! delete it
-//            echo "<pre>debug:<strong>reportlib.php:863</strong>\r\n"; print_r($addY); echo '</pre>'; // !!!!!!!!!! delete it
-            
 
 //            if ($newY < $this->yTopPosition) {
                 $newY = $newY + $this->yTopPosition;// + ($this->pdf->getStringHeight(100, '.') * 2);
@@ -916,6 +915,7 @@ class ExaportVievPdf {
 
     function addImageBySrc($src, $x, $y, $maxWidth = 0, $maxHeight = 0, $url = '', $hide = false)
     {
+//        $maxHeight = 45; // <!------------------- !!!!!!!!!!!!!!!!!!!!! delete it !!!!!!!!!!!!!!! only for testing
         static $downloadedImages = null;
         if ($downloadedImages === null) {
             $downloadedImages = [];
@@ -953,6 +953,7 @@ class ExaportVievPdf {
             $imW = ($imagesize[0] <= $maxWidth ? $imagesize[0] : $maxWidth);
             $imKoef = $imW / $imagesize[0];
             $imH = round($imagesize[1] * $imKoef);
+
             if ($maxHeight && $imH > $maxHeight) {
                 $imH = $maxHeight;
                 $koef = $imH / $maxHeight;
@@ -1187,7 +1188,7 @@ class ExaportVievPdf {
         $htmlHeight = 0;
         $currentPageId = $this->pdf->getPage();
         $yBeforeHtml = $this->pdf->GetY();
-//        $this->pdf->writeHTMLCell($columnWidth, 0, $x, $yBlockCurrent, $text, 0, 1, false, false, 'L', true);
+        echo "<pre>debug:<strong>reportlib.php:1191</strong>\r\n"; print_r($this->pdf->getStringHeight(80, $text)); echo '</pre>'; // !!!!!!!!!! delete it
         $this->pdf->writeHTMLCell($columnWidth, 0, $x, $y, $text, 0, 1, true, true, $align, true);
         $yAfterHtml = $this->pdf->GetY();
         $newPageId = $this->pdf->getPage();
@@ -1195,7 +1196,17 @@ class ExaportVievPdf {
         if ($pagesKoef == 0) {
             // no page changed
             $htmlHeight = $yAfterHtml - $yBeforeHtml;
-        } elseif ($pagesKoef >= 1) {
+//            $this->pageAdded = false;
+        }
+        echo "<pre>debug:<strong>reportlib.php:1195</strong>\r\n"; print_r($yBeforeHtml); echo '</pre>'; // !!!!!!!!!! delete it
+        echo "<pre>debug:<strong>reportlib.php:1195</strong>\r\n"; print_r($yAfterHtml); echo '</pre>'; // !!!!!!!!!! delete it
+        if ($htmlHeight < 0) {
+            // sometimes pdf lib does not know about changed page (why?)
+            // in this case $htmlHeight is < 0
+            $htmlHeight = $yAfterHtml;
+            $this->pageAdded = true;
+        }
+        if ($pagesKoef >= 1 || $htmlHeight < 0) {
             // pages added
             $pageHeight = $this->pdf->getPageDimensions($this->firstPageForMainReportData)['hk'] - $this->pdf->getPageDimensions($this->firstPageForMainReportData)['bm'] - $this->pdf->getPageDimensions($this->firstPageForMainReportData)['tm']; // from first page?
             $htmlHeight = $pageHeight - $yBeforeHtml + $yAfterHtml + ($pageHeight * ($pagesKoef - 1));

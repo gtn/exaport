@@ -587,6 +587,8 @@ if (!$isPdf) {
 }
 
 if ($isPdf) {
+    // old pdf view
+
     require_once __DIR__.'/lib/classes/dompdf/autoload.inc.php';
     $options = new \Dompdf\Options();
     $options->set('isRemoteEnabled', true);
@@ -599,14 +601,17 @@ if ($isPdf) {
     $dompdf->render();
     $dompdf->stream('view.pdf'); //To popup pdf as download
     exit;
-/*
+    /**/
+
+    // new pdf view
+
     // generate PDF directly. not as HTML. not done fully yet
-    require_once __DIR__.'/lib/reportlib.php';
+/*    require_once __DIR__.'/lib/reportlib.php';
 //    $pdf = new ExaportViewPdf();
 //    $pdf->generatePDFview($view->layout, $dataForPdf);
     $pdf = new ExaportVievPdf($view);
-    $pdf->genarateView($view->layout, $dataForPdfBlocks, $access);
-/**/
+    $pdf->genarateView($view->layout, $dataForPdfBlocks, $access);*/
+    /**/
 }
 
 echo $generalContent;

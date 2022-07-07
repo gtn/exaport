@@ -61,7 +61,7 @@ $string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Вчитель
 $string['block_exaport_userquota'] = 'Дисковий ліміт для Exabis ePortfolio';
 $string['block_exaport_userquota_body'] = 'Максимальна кількість байт для кожного користувача, яку він зможе витратити у своїм Exabis eProtfolio<br>Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['blockcontent'] = 'Вміст блоку';
-$string['blocktitle'] = 'Exabis ePortfolio';
+$string['blocktitle'] = 'е-Портфоліо';
 $string['blocktitle2'] = 'Назва блоку';
 $string['bookmarknotfound'] = 'Закладка не знайдена';
 $string['bookmarksall'] = 'Артефакти';
@@ -296,7 +296,7 @@ $string['other_users_course'] = 'Користувачі не з мого кур�
 $string['othercourses'] = 'інщі курси';
 $string['personal'] = 'Інформація';
 $string['personalinformation'] = 'Персональна інформація';
-$string['pluginname'] = 'Exabis ePortfolio';
+$string['pluginname'] = 'еПортфоліо';
 $string['profilepicture'] = 'Зображення користувача';
 $string['publishedportfolios'] = 'Опубліковані портфоліо';
 $string['resume_badges'] = 'Відзнаки';

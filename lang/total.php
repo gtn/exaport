@@ -1231,7 +1231,7 @@ return [
                 'Shared only with me',
         ],
         'sharedwith_shareall' => [
-                'Mit allen Benutzern geteilt',
+                'Mit allen Benutzer:innen geteilt',
                 'Shared with all users',
         ],
         'sharedwith_shareexternal' => [
@@ -1487,7 +1487,7 @@ return [
                 '',
         ],
         'settings_disable_shareall_head' => [
-                'Mit allen Benutzern teilen deaktivieren',
+                'Mit allen Benutzer:innen teilen deaktivieren',
                 'Disable sharing with all users',
         ],
         'settings_disable_shareall_body' => [

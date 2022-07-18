@@ -84,7 +84,7 @@ if ($action == 'xmleuropass') {
 }
 
 // Delete item.
-if ($action == 'delete' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'public'])) {
+if ($action == 'delete' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'linkedin','public'])) {
     if (data_submitted() && $confirm) {
         require_sesskey();
 
@@ -234,6 +234,16 @@ if ($action == 'edit') {
                     'enddate' => 'text',
                     'title' => 'text:required',
                     'description' => 'textarea',
+                    'files' => 'filearea'
+            );
+            if ($showinformation = block_exaport_resume_prepare_block_mm_data($resume, $id, $type, $displayinputs, $data)) {
+                $redirect = true;
+            };
+            break;
+        case 'linkedin':
+            $displayinputs = array(
+                    'date' => 'text',
+                    'url' => 'text:required',
                     'files' => 'filearea'
             );
             if ($showinformation = block_exaport_resume_prepare_block_mm_data($resume, $id, $type, $displayinputs, $data)) {
@@ -393,7 +403,13 @@ if ($showinformation) {
     $memberships = block_exaport_resume_get_profmembershipments($resume->id);
     $membershiphistory = block_exaport_resume_templating_mm_records($courseid, 'mbrship', 'title', $memberships);
     echo block_exaport_form_resume_part($courseid, 'mbrship',
-            get_string('resume_mbrship', 'block_exaport'), $membershiphistory, 'add', $type);
+    get_string('resume_mbrship', 'block_exaport'), $membershiphistory, 'add', $type);
+    
+    // LinkedIn profiles.
+    $linkedinprofiles = block_exaport_resume_get_linkedinprofiles($resume->id);
+    $linkedinhistory = block_exaport_resume_templating_mm_records($courseid, 'linkedin', 'url', $linkedinprofiles);
+    echo block_exaport_form_resume_part($courseid, 'linkedin',
+    get_string('resume_linkedin', 'block_exaport'), $linkedinhistory, 'add', $type);
 
     // My Goals.
     $goals = block_exaport_resume_templating_list_goals_skills($courseid, $resume, 'goals',

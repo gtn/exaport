@@ -343,6 +343,15 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
             }
             $resumeparams->profmembershipments = $profmembershipments;
         }
+        // LinkedIn profile
+        $linkedinprofiles = block_exaport_resume_get_linkedinprofiles(@$resumeparams->id);
+        if ($linkedinprofiles) {
+            foreach ($linkedinprofiles as $linkedinprofile){
+                $linkedinprofile->attachments = $importAttachments('linkedin', $linkedinprofile->id);
+            }
+            $resumeparams->linkedinprofiles = $linkedinprofiles;
+        }
+
         // add files to skills and goals
         $elements = array('personal', 'academic', 'careers');
         foreach ($elements as $element) {
@@ -416,10 +425,15 @@ function block_exaport_resume_get_profmembershipments($resumeid) {
     return block_exaport_resume_get_mm_records('mbrship', array('resume_id' => $resumeid));
 }
 
+function block_exaport_resume_get_linkedinprofiles($resumeid) {
+    return block_exaport_resume_get_mm_records('linkedin', array('resume_id' => $resumeid));
+}
+
 function block_exaport_resume_get_mm_records($table, $conditions) {
     global $DB;
     $wherearr = array();
     $params = array();
+    
     foreach ($conditions as $field => $value) {
         $wherearr[] = $field.' = ? ';
         $params[] = $value;
@@ -547,6 +561,18 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->startdate, FORMAT_PLAIN).
                         (isset($record->enddate) && $record->enddate <> '' ? ' - '.block_exaport_html_secure($record->enddate, FORMAT_PLAIN) : '').'</div>';
                 $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->description).'</div>';
+                break;
+            case 'linkedin':
+                $table->data[$itemindex]['title'] = '<strong>';
+                if ($record->url) {
+                    $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
+                };
+                $table->data[$itemindex]['title'] .= block_exaport_html_secure($record->url, FORMAT_PLAIN).'</strong>';
+                if ($record->url) {
+                    $table->data[$itemindex]['title'] .= '</a>';
+                };
+                $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->date, FORMAT_PLAIN).
+                        '</div>';
                 break;
             case 'badges':
                 $badge = $DB->get_record_sql('SELECT b.*, bi.dateissued, bi.uniquehash '.
@@ -1192,7 +1218,11 @@ function europass_xml($resumeid = 0) {
         europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_mbrship'), '', $mbrshipstring);
         // europass_xml_attachFile($dom, $CandidateProfile, $PublicationNode, 'public', [$publication->id], 'DOC'); files?
     }
-
+    // LinkedIn
+    list ($linkedinstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_linkedin');
+    if ($linkedinstring) {
+        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_linkedin'), block_exaport_get_string('resume_linkedin'), $resume->linkedin);
+    }
     // Goals.
     // goals - Personal goals
     if ($resume->goalspersonal) {
@@ -1548,6 +1578,10 @@ function list_for_resume_elements($resumeid, $tablename) {
                 $itemsstring .= $item->title;
                 $itemsstring .= ' ('.$item->startdate.($item->enddate ? "-".$item->enddate : "").')';
                 $itemsstring .= ($item->description ? ". " : "").$item->description;
+                break;
+            case 'block_exaportresume_linkedin';
+                $itemsstring .= $item->titel;
+                $itemsstring .= ' ('.$item->date.'). ';
                 break;
             default:
                 $itemsstring .= '';

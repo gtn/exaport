@@ -358,6 +358,7 @@ $string['cofigureblock_cvinfo_employment_history'] = 'Employment history';
 $string['cofigureblock_cvinfo_certif'] = 'Certifications, accreditations and awards';
 $string['cofigureblock_cvinfo_public'] = 'Books and publications';
 $string['cofigureblock_cvinfo_mbrship'] = 'Memberships';
+$string['cofigureblock_cvinfo_linkedin'] = 'LinkedIn profile';
 $string['cofigureblock_cvinfo_goals'] = 'My goals';
 $string['cofigureblock_cvinfo_skills'] = 'My skills';
 $string['cofigureblock_cvinfo_interests'] = 'Interests';
@@ -489,8 +490,13 @@ $string['resume_publicsaved'] = 'Books and publications saved';
 $string['resume_deletepublicconfirm'] = 'Do you really want to delete this book or publication?';
 $string['resume_publicdeleted'] = 'Book or publication deleted';
 $string['resume_mbrship'] = 'Memberships';
+$string['resume_mbrshipdeleted'] = 'Membership deleted';
 $string['resume_mbrshipsaved'] = 'Membership saved';
+$string['resume_linkedin'] = 'LinkedIn profile';
+$string['resume_linkedinsaved'] = 'LinkedIn profile saved';
+$string['resume_linkedindeleted'] = 'LinkedIn profile deleted';
 $string['resume_deletembrshipconfirm'] = 'Do you really want to delete this membership?';
+$string['resume_deletelinkedinconfirm'] = "Do you really want to delete this linkedin profile?";
 $string['resume_mbrshipdeleted'] = 'Membership deleted';
 $string['resume_mygoals'] = 'My goals';
 $string['resume_goals'] = 'Goals';
@@ -530,7 +536,7 @@ $string['resume_exportto_europass_intro'] = '<p>The Europass profile can help pe
     </ul>';
 $string['resume_exportto_europass_getXML'] = 'Download XML';
 $string['resume_expand'] = 'Expand all';
-$string['resume_collaps'] = 'Collaps all';
+$string['resume_collaps'] = 'Collapse all';
 
 // === Structure sharing.
 $string['shared_categories'] = 'Shared Categories';

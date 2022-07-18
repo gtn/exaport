@@ -1772,6 +1772,22 @@ return [
                 'Mitgliedschaft gelöscht',
                 'Membership deleted',
         ],
+        'resume_linkedin' => [
+                'LinkedIn-Profil',
+                'LinkedIn profile',
+        ],
+        'resume_linkedinsaved' => [
+                'LinkedIn-Profil gespeichert',
+                'LinkedIn profile saved',
+        ],
+        'resume_deletelinkedinconfirm' => [
+                'Wollen Sie wirklich den Eintrag löschen?',
+                'Do you really want to delete this membership?',
+        ],
+        'resume_linkedindeleted' => [
+                'LinkedIn-Profil gelöscht',
+                'LinkedIN profile deleted',
+        ],
         'resume_mygoals' => [
                 'Meine Ziele',
                 'My goals',

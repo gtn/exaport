@@ -244,7 +244,6 @@ if ($action == 'edit') {
             $displayinputs = array(
                     'date' => 'text',
                     'url' => 'text:required',
-                    'files' => 'filearea'
             );
             if ($showinformation = block_exaport_resume_prepare_block_mm_data($resume, $id, $type, $displayinputs, $data)) {
                 $redirect = true;
@@ -268,7 +267,7 @@ if ($action == 'edit') {
 }
 
 // Sort changing.
-if ($action == 'sortchange' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'public'])) {
+if ($action == 'sortchange' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'linkedin', 'public'])) {
     require_sesskey();
 
     $id1 = optional_param('id1', 0, PARAM_INT);

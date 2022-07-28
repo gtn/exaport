@@ -429,6 +429,7 @@ function block_exaport_resume_get_linkedinprofiles($resumeid) {
     return block_exaport_resume_get_mm_records('linkedin', array('resume_id' => $resumeid));
 }
 
+
 function block_exaport_resume_get_mm_records($table, $conditions) {
     global $DB;
     $wherearr = array();
@@ -567,7 +568,14 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 if ($record->url) {
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
-                $table->data[$itemindex]['title'] .= block_exaport_html_secure($record->url, FORMAT_PLAIN).'</strong>';
+                if (strpos($record->url, "https://") === false){
+                    $table->data[$itemindex]['title'] .= '<a href="https://'.$record->url.'" target="_blank">'.$record->url.' LinkedIn</a>';
+                }
+                else {
+                    $table->data[$itemindex]['title'] .= '<a href="'.$record->url.'" target="_blank">'.$record->url.' LinkedIn</a>';
+
+                }
+
                 if ($record->url) {
                     $table->data[$itemindex]['title'] .= '</a>';
                 };

@@ -376,28 +376,28 @@ if ($showinformation) {
     $employments = block_exaport_resume_get_employments($resume->id);
     $employmenthistory = block_exaport_resume_templating_mm_records($courseid, 'employ', 'position', $employments);
     echo block_exaport_form_resume_part($courseid, 'employ',
-            get_string('resume_employhistory', 'block_exaport'), $employmenthistory, 'add', $type);
+    get_string('resume_employhistory', 'block_exaport'), $employmenthistory, 'add', $type);
 
     // Certifications, accreditations and awards.
     $certifications = block_exaport_resume_get_certificates($resume->id);
     $certificationhistory = block_exaport_resume_templating_mm_records($courseid, 'certif', 'title', $certifications);
     echo block_exaport_form_resume_part($courseid, 'certif',
-            get_string('resume_certif', 'block_exaport'), $certificationhistory, 'add', $type);
-
+    get_string('resume_certif', 'block_exaport'), $certificationhistory, 'add', $type);
+    
     // Badges.
     if (block_exaport_badges_enabled()) {
         $badges = block_exaport_resume_get_badges($resume->id);
         $badgesrecords = block_exaport_resume_templating_mm_records($courseid, 'badges', 'title', $badges, 0, 0, 0);
         echo block_exaport_form_resume_part($courseid, 'badges',
-                get_string('resume_badges', 'block_exaport'), $badgesrecords, 'edit', $type);
+        get_string('resume_badges', 'block_exaport'), $badgesrecords, 'edit', $type);
     };
 
     // Books and publications.
     $publications = block_exaport_resume_get_publications($resume->id);
     $publicationhistory = block_exaport_resume_templating_mm_records($courseid, 'public', 'title', $publications);
     echo block_exaport_form_resume_part($courseid, 'public',
-            get_string('resume_public', 'block_exaport'), $publicationhistory, 'add', $type);
-
+    get_string('resume_public', 'block_exaport'), $publicationhistory, 'add', $type);
+    
     // Professional memberships.
     $memberships = block_exaport_resume_get_profmembershipments($resume->id);
     $membershiphistory = block_exaport_resume_templating_mm_records($courseid, 'mbrship', 'title', $memberships);
@@ -409,23 +409,24 @@ if ($showinformation) {
     $linkedinhistory = block_exaport_resume_templating_mm_records($courseid, 'linkedin', 'url', $linkedinprofiles);
     echo block_exaport_form_resume_part($courseid, 'linkedin',
     get_string('resume_linkedin', 'block_exaport'), $linkedinhistory, 'add', $type);
-
+    
     // My Goals.
     $goals = block_exaport_resume_templating_list_goals_skills($courseid, $resume, 'goals',
-            get_string('resume_goals', 'block_exaport'));
+    get_string('resume_goals', 'block_exaport'));
     echo block_exaport_form_resume_part($courseid, 'goals', get_string('resume_mygoals', 'block_exaport'), $goals, '', $type);
-
+    
     // My Skills.
     $skills = block_exaport_resume_templating_list_goals_skills($courseid, $resume, 'skills',
-            get_string('resume_skills', 'block_exaport'));
+    get_string('resume_skills', 'block_exaport'));
     echo block_exaport_form_resume_part($courseid, 'skills', get_string('resume_myskills', 'block_exaport'), $skills, '', $type);
-
+    
     // Interests.
     $interests = file_rewrite_pluginfile_urls($resume->interests, 'pluginfile.php', context_user::instance($USER->id)->id,
-            'block_exaport', 'resume_interests', $resume->id);
+    'block_exaport', 'resume_interests', $resume->id);
     echo block_exaport_form_resume_part($courseid, 'interests',
-            get_string('resume_interests', 'block_exaport'), $interests, 'edit', $type);
-
+    get_string('resume_interests', 'block_exaport'), $interests, 'edit', $type);
+    
+    
 };
 
 function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '', $content = '', $buttons = '', $opened = false) {
@@ -441,6 +442,10 @@ function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '',
     $resumepart .= '<a name="'.$type.'"></a>';
     $resumepart .= '<div class="view-group-content clearfix">';
     $resumepart .= '<div>'.$content.'</div>';
+    if ($type = "linkedin"){
+
+
+    }
     switch ($buttons) {
         case 'edit':
             $resumepart .= '<input type="submit" value="'.get_string("edit").'" class="btn btn-default" />';

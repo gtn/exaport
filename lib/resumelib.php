@@ -568,20 +568,18 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 if ($record->url) {
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
-                if (strpos($record->url, "https://") === false){
+                if (strpos($record->url, "https://") === false && strpos($record->url, "http://") === false){
                     $table->data[$itemindex]['title'] .= '<a href="https://'.$record->url.'" target="_blank">'.$record->url.'</a>';
                 }
                 else {
                     $table->data[$itemindex]['title'] .= '<a href="'.$record->url.'" target="_blank">'.$record->url.'</a>';
-
                 }
-
                 if ($record->url) {
                     $table->data[$itemindex]['title'] .= '</a>';
                 };
                 $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->date, FORMAT_PLAIN).
                         '</div>';
-                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->description).'</div>';
+                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->url).'</div>';
                 break;
             case 'badges':
                 $badge = $DB->get_record_sql('SELECT b.*, bi.dateissued, bi.uniquehash '.
@@ -1601,4 +1599,3 @@ function list_for_resume_elements($resumeid, $tablename) {
     $itemsstring .= '</ul>';
     return array($itemsstring, $itemsids);
 }
-

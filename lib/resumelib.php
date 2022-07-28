@@ -569,10 +569,10 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                     $table->data[$itemindex]['title'] .= '<a href="#" class="expandable-head">';
                 };
                 if (strpos($record->url, "https://") === false){
-                    $table->data[$itemindex]['title'] .= '<a href="https://'.$record->url.'" target="_blank">'.$record->url.' LinkedIn</a>';
+                    $table->data[$itemindex]['title'] .= '<a href="https://'.$record->url.'" target="_blank">'.$record->url.'</a>';
                 }
                 else {
-                    $table->data[$itemindex]['title'] .= '<a href="'.$record->url.'" target="_blank">'.$record->url.' LinkedIn</a>';
+                    $table->data[$itemindex]['title'] .= '<a href="'.$record->url.'" target="_blank">'.$record->url.'</a>';
 
                 }
 
@@ -581,6 +581,7 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 };
                 $table->data[$itemindex]['title'] .= '<div>'.block_exaport_html_secure($record->date, FORMAT_PLAIN).
                         '</div>';
+                $table->data[$itemindex]['title'] .= '<div class="expandable-text hidden">'.block_exaport_html_secure($record->description).'</div>';
                 break;
             case 'badges':
                 $badge = $DB->get_record_sql('SELECT b.*, bi.dateissued, bi.uniquehash '.

@@ -345,12 +345,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         }
         // LinkedIn profile
         $linkedinprofiles = block_exaport_resume_get_linkedinprofiles(@$resumeparams->id);
-        if ($linkedinprofiles) {
-            foreach ($linkedinprofiles as $linkedinprofile){
-                $linkedinprofile->attachments = $importAttachments('linkedin', $linkedinprofile->id);
-            }
-            $resumeparams->linkedinprofiles = $linkedinprofiles;
-        }
+        $resumeparams->linkedinprofiles = $linkedinprofiles;
 
         // add files to skills and goals
         $elements = array('personal', 'academic', 'careers');

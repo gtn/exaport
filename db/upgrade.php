@@ -961,7 +961,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 $index = new xmldb_index($indexname, XMLDB_INDEX_NOTUNIQUE, array($indexname));
                 if (!$dbman->index_exists($table, $index)) {
                     $dbman->add_index($table, $index);
-                
+                }
             }
         }
         upgrade_block_savepoint(true, 2019111202, 'exaport');

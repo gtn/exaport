@@ -972,7 +972,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $table = new xmldb_table('block_exaportresume_linkedin');
         // Adding fields to table block_exaportresume_linkedin.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('resumeid', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('resume_id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
         $table->add_field('date', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
         $table->add_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
         $table->add_field('sorting', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);

@@ -442,10 +442,6 @@ function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '',
     $resumepart .= '<a name="'.$type.'"></a>';
     $resumepart .= '<div class="view-group-content clearfix">';
     $resumepart .= '<div>'.$content.'</div>';
-    if ($type = "linkedin"){
-
-
-    }
     switch ($buttons) {
         case 'edit':
             $resumepart .= '<input type="submit" value="'.get_string("edit").'" class="btn btn-default" />';

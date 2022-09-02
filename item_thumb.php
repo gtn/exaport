@@ -63,7 +63,7 @@ if ($access == '') {
 if (empty($item)) {
     throw new moodle_exception('item not found');
 }
-
+//echo "<pre>debug:<strong>item_thumb.php:66</strong>\r\n"; print_r($item); echo '</pre>'; exit; // !!!!!!!!!! delete it
 // Custom Icon file.
 if ($iconfile = block_exaport_get_files($item, 'item_iconfile', true)) {
     if (is_array($iconfile)) { // from new moodle version?
@@ -120,13 +120,16 @@ switch ($item->type) {
 
     case "link":
         $url = $item->url;
-        if (strpos($url, 'http') === false) {
-            $url = 'http://'.$url;
+        if ($purl = parse_url($url)) {
+            if (!isset($purl["scheme"]) || strpos($purl["scheme"], 'http') === false) {
+                $url = 'http://'.$url;
+            }
         }
 
-        $str = file_get_contents($url);
+        $str = @file_get_contents($url);
 
         if ($str && preg_match('/<img\s.*src=[\'"]([^\'"]+)[\'"]/im', $str, $matches)) {
+
             $firstimg = $matches[1];
             if (strpos($firstimg, 'http') === false) {
                 if ($firstimg[0] == '/') {
@@ -139,13 +142,24 @@ switch ($item->type) {
                 }
             }
 
-            $headers = get_headers($firstimg, 1);
-            $type = $headers["Content-Type"];
-            if (is_array($type)) {
-                $type = end($type); // TODO: only last or more difficult rule?
+            // img must not be a local file, only url
+            if ($purl = parse_url($firstimg)) {
+                if (!isset($purl["scheme"]) || strpos($purl["scheme"], 'http') === false) {
+                    $firstimg = 'http://'.$firstimg;
+                }
             }
 
             $imgstr = @file_get_contents($firstimg);
+
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $type = $finfo->buffer($imgstr);
+
+            // we need to return only PICTURES
+            if (strpos($type, 'image/') === false) {
+                header('Location: pix/link_tile.png');
+                break;
+            }
+
             if (strlen($imgstr) < 50) {
                 header('Location: pix/link_tile.png');
                 break;

@@ -63,7 +63,7 @@ if ($access == '') {
 if (empty($item)) {
     throw new moodle_exception('item not found');
 }
-//echo "<pre>debug:<strong>item_thumb.php:66</strong>\r\n"; print_r($item); echo '</pre>'; exit; // !!!!!!!!!! delete it
+
 // Custom Icon file.
 if ($iconfile = block_exaport_get_files($item, 'item_iconfile', true)) {
     if (is_array($iconfile)) { // from new moodle version?

@@ -1010,6 +1010,19 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2022090600, 'exaport');
     }
 
+    if ($oldversion < 2022083100){
+        // rename field 'resumeid' to 'resume_id'
+        $table = new xmldb_table('block_exaportresume_linkedin');
+        $field = new xmldb_field('resumeid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null, 'id');
+        if ($dbman->field_exists($table, $field)) {
+            // Launch rename field
+            $dbman->rename_field($table, $field, 'resume_id');
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2022083100, 'exaport');
+    }
+
     // TODO: delete structure fields / tables.
 
     return $result;

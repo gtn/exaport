@@ -984,3 +984,4 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     return $result;
 }
+}

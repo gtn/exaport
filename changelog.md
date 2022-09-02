@@ -1,4 +1,4 @@
-v4.6.5 Moodle 4.0 compatibility 
+v4.6.7 Moodle 4.0 compatibility 
 		securty fixes, deleted old code
 v4.6.4 (2020011700)
 		Upgrade-bugfix

@@ -2121,4 +2121,303 @@ return [
             </ol>
             ',
         ],
+
+        // === Privacy wordings
+        'privacy:metadata:block_exaportuser' => [
+            'user\'s data from exabis e-portfolio',
+            'user\'s data from exabis e-portfolio',
+        ],
+        'privacy:metadata:block_exaportuser:user_id' => [
+            'user id',
+            'user id',
+        ],
+        'privacy:metadata:block_exaportuser:description' => [
+            'description',
+            'description',
+        ],
+        'privacy:metadata:block_exaportuser:view_items_layout' => [
+            'user id',
+            'user id',
+        ],
+
+        'privacy:metadata:block_exaportcate' => [
+            'user\'s categories',
+            'user\'s categories',
+        ],
+        'privacy:metadata:block_exaportcate:pid' => [
+            'parent category id',
+            'parent category id',
+        ],
+        'privacy:metadata:block_exaportcate:userid' => [
+            'user id',
+            'user id',
+        ],
+        'privacy:metadata:block_exaportcate:name' => [
+            'title',
+            'title',
+        ],
+        'privacy:metadata:block_exaportcate:timemodified' => [
+            'last modified',
+            'last modified',
+        ],
+        'privacy:metadata:block_exaportcate:courseid' => [
+            'course id',
+            'course id',
+        ],
+        'privacy:metadata:block_exaportcate:description' => [
+            'description',
+            'description',
+        ],
+        'privacy:metadata:block_exaportcate:subjid' => [
+            'related subject id',
+            'related subject id',
+        ],
+        'privacy:metadata:block_exaportcate:topicid' => [
+            'related topic id',
+            'related topic id',
+        ],
+        'privacy:metadata:block_exaportcate:source' => [
+            'source',
+            'source',
+        ],
+        'privacy:metadata:block_exaportcate:sourceid' => [
+            'source id',
+            'source id',
+        ],
+        'privacy:metadata:block_exaportcate:parent_ids' => [
+            'list of parent ids',
+            'list of parent ids',
+        ],
+        'privacy:metadata:block_exaportcate:parent_titles' => [
+            'list of parent titles',
+            'list of parent titles',
+        ],
+        'privacy:metadata:block_exaportcate:stid' => [
+            'schooltype id',
+            'schooltype id',
+        ],
+        'privacy:metadata:block_exaportcate:sourcemod' => [
+            'sourcemod',
+            'sourcemod',
+        ],
+        'privacy:metadata:block_exaportcate:name_short' => [
+            'short title',
+            'short title',
+        ],
+        'privacy:metadata:block_exaportcate:shareall' => [
+            'shared for all? 0 - did not share; 1 - shared for all; 2 - shared for groups',
+            'shared for all? 0 - did not share; 1 - shared for all; 2 - shared for groups',
+        ],
+        'privacy:metadata:block_exaportcate:internshare' => [
+            'internal share?',
+            'internal share?',
+        ],
+        'privacy:metadata:block_exaportcate:structure_shareall' => [
+            'shared as structure? : 0 - did not share; 1 - shared for all; 2 - shared for groups',
+            'shared as structure? : 0 - did not share; 1 - shared for all; 2 - shared for groups',
+        ],
+        'privacy:metadata:block_exaportcate:structure_share' => [
+            'shared as structure? look also \'structure_shareall\'',
+            'shared as structure? look also \'structure_shareall\'',
+        ],
+
+        'privacy:metadata:block_exaportitem' => [
+            'user\'s artifact',
+            'user\'s artifact',
+        ],
+        'privacy:metadata:block_exaportitem:userid' => [
+            'artifact\'s owner',
+            'artifact\'s owner',
+        ],
+        'privacy:metadata:block_exaportitem:type' => [
+            'type of artifact',
+            'type of artifact',
+        ],
+        'privacy:metadata:block_exaportitem:categoryid' => [
+            'category id',
+            'category id',
+        ],
+        'privacy:metadata:block_exaportitem:name' => [
+            'name',
+            'name',
+        ],
+        'privacy:metadata:block_exaportitem:url' => [
+            'url',
+            'url',
+        ],
+        'privacy:metadata:block_exaportitem:intro' => [
+            'intro',
+            'intro',
+        ],
+        'privacy:metadata:block_exaportitem:timemodified' => [
+            'last modified time',
+            'last modified time',
+        ],
+        'privacy:metadata:block_exaportitem:courseid' => [
+            'course id',
+            'course id',
+        ],
+        'privacy:metadata:block_exaportitem:shareall' => [
+            'shared for all?',
+            'shared for all?',
+        ],
+        'privacy:metadata:block_exaportitem:externaccess' => [
+            'external access?',
+            'external access?',
+        ],
+        'privacy:metadata:block_exaportitem:externcomment' => [
+            'comment for externals',
+            'comment for externals',
+        ],
+        'privacy:metadata:block_exaportitem:fileurl' => [
+            'url to file',
+            'url to file',
+        ],
+        'privacy:metadata:block_exaportitem:exampid' => [
+            'related example id',
+            'related example id',
+        ],
+        'privacy:metadata:block_exaportitem:langid' => [
+            'language id',
+            'language id',
+        ],
+        'privacy:metadata:block_exaportitem:source' => [
+            'source',
+            'source',
+        ],
+        'privacy:metadata:block_exaportitem:sourceid' => [
+            'source id',
+            'source id',
+        ],
+        'privacy:metadata:block_exaportitem:iseditable' => [
+            'is editable?',
+            'is editable?',
+        ],
+        'privacy:metadata:block_exaportitem:example_url' => [
+            'example_url',
+            'artifact\'s owner',
+        ],
+        'privacy:metadata:block_exaportitem:parentid' => [
+            'parent id',
+            'parent id',
+        ],
+
+        'privacy:metadata:block_exaportitemcomm' => [
+            'comments for artifacts',
+            'comments for artifacts',
+        ],
+        'privacy:metadata:block_exaportitemcomm:itemid' => [
+            'id of artifact',
+            'id of artifact',
+        ],
+        'privacy:metadata:block_exaportitemcomm:userid' => [
+            'author of comment',
+            'author of comment',
+        ],
+        'privacy:metadata:block_exaportitemcomm:entry' => [
+            'comment',
+            'comment',
+        ],
+        'privacy:metadata:block_exaportitemcomm:timemodified' => [
+            'last modified',
+            'last modified',
+        ],
+
+        'privacy:metadata:block_exaportview' => [
+            'comments for artifacts',
+            'comments for artifacts',
+        ],
+        'privacy:metadata:block_exaportview:userid' => [
+            'owner of view',
+            'owner of view',
+        ],
+        'privacy:metadata:block_exaportview:name' => [
+            'name',
+            'name',
+        ],
+        'privacy:metadata:block_exaportview:description' => [
+            'description',
+            'description',
+        ],
+        'privacy:metadata:block_exaportview:timemodified' => [
+            'last modified',
+            'last modified',
+        ],
+        'privacy:metadata:block_exaportview:shareall' => [
+            'shared for all?',
+            'shared for all?',
+        ],
+        'privacy:metadata:block_exaportview:externaccess' => [
+            'external access?',
+            'external access?',
+        ],
+        'privacy:metadata:block_exaportview:externcomment' => [
+            'comment from external?',
+            'comment from external?',
+        ],
+        'privacy:metadata:block_exaportview:langid' => [
+            'language id',
+            'language id',
+        ],
+        'privacy:metadata:block_exaportview:layout' => [
+            'layout of the view',
+            'layout of the view',
+        ],
+        'privacy:metadata:block_exaportview:sharedemails' => [
+            'shared emails list',
+            'shared emails list',
+        ],
+        'privacy:metadata:block_exaportview:autofill_artefacts' => [
+            'enabled autofill by artifacts',
+            'enabled autofill by artifacts',
+        ],
+
+        'privacy:metadata:block_exaportresume' => [
+            'resume data',
+            'resume data',
+        ],
+        'privacy:metadata:block_exaportresume:user_id' => [
+            'resume owner',
+            'resume owner',
+        ],
+        'privacy:metadata:block_exaportresume:courseid' => [
+            'course id',
+            'course id',
+        ],
+        'privacy:metadata:block_exaportresume:cover' => [
+            'cover content',
+            'cover content',
+        ],
+        'privacy:metadata:block_exaportresume:interests' => [
+            'interests',
+            'interests',
+        ],
+        'privacy:metadata:block_exaportresume:goalspersonal' => [
+            'personal goals',
+            'personal goals',
+        ],
+        'privacy:metadata:block_exaportresume:goalsacademic' => [
+            'academic goals',
+            'academic goals',
+        ],
+        'privacy:metadata:block_exaportresume:goalscareers' => [
+            'careers goals',
+            'careers goals',
+        ],
+        'privacy:metadata:block_exaportresume:skillspersonal' => [
+            'personal skills',
+            'personal skills',
+        ],
+        'privacy:metadata:block_exaportresume:skillsacademic' => [
+            'academic skills',
+            'academic skills',
+        ],
+        'privacy:metadata:block_exaportresume:skillscareers' => [
+            'careers skills',
+            'careers skills',
+        ],
+
+
+
+
 ];

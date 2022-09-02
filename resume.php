@@ -84,7 +84,7 @@ if ($action == 'xmleuropass') {
 }
 
 // Delete item.
-if ($action == 'delete' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'linkedin','public'])) {
+if ($action == 'delete' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'public'])) {
     if (data_submitted() && $confirm) {
         require_sesskey();
 
@@ -134,6 +134,7 @@ if ($action == 'edit') {
             $withfiles = true;
         case 'cover':
         case 'interests':
+        case 'linkedinurl':
             $data->{$type} = $resume->{$type};
             $data->{$type.'format'} = FORMAT_HTML;
             $workform = new block_exaport_resume_editor_form($_SERVER['REQUEST_URI'].'#'.$type,
@@ -240,15 +241,6 @@ if ($action == 'edit') {
                 $redirect = true;
             };
             break;
-        case 'linkedin':
-            $displayinputs = array(
-                    'date' => 'text',
-                    'url' => 'text:required',
-            );
-            if ($showinformation = block_exaport_resume_prepare_block_mm_data($resume, $id, $type, $displayinputs, $data)) {
-                $redirect = true;
-            };
-            break;
         case 'goalscomp':
         case 'skillscomp':
             if ($showinformation = block_exaport_resume_competences_form($resume, $id, $type)) {
@@ -267,7 +259,7 @@ if ($action == 'edit') {
 }
 
 // Sort changing.
-if ($action == 'sortchange' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'linkedin', 'public'])) {
+if ($action == 'sortchange' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'public'])) {
     require_sesskey();
 
     $id1 = optional_param('id1', 0, PARAM_INT);
@@ -404,12 +396,6 @@ if ($showinformation) {
     echo block_exaport_form_resume_part($courseid, 'mbrship',
     get_string('resume_mbrship', 'block_exaport'), $membershiphistory, 'add', $type);
     
-    // LinkedIn profiles.
-    $linkedinprofiles = block_exaport_resume_get_linkedinprofiles($resume->id);
-    $linkedinhistory = block_exaport_resume_templating_mm_records($courseid, 'linkedin', 'url', $linkedinprofiles);
-    echo block_exaport_form_resume_part($courseid, 'linkedin',
-    get_string('resume_linkedin', 'block_exaport'), $linkedinhistory, 'add', $type);
-    
     // My Goals.
     $goals = block_exaport_resume_templating_list_goals_skills($courseid, $resume, 'goals',
     get_string('resume_goals', 'block_exaport'));
@@ -425,8 +411,13 @@ if ($showinformation) {
     'block_exaport', 'resume_interests', $resume->id);
     echo block_exaport_form_resume_part($courseid, 'interests',
     get_string('resume_interests', 'block_exaport'), $interests, 'edit', $type);
-    
-    
+
+    //linkedin
+    $linkedin = file_rewrite_pluginfile_urls($resume->linkedinurl, 'pluginfile.php', context_user::instance($USER->id)->id,
+    'block_exaport', 'resume_linkedinurl', $resume->id);
+    echo block_exaport_form_resume_part($courseid, 'linkedinurl',
+    get_string('resume_linkedinurl', 'block_exaport'), $linkedin, 'edit', $type);
+
 };
 
 function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '', $content = '', $buttons = '', $opened = false) {

@@ -961,30 +961,23 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 $index = new xmldb_index($indexname, XMLDB_INDEX_NOTUNIQUE, array($indexname));
                 if (!$dbman->index_exists($table, $index)) {
                     $dbman->add_index($table, $index);
-                }
+                
             }
         }
         upgrade_block_savepoint(true, 2019111202, 'exaport');
     }
 
-    if ($oldversion < 2022073100){
-        // Define table block_exaportresume_linkedin to be created.
-        $table = new xmldb_table('block_exaportresume_linkedin');
-        // Adding fields to table block_exaportresume_linkedin.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('resume_id', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('date', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null);
+    if ($oldversion < 2022083100){
+        // Define a new field for table block_exaportresume
+        $table= new xmldb_table('block_exaportresume');
         $table->add_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('sorting', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, null);
-        // Adding keys to table block_exaportresume_badges.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        // Conditionally launch create table for block_exaportresume_badges.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
         }
+
         // Exaport savepoint reached.
 
-        upgrade_block_savepoint(true, 2022073100, 'exaport');
+        upgrade_block_savepoint(true, 2022083100, 'exaport');
     }
 
     // TODO: delete structure fields / tables.

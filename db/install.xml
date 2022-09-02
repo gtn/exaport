@@ -268,6 +268,7 @@
 		<FIELD NAME="skillspersonal" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="personal skills"/>
 		<FIELD NAME="skillsacademic" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="academic skills"/>
 		<FIELD NAME="skillscareers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="careers skills"/>
+		<FIELD NAME="linkedinurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="url to linkedin"/>
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -348,22 +349,7 @@
 		<INDEX NAME="resume_id" UNIQUE="false" FIELDS="resume_id"/>
 	  </INDEXES>
 	</TABLE>
-<TABLE NAME="block_exaportresume_linkedin" COMMENT="users resume linkedin">
-	<FIELDS>
-		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-		<FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
-		<FIELD NAME="date" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="date linkedin membership"/>
-		<FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="linkedin"/>
-		<FIELD NAME="sorting" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="field for sorting"/>
-	</FIELDS>
-	<KEYS>
-		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-	</KEYS>
-	<INDEXES>
-		<INDEX NAME="resume_id" UNIQUE="false" FIELDS="resume_id"/>
-	</INDEXES>
-</TABLE>
-<TABLE NAME="block_exaportresume_public" COMMENT="users resume publications">
+	<TABLE NAME="block_exaportresume_public" COMMENT="users resume publications">
 	  <FIELDS>
 		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
 		<FIELD NAME="resume_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>

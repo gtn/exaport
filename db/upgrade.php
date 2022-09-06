@@ -967,19 +967,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2019111202, 'exaport');
     }
 
-    if ($oldversion < 2022083100){
-        // Define a new field for table block_exaportresume
-        $table= new xmldb_table('block_exaportresume');
-        $table->add_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Exaport savepoint reached.
-
-        upgrade_block_savepoint(true, 2022083100, 'exaport');
-    }
-
     if ($oldversion < 2022090400 || 11 == 11) { // for any plugin version - we need to check these files and ask admin to delete them
         // delete redundant files
         $filenames = ['epop.php', 'epop_viewfile.php', 'epopal.php', 'epopalm.php'];
@@ -1009,6 +996,18 @@ function xmldb_block_exaport_upgrade($oldversion) {
         if ($oldversion < 2022090400) {
             upgrade_block_savepoint(true, 2022090400, 'exaport');
         }
+    }
+
+    if ($oldversion < 2022090600){
+        // Define a new field for table block_exaportresume
+        $table = new xmldb_table('block_exaportresume');
+        $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, null, null, '');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2022090600, 'exaport');
     }
 
     // TODO: delete structure fields / tables.

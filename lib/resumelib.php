@@ -349,6 +349,24 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
             $resumeparams->{'goals'.$element.'_attachments'} = $importAttachments('goals'.$element, $resumeparams->id);
             $resumeparams->{'skills'.$element.'_attachments'} = $importAttachments('skills'.$element, $resumeparams->id);
         }
+        // badges
+        $badges = block_exaport_resume_get_badges($resumeparams->id);
+        if ($badges) {
+            $badgesData = [];
+            foreach ($badges as $badgeMMRec) {
+                $badge = $DB->get_record_sql('SELECT b.*, bi.dateissued, bi.uniquehash '.
+                    ' FROM {badge} b LEFT JOIN {badge_issued} bi ON b.id=bi.badgeid AND bi.userid='.intval($userid).
+                    ' WHERE b.id=? ',
+                    array('id' => $badgeMMRec->badgeid));
+                $badgeEntry = new stdClass();
+                $badgeEntry->name = $badge->name;
+                $badgeEntry->image = block_exaport_get_user_badge_image($badge, true);
+                $badgeEntry->description = $badge->description;
+                $badgeEntry->date = userdate($badge->dateissued, get_string('strftimedate', 'langconfig'));
+                $badgesData[] = $badgeEntry;
+            }
+            $resumeparams->badges = $badgesData;
+        }
     }
 
     return $resumeparams;
@@ -775,7 +793,7 @@ function block_exaport_resume_competences_form($resume, $id, $typeblock) {
     return false;
 }
 
-function block_exaport_get_user_badge_image($badge) {
+function block_exaport_get_user_badge_image($badge, $justUrl = false) {
 //    $src = '/pluginfile.php/'.context_user::instance($badge->usercreated)->id.'/badges/userbadge/'.$badge->id.'/'.
 //            $badge->uniquehash;
     // Find badge by id.
@@ -789,6 +807,9 @@ function block_exaport_get_user_badge_image($badge) {
         $context = context_course::instance($badge->courseid);
         $src = (string)moodle_url::make_pluginfile_url($context->id,
             'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+    }
+    if ($justUrl) {
+        return $src;
     }
     $img = '<img src="'.$src.'" style="float: left; margin: 0px 10px;">';
     return $img;

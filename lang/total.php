@@ -2400,6 +2400,10 @@ return [
             'careers skills',
             'careers skills',
         ],
+        'privacy:metadata:core_files' => [
+            'Exabis ePortfolio stores files which have been uploaded by the user to form part of artifacts, resume entries and comments.',
+            'Exabis ePortfolio stores files which have been uploaded by the user to form part of artifacts, resume entries and comments.',
+        ],
 
 
 

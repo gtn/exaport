@@ -17,6 +17,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use core_privacy\local\request\transform;
+
 require_once($CFG->libdir.'/filelib.php');
 
 if (block_exaport_check_competence_interaction()) {
@@ -1112,6 +1114,11 @@ function block_exaport_share_view_to_teachers($viewid) {
     };
 }
 
+/**
+ * @param stdClass $view
+ * @return array
+ * @throws dml_exception
+ */
 function block_exaport_get_view_blocks($view) {
     global $DB, $USER;
 
@@ -1992,4 +1999,166 @@ abstract class block_exaport_moodleform extends moodleform {
         $this->_process_submission($method);
     }
 
+}
+
+function block_exaport_get_all_categories_for_user($userid) {
+    global $DB;
+    $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+    $categories = $DB->get_records_sql("
+        SELECT
+            {$categorycolumns}
+            , COUNT(i.id) AS item_cnt
+        FROM {block_exaportcate} c
+        LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND ".block_exaport_get_item_where()."
+        WHERE c.userid = ?
+        GROUP BY
+            {$categorycolumns}
+        ORDER BY c.name ASC
+    ", array($userid));
+    return $categories;
+}
+
+
+/**
+ * convert categories and artifacts into tree
+ * @param integer $userid
+ * @param bool $withArtifacts
+ */
+function block_exaport_user_categories_into_tree($userid, $withArtifacts = false, $forPrivacy = false) {
+    global $DB;
+/*    $returnTree = array();
+    if ($catTree === null) {
+//        $catTree = array_merge(['0' => block_exaport_get_root_category()], block_exaport_get_all_categories_for_user($userid)); // start with ALL categories
+        $catTree = block_exaport_get_all_categories_for_user($userid); // start with ALL categories
+        $returnTree = block_exaport_get_root_category();
+        $returnTree->subcategories = block_exaport_user_categories_into_tree($userid, $catTree, 0);
+//        file_put_contents('D://222.222', print_r($catTree, true));
+    } else {
+        # Traverse the tree and search for direct children of the root
+        foreach ($catTree as $catId => $category) {
+            $newCategoryEntry = clone $category;
+//        $catId = $category->id;
+            if ($category->pid == $rootId) {
+                unset($catTree[$catId]); // we do not need it in next iterations
+                $newCategoryEntry->subcategories = block_exaport_user_categories_into_tree($userid, $catTree, $category->pid);
+                $returnTree[$catId] = $newCategoryEntry;
+            }
+
+        }
+    }*/
+    // without recursions
+    $references = [];
+    $returnTree = [];
+    $catTree = ['0' => block_exaport_get_root_category()] + block_exaport_get_all_categories_for_user($userid); // start with ALL categories
+    // TODO: here is cleaning of all parameters which is not saw for the user. Is this right?
+    $cleanCategoryParameters = ['id', 'pid', 'userid', 'courseid', 'subjid', 'topicid', 'source', 'sourceid', 'parent_ids', 'parent_titles', 'stid',
+                'sourcemod', 'name_short', 'item_cnt'];
+    $cleanItemParameters = ['id', 'userid', 'categoryid', 'courseid', 'sortorder', 'beispiel_url', 'langid', 'beispiel_angabe', 'source', 'sourceid',
+                'iseditable', 'example_url', 'parentid', 'exampid'];
+
+    foreach ($catTree as $catId => &$category) {
+        if (!array_key_exists($catId, $references)) {
+            $references[$catId] =& $category;
+        }
+        $category->subcategories = [];
+        if ($withArtifacts) {
+            $items = block_exaport_get_items_by_category_and_user($userid, $catId);
+            if ($forPrivacy) {
+                foreach ($items as &$item) {
+                    $item->timemodified = transform::datetime(@$item->timemodified);
+                    $comments = block_exaport_get_comments_for_item($item->id);
+                    if ($comments && count($comments) > 0) {
+                        foreach ($comments as &$comment) {
+                            $comment->timemodified = transform::datetime(@$comment->timemodified);
+                            $userObj = $DB->get_record('user', ['id' => $comment->userid]);
+                            $comment->fromUser = fullname($userObj, $userid);
+                            unset($comment->userid);
+                            unset($comment->id);
+                            unset($comment->itemid);
+                        }
+                        $item->comments = $comments;
+                    }
+                    if (block_exaport_check_competence_interaction()) {
+                        $comps = block_exaport_get_active_comps_for_item($item);
+                        if ($comps && is_array($comps) && array_key_exists('descriptors', $comps)) {
+                            $competencies = $comps['descriptors'];
+                        } else {
+                            $competencies = null;
+                        }
+
+                        if ($competencies) {
+                            $competenciesoutput = "";
+                            foreach ($competencies as $competence) {
+                                $competenciesoutput .= $competence->title.'<br>';
+                            }
+                            $item->competences = $competenciesoutput;
+                        }
+                    }
+                    foreach ($cleanItemParameters as $param) {
+                        if (property_exists($item, $param)) {
+                            unset($item->{$param});
+                        }
+                    }
+                }
+            }
+            $category->items = $items;
+        }
+        if ($catId == 0) { // only single Root
+            unset($category->pid);
+            unset($category->url);
+            unset($category->item_cnt);
+            $returnTree[0] =& $category;
+        } else {
+            $references[$category->pid]->subcategories[$catId] =& $category;
+            if ($forPrivacy) {
+                // clean properties for readable data in privacy report
+                $category->timemodified = transform::datetime(@$category->timemodified);
+                foreach ($cleanCategoryParameters as $param) {
+                    if (property_exists($category, $param)) {
+                        unset($category->{$param});
+                    }
+                }
+            }
+        }
+
+    }
+
+    return $returnTree;
+}
+
+
+function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sort = '', $withShared = false) {
+    global $DB;
+    $where = ' i.categoryid = ? ';
+    if ($withShared) {
+        if ($categoryid > 0) {
+            // add items from other users if the category is shared
+        } else {
+            // only own
+            $where .= ' AND i.userid = ? ';
+        }
+    } else {
+        $where .= ' AND i.userid = ? ';
+    }
+    $where .= " AND ".block_exaport_get_item_where()." ";
+    $items = $DB->get_records_sql("
+            SELECT DISTINCT i.*, COUNT(com.id) As comments
+            FROM {block_exaportitem} i
+            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+            WHERE $where
+            GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
+                i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
+                i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
+                i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
+                i.iseditable, i.example_url, i.parentid
+            $sort
+        ", [$categoryid, $userid]);
+
+    return $items;
+}
+
+function block_exaport_get_comments_for_item($itemid) {
+    global $DB;
+    $comments = $DB->get_records("block_exaportitemcomm", ['itemid' => $itemid], 'timemodified DESC');
+    return $comments;
 }

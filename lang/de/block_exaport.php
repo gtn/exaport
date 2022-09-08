@@ -334,7 +334,7 @@ $string['clearAllFilers'] = 'Alle Filter zurücksetzen';
 $string['sharedwith'] = 'Geteilt mit';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
-$string['sharedwith_shareall'] = 'Mit allen Benutzern geteilt';
+$string['sharedwith_shareall'] = 'Mit allen Benutzer:innen geteilt';
 $string['sharedwith_shareexternal'] = 'Geteilte externe Views';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 $string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
@@ -418,7 +418,7 @@ $string['settings_allow_loginas_head'] = '"Login als" erlauben';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
-$string['settings_disable_shareall_head'] = 'Mit allen Benutzern teilen deaktivieren';
+$string['settings_disable_shareall_head'] = 'Mit allen Benutzer:innen teilen deaktivieren';
 $string['settings_disable_shareall_body'] = 'Klicken Sie <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen';
 $string['settings_disable_external_comments_head'] = 'Teilen von Kommentaren in externen Views deaktivieren';
 $string['settings_disable_external_comments_body'] = '';
@@ -459,8 +459,13 @@ $string['resume_deleteemployconfirm'] = 'Wollen Sie wirklich den Eintrag lösche
 $string['resume_employdeleted'] = 'Beschäftigung gelöscht';
 $string['resume_interests'] = 'Interessen';
 $string['resume_interestssaved'] = 'Interessen gespeichert';
+<<<<<<< HEAD
 $string['resume_startdate'] = 'Beginn';
 $string['resume_enddate'] = 'Ende';
+=======
+$string['resume_startdate'] = 'Start-Datum';
+$string['resume_enddate'] = 'End-Datum';
+>>>>>>> a0f9524 (Privacy API added)
 $string['resume_institution'] = 'Bildungseinrichtung';
 $string['resume_institutionaddress'] = 'Adresse der Bildungseinrichtung';
 $string['resume_qualification'] = 'Qualifikation';
@@ -491,6 +496,13 @@ $string['resume_mbrship'] = 'Mitgliedschaften';
 $string['resume_mbrshipsaved'] = 'Mitgliedschaften gespeichert';
 $string['resume_deletembrshipconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
 $string['resume_mbrshipdeleted'] = 'Mitgliedschaft gelöscht';
+<<<<<<< HEAD
+=======
+$string['resume_linkedin'] = 'LinkedIn-Profil';
+$string['resume_linkedinsaved'] = 'LinkedIn-Profil gespeichert';
+$string['resume_deletelinkedinconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
+$string['resume_linkedindeleted'] = 'LinkedIn-Profil gelöscht';
+>>>>>>> a0f9524 (Privacy API added)
 $string['resume_mygoals'] = 'Meine Ziele';
 $string['resume_goals'] = 'Ziele';
 $string['resume_goalspersonal'] = 'persönliche Ziele';
@@ -601,3 +613,78 @@ $string['what_is_embed_code_content'] = '<p>Embed code is code that is generated
                 <li>Past this code to exabis E-portfolio textarea field.</li>
             </ol>
             ';
+
+// === Privacy wordings
+$string['privacy:metadata:block_exaportuser'] = 'user\'s data from exabis e-portfolio';
+$string['privacy:metadata:block_exaportuser:user_id'] = 'user id';
+$string['privacy:metadata:block_exaportuser:description'] = 'description';
+$string['privacy:metadata:block_exaportuser:view_items_layout'] = 'user id';
+$string['privacy:metadata:block_exaportcate'] = 'user\'s categories';
+$string['privacy:metadata:block_exaportcate:pid'] = 'parent category id';
+$string['privacy:metadata:block_exaportcate:userid'] = 'user id';
+$string['privacy:metadata:block_exaportcate:name'] = 'title';
+$string['privacy:metadata:block_exaportcate:timemodified'] = 'last modified';
+$string['privacy:metadata:block_exaportcate:courseid'] = 'course id';
+$string['privacy:metadata:block_exaportcate:description'] = 'description';
+$string['privacy:metadata:block_exaportcate:subjid'] = 'related subject id';
+$string['privacy:metadata:block_exaportcate:topicid'] = 'related topic id';
+$string['privacy:metadata:block_exaportcate:source'] = 'source';
+$string['privacy:metadata:block_exaportcate:sourceid'] = 'source id';
+$string['privacy:metadata:block_exaportcate:parent_ids'] = 'list of parent ids';
+$string['privacy:metadata:block_exaportcate:parent_titles'] = 'list of parent titles';
+$string['privacy:metadata:block_exaportcate:stid'] = 'schooltype id';
+$string['privacy:metadata:block_exaportcate:sourcemod'] = 'sourcemod';
+$string['privacy:metadata:block_exaportcate:name_short'] = 'short title';
+$string['privacy:metadata:block_exaportcate:shareall'] = 'shared for all? 0 - did not share; 1 - shared for all; 2 - shared for groups';
+$string['privacy:metadata:block_exaportcate:internshare'] = 'internal share?';
+$string['privacy:metadata:block_exaportcate:structure_shareall'] = 'shared as structure? : 0 - did not share; 1 - shared for all; 2 - shared for groups';
+$string['privacy:metadata:block_exaportcate:structure_share'] = 'shared as structure? look also \'structure_shareall\'';
+$string['privacy:metadata:block_exaportitem'] = 'user\'s artifact';
+$string['privacy:metadata:block_exaportitem:userid'] = 'artifact\'s owner';
+$string['privacy:metadata:block_exaportitem:type'] = 'type of artifact';
+$string['privacy:metadata:block_exaportitem:categoryid'] = 'category id';
+$string['privacy:metadata:block_exaportitem:name'] = 'name';
+$string['privacy:metadata:block_exaportitem:url'] = 'url';
+$string['privacy:metadata:block_exaportitem:intro'] = 'intro';
+$string['privacy:metadata:block_exaportitem:timemodified'] = 'last modified time';
+$string['privacy:metadata:block_exaportitem:courseid'] = 'course id';
+$string['privacy:metadata:block_exaportitem:shareall'] = 'shared for all?';
+$string['privacy:metadata:block_exaportitem:externaccess'] = 'external access?';
+$string['privacy:metadata:block_exaportitem:externcomment'] = 'comment for externals';
+$string['privacy:metadata:block_exaportitem:fileurl'] = 'url to file';
+$string['privacy:metadata:block_exaportitem:exampid'] = 'related example id';
+$string['privacy:metadata:block_exaportitem:langid'] = 'language id';
+$string['privacy:metadata:block_exaportitem:source'] = 'source';
+$string['privacy:metadata:block_exaportitem:sourceid'] = 'source id';
+$string['privacy:metadata:block_exaportitem:iseditable'] = 'is editable?';
+$string['privacy:metadata:block_exaportitem:example_url'] = 'example_url';
+$string['privacy:metadata:block_exaportitem:parentid'] = 'parent id';
+$string['privacy:metadata:block_exaportitemcomm'] = 'comments for artifacts';
+$string['privacy:metadata:block_exaportitemcomm:itemid'] = 'id of artifact';
+$string['privacy:metadata:block_exaportitemcomm:userid'] = 'author of comment';
+$string['privacy:metadata:block_exaportitemcomm:entry'] = 'comment';
+$string['privacy:metadata:block_exaportitemcomm:timemodified'] = 'last modified';
+$string['privacy:metadata:block_exaportview'] = 'comments for artifacts';
+$string['privacy:metadata:block_exaportview:userid'] = 'owner of view';
+$string['privacy:metadata:block_exaportview:name'] = 'name';
+$string['privacy:metadata:block_exaportview:description'] = 'description';
+$string['privacy:metadata:block_exaportview:timemodified'] = 'last modified';
+$string['privacy:metadata:block_exaportview:shareall'] = 'shared for all?';
+$string['privacy:metadata:block_exaportview:externaccess'] = 'external access?';
+$string['privacy:metadata:block_exaportview:externcomment'] = 'comment from external?';
+$string['privacy:metadata:block_exaportview:langid'] = 'language id';
+$string['privacy:metadata:block_exaportview:layout'] = 'layout of the view';
+$string['privacy:metadata:block_exaportview:sharedemails'] = 'shared emails list';
+$string['privacy:metadata:block_exaportview:autofill_artefacts'] = 'enabled autofill by artifacts';
+$string['privacy:metadata:block_exaportresume'] = 'resume data';
+$string['privacy:metadata:block_exaportresume:user_id'] = 'resume owner';
+$string['privacy:metadata:block_exaportresume:courseid'] = 'course id';
+$string['privacy:metadata:block_exaportresume:cover'] = 'cover content';
+$string['privacy:metadata:block_exaportresume:interests'] = 'interests';
+$string['privacy:metadata:block_exaportresume:goalspersonal'] = 'personal goals';
+$string['privacy:metadata:block_exaportresume:goalsacademic'] = 'academic goals';
+$string['privacy:metadata:block_exaportresume:goalscareers'] = 'careers goals';
+$string['privacy:metadata:block_exaportresume:skillspersonal'] = 'personal skills';
+$string['privacy:metadata:block_exaportresume:skillsacademic'] = 'academic skills';
+$string['privacy:metadata:block_exaportresume:skillscareers'] = 'careers skills';
+$string['privacy:metadata:core_files'] = 'Exabis ePortfolio stores files which have been uploaded by the user to form part of artifacts, resume entries and comments.';

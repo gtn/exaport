@@ -159,6 +159,13 @@ class provider implements
         // block_exaportviewemailshar
         // no personal data. just relations
 
+        // this plugin stores user's files
+        $collection->add_subsystem_link(
+            'core_files',
+            [],
+            'privacy:metadata:core_files'
+        );
+
         return $collection;
 
     }
@@ -219,6 +226,98 @@ class provider implements
         }
     }
 
+    static function export_resume_list_data(&$resume, $listName, $subcontextName, $fileAreaName, $resumeContext, $user) {
+        $cleanProps = ['id', 'resume_id', 'resumeid', 'sorting'];
+        $fileAreaNameEditor = str_replace('resume_', 'resume_editor_', $fileAreaName);
+        if ($resume->{$listName}) {
+            if (is_array($resume->{$listName})) {
+                $i = 1;
+                foreach ($resume->{$listName} as $itemId => $item) {
+                    foreach ($cleanProps as $prop) {
+                        if (property_exists($item, $prop)) {
+                            unset($item->{$prop});
+                        }
+                    }
+                    $itemData = array($listName => $item);
+                    $contextdata = helper::get_context_data($resumeContext, $user);
+                    $contextdata = (object)array_merge((array)$contextdata, $itemData);
+                    $writer = writer::with_context($resumeContext);
+
+                    $subcontextNameTemp = 'Exabis ePortfolio/Curriculum Vitae/' . $subcontextName . '/_' . $i . '_';
+                    $writer->export_data([$subcontextNameTemp], $contextdata)
+                        ->export_area_files([$subcontextNameTemp], 'block_exaport', $fileAreaName, $itemId);
+                    $i++;
+                }
+            } elseif (is_string($resume->{$listName})) {
+                $subcontextName = 'Exabis ePortfolio/Curriculum Vitae/' . $subcontextName;
+                // just a string
+                $writer = writer::with_context($resumeContext);
+                $itemData = $writer->rewrite_pluginfile_urls([$subcontextName], 'block_exaport', $fileAreaNameEditor, $resume->id, $resume->{$listName});
+                $itemData = format_text($itemData, FORMAT_HTML);
+                $itemData = array($listName => $itemData);
+                $contextdata = helper::get_context_data($resumeContext, $user);
+                $contextdata = (object)array_merge((array)$contextdata, $itemData);
+
+                $writer->export_data([$subcontextName], $contextdata);
+                $writer->export_area_files([$subcontextName], 'block_exaport', $fileAreaNameEditor, $resume->id);
+//                $writer->export_area_files(['Exabis ePortfolio/Curriculum Vitae/'], 'block_exaport', $fileAreaNameEditor, $resume->id);
+            }
+        }
+    }
+
+    static function export_resume_list_related_competencies($resumeid, $type, $subcontextName, $resumeContext, $user) {
+        global $DB;
+        if (block_exaport_check_competence_interaction()) {
+            $comptitles = '';
+            $competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $resumeid, "comptype" => $type));
+            foreach ($competences as $competence) {
+                $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, array('id' => $competence->compid), '*', IGNORE_MISSING);
+                if ($competencesdb != null) {
+                    $comptitles .= $competencesdb->title."<br>";
+                };
+            };
+            $comptitles = array('competencies' => $comptitles);
+            $contextdata = helper::get_context_data($resumeContext, $user);
+            $contextdata = (object)array_merge((array)$contextdata, $comptitles);
+            $writer = writer::with_context($resumeContext);
+
+            $subcontextName = 'Exabis ePortfolio/Curriculum Vitae/'.$subcontextName;
+            $writer->export_data([$subcontextName], $contextdata);
+        }
+    }
+
+
+    static function attach_category_artifact_files($categoriesTree, $context, $subcontextName) {
+        $writer = writer::with_context($context);
+
+        foreach ($categoriesTree as $catId => $category) {
+            // category icon
+            $writer->export_area_files([$subcontextName.'/Categories'], 'block_exaport', 'category_icon', $catId);
+            // items
+            if ($category->items) {
+                $addToSubContextName = '/Artifacts';
+                foreach ($category->items as $itemId => $item) {
+                    // item file
+                    $writer->export_area_files([$subcontextName.$addToSubContextName], 'block_exaport', 'item_file', $itemId);
+                    // item content (from html)
+                    if ($item->intro) {
+                        $item->intro = $writer->rewrite_pluginfile_urls([$subcontextName.$addToSubContextName], 'block_exaport', 'item_content', $itemId, $item->intro);
+                    }
+                    $writer->export_area_files([$subcontextName.$addToSubContextName], 'block_exaport', 'item_content', $itemId);
+                    // item icon
+                    $writer->export_area_files([$subcontextName.$addToSubContextName.'/Icons'], 'block_exaport', 'item_iconfile', $itemId);
+                    // comment for item
+                    $writer->export_area_files([$subcontextName.$addToSubContextName.'/Comments'], 'block_exaport', 'item_comment_file', $itemId);
+                }
+            }
+            // subcategory
+            if ($category->subcategories) {
+                self::attach_category_artifact_files($category->subcategories, $context, $subcontextName);
+            }
+        }
+    }
+
+
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
@@ -238,643 +337,370 @@ class provider implements
         }
 
         // resume data
-        foreach ($exaportcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $resumeData = [];
-            $resume = block_exaport_get_resume_params($user->id, true);
+        $courseid = $context->instanceid;
+        $resumeData = [];
+        $resume = block_exaport_get_resume_params($user->id, true);
 
-            if ($resume) {
-                $resume = array('resume' => $resume);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $resume);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exaport/Curriculum Vitae'], $contextdata);
-            }
+        if ($resume) {
+            $resumeContext = context_user::instance($user->id);
+
+            // cover
+            static::export_resume_list_data($resume, 'cover', 'Cover', 'resume_cover', $resumeContext, $user);
+            // educations
+            static::export_resume_list_data($resume, 'educations', 'Educations', 'resume_edu', $resumeContext, $user);
+            // employment
+            static::export_resume_list_data($resume, 'employments', 'Employments', 'resume_employ', $resumeContext, $user);
+            // certifications
+            static::export_resume_list_data($resume, 'certifications', 'Certifications', 'resume_certif', $resumeContext, $user);
+            // badges
+            static::export_resume_list_data($resume, 'badges', 'Badges', 'resume_badges', $resumeContext, $user);
+            // publications
+            static::export_resume_list_data($resume, 'publications', 'Publications', 'resume_public', $resumeContext, $user);
+            // memberships
+            static::export_resume_list_data($resume, 'profmembershipments', 'Memberships', 'resume_mbrship', $resumeContext, $user);
+            // goals
+            static::export_resume_list_related_competencies($resume->id, 'goals', 'Goals/Educational standards', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'goalspersonal', 'Goals/Personal', 'resume_goalspersonal', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'goalsacademic', 'Goals/Academic', 'resume_goalsacademic', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'goalscareers', 'Goals/Career', 'resume_goalscareer', $resumeContext, $user);
+            // skills
+            static::export_resume_list_related_competencies($resume->id, 'skills', 'Skills/Educational standards', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'skillspersonal', 'Skills/Personal', 'resume_skillspersonal', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'skillsacademic', 'Skills/Academic', 'resume_skillsacademic', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'skillscareers', 'Skills/Career', 'resume_skillscareer', $resumeContext, $user);
+            // interests
+            static::export_resume_list_data($resume, 'interests', 'Interests', 'resume_interests', $resumeContext, $user);
 
         }
-        return true;
 
 
-        // block_exacompcompuser
-        // block_exacompexameval
-        // get user's grades (reviews from teachers)
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $grades = array();
-            $tree = block_exacomp_get_competence_tree($courseid);
-            foreach ($tree as $subject) {
-                if (!array_key_exists($subject->id, $grades)) {
-                    $grades[$subject->id] = array();
+
+        // artifacts data (with categories)
+        $categoriesTree = block_exaport_user_categories_into_tree($user->id, true, true);
+        if ($categoriesTree) {
+            // $context - user or course?
+            $context = context_user::instance($user->id);
+
+            $subContextName = 'Exabis ePortfolio/Portolio Artifacts';
+            // attach files and format HTML
+            self::attach_category_artifact_files($categoriesTree, $context, $subContextName);
+            $categoriesTree = array('categories' => $categoriesTree);
+            $contextdata = helper::get_context_data($context, $user);
+            $contextdata = (object) array_merge((array) $contextdata, $categoriesTree);
+            $writer = writer::with_context($context);
+            $writer->export_data([$subContextName], $contextdata);
+        }
+
+
+        $badges = block_exaport_get_all_user_badges($user->id);
+        $resume = block_exaport_get_resume_params($user->id, true);
+
+        // views
+        $views = $DB->get_records("block_exaportview", ['userid' => $user->id]);
+        $viewsArr = array();
+        $copyProps = ['name', 'description', 'shareall', 'externaccess'];
+        foreach ($views as $view) {
+            $viewEntry = new stdClass();
+            foreach ($copyProps as $prop) {
+                if (property_exists($view, $prop)) {
+                    $viewEntry->{$prop} = $view->{$prop};
                 }
-                $grades[$subject->id]['title'] = $subject->title;
-                $grades[$subject->id]['titleshort'] = $subject->titleshort;
-                $grades[$subject->id]['infolink'] = $subject->infolink;
-                $grades[$subject->id]['description'] = $subject->description;
-                $grades[$subject->id]['author'] = $subject->author;
-                $assessment = block_exacomp_get_user_assesment_wordings($user->id, $subject->id, BLOCK_EXACOMP_TYPE_SUBJECT, $courseid);
-                $grades[$subject->id]['assessment_grade'] = $assessment->grade;
-                $grades[$subject->id]['assessment_niveau'] = $assessment->niveau;
-                $grades[$subject->id]['assessment_selfgrade'] = $assessment->self_grade;
-                $grades[$subject->id]['topics'] = array();
-                foreach ($subject->topics as $topic) {
-                    if (!array_key_exists($topic->id, $grades[$subject->id]['topics'])) {
-                        $grades[$subject->id]['topics'][$topic->id] = array();
-                    }
-                    $grades[$subject->id]['topics'][$topic->id]['title'] = $topic->title;
-                    $grades[$subject->id]['topics'][$topic->id]['description'] = $topic->description;
-                    $assessment = block_exacomp_get_user_assesment_wordings($user->id, $topic->id, BLOCK_EXACOMP_TYPE_TOPIC, $courseid);
-                    $grades[$subject->id]['topics'][$topic->id]['assessment_grade'] = $assessment->grade;
-                    $grades[$subject->id]['topics'][$topic->id]['assessment_niveau'] = $assessment->niveau;
-                    $grades[$subject->id]['topics'][$topic->id]['assessment_selfgrade'] = $assessment->self_grade;
-                    $grades[$subject->id]['topics'][$topic->id]['descriptors'] = array();
-                    foreach ($topic->descriptors as $descriptor) {
-                        $assessment = block_exacomp_get_user_assesment_wordings($user->id, $descriptor->id, BLOCK_EXACOMP_TYPE_DESCRIPTOR, $courseid);
-                        if (!array_key_exists($descriptor->id, $grades[$subject->id]['topics'][$topic->id]['descriptors'])) {
-                            $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id] = array();
+            }
+            if ($viewEntry->description) {
+                // files and HTML format
+                $writer = writer::with_context($resumeContext);
+                $viewEntry->description = $writer->rewrite_pluginfile_urls(['Exabis ePortfolio/Views'], 'block_exaport', 'view', $view->id, $viewEntry->description);
+                $viewEntry->description = format_text($viewEntry->description, FORMAT_HTML);
+                $writer->export_area_files(['Exabis ePortfolio/Views'], 'block_exaport', 'view', $view->id);
+            }
+            $viewEntry->timemodified = transform::datetime(@$view->timemodified);
+            // add blocks
+            $blocks = [];
+            $allBlocks = $DB->get_records_sql('SELECT b.* 
+                                FROM {block_exaportviewblock} b 
+                                  WHERE b.viewid = ? 
+                                ORDER BY b.positionx, b.positiony', array($view->id));
+            foreach ($allBlocks as &$block) {
+                $blockEntry = new stdClass();
+                $blockEntry->content = '';
+                if (@$block->block_title) {
+                    $blockEntry->block_title = $block->block_title;
+                }
+                switch ($block->type) {
+                    case 'headline': // headline
+                        $blockEntry->content = $block->text;
+                        break;
+                    case 'item': // artifact
+                        $item = $DB->get_record('block_exaportitem', ['id' => $block->itemid]);
+                        if (!$item) {
+                            continue 2;
                         }
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['title'] = $descriptor->title;
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['niveautitle'] = $descriptor->niveau_title;
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['assessment_grade'] = $assessment->grade;
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['assessment_niveau'] = $assessment->niveau;
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['assessment_selfgrade'] = $assessment->self_grade;
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'] = array();
-                        foreach ($descriptor->examples as $example) {
-                            $assessment = block_exacomp_get_user_assesment_wordings($user->id, $example->id, BLOCK_EXACOMP_TYPE_EXAMPLE, $courseid);
-                            if ($assessment) {
-                                if (!array_key_exists($example->id,
-                                    $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'])) {
-                                    $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id] =
-                                        array();
-                                }
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['assessment_grade'] =
-                                    $assessment->grade;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['assessment_niveau'] =
-                                    $assessment->niveau;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['assessment_selfgrade'] =
-                                    $assessment->self_grade;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['title'] =
-                                    $example->title;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['description'] =
-                                    $example->description;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['externalurl'] =
-                                    $example->externalurl;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['externalsolution'] =
-                                    $example->externalsolution;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['externaltask'] =
-                                    $example->externaltask;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['author'] =
-                                    $example->author;
+                        if ($item->url && $item->url != "false") {
+                            $blockEntry->url = $item->url;
+                        }
+                        if ($item->intro) {
+                            $blockEntry->content = $item->intro;
+                        }
+                        if (block_exaport_check_competence_interaction()) {
+                            $comps = block_exaport_get_active_comps_for_item($item);
+                            if ($comps && is_array($comps) && array_key_exists('descriptors', $comps)) {
+                                $competencies = $comps['descriptors'];
+                            } else {
+                                $competencies = null;
+                            }
 
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id] =
-                                    array_filter($grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]);
+                            if ($competencies) {
+                                $competenciesoutput = "";
+                                foreach ($competencies as $competence) {
+                                    $competenciesoutput .= $competence->title.'<br>';
+                                }
+                                $blockEntry->competences = $competenciesoutput;
                             }
                         }
-                        // TODO: subdescriptors?
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id] = array_filter($grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]);
-                    }
-                    $grades[$subject->id]['topics'][$topic->id] = array_filter($grades[$subject->id]['topics'][$topic->id]);
-                }
-                $grades[$subject->id] = array_filter($grades[$subject->id]);
-            }
-            if (count($grades)) {
-                $grades = array('competences_overview' => $grades);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $grades);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/gradings'], $contextdata);
-            }
-        }
-
-        // get user's grades (reviews AS a teacher)
-        // does not kept real data of reviewed student. Only values. Is it correct?
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $grades = array();
-            $tree = block_exacomp_get_competence_tree($courseid);
-            foreach ($tree as $subject) {
-                if (!array_key_exists($subject->id, $grades)) {
-                    $grades[$subject->id] = array();
-                }
-                $grades[$subject->id]['title'] = $subject->title;
-                $grades[$subject->id]['titleshort'] = $subject->titleshort;
-                $grades[$subject->id]['infolink'] = $subject->infolink;
-                $grades[$subject->id]['description'] = $subject->description;
-                $grades[$subject->id]['author'] = $subject->author;
-                $assessments = block_exacomp_get_teacher_assesment_wordings_array($user->id, $subject->id, BLOCK_EXACOMP_TYPE_SUBJECT, $courseid);
-                $grades[$subject->id]['my_assessments'] = $assessments;
-                $grades[$subject->id]['topics'] = array();
-                foreach ($subject->topics as $topic) {
-                    if (!array_key_exists($topic->id, $grades[$subject->id]['topics'])) {
-                        $grades[$subject->id]['topics'][$topic->id] = array();
-                    }
-                    $grades[$subject->id]['topics'][$topic->id]['title'] = $topic->title;
-                    $grades[$subject->id]['topics'][$topic->id]['description'] = $topic->description;
-                    $assessments = block_exacomp_get_teacher_assesment_wordings_array($user->id, $topic->id, BLOCK_EXACOMP_TYPE_TOPIC, $courseid);
-                    $grades[$subject->id]['topics'][$topic->id]['my_assessments'] = $assessments;
-                    $grades[$subject->id]['topics'][$topic->id]['descriptors'] = array();
-                    foreach ($topic->descriptors as $descriptor) {
-                        $assessments = block_exacomp_get_teacher_assesment_wordings_array($user->id, $descriptor->id, BLOCK_EXACOMP_TYPE_DESCRIPTOR, $courseid);
-                        if (!array_key_exists($descriptor->id, $grades[$subject->id]['topics'][$topic->id]['descriptors'])) {
-                            $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id] = array();
+                        switch ($item->type) {
+                            case 'file':
+                                break;
+                            case 'link':
+                                break;
                         }
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['title'] = $descriptor->title;
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['niveautitle'] = $descriptor->niveau_title;
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['my_assessment'] = $assessments;
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'] = array();
-                        foreach ($descriptor->examples as $example) {
-                            $assessments = block_exacomp_get_teacher_assesment_wordings_array($user->id, $example->id, BLOCK_EXACOMP_TYPE_EXAMPLE, $courseid);
-                            if ($assessments) {
-                                if (!array_key_exists($example->id,
-                                    $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'])) {
-                                    $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id] =
-                                        array();
-                                }
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['my_assessment'] = $assessments;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['title'] = $example->title;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['description'] = $example->description;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['externalurl'] = $example->externalurl;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['externalsolution'] = $example->externalsolution;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['externaltask'] = $example->externaltask;
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]['author'] = $example->author;
-
-                                $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id] =
-                                    array_filter($grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]['examples'][$example->id]);
+                        break;
+                    case 'personal_information':
+                        // add picture?
+                        $personInfo = '';
+                        if (isset($block->firstname) or isset($block->lastname)) {
+                            if (isset($block->firstname)) {
+                                $personInfo .= $block->firstname;
                             }
+                            if (isset($block->lastname)) {
+                                $personInfo .= ' '.$block->lastname;
+                            }
+                        };
+                        if (isset($block->email)) {
+                            $personInfo .= $block->email;
                         }
-                        // TODO: subdescriptors?
-                        $grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id] = array_filter($grades[$subject->id]['topics'][$topic->id]['descriptors'][$descriptor->id]);
-                    }
-                    $grades[$subject->id]['topics'][$topic->id] = array_filter($grades[$subject->id]['topics'][$topic->id]);
+                        if (isset($block->text)) {
+                            $personInfo .= $block->text;
+                        }
+                        $blockEntry->content = $personInfo;
+                        break;
+                    case 'media':
+                        if (!empty($block->contentmedia)) {
+                            $blockEntry->content .= $block->contentmedia;
+                        }
+                        break;
+                    case 'badge':
+                        if (count($badges) > 0) {
+                            // badge can be deleted, but relation is still existing in DB, so check all existing badges:
+                            $badge = null;
+                            foreach ($badges as $tmp) {
+                                if ($tmp->id == $block->itemid) {
+                                    $badge = $tmp;
+                                    break;
+                                };
+                            };
+                            if (!$badge) {
+                                // Badge not found.
+                                continue 2;
+                            }
+                            $blockEntry->content .= $badge->name;
+                            // badge file?
+                            $blockEntry->content .= format_text($badge->description, FORMAT_HTML);
+                        }
+                        break;
+                    case 'cv_information':
+                        switch ($block->resume_itemtype) {
+                            case 'edu':
+                                if ($block->itemid && $resume && $resume->educations[$block->itemid]) {
+                                    $itemData = $resume->educations[$block->itemid];
+                                    // files?
+//                                    $attachments = $itemData->attachments;
+                                    $blockEntry->content .= $itemData->institution.': ';
+                                    $blockEntry->content .= $itemData->qualname;
+                                    if ($itemData->startdate != '' || $itemData->enddate != '') {
+                                        $blockEntry->content .= ' (';
+                                        if ($itemData->startdate != '') {
+                                            $blockEntry->content .= $itemData->startdate;
+                                        }
+                                        if ($itemData->enddate != '') {
+                                            $blockEntry->content .= ' - '.$itemData->enddate;
+                                        }
+                                        $blockEntry->content .= ')';
+                                    }
+                                    if ($itemData->qualdescription != '') {
+                                        $blockEntry->content .= '; '.$itemData->qualdescription;
+                                    }
+                                }
+                                break;
+                            case 'employ':
+                                if ($block->itemid && $resume && $resume->employments[$block->itemid]) {
+                                    $itemData = $resume->employments[$block->itemid];
+                                    // files?
+//                                    $attachments = $itemData->attachments;
+                                    $description = '';
+                                    $description .= $itemData->jobtitle.': '.$itemData->employer;
+                                    if ($itemData->startdate != '' || $itemData->enddate != '') {
+                                        $description .= ' (';
+                                        if ($itemData->startdate != '') {
+                                            $description .= $itemData->startdate;
+                                        }
+                                        if ($itemData->enddate != '') {
+                                            $description .= ' - '.$itemData->enddate;
+                                        }
+                                        $description .= ')';
+                                    }
+                                    if ($itemData->positiondescription != '') {
+                                        $description .= '; '.$itemData->positiondescription;
+                                    }
+                                    $blockEntry->content .= $description;
+                                }
+                                break;
+                            case 'certif':
+                                if ($block->itemid && $resume && $resume->certifications[$block->itemid]) {
+                                    $itemData = $resume->certifications[$block->itemid];
+                                    // files?
+//                                    $attachments = $itemData->attachments;
+                                    $description = '';
+                                    $description .= $itemData->title;
+                                    if ($itemData->date != '') {
+                                        $description .= ' ('.$itemData->date.')';
+                                    }
+                                    if ($itemData->description != '') {
+                                        $description .= '; '.$itemData->description;
+                                    }
+                                    $blockEntry->content = $description;
+                                }
+                                break;
+                            case 'public':
+                                if ($block->itemid && $resume && $resume->publications[$block->itemid]) {
+                                    $itemData = $resume->publications[$block->itemid];
+                                    // files
+//                                    $attachments = $itemData->attachments;
+                                    $description = '';
+                                    $description .= $itemData->title;
+                                    if ($itemData->contribution != '') {
+                                        $description .= ' ('.$itemData->contribution.')';
+                                    }
+                                    if ($itemData->date != '') {
+                                        $description .= ' ('.$itemData->date.')';
+                                    }
+                                    if ($itemData->contributiondetails != '' || $itemData->url != '') {
+                                        $description .= '; ';
+                                        if ($itemData->contributiondetails != '') {
+                                            $description .= $itemData->contributiondetails;
+                                        }
+                                        if ($itemData->url != '') {
+                                            $description .= ' '.$itemData->url.' ';
+                                        }
+                                    }
+                                    $blockEntry->content = $description;
+                                }
+                                break;
+                            case 'mbrship':
+                                if ($block->itemid && $resume && $resume->profmembershipments[$block->itemid]) {
+                                    $itemData = $resume->profmembershipments[$block->itemid];
+                                    // files?
+//                                    $attachments = $itemData->attachments;
+                                    $description = '';
+                                    $description .= $itemData->title.' ';
+                                    if ($itemData->startdate != '' || $itemData->enddate != '') {
+                                        $description .= ' (';
+                                        if ($itemData->startdate != '') {
+                                            $description .= $itemData->startdate;
+                                        }
+                                        if ($itemData->enddate != '') {
+                                            $description .= ' - '.$itemData->enddate;
+                                        }
+                                        $description .= ')';
+                                    }
+                                    if ($itemData->description != '') {
+                                        $description .= '; '.$itemData->description;
+                                    }
+                                    $blockEntry->content = $description;
+                                }
+                                break;
+                            case 'goalspersonal':
+                            case 'goalsacademic':
+                            case 'goalscareers':
+                            case 'skillspersonal':
+                            case 'skillsacademic':
+                            case 'skillscareers':
+                                // files?
+//                                $attachments = @$resume->{$block->resume_itemtype.'_attachments'};
+                                $description = '';
+                                if ($resume && $resume->{$block->resume_itemtype}) {
+                                    $description .= $resume->{$block->resume_itemtype}.' ';
+                                }
+                                $blockEntry->content = $description;
+                                break;
+                            case 'interests':
+                                $description = '';
+                                if ($resume->interests != '') {
+                                    $description .= $resume->interests.' ';
+                                }
+                                $blockEntry->content = $description;
+                                break;
+                            default:
+                                $blockEntry->content .= '!!! '.$block->resume_itemtype.' !!!';
+                        }
+
+                        break;
+                    case 'text':
+                    default:
+                        $blockEntry->content .= format_text($block->text, FORMAT_HTML);
+                        break;
                 }
-                $grades[$subject->id] = array_filter($grades[$subject->id]);
-            }
-            if (count($grades)) {
-                $grades = array('competences_reviews' => $grades);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $grades);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/reviews'], $contextdata);
-            }
-
-        }
-
-        // block_exacompcmassign
-        // does not need to export, because this data used only for comparing old<->new data
-        // real data is exporting with quiz plugin
-
-        // block_exacompcrossstud_mm
-        // crossubjects related to students
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $crosssubjectsData = array();
-            $crosssubjects = block_exacomp_get_cross_subjects_by_course($courseid, $user->id);
-            foreach ($crosssubjects as $cross_subject) {
-                $crosssubjectsData[$cross_subject->id] = array();
-                $crosssubjectsData[$cross_subject->id]['title'] = $cross_subject->title;
-                $crosssubjectsData[$cross_subject->id]['description'] = $cross_subject->description;
-                $crosssubjectsData[$cross_subject->id]['subjects'] = array();
-                $subjects = block_exacomp_get_competence_tree_for_cross_subject($courseid, $cross_subject, true, null, $user->id);
-                foreach ($subjects as $subject) {
-                    $crosssubjectsData[$cross_subject->id]['subjects'][] = $subject->title;
+                $blockEntry->positionx = $block->positionx;
+                $blockEntry->positiony = $block->positiony;
+                if (!$blockEntry->content) {
+                    unset($blockEntry->content);
                 }
-                $assessment = block_exacomp_get_user_assesment_wordings($user->id, $cross_subject->id, BLOCK_EXACOMP_TYPE_CROSSSUB, $courseid);
-                $crosssubjectsData[$cross_subject->id]['assessment_grade'] = $assessment->grade;
-                $crosssubjectsData[$cross_subject->id]['assessment_niveau'] = $assessment->niveau;
-                $crosssubjectsData[$cross_subject->id]['assessment_selfgrade'] = $assessment->self_grade;
-                $crosssubjectsData[$cross_subject->id] = array_filter($crosssubjectsData[$cross_subject->id]);
-                // all other data is in the subject/topic/... data (look above).  Is it true?
-            }
 
-            if (count($crosssubjectsData)) {
-                $crosssubjectsData = array('crossubjects_reviews' => $crosssubjectsData);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $crosssubjectsData);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/crossubject gradings'], $contextdata);
+                $blocks[] = $blockEntry;
             }
+            $viewEntry->blocks = $blocks;
+
+            if (!$viewEntry->shareall) {
+                unset($viewEntry->shareall);
+            }
+            if (!$viewEntry->externaccess) {
+                unset($viewEntry->externaccess);
+            }
+            $viewsArr[] = $viewEntry;
         }
-        // crossubjects what I evaluate
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $crosssubjectsData = array();
-            $crosssubjects = $DB->get_fieldset_select('block_exacompcompuser',
-                'compid',
-                ' reviewerid = ? AND comptype = ? ',
-                [$user->id, BLOCK_EXACOMP_TYPE_CROSSSUB]
-            );
-
-            if ($crosssubjects) {
-                $allcrossubjects = block_exacomp_get_crosssubjects();
-                foreach ($crosssubjects as $crosssubjectid) {
-                    if (!array_key_exists($crosssubjectid, $allcrossubjects)) {
-                        continue;
-                    }
-                    $cross_subject = $allcrossubjects[$crosssubjectid];
-                    $crosssubjectsData[$cross_subject->id] = array();
-                    $crosssubjectsData[$cross_subject->id]['title'] = $cross_subject->title;
-                    $crosssubjectsData[$cross_subject->id]['description'] = $cross_subject->description;
-                    $subjects = block_exacomp_get_competence_tree_for_cross_subject($courseid, $cross_subject, true, null, $user->id);
-                    $crosssubjectsData[$cross_subject->id]['subjects'] = array();
-                    foreach ($subjects as $subject) {
-                        $crosssubjectsData[$cross_subject->id]['subjects'][] = $subject->title;
-                    }
-                    $assessments = block_exacomp_get_teacher_assesment_wordings_array($user->id, $cross_subject->id,
-                        BLOCK_EXACOMP_TYPE_CROSSSUB, $courseid);
-                    $crosssubjectsData[$cross_subject->id]['my_assessment'] = $assessments;
-                    $crosssubjectsData[$cross_subject->id] = array_filter($crosssubjectsData[$cross_subject->id]);
-                    // all other data is in the subject/topic/... data (look above).  Is it true?
-                }
-            }
-
-            if (count($crosssubjectsData)) {
-                $crosssubjectsData = array('crossubjects_reviews' => $crosssubjectsData);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $crosssubjectsData);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/crossubject reviews'], $contextdata);
-            }
-        }
-
-        // block_exacompdescrvisibility
-        // which descriptors are visible
-        // select only competences, which has relation to the student
-        // if the table record has studentid = 0 (for all?) -  does not export
-        // So: export only data, which is not default for user
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $descrvisiblesData = array();
-            $descrhiddenData = array();
-            $visibles = $DB->get_records_sql('SELECT d.title, dv.visible
-                    FROM {' . BLOCK_EXACOMP_DB_DESCVISIBILITY . '} dv
-                        LEFT JOIN {' . BLOCK_EXACOMP_DB_DESCRIPTORS . '} d ON dv.descrid = d.id
-                    WHERE dv.studentid = ?
-                        AND dv.courseid = ?
-                    ',
-                [$user->id, $courseid]
-            );
-            if ($visibles) {
-                foreach ($visibles as $visible) {
-                    if ($visible->visible) {
-                        $descrvisiblesData[] = $visible->title;
-                    } else {
-                        $descrhiddenData[] = $visible->title;
-                    }
-                }
-            }
-
-            if (count($descrvisiblesData) || count($descrhiddenData)) {
-                $descrvisibles = array('visible_competences' => $descrvisiblesData,
-                    'hidden_competences' => $descrhiddenData);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $descrvisibles);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/visible competences/descriptors'], $contextdata);
-            }
-        }
-
-        // block_exacompexampvisibility
-        // which examples are visible
-        // select only materials, which has relation to the student
-        // if the table record has studentid = 0 (for all?) -  does not export
-        // So: export only data, which is not default for user
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $examvisiblesData = array();
-            $examhiddenData = array();
-            $visibles = $DB->get_records_sql('SELECT e.title, ev.visible
-                    FROM {' . BLOCK_EXACOMP_DB_EXAMPVISIBILITY . '} ev
-                        LEFT JOIN {' . BLOCK_EXACOMP_DB_EXAMPLES . '} e ON ev.exampleid = e.id
-                    WHERE ev.studentid = ?
-                        AND ev.courseid = ?
-                    ',
-                [$user->id, $courseid]
-            );
-            if ($visibles) {
-                foreach ($visibles as $visible) {
-                    if ($visible->visible) {
-                        $examvisiblesData[] = $visible->title;
-                    } else {
-                        $examhiddenData[] = $visible->title;
-                    }
-                }
-            }
-
-            if (count($examvisiblesData) || count($examhiddenData)) {
-                $examvisibles = array('visible_competences' => $examvisiblesData,
-                    'hidden_competences' => $examhiddenData);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $examvisibles);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/visible competences/examples'], $contextdata);
-            }
-        }
-
-        // block_exacompexternaltrainer
-        // external trainers for student
-        $context = context_user::instance($user->id);
-        $externaltrainersData = array();
-        $externaltrainers = $DB->get_fieldset_sql('SELECT DISTINCT u.id
-                FROM {' . BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS . '} et
-                    LEFT JOIN {user} u ON et.trainerid = u.id
-                WHERE et.studentid = ?
-                ',
-            [$user->id]
-        );
-        if ($externaltrainers) {
-            foreach ($externaltrainers as $trainer) {
-                $trainerobject = $DB->get_record('user', array('id' => $trainer));
-                if ($trainerobject) {
-                    $externaltrainersData[] = fullname($trainerobject);
-                }
-            }
-        }
-        if (count($externaltrainersData)) {
-            $externaltrainersData = array('external_trainers' => $externaltrainersData);
+        if ($viewsArr) {
+            $viewsArr = array('views' => $viewsArr);
             $contextdata = helper::get_context_data($context, $user);
-            $contextdata = (object) array_merge((array) $contextdata, $externaltrainersData);
+            $contextdata = (object) array_merge((array) $contextdata, $viewsArr);
             $writer = writer::with_context($context);
-            $writer->export_data(['Exacomp/external/trainers'], $contextdata);
+            $writer->export_data(['Exabis ePortfolio/Views'], $contextdata);
         }
-        // my external students
-        $context = context_user::instance($user->id);
-        $externalstudentsData = array();
-        $externalstudents = $DB->get_fieldset_sql('SELECT DISTINCT u.id
-                FROM {' . BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS . '} et
-                    LEFT JOIN {user} u ON et.studentid = u.id
-                WHERE et.trainerid = ?
-                ',
-            [$user->id]
-        );
-        if ($externalstudents) {
-            foreach ($externalstudents as $student) {
-                $studentobject = $DB->get_record('user', array('id' => $student));
-                if ($studentobject) {
-                    $externalstudentsData[] = fullname($studentobject);
-                }
+
+        // comments to artifacts
+        $comments = $DB->get_records_sql('SELECT c.*, i.name as itemname, i.userid as itemownerid 
+                                FROM {block_exaportitemcomm} c
+                                  LEFT JOIN {block_exaportitem} i ON i.id = c.itemid                                    
+                                WHERE c.userid = ? 
+                                ORDER BY c.timemodified', array($user->id));
+        if ($comments) {
+            $commentsArr = [];
+            foreach ($comments as $comment) {
+                $commentEntry = new stdClass();
+                $commentEntry->text = $comment->entry;
+                $commentEntry->timemodified = transform::datetime(@$comment->timemodified);
+                $itemEntry = new stdClass();
+                $itemEntry->name = $comment->itemname;
+                $userObj = $DB->get_record('user', ['id' => $comment->itemownerid]);
+                $itemEntry->fromUser = fullname($userObj, $user->id);
+                $commentEntry->item = $itemEntry;
+
+                $commentsArr[] = $commentEntry;
             }
-        }
-        if (count($externalstudentsData)) {
-            $externalstudentsData = array('external_students' => $externalstudentsData);
+            $commentsArr = array('comments' => $commentsArr);
             $contextdata = helper::get_context_data($context, $user);
-            $contextdata = (object) array_merge((array) $contextdata, $externalstudentsData);
+            $contextdata = (object) array_merge((array) $contextdata, $commentsArr);
             $writer = writer::with_context($context);
-            $writer->export_data(['Exacomp/external/students'], $contextdata);
+            $writer->export_data(['Exabis ePortfolio/Comments/Artifacts'], $contextdata);
         }
-
-        // block_exacompprofilesettings
-        $context = context_user::instance($user->id);
-        $selectedCourcesData = array();
-        $selectedCources = $DB->get_fieldset_sql('SELECT DISTINCT c.fullname
-                FROM {block_exacompprofilesettings} ps
-                    LEFT JOIN {course} c ON ps.itemid = c.id AND ps.block = ?
-                WHERE ps.userid = ?
-                ',
-            ['exacomp', $user->id]
-        );
-        if ($selectedCources) {
-            foreach ($selectedCources as $courseTitle) {
-                $selectedCourcesData[] = $courseTitle; // title: is it enough?
-            }
-        }
-        if (count($selectedCourcesData)) {
-            $selectedCourcesData = array('courses_for_profile' => $selectedCourcesData);
-            $contextdata = helper::get_context_data($context, $user);
-            $contextdata = (object) array_merge((array) $contextdata, $selectedCourcesData);
-            $writer = writer::with_context($context);
-            $writer->export_data(['Exacomp/Competence profile/courses'], $contextdata);
-        }
-
-        // block_exacompschedule
-        // which examples were added to student's scheduler
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $examplesData = array();
-            $examples = $DB->get_records_sql(
-                'SELECT DISTINCT e.title as example_title,
-                                    s.creatorid as creator_id,
-                                    s.timecreated as timecreated,
-                                    s.timemodified as timemodified,
-                                    s.sorting as sorting,
-                                    s.start as startts,
-                                    s.endtime as endts
-                        FROM {' . BLOCK_EXACOMP_DB_SCHEDULE . '} s
-                            LEFT JOIN {' . BLOCK_EXACOMP_DB_EXAMPLES . '} e ON e.id = s.exampleid
-                        WHERE s.studentid = ?
-                            AND s.courseid = ?
-                            AND s.deleted = 0
-                        ORDER BY s.sorting ',
-                [$user->id, $courseid]
-            );
-            foreach ($examples as $example) {
-                $creator = $DB->get_record('user', ['id' => $example->creator_id]);
-                $examplesData[] = array_filter(array(
-                    'scheduled_example' => $example->example_title,
-                    'scheduled_author' => fullname($creator),
-                    'scheduled_timecreated' => transform::datetime($example->timecreated),
-                    'scheduled_timemodified' => transform::datetime($example->timemodified),
-                    'scheduled_starttime' => ($example->startts ? transform::datetime($example->startts) : ''),
-                    'scheduled_endtime' => ($example->endts ? transform::datetime($example->endts) : ''),
-                    //'scheduled_sorting_position' => transform::datetime($example->timemodified),
-                ));
-            }
-
-            if (count($examplesData)) {
-                $examplesData = array('scheduled_examples' => $examplesData);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $examplesData);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/scheduled examples'], $contextdata);
-            }
-        }
-        // which examples were added from me
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $examplesData = array();
-            $examples = $DB->get_records_sql(
-                'SELECT DISTINCT e.title as example_title,
-                                    s.studentid as student_id,
-                                    s.timecreated as timecreated,
-                                    s.timemodified as timemodified,
-                                    s.sorting as sorting,
-                                    s.start as startts,
-                                    s.endtime as endts
-                        FROM {' . BLOCK_EXACOMP_DB_SCHEDULE . '} s
-                            LEFT JOIN {' . BLOCK_EXACOMP_DB_EXAMPLES . '} e ON e.id = s.exampleid
-                        WHERE s.creatorid = ?
-                            AND s.courseid = ?
-                            AND s.deleted = 0
-                        ORDER BY s.sorting ',
-                [$user->id, $courseid]
-            );
-            foreach ($examples as $example) {
-                $student = $DB->get_record('user', ['id' => $example->student_id]);
-                $examplesData[] = array_filter(array(
-                    'scheduled_example' => $example->example_title,
-                    //'scheduled_student' => fullname($student), // to add name of student?
-                    'scheduled_timecreated' => transform::datetime($example->timecreated),
-                    'scheduled_timemodified' => transform::datetime($example->timemodified),
-                    'scheduled_starttime' => ($example->startts ? transform::datetime($example->startts) : ''),
-                    'scheduled_endtime' => ($example->endts ? transform::datetime($example->endts) : ''),
-                    // may be to add count of related students?
-                    //'scheduled_sorting_position' => transform::datetime($example->timemodified),
-                ));
-            }
-
-            if (count($examplesData)) {
-                $examplesData = array('scheduled_examples' => $examplesData);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $examplesData);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/my scheduled examples'], $contextdata);
-            }
-        }
-
-        // block_exacompsolutvisibility
-        // solutions visibility
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $solutvisiblesData = array();
-            $soluthiddenData = array();
-            $visibles = $DB->get_records_sql('SELECT e.title, sol.visible
-                    FROM {' . BLOCK_EXACOMP_DB_SOLUTIONVISIBILITY . '} sol
-                        LEFT JOIN {' . BLOCK_EXACOMP_DB_EXAMPLES . '} e ON sol.exampleid = e.id
-                    WHERE sol.studentid = ?
-                        AND sol.courseid = ?
-                    ',
-                [$user->id, $courseid]
-            );
-            if ($visibles) {
-                foreach ($visibles as $visible) {
-                    if ($visible->visible) {
-                        $solutvisiblesData[] = $visible->title;
-                    } else {
-                        $soluthiddenData[] = $visible->title;
-                    }
-                }
-            }
-
-            if (count($solutvisiblesData) || count($soluthiddenData)) {
-                $solutvisiblesData = array('visible_solutions' => $solutvisiblesData,
-                    'hidden_solutions' => $soluthiddenData);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $solutvisiblesData);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/visible competences/solutions'], $contextdata);
-            }
-        }
-
-        // block_exacomptopicvisibility
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $topicvisiblesData = array();
-            $topichiddenData = array();
-            $visibles = $DB->get_records_sql('SELECT t.title, tv.visible
-                    FROM {' . BLOCK_EXACOMP_DB_TOPICVISIBILITY . '} tv
-                        LEFT JOIN {' . BLOCK_EXACOMP_DB_TOPICS . '} t ON tv.topicid = t.id
-                    WHERE tv.studentid = ?
-                        AND tv.courseid = ? AND tv.niveauid IS NULL
-                    ',
-                [$user->id, $courseid]
-            );
-            if ($visibles) {
-                foreach ($visibles as $visible) {
-                    if ($visible->visible) {
-                        $topicvisiblesData[] = $visible->title;
-                    } else {
-                        $topichiddenData[] = $visible->title;
-                    }
-                }
-            }
-
-            if (count($topicvisiblesData) || count($topichiddenData)) {
-                $topicsvisibles = array('visible_topics' => $topicvisiblesData,
-                    'hidden_topics' => $topichiddenData);
-                //$context = \context_course::instance($courseid);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $topicsvisibles);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/visible competences/topics'], $contextdata);
-            }
-        }
-
-        // block_exacompwsdata
-        // does not need to export, because it is temporary data for working of webservices
-
-        // block_exacompcrosssubjects
-        // which cross-subjects was added by me
-        foreach ($exacompcoursescontexts as $context) {
-            $courseid = $context->instanceid;
-            $crossData = array();
-            $crosssubjects = $DB->get_records_sql(
-                'SELECT DISTINCT cs.title as cs_title,
-                                    cs.description as cs_description,
-                                    cs.shared as cs_shared,
-                                    s.title as cs_subject,
-                                    cs.groupcategory as cs_groupcategory 
-                        FROM {' . BLOCK_EXACOMP_DB_CROSSSUBJECTS . '} cs
-                            LEFT JOIN {' . BLOCK_EXACOMP_DB_SUBJECTS . '} s ON s.id = cs.subjectid                            
-                        WHERE cs.creatorid = ?
-                            AND cs.courseid = ?                            
-                        ORDER BY cs.sorting ',
-                [$user->id, $courseid]
-            );
-            foreach ($crosssubjects as $crosssubject) {
-                $crossData[] = array_filter(array(
-                    'title' => $crosssubject->cs_title,
-                    'description' => $crosssubject->cs_description,
-                    'shared' => $crosssubject->cs_shared,
-                    'groupcategory ' => $crosssubject->cs_groupcategory,
-                    'related_subject' => $crosssubject->cs_subject,
-                ));
-            }
-
-            if (count($crossData)) {
-                $crossData = array('crosssubjects' => $crossData);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $crossData);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/my cross-subjects'], $contextdata);
-            }
-        }
-
-        // block_exacompglobalgradings
-        // global gradings for the students
-        foreach ($exacompcoursescontexts as $context) {
-            $gradingsData = array();
-            $gradings = $DB->get_records_sql(
-                'SELECT DISTINCT g.compid as compid,
-                                    g.comptype as comptype,
-                                    g.globalgradings as globalgradings                                     
-                        FROM {' . BLOCK_EXACOMP_DB_GLOBALGRADINGS . '} g                                                        
-                        WHERE g.userid = ?',
-                [$user->id]
-            );
-            foreach ($gradings as $grading) {
-                $gradingsData[] = array_filter(array(
-                    'compid' => $grading->compid,
-                    'comptype' => $grading->comptype,
-                    'globalgradings' => $grading->globalgradings,
-                ));
-            }
-
-            if (count($gradingsData)) {
-                $gradingsData = array('globalgradings' => $gradingsData);
-                $contextdata = helper::get_context_data($context, $user);
-                $contextdata = (object) array_merge((array) $contextdata, $gradingsData);
-                $writer = writer::with_context($context);
-                $writer->export_data(['Exacomp/my global gradings data'], $contextdata);
-            }
-        }
-
 
     }
 
@@ -891,7 +717,7 @@ class provider implements
         $DB->delete_records('block_exaportcompresume_mm', ['resumeid' => $resumeId]);
         return true;
     }
-    
+
     /**
      * Delete all data for all users in the specified context.
      *

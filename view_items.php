@@ -283,18 +283,7 @@ if ($type == 'sharedstudent') {
 
 } else {
     // Read all categories.
-    $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
-    $categories = $DB->get_records_sql("
-        SELECT
-            {$categorycolumns}
-            , COUNT(i.id) AS item_cnt
-        FROM {block_exaportcate} c
-        LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND ".block_exaport_get_item_where()."
-        WHERE c.userid = ?
-        GROUP BY
-            {$categorycolumns}
-        ORDER BY c.name ASC
-    ", array($USER->id));
+    $categories = block_exaport_get_all_categories_for_user($USER->id);
 
     foreach ($categories as $category) {
         $category->url = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&categoryid='.$category->id;
@@ -330,20 +319,7 @@ if ($type == 'sharedstudent') {
     $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
 
     // Common items.
-    // SZ 14.10.2020 - shows not only own items. here can be items from other users if the folder was shared
-    $items = $DB->get_records_sql("
-            SELECT DISTINCT i.*, COUNT(com.id) As comments
-            FROM {block_exaportitem} i
-            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE "/*i.userid = ? AND*/." i.categoryid = ? ".($currentcategory->id > 0 ? "" : " AND i.userid = ? " )."
-                AND ".block_exaport_get_item_where().
-            " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
-            i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-            i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-            i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-            i.iseditable, i.example_url, i.parentid
-            $sqlsort
-        ", [$currentcategory->id, $USER->id]);
+    $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true);
 }
 
 $PAGE->set_url($currentcategory->url);

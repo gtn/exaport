@@ -416,6 +416,21 @@ namespace {
         return $sharedgroups;
     }
 
+    function exaport_get_picture_fields() {
+        global $CFG;
+        $moodle_version = $CFG->version;
+        if ($moodle_version < 2021051700) {
+            $fields = user_picture::fields();
+        } else {
+            // since user_picture::fields() uses a deprecated moodle function, this is the workaround:
+            $fields = core_user\fields::get_picture_fields();
+        }
+        if (!is_array($fields) && is_string($fields)) {
+            $fields = explode(',', $fields);
+        }
+        return $fields;
+    }
+
     function exaport_get_shareable_courses_with_users_for_view($viewid) {
         global $DB;
 
@@ -438,7 +453,8 @@ namespace {
 
             foreach ($sharedusers as $userid) {
                 // since user_picture::fields() uses a deprecated moodle function, this is the workaround:
-                $fields = implode(',', core_user\fields::get_picture_fields());
+                $fields = exaport_get_picture_fields();
+                $fields = implode(',', $fields);
                 $user = $DB->get_record('user', array('id' => $userid), $fields);
                 if (!$user) {
                     // Doesn't exist anymore.
@@ -481,7 +497,7 @@ namespace {
 
             foreach ($roles as $role) {
                 // since user_picture::fields('u') uses a deprecated moodle function, this is the workaround:
-                $fields = core_user\fields::get_picture_fields();
+                $fields = exaport_get_picture_fields();
                 foreach ($fields as $key => $field){
                     $fields[$key] = 'u.'.$field;
                 }

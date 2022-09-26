@@ -24,6 +24,12 @@ define(['jquery',
     var exaportViewEditCreate = function() {
 
         var viewEdit = {
+
+            strip_tags: function(text) {
+                let tempDoc = new DOMParser().parseFromString(text, 'text/html');
+                return tempDoc.body.textContent || "";
+            },
+
             resetViewContent: function(){
                 // Load stored blocks.
                 var blocks = $('form :input[name=blocks]').val();
@@ -79,7 +85,7 @@ define(['jquery',
                 var data = {};
                 data.type = 'personal_information';
                 data.id = id;
-                data.block_title = $('#block_title').val();
+                data.block_title = this.strip_tags($('#block_title').val());
                 // if ($('#firstname').attr('checked') == 'checked') {
                 var fncheckbox = $('.pieform input[name="fields\[firstname\]"]').first();
                 if (fncheckbox !== undefined && fncheckbox.is(':checked')) {
@@ -138,7 +144,7 @@ define(['jquery',
                 data = {};
                 data.type = 'text';
                 data.id = id;
-                data.block_title = $('#block_title').val();
+                data.block_title = this.strip_tags($('#block_title').val());
                 // ...data.text = tinymce.get('block_text').getContent();.
                 data.text = $('#id_block_text').val();
                 // If it is tinyMCE: use #tinymce.
@@ -228,7 +234,7 @@ define(['jquery',
                     newItem = lastclicked;
                 }
                 data = {};
-                data.block_title = $('#block_title').val();
+                data.block_title = this.strip_tags($('#block_title').val());
                 data.type = 'media';
                 data.contentmedia = $('#block_media').val();
                 data.width = $('#block_width').val();

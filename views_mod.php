@@ -429,6 +429,11 @@ if ($editform->is_cancelled()) {
             foreach ($blocks as $block) {
                 $block->viewid = $dbview->id;
 
+                // clean block title. We need only clan text. Right?
+                if ($block->block_title) {
+                    $block->block_title = htmlspecialchars(strip_tags($block->block_title));
+                }
+
                 // Media process.
                 if (!empty($block->type) && $block->type == 'media') {
                     if (!empty($block->contentmedia)) {

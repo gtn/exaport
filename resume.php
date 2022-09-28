@@ -410,12 +410,6 @@ if ($showinformation) {
             'block_exaport', 'resume_interests', $resume->id);
     echo block_exaport_form_resume_part($courseid, 'interests',
             get_string('resume_interests', 'block_exaport'), $interests, 'edit', $type);
-			
-	//linkedin
-    $linkedin = file_rewrite_pluginfile_urls($resume->linkedinurl, 'pluginfile.php', context_user::instance($USER->id)->id,
-    'block_exaport', 'resume_linkedinurl', $resume->id);
-    echo block_exaport_form_resume_part($courseid, 'linkedinurl',
-    get_string('resume_linkedinurl', 'block_exaport'), $linkedin, 'edit', $type);
 
 };
 

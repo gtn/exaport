@@ -1009,6 +1009,21 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2022090600, 'exaport');
     }
+	if ($oldversion < 2022092800){
+        // Define a new field for table block_exaportresume
+        $table = new xmldb_table('block_exaportresume');
+        $field = new xmldb_field('linkedinurl', XMLDB_TYPE_CHAR, '255', null, null, null, '');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+		$field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, null, null, '');
+		 if ($dbman->field_exists($table, $field)) {
+			 $dbman->drop_field($table, $field);
+		 }
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2022092800, 'exaport');
+    }
+	
 
     // TODO: delete structure fields / tables.
 

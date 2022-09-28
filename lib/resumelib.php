@@ -438,6 +438,7 @@ function block_exaport_resume_get_mm_records($table, $conditions) {
     global $DB;
     $wherearr = array();
     $params = array();
+	
     foreach ($conditions as $field => $value) {
         $wherearr[] = $field.' = ? ';
         $params[] = $value;
@@ -1213,7 +1214,6 @@ function europass_xml($resumeid = 0) {
         europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_mbrship'), '', $mbrshipstring);
         // europass_xml_attachFile($dom, $CandidateProfile, $PublicationNode, 'public', [$publication->id], 'DOC'); files?
     }
-
     // Goals.
     // goals - Personal goals
     if ($resume->goalspersonal) {

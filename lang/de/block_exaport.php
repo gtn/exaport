@@ -459,13 +459,8 @@ $string['resume_deleteemployconfirm'] = 'Wollen Sie wirklich den Eintrag lösche
 $string['resume_employdeleted'] = 'Beschäftigung gelöscht';
 $string['resume_interests'] = 'Interessen';
 $string['resume_interestssaved'] = 'Interessen gespeichert';
-<<<<<<< HEAD
-$string['resume_startdate'] = 'Beginn';
-$string['resume_enddate'] = 'Ende';
-=======
 $string['resume_startdate'] = 'Start-Datum';
 $string['resume_enddate'] = 'End-Datum';
->>>>>>> a0f9524 (Privacy API added)
 $string['resume_institution'] = 'Bildungseinrichtung';
 $string['resume_institutionaddress'] = 'Adresse der Bildungseinrichtung';
 $string['resume_qualification'] = 'Qualifikation';
@@ -496,15 +491,12 @@ $string['resume_mbrship'] = 'Mitgliedschaften';
 $string['resume_mbrshipsaved'] = 'Mitgliedschaften gespeichert';
 $string['resume_deletembrshipconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
 $string['resume_mbrshipdeleted'] = 'Mitgliedschaft gelöscht';
-<<<<<<< HEAD
-=======
 $string['resume_linkedin'] = 'LinkedIn-Profil';
 $string['resume_linkedinsaved'] = 'LinkedIn-Profil gespeichert';
 $string['resume_deletelinkedinconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
 $string['resume_linkedindeleted'] = 'LinkedIn-Profil gelöscht';
->>>>>>> a0f9524 (Privacy API added)
 $string['resume_mygoals'] = 'Meine Ziele';
-$string['resume_goals'] = 'Ziele';
+$string['resume_goals'] = 'Ziele'; 
 $string['resume_goalspersonal'] = 'persönliche Ziele';
 $string['resume_goalsacademic'] = 'Bildungsziele';
 $string['resume_goalscareers'] = 'Karriereziele';

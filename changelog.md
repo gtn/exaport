@@ -1,4 +1,8 @@
-v4.6.7 Moodle 4.0 compatibility 
+v4.6.7 (2022092800)
+		Privacy API integration, GDPR
+		backward compability fixes
+v4.6.7 (2022090200)
+		Moodle 4.0 compatibility 
 		securty fixes, deleted old code
 v4.6.4 (2020011700)
 		Upgrade-bugfix

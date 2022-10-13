@@ -754,7 +754,6 @@ if ($view->id) {
         $portfolioitems = $portfolioitems + block_exaport_get_portfolio_items(0, $allpotentialitemsids);
     }
 }
-//echo "<pre>debug:<strong>views_mod.php:718</strong>\r\n"; print_r($portfolioitems); echo '</pre>'; exit; // !!!!!!!!!! delete it
 
 // add resume items
 $resumeitems = block_exaport_get_resume_params($USER->id, true);

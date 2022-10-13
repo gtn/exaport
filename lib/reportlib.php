@@ -429,9 +429,6 @@ class ExaportVievPdf {
                                     $cellHight = $this->writeHTMLCellReturnHeight($columnWidth, $x, $yBlockCurrent, $linkscontent);
                                     $heightBlockCurrent += $cellHight;
                                     $yBlockCurrent = $this->increaseBlockY($yBlockCurrent, $cellHight);
-                                    if ($item->id == 50) {
-                                        echo "<pre>debug:<strong>reportlib.php:433</strong>\r\n"; print_r($cellHight); echo '</pre>'; exit; // !!!!!!!!!! delete it
-                                    }
                                 }
                             }
                         }
@@ -826,9 +823,6 @@ class ExaportVievPdf {
 
         }
 
-//        if (@$item->id == 50) {
-//            echo "<pre>debug:<strong>reportlib.php:830</strong>\r\n"; print_r($heightBlockCurrent); echo '</pre>'; exit; // !!!!!!!!!! delete it
-//        }
     }
 
     function cleanHtmlContent($htmlContent = '') {
@@ -915,7 +909,6 @@ class ExaportVievPdf {
 
     function addImageBySrc($src, $x, $y, $maxWidth = 0, $maxHeight = 0, $url = '', $hide = false)
     {
-//        $maxHeight = 45; // <!------------------- !!!!!!!!!!!!!!!!!!!!! delete it !!!!!!!!!!!!!!! only for testing
         static $downloadedImages = null;
         if ($downloadedImages === null) {
             $downloadedImages = [];
@@ -1162,8 +1155,6 @@ class ExaportVievPdf {
         $closedtags = $result[1];
         $len_opened = count($openedtags);
 
-//        echo "<pre>debug:<strong>reportlib.php:1125</strong>\r\n"; print_r($openedtags); echo '</pre>';  // !!!!!!!!!! delete it
-//        echo "<pre>debug:<strong>reportlib.php:1125</strong>\r\n"; print_r($closedtags); echo '</pre>';  // !!!!!!!!!! delete it
 
         if (count($closedtags) == $len_opened) {
             return $html; // all tags are closed!
@@ -1188,7 +1179,6 @@ class ExaportVievPdf {
         $htmlHeight = 0;
         $currentPageId = $this->pdf->getPage();
         $yBeforeHtml = $this->pdf->GetY();
-        echo "<pre>debug:<strong>reportlib.php:1191</strong>\r\n"; print_r($this->pdf->getStringHeight(80, $text)); echo '</pre>'; // !!!!!!!!!! delete it
         $this->pdf->writeHTMLCell($columnWidth, 0, $x, $y, $text, 0, 1, true, true, $align, true);
         $yAfterHtml = $this->pdf->GetY();
         $newPageId = $this->pdf->getPage();
@@ -1198,8 +1188,6 @@ class ExaportVievPdf {
             $htmlHeight = $yAfterHtml - $yBeforeHtml;
 //            $this->pageAdded = false;
         }
-        echo "<pre>debug:<strong>reportlib.php:1195</strong>\r\n"; print_r($yBeforeHtml); echo '</pre>'; // !!!!!!!!!! delete it
-        echo "<pre>debug:<strong>reportlib.php:1195</strong>\r\n"; print_r($yAfterHtml); echo '</pre>'; // !!!!!!!!!! delete it
         if ($htmlHeight < 0) {
             // sometimes pdf lib does not know about changed page (why?)
             // in this case $htmlHeight is < 0
@@ -1247,7 +1235,6 @@ class ExaportVievPdf {
         $description = trim($this->getViewMetaData()->description);
         if ($description) {
             $description = $this->convertHtmlToPdfHtml($description);
-//            echo "<pre>debug:<strong>reportlib.php:1058</strong>\r\n"; print_r($pageParams); echo '</pre>'; exit; // !!!!!!!!!! delete it
             $headHeight += $this->writeHTMLCellReturnHeight($pageParams['wk'] - $pageParams['lm'] - $pageParams['rm'], $this->pageRightMargin, $y, $description, 'R');
             $y = $this->increaseBlockY($y, $headHeight);
         }

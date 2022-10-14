@@ -884,7 +884,6 @@ function europass_xml($resumeid = 0) {
     $Address = $dom->createElement('Address');
     $Address->setAttribute('type', 'home');
     $Communication->appendChild($Address);
-//    echo "<pre>debug:<strong>resumelib.php:827</strong>\r\n"; print_r($USER); echo '</pre>'; exit; // !!!!!!!!!! delete it
     europassFillSubElementText($dom, $Address, 'oa:AddressLine', $USER->address);
     europassFillSubElementText($dom, $Address, 'oa:CityName', $USER->city);
     europassFillSubElementText($dom, $Address, 'CountryCode', strtolower($USER->country));

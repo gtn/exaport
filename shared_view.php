@@ -643,7 +643,6 @@ function pdfView($view, $colslayout, $dataForPdf) {
     $pdfContent .= '<table border="0" width="100%" class="view-table" style="table-layout:fixed;">';
     $pdfContent .= '<tr>';
     $maxRows = 0;
-    //echo "<pre>debug:<strong>shared_view.php:526</strong>\r\n"; print_r($dataForPdf); echo '</pre>'; exit; // !!!!!!!!!! delete it
     foreach ($dataForPdf as $col => $blocks) {
         $maxRows = max(count($blocks), $maxRows);
     }

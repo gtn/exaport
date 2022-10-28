@@ -19,6 +19,10 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_exaport';
 $plugin->release = '4.6.7';
+<<<<<<< HEAD
 $plugin->version = 2022112100;
+=======
+$plugin->version = 2022102800;
+>>>>>>> 4119573 (feature: add timecreated to portfolio entries)
 $plugin->requires = 2016120505;
 $plugin->maturity = MATURITY_STABLE;

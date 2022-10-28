@@ -1027,5 +1027,20 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     // TODO: delete structure fields / tables.
 
+	if ($oldversion < 2022102800) {
+
+		// Define field timecreated to be added to block_exaportitem.
+		$table = new xmldb_table('block_exaportitem');
+		$field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'attachment');
+
+		// Conditionally launch add field timecreated.
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		// Exaport savepoint reached.
+		upgrade_block_savepoint(true, 2022102800, 'exaport');
+	}
+
     return $result;
 }

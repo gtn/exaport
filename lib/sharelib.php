@@ -419,11 +419,11 @@ namespace {
     function exaport_get_picture_fields() {
         global $CFG;
         $moodle_version = $CFG->version;
-        if ($moodle_version < 2021051700) {
-            $fields = user_picture::fields();
-        } else {
+        if (class_exists('\core_user\fields')) {
             // since user_picture::fields() uses a deprecated moodle function, this is the workaround:
-            $fields = core_user\fields::get_picture_fields();
+            $fields = \core_user\fields::get_picture_fields();
+        } else {
+            $fields = user_picture::fields();
         }
         if (!is_array($fields) && is_string($fields)) {
             $fields = explode(',', $fields);

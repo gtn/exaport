@@ -1,4 +1,5 @@
 v4.6.7 (2022092800)
+		Increase downwards compatibility
 		Privacy API integration, GDPR
 		backward compability fixes
 v4.6.7 (2022090200)

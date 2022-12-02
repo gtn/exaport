@@ -1127,7 +1127,7 @@ class CPDF implements Canvas
      * Streams the PDF to the client.
      *
      * @param string $filename The filename to present to the client.
-     * @param array $options Associative array: 'compress' => 1 or 0 (default 1); 'Attachment' => 1 or 0 (default 1).
+     * @param array $options Associative array: 'compress' => 1 or 0 (default 1); 'attachment' => 1 or 0 (default 1).
      */
     public function stream($filename = "document.pdf", $options = array())
     {
@@ -1136,7 +1136,7 @@ class CPDF implements Canvas
         }
 
         if (!isset($options["compress"])) $options["compress"] = true;
-        if (!isset($options["Attachment"])) $options["Attachment"] = true;
+        if (!isset($options["attachment"])) $options["attachment"] = true;
 
         $this->_add_page_text();
 
@@ -1148,7 +1148,7 @@ class CPDF implements Canvas
         header("Content-Length: " . mb_strlen($tmp, "8bit"));
 
         $filename = str_replace(array("\n", "'"), "", basename($filename, ".pdf")) . ".pdf";
-        $attachment = $options["Attachment"] ? "attachment" : "inline";
+        $attachment = $options["attachment"] ? "attachment" : "inline";
         header(Helpers::buildContentDispositionHeader($attachment, $filename));
 
         echo $tmp;

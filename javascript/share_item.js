@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-jQueryExaport(function ($) {
+jQueryExaport(function (/*$*/) {
 
     ExabisEportfolio.load_userlist();
 

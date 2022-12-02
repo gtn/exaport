@@ -60,8 +60,8 @@ switch ($action) {
             if (optional_param('confirm', 0, PARAM_INT)) {
                 $sql = "INSERT INTO {user_info_field} (shortname, name, datatype, description, descriptionformat, categoryid,
                       sortorder, required, locked, visible, forceunique, signup, defaultdata, defaultdataformat,
-                      param1, param2, param3, param4, param5) 
-                 VALUES ('".$shortfieldname."', 'This teacher is trusted for viewing of all artifacts of own students', 'checkbox', 
+                      param1, param2, param3, param4, param5)
+                 VALUES ('".$shortfieldname."', 'This teacher is trusted for viewing of all artifacts of own students', 'checkbox',
                     '<p>This teacher can see all artifacts of own students.</p><p>Use this option with care!</p>".
                         "<p>Has sence only if the parameter \"block_exaport_teachercanseeartifactsofstudents\" is enabled ".
                         "in block_exaport settings</p>',
@@ -94,7 +94,7 @@ switch ($action) {
             echo $OUTPUT->header();
             echo block_exaport_wrapperdivstart();
             echo $OUTPUT->notification(block_exaport_get_string("block_exaport_confirm_profilefield_exists"),
-                                    \core\output\notification::NOTIFY_SUCCESS);
+            \core\output\notification::NOTIFY_SUCCESS);
             $backbutton = new single_button(new moodle_url($backurl), get_string('back'), 'post', true);
             echo $OUTPUT->render($backbutton);
 

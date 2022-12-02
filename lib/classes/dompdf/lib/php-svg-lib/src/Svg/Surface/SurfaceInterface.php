@@ -46,9 +46,9 @@ interface SurfaceInterface
     public function clip();
 
     // text (see also the CanvasDrawingStyles interface)
-    public function fillText($text, $x, $y, $maxWidth = null);
+    public function fillText($text, $x, $y, $max_width = null);
 
-    public function strokeText($text, $x, $y, $maxWidth = null);
+    public function strokeText($text, $x, $y, $max_width = null);
 
     public function measureText($text);
 

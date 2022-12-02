@@ -30,7 +30,8 @@
     background-image: url('../pix/group_open.png');
 }
 
-#exaport .resumeform  legend, #exaport .resumeform .generaltable {
+#exaport .resumeform  legend,
+#exaport .resumeform .generaltable {
     margin-bottom: 5px;
 }
 
@@ -42,6 +43,6 @@
     font-size: 12px;
 }
 
-#exaport .services{
+#exaport .services {
     text-align: right;
 }

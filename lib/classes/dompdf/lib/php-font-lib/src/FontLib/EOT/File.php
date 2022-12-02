@@ -101,7 +101,7 @@ class File extends \FontLib\TrueType\File {
    * @return string|null
    */
   function getFontName() {
-    return $this->header->data["FamilyName"];
+    return $this->header->data["family_name"];
   }
 
   /**

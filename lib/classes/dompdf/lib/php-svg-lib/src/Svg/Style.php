@@ -361,7 +361,7 @@ class Style
      *
      * @param string $size          SVG size
      * @param float  $dpi           DPI
-     * @param float  $referenceSize Reference size
+     * @param float  $referenceSize reference size
      *
      * @return float|null
      */

@@ -66,13 +66,13 @@ function block_exaport_get_item_files($item) {
 }
 
 function block_exaport_get_single_file($item, $type) {
-	$file = block_exaport_get_files($item, $type);
+    $file = block_exaport_get_files($item, $type);
 
-	return reset($file);
+    return reset($file);
 }
 
 function block_exaport_get_item_single_file($item) {
-	return block_exaport_get_single_file($item, 'item_file');
+    return block_exaport_get_single_file($item, 'item_file');
 }
 
 function block_exaport_get_category_icon($category) {
@@ -311,8 +311,8 @@ function block_exaport_init_js_css() {
 
     // possible problems with $CONF->cachejs = false!
 
-//    $PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
-//    $PAGE->requires->js_call_amd('block_exaport/json', 'initialise');
+    //$PAGE->requires->js('/blocks/exaport/javascript/jquery.json.js', true);
+    //$PAGE->requires->js_call_amd('block_exaport/json', 'initialise');
 
     $PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
@@ -383,7 +383,6 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     }*/
     $tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot.'/blocks/exaport/importexport.php?courseid='.$COURSE->id,
         $tabtitle, '', true);
-
 
     $tabitemidentifier = preg_replace('!_.*!', '', $itemidentifier);
     $tabsubitemidentifier = preg_replace('!_.*!', '', $subitemidentifier);
@@ -648,12 +647,12 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences) 
     global $DB;
 
     // TODO: refactor: use block_exaport_get_active_comps_for_item instead.
-//    $sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id ".
-//            " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY."} da ".
-//            " WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
-//    $descriptors = $DB->get_records_sql($sql, array($item->id));
+    // $sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id ".
+    // " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY."} da ".
+    // " WHERE d.id=da.compid AND da.eportfolioitem=1 AND da.activityid=?";
+    // $descriptors = $DB->get_records_sql($sql, array($item->id));
 
-    //RW 2021.04.06 using block_exaport_get_active_comps_for_item
+    // RW 2021.04.06 using block_exaport_get_active_comps_for_item
     $descriptors = $competences["descriptors"];
     $topics = $competences["topics"];
 
@@ -744,7 +743,7 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
 function block_exaport_get_active_compids_for_item($item) {
     $comps = block_exaport_get_active_comps_for_item($item);
     if ($comps && is_array($comps) && array_key_exists('descriptors', $comps)) {
-        $ids = array_keys($comps); //TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
+        $ids = array_keys($comps); // TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
     } else {
         $ids = [];
     }
@@ -981,7 +980,7 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
             'item_cnt' => '',
             'url' => g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id.'&type=shared&userid='.$userid,
             'userid' => $userid ? $userid : ''
-        /* 		'item_cnt' => $DB->get_field_sql('
+        /*      'item_cnt' => $DB->get_field_sql('
                     SELECT COUNT(i.id) AS item_cnt
                     FROM {block_exaportitem} i
                     WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
@@ -1344,10 +1343,10 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
 function block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort){
     global $DB, $USER;
 
-    $categories = $DB->get_records_sql("
+    $categories = $DB->get_records_sql ("
     SELECT
         {$categorycolumns}, u.firstname, u.lastname, u.picture,
-        COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, 
+        COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users,
         COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups
     FROM {user} u
     JOIN {block_exaportcate} c ON (u.id = c.userid AND c.userid != ?)
@@ -1709,9 +1708,9 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
                 FROM {block_exaportitem} i
                 LEFT JOIN {block_exaportcate} cat ON i.categoryid = cat.id
                 JOIN {tag_instance} tt ON i.id = tt.itemid
-                WHERE tt.itemtype = :itemtype 
-                    AND tt.tagid = :tagid 
-                    AND tt.component = :component 
+                WHERE tt.itemtype = :itemtype
+                    AND tt.tagid = :tagid
+                    AND tt.component = :component
                     AND i.id %ITEMFILTER%";
 
     $params = array('itemtype' => 'block_exaportitem', 'tagid' => $tag->id, 'component' => 'block_exaport');
@@ -1738,7 +1737,7 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
         $modinfo = get_fast_modinfo($builder->get_course($courseid));
         // Set accessibility of this item and all other items in the same course.
         $builder->walk(function ($taggeditem) use ($courseid, $modinfo, $builder, $item, $shareditemuids, $USER) {
-//            if ($taggeditem->courseid == $courseid) {
+            //if ($taggeditem->courseid == $courseid) {
                 $accessible = false;
                 // TODO: check rules: courseid?,...
                 if ($taggeditem->userid == $USER->id // owner of artifact
@@ -1747,7 +1746,7 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
                    $accessible = true;
                 }
                 $builder->set_accessible($taggeditem, $accessible);
-//            }
+            // }
         });
     }
     $items = $builder->get_items();
@@ -1797,10 +1796,10 @@ function block_exaport_mix_images($sourceimages = array()) {
     $width = 90;
     $height = 90;
     $tempimages = array();
-    //$fs = get_file_storage();
+    // $fs = get_file_storage();
     $PAGE->set_context(context_system::instance());
     $output = block_exaport_get_renderer();
-    //$themedir = $output->get_theme_dir();
+    // $themedir = $output->get_theme_dir();
     $pixdir = $CFG->dirroot.'/pix/';
 
     $circlepointcoordinates = function($countallpoints, $currentpoint, $iconwidth, $iconheight) use ($width, $height) {
@@ -1822,12 +1821,12 @@ function block_exaport_mix_images($sourceimages = array()) {
         if (!$image) {
             continue;
         }
-        //$imagefile = $image->getFile
+        // $imagefile = $image->getFile
         if ($image->is_valid_image()) {
-            //$tempfile = $fs->create_file_from_pathname($image, $image->filepath);
+            // $tempfile = $fs->create_file_from_pathname($image, $image->filepath);
             $tempimgcontent = $image->get_content();
         } else {
-            //$tempfile = $output->image_url(file_file_icon($image, 90));
+            // $tempfile = $output->image_url(file_file_icon($image, 90));
             $tempfile = $pixdir.file_file_icon($image, $width).'.png';
             $tempimgcontent = file_get_contents($tempfile);
         }
@@ -1837,8 +1836,8 @@ function block_exaport_mix_images($sourceimages = array()) {
     }
     if (count($tempimages) > 0) {
         $resimage = imagecreatetruecolor($width, $height);
-        //imagesavealpha($resimage, true);
-        //$trans_background = imagecolorallocatealpha($resimage, 0, 0, 0, 127);
+        // imagesavealpha($resimage, true);
+        // $trans_background = imagecolorallocatealpha($resimage, 0, 0, 0, 127);
         $black = imagecolorallocate($resimage, 0, 0, 0);
         imagefill($resimage, 0, 0, $black);
         imagecolortransparent($resimage, imagecolorallocate($resimage, 0, 0, 0));
@@ -1854,7 +1853,7 @@ function block_exaport_mix_images($sourceimages = array()) {
             default:
                 $proportion = 40; break;
         }
-        //$proportion = 40;
+        // $proportion = 40;
         $newwidth = ceil($width * $proportion / 100);
         $newheight = ceil($height * $proportion / 100);
         // round mask
@@ -1867,8 +1866,8 @@ function block_exaport_mix_images($sourceimages = array()) {
         $r = min($newwidth, $newheight);
         // with the border
         imagefilledellipse($mask, ($newwidth / 2), ($newheight / 2), $r, $r, $gray);
-        imagefilledellipse($mask, ($newwidth / 2), ($newheight / 2), $r-2, $r-2, $white);
-        imagefilledellipse($mask, ($newwidth / 2), ($newheight / 2), $r-5, $r-5, $black); // for white circle border
+        imagefilledellipse($mask, ($newwidth / 2), ($newheight / 2), $r - 2, $r - 2, $white);
+        imagefilledellipse($mask, ($newwidth / 2), ($newheight / 2), $r - 5, $r - 5, $black); // for white circle border
         imagecolortransparent($mask, $black);
         foreach ($tempimages as $tmpimg) {
             $sizex = imagesx($tmpimg);
@@ -1892,12 +1891,12 @@ function block_exaport_mix_images($sourceimages = array()) {
             imagecopymerge($tmpimg, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
 
             // position calculating (line)
-            //$posX = ceil($copy * $newwidth / 1.75);
-            //$posY = ceil($copy * $newwidth / 1.75);
+            // $pos_x = ceil($copy * $newwidth / 1.75);
+            // $pos_y = ceil($copy * $newwidth / 1.75);
 
             // insert via circle points
-            list ($posX, $posY) = $circlepointcoordinates($imagecount, $copy, $newwidth, $newheight);
-            imagecopy($resimage, $tmpimg, $posX, $posY, 0, 0, $newwidth, $newheight);
+            list ($pos_x, $pos_y) = $circlepointcoordinates($imagecount, $copy, $newwidth, $newheight);
+            imagecopy($resimage, $tmpimg, $pos_x, $pos_y, 0, 0, $newwidth, $newheight);
             $copy++;
         }
         // return result image
@@ -1928,7 +1927,7 @@ require_once($CFG->libdir.'/formslib.php');
 
 class BlockExaportMoodleQuickForm extends MoodleQuickForm {
 
-    function addExaportHelpButton($elementname, $identifier, $component = 'block_exaport', $linktext = '', $suppresscheck = false) {
+    public function add_exaport_help_button($elementname, $identifier, $component = 'block_exaport', $linktext = '', $suppresscheck = false) {
         $sm = get_string_manager();
         if (!$sm->string_exists($identifier.'_help', 'block_exaport')) {
             $element = $this->_elements[$this->_elementIndex[$elementname]];
@@ -1949,7 +1948,7 @@ abstract class block_exaport_moodleform extends moodleform {
         global $CFG, $FULLME;
         // no standard mform in moodle should allow autocomplete with the exception of user signup
         if (empty($attributes)) {
-            $attributes = array('autocomplete'=>'off');
+            $attributes = array('autocomplete' => 'off');
         } else if (is_array($attributes)) {
             $attributes['autocomplete'] = 'off';
         } else {
@@ -1958,7 +1957,6 @@ abstract class block_exaport_moodleform extends moodleform {
             }
         }
 
-
         if (empty($action)){
             // do not rely on PAGE->url here because dev often do not setup $actualurl properly in admin_externalpage_setup()
             $action = strip_querystring($FULLME);
@@ -1966,8 +1964,8 @@ abstract class block_exaport_moodleform extends moodleform {
                 // return only https links when using SSL proxy
                 $action = preg_replace('/^http:/', 'https:', $action, 1);
             }
-            //TODO: use following instead of FULLME - see MDL-33015
-            //$action = strip_querystring(qualified_me());
+            // TODO: use following instead of FULLME - see MDL-33015
+            // $action = strip_querystring(qualified_me());
         }
         // Assign custom data first, so that get_form_identifier can use it.
         $this->_customdata = $customdata;
@@ -1975,7 +1973,7 @@ abstract class block_exaport_moodleform extends moodleform {
         $this->_ajaxformdata = $ajaxformdata;
         // CUSTOM MoodleQuickForm
         $this->_form = new BlockExaportMoodleQuickForm($this->_formname, $method, $action, $target, $attributes, $ajaxformdata);
-//        $this->_form = new MoodleQuickForm($this->_formname, $method, $action, $target, $attributes, $ajaxformdata);
+        // $this->_form = new MoodleQuickForm($this->_formname, $method, $action, $target, $attributes, $ajaxformdata);
         if (!$editable){
             $this->_form->hardFreeze();
         }
@@ -2022,56 +2020,56 @@ function block_exaport_get_all_categories_for_user($userid) {
 /**
  * convert categories and artifacts into tree
  * @param integer $userid
- * @param bool $withArtifacts
+ * @param bool $with_artifacts
  */
-function block_exaport_user_categories_into_tree($userid, $withArtifacts = false, $forPrivacy = false) {
+function block_exaport_user_categories_into_tree($userid, $with_artifacts = false, $for_privacy = false) {
     global $DB;
-/*    $returnTree = array();
-    if ($catTree === null) {
-//        $catTree = array_merge(['0' => block_exaport_get_root_category()], block_exaport_get_all_categories_for_user($userid)); // start with ALL categories
-        $catTree = block_exaport_get_all_categories_for_user($userid); // start with ALL categories
-        $returnTree = block_exaport_get_root_category();
-        $returnTree->subcategories = block_exaport_user_categories_into_tree($userid, $catTree, 0);
-//        file_put_contents('D://222.222', print_r($catTree, true));
+    /*$return_tree = array();
+    if ($cat_tree === null) {
+      //$cat_tree = array_merge(['0' => block_exaport_get_root_category()], block_exaport_get_all_categories_for_user($userid)); // start with ALL categories
+        $cat_tree = block_exaport_get_all_categories_for_user($userid); // start with ALL categories
+        $return_tree = block_exaport_get_root_category();
+        $return_tree->subcategories = block_exaport_user_categories_into_tree($userid, $cat_tree, 0);
+         //file_put_contents('D://222.222', print_r($cat_tree, true));
     } else {
         # Traverse the tree and search for direct children of the root
-        foreach ($catTree as $catId => $category) {
-            $newCategoryEntry = clone $category;
-//        $catId = $category->id;
+        foreach ($cat_tree as $cat_id => $category) {
+           $newCategoryEntry = clone $category;
+        // $cat_id = $category->id;
             if ($category->pid == $rootId) {
-                unset($catTree[$catId]); // we do not need it in next iterations
-                $newCategoryEntry->subcategories = block_exaport_user_categories_into_tree($userid, $catTree, $category->pid);
-                $returnTree[$catId] = $newCategoryEntry;
+                unset($cat_tree[$cat_id]); // we do not need it in next iterations
+                $newCategoryEntry->subcategories = block_exaport_user_categories_into_tree($userid, $cat_tree, $category->pid);
+                $return_tree[$cat_id] = $newCategoryEntry;
             }
 
         }
-    }*/
+    } */
     // without recursions
     $references = [];
-    $returnTree = [];
-    $catTree = ['0' => block_exaport_get_root_category()] + block_exaport_get_all_categories_for_user($userid); // start with ALL categories
+    $return_tree = [];
+    $cat_tree = ['0' => block_exaport_get_root_category()] + block_exaport_get_all_categories_for_user($userid); // start with ALL categories
     // TODO: here is cleaning of all parameters which is not saw for the user. Is this right?
-    $cleanCategoryParameters = ['id', 'pid', 'userid', 'courseid', 'subjid', 'topicid', 'source', 'sourceid', 'parent_ids', 'parent_titles', 'stid',
+    $clean_category_parameters = ['id', 'pid', 'userid', 'courseid', 'subjid', 'topicid', 'source', 'sourceid', 'parent_ids', 'parent_titles', 'stid',
                 'sourcemod', 'name_short', 'item_cnt'];
-    $cleanItemParameters = ['id', 'userid', 'categoryid', 'courseid', 'sortorder', 'beispiel_url', 'langid', 'beispiel_angabe', 'source', 'sourceid',
+    $clean_item_parameters = ['id', 'userid', 'categoryid', 'courseid', 'sortorder', 'beispiel_url', 'langid', 'beispiel_angabe', 'source', 'sourceid',
                 'iseditable', 'example_url', 'parentid', 'exampid'];
 
-    foreach ($catTree as $catId => &$category) {
-        if (!array_key_exists($catId, $references)) {
-            $references[$catId] =& $category;
+    foreach ($cat_tree as $cat_id => &$category) {
+        if (!array_key_exists($cat_id, $references)) {
+            $references[$cat_id] =& $category;
         }
         $category->subcategories = [];
-        if ($withArtifacts) {
-            $items = block_exaport_get_items_by_category_and_user($userid, $catId);
-            if ($forPrivacy) {
+        if ($with_artifacts) {
+            $items = block_exaport_get_items_by_category_and_user($userid, $cat_id);
+            if ($for_privacy) {
                 foreach ($items as &$item) {
                     $item->timemodified = transform::datetime(@$item->timemodified);
                     $comments = block_exaport_get_comments_for_item($item->id);
                     if ($comments && count($comments) > 0) {
                         foreach ($comments as &$comment) {
                             $comment->timemodified = transform::datetime(@$comment->timemodified);
-                            $userObj = $DB->get_record('user', ['id' => $comment->userid]);
-                            $comment->fromUser = fullname($userObj, $userid);
+                            $user_obj = $DB->get_record('user', ['id' => $comment->userid]);
+                            $comment->fromUser = fullname($user_obj, $userid);
                             unset($comment->userid);
                             unset($comment->id);
                             unset($comment->itemid);
@@ -2094,7 +2092,7 @@ function block_exaport_user_categories_into_tree($userid, $withArtifacts = false
                             $item->competences = $competenciesoutput;
                         }
                     }
-                    foreach ($cleanItemParameters as $param) {
+                    foreach ($clean_item_parameters as $param) {
                         if (property_exists($item, $param)) {
                             unset($item->{$param});
                         }
@@ -2103,17 +2101,17 @@ function block_exaport_user_categories_into_tree($userid, $withArtifacts = false
             }
             $category->items = $items;
         }
-        if ($catId == 0) { // only single Root
+        if ($cat_id == 0) { // only single Root
             unset($category->pid);
             unset($category->url);
             unset($category->item_cnt);
-            $returnTree[0] =& $category;
+            $return_tree[0] =& $category;
         } else {
-            $references[$category->pid]->subcategories[$catId] =& $category;
-            if ($forPrivacy) {
+            $references[$category->pid]->subcategories[$cat_id] =& $category;
+            if ($for_privacy) {
                 // clean properties for readable data in privacy report
                 $category->timemodified = transform::datetime(@$category->timemodified);
-                foreach ($cleanCategoryParameters as $param) {
+                foreach ($clean_category_parameters as $param) {
                     if (property_exists($category, $param)) {
                         unset($category->{$param});
                     }
@@ -2123,7 +2121,7 @@ function block_exaport_user_categories_into_tree($userid, $withArtifacts = false
 
     }
 
-    return $returnTree;
+    return $return_tree;
 }
 
 
@@ -2162,3 +2160,4 @@ function block_exaport_get_comments_for_item($itemid) {
     $comments = $DB->get_records("block_exaportitemcomm", ['itemid' => $itemid], 'timemodified DESC');
     return $comments;
 }
+?>

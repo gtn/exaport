@@ -954,7 +954,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
                     if ($dbman->index_exists($table, $index)) {
                         $dbman->drop_index($table, $index);
                     }
-                    //$DB->execute('DROP INDEX '.$eindex.' ON '.$DB->get_prefix().$tablename.' ');
+                    // $DB->execute('DROP INDEX '.$eindex.' ON '.$DB->get_prefix().$tablename.' ');
                 }
             }
             foreach ($indexes as $indexname) {
@@ -971,23 +971,23 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // delete redundant files
         $filenames = ['epop.php', 'epop_viewfile.php', 'epopal.php', 'epopalm.php'];
 
-        $manualDeleting = [];
+        $manual_deleting = [];
         foreach ($filenames as $filename) {
-            $fileRpath = '/blocks/exaport/'.$filename;
-            $filePath = $CFG->dirroot.$fileRpath;
+            $file_r_path = '/blocks/exaport/'.$filename;
+            $filePath = $CFG->dirroot.$file_r_path;
             if (file_exists($filePath)) {
                 if (is_writable(dirname($filePath)) && unlink($filePath)) {
                     // file deleted
                 } else {
-                    $manualDeleting[] = $fileRpath;
+                    $manual_deleting[] = $file_r_path;
                 }
             }
         }
 
-        if (count($manualDeleting) > 0) {
+        if (count($manual_deleting) > 0) {
             $message = 'We strongly recommend to delete these files from the server:<ul>';
-            foreach ($manualDeleting as $fName) {
-                $message .= '<li>'.$fName.'</li>';
+            foreach ($manual_deleting as $f_name) {
+                $message .= '<li>'.$f_name.'</li>';
             }
             $message .= '</ul>';
             echo '<div class="alert alert-warning alert-block fade in">'.$message.'</div>';
@@ -1010,7 +1010,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2022090600, 'exaport');
     }
 	if ($oldversion < 2022092800){
-        // Define a new field for table block_exaportresume
+        //    Define a new field for table block_exaportresume
         $table = new xmldb_table('block_exaportresume');
         $field = new xmldb_field('linkedinurl', XMLDB_TYPE_CHAR, '255', null, null, null, '');
         if (!$dbman->field_exists($table, $field)) {
@@ -1020,15 +1020,13 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		 if ($dbman->field_exists($table, $field)) {
 			 $dbman->drop_field($table, $field);
 		 }
-        // Exaport savepoint reached.
+        //        Exaport savepoint reached.
         upgrade_block_savepoint(true, 2022092800, 'exaport');
     }
-	
 
     // TODO: delete structure fields / tables.
 
 	if ($oldversion < 2022102800) {
-
 		// Define field timecreated to be added to block_exaportitem.
 		$table = new xmldb_table('block_exaportitem');
 		$field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'attachment');
@@ -1037,10 +1035,10 @@ function xmldb_block_exaport_upgrade($oldversion) {
 		if (!$dbman->field_exists($table, $field)) {
 			$dbman->add_field($table, $field);
 		}
-
 		// Exaport savepoint reached.
 		upgrade_block_savepoint(true, 2022102800, 'exaport');
 	}
-
     return $result;
 }
+
+?>

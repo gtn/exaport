@@ -71,7 +71,7 @@ class CPdf
     /**
      * @var integer Object number of the current page
      */
-    public $currentPage;
+    public $current_page;
 
     /**
      * @var integer Object number of the currently active contents block
@@ -133,7 +133,7 @@ class CPdf
     /**
      * @var integer Number of page objects within the document
      */
-    public $numPages = 0;
+    public $num_pages = 0;
 
     /**
      * @var array Object Id storage stack
@@ -1287,7 +1287,7 @@ EOT;
         switch ($action) {
             case 'new':
                 // add the annotation to the current page
-                $pageId = $this->currentPage;
+                $pageId = $this->current_page;
                 $this->o_page($pageId, 'annot', $id);
 
                 // and add the action object which is going to be required
@@ -1345,12 +1345,12 @@ EOT;
 
         switch ($action) {
             case 'new':
-                $this->numPages++;
+                $this->num_pages++;
                 $this->objects[$id] = array(
                     't'    => 'page',
                     'info' => array(
                         'parent'  => $this->currentNode,
-                        'pageNum' => $this->numPages
+                        'pageNum' => $this->num_pages
                     )
                 );
 
@@ -1362,7 +1362,7 @@ EOT;
                     $this->o_pages($this->currentNode, 'page', $id);
                 }
 
-                $this->currentPage = $id;
+                $this->current_page = $id;
                 //make a contents object to go with this page
                 $this->numObj++;
                 $this->o_contents($this->numObj, 'new', $id);
@@ -1370,7 +1370,7 @@ EOT;
                 $this->objects[$id]['info']['contents'] = array();
                 $this->objects[$id]['info']['contents'][] = $this->numObj;
 
-                $match = ($this->numPages % 2 ? 'odd' : 'even');
+                $match = ($this->num_pages % 2 ? 'odd' : 'even');
                 foreach ($this->addLooseObjects as $oId => $target) {
                     if ($target === 'all' || $match === $target) {
                         $this->objects[$id]['info']['contents'][] = $oId;
@@ -2175,7 +2175,7 @@ EOT;
                     switch ($key) {
                         case 'FontName':
                         case 'FullName':
-                        case 'FamilyName':
+                        case 'family_name':
                         case 'PostScriptName':
                         case 'Weight':
                         case 'ItalicAngle':
@@ -3291,7 +3291,7 @@ EOT;
         //    this header seems to have caused some problems despite tha fact that it is supposed to solve
         //    them, so I am leaving it off by default.
         // 'compress' = > 1 or 0 - apply content stream compression, this is on (1) by default
-        // 'Attachment' => 1 or 0 - if 1, force the browser to open a download dialog
+        // 'attachment' => 1 or 0 - if 1, force the browser to open a download dialog
         if (!is_array($options)) {
             $options = array();
         }
@@ -3310,11 +3310,11 @@ EOT;
         header("Content-Length: " . mb_strlen($tmp, '8bit'));
         $fileName = (isset($options['Content-Disposition']) ? $options['Content-Disposition'] : 'file.pdf');
 
-        if (!isset($options["Attachment"])) {
-            $options["Attachment"] = true;
+        if (!isset($options["attachment"])) {
+            $options["attachment"] = true;
         }
 
-        $attachment = $options["Attachment"] ? "attachment" : "inline";
+        $attachment = $options["attachment"] ? "attachment" : "inline";
 
         // detect the character encoding of the incoming file
         $encoding = mb_detect_encoding($fileName);
@@ -3753,7 +3753,7 @@ EOT;
     function openObject()
     {
         $this->nStack++;
-        $this->stack[$this->nStack] = array('c' => $this->currentContents, 'p' => $this->currentPage);
+        $this->stack[$this->nStack] = array('c' => $this->currentContents, 'p' => $this->current_page);
         // add a new object of the content type, to hold the data flow
         $this->numObj++;
         $this->o_contents($this->numObj, 'new');
@@ -3769,12 +3769,12 @@ EOT;
     function reopenObject($id)
     {
         $this->nStack++;
-        $this->stack[$this->nStack] = array('c' => $this->currentContents, 'p' => $this->currentPage);
+        $this->stack[$this->nStack] = array('c' => $this->currentContents, 'p' => $this->current_page);
         $this->currentContents = $id;
 
         // also if this object is the primary contents for a page, then set the current page to its parent
         if (isset($this->objects[$id]['onPage'])) {
-            $this->currentPage = $this->objects[$id]['onPage'];
+            $this->current_page = $this->objects[$id]['onPage'];
         }
     }
 
@@ -3787,7 +3787,7 @@ EOT;
         // an objectId on the stack.
         if ($this->nStack > 0) {
             $this->currentContents = $this->stack[$this->nStack]['c'];
-            $this->currentPage = $this->stack[$this->nStack]['p'];
+            $this->current_page = $this->stack[$this->nStack]['p'];
             $this->nStack--;
             // easier to probably not worry about removing the old entries, they will be overwritten
             // if there are new ones.
@@ -4278,7 +4278,7 @@ EOT;
                             $info['filterMethod'] = ord($data[$p + 19]);
                             $info['interlaceMethod'] = ord($data[$p + 20]);
 
-                            //print_r($info);
+                            // print_r($info);
                             $haveHeader = 1;
                             if ($info['compressionMethod'] != 0) {
                                 $error = 1;
@@ -4452,7 +4452,7 @@ EOT;
                 return;
             }
 
-            //print_r($info);
+            // print_r($info);
             // so this image is ok... add it in.
             $this->numImages++;
             $im = $this->numImages;
@@ -4623,7 +4623,7 @@ EOT;
         $this->o_destination(
             $this->numObj,
             'new',
-            array('page' => $this->currentPage, 'type' => $style, 'p1' => $a, 'p2' => $b, 'p3' => $c)
+            array('page' => $this->current_page, 'type' => $style, 'p1' => $a, 'p2' => $b, 'p3' => $c)
         );
         $id = $this->catalogId;
         $this->o_catalog($id, 'openHere', $this->numObj);
@@ -4653,7 +4653,7 @@ EOT;
         $this->o_destination(
             $this->numObj,
             'new',
-            array('page' => $this->currentPage, 'type' => $style, 'p1' => $a, 'p2' => $b, 'p3' => $c)
+            array('page' => $this->current_page, 'type' => $style, 'p1' => $a, 'p2' => $b, 'p3' => $c)
         );
         $id = $this->numObj;
 

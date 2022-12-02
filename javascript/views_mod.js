@@ -72,8 +72,9 @@ Y.use('moodle-core-notification-dialogue');
                     var clone = $(newItem).clone();
                     newItem.after(clone);
                     newItem = clone;
-                };
-                data = {};
+                }
+                // data = {};
+                var data = new Object();
                 data.type = 'item';
                 data.itemid = $(this).val();
                 newItem.data('portfolio', data);
@@ -269,7 +270,7 @@ Y.use('moodle-core-notification-dialogue');
                                 var data = JSON.parse(res);
 
                                 var popup = $E.popup({
-                                    bodyContent: data.html, onhide: function () {
+                                    body_content: data.html, onhide: function () {
                                         if (newItem) {
                                             $(newItem).remove();
                                         }
@@ -345,7 +346,7 @@ Y.use('moodle-core-notification-dialogue');
 
         filterItemsByTag: function () {
             // Clear the search by title.
-            $('#blockform #filterByTitle').val('')
+            $('#blockform #filterByTitle').val('');
             $('div.add-item-category').hide();
             $('div.add-item').show();
             $('div.add-item-sub').show();
@@ -360,20 +361,20 @@ Y.use('moodle-core-notification-dialogue');
                         }
                     } else {
                         $(this).hide();
-                    };
+                    }
                 });
             } else {
                 $('div.add-item-category, div.add-item-sub').show();
-            };
+            }
             // Hide category names if it has no visible artefact.
             $('div.add-item-sub').each(function () {
                 if ($(this).find('div.add-item:visible').length == 0) {
                     $(this).hide();
-                };
+                }
             });
             $('div.add-item:visible').each(function () {
-                var categoryId = $(this).data('category');
-                $('div.add-item-category[data-category="' + categoryId + '"]').show();
+                var category_id = $(this).data('category');
+                $('div.add-item-category[data-category="' + category_id + '"]').show();
             });
             // List of shared artefacts.
             if ($('div.add-item[data-category="sharedFromUser"]:visible').length == 0) {
@@ -398,20 +399,20 @@ Y.use('moodle-core-notification-dialogue');
                         $(this).show();
                     } else {
                         $(this).hide();
-                    };
+                    }
                 });
             } else {
                 $('div.add-item-category, div.add-item-sub').show();
-            };
+            }
             // Hide category names if it has no visible artefact.
             $('div.add-item-sub').each(function () {
                 if ($(this).find('div.add-item:visible').length == 0) {
                     $(this).hide();
-                };
+                }
             });
             $('div.add-item:visible').each(function () {
-                var categoryId = $(this).data('category');
-                $('div.add-item-category[data-category="' + categoryId + '"]').show();
+                var category_id = $(this).data('category');
+                $('div.add-item-category[data-category="' + category_id + '"]').show();
             });
             // List of shared artefacts.
             if ($('div.add-item[data-category="sharedFromUser"]:visible').length == 0) {
@@ -511,39 +512,39 @@ Y.use('moodle-core-notification-dialogue');
             data.item = portfolioItems[data.itemid];
         }
         if (data.type == 'item' && data.itemid && data.item) {
-            var itemData = data.item;
-            var ilink = itemData.link
+            var item_data = data.item;
+            var ilink = item_data.link;
             if (ilink != "") {
                 ilink = $E.translate('link') + ': ' + ilink + '<br />';
             }
 
-            if (itemData.competences) {
+            if (item_data.competences) {
                 var tempHtml = '<div id="id_holder" style="display:none;"></div>';
                 tempHtml += '<div class="item_info" style="overflow: hidden;">';
-                tempHtml += '<div class="header">' + $E.translate('viewitem') + ': ' + itemData.name + '</div>';
+                tempHtml += '<div class="header">' + $E.translate('viewitem') + ': ' + item_data.name + '</div>';
                 tempHtml += '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">';
-                tempHtml += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + itemData.id + '">';
+                tempHtml += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + item_data.id + '">';
                 tempHtml += '</div>';
-                tempHtml += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(itemData.type) + '<br />';
-                tempHtml += $E.translate('category') + ': ' + itemData.category + '<br />' + ilink;
-                tempHtml += $E.translate('comments') + ': ' + itemData.comments + '<div class="exaport-item-intro"></div>';
-                tempHtml += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + itemData.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
+                tempHtml += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(item_data.type) + '<br />';
+                tempHtml += $E.translate('category') + ': ' + item_data.category + '<br />' + ilink;
+                tempHtml += $E.translate('comments') + ': ' + item_data.comments + '<div class="exaport-item-intro"></div>';
+                tempHtml += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
                 tempHtml += '</div></div>';
                 $item.html(tempHtml);
             } else {
                 var tempHtml = '<div id="id_holder" style="display:none;"></div>';
                 tempHtml += '<div class="item_info" style="overflow: hidden;">';
-                tempHtml += '<div class="header">' + $E.translate('viewitem') + ': ' + itemData.name + '</div>';
+                tempHtml += '<div class="header">' + $E.translate('viewitem') + ': ' + item_data.name + '</div>';
                 tempHtml += '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">';
-                tempHtml += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + itemData.id + '">';
+                tempHtml += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + item_data.id + '">';
                 tempHtml += '</div>';
-                tempHtml += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(itemData.type) + '<br />';
-                tempHtml += $E.translate('category') + ': ' + itemData.category + '<br />' + ilink;
-                tempHtml += $E.translate('comments') + ': ' + itemData.comments + '<div class="exaport-item-intro"></div>';
+                tempHtml += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(item_data.type) + '<br />';
+                tempHtml += $E.translate('category') + ': ' + item_data.category + '<br />' + ilink;
+                tempHtml += $E.translate('comments') + ': ' + item_data.comments + '<div class="exaport-item-intro"></div>';
                 tempHtml += '</div></div>';
                 $item.html(tempHtml);
                 // User html may be malformed, so savely inject it here.
-                $item.find('.exaport-item-intro').html(itemData.intro);
+                $item.find('.exaport-item-intro').html(item_data.intro);
             }
         } else if (data.type == 'personal_information') {
             var tempHtml = '<div id="id_holder" style="display:none;"></div>';
@@ -661,7 +662,7 @@ Y.use('moodle-core-notification-dialogue');
             success: function (res) {
                 var data = JSON.parse(res);
 
-                var popup = $E.popup({bodyContent: data.html});
+                var popup = $E.popup({body_content: data.html});
 
                 // Focus first element.
                 popup.$body.find('input:visible:first').focus();
@@ -739,12 +740,12 @@ Y.use('moodle-core-notification-dialogue');
         if ($form.find(':input[name=sharedemails]').is(':checked')) {
             if (share_text) {
                 share_text += ' ' + $E.translate('viewand') + ' ';
-            };
+            }
             share_text += $E.translate('emailaccess') + ' ';
             $('#emailaccess-settings').show();
         } else {
             $('#emailaccess-settings').hide();
-        };
+        }
 
         if (!share_text) {
             share_text = $E.translate('view_sharing_noaccess');

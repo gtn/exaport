@@ -55,7 +55,7 @@ class Header extends \FontLib\Header {
     ));
 
     $this->data["Padding1"] = $font->readUInt16();
-    $this->readString("FamilyName");
+    $this->readString("family_name");
 
     $this->data["Padding2"] = $font->readUInt16();
     $this->readString("StyleName");

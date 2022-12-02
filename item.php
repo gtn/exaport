@@ -125,14 +125,14 @@ if ($existing && $exacompactive) {
         $existing->compids_array = [];
     }
     // For form.
-    $existing->compids = join(',', $existing->compids_array);
+    $existing -> compids = join(',', $existing->compids_array);
 }
-$cattypeParams = '';
+$cattype_params = '';
 if ($cattype) {
-    $catuser = $DB->get_field('block_exaportcate', 'userid', ['id'=>$categoryid]);
-    $cattypeParams = '&type=shared&userid='.$catuser;
+    $catuser = $DB -> get_field('block_exaportcate', 'userid', ['id'=>$categoryid]);
+    $cattype_params = '&type=shared&userid='.$catuser;
 }
-$returnurl = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid."&categoryid=".$categoryid.$cattypeParams;
+$returnurl = $CFG -> wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid."&categoryid=".$categoryid.$cattype_params;
 
 // Delete item.
 if ($action == 'delete' && $allowedit) {
@@ -291,7 +291,7 @@ switch ($action) {
                     $file = array($file);
                 }
                 $extracontent = "<div class='block_eportfolio_center'>\n";
-                foreach($file as $fileindex => $fileobject) {
+                foreach ($file as $fileindex => $fileobject) {
                     if (!$fileobject) {
                         continue;
                     }
@@ -341,8 +341,8 @@ if ($exacompactive) {
     $PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
     $PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
 
-    $PAGE->requires-> js('/blocks/exaport/javascript/jquery.colorbox.js', true);
-    //$PAGE->
+    $PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
+    // $PAGE->
     $PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
     $PAGE->requires->css('/blocks/exaport/css/colorbox.css');
 }

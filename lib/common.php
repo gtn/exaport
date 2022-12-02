@@ -114,7 +114,7 @@ namespace block_exaport\common {
          * @return SimpleXMLElement
          */
         public function add_child_with_cdata($name, $value = null) {
-            $newchild = $this->addChild($name);
+            $newchild = $this->add_child($name);
 
             if ($newchild !== null) {
                 $node = dom_import_simplexml($newchild);
@@ -133,11 +133,11 @@ namespace block_exaport\common {
             if ($value) {
                 return $this->add_child_with_cdata($name, $value);
             } else {
-                return $this->addChild($name, $value);
+                return $this->add_child($name, $value);
             }
         }
 
-        public function addChild($name, $value = null, $namespace = null) {
+        public function add_child($name, $value = null, $namespace = null) {
             if ($name instanceof SimpleXMLElement) {
                 $newnode = $name;
                 $node = dom_import_simplexml($this);
@@ -149,7 +149,7 @@ namespace block_exaport\common {
 
                 return $children[$children->count() - 1];
             } else {
-                return parent::addChild($name, $value, $namespace);
+                return parent::add_child($name, $value, $namespace);
             }
         }
 
@@ -656,7 +656,7 @@ namespace block_exaport\common {
         } else if (is_string($arg) && $matches = _t_check_identifier($arg)) {
             $languagestrings = [$matches[1] => $matches[2]];
         } else {
-            throw new moodle_exception('wrong args: '.print_r($origargs, true));
+            throw new moodle_exception('wrong args: '.json_encode($origargs));
         }
 
         if ($args) {
@@ -664,7 +664,7 @@ namespace block_exaport\common {
         }
 
         if ($args) {
-            throw new moodle_exception('too many arguments: '.print_r($origargs, true));
+            throw new moodle_exception('too many arguments: '.json_encode($origargs, true));
         }
 
         // Parse $languagestrings.
@@ -775,7 +775,7 @@ namespace block_exaport {
 
 namespace {
     function _block_exaport_export_function($function) {
-/*        $type = basename(dirname(dirname(__DIR__)));
+        /*$type = basename(dirname(dirname(__DIR__)));
         if ($type == 'blocks') {
             $type = 'block';
         }

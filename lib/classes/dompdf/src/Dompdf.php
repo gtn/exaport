@@ -31,8 +31,8 @@ use Dompdf\Css\Stylesheet;
  * Style} object.
  *
  * Style information is loaded and parsed (see {@link Stylesheet}) and is
- * applied to the frames in the tree by using XPath.  CSS selectors are
- * converted into XPath queries, and the computed {@link Style} objects are
+ * applied to the frames in the tree by using x_path.  CSS selectors are
+ * converted into x_path queries, and the computed {@link Style} objects are
  * applied to the {@link Frame}s.
  *
  * {@link Frame}s are then decorated (in the design pattern sense of the
@@ -921,7 +921,7 @@ class Dompdf
      * 'compress' = > 1 (=default) or 0:
      *   Apply content stream compression
      *
-     * 'Attachment' => 1 (=default) or 0:
+     * 'attachment' => 1 (=default) or 0:
      *   Set the 'Content-Disposition:' HTTP header to 'attachment'
      *   (thereby causing the browser to open a download dialog)
      *

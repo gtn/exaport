@@ -988,7 +988,7 @@ class GD implements Canvas
      *
      * @param string $filename The filename to present to the client.
      * @param array $options Associative array: 'type' => jpeg|jpg|png; 'quality' => 0 - 100 (JPEG only);
-     *     'page' => Number of the page to output (defaults to the first); 'Attachment': 1 or 0 (default 1).
+     *     'page' => Number of the page to output (defaults to the first); 'attachment': 1 or 0 (default 1).
      */
     public function stream($filename, $options = array())
     {
@@ -997,7 +997,7 @@ class GD implements Canvas
         }
 
         if (!isset($options["type"])) $options["type"] = "png";
-        if (!isset($options["Attachment"])) $options["Attachment"] = true;
+        if (!isset($options["attachment"])) $options["attachment"] = true;
         $type = strtolower($options["type"]);
 
         switch ($type) {
@@ -1017,7 +1017,7 @@ class GD implements Canvas
         header("Content-Type: $contentType");
 
         $filename = str_replace(array("\n", "'"), "", basename($filename, ".$type")) . $extension;
-        $attachment = $options["Attachment"] ? "attachment" : "inline";
+        $attachment = $options["attachment"] ? "attachment" : "inline";
         header(Helpers::buildContentDispositionHeader($attachment, $filename));
 
         $this->_output($options);

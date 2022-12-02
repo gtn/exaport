@@ -102,11 +102,11 @@ return [
         ],
         'attachment' => [
                 'Anhang',
-                'Attachment',
+                'attachment',
         ],
         'attachincluded' => [
                 'Anhang?',
-                'Attachment?',
+                'attachment?',
         ],
         'awaiting' => [
                 '(\\$a wartend)',
@@ -496,7 +496,7 @@ return [
         ],
         'descriptionsaved' => [
                 'Beschreibung gespeichert',
-                'Description saved',
+                'description saved',
         ],
         'course' => [
                 'Kurs',
@@ -924,7 +924,7 @@ return [
         ],
         'viewdescription' => [
                 'Beschreibung',
-                'Description',
+                'description',
         ],
         'viewdesign' => [
                 'View Darstellung',
@@ -1306,7 +1306,7 @@ return [
         ],
         'cofigureblock_cvinfo_certif' => [
                 'Zertifikate, Akkreditierungen, Auszeichnungen',
-                'Certifications, accreditations and awards',
+                'certifications, accreditations and awards',
         ],
         'cofigureblock_cvinfo_public' => [
                 'Bücher und Publikationen',
@@ -1702,7 +1702,7 @@ return [
         ],
         'resume_certif' => [
                 'Zertifikate, Akkreditierungen, Auszeichnungen',
-                'Certifications, accreditations and awards',
+                'certifications, accreditations and awards',
         ],
         'resume_date' => [
                 'Datum',
@@ -1714,7 +1714,7 @@ return [
         ],
         'resume_description' => [
                 'Beschreibung',
-                'Description',
+                'description',
         ],
         'resume_certifsaved' => [
                 'Zertifikat, Akkreditierung bzw. Auszeichnung gespeichert',
@@ -1772,7 +1772,7 @@ return [
                 'Mitgliedschaft gelöscht',
                 'Membership deleted',
         ],
-		        'resume_linkedin' => [
+                        'resume_linkedin' => [
                 'LinkedIn-Profil',
                 'LinkedIn profile',
         ],
@@ -1890,7 +1890,7 @@ return [
             (better to be logged in in the Europass previously)<br>
             Press the button "Import Europass CV" and upload XML-file wich will genareted the button below
         </p>
-    
+
     Some notes:<br>
     <ul>
         <li>You definitely need to check out the resulting CV</li>
@@ -2425,3 +2425,4 @@ return [
 
 
 ];
+?>

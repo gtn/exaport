@@ -23,7 +23,7 @@ jQueryExaport(function ($) {
 
     // Sharing.
     function update_sharing() {
-        var share_text = '';
+        // var share_text = '';
         var $form = $('#categoryform');
 
         if ($form.find(':input[name="internshare"]').is(':checked')) {

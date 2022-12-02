@@ -54,7 +54,7 @@ class name extends Table {
     7  => "Trademark",
     8  => "Manufacturer",
     9  => "Designer",
-    10 => "Description",
+    10 => "description",
     11 => "FontVendorURL",
     12 => "FontDesignerURL",
     13 => "LicenseDescription",

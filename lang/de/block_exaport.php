@@ -496,7 +496,7 @@ $string['resume_linkedinsaved'] = 'LinkedIn-Profil gespeichert';
 $string['resume_deletelinkedinconfirm'] = 'Wollen Sie wirklich den Eintrag löschen?';
 $string['resume_linkedindeleted'] = 'LinkedIn-Profil gelöscht';
 $string['resume_mygoals'] = 'Meine Ziele';
-$string['resume_goals'] = 'Ziele'; 
+$string['resume_goals'] = 'Ziele';
 $string['resume_goalspersonal'] = 'persönliche Ziele';
 $string['resume_goalsacademic'] = 'Bildungsziele';
 $string['resume_goalscareers'] = 'Karriereziele';
@@ -591,16 +591,16 @@ $string['what_is_embed_code_content'] = '<p>Embed code is code that is generated
                 <li>Navigate to the video you wish to embed.</li>
                 <li>Click the <strong>Share</strong> button, in the top right corner of your video.</li>
                 <li>A pop-up will appear with the embed link information. You will need to copy only the <strong>&lt;<i>iframe</i>&gt;</strong> portion of the embed link.
-                    Example:<br>                    
+                    Example:<br>
                     <ol>
                         <li>
                             Entire embed link shows the following:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>                            
+                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
                         </li>
                         <li>
-                            You only need to copy the <strong>&lt;<i>iframe</i>&gt;</strong> portion:<br>                            
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>                            
-                        </li>                    
+                            You only need to copy the <strong>&lt;<i>iframe</i>&gt;</strong> portion:<br>
+                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
+                        </li>
                     </ol>
                 <li>Past this code to exabis E-portfolio textarea field.</li>
             </ol>

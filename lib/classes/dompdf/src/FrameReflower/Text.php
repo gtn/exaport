@@ -160,9 +160,9 @@ class Text extends AbstractFrameReflower
         $offset = mb_strlen($str);
 
         // More debugging:
-        //     var_dump($str);
-        //     print_r("Width: ". $width);
-        //     print_r("Offset: " . $offset);
+            // var_dump($str);
+            // print_r("Width: ". $width);
+            // print_r("Offset: " . $offset);
 
         return $offset;
     }

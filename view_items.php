@@ -149,7 +149,7 @@ if ($type == 'sharedstudent') {
             SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE i.userid = ? 
+            WHERE i.userid = ?
                 AND i.categoryid=?
                 AND ".block_exaport_get_item_where().
                 " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
@@ -195,7 +195,7 @@ if ($type == 'sharedstudent') {
     */
     if (!$categoryid) {
         throw new moodle_exception('wrong category');
-    } elseif (!$selecteduser) {
+    } else if (!$selecteduser) {
         throw new moodle_exception('wrong userid');
     } else {
         $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
@@ -579,7 +579,7 @@ if ($layout == 'details') {
 
         if (isset($item->comments) && $item->comments > 0) {
             $icons .= '<span class="excomdos_listcomments">
-                            <a href="'.$url.'" > 
+                            <a href="'.$url.'" >
                         '.$item->comments.'<img src="pix/comments.png" alt="file">
                             </a>
                         </span>';
@@ -665,7 +665,7 @@ if ($layout == 'details') {
                                         (isset($category->shareall) && $category->shareall == 1))) {
                             ?>
                             <img src="pix/noteitshared.gif" alt="file" title="shared to other users">
-                        <?php
+                            <?php
                         };
                         if (@$category->structure_share) {
                             echo ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
@@ -740,13 +740,13 @@ if ($layout == 'details') {
                             if ($item->userid != $USER->id) {
                                 $itemuser = $DB->get_record('user', ['id' => $item->userid]);
                                 // user icon
-                                echo '<a class="" role="button" data-container="body" 
+                                echo '<a class="" role="button" data-container="body"
                                             './*data-toggle="popover" data-placement="bottom" // popover does not work in Firefox
                                             data-content="'.fullname($itemuser).'" tabindex="0" data-trigger="hover".*/'
                                             title="'.fullname($itemuser).'">
                                         <img src="pix/personal.png">
-                                      </a>';
-//                                echo '<img src="pix/personal.png" alt="'.fullname($itemuser).'" title="'.fullname($itemuser).'">';
+                                        </a>';
+                                        // echo '<img src="pix/personal.png" alt="'.fullname($itemuser).'" title="'.fullname($itemuser).'">';
                             }
                         }
                     }

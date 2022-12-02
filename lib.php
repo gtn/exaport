@@ -32,21 +32,21 @@ require_once(__DIR__.'/inc.php');
 function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $USER, $CFG, $DB;
 
-    $isForPdf = false;
+    $is_for_pdf = false;
     $pdfforuserid = 0;
     if ($p = array_search('forPdf', $args) ) {
         // added to link of the file: /forPdf/--hash--/--viewid--/--curruserid--
         $pdfforuserid = array_pop($args);
         $viewid = array_pop($args);
-        $pdfHash = array_pop($args);
+        $pdf_hash = array_pop($args);
         $view = $DB->get_record('block_exaportview', ['id' => $viewid]);
-        if ($view && $view->hash == $pdfHash) {
-            $isForPdf = true;
+        if ($view && $view->hash == $pdf_hash) {
+            $is_for_pdf = true;
         }
         unset($args[$p]);
     }
 
-    if (!$isForPdf) {
+    if (!$is_for_pdf) {
         // Always require login, at least guest.
         require_login();
     } else {
@@ -63,7 +63,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         $access = join('/', $args);
 
         // Item exists?
-        $item = block_exaport_get_item($id, $access, false, $isForPdf, $pdfforuserid);
+        $item = block_exaport_get_item($id, $access, false, $is_for_pdf, $pdfforuserid);
         if (!$item) {
             print_error('Item not found');
         }

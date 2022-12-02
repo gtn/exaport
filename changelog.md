@@ -1,7 +1,11 @@
+v4.6.7 (2022112100)
+		Moodle Codestyle fixes
+v4.6.7 (2022092800) 
+		Increase downwards compatibility 	
+		Privacy API integration, 	
+		GDPR backward compability fixes 
 v4.6.7 (2022092800)
-		Increase downwards compatibility
-		Privacy API integration, GDPR
-		backward compability fixes
+		Privacy API integration, GDPRs
 v4.6.7 (2022090200)
 		Moodle 4.0 compatibility 
 		securty fixes, deleted old code

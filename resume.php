@@ -134,7 +134,8 @@ if ($action == 'edit') {
             $withfiles = true;
         case 'cover':
         case 'interests':
-            $data->{$type} = $resume->{$type};
+        case 'linkedinurl':
+        $data->{$type} = $resume->{$type};
             $data->{$type.'format'} = FORMAT_HTML;
             $workform = new block_exaport_resume_editor_form($_SERVER['REQUEST_URI'].'#'.$type,
                     array('formheader' => $formheader, 'field' => $type, 'withfiles' => $withfiles));
@@ -165,6 +166,7 @@ if ($action == 'edit') {
                                 array('subdirs' => false, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'maxfiles' => 5));
                     };
                 };
+
                 block_exaport_set_resume_params(array($type => $fromform->{$type}, 'courseid' => $fromform->courseid));
                 echo "<div class='block_eportfolio_center'>".
                         $OUTPUT->box(get_string('resume_'.$type."saved", "block_exaport"), 'center')."</div>";
@@ -365,11 +367,11 @@ if ($showinformation) {
 
     // Employment history.
     $employments = block_exaport_resume_get_employments($resume->id);
-    $executive_summary = block_exaport_resume_templating_mm_records($courseid, 'employ', 'position', $employments);
+    $employmenthistory = block_exaport_resume_templating_mm_records($courseid, 'employ', 'position', $employments);
     echo block_exaport_form_resume_part($courseid, 'employ',
-            get_string('resume_employhistory', 'block_exaport'), $executive_summary, 'add', $type);
+            get_string('resume_employhistory', 'block_exaport'), $employmenthistory, 'add', $type);
 
-    // certifications, accreditations and awards.
+    // Certifications, accreditations and awards.
     $certifications = block_exaport_resume_get_certificates($resume->id);
     $certificationhistory = block_exaport_resume_templating_mm_records($courseid, 'certif', 'title', $certifications);
     echo block_exaport_form_resume_part($courseid, 'certif',
@@ -411,6 +413,11 @@ if ($showinformation) {
     echo block_exaport_form_resume_part($courseid, 'interests',
             get_string('resume_interests', 'block_exaport'), $interests, 'edit', $type);
 
+    $linkedin = file_rewrite_pluginfile_urls($resume->linkedinurl, 'pluginfile.php', context_user::instance($USER->id)->id,
+        'block_exaport', 'resume_linkedin', $resume->id);
+    echo block_exaport_form_resume_part($courseid, 'linkedinurl',
+        get_string('resume_linkedin', 'block_exaport'), $linkedin, 'href', $type);
+
 };
 
 function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '', $content = '', $buttons = '', $opened = false) {
@@ -433,6 +440,10 @@ function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '',
         case 'add':
             $resumepart .= '<input type="submit" value="'.get_string("add").'" class="btn btn-default" />';
             break;
+        case 'href':
+            $resumepart .= '<a target="_blank" href="' . getLinkedInProfile() . '"><input type="button" value="Profil" class="btn btn-default"/></a>';
+            $resumepart .= '<input type="submit" value="'.get_string("edit").'" class="btn btn-default" />';
+            break;
         default :
             $resumepart .= '';
             break;
@@ -441,6 +452,15 @@ function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '',
     $resumepart .= '</fieldset>';
     $resumepart .= '</form>';
     return $resumepart;
+}
+
+function getLinkedInProfile()
+{
+    global $DB, $USER;
+    $courseid = optional_param('courseid', 0, PARAM_INT);
+    $profile = $DB->get_record('block_exaportresume', ['user_id' => $USER->id, 'courseid' => $courseid]);
+
+    return $profile->linkedinurl;
 }
 
 function block_exaport_resume_header() {

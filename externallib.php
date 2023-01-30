@@ -160,7 +160,7 @@ class block_exaport_external extends external_api {
     public static function get_item_parameters() {
         return new external_function_parameters([
                 'itemid' => new external_value(PARAM_INT, 'id of item'),
-                'owneruserid' => new external_value(PARAM_INT, 'id of owner of this file (needed for items in shared categories', VALUE_OPTIONAL),
+                'owneruserid' => new external_value(PARAM_INT, 'id of owner of this file (needed for items in shared categories', VALUE_DEFAULT, null),
         ]);
     }
 
@@ -172,7 +172,7 @@ class block_exaport_external extends external_api {
      * @param int itemid
      * @return array of course subjects
      */
-    public static function get_item($itemid, $owneruserid) {
+    public static function get_item($itemid, $owneruserid=null) {
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::get_item_parameters(), array('itemid' => $itemid, 'owneruserid' => $owneruserid));

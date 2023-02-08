@@ -643,7 +643,7 @@ function block_exaport_check_competence_interaction() {
             class_exists('\block_exacomp\api') && \block_exacomp\api::active();
 }
 
-function block_exaport_build_comp_table($item, $role = "teacher", $competences) {
+function block_exaport_build_comp_table($item, $role = "teacher", $competences=null) {
     global $DB;
 
     // TODO: refactor: use block_exaport_get_active_comps_for_item instead.

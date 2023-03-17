@@ -50,15 +50,14 @@ class block_exaport_external extends external_api {
 
         $params = self::validate_parameters(self::get_items_parameters(), array('level' => $level, 'type' => $type));
 
-
         $results = array();
 
-        if($type == "all" || $type == "category" || $level == 0){
+        if ($type == "all" || $type == "category" || $level == 0){
             $conditions = array("pid" => $level, "userid" => $USER->id);
             $categories = $DB->get_records("block_exaportcate", $conditions);
 
-            //RW add courseid if there is one:
-            //better: when creating
+            // RW add courseid if there is one:
+            // better: when creating
 
             foreach ($categories as $category) {
                 $result = new stdClass();
@@ -80,7 +79,7 @@ class block_exaport_external extends external_api {
 //         }
         }
 
-        if($type == "all" || $type == "shared" || $level == 0) {
+        if ($type == "all" || $type == "shared" || $level == 0) {
             if ($level == 0) {
                 // Shared categories:
                 $sqlsort = " ORDER BY c.name, u.lastname, u.firstname";
@@ -126,7 +125,6 @@ class block_exaport_external extends external_api {
             }
         }
 
-
         $results = array_merge($results, $items);
 
         return $results;
@@ -147,7 +145,7 @@ class block_exaport_external extends external_api {
                                 'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned'),
                                 'amount' => new external_value(PARAM_INT,
                                         'iff item is a cat, amount of items in the category, otherwise 0'),
-                                'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to',VALUE_OPTIONAL),
+                                'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to', VALUE_OPTIONAL),
                                 'owneruserid' => new external_value(PARAM_INT, 'userid of the owner of this category, if it is a category', VALUE_OPTIONAL)
                         )
                 )
@@ -162,7 +160,7 @@ class block_exaport_external extends external_api {
     public static function get_item_parameters() {
         return new external_function_parameters([
                 'itemid' => new external_value(PARAM_INT, 'id of item'),
-                'owneruserid' => new external_value(PARAM_INT, 'id of owner of this file (needed for items in shared categories', VALUE_OPTIONAL),
+                'owneruserid' => new external_value(PARAM_INT, 'id of owner of this file (needed for items in shared categories', VALUE_DEFAULT, null),
         ]);
     }
 
@@ -174,18 +172,18 @@ class block_exaport_external extends external_api {
      * @param int itemid
      * @return array of course subjects
      */
-    public static function get_item($itemid, $owneruserid) {
+    public static function get_item($itemid, $owneruserid=null) {
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::get_item_parameters(), array('itemid' => $itemid, 'owneruserid' => $owneruserid));
 
         $shared_item = false;
-        if($owneruserid){
+        if ($owneruserid){
             $userid = $owneruserid;
-            if($owneruserid != $USER->id){
+            if ($owneruserid != $USER->id){
                 $shared_item = true; // this item is not the Item of the USER, but of somewone who shared it... needed later on
             }
-        }else{
+        } else{
             $userid = $USER->id;
         }
 
@@ -984,8 +982,8 @@ class block_exaport_external extends external_api {
 
             if ($item->type == 'file') {
                 if ($file = block_exaport_get_item_single_file($item)) {
-					$item->file = g::$CFG->wwwroot."/blocks/exaport/portfoliofile.php?access=portfolio/id/".g::$USER->id."&itemid=".
-							$item->id."&wstoken=".static::wstoken();
+                    $item->file = g::$CFG->wwwroot."/blocks/exaport/portfoliofile.php?access=portfolio/id/".g::$USER->id."&itemid=".
+                    $item->id."&wstoken=".static::wstoken();
 					$item->isimage = $file->is_valid_image();
 					$item->filename = $file->get_filename();
 					$item->mimetype = $file->get_mimetype();
@@ -1748,7 +1746,7 @@ class block_exaport_external extends external_api {
                 array(
                     'id' => new external_value(PARAM_INT, 'id of item'),
                     'name' => new external_value(PARAM_TEXT, 'title of item'),
-                    'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to',VALUE_OPTIONAL)
+                    'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to', VALUE_OPTIONAL)
                 )
             )
         );

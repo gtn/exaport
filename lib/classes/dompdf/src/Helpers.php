@@ -218,7 +218,7 @@ class Helpers
      * characters that have special meaning in the URI.
      *
      * Simulates the encodeURI function available in JavaScript
-     * https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/encodeURI
+     * https://developer.mozilla.org/en/JavaScript/reference/Global_Objects/encodeURI
      *
      * Source: http://stackoverflow.com/q/4929584/264628
      *

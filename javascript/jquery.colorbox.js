@@ -21,11 +21,11 @@
 		width: false,
 		initialWidth: "600",
 		innerWidth: false,
-		maxWidth: false,
+		max_width: false,
 		height: false,
 		initialHeight: "450",
 		innerHeight: false,
-		maxHeight: false,
+		max_height: false,
 		scalePhotos: true,
 		scrolling: true,
 		opacity: 0.9,
@@ -410,11 +410,11 @@
 				// Opens inital empty Colorbox prior to content being loaded.
 				var initialWidth = setSize(settings.get('initialWidth'), 'x');
 				var initialHeight = setSize(settings.get('initialHeight'), 'y');
-				var maxWidth = settings.get('maxWidth');
-				var maxHeight = settings.get('maxHeight');
+				var max_width = settings.get('max_width');
+				var max_height = settings.get('max_height');
 
-				settings.w = Math.max((maxWidth !== false ? Math.min(initialWidth, setSize(maxWidth, 'x')) : initialWidth) - loadedWidth - interfaceWidth, 0);
-				settings.h = Math.max((maxHeight !== false ? Math.min(initialHeight, setSize(maxHeight, 'y')) : initialHeight) - loadedHeight - interfaceHeight, 0);
+				settings.w = Math.max((max_width !== false ? Math.min(initialWidth, setSize(max_width, 'x')) : initialWidth) - loadedWidth - interfaceWidth, 0);
+				settings.h = Math.max((max_height !== false ? Math.min(initialHeight, setSize(max_height, 'y')) : initialHeight) - loadedHeight - interfaceHeight, 0);
 
 				$loaded.css({width:'', height:settings.h});
 				publicMethod.position();
@@ -934,14 +934,14 @@
 		settings.mw = settings.w;
 		settings.mh = settings.h;
 
-		// Re-evaluate the minimum width and height based on maxWidth and maxHeight values.
-		// If the width or height exceed the maxWidth or maxHeight, use the maximum values instead.
-		if (settings.get('maxWidth')) {
-			settings.mw = setSize(settings.get('maxWidth'), 'x') - loadedWidth - interfaceWidth;
+		// Re-evaluate the minimum width and height based on max_width and max_height values.
+		// If the width or height exceed the max_width or max_height, use the maximum values instead.
+		if (settings.get('max_width')) {
+			settings.mw = setSize(settings.get('max_width'), 'x') - loadedWidth - interfaceWidth;
 			settings.mw = settings.w && settings.w < settings.mw ? settings.w : settings.mw;
 		}
-		if (settings.get('maxHeight')) {
-			settings.mh = setSize(settings.get('maxHeight'), 'y') - loadedHeight - interfaceHeight;
+		if (settings.get('max_height')) {
+			settings.mh = setSize(settings.get('max_height'), 'y') - loadedHeight - interfaceHeight;
 			settings.mh = settings.h && settings.h < settings.mh ? settings.h : settings.mh;
 		}
 

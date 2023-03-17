@@ -1005,7 +1005,7 @@ class Frame
         }
 
         if ($ref->_parent !== $this) {
-            throw new Exception("Reference child is not a child of this node.");
+            throw new Exception("reference child is not a child of this node.");
         }
 
         // Update the node
@@ -1053,7 +1053,7 @@ class Frame
         }
 
         if ($ref->_parent !== $this) {
-            throw new Exception("Reference child is not a child of this node.");
+            throw new Exception("reference child is not a child of this node.");
         }
 
         // Update the node

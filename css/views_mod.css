@@ -74,8 +74,6 @@
     display: none;
 }
 
-
-
 #exaport #view-share-text {
     font-weight: normal;
 }
@@ -152,7 +150,9 @@
     height: 26px;
     cursor: pointer;
 }
-#exaport .portfolioDesignBlocks li .delete span, .portfolioDesignBlocks li .edit span,  .portfolioDesignBlocks li .unsaved span {
+#exaport .portfolioDesignBlocks li .delete span,
+.portfolioDesignBlocks li .edit span,
+.portfolioDesignBlocks li .unsaved span {
     display: none;
 }
 
@@ -168,7 +168,7 @@
 
 #exaport .portfolioDesignBlocks li.block-placeholder {
     border: 3px dotted #ddd;
-    visibility: show;
+    visibility: visible;
     min-height: 60px;
 }
 #exaport .portfolioDesignBlocks li .default-text {
@@ -221,7 +221,7 @@
 
 #exaport .cb {
     clear: both;
-    border-color: -moz-use-text-color -moz-use-text-color #D1D1D1;
+    border-color: #D1D1D1; /*-moz-use-text-color -moz-use-text-color*/
     border-style: none none dotted;
     border-width: 0 0 1px;
 }
@@ -235,16 +235,17 @@
     float: left;
 }
 
-#exaport .table_share, #exaport .table_share table {
-    width: 100%
+#exaport .table_share,
+#exaport .table_share table {
+    width: 100%;
 }
 
 /* layouts */
 #exaport .table_layout {
     width: 100%;
-    border:0;
-    padding:0;
-    border-collapse:collapse;
+    border: 0;
+    padding: 0;
+    border-collapse: collapse;
     table-layout: fixed;
 }
 #exaport .table_layout td {
@@ -267,19 +268,23 @@
 #exaport .layout5 td {
     width: 33%;
 }
-#exaport .layout6 .td1, #exaport .layout6 .td3 {
+#exaport .layout6 .td1,
+#exaport .layout6 .td3 {
     width: 25%;
 }
-#exaport .layout7 .td1, #exaport .layout7 .td3 {
+#exaport .layout7 .td1,
+#exaport .layout7 .td3 {
     width: 15%;
 }
 #exaport .layout8 td {
     width: 25%;
 }
-#exaport .layout9 .td1, #exaport .layout9 .td4 {
+#exaport .layout9 .td1,
+#exaport .layout9 .td4 {
     width: 20%;
 }
-#exaport .layout9 .td2, #exaport .layout9 .td3 {
+#exaport .layout9 .td2, 
+#exaport .layout9 .td3 {
     width: 30%;
 }
 #exaport .layout10 td {
@@ -315,7 +320,7 @@
     width:100%;
 }
 #exaport table.mceLayout {
-    width: 430px!important;
+    width: 430px !important;
 }
 
 #exaport input.submit {
@@ -328,8 +333,9 @@
     padding: 5px;
 }
 
-#blockform input[name=block_title], #exaport input[name=headline] {
-    width: 95%
+#blockform input[name=block_title],
+#exaport input[name=headline] {
+    width: 95%;
 }
 
 #blockform #add-items-list {

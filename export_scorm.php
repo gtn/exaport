@@ -832,3 +832,4 @@ function create_html_header($title, $depthpath = 0) {
     $filecontent .= '</head>'."\n";
     return $filecontent;
 }
+?>

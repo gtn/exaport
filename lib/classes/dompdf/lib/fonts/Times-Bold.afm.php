@@ -223,7 +223,7 @@
   'isUnicode' => false,
   'FontName' => 'Times-Bold',
   'FullName' => 'Times Bold',
-  'FamilyName' => 'Times',
+  'family_name' => 'Times',
   'Weight' => 'Bold',
   'ItalicAngle' => '0',
   'IsFixedPitch' => 'false',

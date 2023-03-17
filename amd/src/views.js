@@ -11,7 +11,7 @@ define(['jquery',
 
     var dialogue;
     var helpDialogue;
-    var last_popup;
+    // var last_popup;
 
     var defaultModalOptions = {
         title: 'test title',
@@ -58,7 +58,7 @@ define(['jquery',
                 updateBlockData();
             },
 
-            initAddItems: function(title){
+            initAddItems: function(/*title*/){
                 $('#add-items-list .add-item').click(function(event){
                     var $input = $(this).find('input');
 
@@ -82,7 +82,7 @@ define(['jquery',
                 if (id != -1) {
                     newItem = lastclicked;
                 }
-                var data = {};
+                var data = new Object();
                 data.type = 'personal_information';
                 data.id = id;
                 data.block_title = this.strip_tags($('#block_title').val());
@@ -302,7 +302,7 @@ define(['jquery',
 
             filterItemsByTag: function() {
                 // Clear the search by title.
-                $('#filterByTitle').val('')
+                $('#filterByTitle').val('');
                 $('div.add-item-category').hide();
                 $('div.add-item').show();
                 $('div.add-item-sub').show();
@@ -317,20 +317,20 @@ define(['jquery',
                             }
                         } else {
                             $(this).hide();
-                        };
+                        }
                     });
                 } else {
                     $('div.add-item-category, div.add-item-sub').show();
-                };
+                }
                 // Hide category names if it has no visible artefact.
                 $('div.add-item-sub').each(function(){
                     if ($(this).find('div.add-item:visible').length == 0) {
                         $(this).hide();
-                    };
+                    }
                 });
                 $('div.add-item:visible').each(function() {
-                    var categoryId = $(this).data('category');
-                    $('div.add-item-category[data-category="' + categoryId + '"]').show();
+                    var category_id = $(this).data('category');
+                    $('div.add-item-category[data-category="' + category_id + '"]').show();
                 });
                 // List of shared artefacts.
                 if ($('div.add-item[data-category="sharedFromUser"]:visible').length == 0) {
@@ -355,20 +355,20 @@ define(['jquery',
                             $(this).show();
                         } else {
                             $(this).hide();
-                        };
+                        }
                     });
                 } else {
                     $('div.add-item-category, div.add-item-sub').show();
-                };
+                }
                 // Hide category names if it has no visible artefact.
                 $('div.add-item-sub').each(function() {
                     if ($(this).find('div.add-item:visible').length == 0) {
                         $(this).hide();
-                    };
+                    }
                 });
                 $('div.add-item:visible').each(function(){
-                    var categoryId = $(this).data('category');
-                    $('div.add-item-category[data-category="' + categoryId + '"]').show();
+                    var category_id = $(this).data('category');
+                    $('div.add-item-category[data-category="' + category_id + '"]').show();
                 });
                 // List of shared artefacts.
                 if ($('div.add-item[data-category="sharedFromUser"]:visible').length == 0) {
@@ -416,7 +416,7 @@ define(['jquery',
 
         var input = $('form :input[name=blocks]');
         input.val($.toJSON(blocks));
-    };
+    }
 
     function generateItem(type, data)
     {
@@ -467,59 +467,61 @@ define(['jquery',
             $item.css('height', '1%');
         }.
         */
-        var header_content = '';
+        // var header_content = '';
+        var portfolioItems;
+        var $E;
         if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
             data.item = portfolioItems[data.itemid];
         }
         if (data.type == 'item' && data.itemid && data.item) {
-            var itemData = data.item;
-            var ilink = itemData.link;
+            var item_data = data.item;
+            var ilink = item_data.link;
             if (ilink != "") {
                 ilink = $E.translate('link') + ': ' + ilink + '<br />';
             }
 
             var itemPictures = '';
-            if (itemData.filescount > 1) {
+            if (item_data.filescount > 1) {
                 var imgWidth = 40;
-                if (itemData.filescount > 3) {
+                if (item_data.filescount > 3) {
                     imgWidth = 35;
                 }
-                if (itemData.filescount > 5) {
+                if (item_data.filescount > 5) {
                     imgWidth = 30;
                 }
                 itemPictures += '<div class="pictureset" style="float:right; position: relative; text-align: right; max-width: 150px;">';
-                for (var imi = 0; imi < itemData.filescount; imi++) {
+                for (var imi = 0; imi < item_data.filescount; imi++) {
                     if (imi && imi % 5 === 0) {
                         itemPictures += '<br />';
                     }
                     // itemPictures += '<div class="picture" style="float:right; position: relative; height: '+imgWidth+'px; width: '+imgWidth+'px;">';
                     itemPictures += '<div class="picture" style="float:right; height: '+imgWidth+'px; width: '+imgWidth+'px;">';
-                    itemPictures += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + itemData.id + '&imindex='+imi+'">';
+                    itemPictures += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + item_data.id + '&imindex='+imi+'">';
                     itemPictures += '</div>';
                 }
                 itemPictures += '</div>';
             } else {
                 itemPictures += '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;">';
-                itemPictures += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + itemData.id + '">';
+                itemPictures += '<img style="max-width: 100%; max-height: 100%;" src="' + M.cfg['wwwroot'] + '/blocks/exaport/item_thumb.php?item_id=' + item_data.id + '">';
                 itemPictures += '</div>';
             }
 
             var tempString = '';
             tempString += '<div id="id_holder" style="display:none;"></div> ';
             tempString += '<div class="item_info" style="overflow: hidden;">';
-            tempString += '<div class="header">' + $E.translate('viewitem') + ': ' + itemData.name + '</div>';
+            tempString += '<div class="header">' + $E.translate('viewitem') + ': ' + item_data.name + '</div>';
             tempString += itemPictures;
-            tempString += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(itemData.type) + '<br />';
-            tempString += $E.translate('category') + ': ' + itemData.category + '<br />' + ilink;
-            tempString += $E.translate('comments') + ': ' + itemData.comments + '<div class="exaport-item-intro"></div>';
-            if (itemData.competences) {
-                tempString += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + itemData.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
-            };
+            tempString += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(item_data.type) + '<br />';
+            tempString += $E.translate('category') + ': ' + item_data.category + '<br />' + ilink;
+            tempString += $E.translate('comments') + ': ' + item_data.comments + '<div class="exaport-item-intro"></div>';
+            if (item_data.competences) {
+                tempString += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
+            }
             tempString += '</div></div>';
             $item.html(tempString);
-            if (!itemData.competences) {
+            if (!item_data.competences) {
                 // User html may be malformed, so savely inject it here.
-                $item.find('.exaport-item-intro').html(itemData.intro);
+                $item.find('.exaport-item-intro').html(item_data.intro);
             }
         } else if (data.type == 'personal_information') {
             var tempString = '<div id="id_holder" style="display:none;"></div>';
@@ -562,134 +564,135 @@ define(['jquery',
                 tempString += '<img style="max-width: 100%; max-height: 100%;" src="' + badge.imageUrl + '">';
                 tempString += '</div>';
                 tempString += '<div class="body">' + badge.description + '</div>';
-                    /*				+
+                                    /* +
                                     '</div>' +
-                                    '<div class="body">'+$E.translate('type')+': '+$E.translate(itemData.type)+'<br />' +
-                                    $E.translate('category')+': '+itemData.category+'<br />' + ilink +
-                                    $E.translate('comments')+': '+itemData.comments+'<br />' + itemData.intro +
+                                    '<div class="body">'+$E.translate('type')+': '+$E.translate(item_data.type)+'<br />' +
+                                    $E.translate('category')+': '+item_data.category+'<br />' + ilink +
+                                    $E.translate('comments')+': '+item_data.comments+'<br />' + item_data.intro +
                                     '</div>
                                     */
                 $item.html(tempString);
             }
         } else if (data.type == 'cv_information') {
             data.item = null;
-            var bodyContent = '';
-            var titleContent = '';
+            var body_content = '';
+            // var titleContent = '';
+            var resumeItems;
             var addToHeader = '';
             var attachments = [];
             switch (data.resume_itemtype) {
                 case 'edu':
                     addToHeader = $E.translate('cofigureblock_cvinfo_education_history');
                     if (data.itemid && resumeItems && resumeItems.educations[data.itemid]) {
-                        itemData = resumeItems.educations[data.itemid];
-                        attachments = itemData.attachments;
+                        item_data = resumeItems.educations[data.itemid];
+                        attachments = item_data.attachments;
                         var description = '';
-                        description += '<span class="edu_institution">' + itemData.institution + ':</span> ';
-                        description += '<span class="edu_qualname">' + itemData.qualname + '</span>';
-                        if (itemData.startdate != '' || itemData.enddate != '') {
+                        description += '<span class="edu_institution">' + item_data.institution + ':</span> ';
+                        description += '<span class="edu_qualname">' + item_data.qualname + '</span>';
+                        if (item_data.startdate != '' || item_data.enddate != '') {
                             description += ' (';
-                            if (itemData.startdate != '') {
-                                description += '<span class="edu_startdate">' + itemData.startdate + '</span>';
+                            if (item_data.startdate != '') {
+                                description += '<span class="edu_startdate">' + item_data.startdate + '</span>';
                             }
-                            if (itemData.enddate != '') {
-                                description += '<span class="edu_enddate"> - ' + itemData.enddate + '</span>';
+                            if (item_data.enddate != '') {
+                                description += '<span class="edu_enddate"> - ' + item_data.enddate + '</span>';
                             }
                             description += ')';
                         }
-                        if (itemData.qualdescription != '') {
-                            description += '<span class="edu_qualdescription">' + itemData.qualdescription + '</span>';
+                        if (item_data.qualdescription != '') {
+                            description += '<span class="edu_qualdescription">' + item_data.qualdescription + '</span>';
                         }
-                        bodyContent = description;
+                        body_content = description;
                     }
                     break;
                 case 'employ':
                     addToHeader = $E.translate('cofigureblock_cvinfo_employment_history');
                     if (data.itemid && resumeItems && resumeItems.employments[data.itemid]) {
-                        itemData = resumeItems.employments[data.itemid];
-                        attachments = itemData.attachments;
+                        item_data = resumeItems.employments[data.itemid];
+                        attachments = item_data.attachments;
                         var description = '';
-                        description += '<span class="employ_jobtitle">' + itemData.jobtitle + ':</span> ';
-                        description += '<span class="employ_employer">' + itemData.employer + '</span>';
-                        if (itemData.startdate != '' || itemData.enddate != '') {
+                        description += '<span class="employ_jobtitle">' + item_data.jobtitle + ':</span> ';
+                        description += '<span class="employ_employer">' + item_data.employer + '</span>';
+                        if (item_data.startdate != '' || item_data.enddate != '') {
                             description += ' (';
-                            if (itemData.startdate != '') {
-                                description += '<span class="employ_startdate">' + itemData.startdate + '</span>';
+                            if (item_data.startdate != '') {
+                                description += '<span class="employ_startdate">' + item_data.startdate + '</span>';
                             }
-                            if (itemData.enddate != '') {
-                                description += '<span class="employ_enddate"> - ' + itemData.enddate + '</span>';
+                            if (item_data.enddate != '') {
+                                description += '<span class="employ_enddate"> - ' + item_data.enddate + '</span>';
                             }
                             description += ')';
                         }
-                        if (itemData.positiondescription != '') {
-                            description += '<span class="employ_positiondescription">' + itemData.positiondescription + '</span>';
+                        if (item_data.positiondescription != '') {
+                            description += '<span class="employ_positiondescription">' + item_data.positiondescription + '</span>';
                         }
-                        bodyContent = description;
+                        body_content = description;
                     }
                     break;
                 case 'certif':
                     addToHeader = $E.translate('cofigureblock_cvinfo_certif');
                     if (data.itemid && resumeItems && resumeItems.certifications[data.itemid]) {
-                        itemData = resumeItems.certifications[data.itemid];
-                        attachments = itemData.attachments;
+                        item_data = resumeItems.certifications[data.itemid];
+                        attachments = item_data.attachments;
                         var description = '';
-                        description += '<span class="certif_title">' + itemData.title + '</span> ';
-                        if (itemData.date != '') {
-                            description += '<span class="certif_date">(' + itemData.date + ')</span>';
+                        description += '<span class="certif_title">' + item_data.title + '</span> ';
+                        if (item_data.date != '') {
+                            description += '<span class="certif_date">(' + item_data.date + ')</span>';
                         }
-                        if (itemData.description != '') {
-                            description += '<span class="certif_description">' + itemData.description + '</span>';
+                        if (item_data.description != '') {
+                            description += '<span class="certif_description">' + item_data.description + '</span>';
                         }
-                        bodyContent = description;
+                        body_content = description;
                     }
                     break;
                 case 'public':
                     addToHeader = $E.translate('cofigureblock_cvinfo_public');
                     if (data.itemid && resumeItems && resumeItems.publications[data.itemid]) {
-                        itemData = resumeItems.publications[data.itemid];
-                        attachments = itemData.attachments;
+                        item_data = resumeItems.publications[data.itemid];
+                        attachments = item_data.attachments;
                         var description = '';
-                        description += '<span class="public_title">' + itemData.title;
-                        if (itemData.contribution != '') {
-                            description += ' (' + itemData.contribution + ')';
+                        description += '<span class="public_title">' + item_data.title;
+                        if (item_data.contribution != '') {
+                            description += ' (' + item_data.contribution + ')';
                         }
                         description += '</span> ';
-                        if (itemData.date != '') {
-                            description += '<span class="public_date">(' + itemData.date + ')</span>';
+                        if (item_data.date != '') {
+                            description += '<span class="public_date">(' + item_data.date + ')</span>';
                         }
-                        if (itemData.contributiondetails != '' || itemData.url != '') {
+                        if (item_data.contributiondetails != '' || item_data.url != '') {
                             description += '<span class="public_description">';
-                            if (itemData.contributiondetails != '') {
-                                description += itemData.contributiondetails;
+                            if (item_data.contributiondetails != '') {
+                                description += item_data.contributiondetails;
                             }
-                            if (itemData.url != '') {
-                                description += '<br /><a href="' + itemData.url + '" class="public_url" target="_blank">' + itemData.url + '</a>';
+                            if (item_data.url != '') {
+                                description += '<br /><a href="' + item_data.url + '" class="public_url" target="_blank">' + item_data.url + '</a>';
                             }
                             description += '</span>';
                         }
-                        bodyContent = description;
+                        body_content = description;
                     }
                     break;
                 case 'mbrship':
                     addToHeader = $E.translate('cofigureblock_cvinfo_mbrship');
                     if (data.itemid && resumeItems && resumeItems.profmembershipments[data.itemid]) {
-                        itemData = resumeItems.profmembershipments[data.itemid];
-                        attachments = itemData.attachments;
+                        item_data = resumeItems.profmembershipments[data.itemid];
+                        attachments = item_data.attachments;
                         var description = '';
-                        description += '<span class="mbrship_title">' + itemData.title + '</span> ';
-                        if (itemData.startdate != '' || itemData.enddate != '') {
+                        description += '<span class="mbrship_title">' + item_data.title + '</span> ';
+                        if (item_data.startdate != '' || item_data.enddate != '') {
                             description += ' (';
-                            if (itemData.startdate != '') {
-                                description += '<span class="mbrship_startdate">' + itemData.startdate + '</span>';
+                            if (item_data.startdate != '') {
+                                description += '<span class="mbrship_startdate">' + item_data.startdate + '</span>';
                             }
-                            if (itemData.enddate != '') {
-                                description += '<span class="mbrship_enddate"> - ' + itemData.enddate + '</span>';
+                            if (item_data.enddate != '') {
+                                description += '<span class="mbrship_enddate"> - ' + item_data.enddate + '</span>';
                             }
                             description += ')';
                         }
-                        if (itemData.description != '') {
-                            description += '<span class="mbrship_description">' + itemData.description + '</span>';
+                        if (item_data.description != '') {
+                            description += '<span class="mbrship_description">' + item_data.description + '</span>';
                         }
-                        bodyContent = description;
+                        body_content = description;
                     }
                     break;
                 case 'goalspersonal':
@@ -699,14 +702,14 @@ define(['jquery',
                 case 'skillsacademic':
                 case 'skillscareers':
                     attachments = resumeItems[data.resume_itemtype + '_attachments'];
-                    console.log(resumeItems);
-                    console.log(data.resume_itemtype + '_attachments');
+                    // console.log(resumeItems);
+                    // console.log(data.resume_itemtype + '_attachments');
                     addToHeader = $E.translate('resume_' + data.resume_itemtype);
                     var description = '';
                     if (resumeItems['' + data.resume_itemtype]) {
                         description += '<span class="' + data.resume_itemtype + '_text">' + resumeItems['' + data.resume_itemtype] + '</span> ';
                     }
-                    bodyContent = description;
+                    body_content = description;
                     break;
                 case 'interests':
                     addToHeader = $E.translate('cofigureblock_cvinfo_interests');
@@ -714,24 +717,24 @@ define(['jquery',
                     if (resumeItems.interests != '') {
                         description += '<span class="interests">' + resumeItems.interests + '</span> ';
                     }
-                    bodyContent = description;
+                    body_content = description;
                     break;
                 default:
                     break;
             }
 
             if (data.resume_withfiles == "1" && attachments && attachments.length) {
-                bodyContent += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
+                body_content += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
                 $.each(attachments, function (k, file) {
-                    bodyContent += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
-                })
-                bodyContent += '</ul>';
+                    body_content += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
+                });
+                body_content += '</ul>';
             }
 
             var tempString = '<div id="id_holder" style="display:none;"></div>';
             tempString += '<div class="cv_info" style="overflow: hidden;">';
             tempString += '<div class="header">' + $E.translate('cvinformation') + ': ' + addToHeader + '</div>';
-            tempString += '<div class="body">' + bodyContent + '</div>';
+            tempString += '<div class="body">' + body_content + '</div>';
             tempString += '</div>';
             $item.html(tempString);
         } else {
@@ -866,7 +869,7 @@ define(['jquery',
 
                             showDialog(data.modalTitle, data.html);
 
-                            // ...var popup = $E.popup({ bodyContent: data.html, onhide: function(){
+                            // ...var popup = $E.popup({ body_content: data.html, onhide: function(){
                             // if (newItem) $(newItem).remove();
                             // } });
                             // focus first element
@@ -996,7 +999,7 @@ define(['jquery',
                 dialogue.getRoot().on(modalEvents.shown, function () {
                     hidePreloadinator(newItem, '.blocktype');
                     hidePreloadinator(lastclicked, '');
-                    console.log('modal is shown');
+                    // console.log('modal is shown');
                 });
                 // On hide handler.
                 dialogue.getRoot().on(modalEvents.hidden, function () {
@@ -1081,7 +1084,7 @@ define(['jquery',
 
     // MAIN code of MODULE.
     return {
-        initialise: function ($params) {
+        initialise: function (/*$params*/) {
             // console.log('exaport AMD loaded');
             initContentEdit();
             // For sharing of views

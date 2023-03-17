@@ -28,7 +28,7 @@
         this.$container = t;
         this.$document = e(document);
         this.lockToScrollPos = [0, 0];
-        this.disable()
+        this.disable();
     }
 
     var t, n;
@@ -39,24 +39,24 @@
         if (e.opts.handleScrollbar) {
             e.lockToScrollPos = [e.$container.scrollLeft(), e.$container.scrollTop()];
             e.$container.on("scroll.disablescroll", function () {
-                e._handleScrollbar.call(e)
-            })
+                e._handleScrollbar.call(e);
+            });
         }
         e.opts.handleKeys && e.$document.on("keydown.disablescroll", function (t) {
-            e._handleKeydown.call(e, t)
-        })
+            e._handleKeydown.call(e, t);
+        });
     };
     n.undo = function () {
         var e = this;
         e.$container.off(".disablescroll");
-        e.opts.handleKeys && e.$document.off(".disablescroll")
+        e.opts.handleKeys && e.$document.off(".disablescroll");
     };
     n._handleWheel = function (e) {
-        e.preventDefault()
+        e.preventDefault();
     };
     n._handleScrollbar = function () {
         this.$container.scrollLeft(this.lockToScrollPos[0]);
-        this.$container.scrollTop(this.lockToScrollPos[1])
+        this.$container.scrollTop(this.lockToScrollPos[1]);
     };
     n._handleKeydown = function (e) {
         for (var t = 0; t < this.opts.scrollEventKeys.length; t++) {
@@ -68,7 +68,7 @@
     };
     e.fn.disablescroll = function (e) {
         !t && (typeof e == "object" || !e) && (t = new r(this, e));
-        t && typeof e == "undefined" ? t.disable() : t && t[e] && t[e].call(t)
+        t && typeof e == "undefined" ? t.disable() : t && t[e] && t[e].call(t);
     };
     window.UserScrollDisabler = r
 })(jQuery);
@@ -337,7 +337,7 @@
             var popup = this.last_popup = new M.core.dialogue({
                 headerContent: config.headerContent || config.title || 'Popup',
 
-                bodyContent: '',
+                body_content: '',
                 visible: true, // By default it is not displayed.
                 modal: false, // Sollte true sein, aber wegen moodle bug springt dann das fenster immer nach oben.
                 zIndex: 1000,
@@ -355,8 +355,8 @@
 
             // Body mit jquery injecten, dadurch werden z.b. auch javascripts ausgeführt
             // bei anabe im popup constructor eben nicht.
-            if (config.bodyContent) {
-                popup.$body.html(config.bodyContent);
+            if (config.body_content) {
+                popup.$body.html(config.body_content);
             }
 
             // Hack my own overlay, because moodle dialogue modal is not working.

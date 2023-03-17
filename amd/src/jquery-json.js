@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 (function (factory) {
     "use strict";
 
@@ -30,7 +32,6 @@
         factory(jQuery, window, document);
     }
 }
-
 
 (function ($) {
     var m = {

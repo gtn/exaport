@@ -37,22 +37,24 @@
 }
 
 .dots .dot:nth-child(2) {
-  animation-delay: .2s;
+  animation-delay: 0.2s;
 }
 
 .dots .dot:nth-child(3) {
-  animation-delay: .4s;
+  animation-delay: 0.4s;
 }
 
 @keyframes dot-dot-dot {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     -webkit-transform: initial;
-      -ms-transform: initial;
-        transform: initial;
+    -ms-transform: initial;
+    transform: initial;
   }
   30% {
     -webkit-transform: translateY(-15px);
-      -ms-transform: translateY(-15px);
-        transform: translateY(-15px);
+    -ms-transform: translateY(-15px);
+    transform: translateY(-15px);
   }
 }

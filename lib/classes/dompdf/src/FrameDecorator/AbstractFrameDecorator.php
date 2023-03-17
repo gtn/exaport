@@ -62,7 +62,7 @@ abstract class AbstractFrameDecorator extends Frame
     protected $_reflower;
 
     /**
-     * Reference to the current dompdf instance
+     * reference to the current dompdf instance
      *
      * @var Dompdf
      */

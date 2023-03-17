@@ -72,9 +72,9 @@ if ($fromform = $exteditform->get_data()) {
 
                 if (mkdir($unzipdir)) {
                     $zip = new ZipArchive();
-                    if ($zip->open($dir.'/'.$newfilename) == TRUE) {
+                    if ($zip->open($dir.'/'.$newfilename) == true) {
                         $zip->extractTo($unzipdir);
-                    //if (unzip_file($dir.'/'.$newfilename, $unzipdir, false)) {
+                        // if (unzip_file($dir.'/'.$newfilename, $unzipdir, false)) {
                         if (is_file($unzipdir."/itemscomp.xml")) {
                             $xml = simplexml_load_file($unzipdir."/itemscomp.xml");
                         }
@@ -135,7 +135,7 @@ $formdata = new stdClass();
 $formdata->courseid = $courseid;
 $exteditform->set_data($formdata);
 if ($imported) {
-    //notify(get_string("success", "block_exaport"));
+    // notify(get_string("success", "block_exaport"));
     echo $OUTPUT->notification(get_string("success", "block_exaport"), 'success');
 } else {
     $exteditform->display();
@@ -450,12 +450,12 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
                         'userid' => $USER->id);
                 // add file instances
                 foreach ($allfiles as $filename) {
-                    //$starturl += strlen('<!--###BOOKMARK_FILE_URL###-->');
-                    //$startdesc += strlen('<!--###BOOKMARK_FILE_DESC###-->');
-                    //if ((($endurl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->', $starturl)) !== false) &&
-                    //        (($enddesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startdesc)) !== false)
-                    //) {
-                    //    $linkedfilename = block_exaport_clean_path(substr($content, $starturl, $endurl - $starturl));
+                    // $starturl += strlen('<!--###BOOKMARK_FILE_URL###-->');
+                    // $startdesc += strlen('<!--###BOOKMARK_FILE_DESC###-->');
+                    // if ((($endurl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->', $starturl)) !== false) &&
+                    // (($enddesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startdesc)) !== false)
+                    // ) {
+                    // $linkedfilename = block_exaport_clean_path(substr($content, $starturl, $endurl - $starturl));
                     $linkedfilename = block_exaport_clean_path($filename);
                     $linkedfilepath = dirname($filepath).'/'.$linkedfilename;
                     if (is_file($linkedfilepath)) {
@@ -472,9 +472,9 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
                     }
                 }
             }
-            //} else {
-            //    notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
-            //}
+            // } else {
+            // notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
+            // }
         } else {
             $OUTPUT->notification(get_string("linkedfilenotfound", "block_exaport",
                     array("filename" => dirname($filepath).'/'.block_exaport_clean_path($allfiles[0]), "url" => $url, "title" => $title)));

@@ -439,7 +439,7 @@ class Stylesheet
     }
 
     /**
-     * Converts a CSS selector to an XPath query.
+     * Converts a CSS selector to an x_path query.
      *
      * @param string $selector
      * @param bool $first_pass
@@ -561,7 +561,7 @@ class Stylesheet
                     // class.  Search for class attributes with class="$tok",
                     // class=".* $tok .*" and class=".* $tok"
 
-                    // This doesn't work because libxml only supports XPath 1.0...
+                    // This doesn't work because libxml only supports x_path 1.0...
                     //$query .= "[matches(@$attr,\"^${tok}\$|^${tok}[ ]+|[ ]+${tok}\$|[ ]+${tok}[ ]+\")]";
 
                     // Query improvement by Michael Sheakoski <michael@mjsdigital.com>:
@@ -934,7 +934,7 @@ class Stylesheet
      */
     function apply_styles(FrameTree $tree)
     {
-        // Use XPath to select nodes.  This would be easier if we could attach
+        // Use x_path to select nodes.  This would be easier if we could attach
         // Frame objects directly to DOMNodes using the setUserData() method, but
         // we can't do that just yet.  Instead, we set a _node attribute_ in
         // Frame->set_id() and use that as a handle on the Frame object via

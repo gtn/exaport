@@ -132,14 +132,14 @@ class SurfacePDFLib implements SurfaceInterface
         $this->canvas->clip();
     }
 
-    public function fillText($text, $x, $y, $maxWidth = null)
+    public function fillText($text, $x, $y, $max_width = null)
     {
         if (self::DEBUG) echo __FUNCTION__ . "\n";
         $this->canvas->set_text_pos($x, $y);
         $this->canvas->show($text);
     }
 
-    public function strokeText($text, $x, $y, $maxWidth = null)
+    public function strokeText($text, $x, $y, $max_width = null)
     {
         if (self::DEBUG) echo __FUNCTION__ . "\n";
         // TODO: Implement drawImage() method.

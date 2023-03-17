@@ -365,11 +365,11 @@ if ($showinformation) {
 
     // Employment history.
     $employments = block_exaport_resume_get_employments($resume->id);
-    $employmenthistory = block_exaport_resume_templating_mm_records($courseid, 'employ', 'position', $employments);
+    $executive_summary = block_exaport_resume_templating_mm_records($courseid, 'employ', 'position', $employments);
     echo block_exaport_form_resume_part($courseid, 'employ',
-            get_string('resume_employhistory', 'block_exaport'), $employmenthistory, 'add', $type);
+            get_string('resume_employhistory', 'block_exaport'), $executive_summary, 'add', $type);
 
-    // Certifications, accreditations and awards.
+    // certifications, accreditations and awards.
     $certifications = block_exaport_resume_get_certificates($resume->id);
     $certificationhistory = block_exaport_resume_templating_mm_records($courseid, 'certif', 'title', $certifications);
     echo block_exaport_form_resume_part($courseid, 'certif',

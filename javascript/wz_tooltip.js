@@ -293,7 +293,7 @@ tt_db, tt_op, tt_ie, tt_ie56, tt_bBoxOld,	// Browser flags
 tt_body,
 tt_ovr_,				// HTML element the mouse is currently over
 tt_flagOpa,				// Opacity support: 1=IE, 2=Khtml, 3=KHTML, 4=Moz, 5=W3C
-tt_maxPosX, tt_maxPosY,
+tt_maxpos_x, tt_maxpos_y,
 tt_iState = 0,			// Tooltip active |= 1, shown |= 2, move with mouse |= 4, exclusive |= 8
 tt_opa,					// Currently applied opacity
 tt_bJmpVert, tt_bJmpHorz,// Tip temporarily on other side of mouse
@@ -343,7 +343,7 @@ function tt_Browser()
 		tt_db = !ieOld ? document.documentElement : (document.body || null);
 		if(tt_db)
 			tt_ie56 = parseFloat(nv.substring(nv.indexOf("MSIE") + 5)) >= 5.5
-					&& typeof document.body.style.maxHeight == tt_u;
+					&& typeof document.body.style.max_height == tt_u;
 	}
 	else
 	{
@@ -546,8 +546,8 @@ function tt_Tip(arg, t2t)
 	tt_FormatTip();
 	tt_bJmpVert = false;
 	tt_bJmpHorz = false;
-	tt_maxPosX = tt_GetClientW() + tt_GetScrollX() - tt_w - 1;
-	tt_maxPosY = tt_GetClientH() + tt_GetScrollY() - tt_h - 1;
+	tt_maxpos_x = tt_GetClientW() + tt_GetScrollX() - tt_w - 1;
+	tt_maxpos_y = tt_GetClientH() + tt_GetScrollY() - tt_h - 1;
 	tt_AdaptConfig2();
 	// Ensure the tip be shown and positioned before the first onmousemove
 	tt_OverInit();
@@ -1014,7 +1014,7 @@ function tt_Pos(iDim)
 		cmdAlt = ABOVE;
 		cmdOff = OFFSETY;
 		cx = tt_h;
-		iMax = tt_maxPosY;
+		iMax = tt_maxpos_y;
 		iScrl = tt_GetScrollY();
 		iMus = tt_musY;
 		bJmp = tt_bJmpVert;
@@ -1025,7 +1025,7 @@ function tt_Pos(iDim)
 		cmdAlt = LEFT;
 		cmdOff = OFFSETX;
 		cx = tt_w;
-		iMax = tt_maxPosX;
+		iMax = tt_maxpos_x;
 		iScrl = tt_GetScrollX();
 		iMus = tt_musX;
 		bJmp = tt_bJmpHorz;

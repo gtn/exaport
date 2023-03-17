@@ -39,12 +39,12 @@ class block_exaport_resume_editor_form extends block_exaport_moodleform {
 
         $mform->addElement('editor', $param.'_editor', get_string('resume_'.$param, 'block_exaport'), null,
                 array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-        $mform->addExaportHelpButton($param.'_editor', 'forms.resume.'.$param.'_editor');
+        $mform->add_exaport_help_button($param.'_editor', 'forms.resume.'.$param.'_editor');
 
         if ($withfiles) {
             $mform->addElement('filemanager', 'attachments', get_string('resume_files', 'block_exaport'), null,
                     array('subdirs' => false, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'maxfiles' => 5));
-            $mform->addExaportHelpButton('attachments', 'forms.resume.attachments');
+            $mform->add_exaport_help_button('attachments', 'forms.resume.attachments');
         }
 
         $mform->addElement('hidden', 'courseid');
@@ -83,18 +83,18 @@ class block_exaport_resume_multifields_form extends block_exaport_moodleform {
                     case 'text' :
                         $mform->addElement('text', $fieldname, get_string('resume_'.$fieldname, 'block_exaport'), $attributestext);
                         $mform->setType($fieldname, PARAM_RAW);
-                        $mform->addExaportHelpButton($fieldname, 'forms.resume.'.$fieldname);
+                        $mform->add_exaport_help_button($fieldname, 'forms.resume.'.$fieldname);
                         break;
                     case 'textarea' :
                         $mform->addElement('textarea', $fieldname, get_string('resume_'.$fieldname, 'block_exaport'),
                                 $attributestextarea);
                         $mform->setType($fieldname, PARAM_RAW);
-                        $mform->addExaportHelpButton($fieldname, 'forms.resume.'.$fieldname);
+                        $mform->add_exaport_help_button($fieldname, 'forms.resume.'.$fieldname);
                         break;
                     case 'filearea' :
                         $mform->addElement('filemanager', 'attachments', get_string('resume_'.$fieldname, 'block_exaport'), null,
                                 array('subdirs' => false, 'maxfiles' => 5, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-                        $mform->addExaportHelpButton('attachments', 'forms.resume.attachments_'.$fieldname);
+                        $mform->add_exaport_help_button('attachments', 'forms.resume.attachments_'.$fieldname);
                         break;
                 };
                 // Required field.
@@ -288,7 +288,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         // TODO: add images?
         $fs = get_file_storage();
         $context = context_user::instance($userid);
-        $importAttachments = function($type, $recordid) use ($fs, $context, $CFG) {
+        $import_attachments = function($type, $recordid) use ($fs, $context, $CFG) {
             $result = null;
             $files = $fs->get_area_files($context->id, 'block_exaport', 'resume_'.$type, $recordid, 'filename', false);
             if (count($files) > 0) {
@@ -307,7 +307,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         $educations = block_exaport_resume_get_educations(@$resumeparams->id);
         if ($educations) {
             foreach ($educations as $education) {
-                $education->attachments = $importAttachments('edu', $education->id);
+                $education->attachments = $import_attachments('edu', $education->id);
             }
             $resumeparams->educations = $educations;
         }
@@ -315,7 +315,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         $employments = block_exaport_resume_get_employments(@$resumeparams->id);
         if ($employments) {
             foreach ($employments as $employment) {
-                $employment->attachments = $importAttachments('employ', $employment->id);
+                $employment->attachments = $import_attachments('employ', $employment->id);
             }
             $resumeparams->employments = $employments;
         }
@@ -323,7 +323,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         $certifications = block_exaport_resume_get_certificates(@$resumeparams->id);
         if ($certifications) {
             foreach ($certifications as $certification) {
-                $certification->attachments = $importAttachments('certif', $certification->id);
+                $certification->attachments = $import_attachments('certif', $certification->id);
             }
             $resumeparams->certifications = $certifications;
         }
@@ -331,7 +331,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         $publications = block_exaport_resume_get_publications(@$resumeparams->id);
         if ($publications) {
             foreach ($publications as $publication) {
-                $publication->attachments = $importAttachments('public', $publication->id);
+                $publication->attachments = $import_attachments('public', $publication->id);
             }
             $resumeparams->publications = $publications;
         }
@@ -339,33 +339,33 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         $profmembershipments = block_exaport_resume_get_profmembershipments(@$resumeparams->id);
         if ($profmembershipments) {
             foreach ($profmembershipments as $profmembershipment) {
-                $profmembershipment->attachments = $importAttachments('mbrship', $profmembershipment->id);
+                $profmembershipment->attachments = $import_attachments('mbrship', $profmembershipment->id);
             }
             $resumeparams->profmembershipments = $profmembershipments;
         }
         // add files to skills and goals
         $elements = array('personal', 'academic', 'careers');
         foreach ($elements as $element) {
-            $resumeparams->{'goals'.$element.'_attachments'} = $importAttachments('goals'.$element, $resumeparams->id);
-            $resumeparams->{'skills'.$element.'_attachments'} = $importAttachments('skills'.$element, $resumeparams->id);
+            $resumeparams->{'goals'.$element.'_attachments'} = $import_attachments('goals'.$element, $resumeparams->id);
+            $resumeparams->{'skills'.$element.'_attachments'} = $import_attachments('skills'.$element, $resumeparams->id);
         }
         // badges
         $badges = block_exaport_resume_get_badges($resumeparams->id);
         if ($badges) {
-            $badgesData = [];
-            foreach ($badges as $badgeMMRec) {
+            $badges_data = [];
+            foreach ($badges as $badges_mm_rec) {
                 $badge = $DB->get_record_sql('SELECT b.*, bi.dateissued, bi.uniquehash '.
                     ' FROM {badge} b LEFT JOIN {badge_issued} bi ON b.id=bi.badgeid AND bi.userid='.intval($userid).
                     ' WHERE b.id=? ',
-                    array('id' => $badgeMMRec->badgeid));
-                $badgeEntry = new stdClass();
-                $badgeEntry->name = $badge->name;
-                $badgeEntry->image = block_exaport_get_user_badge_image($badge, true);
-                $badgeEntry->description = $badge->description;
-                $badgeEntry->date = userdate($badge->dateissued, get_string('strftimedate', 'langconfig'));
-                $badgesData[] = $badgeEntry;
+                    array('id' => $badges_mm_rec->badgeid));
+                $badge_entry = new stdClass();
+                $badge_entry->name = $badge->name;
+                $badge_entry->image = block_exaport_get_user_badge_image($badge, true);
+                $badge_entry->description = $badge->description;
+                $badge_entry->date = userdate($badge->dateissued, get_string('strftimedate', 'langconfig'));
+                $badges_data[] = $badge_entry;
             }
-            $resumeparams->badges = $badgesData;
+            $resumeparams->badges = $badges_data;
         }
     }
 
@@ -438,7 +438,7 @@ function block_exaport_resume_get_mm_records($table, $conditions) {
     global $DB;
     $wherearr = array();
     $params = array();
-	
+
     foreach ($conditions as $field => $value) {
         $wherearr[] = $field.' = ? ';
         $params[] = $value;
@@ -690,7 +690,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
 
     foreach ($elements as $element) {
         $itemindex++;
-        // Title and Description.
+        // Title and description.
         $description = '';
         $description = $resume->{$type.$element};
         $description = file_rewrite_pluginfile_urls($description, 'pluginfile.php',
@@ -794,9 +794,9 @@ function block_exaport_resume_competences_form($resume, $id, $typeblock) {
     return false;
 }
 
-function block_exaport_get_user_badge_image($badge, $justUrl = false) {
-//    $src = '/pluginfile.php/'.context_user::instance($badge->usercreated)->id.'/badges/userbadge/'.$badge->id.'/'.
-//            $badge->uniquehash;
+function block_exaport_get_user_badge_image($badge, $just_url = false) {
+    // $src = '/pluginfile.php/'.context_user::instance($badge->usercreated)->id.'/badges/userbadge/'.$badge->id.'/'.
+    // $badge->uniquehash;
     // Find badge by id.
     if (!$badge) {
         return '';
@@ -809,7 +809,7 @@ function block_exaport_get_user_badge_image($badge, $justUrl = false) {
         $src = (string)moodle_url::make_pluginfile_url($context->id,
             'badges', 'badgeimage', $badge->id, '/', 'f1', false);
     }
-    if ($justUrl) {
+    if ($just_url) {
         return $src;
     }
     $img = '<img src="'.$src.'" style="float: left; margin: 0px 10px;">';
@@ -822,304 +822,304 @@ function europass_xml($resumeid = 0) {
     $xml = '';
     $resume = $DB->get_record('block_exaportresume', array("id" => $resumeid, 'user_id' => $USER->id));
 
-    $languageCode = 'en';
-    $schemeID = 'exaportTest-0001';
-    $schemeName = 'DocumentIdentifier';
-    $schemeAgencyName = 'EUROPASS';
-    $schemeVersionID = '4.0';
+    $language_code = 'en';
+    $scheme_id = 'exaportTest-0001';
+    $scheme_name = 'DocumentIdentifier';
+    $scheme_agency_name = 'EUROPASS';
+    $scheme_version_id = '4.0';
 
     $dom = new DOMDocument('1.0', 'utf-8');
     $root = $dom->createElement('Candidate');
     $root->setAttribute('xsi:schemaLocation', 'http://www.europass.eu/1.0 Candidate.xsd');
     $root->setAttribute('xmlns', 'http://www.europass.eu/1.0');
 
-
     $root->setAttribute('xmlns:oa', 'http://www.openapplications.org/oagis/9');
     $root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
     $root->setAttribute('xmlns:eures', 'http://www.europass_eures.eu/1.0');
     $root->setAttribute('xmlns:hr', 'http://www.hr-xml.org/3');
-//    $root->setAttribute('majorVersionID', '3');
-//    $root->setAttribute('minorVersionID', '2');
+    // $root->setAttribute('majorVersionID', '3');
+    // $root->setAttribute('minorVersionID', '2');
 
     // document ID
     $documentID = $dom->createElement('hr:DocumentID');
-    $documentID->setAttribute('schemeID', $schemeID);
-    $documentID->setAttribute('schemeName', $schemeName);
-    $documentID->setAttribute('schemeAgencyName', $schemeAgencyName);
-    $documentID->setAttribute('schemeVersionID', $schemeVersionID);
+    $documentID->setAttribute('scheme_id', $scheme_id);
+    $documentID->setAttribute('scheme_name', $scheme_name);
+    $documentID->setAttribute('scheme_agency_name', $scheme_agency_name);
+    $documentID->setAttribute('scheme_version_id', $scheme_version_id);
 
     // supplier
-    $CandidateSupplier = $dom->createElement('CandidateSupplier');
-    $PartyID = $dom->createElement('hr:PartyID');
-    $PartyID->setAttribute('schemeID', $schemeID);
-    $PartyID->setAttribute('schemeName', 'PartyID');
-    $PartyID->setAttribute('schemeAgencyName', $schemeAgencyName);
-    $PartyID->setAttribute('schemeVersionID', '1.0');
-    $CandidateSupplier->appendChild($PartyID);
-    $PartyName = $dom->createElement('hr:PartyName');
+    $candidate_supplier = $dom->createElement('candidate_supplier');
+    $party_id = $dom->createElement('hr:party_id');
+    $party_id->setAttribute('scheme_id', $scheme_id);
+    $party_id->setAttribute('scheme_name', 'party_id');
+    $party_id->setAttribute('scheme_agency_name', $scheme_agency_name);
+    $party_id->setAttribute('scheme_version_id', '1.0');
+    $candidate_supplier->appendChild($party_id);
+    $party_name = $dom->createElement('hr:party_name');
     $text = $dom->createTextNode($SITE->fullname.': Exabis ePortfolio CV');
-    $PartyName->appendChild($text);
-    $CandidateSupplier->appendChild($PartyName);
-    $root->appendChild($CandidateSupplier);
+    $party_name->appendChild($text);
+    $candidate_supplier->appendChild($party_name);
+    $root->appendChild($candidate_supplier);
 
     // candidate
-    $CandidatePerson = $dom->createElement('CandidatePerson');
+    $candidate_person = $dom->createElement('candidate_person');
     // name
-    $PersonName = $dom->createElement('PersonName');
-    $GivenName = $dom->createElement('oa:GivenName');
+    $person_name = $dom->createElement('person_name');
+    $given_name = $dom->createElement('oa:given_name');
     $text = $dom->createTextNode($USER->firstname);
-    $GivenName->appendChild($text);
-    $FamilyName = $dom->createElement('hr:FamilyName');
+    $given_name->appendChild($text);
+    $family_name = $dom->createElement('hr:family_name');
     $text = $dom->createTextNode($USER->lastname);
-    $FamilyName->appendChild($text);
-    $PersonName->appendChild($GivenName);
-    $PersonName->appendChild($FamilyName);
-    $CandidatePerson->appendChild($PersonName);
+    $family_name->appendChild($text);
+    $person_name->appendChild($given_name);
+    $person_name->appendChild($family_name);
+    $candidate_person->appendChild($person_name);
     // contact data
-    $Communication = $dom->createElement('Communication');
-    $UseCode = $dom->createElement('UseCode');
+    $communication = $dom->createElement('communication');
+    $use_code = $dom->createElement('use_code');
     $text = $dom->createTextNode('home');
-    $UseCode->appendChild($text);
-    $Communication->appendChild($UseCode);
-    $Address = $dom->createElement('Address');
-    $Address->setAttribute('type', 'home');
-    $Communication->appendChild($Address);
-    europassFillSubElementText($dom, $Address, 'oa:AddressLine', $USER->address);
-    europassFillSubElementText($dom, $Address, 'oa:CityName', $USER->city);
-    europassFillSubElementText($dom, $Address, 'CountryCode', strtolower($USER->country));
-    $CandidatePerson->appendChild($Communication);
+    $use_code->appendChild($text);
+    $communication->appendChild($use_code);
+    $address = $dom->createElement('address');
+    $address->setAttribute('type', 'home');
+    $communication->appendChild($address);
+    // echo "<pre>debug:<strong>resumelib.php:827</strong>\r\n"; print_r($USER); echo '</pre>'; exit; // !!!!!!!!!! delete it
+    europass_fill_sub_element_text($dom, $address, 'oa:AddressLine', $USER->address);
+    europass_fill_sub_element_text($dom, $address, 'oa:CityName', $USER->city);
+    europass_fill_sub_element_text($dom, $address, 'CountryCode', strtolower($USER->country));
+    $candidate_person->appendChild($communication);
 
     // for phone numbers we need to know country code and phone number. So, use this code
-    $phoneTypes = ['home', 'mobile'];
+    $phone_types = ['home', 'mobile'];
     $numb = [1, 2];
     $i = 0;
     foreach ($numb as $n) {
         if ($USER->{'phone'.$n}) {
             preg_match("~^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$~i", $USER->{'phone'.$n}, $matches);
-            $countryCode = @$matches[1];
-            $phoneNumber = @$matches[2];
-            if ($phoneNumber) {
-                if ($countryCode && $countryCode > 0) { // get default country code from Moodle settings
-                    europassFillCommunicationItem($dom, $CandidatePerson, 'Telephone', ['oa:DialNumber' => $phoneNumber, 'UseCode' => $phoneTypes[$i++], 'CountryDialing' => $countryCode]);
+            $country_code = @$matches[1];
+            $phone_number = @$matches[2];
+            if ($phone_number) {
+                if ($country_code && $country_code > 0) { // get default country code from Moodle settings
+                    europass_fill_communication_item($dom, $candidate_person, 'Telephone', ['oa:DialNumber' => $phone_number, 'use_code' => $phone_types[$i++], 'CountryDialing' => $country_code]);
                 } else if ($CFG->country) {
                     // todo: find phone code by country code?
-//                    europassFillCommunicationItem($dom, $CandidatePerson, 'Telephone', ['oa:DialNumber' => $phoneNumber, 'UseCode' => $phoneTypes[$i++], 'CountryCode' => strtolower($CFG->country)]);
+                    // europass_fill_communication_item($dom, $candidate_person, 'Telephone', ['oa:DialNumber' => $phone_number, 'use_code' => $phone_types[$i++], 'CountryCode' => strtolower($CFG->country)]);
                 }
 
             }
         }
     }
-    europassFillCommunicationItem($dom, $CandidatePerson, 'Email', ['oa:URI' => $USER->email]);
-    europassFillCommunicationItem($dom, $CandidatePerson, 'Web', ['oa:URI' => $USER->url]);
-    europassFillCommunicationItem($dom, $CandidatePerson, 'InstantMessage', ['oa:URI' => $USER->icq, 'OtherTitle' => 'ICQ', 'UseCode' => 'other']);
-    europassFillCommunicationItem($dom, $CandidatePerson, 'InstantMessage', ['oa:URI' => $USER->skype, 'OtherTitle' => 'Skype', 'UseCode' => 'other']);
-    europassFillCommunicationItem($dom, $CandidatePerson, 'InstantMessage', ['oa:URI' => $USER->yahoo, 'OtherTitle' => 'Yahoo', 'UseCode' => 'other']);
-    europassFillCommunicationItem($dom, $CandidatePerson, 'InstantMessage', ['oa:URI' => $USER->aim, 'OtherTitle' => 'AIM', 'UseCode' => 'other']);
-    europassFillCommunicationItem($dom, $CandidatePerson, 'InstantMessage', ['oa:URI' => $USER->msn, 'OtherTitle' => 'MSN', 'UseCode' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'Email', ['oa:URI' => $USER->email]);
+    europass_fill_communication_item($dom, $candidate_person, 'Web', ['oa:URI' => $USER->url]);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->icq, 'OtherTitle' => 'ICQ', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->skype, 'OtherTitle' => 'Skype', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->yahoo, 'OtherTitle' => 'Yahoo', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->aim, 'OtherTitle' => 'AIM', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->msn, 'OtherTitle' => 'MSN', 'use_code' => 'other']);
 
-    europassFillSubElementText($dom, $CandidatePerson, 'ResidenceCountryCode', strtolower($USER->country));
-    $root->appendChild($CandidatePerson);
+    europass_fill_sub_element_text($dom, $candidate_person, 'ResidenceCountryCode', strtolower($USER->country));
+    $root->appendChild($candidate_person);
 
-    // CandidateProfile
-    $CandidateProfile = $dom->createElement('CandidateProfile');
-    $CandidateProfile->setAttribute('languageCode', 'en');
+    // candidate_profile
+    $candidate_profile = $dom->createElement('candidate_profile');
+    $candidate_profile->setAttribute('language_code', 'en');
     $ID = $dom->createElement('hr:ID');
-    $ID->setAttribute('schemeID', $schemeID);
-    $ID->setAttribute('schemeName', 'CandidateProfileID');
-    $ID->setAttribute('schemeAgencyName', $schemeAgencyName);
-    $ID->setAttribute('schemeVersionID', '1.0');
-    $CandidateProfile->appendChild($ID);
+    $ID->setAttribute('scheme_id', $scheme_id);
+    $ID->setAttribute('scheme_name', 'CandidateProfileID');
+    $ID->setAttribute('scheme_agency_name', $scheme_agency_name);
+    $ID->setAttribute('scheme_version_id', '1.0');
+    $candidate_profile->appendChild($ID);
 
     // user picture.
     $fs = get_file_storage();
-    $imgTypes = array('png', 'jpg', 'jpeg');
+    $img_types = array('png', 'jpg', 'jpeg');
     $i = 0;
     do {
-        $file = $fs->get_file(context_user::instance($USER->id)->id, 'user', 'icon', 0, '/', 'f3.'.$imgTypes[$i]);
+        $file = $fs->get_file(context_user::instance($USER->id)->id, 'user', 'icon', 0, '/', 'f3.'.$img_types[$i]);
         $i++;
-    } while (!$file && $i < count($imgTypes));
+    } while (!$file && $i < count($img_types));
     if ($file) {
         $base64content = base64_encode('data:'.$file->get_mimetype().';base64,'.base64_encode($file->get_content())); // double encoding!!!!!
-        europassAddAttachment($dom, $CandidateProfile, $base64content, 'photo', 'ProfilePicture');
+        europass_add_attachment($dom, $candidate_profile, $base64content, 'photo', 'ProfilePicture');
     };
 
     // personal information
-    $ExecutiveSummary = $dom->createElement('hr:ExecutiveSummary');
-    $ExecutiveSummary->appendChild($dom->createTextNode(clean_html_to_plain_text($resume->cover)));
-    $CandidateProfile->appendChild($ExecutiveSummary);
+    $executive_summary = $dom->createElement('hr:executive_summary');
+    $executive_summary->appendChild($dom->createTextNode(clean_html_to_plain_text($resume->cover)));
+    $candidate_profile->appendChild($executive_summary);
 
     // WorkExperienceList / Employment history.
     $employments = $DB->get_records('block_exaportresume_employ', array("resume_id" => $resume->id), 'sorting');
-//    $workexperiencelist = europass_xml_employers_educations($dom, 'WorkExperience', $resume->employments);
-    $EmploymentHistory = $dom->createElement('EmploymentHistory');
+    // $workexperiencelist = europass_xml_employers_educations($dom, 'WorkExperience', $resume->employments);
+    $executive_summary = $dom->createElement('executive_summary');
     foreach ($employments as $employment) {
-        $EmployerHistory = $dom->createElement('EmployerHistory');
+        $employer_history = $dom->createElement('employer_history');
         // title
-        $OrganizationName = $dom->createElement('hr:OrganizationName');
+        $organization_name = $dom->createElement('hr:organization_name');
         $text = $dom->createTextNode(clean_for_external_xml($employment->employer));
-        $OrganizationName->appendChild($text);
-        $EmployerHistory->appendChild($OrganizationName);
+        $organization_name->appendChild($text);
+        $employer_history->appendChild($organization_name);
         // address
         $address = clean_for_external_xml($employment->employeraddress);
-        $OrganizationContact = $dom->createElement('OrganizationContact');
-        $Communication = $dom->createElement('Communication');
-        $Address = $dom->createElement('Address');
+        $organization_contact = $dom->createElement('organization_contact');
+        $communication = $dom->createElement('communication');
+        $address = $dom->createElement('address');
         $text = $dom->createTextNode($address);
-        $Address->appendChild($text);
-        $Communication->appendChild($Address);
-        $OrganizationContact->appendChild($Communication);
-        $EmployerHistory->appendChild($OrganizationContact);
+        $address->appendChild($text);
+        $communication->appendChild($address);
+        $organization_contact->appendChild($communication);
+        $employer_history->appendChild($organization_contact);
 
-        $PositionHistory = $dom->createElement('PositionHistory');
-        $PositionTitle = $dom->createElement('PositionTitle');
-        $PositionTitle->setAttribute('typeCode', 'FREETEXT');
+        $position_history = $dom->createElement('position_history');
+        $position_title = $dom->createElement('position_title');
+        $position_title->setAttribute('typeCode', 'FREETEXT');
         $text = $dom->createTextNode(clean_for_external_xml($employment->jobtitle));
-        $PositionTitle->appendChild($text);
-        $PositionHistory->appendChild($PositionTitle);
-        $EmploymentPeriod = $dom->createElement('eures:EmploymentPeriod');
+        $position_title->appendChild($text);
+        $position_history->appendChild($position_title);
+        $employment_period = $dom->createElement('eures:employment_period');
         // start date
-        $date = getEuropassDate($employment->startdate);
+        $date = get_europass_date($employment->startdate);
         if ($date) {
-            $StartDate = $dom->createElement('eures:StartDate');
-            $FormattedDateTime = $dom->createElement('hr:FormattedDateTime');
+            $start_date = $dom->createElement('eures:start_date');
+            $formatted_date_time = $dom->createElement('hr:formatted_date_time');
             $text = $dom->createTextNode($date);
-            $FormattedDateTime->appendChild($text);
-            $StartDate->appendChild($FormattedDateTime);
-            $EmploymentPeriod->appendChild($StartDate);
+            $formatted_date_time->appendChild($text);
+            $start_date->appendChild($formatted_date_time);
+            $employment_period->appendChild($start_date);
         }
         // end date
         if ($employment->enddate) {
-            $date = getEuropassDate($employment->enddate);
+            $date = get_europass_date($employment->enddate);
             if ($date) {
-                $EndDate = $dom->createElement('eures:EndDate');
-                $FormattedDateTime = $dom->createElement('hr:FormattedDateTime');
+                $end_date = $dom->createElement('eures:end_date');
+                $formatted_date_time = $dom->createElement('hr:formatted_date_time');
                 $text = $dom->createTextNode($date);
-                $FormattedDateTime->appendChild($text);
-                $EndDate->appendChild($FormattedDateTime);
-                $EmploymentPeriod->appendChild($EndDate);
+                $formatted_date_time->appendChild($text);
+                $end_date->appendChild($formatted_date_time);
+                $employment_period->appendChild($end_date);
             }
             $current = 'false';
         } else {
             $current = 'true';
         }
         // current
-        $CurrentIndicator = $dom->createElement('hr:CurrentIndicator');
+        $current_indicator = $dom->createElement('hr:current_indicator');
         $text = $dom->createTextNode($current);
-        $CurrentIndicator->appendChild($text);
-        $EmploymentPeriod->appendChild($CurrentIndicator);
-        $PositionHistory->appendChild($EmploymentPeriod);
+        $current_indicator->appendChild($text);
+        $employment_period->appendChild($current_indicator);
+        $position_history->appendChild($employment_period);
         // description
-        $Description = $dom->createElement('oa:Description');
+        $description = $dom->createElement('oa:description');
         $text = $dom->createTextNode(clean_for_external_xml($employment->positiondescription));
-        $Description->appendChild($text);
-        $PositionHistory->appendChild($Description);
+        $description->appendChild($text);
+        $position_history->appendChild($description);
 
-        $EmployerHistory->appendChild($PositionHistory);
+        $employer_history->appendChild($position_history);
 
-        $EmploymentHistory->appendChild($EmployerHistory);
+        $executive_summary->appendChild($employer_history);
     }
-    $CandidateProfile->appendChild($EmploymentHistory);
+    $candidate_profile->appendChild($executive_summary);
 
     // EducationList / Education history.
     $educations = $DB->get_records('block_exaportresume_edu', array("resume_id" => $resume->id), 'sorting');
-//    [id] => 1
-//            [resume_id] => 1
-//            [startdate] => marth 2010
-//            [enddate] => april 2010
-//            [institution] => Education 1
-//            [institutionaddress] => address1
-//    [qualtype] => type1
-//    [qualname] => my title name1
-//    [qualdescription] => description of qualification 1
-//            [sorting] => 10
-    $EducationHistory = $dom->createElement('EducationHistory');
+    //[id] => 1
+            // [resume_id] => 1
+            // [startdate] => marth 2010
+            // [enddate] => april 2010
+            // [institution] => Education 1
+            // [institutionaddress] => address1
+    // [qualtype] => type1
+    // [qualname] => my title name1
+    // [qualdescription] => description of qualification 1
+            // [sorting] => 10
+    $education_history = $dom->createElement('education_history');
     foreach ($educations as $education) {
-        $EducationOrganizationAttendance = $dom->createElement('EducationOrganizationAttendance');
+        $education_organization_attendance = $dom->createElement('education_organization_attendance');
         // title
-        $OrganizationName = $dom->createElement('hr:OrganizationName');
+        $organization_name = $dom->createElement('hr:organization_name');
         $text = $dom->createTextNode(clean_for_external_xml($education->institution));
-        $OrganizationName->appendChild($text);
-        $EducationOrganizationAttendance->appendChild($OrganizationName);
+        $organization_name->appendChild($text);
+        $education_organization_attendance->appendChild($organization_name);
         // address
         $address = clean_for_external_xml($education->institutionaddress);
-        $OrganizationContact = $dom->createElement('OrganizationContact');
-        $Communication = $dom->createElement('Communication');
-        $Address = $dom->createElement('Address');
+        $organization_contact = $dom->createElement('organization_contact');
+        $communication = $dom->createElement('communication');
+        $address = $dom->createElement('address');
         $text = $dom->createTextNode($address);
-        $Address->appendChild($text);
-        $Communication->appendChild($Address);
-        $OrganizationContact->appendChild($Communication);
-        $EducationOrganizationAttendance->appendChild($OrganizationContact);
+        $address->appendChild($text);
+        $communication->appendChild($address);
+        $organization_contact->appendChild($communication);
+        $education_organization_attendance->appendChild($organization_contact);
 
-        $EducationDegree = $dom->createElement('EducationDegree');
-        $DegreeName = $dom->createElement('hr:DegreeName');
+        $education_degree = $dom->createElement('education_degree');
+        $degree_name = $dom->createElement('hr:degree_name');
         $text = $dom->createTextNode(clean_for_external_xml($education->qualtype));
-        $DegreeName->appendChild($text);
-        $EducationDegree->appendChild($DegreeName);
+        $degree_name->appendChild($text);
+        $education_degree->appendChild($degree_name);
 
-        $FinalGrade = $dom->createElement('FinalGrade');
-        $ScoreText = $dom->createElement('hr:ScoreText');
+        $final_grade = $dom->createElement('final_grade');
+        $score_ext = $dom->createElement('hr:score_ext');
         $text = $dom->createTextNode(clean_for_external_xml($education->qualname));
-        $ScoreText->appendChild($text);
-        $FinalGrade->appendChild($ScoreText);
-        $EducationDegree->appendChild($FinalGrade);
+        $score_ext->appendChild($text);
+        $final_grade->appendChild($score_ext);
+        $education_degree->appendChild($final_grade);
 
-        $OccupationalSkillsCovered = $dom->createElement('OccupationalSkillsCovered');
+        $occupational_skills_covered = $dom->createElement('occupational_skills_covered');
         $text = $dom->createTextNode(clean_for_external_xml($education->qualdescription));
-        $OccupationalSkillsCovered->appendChild($text);
-        $EducationDegree->appendChild($OccupationalSkillsCovered);
-        $EducationOrganizationAttendance->appendChild($EducationDegree);
+        $occupational_skills_covered->appendChild($text);
+        $education_degree->appendChild($occupational_skills_covered);
+        $education_organization_attendance->appendChild($education_degree);
 
-        $AttendancePeriod = $dom->createElement('AttendancePeriod');
+        $attendance_period = $dom->createElement('attendance_period');
         // start date
-        $date = getEuropassDate($education->startdate);
+        $date = get_europass_date($education->startdate);
         if ($date) {
-            $StartDate = $dom->createElement('StartDate');
-            $FormattedDateTime = $dom->createElement('hr:FormattedDateTime');
+            $start_date = $dom->createElement('start_date');
+            $formatted_date_time = $dom->createElement('hr:formatted_date_time');
             $text = $dom->createTextNode($date);
-            $FormattedDateTime->appendChild($text);
-            $StartDate->appendChild($FormattedDateTime);
-            $AttendancePeriod->appendChild($StartDate);
+            $formatted_date_time->appendChild($text);
+            $start_date->appendChild($formatted_date_time);
+            $attendance_period->appendChild($start_date);
         }
         // end date
         if ($education->enddate) {
-            $date = getEuropassDate($education->enddate);
+            $date = get_europass_date($education->enddate);
             if ($date) {
-                $EndDate = $dom->createElement('EndDate');
-                $FormattedDateTime = $dom->createElement('hr:FormattedDateTime');
+                $end_date = $dom->createElement('end_date');
+                $formatted_date_time = $dom->createElement('hr:formatted_date_time');
                 $text = $dom->createTextNode($date);
-                $FormattedDateTime->appendChild($text);
-                $EndDate->appendChild($FormattedDateTime);
-                $AttendancePeriod->appendChild($EndDate);
+                $formatted_date_time->appendChild($text);
+                $end_date->appendChild($formatted_date_time);
+                $attendance_period->appendChild($end_date);
             }
             $current = 'false';
         } else {
             $current = 'true';
         }
         // current
-        $Ongoing = $dom->createElement('Ongoing');
+        $ongoing = $dom->createElement('ongoing');
         $text = $dom->createTextNode($current);
-        $Ongoing->appendChild($text);
-        $AttendancePeriod->appendChild($Ongoing);
-        $EducationOrganizationAttendance->appendChild($AttendancePeriod);
+        $ongoing->appendChild($text);
+        $attendance_period->appendChild($ongoing);
+        $education_organization_attendance->appendChild($attendance_period);
 
-        $EducationHistory->appendChild($EducationOrganizationAttendance);
+        $education_history->appendChild($education_organization_attendance);
 
     }
-    $CandidateProfile->appendChild($EducationHistory);
+    $candidate_profile->appendChild($education_history);
 
     // Skills
     // skills - Career skills
     if ($resume->skillscareers) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscareers'), $resume->skillscareers);
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscareers'), $resume->skillscareers);
     }
     // skills - Academic skills
     if ($resume->skillsacademic) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillsacademic'), $resume->skillsacademic);
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillsacademic'), $resume->skillsacademic);
     }
     // skills - Personal skills
     if ($resume->skillspersonal) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillspersonal'), $resume->skillspersonal);
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillspersonal'), $resume->skillspersonal);
     }
     // skills - Educational standards
     $skillscontent = '';
@@ -1131,100 +1131,100 @@ function europass_xml($resumeid = 0) {
         };
     };
     if ($skillscontent) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscomp'), $skillscontent);
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscomp'), $skillscontent);
     }
 
     // certificates
     $certifications = $DB->get_records('block_exaportresume_certif', array("resume_id" => $resume->id), 'sorting');
     if ($certifications && is_array($certifications)) {
-//        list($sertificationsstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_certif');
-//        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_certif'), '', $sertificationsstring);
-        $Certifications = $dom->createElement('Certifications');
+        // list($sertificationsstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_certif');
+        // europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_certif'), '', $sertificationsstring);
+        $certifications = $dom->createElement('certifications');
         foreach ($certifications as $certification) {
-            $CertificationNode = $dom->createElement('Certification');
-            $CertificationName = $dom->createElement('hr:CertificationName');
+            $certification_node = $dom->createElement('Certification');
+            $certification_name = $dom->createElement('hr:certification_name');
             $text = $dom->createTextNode($certification->title);
-            $CertificationName->appendChild($text);
-            $CertificationNode->appendChild($CertificationName);
-            $date = getEuropassDate($certification->date);
+            $certification_name->appendChild($text);
+            $certification_node->appendChild($certification_name);
+            $date = get_europass_date($certification->date);
             if ($date) {
-                $FirstIssuedDate = $dom->createElement('eures:FirstIssuedDate');
-                $FormattedDateTime = $dom->createElement('hr:FormattedDateTime');
+                $first_issued_date = $dom->createElement('eures:first_issued_date');
+                $formatted_date_time = $dom->createElement('hr:formatted_date_time');
                 $text = $dom->createTextNode($date);
-                $FormattedDateTime->appendChild($text);
-                $FirstIssuedDate->appendChild($FormattedDateTime);
-                $CertificationNode->appendChild($FirstIssuedDate);
+                $formatted_date_time->appendChild($text);
+                $first_issued_date->appendChild($formatted_date_time);
+                $certification_node->appendChild($first_issued_date);
             }
-            $Description = $dom->createElement('oa:Description');
+            $description = $dom->createElement('oa:description');
             $text = $dom->createTextNode($certification->description);
-            $Description->appendChild($text);
-            $CertificationNode->appendChild($Description);
+            $description->appendChild($text);
+            $certification_node->appendChild($description);
             // attachment
-            europass_xml_attachFile($dom, $CandidateProfile, $CertificationNode, 'certif', [$certification->id], 'DOC');
-            $Certifications->appendChild($CertificationNode);
+            europass_xml_attachfile($dom, $candidate_profile, $certification_node, 'certif', [$certification->id], 'DOC');
+            $certifications->appendChild($certification_node);
         }
-        $CandidateProfile->appendChild($Certifications);
+        $candidate_profile->appendChild($certifications);
     }
 
     // Books, publications.
     $publications = $DB->get_records('block_exaportresume_public', array("resume_id" => $resume->id), 'sorting');
     if ($publications && is_array($publications)) {
-//        list($publicationsstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_public');
-//        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_public'), '', $publicationsstring);
-        $PublicationHistory = $dom->createElement('PublicationHistory');
+        // list($publicationsstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_public');
+        // europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_public'), '', $publicationsstring);
+        $publication_history = $dom->createElement('publication_history');
         foreach ($publications as $publication) {
-            $PublicationNode = $dom->createElement('Publication');
-            $FormattedPublicationDescription = $dom->createElement('hr:FormattedPublicationDescription');
+            $publication_node = $dom->createElement('Publication');
+            $formatted_publication_description = $dom->createElement('hr:formatted_publication_description');
             $text = $dom->createTextNode(clean_for_external_xml($publication->contributiondetails));
-            $FormattedPublicationDescription->appendChild($text);
-            $PublicationNode->appendChild($FormattedPublicationDescription);
+            $formatted_publication_description->appendChild($text);
+            $publication_node->appendChild($formatted_publication_description);
             $Title = $dom->createElement('Title');
             $text = $dom->createTextNode(clean_for_external_xml($publication->title));
             $Title->appendChild($text);
-            $PublicationNode->appendChild($Title);
-            $Reference = $dom->createElement('Reference');
+            $publication_node->appendChild($Title);
+            $reference = $dom->createElement('reference');
             $text = $dom->createTextNode(clean_for_external_xml($publication->contribution));
-            $Reference->appendChild($text);
-            $PublicationNode->appendChild($Reference);
-            $date = getEuropassDate($publication->date, 'Y');
+            $reference->appendChild($text);
+            $publication_node->appendChild($reference);
+            $date = get_europass_date($publication->date, 'Y');
             if ($date) {
-                $Year = $dom->createElement('Year');
+                $year = $dom->createElement('year');
                 $text = $dom->createTextNode($date);
-                $Year->appendChild($text);
-                $PublicationNode->appendChild($Year);
+                $year->appendChild($text);
+                $publication_node->appendChild($year);
             }
             if ($publication->url) {
-                $DOI = $dom->createElement('DOI');
+                $doi = $dom->createElement('doi');
                 $Link = $dom->createElement('Link');
                 $text = $dom->createTextNode($publication->url);
                 $Link->appendChild($text);
-                $DOI->appendChild($Link);
-                $PublicationNode->appendChild($DOI);
+                $doi->appendChild($Link);
+                $publication_node->appendChild($doi);
             }
-            europass_xml_attachFile($dom, $CandidateProfile, $PublicationNode, 'public', [$publication->id], 'DOC');
-            $PublicationHistory->appendChild($PublicationNode);
+            europass_xml_attachfile($dom, $candidate_profile, $publication_node, 'public', [$publication->id], 'DOC');
+            $publication_history->appendChild($publication_node);
         }
-        $CandidateProfile->appendChild($PublicationHistory);
+        $candidate_profile->appendChild($publication_history);
     }
 
     // Memberships.
     list($mbrshipstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_mbrship');
     if ($mbrshipstring) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_mbrship'), '', $mbrshipstring);
-        // europass_xml_attachFile($dom, $CandidateProfile, $PublicationNode, 'public', [$publication->id], 'DOC'); files?
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_mbrship'), '', $mbrshipstring);
+        // europass_xml_attachfile($dom, $candidate_profile, $publication_node, 'public', [$publication->id], 'DOC'); files?
     }
     // Goals.
     // goals - Personal goals
     if ($resume->goalspersonal) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalspersonal'), $resume->goalspersonal);
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalspersonal'), $resume->goalspersonal);
     }
     // goals - Academic goals
     if ($resume->goalsacademic) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalsacademic'), $resume->goalsacademic);
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalsacademic'), $resume->goalsacademic);
     }
     // goals - Careers goals
     if ($resume->goalscareers) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalscareers'), $resume->goalscareers);
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalscareers'), $resume->goalscareers);
     }
     // goals - Educational standards
     $goalsstring = '';
@@ -1236,26 +1236,26 @@ function europass_xml($resumeid = 0) {
         };
     };
     if ($goalsstring) {
-        europassAddOthersPartToCandiadateProfile($dom, $CandidateProfile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalscomp'), $goalsstring);
+        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalscomp'), $goalsstring);
     }
 
     // Interests.
     if ($resume->interests) {
-        $HobbiesAndInterests = $dom->createElement('HobbiesAndInterests');
-        $HobbyOrInterest = $dom->createElement('HobbyOrInterest');
+        $hobbies_and_interests = $dom->createElement('hobbies_and_interests');
+        $hobby_or_interest = $dom->createElement('hobby_or_interest');
         $Title = $dom->createElement('Title');
         $text = $dom->createTextNode(block_exaport_get_string('resume_interests'));
         $Title->appendChild($text);
-        $HobbyOrInterest->appendChild($Title);
-        $Description = $dom->createElement('Description');
+        $hobby_or_interest->appendChild($Title);
+        $description = $dom->createElement('description');
         $text = $dom->createTextNode($resume->interests);
-        $Description->appendChild($text);
-        $HobbyOrInterest->appendChild($Description);
-        $HobbiesAndInterests->appendChild($HobbyOrInterest);
-        $CandidateProfile->appendChild($HobbiesAndInterests);
+        $description->appendChild($text);
+        $hobby_or_interest->appendChild($description);
+        $hobbies_and_interests->appendChild($hobby_or_interest);
+        $candidate_profile->appendChild($hobbies_and_interests);
     }
 
-    $root->appendChild($CandidateProfile);
+    $root->appendChild($candidate_profile);
 
     $dom->appendChild($root);
     $dom->formatOutput = true;
@@ -1267,11 +1267,11 @@ function europass_xml($resumeid = 0) {
 }
 
 function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $sectionTitle, $title, $description) {
-    $Others = $dom->createElement('Others');
+    $others = $dom->createElement('others');
     $Title = $dom->createElement('Title');
     $text = $dom->createTextNode($sectionTitle);
     $Title->appendChild($text);
-    $Others->appendChild($Title);
+    $others->appendChild($Title);
     $Other = $dom->createElement('Other');
     if ($title) {
         $Title = $dom->createElement('Title');
@@ -1279,19 +1279,19 @@ function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $se
         $Title->appendChild($text);
         $Other->appendChild($Title);
     }
-    $DescriptionNode = $dom->createElement('Description');
+    $DescriptionNode = $dom->createElement('description');
     $text = $dom->createTextNode($description);
     $DescriptionNode->appendChild($text);
     $Other->appendChild($DescriptionNode);
 
-    $Others->appendChild($Other);
+    $others->appendChild($Other);
 
-    $candidateProfile->appendChild($Others);
+    $candidateProfile->appendChild($others);
 }
 
-function getEuropassDate($stringDate, $format = 'Y-m-d') {
+function get_europass_date($string_date, $format = 'Y-m-d') {
     try {
-        $date = new \DateTime($stringDate);
+        $date = new \DateTime($string_date);
         $date = $date->format($format);
     } catch (\Exception $e) {
         $date = '';
@@ -1299,36 +1299,36 @@ function getEuropassDate($stringDate, $format = 'Y-m-d') {
     return $date;
 }
 
-function europassAddAttachment(&$dom, &$candidateProfile, $fileContent, $fileType, $instructions, $filename = '', $description = '', $documentTitle = '', $mimecode = '') {
-    $attachment = $dom->createElement('eures:Attachment');
+function europass_add_attachment(&$dom, &$candidateProfile, $file_content, $fileType, $instructions, $filename = '', $description = '', $documentTitle = '', $mimecode = '') {
+    $attachment = $dom->createElement('eures:attachment');
 
-    $fileContentNode = $dom->createElement('oa:EmbeddedData');
+    $file_content_node = $dom->createElement('oa:embedded_data');
     if ($mimecode) {
-        $fileContentNode->setAttribute('mimeCode', $mimecode);
+        $file_content_node->setAttribute('mimeCode', $mimecode);
     }
     if ($filename) {
-        $fileContentNode->setAttribute('filename', $filename);
+        $file_content_node->setAttribute('filename', $filename);
     }
-    $text = $dom->createTextNode($fileContent);
-    $fileContentNode->appendChild($text);
-    $attachment->appendChild($fileContentNode);
+    $text = $dom->createTextNode($file_content);
+    $file_content_node->appendChild($text);
+    $attachment->appendChild($file_content_node);
 
-    $fileTypeNode = $dom->createElement('oa:FileType');
+    $file_type_node = $dom->createElement('oa:file_type');
     $text = $dom->createTextNode($fileType);
-    $fileTypeNode->appendChild($text);
-    $attachment->appendChild($fileTypeNode);
+    $file_type_node->appendChild($text);
+    $attachment->appendChild($file_type_node);
 
-    $instructionsNode = $dom->createElement('hr:Instructions');
+    $instructions_node = $dom->createElement('hr:Instructions');
     $text = $dom->createTextNode($instructions);
-    $instructionsNode->appendChild($text);
-    $attachment->appendChild($instructionsNode);
+    $instructions_node->appendChild($text);
+    $attachment->appendChild($instructions_node);
 
-    $additionalParams = array(
-        'filename' => 'oa:FileName',
-        'description' => 'oa:Description',
+    $additional_params = array(
+        'filename' => 'oa:file_name',
+        'description' => 'oa:description',
         'documentTitle' => 'hr:DocumentTitle',
     );
-    foreach ($additionalParams as $param => $nodeName) {
+    foreach ($additional_params as $param => $nodeName) {
         if (${''.$param}) {
             $node = $dom->createElement($nodeName);
             $text = $dom->createTextNode(${''.$param});
@@ -1340,16 +1340,16 @@ function europassAddAttachment(&$dom, &$candidateProfile, $fileContent, $fileTyp
     $candidateProfile->appendChild($attachment);
 }
 
-function europassFillCommunicationItem(&$dom, &$parenNode, $channelCode, $nodes) {
+function europass_fill_communication_item(&$dom, &$paren_node, $channel_code, $nodes) {
     $inserted = false;
-    $Communication = $dom->createElement('Communication'); // new Communicate node!
+    $communication = $dom->createElement('communication'); // new Communicate node!
     $i = 0;
     foreach ($nodes as $nodeName => $value) {
         if ($value) {
             $node = $dom->createElement($nodeName);
             $text = $dom->createTextNode($value);
             $node->appendChild($text);
-            $Communication->appendChild($node);
+            $communication->appendChild($node);
             $i++;
         }
     }
@@ -1358,19 +1358,19 @@ function europassFillCommunicationItem(&$dom, &$parenNode, $channelCode, $nodes)
     }
     if ($inserted) {
         $node = $dom->createElement('ChannelCode');
-        $text = $dom->createTextNode($channelCode);
+        $text = $dom->createTextNode($channel_code);
         $node->appendChild($text);
-        $Communication->appendChild($node);
-        $parenNode->appendChild($Communication);
+        $communication->appendChild($node);
+        $paren_node->appendChild($communication);
     }
 }
 
-function europassFillSubElementText(&$dom, &$parenNode, $nodeName, $value) {
+function europass_fill_sub_element_text(&$dom, &$paren_node, $nodeName, $value) {
     if ($value) {
         $node = $dom->createElement($nodeName);
         $text = $dom->createTextNode($value);
         $node->appendChild($text);
-        $parenNode->appendChild($node);
+        $paren_node->appendChild($node);
     }
 }
 
@@ -1424,7 +1424,7 @@ function get_date_params_from_string($datestring) {
     return $dateparams;
 }
 
-// Attachment files
+// attachment files
 /**
  * @param DOMDocument $dom
  * @param DOMElement $candidateProfile
@@ -1435,7 +1435,7 @@ function get_date_params_from_string($datestring) {
  * @return mixed
  * @throws coding_exception
  */
-function europass_xml_attachFile(&$dom, &$candidateProfile, &$parentNode, $type, $ids = array(), $instructions = 'ProfilePicture') {
+function europass_xml_attachfile(&$dom, &$candidateProfile, &$parentNode, $type, $ids = array(), $instructions = 'ProfilePicture') {
     // non implemented yet in new Europass?
     return true;
 
@@ -1481,62 +1481,62 @@ function europass_xml_attachFile(&$dom, &$candidateProfile, &$parentNode, $type,
 
     if (count($files) > 0) {
 
-/*        if ($candidateProfile->getElementsByTagName("eures:Attachment")->length == 0) {
-            $Attachment = $dom->createElement('eures:Attachment');
-            $candidateProfile->appendChild($Attachment);
+        /* if ($candidateProfile->getElementsByTagName("eures:attachment")->length == 0) {
+            $attachment = $dom->createElement('eures:attachment');
+            $candidateProfile->appendChild($attachment);
         } else {
-            $Attachment = $candidateProfile->getElementsByTagName('eures:Attachment')[0];
+            $attachment = $candidateProfile->getElementsByTagName('eures:attachment')[0];
         }*/
 
         foreach ($files as $file) {
-            $fileNameID = '';
+            $file_name_id = '';
 
             if ($parentNode) {
                 // Insert reference to the Parent node
-                $AttachmentReference = $dom->createElement('eures:AttachmentReference');
-                $Description = $dom->createElement('oa:Description');
+                $attachment_reference = $dom->createElement('eures:attachment_reference');
+                $description = $dom->createElement('oa:description');
                 $text = $dom->createTextNode('1111111111');
-                $Description->appendChild($text);
-                $AttachmentReference->appendChild($Description);
+                $description->appendChild($text);
+                $attachment_reference->appendChild($description);
 
-                $XPath = $dom->createElement('hr:XPath');
-                $randStr = substr(str_shuffle(MD5(microtime())), 0, 5);
-                $fileNameID = $randStr . '_' . $file->get_filename();
-                $xpathFull = '/Candidate/CandidateProfile/Attachment/oa:FileName[text()=\'' . $fileNameID . '\']';
-                $text = $dom->createTextNode($xpathFull);
-                $XPath->appendChild($text);
-                $AttachmentReference->appendChild($XPath);
-                $parentNode->appendChild($AttachmentReference);
+                $x_path = $dom->createElement('hr:x_path');
+                $rand_str = substr(str_shuffle(MD5(microtime())), 0, 5);
+                $file_name_id = $rand_str . '_' . $file->get_filename();
+                $xpath_full = '/Candidate/candidate_profile/attachment/oa:file_name[text()=\'' . $file_name_id . '\']';
+                $text = $dom->createTextNode($xpath_full);
+                $x_path->appendChild($text);
+                $attachment_reference->appendChild($x_path);
+                $parentNode->appendChild($attachment_reference);
             }
 
             // insert attachment main data
-            $Attachment = $dom->createElement('eures:Attachment');
+            $attachment = $dom->createElement('eures:attachment');
 
-            $EmbeddedData = $dom->createElement('oa:EmbeddedData');
-            $EmbeddedDataContent = base64_encode($file->get_content());
-            $EmbeddedDataContentNode = $dom->createTextNode($EmbeddedDataContent);
-            $EmbeddedDataContentNode->appendChild($EmbeddedDataContentNode);
-            $EmbeddedData->appendChild($EmbeddedDataContentNode);
-            $Attachment->appendChild($EmbeddedData);
+            $embedded_data = $dom->createElement('oa:embedded_data');
+            $embedded_data_content = base64_encode($file->get_content());
+            $embedded_data_content_node = $dom->createTextNode($embedded_data_content);
+            $embedded_data_content_node->appendChild($embedded_data_content_node);
+            $embedded_data->appendChild($embedded_data_content_node);
+            $attachment->appendChild($embedded_data);
 
-            $FileType = $dom->createElement('oa:FileType');
+            $file_type = $dom->createElement('oa:file_type');
             $text = $dom->createTextNode('DOC');
-            $FileType->appendChild($text);
-            $Attachment->appendChild($FileType);
+            $file_type->appendChild($text);
+            $attachment->appendChild($file_type);
 
             $Instructions = $dom->createElement('hr:Instructions');
             $text = $dom->createTextNode($instructions);
             $Instructions->appendChild($text);
-            $Attachment->appendChild($Instructions);
+            $attachment->appendChild($Instructions);
 
-            if ($fileNameID) {
-                $FileName = $dom->createElement('oa:FileName');
-                $text = $dom->createTextNode($fileNameID);
-                $FileName->appendChild($text);
-                $Attachment->appendChild($FileName);
+            if ($file_name_id) {
+                $file_name = $dom->createElement('oa:file_name');
+                $text = $dom->createTextNode($file_name_id);
+                $file_name->appendChild($text);
+                $attachment->appendChild($file_name);
             }
 
-            $candidateProfile->appendChild($Attachment);
+            $candidateProfile->appendChild($attachment);
         };
 
     };
@@ -1579,3 +1579,4 @@ function list_for_resume_elements($resumeid, $tablename) {
     return array($itemsstring, $itemsids);
 }
 
+?>

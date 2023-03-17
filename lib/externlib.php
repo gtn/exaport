@@ -82,9 +82,9 @@ function block_exaport_print_extern_item($item, $access) {
     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                     'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
     $intro = format_text($intro);
-    $templateTextToHtml = text_to_html('');
+    $template_text_to_html = text_to_html('');
     $intro = trim($intro);
-    if ($intro && $intro == $templateTextToHtml && strpos($item->intro, '<iframe') !== false) {
+    if ($intro && $intro == $template_text_to_html && strpos($item->intro, '<iframe') !== false) {
         // TODO: test - if the intro is empty - it will have wrapper template (Moodle api)
         // in this case it is possible that it is cleaned media link. Get it again
         $intro = $item->intro;

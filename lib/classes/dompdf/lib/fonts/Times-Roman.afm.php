@@ -223,7 +223,7 @@
   'isUnicode' => false,
   'FontName' => 'Times-Roman',
   'FullName' => 'Times Roman',
-  'FamilyName' => 'Times',
+  'family_name' => 'Times',
   'Weight' => 'Roman',
   'ItalicAngle' => '0',
   'IsFixedPitch' => 'false',

@@ -42,7 +42,7 @@ class temporary_form extends block_exaport_moodleform {
 
         $mform->addElement('editor', $propertyname, 'temp', null,
                 array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-        $mform->addExaportHelpButton($propertyname, 'forms.temp.'.$propertyname);
+        $mform->add_exaport_help_button($propertyname, 'forms.temp.'.$propertyname);
     }
 }
 
@@ -549,7 +549,7 @@ function get_form_cvinfo($id, $blockdata = array()) {
         }
         $content .= '</td></tr>';
     }
-    // Certifications, accreditations and awards
+    // certifications, accreditations and awards
     $usercertifs = block_exaport_resume_get_certificates(@$resume->id);
     if ($usercertifs) {
         $content .= '<tr><th>';
@@ -605,8 +605,8 @@ function get_form_cvinfo($id, $blockdata = array()) {
     $content .= '<label>'.get_string('cofigureblock_cvinfo_goals', 'block_exaport').'</label>';
     $content .= '</th></tr>';
     $content .= '<tr><td>';
-    $goalTypes = array('personal', 'academic', 'careers');
-    foreach ($goalTypes as $goal) {
+    $goal_types = array('personal', 'academic', 'careers');
+    foreach ($goal_types as $goal) {
         $content .= '<div class="add-item">';
         $content .= '<label>';
         $content .= '<input class="add-cvitem-checkbox" data-cvtype="goals'.$goal.'" type="checkbox" name="add_goal_items[]" value="1" /> ';
@@ -620,8 +620,8 @@ function get_form_cvinfo($id, $blockdata = array()) {
     $content .= '<label>'.get_string('cofigureblock_cvinfo_skills', 'block_exaport').'</label>';
     $content .= '</th></tr>';
     $content .= '<tr><td>';
-    $skillTypes = array('personal', 'academic', 'careers');
-    foreach ($skillTypes as $skill) {
+    $skill_types = array('personal', 'academic', 'careers');
+    foreach ($skill_types as $skill) {
         $content .= '<div class="add-item">';
         $content .= '<label>';
         $content .= '<input class="add-cvitem-checkbox" data-cvtype="skills'.$skill.'" type="checkbox" name="add_skill_items[]" value="1" /> ';
@@ -666,10 +666,10 @@ function get_form_media($id, $blockdata = array()) {
     $content .= '<div for="block_title" class="not-empty-check">'.block_exaport_get_string('titlenotemtpy').'</div>';
     $content .= '</td></tr>';
     $content .= '<tr><th>';
-    $helpicon = $OUTPUT->pix_icon('help', get_string('mediacontent', 'block_exaport'), 'moodle', array('class'=>'iconhelp'));
+    $helpicon = $OUTPUT->pix_icon('help', get_string('mediacontent', 'block_exaport'), 'moodle', array('class' => 'iconhelp'));
     $content .= '<label for="mediacontent">'.get_string('mediacontent', 'block_exaport').'</label>
                     &nbsp;<span class="exaport-helpicon"
-                            data-toggle="gtn-help-modal" 
+                            data-toggle="gtn-help-modal"
                             data-title="'.block_exaport_get_string('what_is_embed_code_title').'"
                             data-content="'.block_exaport_get_string('what_is_embed_code_content').'">'.$helpicon.'</span>';
     $content .= '</th></tr>';

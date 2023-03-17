@@ -27,7 +27,7 @@ class block_exaport_scorm_upload_form extends block_exaport_moodleform {
         $mform->addElement('header', 'general', get_string('import', 'block_exaport'));
 
         $mform->addElement('filepicker', 'attachment', get_string('file'), null, array('accepted_types' => '*'));
-        $mform->addExaportHelpButton('attachment', 'forms.scorm.attachment');
+        $mform->add_exaport_help_button('attachment', 'forms.scorm.attachment');
         $this->add_action_buttons();
 
         $mform->addElement('hidden', 'courseid');

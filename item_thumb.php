@@ -23,7 +23,7 @@ $access = optional_param('access', '', PARAM_TEXT);
 $imageindex = optional_param('imindex', '', PARAM_INT);
 
 $ispdf = optional_param('ispdf', 0, PARAM_INT);
-$isforpdf = false;
+$is_for_pdf = false;
 $pdfuserid = 0;
 if ($ispdf) {
     $vhash = optional_param('vhash', 0, PARAM_RAW);
@@ -31,7 +31,7 @@ if ($ispdf) {
     $pdfuserid = optional_param('uid', 0, PARAM_INT);
     $view = $DB->get_record('block_exaportview', ['id' => $vid]);
     if ($view && $view->hash == $vhash && $pdfuserid > 0) {
-        $isforpdf = true;
+        $is_for_pdf = true;
     }
 }
 
@@ -39,7 +39,6 @@ $item = null;
 
 // Thumbnails for BackEnd (editing the view part).
 if ($access == '') {
-    // echo $access;
     if ($sharable = block_exaport_can_user_access_shared_item($USER->id, $itemid)) {
         // Get thumbnails if item was shared for current user.
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
@@ -49,7 +48,7 @@ if ($access == '') {
     }
 } else {
     // Checking access to item by access to view.
-    if (!$view = block_exaport_get_view_from_access($access, $isforpdf, $pdfuserid)) {
+    if (!$view = block_exaport_get_view_from_access($access, $is_for_pdf, $pdfuserid)) {
         die("view not found");
     }
     $viewid = $view->id;
@@ -80,27 +79,27 @@ switch ($item->type) {
         // Serve file.
         if ($file && ($imageindex || $imageindex === 0  )) {
             $filevalues = array_values($file);
-            $singleFile = $filevalues[$imageindex];
-            if ($singleFile && $singleFile->is_valid_image()) {
-                send_stored_file($singleFile, 1);
+            $single_file = $filevalues[$imageindex];
+            if ($single_file && $single_file->is_valid_image()) {
+                send_stored_file($single_file, 1);
                 exit;
             }
-            $file = $singleFile;
+            $file = $single_file;
         } else if ($file) {
             if (is_array($file)) {
                 if (count($file) > 1) {
                     $mixedimage = block_exaport_mix_images($file);
-                    //$file->is_valid_image()
-                    //send_stored_file($file, 1);  // !!!!!!!!!!!!!!! may be make composite of images?
+                    // $file->is_valid_image()
+                    // send_stored_file($file, 1);  // !!!!!!!!!!!!!!! may be make composite of images?
                     echo 'mixed image';
                     exit;
                 } else {
-                    $singleFile = reset($file);
-                    if ($singleFile->is_valid_image()) {
-                        send_stored_file($singleFile, 1);
+                    $single_file = reset($file);
+                    if ($single_file->is_valid_image()) {
+                        send_stored_file($single_file, 1);
                         exit;
                     }
-                    $file = $singleFile;
+                    $file = $single_file;
                 }
             } else {
                 if ($file->is_valid_image()) {

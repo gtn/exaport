@@ -1,5 +1,19 @@
 <?php
-// …
+// This file is part of Exabis Eportfolio (extension for Moodle)
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 namespace block_exaport\privacy;
 
@@ -23,15 +37,15 @@ class provider implements
     core_userlist_provider,
     \core_privacy\local\request\plugin\provider {
 
-    public static function get_metadata(collection $collection): collection
-    {
+    public static function get_metadata(collection $collection): collection{
+
         // block_exaportuser
         $collection->add_database_table('block_exaportuser', [
             'user_id' => 'privacy:metadata:block_exaportuser:user_id',
             'description' => 'privacy:metadata:block_exaportuser:description',
             // epop: needed?
-//            'oezinstall' => '',
-//            'import_oez_tstamp' => '',
+// 'oezinstall' => '',
+// 'import_oez_tstamp' => '',
             'view_items_layout' => 'privacy:metadata:block_exaportuser:view_items_layout',
         ], 'privacy:metadata:block_exaportuser');
 
@@ -75,16 +89,16 @@ class provider implements
             'url' => 'privacy:metadata:block_exaportitem:url',
             'intro' => 'privacy:metadata:block_exaportitem:intro',
             // looks like 'attachment' is not used anymore: right? (filestorage is used)
-            //'attachment' => 'privacy:metadata:block_exaportitem:userid',
+            // 'attachment' => 'privacy:metadata:block_exaportitem:userid',
             'timemodified' => 'privacy:metadata:block_exaportitem:timemodified',
             'courseid' => 'privacy:metadata:block_exaportitem:courseid',
             'shareall' => 'privacy:metadata:block_exaportitem:shareall',
             'externaccess' => 'privacy:metadata:block_exaportitem:externaccess',
             'externcomment' => 'privacy:metadata:block_exaportitem:externcomment',
             // epop: needed?
-            //'isoez' => 'privacy:metadata:block_exaportitem:userid',
-            //'beispiel_url' => 'privacy:metadata:block_exaportitem:userid',
-            //'beispiel_angabe' => 'privacy:metadata:block_exaportitem:userid',
+            // 'isoez' => 'privacy:metadata:block_exaportitem:userid',
+            // 'beispiel_url' => 'privacy:metadata:block_exaportitem:userid',
+            // 'beispiel_angabe' => 'privacy:metadata:block_exaportitem:userid',
             'example_url' => 'privacy:metadata:block_exaportitem:example_url',
 
             // fileurl - needed?
@@ -189,8 +203,8 @@ class provider implements
                         INNER JOIN {block_exaportitem} item ON item.courseid = c.instanceid
                         INNER JOIN {block_exaportresume} res ON res.courseid = c.instanceid
                     WHERE cat.userid = ?
-                          OR item.userid = ?                          
-                          OR res.user_id = ?                          
+                          OR item.userid = ?
+                          OR res.user_id = ?
         ';
 
         $params = ['exaport', CONTEXT_COURSE, $userid, $userid, $userid];
@@ -226,46 +240,46 @@ class provider implements
         }
     }
 
-    static function export_resume_list_data(&$resume, $listName, $subcontextName, $fileAreaName, $resumeContext, $user) {
-        $cleanProps = ['id', 'resume_id', 'resumeid', 'sorting'];
-        $fileAreaNameEditor = str_replace('resume_', 'resume_editor_', $fileAreaName);
-        if ($resume->{$listName}) {
-            if (is_array($resume->{$listName})) {
+   public static function export_resume_list_data(&$resume, $list_name, $subcontext_name, $file_area_name, $resume_context, $user) {
+        $clean_props = ['id', 'resume_id', 'resumeid', 'sorting'];
+        $file_area_name_editor = str_replace('resume_', 'resume_editor_', $file_area_name);
+        if ($resume->{$list_name}) {
+            if (is_array($resume->{$list_name})) {
                 $i = 1;
-                foreach ($resume->{$listName} as $itemId => $item) {
-                    foreach ($cleanProps as $prop) {
+                foreach ($resume->{$list_name} as $item_id => $item) {
+                    foreach ($clean_props as $prop) {
                         if (property_exists($item, $prop)) {
                             unset($item->{$prop});
                         }
                     }
-                    $itemData = array($listName => $item);
-                    $contextdata = helper::get_context_data($resumeContext, $user);
-                    $contextdata = (object)array_merge((array)$contextdata, $itemData);
-                    $writer = writer::with_context($resumeContext);
+                    $item_data = array($list_name => $item);
+                    $contextdata = helper::get_context_data($resume_context, $user);
+                    $contextdata = (object)array_merge((array)$contextdata, $item_data);
+                    $writer = writer::with_context($resume_context);
 
-                    $subcontextNameTemp = 'Exabis ePortfolio/Curriculum Vitae/' . $subcontextName . '/_' . $i . '_';
-                    $writer->export_data([$subcontextNameTemp], $contextdata)
-                        ->export_area_files([$subcontextNameTemp], 'block_exaport', $fileAreaName, $itemId);
+                    $subcontext_name_temp = 'Exabis ePortfolio/Curriculum Vitae/' . $subcontext_name . '/_' . $i . '_';
+                    $writer->export_data([$subcontext_name_temp], $contextdata)
+                        ->export_area_files([$subcontext_name_temp], 'block_exaport', $file_area_name, $item_id);
                     $i++;
                 }
-            } elseif (is_string($resume->{$listName})) {
-                $subcontextName = 'Exabis ePortfolio/Curriculum Vitae/' . $subcontextName;
+            } else if (is_string($resume->{$list_name})) {
+                $subcontext_name = 'Exabis ePortfolio/Curriculum Vitae/' . $subcontext_name;
                 // just a string
-                $writer = writer::with_context($resumeContext);
-                $itemData = $writer->rewrite_pluginfile_urls([$subcontextName], 'block_exaport', $fileAreaNameEditor, $resume->id, $resume->{$listName});
-                $itemData = format_text($itemData, FORMAT_HTML);
-                $itemData = array($listName => $itemData);
-                $contextdata = helper::get_context_data($resumeContext, $user);
-                $contextdata = (object)array_merge((array)$contextdata, $itemData);
+                $writer = writer::with_context($resume_context);
+                $item_data = $writer->rewrite_pluginfile_urls([$subcontext_name], 'block_exaport', $file_area_name_editor, $resume->id, $resume->{$list_name});
+                $item_data = format_text($item_data, FORMAT_HTML);
+                $item_data = array($list_name => $item_data);
+                $contextdata = helper::get_context_data($resume_context, $user);
+                $contextdata = (object)array_merge((array)$contextdata, $item_data);
 
-                $writer->export_data([$subcontextName], $contextdata);
-                $writer->export_area_files([$subcontextName], 'block_exaport', $fileAreaNameEditor, $resume->id);
-//                $writer->export_area_files(['Exabis ePortfolio/Curriculum Vitae/'], 'block_exaport', $fileAreaNameEditor, $resume->id);
+                $writer->export_data([$subcontext_name], $contextdata);
+                $writer->export_area_files([$subcontext_name], 'block_exaport', $file_area_name_editor, $resume->id);
+                // $writer->export_area_files(['Exabis ePortfolio/Curriculum Vitae/'], 'block_exaport', $file_area_name_editor, $resume->id);
             }
         }
     }
 
-    static function export_resume_list_related_competencies($resumeid, $type, $subcontextName, $resumeContext, $user) {
+    public static function export_resume_list_related_competencies($resumeid, $type, $subcontext_name, $resume_context, $user) {
         global $DB;
         if (block_exaport_check_competence_interaction()) {
             $comptitles = '';
@@ -277,42 +291,42 @@ class provider implements
                 };
             };
             $comptitles = array('competencies' => $comptitles);
-            $contextdata = helper::get_context_data($resumeContext, $user);
+            $contextdata = helper::get_context_data($resume_context, $user);
             $contextdata = (object)array_merge((array)$contextdata, $comptitles);
-            $writer = writer::with_context($resumeContext);
+            $writer = writer::with_context($resume_context);
 
-            $subcontextName = 'Exabis ePortfolio/Curriculum Vitae/'.$subcontextName;
-            $writer->export_data([$subcontextName], $contextdata);
+            $subcontext_name = 'Exabis ePortfolio/Curriculum Vitae/'.$subcontext_name;
+            $writer->export_data([$subcontext_name], $contextdata);
         }
     }
 
 
-    static function attach_category_artifact_files($categoriesTree, $context, $subcontextName) {
+    public  static function attach_category_artifact_files($categories_tree, $context, $subcontext_name) {
         $writer = writer::with_context($context);
 
-        foreach ($categoriesTree as $catId => $category) {
+        foreach ($categories_tree as $cat_id => $category) {
             // category icon
-            $writer->export_area_files([$subcontextName.'/Categories'], 'block_exaport', 'category_icon', $catId);
+            $writer->export_area_files([$subcontext_name.'/Categories'], 'block_exaport', 'category_icon', $cat_id);
             // items
             if ($category->items) {
-                $addToSubContextName = '/Artifacts';
-                foreach ($category->items as $itemId => $item) {
+                $add_tosubcontext_name = '/Artifacts';
+                foreach ($category->items as $item_id => $item) {
                     // item file
-                    $writer->export_area_files([$subcontextName.$addToSubContextName], 'block_exaport', 'item_file', $itemId);
+                    $writer->export_area_files([$subcontext_name.$add_tosubcontext_name], 'block_exaport', 'item_file', $item_id);
                     // item content (from html)
                     if ($item->intro) {
-                        $item->intro = $writer->rewrite_pluginfile_urls([$subcontextName.$addToSubContextName], 'block_exaport', 'item_content', $itemId, $item->intro);
+                        $item->intro = $writer->rewrite_pluginfile_urls([$subcontext_name.$add_tosubcontext_name], 'block_exaport', 'item_content', $item_id, $item->intro);
                     }
-                    $writer->export_area_files([$subcontextName.$addToSubContextName], 'block_exaport', 'item_content', $itemId);
+                    $writer->export_area_files([$subcontext_name.$add_tosubcontext_name], 'block_exaport', 'item_content', $item_id);
                     // item icon
-                    $writer->export_area_files([$subcontextName.$addToSubContextName.'/Icons'], 'block_exaport', 'item_iconfile', $itemId);
+                    $writer->export_area_files([$subcontext_name.$add_tosubcontext_name.'/Icons'], 'block_exaport', 'item_iconfile', $item_id);
                     // comment for item
-                    $writer->export_area_files([$subcontextName.$addToSubContextName.'/Comments'], 'block_exaport', 'item_comment_file', $itemId);
+                    $writer->export_area_files([$subcontext_name.$add_tosubcontext_name.'/Comments'], 'block_exaport', 'item_comment_file', $item_id);
                 }
             }
             // subcategory
             if ($category->subcategories) {
-                self::attach_category_artifact_files($category->subcategories, $context, $subcontextName);
+                self::attach_category_artifact_files($category->subcategories, $context, $subcontext_name);
             }
         }
     }
@@ -322,12 +336,11 @@ class provider implements
         global $DB, $CFG;
         require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
         require_once($CFG->dirroot . '/blocks/exaport/lib/resumelib.php');
-//        require_once($CFG->dirroot . '/blocks/exacomp/lib/classes.php');
+        // require_once($CFG->dirroot . '/blocks/exacomp/lib/classes.php');
         if (empty($contextlist->count())) {
-            //return;
+            // return;
         }
         $user = $contextlist->get_user();
-
         // got only context_cources
         $exaportcoursescontexts = $contextlist->get_contexts();
         foreach ($exaportcoursescontexts as $k => $context) {
@@ -338,59 +351,56 @@ class provider implements
 
         // resume data
         $courseid = $context->instanceid;
-        $resumeData = [];
+        $resume_data = [];
         $resume = block_exaport_get_resume_params($user->id, true);
 
         if ($resume) {
-            $resumeContext = context_user::instance($user->id);
+            $resume_context = context_user::instance($user->id);
 
             // cover
-            static::export_resume_list_data($resume, 'cover', 'Cover', 'resume_cover', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'cover', 'Cover', 'resume_cover', $resume_context, $user);
             // educations
-            static::export_resume_list_data($resume, 'educations', 'Educations', 'resume_edu', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'educations', 'Educations', 'resume_edu', $resume_context, $user);
             // employment
-            static::export_resume_list_data($resume, 'employments', 'Employments', 'resume_employ', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'employments', 'Employments', 'resume_employ', $resume_context, $user);
             // certifications
-            static::export_resume_list_data($resume, 'certifications', 'Certifications', 'resume_certif', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'certifications', 'certifications', 'resume_certif', $resume_context, $user);
             // badges
-            static::export_resume_list_data($resume, 'badges', 'Badges', 'resume_badges', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'badges', 'Badges', 'resume_badges', $resume_context, $user);
             // publications
-            static::export_resume_list_data($resume, 'publications', 'Publications', 'resume_public', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'publications', 'Publications', 'resume_public', $resume_context, $user);
             // memberships
-            static::export_resume_list_data($resume, 'profmembershipments', 'Memberships', 'resume_mbrship', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'profmembershipments', 'Memberships', 'resume_mbrship', $resume_context, $user);
             // goals
-            static::export_resume_list_related_competencies($resume->id, 'goals', 'Goals/Educational standards', $resumeContext, $user);
-            static::export_resume_list_data($resume, 'goalspersonal', 'Goals/Personal', 'resume_goalspersonal', $resumeContext, $user);
-            static::export_resume_list_data($resume, 'goalsacademic', 'Goals/Academic', 'resume_goalsacademic', $resumeContext, $user);
-            static::export_resume_list_data($resume, 'goalscareers', 'Goals/Career', 'resume_goalscareer', $resumeContext, $user);
+            static::export_resume_list_related_competencies($resume->id, 'goals', 'Goals/Educational standards', $resume_context, $user);
+            static::export_resume_list_data($resume, 'goalspersonal', 'Goals/Personal', 'resume_goalspersonal', $resume_context, $user);
+            static::export_resume_list_data($resume, 'goalsacademic', 'Goals/Academic', 'resume_goalsacademic', $resume_context, $user);
+            static::export_resume_list_data($resume, 'goalscareers', 'Goals/Career', 'resume_goalscareer', $resume_context, $user);
             // skills
-            static::export_resume_list_related_competencies($resume->id, 'skills', 'Skills/Educational standards', $resumeContext, $user);
-            static::export_resume_list_data($resume, 'skillspersonal', 'Skills/Personal', 'resume_skillspersonal', $resumeContext, $user);
-            static::export_resume_list_data($resume, 'skillsacademic', 'Skills/Academic', 'resume_skillsacademic', $resumeContext, $user);
-            static::export_resume_list_data($resume, 'skillscareers', 'Skills/Career', 'resume_skillscareer', $resumeContext, $user);
+            static::export_resume_list_related_competencies($resume->id, 'skills', 'Skills/Educational standards', $resume_context, $user);
+            static::export_resume_list_data($resume, 'skillspersonal', 'Skills/Personal', 'resume_skillspersonal', $resume_context, $user);
+            static::export_resume_list_data($resume, 'skillsacademic', 'Skills/Academic', 'resume_skillsacademic', $resume_context, $user);
+            static::export_resume_list_data($resume, 'skillscareers', 'Skills/Career', 'resume_skillscareer', $resume_context, $user);
             // interests
-            static::export_resume_list_data($resume, 'interests', 'Interests', 'resume_interests', $resumeContext, $user);
+            static::export_resume_list_data($resume, 'interests', 'Interests', 'resume_interests', $resume_context, $user);
 
         }
-
-
-
+        
         // artifacts data (with categories)
-        $categoriesTree = block_exaport_user_categories_into_tree($user->id, true, true);
-        if ($categoriesTree) {
+        $categories_tree = block_exaport_user_categories_into_tree($user->id, true, true);
+        if ($categories_tree) {
             // $context - user or course?
             $context = context_user::instance($user->id);
 
-            $subContextName = 'Exabis ePortfolio/Portolio Artifacts';
+            $subcontext_name = 'Exabis ePortfolio/Portolio Artifacts';
             // attach files and format HTML
-            self::attach_category_artifact_files($categoriesTree, $context, $subContextName);
-            $categoriesTree = array('categories' => $categoriesTree);
+            self::attach_category_artifact_files($categories_tree, $context, $subcontext_name);
+            $categories_tree = array('categories' => $categories_tree);
             $contextdata = helper::get_context_data($context, $user);
-            $contextdata = (object) array_merge((array) $contextdata, $categoriesTree);
+            $contextdata = (object) array_merge((array) $contextdata, $categories_tree);
             $writer = writer::with_context($context);
-            $writer->export_data([$subContextName], $contextdata);
+            $writer->export_data([$subcontext_name], $contextdata);
         }
-
 
         $badges = block_exaport_get_all_user_badges($user->id);
         $resume = block_exaport_get_resume_params($user->id, true);
@@ -400,35 +410,35 @@ class provider implements
         $viewsArr = array();
         $copyProps = ['name', 'description', 'shareall', 'externaccess'];
         foreach ($views as $view) {
-            $viewEntry = new stdClass();
+            $view_entry = new stdClass();
             foreach ($copyProps as $prop) {
                 if (property_exists($view, $prop)) {
-                    $viewEntry->{$prop} = $view->{$prop};
+                    $view_entry->{$prop} = $view->{$prop};
                 }
             }
-            if ($viewEntry->description) {
+            if ($view_entry->description) {
                 // files and HTML format
-                $writer = writer::with_context($resumeContext);
-                $viewEntry->description = $writer->rewrite_pluginfile_urls(['Exabis ePortfolio/Views'], 'block_exaport', 'view', $view->id, $viewEntry->description);
-                $viewEntry->description = format_text($viewEntry->description, FORMAT_HTML);
+                $writer = writer::with_context($resume_context);
+                $view_entry->description = $writer->rewrite_pluginfile_urls(['Exabis ePortfolio/Views'], 'block_exaport', 'view', $view->id, $view_entry->description);
+                $view_entry->description = format_text($view_entry->description, FORMAT_HTML);
                 $writer->export_area_files(['Exabis ePortfolio/Views'], 'block_exaport', 'view', $view->id);
             }
-            $viewEntry->timemodified = transform::datetime(@$view->timemodified);
+            $view_entry->timemodified = transform::datetime(@$view->timemodified);
             // add blocks
             $blocks = [];
-            $allBlocks = $DB->get_records_sql('SELECT b.* 
-                                FROM {block_exaportviewblock} b 
-                                  WHERE b.viewid = ? 
+            $all_blocks = $DB->get_records_sql('SELECT b.*
+                                FROM {block_exaportviewblock} b
+                                  WHERE b.viewid = ?
                                 ORDER BY b.positionx, b.positiony', array($view->id));
-            foreach ($allBlocks as &$block) {
-                $blockEntry = new stdClass();
-                $blockEntry->content = '';
+            foreach ($all_blocks as &$block) {
+                $block_entry = new stdClass();
+                $block_entry->content = '';
                 if (@$block->block_title) {
-                    $blockEntry->block_title = $block->block_title;
+                    $block_entry->block_title = $block->block_title;
                 }
                 switch ($block->type) {
                     case 'headline': // headline
-                        $blockEntry->content = $block->text;
+                        $block_entry->content = $block->text;
                         break;
                     case 'item': // artifact
                         $item = $DB->get_record('block_exaportitem', ['id' => $block->itemid]);
@@ -436,10 +446,10 @@ class provider implements
                             continue 2;
                         }
                         if ($item->url && $item->url != "false") {
-                            $blockEntry->url = $item->url;
+                            $block_entry->url = $item->url;
                         }
                         if ($item->intro) {
-                            $blockEntry->content = $item->intro;
+                            $block_entry->content = $item->intro;
                         }
                         if (block_exaport_check_competence_interaction()) {
                             $comps = block_exaport_get_active_comps_for_item($item);
@@ -454,7 +464,7 @@ class provider implements
                                 foreach ($competencies as $competence) {
                                     $competenciesoutput .= $competence->title.'<br>';
                                 }
-                                $blockEntry->competences = $competenciesoutput;
+                                $block_entry->competences = $competenciesoutput;
                             }
                         }
                         switch ($item->type) {
@@ -466,26 +476,26 @@ class provider implements
                         break;
                     case 'personal_information':
                         // add picture?
-                        $personInfo = '';
+                        $person_info = '';
                         if (isset($block->firstname) or isset($block->lastname)) {
                             if (isset($block->firstname)) {
-                                $personInfo .= $block->firstname;
+                                $person_info .= $block->firstname;
                             }
                             if (isset($block->lastname)) {
-                                $personInfo .= ' '.$block->lastname;
+                                $person_info .= ' '.$block->lastname;
                             }
                         };
                         if (isset($block->email)) {
-                            $personInfo .= $block->email;
+                            $person_info .= $block->email;
                         }
                         if (isset($block->text)) {
-                            $personInfo .= $block->text;
+                            $person_info .= $block->text;
                         }
-                        $blockEntry->content = $personInfo;
+                        $block_entry->content = $person_info;
                         break;
                     case 'media':
                         if (!empty($block->contentmedia)) {
-                            $blockEntry->content .= $block->contentmedia;
+                            $block_entry->content .= $block->contentmedia;
                         }
                         break;
                     case 'badge':
@@ -502,120 +512,120 @@ class provider implements
                                 // Badge not found.
                                 continue 2;
                             }
-                            $blockEntry->content .= $badge->name;
+                            $block_entry->content .= $badge->name;
                             // badge file?
-                            $blockEntry->content .= format_text($badge->description, FORMAT_HTML);
+                            $block_entry->content .= format_text($badge->description, FORMAT_HTML);
                         }
                         break;
                     case 'cv_information':
                         switch ($block->resume_itemtype) {
                             case 'edu':
                                 if ($block->itemid && $resume && $resume->educations[$block->itemid]) {
-                                    $itemData = $resume->educations[$block->itemid];
+                                    $item_data = $resume->educations[$block->itemid];
                                     // files?
-//                                    $attachments = $itemData->attachments;
-                                    $blockEntry->content .= $itemData->institution.': ';
-                                    $blockEntry->content .= $itemData->qualname;
-                                    if ($itemData->startdate != '' || $itemData->enddate != '') {
-                                        $blockEntry->content .= ' (';
-                                        if ($itemData->startdate != '') {
-                                            $blockEntry->content .= $itemData->startdate;
+                                    // $attachments = $item_data->attachments;
+                                    $block_entry->content .= $item_data->institution.': ';
+                                    $block_entry->content .= $item_data->qualname;
+                                    if ($item_data->startdate != '' || $item_data->enddate != '') {
+                                        $block_entry->content .= ' (';
+                                        if ($item_data->startdate != '') {
+                                            $block_entry->content .= $item_data->startdate;
                                         }
-                                        if ($itemData->enddate != '') {
-                                            $blockEntry->content .= ' - '.$itemData->enddate;
+                                        if ($item_data->enddate != '') {
+                                            $block_entry->content .= ' - '.$item_data->enddate;
                                         }
-                                        $blockEntry->content .= ')';
+                                        $block_entry->content .= ')';
                                     }
-                                    if ($itemData->qualdescription != '') {
-                                        $blockEntry->content .= '; '.$itemData->qualdescription;
+                                    if ($item_data->qualdescription != '') {
+                                        $block_entry->content .= '; '.$item_data->qualdescription;
                                     }
                                 }
                                 break;
                             case 'employ':
                                 if ($block->itemid && $resume && $resume->employments[$block->itemid]) {
-                                    $itemData = $resume->employments[$block->itemid];
+                                    $item_data = $resume->employments[$block->itemid];
                                     // files?
-//                                    $attachments = $itemData->attachments;
+                                    // $attachments = $item_data->attachments;
                                     $description = '';
-                                    $description .= $itemData->jobtitle.': '.$itemData->employer;
-                                    if ($itemData->startdate != '' || $itemData->enddate != '') {
+                                    $description .= $item_data->jobtitle.': '.$item_data->employer;
+                                    if ($item_data->startdate != '' || $item_data->enddate != '') {
                                         $description .= ' (';
-                                        if ($itemData->startdate != '') {
-                                            $description .= $itemData->startdate;
+                                        if ($item_data->startdate != '') {
+                                            $description .= $item_data->startdate;
                                         }
-                                        if ($itemData->enddate != '') {
-                                            $description .= ' - '.$itemData->enddate;
+                                        if ($item_data->enddate != '') {
+                                            $description .= ' - '.$item_data->enddate;
                                         }
                                         $description .= ')';
                                     }
-                                    if ($itemData->positiondescription != '') {
-                                        $description .= '; '.$itemData->positiondescription;
+                                    if ($item_data->positiondescription != '') {
+                                        $description .= '; '.$item_data->positiondescription;
                                     }
-                                    $blockEntry->content .= $description;
+                                    $block_entry->content .= $description;
                                 }
                                 break;
                             case 'certif':
                                 if ($block->itemid && $resume && $resume->certifications[$block->itemid]) {
-                                    $itemData = $resume->certifications[$block->itemid];
+                                    $item_data = $resume->certifications[$block->itemid];
                                     // files?
-//                                    $attachments = $itemData->attachments;
+                                    // $attachments = $item_data->attachments;
                                     $description = '';
-                                    $description .= $itemData->title;
-                                    if ($itemData->date != '') {
-                                        $description .= ' ('.$itemData->date.')';
+                                    $description .= $item_data->title;
+                                    if ($item_data->date != '') {
+                                        $description .= ' ('.$item_data->date.')';
                                     }
-                                    if ($itemData->description != '') {
-                                        $description .= '; '.$itemData->description;
+                                    if ($item_data->description != '') {
+                                        $description .= '; '.$item_data->description;
                                     }
-                                    $blockEntry->content = $description;
+                                    $block_entry->content = $description;
                                 }
                                 break;
                             case 'public':
                                 if ($block->itemid && $resume && $resume->publications[$block->itemid]) {
-                                    $itemData = $resume->publications[$block->itemid];
+                                    $item_data = $resume->publications[$block->itemid];
                                     // files
-//                                    $attachments = $itemData->attachments;
+                                    // $attachments = $item_data->attachments;
                                     $description = '';
-                                    $description .= $itemData->title;
-                                    if ($itemData->contribution != '') {
-                                        $description .= ' ('.$itemData->contribution.')';
+                                    $description .= $item_data->title;
+                                    if ($item_data->contribution != '') {
+                                        $description .= ' ('.$item_data->contribution.')';
                                     }
-                                    if ($itemData->date != '') {
-                                        $description .= ' ('.$itemData->date.')';
+                                    if ($item_data->date != '') {
+                                        $description .= ' ('.$item_data->date.')';
                                     }
-                                    if ($itemData->contributiondetails != '' || $itemData->url != '') {
+                                    if ($item_data->contributiondetails != '' || $item_data->url != '') {
                                         $description .= '; ';
-                                        if ($itemData->contributiondetails != '') {
-                                            $description .= $itemData->contributiondetails;
+                                        if ($item_data->contributiondetails != '') {
+                                            $description .= $item_data->contributiondetails;
                                         }
-                                        if ($itemData->url != '') {
-                                            $description .= ' '.$itemData->url.' ';
+                                        if ($item_data->url != '') {
+                                            $description .= ' '.$item_data->url.' ';
                                         }
                                     }
-                                    $blockEntry->content = $description;
+                                    $block_entry->content = $description;
                                 }
                                 break;
                             case 'mbrship':
                                 if ($block->itemid && $resume && $resume->profmembershipments[$block->itemid]) {
-                                    $itemData = $resume->profmembershipments[$block->itemid];
+                                    $item_data = $resume->profmembershipments[$block->itemid];
                                     // files?
-//                                    $attachments = $itemData->attachments;
+                                    // $attachments = $item_data->attachments;
                                     $description = '';
-                                    $description .= $itemData->title.' ';
-                                    if ($itemData->startdate != '' || $itemData->enddate != '') {
+                                    $description .= $item_data->title.' ';
+                                    if ($item_data->startdate != '' || $item_data->enddate != '') {
                                         $description .= ' (';
-                                        if ($itemData->startdate != '') {
-                                            $description .= $itemData->startdate;
+                                        if ($item_data->startdate != '') {
+                                            $description .= $item_data->startdate;
                                         }
-                                        if ($itemData->enddate != '') {
-                                            $description .= ' - '.$itemData->enddate;
+                                        if ($item_data->enddate != '') {
+                                            $description .= ' - '.$item_data->enddate;
                                         }
                                         $description .= ')';
                                     }
-                                    if ($itemData->description != '') {
-                                        $description .= '; '.$itemData->description;
+                                    if ($item_data->description != '') {
+                                        $description .= '; '.$item_data->description;
                                     }
-                                    $blockEntry->content = $description;
+                                    $block_entry->content = $description;
                                 }
                                 break;
                             case 'goalspersonal':
@@ -625,47 +635,47 @@ class provider implements
                             case 'skillsacademic':
                             case 'skillscareers':
                                 // files?
-//                                $attachments = @$resume->{$block->resume_itemtype.'_attachments'};
+                                // $attachments = @$resume->{$block->resume_itemtype.'_attachments'};
                                 $description = '';
                                 if ($resume && $resume->{$block->resume_itemtype}) {
                                     $description .= $resume->{$block->resume_itemtype}.' ';
                                 }
-                                $blockEntry->content = $description;
+                                $block_entry->content = $description;
                                 break;
                             case 'interests':
                                 $description = '';
                                 if ($resume->interests != '') {
                                     $description .= $resume->interests.' ';
                                 }
-                                $blockEntry->content = $description;
+                                $block_entry->content = $description;
                                 break;
                             default:
-                                $blockEntry->content .= '!!! '.$block->resume_itemtype.' !!!';
+                                $block_entry->content .= '!!! '.$block->resume_itemtype.' !!!';
                         }
 
                         break;
                     case 'text':
                     default:
-                        $blockEntry->content .= format_text($block->text, FORMAT_HTML);
+                        $block_entry->content .= format_text($block->text, FORMAT_HTML);
                         break;
                 }
-                $blockEntry->positionx = $block->positionx;
-                $blockEntry->positiony = $block->positiony;
-                if (!$blockEntry->content) {
-                    unset($blockEntry->content);
+                $block_entry->positionx = $block->positionx;
+                $block_entry->positiony = $block->positiony;
+                if (!$block_entry->content) {
+                    unset($block_entry->content);
                 }
 
-                $blocks[] = $blockEntry;
+                $blocks[] = $block_entry;
             }
-            $viewEntry->blocks = $blocks;
+            $view_entry->blocks = $blocks;
 
-            if (!$viewEntry->shareall) {
-                unset($viewEntry->shareall);
+            if (!$view_entry->shareall) {
+                unset($view_entry->shareall);
             }
-            if (!$viewEntry->externaccess) {
-                unset($viewEntry->externaccess);
+            if (!$view_entry->externaccess) {
+                unset($view_entry->externaccess);
             }
-            $viewsArr[] = $viewEntry;
+            $viewsArr[] = $view_entry;
         }
         if ($viewsArr) {
             $viewsArr = array('views' => $viewsArr);
@@ -676,45 +686,45 @@ class provider implements
         }
 
         // comments to artifacts
-        $comments = $DB->get_records_sql('SELECT c.*, i.name as itemname, i.userid as itemownerid 
+        $comments = $DB->get_records_sql('SELECT c.*, i.name as itemname, i.userid as itemownerid
                                 FROM {block_exaportitemcomm} c
-                                  LEFT JOIN {block_exaportitem} i ON i.id = c.itemid                                    
-                                WHERE c.userid = ? 
+                                  LEFT JOIN {block_exaportitem} i ON i.id = c.itemid
+                                WHERE c.userid = ?
                                 ORDER BY c.timemodified', array($user->id));
         if ($comments) {
-            $commentsArr = [];
+            $comments_arr = [];
             foreach ($comments as $comment) {
-                $commentEntry = new stdClass();
-                $commentEntry->text = $comment->entry;
-                $commentEntry->timemodified = transform::datetime(@$comment->timemodified);
-                $itemEntry = new stdClass();
-                $itemEntry->name = $comment->itemname;
-                $userObj = $DB->get_record('user', ['id' => $comment->itemownerid]);
-                $itemEntry->fromUser = fullname($userObj, $user->id);
-                $commentEntry->item = $itemEntry;
+                $comment_entry = new stdClass();
+                $comment_entry->text = $comment->entry;
+                $comment_entry->timemodified = transform::datetime(@$comment->timemodified);
+                $item_entry = new stdClass();
+                $item_entry->name = $comment->itemname;
+                $user_obj = $DB->get_record('user', ['id' => $comment->itemownerid]);
+                $item_entry->fromUser = fullname($user_obj, $user->id);
+                $comment_entry->item = $item_entry;
 
-                $commentsArr[] = $commentEntry;
+                $comments_arr[] = $comment_entry;
             }
-            $commentsArr = array('comments' => $commentsArr);
+            $comments_arr = array('comments' => $comments_arr);
             $contextdata = helper::get_context_data($context, $user);
-            $contextdata = (object) array_merge((array) $contextdata, $commentsArr);
+            $contextdata = (object) array_merge((array) $contextdata, $comments_arr);
             $writer = writer::with_context($context);
             $writer->export_data(['Exabis ePortfolio/Comments/Artifacts'], $contextdata);
         }
 
     }
 
-    public function deleteResumeData($resumeId)
-    {
+    public function delete_resume_data($resume_id){
+
         global $DB;
-        $DB->delete_records('block_exaportresume_certif', ['resume_id' => $resumeId]);
-        $DB->delete_records('block_exaportresume_edu', ['resume_id' => $resumeId]);
-        $DB->delete_records('block_exaportresume_employ', ['resume_id' => $resumeId]);
-        $DB->delete_records('block_exaportresume_mbrship', ['resume_id' => $resumeId]);
-        $DB->delete_records('block_exaportresume_linkedin', ['resume_id' => $resumeId]);
-        $DB->delete_records('block_exaportresume_public', ['resume_id' => $resumeId]);
-        $DB->delete_records('block_exaportresume_badges', ['resumeid' => $resumeId]);
-        $DB->delete_records('block_exaportcompresume_mm', ['resumeid' => $resumeId]);
+        $DB->delete_records('block_exaportresume_certif', ['resume_id' => $resume_id]);
+        $DB->delete_records('block_exaportresume_edu', ['resume_id' => $resume_id]);
+        $DB->delete_records('block_exaportresume_employ', ['resume_id' => $resume_id]);
+        $DB->delete_records('block_exaportresume_mbrship', ['resume_id' => $resume_id]);
+        $DB->delete_records('block_exaportresume_linkedin', ['resume_id' => $resume_id]);
+        $DB->delete_records('block_exaportresume_public', ['resume_id' => $resume_id]);
+        $DB->delete_records('block_exaportresume_badges', ['resumeid' => $resume_id]);
+        $DB->delete_records('block_exaportcompresume_mm', ['resumeid' => $resume_id]);
         return true;
     }
 
@@ -734,14 +744,14 @@ class provider implements
             // categories
             $cats = $DB->get_records('block_exaportcate', ['courseid' => $courseid]);
             foreach ($cats as $category) {
-                self::deleteCategoryData($category->id);
+                self::delete_category_data($category->id);
             }
             $DB->delete_records('block_exaportcate', ['courseid' => $courseid]);
 
             // artifatcs
             $artifacts = $DB->get_records('block_exaportitem', ['courseid' => $courseid]);
             foreach ($artifacts as $artifact) {
-                self::deleteArtifactData($artifact->id);
+                self::delete_atifact_data($artifact->id);
             }
             $DB->delete_records('block_exaportitem', ['courseid' => $courseid]);
             // other shared
@@ -750,7 +760,7 @@ class provider implements
             // resume
             $resumes = $DB->get_records('block_exaportresume', ['courseid' => $courseid]);
             foreach ($resumes as $resume) {
-                self::deleteResumeData($resume->id);
+                self::delete_resume_data($resume->id);
             }
             $DB->delete_records('block_exaportresume', ['courseid' => $courseid]);
 
@@ -758,32 +768,29 @@ class provider implements
         return;
     }
 
-    public function deleteCategoryData($categoryId)
-    {
+    public function delete_category_data($category_id){
         global $DB;
-        $DB->delete_records('block_exaportcatshar', ['catid' => $categoryId]);
-        $DB->delete_records('block_exaportcatgroupshar', ['catid' => $categoryId]);
-        $DB->delete_records('block_exaportcat_structshar', ['catid' => $categoryId]);
-        $DB->delete_records('block_exaportcat_strgrshar', ['catid' => $categoryId]);
+        $DB->delete_records('block_exaportcatshar', ['catid' => $category_id]);
+        $DB->delete_records('block_exaportcatgroupshar', ['catid' => $category_id]);
+        $DB->delete_records('block_exaportcat_structshar', ['catid' => $category_id]);
+        $DB->delete_records('block_exaportcat_strgrshar', ['catid' => $category_id]);
         return true;
     }
 
-    public function deleteArtifactData($artifactId)
-    {
+    public function delete_atifact_data($artifact_id){
         global $DB;
-        $DB->delete_records('block_exaportitemshar', ['itemid' => $artifactId]);
-        $DB->delete_records('block_exaportitemcomm', ['itemid' => $artifactId]);
-        $DB->delete_records('block_exaportviewblock', ['itemid' => $artifactId]);
+        $DB->delete_records('block_exaportitemshar', ['itemid' => $artifact_id]);
+        $DB->delete_records('block_exaportitemcomm', ['itemid' => $artifact_id]);
+        $DB->delete_records('block_exaportviewblock', ['itemid' => $artifact_id]);
         return true;
     }
 
-    public function deleteViewData($viewId)
-    {
+    public function delete_view_data($view_id) {
         global $DB;
-        $DB->delete_records('block_exaportviewblock', ['viewid' => $viewId]);
-        $DB->delete_records('block_exaportviewshar', ['viewid' => $viewId]);
-        $DB->delete_records('block_exaportviewgroupshar', ['viewid' => $viewId]);
-        $DB->delete_records('block_exaportviewemailshar', ['viewid' => $viewId]);
+        $DB->delete_records('block_exaportviewblock', ['viewid' => $view_id]);
+        $DB->delete_records('block_exaportviewshar', ['viewid' => $view_id]);
+        $DB->delete_records('block_exaportviewgroupshar', ['viewid' => $view_id]);
+        $DB->delete_records('block_exaportviewemailshar', ['viewid' => $view_id]);
         return true;
     }
 
@@ -809,14 +816,14 @@ class provider implements
             // resume
             $resumes = $DB->get_records('block_exaportresume', ['user_id' => $userid]);
             foreach ($resumes as $resume) {
-                self::deleteResumeData($resume->id);
+                self::delete_resume_data($resume->id);
             }
             $DB->delete_records('block_exaportresume', ['user_id' => $userid]);
 
             // categories
             $cats = $DB->get_records('block_exaportcate', ['userid' => $userid, 'courseid' => $courseid]);
             foreach ($cats as $category) {
-                self::deleteCategoryData($category->id);
+                self::delete_category_data($category->id);
             }
             $DB->delete_records('block_exaportcate', ['userid' => $userid, 'courseid' => $courseid]);
 
@@ -827,7 +834,7 @@ class provider implements
             // artifacts
             $artifacts = $DB->get_records('block_exaportitem', ['userid' => $userid, 'courseid' => $courseid]);
             foreach ($artifacts as $artifact) {
-                self::deleteArtifactData($artifact->id);
+                self::delete_atifact_data($artifact->id);
             }
             $DB->delete_records('block_exaportitem', ['userid' => $userid, 'courseid' => $courseid]);
 
@@ -840,7 +847,7 @@ class provider implements
             // views
             $views = $DB->get_records('block_exaportview', ['userid' => $userid]);
             foreach ($views as $view) {
-                self::deleteViewData($view->id);
+                self::delete_view_data($view->id);
             }
             $DB->delete_records('block_exaportview', ['userid' => $userid]);
 
@@ -849,7 +856,6 @@ class provider implements
 
         }
     }
-
 
     /**
      * Delete multiple users within a single context.
@@ -864,10 +870,10 @@ class provider implements
         }
         $courseid = $context->instanceid;
 
-        list($inSql, $inParams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
+        list($in_sql, $inParams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
         $params = $inParams;
 
-        $select = " user_id {$inSql}";
+        $select = " user_id {$in_sql}";
 
         // personal data
         $DB->delete_records_select('block_exaportuser', $select, $params);
@@ -875,12 +881,11 @@ class provider implements
         // resume
         $resumes = $DB->get_record_select('block_exaportresume', $select, $params);
         foreach ($resumes as $resume) {
-            self::deleteResumeData($resume->id);
+            self::delete_resume_data($resume->id);
         }
         $DB->delete_records_select('block_exaportresume', $select, $params);
 
-
-        $select = " userid {$inSql}";
+        $select = " userid {$in_sql}";
 
         // relations
         $DB->delete_records_select('block_exaportcatshar', $select, $params);
@@ -890,27 +895,23 @@ class provider implements
         $DB->delete_records_select('block_exaportview', $select, $params);
         $DB->delete_records_select('block_exaportviewshar', $select, $params);
 
-
         $params += ['courseid' => $courseid];
-        $select = " userid {$inSql} AND courseid = :courseid ";
+        $select = " userid {$in_sql} AND courseid = :courseid ";
 
         // categories
         $cats = $DB->get_record_select('block_exaportcate', $select, $params);
         foreach ($cats as $category) {
-            self::deleteCategoryData($category->id);
+            self::delete_category_data($category->id);
         }
         $DB->delete_records_select('block_exaportcate', $select, $params);
 
         // artifacts
         $artifacts = $DB->get_record_select('block_exaportitem', $select, $params);
         foreach ($artifacts as $artifact) {
-            self::deleteArtifactData($artifact->id);
+            self::delete_atifact_data($artifact->id);
         }
         $DB->delete_records_select('block_exaportitem', $select, $params);
 
-
     }
-
-
-
 }
+?>

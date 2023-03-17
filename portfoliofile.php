@@ -118,16 +118,16 @@ if ($itemid) {
     } else {
         $file = block_exaport_get_item_files($item);
         if (is_array($file) && count($file) > 1) {
-//            $counter = 0; //accessing the file by index is not possible because it is private... solution is a foreach + counter
-//            foreach($file as $onefile){
-//                if($counter == $inst){
-//                    $file = $onefile;
-//                }
-//                $counter++;
-//            }
+            // $counter = 0; //accessing the file by index is not possible because it is private... solution is a foreach + counter
+            // foreach($file as $onefile){
+                    // if($counter == $inst){
+                    // $file = $onefile;
+                // }
+                // $counter++;
+            // }
             $file = $file[$inst]; // If multiple files - return file with &inst=X this does not work...
-//            var_dump($file);
-//            die();
+            // die();
+            // var_dump($file);
         } else if (is_array($file)) {
             $file = array_shift($file);
         }
@@ -142,7 +142,7 @@ if ($itemid) {
             readstring_accel($tempfilecontent, $mimetype, false);
             die;
         }
-//        send_stored_file($file, 1);
+            // send_stored_file($file, 1);
         send_stored_file($file, null, 0, true);
     } else {
         not_found();
@@ -215,10 +215,11 @@ send_file($filepath, basename($filepath), $lifetime, $CFG->filteruploadedfiles, 
 function not_found($courseid = 0) {
     global $CFG;
     header('HTTP/1.0 404 not found');
-    //if ($courseid > 0) {
+    // if ($courseid > 0) {
         //error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); // This is not displayed on IIS?
-    //} else {
-    //    error(get_string('filenotfound', 'error')); // This is not displayed on IIS??
+    // } else {
+    // error(get_string('filenotfound', 'error')); // This is not displayed on IIS??
     //}
     print_error("filenotfound", "block_exaport");
 }
+?>

@@ -55,5 +55,5 @@ jQueryExaport(function ($) {
                 }
             });
         }
-    })
+    });
 });

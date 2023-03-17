@@ -22,8 +22,6 @@ define('NO_MOODLE_COOKIES', true);
 require(__DIR__.'/inc.php');
 
 function block_exaport_load_service($service) {
-    //extract($GLOBALS);
-    //print_r($GLOBALS);exit;
     $CFG = $GLOBALS['CFG'];
     $OUTPUT = $GLOBALS['OUTPUT'];
     $DB = $GLOBALS['DB'];

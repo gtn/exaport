@@ -134,13 +134,13 @@ class SurfaceCpdf implements SurfaceInterface
         $this->canvas->clip();
     }
 
-    public function fillText($text, $x, $y, $maxWidth = null)
+    public function fillText($text, $x, $y, $max_width = null)
     {
         if (self::DEBUG) echo __FUNCTION__ . "\n";
         $this->canvas->addText($x, $y, $this->style->fontSize, $text);
     }
 
-    public function strokeText($text, $x, $y, $maxWidth = null)
+    public function strokeText($text, $x, $y, $max_width = null)
     {
         if (self::DEBUG) echo __FUNCTION__ . "\n";
         $this->canvas->addText($x, $y, $this->style->fontSize, $text);

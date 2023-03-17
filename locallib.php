@@ -88,7 +88,7 @@ class exaport_portfolio_caller extends portfolio_module_caller_base {
      */
     public function get_sha1() {
         $fs = get_file_storage();
-        $this->singlefile = $fs->get_file_by_id($this->fileid);
+        $this->single_file = $fs->get_file_by_id($this->fileid);
         return $this->get_sha1_file();
     }
 

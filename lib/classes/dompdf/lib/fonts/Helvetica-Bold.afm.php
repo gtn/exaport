@@ -223,7 +223,7 @@
   'isUnicode' => false,
   'FontName' => 'Helvetica-Bold',
   'FullName' => 'Helvetica Bold',
-  'FamilyName' => 'Helvetica',
+  'family_name' => 'Helvetica',
   'Weight' => 'Bold',
   'ItalicAngle' => '0',
   'IsFixedPitch' => 'false',

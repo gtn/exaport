@@ -52,7 +52,7 @@
 }
 
 #exaport .excomdos_listtable tr td.excomdos_listlastcol {
-    word-wrap: break-word;.
+    word-wrap: break-word;
     max-width: 300px;
     min-width: 200px;
      overflow: hidden;

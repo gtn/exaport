@@ -498,7 +498,7 @@ namespace {
             foreach ($roles as $role) {
                 // since user_picture::fields('u') uses a deprecated moodle function, this is the workaround:
                 $fields = exaport_get_picture_fields();
-                foreach ($fields as $key => $field){
+                foreach ($fields as $key => $field) {
                     $fields[$key] = 'u.'.$field;
                 }
                 $fields = implode(',', $fields);
@@ -528,7 +528,7 @@ namespace {
         if (isset($courses[$COURSE->id]) && ($type != 'shared_views')) {
             $course = $courses[$COURSE->id];
             unset($courses[$COURSE->id]);
-//            $courses = array_merge(array($course->id => $course), $courses);
+            // $courses = array_merge(array($course->id => $course), $courses);
             $courses = array($course->id => $course) + $courses;
         }
 
@@ -633,7 +633,7 @@ namespace {
         // All categories and users who shared.
         $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
         $itemwhere = '';
-/*        if ($itemid) {
+        /* if ($itemid) {
             if (is_array($itemid) && count($itemid) > 0) {
                 $itemwhere = ' AND i.id IN ('.implode(',', $itemid).') ';
             } elseif ($itemid > 0) {
@@ -645,7 +645,7 @@ namespace {
                 " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
                 " FROM {user} u ".
                 " JOIN {block_exaportcate} c ON u.id = c.userid ".
-                //($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
+                // ($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
                 " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?".
 
                 " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid ".
@@ -662,7 +662,7 @@ namespace {
                 $itemwhere.
                 " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture".
                 " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
-        //return array();
+        // return array();
         // Get users for grouping later.
         $sharedusers = array();
         $sharedcategories = array();
@@ -676,17 +676,17 @@ namespace {
         }
 
         // Get sub categories (recursively).
-        $getSubcats = function($parentId) use (&$getSubcats, &$sharedcategories, $DB) {
-            $subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $parentId], null, 'id, id as tmp');
+        $get_subcats = function($parent_id) use (&$get_subcats, &$sharedcategories, $DB) {
+            $subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $parent_id], null, 'id, id as tmp');
             foreach ($subcategories as $categoryid) {
                 if (!in_array($categoryid, $sharedcategories)) {
                     $sharedcategories[] = $categoryid;
                 }
-                $getSubcats($categoryid);
+                $get_subcats($categoryid);
             }
         };
         for ($i = 0, $c = count($sharedcategories); $i < $c; $i++) {
-            $getSubcats($sharedcategories[$i]);
+            $get_subcats($sharedcategories[$i]);
             /*$subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $sharedcategories[$i]], null, 'id, id as tmp');
             foreach ($subcategories as $categoryid) {
                 if (!in_array($categoryid, $sharedcategories)) {
@@ -701,8 +701,8 @@ namespace {
             } else {
                 $items = $itemid;
             }
-            $catFromItems = $DB->get_records_sql_menu(' SELECT DISTINCT categoryid, categoryid as tmp FROM {block_exaportitem} WHERE id IN ('.implode(',', $items).') ');
-            $sharedcategories = array_intersect($sharedcategories, $catFromItems);
+            $cat_from_items = $DB->get_records_sql_menu(' SELECT DISTINCT categoryid, categoryid as tmp FROM {block_exaportitem} WHERE id IN ('.implode(',', $items).') ');
+            $sharedcategories = array_intersect($sharedcategories, $cat_from_items);
         }
 
         // Get items for every user.
@@ -782,8 +782,9 @@ namespace {
             // The owner of item is a student of teacher
             $students = block_exaport_get_students_for_teacher($userid);
             $itemdata = $DB->get_record('block_exaportitem', array('id' => $itemid));
-            if (array_key_exists($itemdata->userid, $students))
+            if (array_key_exists($itemdata->userid, $students)) {
                 return $itemdata->userid;
+            }
         }
         // Check access by self sharing
         $itemsforuser = block_exaport_get_items_shared_to_user($userid, true, $itemid);
@@ -918,3 +919,4 @@ namespace block_exaport {
         return $tree;
     }
 }
+

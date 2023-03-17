@@ -26,7 +26,7 @@ class block_exaport_personal_information_form extends block_exaport_moodleform {
 
         $mform->addElement('editor', 'description_editor', get_string('steckbrief', 'block_exaport'), null,
                 array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-        $mform->addExaportHelpButton('description_editor', 'forms.personal_info.description_editor');
+        $mform->add_exaport_help_button('description_editor', 'forms.personal_info.description_editor');
 
         $mform->addElement('hidden', 'cataction');
         $mform->setType('cataction', PARAM_ALPHA);

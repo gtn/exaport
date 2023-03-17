@@ -408,7 +408,7 @@ interface Canvas
      * Streams the PDF directly to the browser.
      *
      * @param string $filename The filename to present to the browser.
-     * @param array $options Associative array: 'compress' => 1 or 0 (default 1); 'Attachment' => 1 or 0 (default 1).
+     * @param array $options Associative array: 'compress' => 1 or 0 (default 1); 'attachment' => 1 or 0 (default 1).
      */
     function stream($filename, $options = array());
 

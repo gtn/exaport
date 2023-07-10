@@ -68,6 +68,7 @@ namespace {
             $userid = $accesspath[1];
 
             $conditions = array("user_id" => $userid);
+            $userpreferences = block_exaport_get_user_preferences($userid); // We need it for creating record if it is not existing.
             if (!$portfoliouser = $DB->get_record("block_exaportuser", $conditions)) {
                 // TODO: why is this needed?
                 // No portfolio user with this id.

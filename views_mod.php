@@ -416,60 +416,73 @@ if ($editform->is_cancelled()) {
     // Processing for blocks and shares.
     switch ($type) {
         case 'content':
-            // Delete all blocks.
-            $DB->delete_records('block_exaportviewblock', array('viewid' => $dbview->id));
-            // Add blocks.
-            $blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), context_user::instance($USER->id)->id,
+            // Delete all blocks only if all ok with possible blocks preparing
+			$torewriteblocks = false;
+
+			try {
+                // Add blocks.
+                $blocks = file_save_draft_area_files(required_param('draft_itemid', PARAM_INT), context_user::instance($USER->id)->id,
                     'block_exaport', 'view_content', $view->id,
                     array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99, 'context' => context_user::instance($USER->id),
-                            'maxbytes' => $CFG->block_exaport_max_uploadfile_size),
+                        'maxbytes' => $CFG->block_exaport_max_uploadfile_size),
                     $formview->blocks);
-            $blocks = json_decode($blocks) ?: [];
+                $blocks = json_decode($blocks) ?: [];
 
-            foreach ($blocks as $block) {
-                $block->viewid = $dbview->id;
+                foreach ($blocks as $block) {
+                    $block->viewid = $dbview->id;
 
-                // clean block title. We need only clan text. Right?
-                if ($block->block_title) {
-                    $block->block_title = htmlspecialchars(strip_tags($block->block_title));
-                }
-
-                // Media process.
-                if (!empty($block->type) && $block->type == 'media') {
-                    if (!empty($block->contentmedia)) {
-                        if (empty($block->width)) {
-                            $block->width = 360;
-                        } else {
-                            $block->width = (int) $block->width;
-                        }
-                        if (empty($block->height)) {
-                            $block->height = 240;
-                        } else {
-                            $block->height = (int) $block->height;
-                        }
-                        $block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
+                    // clean block title. We need only clean text. Right?
+                    if ($block->block_title) {
+                        $block->block_title = htmlspecialchars(strip_tags($block->block_title));
                     }
 
-                    if (!empty($block->create_as_note)) {
-                        $newitem = new stdClass;
-                        $newitem->name = $block->block_title;
-                        $newitem->type = 'note';
-                        $newitem->categoryid = 0;
-                        $newitem->userid = $USER->id;
-                        $newitem->intro = $block->contentmedia;
-                        $newitem->timemodified = time();
+                    // Media process.
+                    if (!empty($block->type) && $block->type == 'media') {
+                        if (!empty($block->contentmedia)) {
+                            if (empty($block->width)) {
+                                $block->width = 360;
+                            } else {
+                                $block->width = (int)$block->width;
+                            }
+                            if (empty($block->height)) {
+                                $block->height = 240;
+                            } else {
+                                $block->height = (int)$block->height;
+                            }
+                            $block->contentmedia = process_media_url($block->contentmedia, $block->width, $block->height);
+                        }
 
-                        $block->itemid = $DB->insert_record('block_exaportitem', $newitem);
-                        $block->type = 'item';
-                        $block->block_title = '';
-                        $block->contentmedia = '';
-                        $block->width = 0;
-                        $block->height = 0;/**/
+                        if (!empty($block->create_as_note)) {
+                            $newitem = new stdClass;
+                            $newitem->name = $block->block_title;
+                            $newitem->type = 'note';
+                            $newitem->categoryid = 0;
+                            $newitem->userid = $USER->id;
+                            $newitem->intro = $block->contentmedia;
+                            $newitem->timemodified = time();
+
+                            $block->itemid = $DB->insert_record('block_exaportitem', $newitem);
+                            $block->type = 'item';
+                            $block->block_title = '';
+                            $block->contentmedia = '';
+                            $block->width = 0;
+                            $block->height = 0;
+                        }
                     }
-                }
 
-                $block->id = $DB->insert_record('block_exaportviewblock', $block);
+                }
+            } catch (moodle_exception $e) {
+                $message = block_exaport_get_string('Something wrong with blocks saving (code: 1694089814164)');
+				break;
             }
+			$torewriteblocks = true; // All ok.
+			// Rewrite all blocks
+	        if ($torewriteblocks) {
+                $DB->delete_records('block_exaportviewblock', array('viewid' => $dbview->id));
+                foreach ($blocks as $block) {
+                    $block->id = $DB->insert_record('block_exaportviewblock', $block);
+                }
+	        }
 
             if (optional_param('ajax', 0, PARAM_INT)) {
                 $ret = new stdClass;

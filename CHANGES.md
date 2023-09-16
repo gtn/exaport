@@ -2,6 +2,9 @@
 * php8 fixes
 * fix several bugs with exaport view editing
 
+### v4.6.7 (2023071500) ###
+* Webservice Bufixing for Dakora+
+
 ### v4.6.7 (2022112100) ###
 * Moodle Codestyle fixes
 

@@ -11,7 +11,7 @@ This module enables the following functionality:
 This block can easily be added to a Moodle installation. It works course-independently.
 
 #INSTALLATION:
-This block is for Moodle 3.2 to 4.0 versions, it will not work for versions below 2016120505 - please download earlier
+This block is for Moodle 3.11 to 4.2 versions, it will not work for versions below 2021051700 - please download earlier
 versions from here: https://moodle.org/plugins/pluginversions.php?plugin=block_exaport
 
 Download the plugin from Moodle Plug-ins Repository. Please follow the instructions available in the Moodle Plug-ins Repository.

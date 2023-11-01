@@ -204,6 +204,20 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         } else {
             return false;
         }
+    } else if ($filearea == 'pdf_fontfamily') {
+        $filename = array_pop($args);
+        $itemid = array_pop($args); // Always 0.
+
+        // Get file.
+        $fs = get_file_storage();
+        $file = $fs->get_file(context_system::instance()->id, 'block_exaport', 'pdf_fontfamily', $itemid, '/', $filename);
+
+        // Serve file.
+        if ($file) {
+            send_stored_file($file);
+        } else {
+            return false;
+        }
     } else {
         die('wrong file area');
     }

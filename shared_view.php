@@ -38,7 +38,130 @@ if (!$view = block_exaport_get_view_from_access($access)) {
     print_error("viewnotfound", "block_exaport");
 }
 
-$is_pdf = optional_param('ispdf', 0, PARAM_INT);
+//$is_pdf = optional_param('ispdf', 0, PARAM_INT);
+
+// Get pdf settings
+$pdf_settings = unserialize($view->pdf_settings);
+
+$pdfsettingslink = $PAGE->url;
+$pdfsettingslink->params(array(
+    'courseid' => optional_param('courseid', 1, PARAM_TEXT),
+    'access' => optional_param('access', 0, PARAM_TEXT),
+));
+
+// PDF form defintition
+require_once($CFG->libdir.'/formslib.php');
+class pdfsettings_form extends moodleform {
+    //Add elements to form
+    public function definition() {
+		global $USER;
+        $mform = $this->_form;
+        $mform->disable_form_change_checker();
+        $mform->addElement('hidden', 'ispdf', '1');
+
+		$view = $this->_customdata['view'];
+		// All pdf settings are only for view owners
+		if ($USER->id === $view->userid) {
+            // Container: collapsible.
+            $mform->addElement('html', '<fieldset class="clearfix view-group">');
+            $mform->addElement('html', '<legend class="view-group-header">' . block_exaport_get_string('pdf_settings') . '</legend>');
+            $mform->addElement('html', '<div class="view-group-content clearfix"><div>');
+            // Description.
+            $mform->addElement('html', '<div class="alert alert-info">'.block_exaport_get_string('pdf_settings_description').'</div>');
+            // Font family. Grouped by 'fixed' and 'Custom' files.
+            $mform->addElement('selectgroups', 'fontfamily', block_exaport_get_string('pdf_settings_fontfamily'), block_export_getpdffontfamilies(true));
+
+            // Upload custom font.
+            // Toggler of file uploader
+            $mform->addElement('static', 'fontuploader_toggler', '', 'Or upload custom font');
+            // container of file uploader
+            $mform->addElement('html', '<div class="uploadFont-container">');
+            $mform->addElement(
+                'filepicker',
+                'pdf_customfont',
+                '',
+                null,
+                [
+                    'accepted_types' => ['.ttf'],
+                ]
+            );
+            $mform->addHelpButton('pdf_customfont', 'pdf_customfont', 'block_exaport');
+            $mform->addElement('html', '</div>');
+            // Font size.
+            $mform->addElement('text', 'fontsize', block_exaport_get_string('pdf_settings_fontsize'));
+            $mform->setType('fontsize', PARAM_INT);
+            $mform->setDefault('fontsize', '14');
+
+            // Close collapsible container.
+            $mform->addElement('html', '</div>');
+            $mform->addElement('html', '</fieldset>');
+        }
+
+        // Download pdf button.
+	    // 'submit' type is not suitable, because it is disabled after first pressing
+        $mform->addElement('button', 'download', block_exaport_get_string('download_pdf'), ['onclick' => 'this.form.submit();']);
+    }
+
+}
+
+$is_pdf = false;
+
+$pdfForm = new pdfsettings_form($pdfsettingslink->raw_out(false), ['view' => $view]);
+
+if ($fromPdform = $pdfForm->get_data()) {
+    $is_pdf = true;
+
+    // Save pdf settings into view settings - only for view owner
+	if ($USER->id == $view->userid) {
+        $customfontcfilecontent = $pdfForm->get_file_content('pdf_customfont');
+        $newFontFile = null;
+        if ($customfontcfilecontent) {
+            // if it is an owner of the view - allow to upload file permanently
+            $fs = get_file_storage();
+            if ($view->userid == $USER->id) {
+                $fileinfo = array(
+                    'contextid' => context_system::instance()->id,
+                    'component' => 'block_exaport',
+                    'filearea' => 'pdf_fontfamily',
+                    'itemid' => 0,
+                    'filepath' => '/',
+                    'filename' => $pdfForm->get_new_filename('pdf_customfont')
+                );
+                $newFontFile = $fs->create_file_from_string($fileinfo, $customfontcfilecontent);
+            } else {
+                // only for temporary using!
+                // Disabled. Not owners can not change any pdf setting!
+                /*$draftid = file_get_submitted_draft_itemid('pdf_customfont');
+                $newFontFile = $fs->get_file(context_user::instance($USER->id)->id, 'user', 'draft', $draftid, '/', $pdfForm->get_new_filename('pdf_customfont'));*/
+            }
+        }
+
+        if ($newFontFile !== null) {
+            // uploaded file has more priority
+            $fontfamily = $newFontFile->get_id();
+        } else {
+            $fontfamily = $fromPdform->fontfamily;
+        }
+        $allpossiblefonts = block_export_getpdffontfamilies();
+
+        if (!trim($fontfamily) /*|| !in_array($fontfamily, array_keys($allpossiblefonts))*/) {
+            $fontfamily = 'Dejavu sans'; // If the pdf is not from form
+        }
+        $pdf_settings['fontfamily'] = $fontfamily;
+        $fontsize = $fromPdform->fontsize;
+        if (!trim($fontsize)) {
+            $fontsize = '14'; // If the pdf is not from form
+        }
+        $pdf_settings['fontsize'] = $fontsize;
+
+        // Save pdf settings into DB
+        $pdf_settings_serialized = serialize($pdf_settings);
+        $view->pdf_settings = $pdf_settings_serialized;
+        $DB->update_record('block_exaportview', $view);
+
+    }
+
+}
 
 $conditions = array("id" => $view->userid);
 if (!$user = $DB->get_record("user", $conditions)) {
@@ -536,6 +659,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $pdf_text = format_text($block->text, FORMAT_HTML);
                     // If the text has HTML <img> - it can broke view template. Try to clean it
                    /* try {*/
+                        $pdf_text = mb_convert_encoding($pdf_text, 'HTML-ENTITIES', 'UTF-8');
                         $dom = new DOMDocument;
                         $dom->loadHTML($pdf_text);
                         $xpath = new DOMXPath($dom);
@@ -567,20 +691,77 @@ $general_content .= '</tr></table>';
 $general_content .= '</div>';
 
 $general_content .= "<br />";
-$general_content .= "<div class=''>\n";
-$pdflink = $PAGE->url;
-$pdflink->params(array(
-        'courseid' => optional_param('courseid', 1, PARAM_TEXT),
-        'access' => optional_param('access', 0, PARAM_TEXT),
-        'ispdf' => 1
+
+// PDF form
+// Get font families
+function block_export_getpdffontfamilies($grouped = false) {
+	// static fonts
+	$defaultfamilies = [
+        // css name => Name
+        // must support dompdf by defualt
+        'Dejavu' => 'DejaVu sans',
+        'Arial' => 'Arial',
+        'Times New Roman' => 'Times New Roman',
+        'Helvetica' => 'Helvetica',
+        'Symbol' => 'Symbol',
+        'ZapfDingbats' => 'ZapfDingbats',
+        // not sure that it is supported PDF
+//	    'Verdana, sans-serif' => 'Verdana (sans-serif)',
+//	    'Tahoma, sans-serif' => 'Tahoma (sans-serif)',
+//	    '"Trebuchet MS", sans-serif' => 'Trebuchet MS (sans-serif)',
+//	    '"Times New Roman", serif' => 'Times New Roman (serif)',
+//	    'Georgia, serif' => 'Georgia (serif)',
+//	    'Garamond, serif' => 'Garamond (serif)',
+//	    '"Courier New", monospace' => 'Courier New (monospace)',
+//	    '"Brush Script MT", cursive' => 'Brush Script MT (cursive)',
+    ];
+	// uploaded fonts
+	$customfonts = [];
+    $fs = get_file_storage();
+    $files = $fs->get_area_files(context_system::instance()->id, 'block_exaport', 'pdf_fontfamily', 0);
+    foreach ($files as $file) {
+		if ($file->get_filename() != '.') {
+            $customfonts[$file->get_id()] = $file->get_filename();
+		}
+    }
+	if ($grouped) {
+		if ($customfonts) {
+			// Add groups only if at least single custom font uploaded
+            $all = [
+                block_exaport_get_string('pdf_settings_fontfamily_fixedgroup') => $defaultfamilies,
+                block_exaport_get_string('pdf_settings_fontfamily_customgroup') => $customfonts,
+            ];
+        } else {
+            $all = [
+                0 => $defaultfamilies, // No groups!
+            ];
+        }
+	} else {
+        $all = $defaultfamilies + $customfonts;
+    }
+
+	return $all;
+}
+
+
+$general_content .= "<div class='' id='pdfDownloader'>\n";
+
+$pdfsettingslink = $PAGE->url;
+$pdfsettingslink->params(array(
+    'courseid' => optional_param('courseid', 1, PARAM_TEXT),
+    'access' => optional_param('access', 0, PARAM_TEXT),
 ));
-$general_content .= '<button class="btn btn-default" onclick="location.href=\''.$pdflink.'\'" type="button">'.block_exaport_get_string('download_pdf').' </button>';
 
-$general_content .= "</div>\n";
+// Insert PDF form
+$pdfFormData = [
+	'fontfamily' => $pdf_settings['fontfamily'],
+    'fontsize' => $pdf_settings['fontsize'],
+];
+$pdfForm->set_data($pdfFormData);
+//displays the form
+$general_content .= $pdfForm->render();
 
-$general_content .= "<div class='block_eportfolio_center'>\n";
 
-$general_content .= "</div>\n";
 if (!$is_pdf) {
     $general_content .= block_exaport_wrapperdivend();
     $general_content .= $OUTPUT->footer();
@@ -588,22 +769,21 @@ if (!$is_pdf) {
 
 if ($is_pdf) {
     // old pdf view
-
     require_once (__DIR__.'/lib/classes/dompdf/autoload.inc.php');
     $options = new \Dompdf\Options();
     $options->set('isRemoteEnabled', true);
-    $options->set('defaultFont', 'dejavu sans');
+//    $options->set('defaultFont', 'dejavu sans');
     $dompdf = new Dompdf($options);
     $dompdf->setPaper('A4', 'landscape');
-    $general_content = pdf_view($view, $colslayout, $data_for_pdf);
-    // echo $general_content;exit;
+    $general_content = pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings);
+//     echo $general_content;exit;
     $dompdf->loadHtml($general_content);
     $dompdf->render();
     $dompdf->stream('view.pdf'); //To popup pdf as download
     exit;
     /**/
 
-    // new pdf view
+    // new pdf view. not implemented yet
 
     // generate PDF directly. not as HTML. not done fully yet
     /* require_once __DIR__.'/lib/reportlib.php';
@@ -617,14 +797,42 @@ if ($is_pdf) {
 echo $general_content;
 
 
-function pdf_view($view, $colslayout, $data_for_pdf) {
+function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
+
+    $fontfamily = $pdf_settings['fontfamily'];
+    $fontfamilyUrl = '';
+	if (is_numeric($fontfamily)) {
+		// It is a custom uploaded file, so we need to get an url to this font.
+        $fs = get_file_storage();
+		$fontFile = $fs->get_file_by_id(intval($fontfamily));
+        $fontfamilyUrl = moodle_url::make_pluginfile_url(
+            $fontFile->get_contextid(),
+            $fontFile->get_component(),
+            $fontFile->get_filearea(),
+            $fontFile->get_itemid(),
+            $fontFile->get_filepath(),
+            $fontFile->get_filename(),
+            false                     // Do not force download of the file.
+        );
+        $fontfamilyUrl = $fontfamilyUrl->raw_out();
+		// font family must be unique for the font. Because dompdf creates cached fonts for every family
+        $fontfamily = 'customUploaded_'.$fontFile->get_filename();
+	}
+
     $pdf_content = '<html>';
-    $pdf_content .= '<body>';
-    $pdf_content .= '<style>
+    $pdf_content .= '<head>';
+    $pdf_content .= '<style>';
+    if ($fontfamilyUrl) {
+        $pdf_content .= '
+			@font-face {
+			  font-family: "'.$fontfamily.'";			  
+			  src: url("'.$fontfamilyUrl.'") format("truetype");
+			}';
+    }
+    $pdf_content .= '
         body {
-            /* only dejavu sans supports greek characters, but chinese is not working */
-            font-family: "dejavu sans";
-            font-size: 14px;
+            font-family: "'.$fontfamily.'";
+            font-size: '.$pdf_settings['fontsize'].'px;
         }
         .view-table td {
             padding: 5px;
@@ -640,6 +848,8 @@ function pdf_view($view, $colslayout, $data_for_pdf) {
             border-top: 1px solid #eeeeee;
         }
         </style>';
+    $pdf_content .= '</head>';
+    $pdf_content .= '<body>';
     $pdf_content .= '<table border="0" width="100%" class="view-table" style="table-layout:fixed;">';
     $pdf_content .= '<tr>';
     $max_rows = 0;
@@ -678,7 +888,7 @@ function pdf_view($view, $colslayout, $data_for_pdf) {
     $pdf_content .= '</table>';
     $pdf_content .= '</body>';
     $pdf_content .= '</html>';
-    // echo $pdf_content; exit;
+//     echo $pdf_content; exit;
     return $pdf_content;
 }
 

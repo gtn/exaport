@@ -185,6 +185,7 @@
 		<FIELD NAME="layout" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="2" SEQUENCE="false"/>
 		<FIELD NAME="sharedemails" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
 		<FIELD NAME="autofill_artefacts" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+		<FIELD NAME="pdf_settings" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>

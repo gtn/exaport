@@ -569,11 +569,21 @@ $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten L
 $string['download_pdf'] = 'Download as Pdf';
 $string['pdf_settings'] = 'PDF-Einstellungen';
 $string['pdf_settings_description'] = 'If you use some special or uncommon language characters the generated pdf can have problems. So, you can try to use different font settings<br>
-            Your PDF settings will be saved for this view.<br>So, if your view is shared with other users - they will see the pdf with your settings.';
+            Your PDF settings will be saved for this view.<br>So, if your view is shared with other users - they will see the pdf with your settings.<br>
+            Non-standard fonts can have some lost options like bold, italic, e.t.c.';
 $string['pdf_settings_fontfamily'] = 'Schriftfamilie';
 $string['pdf_settings_fontsize'] = 'Grundlegende Schriftgröße';
+$string['pdf_settings_showmetadata'] = 'Add view meta data';
+$string['pdf_settings_showusername'] = 'user name';
+$string['pdf_settings_showuserpicture'] = 'user picture';
+$string['pdf_settings_showuseremail'] = 'user email';
+$string['pdf_settings_showuserphone'] = 'user phone';
 $string['pdf_customfont'] = 'Upload custom font';
 $string['pdf_settings_uploadfont'] = 'Eigene Schriftart hochladen';
+$string['pdf_settings_pagesize'] = 'Seitengröße';
+$string['pdf_settings_pageorient'] = 'Seitenausrichtung';
+$string['pdf_settings_pageorient.portrait'] = 'Hochformat';
+$string['pdf_settings_pageorient.landscape'] = 'Querformat';
 $string['pdf_customfont_help'] = 'Your can upload own .ttf file. We will try to use it for PDF generation.';
 $string['pdf_settings_fontfamily_fixedgroup'] = 'Predefined fonts';
 $string['pdf_settings_fontfamily_customgroup'] = 'Custom uploaded fonts';

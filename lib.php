@@ -34,6 +34,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 
     $is_for_pdf = false;
     $pdfforuserid = 0;
+
     if ($p = array_search('forPdf', $args) ) {
         // added to link of the file: /forPdf/--hash--/--viewid--/--curruserid--
         $pdfforuserid = array_pop($args);
@@ -46,11 +47,12 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         unset($args[$p]);
     }
 
-    if (!$is_for_pdf) {
+    if (!$is_for_pdf && $filearea != 'pdf_fontfamily') {
         // Always require login, at least guest.
         require_login();
     } else {
-        // login is not required if it it for PDF generation (accessible only from php)
+        // Login is not required if it is for PDF generation (accessible only from php).
+        // Also if it is for getting custom .ttf font file
     }
 
     if ($filearea == 'item_file') {
@@ -110,14 +112,13 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         // Other params together are the access string.
         $access = join('/', $args);
 
-        if (!$view = block_exaport_get_view_from_access($access)) {
+        if (!$view = block_exaport_get_view_from_access($access, $is_for_pdf, $pdfforuserid)) {
             print_error("viewnotfound", "block_exaport");
         }
 
         // Get file.
         $fs = get_file_storage();
         $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
-
         // Serve file.
         if ($file) {
             send_stored_file($file);

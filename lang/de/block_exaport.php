@@ -567,6 +567,26 @@ $string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';
+$string['pdf_settings'] = 'PDF-Einstellungen';
+$string['pdf_settings_description'] = 'If you use some special or uncommon language characters the generated pdf can have problems. So, you can try to use different font settings<br>
+            Your PDF settings will be saved for this view.<br>So, if your view is shared with other users - they will see the pdf with your settings.<br>
+            Non-standard fonts can have some lost options like bold, italic, e.t.c.';
+$string['pdf_settings_fontfamily'] = 'Schriftfamilie';
+$string['pdf_settings_fontsize'] = 'Grundlegende Schriftgröße';
+$string['pdf_settings_showmetadata'] = 'Add view meta data';
+$string['pdf_settings_showusername'] = 'user name';
+$string['pdf_settings_showuserpicture'] = 'user picture';
+$string['pdf_settings_showuseremail'] = 'user email';
+$string['pdf_settings_showuserphone'] = 'user phone';
+$string['pdf_customfont'] = 'Upload custom font';
+$string['pdf_settings_uploadfont'] = 'Eigene Schriftart hochladen';
+$string['pdf_settings_pagesize'] = 'Seitengröße';
+$string['pdf_settings_pageorient'] = 'Seitenausrichtung';
+$string['pdf_settings_pageorient.portrait'] = 'Hochformat';
+$string['pdf_settings_pageorient.landscape'] = 'Querformat';
+$string['pdf_customfont_help'] = 'Your can upload own .ttf file. We will try to use it for PDF generation.';
+$string['pdf_settings_fontfamily_fixedgroup'] = 'Predefined fonts';
+$string['pdf_settings_fontfamily_customgroup'] = 'Custom uploaded fonts';
 $string['selected_competencies'] = 'Erreichte Kompetenz';
 $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = 'Titel help text';
@@ -591,16 +611,16 @@ $string['what_is_embed_code_content'] = '<p>Embed code is code that is generated
                 <li>Navigate to the video you wish to embed.</li>
                 <li>Click the <strong>Share</strong> button, in the top right corner of your video.</li>
                 <li>A pop-up will appear with the embed link information. You will need to copy only the <strong>&lt;<i>iframe</i>&gt;</strong> portion of the embed link.
-                    Example:<br>
+                    Example:<br>                    
                     <ol>
                         <li>
                             Entire embed link shows the following:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
+                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>                            
                         </li>
                         <li>
-                            You only need to copy the <strong>&lt;<i>iframe</i>&gt;</strong> portion:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
-                        </li>
+                            You only need to copy the <strong>&lt;<i>iframe</i>&gt;</strong> portion:<br>                            
+                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>                            
+                        </li>                    
                     </ol>
                 <li>Past this code to exabis E-portfolio textarea field.</li>
             </ol>

@@ -909,15 +909,15 @@ function europass_xml($resumeid = 0) {
             }
         }
     }
-    europass_fill_communication_item($dom, $candidate_person, 'Email', ['oa:URI' => $USER->email]);
-    europass_fill_communication_item($dom, $candidate_person, 'Web', ['oa:URI' => $USER->url]);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->icq, 'OtherTitle' => 'ICQ', 'use_code' => 'other']);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->skype, 'OtherTitle' => 'Skype', 'use_code' => 'other']);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->yahoo, 'OtherTitle' => 'Yahoo', 'use_code' => 'other']);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->aim, 'OtherTitle' => 'AIM', 'use_code' => 'other']);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => $USER->msn, 'OtherTitle' => 'MSN', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'Email', ['oa:URI' => @$USER->email]);
+    europass_fill_communication_item($dom, $candidate_person, 'Web', ['oa:URI' => @$USER->url]);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->icq, 'OtherTitle' => 'ICQ', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->skype, 'OtherTitle' => 'Skype', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->yahoo, 'OtherTitle' => 'Yahoo', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->aim, 'OtherTitle' => 'AIM', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->msn, 'OtherTitle' => 'MSN', 'use_code' => 'other']);
 
-    europass_fill_sub_element_text($dom, $candidate_person, 'ResidenceCountryCode', strtolower($USER->country));
+    europass_fill_sub_element_text($dom, $candidate_person, 'ResidenceCountryCode', strtolower(@$USER->country));
     $root->appendChild($candidate_person);
 
     // candidate_profile
@@ -1045,7 +1045,7 @@ function europass_xml($resumeid = 0) {
         $organization_contact = $dom->createElement('organization_contact');
         $communication = $dom->createElement('communication');
         $address = $dom->createElement('address');
-        $text = $dom->createTextNode($address);
+        $text = $dom->createTextNode(clean_for_external_xml($education->address));
         $address->appendChild($text);
         $communication->appendChild($address);
         $organization_contact->appendChild($communication);

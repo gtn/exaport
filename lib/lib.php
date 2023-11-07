@@ -2160,4 +2160,6 @@ function block_exaport_get_comments_for_item($itemid) {
     $comments = $DB->get_records("block_exaportitemcomm", ['itemid' => $itemid], 'timemodified DESC');
     return $comments;
 }
-?>
+
+
+

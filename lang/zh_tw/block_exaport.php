@@ -413,7 +413,6 @@ $string['current_category'] = '當前分類';
 $string['change_layout'] = '更改布局';
 $string['details'] = '細節';
 $string['tiles'] = '方塊';
-$string['category'] = '分類';
 $string['category_up'] = '返回父分類';
 $string['supported'] = '支持';
 $string['developed'] = '開發';

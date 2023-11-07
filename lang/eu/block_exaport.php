@@ -315,8 +315,6 @@ $string['selectitems'] = "Select items";
 $string['exaport:addinstance'] = 'add Exabis ePortfolio to the course';
 $string['exaport:myaddinstance'] = 'add Exabis ePortfolio on My home';
 
-$string['notify'] = 'notify';
-$string['share'] = 'share';
 $string['sharejs'] = 'share';
 
 $string['view_specialitem_media'] = 'Media';

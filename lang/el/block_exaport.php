@@ -223,7 +223,6 @@ $string['createepxexport'] = null;
 $string['exportviewselect'] = null;
 
 $string['type'] = null;
-$string['share'] = null;
 $string['explainingall'] = null;
 
 // Item sorting.
@@ -314,7 +313,6 @@ $string['cofigureblock'] = "Configure Block";
 $string['selectitems'] = "Select items";
 $string['exaport:addinstance'] = 'add Exabis ePortfolio to the course';
 $string['exaport:myaddinstance'] = 'add Exabis ePortfolio on My home';
-$string['notify'] = 'notify';
 $string['share'] = 'share';
 $string['sharejs'] = 'share';
 

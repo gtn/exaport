@@ -701,8 +701,16 @@ if ($view) {
     $postview->resume = json_encode(block_exaport_get_resume_params($USER->id, true));
 }
 
-require_once($CFG->libdir.'/editor/tinymce/lib.php');
-$tinymce = new tinymce_texteditor();
+$tinylibpath = $CFG->libdir.'/editor/tinymce/lib.php';
+if (file_exists($tinylibpath)) {
+    require_once($tinylibpath);
+    $tinymce = new tinymce_texteditor();
+} else {
+	// for Moodle 4.2 >
+    $tinylibpath = $CFG->libdir.'/editor/tiny/lib.php';
+    require_once($tinylibpath);
+    $tinymce = new tiny_texteditor();
+}
 
 $PAGE->requires->css('/blocks/exaport/css/blocks.css');
 

@@ -17,8 +17,16 @@
 
 require_once(__DIR__.'/inc.php');
 
-require_once($CFG->libdir.'/editor/tinymce/lib.php');
-$tinymce = new tinymce_texteditor();
+$tinylibpath = $CFG->libdir.'/editor/tinymce/lib.php';
+if (file_exists($tinylibpath)) {
+    require_once($tinylibpath);
+    $tinymce = new tinymce_texteditor();
+} else {
+    // for Moodle 4.2 >
+    $tinylibpath = $CFG->libdir.'/editor/tiny/lib.php';
+    require_once($tinylibpath);
+    $tinymce = new tiny_texteditor();
+}
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "add", PARAM_ALPHA);

@@ -116,20 +116,13 @@ if ($itemid) {
         $file = block_exaport_get_item_comment_file($comment->id);
 
     } else {
-        $file = block_exaport_get_item_files($item);
-        if (is_array($file) && count($file) > 1) {
-            // $counter = 0; //accessing the file by index is not possible because it is private... solution is a foreach + counter
-            // foreach($file as $onefile){
-                    // if($counter == $inst){
-                    // $file = $onefile;
-                // }
-                // $counter++;
-            // }
-            $file = $file[$inst]; // If multiple files - return file with &inst=X this does not work...
-            // die();
-            // var_dump($file);
-        } else if (is_array($file)) {
-            $file = array_shift($file);
+        $files = block_exaport_get_item_files_array($item);
+
+        if ($inst && !empty($files[$inst])) {
+            $file = $files[$inst];
+        } else {
+            // fallback: always get first file
+            $file = reset($files);
         }
     }
 

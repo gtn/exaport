@@ -65,6 +65,10 @@ function block_exaport_get_item_files($item) {
     return [ block_exaport_get_single_file($item, 'item_file') ];
 }
 
+function block_exaport_get_item_files_array($item) {
+    return block_exaport_get_files($item, 'item_file'); // Multiple files
+}
+
 function block_exaport_get_single_file($item, $type) {
     $file = block_exaport_get_files($item, $type);
 

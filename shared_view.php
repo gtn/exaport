@@ -1180,8 +1180,8 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
         $pdf_content .= '</body>' . "\r\n";
         $pdf_content .= '</html>';
 
-        $pdf_content = prependHtmlContentToPdf($pdf_content, $view);
     }
+    $pdf_content = prependHtmlContentToPdf($pdf_content, $view);
 
 	// Output for debugging.
 //    echo '<textarea>';

@@ -113,7 +113,7 @@ switch ($item->type) {
         // Needed for pix_url.
         $PAGE->set_context(context_system::instance());
         $icon = $output->image_url(file_file_icon($file, 90));
-
+        // TODO: If Pdf will have a problems - look a solution with readfile below
         header('Location: '.$icon);
         break;
 
@@ -153,14 +153,19 @@ switch ($item->type) {
             $finfo = new finfo(FILEINFO_MIME_TYPE);
             $type = $finfo->buffer($imgstr);
 
+            echo "<pre>debug:<strong>item_thumb.php:163</strong>\r\n"; print_r($imgstr); echo '</pre>'; exit; // !!!!!!!!!! delete it
             // we need to return only PICTURES
             if (strpos($type, 'image/') === false) {
-                header('Location: pix/link_tile.png');
+                header('Content-Type: image/png');
+                readfile('pix/link_tile.png');
+                exit;
                 break;
             }
 
             if (strlen($imgstr) < 50) {
-                header('Location: pix/link_tile.png');
+                header('Content-Type: image/png');
+                readfile('pix/link_tile.png');
+                exit;
                 break;
             }
             header("Content-type: ".$type);
@@ -169,11 +174,15 @@ switch ($item->type) {
 
             exit;
         }
-        header('Location: pix/link_tile.png');
+        header('Content-Type: image/png');
+        readfile('pix/link_tile.png');
+        exit;
         break;
 
     case "note":
-        header('Location: pix/note_tile.png');
+        header('Content-Type: image/png');
+        readfile('pix/note_tile.png');
+        exit;
         break;
     default:
         die('wrong type');

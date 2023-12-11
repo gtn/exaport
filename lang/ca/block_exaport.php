@@ -391,7 +391,6 @@ $string['current_category'] = 'Categoria actual';
 $string['change_layout'] = "Canvia l'aparença";
 $string['details'] = 'Detalls';
 $string['tiles'] = 'Rajoles';
-$string['category'] = 'Categoria';
 $string['category_up'] = 'tornar a la categoria mare';
 
 $string['supported'] = 'amb el recolzament de';

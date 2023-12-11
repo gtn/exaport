@@ -38,7 +38,226 @@ if (!$view = block_exaport_get_view_from_access($access)) {
     print_error("viewnotfound", "block_exaport");
 }
 
-$is_pdf = optional_param('ispdf', 0, PARAM_INT);
+//$is_pdf = optional_param('ispdf', 0, PARAM_INT);
+
+// Get pdf settings
+$pdf_settings = unserialize($view->pdf_settings);
+
+$pdfsettingslink = $PAGE->url;
+$pdfsettingslink->params(array(
+    'courseid' => optional_param('courseid', 1, PARAM_TEXT),
+    'access' => optional_param('access', 0, PARAM_TEXT),
+));
+
+// PDF form defintition
+require_once($CFG->libdir.'/formslib.php');
+class pdfsettings_form extends moodleform {
+    //Add elements to form
+    public function definition() {
+		global $USER, $CFG;
+        $mform = $this->_form;
+        $mform->disable_form_change_checker();
+        $mform->addElement('hidden', 'ispdf', '1');
+
+		$view = $this->_customdata['view'];
+		// All pdf settings are only for view owners
+		if ($USER->id === $view->userid) {
+            // Container: collapsible.
+            $mform->addElement('html', '<fieldset class="clearfix view-group">');
+            $mform->addElement('html', '<legend class="view-group-header">' . block_exaport_get_string('pdf_settings') . '</legend>');
+            $mform->addElement('html', '<div class="view-group-content clearfix"><div>');
+            // Description.
+            $mform->addElement('html', '<div class="alert alert-info">'.block_exaport_get_string('pdf_settings_description').'</div>');
+            // Font family. Grouped by 'fixed' and 'Custom' files.
+            $mform->addElement('selectgroups', 'fontfamily', block_exaport_get_string('pdf_settings_fontfamily'), block_export_getpdffontfamilies(true));
+
+            // Upload custom font.
+            // Toggler of file uploader
+            $mform->addElement('static', 'fontuploader_toggler', '', 'Or upload custom font');
+            // container of file uploader
+            $mform->addElement('html', '<div class="uploadFont-container">');
+			// Check permissions for pdf (dompdf creates own cache file in the own folder).
+			// TODO: use moodle temp folder ('fontCache' option of dompdf)?
+			$relatedpathtodompdffontcachefile = "/blocks/exaport/lib/classes/dompdf/vendor/dompdf/dompdf/lib/fonts/dompdf_font_family_cache.php";
+			$pathtodompdffontcachefile = $CFG->dirroot.$relatedpathtodompdffontcachefile;
+			// TODO:  Deprecated for new dompdf?
+            /*if (!is_writable($pathtodompdffontcachefile)) {
+				// Try to make it writeable.
+                chmod($pathtodompdffontcachefile, 0766);
+				// Check again
+				if (!is_writable($pathtodompdffontcachefile)) {
+                    $mform->addElement('html', '<div class="alert alert-danger">File "' . $relatedpathtodompdffontcachefile . '" must be writable. <br/>Otherwise we do not guarantee the operation of this function</div>');
+                }
+            }*/
+			if (!is_writable(dirname($pathtodompdffontcachefile))) {
+                // Try to make it writeable.
+                chmod($pathtodompdffontcachefile, 0766);
+				// Check again
+				if (!is_writable(dirname($pathtodompdffontcachefile))) {
+                    $mform->addElement('html', '<div class="alert alert-danger">Folder "' . dirname($relatedpathtodompdffontcachefile) . '" must be writable. <br/>Otherwise we do not guarantee the operation of this function</div>');
+                }
+            }
+
+            $mform->addElement(
+                'filepicker',
+                'pdf_customfont',
+                '',
+                null,
+                [
+                    'accepted_types' => ['.ttf'],
+                ]
+            );
+            $mform->addHelpButton('pdf_customfont', 'pdf_customfont', 'block_exaport');
+            $mform->addElement('html', '</div>');
+            // Font size.
+            $mform->addElement('text', 'fontsize', block_exaport_get_string('pdf_settings_fontsize'));
+            $mform->setType('fontsize', PARAM_INT);
+            $mform->setDefault('fontsize', '14');
+			// Page size.
+			$pagesizes = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'B0', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'letter', 'legal'];
+            $pagesizes = array_combine($pagesizes, $pagesizes);
+            $mform->addElement('select', 'pagesize', block_exaport_get_string('pdf_settings_pagesize'), $pagesizes);
+            $mform->setDefault('pagesize', 'A4');
+			// Page size.
+			$pageorients = [
+				'portrait' => block_exaport_get_string('pdf_settings_pageorient.portrait'),
+				'landscape' => block_exaport_get_string('pdf_settings_pageorient.landscape'),
+			];
+            $mform->addElement('select', 'pageorient', block_exaport_get_string('pdf_settings_pageorient'), $pageorients);
+            $mform->setDefault('pageorient', 'landscape');
+			// Show view metadata.
+            $mform->addElement('checkbox', 'showmetadata', '', block_exaport_get_string('pdf_settings_showmetadata'));
+            $mform->setDefault('showmetadata', 1);
+			// Show user info:
+			// name
+            $mform->addElement('checkbox', 'showusername', '', block_exaport_get_string('pdf_settings_showusername'));
+            $mform->setDefault('showusername', 1);
+            $mform->hideIf('showusername', 'showmetadata', 'notchecked');
+            // user picture
+            $mform->addElement('checkbox', 'showuserpicture', '', block_exaport_get_string('pdf_settings_showuserpicture'));
+            $mform->setDefault('showuserpicture', 0);
+            $mform->hideIf('showuserpicture', 'showmetadata', 'notchecked');
+			// email
+            $mform->addElement('checkbox', 'showuseremail', '', block_exaport_get_string('pdf_settings_showuseremail'));
+            $mform->setDefault('showuseremail', 0);
+            $mform->hideIf('showuseremail', 'showmetadata', 'notchecked');
+			// email
+            $mform->addElement('checkbox', 'showuserphone', '', block_exaport_get_string('pdf_settings_showuserphone'));
+            $mform->setDefault('showuserphone', 0);
+            $mform->hideIf('showuserphone', 'showmetadata', 'notchecked');
+
+            // Close collapsible container.
+            $mform->addElement('html', '</div>');
+            $mform->addElement('html', '</fieldset>');
+        }
+
+        // Download pdf button.
+	    // 'submit' type is not suitable, because it is disabled after first pressing
+        $mform->addElement('button', 'download', block_exaport_get_string('download_pdf'), ['onclick' => 'this.form.submit();']);
+    }
+
+}
+
+$is_pdf = false;
+
+$pdfForm = new pdfsettings_form($pdfsettingslink->raw_out(false), ['view' => $view]);
+
+if ($fromPdform = $pdfForm->get_data()) {
+    $is_pdf = true;
+
+    // Save pdf settings into view settings - only for view owner
+	if ($USER->id == $view->userid) {
+        $customfontcfilecontent = $pdfForm->get_file_content('pdf_customfont');
+        $newFontFile = null;
+        if ($customfontcfilecontent) {
+            // if it is an owner of the view - allow to upload file permanently
+            $fs = get_file_storage();
+            if ($view->userid == $USER->id) {
+				// Dompdf library has wrong regular expression and incorrect works with filenames with ')', so:
+				$filename = str_replace(['(', ')'], ['_', '_'], $pdfForm->get_new_filename('pdf_customfont'));
+                $fileinfo = array(
+                    'contextid' => context_system::instance()->id,
+                    'component' => 'block_exaport',
+                    'filearea' => 'pdf_fontfamily',
+                    'itemid' => 0,
+                    'filepath' => '/',
+                    'filename' => $filename,
+                );
+                $newFontFile = $fs->create_file_from_string($fileinfo, $customfontcfilecontent);
+            } else {
+                // only for temporary using!
+                // Disabled. Not owners can not change any pdf setting!
+                /*$draftid = file_get_submitted_draft_itemid('pdf_customfont');
+                $newFontFile = $fs->get_file(context_user::instance($USER->id)->id, 'user', 'draft', $draftid, '/', $pdfForm->get_new_filename('pdf_customfont'));*/
+            }
+        }
+
+        if ($newFontFile !== null) {
+            // uploaded file has more priority
+            $fontfamily = $newFontFile->get_id();
+        } else {
+            $fontfamily = $fromPdform->fontfamily;
+        }
+        $allpossiblefonts = block_export_getpdffontfamilies();
+
+		// Check default settings.
+		// font family
+        if (!trim($fontfamily) /*|| !in_array($fontfamily, array_keys($allpossiblefonts))*/) {
+            $fontfamily = 'Dejavu sans';
+        }
+        $pdf_settings['fontfamily'] = $fontfamily;
+        // fontsize
+        $fontsize = $fromPdform->fontsize;
+        if (!trim($fontsize)) {
+            $fontsize = '14';
+        }
+        $pdf_settings['fontsize'] = $fontsize;
+        // pagesize
+		$pagesize = $fromPdform->pagesize;
+        if (!trim($pagesize)) {
+            $pagesize = 'A4';
+        }
+        $pdf_settings['pagesize'] = $pagesize;
+		// page orientation
+		$pageorient = $fromPdform->pageorient;
+        if (!trim($pageorient)) {
+            $pageorient = 'landscape';
+        }
+        $pdf_settings['pageorient'] = $pageorient;
+		// show view metadata
+		if ($fromPdform->showmetadata) {
+            $pdf_settings['showmetadata'] = $fromPdform->showmetadata;
+        } else {
+            $pdf_settings['showmetadata'] = 0;
+		}
+		// show user name
+        $pdf_settings['showusername'] = $fromPdform->showusername ? 1 : 0;
+		// show user picture
+        $pdf_settings['showuserpicture'] = $fromPdform->showuserpicture ? 1 : 0;
+		// show user email
+        $pdf_settings['showuseremail'] = $fromPdform->showuseremail ? 1 : 0;
+		// show user phone
+        $pdf_settings['showuserphone'] = $fromPdform->showuserphone ? 1 : 0;
+
+        // Save pdf settings into DB
+        $pdf_settings_serialized = serialize($pdf_settings);
+        $view->pdf_settings = $pdf_settings_serialized;
+        $DB->update_record('block_exaportview', $view);
+
+    }
+
+}
+
+// check default pdf settings (for example if the pdf is not from the form)
+$pdf_settings['fontfamily'] = @$pdf_settings['fontfamily'] ?? 'Dejavu sans';
+$pdf_settings['fontsize'] = @$pdf_settings['fontsize'] ?? '14';
+$pdf_settings['pagesize'] = @$pdf_settings['pagesize'] ?? 'A4';
+$pdf_settings['pageorient'] = @$pdf_settings['pageorient'] ?? 'landscape';
+$pdf_settings['showmetadata'] = isset($pdf_settings['showmetadata']) ? $pdf_settings['showmetadata'] : 0;
+$pdf_settings['showusername'] = isset($pdf_settings['showusername']) ? $pdf_settings['showusername'] : 1;
+$pdf_settings['showuserpicture'] = isset($pdf_settings['showuserpicture']) ? $pdf_settings['showuserpicture'] : 0;
+$pdf_settings['showuseremail'] = isset($pdf_settings['showuseremail']) ? $pdf_settings['showuseremail'] : 0;
+$pdf_settings['showuserphone'] = isset($pdf_settings['showuserphone']) ? $pdf_settings['showuserphone'] : 0;
 
 $conditions = array("id" => $view->userid);
 if (!$user = $DB->get_record("user", $conditions)) {
@@ -166,7 +385,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         if ($competencies) {
                             $competenciesoutput = "";
                             foreach ($competencies as $competence) {
-                                $competenciesoutput .= $competence->title.'<br>';
+                                $competenciesoutput .= $competence->title.'<br/>';
                             }
 
                             // TODO: still needed?
@@ -207,9 +426,6 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                                 "/".'block_exaport'."/".'item_file'."/view/".$access."/itemid/".$item->id."/".
                                                 $file->filename;
                                         $general_content .= '<div class="view-item-image"><img src="'.$imgsrc.'" class="'.$width.'" alt=""/></div>';
-                                        if ($is_pdf) {
-                                            $imgsrc .= '/forPdf/'.$view->hash.'/'.$view->id.'/'.$USER->id;
-                                        }
                                         $blockForPdf .= '<div class="view-item-image">
                                                             <img align = "right"
                                                                 border = "0"
@@ -229,8 +445,9 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                         $fileparams = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> '.
                                                 '<span class="filedescription">('.$filesize.')</span></div>';
                                         if (block_exaport_is_valid_media_by_filename($file->filename)) {
-                                            $general_content .= '<div class="view-item-image"><img height="60" src="'.$CFG->wwwroot.
-                                                    '/blocks/exaport/pix/media.png" alt=""/></div>';
+                                            $general_content .= '<div class="view-item-image">
+													<img height="60" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" alt="" />
+												</div>';
                                             $blockForPdf .= '<img height="60" src="'.$CFG->wwwroot. '/blocks/exaport/pix/media.png" align="right" />';
                                         }
                                     };
@@ -533,11 +750,12 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     if ($block->block_title) {
                         $blockForPdf .= "\r\n".'<h4>'.$block->block_title.'</h4>';
                     }
-                    $pdf_text = format_text($block->text, FORMAT_HTML);
+					$pdf_text = format_text($block->text, FORMAT_HTML);
                     // If the text has HTML <img> - it can broke view template. Try to clean it
                    /* try {*/
+                        $pdf_text = mb_convert_encoding($pdf_text, 'HTML-ENTITIES', 'UTF-8');
                         $dom = new DOMDocument;
-                        $dom->loadHTML($pdf_text);
+                        $dom->loadHTML($pdf_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
                         $xpath = new DOMXPath($dom);
                         $nodes = $xpath->query('//img');
                         /** @var DOMElement $node */
@@ -567,20 +785,84 @@ $general_content .= '</tr></table>';
 $general_content .= '</div>';
 
 $general_content .= "<br />";
-$general_content .= "<div class=''>\n";
-$pdflink = $PAGE->url;
-$pdflink->params(array(
-        'courseid' => optional_param('courseid', 1, PARAM_TEXT),
-        'access' => optional_param('access', 0, PARAM_TEXT),
-        'ispdf' => 1
+
+// PDF form
+// Get font families
+function block_export_getpdffontfamilies($grouped = false) {
+	// static fonts
+	$defaultfamilies = [
+        // css name => Name
+        // must support dompdf by defualt
+        'Dejavu' => 'DejaVu sans',
+        'Arial' => 'Arial',
+        'Times New Roman' => 'Times New Roman',
+        'Helvetica' => 'Helvetica',
+        'Symbol' => 'Symbol',
+        'ZapfDingbats' => 'ZapfDingbats',
+        // not sure that it is supported PDF
+//	    'Verdana, sans-serif' => 'Verdana (sans-serif)',
+//	    'Tahoma, sans-serif' => 'Tahoma (sans-serif)',
+//	    '"Trebuchet MS", sans-serif' => 'Trebuchet MS (sans-serif)',
+//	    '"Times New Roman", serif' => 'Times New Roman (serif)',
+//	    'Georgia, serif' => 'Georgia (serif)',
+//	    'Garamond, serif' => 'Garamond (serif)',
+//	    '"Courier New", monospace' => 'Courier New (monospace)',
+//	    '"Brush Script MT", cursive' => 'Brush Script MT (cursive)',
+    ];
+	// uploaded fonts
+	$customfonts = [];
+    $fs = get_file_storage();
+    $files = $fs->get_area_files(context_system::instance()->id, 'block_exaport', 'pdf_fontfamily', 0);
+    foreach ($files as $file) {
+		if ($file->get_filename() != '.') {
+            $customfonts[$file->get_id()] = $file->get_filename();
+		}
+    }
+	if ($grouped) {
+		if ($customfonts) {
+			// Add groups only if at least single custom font uploaded
+            $all = [
+                block_exaport_get_string('pdf_settings_fontfamily_fixedgroup') => $defaultfamilies,
+                block_exaport_get_string('pdf_settings_fontfamily_customgroup') => $customfonts,
+            ];
+        } else {
+            $all = [
+                0 => $defaultfamilies, // No groups!
+            ];
+        }
+	} else {
+        $all = $defaultfamilies + $customfonts;
+    }
+
+	return $all;
+}
+
+
+$general_content .= "<div class='' id='pdfDownloader'>\n";
+
+$pdfsettingslink = $PAGE->url;
+$pdfsettingslink->params(array(
+    'courseid' => optional_param('courseid', 1, PARAM_TEXT),
+    'access' => optional_param('access', 0, PARAM_TEXT),
 ));
-$general_content .= '<button class="btn btn-default" onclick="location.href=\''.$pdflink.'\'" type="button">'.block_exaport_get_string('download_pdf').' </button>';
 
-$general_content .= "</div>\n";
+// Insert PDF form
+$pdfFormData = [
+	'fontfamily' => $pdf_settings['fontfamily'],
+    'fontsize' => $pdf_settings['fontsize'],
+    'pagesize' => $pdf_settings['pagesize'],
+    'pageorient' => $pdf_settings['pageorient'],
+	'showmetadata' => $pdf_settings['showmetadata'] ? 1 : 0,
+	'showusername' => $pdf_settings['showusername'] ? 1 : 0,
+	'showuserpicture' => $pdf_settings['showuserpicture'] ? 1 : 0,
+	'showuseremail' => $pdf_settings['showuseremail'] ? 1 : 0,
+	'showuserphone' => $pdf_settings['showuserphone'] ? 1 : 0,
+];
+$pdfForm->set_data($pdfFormData);
+//displays the form
+$general_content .= $pdfForm->render();
 
-$general_content .= "<div class='block_eportfolio_center'>\n";
 
-$general_content .= "</div>\n";
 if (!$is_pdf) {
     $general_content .= block_exaport_wrapperdivend();
     $general_content .= $OUTPUT->footer();
@@ -588,22 +870,21 @@ if (!$is_pdf) {
 
 if ($is_pdf) {
     // old pdf view
-
     require_once (__DIR__.'/lib/classes/dompdf/autoload.inc.php');
     $options = new \Dompdf\Options();
     $options->set('isRemoteEnabled', true);
-    $options->set('defaultFont', 'dejavu sans');
+//    $options->set('defaultFont', 'dejavu sans');
+//	$options->set('debugLayout', true);
     $dompdf = new Dompdf($options);
-    $dompdf->setPaper('A4', 'landscape');
-    $general_content = pdf_view($view, $colslayout, $data_for_pdf);
-    // echo $general_content;exit;
+    $dompdf->setPaper($pdf_settings['pagesize'], $pdf_settings['pageorient']);
+    $general_content = pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings);
     $dompdf->loadHtml($general_content);
     $dompdf->render();
     $dompdf->stream('view.pdf'); //To popup pdf as download
     exit;
     /**/
 
-    // new pdf view
+    // new pdf view. not implemented yet
 
     // generate PDF directly. not as HTML. not done fully yet
     /* require_once __DIR__.'/lib/reportlib.php';
@@ -616,31 +897,255 @@ if ($is_pdf) {
 
 echo $general_content;
 
+/**
+ * Some servers app combinations PHP, OS e.t.c. can have different issues with pdf generation. Use this HTML cleaning
+ * @param $content
+ * @return mixed
+ */
+function prependHtmlContentToPdf($content, $view) {
+	global $USER;
 
-function pdf_view($view, $colslayout, $data_for_pdf) {
-    $pdf_content = '<html>';
-    $pdf_content .= '<body>';
-    $pdf_content .= '<style>
-        body {
-            /* only dejavu sans supports greek characters, but chinese is not working */
-            font-family: "dejavu sans";
-            font-size: 14px;
+    $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
+
+    $doc = new DOMDocument();
+    $doc->loadHTML($content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+	// Replace all <p> to span. Sometimes <p> has wrong overlays in result PDF.
+	// deprecated for new dompdf version?
+    /*$xpath = new DOMXPath($doc);
+    $pTags = $xpath->query('//p');
+    foreach ($pTags as $p) {
+        $span = $doc->createElement('p');
+	    // keep attributes
+//        foreach ($p->attributes as $attr) {
+//            $span->setAttribute($attr->name, $attr->value);
+//        }
+//      Add class to see span like p.
+        $span->setAttribute('class', $span->getAttribute('class').' pdf_paragraph');
+        $children = $p->childNodes;
+        foreach($children as $child) {
+            $newDomElementChild = $doc->importNode($child, true);
+            $span->appendChild($newDomElementChild);
         }
-        .view-table td {
-            padding: 5px;
+
+        $p->parentNode->replaceChild($span, $p);
+    }*/
+
+    // To see moodle images/files we need to have additional parameters in src url
+    // without this parameters Moodle asks to be logged in, but PDF generator is not
+    $xpath = new DOMXPath($doc);
+    // Find all <img> tags with 'src' containing 'pluginfile.php' (only our Moodle urls)
+    $imgTags = $xpath->query('//img[contains(@src, "pluginfile.php")][contains(@src, "block_exaport")]'); // check these conditions
+    foreach ($imgTags as $img) {
+        $src = $img->getAttribute('src');
+        // Additional check if 'src' contains 'pluginfile.php'
+        if (strpos($src, 'pluginfile.php') !== false) {
+            $newSrc = $src.'/forPdf/'.$view->hash.'/'.$view->id.'/'.$USER->id;
+            $img->setAttribute('src', $newSrc);
         }
-        h4 {
-            margin: 15px 0 0;
+    }
+
+    // Save the modified HTML content
+    $content = $doc->saveHTML();
+
+	// Clean empty spaces between tags.
+//    $content = trim(preg_replace('/>\s+</', '><', $content));
+
+	return $content;
+}
+
+
+function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
+	global $USER, $CFG;
+
+    $fontfamily = $pdf_settings['fontfamily'];
+    $fontfamilyUrl = '';
+	if (is_numeric($fontfamily)) {
+		// It is a custom uploaded file, so we need to get an url to this font.
+        $fs = get_file_storage();
+		$fontFile = $fs->get_file_by_id(intval($fontfamily));
+        $fontfamilyUrl = moodle_url::make_pluginfile_url(
+            $fontFile->get_contextid(),
+            $fontFile->get_component(),
+            $fontFile->get_filearea(),
+            $fontFile->get_itemid(),
+            $fontFile->get_filepath(),
+            $fontFile->get_filename(),
+            false                     // Do not force download of the file.
+        );
+        $fontfamilyUrl = $fontfamilyUrl->raw_out();
+		// font family must be unique for the font. Because dompdf creates cached fonts for every family
+        $fontfamily = 'customUploaded_'.$fontFile->get_filename();
+	}
+
+    $pdf_content = '';
+    $pdf_content .= '<!DOCTYPE html>'."\r\n";
+    $pdf_content .= '<html>'."\r\n";
+    $pdf_content .= '<head>'."\r\n";
+    $pdf_content .= '<style>'."\r\n";
+    if ($fontfamilyUrl) {
+		// Use the same font for different styles|weights (TODO: do we need to have a possibilitu to upload fonts for bold/italic?).
+        $pdf_content .= '
+			@font-face {
+			  font-family: "'.$fontfamily.'";
+			  font-weight: normal;
+		      font-style: normal;		  
+			  src:  url("'.$fontfamilyUrl.'") format("truetype");
+			}
+			@font-face {
+			  font-family: "'.$fontfamily.'";
+			  font-weight: normal;
+		      font-style: italic;		  
+			  src:  url("'.$fontfamilyUrl.'") format("truetype");
+			}
+			@font-face {
+			  font-family: "'.$fontfamily.'";
+			  font-weight: bold;
+		      font-style: normal;		  
+			  src:  url("'.$fontfamilyUrl.'") format("truetype");
+			}
+			@font-face {
+			  font-family: "'.$fontfamily.'";
+			  font-weight: bold;
+		      font-style: italic;		  
+			  src:  url("'.$fontfamilyUrl.'") format("truetype");
+			}
+			';
+    }
+	// Add CSS rules for metadata (header and footer)
+    if (@$pdf_settings['showmetadata']) {
+        $pdf_content .= '
+            body {
+                margin-top: 50px;
+                margin-bottom: 50px;
+            }
+		    #header {
+			    position: fixed;			     
+			    top: 0px; 			    
+			    height: 50px;		        
+		        margin: -25px -5px;
+                padding: 5px 15px;
+                width: 100%;
+	        }
+	        #header table {
+	            width: 100%;
+	        }
+	        #header table td.viewtitle,
+	        #header table td.userinfo {
+	            width: 50%;
+	        }
+	        #header table td.viewtitle {	            
+	            font-size: 1.25em;
+	            line-height: 1em;
+	        }
+	        #header table td.userinfo {
+	            text-align: right;
+	            padding-right: 15px;
+	            font-size:0.75em;
+	            line-height: 1.1em;
+	        }
+	        #header table td.userpicture {
+	            width: 50px;
+	            text-align: right;
+	        }
+	        #header table td.userpicture img {
+	            max-height: 40px;
+	            height: 40px;	            	          
+	        }
+	        #footer {
+	            position: fixed; 
+	            bottom: 0px;                		    
+			    height: 30px;		        
+		        margin: -15px -5px;
+		        margin-bottom: -15px;
+                padding: 0px 15px;
+                width: 100%;
+                color: #cccccc;
+                font-size: 0.75em;  
+                border-top: 1px solid #cccccc;              
+            }
+            #footer table { 
+                width: 100%;                
+            }
+            #footer table td {
+                width: 33%;
+                vertical-align: bottom;
+            }
+            #footer table td {
+                text-align: center;
+            }
+            #footer table td:first-child {
+				text-align: left                 
+            }
+            #footer table td:last-child  {
+                text-align: right;
+                padding-right: 15px;
+            }
+		';
+    }
+
+    $pdf_content .= '
+	        body {
+	            font-family: "'.$fontfamily.'";
+	            font-size: '.$pdf_settings['fontsize'].'px;
+	            font-weight: normal !important;
+	        }	        
+	        .view-table td {
+	            padding: 5px;
+	        }
+	        h4 {	          
+	            margin: 15px 0 0;	           
+	        }
+	        div.view-block {
+	            position: relative;
+	            height: auto;
+	            clear: both;           
+	            border-top: 1px solid #eeeeee;
+	        }
+	        /*span.pdf_paragraph {
+	            clear: both;
+	            color: red;
+	            display: block;	            
+	        }*/
+        ';
+    $pdf_content .= "\r\n";
+    $pdf_content .= '</style>'."\r\n";
+    $pdf_content .= '<title>'.$view->name.'</title>'."\r\n";
+    $pdf_content .= '</head>'."\r\n";
+    $pdf_content .= '<body>'."\r\n";
+
+	// Add header metadata
+	if (@$pdf_settings['showmetadata']) {
+		$pdf_content .= '<div id="header">';
+        $pdf_content .= '<table><tr>';
+        $pdf_content .= '<td class="viewtitle">'.$view->name.'</td>';
+		$userlines = [];
+        require_once($CFG->dirroot . '/user/lib.php');
+        $user = \core_user::get_user($view->userid);
+		$userData = user_get_user_details($user, null, array('email', 'fullname', 'profileimageurl', 'email', 'phone1', 'phone2'));
+		if ($pdf_settings['showusername']) {
+			$userlines[] = $userData['fullname'];
+		}
+		if ($pdf_settings['showuseremail']) {
+			$userlines[] = $userData['email'];
+		}
+		if ($pdf_settings['showuserphone']) {
+			$tel = trim($userData['phone1'].($userData['phone1'] ? ', '.$userData['phone1'] : ''));
+			$userlines[] = $tel ? 'tel: '.$tel : '';
+		}
+        $userlines = array_filter($userlines);
+        $userdatacontent = implode('<br>', $userlines);
+        $pdf_content .= '<td class="userinfo">'.$userdatacontent.'</td>';
+        if ($pdf_settings['showuserpicture']) {
+            $pdf_content .= '<td class="userpicture">';
+            $pdf_content .= '<img src="'.$userData['profileimageurl'].'" />';
+            $pdf_content .= '</td>';
         }
-        div.view-block {
-            position: relative;
-            height: auto;
-            clear: both;
-            /*background-color: #fefefe;*/
-            border-top: 1px solid #eeeeee;
-        }
-        </style>';
-    $pdf_content .= '<table border="0" width="100%" class="view-table" style="table-layout:fixed;">';
+        $pdf_content .= '</tr></table>';
+        $pdf_content .= '</div>';
+	}
+
+    $pdf_content .= '<table class="view-table" style="width: 100%; border: none; table-layout:fixed;">'."\r\n";
     $pdf_content .= '<tr>';
     $max_rows = 0;
     foreach ($data_for_pdf as $col => $blocks) {
@@ -649,36 +1154,41 @@ function pdf_view($view, $colslayout, $data_for_pdf) {
     for ($coli = 1; $coli <= $colslayout[$view->layout]; $coli++) {
         $pdf_content .= '<td width="'.(round(100 / $colslayout[$view->layout]) - 1).'%" valign="top">';
         if (array_key_exists($coli, $data_for_pdf)) {
-            $pdf_content .= '<table width="100%" style="word-wrap: break-word !important;">';
             foreach ($data_for_pdf[$coli] as $block) {
+				// Every block in own table - to keep width if some block has very big width.
+                $pdf_content .= '<table width="100%" style="word-break:break-all !important; word-wrap: break-word !important; overflow-wrap: break-word !important;">';
                 $pdf_content .= '<tr><td>';
                 $pdf_content .= $block;
                 $pdf_content .= '</td></tr>';
+                $pdf_content .= '</table>';
             }
-            $pdf_content .= '</table>';
+        } else {
+            $pdf_content .= '&nbsp;';
         }
-
         $pdf_content .= '</td>';
     }
-    /* for ($rowI = 0; $rowI < $max_rows; $rowI++) {
-        $pdf_content .= '<tr>';
-
-        for ($coli = 1; $coli <= $colslayout[$view->layout]; $coli++) {
-            $pdf_content .= '<td width="'.(round(100 / $colslayout[$view->layout]) - 1).'%">';
-            if (array_key_exists($coli, $data_for_pdf)) {
-                if (array_key_exists($rowI, $data_for_pdf[$coli])) {
-                    $pdf_content .= $data_for_pdf[$coli][$rowI];
-                }
-            }
-            $pdf_content .= '</td>';
-        }
-        $pdf_content .= '</tr>';
-    }*/
     $pdf_content .= '</tr>';
-    $pdf_content .= '</table>';
-    $pdf_content .= '</body>';
-    $pdf_content .= '</html>';
-    // echo $pdf_content; exit;
+    $pdf_content .= '</table>'."\r\n";
+
+	// footer
+	if (@$pdf_settings['showmetadata']) {
+        $pdf_content .= '<div id="footer">';
+        $pdf_content .= '<table><tr>';
+        $pdf_content .= '<td class="">' . $view->name . '</td>';
+        $pdf_content .= '<td class="">&copy; Exabis ePortfolio</td>';
+        $pdf_content .= '<td class="">' . date('d.m.Y') . '</td>';
+        $pdf_content .= '</body>' . "\r\n";
+        $pdf_content .= '</html>';
+
+        $pdf_content = prependHtmlContentToPdf($pdf_content, $view);
+    }
+
+	// Output for debugging.
+//    echo '<textarea>';
+//    print_r($pdf_content);
+//    echo '</textarea>';
+//    exit;
+//     echo $pdf_content; exit;
     return $pdf_content;
 }
 

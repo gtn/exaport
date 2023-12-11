@@ -271,7 +271,6 @@ $stringnotused['nobookmarksexternal'] = '(inga externa länkar ännu)';
 $string['steckbrief'] = 'Profile';
 
 $string['notify'] = 'notify';
-$string['share'] = 'share';
 $string['sharejs'] = 'share';
 
 $string['view_specialitem_media'] = 'Media';

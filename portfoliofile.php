@@ -50,6 +50,8 @@ $userhash = optional_param('hv', 0, PARAM_ALPHANUM);
 $token = optional_param('token', null, PARAM_ALPHANUM);
 // New token.
 $wstoken = optional_param('wstoken', $token, PARAM_ALPHANUM);
+$download = optional_param('download', true, PARAM_BOOL);
+
 // Block_exaport_epop_checkhash.
 $epopaccess = false;
 
@@ -135,8 +137,14 @@ if ($itemid) {
             readstring_accel($tempfilecontent, $mimetype, false);
             die;
         }
-            // send_stored_file($file, 1);
-        send_stored_file($file, null, 0, true);
+
+
+        $as_pdf = optional_param('as_pdf', false, PARAM_BOOL);
+        if ($as_pdf && class_exists('\block_exacomp\api')) {
+            \block_exacomp\api::send_stored_file_as_pdf($file, $download);
+        }
+
+        send_stored_file($file, null, 0, $download);
     } else {
         not_found();
     }

@@ -1,3 +1,8 @@
+### v4.6.7 (2023121200) ###
+* moodle 4.3 compatibility 
+* dakora, possibility of multiple assignments
+* allow as_pdf=1 for diggr+ files
+
 ### v4.6.7 (2023091600) ###
 * php8 fixes
 * fix several bugs with exaport view editing

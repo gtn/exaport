@@ -275,7 +275,7 @@ class block_exaport_external extends external_api {
                 'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link)', VALUE_DEFAULT, ''),
                 'fileitemid' => new external_value(PARAM_INT, 'itemid for draft-area files; for "private" files is ignored',
                         VALUE_DEFAULT, null),
-                'filename' => new external_value (PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT,
+                'filename' => new external_value(PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT,
                         ''),
         ]);
     }
@@ -362,7 +362,7 @@ class block_exaport_external extends external_api {
                 'fileitemid' => new external_value(PARAM_INT,
                         'itemid for draft-area files; for "private" files is ignored, use \'0\' to delete the file', VALUE_DEFAULT,
                         null),
-                'filename' => new external_value (PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT,
+                'filename' => new external_value(PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT,
                         ''),
         ]);
     }
@@ -1636,7 +1636,7 @@ class block_exaport_external extends external_api {
     }
 
     public static function get_user_information_parameters() {
-        return new external_function_parameters (array());
+        return new external_function_parameters(array());
     }
 
     /**
@@ -1653,7 +1653,7 @@ class block_exaport_external extends external_api {
     }
 
     public static function get_user_information_returns() {
-        return new external_single_structure (array(
+        return new external_single_structure(array(
                 'id' => new external_value(PARAM_INT, 'ID of the user'),
                 'username' => new external_value(PARAM_RAW, 'The username', VALUE_OPTIONAL),
                 'firstname' => new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL),
@@ -1673,9 +1673,9 @@ class block_exaport_external extends external_api {
 
     public static function login_parameters() {
         return new external_function_parameters(array(
-                'app' => new external_value (PARAM_INT, 'app accessing this service (eg. dakora)'),
-                'app_version' => new external_value (PARAM_INT, 'version of the app (eg. 4.6.0)'),
-                'services' => new external_value (PARAM_INT, 'wanted webservice tokens (eg. exacomp,exaport)', VALUE_DEFAULT,
+                'app' => new external_value(PARAM_INT, 'app accessing this service (eg. dakora)'),
+                'app_version' => new external_value(PARAM_INT, 'version of the app (eg. 4.6.0)'),
+                'services' => new external_value(PARAM_INT, 'wanted webservice tokens (eg. exacomp,exaport)', VALUE_DEFAULT,
                         'moodle_mobile_app,exaportservices'),
         ));
     }
@@ -1686,12 +1686,12 @@ class block_exaport_external extends external_api {
      * @return external_multiple_structure
      */
     public static function login_returns() {
-        return new external_single_structure ([
+        return new external_single_structure([
                 'user' => static::get_user_information_returns(),
                 'config' => new external_single_structure([]),
-                'tokens' => new external_multiple_structure (new external_single_structure ([
-                        'service' => new external_value (PARAM_TEXT, 'name of service'),
-                        'token' => new external_value (PARAM_TEXT, 'token of the service'),
+                'tokens' => new external_multiple_structure(new external_single_structure([
+                        'service' => new external_value(PARAM_TEXT, 'name of service'),
+                        'token' => new external_value(PARAM_TEXT, 'token of the service'),
                 ]), 'requested tokens'),
         ]);
     }

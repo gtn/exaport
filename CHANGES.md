@@ -2,6 +2,7 @@
 * moodle 4.3 compatibility 
 * dakora, possibility of multiple assignments
 * allow as_pdf=1 for diggr+ files
+* fix issues when creating a pdf from exaport-views
 
 ### v4.6.7 (2023091600) ###
 * php8 fixes

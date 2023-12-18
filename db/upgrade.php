@@ -1051,6 +1051,18 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023102600, 'exaport');
     }
 
+    if ($oldversion < 2023121800){
+        // Define a new field 'pdf_settings' for table block_exaportview
+        $table = new xmldb_table('block_exaportview');
+        $field = new xmldb_field('layout_settings', XMLDB_TYPE_TEXT, null, null, null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2023121800, 'exaport');
+    }
+
     return $result;
 }
 

@@ -765,5 +765,11 @@ Y.use('moodle-core-notification-dialogue');
         // $(this).fu_popover('show');
     });
 
+    $(function () {
+        $('.view-group-header').on('click', function () {
+            $(this).closest('.view-group').toggleClass('view-group-open');
+        });
+    });
+
 
 })(jQueryExaport);

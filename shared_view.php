@@ -346,6 +346,11 @@ $comp = block_exaport_check_competence_interaction();
 require_once(__DIR__.'/lib/resumelib.php');
 $resume = block_exaport_get_resume_params($view->userid, true);
 
+$layoutSettings = unserialize($view->layout_settings);
+if ($layoutSettings) {
+    echo block_exaport_get_view_layout_style_from_settings($layoutSettings, 'shared');
+}
+
 $colslayout = array(
         "1" => 1, "2" => 2, "3" => 2, "4" => 2, "5" => 3, "6" => 3, "7" => 3, "8" => 4, "9" => 4, "10" => 5,
 );

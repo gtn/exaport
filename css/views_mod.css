@@ -399,3 +399,26 @@
 .modal .exaport-helpicon {
     cursor: pointer;
 }
+
+#exaport .layout_settings.view-group {
+ border: none;
+}
+#exaport .view-group-header {
+    text-align: left;
+    padding: 5px;
+    padding-left: 25px;
+    cursor: pointer;
+    background: url('../pix/group_closed.png') no-repeat 10px;
+}
+#exaport .view-group-open .view-group-header {
+    background: url('../pix/group_open.png') no-repeat 10px;
+}
+#exaport .view-group .view-group-content {
+    display: none;
+}
+#exaport .view-group-open .view-group-content {
+    display: block;
+}
+#exaport #exaport-view-mod .layout_settings textarea {
+    height: auto !important;
+}

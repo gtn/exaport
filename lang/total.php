@@ -2105,6 +2105,46 @@ return [
             'Custom uploaded fonts',
             'Custom uploaded fonts',
         ],
+        'layout_settings' => [
+            'Layout-Einstellungen',
+            'Layout settings',
+        ],
+        'layout_settings_description' => [
+            'Here you can change some view layout options or use own custom CSS rules to have the view as you want',
+            'Here you can change some view layout options or use own custom CSS rules to have the view as you want',
+        ],
+        'layout_settings_font_size' => [
+            'Font size',
+            'Font size',
+        ],
+        'layout_settings_border_width' => [
+            'Border width',
+            'Border width',
+        ],
+        'layout_settings_font_weight' => [
+            'Bold',
+            'Bold',
+        ],
+        'layout_settings_border_width_only_bottom' => [
+            'Only bottom border',
+            'Only bottom border',
+        ],
+        'layout_settings_view_headers' => [
+            'Headers of view blocks',
+            'Headers of view blocks',
+        ],
+        'layout_settings_view_content' => [
+            'Content of view blocks',
+            'Content of view blocks',
+        ],
+        'layout_settings_custom_css' => [
+            'Custom CSS',
+            'Custom CSS',
+        ],
+        'layout_settings_custom_css_description' => [
+            'You can use own custom CSS rules here',
+            'You can use own custom CSS rules here',
+        ],
         'selected_competencies' => [
             'Erreichte Kompetenz',
             'Achieved Competency'

@@ -2165,5 +2165,82 @@ function block_exaport_get_comments_for_item($itemid) {
     return $comments;
 }
 
+function block_exaport_get_view_layout_style_from_settings($layoutSettings, $view = 'shared') {
+    $layoutSettings = array_filter($layoutSettings);
+    if (!$layoutSettings) {
+        return '';
+    }
+    $style = '<style>';
+    $style .= '/* Custom view styles */';
+    switch ($view) {
+        case 'edit_form': // do we need it?
+            /*if (@$layoutSettings['header_fontSize'] != -1) {
+                $style .= '
+                    #exaport .item .header > .body,
+                    #exaport .item .header > .headerText
+                                        {font-size: '.$layoutSettings['header_fontSize'].'rem;}
+                    ';
+            }
+            if (@$layoutSettings['text_fontSize'] != -1) {
+                $style .= '#exaport .item :not(.header) .body {font-size: '.$layoutSettings['text_fontSize'].'rem;}';
+            }*/
+            break;
+        case 'shared':
+            if (@$layoutSettings['header_fontSize'] != -1) {
+                $style .= '
+                    #exaport #view .header {
+                        font-size: '.$layoutSettings['header_fontSize'].'rem;
+                    }';
+                $style .= "\r\n";
+            }
+            if (@$layoutSettings['headerBold']) {
+                $style .= '
+                    #exaport #view .header {
+                        font-weight: bold;
+                    }
+                    ';
+                $style .= "\r\n";
+            }
+            if (@$layoutSettings['text_fontSize'] != -1) {
+                $style .= '#exaport #view .view-personal-information,
+                            #exaport #view .view-text,
+                            #exaport #view .view-item
+                    {
+                        font-size: '.$layoutSettings['text_fontSize'].'rem;
+                    }';
+                $style .= "\r\n";
+            }
+            if (@$layoutSettings['header_borderWidth'] != -1) {
+                if (!$layoutSettings['header_borderWidth']) { // zero
+                    $styleVal = 'border-bottom: none !important;';
+                } else {
+                    $styleVal = 'border-bottom: solid ' . $layoutSettings['header_borderWidth'] . 'px #dddddd !important;';
+                }
+                $style .= '#exaport #view .header { '.$styleVal.' }';
+                $style .= "\r\n";
+            }
+            if (@$layoutSettings['block_borderWidth'] != -1) {
+                if (!$layoutSettings['block_borderWidth']) { // zero
+                    $styleVal = 'border: none !important;';
+                } else {
+                    $styleVal = 'border: solid '.$layoutSettings['block_borderWidth'].'px #dddddd !important;';
+                }
+                $style .= '#exaport #view .view-personal-information,
+                            #exaport #view .view-text,
+                            #exaport #view .view-item
+                    {
+                        '.$styleVal.'
+                    }';
+                $style .= "\r\n";
+            }
+            if (@$layoutSettings['customCss']) {
+                $style .= $layoutSettings['customCss'];
+                $style .= "\r\n";
+            }
+            break;
+    }
+    $style .= '</style>';
+    return $style;
+}
 
 

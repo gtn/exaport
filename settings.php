@@ -18,6 +18,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once(__DIR__ . '/lib/lib.php');
+require_once __DIR__ . '/lib/settings_helper.php';
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas',
@@ -99,4 +100,17 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_copy_category_to_my',
         get_string('block_exaport_copytomyportfolio', 'block_exaport'),
         get_string('block_exaport_copytomyportfolio_body', 'block_exaport'), 0));
+
+    // View custom template settings
+    $settings->add(new admin_setting_heading('exaport/layout_settings',
+        block_exacomp_get_string('settings_layout_settings_heading', 'block_exaport'),
+        ''));
+    // allow "custom layouts" for view owners
+    $settings->add(new admin_setting_configcheckbox('block_exaport_allow_custom_layout',
+        get_string('block_exaport_allowcustomlayout_head', 'block_exaport'),
+        get_string('block_exaport_allowcustomlayout_body', 'block_exaport'), 0));
+    //  the table with layout settings
+    $settings->add(new block_exaport_layout_configtable('block_exaport_layout_settings', block_exaport_get_string('settings_layout_settings_description'), '', ''));
+
+
 }

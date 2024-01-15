@@ -2105,6 +2105,22 @@ return [
             'Custom uploaded fonts',
             'Custom uploaded fonts',
         ],
+        'settings_layout_settings_heading' => [
+            'Layout-Einstellungen',
+            'Layout settings',
+        ],
+        'block_exaport_allowcustomlayout_head' => [
+            'Custom options for the view layout for view owners',
+            'Custom options for the view layout for view owners',
+        ],
+        'block_exaport_allowcustomlayout_body' => [
+            'Allows to use custom view layout settings (similar to options below) for regular owners of the views',
+            'Allows to use custom view layout settings (similar to options below) for regular owners of the views',
+        ],
+        'settings_layout_settings_description' => [
+            'Here you can change some view layout options or use own custom CSS rules to have the view as you want<br>These settings will be used as default settings <strong>for all views</strong>',
+            'Here you can change some view layout options or use own custom CSS rules to have the view as you want<br>These settings will be used as default settings <strong>for all views</strong>',
+        ],
         'layout_settings' => [
             'Layout-Einstellungen',
             'Layout settings',

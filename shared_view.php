@@ -17,7 +17,6 @@
 
 use Dompdf\Adapter\CPDF;
 use Dompdf\Dompdf;
-use Dompdf\Exception;
 
 require_once(__DIR__.'/inc.php');
 require_once(__DIR__.'/blockmediafunc.php');
@@ -49,7 +48,7 @@ $pdfsettingslink->params(array(
     'access' => optional_param('access', 0, PARAM_TEXT),
 ));
 
-// PDF form defintition
+// PDF form definition
 require_once($CFG->libdir.'/formslib.php');
 class pdfsettings_form extends moodleform {
     //Add elements to form
@@ -58,6 +57,7 @@ class pdfsettings_form extends moodleform {
         $mform = $this->_form;
         $mform->disable_form_change_checker();
         $mform->addElement('hidden', 'ispdf', '1');
+        $mform->setType('ispdf', PARAM_INT);
 
 		$view = $this->_customdata['view'];
 		// All pdf settings are only for view owners
@@ -346,9 +346,8 @@ $comp = block_exaport_check_competence_interaction();
 require_once(__DIR__.'/lib/resumelib.php');
 $resume = block_exaport_get_resume_params($view->userid, true);
 
-$layoutSettings = unserialize($view->layout_settings);
-if ($layoutSettings) {
-    echo block_exaport_get_view_layout_style_from_settings($layoutSettings, 'shared');
+if (!$is_pdf) {
+    echo block_exaport_get_view_layout_style_from_settings($view, 'shared_view');
 }
 
 $colslayout = array(
@@ -884,7 +883,13 @@ if ($is_pdf) {
     $dompdf->setPaper($pdf_settings['pagesize'], $pdf_settings['pageorient']);
     $general_content = pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings);
     $dompdf->loadHtml($general_content);
-    $dompdf->render();
+    try {
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING | E_DEPRECATED));
+        $dompdf->render();
+    } catch (\Dompdf\Exception $e) {
+        throw new moodle_exception('Something wrong with PDF generator ');
+        exit;
+    }
     $dompdf->stream('view.pdf'); //To popup pdf as download
     exit;
     /**/
@@ -1115,6 +1120,11 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
         ';
     $pdf_content .= "\r\n";
     $pdf_content .= '</style>'."\r\n";
+
+    // add custom styles from view layouts
+    // TODO: dow we need this?
+//    $pdf_settings .= block_exaport_get_view_layout_style_from_settings($view);
+
     $pdf_content .= '<title>'.$view->name.'</title>'."\r\n";
     $pdf_content .= '</head>'."\r\n";
     $pdf_content .= '<body>'."\r\n";

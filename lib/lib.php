@@ -2165,14 +2165,41 @@ function block_exaport_get_comments_for_item($itemid) {
     return $comments;
 }
 
-function block_exaport_get_view_layout_style_from_settings($layoutSettings, $view = 'shared') {
+function block_exaport_get_view_layout_style_from_settings($view, $styleFor = 'shared_view') {
+    global $CFG;
+    
+    // Get layout options from exaport settings
+    $layoutSettings = @$CFG->block_exaport_layout_settings;
+    if ($layoutSettings) {
+        $layoutSettings = unserialize($layoutSettings);
+    }
+
+    if (@$CFG->block_exaport_allow_custom_layout && $view->layout_settings) {
+        $viewLayoutSettings = unserialize($view->layout_settings);
+        foreach ($viewLayoutSettings as $settingName => $value) {
+            // we need this foreach because '-1' is for default (so - from exaport settings) value
+            switch ($settingName) {
+                case 'customCss':
+                    if (trim($value)) {
+                        // ADD custom CSS to existing
+                        $layoutSettings[$settingName] .= $value;
+                    }
+                    break;
+                default:
+                    if ($value != -1) {
+                        $layoutSettings[$settingName] = $value;
+                    }
+            }
+        }
+    }
+
     $layoutSettings = array_filter($layoutSettings);
     if (!$layoutSettings) {
         return '';
     }
     $style = '<style>';
     $style .= '/* Custom view styles */';
-    switch ($view) {
+    switch ($styleFor) {
         case 'edit_form': // do we need it?
             /*if (@$layoutSettings['header_fontSize'] != -1) {
                 $style .= '
@@ -2185,7 +2212,7 @@ function block_exaport_get_view_layout_style_from_settings($layoutSettings, $vie
                 $style .= '#exaport .item :not(.header) .body {font-size: '.$layoutSettings['text_fontSize'].'rem;}';
             }*/
             break;
-        case 'shared':
+        case 'shared_view':
             if (@$layoutSettings['header_fontSize'] != -1) {
                 $style .= '
                     #exaport #view .header {
@@ -2204,7 +2231,8 @@ function block_exaport_get_view_layout_style_from_settings($layoutSettings, $vie
             if (@$layoutSettings['text_fontSize'] != -1) {
                 $style .= '#exaport #view .view-personal-information,
                             #exaport #view .view-text,
-                            #exaport #view .view-item
+                            #exaport #view .view-item,
+                            #exaport #view .view-cv-information
                     {
                         font-size: '.$layoutSettings['text_fontSize'].'rem;
                     }';
@@ -2227,7 +2255,8 @@ function block_exaport_get_view_layout_style_from_settings($layoutSettings, $vie
                 }
                 $style .= '#exaport #view .view-personal-information,
                             #exaport #view .view-text,
-                            #exaport #view .view-item
+                            #exaport #view .view-item,
+                            #exaport #view .view-cv-information
                     {
                         '.$styleVal.'
                     }';
@@ -2243,4 +2272,32 @@ function block_exaport_get_view_layout_style_from_settings($layoutSettings, $vie
     return $style;
 }
 
+function block_exaport_layout_fontsizes() {
+    $fontSizes = [
+        '-1' => 'default',
+        '0.25' => '25%',
+        '0.5' => '50%',
+        '0.75' => '75%',
+        '1' => '100%',
+        '1.25' => '125%',
+        '1.5' => '150%',
+        '1.75' => '175%',
+        '2.0' => '200%',
+        '2.25' => '225%',
+        '2.5' => '250%',
+    ];
+    return $fontSizes;
+}
 
+function block_exaport_layout_borderwidths() {
+    $borderWidths = [
+        '-1' => 'default',
+        '0' => 'none',
+        '1' => '1px',
+        '2' => '2px',
+        '3' => '3px',
+        '4' => '4px',
+        '5' => '5px',
+    ];
+    return $borderWidths;
+}

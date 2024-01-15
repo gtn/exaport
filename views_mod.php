@@ -1030,112 +1030,94 @@ switch ($type) {
                     <div class="layoutdescription">'.get_string("viewlayout10", "block_exaport").'</div>
                 </div>
             </div>';
-        if ($view->layout_settings) {
-            $layoutSettings = unserialize($view->layout_settings);
-        } else {
-            $layoutSettings = [];
-        }
-		// Additional layout settings
 
-        $fontSizes = [
-				'-1' => 'default',
-				'0.25' => '25%',
-				'0.5' => '50%',
-				'0.75' => '75%',
-				'1' => '100%',
-				'1.25' => '125%',
-				'1.5' => '150%',
-				'1.75' => '175%',
-				'2.0' => '200%',
-	            '2.25' => '225%',
-	            '2.5' => '250%',
-        ];
-        $borderWidths = [
-				'-1' => 'default',
-				'0' => 'none',
-				'1' => '1px',
-				'2' => '2px',
-				'3' => '3px',
-				'4' => '4px',
-				'5' => '5px',
-        ];
-        $selectedHeaderFontSize = @$layoutSettings['header_fontSize'] ?: '-1';
-        $selectedTextFontSize = @$layoutSettings['text_fontSize'] ?: '-1';
-        $selectedHeaderBorderWidth = @$layoutSettings['header_borderWidth'] ?: '-1';
-        $selectedBlockBorderWidth = @$layoutSettings['block_borderWidth'] ?: '-1';
-        $customLayoutCss = @$layoutSettings['customCss'] ?: '';
-        $headerBold = @$layoutSettings['headerBold'] ?: false;
-        // Container: collapsible.
-        echo '<fieldset class="layout_settings clearfix view-group">
-            <legend class="view-group-header">' . block_exaport_get_string('layout_settings') . '</legend>
-            <div class="view-group-content clearfix">
-            
-            <div class="alert alert-info">'.block_exaport_get_string('layout_settings_description').'</div>
-            
-            <div class="form-group row">
-					<div class="col-md-3 col-form-label">					    
-					</div>
-					<div class="col-md-3 col-form-label">
-					    <strong>'.block_exaport_get_string('layout_settings_font_size').'</strong>
-					</div>
-					<div class="col-md-3 col-form-label">
-					    <strong>'.block_exaport_get_string('layout_settings_font_weight').'</strong>
-					</div>
-					<div class="col-md-3 col-form-label">
-					    <strong>'.block_exaport_get_string('layout_settings_border_width').'</strong>
-					</div>					
-            </div>
-            <div class="form-group row">
-					<div class="col-md-3 col-form-label">
-					    <strong>'.block_exaport_get_string('layout_settings_view_headers').'</strong>					    
-					</div>
-					<div class="col-md-3 col-form-label">
-					    '.html_writer::select($fontSizes, 'layoutSettings[header_fontSize]', $selectedHeaderFontSize, false, ['id' => 'header_fontSize']).'
-					</div>
-					<div class="col-md-3 col-form-label">
-					    '.html_writer::checkbox('layoutSettings[headerBold]', '1', $headerBold).'
-					</div>
-					<div class="col-md-3 col-form-label">
-					    '.html_writer::select($borderWidths, 'layoutSettings[header_borderWidth]', $selectedHeaderBorderWidth, false, ['id' => 'header_borderWidth']).'<br>					  
-					    <small>'.block_exaport_get_string('layout_settings_border_width_only_bottom').'</small>
-					</div>					
-            </div>
-            <div class="form-group row">
-					<div class="col-md-3 col-form-label">
-					    <strong>'.block_exaport_get_string('layout_settings_view_content').'</strong>					    
-					</div>
-					<div class="col-md-3 col-form-label">
-					    '.html_writer::select($fontSizes, 'layoutSettings[text_fontSize]', $selectedTextFontSize, false, ['id' => 'text_fontSize']).'
-					</div>
-					<div class="col-md-3 col-form-label">
-					    
-					</div>
-					<div class="col-md-3 col-form-label">
-					    '.html_writer::select($borderWidths, 'layoutSettings[block_borderWidth]', $selectedBlockBorderWidth, false, ['id' => 'block_borderWidth']).'
-					</div>					
-            </div>           
-	           
-            <div class="form-group row">
-				<div class="col-md-3 col-form-label">
-					<strong>'.html_writer::label(block_exaport_get_string('layout_settings_custom_css'), 'customCss').'</strong><br>
-					<small>'.block_exaport_get_string('layout_settings_custom_css_description').'</small>
-					</div>
-					<div class="col-md-9 form-inline">
-						'.html_writer::tag(
-                                'textarea',
-                                $customLayoutCss,
-                                array(
-                                        'id' => 'customCss',
-                                        'name' => 'layoutSettings[customCss]',
-                                        'class' => 'form-control',
-                                        'rows' => 5,
-                                        'cols' => 40,
-                                )
-                        ).'
-					</div>
-				</div>                
-            </div>
-			</fieldset>';
+            if (@$CFG->block_exaport_allow_custom_layout) {
+                if ($view->layout_settings) {
+                    $layoutSettings = unserialize($view->layout_settings);
+                } else {
+                    $layoutSettings = [];
+                }
+                // Additional layout settings
+                $fontSizes = block_exaport_layout_fontsizes();
+                $borderWidths = block_exaport_layout_borderwidths();
+                $selectedHeaderFontSize = @$layoutSettings['header_fontSize'] ?: '-1';
+                $selectedTextFontSize = @$layoutSettings['text_fontSize'] ?: '-1';
+                $selectedHeaderBorderWidth = @$layoutSettings['header_borderWidth'] ?: '-1';
+                $selectedBlockBorderWidth = @$layoutSettings['block_borderWidth'] ?: '-1';
+                $customLayoutCss = @$layoutSettings['customCss'] ?: '';
+                $headerBold = @$layoutSettings['headerBold'] ?: false;
+                // Container: collapsible.
+                echo '<fieldset class="layout_settings clearfix view-group">
+                <legend class="view-group-header">' . block_exaport_get_string('layout_settings') . '</legend>
+                <div class="view-group-content clearfix">
+                
+                <div class="alert alert-info">' . block_exaport_get_string('layout_settings_description') . '</div>
+                
+                <div class="form-group row">
+                        <div class="col-md-3 col-form-label">					    
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            <strong>' . block_exaport_get_string('layout_settings_font_size') . '</strong>
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            <strong>' . block_exaport_get_string('layout_settings_font_weight') . '</strong>
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            <strong>' . block_exaport_get_string('layout_settings_border_width') . '</strong>
+                        </div>					
+                </div>
+                <div class="form-group row">
+                        <div class="col-md-3 col-form-label">
+                            <strong>' . block_exaport_get_string('layout_settings_view_headers') . '</strong>					    
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            ' . html_writer::select($fontSizes, 'layoutSettings[header_fontSize]', $selectedHeaderFontSize, false, ['id' => 'header_fontSize']) . '
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            ' . html_writer::checkbox('layoutSettings[headerBold]', '1', $headerBold) . '
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            ' . html_writer::select($borderWidths, 'layoutSettings[header_borderWidth]', $selectedHeaderBorderWidth, false, ['id' => 'header_borderWidth']) . '<br>					  
+                            <small>' . block_exaport_get_string('layout_settings_border_width_only_bottom') . '</small>
+                        </div>					
+                </div>
+                <div class="form-group row">
+                        <div class="col-md-3 col-form-label">
+                            <strong>' . block_exaport_get_string('layout_settings_view_content') . '</strong>					    
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            ' . html_writer::select($fontSizes, 'layoutSettings[text_fontSize]', $selectedTextFontSize, false, ['id' => 'text_fontSize']) . '
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            
+                        </div>
+                        <div class="col-md-3 col-form-label">
+                            ' . html_writer::select($borderWidths, 'layoutSettings[block_borderWidth]', $selectedBlockBorderWidth, false, ['id' => 'block_borderWidth']) . '
+                        </div>					
+                </div>           
+                   
+                <div class="form-group row">
+                    <div class="col-md-3 col-form-label">
+                        <strong>' . html_writer::label(block_exaport_get_string('layout_settings_custom_css'), 'customCss') . '</strong><br>
+                        <small>' . block_exaport_get_string('layout_settings_custom_css_description') . '</small>
+                        </div>
+                        <div class="col-md-9 form-inline">
+                            ' . html_writer::tag(
+                        'textarea',
+                        $customLayoutCss,
+                        array(
+                            'id' => 'customCss',
+                            'name' => 'layoutSettings[customCss]',
+                            'class' => 'form-control',
+                            'rows' => 5,
+                            'cols' => 40,
+                        )
+                    ) . '
+                        </div>
+                    </div>                
+                </div>
+                </fieldset>';
+            }
         break;
 
     case 'share' :

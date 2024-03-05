@@ -184,7 +184,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             return false;
         }
     } else if (in_array($filearea,
-                    array('resume_cover', 'resume_interests', 'resume_edu', 'resume_employ', 'resume_certif', 'resume_public',
+                    array('resume_cover', 'resume_editor_cover', 'resume_interests', 'resume_edu', 'resume_employ', 'resume_certif', 'resume_public',
                             'resume_mbrship')) ||
             in_array($filearea,
                     array('resume_goalspersonal', 'resume_goalsacademic', 'resume_goalscareers', 'resume_skillspersonal',

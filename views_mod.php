@@ -276,7 +276,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
             $mform->closeHeaderBefore('buttonar');
         } else {
             // No group needed
-            $mform->addElement('submit', 'submitbutton', $submitlabel, ['class' => 'btn btn-primary btn-default']);
+            $mform->addElement('submit', 'submitbutton', $submitlabel, ['class' => 'btn btn-primary']);
             $mform->closeHeaderBefore('submitbutton');
         }
     }
@@ -711,7 +711,10 @@ switch ($action) {
 if ($view) {
     $postview->blocks = json_encode(block_exaport_get_view_blocks($view));
     require_once(__DIR__.'/lib/resumelib.php');
-    $postview->resume = json_encode(block_exaport_get_resume_params($USER->id, true));
+    $resumedata = block_exaport_get_resume_params($USER->id, true);
+    $resumedata->cover = file_rewrite_pluginfile_urls($resumedata->cover, 'pluginfile.php',
+        context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resumedata->id);
+    $postview->resume = json_encode($resumedata);
 }
 
 $tinylibpath = $CFG->libdir.'/editor/tinymce/lib.php';
@@ -791,6 +794,8 @@ if ($view->id) {
 
 // add resume items
 $resumeitems = block_exaport_get_resume_params($USER->id, true);
+$resumeitems->cover = file_rewrite_pluginfile_urls($resumeitems->cover, 'pluginfile.php',
+    context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resumeitems->id);
 
 ?>
     <script type="text/javascript">
@@ -822,13 +827,6 @@ switch ($type) {
                 src="<?php echo $CFG->wwwroot;?>/lib/editor/tinymce/tiny_mce/<?php echo $tinymce->version; ?>/tiny_mce.js"></script>
 
         <?php
-        // Custom Layout settings
-        // Do we need it for edit form?
-        /*$layoutSettings = unserialize($view->layout_settings);
-        if ($layoutSettings) {
-            echo block_exaport_get_view_layout_style_from_settings($layoutSettings, 'edit_form');
-        }*/
-
         // View data form.
         echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');
         // Preview button.

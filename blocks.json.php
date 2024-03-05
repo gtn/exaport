@@ -288,9 +288,9 @@ function get_form_items($id, $blockdata = array()) {
     }
     $content .= '<tr><td>';
     $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" '.
-            ' class="submit btn btn-default" />';
+            ' class="submit btn btn-primary" />';
     $content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" '.
-            ' class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+            ' class="submit btn btn-secondary" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
     $content .= '</td></tr>';
     $content .= '</table>';
     $content .= '</form>';
@@ -336,9 +336,9 @@ function get_form_text($id, $blockdata = array()) {
     $content .= '</td></tr>';
     $content .= '<tr><td>';
     $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" '.
-            ' class="submit btn btn-default" />';
+            ' class="submit btn btn-primary" />';
     $content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" '.
-            ' class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+            ' class="submit btn btn-secondary" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
     $content .= '</td></tr>';
     $content .= '</table>';
     $content .= '</form>';
@@ -365,9 +365,9 @@ function get_form_headline($id, $blockdata = array()) {
     $content .= '</td></tr>';
     $content .= '<tr><td>';
     $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" '.
-            ' class="submit btn btn-default" />';
+            ' class="submit btn btn-primary" />';
     $content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" '.
-            ' class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+            ' class="submit btn btn-secondary" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
     $content .= '</td></tr>';
     $content .= '</table>';
     $content .= '</form>';
@@ -407,13 +407,15 @@ function get_form_personalinfo($id, $blockdata = array()) {
         $resumedata = block_exaport_get_resume_params_record();
         $text = @$resumedata->cover ?: '';
 
-        $text = file_prepare_draft_area(
+        $text = file_rewrite_pluginfile_urls($text, 'pluginfile.php',
+            context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resumedata->id);
+        /*$text = file_prepare_draft_area(
                 $draftideditor,
                 context_user::instance($USER->id)->id,
                 'block_exaport',
-                'personal_information',
+                'resume_editor_cover',
                 $USER->id,
-                array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $text);
+                array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $text);*/
     }
     $content = "";
 
@@ -472,7 +474,8 @@ function get_form_personalinfo($id, $blockdata = array()) {
     $content .= '</td></tr>';
 
     $content .= '<tr><th>';
-    $content .= '<label for="text">'.get_string('aboutme', 'block_exaport').'</label>';
+    $content .= '<label for="text">'.get_string('aboutme', 'block_exaport').'<br>';
+    $content .= '<small>'.get_string('aboutme_description', 'block_exaport').'</small></label>';
     $content .= '</th></tr>';
     $content .= '<tr><td>';
     $content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="id_block_intro" '.
@@ -480,9 +483,9 @@ function get_form_personalinfo($id, $blockdata = array()) {
     $content .= '</td></tr>';
     $content .= '<tr><td>';
     $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" '.
-            ' class="submit btn btn-default" />';
+            ' class="submit btn btn-primary" />';
     $content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" '.
-            ' class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+            ' class="submit btn btn-secondary" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
     $content .= '</td></tr>';
     $content .= '</table>';
 
@@ -669,9 +672,9 @@ function get_form_cvinfo($id, $blockdata = array()) {
 
     $content .= '<tr><td>';
     $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" '.
-            ' class="submit btn btn-default" />';
+            ' class="submit btn btn-primary" />';
     $content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" '.
-            ' class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+            ' class="submit btn btn-secondary" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
     $content .= '</td></tr>';
     $content .= '</table>';
 
@@ -753,9 +756,9 @@ function get_form_media($id, $blockdata = array()) {
     $content .= '</td></tr>';
     $content .= '<tr><td>';
     $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_media" name="submit_block"'.
-            ' class="submit btn btn-default" />';
+            ' class="submit btn btn-primary" />';
     $content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel"'.
-            ' class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+            ' class="submit btn btn-secondary" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
     $content .= '</td></tr>';
     $content .= '</table>';
     $content .= '</form>';
@@ -800,9 +803,9 @@ function get_form_badge($id, $blockdata = array()) {
     $content .= '</td></tr>';
     $content .= '<tr><td>';
     $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" '.
-            ' class="submit btn btn-default" />';
+            ' class="submit btn btn-primary" />';
     $content .= '<input type="button" value="'.get_string('cancelButton', 'block_exaport').'" name="cancel" '.
-            ' class="submit btn btn-default" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
+            ' class="submit btn btn-secondary" id="cancel_list" onclick="exaportViewEdit.cancelAddEdit()" />';
     $content .= '</td></tr>';
     $content .= '</table>';
     $content .= '</form>';

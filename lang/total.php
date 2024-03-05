@@ -1178,6 +1178,10 @@ return [
                 'Über mich',
                 'About me',
         ],
+        'aboutme_description' => [
+                'Predefined by CV information, but can be editabled for every block',
+                'Predefined by CV information, but can be editabled for every block',
+        ],
         'notify' => [
                 'benachrichtigen',
                 'notify',

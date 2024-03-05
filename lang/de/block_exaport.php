@@ -321,6 +321,7 @@ $string['mailadress'] = 'E-Mail-Adresse';
 $string['nomail'] = 'keine Mail-Adresse';
 $string['noemails'] = 'keine Mail-Adresse vorhanden';
 $string['aboutme'] = 'Über mich';
+$string['aboutme_description'] = 'Predefined by CV information, but can be editabled for every block';
 $string['notify'] = 'benachrichtigen';
 $string['sharejs'] = 'teilen';
 $string['mediacontent'] = 'URL oder eingebetteter Code*';

@@ -77,7 +77,7 @@ if ($action == 'xmleuropass') {
     echo get_string("resume_exportto_europass_intro", "block_exaport");
     echo '<form action="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.
             '&action=xmleuropass_export" method="post">';
-    echo '<input type="submit" value="'.get_string("resume_exportto_europass_getXML", "block_exaport").'" class="btn btn-default">';
+    echo '<input type="submit" value="'.get_string("resume_exportto_europass_getXML", "block_exaport").'" class="btn btn-primary">';
     echo '</form><br>';
     $showinformation = false;
 }
@@ -315,7 +315,7 @@ if ($showinformation) {
 
     // Cover.
     $cover = file_rewrite_pluginfile_urls($resume->cover, 'pluginfile.php',
-            context_user::instance($USER->id)->id, 'block_exaport', 'resume_cover', $resume->id);
+            context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resume->id);
     $cover = block_exaport_html_secure($cover);
     echo block_exaport_form_resume_part($courseid, 'cover',
             get_string('resume_cover', 'block_exaport'), $cover, 'edit', $type);
@@ -390,10 +390,10 @@ function block_exaport_form_resume_part($courseid = 0, $type = '', $header = '',
     $resumepart .= '<div>'.$content.'</div>';
     switch ($buttons) {
         case 'edit':
-            $resumepart .= '<input type="submit" value="'.get_string("edit").'" class="btn btn-default" />';
+            $resumepart .= '<input type="submit" value="'.get_string("edit").'" class="btn btn-secondary" />';
             break;
         case 'add':
-            $resumepart .= '<input type="submit" value="'.get_string("add").'" class="btn btn-default" />';
+            $resumepart .= '<input type="submit" value="'.get_string("add").'" class="btn btn-primary" />';
             break;
         default :
             $resumepart .= '';

@@ -592,6 +592,14 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                 case 'cv_information':
                     $body_content = '';
                     switch ($block->resume_itemtype) {
+                        case 'cover':
+                            if ($resume && $resume->cover) {
+                                $cover = $resume->cover;
+                                $cover = file_rewrite_pluginfile_urls($cover, 'pluginfile.php',
+                                    context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_cover', $resume->id);
+                                $body_content .= $cover;
+                            }
+                            break;
                         case 'edu':
                             if ($block->itemid && $resume && $resume->educations[$block->itemid]) {
                                 $item_data = $resume->educations[$block->itemid];

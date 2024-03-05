@@ -1127,7 +1127,7 @@ function block_exaport_share_view_to_teachers($viewid) {
  * @throws dml_exception
  */
 function block_exaport_get_view_blocks($view) {
-    global $DB, $USER;
+    global $DB, $USER, $CFG;
 
     $portfolioitems = block_exaport_get_portfolio_items();
 
@@ -1193,7 +1193,7 @@ function block_exaport_get_view_blocks($view) {
 
             $block->badge = $badge;
         } else if ($block->type == 'cv_information') {
-            // any doings now
+            // Nothing to do here
         } else {
             $block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php',
                                     context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);
@@ -2252,7 +2252,7 @@ function block_exaport_get_view_layout_style_from_settings($view, $styleFor = 's
                 $style .= "\r\n";
             }
             if (@$layoutSettings['block_borderWidth'] != -1) {
-                if (!$layoutSettings['block_borderWidth']) { // zero
+                if (!@$layoutSettings['block_borderWidth']) { // zero
                     $styleVal = 'border: none !important;';
                 } else {
                     $styleVal = 'border: solid '.$layoutSettings['block_borderWidth'].'px #dddddd !important;';

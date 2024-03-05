@@ -6,7 +6,7 @@ define(['jquery',
         'block_exaport/touchpunch',
         'core/modal_factory',
         'core/modal_events'],
-        function($, json, jqui, jquitp, modalFactory, modalEvents) {
+        function($, jqui, jquitp, modalFactory, modalEvents) {
 
     var dialogue;
     var helpDialogue;
@@ -576,13 +576,14 @@ define(['jquery',
             data.item = null;
             var body_content = '';
             // var titleContent = '';
-            var resumeItems;
+            // var resumeItems;
             var addToHeader = '';
             var attachments = [];
-            console.log(data.resume_itemtype);
             switch (data.resume_itemtype) {
                 case 'cover':
-                    body_content = '123';
+                    if (resumeItems && resumeItems.cover) {
+                        body_content = resumeItems.cover;
+                    }
                     break;
                 case 'edu':
                     addToHeader = $E.translate('cofigureblock_cvinfo_education_history');

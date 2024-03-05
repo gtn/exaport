@@ -367,6 +367,13 @@
 #blockform #add-items-list .add-item-sub {
     margin-left: 30px;
 }
+#blockform label {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+#blockform .mceEditor {
+    background-color: #f9f9f9;
+}
 
 #exaport .course-group-title {
     cursor: pointer;

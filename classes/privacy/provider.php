@@ -519,6 +519,11 @@ class provider implements
                         break;
                     case 'cv_information':
                         switch ($block->resume_itemtype) {
+                            case 'cover':
+                                if ($resume && $resume->cover) {
+                                    $block_entry->content .= $resume->cover;
+                                }
+                                break;
                             case 'edu':
                                 if ($block->itemid && $resume && $resume->educations[$block->itemid]) {
                                     $item_data = $resume->educations[$block->itemid];

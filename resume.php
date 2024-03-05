@@ -70,7 +70,6 @@ $showinformation = true;
 $redirect = false;
 
 $userpreferences = block_exaport_get_user_preferences();
-$description = $userpreferences->description;
 
 if ($action == 'xmleuropass') {
     echo block_exaport_resume_header();
@@ -306,44 +305,7 @@ if ($action != 'xmleuropass' && $showinformation) {
 };
 
 if ($showinformation) {
-    echo "<div class='block_eportfolio_center'><h2>";
-    echo $OUTPUT->box(text_to_html(get_string("explainpersonal", "block_exaport")), 'center');
-    echo "</h2></div>";
-
-    echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
-
-    echo '<tr class="header"><td class="picture left">';
     $user = $DB->get_record('user', array("id" => $USER->id));
-    echo $OUTPUT->user_picture($user, array("courseid" => $courseid));
-    echo '</td>';
-
-    echo '<td class="topic starter"><div class="author">';
-    $by = '<a href="'.$CFG->wwwroot.'/user/view.php?id='.
-            $USER->id.'&amp;course='.$courseid.'">'.fullname($USER, $USER->id).'</a>';
-    print_string('byname', 'moodle', $by);
-    echo '</div></td></tr>';
-
-    echo '<tr><td class="left side">';
-
-    echo '</td><td class="content">'."\n";
-
-    $description = file_rewrite_pluginfile_urls($description,
-            'pluginfile.php', context_user::instance($USER->id)->id, 'block_exaport', 'personal_information_self', null);
-    echo block_exaport_html_secure($description);
-
-    echo '</td></tr></table>'."\n\n";
-
-    echo '<div class="block_eportfolio_center">';
-
-    echo '<form method="post" action="'.$CFG->wwwroot.'/blocks/exaport/personal_information.php?courseid='.$courseid.'">';
-    echo '<fieldset class="hidden">';
-    echo '<input type="hidden" name="edit" value="1" />';
-    echo '<input type="submit" value="'.get_string("edit").'" class="btn btn-default" />';
-    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-
-    echo '</fieldset>';
-    echo '</form>';
-    echo '</div>';
 
     echo '<br />';
 

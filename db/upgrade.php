@@ -1063,6 +1063,38 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023121800, 'exaport');
     }
 
+    if ($oldversion < 2024030400) {
+        // 'Personal information' block is removed from CV. But if the data is already filled - move this data into 'About me' CV content.
+
+        require_once(__DIR__.'/../lib/resumelib.php');
+        foreach ($DB->get_records('block_exaportuser') as $pdata) {
+            $tempdescr = trim(strip_tags($pdata->description));
+            block_exaport_get_user_preferences()->description;
+            if ($tempdescr) {
+                $userid = $pdata->user_id;
+                $coverData = [];
+                // get Resume data for the user
+                $description = @$pdata->description ?: '';
+                if ($description) {
+                    $description = rtrim($description, '<br>');
+                    $coverData[] = $description;
+                }
+                $resumedata = block_exaport_get_resume_params_record($userid);
+                $cover = $resumedata->cover ?: '';
+                if (trim(strip_tags($resumedata->cover))) {
+                    $coverData[] = $cover;
+                }
+                $newcover = implode('<br>', $coverData);
+                block_exaport_set_resume_params($userid, array('cover' => $newcover));
+                // remove info from personal information
+                block_exaport_set_user_preferences($userid, array('description' => ''));
+            }
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2024030400, 'exaport');
+    }
+
     return $result;
 }
 

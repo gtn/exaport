@@ -13,16 +13,29 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
+// (c) 2024 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__."/../../config.php");
-// Get rid 'warning' messages for ajax request (regardless moodle configuration)
-if (
-    basename($_SERVER['SCRIPT_NAME']) == 'blocks.json.php' // ajax requests to work with blocks
-    || (basename($_SERVER['SCRIPT_NAME']) == 'views_mod.php' && optional_param('ajax', '0', PARAM_INT) === 1) // ajax requests in view editing
-) {
-    @$CFG->debug = 5;
-    @error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-    @ini_set('display_errors', '5');
+require_once(__DIR__.'/inc.php');
+
+$courseid = optional_param('courseid', 0, PARAM_INT);
+
+block_exaport_require_login($courseid);
+
+$context = context_system::instance();
+
+$conditions = array("id" => $courseid);
+if (!$course = $DB->get_record("course", $conditions)) {
+    print_error("invalidinstance", "block_exaport");
 }
-require_once(__DIR__.'/lib/lib.php');
+
+$url = '/blocks/exaport/whyeportfolio.php';
+$PAGE->set_url($url, ['courseid' => $courseid]);
+
+block_exaport_print_header("whyEportfolio");
+
+echo "<br />";
+
+echo get_string("whyEportfolio_description", "block_exaport");
+
+//echo block_exaport_wrapperdivend();
+echo $OUTPUT->footer($course);

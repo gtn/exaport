@@ -85,8 +85,8 @@ return [
                 'Allow competences',
         ],
         'exaport:viewartifactsfromstudents' => [
-                '',
-                'Can see portfolio artifacts of own students',
+                'Can see portfolio artefacts of own students',
+                'Can see portfolio artefacts of own students',
         ],
         'new' => [
                 'Neu',
@@ -242,7 +242,7 @@ return [
         ],
         'myportfolio' => [
                 'Meine Portfolio Artefakte',
-                'My Portfolio Artifacts',
+                'My Portfolio Artefacts',
         ],
         'myportfoliotitle' => [
                 'ePortfolio-Modul: Fügen Sie hier Links und Dateien hinzu.',
@@ -1208,7 +1208,7 @@ return [
         ],
         'tagarea_block_exaportitem' => [
                 'Meine Portfolio Artefakte',
-                'My Portfolio Artifacts',
+                'My Portfolio Artefacts',
         ],
         'searchByTitle' => [
                 'Suchen',
@@ -1528,7 +1528,7 @@ return [
         ],
         'block_exaport_multiplefilesinitem' => [
                 'Mehrere Dateien in Datei-Artefakt hochladen',
-                'Multiple files in "File" artifact',
+                'Multiple files in "File" artefact',
         ],
         'block_exaport_multiplefilesinitem_body' => [
                 'limit: 10 Dateien',
@@ -1539,8 +1539,8 @@ return [
                 'Enable "Copy to my portfolio"',
         ],
         'block_exaport_copytomyportfolio_body' => [
-                'User will be able copy artifacts from shared category into own portfolio',
-                'User will be able copy artifacts from shared category into own portfolio',
+                'User will be able copy artefacts from shared category into own portfolio',
+                'User will be able copy artefacts from shared category into own portfolio',
         ],
         'block_exaport_app_alloweditdelete_head' => [
                 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen',
@@ -1556,7 +1556,7 @@ return [
         ],
         'block_exaport_teachercanseeartifactsofstudents_head' => [
                 'Trainer/in hat Zugriff auf alle Artefakte eigene Schüler/innen',
-                'Teacher can see ALL artifacts of own students',
+                'Teacher can see ALL artefacts of own students',
         ],
         'block_exaport_teachercanseeartifactsofstudents_body' => [
                 'Vertrauenswürdige Trainer/innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der Teilnehmer/innen für jede/n als vertrauenswürdig definierte/n Trainer/in generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/innen.',
@@ -1590,7 +1590,7 @@ return [
         ],
         'resume_cover' => [
                 'Begleit-Informationen',
-                'Personal information',
+                'About me',
         ],
         'resume_coversaved' => [
                 'Begleit-Informationen gespeichert',
@@ -2354,16 +2354,16 @@ return [
         ],
 
         'privacy:metadata:block_exaportitem' => [
-            'user\'s artifact',
-            'user\'s artifact',
+            'user\'s artefact',
+            'user\'s artefact',
         ],
         'privacy:metadata:block_exaportitem:userid' => [
-            'artifact\'s owner',
-            'artifact\'s owner',
+            'artefact\'s owner',
+            'artefact\'s owner',
         ],
         'privacy:metadata:block_exaportitem:type' => [
-            'type of artifact',
-            'type of artifact',
+            'type of artefact',
+            'type of artefact',
         ],
         'privacy:metadata:block_exaportitem:categoryid' => [
             'category id',
@@ -2427,7 +2427,7 @@ return [
         ],
         'privacy:metadata:block_exaportitem:example_url' => [
             'example_url',
-            'artifact\'s owner',
+            'artefact\'s owner',
         ],
         'privacy:metadata:block_exaportitem:parentid' => [
             'parent id',
@@ -2435,12 +2435,12 @@ return [
         ],
 
         'privacy:metadata:block_exaportitemcomm' => [
-            'comments for artifacts',
-            'comments for artifacts',
+            'comments for artefacts',
+            'comments for artefacts',
         ],
         'privacy:metadata:block_exaportitemcomm:itemid' => [
-            'id of artifact',
-            'id of artifact',
+            'id of artefact',
+            'id of artefact',
         ],
         'privacy:metadata:block_exaportitemcomm:userid' => [
             'author of comment',
@@ -2456,8 +2456,8 @@ return [
         ],
 
         'privacy:metadata:block_exaportview' => [
-            'comments for artifacts',
-            'comments for artifacts',
+            'comments for artefacts',
+            'comments for artefacts',
         ],
         'privacy:metadata:block_exaportview:userid' => [
             'owner of view',
@@ -2500,8 +2500,8 @@ return [
             'shared emails list',
         ],
         'privacy:metadata:block_exaportview:autofill_artefacts' => [
-            'enabled autofill by artifacts',
-            'enabled autofill by artifacts',
+            'enabled autofill by artefacts',
+            'enabled autofill by artefacts',
         ],
 
         'privacy:metadata:block_exaportresume' => [
@@ -2549,11 +2549,56 @@ return [
             'careers skills',
         ],
         'privacy:metadata:core_files' => [
-            'Exabis ePortfolio stores files which have been uploaded by the user to form part of artifacts, resume entries and comments.',
-            'Exabis ePortfolio stores files which have been uploaded by the user to form part of artifacts, resume entries and comments.',
+            'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.',
+            'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.',
         ],
-
-
+        'whyEportfolio' => [
+            'Why eProtfolio',
+            'Why ePortfolio',
+        ],
+        'whyEportfolio_description' => [
+            '',
+            '   <h4>Don\'t Let Your Hard Work Disappear: Build Your Digital Portfolio</h4>
+                <br>
+                <p>Imagine all the effort you put into assignments, presentations, and projects. Do you ever feel like it just gets buried in a drawer after it\'s submitted?</p>
+                <p>But here\'s the good news: those projects are <strong>proof of your skills and knowledge</strong>, and you can use them to impress potential employers or clients!</p>
+                <p><strong>Build your digital portfolio</strong> and showcase your best work, from presentations, assignments, and projects to videos. It\'s easier than you think!</p>
+                <br>
+                <h4>What is an ePortfolio?</h4>
+                <br>
+                <p>An <strong>ePortfolio</strong> (electronic portfolio) is a <strong>digital collection</strong> that showcases your <strong>skills, knowledge, and experiences</strong>.
+                    While your CV focuses on your education and work history, your ePortfolio goes beyond that, providing <strong>proof and context</strong> for your skills.
+                    It lets you showcase your work samples and <strong>demonstrate your talent</strong> quickly and effectively.
+                    Ultimately, your ePortfolio is a powerful tool to <strong>highlight your qualifications</strong> and set you apart.
+                </p>
+                <p><strong>Remember, different roles may require different types of ePortfolios.</strong> 
+                    However, some key elements remain constant. 
+                    <strong>Exabis ePortfolio</strong> allows you to <strong>create multiple views</strong> tailored to specific positions, job opportunities, or other purposes.
+                </p>
+                <br>
+                <h4>How to Build Your ePortfolio</h4>
+                <br>
+                <ol>
+                    <li><strong>Gather your work</strong>: Start by reviewing all your projects, presentations, and assignments.</li>
+                    <li><strong>Choose your best work</strong>: Select the pieces that showcase your strongest skills and those that have received positive feedback.</li>
+                    <li><strong>Reflect and describe</strong>: Think about the skills and competencies each piece demonstrates. Write a brief description to provide context.</li>
+                    <li><strong>Build and iterate</strong>: Don\'t be afraid to experiment and refine your ePortfolio as you learn and grow.</li>
+                </ol>
+                <p><strong>Exabis ePortfolio</strong> can guide you through each step, making the process of building your ePortfolio smooth and efficient.</p>
+',
+        ],
+        'cofigureblock_cvinfo_help' => [
+            'Will be shown actual state of selected CV items. Block content will be updated if you will change the item in your CV later',
+            'Will be shown actual state of selected CV items. Block content will be updated if you will change the item in your CV later',
+        ],
+        'cofigureblock_cvinfo_cover' => [
+            'About me',
+            'About me',
+        ],
+        'cofigureblock_cvinfo_cover_actual' => [
+            'add actual CV "About me" content',
+            'add actual CV "About me" content',
+        ],
 
 
 ];

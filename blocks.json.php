@@ -389,6 +389,7 @@ function get_form_personalinfo($id, $blockdata = array()) {
     $draftideditor = file_get_submitted_draft_itemid('text');
 
     if (isset($blockdata->text) && $blockdata->text) {
+        // block data (text) can be changed manually for the block
         $text = $blockdata->text;
 
         $text = file_prepare_draft_area(
@@ -401,7 +402,10 @@ function get_form_personalinfo($id, $blockdata = array()) {
                 $text
         );
     } else {
-        $text = block_exaport_get_user_preferences()->description;
+        // Or the block data can be a default value from 'About me' CV section
+        require_once(__DIR__.'/lib/resumelib.php');
+        $resumedata = block_exaport_get_resume_params_record();
+        $text = @$resumedata->cover ?: '';
 
         $text = file_prepare_draft_area(
                 $draftideditor,
@@ -493,7 +497,11 @@ function get_form_cvinfo($id, $blockdata = array()) {
     require_once(__DIR__.'/lib/resumelib.php');
     $resume = block_exaport_get_resume_params();
 
+    $output = block_exaport_get_renderer();
+
     $content = "";
+
+    $content .= '<p><img src="'.$output->image_url('help', 'block_exaport').'" class="icon" alt="" />'.block_exaport_get_string('cofigureblock_cvinfo_help').'</p>';
 
     $content .= '<form enctype="multipart/form-data" id="blockform" action="#json" method="post" '.
             ' class="pieform" onsubmit="exaportViewEdit.addCvInfo('.$id.'); return false;">';
@@ -514,6 +522,20 @@ function get_form_cvinfo($id, $blockdata = array()) {
     $content .= '<input class="add-checkbox" type="checkbox" name="add_withfiles" value="1" /> ';
     $content .= get_string('cofigureblock_cvinfo_withfiles', 'block_exaport').'</label>';
     $content .= '</th></tr>';
+    // About me
+    $content .= '<tr><th>';
+    $content .= '<label>'.block_exaport_get_string('cofigureblock_cvinfo_cover').'</label>';
+    $content .= '</th></tr>';
+    $content .= '<tr><td>';
+    $content .= '<div class="add-item">';
+    $content .= '<label>';
+    $content .= '<input class="add-cvitem-checkbox" data-cvtype="cover" type="checkbox" name="add_cover" value="1" /> ';
+
+    $content .= block_exaport_get_string('cofigureblock_cvinfo_cover_actual');
+    $content .= '</label>';
+    $content .= '</div>';
+    $content .= '</td></tr>';
+
     // educations
     $usereducaitons = block_exaport_resume_get_educations(@$resume->id);
     if ($usereducaitons) {

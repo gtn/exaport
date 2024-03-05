@@ -35,7 +35,7 @@ $string['exaport:shareintern'] = 'Internal sharing of views';
 $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
-$string['exaport:viewartifactsfromstudents'] = 'Can see portfolio artifacts of own students';
+$string['exaport:viewartifactsfromstudents'] = 'Can see portfolio artefacts of own students';
 $string['new'] = 'New';
 $string['addbookmark'] = 'Add bookmark';
 $string['addcategory'] = 'Add category';
@@ -74,7 +74,7 @@ $string['hidesummary'] = '(hide summary)';
 $string['managecategories'] = 'Manage categories';
 $string['mandatoryfields'] = 'The field\'s name, category and intro are required. Please fill them in.';
 $string['mandatoryfieldsforcat'] = 'The field name is required. Please fill them in.';
-$string['myportfolio'] = 'My Portfolio Artifacts';
+$string['myportfolio'] = 'My Portfolio Artefacts';
 $string['myportfoliotitle'] = 'Exabis ePortfolio module: Add your links and files here.';
 $string['newlink'] = 'Add new link';
 $string['newfile'] = 'Add new file';
@@ -329,7 +329,7 @@ $string['height'] = 'Height';
 $string['width'] = 'Width';
 $string['media_allowed_notes'] = 'URLs from the following sites are allowed:';
 $string['filterByTag'] = 'Filter by tag';
-$string['tagarea_block_exaportitem'] = 'My Portfolio Artifacts';
+$string['tagarea_block_exaportitem'] = 'My Portfolio Artefacts';
 $string['searchByTitle'] = 'Search';
 $string['clearAllFilers'] = 'Clear all filters';
 $string['sharedwith'] = 'Shared with';
@@ -429,14 +429,14 @@ $string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis ePortf
 $string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_userquota'] = 'User quota for Exabis ePortfolio';
 $string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
-$string['block_exaport_multiplefilesinitem'] = 'Multiple files in "File" artifact';
+$string['block_exaport_multiplefilesinitem'] = 'Multiple files in "File" artefact';
 $string['block_exaport_multiplefilesinitem_body'] = 'limit: 10 files';
 $string['block_exaport_copytomyportfolio'] = 'Enable "Copy to my portfolio"';
-$string['block_exaport_copytomyportfolio_body'] = 'User will be able copy artifacts from shared category into own portfolio';
+$string['block_exaport_copytomyportfolio_body'] = 'User will be able copy artefacts from shared category into own portfolio';
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';
-$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Teacher can see ALL artifacts of own students';
+$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Teacher can see ALL artefacts of own students';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.';
 $string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'Add required user profile field';
 $string['block_exaport_confirm_profilefield_create'] = 'Do you really want to add the required profile field?';
@@ -446,7 +446,7 @@ $string['block_exaport_profilefield_created'] = 'Profile field for trusted teach
 // === Resume.
 $string['resume_template_newresume'] = '<h2>My new CV</h2>';
 $string['resume_my'] = 'My CV';
-$string['resume_cover'] = 'Personal information';
+$string['resume_cover'] = 'About me';
 $string['resume_coversaved'] = 'Cover saved';
 $string['resume_eduhistory'] = 'Education history';
 $string['resume_edu'] = 'Education';
@@ -668,9 +668,9 @@ $string['privacy:metadata:block_exaportcate:shareall'] = 'shared for all? 0 - di
 $string['privacy:metadata:block_exaportcate:internshare'] = 'internal share?';
 $string['privacy:metadata:block_exaportcate:structure_shareall'] = 'shared as structure? : 0 - did not share; 1 - shared for all; 2 - shared for groups';
 $string['privacy:metadata:block_exaportcate:structure_share'] = 'shared as structure? look also \'structure_shareall\'';
-$string['privacy:metadata:block_exaportitem'] = 'user\'s artifact';
-$string['privacy:metadata:block_exaportitem:userid'] = 'artifact\'s owner';
-$string['privacy:metadata:block_exaportitem:type'] = 'type of artifact';
+$string['privacy:metadata:block_exaportitem'] = 'user\'s artefact';
+$string['privacy:metadata:block_exaportitem:userid'] = 'artefact\'s owner';
+$string['privacy:metadata:block_exaportitem:type'] = 'type of artefact';
 $string['privacy:metadata:block_exaportitem:categoryid'] = 'category id';
 $string['privacy:metadata:block_exaportitem:name'] = 'name';
 $string['privacy:metadata:block_exaportitem:url'] = 'url';
@@ -686,14 +686,14 @@ $string['privacy:metadata:block_exaportitem:langid'] = 'language id';
 $string['privacy:metadata:block_exaportitem:source'] = 'source';
 $string['privacy:metadata:block_exaportitem:sourceid'] = 'source id';
 $string['privacy:metadata:block_exaportitem:iseditable'] = 'is editable?';
-$string['privacy:metadata:block_exaportitem:example_url'] = 'artifact\'s owner';
+$string['privacy:metadata:block_exaportitem:example_url'] = 'artefact\'s owner';
 $string['privacy:metadata:block_exaportitem:parentid'] = 'parent id';
-$string['privacy:metadata:block_exaportitemcomm'] = 'comments for artifacts';
-$string['privacy:metadata:block_exaportitemcomm:itemid'] = 'id of artifact';
+$string['privacy:metadata:block_exaportitemcomm'] = 'comments for artefacts';
+$string['privacy:metadata:block_exaportitemcomm:itemid'] = 'id of artefact';
 $string['privacy:metadata:block_exaportitemcomm:userid'] = 'author of comment';
 $string['privacy:metadata:block_exaportitemcomm:entry'] = 'comment';
 $string['privacy:metadata:block_exaportitemcomm:timemodified'] = 'last modified';
-$string['privacy:metadata:block_exaportview'] = 'comments for artifacts';
+$string['privacy:metadata:block_exaportview'] = 'comments for artefacts';
 $string['privacy:metadata:block_exaportview:userid'] = 'owner of view';
 $string['privacy:metadata:block_exaportview:name'] = 'name';
 $string['privacy:metadata:block_exaportview:description'] = 'description';
@@ -704,7 +704,7 @@ $string['privacy:metadata:block_exaportview:externcomment'] = 'comment from exte
 $string['privacy:metadata:block_exaportview:langid'] = 'language id';
 $string['privacy:metadata:block_exaportview:layout'] = 'layout of the view';
 $string['privacy:metadata:block_exaportview:sharedemails'] = 'shared emails list';
-$string['privacy:metadata:block_exaportview:autofill_artefacts'] = 'enabled autofill by artifacts';
+$string['privacy:metadata:block_exaportview:autofill_artefacts'] = 'enabled autofill by artefacts';
 $string['privacy:metadata:block_exaportresume'] = 'resume data';
 $string['privacy:metadata:block_exaportresume:user_id'] = 'resume owner';
 $string['privacy:metadata:block_exaportresume:courseid'] = 'course id';
@@ -716,4 +716,36 @@ $string['privacy:metadata:block_exaportresume:goalscareers'] = 'careers goals';
 $string['privacy:metadata:block_exaportresume:skillspersonal'] = 'personal skills';
 $string['privacy:metadata:block_exaportresume:skillsacademic'] = 'academic skills';
 $string['privacy:metadata:block_exaportresume:skillscareers'] = 'careers skills';
-$string['privacy:metadata:core_files'] = 'Exabis ePortfolio stores files which have been uploaded by the user to form part of artifacts, resume entries and comments.';
+$string['privacy:metadata:core_files'] = 'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.';
+$string['whyEportfolio'] = 'Why ePortfolio';
+$string['whyEportfolio_description'] = '   <h4>Don\'t Let Your Hard Work Disappear: Build Your Digital Portfolio</h4>
+                <br>
+                <p>Imagine all the effort you put into assignments, presentations, and projects. Do you ever feel like it just gets buried in a drawer after it\'s submitted?</p>
+                <p>But here\'s the good news: those projects are <strong>proof of your skills and knowledge</strong>, and you can use them to impress potential employers or clients!</p>
+                <p><strong>Build your digital portfolio</strong> and showcase your best work, from presentations, assignments, and projects to videos. It\'s easier than you think!</p>
+                <br>
+                <h4>What is an ePortfolio?</h4>
+                <br>
+                <p>An <strong>ePortfolio</strong> (electronic portfolio) is a <strong>digital collection</strong> that showcases your <strong>skills, knowledge, and experiences</strong>.
+                    While your CV focuses on your education and work history, your ePortfolio goes beyond that, providing <strong>proof and context</strong> for your skills.
+                    It lets you showcase your work samples and <strong>demonstrate your talent</strong> quickly and effectively.
+                    Ultimately, your ePortfolio is a powerful tool to <strong>highlight your qualifications</strong> and set you apart.
+                </p>
+                <p><strong>Remember, different roles may require different types of ePortfolios.</strong> 
+                    However, some key elements remain constant. 
+                    <strong>Exabis ePortfolio</strong> allows you to <strong>create multiple views</strong> tailored to specific positions, job opportunities, or other purposes.
+                </p>
+                <br>
+                <h4>How to Build Your ePortfolio</h4>
+                <br>
+                <ol>
+                    <li><strong>Gather your work</strong>: Start by reviewing all your projects, presentations, and assignments.</li>
+                    <li><strong>Choose your best work</strong>: Select the pieces that showcase your strongest skills and those that have received positive feedback.</li>
+                    <li><strong>Reflect and describe</strong>: Think about the skills and competencies each piece demonstrates. Write a brief description to provide context.</li>
+                    <li><strong>Build and iterate</strong>: Don\'t be afraid to experiment and refine your ePortfolio as you learn and grow.</li>
+                </ol>
+                <p><strong>Exabis ePortfolio</strong> can guide you through each step, making the process of building your ePortfolio smooth and efficient.</p>
+';
+$string['cofigureblock_cvinfo_help'] = 'Will be shown actual state of selected CV items. Block content will be updated if you will change the item in your CV later';
+$string['cofigureblock_cvinfo_cover'] = 'About me';
+$string['cofigureblock_cvinfo_cover_actual'] = 'add actual CV "About me" content';

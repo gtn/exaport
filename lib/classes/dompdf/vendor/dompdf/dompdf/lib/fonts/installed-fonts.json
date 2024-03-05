@@ -1,2 +1,20 @@
 {
+    "customuploaded_humour-normal.ttf": {
+        "normal": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_humour_normal_ttf_normal_826edfbe83e2ed3786362e82432af7ce",
+        "italic": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_humour_normal_ttf_italic_826edfbe83e2ed3786362e82432af7ce",
+        "bold": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_humour_normal_ttf_bold_826edfbe83e2ed3786362e82432af7ce",
+        "bold_italic": "customuploaded_humour_normal_ttf_bold_italic_826edfbe83e2ed3786362e82432af7ce"
+    },
+    "customuploaded_kozgopro-extralight-alphanum(1).ttf": {
+        "normal": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_kozgopro_extralight_alphanum_1__ttf_normal_9379d1c0fcdba8b5bfabdeab15fa6ad6",
+        "italic": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_kozgopro_extralight_alphanum_1__ttf_italic_9379d1c0fcdba8b5bfabdeab15fa6ad6",
+        "bold": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_kozgopro_extralight_alphanum_1__ttf_bold_9379d1c0fcdba8b5bfabdeab15fa6ad6",
+        "bold_italic": "customuploaded_kozgopro_extralight_alphanum_1__ttf_bold_italic_9379d1c0fcdba8b5bfabdeab15fa6ad6"
+    },
+    "customuploaded_reggaeone-regular.ttf": {
+        "normal": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_reggaeone_regular_ttf_normal_415c3ad58a31c91baf1035b3346245f7",
+        "italic": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_reggaeone_regular_ttf_italic_415c3ad58a31c91baf1035b3346245f7",
+        "bold": "D:\\Web_Ras\\Moodle40\\blocks\\exaport\\lib\\classes\\dompdf\\vendor\\dompdf\\dompdf\/lib\/fonts\/customuploaded_reggaeone_regular_ttf_bold_415c3ad58a31c91baf1035b3346245f7",
+        "bold_italic": "customuploaded_reggaeone_regular_ttf_bold_italic_415c3ad58a31c91baf1035b3346245f7"
+    }
 }

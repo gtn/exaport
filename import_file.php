@@ -170,6 +170,7 @@ function get_image_url($content) {
     return $urls;
 }
 
+// deprecated?
 function import_user_image($unzipdir, $url) {
     global $USER, $DB, $OUTPUT;
 

@@ -56,7 +56,7 @@ $string['block_exaport_multiplefilesinitem_body'] = 'ліміт: 10 файлів
 $string['block_exaport_profilefield_created'] = 'Поле для довіреного вчителя додане';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Довірені вчителі мають бути налаштовані в їхніх індивідуальних профілях, і це працюватиме, лише якщо ввімкнено опцію вище.<br />{$a}Список студентів для кожного довіреного вчителя створюється відповідно до їхніх записів на курс.<br />Студенти не можуть вимкнути цей доступ. Доступ іншим користувачам можна надавати, як і раніше.';
 $string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'Додати обов`язкове поле до профіля користувача';
-$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Вчитель може бачити ВСІ артефакти своїх студентів';
+$string['block_exaport_teachercanseeartefactsofstudents_head'] = 'Вчитель може бачити ВСІ артефакти своїх студентів';
 $string['block_exaport_userquota'] = 'Дисковий ліміт для Exabis ePortfolio';
 $string['block_exaport_userquota_body'] = 'Максимальна кількість байт для кожного користувача, яку він зможе витратити у своїм Exabis eProtfolio<br>Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['blockcontent'] = 'Вміст блоку';
@@ -173,7 +173,7 @@ $string['exaport:myaddinstance'] = 'додати Exabis eProtfolio на голо
 $string['exaport:shareextern'] = 'Зовнішній обмін відображень';
 $string['exaport:shareintern'] = 'Внутрішній обмін відображень';
 $string['exaport:use'] = 'Використання дозволено';
-$string['exaport:viewartifactsfromstudents'] = 'Може бачити артефакті з портфоліо своїх студентів?';
+$string['exaport:viewartefactsfromstudents'] = 'Може бачити артефакті з портфоліо своїх студентів?';
 $string['expandcomps'] = 'Розгорнути все';
 $string['explaincategories'] = 'Категоріі: тут Ви можете створювати та редагувати категоріі';
 $string['explainexport'] = 'Експорт Вашого портфоліо';

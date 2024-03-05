@@ -223,7 +223,7 @@ Y.use('moodle-core-notification-dialogue');
             // Load stored blocks.
             var blocks = $('form :input[name=blocks]').val();
             if (blocks) {
-                blocks = $.parseJSON(blocks);
+                blocks = JSON.parse(blocks);
             }
             if (!blocks) {
                 // Start with headline.
@@ -441,7 +441,7 @@ Y.use('moodle-core-notification-dialogue');
             });
         });
 
-        $('form :input[name=blocks]').val($.toJSON(blocks));
+        $('form :input[name=blocks]').val(JSON.stringify(blocks));
     }
 
     function saveBlockData() {

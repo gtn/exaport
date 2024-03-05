@@ -43,13 +43,6 @@
         <licenseversion></licenseversion>
     </library>
     <library>
-        <location>javascript/jquery-json.js</location>
-        <name>JSON library</name>
-        <license>MIT</license>
-        <version>1.6.3</version>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
         <location>javascript/vedeo-js/video.js</location>
         <name>Video.js</name>
         <license>Apache License</license>

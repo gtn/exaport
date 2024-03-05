@@ -2,7 +2,6 @@ var exaportViewEdit;
 var newItem = null, lastclicked = null;
 
 define(['jquery',
-        'block_exaport/jquery-json',
         'jqueryui',
         'block_exaport/touchpunch',
         'core/modal_factory',
@@ -34,11 +33,11 @@ define(['jquery',
                 // Load stored blocks.
                 var blocks = $('form :input[name=blocks]').val();
                 if (blocks) {
-                    blocks = $.parseJSON(blocks);
+                    blocks = JSON.parse(blocks);
                 }
                 var myresume = $('form :input[name=myresume]').val();
                 if (myresume) {
-                    myresume = $.parseJSON(myresume);
+                    myresume = JSON.parse(myresume);
                 }
                 if (!blocks) {
                     // Start with headline.
@@ -415,7 +414,7 @@ define(['jquery',
         });
 
         var input = $('form :input[name=blocks]');
-        input.val($.toJSON(blocks));
+        input.val(JSON.stringify(blocks));
     }
 
     function generateItem(type, data)
@@ -469,7 +468,7 @@ define(['jquery',
         */
         // var header_content = '';
         var portfolioItems;
-        var $E;
+        var $E = window.block_exaport;
         if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
             data.item = portfolioItems[data.itemid];
         }
@@ -580,7 +579,11 @@ define(['jquery',
             var resumeItems;
             var addToHeader = '';
             var attachments = [];
+            console.log(data.resume_itemtype);
             switch (data.resume_itemtype) {
+                case 'cover':
+                    body_content = '123';
+                    break;
                 case 'edu':
                     addToHeader = $E.translate('cofigureblock_cvinfo_education_history');
                     if (data.itemid && resumeItems && resumeItems.educations[data.itemid]) {

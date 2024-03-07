@@ -55,171 +55,211 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         // Also if it is for getting custom .ttf font file
     }
 
-    if ($filearea == 'item_file') {
-        $filename = array_pop($args);
-        $id = array_pop($args);
-        if (array_pop($args) != 'itemid') {
-            print_error('wrong params');
-        }
-        // Other params together are the access string.
-        $access = join('/', $args);
+    switch ($filearea) {
+        case 'item_file':
+            $filename = array_pop($args);
+            $id = array_pop($args);
+            if (array_pop($args) != 'itemid') {
+                print_error('wrong params');
+            }
+            // Other params together are the access string.
+            $access = join('/', $args);
 
-        // Item exists?
-        $item = block_exaport_get_item($id, $access, false, $is_for_pdf, $pdfforuserid);
-        if (!$item) {
-            print_error('Item not found');
-        }
+            // Item exists?
+            $item = block_exaport_get_item($id, $access, false, $is_for_pdf, $pdfforuserid);
+            if (!$item) {
+                print_error('Item not found');
+            }
 
-        // Get file.
-        $fs = get_file_storage();
-        $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
+            // Get file.
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
-        // Serve file.
-        if ($file) {
-            send_stored_file($file);
-        } else {
-            return false;
-        }
-    } else if ($filearea == 'item_content') {
-        $filename = array_pop($args);
-        $id = array_pop($args);
-        if (array_pop($args) != 'itemid') {
-            print_error('wrong params');
-        }
+            // Serve file.
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
+        case 'item_content':
+            $filename = array_pop($args);
+            $id = array_pop($args);
+            if (array_pop($args) != 'itemid') {
+                print_error('wrong params');
+            }
 
-        // Other params together are the access string.
-        $access = join('/', $args);
+            // Other params together are the access string.
+            $access = join('/', $args);
 
-        // Item exists?
-        $item = block_exaport_get_item($id, $access);
-        if (!$item) {
-            print_error('Item not found');
-        }
+            // Item exists?
+            $item = block_exaport_get_item($id, $access);
+            if (!$item) {
+                print_error('Item not found');
+            }
 
-        // Get file.
-        $fs = get_file_storage();
-        $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
+            // Get file.
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
-        // Serve file.
-        if ($file) {
-            send_stored_file($file);
-        } else {
-            return false;
-        }
-    } else if ($filearea == 'view_content') {
-        $filename = array_pop($args);
+            // Serve file.
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
+        case 'view_content':
+            $filename = array_pop($args);
 
-        // Other params together are the access string.
-        $access = join('/', $args);
+            // Other params together are the access string.
+            $access = join('/', $args);
 
-        if (!$view = block_exaport_get_view_from_access($access, $is_for_pdf, $pdfforuserid)) {
-            print_error("viewnotfound", "block_exaport");
-        }
+            if (!$view = block_exaport_get_view_from_access($access, $is_for_pdf, $pdfforuserid)) {
+                print_error("viewnotfound", "block_exaport");
+            }
 
-        // Get file.
-        $fs = get_file_storage();
-        $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
-        // Serve file.
-        if ($file) {
-            send_stored_file($file);
-        } else {
-            return false;
-        }
-    } else if ($filearea == 'personal_information_view') {
-        $filename = array_pop($args);
+            // Get file.
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
+            // Serve file.
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
+        case 'personal_information_view':
+            $filename = array_pop($args);
 
-        // Other params together are the access string.
-        $access = join('/', $args);
+            // Other params together are the access string.
+            $access = join('/', $args);
 
-        if (!$view = block_exaport_get_view_from_access($access)) {
-            print_error("viewnotfound", "block_exaport");
-        }
+            if (!$view = block_exaport_get_view_from_access($access)) {
+                print_error("viewnotfound", "block_exaport");
+            }
 
-        // View has personal information?
-        $sql = "SELECT b.* FROM {block_exaportviewblock} b".
-                " WHERE b.viewid=? AND".
-                " b.type='personal_information'";
-        if (!$DB->record_exists_sql($sql, array($view->id))) {
-            return false;
-        }
+            // View has personal information?
+            $sql = "SELECT b.* FROM {block_exaportviewblock} b".
+                    " WHERE b.viewid=? AND".
+                    " b.type='personal_information'";
+            if (!$DB->record_exists_sql($sql, array($view->id))) {
+                return false;
+            }
 
-        // Get file.
-        $fs = get_file_storage();
-        $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', 'personal_information', $view->userid,
-                '/', $filename);
+            // Get file.
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', 'personal_information', $view->userid,
+                    '/', $filename);
 
-        // Serve file.
-        if ($file) {
-            send_stored_file($file);
-        } else {
-            return false;
-        }
-    } else if ($filearea == 'personal_information_self') {
-        $filename = join('/', $args);
+            // Serve file.
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
+        case 'personal_information_self':
+            $filename = join('/', $args);
 
-        // Get file.
-        $fs = get_file_storage();
-        $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/',
-                $filename);
+            // Get file.
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/',
+                    $filename);
 
-        // Serve file.
-        if ($file) {
-            send_stored_file($file);
-        } else {
-            return false;
-        }
-    } else if ($filearea == 'category_icon') {
-        $filename = array_pop($args);
-        $categoryid = array_pop($args);
+            // Serve file.
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
+        case 'category_icon':
+            $filename = array_pop($args);
+            $categoryid = array_pop($args);
 
-        // Get file.
-        $fs = get_file_storage();
-        $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'category_icon', $categoryid, '/',
-                $filename);
+            // Get file.
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'category_icon', $categoryid, '/',
+                    $filename);
 
-        // Serve file.
-        if ($file) {
-            send_stored_file($file);
-        } else {
-            return false;
-        }
-    } else if (in_array($filearea,
-                    array('resume_cover', 'resume_editor_cover', 'resume_interests', 'resume_edu', 'resume_employ', 'resume_certif', 'resume_public',
-                            'resume_mbrship')) ||
-            in_array($filearea,
-                    array('resume_goalspersonal', 'resume_goalsacademic', 'resume_goalscareers', 'resume_skillspersonal',
-                            'resume_skillsacademic', 'resume_skillscareers')) ||
-            in_array($filearea, array('resume_editor_goalspersonal', 'resume_editor_goalsacademic', 'resume_editor_goalscareers',
-                    'resume_editor_skillspersonal', 'resume_editor_skillsacademic', 'resume_editor_skillscareers'))
-    ) {
-        $filename = array_pop($args);
-        $id = array_pop($args);
+            // Serve file.
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
+        case 'resume_editor_cover':
+            if ($is_for_pdf) {
+                // $view is already defined
+            } else {
+                $access = required_param('access', PARAM_RAW);
+                $view = block_exaport_get_view_from_access($access);
+            }
+            if (!$view) {
+                print_error("viewnotfound", "block_exaport");
+            }
+            // Simple checking: the view has a block with 'cover' CV?
+            $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
+                " WHERE b.viewid=? AND" .
+                " b.type='cv_information' AND b.resume_itemtype='cover'";
+            if (!$DB->record_exists_sql($sql, array($view->id))) {
+                print_error("viewnotfound", "block_exaport");
+            }
+            $viewuser = $view->userid;
+        case 'resume_cover':
+        case 'resume_interests':
+        case 'resume_edu':
+        case 'resume_employ':
+        case 'resume_certif':
+        case 'resume_public':
+        case 'resume_mbrship':
+        case 'resume_goalspersonal':
+        case 'resume_goalsacademic':
+        case 'resume_goalscareers':
+        case 'resume_skillspersonal':
+        case 'resume_skillsacademic':
+        case 'resume_skillscareers':
+        case 'resume_editor_goalspersonal':
+        case 'resume_editor_goalsacademic':
+        case 'resume_editor_goalscareers':
+        case 'resume_editor_skillspersonal':
+        case 'resume_editor_skillsacademic':
+        case 'resume_editor_skillscareers':
+            if (!$viewuser) {
+                $viewuser = $USER->id;
+            }
+            $filename = array_pop($args);
+            $id = array_pop($args);
 
-        // Get file.
-        $fs = get_file_storage();
-        $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', $filearea, $id, '/', $filename);
+            // Get file.
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_user::instance($viewuser)->id, 'block_exaport', $filearea, $id, '/', $filename);
 
-        // Serve file.
-        if ($file) {
-            send_stored_file($file);
-        } else {
-            return false;
-        }
-    } else if ($filearea == 'pdf_fontfamily') {
-        $filename = array_pop($args);
-        $itemid = array_pop($args); // Always 0.
+            // Serve file.
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
+        case 'pdf_fontfamily':
+            $filename = array_pop($args);
+            $itemid = array_pop($args); // Always 0.
 
-        // Get file.
-        $fs = get_file_storage();
-        $file = $fs->get_file(context_system::instance()->id, 'block_exaport', 'pdf_fontfamily', $itemid, '/', $filename);
+            // Get file.
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_system::instance()->id, 'block_exaport', 'pdf_fontfamily', $itemid, '/', $filename);
 
-        // Serve file.
-        if ($file) {
-            send_stored_file($file);
-        } else {
-            return false;
-        }
-    } else {
-        die('wrong file area');
+            // Serve file.
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
+        default:
+            die('wrong file area');
     }
 }

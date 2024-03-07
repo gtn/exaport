@@ -366,6 +366,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
     $general_content .= '<td class="view-column td'.$i.'">';
     if (isset($columns[$i])) {
         foreach ($columns[$i] as $block) {
+            $body_content_forPdf = '';
             $blockForPdf = '<div class="view-block">';
             if ($block->text) {
                 $block->text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', context_user::instance($USER->id)->id,
@@ -597,6 +598,23 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 $cover = $resume->cover;
                                 $cover = file_rewrite_pluginfile_urls($cover, 'pluginfile.php',
                                     context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_cover', $resume->id);
+                                // For shared views we need to have access argument to show attached files fo different cases:
+                                $body_content_forPdf .= format_text($cover, FORMAT_HTML); // pdf does not need additional parameter
+                                $addParams = [
+                                        'access' => $access,
+                                ];
+                                $pattern = '/(href|src)=["\']([^"\']+)["\']/';
+                                $cover = preg_replace_callback($pattern, function($matches) use ($addParams) {
+                                    $url = $matches[2];
+                                    $parsedUrl = parse_url($url);
+                                    $query = isset($parsedUrl['query']) ? $parsedUrl['query'] : '';
+                                    parse_str($query, $urlParams);
+                                    $urlParams = array_merge($urlParams, $addParams);
+                                    $parsedUrl['query'] = http_build_query($urlParams);
+                                    $newUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $parsedUrl['path'] . '?' . $parsedUrl['query'];
+                                    return $matches[1] . '="' . $newUrl . '"';
+                                }, $cover);
+                                $cover = format_text($cover, FORMAT_HTML);
                                 $body_content .= $cover;
                             }
                             break;
@@ -750,7 +768,11 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         }*/
                         $general_content .= $body_content;
                         $general_content .= '</div>';
-                        $blockForPdf .= $body_content;
+                        if ($body_content_forPdf) {
+                            $blockForPdf .= $body_content_forPdf;
+                        } else {
+                            $blockForPdf .= $body_content;
+                        }
                     }
                     break;
                 default:
@@ -1205,7 +1227,6 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
 
     }
     $pdf_content = prependHtmlContentToPdf($pdf_content, $view);
-
 	// Output for debugging.
 //    echo '<textarea>';
 //    print_r($pdf_content);

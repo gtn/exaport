@@ -212,25 +212,37 @@ namespace {
         }
     }
 
-    function block_exaport_get_elove_item($itemid, $userid, $authenticationinfo) {
+    function block_exaport_get_item_for_webservice($itemid, $itemOwnerid, $currentUserid) {
         global $DB;
         // Check if user is userid or if user is trainer of userid.
-        if ($userid == $authenticationinfo['user']->id) {
-            return $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $userid));
-        } else if ($DB->record_exists(BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS, array('trainerid' => $authenticationinfo['user']->id,
-                'studentid' => $userid))
-        ) {
+        if ($itemOwnerid == $currentUserid) {
+            return $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $itemOwnerid));
+        }
+
+        // old external trainer logic
+        $found = $DB->record_exists(BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS, array('trainerid' => $currentUserid, 'studentid' => $itemOwnerid));
+        if ($found) {
             return $DB->get_record('block_exaportitem', array('id' => $itemid));
-        } else {
-            $sql = "SELECT * FROM {block_exaportview} v ".
-                    " JOIN {block_exaportviewblock} vb ON v.id = vb.viewid AND vb.itemid = ? ".
-                    " JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ? ";
-            if ($DB->record_exists_sql($sql, array($itemid, $authenticationinfo['user']->id))) {
+        }
+
+        // in a view shared with user?
+        $sql = "SELECT * FROM {block_exaportview} v ".
+                " JOIN {block_exaportviewblock} vb ON v.id = vb.viewid AND vb.itemid = ? ".
+                " JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ? ";
+        $found = $DB->record_exists_sql($sql, array($itemid, $currentUserid));
+        if ($found) {
+            return $DB->get_record('block_exaportitem', array('id' => $itemid));
+        }
+
+        // in an exacomp course (for diggr+ / dakora+)
+        if (class_exists('\block_exacomp\api')) {
+            $courseid = $DB->get_field('block_exaportitem', 'courseid', array('id' => $itemid));
+            if ($courseid && block_exacomp_is_teacher($courseid, $currentUserid)) {
                 return $DB->get_record('block_exaportitem', array('id' => $itemid));
             }
-
-            return false;
         }
+
+        return false;
     }
 
     function block_exaport_epop_checkhash($userhash) {
@@ -873,20 +885,20 @@ namespace block_exaport {
 
         // All categories and users who shared.
         $categories = $DB->get_records_sql(
-                ' SELECT c.* 
-                    FROM {block_exaportcate} c 
-                      JOIN {user} u ON u.id = c.userid                      
+                ' SELECT c.*
+                    FROM {block_exaportcate} c
+                      JOIN {user} u ON u.id = c.userid
                       LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?
-                      LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid 
+                      LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid
                     WHERE (
                         ('.(block_exaport_shareall_enabled() ? ' c.shareall = 1 OR ' : '').' cshar.userid IS NOT NULL) '.
                         // Only show shared all, if enabled
                         // Shared for you group.
                         ($usercats ? ' OR c.id IN ('.join(',', array_keys($usercats)).') ' : ''). // Add group sharing categories.
-                        ') 
+                        ')
                           AND c.userid != ? '. // Don't show my own categories.
-                        ' AND internshare = 1 
-                          AND u.deleted = 0 
+                        ' AND internshare = 1
+                          AND u.deleted = 0
                     ORDER BY u.lastname, u.firstname, c.name', array($userid, $USER->id));
 
         // add subcategories (TODO: check!)

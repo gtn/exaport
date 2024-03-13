@@ -66,7 +66,7 @@ if ($token) {
         $accesspath[2] = (explode('-', $accesspath[2])[0]);
     }
 
-    $item = block_exaport_get_elove_item($itemid, $accesspath[2], $authenticationinfo);
+    $item = block_exaport_get_item_for_webservice($itemid, $accesspath[2], $authenticationinfo['user']->id);
     if (!$item) {
         print_error("viewnotfound", "block_exaport");
     }
@@ -102,7 +102,7 @@ if ($itemid) {
     } else if ($access) {
         $item = block_exaport_get_item($itemid, $access, false);
     } else if (($userid = optional_param('userid', 0, PARAM_INT)) && $authenticationinfo) {
-        $item = block_exaport_get_elove_item($itemid, $userid, $authenticationinfo);
+        $item = block_exaport_get_item_for_webservice($itemid, $userid, $authenticationinfo['user']->id);
     }
 
     if (!$item) {
@@ -223,4 +223,3 @@ function not_found($courseid = 0) {
     //}
     print_error("filenotfound", "block_exaport");
 }
-?>

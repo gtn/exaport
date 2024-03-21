@@ -65,7 +65,7 @@ $string['explainingshared'] = 'These participants have shared some of their exte
 $string['explainingsharefile'] = 'To allow a participant to see the file, click on their name and then click on Save Changes.  You can choose more than one participant.';
 $string['explainingsharenote'] = 'To allow a participant to see the note, click on their name and then click on Save Changes.  You can choose more than one participant.';
 $string['file'] = 'File';
-$string['iconfile'] = 'Icon picture';
+$string['iconfile'] = 'Thumbnail';
 $string['iconfile_merge'] = 'Merge this icon picture with the folder icon';
 $string['iconfile_merge_description'] = 'Icon picture will try (without any guarantee) to merge with standard folder icon. The icon will be replaced with the new image.';
 $string['firstnameshared'] = 'First Name';
@@ -187,6 +187,10 @@ $string['commentshouldnotbeempty'] = 'You have to enter a comment.';
 $string['title'] = 'Title';
 $string['titlenotemtpy'] = 'You have to enter a title.';
 $string['intro'] = 'Content';
+$string['shortdescription'] = 'Short description';
+$string['project_description'] = 'The why behind this project';
+$string['project_process'] = 'Making it happen';
+$string['project_result'] = 'Results and learnings';
 $string['intronotempty'] = 'You have to enter a content.';
 $string['link'] = 'Link';
 $string['categorynotempty'] = 'You have to choose a category.';
@@ -609,7 +613,49 @@ $string['layout_settings_custom_css'] = 'Custom CSS';
 $string['layout_settings_custom_css_description'] = 'You can use own custom CSS rules here';
 $string['selected_competencies'] = 'Achieved Competency';
 $string['forms.item.title'] = 'Title';
-$string['forms.item.title_help'] = 'Title help text';
+$string['forms.item.title_help'] = '';
+$string['forms.item.project_description'] = 'The why behind this project';
+$string['forms.item.project_description_help'] = 'Briefly explain the purpose of your work:<ul> 
+                <li>What problem did it address?</li> 
+                <li>What skills did you aim to develop?</li> 
+                <li>What was the context?</li>
+            </ul>';
+$string['forms.item.project_description_editor'] = 'The why behind this project';
+$string['forms.item.project_description_editor_help'] = 'Briefly explain the purpose of your work:<ul> 
+                <li>What problem did it address?</li> 
+                <li>What skills did you aim to develop?</li> 
+                <li>What was the context?</li>
+            </ul>';
+$string['forms.item.project_process'] = 'Making it happen';
+$string['forms.item.project_process_help'] = 'Describe your journey:
+            <ul> 
+                <li>What steps did you take to complete this project?</li> 
+                <li>What challenges did you encounter, and how did you overcome them?</li> 
+                <li>What resources did you use?</li>
+            </ul>';
+$string['forms.item.project_process_editor'] = 'Making it happen';
+$string['forms.item.project_process_editor_help'] = 'Describe your journey:
+            <ul> 
+                <li>What steps did you take to complete this project?</li> 
+                <li>What challenges did you encounter, and how did you overcome them?</li> 
+                <li>What resources did you use?</li>
+            </ul>';
+$string['forms.item.project_result'] = 'Results and learnings';
+$string['forms.item.project_result_help'] = 'Briefly summarize the outcomes of your project:
+                <ul> 
+                    <li>What did you achieve?</li>
+                    <li>What skills and competencies did you develop or strengthen through this work?</li>
+                    <li>What did you learn about yourself and your abilities?</li>
+                    <li>What would you do differently next time?”</li>
+                </ul>';
+$string['forms.item.project_result_editor'] = 'Results and learnings';
+$string['forms.item.project_result_editor_help'] = 'Briefly summarize the outcomes of your project:
+                <ul> 
+                    <li>What did you achieve?</li>
+                    <li>What skills and competencies did you develop or strengthen through this work?</li>
+                    <li>What did you learn about yourself and your abilities?</li>
+                    <li>What would you do differently next time?”</li>
+                </ul>';
 $string['view_saved'] = 'View saved';
 $string['view_sharing_updated'] = 'View sharing updated';
 $string['list'] = 'List';

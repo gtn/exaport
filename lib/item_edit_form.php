@@ -164,26 +164,35 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->add_exaport_help_button('langid', 'forms.item.langid');
         }
 
-        if (isset($this->_customdata['useTextarea']) && $this->_customdata['useTextarea']) {
-            // It has iframe, show textfield, no editor.
-            $mform->addElement('textarea', 'intro', get_string('intro', 'block_exaport'), 'rows="20" cols="50" style="width: 95%"');
-            $mform->setType('intro', PARAM_RAW);
-            if ($type == 'note') {
-                $mform->addRule('intro', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
-            }
-            $mform->add_exaport_help_button('intro', 'forms.item.intro');
-        } else {
-            if (!isset($this->_customdata['textfieldoptions'])) {
-                $this->_customdata['textfieldoptions'] = array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99,
+        $textareafields = [ // field name => string marker
+            'intro' => 'shortdescription',
+            'project_description' => 'project_description',
+            'project_process' => 'project_process',
+            'project_result' => 'project_result',
+        ];
+        $usetextareas = @$this->_customdata['useTextareas'] ?: [];
+        foreach ($textareafields as $textareafield => $stringmarker) {
+            if (isset($usetextareas[$textareafield]) && $usetextareas[$textareafield]) {
+                // It has iframe, show textfield, no editor.
+                $mform->addElement('textarea', $textareafield, get_string($stringmarker, 'block_exaport'), 'rows="20" cols="50" style="width: 95%"');
+                $mform->setType($textareafield, PARAM_RAW);
+                if ($type == 'note' && $textareafield == 'intro') {
+                    $mform->addRule($textareafield, get_string('intronotempty', 'block_exaport'), 'required', null, 'client');
+                }
+                $mform->add_exaport_help_button($textareafield, 'forms.item.'.$textareafield);
+            } else {
+                if (!isset($this->_customdata['textfieldoptions'])) {
+                    $this->_customdata['textfieldoptions'] = array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99,
                         'context' => context_user::instance($USER->id));
-            }
-            $mform->addElement('editor', 'intro_editor', get_string('intro', 'block_exaport'), null,
+                }
+                $mform->addElement('editor', $textareafield.'_editor', get_string($stringmarker, 'block_exaport'), null,
                     $this->_customdata['textfieldoptions']);
-            $mform->setType('intro_editor', PARAM_RAW);
-            if ($type == 'note') {
-                $mform->addRule('intro_editor', get_string("intronotempty", "block_exaport"), 'required', null, 'client');
+                $mform->setType($textareafield.'_editor', PARAM_RAW);
+                if ($type == 'note' && $textareafield == 'intro') {
+                    $mform->addRule($textareafield.'_editor', get_string('intronotempty', 'block_exaport'), 'required', null, 'client');
+                }
+                $mform->add_exaport_help_button($textareafield.'_editor', 'forms.item.'.$textareafield.'_editor');
             }
-            $mform->add_exaport_help_button('intro_editor', 'forms.item.intro_editor');
         }
 
         $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,

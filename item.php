@@ -17,6 +17,8 @@
 
 require_once(__DIR__.'/inc.php');
 
+const POSSIBLE_IFRAME_FIELDS = ['intro', 'project_description', 'project_process', 'project_result'];
+
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
 $confirm = optional_param("confirm", "", PARAM_BOOL);
@@ -192,9 +194,12 @@ require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
 $textfieldoptions = array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99, 'context' => context_user::instance($USER->id));
 
-$usetextarea = false;
-if ($existing && $existing->intro && preg_match('!<iframe!i', $existing->intro)) {
-    $usetextarea = true;
+$usetextareas = [];
+foreach(POSSIBLE_IFRAME_FIELDS as $itemfield) {
+    $usetextareas[$itemfield] = false;
+    if ($existing && $existing->{$itemfield} && preg_match('!<iframe!i', $existing->{$itemfield})) {
+        $usetextareas[$itemfield] = true;
+    }
 }
 
 $categoryidforform = $categoryid;
@@ -202,7 +207,7 @@ if ($cattype == 'shared' && $categoryid === 0) {
     $categoryidforform = $existing->categoryid;
 }
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'].'&type='.$type,
-        Array('current' => $existing, 'useTextarea' => $usetextarea, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
+        Array('current' => $existing, 'useTextareas' => $usetextareas, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
                 'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission, 'cattype' => $cattype, 'catid' => $categoryidforform));
 
 if ($editform->is_cancelled()) {
@@ -217,7 +222,7 @@ if ($editform->is_cancelled()) {
             $fromform->type = $type;
             $fromform->compids = $compids;
 
-            block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextarea);
+            block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
             break;
 
         case 'edit':
@@ -226,7 +231,7 @@ if ($editform->is_cancelled()) {
                 print_error("bookmarknotfound", "block_exaport");
             }
 
-            block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextarea);
+            block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
             break;
 
         default:
@@ -241,6 +246,9 @@ $extracontent = '';
 // Gui setup.
 $post = new stdClass();
 $post->introformat = FORMAT_HTML;
+$post->project_descriptionformat = FORMAT_HTML;
+$post->project_processformat = FORMAT_HTML;
+$post->project_resultformat = FORMAT_HTML;
 $post->allowedit = $allowedit;
 
 switch ($action) {
@@ -258,6 +266,9 @@ switch ($action) {
         $post->id = $existing->id;
         $post->name = $existing->name;
         $post->intro = $existing->intro;
+        $post->project_description = $existing->project_description;
+        $post->project_process = $existing->project_process;
+        $post->project_result = $existing->project_result;
         $post->categoryid = $existing->categoryid;
         $post->userid = $existing->userid;
         $post->action = $action;
@@ -273,9 +284,11 @@ switch ($action) {
             }
         }
 
-        if (!$usetextarea) {
-            $post = file_prepare_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id),
-                    'block_exaport', 'item_content', $post->id);
+        foreach ($usetextareas as $fieldname => $usetextarea) {
+            if (!$usetextarea) {
+                $post = file_prepare_standard_editor($post, $fieldname, $textfieldoptions, context_user::instance($USER->id),
+                    'block_exaport', 'item_content_'.$fieldname, $post->id);
+            }
         }
 
         $straction = get_string('edit');
@@ -439,14 +452,16 @@ echo $OUTPUT->footer($course);
 /**
  * Update item in the database
  */
-function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextarea) {
+function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextareas) {
     global $CFG, $USER, $DB;
 
     $post->timemodified = time();
-    if (!$usetextarea) {
-        $post->introformat = FORMAT_HTML;
-        $post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id),
-                'block_exaport', 'item_content', $post->id);
+    foreach ($usetextareas as $fieldname => $usetextarea) {
+        if (!$usetextarea) {
+            $post->{$fieldname.'format'} = FORMAT_HTML;
+            $post = file_postupdate_standard_editor($post, $fieldname, $textfieldoptions, context_user::instance($USER->id),
+                'block_exaport', 'item_content_'.$fieldname, $post->id);
+        }
     }
 
     if (!empty($post->url)) {
@@ -524,15 +539,12 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 /**
  * Write a new item into database
  */
-function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextarea) {
+function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextareas) {
     global $CFG, $USER, $DB;
 
     $post->userid = $USER->id;
     $post->timemodified = time();
     $post->courseid = $courseid;
-    if (!$usetextarea) {
-        $post->intro = '';
-    }
 
     if (!empty($post->url)) {
         if ($post->url == 'http://') {
@@ -541,12 +553,26 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
             $post->url = "http://".$post->url;
         }
     }
+
+    foreach ($usetextareas as $fieldname => $usetextarea) {
+        if (!$usetextarea) {
+            $post->{$fieldname} = '';
+        }
+    }
+
     // Insert the new entry.
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
-        if (!$usetextarea) {
-            $post->introformat = FORMAT_HTML;
-            $post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id),
-                    'block_exaport', 'item_content', $post->id);
+        $postupdate = false;
+        foreach ($usetextareas as $fieldname => $usetextarea) {
+            if (!$usetextarea) {
+                $post->{$fieldname.'format'} = FORMAT_HTML;
+                $post = file_postupdate_standard_editor($post, $fieldname, $textfieldoptions, context_user::instance($USER->id),
+                    'block_exaport', 'item_content_'.$fieldname, $post->id);
+                $postupdate = true;
+            }
+        }
+
+        if ($postupdate) {
             $DB->update_record('block_exaportitem', $post);
         }
 

@@ -205,8 +205,8 @@ return [
                 'File',
         ],
         'iconfile' => [
-                null,
-                'Icon picture',
+                'Miniaturansicht',
+                'Thumbnail',
         ],
         'iconfile_merge' => [
                 'Symbol mit Ordner-Symbol kombinieren',
@@ -673,6 +673,22 @@ return [
         'intro' => [
                 'Inhalt',
                 'Content',
+        ],
+        'shortdescription' => [
+                'Kurzbeschreibung',
+                'Short description',
+        ],
+        'project_description' => [
+                'The why behind this project',
+                'The why behind this project',
+        ],
+        'project_process' => [
+                'Making it happen',
+                'Making it happen',
+        ],
+        'project_result' => [
+                'Results and learnings',
+                'Results and learnings',
         ],
         'intronotempty' => [
                 'Der Inhalt darf nicht leer sein.',
@@ -2182,8 +2198,115 @@ return [
             'Title',
         ],
         'forms.item.title_help' => [
-            'Titel help text',
-            'Title help text',
+            '',
+            '',
+        ],
+        'forms.item.project_description' => [
+            'The why behind this project',
+            'The why behind this project',
+        ],
+        'forms.item.project_description_help' => [
+            'Briefly explain the purpose of your work:<ul> 
+                <li>What problem did it address?</li> 
+                <li>What skills did you aim to develop?</li> 
+                <li>What was the context?</li>
+            </ul>',
+            'Briefly explain the purpose of your work:<ul> 
+                <li>What problem did it address?</li> 
+                <li>What skills did you aim to develop?</li> 
+                <li>What was the context?</li>
+            </ul>',
+        ],
+        'forms.item.project_description_editor' => [
+            'The why behind this project',
+            'The why behind this project',
+        ],
+        'forms.item.project_description_editor_help' => [
+            'Briefly explain the purpose of your work:<ul> 
+                <li>What problem did it address?</li> 
+                <li>What skills did you aim to develop?</li> 
+                <li>What was the context?</li>
+            </ul>',
+            'Briefly explain the purpose of your work:<ul> 
+                <li>What problem did it address?</li> 
+                <li>What skills did you aim to develop?</li> 
+                <li>What was the context?</li>
+            </ul>',
+        ],
+        'forms.item.project_process' => [
+            'Making it happen',
+            'Making it happen',
+        ],
+        'forms.item.project_process_help' => [
+            'Describe your journey:
+            <ul> 
+                <li>What steps did you take to complete this project?</li> 
+                <li>What challenges did you encounter, and how did you overcome them?</li> 
+                <li>What resources did you use?</li>
+            </ul>',
+            'Describe your journey:
+            <ul> 
+                <li>What steps did you take to complete this project?</li> 
+                <li>What challenges did you encounter, and how did you overcome them?</li> 
+                <li>What resources did you use?</li>
+            </ul>',
+        ],
+        'forms.item.project_process_editor' => [
+            'Making it happen',
+            'Making it happen',
+        ],
+        'forms.item.project_process_editor_help' => [
+            'Describe your journey:
+            <ul> 
+                <li>What steps did you take to complete this project?</li> 
+                <li>What challenges did you encounter, and how did you overcome them?</li> 
+                <li>What resources did you use?</li>
+            </ul>',
+            'Describe your journey:
+            <ul> 
+                <li>What steps did you take to complete this project?</li> 
+                <li>What challenges did you encounter, and how did you overcome them?</li> 
+                <li>What resources did you use?</li>
+            </ul>',
+        ],
+        'forms.item.project_result' => [
+            'Results and learnings',
+            'Results and learnings',
+        ],
+        'forms.item.project_result_help' => [
+            'Briefly summarize the outcomes of your project:
+                <ul> 
+                    <li>What did you achieve?</li>
+                    <li>What skills and competencies did you develop or strengthen through this work?</li>
+                    <li>What did you learn about yourself and your abilities?</li>
+                    <li>What would you do differently next time?”</li>
+                </ul>',
+            'Briefly summarize the outcomes of your project:
+                <ul> 
+                    <li>What did you achieve?</li>
+                    <li>What skills and competencies did you develop or strengthen through this work?</li>
+                    <li>What did you learn about yourself and your abilities?</li>
+                    <li>What would you do differently next time?”</li>
+                </ul>',
+        ],
+        'forms.item.project_result_editor' => [
+            'Results and learnings',
+            'Results and learnings',
+        ],
+        'forms.item.project_result_editor_help' => [
+            'Briefly summarize the outcomes of your project:
+                <ul> 
+                    <li>What did you achieve?</li>
+                    <li>What skills and competencies did you develop or strengthen through this work?</li>
+                    <li>What did you learn about yourself and your abilities?</li>
+                    <li>What would you do differently next time?”</li>
+                </ul>','Briefly summarize the outcomes of your project:
+                <ul> 
+                    <li>What did you achieve?</li>
+                    <li>What skills and competencies did you develop or strengthen through this work?</li>
+                    <li>What did you learn about yourself and your abilities?</li>
+                    <li>What would you do differently next time?”</li>
+                </ul>',
         ],
         'view_saved' => [
             'View gespeichert',

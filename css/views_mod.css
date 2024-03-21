@@ -119,6 +119,8 @@
 }
 
 #exaport .portfolioDesignBlocks li .header {
+    font-size: 1.05rem;
+    font-weight: bold;
     cursor: move;
     padding: 4px 20px 4px 8px;
 }

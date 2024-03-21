@@ -855,7 +855,14 @@ switch ($type) {
 
         <?php
         // View data form.
-        echo '<div id="blocktype-list">'.get_string('createpage', 'block_exaport');
+        echo '<div id="blocktype-list">';
+        echo get_string('createpage', 'block_exaport');
+        // help popup
+        echo '
+            &nbsp;&nbsp;<a class="" data-modal="alert" data-modal-title-str=\'["create_view_content_help_title", "block_exaport"]\'
+data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' href="#"><img src="'.$OUTPUT->image_url('help', 'block_exaport').'" class="icon" alt="" /></a>            
+        ';
+
         // Preview button.
         echo '<div style="float: right;">
             <a target="_blank" href="'.

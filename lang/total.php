@@ -2611,6 +2611,26 @@ return [
             'add actual CV "About me" content',
             'add actual CV "About me" content',
         ],
+        'create_view_content_help_title' => [
+            'Craft Your Unique Story: Build Your Portfolio',
+            'Craft Your Unique Story: Build Your Portfolio',
+        ],
+        'create_view_content_help_text' => [
+            '<ul>
+                <li><strong>Plan your layout:</strong> Drag and drop building blocks and arrange them to tell your story. Use columns (available in the "layout" section) to plan your portfolio.</li>
+                <li><strong>Organize for clarity:</strong> Use headers, links, and notes to structure your content effectively.</li>
+                <li><strong>Personalize your style:</strong> Choose fonts and colours within the available options to add a touch of you.</li>
+            </ul>
+            <strong>Remember: Your e-portfolio tells the world about you and your skills. Make it clear, concise, and engaging!</strong>
+            ',
+            '<ul>
+                <li><strong>Plan your layout:</strong> Drag and drop building blocks and arrange them to tell your story. Use columns (available in the "layout" section) to plan your portfolio.</li>
+                <li><strong>Organize for clarity:</strong> Use headers, links, and notes to structure your content effectively.</li>
+                <li><strong>Personalize your style:</strong> Choose fonts and colours within the available options to add a touch of you.</li>
+            </ul>
+            <strong>Remember: Your e-portfolio tells the world about you and your skills. Make it clear, concise, and engaging!</strong>
+            ',
+        ],
 
 
 ];

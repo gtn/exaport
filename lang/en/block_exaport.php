@@ -752,3 +752,11 @@ $string['whyEportfolio_description'] = '   <h4>Don\'t Let Your Hard Work Disappe
 $string['cofigureblock_cvinfo_help'] = 'Will be shown actual state of selected CV items. Block content will be updated if you will change the item in your CV later';
 $string['cofigureblock_cvinfo_cover'] = 'About me';
 $string['cofigureblock_cvinfo_cover_actual'] = 'add actual CV "About me" content';
+$string['create_view_content_help_title'] = 'Craft Your Unique Story: Build Your Portfolio';
+$string['create_view_content_help_text'] = '<ul>
+                <li><strong>Plan your layout:</strong> Drag and drop building blocks and arrange them to tell your story. Use columns (available in the "layout" section) to plan your portfolio.</li>
+                <li><strong>Organize for clarity:</strong> Use headers, links, and notes to structure your content effectively.</li>
+                <li><strong>Personalize your style:</strong> Choose fonts and colours within the available options to add a touch of you.</li>
+            </ul>
+            <strong>Remember: Your e-portfolio tells the world about you and your skills. Make it clear, concise, and engaging!</strong>
+            ';

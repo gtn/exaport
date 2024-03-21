@@ -191,6 +191,13 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             }
             break;
         case 'resume_editor_cover':
+        case 'resume_editor_goalspersonal':
+        case 'resume_editor_goalsacademic':
+        case 'resume_editor_goalscareers':
+        case 'resume_editor_skillspersonal':
+        case 'resume_editor_skillsacademic':
+        case 'resume_editor_skillscareers':
+        case 'resume_editor_interests':
             if ($is_for_pdf) {
                 // $view is already defined
             } else {
@@ -200,10 +207,10 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (!$view) {
                 print_error("viewnotfound", "block_exaport");
             }
-            // Simple checking: the view has a block with 'cover' CV?
+            // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
             $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
                 " WHERE b.viewid=? AND" .
-                " b.type='cv_information' AND b.resume_itemtype='cover'";
+                " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype='cover'";
             if (!$DB->record_exists_sql($sql, array($view->id))) {
                 print_error("viewnotfound", "block_exaport");
             }
@@ -221,12 +228,6 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         case 'resume_skillspersonal':
         case 'resume_skillsacademic':
         case 'resume_skillscareers':
-        case 'resume_editor_goalspersonal':
-        case 'resume_editor_goalsacademic':
-        case 'resume_editor_goalscareers':
-        case 'resume_editor_skillspersonal':
-        case 'resume_editor_skillsacademic':
-        case 'resume_editor_skillscareers':
             if (!$viewuser) {
                 $viewuser = $USER->id;
             }

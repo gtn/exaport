@@ -225,19 +225,19 @@ if ($fromPdform = $pdfForm->get_data()) {
         }
         $pdf_settings['pageorient'] = $pageorient;
 		// show view metadata
-		if ($fromPdform->showmetadata) {
+		if (@$fromPdform->showmetadata) {
             $pdf_settings['showmetadata'] = $fromPdform->showmetadata;
         } else {
             $pdf_settings['showmetadata'] = 0;
 		}
 		// show user name
-        $pdf_settings['showusername'] = $fromPdform->showusername ? 1 : 0;
+        $pdf_settings['showusername'] = @$fromPdform->showusername ? 1 : 0;
 		// show user picture
-        $pdf_settings['showuserpicture'] = $fromPdform->showuserpicture ? 1 : 0;
+        $pdf_settings['showuserpicture'] = @$fromPdform->showuserpicture ? 1 : 0;
 		// show user email
-        $pdf_settings['showuseremail'] = $fromPdform->showuseremail ? 1 : 0;
+        $pdf_settings['showuseremail'] = @$fromPdform->showuseremail ? 1 : 0;
 		// show user phone
-        $pdf_settings['showuserphone'] = $fromPdform->showuserphone ? 1 : 0;
+        $pdf_settings['showuserphone'] = @$fromPdform->showuserphone ? 1 : 0;
 
         // Save pdf settings into DB
         $pdf_settings_serialized = serialize($pdf_settings);
@@ -360,6 +360,19 @@ $general_content .= '<div id="view">';
 $general_content .= '<table class="table_layout layout'.$view->layout.'""><tr>';
 $data_for_pdf = array(); // for old pdf view
 $data_for_pdf_blocks = array(); // for new pdf view
+
+$addAttachementsToBlockView = function($attachments, $block) {
+    $body_content = '';
+    if ($block->resume_withfiles && $attachments && is_array($attachments) && count($attachments) > 0) {
+        $body_content .= '<ul class="resume_attachments ' . $block->resume_itemtype . '_attachments">';
+        foreach ($attachments as $attachm) {
+            $body_content .= '<li><a href="' . $attachm['fileurl'] . '" target="_blank">' . $attachm['filename'] . '</a></li>';
+        }
+        $body_content .= '</ul>';
+    }
+    return $body_content;
+};
+
 for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
     $data_for_pdf[$i] = array();
     $data_for_pdf_blocks[$i] = array();
@@ -590,6 +603,222 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $blockForPdf .= '<img align="right" src="'.$badge->imageUrl.'" />';
                     // $blockForPdf .= '</div>';
                     break;
+                case 'cv_group':
+                    $body_content = '';
+                    switch ($block->resume_itemtype) {
+                        case 'cover':
+                            if ($resume && $resume->cover) {
+                                $cover = $resume->cover;
+                                $cover = file_rewrite_pluginfile_urls($cover, 'pluginfile.php',
+                                    context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_cover', $resume->id);
+                                // For shared views we need to have access argument to show attached files fo different cases:
+                                $body_content_forPdf .= format_text($cover, FORMAT_HTML); // pdf does not need additional parameter
+                                $cover = block_exaport_add_view_access_parameter_to_url($cover, $access, ['src', 'href']);
+                                $cover = format_text($cover, FORMAT_HTML);
+                                $body_content .= $cover;
+                            }
+                            break;
+                        case 'edu':
+                            $items = [];
+                            if ($block->text && $resume && $resume->educations) {
+                                $itemIds = explode(',', $block->text);
+                                foreach ($itemIds as $itemid) {
+                                    if ($resume->educations[$itemid]) {
+                                        $item_data = $resume->educations[$itemid];
+                                        $description = '';
+                                        $description .= '<span class="edu_institution">' . $item_data->institution . ':</span> ';
+                                        $description .= '<span class="edu_qualname">' . $item_data->qualname . '</span>';
+                                        if ($item_data->startdate != '' || $item_data->enddate != '') {
+                                            $description .= ' (';
+                                            if ($item_data->startdate != '') {
+                                                $description .= '<span class="edu_startdate">' . $item_data->startdate . '</span>';
+                                            }
+                                            if ($item_data->enddate != '') {
+                                                $description .= '<span class="edu_enddate"> - ' . $item_data->enddate . '</span>';
+                                            }
+                                            $description .= ')';
+                                        }
+                                        if ($item_data->qualdescription != '') {
+                                            $description .= '<span class="edu_qualdescription">' . $item_data->qualdescription . '</span>';
+                                        }
+                                        $attachments = $item_data->attachments;
+                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $items[] = $description;
+                                    }
+                                }
+                            }
+                            $body_content .= implode('<br>', $items);
+                            break;
+                        case 'employ':
+                            $items = [];
+                            if ($block->text && $resume && $resume->employments) {
+                                $itemIds = explode(',', $block->text);
+                                foreach ($itemIds as $itemid) {
+                                    if ($resume->employments[$itemid]) {
+                                        $item_data = $resume->employments[$itemid];
+                                        $description = '';
+                                        $description .= '<span class="employ_jobtitle">' . $item_data->jobtitle . ':</span> ';
+                                        $description .= '<span class="employ_employer">' . $item_data->employer . '</span>';
+                                        if ($item_data->startdate != '' || $item_data->enddate != '') {
+                                            $description .= ' (';
+                                            if ($item_data->startdate != '') {
+                                                $description .= '<span class="employ_startdate">' . $item_data->startdate . '</span>';
+                                            }
+                                            if ($item_data->enddate != '') {
+                                                $description .= '<span class="employ_enddate"> - ' . $item_data->enddate . '</span>';
+                                            }
+                                            $description .= ')';
+                                        }
+                                        if ($item_data->positiondescription != '') {
+                                            $description .= '<span class="employ_positiondescription">' . $item_data->positiondescription . '</span>';
+                                        }
+                                        $attachments = $item_data->attachments;
+                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $items[] = $description;
+                                    }
+                                }
+                            }
+                            $body_content .= implode('<br>', $items);
+                            break;
+                        case 'certif':
+                            $items = [];
+                            if ($block->text && $resume && $resume->certifications) {
+                                $itemIds = explode(',', $block->text);
+                                foreach ($itemIds as $itemid) {
+                                    if ($resume->certifications[$itemid]) {
+                                        $item_data = $resume->certifications[$itemid];
+                                        $attachments = $item_data->attachments;
+                                        $description = '';
+                                        $description .= '<span class="certif_title">' . $item_data->title . '</span> ';
+                                        if ($item_data->date != '') {
+                                            $description .= '<span class="certif_date">(' . $item_data->date . ')</span>';
+                                        }
+                                        if ($item_data->description != '') {
+                                            $description .= '<span class="certif_description">' . $item_data->description . '</span>';
+                                        }
+                                        $attachments = $item_data->attachments;
+                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $items[] = $description;
+                                    }
+                                }
+                            }
+                            $body_content .= implode('<br>', $items);
+                            break;
+                        case 'public':
+                            $items = [];
+                            if ($block->text && $resume && $resume->publications) {
+                                $itemIds = explode(',', $block->text);
+                                foreach ($itemIds as $itemid) {
+                                    if ($resume->publications[$itemid]) {
+                                        $item_data = $resume->publications[$itemid];
+                                        $description = '';
+                                        $description .= '<span class="public_title">'.$item_data->title;
+                                        if ($item_data->contribution != '') {
+                                            $description .= ' ('.$item_data->contribution.')';
+                                        }
+                                        $description .= '</span> ';
+                                        if ($item_data->date != '') {
+                                            $description .= '<span class="public_date">('.$item_data->date.')</span>';
+                                        }
+                                        if ($item_data->contributiondetails != '' || $item_data->url != '') {
+                                            $description .= '<span class="public_description">';
+                                            if ($item_data->contributiondetails != '') {
+                                                $description .= $item_data->contributiondetails;
+                                            }
+                                            if ($item_data->url != '') {
+                                                $description .= '<br /><a href="'.$item_data->url.'" class="public_url" target="_blank">'.$item_data->url.'</a>';
+                                            }
+                                            $description .= '</span>';
+                                        }
+                                        $attachments = $item_data->attachments;
+                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $items[] = $description;
+                                    }
+                                }
+                            }
+                            $body_content .= implode('<br>', $items);
+                            break;
+                        case 'mbrship':
+                            $items = [];
+                            if ($block->text && $resume && $resume->publications) {
+                                $itemIds = explode(',', $block->text);
+                                foreach ($itemIds as $itemid) {
+                                    if ($resume->profmembershipments[$itemid]) {
+                                        $item_data = $resume->profmembershipments[$itemid];
+                                        $description = '';
+                                        $description .= '<span class="mbrship_title">' . $item_data->title . '</span> ';
+                                        if ($item_data->startdate != '' || $item_data->enddate != '') {
+                                            $description .= ' (';
+                                            if ($item_data->startdate != '') {
+                                                $description .= '<span class="mbrship_startdate">' . $item_data->startdate . '</span>';
+                                            }
+                                            if ($item_data->enddate != '') {
+                                                $description .= '<span class="mbrship_enddate"> - ' . $item_data->enddate . '</span>';
+                                            }
+                                            $description .= ')';
+                                        }
+                                        if ($item_data->description != '') {
+                                            $description .= '<span class="mbrship_description">' . $item_data->description . '</span>';
+                                        }
+                                        $attachments = $item_data->attachments;
+                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $items[] = $description;
+                                    }
+                                }
+                            }
+                            $body_content .= implode('<br>', $items);
+                            break;
+                        case 'goals':
+                        case 'skills':
+                            $items = [];
+                            if ($block->text && $resume) {
+                                $itemIds = explode(',', $block->text);
+                                foreach ($itemIds as $goalSkillType) {
+                                    $description = '';
+                                    if ($tempContent = $resume->{$goalSkillType}) {
+                                        $tempContent = file_rewrite_pluginfile_urls($tempContent, 'pluginfile.php',
+                                            context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_'.$goalSkillType, $resume->id);
+                                        $body_content_forPdf .= format_text($tempContent, FORMAT_HTML); // pdf does not need additional parameter
+                                        $tempContent = block_exaport_add_view_access_parameter_to_url($tempContent, $access, ['src']);
+                                        $description .= '<span class="'.$goalSkillType.'_text">'.$tempContent.'</span> ';
+                                    }
+                                    $attachments = @$resume->{$goalSkillType.'_attachments'};
+                                    $description .= $addAttachementsToBlockView($attachments, $block);
+                                    $description = trim($description);
+                                    if ($description) {
+                                        $items[] = $description;
+                                    }
+                                }
+                            }
+                            $body_content .= implode('<br>', $items);
+                            break;
+                        case 'interests':
+                            $description = '';
+                            if ($tempContent = $resume->interests) {
+                                $tempContent = file_rewrite_pluginfile_urls($tempContent, 'pluginfile.php',
+                                    context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_interests', $resume->id);
+                                $body_content_forPdf .= format_text($tempContent, FORMAT_HTML); // pdf does not need additional parameter
+                                $tempContent = block_exaport_add_view_access_parameter_to_url($tempContent, $access, ['src']);
+                                $description .= '<span class="interests">'.$tempContent.'</span> ';
+                            }
+                            $body_content = $description;
+                            break;
+                        default:
+                            $general_content .= '!!! '.$block->resume_itemtype.' !!!';
+                    }
+
+                    // if the resume item is empty - do not show
+                    if ($body_content != '') {
+                        $general_content .= '<div class="view-cv-information">';
+                        $general_content .= $body_content;
+                        $general_content .= '</div>';
+                        if ($body_content_forPdf) {
+                            $blockForPdf .= $body_content_forPdf;
+                        } else {
+                            $blockForPdf .= $body_content;
+                        }
+                    }
+                    break;
                 case 'cv_information':
                     $body_content = '';
                     switch ($block->resume_itemtype) {
@@ -600,20 +829,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                     context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_cover', $resume->id);
                                 // For shared views we need to have access argument to show attached files fo different cases:
                                 $body_content_forPdf .= format_text($cover, FORMAT_HTML); // pdf does not need additional parameter
-                                $addParams = [
-                                        'access' => $access,
-                                ];
-                                $pattern = '/(href|src)=["\']([^"\']+)["\']/';
-                                $cover = preg_replace_callback($pattern, function($matches) use ($addParams) {
-                                    $url = $matches[2];
-                                    $parsedUrl = parse_url($url);
-                                    $query = isset($parsedUrl['query']) ? $parsedUrl['query'] : '';
-                                    parse_str($query, $urlParams);
-                                    $urlParams = array_merge($urlParams, $addParams);
-                                    $parsedUrl['query'] = http_build_query($urlParams);
-                                    $newUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $parsedUrl['path'] . '?' . $parsedUrl['query'];
-                                    return $matches[1] . '="' . $newUrl . '"';
-                                }, $cover);
+                                $cover = block_exaport_add_view_access_parameter_to_url($cover, $access, ['src', 'href']);
                                 $cover = format_text($cover, FORMAT_HTML);
                                 $body_content .= $cover;
                             }
@@ -735,15 +951,23 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         case 'skillscareers':
                             $attachments = @$resume->{$block->resume_itemtype.'_attachments'};
                             $description = '';
-                            if ($resume && $resume->{$block->resume_itemtype}) {
-                                $description .= '<span class="'.$block->resume_itemtype.'_text">'.$resume->{$block->resume_itemtype}.'</span> ';
+                            if ($resume && $tempContent = $resume->{$block->resume_itemtype}) {
+                                $tempContent = file_rewrite_pluginfile_urls($tempContent, 'pluginfile.php',
+                                    context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_'.$block->resume_itemtype, $resume->id);
+                                $body_content_forPdf .= format_text($tempContent, FORMAT_HTML); // pdf does not need additional parameter
+                                $tempContent = block_exaport_add_view_access_parameter_to_url($tempContent, $access, ['src']);
+                                $description .= '<span class="'.$block->resume_itemtype.'_text">'.$tempContent.'</span> ';
                             }
                             $body_content = $description;
                             break;
                         case 'interests':
                             $description = '';
-                            if ($resume->interests != '') {
-                                $description .= '<span class="interests">'.$resume->interests.'</span> ';
+                            if ($tempContent = $resume->interests) {
+                                $tempContent = file_rewrite_pluginfile_urls($tempContent, 'pluginfile.php',
+                                    context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_interests', $resume->id);
+                                $body_content_forPdf .= format_text($tempContent, FORMAT_HTML); // pdf does not need additional parameter
+                                $tempContent = block_exaport_add_view_access_parameter_to_url($tempContent, $access, ['src']);
+                                $description .= '<span class="interests">'.$tempContent.'</span> ';
                             }
                             $body_content = $description;
                             break;

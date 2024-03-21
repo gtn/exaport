@@ -196,30 +196,82 @@ define(['jquery',
                     newItem = lastclicked;
                 }
                 var i = 0;
-                $('#blockform input.add-cvitem-checkbox:checked').each(function () {
-                    i = i + 1;
-                    if (i > 1) {
-                        var clone = $(newItem).clone();
-                        newItem.after(clone);
-                        newItem = clone;
-                    }
-                    data = {};
-                    data.type = 'cv_information';
-                    data.itemid = $(this).val();
-                    if ($('#blockform [name="add_withfiles"]').is(":checked")) {
-                        data.resume_withfiles = 1;
-                    } else {
-                        data.resume_withfiles = 0;
-                    }
-                    data.resume_itemtype = $(this).attr('data-cvtype');
-                    var goalsSkills = ['goalspersonal', 'goalsacademic', 'goalcareers',
-                                       'skillspersonal', 'skillsacademic', 'skillscareers'];
-                    if (goalsSkills.indexOf(data.resume_itemtype) > -1) {
+                // 'with files' checked
+                var resume_withfiles = 0;
+                if ($('#blockform [name="add_withfiles"]').is(":checked")) {
+                    resume_withfiles = 1;
+                }
+                // 'group by category' checked
+                var category_grouping = 0;
+                if ($('#blockform [name="category_grouping"]').is(":checked")) {
+                    category_grouping = 1;
+                }
+                if (category_grouping) {
+                    // every CV item grouped by category
+                    // 1. group selected checkboxes
+                    var groupedValues = {};
+                    $('#blockform input.add-cvitem-checkbox').each(function() {
+                        if ($(this).is(':checked')) {
+                            // Get the value and data-cvtype attribute
+                            var itemid = $(this).val();
+                            var cvtype = $(this).data('cvtype');
+                            // 'goals' group
+                            if (['goalspersonal', 'goalsacademic', 'goalscareers'].indexOf(cvtype) > -1) {
+                                itemid = cvtype;
+                                cvtype = 'goals';
+                            }
+                            // 'skills' group
+                            if (['skillspersonal', 'skillsacademic', 'skillscareers'].indexOf(cvtype) > -1) {
+                                itemid = cvtype;
+                                cvtype = 'skills';
+                            }
+                            if (!groupedValues[cvtype]) {
+                                groupedValues[cvtype] = [];
+                            }
+                            // fill group values
+                            groupedValues[cvtype].push(itemid);
+                        }
+                    });
+                    // 2. generate new blocks from grouped values
+                    Object.keys(groupedValues).map(function(groupType) {
+                        i = i + 1;
+                        if (i > 1) {
+                            var clone = $(newItem).clone();
+                            newItem.after(clone);
+                            newItem = clone;
+                        }
+                        data = {};
+                        data.type = 'cv_group';
+                        data.resume_itemtype = groupType;
                         data.itemid = null;
-                    }
-                    newItem.data('portfolio', data);
-                    generateItem('update', $(newItem));
-                });
+                        data.text = groupedValues[groupType].join(',');
+                        data.resume_withfiles = resume_withfiles;
+                        newItem.data('portfolio', data);
+                        generateItem('update', $(newItem));
+                    });
+                } else {
+                    // every CV item after each other
+                    $('#blockform input.add-cvitem-checkbox:checked').each(function () {
+                        i = i + 1;
+                        if (i > 1) {
+                            var clone = $(newItem).clone();
+                            newItem.after(clone);
+                            newItem = clone;
+                        }
+                        data = {};
+                        data.type = 'cv_information';
+                        data.itemid = $(this).val();
+                        data.resume_withfiles = resume_withfiles;
+                        data.resume_itemtype = $(this).attr('data-cvtype');
+                        var goalsSkills = ['goalspersonal', 'goalsacademic', 'goalscareers',
+                            'skillspersonal', 'skillsacademic', 'skillscareers'];
+                        if (goalsSkills.indexOf(data.resume_itemtype) > -1) {
+                            data.itemid = null;
+                        }
+                        newItem.data('portfolio', data);
+                        generateItem('update', $(newItem));
+                    });
+                }
                 dialogue.hide();
                 newItem = null;
                 saveBlockData();
@@ -572,6 +624,267 @@ define(['jquery',
                                     */
                 $item.html(tempString);
             }
+        } else if (data.type == 'cv_group') {
+
+            var addAttachmentsToGroup = function(attachments) {
+                var attachmentsContent = '';
+                if (attachments && attachments.length) {
+                    attachmentsContent += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
+                    $.each(attachments, function (k, file) {
+                        attachmentsContent += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
+                    });
+                    attachmentsContent += '</ul>';
+                }
+                return attachmentsContent;
+            };
+            // data = {};
+            // data.type = 'cv_group';
+            // data.resume_itemtype = groupType;
+            // data.itemid = null;
+            // data.text = groupedValues[groupType].join(',');
+            // data.resume_withfiles = resume_withfiles;
+            var body_content = '';
+            var attachments = [];
+            switch (data.resume_itemtype) {
+                case 'cover':
+                    addToHeader = '';
+                    if (resumeItems && resumeItems.cover) {
+                        body_content = resumeItems.cover;
+                    }
+                    break;
+                case 'edu':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_education_history');
+                    if (data.text && resumeItems) {
+                        var itemIds = data.text.split(',');
+                        itemIds.forEach(function(itemid, index) {
+                            if (resumeItems.educations[itemid]) {
+                                item_data = resumeItems.educations[itemid];
+                                var description = '';
+                                description += '<span class="edu_institution">' + item_data.institution + ':</span> ';
+                                description += '<span class="edu_qualname">' + item_data.qualname + '</span>';
+                                if (item_data.startdate != '' || item_data.enddate != '') {
+                                    description += ' (';
+                                    if (item_data.startdate != '') {
+                                        description += '<span class="edu_startdate">' + item_data.startdate + '</span>';
+                                    }
+                                    if (item_data.enddate != '') {
+                                        description += '<span class="edu_enddate"> - ' + item_data.enddate + '</span>';
+                                    }
+                                    description += ')';
+                                }
+                                if (item_data.qualdescription != '') {
+                                    description += '<span class="edu_qualdescription">' + item_data.qualdescription + '</span>';
+                                }
+                                body_content += description;
+                                if (index < itemIds.length - 1) {
+                                    body_content += '<br>';
+                                }
+                                attachments = item_data.attachments;
+                                if (data.resume_withfiles == "1" && attachments && attachments.length) {
+                                    body_content += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
+                                    $.each(attachments, function (k, file) {
+                                        body_content += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
+                                    });
+                                    body_content += '</ul>';
+                                }
+                            }
+                        })
+                    }
+                    break;
+                case 'employ':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_employment_history');
+                    if (data.text && resumeItems) {
+                        var itemIds = data.text.split(',');
+                        itemIds.forEach(function(itemid, index) {
+                            if (resumeItems.educations[itemid]) {
+                                item_data = resumeItems.employments[itemid];
+                                var description = '';
+                                description += '<span class="employ_jobtitle">' + item_data.jobtitle + ':</span> ';
+                                description += '<span class="employ_employer">' + item_data.employer + '</span>';
+                                if (item_data.startdate != '' || item_data.enddate != '') {
+                                    description += ' (';
+                                    if (item_data.startdate != '') {
+                                        description += '<span class="employ_startdate">' + item_data.startdate + '</span>';
+                                    }
+                                    if (item_data.enddate != '') {
+                                        description += '<span class="employ_enddate"> - ' + item_data.enddate + '</span>';
+                                    }
+                                    description += ')';
+                                }
+                                if (item_data.positiondescription != '') {
+                                    description += '<span class="employ_positiondescription">' + item_data.positiondescription + '</span>';
+                                }
+                                body_content += description;
+                                if (index < itemIds.length - 1) {
+                                    body_content += '<br>';
+                                }
+                                attachments = item_data.attachments;
+                                if (data.resume_withfiles == "1" && attachments && attachments.length) {
+                                    body_content += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
+                                    $.each(attachments, function (k, file) {
+                                        body_content += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
+                                    });
+                                    body_content += '</ul>';
+                                }
+                            }
+                        });
+                    }
+                    break;
+                case 'certif':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_certif');
+                    if (data.text && resumeItems) {
+                        var itemIds = data.text.split(',');
+                        itemIds.forEach(function (itemid, index) {
+                            if (resumeItems.certifications[itemid]) {
+                                item_data = resumeItems.certifications[itemid];
+                                var description = '';
+                                description += '<span class="certif_title">' + item_data.title + '</span> ';
+                                if (item_data.date != '') {
+                                    description += '<span class="certif_date">(' + item_data.date + ')</span>';
+                                }
+                                if (item_data.description != '') {
+                                    description += '<span class="certif_description">' + item_data.description + '</span>';
+                                }
+                                body_content += description;
+                                if (index < itemIds.length - 1) {
+                                    body_content += '<br>';
+                                }
+                                attachments = item_data.attachments;
+                                if (data.resume_withfiles == "1" && attachments && attachments.length) {
+                                    body_content += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
+                                    $.each(attachments, function (k, file) {
+                                        body_content += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
+                                    });
+                                    body_content += '</ul>';
+                                }
+                            }
+                        });
+                    }
+                    break;
+                case 'public':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_public');
+                    if (data.text && resumeItems) {
+                        var itemIds = data.text.split(',');
+                        itemIds.forEach(function (itemid, index) {
+                            if (resumeItems.publications[itemid]) {
+                                item_data = resumeItems.publications[itemid];
+                                var description = '';
+                                description += '<span class="public_title">' + item_data.title;
+                                if (item_data.contribution != '') {
+                                    description += ' (' + item_data.contribution + ')';
+                                }
+                                description += '</span> ';
+                                if (item_data.date != '') {
+                                    description += '<span class="public_date">(' + item_data.date + ')</span>';
+                                }
+                                if (item_data.contributiondetails != '' || item_data.url != '') {
+                                    description += '<span class="public_description">';
+                                    if (item_data.contributiondetails != '') {
+                                        description += item_data.contributiondetails;
+                                    }
+                                    if (item_data.url != '') {
+                                        description += '<br /><a href="' + item_data.url + '" class="public_url" target="_blank">' + item_data.url + '</a>';
+                                    }
+                                    description += '</span>';
+                                }
+                                body_content += description;
+                                if (index < itemIds.length - 1) {
+                                    body_content += '<br>';
+                                }
+                                attachments = item_data.attachments;
+                                if (data.resume_withfiles == "1" && attachments && attachments.length) {
+                                    body_content += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
+                                    $.each(attachments, function (k, file) {
+                                        body_content += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
+                                    });
+                                    body_content += '</ul>';
+                                }
+                            }
+                        });
+                    }
+                    break;
+                case 'mbrship':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_mbrship');
+                    if (data.text && resumeItems) {
+                        var itemIds = data.text.split(',');
+                        itemIds.forEach(function (itemid, index) {
+                            if (resumeItems.profmembershipments[itemid]) {
+                                item_data = resumeItems.profmembershipments[itemid];
+                                var description = '';
+                                description += '<span class="mbrship_title">' + item_data.title + '</span> ';
+                                if (item_data.startdate != '' || item_data.enddate != '') {
+                                    description += ' (';
+                                    if (item_data.startdate != '') {
+                                        description += '<span class="mbrship_startdate">' + item_data.startdate + '</span>';
+                                    }
+                                    if (item_data.enddate != '') {
+                                        description += '<span class="mbrship_enddate"> - ' + item_data.enddate + '</span>';
+                                    }
+                                    description += ')';
+                                }
+                                if (item_data.description != '') {
+                                    description += '<span class="mbrship_description">' + item_data.description + '</span>';
+                                }
+                                body_content += description;
+                                if (index < itemIds.length - 1) {
+                                    body_content += '<br>';
+                                }
+                                attachments = item_data.attachments;
+                                if (data.resume_withfiles == "1" && attachments && attachments.length) {
+                                    body_content += '<ul class="resume_attachments ' + data.resume_itemtype + '_attachments">';
+                                    $.each(attachments, function (k, file) {
+                                        body_content += '<li><a href="' + file.fileurl + '" target="_blank">' + file.filename + '</a></li>';
+                                    });
+                                    body_content += '</ul>';
+                                }
+                            }
+                        });
+                    }
+                    break;
+                case 'goals':
+                case 'skills':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_' + data.resume_itemtype);
+                    if (data.text && resumeItems) {
+                        var itemIds = data.text.split(',');
+                        itemIds.forEach(function (goalSkillType, index) {
+                            var description = '';
+                            if (resumeItems[goalSkillType]) {
+                                description += '<strong>' + $E.translate('resume_' + goalSkillType) + ':</strong><br>';
+                                description += '<span class="' + goalSkillType + '_text">' + resumeItems[goalSkillType] + '</span> ';
+                            }
+                            description = description.replace(/(<br\s*\/?>)+$/i, '');
+                            attachments = resumeItems[goalSkillType + '_attachments'];
+                            description += addAttachmentsToGroup(attachments);
+                            body_content += description;
+                            if (index < itemIds.length - 1) {
+                                body_content += '<br>';
+                            }
+
+                        });
+                    }
+                    break;
+                case 'interests':
+                    addToHeader = $E.translate('cofigureblock_cvinfo_interests');
+                    var description = '';
+                    if (resumeItems.interests != '') {
+                        description += '<span class="interests">' + resumeItems.interests + '</span> ';
+                    }
+                    body_content = description;
+                    break;
+                default:
+                    break;
+            }
+
+            // only grup content is not empty:
+            if (body_content != '') {
+                var tempString = '<div id="id_holder" style="display:none;"></div>';
+                tempString += '<div class="cv_group" style="overflow: hidden;">';
+                tempString += '<div class="header">' + $E.translate('cvgroup') + ': ' + addToHeader + '</div>';
+                tempString += '<div class="body">' + body_content + '</div>';
+                tempString += '</div>';
+                $item.html(tempString);
+            }
+
         } else if (data.type == 'cv_information') {
             data.item = null;
             var body_content = '';
@@ -767,7 +1080,7 @@ define(['jquery',
 
         if (type == 'new') {
             // No edit button for items, badges and resume items.
-            var typesWithoutEditButton = ['item', 'badge', 'cv_information'];
+            var typesWithoutEditButton = ['item', 'badge', 'cv_information', 'cv_group'];
             // if ((data.type != 'item') && (data.type != 'badge')) {
             if (!(typesWithoutEditButton.indexOf(data.type) > -1)) {
                 $('<a class="edit" title="Edit"><span>Edit</span></a>').prependTo($item).click(editItemClick);

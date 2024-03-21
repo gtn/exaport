@@ -747,9 +747,9 @@ $translations = array(
         'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media',
         'view_specialitem_badge', 'view_specialitem_text_defaulttext',
         'viewitem', 'comments', 'category', 'link', 'type', 'personalinformation',
-        'cvinformation', 'cofigureblock_cvinfo_education_history', 'cofigureblock_cvinfo_employment_history',
+        'cvinformation', 'cvgroup', 'cofigureblock_cvinfo_education_history', 'cofigureblock_cvinfo_employment_history',
         'cofigureblock_cvinfo_certif', 'cofigureblock_cvinfo_public', 'cofigureblock_cvinfo_mbrship',
-        'cofigureblock_cvinfo_goals', 'cofigureblock_cvinfo_skills', 'cofigureblock_cvinfo_interests',
+        'cofigureblock_cvinfo_goals', 'cofigureblock_cvinfo_skills', 'cofigureblock_cvinfo_interests', 'cofigureblock_cvinfo_cover',
         'resume_goalspersonal', 'resume_goalsacademic', 'resume_goalscareers',
         'resume_skillspersonal', 'resume_skillsacademic', 'resume_skillscareers',
         'delete', 'viewand',
@@ -794,8 +794,28 @@ if ($view->id) {
 
 // add resume items
 $resumeitems = block_exaport_get_resume_params($USER->id, true);
+// convert editors images:
+// cover
 $resumeitems->cover = file_rewrite_pluginfile_urls($resumeitems->cover, 'pluginfile.php',
     context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resumeitems->id);
+$resumeitems->cover = block_exaport_add_view_access_parameter_to_url($resumeitems->cover, $view, ['src']);
+// goals
+$resumeitems->goalspersonal = file_rewrite_pluginfile_urls($resumeitems->goalspersonal, 'pluginfile.php',
+    context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_goalspersonal', $resumeitems->id);
+$resumeitems->goalsacademic = file_rewrite_pluginfile_urls($resumeitems->goalsacademic, 'pluginfile.php',
+    context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_goalsacademic', $resumeitems->id);
+$resumeitems->goalscareers = file_rewrite_pluginfile_urls($resumeitems->goalscareers, 'pluginfile.php',
+    context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_goalscareers', $resumeitems->id);
+// skills
+$resumeitems->skillspersonal = file_rewrite_pluginfile_urls($resumeitems->skillspersonal, 'pluginfile.php',
+    context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_skillspersonal', $resumeitems->id);
+$resumeitems->skillsacademic = file_rewrite_pluginfile_urls($resumeitems->skillsacademic, 'pluginfile.php',
+    context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_skillsacademic', $resumeitems->id);
+$resumeitems->skillscareers = file_rewrite_pluginfile_urls($resumeitems->skillscareers, 'pluginfile.php',
+    context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_skillscareers', $resumeitems->id);
+// interests
+$resumeitems->interests = file_rewrite_pluginfile_urls($resumeitems->interests, 'pluginfile.php',
+    context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_interests', $resumeitems->id);
 
 ?>
     <script type="text/javascript">

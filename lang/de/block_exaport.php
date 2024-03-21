@@ -300,6 +300,7 @@ $string['viewlayout9'] = 'Mittlere Spalte breiter';
 $string['viewlayout10'] = 'Gleiche Breite';
 $string['personalinformation'] = 'Persönliche Information';
 $string['cvinformation'] = 'Lebenslauf Information';
+$string['cvgroup'] = 'Lebenslauf Grupe';
 $string['headertext'] = 'Kopfzeile';
 $string['item'] = 'Artefakt';
 $string['items'] = 'Artefakte';
@@ -363,6 +364,7 @@ $string['cofigureblock_cvinfo_skills'] = 'Meine Kompetenzen';
 $string['cofigureblock_cvinfo_interests'] = 'Interessen';
 $string['in'] = 'at';
 $string['cofigureblock_cvinfo_withfiles'] = 'mit Anhängen publizieren';
+$string['configureblock_cvinfo_group_by_category'] = 'Group by category';
 
 // === Desp.
 $string['back_to_desp'] = 'zurück zum d-ESP';

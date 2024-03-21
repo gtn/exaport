@@ -1094,6 +1094,10 @@ return [
                 'Lebenslauf Information',
                 'CV Information',
         ],
+        'cvgroup' => [
+                'Lebenslauf Grupe',
+                'CV Group',
+        ],
         'headertext' => [
                 'Kopfzeile',
                 'Headertext',
@@ -1339,6 +1343,10 @@ return [
         'cofigureblock_cvinfo_withfiles' => [
                 'mit Anhängen publizieren',
                 'With attachment files',
+        ],
+        'configureblock_cvinfo_group_by_category' => [
+                'Group by category',
+                'Group by category',
         ],
 
         // === Desp.

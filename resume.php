@@ -369,7 +369,9 @@ if ($showinformation) {
 
     // Interests.
     $interests = file_rewrite_pluginfile_urls($resume->interests, 'pluginfile.php', context_user::instance($USER->id)->id,
-            'block_exaport', 'resume_interests', $resume->id);
+            'block_exaport', 'resume_interests', $resume->id); // For old records compatible.
+    $interests = file_rewrite_pluginfile_urls($resume->interests, 'pluginfile.php', context_user::instance($USER->id)->id,
+            'block_exaport', 'resume_editor_interests', $resume->id);
     echo block_exaport_form_resume_part($courseid, 'interests',
             get_string('resume_interests', 'block_exaport'), $interests, 'edit', $type);
 

@@ -331,6 +331,11 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         $publications = block_exaport_resume_get_publications(@$resumeparams->id);
         if ($publications) {
             foreach ($publications as $publication) {
+                if ($publication->url) {
+                    if (strpos($publication->url, 'http://') !== 0 && strpos($publication->url, 'https://') !== 0) {
+                        $publication->url = 'http://' . $publication->url;
+                    }
+                }
                 $publication->attachments = $import_attachments('public', $publication->id);
             }
             $resumeparams->publications = $publications;

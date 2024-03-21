@@ -2305,3 +2305,44 @@ function block_exaport_layout_borderwidths() {
     ];
     return $borderWidths;
 }
+
+/**
+ * @param $content
+ * @param string|object $accessOrView
+ * @param $forAttributes
+ * @return array|mixed|string|string[]|null
+ */
+function block_exaport_add_view_access_parameter_to_url($content, $accessOrView, $forAttributes = ['src']) {
+    global $USER;
+    if (!$accessOrView) {
+        return $content;
+    }
+    if (is_object($accessOrView)) {
+        $access = 'id/'.$USER->id.'-'.$accessOrView->id;
+        $accessOrView = $access; // to check the access to the view again
+    }
+    // check access
+    if (is_string($accessOrView)) {
+        $view = block_exaport_get_view_from_access($accessOrView);
+        $access = $accessOrView;
+        if (!$view) {
+            return $content;
+        }
+    }
+    $addParams = [
+        'access' => $access,
+    ];
+    $pattern = '/('.implode('|', $forAttributes).')=["\']([^"\']+)["\']/';
+    $content = preg_replace_callback($pattern, function($matches) use ($addParams) {
+        $url = $matches[2];
+        $parsedUrl = parse_url($url);
+        $query = isset($parsedUrl['query']) ? $parsedUrl['query'] : '';
+        parse_str($query, $urlParams);
+        $urlParams = array_merge($urlParams, $addParams);
+        $parsedUrl['query'] = http_build_query($urlParams);
+        $newUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $parsedUrl['path'] . '?' . $parsedUrl['query'];
+        return $matches[1] . '="' . $newUrl . '"';
+    }, $content);
+
+    return $content;
+}

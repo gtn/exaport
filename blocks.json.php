@@ -392,7 +392,7 @@ function get_form_personalinfo($id, $blockdata = array()) {
         // block data (text) can be changed manually for the block
         $text = $blockdata->text;
 
-        $text = file_prepare_draft_area(
+        $text = '123123'.file_prepare_draft_area(
                 $draftideditor,
                 context_user::instance($USER->id)->id,
                 'block_exaport',
@@ -524,6 +524,12 @@ function get_form_cvinfo($id, $blockdata = array()) {
     $content .= '<label>';
     $content .= '<input class="add-checkbox" type="checkbox" name="add_withfiles" value="1" /> ';
     $content .= get_string('cofigureblock_cvinfo_withfiles', 'block_exaport').'</label>';
+    $content .= '</th></tr>';
+    // group by category
+    $content .= '<tr><th>';
+    $content .= '<label>';
+    $content .= '<input class="add-checkbox" type="checkbox" name="category_grouping" value="1" /> ';
+    $content .= get_string('configureblock_cvinfo_group_by_category', 'block_exaport').'</label>';
     $content .= '</th></tr>';
     // About me
     $content .= '<tr><th>';

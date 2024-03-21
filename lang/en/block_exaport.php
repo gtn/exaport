@@ -301,6 +301,7 @@ $string['viewlayout9'] = 'Larger centre columns';
 $string['viewlayout10'] = 'Equal widths';
 $string['personalinformation'] = 'Personal Information';
 $string['cvinformation'] = 'CV Information';
+$string['cvgroup'] = 'CV Group';
 $string['headertext'] = 'Headertext';
 $string['item'] = 'Item';
 $string['items'] = 'Items';
@@ -364,6 +365,7 @@ $string['cofigureblock_cvinfo_skills'] = 'My skills';
 $string['cofigureblock_cvinfo_interests'] = 'Interests';
 $string['in'] = 'at';
 $string['cofigureblock_cvinfo_withfiles'] = 'With attachment files';
+$string['configureblock_cvinfo_group_by_category'] = 'Group by category';
 
 // === Desp.
 $string['back_to_desp'] = 'back to language portfolio';

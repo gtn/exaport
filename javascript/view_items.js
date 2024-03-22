@@ -56,4 +56,13 @@ jQueryExaport(function ($) {
             });
         }
     });
+
+    $('*[data-toggle="showmore"]').on('click', function(e) {
+        e.preventDefault();
+        var morecontent = $(this).attr('href');
+        if ($(morecontent).length) {
+            $(this).hide();
+            $(morecontent).show(200);
+        }
+    });
 });

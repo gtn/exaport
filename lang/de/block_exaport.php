@@ -57,6 +57,12 @@ $string['dontincludeurl'] = 'Diese Option ausw&auml;hlen um die Verknüpfung zwi
 $string['duplicatedurl'] = 'Diese URL ist bereits bei den Bookmarks vorhanden.';
 $string['editcategories'] = 'Kategorien bearbeiten';
 $string['explaining'] = 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.';
+$string['explainingmoredata'] = '<strong>This is your space to gather evidence of your learning journey.</strong>
+            <ul>
+                <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
+                <li><strong>Reflect on your experiences:</strong> Explain what you learned, the challenges you faced, and your achievements for each piece.</li>
+            </ul>
+            <strong>Think of each item as a story highlighting your skills and knowledge.</strong>';
 $string['explaininglink'] = '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['explainingfile'] = '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['explainingnote'] = '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
@@ -613,33 +619,34 @@ $string['selected_competencies'] = 'Erreichte Kompetenz';
 $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = '';
 $string['forms.item.project_description'] = 'The why behind this project';
-$string['forms.item.project_description_help'] = 'Briefly explain the purpose of your work:<ul> 
+$string['forms.item.project_description_help'] = '<strong>Briefly explain the purpose of your work:</strong><ul> 
                 <li>What problem did it address?</li> 
                 <li>What skills did you aim to develop?</li> 
                 <li>What was the context?</li>
             </ul>';
 $string['forms.item.project_description_editor'] = 'The why behind this project';
-$string['forms.item.project_description_editor_help'] = 'Briefly explain the purpose of your work:<ul> 
+$string['forms.item.project_description_editor_help'] = '<strong>Briefly explain the purpose of your work:</strong>
+            <ul> 
                 <li>What problem did it address?</li> 
                 <li>What skills did you aim to develop?</li> 
                 <li>What was the context?</li>
             </ul>';
 $string['forms.item.project_process'] = 'Making it happen';
-$string['forms.item.project_process_help'] = 'Describe your journey:
+$string['forms.item.project_process_help'] = '<strong>Describe your journey:</
             <ul> 
                 <li>What steps did you take to complete this project?</li> 
                 <li>What challenges did you encounter, and how did you overcome them?</li> 
                 <li>What resources did you use?</li>
             </ul>';
 $string['forms.item.project_process_editor'] = 'Making it happen';
-$string['forms.item.project_process_editor_help'] = 'Describe your journey:
+$string['forms.item.project_process_editor_help'] = '<strong>Describe your journey:</strong>
             <ul> 
                 <li>What steps did you take to complete this project?</li> 
                 <li>What challenges did you encounter, and how did you overcome them?</li> 
                 <li>What resources did you use?</li>
             </ul>';
 $string['forms.item.project_result'] = 'Results and learnings';
-$string['forms.item.project_result_help'] = 'Briefly summarize the outcomes of your project:
+$string['forms.item.project_result_help'] = '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul> 
                     <li>What did you achieve?</li>
                     <li>What skills and competencies did you develop or strengthen through this work?</li>
@@ -647,13 +654,14 @@ $string['forms.item.project_result_help'] = 'Briefly summarize the outcomes of y
                     <li>What would you do differently next time?”</li>
                 </ul>';
 $string['forms.item.project_result_editor'] = 'Results and learnings';
-$string['forms.item.project_result_editor_help'] = 'Briefly summarize the outcomes of your project:
+$string['forms.item.project_result_editor_help'] = '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul> 
                     <li>What did you achieve?</li>
                     <li>What skills and competencies did you develop or strengthen through this work?</li>
                     <li>What did you learn about yourself and your abilities?</li>
                     <li>What would you do differently next time?”</li>
                 </ul>';
+$string['item.project_information'] = 'Project Information';
 $string['view_saved'] = 'View gespeichert';
 $string['view_sharing_updated'] = 'Ver&ouml;ffentlichung gespeichert';
 $string['list'] = 'Liste';
@@ -777,3 +785,4 @@ $string['create_view_content_help_text'] = '<ul>
             </ul>
             <strong>Remember: Your e-portfolio tells the world about you and your skills. Make it clear, concise, and engaging!</strong>
             ';
+$string['moreinfolink'] = 'Show more info ...';

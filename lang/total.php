@@ -172,6 +172,20 @@ return [
                 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.',
                 'The Portfolio may be used to store web addresses, files, as well as enter notes that may contain insights or little notes the user may wish to write down.',
         ],
+        'explainingmoredata' => [
+            '<strong>This is your space to gather evidence of your learning journey.</strong>
+            <ul>
+                <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
+                <li><strong>Reflect on your experiences:</strong> Explain what you learned, the challenges you faced, and your achievements for each piece.</li>
+            </ul>
+            <strong>Think of each item as a story highlighting your skills and knowledge.</strong>',
+            '<strong>This is your space to gather evidence of your learning journey.</strong>
+            <ul>
+                <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
+                <li><strong>Reflect on your experiences:</strong> Explain what you learned, the challenges you faced, and your achievements for each piece.</li>
+            </ul>
+            <strong>Think of each item as a story highlighting your skills and knowledge.</strong>',
+        ],
         'explaininglink' => [
                 '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.',
                 'Links.  These links may be shared with all authorized course members.',
@@ -2206,12 +2220,12 @@ return [
             'The why behind this project',
         ],
         'forms.item.project_description_help' => [
-            'Briefly explain the purpose of your work:<ul> 
+            '<strong>Briefly explain the purpose of your work:</strong><ul> 
                 <li>What problem did it address?</li> 
                 <li>What skills did you aim to develop?</li> 
                 <li>What was the context?</li>
             </ul>',
-            'Briefly explain the purpose of your work:<ul> 
+            '<strong>Briefly explain the purpose of your work:</strong><ul> 
                 <li>What problem did it address?</li> 
                 <li>What skills did you aim to develop?</li> 
                 <li>What was the context?</li>
@@ -2222,12 +2236,14 @@ return [
             'The why behind this project',
         ],
         'forms.item.project_description_editor_help' => [
-            'Briefly explain the purpose of your work:<ul> 
+            '<strong>Briefly explain the purpose of your work:</strong>
+            <ul> 
                 <li>What problem did it address?</li> 
                 <li>What skills did you aim to develop?</li> 
                 <li>What was the context?</li>
             </ul>',
-            'Briefly explain the purpose of your work:<ul> 
+            '<strong>Briefly explain the purpose of your work:</strong>
+            <ul> 
                 <li>What problem did it address?</li> 
                 <li>What skills did you aim to develop?</li> 
                 <li>What was the context?</li>
@@ -2238,13 +2254,13 @@ return [
             'Making it happen',
         ],
         'forms.item.project_process_help' => [
-            'Describe your journey:
+            '<strong>Describe your journey:</
             <ul> 
                 <li>What steps did you take to complete this project?</li> 
                 <li>What challenges did you encounter, and how did you overcome them?</li> 
                 <li>What resources did you use?</li>
             </ul>',
-            'Describe your journey:
+            '<strong>Describe your journey:</strong>
             <ul> 
                 <li>What steps did you take to complete this project?</li> 
                 <li>What challenges did you encounter, and how did you overcome them?</li> 
@@ -2256,13 +2272,13 @@ return [
             'Making it happen',
         ],
         'forms.item.project_process_editor_help' => [
-            'Describe your journey:
+            '<strong>Describe your journey:</strong>
             <ul> 
                 <li>What steps did you take to complete this project?</li> 
                 <li>What challenges did you encounter, and how did you overcome them?</li> 
                 <li>What resources did you use?</li>
             </ul>',
-            'Describe your journey:
+            '<strong>Describe your journey:</strong>
             <ul> 
                 <li>What steps did you take to complete this project?</li> 
                 <li>What challenges did you encounter, and how did you overcome them?</li> 
@@ -2274,14 +2290,14 @@ return [
             'Results and learnings',
         ],
         'forms.item.project_result_help' => [
-            'Briefly summarize the outcomes of your project:
+            '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul> 
                     <li>What did you achieve?</li>
                     <li>What skills and competencies did you develop or strengthen through this work?</li>
                     <li>What did you learn about yourself and your abilities?</li>
                     <li>What would you do differently next time?”</li>
                 </ul>',
-            'Briefly summarize the outcomes of your project:
+            '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul> 
                     <li>What did you achieve?</li>
                     <li>What skills and competencies did you develop or strengthen through this work?</li>
@@ -2294,19 +2310,24 @@ return [
             'Results and learnings',
         ],
         'forms.item.project_result_editor_help' => [
-            'Briefly summarize the outcomes of your project:
-                <ul> 
-                    <li>What did you achieve?</li>
-                    <li>What skills and competencies did you develop or strengthen through this work?</li>
-                    <li>What did you learn about yourself and your abilities?</li>
-                    <li>What would you do differently next time?”</li>
-                </ul>','Briefly summarize the outcomes of your project:
+            '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul> 
                     <li>What did you achieve?</li>
                     <li>What skills and competencies did you develop or strengthen through this work?</li>
                     <li>What did you learn about yourself and your abilities?</li>
                     <li>What would you do differently next time?”</li>
                 </ul>',
+            '<strong>Briefly summarize the outcomes of your project:</strong>
+                <ul> 
+                    <li>What did you achieve?</li>
+                    <li>What skills and competencies did you develop or strengthen through this work?</li>
+                    <li>What did you learn about yourself and your abilities?</li>
+                    <li>What would you do differently next time?”</li>
+                </ul>',
+        ],
+        'item.project_information' => [
+            'Project Information',
+            'Project Information',
         ],
         'view_saved' => [
             'View gespeichert',
@@ -2754,7 +2775,9 @@ return [
             <strong>Remember: Your e-portfolio tells the world about you and your skills. Make it clear, concise, and engaging!</strong>
             ',
         ],
-
-
+        'moreinfolink' => [
+            'Show more info ...',
+            'Show more info ...',
+        ]
 ];
 ?>

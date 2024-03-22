@@ -83,6 +83,9 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             }
             break;
         case 'item_content':
+        case 'item_content_project_description':
+        case 'item_content_project_process':
+        case 'item_content_project_result':
             $filename = array_pop($args);
             $id = array_pop($args);
             if (array_pop($args) != 'itemid') {
@@ -200,21 +203,36 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         case 'resume_editor_interests':
             if ($is_for_pdf) {
                 // $view is already defined
+                // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
+                $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
+                    " WHERE b.viewid=? AND" .
+                    " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype='cover'";
+                if (!$DB->record_exists_sql($sql, array($view->id))) {
+                    print_error("viewnotfound", "block_exaport");
+                }
+                $viewuser = $view->userid;
             } else {
                 $access = required_param('access', PARAM_RAW);
-                $view = block_exaport_get_view_from_access($access);
+                if (strpos($access, 'resume') !== false) {
+                    $resumeattrs = explode('/', $access);
+                    $resumeid = $resumeattrs[1];
+                    $resume = $DB->get_record('block_exaportresume', array("id" => $resumeid));
+                    $viewuser = $resume->user_id;
+                } else {
+                    $view = block_exaport_get_view_from_access($access);
+                    if (!$view) {
+                        print_error("viewnotfound", "block_exaport");
+                    }
+                    // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
+                    $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
+                        " WHERE b.viewid=? AND" .
+                        " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype='cover'";
+                    if (!$DB->record_exists_sql($sql, array($view->id))) {
+                        print_error("viewnotfound", "block_exaport");
+                    }
+                    $viewuser = $view->userid;
+                }
             }
-            if (!$view) {
-                print_error("viewnotfound", "block_exaport");
-            }
-            // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
-            $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
-                " WHERE b.viewid=? AND" .
-                " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype='cover'";
-            if (!$DB->record_exists_sql($sql, array($view->id))) {
-                print_error("viewnotfound", "block_exaport");
-            }
-            $viewuser = $view->userid;
         case 'resume_cover':
         case 'resume_interests':
         case 'resume_edu':
@@ -237,7 +255,6 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             // Get file.
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($viewuser)->id, 'block_exaport', $filearea, $id, '/', $filename);
-
             // Serve file.
             if ($file) {
                 send_stored_file($file);

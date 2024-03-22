@@ -2313,7 +2313,7 @@ function block_exaport_layout_borderwidths() {
  * @return array|mixed|string|string[]|null
  */
 function block_exaport_add_view_access_parameter_to_url($content, $accessOrView, $forAttributes = ['src']) {
-    global $USER;
+    global $USER, $DB;
     if (!$accessOrView) {
         return $content;
     }
@@ -2323,11 +2323,23 @@ function block_exaport_add_view_access_parameter_to_url($content, $accessOrView,
     }
     // check access
     if (is_string($accessOrView)) {
-        $view = block_exaport_get_view_from_access($accessOrView);
-        $access = $accessOrView;
-        if (!$view) {
-            return $content;
+        if (strpos($accessOrView, 'resume') !== false) {
+            $resumeattrs = explode('/', $accessOrView);
+            $resumeid = $resumeattrs[1];
+            $resume = $DB->get_record('block_exaportresume', array("id" => $resumeid));
+            if ($resume->user_id == $USER->id && $resume->user_id == $resumeattrs[2]) {
+                $access = $accessOrView;
+            }
+        } else {
+            $view = block_exaport_get_view_from_access($accessOrView);
+            $access = $accessOrView;
+            if (!$view) {
+                return $content;
+            }
         }
+    }
+    if (!$access) {
+        return $content;
     }
     $addParams = [
         'access' => $access,

@@ -323,6 +323,7 @@ if ($type == 'sharedstudent') {
 }
 
 $PAGE->set_url($currentcategory->url);
+$PAGE->set_context(context_system::instance());
 
 block_exaport_print_header($type == 'shared' || $type == 'sharedstudent' ? 'shared_categories' : "myportfolio");
 
@@ -332,7 +333,11 @@ if (block_exaport_course_has_desp()) {
 } else {
     $pref = "";
 }
-echo $OUTPUT->box(text_to_html(get_string($pref."explaining", "block_exaport")), "center");
+$infobox = text_to_html(get_string($pref."explaining", "block_exaport"));
+$infobox .= '<a href="#more_artefacts_info" data-toggle="showmore">'.get_string('moreinfolink', 'block_exaport').'</a>';
+$infobox .= '<div id="more_artefacts_info" style="display: none;">'.get_string('explainingmoredata', 'block_exaport').'</div>';
+echo $OUTPUT->box($infobox, "center");
+
 echo "</div>";
 
 // Save user preferences.
@@ -717,6 +722,7 @@ if ($layout == 'details') {
                             echo '<span class="excomdos_listcomments">'.$item->comments.
                                     '<img src="pix/comments.png" alt="file"></span>';
                         }
+                        echo block_exaport_get_item_project_icon($item);
                         echo block_exaport_get_item_comp_icon($item);
 
                         if (in_array($type, ['mine', 'shared'])) {
@@ -798,6 +804,58 @@ function block_exaport_get_item_comp_icon($item) {
     $competences = str_replace("\n", "", $competences);
     $competences = str_replace("\"", "&quot;", $competences);
     $competences = str_replace("'", "&prime;", $competences);
+    $competences = trim($competences);
+
+    if (!$competences) {
+        return ;
+    }
 
     return '<a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="pix/comp.png" alt="'.'competences'.'" /></a>';
+}
+
+function block_exaport_get_item_project_icon($item) {
+    global $DB, $OUTPUT;
+
+    $hasprojectdata = @$item->project_description || @$item->project_process || @$item->project_result;
+    
+    if (!$hasprojectdata) {
+        return '';
+    }
+
+    $projectinfo = [];
+    if (@$item->project_description) {
+        $projectinfo[] = '<strong>'.get_string('project_description', 'block_exaport').':</strong>';
+        $content = $item->project_description;
+        $content = file_rewrite_pluginfile_urls($content, 'pluginfile.php', context_user::instance($item->userid)->id,
+            'block_exaport', 'item_content_project_description', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+        $projectinfo[] = $content;
+    }
+    if (@$item->project_process) {
+        $projectinfo[] = '<strong>'.get_string('project_process', 'block_exaport').':</strong>';
+        $content = $item->project_process;
+        $content = file_rewrite_pluginfile_urls($content, 'pluginfile.php', context_user::instance($item->userid)->id,
+            'block_exaport', 'item_content_project_process', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+        $projectinfo[] = $content;
+    }
+    if (@$item->project_result) {
+        $projectinfo[] = '<strong>'.get_string('project_result', 'block_exaport').':</strong>';
+        $content = $item->project_result;
+        $content = file_rewrite_pluginfile_urls($content, 'pluginfile.php', context_user::instance($item->userid)->id,
+            'block_exaport', 'item_content_project_result', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+        $projectinfo[] = $content;
+    }
+
+    $projectcontent = implode('<br>', $projectinfo);
+
+    $projectcontent = str_replace("\r", "", $projectcontent);
+    $projectcontent = str_replace("\n", "", $projectcontent);
+    $projectcontent = str_replace("\"", "&quot;", $projectcontent);
+    $projectcontent = str_replace("'", "&prime;", $projectcontent);
+    $projectcontent = trim($projectcontent);
+
+    if (!$projectcontent) {
+        return '';
+    }
+
+    return '<a onmouseover="Tip(\''.$projectcontent.'\')" onmouseout="UnTip()"><img src="pix/comp.png" alt="'.get_string('item.project_information', 'block_exaport').'" /></a>';
 }

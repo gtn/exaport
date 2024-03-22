@@ -142,6 +142,10 @@ box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
     top: 0;
 }
 
+.excomdos_tileedit a {
+    margin-left: 5px;
+}
+
 
 .excomdos_printer_version {
     float: right;

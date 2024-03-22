@@ -810,7 +810,7 @@ function block_exaport_get_item_comp_icon($item) {
         return ;
     }
 
-    return '<a onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="pix/comp.png" alt="'.'competences'.'" /></a>';
+    return '<a class="artefact-button" onmouseover="Tip(\''.$competences.'\')" onmouseout="UnTip()"><img src="pix/comp.png" alt="'.'competences'.'" /></a>';
 }
 
 function block_exaport_get_item_project_icon($item) {
@@ -857,5 +857,5 @@ function block_exaport_get_item_project_icon($item) {
         return '';
     }
 
-    return '<a onmouseover="Tip(\''.$projectcontent.'\')" onmouseout="UnTip()"><img src="pix/comp.png" alt="'.get_string('item.project_information', 'block_exaport').'" /></a>';
+    return '<a class="artefact-button" onmouseover="Tip(\''.$projectcontent.'\')" onmouseout="UnTip()"><img src="pix/project.png" width="16" alt="'.get_string('item.project_information', 'block_exaport').'" /></a>';
 }

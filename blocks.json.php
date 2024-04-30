@@ -386,13 +386,14 @@ function get_form_personalinfo($id, $blockdata = array()) {
         $picturesrcsmall = $userpicture->get_url($PAGE);
     };
 
-    $draftideditor = file_get_submitted_draft_itemid('text');
+//    $draftideditor = file_get_submitted_draft_itemid('text');
+    $draftideditor = 0; // disable draft for this editor
 
     if (isset($blockdata->text) && $blockdata->text) {
         // block data (text) can be changed manually for the block
         $text = $blockdata->text;
 
-        $text = '123123'.file_prepare_draft_area(
+/*        $text = file_prepare_draft_area(
                 $draftideditor,
                 context_user::instance($USER->id)->id,
                 'block_exaport',
@@ -400,12 +401,12 @@ function get_form_personalinfo($id, $blockdata = array()) {
                 required_param('viewid', PARAM_INT),
                 array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size),
                 $text
-        );
+        );*/
     } else {
         // Or the block data can be a default value from 'About me' CV section
         require_once(__DIR__.'/lib/resumelib.php');
         $resumedata = block_exaport_get_resume_params_record();
-        $text = @$resumedata->cover ?: '';
+        $text = '121212'.@$resumedata->cover ?: '';
 
         $text = file_rewrite_pluginfile_urls($text, 'pluginfile.php',
             context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resumedata->id);

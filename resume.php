@@ -316,6 +316,7 @@ if ($showinformation) {
     // Cover.
     $cover = file_rewrite_pluginfile_urls($resume->cover, 'pluginfile.php',
             context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resume->id);
+    $cover = block_exaport_add_view_access_parameter_to_url($cover, 'resume/'.$resume->id.'/'.$USER->id, ['src']);
     $cover = block_exaport_html_secure($cover);
     echo block_exaport_form_resume_part($courseid, 'cover',
             get_string('resume_cover', 'block_exaport'), $cover, 'edit', $type);

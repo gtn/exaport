@@ -431,3 +431,10 @@
 #exaport #exaport-view-mod .layout_settings textarea {
     height: auto !important;
 }
+
+#exaport .view-additional-help {
+    font-size: .9167em;
+}
+#exaport #more_viewcontent_info {
+    margin-bottom: 20px;
+}

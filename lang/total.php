@@ -1372,11 +1372,11 @@ return [
         ],
         'cofigureblock_cvinfo_withfiles' => [
                 'mit Anhängen publizieren',
-                'With attachment files',
+                'With attached files',
         ],
         'configureblock_cvinfo_group_by_category' => [
-                'Group by category',
-                'Group by category',
+                'Display CV elements in categories',
+                'Display CV elements in categories',
         ],
 
         // === Desp.
@@ -2744,8 +2744,8 @@ return [
 ',
         ],
         'cofigureblock_cvinfo_help' => [
-            'Will be shown actual state of selected CV items. Block content will be updated if you will change the item in your CV later',
-            'Will be shown actual state of selected CV items. Block content will be updated if you will change the item in your CV later',
+            'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.',
+            'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.',
         ],
         'cofigureblock_cvinfo_cover' => [
             'About me',

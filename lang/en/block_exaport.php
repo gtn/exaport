@@ -374,8 +374,8 @@ $string['cofigureblock_cvinfo_goals'] = 'My goals';
 $string['cofigureblock_cvinfo_skills'] = 'My skills';
 $string['cofigureblock_cvinfo_interests'] = 'Interests';
 $string['in'] = 'at';
-$string['cofigureblock_cvinfo_withfiles'] = 'With attachment files';
-$string['configureblock_cvinfo_group_by_category'] = 'Group by category';
+$string['cofigureblock_cvinfo_withfiles'] = 'With attached files';
+$string['configureblock_cvinfo_group_by_category'] = 'Display CV elements in categories';
 
 // === Desp.
 $string['back_to_desp'] = 'back to language portfolio';
@@ -803,7 +803,7 @@ $string['whyEportfolio_description'] = '   <h4>Don\'t Let Your Hard Work Disappe
                 </ol>
                 <p><strong>Exabis ePortfolio</strong> can guide you through each step, making the process of building your ePortfolio smooth and efficient.</p>
 ';
-$string['cofigureblock_cvinfo_help'] = 'Will be shown actual state of selected CV items. Block content will be updated if you will change the item in your CV later';
+$string['cofigureblock_cvinfo_help'] = 'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.';
 $string['cofigureblock_cvinfo_cover'] = 'About me';
 $string['cofigureblock_cvinfo_cover_actual'] = 'add actual CV "About me" content';
 $string['create_view_content_help_title'] = 'Craft Your Unique Story: Build Your Portfolio';

@@ -854,14 +854,19 @@ switch ($type) {
                 src="<?php echo $CFG->wwwroot;?>/lib/editor/tinymce/tiny_mce/<?php echo $tinymce->version; ?>/tiny_mce.js"></script>
 
         <?php
-        // View data form.
-        echo '<div id="blocktype-list">';
-        echo get_string('createpage', 'block_exaport');
-        // help popup
-        echo '
+        echo '<div class="view-additional-help">';
+        echo text_to_html(get_string('createpage', 'block_exaport'));
+        // help information
+        echo '<a href="#more_viewcontent_info" data-toggle="showmore" class="view-additional-help">'.get_string('moreinfolink', 'block_exaport').'</a>';
+        echo '<div id="more_viewcontent_info" style="display: none;">'.get_string('create_view_content_help_text', 'block_exaport').'</div>';
+        // help popup (changed to info by "show more info" text)
+        /*echo '
             &nbsp;&nbsp;<a class="" data-modal="alert" data-modal-title-str=\'["create_view_content_help_title", "block_exaport"]\'
 data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' href="#"><img src="'.$OUTPUT->image_url('help', 'block_exaport').'" class="icon" alt="" /></a>            
-        ';
+        ';*/
+        echo '</div>';
+        // View data form.
+        echo '<div id="blocktype-list">';
 
         // Preview button.
         echo '<div style="float: right;">

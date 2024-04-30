@@ -375,7 +375,7 @@ $string['cofigureblock_cvinfo_skills'] = 'Meine Kompetenzen';
 $string['cofigureblock_cvinfo_interests'] = 'Interessen';
 $string['in'] = 'at';
 $string['cofigureblock_cvinfo_withfiles'] = 'mit Anhängen publizieren';
-$string['configureblock_cvinfo_group_by_category'] = 'Group by category';
+$string['configureblock_cvinfo_group_by_category'] = 'Display CV elements in categories';
 
 // === Desp.
 $string['back_to_desp'] = 'zurück zum d-ESP';
@@ -774,7 +774,7 @@ $string['privacy:metadata:block_exaportresume:skillscareers'] = 'careers skills'
 $string['privacy:metadata:core_files'] = 'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.';
 $string['whyEportfolio'] = 'Why eProtfolio';
 $string['whyEportfolio_description'] = '';
-$string['cofigureblock_cvinfo_help'] = 'Will be shown actual state of selected CV items. Block content will be updated if you will change the item in your CV later';
+$string['cofigureblock_cvinfo_help'] = 'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.';
 $string['cofigureblock_cvinfo_cover'] = 'About me';
 $string['cofigureblock_cvinfo_cover_actual'] = 'add actual CV "About me" content';
 $string['create_view_content_help_title'] = 'Craft Your Unique Story: Build Your Portfolio';

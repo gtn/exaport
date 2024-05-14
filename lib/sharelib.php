@@ -106,6 +106,11 @@ namespace {
         $view = null;
 
         if ($accesspath[0] == 'hash') {
+
+            if (!block_exaport_externaccess_enabled()) {
+                return;
+            }
+
             $hash = $accesspath[1];
             $hash = explode('-', $hash);
 
@@ -174,6 +179,11 @@ namespace {
             $view->access = new stdClass();
             $view->access->request = 'intern';
         } else if ($accesspath[0] == 'email') {
+
+            if (!block_exaport_shareemails_enabled()) {
+                return;
+            }
+
             $hash = explode('-', $accesspath[1]);
             if (count($hash) != 2) {
                 return;

@@ -173,6 +173,18 @@ function block_exaport_shareall_enabled() {
     return empty($CFG->block_exaport_disable_shareall);
 }
 
+function block_exaport_externaccess_enabled() {
+    global $CFG;
+
+    return empty($CFG->block_exaport_disable_externaccess);
+}
+
+function block_exaport_shareemails_enabled() {
+    global $CFG;
+
+    return empty($CFG->block_exaport_disable_shareemails);
+}
+
 function block_exaport_external_comments_enabled() {
     global $CFG;
 

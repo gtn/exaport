@@ -145,7 +145,7 @@ if (!$views) {
                                                          '<div style="padding-left: 10px;">'.join(', ', $users).'</div>';
             }
         }
-        if ($view->externaccess) {
+        if (block_exaport_externaccess_enabled() && $view->externaccess) {
             if ($table->data[$viewi]['accessoptions']) {
                 $style = 'padding-top: 10px;';
             } else {

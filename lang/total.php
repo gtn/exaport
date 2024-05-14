@@ -1560,6 +1560,22 @@ return [
                 'Klicken Sie <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen',
                 'Click <a href="{$a}">here</a>, to remove all global shares',
         ],
+        'settings_disable_externaccess_head' => [
+                'Teilen Option "Externer Zugriff" auf Portfolios deaktivieren.',
+                'Disable Sharing-Option "External Access" for views',
+        ],
+        'settings_disable_externaccess_body' => [
+                '',
+                '',
+        ],
+        'settings_disable_shareemails_head' => [
+                'Teilen Option "Per E-Mail teilen" auf Pr deaktivieren.',
+                'Disable Sharing-Option "Share by Email" for views',
+        ],
+        'settings_disable_shareemails_body' => [
+                '',
+                '',
+        ],
         'settings_disable_external_comments_head' => [
                 'Teilen von Kommentaren in externen Views deaktivieren',
                 'Disable sharing of comments in external view',

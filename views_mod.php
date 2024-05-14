@@ -231,9 +231,11 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                 $mform->setType('resume', PARAM_RAW);
                 break;
             case "share" :
-                $mform->addElement('checkbox', 'externaccess');
-                $mform->setType('externaccess', PARAM_INT);
-                $mform->add_exaport_help_button('externaccess', 'forms.view.externaccess');
+                if (block_exaport_externaccess_enabled()) {
+                    $mform->addElement('checkbox', 'externaccess');
+                    $mform->setType('externaccess', PARAM_INT);
+                    $mform->add_exaport_help_button('externaccess', 'forms.view.externaccess');
+                }
 
                 $mform->addElement('checkbox', 'internaccess');
                 $mform->setType('internaccess', PARAM_INT);
@@ -249,9 +251,11 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                     $mform->add_exaport_help_button('shareall', 'forms.view.shareall');
                 }
 
-                $mform->addElement('checkbox', 'sharedemails');
-                $mform->setType('sharedemails', PARAM_INT);
-                $mform->add_exaport_help_button('sharedemails', 'forms.view.sharedemails');
+                if (block_exaport_shareemails_enabled()) {
+                    $mform->addElement('checkbox', 'sharedemails');
+                    $mform->setType('sharedemails', PARAM_INT);
+                    $mform->add_exaport_help_button('sharedemails', 'forms.view.sharedemails');
+                }
 
                 break;
             default:
@@ -337,7 +341,7 @@ if ($editform->is_cancelled()) {
     }
 
     if ($type == 'share') {
-        if (empty($dbview->externaccess)) {
+        if (!block_exaport_externaccess_enabled() || empty($dbview->externaccess)) {
             $dbview->externaccess = 0;
         }
         if (empty($dbview->internaccess)) {
@@ -349,7 +353,7 @@ if ($editform->is_cancelled()) {
         if (empty($dbview->externcomment)) {
             $dbview->externcomment = 0;
         }
-        if (empty($dbview->sharedemails)) {
+        if (!block_exaport_shareemails_enabled() || empty($dbview->sharedemails)) {
             $dbview->sharedemails = 0;
         }
     }
@@ -1183,7 +1187,7 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         echo '<div class="">';
         echo '<div style="padding: 18px 22px"><table class="table_share">';
 
-        if (has_capability('block/exaport:shareextern', context_system::instance())) {
+        if (block_exaport_externaccess_enabled() && has_capability('block/exaport:shareextern', context_system::instance())) {
 
             echo '<tr><td style="padding-right: 10px; width: 10px">';
             echo $form['elements_by_name']['externaccess']['html'];
@@ -1245,17 +1249,19 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
             echo '</td></tr>';
         }
 
-        echo '<tr><td style="height: 10px"></td></tr>';
-        echo '<tr><td style="padding-right: 10px; width: 10px">';
-        echo $form['elements_by_name']['sharedemails']['html'];
-        echo '</td><td>'.get_string("emailaccess", "block_exaport").'</td></tr>';
+        if (block_exaport_shareemails_enabled()) {
+            echo '<tr><td style="height: 10px"></td></tr>';
+            echo '<tr><td style="padding-right: 10px; width: 10px">';
+            echo $form['elements_by_name']['sharedemails']['html'];
+            echo '</td><td>' . get_string("emailaccess", "block_exaport") . '</td></tr>';
 
-        if ($view) {
-            $view->emailsforshare = implode(';', exaport_get_view_shared_emails($view->id));
-            echo '<tr id="emailaccess-settings"><td></td><td>';
-            echo get_string("emailaccessdescription", "block_exaport");
-            echo '<textarea name="emailsforshare">'.str_replace(';', "\r\n", $view->emailsforshare).'</textarea><br>';
-            echo '</td></tr>';
+            if ($view) {
+                $view->emailsforshare = implode(';', exaport_get_view_shared_emails($view->id));
+                echo '<tr id="emailaccess-settings"><td></td><td>';
+                echo get_string("emailaccessdescription", "block_exaport");
+                echo '<textarea name="emailsforshare">' . str_replace(';', "\r\n", $view->emailsforshare) . '</textarea><br>';
+                echo '</td></tr>';
+            }
         }
 
         echo '</table></div>';

@@ -438,3 +438,39 @@
 #exaport #more_viewcontent_info {
     margin-bottom: 20px;
 }
+
+/*popovers on block adders:*/
+.tippy-box[data-theme~='exaport'] {
+    background-color: #ffffff;
+    border: solid 1px #b3b3b3;
+    color: #000000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+.tippy-box[data-theme~='exaport'] .external-link:before {
+    content: url("../pix/url_12.png");
+    color: rgba(0, 0, 0, 0.5);
+    margin-right: 3px;
+}
+.tippy-box[data-theme~='exaport'][data-placement^='top'] > .tippy-arrow::before {
+    border-top-color: #b3b3b3;
+    bottom: -8px;
+}
+.tippy-box[data-theme~='exaport'][data-placement^='bottom'] > .tippy-arrow::before {
+    border-bottom-color: #b3b3b3;
+    top: -8px;
+}
+.tippy-box[data-theme~='exaport'][data-placement^='left'] > .tippy-arrow::before {
+    border-left-color: #b3b3b3;
+}
+.tippy-box[data-theme~='exaport'][data-placement^='right'] > .tippy-arrow::before {
+    border-right-color: #b3b3b3;
+}
+.tippy-box[data-theme~='exaport'] .popover-title {
+    font-weight: bold;
+}
+.tippy-box[data-theme~='exaport'] hr {
+    margin-top: 0.2rem;
+    margin-bottom: 0.5rem;
+}

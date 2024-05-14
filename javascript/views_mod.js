@@ -255,7 +255,6 @@ Y.use('moodle-core-notification-dialogue');
                     // Get ajax only for item from the top block.
                     var uiattr = $(ui.item[0]).closest('ul').prop("className");
                     if (uiattr.search("portfolioDesignBlocks") == -1) {
-
                         $.ajax({
                             url: M.cfg['wwwroot'] + '/blocks/exaport/blocks.json.php',
                             type: 'POST',
@@ -759,7 +758,49 @@ Y.use('moodle-core-notification-dialogue');
         update_sharing();
     });
 
-    $('body').on('click', '[data-toggle="popover"]', function(e) {
+    $(function () {
+
+        // Elements with popover
+        var popoverItems = [
+            '#personal_information_adder',
+            '#cv_information_adder',
+            '#headline_adder',
+            '#text_adder',
+            '#item_adder',
+            '#media_adder',
+            '#badges_adder',
+        ];
+        popoverItems.forEach(function(elementId) {
+            if ($(elementId).length) {
+                tippy(elementId + ' .blocktype', {
+                    trigger: 'mouseenter focus',
+                    arrow: true,
+                    allowHTML: true,
+                    theme: 'exaport',
+                    delay: [50, 50],
+                    interactive: true,
+                    content(reference) {
+                        var parent = $(reference).closest('.portfolioElement');
+                        var title = '<span class="popover-title">' + parent.attr('title') + '</span>';
+                        parent.removeAttr('title');
+                        if (typeof parent.attr('data-help') != 'undefined') {
+                            title += '<hr>' + '<span class="popover-content">' + parent.attr('data-help') + '</span>';
+                        }
+                        return title;
+                    },
+                    // Enable these for comfort template CSS configuration:
+                    // hideOnClick: 'toggle',
+                    // trigger: 'click',
+                });
+            }
+        });
+
+
+        // $('[data-toggle="popover"]').tippy('button', {content: 'tooltip'});
+
+    });
+
+    $('body').on('click', '[data-toggle="popoverNOOO"]', function(e) {
         e.preventDefault();
         $(this).fu_popover();
         // $(this).fu_popover('show');

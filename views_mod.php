@@ -49,6 +49,8 @@ $PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
 // $requirejs = 'require.config(' . json_encode($config) . ')';
 // $PAGE->requires->js_amd_inline($requirejs);
 $PAGE->requires->js(new moodle_url($CFG->wwwroot.'/blocks/exaport/javascript/popover.min.js'), false);
+$PAGE->requires->js('/blocks/exaport/javascript/popper.min.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/tippy-bundle.umd.js', true);
 // $PAGE->requires->js_call_amd('block_exaport/config', 'initialise');
 $PAGE->requires->css('/blocks/exaport/css/preloadinator.css', true);
 
@@ -823,14 +825,13 @@ $resumeitems->skillscareers = block_exaport_add_view_access_parameter_to_url($re
 $resumeitems->interests = file_rewrite_pluginfile_urls($resumeitems->interests, 'pluginfile.php',
     context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_interests', $resumeitems->id);
 $resumeitems->interests = block_exaport_add_view_access_parameter_to_url($resumeitems->interests, $view, ['src']);
-
 ?>
     <script type="text/javascript">
-        //<![CDATA[
+
         var portfolioItems = <?php echo json_encode($portfolioitems); ?>;
         var resumeItems = <?php echo json_encode($resumeitems); ?>;
         ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
-        //]]>
+
     </script>
 <?php
 
@@ -874,52 +875,70 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
                 s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">
                     <img alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/preview.png" />
             </a></div>';
+        $profileurl = new moodle_url('/user/profile.php');
+        $cvurl = new moodle_url('/blocks/exaport/resume.php', ['courseid' => $courseid]);
+        $itemsurl = new moodle_url('/blocks/exaport/view_items.php', ['courseid' => $courseid]);
         echo '<ul>
-    <li class="portfolioElement" title="'.get_string('personalinformation', 'block_exaport').'" block-type="personal_information">
+    <li class="portfolioElement" title="'.block_exaport_get_string('personalinformation').'" block-type="personal_information" 
+            id="personal_information_adder" 
+            data-help="'.block_exaport_get_string('personalinformation_help', $profileurl->out()).'">
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/personal_info.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('personalinformation', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('personalinformation', 'block_exaport').'</div>
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('personalinformation').'</h4>
+            <div class="blocktype-description js-hidden">'.block_exaport_get_string('personalinformation').'</div>
         </div>
     </li>
-    <li class="portfolioElement" title="'.get_string('cvinformation', 'block_exaport').'" block-type="cv_information">
+    <li class="portfolioElement" title="'.block_exaport_get_string('cvinformation').'" block-type="cv_information" 
+        id="cv_information_adder"
+        data-help="'.block_exaport_get_string('cvinformation_help', $cvurl->out()).'" >    
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/cv_info.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('cvinformation', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('cvinformation', 'block_exaport').'</div>
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('cvinformation').'</h4>
+            <div class="blocktype-description js-hidden">'.block_exaport_get_string('cvinformation').'</div>
         </div>
     </li>
-    <li class="portfolioElement" title="'.get_string('headertext', 'block_exaport').'" block-type="headline">
+    <li class="portfolioElement" title="'.block_exaport_get_string('headertext').'" block-type="headline" 
+        id="headline_adder"
+        data-help="'.block_exaport_get_string('headertext_help').'" >
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/header_text.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('headertext', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('headertext', 'block_exaport').'</div>
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('headertext').'</h4>
+            <div class="blocktype-description js-hidden">'.block_exaport_get_string('headertext').'</div>
         </div>
     </li>
-    <li class="portfolioElement" title="'.get_string('view_specialitem_text', 'block_exaport').'" block-type="text">
+    <li class="portfolioElement" title="'.block_exaport_get_string('view_specialitem_text').'" block-type="text" 
+        id="text_adder"
+        data-help="'.block_exaport_get_string('view_specialitem_text_help').'" >        
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/text.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('view_specialitem_text', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('view_specialitem_text', 'block_exaport').'</div>
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('view_specialitem_text').'</h4>
+            <div class="blocktype-description js-hidden">'.block_exaport_get_string('view_specialitem_text').'</div>
         </div>
     </li>
-    <li class="portfolioElement" title="'.get_string('items', 'block_exaport').'" block-type="item">
+    <li class="portfolioElement" title="'.block_exaport_get_string('items').'" block-type="item" 
+        id="item_adder"
+        data-help="'.block_exaport_get_string('items_help', $itemsurl->out()).'" >
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/lists.png" />
             <h4 class="blocktype-title js-hidden">'.get_string('items', 'block_exaport').'</h4>
             <div class="blocktype-description js-hidden">'.get_string('selectitems', 'block_exaport').'</div>
         </div>
     </li>
-    <li class="portfolioElement" title="'.get_string('media', 'block_exaport').'" block-type="media">
+    <li class="portfolioElement" title="'.block_exaport_get_string('media').'" block-type="media" 
+        id="media_adder"
+        data-help="'.block_exaport_get_string('media_help').'" >
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" />
-            <h4 class="blocktype-title js-hidden">'.get_string('media', 'block_exaport').'</h4>
-            <div class="blocktype-description js-hidden">'.get_string('selectitems', 'block_exaport').'</div>
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('media').'</h4>
+            <div class="blocktype-description js-hidden">'.block_exaport_get_string('selectitems').'</div>
         </div>
     </li>';
 
         if (block_exaport_badges_enabled()) {
-            echo '<li class="portfolioElement" title="'.get_string('badges', 'badges').'" block-type="badge">
+            $badgesurl = new moodle_url('/user/profile.php');
+    echo '<li class="portfolioElement" title="'.get_string('badges', 'badges').'" block-type="badge" 
+        id="badges_adder"
+        data-help="'.block_exaport_get_string('badges_help', $badgesurl).'" >
         <div class="blocktype" style="position: relative;">
             <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />
             <h4 class="blocktype-title js-hidden">'.get_string('badges', 'badges').'</h4>

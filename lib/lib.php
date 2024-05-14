@@ -2350,7 +2350,7 @@ function block_exaport_add_view_access_parameter_to_url($content, $accessOrView,
         $parsedUrl = parse_url($url);
         $query = isset($parsedUrl['query']) ? $parsedUrl['query'] : '';
         parse_str($query, $urlParams);
-        $urlParams = array_merge($urlParams, $addParams);
+        $urlParams = array_merge($addParams, $urlParams); // If 'access' parameter exists - keep it, not change
         $parsedUrl['query'] = http_build_query($urlParams);
         $newUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $parsedUrl['path'] . '?' . $parsedUrl['query'];
         return $matches[1] . '="' . $newUrl . '"';

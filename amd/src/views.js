@@ -84,7 +84,11 @@ define(['jquery',
                 var data = new Object();
                 data.type = 'personal_information';
                 data.id = id;
-                data.block_title = this.strip_tags($('#block_title').val());
+                if ($('#block_title').length) {
+                    data.block_title = this.strip_tags($('#block_title').val());
+                } else {
+                    data.block_title = '';
+                }
                 // if ($('#firstname').attr('checked') == 'checked') {
                 var fncheckbox = $('.pieform input[name="fields\[firstname\]"]').first();
                 if (fncheckbox !== undefined && fncheckbox.is(':checked')) {
@@ -163,17 +167,16 @@ define(['jquery',
             },
 
             addItem: function(id) {
-console.log('views.js:166');console.log('addItem start');// !!!!!!!!!! delete it
+
                 if (!this.checkFields()) {
                     return;
                 }
-console.log('views.js:170');console.log('asdasdasd');// !!!!!!!!!! delete it
+
                 if (id != -1) {
                     newItem = lastclicked;
                 }
-console.log('views.js:174');console.log('dghghdfh');// !!!!!!!!!! delete it
+
                 var i = 0;
-console.log('views.js:176');console.log($('#blockform input.add-item-checkbox:checked'));// !!!!!!!!!! delete it
                 $('#blockform input.add-item-checkbox:checked').each(function () {
                     i = i + 1;
                     if (i > 1) {
@@ -184,7 +187,6 @@ console.log('views.js:176');console.log($('#blockform input.add-item-checkbox:ch
                     data = {};
                     data.type = 'item';
                     data.itemid = $(this).val();
-console.log('views.js:184');console.log(data);// !!!!!!!!!! delete it
                     newItem.data('portfolio', data);
                     generateItem('update', $(newItem));
                 });
@@ -525,7 +527,7 @@ console.log('views.js:184');console.log(data);// !!!!!!!!!! delete it
         */
         // var header_content = '';
         if (typeof portfolioItems === 'undefined') {
-            var portfolioItems;
+            var portfolioItems = window.portfolioItems;
         }
         var $E = window.block_exaport;
         if (data.itemid && !data.item && portfolioItems && portfolioItems[data.itemid]) {
@@ -1121,6 +1123,7 @@ console.log('views.js:184');console.log(data);// !!!!!!!!!! delete it
     function saveBlockData() {
         var data = $('form#view_edit_form').serializeArray();
         data.push({name: 'ajax', value: 1});
+        console.log('views.js:1126');console.log(data);// !!!!!!!!!! delete it
         showPreloadinator($('#view-preview'), '', true);
         $.ajax({
             url: document.location.href,

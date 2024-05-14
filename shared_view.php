@@ -542,7 +542,9 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         $person_info .= '<div class="email">'.$block->email.'</div>';
                     }
                     if (isset($block->text)) {
-                        $person_info .= '<div class="body">'.$block->text.'</div>';
+                        $text = $block->text;
+                        $text = block_exaport_add_view_access_parameter_to_url($text, $access, ['src', 'href']);
+                        $person_info .= '<div class="body">'.$text.'</div>';
                     }
                     $general_content .= $person_info;
                     $general_content .= '</div>';

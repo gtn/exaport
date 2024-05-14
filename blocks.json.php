@@ -49,7 +49,7 @@ class temporary_form extends block_exaport_moodleform {
         $propertyname = $this->_customdata['property_name'];
 
         $mform->addElement('editor', $propertyname, 'temp', null,
-                array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+                array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'autosave' => false));
         $mform->add_exaport_help_button($propertyname, 'forms.temp.'.$propertyname);
     }
 }
@@ -388,6 +388,9 @@ function get_form_personalinfo($id, $blockdata = array()) {
 
 //    $draftideditor = file_get_submitted_draft_itemid('text');
     $draftideditor = 0; // disable draft for this editor
+    // attodraftid - we need to disable draft functionality for ATTO editor. It is not possible by settings (or?...)
+    // so - generate random draftid (use as contextId in atto table) for simulate new records for every request
+    $attoDraftContextId = random_int(10000, 99999999);
 
     if (isset($blockdata->text) && $blockdata->text) {
         // block data (text) can be changed manually for the block
@@ -406,17 +409,18 @@ function get_form_personalinfo($id, $blockdata = array()) {
         // Or the block data can be a default value from 'About me' CV section
         require_once(__DIR__.'/lib/resumelib.php');
         $resumedata = block_exaport_get_resume_params_record();
-        $text = '121212'.@$resumedata->cover ?: '';
+        $text = @$resumedata->cover ?: '';
 
         $text = file_rewrite_pluginfile_urls($text, 'pluginfile.php',
             context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resumedata->id);
-        /*$text = file_prepare_draft_area(
-                $draftideditor,
-                context_user::instance($USER->id)->id,
-                'block_exaport',
-                'resume_editor_cover',
-                $USER->id,
-                array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $text);*/
+        $text = block_exaport_add_view_access_parameter_to_url($text, 'resume/'.$resumedata->id.'/'.$USER->id, ['src']);
+        $text = file_prepare_draft_area(
+            $draftideditor,
+            $attoDraftContextId, //context_user::instance($USER->id)->id,
+            'block_exaport',
+            'resume_editor_cover',
+            $USER->id,
+            array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), $text);
     }
     $content = "";
 
@@ -424,14 +428,15 @@ function get_form_personalinfo($id, $blockdata = array()) {
             ' class="pieform" onsubmit="exaportViewEdit.addPersonalInfo('.$id.'); return false;">';
     $content .= '<input type="hidden" name="item_id" value="'.$id.'">';
     $content .= '<table style="width: 100%;">';
-    $content .= '<tr><th>';
+    // SZ: 13.05.2024. Block title is removed. It is overcomplicated for view editing. Use the block 'headline' instead.
+    /*$content .= '<tr><th>';
     $content .= '<label for="block_title">'.get_string('blocktitle2', 'block_exaport').'</label>';
     $content .= '</th></tr>';
     $content .= '<tr><td>';
     $content .= '<input type="text" name="block_title" value="'.
             (isset($blockdata->block_title) ? s($blockdata->block_title) : '').
             '" id="block_title">';
-    $content .= '</td></tr>';
+    $content .= '</td></tr>';*/
     $content .= '<tr><th>';
     $content .= '<label>'.get_string('fieldstoshow', 'block_exaport').'</label>';
     $content .= '</th></tr>';
@@ -480,7 +485,7 @@ function get_form_personalinfo($id, $blockdata = array()) {
     $content .= '</th></tr>';
     $content .= '<tr><td>';
     $content .= '<textarea tabindex="1" style="height: 150px; width: 100%;" name="text" id="id_block_intro" '.
-            ' class="mceEditor" cols="10" rows="15" aria-hidden="true">'.s($text).'</textarea>';
+            ' class="mceEditor" cols="10" rows="15" aria-hidden="true" autocomplete="off">'.s($text).'</textarea>';
     $content .= '</td></tr>';
     $content .= '<tr><td>';
     $content .= '<input type="submit" value="'.SUBMIT_BUTTON_TEXT.'" id="add_text" name="submit_block" '.
@@ -533,18 +538,18 @@ function get_form_cvinfo($id, $blockdata = array()) {
     $content .= get_string('configureblock_cvinfo_group_by_category', 'block_exaport').'</label>';
     $content .= '</th></tr>';
     // About me
-    $content .= '<tr><th>';
+    // SZ: hidden 10.05.2024. Use "Personal information block" - there is predefined content from CV
+    /*$content .= '<tr><th>';
     $content .= '<label>'.block_exaport_get_string('cofigureblock_cvinfo_cover').'</label>';
     $content .= '</th></tr>';
     $content .= '<tr><td>';
     $content .= '<div class="add-item">';
     $content .= '<label>';
     $content .= '<input class="add-cvitem-checkbox" data-cvtype="cover" type="checkbox" name="add_cover" value="1" /> ';
-
     $content .= block_exaport_get_string('cofigureblock_cvinfo_cover_actual');
     $content .= '</label>';
     $content .= '</div>';
-    $content .= '</td></tr>';
+    $content .= '</td></tr>';*/
 
     // educations
     $usereducaitons = block_exaport_resume_get_educations(@$resume->id);
@@ -820,6 +825,11 @@ function get_form_badge($id, $blockdata = array()) {
     return $content;
 };
 
+/**
+ * To enable text editor in modal window we need to call some JS code. Here is this code
+ * @param $elementid
+ * @return string
+ */
 function htmleditor_enable_script($elementid) {
     global $CFG, $PAGE, $OUTPUT;
     $content = '';
@@ -857,9 +867,10 @@ function htmleditor_enable_script($elementid) {
         $content .= '});';
     }
     // Change itemid to draft!!
-    $draftitemid = (int) file_get_submitted_draft_itemid('text');
-    $content .= "\r\n".' var dr = '.$draftitemid.';';
-    $content = preg_replace('/("itemid":[[:digit:]]*)/', '"itemid":'.$draftitemid, $content);
+    $draftitemid = (int)file_get_submitted_draft_itemid('text');
+    $content .= "\r\n" . ' var dr = ' . $draftitemid . ';';
+    $content = preg_replace('/("itemid":[[:digit:]]*)/', '"itemid":' . $draftitemid, $content);
+
     $content .= '</script>';
     return $content;
 

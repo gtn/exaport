@@ -984,6 +984,10 @@ return [
                 'Text',
                 'Text',
         ],
+        'view_specialitem_text_help' => [
+                'The block with custom text. You can format the text as you need',
+                'The block with custom text. You can format the text as you need',
+        ],
         'view_specialitem_media' => [
                 'Medieneintrag',
                 'Media',
@@ -1120,17 +1124,29 @@ return [
                 'Persönliche Information',
                 'Personal Information',
         ],
+        'personalinformation_help' => [
+                'The block with your personal data, like: name, email.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your profile</a>',
+                'The block with your personal data, like: name, email.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your profile</a>',
+        ],
         'cvinformation' => [
                 'Lebenslauf Information',
                 'CV Information',
         ],
+        'cvinformation_help' => [
+            'The block with your exabis ePortfolio CV data, like: education, employment, e.t.c.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your CV</a>',
+            'The block with your exabis ePortfolio CV data, like: education, employment, e.t.c.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your CV</a>',
+        ],
         'cvgroup' => [
-                'Lebenslauf Grupe',
-                'CV Group',
+                'Lebenslauf',
+                'CV',
         ],
         'headertext' => [
                 'Kopfzeile',
                 'Headertext',
+        ],
+        'headertext_help' => [
+                'The simple block for adding only header line',
+                'The simple block for adding only header line',
         ],
         'item' => [
                 'Artefakt',
@@ -1138,11 +1154,19 @@ return [
         ],
         'items' => [
                 'Artefakte',
-                'Items',
+                'My artefacts',
+        ],
+        'items_help' => [
+            'The block with your artefacts<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your artefacts</a>',
+            'The block with your artefacts<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your artefacts</a>',
         ],
         'media' => [
                 'Medieneintrag',
                 'Media',
+        ],
+        'media_help' => [
+                'The block with embeded media data, from source like: Youtube, Vimeo, SlideShare, e.t.c.',
+                'The block with embeded media data, from source like: Youtube, Vimeo, SlideShare, e.t.c.',
         ],
         'fieldstoshow' => [
                 'Anzuzeigende Felder',
@@ -1316,7 +1340,7 @@ return [
         ],
         'cofigureblock_item' => [
                 'Auswahl der Artefakte',
-                'Choose item',
+                'Choose artefact',
         ],
         'cofigureblock_media' => [
                 'Medieneintrag',
@@ -2778,6 +2802,10 @@ return [
         'moreinfolink' => [
             'Show more info ...',
             'Show more info ...',
-        ]
+        ],
+        'badges_help' => [
+            'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>',
+            'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>',
+        ],
 ];
 ?>

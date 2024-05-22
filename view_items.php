@@ -389,15 +389,26 @@ if (in_array($type, ['mine', 'shared'])) {
         echo '<span><a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid . '">' .
             '<img src="pix/folder_new_32.png" /><br />' . get_string("category", "block_exaport") . "</a></span>";
     }
+    // Add "Mixed" artefact
+    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
+            '&type=mixed">'.
+            '<img src="pix/mixed_new_32.png" /><br />'.get_string("add_mixed", "block_exaport")."</a></span>";
+    // Next types are disabled after adding 'mixed' type. Real artefact type will be changed after filling fields.
+    // These types are hidden only in this view. All other functions are working with types as before.
+    /*
+    // Add "Link" artefact.
     echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
             '&type=link">'.
             '<img src="pix/link_new_32.png" /><br />'.get_string("link", "block_exaport")."</a></span>";
+    // Add "File" artefact.
     echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
             '&type=file">'.
             '<img src="pix/file_new_32.png" /><br />'.get_string("file", "block_exaport")."</a></span>";
+    // Add "Note" artefact.
     echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
             '&type=note">'.
             '<img src="pix/note_new_32.png" /><br />'.get_string("note", "block_exaport")."</a></span>";
+    */
     // Anzeigen wenn kategorien vorhanden zum importieren aus sprachfile.
     if ($type == 'mine') {
         $categories = trim(get_string("lang_categories", "block_exaport"));
@@ -428,30 +439,38 @@ echo '</p></div></div>';
 echo '<div class="excomdos_cat">';
 echo block_exaport_get_string('current_category').': ';
 
-echo '<b>';
+$currentcategoryPathItemButtons = '';
+
+/*echo '<b>';
 if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser) {
     echo $selecteduser->name.' / ';
 }
 echo $currentcategory->name;
-echo '</b> ';
+echo '</b> ';*/
 
 if ($type == 'mine' && $currentcategory->id > 0) {
     if (@$currentcategory->internshare && (count(exaport_get_category_shared_users($currentcategory->id)) > 0 ||
                     count(exaport_get_category_shared_groups($currentcategory->id)) > 0 || $currentcategory->shareall == 1)
     ) {
-        echo ' <img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
+        $currentcategoryPathItemButtons .= ' <img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
     }
-    echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentcategory->id.
+    $currentcategoryPathItemButtons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentcategory->id.
             '&action=edit&back=same"><img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
-    echo ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentcategory->id.
+    $currentcategoryPathItemButtons .= ' <a href="'.$CFG->wwwroot.'/blocks/exaport/category.php?courseid='.$courseid.'&id='.$currentcategory->id.
             '&action=delete&back=same"><img src="pix/del.png" alt="'.get_string("delete").'"/></a>';
+
+    // Show path only for "my" category. Shared category will not show it, because we need to hide inner Path of the user's structure
+    echo '<span class="excomdos_cat_path">'.block_exaport_category_path($currentcategory, $courseid, $currentcategoryPathItemButtons).'</span>';
 } else if ($type == 'shared' && $selecteduser && $categoryid) {
-    $tempvar = 1; // For code checker.
+    echo '<strong><img src="pix/user1.png" width="16" />&nbsp;'.$selecteduser->name.'&nbsp;/&nbsp;<img src="pix/cat_path_item.png" width="16" />&nbsp;'.$currentcategory->name.'</strong>';
     // When category selected, allow copy.
     /*
     $url = $PAGE->url->out(true, ['action'=>'copy']);
     echo '<button onclick="document.location.href=\'shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$categoryid.'\'">'.block_exaport_get_string('copycategory').'</button>';
     */
+} else if ($type == 'mine') {
+    // mine, but ROOT
+    echo '<span class="excomdos_cat_path">'.block_exaport_category_path(null, $courseid, $currentcategoryPathItemButtons).'</span>';
 }
 echo '</div>';
 
@@ -539,7 +558,8 @@ if ($layout == 'details') {
 
         $table->data[$itemind] = array();
 
-        $imgtype = '<img src="pix/'.$item->type.'_32.png" alt="'.get_string($item->type, "block_exaport").'">';
+//        $imgtype = '<img src="pix/'.$item->type.'_32.png" alt="'.get_string($item->type, "block_exaport").'">';
+        $imgtype = '<img src="pix/'.$item->type.'_icon.png" alt="'.get_string($item->type, "block_exaport").'" title="'.get_string($item->type, "block_exaport").'" width="32">';
         $table->data[$itemind]['type'] = $imgtype;
 
         $table->data[$itemind]['name'] = "<a href=\"".s($url)."\">".$item->name."</a>";
@@ -628,9 +648,7 @@ if ($layout == 'details') {
                     <br>
                 </span>
             </div>
-            <div class="excomdos_tileimage">
-                <a href="<?php echo $parentcategory->url; ?>"><img src="pix/folderup_tile.png"></a>
-            </div>
+            <div class="excomdos_tileimage"><a href="<?php echo $parentcategory->url; ?>"><img src="pix/folderup_tile.png"></a></div>
             <div class="exomdos_tiletitle">
                 <a href="<?php echo $parentcategory->url; ?>"><?php echo $parentcategory->name; ?></a>
             </div>
@@ -707,7 +725,15 @@ if ($layout == 'details') {
         <div class="excomdos_tile excomdos_tile_item id-<?php echo $item->id; ?>">
             <div class="excomdos_tilehead">
                 <span class="excomdos_tileinfo">
-                    <?php echo get_string($item->type, "block_exaport"); ?>
+                    <?php
+                        // Icon with the type of the item
+                        echo '<img src="'.$OUTPUT->image_url($item->type.'_icon', 'block_exaport').'" 
+                                class="artefact_icon" 
+                                alt="'.get_string($item->type, "block_exaport").'" 
+                                title="'.get_string($item->type, "block_exaport").'" 
+                                width="16" />';
+                        echo '<span class="excomdos_tileinfo_type">'.get_string($item->type, "block_exaport").'</span>';
+                    ?>
                     <br><span class="excomdos_tileinfo_time"><?php echo userdate($item->timemodified); ?></span>
                 </span>
                 <span class="excomdos_tileedit">
@@ -738,7 +764,7 @@ if ($layout == 'details') {
                                     || $item->userid == $USER->id) {
                                 if ($item->userid == $USER->id) {
                                     echo '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id .
-                                        '&action=delete&categoryid=' . $categoryid . $cattype . '"><img src="pix/del.png" alt="file"></a>';
+                                        '&action=delete&categoryid=' . $categoryid . $cattype . '" class="item_delete_icon"><img src="pix/del.png" alt="file"></a>';
                                 }
                             } else if (!$allowedit = block_exaport_item_is_editable($item->id)) {
                                 echo '<img src="pix/deleteview.png" alt="file">';
@@ -858,4 +884,33 @@ function block_exaport_get_item_project_icon($item) {
     }
 
     return '<a class="artefact-button" onmouseover="Tip(\''.$projectcontent.'\')" onmouseout="UnTip()"><img src="pix/project.png" width="16" alt="'.get_string('item.project_information', 'block_exaport').'" /></a>';
+}
+
+function block_exaport_category_path($category, $courseid = 1, $currentcategoryPathItemButtons = '') {
+    global $DB, $CFG;
+    $pathItem = function ($id, $title, $courseid, $selected = false, $currentcategoryPathItemButtons = '') use ($CFG) {
+        return '<span class="cat_path_item '.($selected ? 'active' : '').'">'
+                .'<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.($id ? '&categoryid='.$id : '').'">'
+                    .'<img src="pix/cat_path_item.png" width="16" />'
+                    .$title
+                .'</a>'.($selected ? $currentcategoryPathItemButtons : '').'</span>';
+    };
+    $path = [];
+    if ($category !== null) {
+        $currentId = $category->id;
+
+        while ($currentId != NULL) {
+            $item = $DB->get_record('block_exaportcate', array('id' => $currentId));
+            if (!$item) {
+                break;
+            }
+            array_unshift($path, $pathItem($item->id, $item->name, $courseid, (bool)($category->id == $item->id), $currentcategoryPathItemButtons));
+            $currentId = $item->pid;
+        }
+    }
+    // Add root.
+    array_unshift($path, $pathItem('', 'Root', $courseid));
+
+    $resultPath = implode('<span class="cat_path_delimeter">/</span>', $path);
+    return $resultPath;
 }

@@ -522,7 +522,7 @@ function block_exaport_print_footer() {
  * @return string correct type
  */
 function block_exaport_check_item_type($type, $allallowed) {
-    if (in_array($type, Array('link', 'file', 'note'))) {
+    if (in_array($type, Array('link', 'file', 'note', 'mixed'))) {
         return $type;
     } else {
         return $allallowed ? 'all' : false;
@@ -2036,6 +2036,35 @@ function block_exaport_get_all_categories_for_user($userid) {
     return $categories;
 }
 
+function block_exaport_get_all_categories_for_user_simpletree_selectbox($userid, $selectName = '', $selectId = '') {
+    global $DB;
+    $content = '<select '.($selectId ? 'id="'.$selectId.'" ' : '').($selectName ? 'name="'.$selectName.'" ' : '').'>';
+    $content .= '<option value="0">Root</option>';
+    // get ALL categories. Simple list
+    $cats = $DB->get_records_sql('
+        SELECT id, pid, name 
+        FROM {block_exaportcate} c
+        WHERE c.userid = ?         
+        ORDER BY c.name ASC
+    ', array($userid));
+    // convert the list into the simple "tree" list. Starts from level 0
+    function buildTree(array &$categories, $parentId = 0, $level = 1) {
+        $treeString = '';
+        foreach ($categories as $key => $category) {
+            if ($category->pid == $parentId) {
+                $treeString .= '<option value="'.$category->id.'">'.str_repeat("&nbsp;", $level * 3) . htmlspecialchars($category->name) . "</option>";
+                $treeString .= buildTree($categories, $category->id, $level + 1);
+            }
+        }
+        return $treeString;
+    }
+    $treeViewOptions = buildTree($cats);
+    $content .= $treeViewOptions;
+    $content .= '</select>';
+
+    return $content;
+}
+
 
 /**
  * convert categories and artifacts into tree
@@ -2188,6 +2217,8 @@ function block_exaport_get_view_layout_style_from_settings($view, $styleFor = 's
     $layoutSettings = @$CFG->block_exaport_layout_settings;
     if ($layoutSettings) {
         $layoutSettings = unserialize($layoutSettings);
+    } else {
+        $layoutSettings = [];
     }
 
     if (@$CFG->block_exaport_allow_custom_layout && $view->layout_settings) {

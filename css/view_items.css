@@ -97,9 +97,12 @@
     float:left;
     margin:0.5em;
 
--webkit-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
--moz-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
+    -webkit-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
+    -moz-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
+    box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
+}
+.excomdos_cont .excomdos_tile:hover {
+    box-shadow: 1px 1px 3px rgba(36, 36, 36, 0.5);
 }
 .excomdos_cont .excomdos_tile.ui-state-active {
     background: #ffc;
@@ -133,6 +136,11 @@ box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
     font-size: 70%;
     display: block;
     overflow: hidden;
+}
+.excomdos_cont .excomdos_tilehead .excomdos_tileinfo_type {
+    font-size: 70%;
+    margin-left: 3px;
+    opacity: 0.75;
 }
 
 .excomdos_cont .excomdos_tilehead .excomdos_tileedit {
@@ -184,4 +192,22 @@ box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
 
 .excomdos_cont .excomdos_additem img {
     margin-bottom: 0.3em;
+}
+
+.excomdos_cat_path .cat_path_item.active {
+    font-weight: bold;
+}
+.excomdos_cat_path .cat_path_delimeter {
+    margin: 1rem 7px;
+}
+.excomdos_cat_path img {
+    margin-right: 3px;
+}
+.excomdos_cont a > img {
+    text-decoration: none !important;
+    border:0px !important;
+    outline:none;
+    border-width: 0px;
+    outline-width:0px;
+    border-bottom: none;
 }

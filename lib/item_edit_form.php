@@ -109,20 +109,24 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $this->category_select_setup($this->_customdata['cattype'], $this->_customdata['catid']);
         $mform->add_exaport_help_button('categoryid', 'forms.item.categoryid');
 
-        if ($type == 'link') {
+        // 'link' input for all types:
+        $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
+        $mform->setType('url', PARAM_TEXT);
+        /*if ($type == 'link') {
             $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="http://"');
             $mform->setType('url', PARAM_TEXT);
             $mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client');
         } else {
             $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
             $mform->setType('url', PARAM_TEXT);
-        }
+        }*/
         $mform->add_exaport_help_button('url', 'forms.item.url');
 
-        if ($type == 'link') {
+        // 'File' input is for ALL types
+        if ($type == 'link' && 11==22) {
             // For code checker.
             $tempvar = 1;
-        } else if ($type == 'file') {
+        } else if (11==11 /* for ALL */ /*$type == 'file'*/) {
             $filelimits = 1;
             if ($CFG->block_exaport_multiple_files_in_item) {
                 $filelimits = 10;
@@ -136,13 +140,15 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             } else if ($this->_customdata['action'] == 'add') {
                 $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null,
                         array('subdirs' => false, 'maxfiles' => $filelimits, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-                $mform->addRule('file', null, 'required', null, 'client');
+                // 'required' was disabled, because this input is for all types from now
+//                $mform->addRule('file', null, 'required', null, 'client');
 
             } else {
                 // Filemanager for edit file.
                 $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null,
                         array('subdirs' => false, 'maxfiles' => $filelimits, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-                $mform->addRule('file', null, 'required', null, 'client');
+                // 'required' was disabled, because this input is for all types from now
+//                $mform->addRule('file', null, 'required', null, 'client');
                 $mform->add_exaport_help_button('file', 'forms.item.file');
             }
         }

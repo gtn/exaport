@@ -823,4 +823,18 @@ Y.use('moodle-core-notification-dialogue');
         });
     });
 
+    $(function () {
+        $('body').on('click', '.exaport_add_artefact', function(e) {
+            e.preventDefault();
+            var url = new URL($(this).attr('href'));
+            var catid = $('#categoryForNewItem').val();
+            if (catid > 0) {
+                url.searchParams.set('categoryid', catid);
+            }
+            window.open(url, '_blank');
+            // close the block modal
+            exaportViewEdit.cancelAddEdit();
+        });
+    });
+
 })(jQueryExaport);

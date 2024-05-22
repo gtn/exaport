@@ -712,6 +712,14 @@ return [
                 'Link',
                 'Link',
         ],
+        'mixed' => [
+                'Artefakte',
+                'Artefact',
+        ],
+        'add_mixed' => [
+                'Neue Artefakte',
+                'Add new artefact',
+        ],
         'categorynotempty' => [
                 'Es muss eine Kategorie ausgew&auml;hlt sein.',
                 'You have to choose a category.',

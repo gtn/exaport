@@ -900,7 +900,8 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
             <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('cvinformation').'</h4>
             <div class="blocktype-description js-hidden">'.block_exaport_get_string('cvinformation').'</div>
         </div>
-    </li>
+    </li>';
+/*    echo '
     <li class="portfolioElement" title="'.block_exaport_get_string('headertext').'" block-type="headline" 
         id="headline_adder"
         data-help="'.block_exaport_get_string('headertext_help').'" >
@@ -918,7 +919,8 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
             <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('view_specialitem_text').'</h4>
             <div class="blocktype-description js-hidden">'.block_exaport_get_string('view_specialitem_text').'</div>
         </div>
-    </li>
+    </li>';*/
+    echo '
     <li class="portfolioElement" title="'.block_exaport_get_string('items').'" block-type="item" 
         id="item_adder"
         data-help="'.block_exaport_get_string('items_help', $itemsurl->out()).'" >

@@ -195,10 +195,9 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $mform->addElement('editor', $textareafield.'_editor', get_string($stringmarker, 'block_exaport'), null,
                     $this->_customdata['textfieldoptions']);
                 $mform->setType($textareafield.'_editor', PARAM_RAW);
-                // Required for all item types
-//                if ($type == 'note' && $textareafield == 'intro') {
+                if ($textareafield == 'intro') {
                     $mform->addRule($textareafield.'_editor', get_string('intronotempty', 'block_exaport'), 'required', null, 'client');
-//                }
+                }
                 $mform->add_exaport_help_button($textareafield.'_editor', 'forms.item.'.$textareafield.'_editor');
             }
         }

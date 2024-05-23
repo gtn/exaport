@@ -1376,7 +1376,7 @@ return [
         ],
         'cofigureblock_cvinfo_certif' => [
                 'Zertifikate, Akkreditierungen, Auszeichnungen',
-                'certifications, accreditations and awards',
+                'Certifications, accreditations and awards',
         ],
         'cofigureblock_cvinfo_public' => [
                 'Bücher und Publikationen',
@@ -1792,7 +1792,7 @@ return [
         ],
         'resume_certif' => [
                 'Zertifikate, Akkreditierungen, Auszeichnungen',
-                'certifications, accreditations and awards',
+                'Certifications, accreditations and awards',
         ],
         'resume_date' => [
                 'Datum',

@@ -2188,6 +2188,8 @@ function block_exaport_get_view_layout_style_from_settings($view, $styleFor = 's
     $layoutSettings = @$CFG->block_exaport_layout_settings;
     if ($layoutSettings) {
         $layoutSettings = unserialize($layoutSettings);
+    } else {
+        $layoutSettings = [];
     }
 
     if (@$CFG->block_exaport_allow_custom_layout && $view->layout_settings) {

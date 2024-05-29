@@ -318,7 +318,7 @@ $string['cvinformation'] = 'CV Information';
 $string['cvinformation_help'] = 'The block with your exabis ePortfolio CV data, like: education, employment, e.t.c.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your CV</a>';
 $string['cvgroup'] = 'CV';
 $string['headertext'] = 'Headertext';
-$string['headertext_help'] = 'The simple block for adding only header line';
+$string['headertext_help'] = 'Der einfache Block zum Hinzufügen einer einzigen Überschriftzeile';
 $string['item'] = 'Item';
 $string['items'] = 'My artefacts';
 $string['items_help'] = 'The block with your artefacts<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your artefacts</a>';

@@ -31,11 +31,11 @@ $string['exaport:myaddinstance'] = 'Exabis ePortfolie zur Startseite hinzuf&uuml
 $string['exaport:export'] = 'Export von SCORM-Files';
 $string['exaport:import'] = 'Import von SCORM-Files';
 $string['exaport:importfrommoodle'] = 'Import von Moodle';
-$string['exaport:shareintern'] = 'Internes Teilen von Sichten';
-$string['exaport:shareextern'] = 'Externes Teilen of views';
+$string['exaport:shareintern'] = 'Internes Teilen von Views';
+$string['exaport:shareextern'] = 'Externes Teilen von Views';
 $string['exaport:allowposts'] = 'Kommentare erlauben';
-$string['exaport:competences'] = 'Allow competences';
-$string['exaport:viewartifactsfromstudents'] = 'Can see portfolio artefacts of own students';
+$string['exaport:competences'] = 'Kompetenzen erlauben';
+$string['exaport:viewartifactsfromstudents'] = 'Portfolio Artefakte der eigenen SuS sehen';
 $string['new'] = 'Neu';
 $string['addbookmark'] = 'Bookmark hinzufügen';
 $string['addcategory'] = 'Kategorie hinzufügen';
@@ -57,12 +57,12 @@ $string['dontincludeurl'] = 'Diese Option ausw&auml;hlen um die Verknüpfung zwi
 $string['duplicatedurl'] = 'Diese URL ist bereits bei den Bookmarks vorhanden.';
 $string['editcategories'] = 'Kategorien bearbeiten';
 $string['explaining'] = 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.';
-$string['explainingmoredata'] = '<strong>This is your space to gather evidence of your learning journey.</strong>
-            <ul>
-                <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
-                <li><strong>Reflect on your experiences:</strong> Explain what you learned, the challenges you faced, and your achievements for each piece.</li>
-            </ul>
-            <strong>Think of each item as a story highlighting your skills and knowledge.</strong>';
+$string['explainingmoredata'] = '<strong>Dies ist dein Bereich, um Belege für deinen Lernweg zu sammeln.</strong>
+			<ul>
+				<li><strong>Füge deine besten Arbeiten hinzu:</strong> Lade Dateien, Weblinks oder Beschreibungen von Projekten, Präsentationen und mehr hoch.</li>
+				<li><strong>Reflektiere über deine Erfahrungen:</strong> Erkläre, was du gelernt hast, welche Herausforderungen du bewältigt hast und deine Erfolge für jedes Stück.</li>
+			</ul>
+			<strong>Denke an jedes Element als eine Geschichte, die deine Fähigkeiten und dein Wissen hervorhebt.</strong>';
 $string['explaininglink'] = '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['explainingfile'] = '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
 $string['explainingnote'] = '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.';
@@ -194,9 +194,9 @@ $string['title'] = 'Titel';
 $string['titlenotemtpy'] = 'Der Titel darf nicht leer sein.';
 $string['intro'] = 'Inhalt';
 $string['shortdescription'] = 'Kurzbeschreibung';
-$string['project_description'] = 'The why behind this project';
-$string['project_process'] = 'Making it happen';
-$string['project_result'] = 'Results and learnings';
+$string['project_description'] = 'Der Grund hinter diesem Projekt';
+$string['project_process'] = 'Umsetzung des Projekts';
+$string['project_result'] = 'Ergebnisse und Erkenntnisse';
 $string['intronotempty'] = 'Der Inhalt darf nicht leer sein.';
 $string['link'] = 'Link';
 $string['categorynotempty'] = 'Es muss eine Kategorie ausgew&auml;hlt sein.';
@@ -276,7 +276,7 @@ $string['view_specialitems'] = 'Spezielle Eintr&auml;ge';
 $string['view_specialitem_headline'] = 'Kopfzeile';
 $string['view_specialitem_personal'] = 'Persönliche Information';
 $string['view_specialitem_text'] = 'Text';
-$string['view_specialitem_text_help'] = 'The block with custom text. You can format the text as you need';
+$string['view_specialitem_text_help'] = 'Der Block mit individuellem Text. Du kannst den Text nach Belieben formatieren.';
 $string['view_specialitem_media'] = 'Medieneintrag';
 $string['view_specialitem_badge'] = 'Badge';
 $string['view_specialitem_headline_defaulttext'] = 'Kopfzeile hier eingeben';
@@ -311,17 +311,17 @@ $string['viewlayout8'] = 'Gleiche Breite';
 $string['viewlayout9'] = 'Mittlere Spalte breiter';
 $string['viewlayout10'] = 'Gleiche Breite';
 $string['personalinformation'] = 'Persönliche Information';
-$string['personalinformation_help'] = 'The block with your personal data, like: name, email.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your profile</a>';
+$string['personalinformation_help'] = 'Der Block mit deinen persönlichen Daten, wie: Name, E-Mail.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Profil anzeigen</a></a>';
 $string['cvinformation'] = 'Lebenslauf Information';
-$string['cvinformation_help'] = 'The block with your exabis ePortfolio CV data, like: education, employment, e.t.c.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your CV</a>';
+$string['cvinformation_help'] = 'Der Block mit deinen exabis ePortfolio-Lebenslaufdaten, wie: Ausbildung, Beschäftigung usw.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Lebenslauf anzeigen</a>';
 $string['cvgroup'] = 'Lebenslauf';
 $string['headertext'] = 'Kopfzeile';
 $string['headertext_help'] = 'The simple block for adding only header line';
 $string['item'] = 'Artefakt';
 $string['items'] = 'Artefakte';
-$string['items_help'] = 'The block with your artefacts<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your artefacts</a>';
+$string['items_help'] = 'Der Block mit deinen Artefakten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Artefakte anzeigen</a>';
 $string['media'] = 'Medieneintrag';
-$string['media_help'] = 'The block with embeded media data, from source like: Youtube, Vimeo, SlideShare, e.t.c.';
+$string['media_help'] = 'Der Block mit eingebetteten Mediendaten von Quellen wie: YouTube, Vimeo, SlideShare usw.';
 $string['fieldstoshow'] = 'Anzuzeigende Felder';
 $string['listofartefacts'] = 'W&aumlhle ein Element aus';
 $string['listofbadges'] = 'Liste von Badges';
@@ -339,8 +339,8 @@ $string['mailadress'] = 'E-Mail-Adresse';
 $string['nomail'] = 'keine Mail-Adresse';
 $string['noemails'] = 'keine Mail-Adresse vorhanden';
 $string['aboutme'] = 'Über mich';
-$string['aboutme_description'] = 'Predefined by CV information, but can be editabled for every block';
-$string['notify'] = 'benachrichtigen';
+$string['aboutme_description'] = 'Vordefiniert durch Lebenslaufinformationen, kann jedoch für jeden Block bearbeitet werden.';
+$string['notify'] = 'Benachrichtigen';
 $string['sharejs'] = 'teilen';
 $string['mediacontent'] = 'URL oder eingebetteter Code*';
 $string['height'] = 'H&ouml;he';
@@ -381,7 +381,7 @@ $string['cofigureblock_cvinfo_skills'] = 'Meine Kompetenzen';
 $string['cofigureblock_cvinfo_interests'] = 'Interessen';
 $string['in'] = 'at';
 $string['cofigureblock_cvinfo_withfiles'] = 'mit Anhängen publizieren';
-$string['configureblock_cvinfo_group_by_category'] = 'Display CV elements in categories';
+$string['configureblock_cvinfo_group_by_category'] = 'Lebenslaufelemente in Kategorien anzeigen';
 
 // === Desp.
 $string['back_to_desp'] = 'zurück zum d-ESP';
@@ -454,8 +454,8 @@ $string['block_exaport_userquota'] = 'Benutzer-Dateikontingent Exabis ePortfolio
 $string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_multiplefilesinitem'] = 'Mehrere Dateien in Datei-Artefakt hochladen';
 $string['block_exaport_multiplefilesinitem_body'] = 'limit: 10 Dateien';
-$string['block_exaport_copytomyportfolio'] = 'Enable "Copy to my portfolio"';
-$string['block_exaport_copytomyportfolio_body'] = 'User will be able copy artefacts from shared category into own portfolio';
+$string['block_exaport_copytomyportfolio'] = 'Aktiviere "In mein Portfolio kopieren"';
+$string['block_exaport_copytomyportfolio_body'] = 'Benutzer können Artefakte aus einer geteilten Kategorie in ihr eigenes Portfolio kopieren.';
 $string['block_exaport_app_alloweditdelete_head'] = 'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 $string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';
@@ -592,208 +592,234 @@ $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';
 $string['pdf_settings'] = 'PDF-Einstellungen';
-$string['pdf_settings_description'] = 'If you use some special or uncommon language characters the generated pdf can have problems. So, you can try to use different font settings<br>
-            Your PDF settings will be saved for this view.<br>So, if your view is shared with other users - they will see the pdf with your settings.<br>
-            Non-standard fonts can have some lost options like bold, italic, e.t.c.';
+$string['pdf_settings_description'] = 'Wenn du spezielle oder ungewöhnliche Schriftzeichen verwendest, kann es zu Problemen mit dem generierten PDF kommen. Du kannst daher versuchen, unterschiedliche Schriftarteinstellungen zu verwenden.<br>
+			Deine PDF-Einstellungen werden für diese Ansicht gespeichert.<br>Wenn deine Ansicht mit anderen Benutzern geteilt wird, sehen sie das PDF mit deinen Einstellungen.<br>
+			Nicht-standardisierte Schriftarten können einige Optionen wie Fett, Kursiv usw. verlieren.';
 $string['pdf_settings_fontfamily'] = 'Schriftfamilie';
 $string['pdf_settings_fontsize'] = 'Grundlegende Schriftgröße';
-$string['pdf_settings_showmetadata'] = 'Add view meta data';
-$string['pdf_settings_showusername'] = 'user name';
-$string['pdf_settings_showuserpicture'] = 'user picture';
-$string['pdf_settings_showuseremail'] = 'user email';
-$string['pdf_settings_showuserphone'] = 'user phone';
-$string['pdf_customfont'] = 'Upload custom font';
+$string['pdf_settings_showmetadata'] = 'Metadaten zur Ansicht hinzufügen';
+$string['pdf_settings_showusername'] = 'Benutzername';
+$string['pdf_settings_showuserpicture'] = 'Profilbild';
+$string['pdf_settings_showuseremail'] = 'Benutzer E-Mail';
+$string['pdf_settings_showuserphone'] = 'Benutzer Telefon';
+$string['pdf_customfont'] = 'Benutzerdefinierte Schriftart hochladen';
 $string['pdf_settings_uploadfont'] = 'Eigene Schriftart hochladen';
 $string['pdf_settings_pagesize'] = 'Seitengröße';
 $string['pdf_settings_pageorient'] = 'Seitenausrichtung';
 $string['pdf_settings_pageorient.portrait'] = 'Hochformat';
 $string['pdf_settings_pageorient.landscape'] = 'Querformat';
-$string['pdf_customfont_help'] = 'Your can upload own .ttf file. We will try to use it for PDF generation.';
-$string['pdf_settings_fontfamily_fixedgroup'] = 'Predefined fonts';
-$string['pdf_settings_fontfamily_customgroup'] = 'Custom uploaded fonts';
+$string['pdf_customfont_help'] = 'Du kannst deine eigene .ttf-Datei hochladen. Wir werden versuchen, sie für die PDF-Erstellung zu verwenden.';
+$string['pdf_settings_fontfamily_fixedgroup'] = 'Vordefinierte Schriften';
+$string['pdf_settings_fontfamily_customgroup'] = 'Benutzerdefinierte hochgeladene Schriftarten';
 $string['settings_layout_settings_heading'] = 'Layout-Einstellungen';
-$string['block_exaport_allowcustomlayout_head'] = 'Custom options for the view layout for view owners';
-$string['block_exaport_allowcustomlayout_body'] = 'Allows to use custom view layout settings (similar to options below) for regular owners of the views';
-$string['settings_layout_settings_description'] = 'Here you can change some view layout options or use own custom CSS rules to have the view as you want<br>These settings will be used as default settings <strong>for all views</strong>';
+$string['block_exaport_allowcustomlayout_head'] = 'Benutzerdefinierte Optionen für das Layout der Views für View-Eigentümer';
+$string['block_exaport_allowcustomlayout_body'] = 'Ermöglicht die Verwendung benutzerdefinierter Layout-Einstellungen für Views (ähnlich den unten aufgeführten Optionen) für reguläre Besitzer der Views.';
+$string['settings_layout_settings_description'] = 'Hier kannst du einige Layout-Optionen der View ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die View nach deinen Wünschen zu gestalten.<br>Diese Einstellungen werden als Standardeinstellungen <strong>für alle Views</strong> verwendet.';
 $string['layout_settings'] = 'Layout-Einstellungen';
-$string['layout_settings_description'] = 'Here you can change some view layout options or use own custom CSS rules to have the view as you want';
-$string['layout_settings_font_size'] = 'Font size';
-$string['layout_settings_border_width'] = 'Border width';
-$string['layout_settings_font_weight'] = 'Bold';
-$string['layout_settings_border_width_only_bottom'] = 'Only bottom border';
-$string['layout_settings_view_headers'] = 'Headers of view blocks';
-$string['layout_settings_view_content'] = 'Content of view blocks';
-$string['layout_settings_custom_css'] = 'Custom CSS';
-$string['layout_settings_custom_css_description'] = 'You can use own custom CSS rules here';
+$string['layout_settings_description'] = 'Hier kannst du einige Layout-Optionen der View ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die View nach deinen Wünschen zu gestalten.';
+$string['layout_settings_font_size'] = 'Schriftgröße';
+$string['layout_settings_border_width'] = 'Randbreite';
+$string['layout_settings_font_weight'] = 'Fett';
+$string['layout_settings_border_width_only_bottom'] = 'Nur unterer Rand';
+$string['layout_settings_view_headers'] = 'Überschriften der View-Blöcke';
+$string['layout_settings_view_content'] = 'Inhalt der View-Blöcke';
+$string['layout_settings_custom_css'] = 'benutzerdefinierte CSS-Regeln';
+$string['layout_settings_custom_css_description'] = 'Hier kannst du eigene benutzerdefinierte CSS-Regeln verwenden.';
 $string['selected_competencies'] = 'Erreichte Kompetenz';
 $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = '';
-$string['forms.item.project_description'] = 'The why behind this project';
-$string['forms.item.project_description_help'] = '<strong>Briefly explain the purpose of your work:</strong><ul> 
-                <li>What problem did it address?</li> 
-                <li>What skills did you aim to develop?</li> 
-                <li>What was the context?</li>
-            </ul>';
-$string['forms.item.project_description_editor'] = 'The why behind this project';
-$string['forms.item.project_description_editor_help'] = '<strong>Briefly explain the purpose of your work:</strong>
-            <ul> 
-                <li>What problem did it address?</li> 
-                <li>What skills did you aim to develop?</li> 
-                <li>What was the context?</li>
-            </ul>';
-$string['forms.item.project_process'] = 'Making it happen';
-$string['forms.item.project_process_help'] = '<strong>Describe your journey:</
-            <ul> 
-                <li>What steps did you take to complete this project?</li> 
-                <li>What challenges did you encounter, and how did you overcome them?</li> 
-                <li>What resources did you use?</li>
-            </ul>';
-$string['forms.item.project_process_editor'] = 'Making it happen';
-$string['forms.item.project_process_editor_help'] = '<strong>Describe your journey:</strong>
-            <ul> 
-                <li>What steps did you take to complete this project?</li> 
-                <li>What challenges did you encounter, and how did you overcome them?</li> 
-                <li>What resources did you use?</li>
-            </ul>';
-$string['forms.item.project_result'] = 'Results and learnings';
-$string['forms.item.project_result_help'] = '<strong>Briefly summarize the outcomes of your project:</strong>
-                <ul> 
-                    <li>What did you achieve?</li>
-                    <li>What skills and competencies did you develop or strengthen through this work?</li>
-                    <li>What did you learn about yourself and your abilities?</li>
-                    <li>What would you do differently next time?”</li>
-                </ul>';
-$string['forms.item.project_result_editor'] = 'Results and learnings';
-$string['forms.item.project_result_editor_help'] = '<strong>Briefly summarize the outcomes of your project:</strong>
-                <ul> 
-                    <li>What did you achieve?</li>
-                    <li>What skills and competencies did you develop or strengthen through this work?</li>
-                    <li>What did you learn about yourself and your abilities?</li>
-                    <li>What would you do differently next time?”</li>
-                </ul>';
-$string['item.project_information'] = 'Project Information';
+$string['forms.item.project_description'] = 'Der Grund hinter diesem Projekt';
+$string['forms.item.project_description_help'] = '<strong>Erkläre kurz den Zweck deiner Arbeit:</strong>
+			<ul> 
+				<li>Welches Problem wurde damit angesprochen?</li> 
+				<li>Welche Fähigkeiten wolltest du entwickeln?</li> 
+				<li>Was war der Kontext?</li>
+			</ul>';
+$string['forms.item.project_description_editor'] = 'Der Grund hinter diesem Projekt';
+$string['forms.item.project_description_editor_help'] = '<strong>Erkläre kurz den Zweck deiner Arbeit:</strong>
+			<ul> 
+				<li>Welches Problem wurde angesprochen?</li> 
+				<li>Welche Fähigkeiten wolltest du entwickeln?</li> 
+				<li>Was war der Kontext?</li>
+			</ul>';
+$string['forms.item.project_process'] = 'Umsetzung des Projekts';
+$string['forms.item.project_process_help'] = '<strong>Beschreibe deinen Weg:</strong>
+			<ul> 
+				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li> 
+				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li> 
+				<li>Welche Ressourcen hast du genutzt?</li>
+			</ul>';
+$string['forms.item.project_process_editor'] = 'Umsetzung des Projekts';
+$string['forms.item.project_process_editor_help'] = '<strong>Beschreibe deinen Weg:</strong>
+			<ul> 
+				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li> 
+				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li> 
+				<li>Welche Ressourcen hast du genutzt?</li>
+			</ul>';
+$string['forms.item.project_result'] = 'Ergebnisse und Erkenntnisse';
+$string['forms.item.project_result_help'] = '<strong>Fasse die Ergebnisse deines Projekts kurz zusammen:</strong>
+			<ul> 
+				<li>Was hast du erreicht?</li>
+				<li>Welche Fähigkeiten und Kompetenzen hast du durch diese Arbeit entwickelt oder gestärkt?</li>
+				<li>Was hast du über dich und deine Fähigkeiten gelernt?</li>
+				<li>Was würdest du das nächste Mal anders machen?</li>
+			</ul>';
+$string['forms.item.project_result_editor'] = 'Ergebnisse und Erkenntnisse';
+$string['forms.item.project_result_editor_help'] = '<strong>Fasse die Ergebnisse deines Projekts kurz zusammen:</strong>
+			<ul> 
+				<li>Was hast du erreicht?</li>
+				<li>Welche Fähigkeiten und Kompetenzen hast du durch diese Arbeit entwickelt oder gestärkt?</li>
+				<li>Was hast du über dich und deine Fähigkeiten gelernt?</li>
+				<li>Was würdest du das nächste Mal anders machen?</li>
+			</ul>';
+$string['item.project_information'] = 'Projekt Information';
 $string['view_saved'] = 'View gespeichert';
 $string['view_sharing_updated'] = 'Ver&ouml;ffentlichung gespeichert';
 $string['list'] = 'Liste';
-$string['what_is_embed_code_title'] = 'What is embed code?';
-$string['what_is_embed_code_content'] = '<p>Embed code is code that is generated by a third-party website such as YouTube or Twitter, that a user can copy and paste into his or her own webpage.  This embedded code will then show the same media, application, or feed on the user\'s web page as it does in the original source.</p>
-            <p>We provide instructions for the most popular video vendors such as YouTube or Vimeo.</p>
-            <p><strong>Finding the embed code on YouTube:</strong></p>
-            <ol>
-                <li>Go to YouTube</a>.</li>
-                <li>Navigate to the video you wish to embed.</li>
-                <li>Click the <strong>Share link</strong> below the video, then click the <strong>Embed link</strong>.</li>
-                <li>Press <strong>Copy</strong> button in the footer of opened window.</li>
-                <li>The embed link will be highlighted in blue and copied to the clipboard.</li>
-                <li>Past the code to exabis E-portfolio textarea field.</li>
-            </ol>
-            <p><strong>Finding the embed code on Vimeo:</strong></p>
-            <ol>
-                <li>Go to Vimeo.</li>
-                <li>Navigate to the video you wish to embed.</li>
-                <li>Click the <strong>Share</strong> button, in the top right corner of your video.</li>
-                <li>A pop-up will appear with the embed link information. You will need to copy only the <strong>&lt;<i>iframe</i>&gt;</strong> portion of the embed link.
-                    Example:<br>                    
-                    <ol>
-                        <li>
-                            Entire embed link shows the following:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>                            
-                        </li>
-                        <li>
-                            You only need to copy the <strong>&lt;<i>iframe</i>&gt;</strong> portion:<br>                            
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>                            
-                        </li>                    
-                    </ol>
-                <li>Past this code to exabis E-portfolio textarea field.</li>
-            </ol>
+$string['what_is_embed_code_title'] = 'Was ist ein Einbettungscode?';
+$string['what_is_embed_code_content'] = '<p>Einbettungscode ist ein Code, der von einer Drittanbieter-Website wie YouTube oder Twitter generiert wird und den ein Benutzer in seine eigene Webseite kopieren und einfügen kann. Dieser eingebettete Code zeigt dann dasselbe Medium, dieselbe Anwendung oder denselben Feed auf der Webseite des Benutzers wie im Original.</p>
+			<p>Wir bieten Anleitungen für die beliebtesten Videoplattformen wie YouTube oder Vimeo.</p>
+			<p><strong>So findest du den Einbettungscode auf YouTube:</strong></p>
+			<ol>
+				<li>Gehe zu YouTube.</li>
+				<li>Gehe zu dem Video, das du einbetten möchtest.</li>
+				<li>Klicke auf den <strong>Teilen-Link</strong> unter dem Video und dann auf den <strong>Einbetten-Link</strong>.</li>
+				<li>Klicke auf die Schaltfläche <strong>Kopieren</strong> im unteren Bereich des geöffneten Fensters.</li>
+				<li>Der Einbettungslink wird blau markiert und in die Zwischenablage kopiert.</li>
+				<li>Füge den Code in das Textfeld von exabis E-portfolio ein.</li>
+			</ol>
+			<p><strong>So findest du den Einbettungscode auf Vimeo:</strong></p>
+			<ol>
+				<li>Gehe zu Vimeo.</li>
+				<li>Gehe zu dem Video, das du einbetten möchtest.</li>
+				<li>Klicke auf die Schaltfläche <strong>Teilen</strong> oben rechts im Video.</li>
+				<li>Ein Popup-Fenster mit den Einbettungslink-Informationen wird angezeigt. Du musst nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil des Einbettungslinks kopieren.
+					Beispiel:<br>
+					<ol>
+						<li>
+							Der gesamte Einbettungslink zeigt Folgendes:<br>
+							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; von &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; auf &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
+						</li>
+						<li>
+							Du musst nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil kopieren:<br>
+							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
+						</li>
+					</ol>
+				<li>Füge diesen Code in das Textfeld von exabis E-portfolio ein.</li>
+			</ol>
             ';
 
 // === Privacy wordings
-$string['privacy:metadata:block_exaportuser'] = 'user\'s data from exabis e-portfolio';
-$string['privacy:metadata:block_exaportuser:user_id'] = 'user id';
-$string['privacy:metadata:block_exaportuser:description'] = 'description';
-$string['privacy:metadata:block_exaportuser:view_items_layout'] = 'user id';
-$string['privacy:metadata:block_exaportcate'] = 'user\'s categories';
-$string['privacy:metadata:block_exaportcate:pid'] = 'parent category id';
-$string['privacy:metadata:block_exaportcate:userid'] = 'user id';
-$string['privacy:metadata:block_exaportcate:name'] = 'title';
-$string['privacy:metadata:block_exaportcate:timemodified'] = 'last modified';
-$string['privacy:metadata:block_exaportcate:courseid'] = 'course id';
-$string['privacy:metadata:block_exaportcate:description'] = 'description';
-$string['privacy:metadata:block_exaportcate:subjid'] = 'related subject id';
-$string['privacy:metadata:block_exaportcate:topicid'] = 'related topic id';
-$string['privacy:metadata:block_exaportcate:source'] = 'source';
-$string['privacy:metadata:block_exaportcate:sourceid'] = 'source id';
-$string['privacy:metadata:block_exaportcate:parent_ids'] = 'list of parent ids';
-$string['privacy:metadata:block_exaportcate:parent_titles'] = 'list of parent titles';
-$string['privacy:metadata:block_exaportcate:stid'] = 'schooltype id';
-$string['privacy:metadata:block_exaportcate:sourcemod'] = 'sourcemod';
-$string['privacy:metadata:block_exaportcate:name_short'] = 'short title';
-$string['privacy:metadata:block_exaportcate:shareall'] = 'shared for all? 0 - did not share; 1 - shared for all; 2 - shared for groups';
-$string['privacy:metadata:block_exaportcate:internshare'] = 'internal share?';
-$string['privacy:metadata:block_exaportcate:structure_shareall'] = 'shared as structure? : 0 - did not share; 1 - shared for all; 2 - shared for groups';
-$string['privacy:metadata:block_exaportcate:structure_share'] = 'shared as structure? look also \'structure_shareall\'';
-$string['privacy:metadata:block_exaportitem'] = 'user\'s artefact';
-$string['privacy:metadata:block_exaportitem:userid'] = 'artefact\'s owner';
-$string['privacy:metadata:block_exaportitem:type'] = 'type of artefact';
-$string['privacy:metadata:block_exaportitem:categoryid'] = 'category id';
-$string['privacy:metadata:block_exaportitem:name'] = 'name';
-$string['privacy:metadata:block_exaportitem:url'] = 'url';
-$string['privacy:metadata:block_exaportitem:intro'] = 'intro';
-$string['privacy:metadata:block_exaportitem:timemodified'] = 'last modified time';
-$string['privacy:metadata:block_exaportitem:courseid'] = 'course id';
-$string['privacy:metadata:block_exaportitem:shareall'] = 'shared for all?';
-$string['privacy:metadata:block_exaportitem:externaccess'] = 'external access?';
-$string['privacy:metadata:block_exaportitem:externcomment'] = 'comment for externals';
-$string['privacy:metadata:block_exaportitem:fileurl'] = 'url to file';
-$string['privacy:metadata:block_exaportitem:exampid'] = 'related example id';
-$string['privacy:metadata:block_exaportitem:langid'] = 'language id';
-$string['privacy:metadata:block_exaportitem:source'] = 'source';
-$string['privacy:metadata:block_exaportitem:sourceid'] = 'source id';
-$string['privacy:metadata:block_exaportitem:iseditable'] = 'is editable?';
-$string['privacy:metadata:block_exaportitem:example_url'] = 'example_url';
-$string['privacy:metadata:block_exaportitem:parentid'] = 'parent id';
-$string['privacy:metadata:block_exaportitemcomm'] = 'comments for artefacts';
-$string['privacy:metadata:block_exaportitemcomm:itemid'] = 'id of artefact';
-$string['privacy:metadata:block_exaportitemcomm:userid'] = 'author of comment';
-$string['privacy:metadata:block_exaportitemcomm:entry'] = 'comment';
-$string['privacy:metadata:block_exaportitemcomm:timemodified'] = 'last modified';
-$string['privacy:metadata:block_exaportview'] = 'comments for artefacts';
-$string['privacy:metadata:block_exaportview:userid'] = 'owner of view';
-$string['privacy:metadata:block_exaportview:name'] = 'name';
-$string['privacy:metadata:block_exaportview:description'] = 'description';
-$string['privacy:metadata:block_exaportview:timemodified'] = 'last modified';
-$string['privacy:metadata:block_exaportview:shareall'] = 'shared for all?';
-$string['privacy:metadata:block_exaportview:externaccess'] = 'external access?';
-$string['privacy:metadata:block_exaportview:externcomment'] = 'comment from external?';
-$string['privacy:metadata:block_exaportview:langid'] = 'language id';
-$string['privacy:metadata:block_exaportview:layout'] = 'layout of the view';
-$string['privacy:metadata:block_exaportview:sharedemails'] = 'shared emails list';
-$string['privacy:metadata:block_exaportview:autofill_artefacts'] = 'enabled autofill by artefacts';
-$string['privacy:metadata:block_exaportresume'] = 'resume data';
-$string['privacy:metadata:block_exaportresume:user_id'] = 'resume owner';
-$string['privacy:metadata:block_exaportresume:courseid'] = 'course id';
-$string['privacy:metadata:block_exaportresume:cover'] = 'cover content';
-$string['privacy:metadata:block_exaportresume:interests'] = 'interests';
-$string['privacy:metadata:block_exaportresume:goalspersonal'] = 'personal goals';
-$string['privacy:metadata:block_exaportresume:goalsacademic'] = 'academic goals';
-$string['privacy:metadata:block_exaportresume:goalscareers'] = 'careers goals';
-$string['privacy:metadata:block_exaportresume:skillspersonal'] = 'personal skills';
-$string['privacy:metadata:block_exaportresume:skillsacademic'] = 'academic skills';
-$string['privacy:metadata:block_exaportresume:skillscareers'] = 'careers skills';
-$string['privacy:metadata:core_files'] = 'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.';
-$string['whyEportfolio'] = 'Why eProtfolio';
-$string['whyEportfolio_description'] = '';
-$string['cofigureblock_cvinfo_help'] = 'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.';
-$string['cofigureblock_cvinfo_cover'] = 'About me';
-$string['cofigureblock_cvinfo_cover_actual'] = 'add actual CV "About me" content';
-$string['create_view_content_help_title'] = 'Craft Your Unique Story: Build Your Portfolio';
+$string['privacy:metadata:block_exaportuser'] = 'Benutzerdaten von exabis e-portfolio';
+$string['privacy:metadata:block_exaportuser:user_id'] = 'Benutzerid';
+$string['privacy:metadata:block_exaportuser:description'] = 'Beschreibung';
+$string['privacy:metadata:block_exaportuser:view_items_layout'] = 'Benutzerid';
+$string['privacy:metadata:block_exaportcate'] = 'Kategorien des Benutzers';
+$string['privacy:metadata:block_exaportcate:pid'] = 'Hauptkategorie ID';
+$string['privacy:metadata:block_exaportcate:userid'] = 'Benutzerid';
+$string['privacy:metadata:block_exaportcate:name'] = 'Titel';
+$string['privacy:metadata:block_exaportcate:timemodified'] = 'letzte Änderung';
+$string['privacy:metadata:block_exaportcate:courseid'] = 'Kurse ID';
+$string['privacy:metadata:block_exaportcate:description'] = 'Beschreibung';
+$string['privacy:metadata:block_exaportcate:subjid'] = 'Raster ID';
+$string['privacy:metadata:block_exaportcate:topicid'] = 'Kompetenzbereich ID';
+$string['privacy:metadata:block_exaportcate:source'] = 'Source';
+$string['privacy:metadata:block_exaportcate:sourceid'] = 'Source Id';
+$string['privacy:metadata:block_exaportcate:parent_ids'] = 'Liste der übergeordneten IDs';
+$string['privacy:metadata:block_exaportcate:parent_titles'] = 'List der übergeordneten Titel';
+$string['privacy:metadata:block_exaportcate:stid'] = 'Schultyp ID';
+$string['privacy:metadata:block_exaportcate:sourcemod'] = 'Sourcemod';
+$string['privacy:metadata:block_exaportcate:name_short'] = 'Kurztitel';
+$string['privacy:metadata:block_exaportcate:shareall'] = 'Freigegeben für alle? 0 - nicht freigegeben; 1 - für alle freigegeben; 2 - für Gruppen freigegeben';
+$string['privacy:metadata:block_exaportcate:internshare'] = 'intern geteilt?';
+$string['privacy:metadata:block_exaportcate:structure_shareall'] = 'Als Struktur freigegeben? 0 - nicht freigegeben; 1 - für alle freigegeben; 2 - für Gruppen freigegeben';
+$string['privacy:metadata:block_exaportcate:structure_share'] = 'Als Struktur freigegeben? Siehe auch \'structure_shareall\'';
+$string['privacy:metadata:block_exaportitem'] = 'Artefakt des Benutzers';
+$string['privacy:metadata:block_exaportitem:userid'] = 'Artefakt des Besitzers';
+$string['privacy:metadata:block_exaportitem:type'] = 'Typ des Artefakts';
+$string['privacy:metadata:block_exaportitem:categoryid'] = 'Kategorie Id';
+$string['privacy:metadata:block_exaportitem:name'] = 'Name';
+$string['privacy:metadata:block_exaportitem:url'] = 'Url';
+$string['privacy:metadata:block_exaportitem:intro'] = 'Intro';
+$string['privacy:metadata:block_exaportitem:timemodified'] = 'Zeit zuletzt geändert';
+$string['privacy:metadata:block_exaportitem:courseid'] = 'Kurs Id';
+$string['privacy:metadata:block_exaportitem:shareall'] = 'Freigegeben für alle?';
+$string['privacy:metadata:block_exaportitem:externaccess'] = 'Externer Zugriff?';
+$string['privacy:metadata:block_exaportitem:externcomment'] = 'Kommentar für Externe';
+$string['privacy:metadata:block_exaportitem:fileurl'] = 'URL zur Datei';
+$string['privacy:metadata:block_exaportitem:exampid'] = 'zugehörige Beispiel-ID';
+$string['privacy:metadata:block_exaportitem:langid'] = 'Sprach-ID';
+$string['privacy:metadata:block_exaportitem:source'] = 'Source';
+$string['privacy:metadata:block_exaportitem:sourceid'] = 'Source Id';
+$string['privacy:metadata:block_exaportitem:iseditable'] = 'Ist bearbeitbar?';
+$string['privacy:metadata:block_exaportitem:example_url'] = 'Material Url';
+$string['privacy:metadata:block_exaportitem:parentid'] = 'Übergeordnete ID';
+$string['privacy:metadata:block_exaportitemcomm'] = 'Kommentare zu Artefakten';
+$string['privacy:metadata:block_exaportitemcomm:itemid'] = 'Id zu Artefakten';
+$string['privacy:metadata:block_exaportitemcomm:userid'] = 'Autor des Kommentars';
+$string['privacy:metadata:block_exaportitemcomm:entry'] = 'Kommentar';
+$string['privacy:metadata:block_exaportitemcomm:timemodified'] = 'zuletzt geändert';
+$string['privacy:metadata:block_exaportview'] = 'Kommentar zu Artefakten';
+$string['privacy:metadata:block_exaportview:userid'] = 'Besitzer der View';
+$string['privacy:metadata:block_exaportview:name'] = 'Name';
+$string['privacy:metadata:block_exaportview:description'] = 'Beschreibung';
+$string['privacy:metadata:block_exaportview:timemodified'] = 'zuletzt geändert';
+$string['privacy:metadata:block_exaportview:shareall'] = 'Für alle Teilen?';
+$string['privacy:metadata:block_exaportview:externaccess'] = 'Externer Zugriff?';
+$string['privacy:metadata:block_exaportview:externcomment'] = 'Kommentar von extern?';
+$string['privacy:metadata:block_exaportview:langid'] = 'Sprach-ID';
+$string['privacy:metadata:block_exaportview:layout'] = 'Layout der View';
+$string['privacy:metadata:block_exaportview:sharedemails'] = 'Liste freigegebener E-Mails';
+$string['privacy:metadata:block_exaportview:autofill_artefacts'] = 'Automatisches Ausfüllen bei Artefakten aktiviert';
+$string['privacy:metadata:block_exaportresume'] = 'Lebenslaufdaten';
+$string['privacy:metadata:block_exaportresume:user_id'] = 'Besitzer des Lebenslaufs';
+$string['privacy:metadata:block_exaportresume:courseid'] = 'Kurs ID';
+$string['privacy:metadata:block_exaportresume:cover'] = 'Inhalt des Deckblattes';
+$string['privacy:metadata:block_exaportresume:interests'] = 'Interessen';
+$string['privacy:metadata:block_exaportresume:goalspersonal'] = 'persönliche Ziele';
+$string['privacy:metadata:block_exaportresume:goalsacademic'] = 'akademische Ziele';
+$string['privacy:metadata:block_exaportresume:goalscareers'] = 'Karriereziele';
+$string['privacy:metadata:block_exaportresume:skillspersonal'] = 'Persönliche Fähigkeiten';
+$string['privacy:metadata:block_exaportresume:skillsacademic'] = 'akademische Fähigkeiten';
+$string['privacy:metadata:block_exaportresume:skillscareers'] = 'Karriere Fähigkeiten';
+$string['privacy:metadata:core_files'] = 'Exabis ePortfolio speichert Dateien, die vom Benutzer hochgeladen wurden, um Teil von Artefakten, Lebenslaufeinträgen und Kommentaren zu werden.';
+$string['whyEportfolio'] = 'Warum ein ePortfolio?';
+$string['whyEportfolio_description'] = '<h4>Lass deine harte Arbeit nicht verschwinden: Erstelle dein digitales Portfolio</h4>
+				<br>
+				<p>Stell dir vor, all die Mühe, die du in Aufgaben, Präsentationen und Projekte steckst. Hast du jemals das Gefühl, dass es nach der Abgabe einfach in einer Schublade verschwindet?</p>
+				<p>Aber hier ist die gute Nachricht: Diese Projekte sind <strong>Beweise für deine Fähigkeiten und dein Wissen</strong>, und du kannst sie nutzen, um potenzielle Arbeitgeber oder Kunden zu beeindrucken!</p>
+				<p><strong>Erstelle dein digitales Portfolio</strong> und präsentiere deine besten Arbeiten, von Präsentationen, Aufgaben und Projekten bis hin zu Videos. Es ist einfacher, als du denkst!</p>
+				<br>
+				<h4>Was ist ein ePortfolio?</h4>
+				<br>
+				<p>Ein <strong>ePortfolio</strong> (elektronisches Portfolio) ist eine <strong>digitale Sammlung</strong>, die deine <strong>Fähigkeiten, dein Wissen und deine Erfahrungen</strong> präsentiert.
+					Während dein Lebenslauf sich auf deine Ausbildung und Berufserfahrung konzentriert, geht dein ePortfolio darüber hinaus und bietet <strong>Beweise und Kontext</strong> für deine Fähigkeiten.
+					Es ermöglicht dir, Arbeitsproben zu zeigen und dein <strong>Talent schnell und effektiv zu demonstrieren</strong>.
+					Letztendlich ist dein ePortfolio ein mächtiges Werkzeug, um deine <strong>Qualifikationen hervorzuheben</strong> und dich abzuheben.
+				</p>
+				<p><strong>Denke daran, dass verschiedene Rollen unterschiedliche Arten von ePortfolios erfordern können.</strong> 
+					Einige Schlüsselelemente bleiben jedoch konstant. 
+					Mit <strong>Exabis ePortfolio</strong> kannst du <strong>mehrere Ansichten erstellen</strong>, die auf bestimmte Positionen, Jobchancen oder andere Zwecke zugeschnitten sind.
+				</p>
+				<br>
+				<h4>Wie erstelle ich mein ePortfolio?</h4>
+				<br>
+				<ol>
+					<li><strong>Sammle deine Arbeiten</strong>: Beginne damit, alle deine Projekte, Präsentationen und Aufgaben zu überprüfen.</li>
+					<li><strong>Wähle deine besten Arbeiten aus</strong>: Wähle die Stücke aus, die deine stärksten Fähigkeiten zeigen und die positives Feedback erhalten haben.</li>
+					<li><strong>Reflektiere und beschreibe</strong>: Überlege, welche Fähigkeiten und Kompetenzen jedes Stück demonstriert. Schreibe eine kurze Beschreibung, um Kontext zu bieten.</li>
+					<li><strong>Erstelle und iteriere</strong>: Scheue dich nicht davor, zu experimentieren und dein ePortfolio im Laufe der Zeit zu verfeinern, während du lernst und wächst.</li>
+				</ol>
+				<p><strong>Exabis ePortfolio</strong> kann dich durch jeden Schritt führen und den Prozess der Erstellung deines ePortfolios reibungslos und effizient gestalten.</p>';
+$string['cofigureblock_cvinfo_help'] = 'Du wirst den aktuellen Status der ausgewählten Elemente in deinem Lebenslauf sehen. Der Blockinhalt wird aktualisiert, wenn du später Änderungen an irgendwelchen Elementen in deinem Lebenslauf vornimmst.';
+$string['cofigureblock_cvinfo_cover'] = 'Über mich';
+$string['cofigureblock_cvinfo_cover_actual'] = 'Aktuellen Lebenslauf "Über mich" Inhalt hinzufügen';
+$string['create_view_content_help_title'] = 'Gestalte deine einzigartige Geschichte: Erstelle dein Portfolio';
 $string['create_view_content_help_text'] = '<ul>
-                <li><strong>Plan your layout:</strong> Drag and drop building blocks and arrange them to tell your story. Use columns (available in the "layout" section) to plan your portfolio.</li>
-                <li><strong>Organize for clarity:</strong> Use headers, links, and notes to structure your content effectively.</li>
-                <li><strong>Personalize your style:</strong> Choose fonts and colours within the available options to add a touch of you.</li>
-            </ul>
-            <strong>Remember: Your e-portfolio tells the world about you and your skills. Make it clear, concise, and engaging!</strong>
-            ';
-$string['moreinfolink'] = 'Show more info ...';
-$string['badges_help'] = 'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>';
+				<li><strong>Plane dein Layout:</strong> Ziehe und lasse Bausteine fallen und arrangiere sie, um deine Geschichte zu erzählen. Verwende Spalten (verfügbar im Abschnitt "Layout"), um dein Portfolio zu planen.</li>
+				<li><strong>Organisiere für Klarheit:</strong> Verwende Überschriften, Links und Notizen, um deine Inhalte effektiv zu strukturieren.</li>
+				<li><strong>Personalisiere deinen Stil:</strong> Wähle Schriftarten und Farben innerhalb der verfügbaren Optionen, um einen Hauch von dir hinzuzufügen.</li>
+			</ul>
+			<strong>Denke daran: Dein e-Portfolio erzählt der Welt von dir und deinen Fähigkeiten. Mache es klar, prägnant und ansprechend!</strong>';
+$string['moreinfolink'] = 'Mehr Informationen anzeigen ...';
+$string['badges_help'] = 'Der Block mit dir verliehenen Abzeichen<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Abzeichen anzeigen</a>';

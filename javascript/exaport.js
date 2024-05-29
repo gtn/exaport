@@ -403,3 +403,27 @@
     });
 
 })();
+
+
+/**
+ *
+ * @param selector
+ */
+function block_exaport_update_fontawesome_icons(element) {
+    if (typeof FontAwesome === 'undefined') {
+        return false;
+    }
+
+    // Find the specific block
+    // var iconsBlock = document.querySelector('#exaport');
+    // var iconsBlock = $('#exaport').get(0);
+    if (typeof element !== 'undefined' && element.length) {
+        var iconsBlock = element.get(0);
+        // console.log('exaport_fa.js:12');console.log(iconsBlock);// !!!!!!!!!! delete it
+
+        // Replace icons within this block
+        if (iconsBlock) {
+            FontAwesome.dom.i2svg({node: iconsBlock});
+        }
+    }
+}

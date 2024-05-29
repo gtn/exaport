@@ -25,6 +25,8 @@ $context = context_system::instance();
 $url = '/blocks/exaport/importexport.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
+block_exaport_add_iconpack();
+
 global $DB;
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
@@ -40,15 +42,19 @@ echo "<div class='block_eportfolio_center'>";
 $OUTPUT->box(text_to_html(get_string("explainexport", "block_exaport")));
 
 if (has_capability('block/exaport:export', $context)) {
-    echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/export.png\" height=\"16\" width=\"16\" alt='".
-            get_string("export", "block_exaport")."' /> <a title=\"".get_string("export", "block_exaport").
+    echo "<p >"
+            .block_exaport_fontawesome_icon('file-export', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
+//            ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/export.png\" height=\"16\" width=\"16\" alt='".get_string("export", "block_exaport")."' />"
+            ." <a title=\"".get_string("export", "block_exaport").
             "\" href=\"{$CFG->wwwroot}/blocks/exaport/export_scorm.php?courseid=".$courseid."\">".
             get_string("export", "block_exaport")."</a></p>";
 }
 
 if (has_capability('block/exaport:import', $context)) {
-    echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='".
-            get_string("import", "block_exaport")."' /> <a title=\"".get_string("import", "block_exaport").
+    echo "<p >"
+        .block_exaport_fontawesome_icon('file-import', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
+//        ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='".get_string("import", "block_exaport")."' />"
+        ." <a title=\"".get_string("import", "block_exaport").
             "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_file.php?courseid=".$courseid."\">".
             get_string("import", "block_exaport")."</a></p>";
 }
@@ -57,8 +63,10 @@ if (has_capability('block/exaport:importfrommoodle', $context)) {
     $modassign = block_exaport_assignmentversion();
     $assignments = block_exaport_get_assignments_for_import($modassign);
     if ($assignments) {
-        echo "<p ><img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='" .
-            get_string("moodleimport", "block_exaport") . "' /> <a title=\"" . get_string("moodleimport", "block_exaport") .
+        echo "<p >"
+            .block_exaport_fontawesome_icon('file-import', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
+//            ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='" . get_string("moodleimport", "block_exaport") . "' />"
+            ." <a title=\"" . get_string("moodleimport", "block_exaport") .
             "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_moodle.php?courseid=" . $courseid . "\">" .
             get_string("moodleimport", "block_exaport") . "</a></p>";
     }

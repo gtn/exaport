@@ -25,6 +25,8 @@ block_exaport_require_login($courseid);
 $url = '/blocks/exaport/views_list.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
+block_exaport_add_iconpack();
+
 if (!$COURSE) {
     print_error("invalidcourseid", "block_exaport");
 }
@@ -159,13 +161,17 @@ if (!$views) {
         $icons = '';
         $icons .= '<a title="'.get_string("edit", "block_exaport").'" href="'.
                 s(dirname($_SERVER['PHP_SELF']).'/views_mod.php?courseid='.$courseid.'&id='.$view->id.'&sesskey='.sesskey().
-                        '&action=edit').'"><img src="'.$CFG->wwwroot.'/blocks/exaport/pix/editview.png" class="iconsmall" alt="'.
-                get_string("edit").'" /></a> ';
+                        '&action=edit').'">'
+                        .block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
+//                        .'<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/editview.png" class="iconsmall" alt="'.get_string("edit").'" />'
+                        .'</a> ';
 
         $icons .= '<a title="'.get_string("delete", "block_exaport").'" href="'.
                 s(dirname($_SERVER['PHP_SELF']).'/views_mod.php?courseid='.$courseid.'&id='.$view->id.'&sesskey='.sesskey().
-                        '&action=delete&confirm=1').'"><img src="'.$CFG->wwwroot.
-                '/blocks/exaport/pix/deleteview.png" class="iconsmall" alt="'.get_string("delete").'"/></a> ';
+                        '&action=delete&confirm=1').'">'
+                        .block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon'])
+//                        .'<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/deleteview.png" class="iconsmall" alt="'.get_string("delete").'"/>'
+                        .'</a> ';
 
         $table->data[$viewi]['icons'] = $icons;
     }

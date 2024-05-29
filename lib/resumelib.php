@@ -612,11 +612,15 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 $idnext = $keys[$itemindex + 1];
             };
             $linktoup = '<a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=sortchange&type='.$type.
-                    '&id1='.$record->id.'&id2='.$idnext.'&sesskey='.sesskey().'"><img src="pix/down_16.png" alt="'.
-                    get_string("down").'" /></a>';
+                    '&id1='.$record->id.'&id2='.$idnext.'&sesskey='.sesskey().'">'
+                    .block_exaport_fontawesome_icon('chevron-down', 'solid', 1)
+//                    .'<img src="pix/down_16.png" alt="'.get_string("down").'" />'
+                    .'</a>';
             $linktodown = '<a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.
-                    '&action=sortchange&type='.$type.'&id1='.$record->id.'&id2='.$idprev.'&sesskey='.sesskey().'">'.
-                    '<img src="pix/up_16.png" alt="'.get_string("up").'" /></a>';
+                    '&action=sortchange&type='.$type.'&id1='.$record->id.'&id2='.$idprev.'&sesskey='.sesskey().'">'
+                    .block_exaport_fontawesome_icon('chevron-up', 'solid', 1)
+//                    .'<img src="pix/up_16.png" alt="'.get_string("up").'" />'
+                    .'</a>';
             $table->data[$itemindex]['up'] = '&nbsp';
             $table->data[$itemindex]['down'] = '&nbsp';
             if ($itemindex < count($records) - 1) {
@@ -631,9 +635,14 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
         if ($editcolumn) {
             $table->data[$itemindex]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.
                     '&action=edit&type='.$type.'&id='.$record->id.'&sesskey='.sesskey().'">'.
-                    '<img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
+                    block_exaport_fontawesome_icon('pen-to-square', 'regular', 1).
+//                    '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+                    '</a>'.
                     ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=delete&type='.$type.'&id='.
-                    $record->id.'"><img src="pix/del.png" alt="'.get_string("delete").'"/></a>';
+                    $record->id.'">'.
+                    block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon', 'mt-2']).
+//                    '<img src="pix/del.png" alt="'.get_string("delete").'"/>'.
+                    '</a>';
         };
     };
     return html_writer::table($table);
@@ -685,7 +694,9 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
             if (file_exists($CFG->dirroot.'/blocks/exacomp/lib/lib.php')) {
                 $table->data[$itemindex]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.
                         $courseid.'&action=edit&type='.$type.'comp&id='.$resume->id.'&sesskey='.sesskey().'">'.
-                        '<img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
+                        block_exaport_fontawesome_icon('pen-to-square', 'regular', 1).
+//                        '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+                        '</a>';
             } else {
                 $table->data[$itemindex]['icons'] = '';
             }
@@ -728,7 +739,9 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
         // Links to edit / delete.
         $table->data[$itemindex]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.
                 '&action=edit&type='.$type.$element.'&id='.$resume->id.'&sesskey='.sesskey().'">'.
-                '<img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
+                block_exaport_fontawesome_icon('pen-to-square', 'regular', 1).
+//                '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+                '</a>';
     };
 
     $tablecontent = html_writer::table($table);

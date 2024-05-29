@@ -19,3 +19,20 @@ div.item-detail-image img {
 .generaltable .exaport-shared-list li {
     list-style: none;
 }
+
+.exaport-icon.exaport-remove-icon {
+    color: red;
+    opacity: 0.5;
+}
+.exaport-icon.exaport-remove-icon:hover {
+    opacity: 1;
+}
+
+.exaport-icon.exaport-items-category-big,
+.exaport-icon.exaport-items-category-middle {
+    color: #e3c975;
+}
+
+.exaport-icon.exaport-export-import-scorm-icon {
+    opacity: 0.75;
+}

@@ -137,7 +137,7 @@
     display: block;
     overflow: hidden;
 }
-.excomdos_cont .excomdos_tilehead .excomdos_tileinfo_type {
+.excomdos_cont .excomdos_tilehead .excomdos_tileinfo_type .type_title {
     font-size: 70%;
     margin-left: 3px;
     opacity: 0.75;
@@ -185,12 +185,17 @@
     display:inline-block;
 }
 
+.excomdos_cont .excomdos_additem .exaport-icon {
+    margin-right: 0;
+}
+
 .excomdos_cont .excomdos_changeview span {
     vertical-align: middle;
     display:inline-block;
 }
 
-.excomdos_cont .excomdos_additem img {
+.excomdos_cont .excomdos_additem img,
+.excomdos_cont .excomdos_additem .exaport-icon {
     margin-bottom: 0.3em;
 }
 
@@ -210,4 +215,8 @@
     border-width: 0px;
     outline-width:0px;
     border-bottom: none;
+}
+
+.exaport-icon.exaport-items-type-icon {
+    color: #cccccc;
 }

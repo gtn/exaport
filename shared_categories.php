@@ -35,6 +35,8 @@ require_capability('block/exaport:use', $context);
 $url = '/blocks/exaport/shared_categories.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
+
+block_exaport_add_iconpack();
 block_exaport_init_js_css();
 
 $parsedsort = block_exaport_parse_sort($sort, array('user', 'category', 'mystudents'));
@@ -231,8 +233,10 @@ function exaport_print_structures($categories, $parsedsort) {
                         $structurecontent .= block_exaport_get_structure_content($structure->id);
                         $structurecontent .= '</div>';
                         $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
-                                $structure->userid.'&categoryid='.$structure->id.'">
-                                            <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
+                                $structure->userid.'&categoryid='.$structure->id.'">'
+                                            .block_exaport_fontawesome_icon('folder-open', 'regular', 2, [], [], [], '', [], [], [], ['exaport-items-category-middle'])
+//                                            .'<img src="pix/folder_32.png" />'
+                                            .get_string("browsecategory", "block_exaport").'</a>';
                         $link2 = '';
                         if ($CFG->block_exaport_copy_category_to_my) {
                             $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">
@@ -283,8 +287,10 @@ function exaport_print_structures($categories, $parsedsort) {
                     $structurecontent = '<div class="structure_head"><span class="structure_header">'.$structure->name.'</span></div>';
                     $structurecontent .= '<div class="structure_content">'.block_exaport_get_structure_content($structure->id).'</div>';
                     $link = '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid.'&type=shared&userid='.
-                            $structure->userid.'&categoryid='.$structure->id.'">
-                                        <img src="pix/folder_32.png" /><br />'.get_string("browsecategory", "block_exaport").'</a>';
+                            $structure->userid.'&categoryid='.$structure->id.'">'
+                                        .block_exaport_fontawesome_icon('folder-open', 'regular', 2, [], [], [], '', [], [], [], ['exaport-items-category-middle'])
+//                                        .'<img src="pix/folder_32.png" />'
+                                        .get_string("browsecategory", "block_exaport").'</a>';
                     $link2 = '';
                     if ($CFG->block_exaport_copy_category_to_my) {
                         $link2 = '<a href="shared_categories.php?courseid='.$courseid.'&action=copy&categoryid='.$structure->id.'">

@@ -1092,13 +1092,15 @@ define(['jquery',
             var typesWithoutEditButton = ['item', 'badge', 'cv_information', 'cv_group'];
             // if ((data.type != 'item') && (data.type != 'badge')) {
             if (!(typesWithoutEditButton.indexOf(data.type) > -1)) {
-                $('<a class="edit" title="Edit"><span>Edit</span></a>').prependTo($item).click(editItemClick);
+                $('<a class="edit" title="Edit"><i class="fa-solid fa-pen-to-square" /><span>Edit</span></a>').prependTo($item).click(editItemClick); // for fontawesome icons
+                // $('<a class="edit" title="Edit"><span>Edit</span></a>').prependTo($item).click(editItemClick);
             }
         }
         else {
             $item.append('<a class="unsaved" title="This block was not saved"><span>Unsaved</span></a>');
         }
-        $('<a class="delete" title="' + $E.translate('delete') + '"><span>' + $E.translate('delete') + '</span></a>').prependTo($item).click(deleteItemClick);
+        $('<a class="delete" title="' + $E.translate('delete') + '"><i class="fa-regular fa-trash-can" /><span>' + $E.translate('delete') + '</span></a>').prependTo($item).click(deleteItemClick); // for fontawesome icons
+        // $('<a class="delete" title="' + $E.translate('delete') + '"><span>' + $E.translate('delete') + '</span></a>').prependTo($item).click(deleteItemClick);
         $item.find(':input').change(function() {
             $item.data('portfolio').text = $(this).val();
         });
@@ -1109,6 +1111,10 @@ define(['jquery',
             $item_header = $item.find('div.header').html();
             $item.find('div.header').html($item_header + '<span class="unshared_message">Unshared</span>');
         }
+
+        // update fontawesome icons
+        block_exaport_update_fontawesome_icons($item);
+
         return $item;
     }
 

@@ -64,6 +64,12 @@ block_exaport_print_header("resume_my");
 
 $PAGE->requires->js('/blocks/exaport/javascript/resume.js', true);
 
+if ($action != 'edit') {
+    // a conflict with Moodle fontawesome inside 'editor'
+    // TODO: check how to solve it
+    block_exaport_add_iconpack();
+}
+
 echo "<br />";
 
 $showinformation = true;

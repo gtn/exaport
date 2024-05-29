@@ -220,3 +220,15 @@
 .exaport-icon.exaport-items-type-icon {
     color: #cccccc;
 }
+
+#exaport .exaport-icon svg {
+    color: #7a7a7a;
+}
+
+#exaport .excomdos_additem a {
+    color: #303030;
+}
+
+#exaport .excomdos_tileimage a {
+    display: block;
+}

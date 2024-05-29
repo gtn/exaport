@@ -2448,17 +2448,24 @@ function block_exaport_fontawesome_icon($icon, $iconStyle = 'regular', $iconSize
     // Action
     switch ($action) {
         case 'add': // "add" icon (+)
-            $defaultStyles = ['color' => '#2ecc71'];
-            $actionStyles = array_merge($defaultStyles, $actionStyles);
             $defaultAttrs = ['data-fa-transform' => 'shrink-7 down-4 right-4'];
             $actionAttributes = array_merge($defaultAttrs, $actionAttributes);
+            // add white circle below plus
+            $stylesCircle = ['color' => '#ffffff'];
+            $iconContent .= '<i class="fa-solid fa-circle" '.$customAttributes($actionAttributes).' '.$getStylesAttr($stylesCircle).'></i>';
+            // add plus icon
+            $defaultStyles = ['color' => '#ef990f'];
+            $actionStyles = array_merge($defaultStyles, $actionStyles);
             $iconContent .= '<i class="fa-solid fa-circle-plus" '.$customAttributes($actionAttributes).' '.$getStylesAttr($actionStyles).'></i>';
             break;
         case 'up': // "up" icon. useful for folder-up
-            $defaultStyles = ['color' => '#2ecc71'];
-            $actionStyles = array_merge($defaultStyles, $actionStyles);
             $defaultAttrs = ['data-fa-transform' => 'shrink-8 down-5 right-4'];
             $actionAttributes = array_merge($defaultAttrs, $actionAttributes);
+            // add white circle below plus
+            $stylesCircle = ['color' => '#ffffff'];
+            $iconContent .= '<i class="fa-solid fa-circle" '.$customAttributes($actionAttributes).' '.$getStylesAttr($stylesCircle).'></i>';
+            $defaultStyles = ['color' => '#ef990f'];
+            $actionStyles = array_merge($defaultStyles, $actionStyles);
             $iconContent .= '<i class="fa-solid fa-circle-up" '.$customAttributes($actionAttributes).' '.$getStylesAttr($actionStyles).'></i>';
             break;
         case 'edit': // "pen" icon.

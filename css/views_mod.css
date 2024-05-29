@@ -481,13 +481,17 @@
     margin-bottom: 0.5rem;
 }
 
+#view-preview a.edit {
+    color: #7a7a7a;
+}
+
 .exaport-icon.exaport-view-block-adder-icon,
 .exaport-icon.exaport-view-block-view-icon {
-    /*color: #7a7a7a;*/
+    color: #7a7a7a;
 }
 .exaport-icon.exaport-view-block-adder-icon:hover,
 .exaport-icon.exaport-view-block-view-icon:hover {
-    /*color: inherit;*/
+    color: #505050;
 }
 
 .exaport-icon.exaport-view-block-view-icon {

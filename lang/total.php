@@ -57,35 +57,35 @@ return [
                 'add Exabis ePortfolio on My home',
         ],
         'exaport:export' => [
-                'Export of SCORM-Files',
+                'Export von SCORM-Files',
                 'Export of SCORM-Files',
         ],
         'exaport:import' => [
-                'Import of SCORM-Files',
+                'Import von SCORM-Files',
                 'Import of SCORM-Files',
         ],
         'exaport:importfrommoodle' => [
-                'Import from Moodle',
+                'Import von Moodle',
                 'Import from Moodle',
         ],
         'exaport:shareintern' => [
-                'Internal sharing of views',
+                'Internes Teilen von Views',
                 'Internal sharing of views',
         ],
         'exaport:shareextern' => [
-                'External sharing of views',
+                'Externes Teilen von Views',
                 'External sharing of views',
         ],
         'exaport:allowposts' => [
-                'Allow posting',
+                'Kommentare erlauben',
                 'Allow posting',
         ],
         'exaport:competences' => [
-                'Allow competences',
+                'Kompetenzen erlauben',
                 'Allow competences',
         ],
         'exaport:viewartifactsfromstudents' => [
-                'Can see portfolio artefacts of own students',
+                'Portfolio Artefakte der eigenen SuS sehen',
                 'Can see portfolio artefacts of own students',
         ],
         'new' => [
@@ -173,12 +173,12 @@ return [
                 'The Portfolio may be used to store web addresses, files, as well as enter notes that may contain insights or little notes the user may wish to write down.',
         ],
         'explainingmoredata' => [
-            '<strong>This is your space to gather evidence of your learning journey.</strong>
-            <ul>
-                <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
-                <li><strong>Reflect on your experiences:</strong> Explain what you learned, the challenges you faced, and your achievements for each piece.</li>
-            </ul>
-            <strong>Think of each item as a story highlighting your skills and knowledge.</strong>',
+            '<strong>Dies ist dein Bereich, um Belege für deinen Lernweg zu sammeln.</strong>
+			<ul>
+				<li><strong>Füge deine besten Arbeiten hinzu:</strong> Lade Dateien, Weblinks oder Beschreibungen von Projekten, Präsentationen und mehr hoch.</li>
+				<li><strong>Reflektiere über deine Erfahrungen:</strong> Erkläre, was du gelernt hast, welche Herausforderungen du bewältigt hast und deine Erfolge für jedes Stück.</li>
+			</ul>
+			<strong>Denke an jedes Element als eine Geschichte, die deine Fähigkeiten und dein Wissen hervorhebt.</strong>',
             '<strong>This is your space to gather evidence of your learning journey.</strong>
             <ul>
                 <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
@@ -693,15 +693,15 @@ return [
                 'Short description',
         ],
         'project_description' => [
-                'The why behind this project',
+                'Der Grund hinter diesem Projekt',
                 'The why behind this project',
         ],
         'project_process' => [
-                'Making it happen',
+                'Umsetzung des Projekts',
                 'Making it happen',
         ],
         'project_result' => [
-                'Results and learnings',
+                'Ergebnisse und Erkenntnisse',
                 'Results and learnings',
         ],
         'intronotempty' => [
@@ -985,7 +985,7 @@ return [
                 'Text',
         ],
         'view_specialitem_text_help' => [
-                'The block with custom text. You can format the text as you need',
+                'Der Block mit individuellem Text. Du kannst den Text nach Belieben formatieren.',
                 'The block with custom text. You can format the text as you need',
         ],
         'view_specialitem_media' => [
@@ -1125,7 +1125,7 @@ return [
                 'Personal Information',
         ],
         'personalinformation_help' => [
-                'The block with your personal data, like: name, email.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your profile</a>',
+                'Der Block mit deinen persönlichen Daten, wie: Name, E-Mail.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Profil anzeigen</a></a>',
                 'The block with your personal data, like: name, email.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your profile</a>',
         ],
         'cvinformation' => [
@@ -1133,7 +1133,7 @@ return [
                 'CV Information',
         ],
         'cvinformation_help' => [
-            'The block with your exabis ePortfolio CV data, like: education, employment, e.t.c.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your CV</a>',
+            'Der Block mit deinen exabis ePortfolio-Lebenslaufdaten, wie: Ausbildung, Beschäftigung usw.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Lebenslauf anzeigen</a>',
             'The block with your exabis ePortfolio CV data, like: education, employment, e.t.c.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your CV</a>',
         ],
         'cvgroup' => [
@@ -1146,7 +1146,7 @@ return [
         ],
         'headertext_help' => [
                 'The simple block for adding only header line',
-                'The simple block for adding only header line',
+                'Der einfache Block zum Hinzufügen einer einzigen Überschriftzeile',
         ],
         'item' => [
                 'Artefakt',
@@ -1157,7 +1157,7 @@ return [
                 'My artefacts',
         ],
         'items_help' => [
-            'The block with your artefacts<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your artefacts</a>',
+            'Der Block mit deinen Artefakten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Artefakte anzeigen</a>',
             'The block with your artefacts<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your artefacts</a>',
         ],
         'media' => [
@@ -1165,7 +1165,7 @@ return [
                 'Media',
         ],
         'media_help' => [
-                'The block with embeded media data, from source like: Youtube, Vimeo, SlideShare, e.t.c.',
+                'Der Block mit eingebetteten Mediendaten von Quellen wie: YouTube, Vimeo, SlideShare usw.',
                 'The block with embeded media data, from source like: Youtube, Vimeo, SlideShare, e.t.c.',
         ],
         'fieldstoshow' => [
@@ -1237,11 +1237,11 @@ return [
                 'About me',
         ],
         'aboutme_description' => [
-                'Predefined by CV information, but can be editabled for every block',
+                'Vordefiniert durch Lebenslaufinformationen, kann jedoch für jeden Block bearbeitet werden.',
                 'Predefined by CV information, but can be editabled for every block',
         ],
         'notify' => [
-                'benachrichtigen',
+                'Benachrichtigen',
                 'notify',
         ],
         'sharejs' => [
@@ -1399,7 +1399,7 @@ return [
                 'With attached files',
         ],
         'configureblock_cvinfo_group_by_category' => [
-                'Display CV elements in categories',
+                'Lebenslaufelemente in Kategorien anzeigen',
                 'Display CV elements in categories',
         ],
 
@@ -1617,11 +1617,11 @@ return [
                 'limit: 10 files',
         ],
         'block_exaport_copytomyportfolio' => [
-                'Enable "Copy to my portfolio"',
+                'Aktiviere "In mein Portfolio kopieren"',
                 'Enable "Copy to my portfolio"',
         ],
         'block_exaport_copytomyportfolio_body' => [
-                'User will be able copy artefacts from shared category into own portfolio',
+                'Benutzer können Artefakte aus einer geteilten Kategorie in ihr eigenes Portfolio kopieren.',
                 'User will be able copy artefacts from shared category into own portfolio',
         ],
         'block_exaport_app_alloweditdelete_head' => [
@@ -2116,9 +2116,9 @@ return [
             'Pdf settings',
         ],
         'pdf_settings_description' => [
-            'If you use some special or uncommon language characters the generated pdf can have problems. So, you can try to use different font settings<br>
-            Your PDF settings will be saved for this view.<br>So, if your view is shared with other users - they will see the pdf with your settings.<br>
-            Non-standard fonts can have some lost options like bold, italic, e.t.c.',
+            'Wenn du spezielle oder ungewöhnliche Schriftzeichen verwendest, kann es zu Problemen mit dem generierten PDF kommen. Du kannst daher versuchen, unterschiedliche Schriftarteinstellungen zu verwenden.<br>
+			Deine PDF-Einstellungen werden für diese Ansicht gespeichert.<br>Wenn deine Ansicht mit anderen Benutzern geteilt wird, sehen sie das PDF mit deinen Einstellungen.<br>
+			Nicht-standardisierte Schriftarten können einige Optionen wie Fett, Kursiv usw. verlieren.',
             'If you use some special or uncommon language characters the generated pdf can have problems. So, you can try to use different font settings<br>
             Your PDF settings will be saved for this view.<br>So, if your view is shared with other users - they will see the pdf with your settings.<br>
             Non-standard fonts can have some lost options like bold, italic, e.t.c.',
@@ -2132,27 +2132,27 @@ return [
             'Basic font size',
         ],
         'pdf_settings_showmetadata' => [
-            'Add view meta data',
+            'Metadaten zur Ansicht hinzufügen',
             'Add view meta data',
         ],
         'pdf_settings_showusername' => [
-            'user name',
+            'Benutzername',
             'user name',
         ],
         'pdf_settings_showuserpicture' => [
-            'user picture',
+            'Profilbild',
             'user picture',
         ],
         'pdf_settings_showuseremail' => [
-            'user email',
+            'Benutzer E-Mail',
             'user email',
         ],
         'pdf_settings_showuserphone' => [
-            'user phone',
+            'Benutzer Telefon',
             'user phone',
         ],
         'pdf_customfont' => [
-            'Upload custom font',
+            'Benutzerdefinierte Schriftart hochladen',
             'Upload custom font',
         ],
         'pdf_settings_uploadfont' => [
@@ -2176,15 +2176,15 @@ return [
             'Landscape',
         ],
         'pdf_customfont_help' => [
-            'Your can upload own .ttf file. We will try to use it for PDF generation.',
+            'Du kannst deine eigene .ttf-Datei hochladen. Wir werden versuchen, sie für die PDF-Erstellung zu verwenden.',
             'Your can upload own .ttf file. We will try to use it for PDF generation.',
         ],
         'pdf_settings_fontfamily_fixedgroup' => [
-            'Predefined fonts',
+            'Vordefinierte Schriften',
             'Predefined fonts',
         ],
         'pdf_settings_fontfamily_customgroup' => [
-            'Custom uploaded fonts',
+            'Benutzerdefinierte hochgeladene Schriftarten',
             'Custom uploaded fonts',
         ],
         'settings_layout_settings_heading' => [
@@ -2192,15 +2192,15 @@ return [
             'Layout settings',
         ],
         'block_exaport_allowcustomlayout_head' => [
-            'Custom options for the view layout for view owners',
+            'Benutzerdefinierte Optionen für das Layout der Views für View-Eigentümer',
             'Custom options for the view layout for view owners',
         ],
         'block_exaport_allowcustomlayout_body' => [
-            'Allows to use custom view layout settings (similar to options below) for regular owners of the views',
+            'Ermöglicht die Verwendung benutzerdefinierter Layout-Einstellungen für Views (ähnlich den unten aufgeführten Optionen) für reguläre Besitzer der Views.',
             'Allows to use custom view layout settings (similar to options below) for regular owners of the views',
         ],
         'settings_layout_settings_description' => [
-            'Here you can change some view layout options or use own custom CSS rules to have the view as you want<br>These settings will be used as default settings <strong>for all views</strong>',
+            'Hier kannst du einige Layout-Optionen der View ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die View nach deinen Wünschen zu gestalten.<br>Diese Einstellungen werden als Standardeinstellungen <strong>für alle Views</strong> verwendet.',
             'Here you can change some view layout options or use own custom CSS rules to have the view as you want<br>These settings will be used as default settings <strong>for all views</strong>',
         ],
         'layout_settings' => [
@@ -2208,39 +2208,39 @@ return [
             'Layout settings',
         ],
         'layout_settings_description' => [
-            'Here you can change some view layout options or use own custom CSS rules to have the view as you want',
+            'Hier kannst du einige Layout-Optionen der View ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die View nach deinen Wünschen zu gestalten.',
             'Here you can change some view layout options or use own custom CSS rules to have the view as you want',
         ],
         'layout_settings_font_size' => [
-            'Font size',
+            'Schriftgröße',
             'Font size',
         ],
         'layout_settings_border_width' => [
-            'Border width',
+            'Randbreite',
             'Border width',
         ],
         'layout_settings_font_weight' => [
-            'Bold',
+            'Fett',
             'Bold',
         ],
         'layout_settings_border_width_only_bottom' => [
-            'Only bottom border',
+            'Nur unterer Rand',
             'Only bottom border',
         ],
         'layout_settings_view_headers' => [
-            'Headers of view blocks',
+            'Überschriften der View-Blöcke',
             'Headers of view blocks',
         ],
         'layout_settings_view_content' => [
-            'Content of view blocks',
+            'Inhalt der View-Blöcke',
             'Content of view blocks',
         ],
         'layout_settings_custom_css' => [
-            'Custom CSS',
+            'benutzerdefinierte CSS-Regeln',
             'Custom CSS',
         ],
         'layout_settings_custom_css_description' => [
-            'You can use own custom CSS rules here',
+            'Hier kannst du eigene benutzerdefinierte CSS-Regeln verwenden.',
             'You can use own custom CSS rules here',
         ],
         'selected_competencies' => [
@@ -2256,15 +2256,16 @@ return [
             '',
         ],
         'forms.item.project_description' => [
-            'The why behind this project',
+            'Der Grund hinter diesem Projekt',
             'The why behind this project',
         ],
         'forms.item.project_description_help' => [
-            '<strong>Briefly explain the purpose of your work:</strong><ul> 
-                <li>What problem did it address?</li> 
-                <li>What skills did you aim to develop?</li> 
-                <li>What was the context?</li>
-            </ul>',
+            '<strong>Erkläre kurz den Zweck deiner Arbeit:</strong>
+			<ul> 
+				<li>Welches Problem wurde damit angesprochen?</li> 
+				<li>Welche Fähigkeiten wolltest du entwickeln?</li> 
+				<li>Was war der Kontext?</li>
+			</ul>',
             '<strong>Briefly explain the purpose of your work:</strong><ul> 
                 <li>What problem did it address?</li> 
                 <li>What skills did you aim to develop?</li> 
@@ -2272,16 +2273,16 @@ return [
             </ul>',
         ],
         'forms.item.project_description_editor' => [
-            'The why behind this project',
+            'Der Grund hinter diesem Projekt',
             'The why behind this project',
         ],
         'forms.item.project_description_editor_help' => [
-            '<strong>Briefly explain the purpose of your work:</strong>
-            <ul> 
-                <li>What problem did it address?</li> 
-                <li>What skills did you aim to develop?</li> 
-                <li>What was the context?</li>
-            </ul>',
+            '<strong>Erkläre kurz den Zweck deiner Arbeit:</strong>
+			<ul> 
+				<li>Welches Problem wurde angesprochen?</li> 
+				<li>Welche Fähigkeiten wolltest du entwickeln?</li> 
+				<li>Was war der Kontext?</li>
+			</ul>',
             '<strong>Briefly explain the purpose of your work:</strong>
             <ul> 
                 <li>What problem did it address?</li> 
@@ -2290,16 +2291,16 @@ return [
             </ul>',
         ],
         'forms.item.project_process' => [
-            'Making it happen',
+            'Umsetzung des Projekts',
             'Making it happen',
         ],
         'forms.item.project_process_help' => [
-            '<strong>Describe your journey:</
-            <ul> 
-                <li>What steps did you take to complete this project?</li> 
-                <li>What challenges did you encounter, and how did you overcome them?</li> 
-                <li>What resources did you use?</li>
-            </ul>',
+            '<strong>Beschreibe deinen Weg:</strong>
+			<ul> 
+				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li> 
+				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li> 
+				<li>Welche Ressourcen hast du genutzt?</li>
+			</ul>',
             '<strong>Describe your journey:</strong>
             <ul> 
                 <li>What steps did you take to complete this project?</li> 
@@ -2308,16 +2309,16 @@ return [
             </ul>',
         ],
         'forms.item.project_process_editor' => [
-            'Making it happen',
+            'Umsetzung des Projekts',
             'Making it happen',
         ],
         'forms.item.project_process_editor_help' => [
-            '<strong>Describe your journey:</strong>
-            <ul> 
-                <li>What steps did you take to complete this project?</li> 
-                <li>What challenges did you encounter, and how did you overcome them?</li> 
-                <li>What resources did you use?</li>
-            </ul>',
+            '<strong>Beschreibe deinen Weg:</strong>
+			<ul> 
+				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li> 
+				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li> 
+				<li>Welche Ressourcen hast du genutzt?</li>
+			</ul>',
             '<strong>Describe your journey:</strong>
             <ul> 
                 <li>What steps did you take to complete this project?</li> 
@@ -2326,17 +2327,17 @@ return [
             </ul>',
         ],
         'forms.item.project_result' => [
-            'Results and learnings',
+            'Ergebnisse und Erkenntnisse',
             'Results and learnings',
         ],
         'forms.item.project_result_help' => [
-            '<strong>Briefly summarize the outcomes of your project:</strong>
-                <ul> 
-                    <li>What did you achieve?</li>
-                    <li>What skills and competencies did you develop or strengthen through this work?</li>
-                    <li>What did you learn about yourself and your abilities?</li>
-                    <li>What would you do differently next time?”</li>
-                </ul>',
+            '<strong>Fasse die Ergebnisse deines Projekts kurz zusammen:</strong>
+			<ul> 
+				<li>Was hast du erreicht?</li>
+				<li>Welche Fähigkeiten und Kompetenzen hast du durch diese Arbeit entwickelt oder gestärkt?</li>
+				<li>Was hast du über dich und deine Fähigkeiten gelernt?</li>
+				<li>Was würdest du das nächste Mal anders machen?</li>
+			</ul>',
             '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul> 
                     <li>What did you achieve?</li>
@@ -2346,17 +2347,17 @@ return [
                 </ul>',
         ],
         'forms.item.project_result_editor' => [
-            'Results and learnings',
+            'Ergebnisse und Erkenntnisse',
             'Results and learnings',
         ],
         'forms.item.project_result_editor_help' => [
-            '<strong>Briefly summarize the outcomes of your project:</strong>
-                <ul> 
-                    <li>What did you achieve?</li>
-                    <li>What skills and competencies did you develop or strengthen through this work?</li>
-                    <li>What did you learn about yourself and your abilities?</li>
-                    <li>What would you do differently next time?”</li>
-                </ul>',
+            '<strong>Fasse die Ergebnisse deines Projekts kurz zusammen:</strong>
+			<ul> 
+				<li>Was hast du erreicht?</li>
+				<li>Welche Fähigkeiten und Kompetenzen hast du durch diese Arbeit entwickelt oder gestärkt?</li>
+				<li>Was hast du über dich und deine Fähigkeiten gelernt?</li>
+				<li>Was würdest du das nächste Mal anders machen?</li>
+			</ul>',
             '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul> 
                     <li>What did you achieve?</li>
@@ -2366,7 +2367,7 @@ return [
                 </ul>',
         ],
         'item.project_information' => [
-            'Project Information',
+            'Projekt Information',
             'Project Information',
         ],
         'view_saved' => [
@@ -2382,40 +2383,40 @@ return [
             'List',
         ],
         'what_is_embed_code_title' => [
-            'What is embed code?',
+            'Was ist ein Einbettungscode?',
             'What is embed code?',
         ],
         'what_is_embed_code_content' => [
-            '<p>Embed code is code that is generated by a third-party website such as YouTube or Twitter, that a user can copy and paste into his or her own webpage.  This embedded code will then show the same media, application, or feed on the user\'s web page as it does in the original source.</p>
-            <p>We provide instructions for the most popular video vendors such as YouTube or Vimeo.</p>
-            <p><strong>Finding the embed code on YouTube:</strong></p>
-            <ol>
-                <li>Go to YouTube</a>.</li>
-                <li>Navigate to the video you wish to embed.</li>
-                <li>Click the <strong>Share link</strong> below the video, then click the <strong>Embed link</strong>.</li>
-                <li>Press <strong>Copy</strong> button in the footer of opened window.</li>
-                <li>The embed link will be highlighted in blue and copied to the clipboard.</li>
-                <li>Past the code to exabis E-portfolio textarea field.</li>
-            </ol>
-            <p><strong>Finding the embed code on Vimeo:</strong></p>
-            <ol>
-                <li>Go to Vimeo.</li>
-                <li>Navigate to the video you wish to embed.</li>
-                <li>Click the <strong>Share</strong> button, in the top right corner of your video.</li>
-                <li>A pop-up will appear with the embed link information. You will need to copy only the <strong>&lt;<i>iframe</i>&gt;</strong> portion of the embed link.
-                    Example:<br>                    
-                    <ol>
-                        <li>
-                            Entire embed link shows the following:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>                            
-                        </li>
-                        <li>
-                            You only need to copy the <strong>&lt;<i>iframe</i>&gt;</strong> portion:<br>                            
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>                            
-                        </li>                    
-                    </ol>
-                <li>Past this code to exabis E-portfolio textarea field.</li>
-            </ol>
+            '<p>Einbettungscode ist ein Code, der von einer Drittanbieter-Website wie YouTube oder Twitter generiert wird und den ein Benutzer in seine eigene Webseite kopieren und einfügen kann. Dieser eingebettete Code zeigt dann dasselbe Medium, dieselbe Anwendung oder denselben Feed auf der Webseite des Benutzers wie im Original.</p>
+			<p>Wir bieten Anleitungen für die beliebtesten Videoplattformen wie YouTube oder Vimeo.</p>
+			<p><strong>So findest du den Einbettungscode auf YouTube:</strong></p>
+			<ol>
+				<li>Gehe zu YouTube.</li>
+				<li>Gehe zu dem Video, das du einbetten möchtest.</li>
+				<li>Klicke auf den <strong>Teilen-Link</strong> unter dem Video und dann auf den <strong>Einbetten-Link</strong>.</li>
+				<li>Klicke auf die Schaltfläche <strong>Kopieren</strong> im unteren Bereich des geöffneten Fensters.</li>
+				<li>Der Einbettungslink wird blau markiert und in die Zwischenablage kopiert.</li>
+				<li>Füge den Code in das Textfeld von exabis E-portfolio ein.</li>
+			</ol>
+			<p><strong>So findest du den Einbettungscode auf Vimeo:</strong></p>
+			<ol>
+				<li>Gehe zu Vimeo.</li>
+				<li>Gehe zu dem Video, das du einbetten möchtest.</li>
+				<li>Klicke auf die Schaltfläche <strong>Teilen</strong> oben rechts im Video.</li>
+				<li>Ein Popup-Fenster mit den Einbettungslink-Informationen wird angezeigt. Du musst nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil des Einbettungslinks kopieren.
+					Beispiel:<br>
+					<ol>
+						<li>
+							Der gesamte Einbettungslink zeigt Folgendes:<br>
+							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; von &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; auf &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
+						</li>
+						<li>
+							Du musst nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil kopieren:<br>
+							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
+						</li>
+					</ol>
+				<li>Füge diesen Code in das Textfeld von exabis E-portfolio ein.</li>
+			</ol>
             ',
             '<p>Embed code is code that is generated by a third-party website such as YouTube or Twitter, that a user can copy and paste into his or her own webpage.  This embedded code will then show the same media, application, or feed on the user\'s web page as it does in the original source.</p>
             <p>We provide instructions for the most popular video vendors such as YouTube or Vimeo.</p>
@@ -2452,308 +2453,334 @@ return [
 
         // === Privacy wordings
         'privacy:metadata:block_exaportuser' => [
-            'user\'s data from exabis e-portfolio',
+            'Benutzerdaten von exabis e-portfolio',
             'user\'s data from exabis e-portfolio',
         ],
         'privacy:metadata:block_exaportuser:user_id' => [
-            'user id',
+            'Benutzerid',
             'user id',
         ],
         'privacy:metadata:block_exaportuser:description' => [
-            'description',
+            'Beschreibung',
             'description',
         ],
         'privacy:metadata:block_exaportuser:view_items_layout' => [
-            'user id',
+            'Benutzerid',
             'user id',
         ],
 
         'privacy:metadata:block_exaportcate' => [
-            'user\'s categories',
+            'Kategorien des Benutzers',
             'user\'s categories',
         ],
         'privacy:metadata:block_exaportcate:pid' => [
-            'parent category id',
+            'Hauptkategorie ID',
             'parent category id',
         ],
         'privacy:metadata:block_exaportcate:userid' => [
-            'user id',
+            'Benutzerid',
             'user id',
         ],
         'privacy:metadata:block_exaportcate:name' => [
-            'title',
+            'Titel',
             'title',
         ],
         'privacy:metadata:block_exaportcate:timemodified' => [
-            'last modified',
+            'letzte Änderung',
             'last modified',
         ],
         'privacy:metadata:block_exaportcate:courseid' => [
-            'course id',
+            'Kurse ID',
             'course id',
         ],
         'privacy:metadata:block_exaportcate:description' => [
-            'description',
+            'Beschreibung',
             'description',
         ],
         'privacy:metadata:block_exaportcate:subjid' => [
-            'related subject id',
+            'Raster ID',
             'related subject id',
         ],
         'privacy:metadata:block_exaportcate:topicid' => [
-            'related topic id',
+            'Kompetenzbereich ID',
             'related topic id',
         ],
         'privacy:metadata:block_exaportcate:source' => [
-            'source',
+            'Source',
             'source',
         ],
         'privacy:metadata:block_exaportcate:sourceid' => [
-            'source id',
+            'Source Id',
             'source id',
         ],
         'privacy:metadata:block_exaportcate:parent_ids' => [
-            'list of parent ids',
+            'Liste der übergeordneten IDs',
             'list of parent ids',
         ],
         'privacy:metadata:block_exaportcate:parent_titles' => [
-            'list of parent titles',
+            'List der übergeordneten Titel',
             'list of parent titles',
         ],
         'privacy:metadata:block_exaportcate:stid' => [
-            'schooltype id',
+            'Schultyp ID',
             'schooltype id',
         ],
         'privacy:metadata:block_exaportcate:sourcemod' => [
-            'sourcemod',
+            'Sourcemod',
             'sourcemod',
         ],
         'privacy:metadata:block_exaportcate:name_short' => [
-            'short title',
+            'Kurztitel',
             'short title',
         ],
         'privacy:metadata:block_exaportcate:shareall' => [
-            'shared for all? 0 - did not share; 1 - shared for all; 2 - shared for groups',
+            'Freigegeben für alle? 0 - nicht freigegeben; 1 - für alle freigegeben; 2 - für Gruppen freigegeben',
             'shared for all? 0 - did not share; 1 - shared for all; 2 - shared for groups',
         ],
         'privacy:metadata:block_exaportcate:internshare' => [
-            'internal share?',
+            'intern geteilt?',
             'internal share?',
         ],
         'privacy:metadata:block_exaportcate:structure_shareall' => [
-            'shared as structure? : 0 - did not share; 1 - shared for all; 2 - shared for groups',
+            'Als Struktur freigegeben? 0 - nicht freigegeben; 1 - für alle freigegeben; 2 - für Gruppen freigegeben',
             'shared as structure? : 0 - did not share; 1 - shared for all; 2 - shared for groups',
         ],
         'privacy:metadata:block_exaportcate:structure_share' => [
-            'shared as structure? look also \'structure_shareall\'',
+            'Als Struktur freigegeben? Siehe auch \'structure_shareall\'',
             'shared as structure? look also \'structure_shareall\'',
         ],
 
         'privacy:metadata:block_exaportitem' => [
-            'user\'s artefact',
+            'Artefakt des Benutzers',
             'user\'s artefact',
         ],
         'privacy:metadata:block_exaportitem:userid' => [
-            'artefact\'s owner',
+            'Artefakt des Besitzers',
             'artefact\'s owner',
         ],
         'privacy:metadata:block_exaportitem:type' => [
-            'type of artefact',
+            'Typ des Artefakts',
             'type of artefact',
         ],
         'privacy:metadata:block_exaportitem:categoryid' => [
-            'category id',
+            'Kategorie Id',
             'category id',
         ],
         'privacy:metadata:block_exaportitem:name' => [
-            'name',
+            'Name',
             'name',
         ],
         'privacy:metadata:block_exaportitem:url' => [
-            'url',
+            'Url',
             'url',
         ],
         'privacy:metadata:block_exaportitem:intro' => [
-            'intro',
+            'Intro',
             'intro',
         ],
         'privacy:metadata:block_exaportitem:timemodified' => [
-            'last modified time',
+            'Zeit zuletzt geändert',
             'last modified time',
         ],
         'privacy:metadata:block_exaportitem:courseid' => [
-            'course id',
+            'Kurs Id',
             'course id',
         ],
         'privacy:metadata:block_exaportitem:shareall' => [
-            'shared for all?',
+            'Freigegeben für alle?',
             'shared for all?',
         ],
         'privacy:metadata:block_exaportitem:externaccess' => [
-            'external access?',
+            'Externer Zugriff?',
             'external access?',
         ],
         'privacy:metadata:block_exaportitem:externcomment' => [
-            'comment for externals',
+            'Kommentar für Externe',
             'comment for externals',
         ],
         'privacy:metadata:block_exaportitem:fileurl' => [
-            'url to file',
+            'URL zur Datei',
             'url to file',
         ],
         'privacy:metadata:block_exaportitem:exampid' => [
-            'related example id',
+            'zugehörige Beispiel-ID',
             'related example id',
         ],
         'privacy:metadata:block_exaportitem:langid' => [
-            'language id',
+            'Sprach-ID',
             'language id',
         ],
         'privacy:metadata:block_exaportitem:source' => [
-            'source',
+            'Source',
             'source',
         ],
         'privacy:metadata:block_exaportitem:sourceid' => [
-            'source id',
+            'Source Id',
             'source id',
         ],
         'privacy:metadata:block_exaportitem:iseditable' => [
-            'is editable?',
+            'Ist bearbeitbar?',
             'is editable?',
         ],
         'privacy:metadata:block_exaportitem:example_url' => [
-            'example_url',
+            'Material Url',
             'artefact\'s owner',
         ],
         'privacy:metadata:block_exaportitem:parentid' => [
-            'parent id',
+            'Übergeordnete ID',
             'parent id',
         ],
 
         'privacy:metadata:block_exaportitemcomm' => [
-            'comments for artefacts',
+            'Kommentare zu Artefakten',
             'comments for artefacts',
         ],
         'privacy:metadata:block_exaportitemcomm:itemid' => [
-            'id of artefact',
+            'Id zu Artefakten',
             'id of artefact',
         ],
         'privacy:metadata:block_exaportitemcomm:userid' => [
-            'author of comment',
+            'Autor des Kommentars',
             'author of comment',
         ],
         'privacy:metadata:block_exaportitemcomm:entry' => [
-            'comment',
+            'Kommentar',
             'comment',
         ],
         'privacy:metadata:block_exaportitemcomm:timemodified' => [
-            'last modified',
+            'zuletzt geändert',
             'last modified',
         ],
 
         'privacy:metadata:block_exaportview' => [
-            'comments for artefacts',
+            'Kommentar zu Artefakten',
             'comments for artefacts',
         ],
         'privacy:metadata:block_exaportview:userid' => [
-            'owner of view',
+            'Besitzer der View',
             'owner of view',
         ],
         'privacy:metadata:block_exaportview:name' => [
-            'name',
+            'Name',
             'name',
         ],
         'privacy:metadata:block_exaportview:description' => [
-            'description',
+            'Beschreibung',
             'description',
         ],
         'privacy:metadata:block_exaportview:timemodified' => [
-            'last modified',
+            'zuletzt geändert',
             'last modified',
         ],
         'privacy:metadata:block_exaportview:shareall' => [
-            'shared for all?',
+            'Für alle Teilen?',
             'shared for all?',
         ],
         'privacy:metadata:block_exaportview:externaccess' => [
-            'external access?',
+            'Externer Zugriff?',
             'external access?',
         ],
         'privacy:metadata:block_exaportview:externcomment' => [
-            'comment from external?',
+            'Kommentar von extern?',
             'comment from external?',
         ],
         'privacy:metadata:block_exaportview:langid' => [
-            'language id',
+            'Sprach-ID',
             'language id',
         ],
         'privacy:metadata:block_exaportview:layout' => [
-            'layout of the view',
+            'Layout der View',
             'layout of the view',
         ],
         'privacy:metadata:block_exaportview:sharedemails' => [
-            'shared emails list',
+            'Liste freigegebener E-Mails',
             'shared emails list',
         ],
         'privacy:metadata:block_exaportview:autofill_artefacts' => [
-            'enabled autofill by artefacts',
+            'Automatisches Ausfüllen bei Artefakten aktiviert',
             'enabled autofill by artefacts',
         ],
 
         'privacy:metadata:block_exaportresume' => [
-            'resume data',
+            'Lebenslaufdaten',
             'resume data',
         ],
         'privacy:metadata:block_exaportresume:user_id' => [
-            'resume owner',
+            'Besitzer des Lebenslaufs',
             'resume owner',
         ],
         'privacy:metadata:block_exaportresume:courseid' => [
-            'course id',
+            'Kurs ID',
             'course id',
         ],
         'privacy:metadata:block_exaportresume:cover' => [
-            'cover content',
+            'Inhalt des Deckblattes',
             'cover content',
         ],
         'privacy:metadata:block_exaportresume:interests' => [
-            'interests',
+            'Interessen',
             'interests',
         ],
         'privacy:metadata:block_exaportresume:goalspersonal' => [
-            'personal goals',
+            'persönliche Ziele',
             'personal goals',
         ],
         'privacy:metadata:block_exaportresume:goalsacademic' => [
-            'academic goals',
+            'akademische Ziele',
             'academic goals',
         ],
         'privacy:metadata:block_exaportresume:goalscareers' => [
-            'careers goals',
+            'Karriereziele',
             'careers goals',
         ],
         'privacy:metadata:block_exaportresume:skillspersonal' => [
-            'personal skills',
+            'Persönliche Fähigkeiten',
             'personal skills',
         ],
         'privacy:metadata:block_exaportresume:skillsacademic' => [
-            'academic skills',
+            'akademische Fähigkeiten',
             'academic skills',
         ],
         'privacy:metadata:block_exaportresume:skillscareers' => [
-            'careers skills',
+            'Karriere Fähigkeiten',
             'careers skills',
         ],
         'privacy:metadata:core_files' => [
-            'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.',
+            'Exabis ePortfolio speichert Dateien, die vom Benutzer hochgeladen wurden, um Teil von Artefakten, Lebenslaufeinträgen und Kommentaren zu werden.',
             'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.',
         ],
         'whyEportfolio' => [
-            'Why eProtfolio',
+            'Warum ein ePortfolio?',
             'Why ePortfolio',
         ],
         'whyEportfolio_description' => [
-            '',
+            '<h4>Lass deine harte Arbeit nicht verschwinden: Erstelle dein digitales Portfolio</h4>
+				<br>
+				<p>Stell dir vor, all die Mühe, die du in Aufgaben, Präsentationen und Projekte steckst. Hast du jemals das Gefühl, dass es nach der Abgabe einfach in einer Schublade verschwindet?</p>
+				<p>Aber hier ist die gute Nachricht: Diese Projekte sind <strong>Beweise für deine Fähigkeiten und dein Wissen</strong>, und du kannst sie nutzen, um potenzielle Arbeitgeber oder Kunden zu beeindrucken!</p>
+				<p><strong>Erstelle dein digitales Portfolio</strong> und präsentiere deine besten Arbeiten, von Präsentationen, Aufgaben und Projekten bis hin zu Videos. Es ist einfacher, als du denkst!</p>
+				<br>
+				<h4>Was ist ein ePortfolio?</h4>
+				<br>
+				<p>Ein <strong>ePortfolio</strong> (elektronisches Portfolio) ist eine <strong>digitale Sammlung</strong>, die deine <strong>Fähigkeiten, dein Wissen und deine Erfahrungen</strong> präsentiert.
+					Während dein Lebenslauf sich auf deine Ausbildung und Berufserfahrung konzentriert, geht dein ePortfolio darüber hinaus und bietet <strong>Beweise und Kontext</strong> für deine Fähigkeiten.
+					Es ermöglicht dir, Arbeitsproben zu zeigen und dein <strong>Talent schnell und effektiv zu demonstrieren</strong>.
+					Letztendlich ist dein ePortfolio ein mächtiges Werkzeug, um deine <strong>Qualifikationen hervorzuheben</strong> und dich abzuheben.
+				</p>
+				<p><strong>Denke daran, dass verschiedene Rollen unterschiedliche Arten von ePortfolios erfordern können.</strong> 
+					Einige Schlüsselelemente bleiben jedoch konstant. 
+					Mit <strong>Exabis ePortfolio</strong> kannst du <strong>mehrere Ansichten erstellen</strong>, die auf bestimmte Positionen, Jobchancen oder andere Zwecke zugeschnitten sind.
+				</p>
+				<br>
+				<h4>Wie erstelle ich mein ePortfolio?</h4>
+				<br>
+				<ol>
+					<li><strong>Sammle deine Arbeiten</strong>: Beginne damit, alle deine Projekte, Präsentationen und Aufgaben zu überprüfen.</li>
+					<li><strong>Wähle deine besten Arbeiten aus</strong>: Wähle die Stücke aus, die deine stärksten Fähigkeiten zeigen und die positives Feedback erhalten haben.</li>
+					<li><strong>Reflektiere und beschreibe</strong>: Überlege, welche Fähigkeiten und Kompetenzen jedes Stück demonstriert. Schreibe eine kurze Beschreibung, um Kontext zu bieten.</li>
+					<li><strong>Erstelle und iteriere</strong>: Scheue dich nicht davor, zu experimentieren und dein ePortfolio im Laufe der Zeit zu verfeinern, während du lernst und wächst.</li>
+				</ol>
+				<p><strong>Exabis ePortfolio</strong> kann dich durch jeden Schritt führen und den Prozess der Erstellung deines ePortfolios reibungslos und effizient gestalten.</p>',
             '   <h4>Don\'t Let Your Hard Work Disappear: Build Your Digital Portfolio</h4>
                 <br>
                 <p>Imagine all the effort you put into assignments, presentations, and projects. Do you ever feel like it just gets buried in a drawer after it\'s submitted?</p>
@@ -2784,29 +2811,28 @@ return [
 ',
         ],
         'cofigureblock_cvinfo_help' => [
-            'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.',
+            'Du wirst den aktuellen Status der ausgewählten Elemente in deinem Lebenslauf sehen. Der Blockinhalt wird aktualisiert, wenn du später Änderungen an irgendwelchen Elementen in deinem Lebenslauf vornimmst.',
             'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.',
         ],
         'cofigureblock_cvinfo_cover' => [
-            'About me',
+            'Über mich',
             'About me',
         ],
         'cofigureblock_cvinfo_cover_actual' => [
-            'add actual CV "About me" content',
+            'Aktuellen Lebenslauf "Über mich" Inhalt hinzufügen',
             'add actual CV "About me" content',
         ],
         'create_view_content_help_title' => [
-            'Craft Your Unique Story: Build Your Portfolio',
+            'Gestalte deine einzigartige Geschichte: Erstelle dein Portfolio',
             'Craft Your Unique Story: Build Your Portfolio',
         ],
         'create_view_content_help_text' => [
             '<ul>
-                <li><strong>Plan your layout:</strong> Drag and drop building blocks and arrange them to tell your story. Use columns (available in the "layout" section) to plan your portfolio.</li>
-                <li><strong>Organize for clarity:</strong> Use headers, links, and notes to structure your content effectively.</li>
-                <li><strong>Personalize your style:</strong> Choose fonts and colours within the available options to add a touch of you.</li>
-            </ul>
-            <strong>Remember: Your e-portfolio tells the world about you and your skills. Make it clear, concise, and engaging!</strong>
-            ',
+				<li><strong>Plane dein Layout:</strong> Ziehe und lasse Bausteine fallen und arrangiere sie, um deine Geschichte zu erzählen. Verwende Spalten (verfügbar im Abschnitt "Layout"), um dein Portfolio zu planen.</li>
+				<li><strong>Organisiere für Klarheit:</strong> Verwende Überschriften, Links und Notizen, um deine Inhalte effektiv zu strukturieren.</li>
+				<li><strong>Personalisiere deinen Stil:</strong> Wähle Schriftarten und Farben innerhalb der verfügbaren Optionen, um einen Hauch von dir hinzuzufügen.</li>
+			</ul>
+			<strong>Denke daran: Dein e-Portfolio erzählt der Welt von dir und deinen Fähigkeiten. Mache es klar, prägnant und ansprechend!</strong>',
             '<ul>
                 <li><strong>Plan your layout:</strong> Drag and drop building blocks and arrange them to tell your story. Use columns (available in the "layout" section) to plan your portfolio.</li>
                 <li><strong>Organize for clarity:</strong> Use headers, links, and notes to structure your content effectively.</li>
@@ -2816,11 +2842,11 @@ return [
             ',
         ],
         'moreinfolink' => [
-            'Show more info ...',
+            'Mehr Informationen anzeigen ...',
             'Show more info ...',
         ],
         'badges_help' => [
-            'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>',
+            'Der Block mit dir verliehenen Abzeichen<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Abzeichen anzeigen</a>',
             'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>',
         ],
 ];

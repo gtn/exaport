@@ -1153,8 +1153,8 @@ return [
                 'Headertext',
         ],
         'headertext_help' => [
-                'The simple block for adding only header line',
                 'Der einfache Block zum Hinzufügen einer einzigen Überschriftzeile',
+                'The simple block for adding only header line',
         ],
         'item' => [
                 'Artefakt',

@@ -444,7 +444,7 @@ $string['settings_disable_shareall_head'] = 'Mit allen Benutzer:innen teilen dea
 $string['settings_disable_shareall_body'] = 'Klicken Sie <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen';
 $string['settings_disable_externaccess_head'] = 'Teilen Option "Externer Zugriff" auf Portfolios deaktivieren.';
 $string['settings_disable_externaccess_body'] = '';
-$string['settings_disable_shareemails_head'] = 'Teilen Option "Per E-Mail teilen" auf Pr deaktivieren.';
+$string['settings_disable_shareemails_head'] = 'Teilen Option "Per E-Mail teilen" von Portfolios deaktivieren.';
 $string['settings_disable_shareemails_body'] = '';
 $string['settings_disable_external_comments_head'] = 'Teilen von Kommentaren in externen Views deaktivieren';
 $string['settings_disable_external_comments_body'] = '';

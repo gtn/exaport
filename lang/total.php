@@ -1569,7 +1569,7 @@ return [
                 '',
         ],
         'settings_disable_shareemails_head' => [
-                'Teilen Option "Per E-Mail teilen" auf Pr deaktivieren.',
+                'Teilen Option "Per E-Mail teilen" von Portfolios deaktivieren.',
                 'Disable Sharing-Option "Share by Email" for views',
         ],
         'settings_disable_shareemails_body' => [

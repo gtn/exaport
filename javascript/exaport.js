@@ -407,7 +407,7 @@
 
 /**
  *
- * @param selector
+ * @param selector element (container where we need to get icons)
  */
 function block_exaport_update_fontawesome_icons(element) {
     if (typeof FontAwesome === 'undefined') {
@@ -419,7 +419,6 @@ function block_exaport_update_fontawesome_icons(element) {
     // var iconsBlock = $('#exaport').get(0);
     if (typeof element !== 'undefined' && element.length) {
         var iconsBlock = element.get(0);
-        // console.log('exaport_fa.js:12');console.log(iconsBlock);// !!!!!!!!!! delete it
 
         // Replace icons within this block
         if (iconsBlock) {
@@ -427,3 +426,154 @@ function block_exaport_update_fontawesome_icons(element) {
         }
     }
 }
+
+
+function block_exaport_check_fontawesome_icon_merging() {
+
+    if ($('svg.icon-for-merging').length) {
+        $('svg.icon-for-merging').each(function(catIndex, catIcon) {
+
+            var categoryId = $(catIcon).attr('data-categoryid');
+
+            // to eliminate multiple calling on the same category - with fake static variable
+            if (typeof block_exaport_check_fontawesome_icon_merging.called === 'undefined') {
+                block_exaport_check_fontawesome_icon_merging.called = [];
+            }
+            if (typeof block_exaport_check_fontawesome_icon_merging.called[categoryId] === 'undefined') {
+                block_exaport_check_fontawesome_icon_merging.called[categoryId] = 0;
+            }
+
+            block_exaport_check_fontawesome_icon_merging.called[categoryId]++;
+
+            if (block_exaport_check_fontawesome_icon_merging.called[categoryId] > 1) {
+                return false;
+            }
+
+            var imageToMerge = document.getElementById('mergeImageIntoCategory' + categoryId);
+            // var alreadyDone = imageToMerge.getAttribute('data-iconMerged');
+            if (typeof imageToMerge !== 'undefined') {
+                var canvasMerged = document.getElementById('mergedCanvas' + categoryId);
+                var ctx = canvasMerged.getContext("2d");
+
+                // Compare sizes
+                // Get the current size of the SVG icon
+                var svgRect = catIcon.getBoundingClientRect();
+                var svgWidth = svgRect.width;
+                var svgHeight = svgRect.height;
+                // Set canvas dimensions
+                canvasMerged.width = svgWidth;
+                canvasMerged.height = svgHeight;
+
+                // Convert SVG to data URL
+                var svgData = new XMLSerializer().serializeToString(catIcon);
+                var svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+                var url = URL.createObjectURL(svgBlob);
+
+                // Create an image from the SVG data URL
+                var svgImage = new Image();
+                svgImage.onload = function() {
+                    // Color of the 'folder' icon
+                    ctx.globalAlpha = 0.5; // #7a7a7a
+                    // Draw the SVG onto the canvas
+                    ctx.drawImage(svgImage, 0, 0, svgWidth, svgHeight);
+
+                    // Draw the PNG/JPG image onto the canvas
+                    var imageLoaded = function() {
+                        const x = 30; // x-coordinate
+                        const y = 30; // y-coordinate
+                        const width = 50; // width of the image
+                        const height = 50; // height of the image
+                        ctx.globalAlpha = 1;
+
+                        // 0. a point into random place - to eliminate browser caching
+                        ctx.beginPath();
+                        var xRand = Math.floor(Math.random() * (width - 0)) + width;
+                        var yRand = Math.floor(Math.random() * (height - 0)) + height;
+                        ctx.arc(xRand, yRand, 1, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.01)'; // transparency almost
+                        ctx.fill();
+
+                        // 1. simple adding the image
+                        // ctx.drawImage(imageToMerge, x, y, width, height);
+
+                        // 2. "tilt" the image before adding
+                        // Save the current context state (before rotation)
+                        /*ctx.save();
+                        // Move the context to the center of the image to be rotated
+                        ctx.translate(x + width / 2, y + height / 2);
+                        // Rotate the context by 30 degrees (converted to radians)
+                        ctx.rotate(30 * Math.PI / 180);
+                        // Draw the image on the rotated context, adjusting the position back by half the width/height
+                        ctx.drawImage(imageToMerge, -width / 2, -height / 2, width, height);
+                        ctx.restore();*/
+
+                        // 3. transform as a trapezoid
+                        ctx.save();
+                        // Adjust these values as necessary to achieve the desired effect
+                        var skewX = -0.5; // Horizontal skew factor (move top side to the right)
+                        var scaleX = 1.4;   // Scale factor in X direction
+                        var scaleY = 0.8;   // Scale factor in Y direction
+                        // Move the context to the position where the image will be drawn
+                        ctx.translate(x, y + height / 4);
+                        // Apply transformation matrix
+                        ctx.transform(scaleX, 0, skewX, scaleY, 0, 0);
+                        // Draw the image with the applied transformation
+                        ctx.drawImage(imageToMerge, 0, 0, width, height);
+                        ctx.restore();
+
+                        // REPLACE old SVG with new content
+                        var canvasDataURL = canvasMerged.toDataURL();
+                        // Create an <img> element with the canvas content
+                        var imgElement = document.createElement('img');
+                        imgElement.src = canvasDataURL;// + '?t=' + new Date().getTime(); // to eliminate browser caching
+                        imgElement.width = canvasMerged.width;
+                        imgElement.height = canvasMerged.height;
+                        imgElement.setAttribute('class', 'mergedSvgIcon');
+                        // Replace
+                        $(catIcon).replaceWith(imgElement);
+
+                        imageToMerge.setAttribute('data-iconMerged', '1'); // TODO: do we need it?
+                    };
+
+                    if (imageToMerge.complete) {
+                        imageLoaded(); // If the image is already loaded, call the function directly
+                    } else {
+                        imageToMerge.onload = imageLoaded; // Otherwise, set the onload handler
+                    }
+                };
+
+                svgImage.src = url;
+                // catIcon.remove();
+                // catIcon.setAttribute('style', 'display: none;');
+                // imageToMerge.setAttribute('style', 'display: none;');
+            }
+        });
+    }
+
+}
+
+// We need to catch when the fontawesome converted icons into svg
+// it is possible by checking <HTML> tag on class 'fontawesome-i2svg-complete':
+document.addEventListener("DOMContentLoaded", function() {
+    const targetNode = document.documentElement; // <html> is our target element
+
+    const faEventConfig = {
+        attributes: true,
+        attributeFilter: ['class']
+    };
+
+    const callback = function(mutationsList) {
+        for (let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (targetNode.className.includes('fontawesome-i2svg-complete')) {
+                    setTimeout(() => {
+                        block_exaport_check_fontawesome_icon_merging();
+                    }, 50);
+                }
+            }
+        }
+    };
+    const observer = new MutationObserver(callback);
+    observer.observe(targetNode, faEventConfig);
+});
+

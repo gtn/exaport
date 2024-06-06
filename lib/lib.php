@@ -2521,3 +2521,14 @@ function block_exaport_add_iconpack($limitFaToExaportContent = false) {
     // add boxicons
     //$PAGE->requires->css('/blocks/exaport/pix/icons/boxicons/css/boxicons.min.css');
 }
+
+function block_exaport_use_bootstrap_layout() {
+    return (bool) (strpos(block_exaport_used_layout(), 'bootstrap') !== false);
+}
+
+function block_exaport_used_layout() {
+    global $CFG;
+
+//    return @$CFG->block_exaport_used_layout ?: 'clean_old';
+    return @$CFG->block_exaport_used_layout ?: 'moodle_bootstrap';
+}

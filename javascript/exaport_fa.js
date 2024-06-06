@@ -10,3 +10,4 @@ document.addEventListener('DOMContentLoaded', function () {
     var mainBlock = $('#exaport');
     block_exaport_update_fontawesome_icons(mainBlock);
 });
+

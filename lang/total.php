@@ -25,8 +25,8 @@ return [
                 'Andreas Riepl',
         ],
         'translation:organisation' => [
-                'IZ Steyr',
-                'IZ Steyr',
+                'GTN GmbH',
+                'GTN GmbH',
         ],
         'translation:email' => [
                 'ariepl.work@gmail.com',
@@ -129,7 +129,7 @@ return [
                 'Categories',
         ],
         'explaincategories' => [
-                '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier können Sie die Kategorien einsehen und bearbeiten.',
+                '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier kannst du die Kategorien einsehen und bearbeiten.',
                 'Categories: here you can create and modify categories',
         ],
         'category' => [
@@ -176,9 +176,9 @@ return [
             '<strong>Dies ist dein Bereich, um Belege für deinen Lernweg zu sammeln.</strong>
 			<ul>
 				<li><strong>Füge deine besten Arbeiten hinzu:</strong> Lade Dateien, Weblinks oder Beschreibungen von Projekten, Präsentationen und mehr hoch.</li>
-				<li><strong>Reflektiere über deine Erfahrungen:</strong> Erkläre, was du gelernt hast, welche Herausforderungen du bewältigt hast und deine Erfolge für jedes Stück.</li>
+				<li><strong>Reflektiere über deine Erfahrungen:</strong> Erkläre, was du gelernt hast, welche Herausforderungen du bewältigt hast und deine Erfolge für jeden Eintrag.</li>
 			</ul>
-			<strong>Denke an jedes Element als eine Geschichte, die deine Fähigkeiten und dein Wissen hervorhebt.</strong>',
+			<strong>Betrachte jeden Eintrag als eine Art Geschichte, die deine Fähigkeiten und dein Wissen beschreibt.</strong>',
             '<strong>This is your space to gather evidence of your learning journey.</strong>
             <ul>
                 <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
@@ -187,31 +187,31 @@ return [
             <strong>Think of each item as a story highlighting your skills and knowledge.</strong>',
         ],
         'explaininglink' => [
-                '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.',
+                '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen Kursteilnehmer:innen ausgetauscht werden.',
                 'Links.  These links may be shared with all authorized course members.',
         ],
         'explainingfile' => [
-                '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.',
+                '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen Kursteilnehmer:innen ausgetauscht werden.',
                 'Files. These files may be shared with all authorized course members.',
         ],
         'explainingnote' => [
-                '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen KursteilnehmerInnen ausgetauscht werden.',
+                '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen Kursteilnehmer:innen ausgetauscht werden.',
                 'Notes. These notes may be shared with all authorized course members.',
         ],
         'explainingshare' => [
-                'Um einem/einer anderen TeilnehmerIn den Link zu ver&ouml;ffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die &Auml;nderungen.  Sie k&ouml;nnen mehr als eine/n TeilnehmerIn ausw&auml;hlen.',
+                'Um einem/einer anderen Teilnehmer:in den Link zu ver&ouml;ffentlichen, klicke auf den jeweiligen Namen und speichere dann die &Auml;nderungen.  Du kannst mehr als eine/n Teilnehmer:in ausw&auml;hlen.',
                 'To allow a participant to see the link, click on their name and then click on Save Changes. You can choose more than one participant.',
         ],
         'explainingshared' => [
-                'Folgende TeilnehmerInnen haben ver&ouml;ffentlichte Links, Dateien bzw. Notizen.',
+                'Folgende Teilnehmer:innen haben ver&ouml;ffentlichte Links, Dateien bzw. Notizen.',
                 'These participants have shared some of their external links, files or notes.',
         ],
         'explainingsharefile' => [
-                'Um einem/einer anderen TeilnehmerIn die Datei zu ver&ouml;ffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die &Auml;nderungen.  Sie k&ouml;nnen mehr als eine/n TeilnehmerIn ausw&auml;hlen.',
+                'Um einem/einer anderen Teilnehmer:in die Datei zu ver&ouml;ffentlichen, klicke auf den jeweiligen Namen und speichere dann die &Auml;nderungen.  Du kannst mehr als eine/n Teilnehmer:in ausw&auml;hlen.',
                 'To allow a participant to see the file, click on their name and then click on Save Changes.  You can choose more than one participant.',
         ],
         'explainingsharenote' => [
-                'Um einem/einer anderen TeilnehmerIn die Notiz zu ver&ouml;ffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die &Auml;nderungen.  Sie k&ouml;nnen mehr als eine/n TeilnehmerIn ausw&auml;hlen.',
+                'Um einem/einer anderen Teilnehmer:in die Notiz zu ver&ouml;ffentlichen, klicke auf den jeweiligen Namen und speichere dann die &Auml;nderungen.  Du kannst mehr als eine/n Teilnehmer:in ausw&auml;hlen.',
                 'To allow a participant to see the note, click on their name and then click on Save Changes.  You can choose more than one participant.',
         ],
         'file' => [
@@ -247,11 +247,11 @@ return [
                 'Manage categories',
         ],
         'mandatoryfields' => [
-                'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte füllen Sie beides aus.',
+                'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte fülle beides aus.',
                 'The field\'s name, category and intro are required. Please fill them in.',
         ],
         'mandatoryfieldsforcat' => [
-                'Eine Feldbezeichnung ist erforderlich. Bitte füllen Sie diese aus.',
+                'Eine Feldbezeichnung ist erforderlich. Bitte fülle diese aus.',
                 'The field name is required. Please fill them in.',
         ],
         'myportfolio' => [
@@ -259,7 +259,7 @@ return [
                 'My Portfolio Artefacts',
         ],
         'myportfoliotitle' => [
-                'ePortfolio-Modul: Fügen Sie hier Links und Dateien hinzu.',
+                'ePortfolio-Modul: Füge hier Links und Dateien hinzu.',
                 'Exabis ePortfolio module: Add your links and files here.',
         ],
         'newlink' => [
@@ -379,7 +379,7 @@ return [
                 'Share by Email',
         ],
         'emailaccessdescription' => [
-                'Geben Sie eine Email Adresse pro Zeile ein<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese View. Das Löschen der Adresse löscht den Zugriff auf diese Veiw.',
+                'Gib eine Email Adresse pro Zeile ein<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese View. Das Löschen der Adresse löscht den Zugriff auf diese View.',
                 'Input an email address per line<br />Each email will receive a unique link with access to this view. Deleting the email will remove access to this view.',
         ],
         'emailaccessmessagesubject' => [
@@ -415,7 +415,7 @@ return [
                 'At the moment you have no submission at any assignment!',
         ],
         'deletecategoryconfirm' => [
-                'Wollen Sie die Kategorie "{$a->name}" wirklich l&ouml;schen? Es werden alle Eintr&auml;ge in dieser Kategorie und alle Unterkategorien mitgel&ouml;scht!',
+                'Willst du die Kategorie "{$a->name}" wirklich l&ouml;schen? Es werden alle Eintr&auml;ge in dieser Kategorie und alle Unterkategorien mitgel&ouml;scht!',
                 'Do you really want to delete the category "{$a->name}"? All entries in this category and all subcategories will be deleted!',
         ],
         'name' => [
@@ -473,7 +473,7 @@ return [
                 'Import',
         ],
         'explainexport' => [
-                '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export:</span> hier k&ouml;nnen Sie Ihr ePortfolio exportieren</span>',
+                '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export:</span> hier kannst du dein ePortfolio exportieren</span>',
                 'Export your portfolio here.',
         ],
         'createexport' => [
@@ -521,7 +521,7 @@ return [
                 'Import/Export',
         ],
         'explainimport' => [
-                'hier k&ouml;nnen Sie SCORM-Dateien ins Portfolio importieren. Wenn Marker gefunden werden, die darauf hinweisen, dass diese SCORM-Datei zuvor aus dem Portfolio-Modul exportiert wurde, so wird versucht, die Stuktur entsprechend zu importieren.',
+                'hier kannst du SCORM-Dateien ins Portfolio importieren. Wenn Marker gefunden werden, die darauf hinweisen, dass diese SCORM-Datei zuvor aus dem Portfolio-Modul exportiert wurde, so wird versucht, die Struktur entsprechend zu importieren.',
                 'Here you can import a SCORM-File into the portfolio. If markers from previous exports are found the import tries to import the data in the existing filestructure.',
         ],
         'makeimport' => [
@@ -583,15 +583,15 @@ return [
 
         // === Notes.
         'deletenoteconfirm' => [
-                'Wollen Sie diese Notiz wirklich l&ouml;schen?',
+                'Möchtest du diese Notiz wirklich l&ouml;schen?',
                 'Do you really want to delete this note?',
         ],
         'deletelinkconfirm' => [
-                'Wollen Sie diesen Link wirklich l&ouml;schen?',
+                'Möchtest du diesen Link wirklich l&ouml;schen?',
                 'Do you really want to delete this link?',
         ],
         'deletefileconfirm' => [
-                'Wollen Sie diese Datei wirklich l&ouml;schen?',
+                'Möchtest du diese Datei wirklich l&ouml;schen?',
                 'Do you really want to delete this file?',
         ],
 
@@ -665,7 +665,7 @@ return [
                 'Could not insert the description!',
         ],
         'exportcomment' => [
-                'Das ist eine exportierte Datei von exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden k&ouml;nnen!',
+                'Das ist eine exportierte Datei von exabis ePortfolio. Bitte entferne die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden k&ouml;nnen!',
                 'This is an exported file from Exabis ePortfolio. Please do not remove the comments, they are needed for the import!',
         ],
         'comment' => [
@@ -745,7 +745,7 @@ return [
                 'External Access',
         ],
         'loginasmode' => [
-                'Sie haben als Administrator keine Zugriff auf fremde Portfolios',
+                'Du hast als Administrator keine Zugriff auf fremde Portfolios',
                 'You can\'t access portfolios in \'Login As\'-Mode.',
         ],
         'badsessionkey' => [
@@ -837,7 +837,7 @@ return [
                 'updown arrow',
         ],
         'comment_delete_confirmation' => [
-                'Wollen Sie wirklich diesen Kommentar löschen?',
+                'Willst du wirklich diesen Kommentar löschen?',
                 'Do you really want to delete this comment?',
         ],
 
@@ -1041,7 +1041,7 @@ return [
                 'Automatically add all available artefacts to this view',
         ],
         'sharetoteacher' => [
-                'Sofort mit allen Kurs-Trainer/innen teilen',
+                'Sofort mit allen Kurs-Trainer/:innen teilen',
                 'Share to all teachers in this course',
         ],
         'createpage' => [
@@ -1301,7 +1301,7 @@ return [
                 'Shared only with me',
         ],
         'sharedwith_shareall' => [
-                'Mit allen Benutzer:innen geteilt',
+                'Mit allen Benutzer::innen geteilt',
                 'Shared with all users',
         ],
         'sharedwith_shareexternal' => [
@@ -1525,7 +1525,7 @@ return [
                 'Here you can self-assess whether you have acquired the competency with your artefact.',
         ],
         'teachercomps' => [
-                'Hier k&ouml;nnen Sie beurteilen, ob der Schüler folgende Kompetenzen durch sein Artefakt erreicht hat.',
+                'Hier kannst du beurteilen, ob die Lernenden folgende Kompetenzen durch Artefakte erreicht haben.',
                 'Here you can assess whether your students have acquired the competency with this artefact.',
         ],
         'competences' => [
@@ -1561,11 +1561,11 @@ return [
                 '',
         ],
         'settings_disable_shareall_head' => [
-                'Mit allen Benutzer:innen teilen deaktivieren',
+                'Mit allen Benutzer::innen teilen deaktivieren',
                 'Disable sharing with all users',
         ],
         'settings_disable_shareall_body' => [
-                'Klicken Sie <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen',
+                'Klicke <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen',
                 'Click <a href="{$a}">here</a>, to remove all global shares',
         ],
         'settings_disable_externaccess_head' => [
@@ -1633,7 +1633,7 @@ return [
                 'User will be able copy artefacts from shared category into own portfolio',
         ],
         'block_exaport_app_alloweditdelete_head' => [
-                'Schüler/innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen',
+                'Schüler/:innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen',
                 'Students are allowed to edit and delete items after teacher reviews',
         ],
         'block_exaport_app_alloweditdelete_body' => [
@@ -1645,11 +1645,11 @@ return [
                 'Delete all shareall?',
         ],
         'block_exaport_teachercanseeartifactsofstudents_head' => [
-                'Trainer/in hat Zugriff auf alle Artefakte eigene Schüler/innen',
+                'Trainer/in hat Zugriff auf alle Artefakte eigene Schüler/:innen',
                 'Teacher can see ALL artefacts of own students',
         ],
         'block_exaport_teachercanseeartifactsofstudents_body' => [
-                'Vertrauenswürdige Trainer/innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der Teilnehmer/innen für jede/n als vertrauenswürdig definierte/n Trainer/in generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/innen.',
+                'Vertrauenswürdige Trainer/:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der Teilnehmer/:innen für jede/n als vertrauenswürdig definierte/n Trainer/in generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/:innen.',
                 'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
         ],
         'block_exaport_teachercanseeartifactsofstudents_configurationlink' => [
@@ -1657,7 +1657,7 @@ return [
                 'Add required user profile field',
         ],
         'block_exaport_confirm_profilefield_create' => [
-                'Wollen Sie wirklich das Profilfeld für vertrauenswürdige Trainer erstellen?',
+                'Willst du wirklich das Profilfeld für vertrauenswürdige Trainer erstellen?',
                 'Do you really want to add the required profile field?',
         ],
         'block_exaport_confirm_profilefield_exists' => [
@@ -1699,7 +1699,7 @@ return [
                 'Education saved',
         ],
         'resume_deleteeduconfirm' => [
-                'Wollen Sie wirklich den Eintrag löschen?',
+                'Willst du wirklich den Eintrag löschen?',
                 'Do you really want to delete this education?',
         ],
         'resume_edudeleted' => [
@@ -1719,7 +1719,7 @@ return [
                 'Employment saved',
         ],
         'resume_deleteemployconfirm' => [
-                'Wollen Sie wirklich den Eintrag löschen?',
+                'Willst du wirklich den Eintrag löschen?',
                 'Do you really want to delete this employment?',
         ],
         'resume_employdeleted' => [
@@ -1811,7 +1811,7 @@ return [
                 'Certification, accreditation or award saved',
         ],
         'resume_deletecertifconfirm' => [
-                'Wollen Sie wirklich den Eintrag löschen?',
+                'Willst du wirklich den Eintrag löschen?',
                 'Do you really want to delete this certification, accreditation or award?',
         ],
         'resume_certifdeleted' => [
@@ -1839,7 +1839,7 @@ return [
                 'Books and publications saved',
         ],
         'resume_deletepublicconfirm' => [
-                'Wollen Sie wirklich den Eintrag löschen?',
+                'Willst du wirklich den Eintrag löschen?',
                 'Do you really want to delete this book or publication?',
         ],
         'resume_publicdeleted' => [
@@ -1855,7 +1855,7 @@ return [
                 'Membership saved',
         ],
         'resume_deletembrshipconfirm' => [
-                'Wollen Sie wirklich den Eintrag löschen?',
+                'Willst du wirklich den Eintrag löschen?',
                 'Do you really want to delete this membership?',
         ],
         'resume_mbrshipdeleted' => [
@@ -1871,7 +1871,7 @@ return [
                 'LinkedIn profile saved',
         ],
         'resume_deletelinkedinconfirm' => [
-                'Wollen Sie wirklich den Eintrag löschen?',
+                'Willst du wirklich den Eintrag löschen?',
                 'Do you really want to delete this membership?',
         ],
         'resume_linkedindeleted' => [
@@ -1959,7 +1959,7 @@ return [
                 'Export to Europass',
         ],
         'resume_exportto_europass_intro' => [
-                '<p>Das Tool hilft den Nutzerinnen und Nutzern bei der Ermittlung von Lern- und Karrieremöglichkeiten. Im Hinblick auf Beratung und Service-Angebot ist das Profil auch für Arbeitgeber, Freiwilligenorganisationen, Recruiter/innen, Laufbahnberater/innen, Jugendorganisationen, Bildungseinrichtungen und andere Organisationen interessant.</p>
+                '<p>Das Tool hilft den Nutzer:innen und Nutzern bei der Ermittlung von Lern- und Karrieremöglichkeiten. Im Hinblick auf Beratung und Service-Angebot ist das Profil auch für Arbeitgeber, Freiwilligenorganisationen, Recruiter/:innen, Laufbahnberater/:innen, Jugendorganisationen, Bildungseinrichtungen und andere Organisationen interessant.</p>
         <p>We provide a way for using your CV from Exabis eProtfolio in Europass profile<br>
             The generated XML-file has to be inserted into the page <a href="https://europa.eu/europass/eportfolio/screen/cv-editor?lang=de" target="_blank">Hier kannst du deinen Lebenslauf erstellen</a><br>
             (better to be logged in in the Europass previously)<br>
@@ -2074,11 +2074,11 @@ return [
                 'My file area',
         ],
         'show_mystudents' => [
-                'Meine Teilnehmer/innen',
+                'Meine Teilnehmer/:innen',
                 'My students',
         ],
         'show_sharedbyuser' => [
-                'von Teilnehmer/innen geteilt',
+                'von Teilnehmer/:innen geteilt',
                 'Shared by users',
         ],
         'enrolled_courses' => [

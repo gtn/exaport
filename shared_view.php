@@ -1014,20 +1014,22 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     // If the text has HTML <img> - it can broke view template. Try to clean it
                    /* try {*/
                         $pdf_text = mb_convert_encoding($pdf_text, 'HTML-ENTITIES', 'UTF-8');
-                        $dom = new DOMDocument;
-                        $dom->loadHTML($pdf_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-                        $xpath = new DOMXPath($dom);
-                        $nodes = $xpath->query('//img');
-                        /** @var DOMElement $node */
-                        foreach ($nodes as $node) {
-                            $node->removeAttribute('width');
-                            $node->removeAttribute('height');
-                            // $node->setAttribute('width', '200');
-                            $style = $node->getAttribute('style');
-                            $style .= ';width: 100%;';
-                            $style = $node->setAttribute('style', $style);
+                        if ($pdf_text) {
+                            $dom = new DOMDocument;
+                            $dom->loadHTML($pdf_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+                            $xpath = new DOMXPath($dom);
+                            $nodes = $xpath->query('//img');
+                            /** @var DOMElement $node */
+                            foreach ($nodes as $node) {
+                                $node->removeAttribute('width');
+                                $node->removeAttribute('height');
+                                // $node->setAttribute('width', '200');
+                                $style = $node->getAttribute('style');
+                                $style .= ';width: 100%;';
+                                $style = $node->setAttribute('style', $style);
+                            }
+                            $pdf_text = $dom->saveHTML();
                         }
-                        $pdf_text = $dom->saveHTML();
                     /*}  finally {
                         // just wrapper
                     }*/

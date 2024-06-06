@@ -17,7 +17,7 @@
 
 $string['translation:language'] = 'English';
 $string['translation:person'] = 'Andreas Riepl';
-$string['translation:organisation'] = 'IZ Steyr';
+$string['translation:organisation'] = 'GTN GmbH';
 $string['translation:email'] = 'ariepl.work@gmail.com';
 
 // === Main ===

@@ -155,15 +155,15 @@ switch ($item->type) {
 
             // we need to return only PICTURES
             if (strpos($type, 'image/') === false) {
-                header('Content-Type: image/png');
-                readfile('pix/link_tile.png');
+                header('Content-Type: image/svg+xml');
+                readfile('pix/link_tile.svg');
                 exit;
                 break;
             }
 
             if (strlen($imgstr) < 50) {
-                header('Content-Type: image/png');
-                readfile('pix/link_tile.png');
+                header('Content-Type: image/svg+xml');
+                readfile('pix/link_tile.svg');
                 exit;
                 break;
             }
@@ -173,14 +173,14 @@ switch ($item->type) {
 
             exit;
         }
-        header('Content-Type: image/png');
-        readfile('pix/link_tile.png');
+        header('Content-Type: image/svg+xml');
+        readfile('pix/link_tile.svg');
         exit;
         break;
 
     case "note":
-        header('Content-Type: image/png');
-        readfile('pix/note_tile.png');
+        header('Content-Type: image/svg+xml');
+        readfile('pix/note_tile.svg');
         exit;
         break;
     default:

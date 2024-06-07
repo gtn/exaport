@@ -2857,5 +2857,21 @@ return [
             'Der Block mit dir verliehenen Abzeichen<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Abzeichen anzeigen</a>',
             'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>',
         ],
+        'block_exaport_used_layout' => [
+            'Used layout',
+            'Used layout',
+        ],
+        'block_exaport_used_layout_body' => [
+            'Change the layout if you have some appearance problems. Right now it is used only for artefact list.',
+            'Change the layout if you have some appearance problems. Right now it is used only for artefact list.',
+        ],
+        'block_exaport_used_layout_moodle_bootstrap' => [
+            'Cards layout',
+            'Cards layout',
+        ],
+        'block_exaport_used_layout_clean_old' => [
+            'Tiles layout (Old - ended of support from v4.6.7)',
+            'Tiles layout (Old - ended of support from v4.6.7)',
+        ],
 ];
 ?>

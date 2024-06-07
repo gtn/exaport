@@ -828,3 +828,7 @@ $string['create_view_content_help_text'] = '<ul>
             ';
 $string['moreinfolink'] = 'Show more info ...';
 $string['badges_help'] = 'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>';
+$string['block_exaport_used_layout'] = 'Used layout';
+$string['block_exaport_used_layout_body'] = 'Change the layout if you have some appearance problems. Right now it is used only for artefact list.';
+$string['block_exaport_used_layout_moodle_bootstrap'] = 'Cards layout';
+$string['block_exaport_used_layout_clean_old'] = 'Tiles layout (Old - ended of support from v4.6.7)';

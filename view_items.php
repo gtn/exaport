@@ -1003,7 +1003,7 @@ function block_exaport_category_list_item($category, $courseid, $type, $currentc
         case 'moodle_bootstrap':
             return block_exaport_category_template_bootstrap_card($category, $courseid, $type, $currentcategory, $parentcategory);
             break;
-        case 'exaport_bootstrap':
+        case 'exaport_bootstrap': // may we do not need this at all?
             return '<div>TODO: !!!!!! '.$template.' category !!!!!!!</div>';
             break;
         case 'clean_old':
@@ -1023,7 +1023,7 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
         case 'moodle_bootstrap':
             return block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory);
             break;
-        case 'exaport_bootstrap':
+        case 'exaport_bootstrap': // may we do not need this at all?
             return '<div>TODO: !!!!!! '.$template.' !!!!!!!</div>';
             break;
         case 'clean_old':
@@ -1100,7 +1100,7 @@ function block_exaport_category_template_bootstrap_card($category, $courseid, $t
     }
     $categoryContent .= '
                     </div>
-					<div class="card-body excomdos_tileimage d-flex justify-content-center align-items-center" "="">
+					<div class="card-body excomdos_tileimage d-flex justify-content-center align-items-center">
 						<a href="'.$categoryThumbUrl.'">
 						    '.$categoryIcon.'							
 						</a>
@@ -1179,8 +1179,10 @@ function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type,
 
     $itemContent .= '</div>
 					</div>
-					<div class="card-body excomdos_tileimage d-flex justify-content-center align-items-center" "="">
-					    <a href="'.$url.'"><img alt="'.$item->name.'" title="'.$item->name.'" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'"/></a>
+					<div class="card-body excomdos_tileimage d-flex justify-content-center align-items-center">
+					    <a href="'.$url.'">
+					        <img height="75" alt="'.$item->name.'" title="'.$item->name.'" src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'"/>
+                        </a>
 					</div>
 					<div class="card-extitle exomdos_tiletitle">
 						<a href="'.$url.'">'.$item->name.'</a>

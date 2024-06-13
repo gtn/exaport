@@ -1,3 +1,16 @@
+### v4.6.7 (2024060600) ###
+New features:
+*added block_exaport_disable_externaccess: Disables the "External Access" sharing option for views. (This allows administrators to control external sharing permissions.)
+*added block_exaport_disable_shareemails: Disables the "Share by Email" sharing option for views. (This allows administrators to control email sharing permissions.)
+*block_exaport_disable_external_comments: Disables comment sharing in external views. (This allows administrators to control comment visibility on externally shared portfolios.)
+*Added "Why ePortfolio?" section to explain its purpose and usage.
+
+Improvements:
+*simlipied the process of creating "My views"
+*removed multiple sections for personal information and consolidated them into a single section. The "About Me" field now automatically pulls data from the CV section but also allows for customization.
+*improved layouts of "My artefacts", and "My views"
+*introduced a single, versatile artifact type that allows users to add various content options.
+
 ### v4.6.7 (2023121200) ###
 * moodle 4.3 compatibility 
 * dakora, possibility of multiple assignments

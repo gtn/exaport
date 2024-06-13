@@ -1066,7 +1066,42 @@ function xmldb_block_exaport_upgrade($oldversion) {
     if ($oldversion < 2024030400) {
         // 'Personal information' block is removed from CV. But if the data is already filled - move this data into 'About me' CV content.
 
-        require_once(__DIR__.'/../lib/resumelib.php');
+        // Some helper functions from 'blocks/exaport/lib/resumelib.php'
+        $block_exaport_get_resume_params_record = function($userid = null) use ($DB) {
+            if (!$userid) {
+                return false;
+            }
+            $conditions = array("user_id" => $userid);
+            return $DB->get_record('block_exaportresume', $conditions);
+        };
+        $block_exaport_set_resume_params = function($userid, $params = null) use ($DB, $block_exaport_get_resume_params_record) {
+            $newresumeparams = (object) $params;
+            if ($oldresumeparams = $block_exaport_get_resume_params_record($userid)) {
+                $newresumeparams->id = $oldresumeparams->id;
+                $DB->update_record('block_exaportresume', $newresumeparams);
+            } else {
+                $newresumeparams->user_id = $userid;
+                $DB->insert_record("block_exaportresume", $newresumeparams);
+            }
+        };
+        $block_exaport_get_user_preferences_record = function($userid = null) use ($DB) {
+            if (!$userid) {
+                return false;
+            }
+            $conditions = array("user_id" => $userid);
+            return $DB->get_record('block_exaportuser', $conditions);
+        };
+        $block_exaport_set_user_preferences = function($userid, $preferences = null) use ($DB, $block_exaport_get_user_preferences_record) {
+            $newuserpreferences = (object) $preferences;
+            if ($olduserpreferences = $block_exaport_get_user_preferences_record($userid)) {
+                $newuserpreferences->id = $olduserpreferences->id;
+                $DB->update_record('block_exaportuser', $newuserpreferences);
+            } else {
+                $newuserpreferences->user_id = $userid;
+                $DB->insert_record("block_exaportuser", $newuserpreferences);
+            }
+        };
+
         foreach ($DB->get_records('block_exaportuser') as $pdata) {
             $tempdescr = trim(strip_tags($pdata->description));
             block_exaport_get_user_preferences()->description;
@@ -1079,15 +1114,17 @@ function xmldb_block_exaport_upgrade($oldversion) {
                     $description = rtrim($description, '<br>');
                     $coverData[] = $description;
                 }
-                $resumedata = block_exaport_get_resume_params_record($userid);
-                $cover = $resumedata->cover ?: '';
-                if (trim(strip_tags($resumedata->cover))) {
-                    $coverData[] = $cover;
+                $resumedata = $block_exaport_get_resume_params_record($userid);
+                if ($resumedata !== false) {
+                    $cover = $resumedata->cover ?: '';
+                    if (trim(strip_tags($resumedata->cover))) {
+                        $coverData[] = $cover;
+                    }
+                    $newcover = implode('<br>', $coverData);
+                    $block_exaport_set_resume_params($userid, array('cover' => $newcover));
+                    // remove info from personal information
+                    $block_exaport_set_user_preferences($userid, array('description' => ''));
                 }
-                $newcover = implode('<br>', $coverData);
-                block_exaport_set_resume_params($userid, array('cover' => $newcover));
-                // remove info from personal information
-                block_exaport_set_user_preferences($userid, array('description' => ''));
             }
         }
 

@@ -823,3 +823,7 @@ $string['create_view_content_help_text'] = '<ul>
 			<strong>Denke daran: Dein e-Portfolio erzählt der Welt von dir und deinen Fähigkeiten. Mache es klar, prägnant und ansprechend!</strong>';
 $string['moreinfolink'] = 'Mehr Informationen anzeigen ...';
 $string['badges_help'] = 'Der Block mit dir verliehenen Abzeichen<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Abzeichen anzeigen</a>';
+$string['block_exaport_used_layout'] = 'Used layout';
+$string['block_exaport_used_layout_body'] = 'Change the layout if you have some appearance problems. Right now it is used only for artefact list.';
+$string['block_exaport_used_layout_moodle_bootstrap'] = 'Cards layout';
+$string['block_exaport_used_layout_clean_old'] = 'Tiles layout (Old - ended of support from v4.6.7)';

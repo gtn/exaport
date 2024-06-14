@@ -283,6 +283,15 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
 
     $resumeparams = block_exaport_get_resume_params_record($userid);
 
+    // Create a new table record if no resume yet (TODO: may be to move it into block_exaport_get_resume_params_record()?)
+    if (!$resumeparams) {
+        $newresumeparams = new stdClass();
+        $newresumeparams->user_id = $userid;
+        $newresumeparams->cover = get_string("resume_template_newresume", "block_exaport");
+        $DB->insert_record("block_exaportresume", $newresumeparams);
+        $resumeparams = block_exaport_get_resume_params_record($userid);
+    }
+
     // add related parameters of resume
     if ($full && $resumeparams) {
         // TODO: add images?

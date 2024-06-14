@@ -404,8 +404,8 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     $tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot.'/blocks/exaport/importexport.php?courseid='.$COURSE->id,
         $tabtitle, '', true);
 
-    $tabitemidentifier = preg_replace('!_.*!', '', $itemidentifier);
-    $tabsubitemidentifier = preg_replace('!_.*!', '', $subitemidentifier);
+    $tabitemidentifier = $itemidentifier ? preg_replace('!_.*!', '', $itemidentifier) : '';
+    $tabsubitemidentifier = $subitemidentifier ? preg_replace('!_.*!', '', $subitemidentifier) : '';
 
     if (strpos($tabitemidentifier, 'bookmarks') === 0) {
         $tabitemidentifier = 'myportfolio';

@@ -249,10 +249,10 @@ if ($fromPdform = $pdfForm->get_data()) {
 }
 
 // check default pdf settings (for example if the pdf is not from the form)
-$pdf_settings['fontfamily'] = @$pdf_settings['fontfamily'] ?? 'Dejavu sans';
-$pdf_settings['fontsize'] = @$pdf_settings['fontsize'] ?? '14';
-$pdf_settings['pagesize'] = @$pdf_settings['pagesize'] ?? 'A4';
-$pdf_settings['pageorient'] = @$pdf_settings['pageorient'] ?? 'landscape';
+$pdf_settings['fontfamily'] = isset($pdf_settings['fontfamily']) ? $pdf_settings['fontfamily'] : 'Dejavu sans';
+$pdf_settings['fontsize'] = isset($pdf_settings['fontsize']) ? $pdf_settings['fontsize'] : '14';
+$pdf_settings['pagesize'] = isset($pdf_settings['pagesize']) ? $pdf_settings['pagesize'] : 'A4';
+$pdf_settings['pageorient'] = isset($pdf_settings['pageorient']) ? $pdf_settings['pageorient'] : 'landscape';
 $pdf_settings['showmetadata'] = isset($pdf_settings['showmetadata']) ? $pdf_settings['showmetadata'] : 0;
 $pdf_settings['showusername'] = isset($pdf_settings['showusername']) ? $pdf_settings['showusername'] : 1;
 $pdf_settings['showuserpicture'] = isset($pdf_settings['showuserpicture']) ? $pdf_settings['showuserpicture'] : 0;
@@ -400,7 +400,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                             $competencies = null;
                         }
 
-                        if ($competencies) {
+                        if (is_array($competencies)) {
                             $competenciesoutput = "";
                             foreach ($competencies as $competence) {
                                 $competenciesoutput .= $competence->title.'<br/>';
@@ -484,7 +484,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $general_content .= '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
                     // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.
                     if ($comp && has_capability('block/exaport:competences', $context)) {
-                        if ($competencies) {
+                        if (is_array($competencies) && count($competencies) > 0) {
                             $general_content .= '<img align="right" src="'.$CFG->wwwroot.
                                     '/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
                         }
@@ -505,7 +505,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     }
                     $general_content .= $intro.'</div>';
                     $blockForPdf .= $intro.'</div>';
-                    if ($competencies) {
+                    if (is_array($competencies) && count($competencies) > 0) {
                         $general_content .= '<div class="view-item-competences">'.
                                 '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>'.
                                 '<a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()">'.

@@ -877,10 +877,12 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 
         // Preview button.
         echo '<div style="float: right;">
-            <a target="_blank" href="'.
-                s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">'
-                    .block_exaport_fontawesome_icon('eye', 'regular', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-view-icon'])
-//                    .'<img alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/preview.png" />'
+            <a target="_blank"
+                title="'.block_exaport_get_string('view_preview_help_title').'"
+                id="preview_link" 
+                data-help="'.block_exaport_get_string('view_preview_help').'"
+                href="'.s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">'
+                .block_exaport_fontawesome_icon('eye', 'regular', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-view-icon'])
             .'</a></div>';
         $profileurl = new moodle_url('/user/profile.php');
         $cvurl = new moodle_url('/blocks/exaport/resume.php', ['courseid' => $courseid]);

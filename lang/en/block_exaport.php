@@ -56,7 +56,7 @@ $string['date'] = 'Date';
 $string['dontincludeurl'] = 'Check this box to unassociate the bookmark with the URL';
 $string['duplicatedurl'] = 'You already have this URL bookmarked.';
 $string['editcategories'] = 'edit categories';
-$string['explaining'] = 'The Portfolio may be used to store web addresses, files, as well as enter notes that may contain insights or little notes the user may wish to write down.';
+$string['explaining'] = 'The Portfolio can be used to store web addresses, files, and notes, allowing users to jot down insights or brief comments';
 $string['explainingmoredata'] = '<strong>This is your space to gather evidence of your learning journey.</strong>
             <ul>
                 <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
@@ -828,6 +828,8 @@ $string['create_view_content_help_text'] = '<ul>
             ';
 $string['moreinfolink'] = 'Show more info ...';
 $string['badges_help'] = 'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>';
+$string['view_preview_help_title'] = 'Preview';
+$string['view_preview_help'] = 'Preview of your view';
 $string['block_exaport_used_layout'] = 'Used layout';
 $string['block_exaport_used_layout_body'] = 'Change the layout if you have some appearance problems. Right now it is used only for artefact list.';
 $string['block_exaport_used_layout_moodle_bootstrap'] = 'Cards layout';

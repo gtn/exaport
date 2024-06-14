@@ -170,7 +170,7 @@ return [
         ],
         'explaining' => [
                 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.',
-                'The Portfolio may be used to store web addresses, files, as well as enter notes that may contain insights or little notes the user may wish to write down.',
+                'The Portfolio can be used to store web addresses, files, and notes, allowing users to jot down insights or brief comments',
         ],
         'explainingmoredata' => [
             '<strong>Dies ist dein Bereich, um Belege für deinen Lernweg zu sammeln.</strong>
@@ -2856,6 +2856,14 @@ return [
         'badges_help' => [
             'Der Block mit dir verliehenen Abzeichen<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Abzeichen anzeigen</a>',
             'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>',
+        ],
+        'view_preview_help_title' => [
+            'Preview',
+            'Preview',
+        ],
+        'view_preview_help' => [
+            'Preview of your view',
+            'Preview of your view',
         ],
         'block_exaport_used_layout' => [
             'Used layout',

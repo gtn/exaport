@@ -2858,27 +2858,27 @@ return [
             'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>',
         ],
         'view_preview_help_title' => [
-            'Preview',
+            'Vorschau',
             'Preview',
         ],
         'view_preview_help' => [
-            'Preview of your view',
+            'Vorschau der View',
             'Preview of your view',
         ],
         'block_exaport_used_layout' => [
-            'Used layout',
+            'Verwendetes Layout',
             'Used layout',
         ],
         'block_exaport_used_layout_body' => [
-            'Change the layout if you have some appearance problems. Right now it is used only for artefact list.',
+            'Ändern Sie das Layout, falls es Darstellungsprobleme gibt. Momentan wird es nur für die Artefaktliste verwendet.',
             'Change the layout if you have some appearance problems. Right now it is used only for artefact list.',
         ],
         'block_exaport_used_layout_moodle_bootstrap' => [
-            'Cards layout',
+            'Karten-Layout',
             'Cards layout',
         ],
         'block_exaport_used_layout_clean_old' => [
-            'Tiles layout (Old - ended of support from v4.6.7)',
+            'Kachel-Layout (Alt - Unterstützung endet mit Version 4.6.7)',
             'Tiles layout (Old - ended of support from v4.6.7)',
         ],
 ];

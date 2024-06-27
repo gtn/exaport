@@ -119,7 +119,7 @@ if ($ADMIN->fulltree) {
 
     // View custom template settings
     $settings->add(new admin_setting_heading('exaport/layout_settings',
-        block_exacomp_get_string('settings_layout_settings_heading', 'block_exaport'),
+        get_string('settings_layout_settings_heading', 'block_exaport'),
         ''));
     // allow "custom layouts" for view owners
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_custom_layout',

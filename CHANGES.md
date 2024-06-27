@@ -1,3 +1,6 @@
+### v4.6.7 (2024062700) ###
+*fetch string problem fixed
+
 ### v4.6.7 (2024062100) ###
 *update problem fixed
 *PHP8 deprecations

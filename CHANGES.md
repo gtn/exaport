@@ -1,3 +1,11 @@
+### v4.6.7 (2024062700) ###
+*fetch string problem fixed
+
+### v4.6.7 (2024062100) ###
+*update problem fixed
+*PHP8 deprecations
+*small fix for the new user
+
 ### v4.6.7 (2024060600) ###
 New features:
 *added block_exaport_disable_externaccess: Disables the "External Access" sharing option for views. (This allows administrators to control external sharing permissions.)

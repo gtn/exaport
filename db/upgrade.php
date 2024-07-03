@@ -1152,19 +1152,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     }
 
-    if ($oldversion < 2024060500) {
-        $table = new xmldb_table('block_exaportcate');
-
-        $field = new xmldb_field('iconmerge', XMLDB_TYPE_INTEGER, '1', true, null, null, 0, 'structure_share');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2024060500, 'exaport');
-
-    }
-
     if ($oldversion < 2024061300){
         // Update a field for the table block_exaportresume
         $table = new xmldb_table('block_exaportresume');
@@ -1175,6 +1162,19 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2024061300, 'exaport');
+    }
+
+    if ($oldversion < 2024070300) {
+        $table = new xmldb_table('block_exaportcate');
+
+        $field = new xmldb_field('iconmerge', XMLDB_TYPE_INTEGER, '1', true, null, null, 0, 'structure_share');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2024070300, 'exaport');
+
     }
 
 

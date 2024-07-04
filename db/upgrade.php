@@ -1152,7 +1152,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     }
 
-    if ($oldversion < 2024060500) {
+    if ($oldversion < 2024070300) {
         $table = new xmldb_table('block_exaportcate');
 
         $field = new xmldb_field('iconmerge', XMLDB_TYPE_INTEGER, '1', true, null, null, 0, 'structure_share');
@@ -1161,11 +1161,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2024060500, 'exaport');
+        upgrade_block_savepoint(true, 2024070300, 'exaport');
 
     }
 
-    if ($oldversion < 2024061300){
+    if ($oldversion < 2024070301){
         // Update a field for the table block_exaportresume
         $table = new xmldb_table('block_exaportresume');
         $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
@@ -1174,7 +1174,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2024061300, 'exaport');
+        upgrade_block_savepoint(true, 2024070301, 'exaport');
     }
 
 

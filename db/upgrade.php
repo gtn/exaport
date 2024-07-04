@@ -1152,18 +1152,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     }
 
-    if ($oldversion < 2024061300){
-        // Update a field for the table block_exaportresume
-        $table = new xmldb_table('block_exaportresume');
-        $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->change_field_default($table, $field);
-        }
-
-        // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2024061300, 'exaport');
-    }
-
     if ($oldversion < 2024070300) {
         $table = new xmldb_table('block_exaportcate');
 
@@ -1175,6 +1163,18 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2024070300, 'exaport');
 
+    }
+
+    if ($oldversion < 2024070301){
+        // Update a field for the table block_exaportresume
+        $table = new xmldb_table('block_exaportresume');
+        $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2024070301, 'exaport');
     }
 
 

@@ -709,6 +709,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
         $description = $resume->{$type.$element};
         $description = file_rewrite_pluginfile_urls($description, 'pluginfile.php',
                             context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_'.$type.$element, $resume->id);
+        $description = block_exaport_add_view_access_parameter_to_url($description, 'resume/'.$resume->id.'/'.$USER->id, ['src']);
         $description = trim($description);
         if (preg_replace('/\<br(\s*)?\/?\>/i', "", $description) == '') {
             // If text is only <br> (html-editor can return this).

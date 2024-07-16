@@ -262,7 +262,7 @@
 	  <FIELDS>
 		<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
 		<FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
-		<FIELD NAME="courseid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+		<FIELD NAME="courseid" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
 		<FIELD NAME="cover" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="cover of resume"/>
 		<FIELD NAME="interests" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="interests in resume"/>
 		<FIELD NAME="goalspersonal" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="personal goals"/>

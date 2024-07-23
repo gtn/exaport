@@ -273,7 +273,6 @@
 		<FIELD NAME="skillsacademic" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="academic skills"/>
 		<FIELD NAME="skillscareers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="careers skills"/>
 		<FIELD NAME="linkedinurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="url to linkedin"/>
-		<FIELD NAME="iconmerge" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="structure_share"/>
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>

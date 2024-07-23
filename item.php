@@ -455,9 +455,6 @@ echo $OUTPUT->footer($course);
 function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextareas) {
     global $CFG, $USER, $DB;
 
-    // Convert the type into the type by post data:
-    block_exaport_convert_item_type($post);
-
     $post->timemodified = time();
     foreach ($usetextareas as $fieldname => $usetextarea) {
         if (!$usetextarea) {
@@ -548,11 +545,6 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
     $post->userid = $USER->id;
     $post->timemodified = time();
     $post->courseid = $courseid;
-
-    // Convert 'mixed' type into correct type by post data:
-    if ($post->type == 'mixed') {
-        block_exaport_convert_item_type($post);
-    }
 
     if (!empty($post->url)) {
         if ($post->url == 'http://') {
@@ -668,21 +660,5 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
     if (!$status) {
         print_error('deleteposterror', 'block_exaport', $returnurl);
-    }
-}
-
-function block_exaport_convert_item_type(&$post) {
-    // 1. default type is 'note'
-    $post->type = 'note';
-    // 2. Check 'url' data.
-    if (!empty($post->url) && $post->url) {
-        $post->type = 'link';
-    }
-    // 3. Check 'file' uploading.
-    if (!empty($post->file)) {
-        $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->file);
-        if ($uploadfilesizes > 0) {
-            $post->type = 'file';
-        }
     }
 }

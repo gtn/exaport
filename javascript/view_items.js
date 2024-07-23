@@ -65,6 +65,4 @@ jQueryExaport(function ($) {
             $(morecontent).show(200);
         }
     });
-
-
 });

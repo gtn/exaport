@@ -621,15 +621,11 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
                 $idnext = $keys[$itemindex + 1];
             };
             $linktoup = '<a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=sortchange&type='.$type.
-                    '&id1='.$record->id.'&id2='.$idnext.'&sesskey='.sesskey().'">'
-                    .block_exaport_fontawesome_icon('chevron-down', 'solid', 1)
-//                    .'<img src="pix/down_16.png" alt="'.get_string("down").'" />'
-                    .'</a>';
+                    '&id1='.$record->id.'&id2='.$idnext.'&sesskey='.sesskey().'"><img src="pix/down_16.png" alt="'.
+                    get_string("down").'" /></a>';
             $linktodown = '<a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.
-                    '&action=sortchange&type='.$type.'&id1='.$record->id.'&id2='.$idprev.'&sesskey='.sesskey().'">'
-                    .block_exaport_fontawesome_icon('chevron-up', 'solid', 1)
-//                    .'<img src="pix/up_16.png" alt="'.get_string("up").'" />'
-                    .'</a>';
+                    '&action=sortchange&type='.$type.'&id1='.$record->id.'&id2='.$idprev.'&sesskey='.sesskey().'">'.
+                    '<img src="pix/up_16.png" alt="'.get_string("up").'" /></a>';
             $table->data[$itemindex]['up'] = '&nbsp';
             $table->data[$itemindex]['down'] = '&nbsp';
             if ($itemindex < count($records) - 1) {
@@ -644,14 +640,9 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
         if ($editcolumn) {
             $table->data[$itemindex]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.
                     '&action=edit&type='.$type.'&id='.$record->id.'&sesskey='.sesskey().'">'.
-                    block_exaport_fontawesome_icon('pen-to-square', 'regular', 1).
-//                    '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
-                    '</a>'.
+                    '<img src="pix/edit.png" alt="'.get_string("edit").'" /></a>'.
                     ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.'&action=delete&type='.$type.'&id='.
-                    $record->id.'">'.
-                    block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon', 'mt-2']).
-//                    '<img src="pix/del.png" alt="'.get_string("delete").'"/>'.
-                    '</a>';
+                    $record->id.'"><img src="pix/del.png" alt="'.get_string("delete").'"/></a>';
         };
     };
     return html_writer::table($table);
@@ -703,9 +694,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
             if (file_exists($CFG->dirroot.'/blocks/exacomp/lib/lib.php')) {
                 $table->data[$itemindex]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.
                         $courseid.'&action=edit&type='.$type.'comp&id='.$resume->id.'&sesskey='.sesskey().'">'.
-                        block_exaport_fontawesome_icon('pen-to-square', 'regular', 1).
-//                        '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
-                        '</a>';
+                        '<img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
             } else {
                 $table->data[$itemindex]['icons'] = '';
             }
@@ -720,7 +709,6 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
         $description = $resume->{$type.$element};
         $description = file_rewrite_pluginfile_urls($description, 'pluginfile.php',
                             context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_'.$type.$element, $resume->id);
-        $description = block_exaport_add_view_access_parameter_to_url($description, 'resume/'.$resume->id.'/'.$USER->id, ['src']);
         $description = trim($description);
         if (preg_replace('/\<br(\s*)?\/?\>/i', "", $description) == '') {
             // If text is only <br> (html-editor can return this).
@@ -749,9 +737,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
         // Links to edit / delete.
         $table->data[$itemindex]['icons'] = ' <a href="'.$CFG->wwwroot.'/blocks/exaport/resume.php?courseid='.$courseid.
                 '&action=edit&type='.$type.$element.'&id='.$resume->id.'&sesskey='.sesskey().'">'.
-                block_exaport_fontawesome_icon('pen-to-square', 'regular', 1).
-//                '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
-                '</a>';
+                '<img src="pix/edit.png" alt="'.get_string("edit").'" /></a>';
     };
 
     $tablecontent = html_writer::table($table);
@@ -844,7 +830,8 @@ function block_exaport_get_user_badge_image($badge, $just_url = false) {
     return $img;
 }
 
-function europass_xml($resumeid = 0) {
+function europass_xml($resumeid = 0)
+{
     global $USER, $DB, $SITE, $CFG;
     global $attachedfilenames, $attachedfiledatas, $attachedfilemimetypes;
     $xml = '';
@@ -855,19 +842,23 @@ function europass_xml($resumeid = 0) {
     $scheme_name = 'DocumentIdentifier';
     $scheme_agency_name = 'EUROPASS';
     $scheme_version_id = '4.0';
+    //Everything that i commented out is original
 
     $dom = new DOMDocument('1.0', 'utf-8');
-    $root = $dom->createElement('Candidate');
-    $root->setAttribute('xsi:schemaLocation', 'http://www.europass.eu/1.0 Candidate.xsd');
-    $root->setAttribute('xmlns', 'http://www.europass.eu/1.0');
-
-    $root->setAttribute('xmlns:oa', 'http://www.openapplications.org/oagis/9');
+    $root = $dom->createElement('SkillsPassport');
+    //$root = $dom->createElement('Candidate');
+    //$root->setAttribute('xsi:schemaLocation', 'http://www.europass.eu/1.0 Candidate.xsd');
+    //$root->setAttribute('xmlns', 'http://www.europass.eu/1.0');
+    $root->setAttribute('xmlns', 'http://europass.cedefop.europa.eu/Europass');
+    //$root->setAttribute('xmlns:oa', 'http://www.openapplications.org/oagis/9');
     $root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
-    $root->setAttribute('xmlns:eures', 'http://www.europass_eures.eu/1.0');
-    $root->setAttribute('xmlns:hr', 'http://www.hr-xml.org/3');
+    $root->setAttribute('xsi:schemaLocation', 'http://europass.cedefop.europa.eu/Europass http://europass.cedefop.europa.eu/xml/EuropassSchema_V3.0.xsd');
+    $root->setAttribute('locale',"en");
+    //$root->setAttribute('xmlns:eures', 'http://www.europass_eures.eu/1.0');
+    //$root->setAttribute('xmlns:hr', 'http://www.hr-xml.org/3');
+    // --- was not commented by me--
     // $root->setAttribute('majorVersionID', '3');
     // $root->setAttribute('minorVersionID', '2');
-
     // document ID
     $documentID = $dom->createElement('hr:DocumentID');
     $documentID->setAttribute('scheme_id', $scheme_id);
@@ -876,6 +867,7 @@ function europass_xml($resumeid = 0) {
     $documentID->setAttribute('scheme_version_id', $scheme_version_id);
 
     // supplier
+    /*
     $candidate_supplier = $dom->createElement('candidate_supplier');
     $party_id = $dom->createElement('hr:party_id');
     $party_id->setAttribute('scheme_id', $scheme_id);
@@ -888,34 +880,58 @@ function europass_xml($resumeid = 0) {
     $party_name->appendChild($text);
     $candidate_supplier->appendChild($party_name);
     $root->appendChild($candidate_supplier);
+    */
+
 
     // candidate
-    $candidate_person = $dom->createElement('candidate_person');
+    /*
+    $learner_info= $dom->createElement('LearnerInfo');
+    $identification = $dom->createElement('identification');
+    $person_name= $dom->createElement('PersonName');
+    $firstName= $dom->createElement('FirstName');
+    $text= $dom->createTextNode($USER->firstname);
+    $firstName->appendChild($text);
+    $surName= $dom->createElement('SurName');
+    $text= $dom->createTextNode($USER->lastname);
+    $surName->appendChild($text);
+    $person_name->appendChild($firstName);
+    $person_name->appendChild($surName);
+    $identification->appendChild($person_name);
+    $learner_info->appendChild($identification);
+    */
+
+    //$candidate_person = $dom->createElement('candidate_person');
+    $learner_info = $dom->createElement('LearnerInfo');
+    $identification_tag = $dom->createElement('Identification');
     // name
-    $person_name = $dom->createElement('person_name');
-    $given_name = $dom->createElement('oa:given_name');
+    //$person_name = $dom->createElement('person_name');
+    $person_name = $dom->createElement('PersonName');
+    //$given_name = $dom->createElement('oa:given_name');
+    $first_name = $dom->createElement('FirstName');
     $text = $dom->createTextNode($USER->firstname);
-    $given_name->appendChild($text);
-    $family_name = $dom->createElement('hr:family_name');
+    $first_name->appendChild($text);
+    $family_name = $dom->createElement('Surname');
     $text = $dom->createTextNode($USER->lastname);
     $family_name->appendChild($text);
-    $person_name->appendChild($given_name);
+    $person_name->appendChild($first_name);
     $person_name->appendChild($family_name);
-    $candidate_person->appendChild($person_name);
+    $identification_tag->appendChild($person_name);
     // contact data
-    $communication = $dom->createElement('communication');
-    $use_code = $dom->createElement('use_code');
-    $text = $dom->createTextNode('home');
-    $use_code->appendChild($text);
-    $communication->appendChild($use_code);
-    $address = $dom->createElement('address');
-    $address->setAttribute('type', 'home');
+
+    $communication = $dom->createElement('ContactInfo');
+    $contact_tag= $dom->createElement('Contact');
+    $country_name= $dom->createElement('Country');
+    $address = $dom->createElement('Address');
     $communication->appendChild($address);
-    // echo "<pre>debug:<strong>resumelib.php:827</strong>\r\n"; print_r($USER); echo '</pre>'; exit; // !!!!!!!!!! delete it
-    europass_fill_sub_element_text($dom, $address, 'oa:AddressLine', $USER->address);
-    europass_fill_sub_element_text($dom, $address, 'oa:CityName', $USER->city);
-    europass_fill_sub_element_text($dom, $address, 'CountryCode', strtolower($USER->country));
-    $candidate_person->appendChild($communication);
+    europass_fill_sub_element_text($dom, $contact_tag, 'AddressLine', $USER->address);
+    europass_fill_sub_element_text($dom, $contact_tag, 'PostalCode', $USER->postcode);
+    europass_fill_sub_element_text($dom, $country_name, 'Code', strtoupper($USER->country));
+    $country_label= $dom->createElement('Label');
+    $country_label->appendChild($dom->createTextNode(strtoupper($USER->country)));
+    $country_name->appendChild($country_label);
+    $identification_tag->appendChild($communication);
+    $address->appendChild($contact_tag);
+    $contact_tag->appendChild($country_name);
 
     // for phone numbers we need to know country code and phone number. So, use this code
     $phone_types = ['home', 'mobile'];
@@ -928,7 +944,7 @@ function europass_xml($resumeid = 0) {
             $phone_number = @$matches[2];
             if ($phone_number) {
                 if ($country_code && $country_code > 0) { // get default country code from Moodle settings
-                    europass_fill_communication_item($dom, $candidate_person, 'Telephone', ['oa:DialNumber' => $phone_number, 'use_code' => $phone_types[$i++], 'CountryDialing' => $country_code]);
+                   europass_fill_communication_item($dom, $identification_tag, 'Telephone', ['oa:DialNumber' => $phone_number, 'use_code' => $phone_types[$i++], 'CountryDialing' => $country_code]);
                 } else if ($CFG->country) {
                     // todo: find phone code by country code?
                     // europass_fill_communication_item($dom, $candidate_person, 'Telephone', ['oa:DialNumber' => $phone_number, 'use_code' => $phone_types[$i++], 'CountryCode' => strtolower($CFG->country)]);
@@ -937,26 +953,32 @@ function europass_xml($resumeid = 0) {
             }
         }
     }
-    europass_fill_communication_item($dom, $candidate_person, 'Email', ['oa:URI' => @$USER->email]);
-    europass_fill_communication_item($dom, $candidate_person, 'Web', ['oa:URI' => @$USER->url]);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->icq, 'OtherTitle' => 'ICQ', 'use_code' => 'other']);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->skype, 'OtherTitle' => 'Skype', 'use_code' => 'other']);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->yahoo, 'OtherTitle' => 'Yahoo', 'use_code' => 'other']);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->aim, 'OtherTitle' => 'AIM', 'use_code' => 'other']);
-    europass_fill_communication_item($dom, $candidate_person, 'InstantMessage', ['oa:URI' => @$USER->msn, 'OtherTitle' => 'MSN', 'use_code' => 'other']);
 
-    europass_fill_sub_element_text($dom, $candidate_person, 'ResidenceCountryCode', strtolower(@$USER->country));
-    $root->appendChild($candidate_person);
+    europass_fill_communication_item($dom, $communication, 'Email', ['Contact' => @$USER->email]);
+    europass_fill_communication_item($dom, $identification_tag, 'Web', ['oa:URI' => @$USER->url]);
+    europass_fill_communication_item($dom, $identification_tag, 'InstantMessage', ['oa:URI' => @$USER->icq, 'OtherTitle' => 'ICQ', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $identification_tag, 'InstantMessage', ['oa:URI' => @$USER->skype, 'OtherTitle' => 'Skype', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $identification_tag, 'InstantMessage', ['oa:URI' => @$USER->yahoo, 'OtherTitle' => 'Yahoo', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $identification_tag, 'InstantMessage', ['oa:URI' => @$USER->aim, 'OtherTitle' => 'AIM', 'use_code' => 'other']);
+    europass_fill_communication_item($dom, $identification_tag, 'InstantMessage', ['oa:URI' => @$USER->msn, 'OtherTitle' => 'MSN', 'use_code' => 'other']);
+
+    $learner_info->appendChild($identification_tag);
+    $root->appendChild($learner_info);
 
     // candidate_profile
-    $candidate_profile = $dom->createElement('candidate_profile');
-    $candidate_profile->setAttribute('language_code', 'en');
+    $educations_list = $dom->createElement('EducationList');
+    $educations_list->setAttribute('language_code', 'en');
+
+    /*
     $ID = $dom->createElement('hr:ID');
     $ID->setAttribute('scheme_id', $scheme_id);
     $ID->setAttribute('scheme_name', 'CandidateProfileID');
     $ID->setAttribute('scheme_agency_name', $scheme_agency_name);
     $ID->setAttribute('scheme_version_id', '1.0');
-    $candidate_profile->appendChild($ID);
+
+    $educations_list->appendChild($ID);
+    */
+
 
     // user picture.
     $fs = get_file_storage();
@@ -968,85 +990,89 @@ function europass_xml($resumeid = 0) {
     } while (!$file && $i < count($img_types));
     if ($file) {
         $base64content = base64_encode('data:'.$file->get_mimetype().';base64,'.base64_encode($file->get_content())); // double encoding!!!!!
-        europass_add_attachment($dom, $candidate_profile, $base64content, 'photo', 'ProfilePicture');
+        europass_add_attachment($dom, $educations_list, $base64content, 'photo', 'ProfilePicture');
     };
 
     // personal information
+    /*
     $executive_summary = $dom->createElement('hr:executive_summary');
     $executive_summary->appendChild($dom->createTextNode(clean_html_to_plain_text($resume->cover)));
-    $candidate_profile->appendChild($executive_summary);
+    $educations_list->appendChild($executive_summary);
+    */
 
     // WorkExperienceList / Employment history.
+    $organization_info = $dom->createElement('Employer');
     $employments = $DB->get_records('block_exaportresume_employ', array("resume_id" => $resume->id), 'sorting');
     // $workexperiencelist = europass_xml_employers_educations($dom, 'WorkExperience', $resume->employments);
-    $executive_summary = $dom->createElement('executive_summary');
     foreach ($employments as $employment) {
-        $employer_history = $dom->createElement('employer_history');
+        $work_experience = $dom->createElement('WorkExperienceList');
+        $work= $dom->createElement('WorkExperience');
         // title
-        $organization_name = $dom->createElement('hr:organization_name');
+        $label= $dom->createElement('Label');
+        $organization_name = $dom->createElement('Name');
         $text = $dom->createTextNode(clean_for_external_xml($employment->employer));
         $organization_name->appendChild($text);
-        $employer_history->appendChild($organization_name);
+        $organization_info->appendChild($organization_name);
         // address
+        /*
         $address = clean_for_external_xml($employment->employeraddress);
         $organization_contact = $dom->createElement('organization_contact');
-        $communication = $dom->createElement('communication');
-        $address = $dom->createElement('address');
+        $communication = $dom->createElement('Email');
+        $addresses = $dom->createElement('address');
         $text = $dom->createTextNode($address);
-        $address->appendChild($text);
-        $communication->appendChild($address);
+        $addresses->appendChild($text);
+        $communication->appendChild($addresses);
         $organization_contact->appendChild($communication);
-        $employer_history->appendChild($organization_contact);
+        $work->appendChild($organization_contact);
+        */
 
-        $position_history = $dom->createElement('position_history');
-        $position_title = $dom->createElement('position_title');
-        $position_title->setAttribute('typeCode', 'FREETEXT');
-        $text = $dom->createTextNode(clean_for_external_xml($employment->jobtitle));
-        $position_title->appendChild($text);
-        $position_history->appendChild($position_title);
-        $employment_period = $dom->createElement('eures:employment_period');
+        $position_title = $dom->createElement('Position');
+        $label->appendChild($dom->createTextNode($employment->jobtitle));
+        $position_title->appendChild($label);
+        $period_tag = $dom->createElement('Period');
+        $ongoing= $dom->createElement('Current');
         // start date
-        $date = get_europass_date($employment->startdate);
-        if ($date) {
-            $start_date = $dom->createElement('eures:start_date');
-            $formatted_date_time = $dom->createElement('hr:formatted_date_time');
-            $text = $dom->createTextNode($date);
-            $formatted_date_time->appendChild($text);
-            $start_date->appendChild($formatted_date_time);
-            $employment_period->appendChild($start_date);
+        if ($employment->startdate) {
+            $date_parts= explode('.', $employment->startdate);
+            $year = $date_parts[2];
+            $start_date = $dom->createElement('From');
+            $start_date->setAttribute('year', $year);
+            $period_tag->appendChild($start_date);
         }
         // end date
         if ($employment->enddate) {
             $date = get_europass_date($employment->enddate);
             if ($date) {
-                $end_date = $dom->createElement('eures:end_date');
-                $formatted_date_time = $dom->createElement('hr:formatted_date_time');
-                $text = $dom->createTextNode($date);
-                $formatted_date_time->appendChild($text);
-                $end_date->appendChild($formatted_date_time);
-                $employment_period->appendChild($end_date);
+                $date_parts= explode('.', $employment->startdate);
+                $year = $date_parts[2];
+                $end_date = $dom->createElement('To');
+                $end_date->setAttribute('year', $year);
+                $period_tag->appendChild($end_date);
             }
             $current = 'false';
+            $ongoing->appendChild($dom->createTextNode('false'));
+            $period_tag->appendChild($ongoing);
         } else {
+            $ongoing->appendChild($dom->createTextNode('true'));
             $current = 'true';
+            $period_tag->appendChild($ongoing);
+
         }
         // current
         $current_indicator = $dom->createElement('hr:current_indicator');
         $text = $dom->createTextNode($current);
         $current_indicator->appendChild($text);
-        $employment_period->appendChild($current_indicator);
-        $position_history->appendChild($employment_period);
         // description
-        $description = $dom->createElement('oa:description');
+        $description = $dom->createElement('Activities');
         $text = $dom->createTextNode(clean_for_external_xml($employment->positiondescription));
         $description->appendChild($text);
-        $position_history->appendChild($description);
-
-        $employer_history->appendChild($position_history);
-
-        $executive_summary->appendChild($employer_history);
+        $work->appendChild($position_title);
+        $work->appendChild($description);
+        $work->appendChild($organization_info);
+        $work->appendChild($period_tag);
+        $work_experience->appendChild($work);
+        $learner_info->appendChild($work_experience);
     }
-    $candidate_profile->appendChild($executive_summary);
 
     // EducationList / Education history.
     $educations = $DB->get_records('block_exaportresume_edu', array("resume_id" => $resume->id), 'sorting');
@@ -1060,25 +1086,31 @@ function europass_xml($resumeid = 0) {
     // [qualname] => my title name1
     // [qualdescription] => description of qualification 1
             // [sorting] => 10
-    $education_history = $dom->createElement('education_history');
+
+    $education_history = $dom->createElement('Education');
     foreach ($educations as $education) {
-        $education_organization_attendance = $dom->createElement('education_organization_attendance');
         // title
-        $organization_name = $dom->createElement('hr:organization_name');
+        $organization_info= $dom->createElement('Organisation');
+        $organization_name = $dom->createElement('Name');
         $text = $dom->createTextNode(clean_for_external_xml($education->institution));
         $organization_name->appendChild($text);
-        $education_organization_attendance->appendChild($organization_name);
-        // address
-        $address = clean_for_external_xml($education->institutionaddress);
-        $organization_contact = $dom->createElement('organization_contact');
-        $communication = $dom->createElement('communication');
-        $address = $dom->createElement('address');
-        $text = $dom->createTextNode(clean_for_external_xml($education->address));
-        $address->appendChild($text);
-        $communication->appendChild($address);
-        $organization_contact->appendChild($communication);
-        $education_organization_attendance->appendChild($organization_contact);
+        $organization_info->appendChild($organization_name);
 
+        // address
+        $address = clean_for_external_xml($education->country);
+        $communication = $dom->createElement('ContactInfo');
+        $address = $dom->createElement('Address');
+        $contact= $dom->createElement('Contact');
+        $country= $dom->createElement('Country');
+        $text = $dom->createTextNode($education->country);
+        $organization_info->appendChild($communication);
+        $country->appendChild($text);
+        $contact->appendChild($country);
+        $address->appendChild($contact);
+        $communication->appendChild($address);
+        $education_history->appendChild($organization_info);
+
+        /*
         $education_degree = $dom->createElement('education_degree');
         $degree_name = $dom->createElement('hr:degree_name');
         $text = $dom->createTextNode(clean_for_external_xml($education->qualtype));
@@ -1092,32 +1124,36 @@ function europass_xml($resumeid = 0) {
         $final_grade->appendChild($score_ext);
         $education_degree->appendChild($final_grade);
 
+
         $occupational_skills_covered = $dom->createElement('occupational_skills_covered');
         $text = $dom->createTextNode(clean_for_external_xml($education->qualdescription));
         $occupational_skills_covered->appendChild($text);
         $education_degree->appendChild($occupational_skills_covered);
-        $education_organization_attendance->appendChild($education_degree);
+        $education_history->appendChild($education_degree);
+        */
 
-        $attendance_period = $dom->createElement('attendance_period');
+        $attendance_period = $dom->createElement('Period');
         // start date
         $date = get_europass_date($education->startdate);
+        $data_parts = explode('.', $education->startdate);
+        $year = $data_parts[2];
+        $month = $data_parts[1];
+        $day = $data_parts[0];
         if ($date) {
-            $start_date = $dom->createElement('start_date');
-            $formatted_date_time = $dom->createElement('hr:formatted_date_time');
-            $text = $dom->createTextNode($date);
-            $formatted_date_time->appendChild($text);
-            $start_date->appendChild($formatted_date_time);
+            $start_date = $dom->createElement('From');
+            $start_date->setAttribute('year', $year);
+            $start_date->setAttribute('month', $month);
+            $start_date->setAttribute('day', $day);
             $attendance_period->appendChild($start_date);
         }
         // end date
         if ($education->enddate) {
             $date = get_europass_date($education->enddate);
             if ($date) {
-                $end_date = $dom->createElement('end_date');
-                $formatted_date_time = $dom->createElement('hr:formatted_date_time');
-                $text = $dom->createTextNode($date);
-                $formatted_date_time->appendChild($text);
-                $end_date->appendChild($formatted_date_time);
+                $end_date = $dom->createElement('To');
+                $end_date->setAttribute('year', $year);
+                $end_date->setAttribute('month', $month);
+                $end_date->setAttribute('day', $day);
                 $attendance_period->appendChild($end_date);
             }
             $current = 'false';
@@ -1125,29 +1161,31 @@ function europass_xml($resumeid = 0) {
             $current = 'true';
         }
         // current
-        $ongoing = $dom->createElement('ongoing');
-        $text = $dom->createTextNode($current);
-        $ongoing->appendChild($text);
-        $attendance_period->appendChild($ongoing);
-        $education_organization_attendance->appendChild($attendance_period);
 
-        $education_history->appendChild($education_organization_attendance);
+        $education_history->appendChild($attendance_period);
+
+        $title_tag= $dom->createElement('Title');
+        $title_tag->appendChild($dom->createTextNode('Qualifications'));
+        $education_history->appendChild($title_tag);
+
+
 
     }
-    $candidate_profile->appendChild($education_history);
+    $educations_list->appendChild($education_history);
 
     // Skills
     // skills - Career skills
+
     if ($resume->skillscareers) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscareers'), $resume->skillscareers);
+        europassAddOthersPartToCandiadateProfile($dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscareers'), $resume->skillscareers);
     }
     // skills - Academic skills
     if ($resume->skillsacademic) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillsacademic'), $resume->skillsacademic);
+        europassAddOthersPartToCandiadateProfile($dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillsacademic'), $resume->skillsacademic);
     }
     // skills - Personal skills
     if ($resume->skillspersonal) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillspersonal'), $resume->skillspersonal);
+        europassAddOthersPartToCandiadateProfile($dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillspersonal'), $resume->skillspersonal);
     }
     // skills - Educational standards
     $skillscontent = '';
@@ -1159,39 +1197,48 @@ function europass_xml($resumeid = 0) {
         };
     };
     if ($skillscontent) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscomp'), $skillscontent);
+        europassAddOthersPartToCandiadateProfile($dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscomp'), $skillscontent);
     }
+
 
     // certificates
     $certifications = $DB->get_records('block_exaportresume_certif', array("resume_id" => $resume->id), 'sorting');
     if ($certifications && is_array($certifications)) {
         // list($sertificationsstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_certif');
         // europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_certif'), '', $sertificationsstring);
-        $certifications = $dom->createElement('certifications');
+
+        $certi = $dom->createElement('AchievementList');
         foreach ($certifications as $certification) {
-            $certification_node = $dom->createElement('Certification');
-            $certification_name = $dom->createElement('hr:certification_name');
-            $text = $dom->createTextNode($certification->title);
-            $certification_name->appendChild($text);
+            $certification_node = $dom->createElement('Achievement');
+            $certification_name = $dom->createElement('Title');
+            $code= $dom->createElement('Code');
+            $label= $dom->createElement('Label');
+            $code->appendChild($dom->createTextNode($certification->title));
+            $label->appendChild($dom->createTextNode($certification->title));
+            $certification_name->appendChild($code);
+            $certification_name->appendChild($label);
             $certification_node->appendChild($certification_name);
             $date = get_europass_date($certification->date);
             if ($date) {
-                $first_issued_date = $dom->createElement('eures:first_issued_date');
-                $formatted_date_time = $dom->createElement('hr:formatted_date_time');
-                $text = $dom->createTextNode($date);
-                $formatted_date_time->appendChild($text);
-                $first_issued_date->appendChild($formatted_date_time);
-                $certification_node->appendChild($first_issued_date);
+                $formatted_date_time = $dom->createElement('Date');
+                $date_parts= explode('-', $date);
+                $year= $date_parts[0];
+                $month= $date_parts[1];
+                $day= $date_parts[2];
+                $formatted_date_time->setAttribute('year', $year);
+                $formatted_date_time->setAttribute('month', $month);
+                $formatted_date_time->setAttribute('day', $day);
+                $certification_node->appendChild($formatted_date_time);
             }
-            $description = $dom->createElement('oa:description');
+            $description = $dom->createElement('Description');
             $text = $dom->createTextNode($certification->description);
             $description->appendChild($text);
             $certification_node->appendChild($description);
             // attachment
-            europass_xml_attachfile($dom, $candidate_profile, $certification_node, 'certif', [$certification->id], 'DOC');
-            $certifications->appendChild($certification_node);
+            europass_xml_attachfile($dom, $learner_info, $certification_node, 'certif', [$certification->id], 'DOC');
+            $certi->appendChild($certification_node);
         }
-        $candidate_profile->appendChild($certifications);
+        $learner_info->appendChild($certi);
     }
 
     // Books, publications.
@@ -1229,30 +1276,31 @@ function europass_xml($resumeid = 0) {
                 $doi->appendChild($Link);
                 $publication_node->appendChild($doi);
             }
-            europass_xml_attachfile($dom, $candidate_profile, $publication_node, 'public', [$publication->id], 'DOC');
+            europass_xml_attachfile($dom, $educations_list, $publication_node, 'public', [$publication->id], 'DOC');
             $publication_history->appendChild($publication_node);
         }
-        $candidate_profile->appendChild($publication_history);
+        $educations_list->appendChild($publication_history);
     }
 
     // Memberships.
+    /*
     list($mbrshipstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_mbrship');
     if ($mbrshipstring) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_mbrship'), '', $mbrshipstring);
+        europassAddOthersPartToCandiadateProfile($dom, $educations_list, block_exaport_get_string('resume_mbrship'), '', $mbrshipstring);
         // europass_xml_attachfile($dom, $candidate_profile, $publication_node, 'public', [$publication->id], 'DOC'); files?
     }
     // Goals.
     // goals - Personal goals
     if ($resume->goalspersonal) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalspersonal'), $resume->goalspersonal);
+        europassAddOthersPartToCandiadateProfile($dom, $educations_list, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalspersonal'), $resume->goalspersonal);
     }
     // goals - Academic goals
     if ($resume->goalsacademic) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalsacademic'), $resume->goalsacademic);
+        europassAddOthersPartToCandiadateProfile($dom, $educations_list, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalsacademic'), $resume->goalsacademic);
     }
     // goals - Careers goals
     if ($resume->goalscareers) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalscareers'), $resume->goalscareers);
+        europassAddOthersPartToCandiadateProfile($dom, $educations_list, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalscareers'), $resume->goalscareers);
     }
     // goals - Educational standards
     $goalsstring = '';
@@ -1264,10 +1312,12 @@ function europass_xml($resumeid = 0) {
         };
     };
     if ($goalsstring) {
-        europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalscomp'), $goalsstring);
+        europassAddOthersPartToCandiadateProfile($dom, $educations_list, block_exaport_get_string('resume_goals'), block_exaport_get_string('resume_goalscomp'), $goalsstring);
     }
+    */
 
     // Interests.
+    /*
     if ($resume->interests) {
         $hobbies_and_interests = $dom->createElement('hobbies_and_interests');
         $hobby_or_interest = $dom->createElement('hobby_or_interest');
@@ -1280,10 +1330,11 @@ function europass_xml($resumeid = 0) {
         $description->appendChild($text);
         $hobby_or_interest->appendChild($description);
         $hobbies_and_interests->appendChild($hobby_or_interest);
-        $candidate_profile->appendChild($hobbies_and_interests);
+        $educations_list->appendChild($hobbies_and_interests);
     }
+    */
 
-    $root->appendChild($candidate_profile);
+    $learner_info->appendChild($educations_list);
 
     $dom->appendChild($root);
     $dom->formatOutput = true;
@@ -1294,27 +1345,22 @@ function europass_xml($resumeid = 0) {
     return $xml;
 }
 
-function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $sectionTitle, $title, $description) {
-    $others = $dom->createElement('others');
-    $Title = $dom->createElement('Title');
-    $text = $dom->createTextNode($sectionTitle);
-    $Title->appendChild($text);
-    $others->appendChild($Title);
+
+function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $sectionTitle, $title, $description):void {
+    $skills = $dom->createElement('Skills');
     $Other = $dom->createElement('Other');
+    $DescriptionNode = $dom->createElement('Description');
     if ($title) {
-        $Title = $dom->createElement('Title');
         $text = $dom->createTextNode($title);
-        $Title->appendChild($text);
-        $Other->appendChild($Title);
+        $DescriptionNode->appendChild($text);
     }
-    $DescriptionNode = $dom->createElement('description');
     $text = $dom->createTextNode($description);
     $DescriptionNode->appendChild($text);
     $Other->appendChild($DescriptionNode);
 
-    $others->appendChild($Other);
+    $skills->appendChild($Other);
 
-    $candidateProfile->appendChild($others);
+    $candidateProfile->appendChild($skills);
 }
 
 function get_europass_date($string_date, $format = 'Y-m-d') {
@@ -1370,7 +1416,7 @@ function europass_add_attachment(&$dom, &$candidateProfile, $file_content, $file
 
 function europass_fill_communication_item(&$dom, &$paren_node, $channel_code, $nodes) {
     $inserted = false;
-    $communication = $dom->createElement('communication'); // new Communicate node!
+    $communication = $dom->createElement('Email'); // new Communicate node!
     $i = 0;
     foreach ($nodes as $nodeName => $value) {
         if ($value) {
@@ -1384,14 +1430,15 @@ function europass_fill_communication_item(&$dom, &$paren_node, $channel_code, $n
     if ($i == count($nodes)) {
         $inserted = true; // all nodes must have values
     }
+
     if ($inserted) {
-        $node = $dom->createElement('ChannelCode');
-        $text = $dom->createTextNode($channel_code);
-        $node->appendChild($text);
         $communication->appendChild($node);
         $paren_node->appendChild($communication);
     }
+
 }
+
+
 
 function europass_fill_sub_element_text(&$dom, &$paren_node, $nodeName, $value) {
     if ($value) {

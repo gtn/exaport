@@ -201,13 +201,12 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         case 'resume_editor_skillsacademic':
         case 'resume_editor_skillscareers':
         case 'resume_editor_interests':
-            $resumeitemtypes = ['cover', 'interests', 'goalspersonal', 'goalsacademic', 'goalscareers', 'skillspersonal', 'skillsacademic', 'killscareers'];
             if ($is_for_pdf) {
                 // $view is already defined
                 // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
                 $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
                     " WHERE b.viewid=? AND" .
-                    " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype IN ('".implode("', '", $resumeitemtypes)."')";
+                    " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype='cover'";
                 if (!$DB->record_exists_sql($sql, array($view->id))) {
                     print_error("viewnotfound", "block_exaport");
                 }
@@ -227,7 +226,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                     // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
                     $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
                         " WHERE b.viewid=? AND" .
-                        " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype IN ('".implode("', '", $resumeitemtypes)."')";
+                        " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype='cover'";
                     if (!$DB->record_exists_sql($sql, array($view->id))) {
                         print_error("viewnotfound", "block_exaport");
                     }

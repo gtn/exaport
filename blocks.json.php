@@ -178,14 +178,6 @@ function get_form_items($id, $blockdata = array()) {
             ' onsubmit="exaportViewEdit.addItem('.$id.'); return false;">';
     $content .= '<input type="hidden" name="item_id" value="'.$id.'">';
     $content .= '<table style="width: 100%;">';
-    // Add new artefact button
-    $content .= '<tr><td>';
-    $content .= '<a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?courseid=1&action=add&type=mixed" target="_blank" class="exaport_add_artefact"><img src="pix/mixed_new_32.png" width="24"/>&nbsp;'.get_string("add_mixed", "block_exaport").'</a><br>';
-    $content .= 'To category: &nbsp;';
-    $categories = block_exaport_get_all_categories_for_user_simpletree_selectbox($USER->id, 'categoryForNewItem', 'categoryForNewItem');
-    $content .= $categories;
-    $content .= '<hr width="95%" style="margin: 3px auto;">';
-    $content .= '</td></tr>';
     // Filter by tag.
     $content .= '<tr><th>';
     $content .= '<label for="list">'.get_string('listofartefacts', 'block_exaport').'</label>';

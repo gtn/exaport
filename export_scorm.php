@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+global $PAGE, $USER, $OUTPUT;
 require_once(__DIR__.'/inc.php');
 require_once(__DIR__.'/lib/minixml.inc.php');
 global $DB, $CFG;
@@ -216,6 +217,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
 
     // Index file for category.
     if ($withdirectory) {
+
         $indexfilecontent = '';
         $indexfilecontent .= create_html_header(spch($name), $depth + 1);
         $indexfilecontent .= '<body>'."\n";
@@ -229,6 +231,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             foreach ($cats as $cat) {
                 $subdirname = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $cat->name);
                 $subdirname = mb_ereg_replace("([\.]{2,})", '', $subdirname);
+                //wichtig
                 $indexfilecontent .= '<li><a href="'.$subdirname.'/index.html">'.$cat->name.'</a></li>';
             }
             $indexfilecontent .= '</ul>';
@@ -269,7 +272,6 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             // End.
             unset($filecontent);
             unset($filename);
-
             $filecontent = '';
             $filecontent = create_html_header(spch(format_string($bookmark->name)), $depth + 1);
             $filecontent .= '<body>'."\n";
@@ -288,7 +290,6 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             $filecontent .= '</html>'."\n";
 
             list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $bookmark->name);
-
             $zip->addFromString($exportpath.$filepath, $filecontent);
             create_ressource($resources, 'RES-'.$ridentifier, $filepath);
             create_item($xmlelement, 'ITEM-'.$identifier, $bookmark->name, 'RES-'.$ridentifier, $bookmark->id);
@@ -311,7 +312,6 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
         foreach ($files as $file) {
             if (block_exaport_check_competence_interaction()) {
                 $compids = block_exaport_get_active_compids_for_item($file);
-
                 if ($compids) {
                     $competences = "";
                     $competencesids = array();
@@ -345,12 +345,12 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             foreach ($fsfiles as $ind => $fsfile) {
                 $i = 0;
                 $contentfilename = $fsfile->get_filename();
-                while (in_array($exportpath.$exportdir.$contentfilename, $existingfilesarray)) {
+                while (in_array($exportdir.$contentfilename, $existingfilesarray)) {
                     $i++;
                     $contentfilename = $i.'-'.$fsfile->get_filename();
                 }
-                $existingfilesarray[] = $exportpath.$exportdir.$contentfilename;
-                $zip->addFromString($exportpath.$exportdir.$contentfilename, $fsfile->get_content());
+                $existingfilesarray[] = $exportdir.$contentfilename;
+                $zip->addFromString($contentfilename, $fsfile->get_content());
                 $filelinks .= '  <div id="url-'.$j.'"><a href="'.spch($contentfilename).'"><!--###BOOKMARK_FILE_URL###-->'.
                         spch($contentfilename).'<!--###BOOKMARK_FILE_URL###--></a></div>'."\n";
                 $j++;
@@ -373,7 +373,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             $filecontent .= '</html>'."\n";
 
             list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $file->name);
-            $zip->addFromString($exportpath.$filepath, $filecontent);
+            $zip->addFromString($filepath, $filecontent);
             create_ressource($resources, 'RES-'.$ridentifier, $filepath);
             create_item($xmlelement, 'ITEM-'.$identifier, $file->name, 'RES-'.$ridentifier, $file->id);
 
@@ -434,7 +434,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             $filecontent .= '</html>'."\n";
 
             list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $note->name);
-            $zip->addFromString($exportpath.$filepath, $filecontent);
+            $zip->addFromString($filepath, $filecontent);
             create_ressource($resources, 'RES-'.$ridentifier, $filepath);
             create_item($xmlelement, 'ITEM-'.$identifier, $note->name, 'RES-'.$ridentifier, $note->id);
 
@@ -456,14 +456,14 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
         $indexfilecontent .= '</div>'."\n";
         $indexfilecontent .= '</body>'."\n";
         $indexfilecontent .= '</html>'."\n";
-        $zip->addFromString($exportpath.$exportdir.'index.html', $indexfilecontent);
+        $zip->addFromString($exportdir.'index.html', $indexfilecontent);
     }
 
     return $hasitems;
 }
 
 function rekcat($owncats, $parseddoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i, &$itemscomp,
-        $subdirname, $depth, $withdirectory = false) {
+        $subdirname, $depth, $withdirectory):bool {
     global $DB, $USER, $zip;
     $return = false;
 
@@ -477,7 +477,7 @@ function rekcat($owncats, $parseddoc, $resources, $exportdir, $identifier, $ride
         } else {
             $newsubdir = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $owncat->name);
             $newsubdir = mb_ereg_replace("([\.]{2,})", '', $newsubdir);
-            $zip->addEmptyDir($exportdir.$subdirname.$newsubdir);
+            $zip->addEmptyDir($subdirname.$newsubdir);
             if (substr($newsubdir, -1) != "/") {
                 $newsubdir .= "/";
             }
@@ -505,7 +505,6 @@ function rekcat($owncats, $parseddoc, $resources, $exportdir, $identifier, $ride
                 $mainnotempty = $value;
             }
         }
-
         if ($mainnotempty) {
             // If the main category is not empty, append it to the xml-file.
             if ($owncat->id > 0) {
@@ -567,7 +566,7 @@ if ($confirm) {
     }
 
     // Create directory for data files.
-    $exportdatadir = $exportdir."data";
+    $exportdatadir = "data";
     $zip->addEmptyDir($exportdatadir);
     if (substr($exportdatadir, -1) != "/") {
         $exportdatadir .= "/";
@@ -577,16 +576,17 @@ if ($confirm) {
     if ($withdirectory) {
         $categoriessubdirname = "categories";
         $exportcategoriesdir = $exportdir.$categoriessubdirname;
-        $zip->addEmptyDir($exportcategoriesdir);
-        if (substr($exportcategoriesdir, -1) != "/") {
+        if (!str_ends_with($exportcategoriesdir, "/")) {
             $exportcategoriesdir .= "/";
             $categoriessubdirname .= "/";
-        };
+        }
+        $zip->addEmptyDir($exportcategoriesdir);
     } else {
         $categoriessubdirname = $exportdatadir;
     }
 
     // Copy all necessary files.
+
     $zip->addFromString('adlcp_rootv1p2.xsd', file_get_contents('files/adlcp_rootv1p2.xsd'));
     $zip->addFromString('ims_xml.xsd', file_get_contents('files/ims_xml.xsd'));
     $zip->addFromString('imscp_rootv1p1p2.xsd', file_get_contents('files/imscp_rootv1p1p2.xsd'));
@@ -652,11 +652,11 @@ if ($confirm) {
     $filecontent .= '</div>'."\n";
     $filecontent .= '</body>'."\n";
     $filecontent .= '</html>'."\n";
-
+    //wichtiggg
     list ($profilefilename, $filepath) = get_htmlfile_name_path($exportdir, 'data/', fullname($USER, $USER->id));
     $filepathtopersonal = $filepath;
 
-    $zip->addFromString($exportdir.$filepath, $filecontent);
+    $zip->addFromString($filepath, $filecontent);
 
     create_ressource($resources, 'RES-'.$ridentifier, $filepath);
     create_item($descorganization, 'ITEM-'.$identifier, fullname($USER, $USER->id), 'RES-'.$ridentifier);
@@ -683,31 +683,29 @@ if ($confirm) {
 
     // Save files, from personal information.
     $fs = get_file_storage();
-    $areafiles = $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information');
+    $areafiles = $fs->get_area_files(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information',false,'itemid, filepath, filename',false);
     $areafilesexist = false;
     foreach ($areafiles as $areafile) {
         if (!$areafile) {
             continue;
         }
-
         if (strcmp($areafile->get_filename(), ".") != 0) {
-            $zip->addEmptyDir($exportdir."data/personal/");
-
+            $zip->addEmptyDir("data/personal/");
             $i = 0;
             $contentfilename = $areafile->get_filename();
-            while (in_array($exportdir."data/personal/".$contentfilename, $existingfilesarray)) {
+            while (in_array("data/personal/".$contentfilename, $existingfilesarray)) {
                 $i++;
                 $contentfilename = $i.'-'.$areafile->get_filename();
             }
-            $existingfilesarray[] = $exportdir.$contentfilename;
+            $existingfilesarray[] = $contentfilename;
 
-            $zip->addFromString($exportdir."data/personal/".$contentfilename, $areafile->get_content());
+            $zip->addFromString("data/personal/".$contentfilename, $areafile->get_content());
             $areafilesexist = true;
         }
 
     }
-
     // Main index.html.
+    //i think the if is not needed because withdirectory is not set anywhere
     if ($withdirectory) {
         $filecontent = '';
         $filecontent .= create_html_header(spch(fullname($USER, $USER->id)), 0);
@@ -722,24 +720,28 @@ if ($confirm) {
         $filecontent .= '  <li><a href="'.$categoriessubdirname.'index.html">'.get_string("myportfolio", "block_exaport").
                 '</a></li>'."\n";
         if ($areafilesexist) {
-            $filecontent .= '  <li><a href="data/personal/">'.get_string("myfilearea", "block_exaport").'</a></li>'."\n";
+            $filecontent .= '  <li><a href="a/personadatl/">'.get_string("myfilearea", "block_exaport").'</a></li>'."\n";
         }
         $filecontent .= '  </ul>'."\n";
         $filecontent .= '</div>'."\n";
         $filecontent .= '</body>'."\n";
         $filecontent .= '</html>'."\n";
     }
-    $zip->addFromString($exportdir.'index.html', $filecontent);
+
+    // Save main index.html.
+
+    $zip->addFromString('index.html', $filecontent);
 
     create_xml_comps($itemscomp, $exportdir);
 
-    $zip->addFromString($exportdir.'imsmanifest.xml', $parseddoc->toString(MINIXML_NOWHITESPACES));
+    $zip->addFromString('imsmanifest.xml', $parseddoc->toString(MINIXML_NOWHITESPACES));
 
     $zipname = clean_param($USER->username, PARAM_ALPHANUM).strftime("_%Y_%m_%d_%H%M").".zip";
 
     // Return zip.
     $zipfile = $zip->filename;
     $zip->close();
+
     header('Content-Type: application/zip');
     header('Content-Length: '.filesize($zipfile));
     header('Content-Disposition: attachment; filename="'.$zipname.'"');
@@ -778,8 +780,8 @@ if (block_exaport_feature_enabled('views')) {
 echo '<label><input type="checkbox" name="with_directory" value="1" />'.get_string("add_directory_structure", "block_exaport").
         '</label>';
 echo ' </div>';
-
 echo '<input type="hidden" name="confirm" value="1" />';
+// der button ist wichtig
 echo '<input type="submit" name="export" value="'.get_string("createexport", "block_exaport").'" class="btn btn-primary"/>';
 echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
 echo '<input type="hidden" name="courseid" value="'.$courseid.'" />';
@@ -832,4 +834,3 @@ function create_html_header($title, $depthpath = 0) {
     $filecontent .= '</head>'."\n";
     return $filecontent;
 }
-?>

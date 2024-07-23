@@ -163,7 +163,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
         $id = optional_param('id', 0, PARAM_INT);
         $category = $DB->get_record_sql('
-            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge
+            SELECT c.id, c.name, c.pid, c.internshare, c.shareall
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
             ', array($USER->id, $id));
@@ -171,7 +171,6 @@ class simplehtml_form extends block_exaport_moodleform {
             $category = new stdClass;
             $category->shareall = 0;
             $category->id = 0;
-            $category->iconmerge = 0;
         };
 
         // Don't forget the underscore!
@@ -200,18 +199,13 @@ class simplehtml_form extends block_exaport_moodleform {
                         'accepted_types' => array('image', 'web_image')));
         $mform->add_exaport_help_button('iconfile', 'forms.category.iconfile');
 
-//        if (extension_loaded('gd') && function_exists('gd_info')) {
-        // changed into Fontawesome and Javascript
-            $mform->addElement('advcheckbox',
+        if (extension_loaded('gd') && function_exists('gd_info')) {
+            $mform->addElement('checkbox',
                     'iconmerge',
                     get_string('iconfile_merge', 'block_exaport'),
-                    get_string('iconfile_merge_description', 'block_exaport'),
-                    array('group' => 1),
-                    array(0, 1));
+                    get_string('iconfile_merge_description', 'block_exaport'));
             $mform->add_exaport_help_button('iconmerge', 'forms.category.iconmerge');
-
-
-//        };
+        };
 
         // Sharing.
         if (has_capability('block/exaport:shareintern', context_system::instance())) {
@@ -335,9 +329,7 @@ if ($mform->is_cancelled()) {
     $context = context_user::instance($USER->id);
     $uploadfilesizes = block_exaport_get_filessize_by_draftid($newentry->iconfile);
     // Merge with folder icon.
-    // FontAwesome icons uses icon merge by JS in Frontend. So, this code is redundant now
-    // (also, from now we have new category field 'iconmerge')
-    /*if (isset($newentry->iconmerge) && $newentry->iconmerge == 1 && $uploadfilesizes > 0) {
+    if (isset($newentry->iconmerge) && $newentry->iconmerge == 1 && $uploadfilesizes > 0) {
         $fs = get_file_storage();
         $image = $DB->get_record_sql('SELECT * '.
                 'FROM {files} '.
@@ -406,7 +398,7 @@ if ($mform->is_cancelled()) {
             imagedestroy($imfolder);
         };
     };
-    unset($newentry->iconmerge);*/
+    unset($newentry->iconmerge);
     // Checking userquoata.
     $userquotecheck = block_exaport_file_userquotecheck($uploadfilesizes, $newentry->id);
     $filesizecheck = block_exaport_get_maxfilesize_by_draftid_check($newentry->iconfile);
@@ -427,7 +419,7 @@ if ($mform->is_cancelled()) {
     $category = null;
     if ($id = optional_param('id', 0, PARAM_INT)) {
         $category = $DB->get_record_sql('
-            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge
+            SELECT c.id, c.name, c.pid, c.internshare, c.shareall
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
         ', array($USER->id, $id));

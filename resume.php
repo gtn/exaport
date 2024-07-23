@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+global $DB, $USER, $PAGE, $CFG, $OUTPUT;
 require_once(__DIR__.'/inc.php');
 require_once(__DIR__.'/lib/resumelib.php');
 
@@ -64,12 +65,6 @@ block_exaport_print_header("resume_my");
 
 $PAGE->requires->js('/blocks/exaport/javascript/resume.js', true);
 
-if ($action != 'edit') {
-    // a conflict with Moodle fontawesome inside 'editor'
-    // TODO: check how to solve it
-    block_exaport_add_iconpack();
-}
-
 echo "<br />";
 
 $showinformation = true;
@@ -92,7 +87,6 @@ if ($action == 'xmleuropass') {
 if ($action == 'delete' && in_array($type, ['certif', 'edu', 'employ', 'mbrship', 'public'])) {
     if (data_submitted() && $confirm) {
         require_sesskey();
-
         $conditions = array('id' => $id, 'resume_id' => $resume->id);
         block_exaport_resume_mm_delete($type, $conditions);
         echo "<div class='block_eportfolio_center'>".

@@ -37,9 +37,9 @@
     background: url(../../../theme/formal_white/pix/gradient_h.jpg);
 }
 #exaport .view-group-header div {
-    padding: 6px 5px 3px 3px;
+    padding: 6px 5px 3px 28px;
     font-weight: bold;
-    /*background: url(../pix/arrow_group_right.png) 4px 7px no-repeat;*/
+    background: url(../pix/arrow_group_right.png) 4px 7px no-repeat;
 }
 #exaport .view-group-open .view-group-header {
     border-bottom: 1px solid #ddd;
@@ -54,7 +54,7 @@
     background: url(../pix/bookmarksnotes.png) 4px 7px no-repeat;
 }
 #exaport #view-preview .view-group-header div {
-    /*background: url(../pix/myportfolio.png) 4px 7px no-repeat;*/
+    background: url(../pix/myportfolio.png) 4px 7px no-repeat;
 }
 
 #exaport .view-group-body {
@@ -137,27 +137,21 @@
 #exaport .portfolioDesignBlocks li .delete {
     position: absolute;
     right: 0;
-    top: 5px;
-    /*background: url(../pix/delete.gif) center center no-repeat;*/
+    top: 0;
+    background: url(../pix/delete.gif) center center no-repeat;
     width: 26px;
     height: 26px;
     cursor: pointer;
-    color: red;
-    opacity: 0.5;
-}
-#exaport .portfolioDesignBlocks li .delete:hover {
-    opacity: 1;
 }
 #exaport .portfolioDesignBlocks li .edit {
     position: absolute;
-    right: 25px;
-    top: 5px;
-    /*background: url(../pix/edit.png) center center no-repeat;*/
+    right: 30px;
+    top: 0;
+    background: url(../pix/edit.png) center center no-repeat;
     width: 26px;
     height: 26px;
     cursor: pointer;
 }
-
 #exaport .portfolioDesignBlocks li .delete span,
 .portfolioDesignBlocks li .edit span,
 .portfolioDesignBlocks li .unsaved span {
@@ -192,7 +186,7 @@
 
 #exaport #blocktype-list ul {
     list-style-type: none;
-    margin: 0.5rem 0 1rem;
+    margin: 0;
 }
 #exaport #blocktype-list li {
     display: table-cell;
@@ -479,21 +473,4 @@
 .tippy-box[data-theme~='exaport'] hr {
     margin-top: 0.2rem;
     margin-bottom: 0.5rem;
-}
-
-#view-preview a.edit {
-    color: #7a7a7a;
-}
-
-.exaport-icon.exaport-view-block-adder-icon,
-.exaport-icon.exaport-view-block-view-icon {
-    color: #7a7a7a;
-}
-.exaport-icon.exaport-view-block-adder-icon:hover,
-.exaport-icon.exaport-view-block-view-icon:hover {
-    color: #505050;
-}
-
-.exaport-icon.exaport-view-block-view-icon {
-    margin: 0.5rem 1rem 1rem;
 }

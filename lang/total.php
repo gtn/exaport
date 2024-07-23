@@ -170,7 +170,7 @@ return [
         ],
         'explaining' => [
                 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.',
-                'The Portfolio can be used to store web addresses, files, and notes, allowing users to jot down insights or brief comments',
+                'The Portfolio may be used to store web addresses, files, as well as enter notes that may contain insights or little notes the user may wish to write down.',
         ],
         'explainingmoredata' => [
             '<strong>Dies ist dein Bereich, um Belege für deinen Lernweg zu sammeln.</strong>
@@ -711,14 +711,6 @@ return [
         'link' => [
                 'Link',
                 'Link',
-        ],
-        'mixed' => [
-                'Artefakte',
-                'Artefact',
-        ],
-        'add_mixed' => [
-                'Neue Artefakte',
-                'Add new artefact',
         ],
         'categorynotempty' => [
                 'Es muss eine Kategorie ausgew&auml;hlt sein.',
@@ -1376,7 +1368,7 @@ return [
         ],
         'cofigureblock_cvinfo_certif' => [
                 'Zertifikate, Akkreditierungen, Auszeichnungen',
-                'Certifications, accreditations and awards',
+                'certifications, accreditations and awards',
         ],
         'cofigureblock_cvinfo_public' => [
                 'Bücher und Publikationen',
@@ -1792,7 +1784,7 @@ return [
         ],
         'resume_certif' => [
                 'Zertifikate, Akkreditierungen, Auszeichnungen',
-                'Certifications, accreditations and awards',
+                'certifications, accreditations and awards',
         ],
         'resume_date' => [
                 'Datum',

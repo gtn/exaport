@@ -8,7 +8,7 @@ class block_exaport_layout_configtable extends admin_setting_configtext {
 
     public function get_setting() {
         $layout_settings = parent::get_setting();
-        $result = unserialize($layout_settings ?? '');
+        $result = unserialize($layout_settings);
         return $result;
     }
 
@@ -24,7 +24,7 @@ class block_exaport_layout_configtable extends admin_setting_configtext {
         $result = parent::write_setting($result);
         return $result;
     }
-
+    
     public function output_html($data, $query = '') {
         $return = '';
         $table = new html_table();

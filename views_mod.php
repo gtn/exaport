@@ -43,8 +43,6 @@ if (!$COURSE) {
     print_error("invalidcourseid", "block_exaport");
 }
 
-block_exaport_add_iconpack(true);
-
 // Include JS script.
 $PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
 // $config = ['paths' => ['block_exaport/popover' => $CFG->wwwroot.'/blocks/exaport/javascript/popover.min']];
@@ -877,13 +875,10 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 
         // Preview button.
         echo '<div style="float: right;">
-            <a target="_blank"
-                title="'.block_exaport_get_string('view_preview_help_title').'"
-                id="preview_link" 
-                data-help="'.block_exaport_get_string('view_preview_help').'"
-                href="'.s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">'
-                .block_exaport_fontawesome_icon('eye', 'regular', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-view-icon'])
-            .'</a></div>';
+            <a target="_blank" href="'.
+                s($CFG->wwwroot.'/blocks/exaport/shared_view.php?courseid='.$courseid.'&access=id/'.$USER->id.'-'.$view->id).'">
+                    <img alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/preview.png" />
+            </a></div>';
         $profileurl = new moodle_url('/user/profile.php');
         $cvurl = new moodle_url('/blocks/exaport/resume.php', ['courseid' => $courseid]);
         $itemsurl = new moodle_url('/blocks/exaport/view_items.php', ['courseid' => $courseid]);
@@ -891,65 +886,56 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
     <li class="portfolioElement" title="'.block_exaport_get_string('personalinformation').'" block-type="personal_information" 
             id="personal_information_adder" 
             data-help="'.block_exaport_get_string('personalinformation_help', $profileurl->out()).'">
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            .block_exaport_fontawesome_icon('id-card', 'regular', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-//            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/personal_info.png" />'
-            .'<h4 class="blocktype-title js-hidden">'.block_exaport_get_string('personalinformation').'</h4>
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/personal_info.png" />
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('personalinformation').'</h4>
             <div class="blocktype-description js-hidden">'.block_exaport_get_string('personalinformation').'</div>
-        </a></div>
+        </div>
     </li>
     <li class="portfolioElement" title="'.block_exaport_get_string('cvinformation').'" block-type="cv_information" 
         id="cv_information_adder"
         data-help="'.block_exaport_get_string('cvinformation_help', $cvurl->out()).'" >    
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            .block_exaport_fontawesome_icon('address-book', 'regular', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-//            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/cv_info.png" />'
-            .'<h4 class="blocktype-title js-hidden">'.block_exaport_get_string('cvinformation').'</h4>
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/cv_info.png" />
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('cvinformation').'</h4>
             <div class="blocktype-description js-hidden">'.block_exaport_get_string('cvinformation').'</div>
-        </a></div>
-    </li>';
-    echo '
+        </div>
+    </li>
     <li class="portfolioElement" title="'.block_exaport_get_string('headertext').'" block-type="headline" 
         id="headline_adder"
         data-help="'.block_exaport_get_string('headertext_help').'" >
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            .block_exaport_fontawesome_icon('heading', 'solid', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-//            .block_exaport_fontawesome_icon('grip-lines', 'solid', '3', ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-//            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/header_text.png" />'
-            .'<h4 class="blocktype-title js-hidden">'.block_exaport_get_string('headertext').'</h4>
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/header_text.png" />
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('headertext').'</h4>
             <div class="blocktype-description js-hidden">'.block_exaport_get_string('headertext').'</div>
-        </a></div>
+        </div>
     </li>
     <li class="portfolioElement" title="'.block_exaport_get_string('view_specialitem_text').'" block-type="text" 
         id="text_adder"
         data-help="'.block_exaport_get_string('view_specialitem_text_help').'" >        
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            .block_exaport_fontawesome_icon('file-lines', 'regular', 3, ['fa-border'], [], [], 'edit', [], [], [], ['exaport-view-block-adder-icon'])
-//            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/text.png" />'
-            .'<h4 class="blocktype-title js-hidden">'.block_exaport_get_string('view_specialitem_text').'</h4>
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/text.png" />
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('view_specialitem_text').'</h4>
             <div class="blocktype-description js-hidden">'.block_exaport_get_string('view_specialitem_text').'</div>
-        </a></div>
-    </li>';
-    echo '
+        </div>
+    </li>
     <li class="portfolioElement" title="'.block_exaport_get_string('items').'" block-type="item" 
         id="item_adder"
         data-help="'.block_exaport_get_string('items_help', $itemsurl->out()).'" >
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            .block_exaport_fontawesome_icon('clone', 'regular', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-//            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/lists.png" />'
-            .'<h4 class="blocktype-title js-hidden">'.get_string('items', 'block_exaport').'</h4>
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/lists.png" />
+            <h4 class="blocktype-title js-hidden">'.get_string('items', 'block_exaport').'</h4>
             <div class="blocktype-description js-hidden">'.get_string('selectitems', 'block_exaport').'</div>
-        </a></div>
+        </div>
     </li>
     <li class="portfolioElement" title="'.block_exaport_get_string('media').'" block-type="media" 
         id="media_adder"
         data-help="'.block_exaport_get_string('media_help').'" >
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            .block_exaport_fontawesome_icon('photo-film', 'solid', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-//            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" />'
-            .'<h4 class="blocktype-title js-hidden">'.block_exaport_get_string('media').'</h4>
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" />
+            <h4 class="blocktype-title js-hidden">'.block_exaport_get_string('media').'</h4>
             <div class="blocktype-description js-hidden">'.block_exaport_get_string('selectitems').'</div>
-        </a></div>
+        </div>
     </li>';
 
         if (block_exaport_badges_enabled()) {
@@ -957,12 +943,11 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
     echo '<li class="portfolioElement" title="'.get_string('badges', 'badges').'" block-type="badge" 
         id="badges_adder"
         data-help="'.block_exaport_get_string('badges_help', $badgesurl).'" >
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            .block_exaport_fontawesome_icon('award', 'solid', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-//            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />'
-            .'<h4 class="blocktype-title js-hidden">'.get_string('badges', 'badges').'</h4>
+        <div class="blocktype" style="position: relative;">
+            <img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/badges.png" />
+            <h4 class="blocktype-title js-hidden">'.get_string('badges', 'badges').'</h4>
             <div class="blocktype-description js-hidden">'.get_string('selectitems', 'block_exaport').'</div>
-        </a></div>
+        </div>
     </li>';
         }
 
@@ -981,10 +966,7 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         echo '<div class="view-middle">';
 
         echo '<div id="view-preview">';
-        echo '<div class="view-group-header"><div>';
-        echo block_exaport_fontawesome_icon('briefcase', 'solid', 1);
-        echo get_string('viewdesign', 'block_exaport');
-        echo '</div></div>';
+        echo '<div class="view-group-header"><div>'.get_string('viewdesign', 'block_exaport').'</div></div>';
         echo '<div>';
         echo '<table class="table_layout layout'.$view->layout.'"><tr>';
         for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
@@ -1200,10 +1182,8 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 
     case 'share' :
         echo '<div class="view-sharing view-group">';
-        echo '<div class="view-group-header"><div>';
-        echo block_exaport_fontawesome_icon('share-from-square', 'solid', 1);
-        echo get_string('view_sharing', 'block_exaport');
-        echo ': <span id="view-share-text"></span></div></div>';
+        echo '<div class="view-group-header"><div>'.get_string('view_sharing', 'block_exaport').
+                ': <span id="view-share-text"></span></div></div>';
         echo '<div class="">';
         echo '<div style="padding: 18px 22px"><table class="table_share">';
 

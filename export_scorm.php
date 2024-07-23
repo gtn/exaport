@@ -720,7 +720,7 @@ if ($confirm) {
         $filecontent .= '  <li><a href="'.$categoriessubdirname.'index.html">'.get_string("myportfolio", "block_exaport").
                 '</a></li>'."\n";
         if ($areafilesexist) {
-            $filecontent .= '  <li><a href="a/personadatl/">'.get_string("myfilearea", "block_exaport").'</a></li>'."\n";
+            $filecontent .= '  <li><a href="data/personal/">'.get_string("myfilearea", "block_exaport").'</a></li>'."\n";
         }
         $filecontent .= '  </ul>'."\n";
         $filecontent .= '</div>'."\n";

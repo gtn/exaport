@@ -121,7 +121,6 @@ function export_data_file_area_name() {
 
 function add_comments($table, $bookmarkid) {
     global $DB;
-
     $commentscontent = '';
     $conditions = array("itemid" => $bookmarkid);
     $comments = $DB->get_records($table, $conditions);
@@ -633,7 +632,8 @@ if ($confirm) {
     $userdescriptions = $DB->get_records_select("block_exaportuser", "user_id = '$USER->id'");
 
     $description = '';
-    if ($userdescriptions) {
+
+    if ($userdescriptions){
         foreach ($userdescriptions as $userdescription) {
             $description = $userdescription->description;
             if (strncmp($description, "<img", strlen("<img"))) {
@@ -642,13 +642,15 @@ if ($confirm) {
         }
     }
 
+
     $filecontent = '';
     $filecontent .= create_html_header(spch(fullname($USER, $USER->id)), 1);
     $filecontent .= '<body>'."\n";
     $filecontent .= '	<div id="exa_ex">'."\n";
     $filecontent .= '  <h1 id="header">'.spch(fullname($USER, $USER->id)).'</h1>'."\n";
-    $filecontent .= '  <div id="description"><!--###BOOKMARK_PERSONAL_DESC###-->'.spch_text($description).
-            '<!--###BOOKMARK_PERSONAL_DESC###--></div>'."\n";
+    $filecontent .= '  <div id="description">'.$USER->country. '</div>'."\n";
+    $filecontent .= '  <div id="description">'.$USER->city  . '</div>'."\n";
+    $filecontent .= '  <div id="description">'.$USER->email.'</div>'."\n";
     $filecontent .= '</div>'."\n";
     $filecontent .= '</body>'."\n";
     $filecontent .= '</html>'."\n";
@@ -712,8 +714,6 @@ if ($confirm) {
         $filecontent .= '<body>'."\n";
         $filecontent .= '	<div id="exa_ex">'."\n";
         $filecontent .= '  <h1 id="header">'.spch(fullname($USER, $USER->id)).'</h1>'."\n";
-        $filecontent .= '  <div id="description"><!--###BOOKMARK_PERSONAL_DESC###-->'.spch_text($description).
-                '<!--###BOOKMARK_PERSONAL_DESC###--></div>'."\n";
         $filecontent .= '  <ul>'."\n";
         $filecontent .= '  <li><a href="'.$filepathtopersonal.'">'.get_string("explainpersonal", "block_exaport").
                 '</a></li>'."\n";
@@ -727,9 +727,7 @@ if ($confirm) {
         $filecontent .= '</body>'."\n";
         $filecontent .= '</html>'."\n";
     }
-
     // Save main index.html.
-
     $zip->addFromString('index.html', $filecontent);
 
     create_xml_comps($itemscomp, $exportdir);

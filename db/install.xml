@@ -46,6 +46,7 @@
 		<FIELD NAME="internshare" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="internal shared"/>
 		<FIELD NAME="structure_shareall" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="for sharing category as structure: 0 - did not share; 1 - shared for all; 2 - shared for groups"/>
 		<FIELD NAME="structure_share" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Sharing category as structure (work with structure_shareall field"/>
+		<FIELD NAME="iconmerge" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" />
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="primary key for bookmark categories"/>
@@ -272,7 +273,6 @@
 		<FIELD NAME="skillsacademic" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="academic skills"/>
 		<FIELD NAME="skillscareers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="careers skills"/>
 		<FIELD NAME="linkedinurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="url to linkedin"/>
-		<FIELD NAME="iconmerge" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="structure_share"/>
 	  </FIELDS>
 	  <KEYS>
 		<KEY NAME="primary" TYPE="primary" FIELDS="id"/>

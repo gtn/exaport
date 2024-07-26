@@ -394,8 +394,8 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
 
             }
             if (isset($_POST['export-wp-file'])) {
-                $ok=array();
-                array_push($ok,get_category_items($id, $viewid, 'link'),get_category_items($id, $viewid, 'file'),get_category_items($id, $viewid, 'note'));
+                $itemArray=array();
+                array_push($itemArray,get_category_items($id, $viewid, 'link'),get_category_items($id, $viewid, 'file'),get_category_items($id, $viewid, 'note'));
                 $filecontent = '';
                 $filecontent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
                 $filecontent .= "<rss version=\"2.0\"\n";
@@ -419,21 +419,21 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
 
                 //items
                 //getItemsNaame($itemsArray,$filecontent);
-                foreach ($ok as $subArray) {
-                    foreach ($subArray as $blabla) {
+                foreach ($itemArray as $subArray) {
+                    foreach ($subArray as $arrayItems) {
                         $filecontent .= "<wp:category>\n";
                         $filecontent .= "<wp:term_id>" . $id . "</wp:term_id>\n";
                         $filecontent .= "<wp:category_nicename>" . "<![CDATA[".spch($name)."]]>" . "</wp:category_nicename>\n";
                         $filecontent .= "</wp:category>\n";
 
                         $filecontent .= "<item>\n";
-                        $filecontent.= "<title>" . spch($blabla->name) . "</title>\n";
-                        if (add_comments('block_exaportitemcomm', $blabla->id) != ''){
-                            $filecontent .= "<content:encoded>" . "<![CDATA[<!-- wp:peregraph --> <p>" . add_comments("block_exaportitemcomm",$blabla->id) . "</p> <!-- wp:peregraph -->]]> " . "</content:encoded>\n";
+                        $filecontent.= "<title>" . spch($arrayItems->name) . "</title>\n";
+                        if (add_comments('block_exaportitemcomm', $arrayItems->id) != ''){
+                            $filecontent .= "<content:encoded>" . "<![CDATA[<!-- wp:peregraph --> <p>" . add_comments("block_exaportitemcomm",$arrayItems->id) . "</p> <!-- wp:peregraph -->]]> " . "</content:encoded>\n";
                         }
-                        if ($blabla->intro!= ''){
+                        if ($arrayItems->intro!= ''){
 
-                            $filecontent .= "<description>" . "<![CDATA[" . spch_text($blabla->intro) . "]]>" . "</description>\n";
+                            $filecontent .= "<description>" . "<![CDATA[" . spch_text($arrayItems->intro) . "]]>" . "</description>\n";
                         }
                         $filecontent.= "</item>\n";
                     }

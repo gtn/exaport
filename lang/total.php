@@ -480,6 +480,10 @@ return [
                 'SCORM-Datei erstellen',
                 'Create SCORM-File',
         ],
+        'createexportxapi' => [
+                'XAPI-Datei erstellen',
+                'Create XAPI-File',
+        ],
         'clicktodownloadscorm' => [
                 'Folgenden Button drücken, um SCORM-Datei herunterzuladen:',
                 'Press button to download the SCORM file:',

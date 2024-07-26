@@ -47,7 +47,7 @@ if (has_capability('block/exaport:export', $context)) {
 //            ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/export.png\" height=\"16\" width=\"16\" alt='".get_string("export", "block_exaport")."' />"
             ." <a title=\"".get_string("export", "block_exaport").
             "\" href=\"{$CFG->wwwroot}/blocks/exaport/export_scorm.php?courseid=".$courseid."\">".
-            get_string("export", "block_exaport")."</a></p>";
+            get_string("export", "block_exaport")."/WP-File"."</a></p>";
 }
 
 if (has_capability('block/exaport:import', $context)) {
@@ -57,6 +57,7 @@ if (has_capability('block/exaport:import', $context)) {
         ." <a title=\"".get_string("import", "block_exaport").
             "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_file.php?courseid=".$courseid."\">".
             get_string("import", "block_exaport")."</a></p>";
+
 }
 
 if (has_capability('block/exaport:importfrommoodle', $context)) {

@@ -420,20 +420,19 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                 //items
                 //getItemsNaame($itemsArray,$filecontent);
                 foreach ($itemArray as $subArray) {
-                    foreach ($subArray as $arrayItems) {
+                    foreach ($subArray as $blabla) {
                         $filecontent .= "<wp:category>\n";
                         $filecontent .= "<wp:term_id>" . $id . "</wp:term_id>\n";
                         $filecontent .= "<wp:category_nicename>" . "<![CDATA[".spch($name)."]]>" . "</wp:category_nicename>\n";
                         $filecontent .= "</wp:category>\n";
-
                         $filecontent .= "<item>\n";
-                        $filecontent.= "<title>" . spch($arrayItems->name) . "</title>\n";
-                        if (add_comments('block_exaportitemcomm', $arrayItems->id) != ''){
-                            $filecontent .= "<content:encoded>" . "<![CDATA[<!-- wp:peregraph --> <p>" . add_comments("block_exaportitemcomm",$arrayItems->id) . "</p> <!-- wp:peregraph -->]]> " . "</content:encoded>\n";
+                        $filecontent.= "<title>" . "<![CDATA[".$blabla->name."]]>" . "</title>\n";
+                        if (add_comments('block_exaportitemcomm', $blabla->id) != ''){
+                            $filecontent .= "<content:encoded>" . "<![CDATA[<!-- wp:peregraph --> <p>" . add_comments("block_exaportitemcomm",$blabla->id) . "</p> <!-- wp:peregraph -->]]> " . "</content:encoded>\n";
                         }
-                        if ($arrayItems->intro!= ''){
+                        if ($blabla->intro!= ''){
 
-                            $filecontent .= "<description>" . "<![CDATA[" . spch_text($arrayItems->intro) . "]]>" . "</description>\n";
+                            $filecontent .= "<description>" . "<![CDATA[" . spch_text($blabla->intro) . "]]>" . "</description>\n";
                         }
                         $filecontent.= "</item>\n";
                     }
@@ -659,11 +658,11 @@ if ($confirm) {
 
     // Copy all necessary files.
     if (!isset($_POST['export-wp-file'])) {
-    $zip->addFromString('adlcp_rootv1p2.xsd', file_get_contents('files/adlcp_rootv1p2.xsd'));
-    $zip->addFromString('ims_xml.xsd', file_get_contents('files/ims_xml.xsd'));
-    $zip->addFromString('imscp_rootv1p1p2.xsd', file_get_contents('files/imscp_rootv1p1p2.xsd'));
-    $zip->addFromString('imsmd_rootv1p2p1.xsd', file_get_contents('files/imsmd_rootv1p2p1.xsd'));
-    $zip->addFromString('export_style.css', file_get_contents('files/export_style.css'));
+        $zip->addFromString('adlcp_rootv1p2.xsd', file_get_contents('files/adlcp_rootv1p2.xsd'));
+        $zip->addFromString('ims_xml.xsd', file_get_contents('files/ims_xml.xsd'));
+        $zip->addFromString('imscp_rootv1p1p2.xsd', file_get_contents('files/imscp_rootv1p1p2.xsd'));
+        $zip->addFromString('imsmd_rootv1p2p1.xsd', file_get_contents('files/imsmd_rootv1p2p1.xsd'));
+        $zip->addFromString('export_style.css', file_get_contents('files/export_style.css'));
     }
 
 

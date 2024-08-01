@@ -110,7 +110,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->add_exaport_help_button('categoryid', 'forms.item.categoryid');
 
         if ($type == 'link') {
-            $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="http://"');
+            $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="https://"');
             $mform->setType('url', PARAM_TEXT);
             $mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client');
         } else {

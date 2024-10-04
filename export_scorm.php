@@ -42,6 +42,7 @@ $existingfilesarray = array();
 $courseid = optional_param("courseid", 0, PARAM_INT);
 $confirm = optional_param("confirm", 0, PARAM_INT);
 $viewid = optional_param("viewid", 0, PARAM_INT);
+$exportwpfile = optional_param("export-wp-file", '', PARAM_RAW);
 $identifier = 1000000; // Item identifier.
 $ridentifier = 1000000; // Ressource identifier.
 
@@ -79,12 +80,7 @@ function spch_text($text)
     $text = str_replace('&quot;', '"', $text);
     return $text;
 }
-function getItemsNaame($itemsArray,$content){
-    foreach ($itemsArray as $item){
-        echo $item->name;
-        $content.= $item->name;
-    }
-}
+
 function titlespch($text)
 {
     return clean_param($text, PARAM_ALPHANUM);
@@ -133,7 +129,7 @@ function export_data_file_area_name()
 }
 function add_comments($table, $bookmarkid)
 {
-    global $DB;
+    global $DB, $exportwpfile;
     $commentscontent = '';
     $conditions = array("itemid" => $bookmarkid);
     $comments = $DB->get_records($table, $conditions);
@@ -142,7 +138,7 @@ function add_comments($table, $bookmarkid)
         foreach ($comments as $comment) {
             $conditions = array("id" => $comment->userid);
             $user = $DB->get_record('user', $conditions);
-            if (isset($_POST['export-wp-file'])){
+            if ($exportwpfile){
                 $commentscontent .= userdate($comment->timemodified) . " " . fullname($user, $comment->userid) . " " . $comment->entry . "\n";
             }
             else{
@@ -229,15 +225,15 @@ function get_category_files($categoryid, $viewid = null)
 
 function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath, $exportdir, &$identifier, &$ridentifier, $viewid,
                               &$itemscomp, $depth = 0){
-    global $USER, $CFG, $COURSE, $DB, $zip, $existingfilesarray;
-    if (!isset($_POST['export-wp-file'])) {
+    global $USER, $CFG, $COURSE, $DB, $zip, $existingfilesarray, $exportwpfile;
+    // Index file for category.
+    $indexfilecontent = '';
+    $indexfilecontent .= create_html_header(spch($name), $depth + 1);
+    $indexfilecontent .= '<body>' . "\n";
+    $indexfilecontent .= '<div id="exa_ex">' . "\n";
+    $indexfilecontent .= '<h1>' . get_string("current_category", "block_exaport") . ': ' . spch($name) . '</h1>' . "\n";
+    if (!$exportwpfile) {
         $indexfileitems = '';
-        // Index file for category.
-        $indexfilecontent = '';
-        $indexfilecontent .= create_html_header(spch($name), $depth + 1);
-        $indexfilecontent .= '<body>' . "\n";
-        $indexfilecontent .= '<div id="exa_ex">' . "\n";
-        $indexfilecontent .= '<h1>' . get_string("current_category", "block_exaport") . ': ' . spch($name) . '</h1>' . "\n";
         // Subcategory links.
         $cats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$id'", null, "name ASC");
         if ($cats) {
@@ -305,7 +301,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             $filecontent .= '</html>' . "\n";
 
             list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $bookmark->name);
-            if (!isset($_POST['export-wp-file'])){
+            if (!$exportwpfile) {
                 $zip->addFromString( $filepath, $filecontent);
             }
             create_ressource($resources, 'RES-' . $ridentifier, $filepath);
@@ -362,7 +358,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                     $contentfilename = $i . '-' . $fsfile->get_filename();
                 }
                 $existingfilesarray[] = $exportdir . $contentfilename;
-                if (!isset($_POST['export-wp-file'])){
+                if (!$exportwpfile) {
                     $zip->addFromString($contentfilename, $fsfile->get_content());
                 }
                 $filelinks .= '  <div id="url-' . $j . '"><a href="../' . spch($contentfilename) . '"><!--###BOOKMARK_FILE_URL###-->' .
@@ -386,16 +382,18 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             $filecontent .= '</html>' . "\n";
 
             list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $file->name);
-            if (!isset($_POST['export-wp-file'])){
+            if (!$exportwpfile) {
                 $zip->addFromString($filepath, $filecontent);
                 create_ressource($resources, 'RES-' . $ridentifier, $filepath);
                 create_item($xmlelement, 'ITEM-' . $identifier, $file->name, 'RES-' . $ridentifier, $file->id);
                 $indexfileitems .= '<li><a href="' . $resfilename . '">' . $file->name . '</a></li>';
 
             }
-            if (isset($_POST['export-wp-file'])) {
+            if ($exportwpfile) {
                 $itemArray=array();
-                array_push($itemArray,get_category_items($id, $viewid, 'link'),get_category_items($id, $viewid, 'file'),get_category_items($id, $viewid, 'note'));
+                $itemArray[] = get_category_items($id, $viewid, 'link');
+                $itemArray[] = get_category_items($id, $viewid, 'file');
+                $itemArray[] = get_category_items($id, $viewid, 'note');
                 $filecontent = '';
                 $filecontent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
                 $filecontent .= "<rss version=\"2.0\"\n";
@@ -418,7 +416,6 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
 
 
                 //items
-                //getItemsNaame($itemsArray,$filecontent);
                 foreach ($itemArray as $subArray) {
                     foreach ($subArray as $blabla) {
                         $filecontent .= "<wp:category>\n";
@@ -634,7 +631,7 @@ if ($confirm) {
 
     // Create directory for data files.
 
-    if (!isset($_POST['export-wp-file'])) {
+    if (!$exportwpfile) {
         $exportdatadir = "data";
         $zip->addEmptyDir($exportdatadir);
         if (substr($exportdatadir, -1) != "/") {
@@ -647,17 +644,15 @@ if ($confirm) {
 
     $categoriessubdirname = "categories";
     $exportcategoriesdir = $exportdir . $categoriessubdirname;
-    if (!str_ends_with($exportcategoriesdir, "/")) {
-        $exportcategoriesdir .= "/";
-        $categoriessubdirname .= "/";
-    }
-    if (!isset($_POST['export-wp-file'])) {
+    $exportcategoriesdir = rtrim($exportcategoriesdir, '/') . '/';
+    $categoriessubdirname = rtrim($categoriessubdirname, '/') . '/';
+    if (!$exportwpfile) {
         $zip->addEmptyDir($exportcategoriesdir);
     }
 
 
     // Copy all necessary files.
-    if (!isset($_POST['export-wp-file'])) {
+    if (!$exportwpfile) {
         $zip->addFromString('adlcp_rootv1p2.xsd', file_get_contents('files/adlcp_rootv1p2.xsd'));
         $zip->addFromString('ims_xml.xsd', file_get_contents('files/ims_xml.xsd'));
         $zip->addFromString('imscp_rootv1p1p2.xsd', file_get_contents('files/imscp_rootv1p1p2.xsd'));

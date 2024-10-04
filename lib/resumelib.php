@@ -1389,16 +1389,16 @@ function europass_xml($resumeid = 0)
 function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $sectionTitle, $title, $description)
 {
     $others = $dom->createElement('others');
-    $Title = $dom->createElement('Title');
+    $TitleDomElement = $dom->createElement('Title');
     $text = $dom->createTextNode($sectionTitle);
-    $Title->appendChild($text);
-    $others->appendChild($Title);
+    $TitleDomElement->appendChild($text);
+    $others->appendChild($TitleDomElement);
     $Other = $dom->createElement('Other');
     if ($title) {
-        $Title = $dom->createElement('Title');
+        $TitleDomElement = $dom->createElement('Title');
         $text = $dom->createTextNode($title);
-        $Title->appendChild($text);
-        $Other->appendChild($Title);
+        $TitleDomElement->appendChild($text);
+        $Other->appendChild($TitleDomElement);
     }
     $DescriptionNode = $dom->createElement('description');
     $text = $dom->createTextNode($description);

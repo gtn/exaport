@@ -109,6 +109,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $this->category_select_setup($this->_customdata['cattype'], $this->_customdata['catid']);
         $mform->add_exaport_help_button('categoryid', 'forms.item.categoryid');
 
+
         // 'link' input for all types:
         $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
         $mform->setType('url', PARAM_TEXT);

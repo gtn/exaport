@@ -1,3 +1,6 @@
+### v4.6.7 (2024101700) ###
+*scorm export rework
+
 ### v4.6.7 (2024072300) ###
 *small fixes
 

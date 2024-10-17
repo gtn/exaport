@@ -17,6 +17,8 @@
 
 namespace block_exaport\common {
 
+    use block_exaport\developer;
+
     defined('MOODLE_INTERNAL') || die();
 
     class url extends \moodle_url {
@@ -559,9 +561,8 @@ namespace block_exaport\common {
         }
 
         // Include other developer scripts.
-        if (file_exists(__DIR__ . '/../build/developermode.php')) {
-            require(__DIR__ . '/../build/developermode.php');
-        }
+        // include other developer scripts
+        developer::developer_actions();
     });
 
     /**

@@ -15,16 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+namespace block_exaport\externallib;
+
 defined('MOODLE_INTERNAL') || die();
 
-require(__DIR__ . '/inc.php');
+require(__DIR__ . '/../../inc.php');
 require_once($CFG->libdir . '/externallib.php');
 require_once($CFG->libdir . '/weblib.php');
 require_once($CFG->dirroot . '/lib/filelib.php');
 
 use block_exaport\globals as g;
+use context_course;
+use context_user;
+use external_function_parameters;
+use external_multiple_structure;
+use external_single_structure;
+use external_value;
+use invalid_parameter_exception;
+use stdClass;
 
-class block_exaport_external extends external_api {
+class externallib extends \external_api {
 
     /**
      * Returns description of method parameters

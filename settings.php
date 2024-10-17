@@ -109,6 +109,14 @@ if ($ADMIN->fulltree) {
         get_string('block_exaport_copytomyportfolio', 'block_exaport'),
         get_string('block_exaport_copytomyportfolio_body', 'block_exaport'), 0));
 
+    $layoutKeys = ['moodle_bootstrap', 'clean_old'];
+    $layouts = array_combine($layoutKeys, array_map(function($layoutKey) {
+        return get_string('block_exaport_used_layout_' . $layoutKey, 'block_exaport');
+    }, $layoutKeys));
+    $settings->add(new admin_setting_configselect('block_exaport_used_layout',
+        get_string('block_exaport_used_layout', 'block_exaport'),
+        get_string('block_exaport_used_layout_body', 'block_exaport', $a), 0, $layouts));
+
     // View custom template settings
     $settings->add(new admin_setting_heading('exaport/layout_settings',
         get_string('settings_layout_settings_heading', 'block_exaport'),

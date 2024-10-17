@@ -769,10 +769,15 @@ Y.use('moodle-core-notification-dialogue');
             '#item_adder',
             '#media_adder',
             '#badges_adder',
+            '#preview_link',
         ];
         popoverItems.forEach(function(elementId) {
             if ($(elementId).length) {
-                tippy(elementId + ' .blocktype', {
+                var addBlockTypeClass = '';
+                if (elementId != '#preview_link') {
+                    addBlockTypeClass = ' .blocktype';
+                }
+                tippy(elementId + addBlockTypeClass, {
                     trigger: 'mouseenter focus',
                     arrow: true,
                     allowHTML: true,
@@ -780,11 +785,15 @@ Y.use('moodle-core-notification-dialogue');
                     delay: [50, 50],
                     interactive: true,
                     content(reference) {
-                        var parent = $(reference).closest('.portfolioElement');
-                        var title = '<span class="popover-title">' + parent.attr('title') + '</span>';
-                        parent.removeAttr('title');
-                        if (typeof parent.attr('data-help') != 'undefined') {
-                            title += '<hr>' + '<span class="popover-content">' + parent.attr('data-help') + '</span>';
+                        if (elementId == '#preview_link') {
+                            var dataEl = $(reference);
+                        } else {
+                            var dataEl = $(reference).closest('.portfolioElement');
+                        }
+                        var title = '<span class="popover-title">' + dataEl.attr('title') + '</span>';
+                        dataEl.removeAttr('title');
+                        if (typeof dataEl.attr('data-help') != 'undefined') {
+                            title += '<hr>' + '<span class="popover-content">' + dataEl.attr('data-help') + '</span>';
                         }
                         return title;
                     },
@@ -820,6 +829,20 @@ Y.use('moodle-core-notification-dialogue');
                 $(this).hide();
                 $(morecontent).show(200);
             }
+        });
+    });
+
+    $(function () {
+        $('body').on('click', '.exaport_add_artefact', function(e) {
+            e.preventDefault();
+            var url = new URL($(this).attr('href'));
+            var catid = $('#categoryForNewItem').val();
+            if (catid > 0) {
+                url.searchParams.set('categoryid', catid);
+            }
+            window.open(url, '_blank');
+            // close the block modal
+            exaportViewEdit.cancelAddEdit();
         });
     });
 

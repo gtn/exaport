@@ -170,7 +170,7 @@ return [
         ],
         'explaining' => [
                 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.',
-                'The Portfolio may be used to store web addresses, files, as well as enter notes that may contain insights or little notes the user may wish to write down.',
+                'The Portfolio can be used to store web addresses, files, and notes, allowing users to jot down insights or brief comments',
         ],
         'explainingmoredata' => [
             '<strong>Dies ist dein Bereich, um Belege für deinen Lernweg zu sammeln.</strong>
@@ -480,6 +480,10 @@ return [
                 'SCORM-Datei erstellen',
                 'Create SCORM-File',
         ],
+        'createexportxapi' => [
+                'XAPI-Datei erstellen',
+                'Create XAPI-File',
+        ],
         'clicktodownloadscorm' => [
                 'Folgenden Button drücken, um SCORM-Datei herunterzuladen:',
                 'Press button to download the SCORM file:',
@@ -711,6 +715,14 @@ return [
         'link' => [
                 'Link',
                 'Link',
+        ],
+        'mixed' => [
+                'Artefakte',
+                'Artefact',
+        ],
+        'add_mixed' => [
+                'Neue Artefakte',
+                'Add new artefact',
         ],
         'categorynotempty' => [
                 'Es muss eine Kategorie ausgew&auml;hlt sein.',
@@ -1368,7 +1380,7 @@ return [
         ],
         'cofigureblock_cvinfo_certif' => [
                 'Zertifikate, Akkreditierungen, Auszeichnungen',
-                'certifications, accreditations and awards',
+                'Certifications, accreditations and awards',
         ],
         'cofigureblock_cvinfo_public' => [
                 'Bücher und Publikationen',
@@ -1784,7 +1796,7 @@ return [
         ],
         'resume_certif' => [
                 'Zertifikate, Akkreditierungen, Auszeichnungen',
-                'certifications, accreditations and awards',
+                'Certifications, accreditations and awards',
         ],
         'resume_date' => [
                 'Datum',

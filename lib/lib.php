@@ -522,7 +522,7 @@ function block_exaport_print_footer() {
  * @return string correct type
  */
 function block_exaport_check_item_type($type, $allallowed) {
-    if (in_array($type, Array('link', 'file', 'note'))) {
+    if (in_array($type, Array('link', 'file', 'note', 'mixed'))) {
         return $type;
     } else {
         return $allallowed ? 'all' : false;
@@ -2036,6 +2036,35 @@ function block_exaport_get_all_categories_for_user($userid) {
     return $categories;
 }
 
+function block_exaport_get_all_categories_for_user_simpletree_selectbox($userid, $selectName = '', $selectId = '') {
+    global $DB;
+    $content = '<select '.($selectId ? 'id="'.$selectId.'" ' : '').($selectName ? 'name="'.$selectName.'" ' : '').'>';
+    $content .= '<option value="0">Root</option>';
+    // get ALL categories. Simple list
+    $cats = $DB->get_records_sql('
+        SELECT id, pid, name 
+        FROM {block_exaportcate} c
+        WHERE c.userid = ?         
+        ORDER BY c.name ASC
+    ', array($userid));
+    // convert the list into the simple "tree" list. Starts from level 0
+    function buildTree(array &$categories, $parentId = 0, $level = 1) {
+        $treeString = '';
+        foreach ($categories as $key => $category) {
+            if ($category->pid == $parentId) {
+                $treeString .= '<option value="'.$category->id.'">'.str_repeat("&nbsp;", $level * 3) . htmlspecialchars($category->name) . "</option>";
+                $treeString .= buildTree($categories, $category->id, $level + 1);
+            }
+        }
+        return $treeString;
+    }
+    $treeViewOptions = buildTree($cats);
+    $content .= $treeViewOptions;
+    $content .= '</select>';
+
+    return $content;
+}
+
 
 /**
  * convert categories and artifacts into tree
@@ -2371,4 +2400,135 @@ function block_exaport_add_view_access_parameter_to_url($content, $accessOrView,
     }, $content);
 
     return $content;
+}
+
+/**
+ * Right now we can use only FREE icons. So, use https://fontawesome.com/icons/ to choose what you need
+ * @param string $icon fontAwesome class
+ * @param string $iconStyle fontAwesome style: regular, solid, light, duotone, thin
+ * @param integer $iconSize fontAwesome class to change icon size: 0-do not use fa-size; 1,2,3,4,...
+ * @param array $addClasses add classes to the icon tag <i> (used for additional fa-configuration)
+ * @param array $styles add styles to the icon tag <i>
+ * @param array $iconAttributes add custom tag attribute to the icon tag <i> (used for additional fa-configuration)
+ * @param string $action add action icon into the main icon. simple: add, up, ...
+ * @param array $actionClasses add classes to the 'action' icon tag
+ * @param array $actionStyles add styles to the 'action' icon tag
+ * @param array $actionAttributes add custom tag attribute to the 'action' tag <i>
+ * @param array $iconContainerClasses add classes to the icon container. useful to our custom CSS rules (:hover or other)
+ * @return string
+ */
+function block_exaport_fontawesome_icon($icon, $iconStyle = 'regular', $iconSize = 2, $addClasses = [], $styles = [], $iconAttributes = [],
+                                        $action = '', $actionClasses = [], $actionStyles = [], $actionAttributes = [], $iconContainerClasses = []) {
+    $iconContent = '';
+    $getStylesAttr = function($styles) {
+        $addStyle = '';
+        if ($styles) {
+            $addStyle = 'style="';
+            foreach ($styles as $prop => $val) {
+                $addStyle .= $prop.': '.$val.'; ';
+            }
+            $addStyle .= '"';
+        }
+        return $addStyle;
+    };
+    $customAttributes = function($attrs) {
+        $returnAttrs = '';
+        if ($attrs) {
+            foreach ($attrs as $attrName => $attrVal) {
+                $returnAttrs .= ' '.$attrName.' = "'.$attrVal.'" ';
+            }
+        }
+        return $returnAttrs;
+    };
+
+    // Icon container.
+    $iconContent .= '<span class="exaport-icon fa-layers fa-fw '.($iconSize !== null ? 'fa-'.$iconSize.'x ' : '').implode(' ', $iconContainerClasses).'">';
+    // Icon
+    $iconContent .= '<i class="fa-'.$iconStyle.' fa-'.$icon.' '.implode(' ', $addClasses).'" '.$getStylesAttr($styles).' '.$customAttributes($iconAttributes).'></i>';
+    // Action
+    switch ($action) {
+        case 'add': // "add" icon (+)
+            $defaultAttrs = ['data-fa-transform' => 'shrink-7 down-4 right-4'];
+            $actionAttributes = array_merge($defaultAttrs, $actionAttributes);
+            // add white circle below plus
+            $stylesCircle = ['color' => '#ffffff'];
+            $iconContent .= '<i class="fa-solid fa-circle" '.$customAttributes($actionAttributes).' '.$getStylesAttr($stylesCircle).'></i>';
+            // add plus icon
+            $defaultStyles = ['color' => '#ef990f'];
+            $actionStyles = array_merge($defaultStyles, $actionStyles);
+            $iconContent .= '<i class="fa-solid fa-circle-plus" '.$customAttributes($actionAttributes).' '.$getStylesAttr($actionStyles).'></i>';
+            break;
+        case 'up': // "up" icon. useful for folder-up
+            $defaultAttrs = ['data-fa-transform' => 'shrink-8 down-5 right-4'];
+            $actionAttributes = array_merge($defaultAttrs, $actionAttributes);
+            // add white circle below plus
+            $stylesCircle = ['color' => '#ffffff'];
+            $iconContent .= '<i class="fa-solid fa-circle" '.$customAttributes($actionAttributes).' '.$getStylesAttr($stylesCircle).'></i>';
+            $defaultStyles = ['color' => '#ef990f'];
+            $actionStyles = array_merge($defaultStyles, $actionStyles);
+            $iconContent .= '<i class="fa-solid fa-circle-up" '.$customAttributes($actionAttributes).' '.$getStylesAttr($actionStyles).'></i>';
+            break;
+        case 'edit': // "pen" icon.
+            $defaultStyles = ['color' => '#777777'];
+            $actionStyles = array_merge($defaultStyles, $actionStyles);
+            $defaultAttrs = ['data-fa-transform' => 'shrink-8 down-1 right-6'];
+            $actionAttributes = array_merge($defaultAttrs, $actionAttributes);
+            $iconContent .= '<i class="fa-solid fa-pen" '.$customAttributes($actionAttributes).' '.$getStylesAttr($actionStyles).'></i>';
+            break;
+    }
+
+    // Close the container
+    $iconContent .= '</span>';
+
+
+    return $iconContent;
+}
+
+function block_exaport_item_icon_type_options($itemtype) {
+    // Icon with the type of the item
+    switch ($itemtype) {
+        case 'link':
+            $iconTypes = 'link';
+            $st = 'solid';
+            break;
+        case 'file':
+            $iconTypes = 'file-lines';
+            $st = 'regular';
+            break;
+        default:
+            $iconTypes = 'note-sticky';
+            $st = 'regular';
+            break;
+    }
+    return ['iconName' => $iconTypes, 'iconStyle' => $st];
+}
+
+
+/**
+ * Add icon pack JS/CSS code. BE careful with edit forms. There are possible already existing icons from Moodle
+ * @param bool $limitFaToExaportContent limit fontawesome icons only for content from exabis eportfolio. Useful if there is a conflict with icons.
+ * @return void
+ */
+function block_exaport_add_iconpack($limitFaToExaportContent = false) {
+    global $PAGE;
+
+    if ($limitFaToExaportContent) {
+        $PAGE->requires->js('/blocks/exaport/javascript/exaport_fa.js');
+    }
+
+    // add font awesome
+    $PAGE->requires->js('/blocks/exaport/pix/icons/fontawesome/js/all.min.js');
+    // add boxicons
+    //$PAGE->requires->css('/blocks/exaport/pix/icons/boxicons/css/boxicons.min.css');
+}
+
+function block_exaport_use_bootstrap_layout() {
+    return (bool) (strpos(block_exaport_used_layout(), 'bootstrap') !== false);
+}
+
+function block_exaport_used_layout() {
+    global $CFG;
+
+//    return @$CFG->block_exaport_used_layout ?: 'clean_old';
+    return @$CFG->block_exaport_used_layout ?: 'moodle_bootstrap';
 }

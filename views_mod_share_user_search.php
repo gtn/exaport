@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 $courseid = required_param('courseid', PARAM_INT);
 $id = required_param('id', PARAM_INT);
@@ -60,16 +60,16 @@ if ($shareusers) {
     }
 
     $DB->update_record("block_exaportview", array(
-            'id' => $view->id,
-            'internaccess' => true,
-            'shareall' => false
+        'id' => $view->id,
+        'internaccess' => true,
+        'shareall' => false,
     ));
 }
 
 block_exaport_print_header('views', 'share');
 
-echo '<a href="views_mod.php?courseid='.$courseid.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit">'.
-        get_string('back').'</a><br /><br />';
+echo '<a href="views_mod.php?courseid=' . $courseid . '&id=' . $id . '&sesskey=' . sesskey() . '&type=share&action=edit">' .
+    get_string('back') . '</a><br /><br />';
 ?>
     <form method="get" action="views_mod_share_user_search.php">
         <input type="hidden" name="courseid" value="<?php p($courseid) ?>"/>
@@ -83,10 +83,10 @@ if ($q) {
     $users = get_users_listing('firstname', 'ASC', 0, 10, $q, '', '', '', array(), $context);
 
     if ($users) {
-        echo '<form method="post" action="'.$_SERVER['REQUEST_URI'].'" style="padding-top: 10px;">';
+        echo '<form method="post" action="' . $_SERVER['REQUEST_URI'] . '" style="padding-top: 10px;">';
         echo "<table width=\"70%\">";
-        echo "<tr><th align=\"center\">".get_string('strshare', 'block_exaport')."</th>";
-        echo "<th align=\"left\">".get_string('name')."</th></tr>";
+        echo "<tr><th align=\"center\">" . get_string('strshare', 'block_exaport') . "</th>";
+        echo "<th align=\"left\">" . get_string('name') . "</th></tr>";
 
         $sharedusers = exaport_get_view_shared_users($id);
         foreach ($users as $user) {
@@ -94,16 +94,16 @@ if ($q) {
             $sharedto = isset($sharedusers[$user->id]);
 
             echo '<tr><td align=\"center\" width="50">';
-            echo '<input class="shareusers" type="hidden" name="shareusers['.$user->id.']" value="" />';
-            echo '<input class="shareusers" type="checkbox" name="shareusers['.$user->id.']" value="'.$user->id.'"'.
-                    ($sharedto ? ' checked="checked"' : '').
-                    ' />';
-            echo "</td><td align=\"center\">".fullname($user)."</td></tr>";
+            echo '<input class="shareusers" type="hidden" name="shareusers[' . $user->id . ']" value="" />';
+            echo '<input class="shareusers" type="checkbox" name="shareusers[' . $user->id . ']" value="' . $user->id . '"' .
+                ($sharedto ? ' checked="checked"' : '') .
+                ' />';
+            echo "</td><td align=\"center\">" . fullname($user) . "</td></tr>";
         }
         echo "</table>";
-        echo '<a href="views_mod.php?courseid='.$courseid.'&id='.$id.'&sesskey='.sesskey().'&type=share&action=edit">'.
-                get_string('back').'</a>&nbsp;&nbsp;&nbsp;';
-        echo '<input value="'.get_string('savechanges').'" type="submit" />';
+        echo '<a href="views_mod.php?courseid=' . $courseid . '&id=' . $id . '&sesskey=' . sesskey() . '&type=share&action=edit">' .
+            get_string('back') . '</a>&nbsp;&nbsp;&nbsp;';
+        echo '<input value="' . get_string('savechanges') . '" type="submit" />';
         echo '</form>';
     } else {
         echo get_string('nousersfound');

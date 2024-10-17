@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 $access = optional_param('access', 0, PARAM_TEXT);
 
@@ -31,7 +31,7 @@ if ($user->access->request == 'intern') {
     block_exaport_print_header("shared_views");
 } else {
     print_header(get_string("externaccess", "block_exaport"),
-            get_string("externaccess", "block_exaport")." ".fullname($user, $user->id));
+        get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
     echo block_exaport_wrapperdivstart();
 }
 
@@ -51,7 +51,7 @@ if ($user->access->request == 'extern') {
 
 $conditions[] = $user->id;
 $items = $DB->get_records_sql(
-        "SELECT i.id, i.type, i.url, i.name, i.intro, i.attachment, i.timemodified, ic.name AS cname, ic2.name AS cname_parent
+    "SELECT i.id, i.type, i.url, i.name, i.intro, i.attachment, i.timemodified, ic.name AS cname, ic2.name AS cname_parent
     FROM {block_exaportitem} i
     JOIN {block_exaportcate} ic ON i.categoryid = ic.id
     $extratable
@@ -90,7 +90,7 @@ if ($items) {
     foreach ($items as $item) {
 
         if (!is_null($item->cname_parent)) {
-            $item->cname = $item->cname_parent.' &rArr; '.$item->cname;
+            $item->cname = $item->cname_parent . ' &rArr; ' . $item->cname;
         }
 
         if ($parsedsort[0] == 'category') {
@@ -107,11 +107,11 @@ if ($items) {
         }
 
         $name = "";
-        $name .= "<a href=\"shared_item.php?access=portfolio/".$access."&itemid=".$item->id.'">'.format_string($item->name)."</a>";
+        $name .= "<a href=\"shared_item.php?access=portfolio/" . $access . "&itemid=" . $item->id . '">' . format_string($item->name) . "</a>";
 
         if ($item->intro) {
-            $name .= "<br /><table width=\"98%\"><tr><td class='block_eportfolio_externalview'>".format_text($item->intro).
-                    "</td></tr></table>";
+            $name .= "<br /><table width=\"98%\"><tr><td class='block_eportfolio_externalview'>" . format_text($item->intro) .
+                "</td></tr></table>";
         }
 
         $date = userdate($item->timemodified);
@@ -120,7 +120,7 @@ if ($items) {
     }
     print_table($table);
 } else {
-    echo "<div class='block_eportfolio_center'>".get_string("nobookmarksexternal", "block_exaport")."</div>";
+    echo "<div class='block_eportfolio_center'>" . get_string("nobookmarksexternal", "block_exaport") . "</div>";
 }
 
 echo "<br />";

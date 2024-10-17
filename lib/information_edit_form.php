@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 class block_exaport_personal_information_form extends block_exaport_moodleform {
 
@@ -25,7 +25,7 @@ class block_exaport_personal_information_form extends block_exaport_moodleform {
         $mform =& $this->_form;
 
         $mform->addElement('editor', 'description_editor', get_string('steckbrief', 'block_exaport'), null,
-                array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+            array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
         $mform->add_exaport_help_button('description_editor', 'forms.personal_info.description_editor');
 
         $mform->addElement('hidden', 'cataction');

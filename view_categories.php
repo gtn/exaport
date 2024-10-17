@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 global $OUTPUT;
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -83,7 +83,7 @@ if ($cataction) {
                     ?>
                     <div class="block_eportfolio_center">
                     <form method="post"
-              action="<?php echo $CFG->wwwroot; ?>/blocks/exaport/view_categories.php?courseid=<?php echo $courseid; ?>&amp;edit=1">
+                          action="<?php echo $CFG->wwwroot; ?>/blocks/exaport/view_categories.php?courseid=<?php echo $courseid; ?>&amp;edit=1">
                         <fieldset>
                             <input type="text" name="name" value="<?php echo s($editrecord->name) ?>"/>
                             <input type="hidden" name="pid" value="<?php echo $editrecord->pid == 0 ? "-1" : $editrecord->pid; ?>"/>
@@ -127,7 +127,7 @@ if ($cataction) {
             case "delete":
                 if ($catconfirm == 1) {
                     $optionsyes = array('cataction' => 'delete', 'courseid' => $courseid, 'catconfirm' => 2, 'sesskey' => sesskey(),
-                            'delid' => $delid, 'edit' => 1);
+                        'delid' => $delid, 'edit' => 1);
                     $optionsno = array('courseid' => $courseid, 'edit' => 1, 'sesskey' => sesskey());
 
                     $strbookmarks = get_string("myportfolio", "block_exaport");
@@ -135,7 +135,7 @@ if ($cataction) {
 
                     echo '<br />';
                     echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport"),
-                            new moodle_url('view_categories.php', $optionsyes), new moodle_url('view_categories.php', $optionsno));
+                        new moodle_url('view_categories.php', $optionsyes), new moodle_url('view_categories.php', $optionsno));
                     echo block_exaport_wrapperdivend();
                     $OUTPUT->footer();
                     die;
@@ -177,8 +177,8 @@ if ($edit == 1) {
     $outercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
     if ($outercategories) {
 
-        echo '<tr><td class="block_eportfolio_bold">'.get_string("maincategory", "block_exaport").
-                '</td><td class="block_eportfolio_bold">'.get_string("subcategory", "block_exaport").'</td></tr>';
+        echo '<tr><td class="block_eportfolio_bold">' . get_string("maincategory", "block_exaport") .
+            '</td><td class="block_eportfolio_bold">' . get_string("subcategory", "block_exaport") . '</td></tr>';
         echo '<tr>';
         rekedit($outercategories, $courseid, 1, 0);
     }
@@ -186,15 +186,15 @@ if ($edit == 1) {
     echo '<tr>';
     echo '<td valign="top">';
 
-    echo '<form method="post" action="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?courseid='.$courseid.'&amp;edit=1">';
+    echo '<form method="post" action="' . $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $courseid . '&amp;edit=1">';
     echo '<fieldset>';
     echo '<input type="text" name="name" />';
     echo '<input type="hidden" name="pid" value="-1" />';
-    echo '<input type="hidden" name="courseid" value="'.$courseid.'" />';
-    echo '<input type="submit" name="Submit" value="'.get_string("new").'" />';
+    echo '<input type="hidden" name="courseid" value="' . $courseid . '" />';
+    echo '<input type="submit" name="Submit" value="' . get_string("new") . '" />';
     echo '<input type="hidden" name="cataction" value="add" />';
     echo '<input type="hidden" name="catconfirm" value="1" />';
-    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+    echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
     echo '</fieldset>';
     echo '</form>';
     echo '</td>';
@@ -202,10 +202,10 @@ if ($edit == 1) {
     echo '</tr>';
 
     echo '<tr>';
-    echo '<td valign="top" style="text-align:center" colspan="2"><form method="post" action="'.$CFG->wwwroot.
-            '/blocks/exaport/view_categories.php?courseid='.$courseid.'"><fieldset><input type="submit" name="submit" value="'.
-            get_string("endedit", "block_exaport").'" /><input type="hidden" name="sesskey" value="'.sesskey().
-            '" /></fieldset></form></td>';
+    echo '<td valign="top" style="text-align:center" colspan="2"><form method="post" action="' . $CFG->wwwroot .
+        '/blocks/exaport/view_categories.php?courseid=' . $courseid . '"><fieldset><input type="submit" name="submit" value="' .
+        get_string("endedit", "block_exaport") . '" /><input type="hidden" name="sesskey" value="' . sesskey() .
+        '" /></fieldset></form></td>';
     echo '</tr>';
     echo '</table></div>';
 } else {
@@ -221,12 +221,12 @@ if ($edit == 1) {
 
     echo '<div class="block_eportfolio_centerw">';
 
-    echo '<form method="post" action="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?courseid='.$courseid.'&amp;edit=1">';
+    echo '<form method="post" action="' . $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $courseid . '&amp;edit=1">';
     echo '<fieldset>';
-    echo '<input type="submit" name="submit" value="'.get_string("edit").'" />';
+    echo '<input type="submit" name="submit" value="' . get_string("edit") . '" />';
     echo '<input type="hidden" name="edit" value="1" />';
-    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-    echo '<input type="hidden" name="courseid" value="'.$courseid.'" />';
+    echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+    echo '<input type="hidden" name="courseid" value="' . $courseid . '" />';
     echo '</fieldset>';
     echo '</form>';
     echo '</div></div>';
@@ -252,14 +252,14 @@ function rekedit($outercategories, $courseid, $first, $level) {
 
         echo '<td valign="top">';
         echo format_string($curcategory->name);
-        echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?cataction=edit&amp;sesskey='.sesskey().
-                '&amp;catconfirm=1&amp;courseid='.$courseid.'&amp;editid='.$curcategory->id.'&amp;edit=1">'.
-                '<img src="'.$CFG->wwwroot.'/pix/i/edit.gif" width="16" height="16" alt="'.get_string("edit").'" /></a>';
+        echo '<a href="' . $CFG->wwwroot . '/blocks/exaport/view_categories.php?cataction=edit&amp;sesskey=' . sesskey() .
+            '&amp;catconfirm=1&amp;courseid=' . $courseid . '&amp;editid=' . $curcategory->id . '&amp;edit=1">' .
+            '<img src="' . $CFG->wwwroot . '/pix/i/edit.gif" width="16" height="16" alt="' . get_string("edit") . '" /></a>';
 
         if ($countinnercategories == 0) {
-            echo '<a href="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?cataction=delete&amp;sesskey='.sesskey().
-                    '&amp;catconfirm=1&amp;courseid='.$courseid.'&amp;delid='.$curcategory->id.'&amp;edit=1">'.
-                    '<img src="'.$CFG->wwwroot.'/pix/t/delete.gif" width="11" height="11" alt="'.get_string("delete").'" /></a>';
+            echo '<a href="' . $CFG->wwwroot . '/blocks/exaport/view_categories.php?cataction=delete&amp;sesskey=' . sesskey() .
+                '&amp;catconfirm=1&amp;courseid=' . $courseid . '&amp;delid=' . $curcategory->id . '&amp;edit=1">' .
+                '<img src="' . $CFG->wwwroot . '/pix/t/delete.gif" width="11" height="11" alt="' . get_string("delete") . '" /></a>';
         }
         echo '</td>';
 
@@ -270,15 +270,15 @@ function rekedit($outercategories, $courseid, $first, $level) {
             }
         }
         echo '<td valign="top">';
-        echo '<form method="post" action="'.$CFG->wwwroot.'/blocks/exaport/view_categories.php?courseid='.$courseid.'&amp;edit=1">';
+        echo '<form method="post" action="' . $CFG->wwwroot . '/blocks/exaport/view_categories.php?courseid=' . $courseid . '&amp;edit=1">';
         echo '<fieldset>';
-        echo '<input type="text" name="name" value ="Subkategorie von '.$curcategory->name.'"/>';
-        echo '<input type="hidden" name="pid" value="'.$curcategory->id.'" />';
-        echo '<input type="hidden" name="courseid" value="'.$courseid.'" />';
+        echo '<input type="text" name="name" value ="Subkategorie von ' . $curcategory->name . '"/>';
+        echo '<input type="hidden" name="pid" value="' . $curcategory->id . '" />';
+        echo '<input type="hidden" name="courseid" value="' . $courseid . '" />';
         echo '<input type="hidden" name="cataction" value="add" />';
-        echo '<input type="submit" name="Submit" value="'.get_string("new").'" />';
+        echo '<input type="submit" name="Submit" value="' . get_string("new") . '" />';
         echo '<input type="hidden" name="catconfirm" value="1" />';
-        echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+        echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
         echo '</fieldset>';
         echo '</form>';
         echo '</td>';
@@ -292,7 +292,7 @@ function rekedit($outercategories, $courseid, $first, $level) {
 function rekview($owncats) {
     global $DB, $USER;
     foreach ($owncats as $owncat) {
-        echo '<li>'.format_string($owncat->name);
+        echo '<li>' . format_string($owncat->name);
 
         $conditions = array("userid" => $USER->id, "pid" => $owncat->id);
         $innerowncats = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name ASC");

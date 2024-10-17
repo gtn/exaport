@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
@@ -43,20 +43,20 @@ $OUTPUT->box(text_to_html(get_string("explainexport", "block_exaport")));
 
 if (has_capability('block/exaport:export', $context)) {
     echo "<p >"
-            .block_exaport_fontawesome_icon('file-export', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
-//            ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/export.png\" height=\"16\" width=\"16\" alt='".get_string("export", "block_exaport")."' />"
-            ." <a title=\"".get_string("export", "block_exaport").
-            "\" href=\"{$CFG->wwwroot}/blocks/exaport/export_scorm.php?courseid=".$courseid."\">".
-            get_string("export", "block_exaport").""."</a></p>";
+        . block_exaport_fontawesome_icon('file-export', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
+        //            ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/export.png\" height=\"16\" width=\"16\" alt='".get_string("export", "block_exaport")."' />"
+        . " <a title=\"" . get_string("export", "block_exaport") .
+        "\" href=\"{$CFG->wwwroot}/blocks/exaport/export_scorm.php?courseid=" . $courseid . "\">" .
+        get_string("export", "block_exaport") . "" . "</a></p>";
 }
 
 if (has_capability('block/exaport:import', $context)) {
     echo "<p >"
-        .block_exaport_fontawesome_icon('file-import', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
-//        ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='".get_string("import", "block_exaport")."' />"
-        ." <a title=\"".get_string("import", "block_exaport").
-            "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_file.php?courseid=".$courseid."\">".
-            get_string("import", "block_exaport")."</a></p>";
+        . block_exaport_fontawesome_icon('file-import', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
+        //        ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='".get_string("import", "block_exaport")."' />"
+        . " <a title=\"" . get_string("import", "block_exaport") .
+        "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_file.php?courseid=" . $courseid . "\">" .
+        get_string("import", "block_exaport") . "</a></p>";
 
 }
 
@@ -65,9 +65,9 @@ if (has_capability('block/exaport:importfrommoodle', $context)) {
     $assignments = block_exaport_get_assignments_for_import($modassign);
     if ($assignments) {
         echo "<p >"
-            .block_exaport_fontawesome_icon('file-import', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
-//            ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='" . get_string("moodleimport", "block_exaport") . "' />"
-            ." <a title=\"" . get_string("moodleimport", "block_exaport") .
+            . block_exaport_fontawesome_icon('file-import', 'solid', 1, [], [], [], '', [], [], [], ['exaport-export-import-scorm-icon'])
+            //            ."<img src=\"{$CFG->wwwroot}/blocks/exaport/pix/import.png\" height=\"16\" width=\"16\" alt='" . get_string("moodleimport", "block_exaport") . "' />"
+            . " <a title=\"" . get_string("moodleimport", "block_exaport") .
             "\" href=\"{$CFG->wwwroot}/blocks/exaport/import_moodle.php?courseid=" . $courseid . "\">" .
             get_string("moodleimport", "block_exaport") . "</a></p>";
     }

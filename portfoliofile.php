@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 // Syntax:
 // Files in the portfolio:
@@ -29,7 +29,7 @@ if (!$token || !$wstoken) {
     @define('NO_MOODLE_COOKIES', true);
 }
 
-require_once($CFG->dirroot.'/webservice/lib.php');
+require_once($CFG->dirroot . '/webservice/lib.php');
 
 if (empty($CFG->filelifetime)) {
     $lifetime = 86400;     // Seconds for files to remain in caches.
@@ -201,7 +201,7 @@ if ($itemid) {
         error('No valid arguments supplied');
     }
 
-    $filepath = $CFG->dataroot.'/'.implode('/', $args);
+    $filepath = $CFG->dataroot . '/' . implode('/', $args);
 }
 
 if (!file_exists($filepath)) {
@@ -217,7 +217,7 @@ function not_found($courseid = 0) {
     global $CFG;
     header('HTTP/1.0 404 not found');
     // if ($courseid > 0) {
-        //error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); // This is not displayed on IIS?
+    //error(get_string('filenotfound', 'error'), $CFG->wwwroot.'/course/view.php?id='.$courseid); // This is not displayed on IIS?
     // } else {
     // error(get_string('filenotfound', 'error')); // This is not displayed on IIS??
     //}

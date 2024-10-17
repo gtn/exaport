@@ -25,7 +25,7 @@ namespace {
             $userid = $USER->id;
         }
         // Bei epop wird userid mitgegeben, sonst aus global USER holen.
-        return $CFG->wwwroot.'/blocks/exaport/shared_view.php?access=hash/'.$userid.'-'.$view->hash;
+        return $CFG->wwwroot . '/blocks/exaport/shared_view.php?access=hash/' . $userid . '-' . $view->hash;
     }
 
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
@@ -162,15 +162,15 @@ namespace {
             if (is_array($usergroups) && count($usergroups) > 0) {
                 $tempjoin .= "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id = vgshar.viewid ";
             }
-            $view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v".
-                    " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid = ?".
-                    $tempjoin.
-                    " WHERE v.userid = ? AND v.id = ? AND".
-                    " ((v.userid = ?)". // Myself.
-                    "  OR (v.shareall = 1)". // Shared all.
-                    "  OR (v.shareall = 0 AND vshar.userid IS NOT NULL) ".
-                    ($usergroups ? " OR vgshar.groupid IN (".join(',', array_keys($usergroups)).") " : "").
-                    ")", array($myuserid, $userid, $viewid, $myuserid)); // Shared for me.
+            $view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v" .
+                " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid = ?" .
+                $tempjoin .
+                " WHERE v.userid = ? AND v.id = ? AND" .
+                " ((v.userid = ?)" . // Myself.
+                "  OR (v.shareall = 1)" . // Shared all.
+                "  OR (v.shareall = 0 AND vshar.userid IS NOT NULL) " .
+                ($usergroups ? " OR vgshar.groupid IN (" . join(',', array_keys($usergroups)) . ") " : "") .
+                ")", array($myuserid, $userid, $viewid, $myuserid)); // Shared for me.
             if (!$view) {
                 // View not found.
                 return;
@@ -236,9 +236,9 @@ namespace {
         }
 
         // in a view shared with user?
-        $sql = "SELECT * FROM {block_exaportview} v ".
-                " JOIN {block_exaportviewblock} vb ON v.id = vb.viewid AND vb.itemid = ? ".
-                " JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ? ";
+        $sql = "SELECT * FROM {block_exaportview} v " .
+            " JOIN {block_exaportviewblock} vb ON v.id = vb.viewid AND vb.itemid = ? " .
+            " JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ? ";
         $found = $DB->record_exists_sql($sql, array($itemid, $currentUserid));
         if ($found) {
             return $DB->get_record('block_exaportitem', array('id' => $itemid));
@@ -258,10 +258,10 @@ namespace {
     function block_exaport_epop_checkhash($userhash) {
         global $DB;
 
-        $sql = "SELECT u.* ".
-                " FROM {user} u ".
-                " INNER JOIN {block_exaportuser} eu ON eu.user_id=u.id ".
-                " WHERE eu.user_hash_long=?";
+        $sql = "SELECT u.* " .
+            " FROM {user} u " .
+            " INNER JOIN {block_exaportuser} eu ON eu.user_id=u.id " .
+            " WHERE eu.user_hash_long=?";
         if (!$user = $DB->get_record_sql($sql, array($userhash))) {
             return false;
         } else {
@@ -379,8 +379,8 @@ namespace {
         foreach (get_my_courses($USER->id, 'fullname ASC') as $dbcourse) {
 
             $course = array(
-                    'id' => $dbcourse->id,
-                    'fullname' => $dbcourse->fullname,
+                'id' => $dbcourse->id,
+                'fullname' => $dbcourse->fullname,
             );
 
             $courses[$course['id']] = $course;
@@ -408,7 +408,7 @@ namespace {
         global $DB;
 
         $sharedgroups = $DB->get_records_menu('block_exaportviewgroupshar',
-                                                array("viewid" => $viewid), null, 'groupid, groupid AS tmp');
+            array("viewid" => $viewid), null, 'groupid, groupid AS tmp');
 
         return $sharedgroups;
     }
@@ -417,7 +417,7 @@ namespace {
         global $DB;
 
         $sharedemails = $DB->get_records_menu('block_exaportviewemailshar',
-                                                array("viewid" => $viewid), null, 'email, email AS tmp');
+            array("viewid" => $viewid), null, 'email, email AS tmp');
 
         return $sharedemails;
     }
@@ -434,7 +434,7 @@ namespace {
         global $DB;
 
         $sharedgroups = $DB->get_records_menu('block_exaportcatgroupshar',
-                                                array("catid" => $catid), null, 'groupid, groupid AS tmp');
+            array("catid" => $catid), null, 'groupid, groupid AS tmp');
 
         return $sharedgroups;
     }
@@ -484,18 +484,18 @@ namespace {
                     continue;
                 }
 
-                $extrausers[] = (object) array(
-                        'id' => $user->id,
-                        'name' => fullname($user),
-                        'rolename' => '',
-                        'shared_to' => true,
+                $extrausers[] = (object)array(
+                    'id' => $user->id,
+                    'name' => fullname($user),
+                    'rolename' => '',
+                    'shared_to' => true,
                 );
             }
 
-            array_unshift($courses, (object) array(
-                    'id' => -1,
-                    'fullname' => get_string('other_users_course', 'block_exaport'),
-                    'users' => $extrausers,
+            array_unshift($courses, (object)array(
+                'id' => -1,
+                'fullname' => get_string('other_users_course', 'block_exaport'),
+                'users' => $extrausers,
             ));
         }
 
@@ -509,10 +509,10 @@ namespace {
         // Loop through all my courses.
         foreach (enrol_get_my_courses(null, 'fullname ASC') as $dbcourse) {
 
-            $course = (object) array(
-                    'id' => $dbcourse->id,
-                    'fullname' => $dbcourse->fullname,
-                    'users' => array(),
+            $course = (object)array(
+                'id' => $dbcourse->id,
+                'fullname' => $dbcourse->fullname,
+                'users' => array(),
             );
 
             $context = context_course::instance($dbcourse->id);
@@ -522,7 +522,7 @@ namespace {
                 // since user_picture::fields('u') uses a deprecated moodle function, this is the workaround:
                 $fields = exaport_get_picture_fields();
                 foreach ($fields as $key => $field) {
-                    $fields[$key] = 'u.'.$field;
+                    $fields[$key] = 'u.' . $field;
                 }
                 $fields = implode(',', $fields);
                 $users = get_role_users($role->id, $context, false, $fields, null, true, '', '', '',
@@ -537,10 +537,10 @@ namespace {
                         continue;
                     }
 
-                    $course->users[$user->id] = (object) array(
-                            'id' => $user->id,
-                            'name' => fullname($user),
-                            'rolename' => $role->name ? $role->name : $role->shortname,
+                    $course->users[$user->id] = (object)array(
+                        'id' => $user->id,
+                        'name' => fullname($user),
+                        'rolename' => $role->name ? $role->name : $role->shortname,
                     );
                 }
             }
@@ -626,11 +626,11 @@ namespace {
         }
 
         return [
-                // Global groups.
-                (object) [
-                        'name' => get_string('cohorts', 'cohort'),
-                        'groups' => $cohorts,
-                ],
+            // Global groups.
+            (object)[
+                'name' => get_string('cohorts', 'cohort'),
+                'groups' => $cohorts,
+            ],
         ];
     }
 
@@ -664,27 +664,27 @@ namespace {
             }
         }*/
         $categories = $DB->get_records_sql(
-                "SELECT $categorycolumns, u.firstname, u.lastname, u.picture, ".
-                " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  ".
-                " FROM {user} u ".
-                " JOIN {block_exaportcate} c ON u.id = c.userid ".
-                // ($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
-                " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?".
+            "SELECT $categorycolumns, u.firstname, u.lastname, u.picture, " .
+            " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
+            " FROM {user} u " .
+            " JOIN {block_exaportcate} c ON u.id = c.userid " .
+            // ($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
+            " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?" .
 
-                " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid ".
-                " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid ".
-                " WHERE (".
-                "(".(block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '')." cshar.userid IS NOT NULL) ".
-                // Only show shared all, if enabled.
-                // Shared for you group.
-                (count($usercats) > 0 ? " OR c.id IN (".implode(',', array_keys($usercats)).") " : ""). // Add group shareing categories.
-                ")".
-                " AND c.userid != ? ". // Don't show my own categories.
-                " AND internshare = 1 ".
-                " AND u.deleted = 0 ".
-                $itemwhere.
-                " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture".
-                " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
+            " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid " .
+            " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid " .
+            " WHERE (" .
+            "(" . (block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '') . " cshar.userid IS NOT NULL) " .
+            // Only show shared all, if enabled.
+            // Shared for you group.
+            (count($usercats) > 0 ? " OR c.id IN (" . implode(',', array_keys($usercats)) . ") " : "") . // Add group shareing categories.
+            ")" .
+            " AND c.userid != ? " . // Don't show my own categories.
+            " AND internshare = 1 " .
+            " AND u.deleted = 0 " .
+            $itemwhere .
+            " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture" .
+            " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
         // return array();
         // Get users for grouping later.
         $sharedusers = array();
@@ -724,7 +724,7 @@ namespace {
             } else {
                 $items = $itemid;
             }
-            $cat_from_items = $DB->get_records_sql_menu(' SELECT DISTINCT categoryid, categoryid as tmp FROM {block_exaportitem} WHERE id IN ('.implode(',', $items).') ');
+            $cat_from_items = $DB->get_records_sql_menu(' SELECT DISTINCT categoryid, categoryid as tmp FROM {block_exaportitem} WHERE id IN (' . implode(',', $items) . ') ');
             $sharedcategories = array_intersect($sharedcategories, $cat_from_items);
         }
 
@@ -744,20 +744,20 @@ namespace {
                 if (!$catlist) {
                     return array();
                 }
-                $query = "SELECT DISTINCT i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, ".
-                        " ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments".
-                        " FROM {block_exaportitem} i".
-                        " LEFT JOIN {block_exaportcate} ic on i.categoryid = ic.id".
-                        " LEFT JOIN {block_exaportcate} ic2 on ic.pid = ic2.id".
-                        " LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id".
-                        " WHERE i.userid=? AND categoryid IN (".$catlist.")".
-                        " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid".
-                        " ORDER BY i.name";
+                $query = "SELECT DISTINCT i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, " .
+                    " ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments" .
+                    " FROM {block_exaportitem} i" .
+                    " LEFT JOIN {block_exaportcate} ic on i.categoryid = ic.id" .
+                    " LEFT JOIN {block_exaportcate} ic2 on ic.pid = ic2.id" .
+                    " LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id" .
+                    " WHERE i.userid=? AND categoryid IN (" . $catlist . ")" .
+                    " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid" .
+                    " ORDER BY i.name";
                 $useritems = $DB->get_records_sql($query, array($userid));
                 return $useritems;
             };
             foreach ($sharedusers as $key => $userid) {
-                if (count($sharedcategories) <= 100 ) {
+                if (count($sharedcategories) <= 100) {
                     $useritems = $selectfunc($userid, $sharedcategorieslist);
                     $shareditems = $shareditems + $useritems;
                 } else {
@@ -777,9 +777,9 @@ namespace {
             foreach ($sharedusers as $key => $userid) {
                 $sharedartefactsbyuser[$key]['userid'] = $userid;
                 $sharedartefactsbyuser[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $userid)));
-                $items = $DB->get_records_sql('SELECT * FROM {block_exaportitem} '.
-                                                ' WHERE userid=? AND categoryid IN ('.$sharedcategorieslist.')',
-                                                array('userid' => $userid));
+                $items = $DB->get_records_sql('SELECT * FROM {block_exaportitem} ' .
+                    ' WHERE userid=? AND categoryid IN (' . $sharedcategorieslist . ')',
+                    array('userid' => $userid));
                 $sharedartefactsbyuser[$key]['items'] = $items;
                 // Delete empty categories.
                 if (count($sharedartefactsbyuser[$key]['items']) == 0) {
@@ -846,7 +846,7 @@ namespace {
         return g::$DB->get_records_sql("
             SELECT DISTINCT catid
             FROM {block_exaportcatgroupshar}
-            WHERE groupid IN (".join(',', array_keys($usergroups)).")");
+            WHERE groupid IN (" . join(',', array_keys($usergroups)) . ")");
     }
 
     function block_exaport_get_group_share_views($userid) {
@@ -858,7 +858,7 @@ namespace {
         return g::$DB->get_records_sql("
             SELECT viewid
             FROM {block_exaportviewgroupshar}
-            WHERE groupid IN (".join(',', array_keys($usergroups)).")");
+            WHERE groupid IN (" . join(',', array_keys($usergroups)) . ")");
     }
 
     function block_exaport_user_can_see_artifacts_of_students() {
@@ -868,15 +868,15 @@ namespace {
             // And it is not updating in real time
             // so, I use the code below with $userclone.
             $userclone = clone($USER);
-            require_once($CFG->dirroot.'/user/profile/lib.php');
-            require_once($CFG->dirroot.'/user/lib.php');
+            require_once($CFG->dirroot . '/user/profile/lib.php');
+            require_once($CFG->dirroot . '/user/lib.php');
             profile_load_data($userclone);
             // Only if this user is checked as trusted teacher and only if it is a teacher!
             if (isset($userclone)
                 && isset($userclone->profile_field_blockexaporttrustedteacher)
                 && $userclone->profile_field_blockexaporttrustedteacher == 1
                 && block_exaport_user_is_teacher()) {
-                    return true;
+                return true;
             }
         }
         return false;
@@ -895,19 +895,19 @@ namespace block_exaport {
 
         // All categories and users who shared.
         $categories = $DB->get_records_sql(
-                ' SELECT c.*
+            ' SELECT c.*
                     FROM {block_exaportcate} c
                       JOIN {user} u ON u.id = c.userid
                       LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?
                       LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid
                     WHERE (
-                        ('.(block_exaport_shareall_enabled() ? ' c.shareall = 1 OR ' : '').' cshar.userid IS NOT NULL) '.
-                        // Only show shared all, if enabled
-                        // Shared for you group.
-                        ($usercats ? ' OR c.id IN ('.join(',', array_keys($usercats)).') ' : ''). // Add group sharing categories.
-                        ')
-                          AND c.userid != ? '. // Don't show my own categories.
-                        ' AND internshare = 1
+                        (' . (block_exaport_shareall_enabled() ? ' c.shareall = 1 OR ' : '') . ' cshar.userid IS NOT NULL) ' .
+            // Only show shared all, if enabled
+            // Shared for you group.
+            ($usercats ? ' OR c.id IN (' . join(',', array_keys($usercats)) . ') ' : '') . // Add group sharing categories.
+            ')
+                          AND c.userid != ? ' . // Don't show my own categories.
+            ' AND internshare = 1
                           AND u.deleted = 0
                     ORDER BY u.lastname, u.firstname, c.name', array($userid, $USER->id));
 
@@ -927,14 +927,14 @@ namespace block_exaport {
                 $user = $tree[$category->userid] = $DB->get_record('user', ['id' => $category->userid]);
                 $user->categories = [];
                 $user->name = fullname($user);
-                $user->url = g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id.
-                                '&type=shared&userid='.$user->id;
+                $user->url = g::$CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . g::$COURSE->id .
+                    '&type=shared&userid=' . $user->id;
             } else {
                 $user = $tree[$category->userid];
             }
 
-            $category->url = g::$CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.g::$COURSE->id.
-                    '&type=shared&userid='.$user->id.'&categoryid='.$category->id;
+            $category->url = g::$CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . g::$COURSE->id .
+                '&type=shared&userid=' . $user->id . '&categoryid=' . $category->id;
             $category->icon = block_exaport_get_category_icon($category);
 
             $user->categories[$category->id] = $category;

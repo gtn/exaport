@@ -16,7 +16,7 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 global $DB, $OUTPUT, $CFG;
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 
 $output = "";
@@ -41,7 +41,7 @@ $assignments = block_exaport_get_assignments_for_import($modassign);
 
 $table = new html_table();
 $table->head = array(get_string("modulename", $modassign->title), get_string("time"), get_string("file"),
-        get_string("course", "block_exaport"), get_string("action"));
+    get_string("course", "block_exaport"), get_string("action"));
 $table->align = array("LEFT", "LEFT", "LEFT", "LEFT", "RIGHT");
 $table->size = array("20%", "20%", "25%", "20%", "15%");
 $table->width = "85%";
@@ -56,7 +56,7 @@ if ($assignments) {
         $context = context_module::instance($cm->id);
         $fs = get_file_storage();
         $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid,
-                "filename", false);
+            "filename", false);
 
         foreach ($files as $file) {
 
@@ -64,14 +64,14 @@ if ($assignments) {
 
             $filename = $file->get_filename();
             $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
-                    $file->get_itemid(), $file->get_filepath(), $file->get_filename())->out();
+                $file->get_itemid(), $file->get_filepath(), $file->get_filename())->out();
 
-            $button = '<a href="'.$CFG->wwwroot.'/blocks/exaport/import_moodle_add_file.php?courseid='.$courseid.
-                    '&amp;submissionid='.$assignment->submissionid.'&amp;fileid='.$file->get_pathnamehash().'">'.
-                    get_string("add_this_file", "block_exaport").'</a>';
+            $button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
+                '&amp;submissionid=' . $assignment->submissionid . '&amp;fileid=' . $file->get_pathnamehash() . '">' .
+                get_string("add_this_file", "block_exaport") . '</a>';
 
-            $table->data[] = array($assignment->name, userdate($assignment->timemodified), $icon.
-                    ' <a href="'.s($url).'" >'.$filename.'</a><br />', $assignment->coursename, $button);
+            $table->data[] = array($assignment->name, userdate($assignment->timemodified), $icon .
+                ' <a href="' . s($url) . '" >' . $filename . '</a><br />', $assignment->coursename, $button);
 
         }
 
@@ -79,7 +79,7 @@ if ($assignments) {
     $output .= html_writer::table($table);
     echo $output;
 } else {
-    echo "<p>".get_string("nomoodleimportyet", "block_exaport")."</p>";
+    echo "<p>" . get_string("nomoodleimportyet", "block_exaport") . "</p>";
 }
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

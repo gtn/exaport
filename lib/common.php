@@ -41,7 +41,7 @@ namespace block_exaport\common {
         protected function merge_overrideparams(array $overrideparams = null) {
             $params = parent::merge_overrideparams($overrideparams);
 
-            $overrideparams = (array) $overrideparams;
+            $overrideparams = (array)$overrideparams;
             foreach ($overrideparams as $key => $value) {
                 if ($value === null) {
                     unset($params[$key]);
@@ -54,7 +54,7 @@ namespace block_exaport\common {
         public function params(array $params = null) {
             parent::params($params);
 
-            $params = (array) $params;
+            $params = (array)$params;
             foreach ($params as $key => $value) {
                 if ($value === null) {
                     unset($this->params[$key]);
@@ -67,8 +67,8 @@ namespace block_exaport\common {
         public static function request_uri() {
             global $CFG;
 
-            return new static(preg_replace('!^'.preg_quote(parse_url($CFG->wwwroot)['path'], '!').'!', '',
-                    $_SERVER['REQUEST_URI']));
+            return new static(preg_replace('!^' . preg_quote(parse_url($CFG->wwwroot)['path'], '!') . '!', '',
+                $_SERVER['REQUEST_URI']));
         }
     }
 
@@ -126,7 +126,7 @@ namespace block_exaport\common {
         }
 
         public static function create($rootelement) {
-            return new static('<?xml version="1.0" encoding="UTF-8"?><'.$rootelement.' />');
+            return new static('<?xml version="1.0" encoding="UTF-8"?><' . $rootelement . ' />');
         }
 
         public function add_child_with_cdata_if_value($name, $value = null) {
@@ -201,16 +201,16 @@ namespace block_exaport\common {
                 return parent::update_record($table, $data);
             }
 
-            $where = (array) $where;
-            $data = (array) $data;
+            $where = (array)$where;
+            $data = (array)$data;
 
             if ($dbitem = $this->get_record($table, $where)) {
                 if ($data) {
                     $data['id'] = $dbitem->id;
-                    parent::update_record($table, (object) $data);
+                    parent::update_record($table, (object)$data);
                 }
 
-                return (object) ($data + (array) $dbitem);
+                return (object)($data + (array)$dbitem);
             }
 
             return null;
@@ -224,7 +224,7 @@ namespace block_exaport\common {
          * @throws moodle_exception
          */
         public function insert_or_update_record($table, $data, $where = null) {
-            $data = (array) $data;
+            $data = (array)$data;
 
             if ($dbitem = $this->get_record($table, $where !== null ? $where : $data)) {
                 if (empty($data)) {
@@ -232,18 +232,18 @@ namespace block_exaport\common {
                 }
 
                 $data['id'] = $dbitem->id;
-                $this->update_record($table, (object) $data);
+                $this->update_record($table, (object)$data);
 
-                return (object) ($data + (array) $dbitem);
+                return (object)($data + (array)$dbitem);
             } else {
                 unset($data['id']);
                 if ($where !== null) {
                     $data = $data + $where; // First the values of $data, then of $where, but don't override $data.
                 }
-                $id = $this->insert_record($table, (object) $data);
+                $id = $this->insert_record($table, (object)$data);
                 $data['id'] = $id;
 
-                return (object) $data;
+                return (object)$data;
             }
         }
 
@@ -256,7 +256,7 @@ namespace block_exaport\common {
 
             $columns = $this->get_column_names($table);
             $columns = array_map(function($column) use ($prefix) {
-                return $prefix.'.'.$column;
+                return $prefix . '.' . $column;
             }, $columns);
 
             return join(', ', $columns);
@@ -271,8 +271,8 @@ namespace block_exaport\common {
 
             // Some value => type.
             $ret = new \stdClass;
-            $values = (object) $values;
-            $definition = (array) $definition;
+            $values = (object)$values;
+            $definition = (array)$definition;
 
             foreach ($definition as $key => $valuetype) {
                 $value = isset($values->$key) ? $values->$key : null;
@@ -284,10 +284,10 @@ namespace block_exaport\common {
         }
 
         public static function clean_array($values, $definition) {
-            $definition = (array) $definition;
+            $definition = (array)$definition;
 
             if (is_object($values)) {
-                $values = (array) $values;
+                $values = (array)$values;
             } else if (!is_array($values)) {
                 return array();
             }
@@ -301,7 +301,7 @@ namespace block_exaport\common {
             }
 
             if ($keytype !== PARAM_INT && $keytype !== PARAM_TEXT && $keytype !== PARAM_SEQUENCE) {
-                throw new moodle_exception('wrong key type: '.$keytype);
+                throw new moodle_exception('wrong key type: ' . $keytype);
             }
 
             $ret = array();
@@ -344,7 +344,7 @@ namespace block_exaport\common {
             $param = static::get_param($parname, $isarray);
 
             if ($param === null) {
-                throw new moodle_exception('param not found: '.$parname);
+                throw new moodle_exception('param not found: ' . $parname);
             }
 
             return $param;
@@ -474,12 +474,12 @@ namespace block_exaport\common {
         }
 
         $lang = current_language();
-        $langdir = dirname(__DIR__).'/lang';
-        $totalfile = $langdir.'/total.php';
-        $langfile = $langdir.'/'.$lang.'/'._plugin_name().'.php';
+        $langdir = dirname(__DIR__) . '/lang';
+        $totalfile = $langdir . '/total.php';
+        $langfile = $langdir . '/' . $lang . '/' . _plugin_name() . '.php';
 
         if (file_exists($totalfile) && file_exists($langfile) && ($time = filemtime($totalfile)) != filemtime($langfile) &&
-                is_writable($langfile)
+            is_writable($langfile)
         ) {
             // Regenerate must be enabled by developer with uncommenting below code.
             // It is needed for security reasons
@@ -502,10 +502,10 @@ namespace block_exaport\common {
             $content = str_replace($copyright, '', $content);
 
             $content = preg_replace_callback('!^(?<comment>\s*\/\/\s*.*)!m', function($matches) { // also may be '//' instead of '\/\/';
-                return var_export(preg_replace('!^[ \t]+!m', '', $matches['comment']), true).',';
+                return var_export(preg_replace('!^[ \t]+!m', '', $matches['comment']), true) . ',';
             }, $content);
 
-            $totallanguages = eval('?>'.$content);
+            $totallanguages = eval('?>' . $content);
 
             $bylang = [];
 
@@ -526,7 +526,7 @@ namespace block_exaport\common {
                     } else if ($lang === 1) {
                         $lang = 'en';
                     }
-                    if ($value === null && preg_match('!^'.$lang.':(.*)$!', $key, $matches)) {
+                    if ($value === null && preg_match('!^' . $lang . ':(.*)$!', $key, $matches)) {
                         $bylang[$lang][$key] = $matches[1];
                     } else {
                         $bylang[$lang][$key] = $value;
@@ -535,32 +535,32 @@ namespace block_exaport\common {
             }
 
             foreach ($bylang as $lang => $strings) {
-                $output = '<?php'."\n{$copyright}\n";
+                $output = '<?php' . "\n{$copyright}\n";
 
                 foreach ($strings as $key => $value) {
                     if (is_int($key)) {
-                        $output .= $value."\n";
+                        $output .= $value . "\n";
                     } else if (strpos($key, '===') === 0) {
                         // Group.
-                        $output .= "\n\n// ".trim($key, ' =')."\n";
+                        $output .= "\n\n// " . trim($key, ' =') . "\n";
                     } else if ($value === null) {
                         // For code checker.
                         $tempvar = 1;
                     } else {
-                        $output .= '$string['.var_export($key, true).'] = '.var_export($value, true).";\n";
+                        $output .= '$string[' . var_export($key, true) . '] = ' . var_export($value, true) . ";\n";
                     }
                 }
 
-                file_put_contents($langdir.'/'.$lang.'/'._plugin_name().'.php', $output);
-                @touch($langdir.'/'.$lang.'/'._plugin_name().'.php', $time);
+                file_put_contents($langdir . '/' . $lang . '/' . _plugin_name() . '.php', $output);
+                @touch($langdir . '/' . $lang . '/' . _plugin_name() . '.php', $time);
             }
 
             /* Uncomment to here for language file changing */
         }
 
         // Include other developer scripts.
-        if (file_exists(__DIR__.'/../build/developermode.php')) {
-            require(__DIR__.'/../build/developermode.php');
+        if (file_exists(__DIR__ . '/../build/developermode.php')) {
+            require(__DIR__ . '/../build/developermode.php');
         }
     });
 
@@ -602,7 +602,7 @@ namespace block_exaport\common {
         // Copy from moodle/lib/classes/string_manager_standard.php
         // Process array's and objects (except lang_strings).
         if (is_array($a) or (is_object($a) && !($a instanceof \lang_string))) {
-            $a = (array) $a;
+            $a = (array)$a;
             $search = array();
             $replace = array();
             foreach ($a as $key => $value) {
@@ -614,14 +614,14 @@ namespace block_exaport\common {
                     // We support just string or lang_string as value.
                     continue;
                 }
-                $search[] = '{$a->'.$key.'}';
-                $replace[] = (string) $value;
+                $search[] = '{$a->' . $key . '}';
+                $replace[] = (string)$value;
             }
             if ($search) {
                 $string = str_replace($search, $replace, $string);
             }
         } else {
-            $string = str_replace('{$a}', (string) $a, $string);
+            $string = str_replace('{$a}', (string)$a, $string);
         }
 
         return $string;
@@ -656,7 +656,7 @@ namespace block_exaport\common {
         } else if (is_string($arg) && $matches = _t_check_identifier($arg)) {
             $languagestrings = [$matches[1] => $matches[2]];
         } else {
-            throw new moodle_exception('wrong args: '.json_encode($origargs));
+            throw new moodle_exception('wrong args: ' . json_encode($origargs));
         }
 
         if ($args) {
@@ -664,7 +664,7 @@ namespace block_exaport\common {
         }
 
         if ($args) {
-            throw new moodle_exception('too many arguments: '.json_encode($origargs, true));
+            throw new moodle_exception('too many arguments: ' . json_encode($origargs, true));
         }
 
         // Parse $languagestrings.
@@ -674,7 +674,7 @@ namespace block_exaport\common {
                     $languagestrings[$matches[1]] = $matches[2];
                     unset($languagestrings[$key]);
                 } else {
-                    throw new moodle_exception('wrong language string: '.$origargs);
+                    throw new moodle_exception('wrong language string: ' . $origargs);
                 }
             }
         }
@@ -696,7 +696,7 @@ namespace block_exaport\common {
 
         // Try language string.
         $identifier = reset($languagestrings);
-        $identifier = key($languagestrings).':'.$identifier;
+        $identifier = key($languagestrings) . ':' . $identifier;
         if ($manager->string_exists($identifier, $component)) {
             return $manager->get_string($identifier, $component, $a);
         }
@@ -716,11 +716,11 @@ namespace block_exaport\common {
 namespace block_exaport {
 
     function _should_export_class($classname) {
-        return !class_exists(__NAMESPACE__.'\\'.$classname);
+        return !class_exists(__NAMESPACE__ . '\\' . $classname);
     }
 
     function _export_function($function) {
-        if (!function_exists(__NAMESPACE__.'\\'.$function)) {
+        if (!function_exists(__NAMESPACE__ . '\\' . $function)) {
             /*eval('
                 namespace '.__NAMESPACE__.' {
                     function '.$function.'() {

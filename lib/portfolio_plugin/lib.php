@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once($CFG->libdir.'/portfoliolib.php');
+require_once($CFG->libdir . '/portfoliolib.php');
 
 class portfolio_plugin_exaport extends portfolio_plugin_push_base {
 
@@ -46,7 +46,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
         if ($stage == PORTFOLIO_STAGE_FINISHED) {
             return false;
             global $CFG;
-            return $CFG->wwwroot.'/portfolio/exaport/file.php?id='.$this->get('exporter')->get('id');
+            return $CFG->wwwroot . '/portfolio/exaport/file.php?id=' . $this->get('exporter')->get('id');
         }
     }
 
@@ -96,6 +96,6 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
 
     public function get_interactive_continue_url() {
         global $CFG;
-        return $CFG->wwwroot.'/blocks/exaport/item.php?courseid=1&id='.$this->lastitem->id.'&sesskey='.sesskey().'&action=edit';
+        return $CFG->wwwroot . '/blocks/exaport/item.php?courseid=1&id=' . $this->lastitem->id . '&sesskey=' . sesskey() . '&action=edit';
     }
 }

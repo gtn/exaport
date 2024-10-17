@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 use block_exaport\globals as g;
 
@@ -73,12 +73,12 @@ $views = $DB->get_records_sql("
     WHERE
         (
             vshar.userid IS NOT NULL -- shared to me
-            OR ".(block_exaport_shareall_enabled() ? 'v.shareall=1' : '1!=1')." -- shared to all, if enabled
-            OR v.id IN (".join(',', array_merge([0], array_keys($userviews))).") -- Add group shareing views
+            OR " . (block_exaport_shareall_enabled() ? 'v.shareall=1' : '1!=1') . " -- shared to all, if enabled
+            OR v.id IN (" . join(',', array_merge([0], array_keys($userviews))) . ") -- Add group shareing views
         )
         AND v.userid!=? -- don't show my own views
         AND u.deleted = 0
-        ".($userid ? "AND v.userid=".$userid : '')." -- user filter
+        " . ($userid ? "AND v.userid=" . $userid : '') . " -- user filter
     GROUP BY
         {$viewcolumns}, u.firstname, u.lastname, u.picture
     $sqlsort", [$USER->id, $USER->id]);
@@ -102,8 +102,8 @@ function exaport_print_views($views, $parsedsort) {
     $sort = $parsedsort[0];
 
     $mainviewgroups = array(
-            'thiscourse' => array(),
-            'othercourses' => array(),
+        'thiscourse' => array(),
+        'othercourses' => array(),
     );
 
     if (isset($courses[$COURSE->id])) {
@@ -121,8 +121,8 @@ function exaport_print_views($views, $parsedsort) {
     }
 
     if ($courses) {
-        echo '<span style="padding-right: 20px;">'.get_string('course').
-                ': <select id="block-exaport-courses" url="shared_views.php?courseid=%courseid%&sort='.$sort.'">';
+        echo '<span style="padding-right: 20px;">' . get_string('course') .
+            ': <select id="block-exaport-courses" url="shared_views.php?courseid=%courseid%&sort=' . $sort . '">';
 
         // Print empty line, if course is not in list.
         if (!isset($courses[$COURSE->id])) {
@@ -130,20 +130,20 @@ function exaport_print_views($views, $parsedsort) {
         }
 
         foreach ($courses as $c) {
-            echo '<option value="'.$c->id.'"'.($c->id == $COURSE->id ? ' selected="selected"' : '').'>'.$c->fullname.'</option>';
+            echo '<option value="' . $c->id . '"' . ($c->id == $COURSE->id ? ' selected="selected"' : '') . '>' . $c->fullname . '</option>';
         }
         echo '</select></span>';
     }
 
     // Print.
     if ($views) {
-        echo get_string('sortby').': ';
-        echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;sort=user\"".
-                ($sort == 'user' ? ' style="font-weight: bold;"' : '').">".get_string('user')."</a> | ";
-        echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;sort=view\"".
-                ($sort == 'view' ? ' style="font-weight: bold;"' : '').">".get_string('view', 'block_exaport')."</a> | ";
-        echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;sort=timemodified\"".
-                ($sort == 'timemodified' ? ' style="font-weight: bold;"' : '').">".get_string('date', 'block_exaport')."</a> ";
+        echo get_string('sortby') . ': ';
+        echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;sort=user\"" .
+            ($sort == 'user' ? ' style="font-weight: bold;"' : '') . ">" . get_string('user') . "</a> | ";
+        echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;sort=view\"" .
+            ($sort == 'view' ? ' style="font-weight: bold;"' : '') . ">" . get_string('view', 'block_exaport') . "</a> | ";
+        echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_views.php?courseid=$courseid&amp;sort=timemodified\"" .
+            ($sort == 'timemodified' ? ' style="font-weight: bold;"' : '') . ">" . get_string('date', 'block_exaport') . "</a> ";
         echo '</div>';
     }
 
@@ -154,7 +154,7 @@ function exaport_print_views($views, $parsedsort) {
         }
 
         // Header.
-        echo '<h2>'.get_string($mainviewgroupid, 'block_exaport').'</h2>';
+        echo '<h2>' . get_string($mainviewgroupid, 'block_exaport') . '</h2>';
 
         if (empty($mainviewgroup)) {
             // Print for this course only.
@@ -170,8 +170,8 @@ function exaport_print_views($views, $parsedsort) {
             foreach ($mainviewgroup as $view) {
                 if (!isset($viewsbyuser[$view->userid])) {
                     $viewsbyuser[$view->userid] = array(
-                            'user' => $DB->get_record('user', array("id" => $view->userid)),
-                            'views' => array(),
+                        'user' => $DB->get_record('user', array("id" => $view->userid)),
+                        'views' => array(),
                     );
                 }
 
@@ -185,26 +185,26 @@ function exaport_print_views($views, $parsedsort) {
                 $table->width = "100%";
                 $table->size = array('50%', '25%', '25%');
                 $table->head = array(
-                        'view' => block_exaport_get_string('view'),
-                        'timemodified' => block_exaport_get_string("date"),
-                        'sharedwith' => block_exaport_get_string("sharedwith"),
+                    'view' => block_exaport_get_string('view'),
+                    'timemodified' => block_exaport_get_string("date"),
+                    'sharedwith' => block_exaport_get_string("sharedwith"),
                 );
                 $table->data = array();
 
                 foreach ($item['views'] as $view) {
-                    $linktoview = "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/".
-                                    "{$view->userid}-{$view->id}\">".format_string($view->name)."</a>";
+                    $linktoview = "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/" .
+                        "{$view->userid}-{$view->id}\">" . format_string($view->name) . "</a>";
                     $table->data[] = array(
-                            $linktoview,
-                            userdate($view->timemodified),
-                            block_exaport_get_shared_with_text($view),
+                        $linktoview,
+                        userdate($view->timemodified),
+                        block_exaport_get_shared_with_text($view),
                     );
                 }
 
                 echo '<div class="view-group">';
                 echo '<div class="header view-group-header" style="align: right">';
-                echo '<span class="view-group-pic">'.$OUTPUT->user_picture($curuser, array('link' => false)).'</span>';
-                echo '<span class="view-group-title">'.fullname($curuser).' ('.count($item['views']).') </span>';
+                echo '<span class="view-group-pic">' . $OUTPUT->user_picture($curuser, array('link' => false)) . '</span>';
+                echo '<span class="view-group-title">' . fullname($curuser) . ' (' . count($item['views']) . ') </span>';
                 echo '</div>';
 
                 echo '<div class="view-group-content">';
@@ -218,29 +218,29 @@ function exaport_print_views($views, $parsedsort) {
             $table->width = "100%";
             $table->size = array('1%', '25%', '25%', '25%', '24%');
             $table->head = array(
-                    'userpic' => '',
-                    'user' => get_string('user'),
-                    'view' => block_exaport_get_string('view'),
-                    'timemodified' => block_exaport_get_string("date"),
-                    'sharedwith' => block_exaport_get_string("sharedwith"),
+                'userpic' => '',
+                'user' => get_string('user'),
+                'view' => block_exaport_get_string('view'),
+                'timemodified' => block_exaport_get_string("date"),
+                'sharedwith' => block_exaport_get_string("sharedwith"),
             );
             $table->data = array();
 
             foreach ($mainviewgroup as $view) {
                 $curuser = $DB->get_record('user', array("id" => $view->userid));
                 $table->data[] = array(
-                        $OUTPUT->user_picture($curuser, array("courseid" => $courseid)),
-                        fullname($curuser),
-                        "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/".
-                                "{$view->userid}-{$view->id}\">".
-                        format_string($view->name)."</a>",
-                        userdate($view->timemodified),
-                        block_exaport_get_shared_with_text($view),
+                    $OUTPUT->user_picture($curuser, array("courseid" => $courseid)),
+                    fullname($curuser),
+                    "<a href=\"{$CFG->wwwroot}/blocks/exaport/shared_view.php?courseid=$courseid&amp;access=id/" .
+                    "{$view->userid}-{$view->id}\">" .
+                    format_string($view->name) . "</a>",
+                    userdate($view->timemodified),
+                    block_exaport_get_shared_with_text($view),
                 );
             }
 
-            $sorticon = $parsedsort[1].'.png';
-            $table->head[$parsedsort[0]] .= " <img src=\"pix/$sorticon\" alt='".get_string("updownarrow", "block_exaport")."' />";
+            $sorticon = $parsedsort[1] . '.png';
+            $table->head[$parsedsort[0]] .= " <img src=\"pix/$sorticon\" alt='" . get_string("updownarrow", "block_exaport") . "' />";
 
             echo html_writer::table($table);
         }

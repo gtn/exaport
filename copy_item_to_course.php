@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
@@ -45,12 +45,12 @@ if (!block_exaport_feature_enabled('copy_to_course')) {
 global $DB;
 $params = array($USER->id, $itemid, 'file');
 // Get the bookmark if it is mine.
-$item = $DB->get_record_sql("select *".
-        " from {block_exaportitem i}".
-        " where i.userid = ? and i.id=? AND i.type=?");
+$item = $DB->get_record_sql("select *" .
+    " from {block_exaportitem i}" .
+    " where i.userid = ? and i.id=? AND i.type=?");
 
 if (!$item) {
-    print_error("bookmarknotfound", "block_exaport", 'view.php?courseid='.$courseid);
+    print_error("bookmarknotfound", "block_exaport", 'view.php?courseid=' . $courseid);
 }
 
 $courses = exaport_get_shareable_courses();
@@ -60,44 +60,44 @@ if ($sharecourseid) {
         print_error('not allowed to share to this course');
     }
 
-    $dir = make_upload_directory($sharecourseid.'/students');
+    $dir = make_upload_directory($sharecourseid . '/students');
 
-    $filenamenew = clean_filename($USER->lastname.'_'.$USER->firstname).'_'.$item->attachment;
+    $filenamenew = clean_filename($USER->lastname . '_' . $USER->firstname) . '_' . $item->attachment;
     die('todo: block_exaport_file_area_name');
-    copy($CFG->dataroot."/".block_exaport_file_area_name($item)."/".$item->attachment,
-            $dir.'/'.$filenamenew);
+    copy($CFG->dataroot . "/" . block_exaport_file_area_name($item) . "/" . $item->attachment,
+        $dir . '/' . $filenamenew);
 
-    block_exaport_print_header("bookmarks".block_exaport_get_plural_item_type($backtype), "share");
+    block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), "share");
 
     echo '<div style="text-align: center; font-weight: bold; padding: 20px;">';
     echo get_string('filecopiedtocourse',
-            'block_exaport',
-            (object) array('coursename' => $courses[$sharecourseid]['fullname'], 'filename' => $filenamenew));
+        'block_exaport',
+        (object)array('coursename' => $courses[$sharecourseid]['fullname'], 'filename' => $filenamenew));
     echo '</div>';
 
-    redirect($CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid."&type=".$backtype);
+    redirect($CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&type=" . $backtype);
     echo block_exaport_wrapperdivend();
     print_footer();
     exit;
 }
 
-block_exaport_print_header("bookmarks".block_exaport_get_plural_item_type($backtype), "share");
+block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), "share");
 
 echo "<div class='block_eportfolio_center'>";
-echo '<div style="padding: 20px; font-weight: bold;">'.get_string("copy").' '.$item->name.'</div>';
+echo '<div style="padding: 20px; font-weight: bold;">' . get_string("copy") . ' ' . $item->name . '</div>';
 
 if (!$courses) {
     echo 'error, no courses';
 } else {
     foreach ($courses as $course) {
         echo "<a href=\"{$CFG->wwwroot}/blocks/exaport/copy_item_to_course.php?'.
-            'courseid={$courseid}&amp;itemid={$itemid}&amp;backtype={$backtype}&amp;sharecourseid={$course['id']}\">".
-                $course['fullname'].'</a><br />';
+            'courseid={$courseid}&amp;itemid={$itemid}&amp;backtype={$backtype}&amp;sharecourseid={$course['id']}\">" .
+            $course['fullname'] . '</a><br />';
     }
 }
 
 echo "<br /><a href=\"{$CFG->wwwroot}/blocks/exaport/view_items.php?'.
-          'courseid={$courseid}&amp;backtype={$backtype}\">".get_string("back", "block_exaport")."</a><br /><br />";
+          'courseid={$courseid}&amp;backtype={$backtype}\">" . get_string("back", "block_exaport") . "</a><br /><br />";
 echo '</div';
 echo block_exaport_wrapperdivend();
 print_footer();

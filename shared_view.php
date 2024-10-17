@@ -18,8 +18,8 @@
 use Dompdf\Adapter\CPDF;
 use Dompdf\Dompdf;
 
-require_once(__DIR__.'/inc.php');
-require_once(__DIR__.'/blockmediafunc.php');
+require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/blockmediafunc.php');
 
 $access = optional_param('access', 0, PARAM_TEXT);
 
@@ -49,25 +49,26 @@ $pdfsettingslink->params(array(
 ));
 
 // PDF form definition
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
+
 class pdfsettings_form extends moodleform {
     //Add elements to form
     public function definition() {
-		global $USER, $CFG;
+        global $USER, $CFG;
         $mform = $this->_form;
         $mform->disable_form_change_checker();
         $mform->addElement('hidden', 'ispdf', '1');
         $mform->setType('ispdf', PARAM_INT);
 
-		$view = $this->_customdata['view'];
-		// All pdf settings are only for view owners
-		if ($USER->id === $view->userid) {
+        $view = $this->_customdata['view'];
+        // All pdf settings are only for view owners
+        if ($USER->id === $view->userid) {
             // Container: collapsible.
             $mform->addElement('html', '<fieldset class="clearfix view-group">');
             $mform->addElement('html', '<legend class="view-group-header">' . block_exaport_get_string('pdf_settings') . '</legend>');
             $mform->addElement('html', '<div class="view-group-content clearfix"><div>');
             // Description.
-            $mform->addElement('html', '<div class="alert alert-info">'.block_exaport_get_string('pdf_settings_description').'</div>');
+            $mform->addElement('html', '<div class="alert alert-info">' . block_exaport_get_string('pdf_settings_description') . '</div>');
             // Font family. Grouped by 'fixed' and 'Custom' files.
             $mform->addElement('selectgroups', 'fontfamily', block_exaport_get_string('pdf_settings_fontfamily'), block_export_getpdffontfamilies(true));
 
@@ -76,11 +77,11 @@ class pdfsettings_form extends moodleform {
             $mform->addElement('static', 'fontuploader_toggler', '', 'Or upload custom font');
             // container of file uploader
             $mform->addElement('html', '<div class="uploadFont-container">');
-			// Check permissions for pdf (dompdf creates own cache file in the own folder).
-			// TODO: use moodle temp folder ('fontCache' option of dompdf)?
-			$relatedpathtodompdffontcachefile = "/blocks/exaport/lib/classes/dompdf/vendor/dompdf/dompdf/lib/fonts/dompdf_font_family_cache.php";
-			$pathtodompdffontcachefile = $CFG->dirroot.$relatedpathtodompdffontcachefile;
-			// TODO:  Deprecated for new dompdf?
+            // Check permissions for pdf (dompdf creates own cache file in the own folder).
+            // TODO: use moodle temp folder ('fontCache' option of dompdf)?
+            $relatedpathtodompdffontcachefile = "/blocks/exaport/lib/classes/dompdf/vendor/dompdf/dompdf/lib/fonts/dompdf_font_family_cache.php";
+            $pathtodompdffontcachefile = $CFG->dirroot . $relatedpathtodompdffontcachefile;
+            // TODO:  Deprecated for new dompdf?
             /*if (!is_writable($pathtodompdffontcachefile)) {
 				// Try to make it writeable.
                 chmod($pathtodompdffontcachefile, 0766);
@@ -89,11 +90,11 @@ class pdfsettings_form extends moodleform {
                     $mform->addElement('html', '<div class="alert alert-danger">File "' . $relatedpathtodompdffontcachefile . '" must be writable. <br/>Otherwise we do not guarantee the operation of this function</div>');
                 }
             }*/
-			if (!is_writable(dirname($pathtodompdffontcachefile))) {
+            if (!is_writable(dirname($pathtodompdffontcachefile))) {
                 // Try to make it writeable.
                 chmod($pathtodompdffontcachefile, 0766);
-				// Check again
-				if (!is_writable(dirname($pathtodompdffontcachefile))) {
+                // Check again
+                if (!is_writable(dirname($pathtodompdffontcachefile))) {
                     $mform->addElement('html', '<div class="alert alert-danger">Folder "' . dirname($relatedpathtodompdffontcachefile) . '" must be writable. <br/>Otherwise we do not guarantee the operation of this function</div>');
                 }
             }
@@ -113,23 +114,23 @@ class pdfsettings_form extends moodleform {
             $mform->addElement('text', 'fontsize', block_exaport_get_string('pdf_settings_fontsize'));
             $mform->setType('fontsize', PARAM_INT);
             $mform->setDefault('fontsize', '14');
-			// Page size.
-			$pagesizes = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'B0', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'letter', 'legal'];
+            // Page size.
+            $pagesizes = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'B0', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'letter', 'legal'];
             $pagesizes = array_combine($pagesizes, $pagesizes);
             $mform->addElement('select', 'pagesize', block_exaport_get_string('pdf_settings_pagesize'), $pagesizes);
             $mform->setDefault('pagesize', 'A4');
-			// Page size.
-			$pageorients = [
-				'portrait' => block_exaport_get_string('pdf_settings_pageorient.portrait'),
-				'landscape' => block_exaport_get_string('pdf_settings_pageorient.landscape'),
-			];
+            // Page size.
+            $pageorients = [
+                'portrait' => block_exaport_get_string('pdf_settings_pageorient.portrait'),
+                'landscape' => block_exaport_get_string('pdf_settings_pageorient.landscape'),
+            ];
             $mform->addElement('select', 'pageorient', block_exaport_get_string('pdf_settings_pageorient'), $pageorients);
             $mform->setDefault('pageorient', 'landscape');
-			// Show view metadata.
+            // Show view metadata.
             $mform->addElement('checkbox', 'showmetadata', '', block_exaport_get_string('pdf_settings_showmetadata'));
             $mform->setDefault('showmetadata', 1);
-			// Show user info:
-			// name
+            // Show user info:
+            // name
             $mform->addElement('checkbox', 'showusername', '', block_exaport_get_string('pdf_settings_showusername'));
             $mform->setDefault('showusername', 1);
             $mform->hideIf('showusername', 'showmetadata', 'notchecked');
@@ -137,11 +138,11 @@ class pdfsettings_form extends moodleform {
             $mform->addElement('checkbox', 'showuserpicture', '', block_exaport_get_string('pdf_settings_showuserpicture'));
             $mform->setDefault('showuserpicture', 0);
             $mform->hideIf('showuserpicture', 'showmetadata', 'notchecked');
-			// email
+            // email
             $mform->addElement('checkbox', 'showuseremail', '', block_exaport_get_string('pdf_settings_showuseremail'));
             $mform->setDefault('showuseremail', 0);
             $mform->hideIf('showuseremail', 'showmetadata', 'notchecked');
-			// email
+            // email
             $mform->addElement('checkbox', 'showuserphone', '', block_exaport_get_string('pdf_settings_showuserphone'));
             $mform->setDefault('showuserphone', 0);
             $mform->hideIf('showuserphone', 'showmetadata', 'notchecked');
@@ -152,7 +153,7 @@ class pdfsettings_form extends moodleform {
         }
 
         // Download pdf button.
-	    // 'submit' type is not suitable, because it is disabled after first pressing
+        // 'submit' type is not suitable, because it is disabled after first pressing
         $mform->addElement('button', 'download', block_exaport_get_string('download_pdf'), ['onclick' => 'this.form.submit();']);
     }
 
@@ -166,15 +167,15 @@ if ($fromPdform = $pdfForm->get_data()) {
     $is_pdf = true;
 
     // Save pdf settings into view settings - only for view owner
-	if ($USER->id == $view->userid) {
+    if ($USER->id == $view->userid) {
         $customfontcfilecontent = $pdfForm->get_file_content('pdf_customfont');
         $newFontFile = null;
         if ($customfontcfilecontent) {
             // if it is an owner of the view - allow to upload file permanently
             $fs = get_file_storage();
             if ($view->userid == $USER->id) {
-				// Dompdf library has wrong regular expression and incorrect works with filenames with ')', so:
-				$filename = str_replace(['(', ')'], ['_', '_'], $pdfForm->get_new_filename('pdf_customfont'));
+                // Dompdf library has wrong regular expression and incorrect works with filenames with ')', so:
+                $filename = str_replace(['(', ')'], ['_', '_'], $pdfForm->get_new_filename('pdf_customfont'));
                 $fileinfo = array(
                     'contextid' => context_system::instance()->id,
                     'component' => 'block_exaport',
@@ -200,8 +201,8 @@ if ($fromPdform = $pdfForm->get_data()) {
         }
         $allpossiblefonts = block_export_getpdffontfamilies();
 
-		// Check default settings.
-		// font family
+        // Check default settings.
+        // font family
         if (!trim($fontfamily) /*|| !in_array($fontfamily, array_keys($allpossiblefonts))*/) {
             $fontfamily = 'Dejavu sans';
         }
@@ -213,30 +214,30 @@ if ($fromPdform = $pdfForm->get_data()) {
         }
         $pdf_settings['fontsize'] = $fontsize;
         // pagesize
-		$pagesize = $fromPdform->pagesize;
+        $pagesize = $fromPdform->pagesize;
         if (!trim($pagesize)) {
             $pagesize = 'A4';
         }
         $pdf_settings['pagesize'] = $pagesize;
-		// page orientation
-		$pageorient = $fromPdform->pageorient;
+        // page orientation
+        $pageorient = $fromPdform->pageorient;
         if (!trim($pageorient)) {
             $pageorient = 'landscape';
         }
         $pdf_settings['pageorient'] = $pageorient;
-		// show view metadata
-		if (@$fromPdform->showmetadata) {
+        // show view metadata
+        if (@$fromPdform->showmetadata) {
             $pdf_settings['showmetadata'] = $fromPdform->showmetadata;
         } else {
             $pdf_settings['showmetadata'] = 0;
-		}
-		// show user name
+        }
+        // show user name
         $pdf_settings['showusername'] = @$fromPdform->showusername ? 1 : 0;
-		// show user picture
+        // show user picture
         $pdf_settings['showuserpicture'] = @$fromPdform->showuserpicture ? 1 : 0;
-		// show user email
+        // show user email
         $pdf_settings['showuseremail'] = @$fromPdform->showuseremail ? 1 : 0;
-		// show user phone
+        // show user phone
         $pdf_settings['showuserphone'] = @$fromPdform->showuserphone ? 1 : 0;
 
         // Save pdf settings into DB
@@ -267,9 +268,9 @@ if (!$user = $DB->get_record("user", $conditions)) {
 $portfoliouser = block_exaport_get_user_preferences($user->id);
 
 // Read blocks.
-$query = "select b.*". // , i.*, i.id as itemid".
-        " FROM {block_exaportviewblock} b".
-        " WHERE b.viewid = ? ORDER BY b.positionx, b.positiony";
+$query = "select b.*" . // , i.*, i.id as itemid".
+    " FROM {block_exaportviewblock} b" .
+    " WHERE b.viewid = ? ORDER BY b.positionx, b.positiony";
 
 $blocks = $DB->get_records_sql($query, array($view->id));
 
@@ -313,7 +314,7 @@ if (!$is_pdf) {
     } else {
         $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
         $PAGE->set_title(get_string("externaccess", "block_exaport"));
-        $PAGE->set_heading(get_string("externaccess", "block_exaport")." ".fullname($user, $user->id));
+        $PAGE->set_heading(get_string("externaccess", "block_exaport") . " " . fullname($user, $user->id));
 
         $general_content .= $OUTPUT->header();
         $general_content .= block_exaport_wrapperdivstart();
@@ -343,7 +344,7 @@ if (!$is_pdf) {
 
 $comp = block_exaport_check_competence_interaction();
 
-require_once(__DIR__.'/lib/resumelib.php');
+require_once(__DIR__ . '/lib/resumelib.php');
 $resume = block_exaport_get_resume_params($view->userid, true);
 
 if (!$is_pdf) {
@@ -351,13 +352,13 @@ if (!$is_pdf) {
 }
 
 $colslayout = array(
-        "1" => 1, "2" => 2, "3" => 2, "4" => 2, "5" => 3, "6" => 3, "7" => 3, "8" => 4, "9" => 4, "10" => 5,
+    "1" => 1, "2" => 2, "3" => 2, "4" => 2, "5" => 3, "6" => 3, "7" => 3, "8" => 4, "9" => 4, "10" => 5,
 );
 if (!isset($view->layout) || $view->layout == 0) {
     $view->layout = 2;
 }
 $general_content .= '<div id="view">';
-$general_content .= '<table class="table_layout layout'.$view->layout.'""><tr>';
+$general_content .= '<table class="table_layout layout' . $view->layout . '""><tr>';
 $data_for_pdf = array(); // for old pdf view
 $data_for_pdf_blocks = array(); // for new pdf view
 
@@ -376,14 +377,14 @@ $addAttachementsToBlockView = function($attachments, $block) {
 for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
     $data_for_pdf[$i] = array();
     $data_for_pdf_blocks[$i] = array();
-    $general_content .= '<td class="view-column td'.$i.'">';
+    $general_content .= '<td class="view-column td' . $i . '">';
     if (isset($columns[$i])) {
         foreach ($columns[$i] as $block) {
             $body_content_forPdf = '';
             $blockForPdf = '<div class="view-block">';
             if ($block->text) {
                 $block->text = file_rewrite_pluginfile_urls($block->text, 'pluginfile.php', context_user::instance($USER->id)->id,
-                        'block_exaport', 'view_content', $access);
+                    'block_exaport', 'view_content', $access);
                 $block->text = format_text($block->text, FORMAT_HTML);
             }
             $attachments = array();
@@ -403,7 +404,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         if (is_array($competencies)) {
                             $competenciesoutput = "";
                             foreach ($competencies as $competence) {
-                                $competenciesoutput .= $competence->title.'<br/>';
+                                $competenciesoutput .= $competence->title . '<br/>';
                             }
 
                             // TODO: still needed?
@@ -417,14 +418,14 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
 
                     }
 
-                    $href = 'shared_item.php?access=view/'.$access.'&itemid='.$item->id.'&att='.$item->attachment;
+                    $href = 'shared_item.php?access=view/' . $access . '&itemid=' . $item->id . '&att=' . $item->attachment;
 
-                    $general_content .= '<div class="view-item view-item-type-'.$item->type.'">';
+                    $general_content .= '<div class="view-item view-item-type-' . $item->type . '">';
                     // Thumbnail of item.
                     $fileparams = '';
                     if ($item->type == "file") {
-                        $select = "contextid='".context_user::instance($item->userid)->id."' ".
-                                " AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";
+                        $select = "contextid='" . context_user::instance($item->userid)->id . "' " .
+                            " AND component='block_exaport' AND filearea='item_file' AND itemid='" . $item->id . "' AND filesize>0 ";
                         if ($files = $DB->get_records_select('files', $select, null, 'id, filename, mimetype, filesize')) {
                             if (is_array($files)) {
                                 $width = '';
@@ -440,92 +441,92 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
 
                                 foreach ($files as $file) {
                                     if (strpos($file->mimetype, "image") !== false) {
-                                        $imgsrc = $CFG->wwwroot."/pluginfile.php/".context_user::instance($item->userid)->id.
-                                                "/".'block_exaport'."/".'item_file'."/view/".$access."/itemid/".$item->id."/".
-                                                $file->filename;
-                                        $general_content .= '<div class="view-item-image"><img src="'.$imgsrc.'" class="'.$width.'" alt=""/></div>';
+                                        $imgsrc = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id .
+                                            "/" . 'block_exaport' . "/" . 'item_file' . "/view/" . $access . "/itemid/" . $item->id . "/" .
+                                            $file->filename;
+                                        $general_content .= '<div class="view-item-image"><img src="' . $imgsrc . '" class="' . $width . '" alt=""/></div>';
                                         $blockForPdf .= '<div class="view-item-image">
                                                             <img align = "right"
                                                                 border = "0"
-                                                                src = "'.$imgsrc.'"
-                                                                width = "'.((int)filter_var($width, FILTER_SANITIZE_NUMBER_INT) ?: '100').'"
+                                                                src = "' . $imgsrc . '"
+                                                                width = "' . ((int)filter_var($width, FILTER_SANITIZE_NUMBER_INT) ?: '100') . '"
                                                                 alt = "" />
                                                          </div>';
                                     } else {
                                         // Link to file.
-                                        $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access.
-                                                "&itemid=".$item->id."&inst=".$file->pathnamehash);
+                                        $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/" . $access .
+                                            "&itemid=" . $item->id . "&inst=" . $file->pathnamehash);
                                         // Human filesize.
                                         $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
                                         $power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
-                                        $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',').' '.$units[$power];
+                                        $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
                                         // Fileinfo block.
-                                        $fileparams = '<div class="view-item-file"><a href="'.$ffurl.'" >'.$file->filename.'</a> '.
-                                                '<span class="filedescription">('.$filesize.')</span></div>';
+                                        $fileparams = '<div class="view-item-file"><a href="' . $ffurl . '" >' . $file->filename . '</a> ' .
+                                            '<span class="filedescription">(' . $filesize . ')</span></div>';
                                         if (block_exaport_is_valid_media_by_filename($file->filename)) {
                                             $general_content .= '<div class="view-item-image">
-													<img height="60" src="'.$CFG->wwwroot.'/blocks/exaport/pix/media.png" alt="" />
+													<img height="60" src="' . $CFG->wwwroot . '/blocks/exaport/pix/media.png" alt="" />
 												</div>';
-                                            $blockForPdf .= '<img height="60" src="'.$CFG->wwwroot. '/blocks/exaport/pix/media.png" align="right" />';
+                                            $blockForPdf .= '<img height="60" src="' . $CFG->wwwroot . '/blocks/exaport/pix/media.png" align="right" />';
                                         }
                                     };
                                 }
                             }
                         };
                     } else if ($item->type == "link") {
-                        $general_content .= '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="'.
-                                $href.'"><img style="max-width: 100%; max-height: 100%;" src="'.$CFG->wwwroot.
-                                '/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'" alt=""/></a></div>';
+                        $general_content .= '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="' .
+                            $href . '"><img style="max-width: 100%; max-height: 100%;" src="' . $CFG->wwwroot .
+                            '/blocks/exaport/item_thumb.php?item_id=' . $item->id . '&access=' . $access . '" alt=""/></a></div>';
                         $blockForPdf .= '<img align="right"
                                                 style="" height="100"
-                                                src="'.$CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'&ispdf=1&vhash='.$view->hash.'&vid='.$view->id.'&uid='.$USER->id.'"
+                                                src="' . $CFG->wwwroot . '/blocks/exaport/item_thumb.php?item_id=' . $item->id . '&access=' . $access . '&ispdf=1&vhash=' . $view->hash . '&vid=' . $view->id . '&uid=' . $USER->id . '"
                                                 alt="" />';
                     };
-                    $general_content .= '<div class="view-item-header" title="'.$item->type.'">'.$item->name;
+                    $general_content .= '<div class="view-item-header" title="' . $item->type . '">' . $item->name;
                     // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.
                     if ($comp && has_capability('block/exaport:competences', $context)) {
                         if (is_array($competencies) && count($competencies) > 0) {
-                            $general_content .= '<img align="right" src="'.$CFG->wwwroot.
-                                    '/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
+                            $general_content .= '<img align="right" src="' . $CFG->wwwroot .
+                                '/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
                         }
                     }
                     $general_content .= '</div>';
-                    $blockForPdf .= '<h4>'.$item->name.'</h4>';
+                    $blockForPdf .= '<h4>' . $item->name . '</h4>';
                     $general_content .= $fileparams;
                     $blockForPdf .= $fileparams;
                     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
-                            'block_exaport', 'item_content', 'view/'.$access.'/itemid/'.$item->id);
+                        'block_exaport', 'item_content', 'view/' . $access . '/itemid/' . $item->id);
                     $intro = format_text($intro, FORMAT_HTML, ['noclean' => true]);
                     $general_content .= '<div class="view-item-text">';
                     $blockForPdf .= '<div class="view-item-text">';
                     if ($item->url && $item->url != "false") {
                         // Link.
-                        $general_content .= '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
-                        $blockForPdf .= '<a href="'.s($item->url).'" target="_blank">'.str_replace('http://', '', $item->url).'</a><br />';
+                        $general_content .= '<a href="' . s($item->url) . '" target="_blank">' . str_replace('http://', '', $item->url) . '</a><br />';
+                        $blockForPdf .= '<a href="' . s($item->url) . '" target="_blank">' . str_replace('http://', '', $item->url) . '</a><br />';
                     }
-                    $general_content .= $intro.'</div>';
-                    $blockForPdf .= $intro.'</div>';
+                    $general_content .= $intro . '</div>';
+                    $blockForPdf .= $intro . '</div>';
                     if (is_array($competencies) && count($competencies) > 0) {
-                        $general_content .= '<div class="view-item-competences">'.
-                                '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>'.
-                                '<a onmouseover="Tip(\''.$item->competences.'\')" onmouseout="UnTip()">'.
-                                '<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/comp.png" class="iconsmall" alt="'.'competences'.'" />'.
-                                '</a></div>';
+                        $general_content .= '<div class="view-item-competences">' .
+                            '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>' .
+                            '<a onmouseover="Tip(\'' . $item->competences . '\')" onmouseout="UnTip()">' .
+                            '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/comp.png" class="iconsmall" alt="' . 'competences' . '" />' .
+                            '</a></div>';
                     }
-                    $general_content .= '<div class="view-item-link"><a href="'.s($href).'">'.block_exaport_get_string('show').'</a></div>';
+                    $general_content .= '<div class="view-item-link"><a href="' . s($href) . '">' . block_exaport_get_string('show') . '</a></div>';
                     $general_content .= '</div>';
                     break;
                 case 'personal_information':
-                    $general_content .= '<div class="header">'.$block->block_title.'</div>';
+                    $general_content .= '<div class="header">' . $block->block_title . '</div>';
                     if ($block->block_title) {
-                        $blockForPdf .= '<h4>'.$block->block_title.'</h4>';
+                        $blockForPdf .= '<h4>' . $block->block_title . '</h4>';
                     }
                     $general_content .= '<div class="view-personal-information">';
                     $blockForPdf .= '<div class="view-personal-information">';
                     if (isset($block->picture)) {
-                        $general_content .= '<div class="picture" style="float:right; position: relative;"><img src="'.$block->picture.
-                                '" alt=""/></div>';
-                        $blockForPdf .= '<img src="'.$block->picture.'" align="right" />';
+                        $general_content .= '<div class="picture" style="float:right; position: relative;"><img src="' . $block->picture .
+                            '" alt=""/></div>';
+                        $blockForPdf .= '<img src="' . $block->picture . '" align="right" />';
                     }
                     $person_info = '';
                     if (isset($block->firstname) or isset($block->lastname)) {
@@ -534,17 +535,17 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                             $person_info .= $block->firstname;
                         }
                         if (isset($block->lastname)) {
-                            $person_info .= ' '.$block->lastname;
+                            $person_info .= ' ' . $block->lastname;
                         }
                         $person_info .= '</div>';
                     };
                     if (isset($block->email)) {
-                        $person_info .= '<div class="email">'.$block->email.'</div>';
+                        $person_info .= '<div class="email">' . $block->email . '</div>';
                     }
                     if (isset($block->text)) {
                         $text = $block->text;
                         $text = block_exaport_add_view_access_parameter_to_url($text, $access, ['src', 'href']);
-                        $person_info .= '<div class="body">'.$text.'</div>';
+                        $person_info .= '<div class="body">' . $text . '</div>';
                     }
                     $general_content .= $person_info;
                     $general_content .= '</div>';
@@ -552,13 +553,13 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $blockForPdf .= '</div>';
                     break;
                 case 'headline':
-                    $general_content .= '<div class="header view-header">'.nl2br($block->text).'</div>';
-                    $blockForPdf .= '<h4>'.nl2br($block->text).'</h4>';
+                    $general_content .= '<div class="header view-header">' . nl2br($block->text) . '</div>';
+                    $blockForPdf .= '<h4>' . nl2br($block->text) . '</h4>';
                     break;
                 case 'media':
-                    $general_content .= '<div class="header view-header">'.nl2br($block->block_title).'</div>';
+                    $general_content .= '<div class="header view-header">' . nl2br($block->block_title) . '</div>';
                     if ($block->block_title) {
-                        $blockForPdf .= '<h4>'.nl2br($block->block_title).'</h4>';
+                        $blockForPdf .= '<h4>' . nl2br($block->block_title) . '</h4>';
                     }
                     $general_content .= '<div class="view-media">';
                     if (!empty($block->contentmedia)) {
@@ -583,26 +584,26 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         // Badge not found.
                         continue 2;
                     }
-                    $general_content .= '<div class="header">'.nl2br($badge->name).'</div>';
-                    $blockForPdf .= '<h4>'.nl2br($badge->name).'</h4>';
+                    $general_content .= '<div class="header">' . nl2br($badge->name) . '</div>';
+                    $blockForPdf .= '<h4>' . nl2br($badge->name) . '</h4>';
                     $general_content .= '<div class="view-text">';
                     $general_content .= '<div style="float:right; position: relative; height: 100px; width: 100px;" class="picture">';
                     if (!$badge->courseid) { // For badges with courseid = NULL.
-                        $badge->imageUrl = (string) moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage',
-                                                                                    $badge->id, '/', 'f1', false);
+                        $badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage',
+                            $badge->id, '/', 'f1', false);
                     } else {
                         $context = context_course::instance($badge->courseid);
-                        $badge->imageUrl = (string) moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage',
-                                                                                    $badge->id, '/', 'f1', false);
+                        $badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage',
+                            $badge->id, '/', 'f1', false);
                     }
-                    $general_content .= '<img src="'.$badge->imageUrl.'" />';
+                    $general_content .= '<img src="' . $badge->imageUrl . '" />';
                     $general_content .= '</div>';
                     $general_content .= '<div class="badge-description">';
                     $general_content .= format_text($badge->description, FORMAT_HTML);
                     $general_content .= '</div>';
                     $general_content .= '</div>';
-                    $blockForPdf .= '<p>'.format_text($badge->description, FORMAT_HTML).'</p>';
-                    $blockForPdf .= '<img align="right" src="'.$badge->imageUrl.'" />';
+                    $blockForPdf .= '<p>' . format_text($badge->description, FORMAT_HTML) . '</p>';
+                    $blockForPdf .= '<img align="right" src="' . $badge->imageUrl . '" />';
                     // $blockForPdf .= '</div>';
                     break;
                 case 'cv_group':
@@ -714,13 +715,13 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                     if ($resume->publications[$itemid]) {
                                         $item_data = $resume->publications[$itemid];
                                         $description = '';
-                                        $description .= '<span class="public_title">'.$item_data->title;
+                                        $description .= '<span class="public_title">' . $item_data->title;
                                         if ($item_data->contribution != '') {
-                                            $description .= ' ('.$item_data->contribution.')';
+                                            $description .= ' (' . $item_data->contribution . ')';
                                         }
                                         $description .= '</span> ';
                                         if ($item_data->date != '') {
-                                            $description .= '<span class="public_date">('.$item_data->date.')</span>';
+                                            $description .= '<span class="public_date">(' . $item_data->date . ')</span>';
                                         }
                                         if ($item_data->contributiondetails != '' || $item_data->url != '') {
                                             $description .= '<span class="public_description">';
@@ -728,7 +729,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                                 $description .= $item_data->contributiondetails;
                                             }
                                             if ($item_data->url != '') {
-                                                $description .= '<br /><a href="'.$item_data->url.'" class="public_url" target="_blank">'.$item_data->url.'</a>';
+                                                $description .= '<br /><a href="' . $item_data->url . '" class="public_url" target="_blank">' . $item_data->url . '</a>';
                                             }
                                             $description .= '</span>';
                                         }
@@ -779,12 +780,12 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                     $description = '';
                                     if ($tempContent = $resume->{$goalSkillType}) {
                                         $tempContent = file_rewrite_pluginfile_urls($tempContent, 'pluginfile.php',
-                                            context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_'.$goalSkillType, $resume->id);
+                                            context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_' . $goalSkillType, $resume->id);
                                         $body_content_forPdf .= format_text($tempContent, FORMAT_HTML); // pdf does not need additional parameter
                                         $tempContent = block_exaport_add_view_access_parameter_to_url($tempContent, $access, ['src']);
-                                        $description .= '<span class="'.$goalSkillType.'_text">'.$tempContent.'</span> ';
+                                        $description .= '<span class="' . $goalSkillType . '_text">' . $tempContent . '</span> ';
                                     }
-                                    $attachments = @$resume->{$goalSkillType.'_attachments'};
+                                    $attachments = @$resume->{$goalSkillType . '_attachments'};
                                     $description .= $addAttachementsToBlockView($attachments, $block);
                                     $description = trim($description);
                                     if ($description) {
@@ -801,12 +802,12 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                     context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_interests', $resume->id);
                                 $body_content_forPdf .= format_text($tempContent, FORMAT_HTML); // pdf does not need additional parameter
                                 $tempContent = block_exaport_add_view_access_parameter_to_url($tempContent, $access, ['src']);
-                                $description .= '<span class="interests">'.$tempContent.'</span> ';
+                                $description .= '<span class="interests">' . $tempContent . '</span> ';
                             }
                             $body_content = $description;
                             break;
                         default:
-                            $general_content .= '!!! '.$block->resume_itemtype.' !!!';
+                            $general_content .= '!!! ' . $block->resume_itemtype . ' !!!';
                     }
 
                     // if the resume item is empty - do not show
@@ -841,20 +842,20 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 $item_data = $resume->educations[$block->itemid];
                                 $attachments = $item_data->attachments;
                                 $description = '';
-                                $description .= '<span class="edu_institution">'.$item_data->institution.':</span> ';
-                                $description .= '<span class="edu_qualname">'.$item_data->qualname.'</span>';
+                                $description .= '<span class="edu_institution">' . $item_data->institution . ':</span> ';
+                                $description .= '<span class="edu_qualname">' . $item_data->qualname . '</span>';
                                 if ($item_data->startdate != '' || $item_data->enddate != '') {
                                     $description .= ' (';
                                     if ($item_data->startdate != '') {
-                                        $description .= '<span class="edu_startdate">'.$item_data->startdate.'</span>';
+                                        $description .= '<span class="edu_startdate">' . $item_data->startdate . '</span>';
                                     }
                                     if ($item_data->enddate != '') {
-                                        $description .= '<span class="edu_enddate"> - '.$item_data->enddate.'</span>';
+                                        $description .= '<span class="edu_enddate"> - ' . $item_data->enddate . '</span>';
                                     }
                                     $description .= ')';
                                 }
                                 if ($item_data->qualdescription != '') {
-                                    $description .= '<span class="edu_qualdescription">'.$item_data->qualdescription.'</span>';
+                                    $description .= '<span class="edu_qualdescription">' . $item_data->qualdescription . '</span>';
                                 }
                                 $body_content .= $description;
                             }
@@ -864,20 +865,20 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 $item_data = $resume->employments[$block->itemid];
                                 $attachments = $item_data->attachments;
                                 $description = '';
-                                $description .= '<span class="employ_jobtitle">'.$item_data->jobtitle.':</span> ';
-                                $description .= '<span class="employ_employer">'.$item_data->employer.'</span>';
+                                $description .= '<span class="employ_jobtitle">' . $item_data->jobtitle . ':</span> ';
+                                $description .= '<span class="employ_employer">' . $item_data->employer . '</span>';
                                 if ($item_data->startdate != '' || $item_data->enddate != '') {
                                     $description .= ' (';
                                     if ($item_data->startdate != '') {
-                                        $description .= '<span class="employ_startdate">'.$item_data->startdate.'</span>';
+                                        $description .= '<span class="employ_startdate">' . $item_data->startdate . '</span>';
                                     }
                                     if ($item_data->enddate != '') {
-                                        $description .= '<span class="employ_enddate"> - '.$item_data->enddate.'</span>';
+                                        $description .= '<span class="employ_enddate"> - ' . $item_data->enddate . '</span>';
                                     }
                                     $description .= ')';
                                 }
                                 if ($item_data->positiondescription != '') {
-                                    $description .= '<span class="employ_positiondescription">'.$item_data->positiondescription.'</span>';
+                                    $description .= '<span class="employ_positiondescription">' . $item_data->positiondescription . '</span>';
                                 }
                                 $body_content .= $description;
                             }
@@ -887,12 +888,12 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 $item_data = $resume->certifications[$block->itemid];
                                 $attachments = $item_data->attachments;
                                 $description = '';
-                                $description .= '<span class="certif_title">'.$item_data->title.'</span> ';
+                                $description .= '<span class="certif_title">' . $item_data->title . '</span> ';
                                 if ($item_data->date != '') {
-                                    $description .= '<span class="certif_date">('.$item_data->date.')</span>';
+                                    $description .= '<span class="certif_date">(' . $item_data->date . ')</span>';
                                 }
                                 if ($item_data->description != '') {
-                                    $description .= '<span class="certif_description">'.$item_data->description.'</span>';
+                                    $description .= '<span class="certif_description">' . $item_data->description . '</span>';
                                 }
                                 $body_content = $description;
                             }
@@ -902,13 +903,13 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 $item_data = $resume->publications[$block->itemid];
                                 $attachments = $item_data->attachments;
                                 $description = '';
-                                $description .= '<span class="public_title">'.$item_data->title;
+                                $description .= '<span class="public_title">' . $item_data->title;
                                 if ($item_data->contribution != '') {
-                                    $description .= ' ('.$item_data->contribution.')';
+                                    $description .= ' (' . $item_data->contribution . ')';
                                 }
                                 $description .= '</span> ';
                                 if ($item_data->date != '') {
-                                    $description .= '<span class="public_date">('.$item_data->date.')</span>';
+                                    $description .= '<span class="public_date">(' . $item_data->date . ')</span>';
                                 }
                                 if ($item_data->contributiondetails != '' || $item_data->url != '') {
                                     $description .= '<span class="public_description">';
@@ -916,7 +917,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                         $description .= $item_data->contributiondetails;
                                     }
                                     if ($item_data->url != '') {
-                                        $description .= '<br /><a href="'.$item_data->url.'" class="public_url" target="_blank">'.$item_data->url.'</a>';
+                                        $description .= '<br /><a href="' . $item_data->url . '" class="public_url" target="_blank">' . $item_data->url . '</a>';
                                     }
                                     $description .= '</span>';
                                 }
@@ -928,19 +929,19 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 $item_data = $resume->profmembershipments[$block->itemid];
                                 $attachments = $item_data->attachments;
                                 $description = '';
-                                $description .= '<span class="mbrship_title">'.$item_data->title.'</span> ';
+                                $description .= '<span class="mbrship_title">' . $item_data->title . '</span> ';
                                 if ($item_data->startdate != '' || $item_data->enddate != '') {
                                     $description .= ' (';
                                     if ($item_data->startdate != '') {
-                                        $description .= '<span class="mbrship_startdate">'.$item_data->startdate.'</span>';
+                                        $description .= '<span class="mbrship_startdate">' . $item_data->startdate . '</span>';
                                     }
                                     if ($item_data->enddate != '') {
-                                        $description .= '<span class="mbrship_enddate"> - '.$item_data->enddate.'</span>';
+                                        $description .= '<span class="mbrship_enddate"> - ' . $item_data->enddate . '</span>';
                                     }
                                     $description .= ')';
                                 }
                                 if ($item_data->description != '') {
-                                    $description .= '<span class="mbrship_description">'.$item_data->description.'</span>';
+                                    $description .= '<span class="mbrship_description">' . $item_data->description . '</span>';
                                 }
                                 $body_content = $description;
                             }
@@ -951,14 +952,14 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         case 'skillspersonal':
                         case 'skillsacademic':
                         case 'skillscareers':
-                            $attachments = @$resume->{$block->resume_itemtype.'_attachments'};
+                            $attachments = @$resume->{$block->resume_itemtype . '_attachments'};
                             $description = '';
                             if ($resume && $tempContent = $resume->{$block->resume_itemtype}) {
                                 $tempContent = file_rewrite_pluginfile_urls($tempContent, 'pluginfile.php',
-                                    context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_'.$block->resume_itemtype, $resume->id);
+                                    context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_' . $block->resume_itemtype, $resume->id);
                                 $body_content_forPdf .= format_text($tempContent, FORMAT_HTML); // pdf does not need additional parameter
                                 $tempContent = block_exaport_add_view_access_parameter_to_url($tempContent, $access, ['src']);
-                                $description .= '<span class="'.$block->resume_itemtype.'_text">'.$tempContent.'</span> ';
+                                $description .= '<span class="' . $block->resume_itemtype . '_text">' . $tempContent . '</span> ';
                             }
                             $body_content = $description;
                             break;
@@ -969,18 +970,18 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                     context_user::instance($resume->user_id)->id, 'block_exaport', 'resume_editor_interests', $resume->id);
                                 $body_content_forPdf .= format_text($tempContent, FORMAT_HTML); // pdf does not need additional parameter
                                 $tempContent = block_exaport_add_view_access_parameter_to_url($tempContent, $access, ['src']);
-                                $description .= '<span class="interests">'.$tempContent.'</span> ';
+                                $description .= '<span class="interests">' . $tempContent . '</span> ';
                             }
                             $body_content = $description;
                             break;
                         default:
-                            $general_content .= '!!! '.$block->resume_itemtype.' !!!';
+                            $general_content .= '!!! ' . $block->resume_itemtype . ' !!!';
                     }
 
                     if ($attachments && is_array($attachments) && count($attachments) > 0 && $block->resume_withfiles) {
-                        $body_content .= '<ul class="resume_attachments '.$block->resume_itemtype.'_attachments">';
+                        $body_content .= '<ul class="resume_attachments ' . $block->resume_itemtype . '_attachments">';
                         foreach ($attachments as $attachm) {
-                            $body_content .= '<li><a href="'.$attachm['fileurl'].'" target="_blank">'.$attachm['filename'].'</a></li>';
+                            $body_content .= '<li><a href="' . $attachm['fileurl'] . '" target="_blank">' . $attachm['filename'] . '</a></li>';
                         }
                         $body_content .= '</ul>';
                     }
@@ -1003,14 +1004,14 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     break;
                 default:
                     // Text.
-                    $general_content .= '<div class="header">'.$block->block_title.'</div>';
+                    $general_content .= '<div class="header">' . $block->block_title . '</div>';
                     $general_content .= '<div class="view-text">';
                     $general_content .= format_text($block->text, FORMAT_HTML);
                     $general_content .= '</div>';
                     if ($block->block_title) {
-                        $blockForPdf .= "\r\n".'<h4>'.$block->block_title.'</h4>';
+                        $blockForPdf .= "\r\n" . '<h4>' . $block->block_title . '</h4>';
                     }
-					$pdf_text = format_text($block->text, FORMAT_HTML);
+                    $pdf_text = format_text($block->text, FORMAT_HTML);
                     // If the text has HTML <img> - it can broke view template. Try to clean it
                     try {
                         $pdf_text = trim(mb_convert_encoding($pdf_text, 'HTML-ENTITIES', 'UTF-8'));
@@ -1033,28 +1034,28 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     } catch (\Exception $e) {
                         // just continue?
                     }
-                   /* try {*/
-                        $pdf_text = mb_convert_encoding($pdf_text, 'HTML-ENTITIES', 'UTF-8');
-                        if ($pdf_text) {
-                            $dom = new DOMDocument;
-                            $dom->loadHTML($pdf_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-                            $xpath = new DOMXPath($dom);
-                            $nodes = $xpath->query('//img');
-                            /** @var DOMElement $node */
-                            foreach ($nodes as $node) {
-                                $node->removeAttribute('width');
-                                $node->removeAttribute('height');
-                                // $node->setAttribute('width', '200');
-                                $style = $node->getAttribute('style');
-                                $style .= ';width: 100%;';
-                                $style = $node->setAttribute('style', $style);
-                            }
-                            $pdf_text = $dom->saveHTML();
+                    /* try {*/
+                    $pdf_text = mb_convert_encoding($pdf_text, 'HTML-ENTITIES', 'UTF-8');
+                    if ($pdf_text) {
+                        $dom = new DOMDocument;
+                        $dom->loadHTML($pdf_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+                        $xpath = new DOMXPath($dom);
+                        $nodes = $xpath->query('//img');
+                        /** @var DOMElement $node */
+                        foreach ($nodes as $node) {
+                            $node->removeAttribute('width');
+                            $node->removeAttribute('height');
+                            // $node->setAttribute('width', '200');
+                            $style = $node->getAttribute('style');
+                            $style .= ';width: 100%;';
+                            $style = $node->setAttribute('style', $style);
                         }
+                        $pdf_text = $dom->saveHTML();
+                    }
                     /*}  finally {
                         // just wrapper
                     }*/
-                    $blockForPdf .= "\r\n".'<div>'.$pdf_text.'</div>';
+                    $blockForPdf .= "\r\n" . '<div>' . $pdf_text . '</div>';
             }
             $blockForPdf .= '</div>';
             $data_for_pdf[$i][] = $blockForPdf;
@@ -1072,8 +1073,8 @@ $general_content .= "<br />";
 // PDF form
 // Get font families
 function block_export_getpdffontfamilies($grouped = false) {
-	// static fonts
-	$defaultfamilies = [
+    // static fonts
+    $defaultfamilies = [
         // css name => Name
         // must support dompdf by defualt
         'Dejavu' => 'DejaVu sans',
@@ -1083,27 +1084,27 @@ function block_export_getpdffontfamilies($grouped = false) {
         'Symbol' => 'Symbol',
         'ZapfDingbats' => 'ZapfDingbats',
         // not sure that it is supported PDF
-//	    'Verdana, sans-serif' => 'Verdana (sans-serif)',
-//	    'Tahoma, sans-serif' => 'Tahoma (sans-serif)',
-//	    '"Trebuchet MS", sans-serif' => 'Trebuchet MS (sans-serif)',
-//	    '"Times New Roman", serif' => 'Times New Roman (serif)',
-//	    'Georgia, serif' => 'Georgia (serif)',
-//	    'Garamond, serif' => 'Garamond (serif)',
-//	    '"Courier New", monospace' => 'Courier New (monospace)',
-//	    '"Brush Script MT", cursive' => 'Brush Script MT (cursive)',
+        //	    'Verdana, sans-serif' => 'Verdana (sans-serif)',
+        //	    'Tahoma, sans-serif' => 'Tahoma (sans-serif)',
+        //	    '"Trebuchet MS", sans-serif' => 'Trebuchet MS (sans-serif)',
+        //	    '"Times New Roman", serif' => 'Times New Roman (serif)',
+        //	    'Georgia, serif' => 'Georgia (serif)',
+        //	    'Garamond, serif' => 'Garamond (serif)',
+        //	    '"Courier New", monospace' => 'Courier New (monospace)',
+        //	    '"Brush Script MT", cursive' => 'Brush Script MT (cursive)',
     ];
-	// uploaded fonts
-	$customfonts = [];
+    // uploaded fonts
+    $customfonts = [];
     $fs = get_file_storage();
     $files = $fs->get_area_files(context_system::instance()->id, 'block_exaport', 'pdf_fontfamily', 0);
     foreach ($files as $file) {
-		if ($file->get_filename() != '.') {
+        if ($file->get_filename() != '.') {
             $customfonts[$file->get_id()] = $file->get_filename();
-		}
+        }
     }
-	if ($grouped) {
-		if ($customfonts) {
-			// Add groups only if at least single custom font uploaded
+    if ($grouped) {
+        if ($customfonts) {
+            // Add groups only if at least single custom font uploaded
             $all = [
                 block_exaport_get_string('pdf_settings_fontfamily_fixedgroup') => $defaultfamilies,
                 block_exaport_get_string('pdf_settings_fontfamily_customgroup') => $customfonts,
@@ -1113,11 +1114,11 @@ function block_export_getpdffontfamilies($grouped = false) {
                 0 => $defaultfamilies, // No groups!
             ];
         }
-	} else {
+    } else {
         $all = $defaultfamilies + $customfonts;
     }
 
-	return $all;
+    return $all;
 }
 
 
@@ -1131,15 +1132,15 @@ $pdfsettingslink->params(array(
 
 // Insert PDF form
 $pdfFormData = [
-	'fontfamily' => $pdf_settings['fontfamily'],
+    'fontfamily' => $pdf_settings['fontfamily'],
     'fontsize' => $pdf_settings['fontsize'],
     'pagesize' => $pdf_settings['pagesize'],
     'pageorient' => $pdf_settings['pageorient'],
-	'showmetadata' => $pdf_settings['showmetadata'] ? 1 : 0,
-	'showusername' => $pdf_settings['showusername'] ? 1 : 0,
-	'showuserpicture' => $pdf_settings['showuserpicture'] ? 1 : 0,
-	'showuseremail' => $pdf_settings['showuseremail'] ? 1 : 0,
-	'showuserphone' => $pdf_settings['showuserphone'] ? 1 : 0,
+    'showmetadata' => $pdf_settings['showmetadata'] ? 1 : 0,
+    'showusername' => $pdf_settings['showusername'] ? 1 : 0,
+    'showuserpicture' => $pdf_settings['showuserpicture'] ? 1 : 0,
+    'showuseremail' => $pdf_settings['showuseremail'] ? 1 : 0,
+    'showuserphone' => $pdf_settings['showuserphone'] ? 1 : 0,
 ];
 $pdfForm->set_data($pdfFormData);
 //displays the form
@@ -1153,11 +1154,11 @@ if (!$is_pdf) {
 
 if ($is_pdf) {
     // old pdf view
-    require_once (__DIR__.'/lib/classes/dompdf/autoload.inc.php');
+    require_once(__DIR__ . '/lib/classes/dompdf/autoload.inc.php');
     $options = new \Dompdf\Options();
     $options->set('isRemoteEnabled', true);
-//    $options->set('defaultFont', 'dejavu sans');
-//	$options->set('debugLayout', true);
+    //    $options->set('defaultFont', 'dejavu sans');
+    //	$options->set('debugLayout', true);
     $dompdf = new Dompdf($options);
     $dompdf->setPaper($pdf_settings['pagesize'], $pdf_settings['pageorient']);
     $general_content = pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings);
@@ -1192,15 +1193,15 @@ echo $general_content;
  * @return mixed
  */
 function prependHtmlContentToPdf($content, $view) {
-	global $USER;
+    global $USER;
 
     $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
 
     $doc = new DOMDocument();
     $doc->loadHTML($content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
-	// Replace all <p> to span. Sometimes <p> has wrong overlays in result PDF.
-	// deprecated for new dompdf version?
+    // Replace all <p> to span. Sometimes <p> has wrong overlays in result PDF.
+    // deprecated for new dompdf version?
     /*$xpath = new DOMXPath($doc);
     $pTags = $xpath->query('//p');
     foreach ($pTags as $p) {
@@ -1229,7 +1230,7 @@ function prependHtmlContentToPdf($content, $view) {
         $src = $img->getAttribute('src');
         // Additional check if 'src' contains 'pluginfile.php'
         if (strpos($src, 'pluginfile.php') !== false) {
-            $newSrc = $src.'/forPdf/'.$view->hash.'/'.$view->id.'/'.$USER->id;
+            $newSrc = $src . '/forPdf/' . $view->hash . '/' . $view->id . '/' . $USER->id;
             $img->setAttribute('src', $newSrc);
         }
     }
@@ -1237,22 +1238,22 @@ function prependHtmlContentToPdf($content, $view) {
     // Save the modified HTML content
     $content = $doc->saveHTML();
 
-	// Clean empty spaces between tags.
-//    $content = trim(preg_replace('/>\s+</', '><', $content));
+    // Clean empty spaces between tags.
+    //    $content = trim(preg_replace('/>\s+</', '><', $content));
 
-	return $content;
+    return $content;
 }
 
 
 function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
-	global $USER, $CFG;
+    global $USER, $CFG;
 
     $fontfamily = $pdf_settings['fontfamily'];
     $fontfamilyUrl = '';
-	if (is_numeric($fontfamily)) {
-		// It is a custom uploaded file, so we need to get an url to this font.
+    if (is_numeric($fontfamily)) {
+        // It is a custom uploaded file, so we need to get an url to this font.
         $fs = get_file_storage();
-		$fontFile = $fs->get_file_by_id(intval($fontfamily));
+        $fontFile = $fs->get_file_by_id(intval($fontfamily));
         $fontfamilyUrl = moodle_url::make_pluginfile_url(
             $fontFile->get_contextid(),
             $fontFile->get_component(),
@@ -1263,45 +1264,45 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
             false                     // Do not force download of the file.
         );
         $fontfamilyUrl = $fontfamilyUrl->raw_out();
-		// font family must be unique for the font. Because dompdf creates cached fonts for every family
-        $fontfamily = 'customUploaded_'.$fontFile->get_filename();
-	}
+        // font family must be unique for the font. Because dompdf creates cached fonts for every family
+        $fontfamily = 'customUploaded_' . $fontFile->get_filename();
+    }
 
     $pdf_content = '';
-    $pdf_content .= '<!DOCTYPE html>'."\r\n";
-    $pdf_content .= '<html>'."\r\n";
-    $pdf_content .= '<head>'."\r\n";
-    $pdf_content .= '<style>'."\r\n";
+    $pdf_content .= '<!DOCTYPE html>' . "\r\n";
+    $pdf_content .= '<html>' . "\r\n";
+    $pdf_content .= '<head>' . "\r\n";
+    $pdf_content .= '<style>' . "\r\n";
     if ($fontfamilyUrl) {
-		// Use the same font for different styles|weights (TODO: do we need to have a possibilitu to upload fonts for bold/italic?).
+        // Use the same font for different styles|weights (TODO: do we need to have a possibilitu to upload fonts for bold/italic?).
         $pdf_content .= '
 			@font-face {
-			  font-family: "'.$fontfamily.'";
+			  font-family: "' . $fontfamily . '";
 			  font-weight: normal;
-		      font-style: normal;		  
-			  src:  url("'.$fontfamilyUrl.'") format("truetype");
+		      font-style: normal;
+			  src:  url("' . $fontfamilyUrl . '") format("truetype");
 			}
 			@font-face {
-			  font-family: "'.$fontfamily.'";
+			  font-family: "' . $fontfamily . '";
 			  font-weight: normal;
-		      font-style: italic;		  
-			  src:  url("'.$fontfamilyUrl.'") format("truetype");
+		      font-style: italic;
+			  src:  url("' . $fontfamilyUrl . '") format("truetype");
 			}
 			@font-face {
-			  font-family: "'.$fontfamily.'";
+			  font-family: "' . $fontfamily . '";
 			  font-weight: bold;
-		      font-style: normal;		  
-			  src:  url("'.$fontfamilyUrl.'") format("truetype");
+		      font-style: normal;
+			  src:  url("' . $fontfamilyUrl . '") format("truetype");
 			}
 			@font-face {
-			  font-family: "'.$fontfamily.'";
+			  font-family: "' . $fontfamily . '";
 			  font-weight: bold;
-		      font-style: italic;		  
-			  src:  url("'.$fontfamilyUrl.'") format("truetype");
+		      font-style: italic;
+			  src:  url("' . $fontfamilyUrl . '") format("truetype");
 			}
 			';
     }
-	// Add CSS rules for metadata (header and footer)
+    // Add CSS rules for metadata (header and footer)
     if (@$pdf_settings['showmetadata']) {
         $pdf_content .= '
             body {
@@ -1309,9 +1310,9 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
                 margin-bottom: 50px;
             }
 		    #header {
-			    position: fixed;			     
-			    top: 0px; 			    
-			    height: 50px;		        
+			    position: fixed;
+			    top: 0px;
+			    height: 50px;
 		        margin: -25px -5px;
                 padding: 5px 15px;
                 width: 100%;
@@ -1323,7 +1324,7 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
 	        #header table td.userinfo {
 	            width: 50%;
 	        }
-	        #header table td.viewtitle {	            
+	        #header table td.viewtitle {
 	            font-size: 1.25em;
 	            line-height: 1em;
 	        }
@@ -1339,22 +1340,22 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
 	        }
 	        #header table td.userpicture img {
 	            max-height: 40px;
-	            height: 40px;	            	          
+	            height: 40px;
 	        }
 	        #footer {
-	            position: fixed; 
-	            bottom: 0px;                		    
-			    height: 30px;		        
+	            position: fixed;
+	            bottom: 0px;
+			    height: 30px;
 		        margin: -15px -5px;
 		        margin-bottom: -15px;
                 padding: 0px 15px;
                 width: 100%;
                 color: #cccccc;
-                font-size: 0.75em;  
-                border-top: 1px solid #cccccc;              
+                font-size: 0.75em;
+                border-top: 1px solid #cccccc;
             }
-            #footer table { 
-                width: 100%;                
+            #footer table {
+                width: 100%;
             }
             #footer table td {
                 width: 33%;
@@ -1364,7 +1365,7 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
                 text-align: center;
             }
             #footer table td:first-child {
-				text-align: left                 
+				text-align: left
             }
             #footer table td:last-child  {
                 text-align: right;
@@ -1375,81 +1376,81 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
 
     $pdf_content .= '
 	        body {
-	            font-family: "'.$fontfamily.'";
-	            font-size: '.$pdf_settings['fontsize'].'px;
+	            font-family: "' . $fontfamily . '";
+	            font-size: ' . $pdf_settings['fontsize'] . 'px;
 	            font-weight: normal !important;
-	        }	        
+	        }
 	        .view-table td {
 	            padding: 5px;
 	        }
-	        h4 {	          
-	            margin: 15px 0 0;	           
+	        h4 {
+	            margin: 15px 0 0;
 	        }
 	        div.view-block {
 	            position: relative;
 	            height: auto;
-	            clear: both;           
+	            clear: both;
 	            border-top: 1px solid #eeeeee;
 	        }
 	        /*span.pdf_paragraph {
 	            clear: both;
 	            color: red;
-	            display: block;	            
+	            display: block;
 	        }*/
         ';
     $pdf_content .= "\r\n";
-    $pdf_content .= '</style>'."\r\n";
+    $pdf_content .= '</style>' . "\r\n";
 
     // add custom styles from view layouts
     // TODO: dow we need this?
-//    $pdf_settings .= block_exaport_get_view_layout_style_from_settings($view);
+    //    $pdf_settings .= block_exaport_get_view_layout_style_from_settings($view);
 
-    $pdf_content .= '<title>'.$view->name.'</title>'."\r\n";
-    $pdf_content .= '</head>'."\r\n";
-    $pdf_content .= '<body>'."\r\n";
+    $pdf_content .= '<title>' . $view->name . '</title>' . "\r\n";
+    $pdf_content .= '</head>' . "\r\n";
+    $pdf_content .= '<body>' . "\r\n";
 
-	// Add header metadata
-	if (@$pdf_settings['showmetadata']) {
-		$pdf_content .= '<div id="header">';
+    // Add header metadata
+    if (@$pdf_settings['showmetadata']) {
+        $pdf_content .= '<div id="header">';
         $pdf_content .= '<table><tr>';
-        $pdf_content .= '<td class="viewtitle">'.$view->name.'</td>';
-		$userlines = [];
+        $pdf_content .= '<td class="viewtitle">' . $view->name . '</td>';
+        $userlines = [];
         require_once($CFG->dirroot . '/user/lib.php');
         $user = \core_user::get_user($view->userid);
-		$userData = user_get_user_details($user, null, array('email', 'fullname', 'profileimageurl', 'email', 'phone1', 'phone2'));
-		if ($pdf_settings['showusername']) {
-			$userlines[] = $userData['fullname'];
-		}
-		if ($pdf_settings['showuseremail']) {
-			$userlines[] = $userData['email'];
-		}
-		if ($pdf_settings['showuserphone']) {
-			$tel = trim($userData['phone1'].($userData['phone1'] ? ', '.$userData['phone1'] : ''));
-			$userlines[] = $tel ? 'tel: '.$tel : '';
-		}
+        $userData = user_get_user_details($user, null, array('email', 'fullname', 'profileimageurl', 'email', 'phone1', 'phone2'));
+        if ($pdf_settings['showusername']) {
+            $userlines[] = $userData['fullname'];
+        }
+        if ($pdf_settings['showuseremail']) {
+            $userlines[] = $userData['email'];
+        }
+        if ($pdf_settings['showuserphone']) {
+            $tel = trim($userData['phone1'] . ($userData['phone1'] ? ', ' . $userData['phone1'] : ''));
+            $userlines[] = $tel ? 'tel: ' . $tel : '';
+        }
         $userlines = array_filter($userlines);
         $userdatacontent = implode('<br>', $userlines);
-        $pdf_content .= '<td class="userinfo">'.$userdatacontent.'</td>';
+        $pdf_content .= '<td class="userinfo">' . $userdatacontent . '</td>';
         if ($pdf_settings['showuserpicture']) {
             $pdf_content .= '<td class="userpicture">';
-            $pdf_content .= '<img src="'.$userData['profileimageurl'].'" />';
+            $pdf_content .= '<img src="' . $userData['profileimageurl'] . '" />';
             $pdf_content .= '</td>';
         }
         $pdf_content .= '</tr></table>';
         $pdf_content .= '</div>';
-	}
+    }
 
-    $pdf_content .= '<table class="view-table" style="width: 100%; border: none; table-layout:fixed;">'."\r\n";
+    $pdf_content .= '<table class="view-table" style="width: 100%; border: none; table-layout:fixed;">' . "\r\n";
     $pdf_content .= '<tr>';
     $max_rows = 0;
     foreach ($data_for_pdf as $col => $blocks) {
         $max_rows = max(count($blocks), $max_rows);
     }
     for ($coli = 1; $coli <= $colslayout[$view->layout]; $coli++) {
-        $pdf_content .= '<td width="'.(round(100 / $colslayout[$view->layout]) - 1).'%" valign="top">';
+        $pdf_content .= '<td width="' . (round(100 / $colslayout[$view->layout]) - 1) . '%" valign="top">';
         if (array_key_exists($coli, $data_for_pdf)) {
             foreach ($data_for_pdf[$coli] as $block) {
-				// Every block in own table - to keep width if some block has very big width.
+                // Every block in own table - to keep width if some block has very big width.
                 $pdf_content .= '<table width="100%" style="word-break:break-all !important; word-wrap: break-word !important; overflow-wrap: break-word !important;">';
                 $pdf_content .= '<tr><td>';
                 $pdf_content .= $block;
@@ -1462,10 +1463,10 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
         $pdf_content .= '</td>';
     }
     $pdf_content .= '</tr>';
-    $pdf_content .= '</table>'."\r\n";
+    $pdf_content .= '</table>' . "\r\n";
 
-	// footer
-	if (@$pdf_settings['showmetadata']) {
+    // footer
+    if (@$pdf_settings['showmetadata']) {
         $pdf_content .= '<div id="footer">';
         $pdf_content .= '<table><tr>';
         $pdf_content .= '<td class="">' . $view->name . '</td>';
@@ -1476,12 +1477,12 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
 
     }
     $pdf_content = prependHtmlContentToPdf($pdf_content, $view);
-	// Output for debugging.
-//    echo '<textarea>';
-//    print_r($pdf_content);
-//    echo '</textarea>';
-//    exit;
-//     echo $pdf_content; exit;
+    // Output for debugging.
+    //    echo '<textarea>';
+    //    print_r($pdf_content);
+    //    echo '</textarea>';
+    //    exit;
+    //     echo $pdf_content; exit;
     return $pdf_content;
 }
 

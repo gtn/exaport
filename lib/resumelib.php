@@ -22,11 +22,9 @@ $attachedfilenames = array();
 $attachedfiledatas = array();
 $attachedfilemimetypes = array();
 
-class block_exaport_resume_editor_form extends block_exaport_moodleform
-{
+class block_exaport_resume_editor_form extends block_exaport_moodleform {
 
-    public function definition()
-    {
+    public function definition() {
 
         global $CFG, $USER, $DB, $COURSE;
         $mform =& $this->_form;
@@ -63,11 +61,9 @@ class block_exaport_resume_editor_form extends block_exaport_moodleform
 
 }
 
-class block_exaport_resume_multifields_form extends block_exaport_moodleform
-{
+class block_exaport_resume_multifields_form extends block_exaport_moodleform {
 
-    public function definition()
-    {
+    public function definition() {
 
         global $CFG, $USER, $DB;
         $mform =& $this->_form;
@@ -128,11 +124,9 @@ class block_exaport_resume_multifields_form extends block_exaport_moodleform
 
 }
 
-class block_exaport_resume_checkboxlist_form extends block_exaport_moodleform
-{
+class block_exaport_resume_checkboxlist_form extends block_exaport_moodleform {
 
-    public function definition()
-    {
+    public function definition() {
 
         global $CFG, $USER, $DB;
         $mform =& $this->_form;
@@ -163,8 +157,7 @@ class block_exaport_resume_checkboxlist_form extends block_exaport_moodleform
 
 }
 
-function block_exaport_resume_checkboxeslist_form($resume, $edit, $data)
-{
+function block_exaport_resume_checkboxeslist_form($resume, $edit, $data) {
     global $DB, $CFG, $USER, $OUTPUT;
 
     $showiinformation = false;
@@ -221,8 +214,7 @@ function block_exaport_resume_checkboxeslist_form($resume, $edit, $data)
     return $showiinformation;
 }
 
-function block_exaport_resume_prepare_block_mm_data($resume, $id, $typeblock, $displayinputs, $data)
-{
+function block_exaport_resume_prepare_block_mm_data($resume, $id, $typeblock, $displayinputs, $data) {
     global $DB, $CFG, $USER, $OUTPUT;
 
     $showinformation = false;
@@ -271,8 +263,7 @@ function block_exaport_resume_prepare_block_mm_data($resume, $id, $typeblock, $d
     return $showinformation;
 }
 
-function block_exaport_get_resume_params_record($userid = null)
-{
+function block_exaport_get_resume_params_record($userid = null) {
     global $DB;
 
     if (is_null($userid)) {
@@ -283,8 +274,7 @@ function block_exaport_get_resume_params_record($userid = null)
     return $DB->get_record('block_exaportresume', $conditions);
 }
 
-function block_exaport_get_resume_params($userid = null, $full = false)
-{
+function block_exaport_get_resume_params($userid = null, $full = false) {
     global $DB, $CFG;
     if ($userid === null) {
         global $USER;
@@ -307,7 +297,7 @@ function block_exaport_get_resume_params($userid = null, $full = false)
         // TODO: add images?
         $fs = get_file_storage();
         $context = context_user::instance($userid);
-        $import_attachments = function ($type, $recordid) use ($fs, $context, $CFG) {
+        $import_attachments = function($type, $recordid) use ($fs, $context, $CFG) {
             $result = null;
             $files = $fs->get_area_files($context->id, 'block_exaport', 'resume_' . $type, $recordid, 'filename', false);
             if (count($files) > 0) {
@@ -396,8 +386,7 @@ function block_exaport_get_resume_params($userid = null, $full = false)
     return $resumeparams;
 }
 
-function block_exaport_set_resume_params($userid, $params = null)
-{
+function block_exaport_set_resume_params($userid, $params = null) {
     global $DB;
 
     if (is_null($params) && (is_array($userid) || is_object($userid))) {
@@ -423,8 +412,7 @@ function block_exaport_set_resume_params($userid, $params = null)
     }
 }
 
-function block_exaport_set_resume_mm($table, $fromform)
-{
+function block_exaport_set_resume_mm($table, $fromform) {
     global $DB;
     if ($fromform->id < 1) {
         $fromform->sorting = block_exaport_get_max_sorting($table, $fromform->resume_id) + 10; // Step of sorting.
@@ -436,38 +424,31 @@ function block_exaport_set_resume_mm($table, $fromform)
     return $id;
 }
 
-function block_exaport_resume_get_educations($resumeid)
-{
+function block_exaport_resume_get_educations($resumeid) {
     return block_exaport_resume_get_mm_records('edu', array('resume_id' => $resumeid));
 }
 
-function block_exaport_resume_get_employments($resumeid)
-{
+function block_exaport_resume_get_employments($resumeid) {
     return block_exaport_resume_get_mm_records('employ', array('resume_id' => $resumeid));
 }
 
-function block_exaport_resume_get_certificates($resumeid)
-{
+function block_exaport_resume_get_certificates($resumeid) {
     return block_exaport_resume_get_mm_records('certif', array('resume_id' => $resumeid));
 }
 
-function block_exaport_resume_get_badges($resumeid)
-{
+function block_exaport_resume_get_badges($resumeid) {
     return block_exaport_resume_get_mm_records('badges', array('resumeid' => $resumeid));
 }
 
-function block_exaport_resume_get_publications($resumeid)
-{
+function block_exaport_resume_get_publications($resumeid) {
     return block_exaport_resume_get_mm_records('public', array('resume_id' => $resumeid));
 }
 
-function block_exaport_resume_get_profmembershipments($resumeid)
-{
+function block_exaport_resume_get_profmembershipments($resumeid) {
     return block_exaport_resume_get_mm_records('mbrship', array('resume_id' => $resumeid));
 }
 
-function block_exaport_resume_get_mm_records($table, $conditions)
-{
+function block_exaport_resume_get_mm_records($table, $conditions) {
     global $DB;
     $wherearr = array();
     $params = array();
@@ -482,8 +463,7 @@ function block_exaport_resume_get_mm_records($table, $conditions)
 }
 
 function block_exaport_resume_templating_mm_records($courseid, $type, $headertitle, $records, $filescolumn = 1, $updowncolumn = 1,
-                                                    $editcolumn = 1)
-{
+    $editcolumn = 1) {
     global $CFG, $DB, $OUTPUT, $USER;
     if (count($records) < 1) {
         return '';
@@ -643,12 +623,12 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
             $linktoup = '<a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid . '&action=sortchange&type=' . $type .
                 '&id1=' . $record->id . '&id2=' . $idnext . '&sesskey=' . sesskey() . '">'
                 . block_exaport_fontawesome_icon('chevron-down', 'solid', 1)
-//                    .'<img src="pix/down_16.png" alt="'.get_string("down").'" />'
+                //                    .'<img src="pix/down_16.png" alt="'.get_string("down").'" />'
                 . '</a>';
             $linktodown = '<a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid .
                 '&action=sortchange&type=' . $type . '&id1=' . $record->id . '&id2=' . $idprev . '&sesskey=' . sesskey() . '">'
                 . block_exaport_fontawesome_icon('chevron-up', 'solid', 1)
-//                    .'<img src="pix/up_16.png" alt="'.get_string("up").'" />'
+                //                    .'<img src="pix/up_16.png" alt="'.get_string("up").'" />'
                 . '</a>';
             $table->data[$itemindex]['up'] = '&nbsp';
             $table->data[$itemindex]['down'] = '&nbsp';
@@ -665,12 +645,12 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
             $table->data[$itemindex]['icons'] = ' <a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid .
                 '&action=edit&type=' . $type . '&id=' . $record->id . '&sesskey=' . sesskey() . '">' .
                 block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) .
-//                    '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+                //                    '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
                 '</a>' .
                 ' <a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid . '&action=delete&type=' . $type . '&id=' .
                 $record->id . '">' .
                 block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon', 'mt-2']) .
-//                    '<img src="pix/del.png" alt="'.get_string("delete").'"/>'.
+                //                    '<img src="pix/del.png" alt="'.get_string("delete").'"/>'.
                 '</a>';
         };
     };
@@ -678,8 +658,7 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
 }
 
 // Goals and skills.
-function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $type, $tabletitle)
-{
+function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $type, $tabletitle) {
     global $CFG, $DB, $OUTPUT, $USER;
     $elements = array('personal', 'academic', 'careers');
     $table = new html_table();
@@ -725,7 +704,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
                 $table->data[$itemindex]['icons'] = ' <a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' .
                     $courseid . '&action=edit&type=' . $type . 'comp&id=' . $resume->id . '&sesskey=' . sesskey() . '">' .
                     block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) .
-//                        '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+                    //                        '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
                     '</a>';
             } else {
                 $table->data[$itemindex]['icons'] = '';
@@ -740,7 +719,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
         $description = '';
         $description = $resume->{$type . $element};
         $description = file_rewrite_pluginfile_urls($description, 'pluginfile.php',
-        context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_' . $type . $element, $resume->id);
+            context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_' . $type . $element, $resume->id);
         $description = block_exaport_add_view_access_parameter_to_url($description, 'resume/' . $resume->id . '/' . $USER->id, ['src']);
         $description = trim($description);
         if (preg_replace('/\<br(\s*)?\/?\>/i', "", $description) == '') {
@@ -771,7 +750,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
         $table->data[$itemindex]['icons'] = ' <a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid .
             '&action=edit&type=' . $type . $element . '&id=' . $resume->id . '&sesskey=' . sesskey() . '">' .
             block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) .
-//                '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+            //                '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
             '</a>';
     };
 
@@ -779,8 +758,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
     return $tablecontent;
 }
 
-function block_exaport_resume_list_files($filearea, $files)
-{
+function block_exaport_resume_list_files($filearea, $files) {
     global $CFG;
     $listfiles = '<ul class="resume_listfiles">';
     foreach ($files as $file) {
@@ -794,8 +772,7 @@ function block_exaport_resume_list_files($filearea, $files)
     return $listfiles;
 }
 
-function block_exaport_resume_mm_delete($table, $conditions)
-{
+function block_exaport_resume_mm_delete($table, $conditions) {
     global $DB, $USER;
     $DB->delete_records('block_exaportresume_' . $table, $conditions);
     $fs = get_file_storage();
@@ -805,14 +782,12 @@ function block_exaport_resume_mm_delete($table, $conditions)
     };
 }
 
-function block_exaport_get_max_sorting($table, $resumeid)
-{
+function block_exaport_get_max_sorting($table, $resumeid) {
     global $DB;
     return $DB->get_field_sql('SELECT MAX(sorting) FROM {block_exaportresume_' . $table . '} WHERE resume_id=?', array($resumeid));
 }
 
-function block_exaport_resume_competences_form($resume, $id, $typeblock)
-{
+function block_exaport_resume_competences_form($resume, $id, $typeblock) {
     global $DB;
 
     $type = substr($typeblock, 0, -4); // Skillscomp -> skills / goalscomp -> goals.
@@ -847,8 +822,7 @@ function block_exaport_resume_competences_form($resume, $id, $typeblock)
     return false;
 }
 
-function block_exaport_get_user_badge_image($badge, $just_url = false)
-{
+function block_exaport_get_user_badge_image($badge, $just_url = false) {
     // $src = '/pluginfile.php/'.context_user::instance($badge->usercreated)->id.'/badges/userbadge/'.$badge->id.'/'.
     // $badge->uniquehash;
     // Find badge by id.
@@ -870,8 +844,7 @@ function block_exaport_get_user_badge_image($badge, $just_url = false)
     return $img;
 }
 
-function europass_xml($resumeid = 0)
-{
+function europass_xml($resumeid = 0) {
     global $USER, $DB, $SITE, $CFG;
     global $attachedfilenames, $attachedfiledatas, $attachedfilemimetypes;
     $xml = '';
@@ -1386,8 +1359,7 @@ function europass_xml($resumeid = 0)
     return $xml;
 }
 
-function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $sectionTitle, $title, $description)
-{
+function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $sectionTitle, $title, $description) {
     $others = $dom->createElement('others');
     $TitleDomElement = $dom->createElement('Title');
     $text = $dom->createTextNode($sectionTitle);
@@ -1410,8 +1382,7 @@ function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $se
     $candidateProfile->appendChild($others);
 }
 
-function get_europass_date($string_date, $format = 'Y-m-d')
-{
+function get_europass_date($string_date, $format = 'Y-m-d') {
     try {
         $date = new \DateTime($string_date);
         $date = $date->format($format);
@@ -1421,8 +1392,7 @@ function get_europass_date($string_date, $format = 'Y-m-d')
     return $date;
 }
 
-function europass_add_attachment(&$dom, &$candidateProfile, $file_content, $fileType, $instructions, $filename = '', $description = '', $documentTitle = '', $mimecode = '')
-{
+function europass_add_attachment(&$dom, &$candidateProfile, $file_content, $fileType, $instructions, $filename = '', $description = '', $documentTitle = '', $mimecode = '') {
     $attachment = $dom->createElement('eures:attachment');
 
     $file_content_node = $dom->createElement('oa:embedded_data');
@@ -1463,8 +1433,7 @@ function europass_add_attachment(&$dom, &$candidateProfile, $file_content, $file
     $candidateProfile->appendChild($attachment);
 }
 
-function europass_fill_communication_item(&$dom, &$paren_node, $channel_code, $nodes)
-{
+function europass_fill_communication_item(&$dom, &$paren_node, $channel_code, $nodes) {
     $inserted = false;
     $communication = $dom->createElement('Email'); // new Communicate node!
     $i = 0;
@@ -1488,8 +1457,7 @@ function europass_fill_communication_item(&$dom, &$paren_node, $channel_code, $n
 
 }
 
-function europass_fill_sub_element_text(&$dom, &$paren_node, $nodeName, $value)
-{
+function europass_fill_sub_element_text(&$dom, &$paren_node, $nodeName, $value) {
     if ($value) {
         $node = $dom->createElement($nodeName);
         $text = $dom->createTextNode($value);
@@ -1499,8 +1467,7 @@ function europass_fill_sub_element_text(&$dom, &$paren_node, $nodeName, $value)
 }
 
 // Clean text for XML. Images, links, e.t.c.
-function clean_for_external_xml($text = '')
-{
+function clean_for_external_xml($text = '') {
     $result = $text;
     // Img.
     $result = preg_replace("/<img[^>]+\>/i", "", $result);
@@ -1509,16 +1476,14 @@ function clean_for_external_xml($text = '')
     return $result;
 }
 
-function clean_html_to_plain_text($text = '')
-{
+function clean_html_to_plain_text($text = '') {
     $breaks = ['<br />', '<br>', '<br/>'];
     $content = str_ireplace($breaks, "\r\n", $text);
     $content = strip_tags($content);
     return $content;
 }
 
-function get_date_params_from_string($datestring)
-{
+function get_date_params_from_string($datestring) {
     $datearr = date_parse($datestring);
     if ($datearr['year']) {
         $year = $datearr['year'];
@@ -1562,8 +1527,7 @@ function get_date_params_from_string($datestring)
  * @return mixed
  * @throws coding_exception
  */
-function europass_xml_attachfile(&$dom, &$candidateProfile, &$parentNode, $type, $ids = array(), $instructions = 'ProfilePicture')
-{
+function europass_xml_attachfile(&$dom, &$candidateProfile, &$parentNode, $type, $ids = array(), $instructions = 'ProfilePicture') {
     // non implemented yet in new Europass?
     return true;
 
@@ -1672,8 +1636,7 @@ function europass_xml_attachfile(&$dom, &$candidateProfile, &$parentNode, $type,
 }
 
 // Get string from resume block.
-function list_for_resume_elements($resumeid, $tablename)
-{
+function list_for_resume_elements($resumeid, $tablename) {
     global $DB, $USER;
     $itemsids = array();
     $items = $DB->get_records($tablename, array("resume_id" => $resumeid));

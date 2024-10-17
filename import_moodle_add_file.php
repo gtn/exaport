@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 $id = optional_param('id', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -26,20 +26,20 @@ $submissionid = optional_param('submissionid', 0, PARAM_INT);
 $modassign = block_exaport_assignmentversion();
 
 if ($modassign->new) {
-    $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, ".
-                                " a.name, a.course, c.fullname AS coursename ".
-                                " FROM {assignsubmission_file} sf ".
-                                " INNER JOIN {assign_submission} s ON sf.submission=s.id ".
-                                " INNER JOIN {assign} a ON s.assignment=a.id ".
-                                " LEFT JOIN {course} c on a.course = c.id ".
-                                " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+    $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
+        " a.name, a.course, c.fullname AS coursename " .
+        " FROM {assignsubmission_file} sf " .
+        " INNER JOIN {assign_submission} s ON sf.submission=s.id " .
+        " INNER JOIN {assign} a ON s.assignment=a.id " .
+        " LEFT JOIN {course} c on a.course = c.id " .
+        " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
 } else {
-    $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, ".
-                                " a.name, a.course, a.assignmenttype, c.fullname AS coursename ".
-                                " FROM {assignment_submissions} s ".
-                                " JOIN {assignment} a ON s.assignment=a.id ".
-                                " LEFT JOIN {course} c on a.course = c.id ".
-                                " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+    $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
+        " a.name, a.course, a.assignmenttype, c.fullname AS coursename " .
+        " FROM {assignment_submissions} s " .
+        " JOIN {assignment} a ON s.assignment=a.id " .
+        " LEFT JOIN {course} c on a.course = c.id " .
+        " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
 }
 
 $cm = get_coursemodule_from_instance($modassign->title, $assignment->aid);
@@ -61,7 +61,7 @@ if (!$course = $DB->get_record("course", $conditions)) {
 }
 
 if (!block_exaport_has_categories($USER->id)) {
-    print_error("nocategories", "block_exaport", "view.php?courseid=".$courseid);
+    print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
 }
 
 if ($submissionid == 0) {
@@ -78,10 +78,10 @@ if ($id) {
         print_error("wrongfileid", "block_exaport");
     }
 
-    $returnurl = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid."&type=file";
+    $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&type=file";
 } else {
     $existing = false;
-    $returnurl = $CFG->wwwroot.'/blocks/exaport/view_items.php?courseid='.$courseid."&type=file";
+    $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&type=file";
 }
 
 if ($action == 'delete') {
@@ -103,7 +103,7 @@ if ($action == 'delete') {
         // ... blog _print _entry ($existing);.
         echo '<br />';
         notice_yesno(get_string("deletefileconfirm", "block_exaport"), 'add_file.php', 'view_items.php', $optionsyes, $optionsno,
-                'post', 'get');
+            'post', 'get');
         print_footer();
         die;
     }
@@ -132,7 +132,7 @@ if ($action == 'add') {
 }
 
 $exteditform = new block_exaport_item_edit_form(null,
-            Array('existing' => $existing, 'type' => 'file', 'action' => 'assignment_import'));
+    array('existing' => $existing, 'type' => 'file', 'action' => 'assignment_import'));
 
 if ($exteditform->is_cancelled()) {
     redirect($returnurl);
@@ -200,8 +200,8 @@ function do_edit($post, $blogeditform, $returnurl, $courseid) {
     $post->intro = $post->intro['text'];
 
     if (update_record('block_exaportitem', $post)) {
-        block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'add_file.php?courseid='.$courseid.'&id='.$post->id.'&action=edit',
-                $post->name);
+        block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit',
+            $post->name);
     } else {
         print_error('updateposterror', 'block_exaport', $returnurl);
     }
@@ -224,13 +224,13 @@ function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile) 
     $post->id = $DB->insert_record('block_exaportitem', $post);
 
     $textfieldoptions = array('trusttext' => true,
-                            'subdirs' => true,
-                            'maxfiles' => 99,
-                            'context' => context_user::instance($USER->id));
+        'subdirs' => true,
+        'maxfiles' => 99,
+        'context' => context_user::instance($USER->id));
     $post->introformat = FORMAT_HTML;
 
     $post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport',
-            'item_content', $post->id);
+        'item_content', $post->id);
 
     $filerecord = new stdClass();
     $context = context_user::instance($USER->id);
@@ -252,8 +252,8 @@ function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile) 
         $comps = $DB->get_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $cm->id));
         foreach ($comps as $comp) {
             $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                    array("activityid" => $post->id, "eportfolioitem" => 1, "compid" => $comp->descrid,
-                            "activitytitle" => $post->name, "coursetitle" => $COURSE->shortname));
+                array("activityid" => $post->id, "eportfolioitem" => 1, "compid" => $comp->descrid,
+                    "activitytitle" => $post->name, "coursetitle" => $COURSE->shortname));
         }
     }
 }
@@ -266,7 +266,7 @@ function do_delete($post, $returnurl, $courseid) {
     $status = $DB->delete_records('block_exaportitem', 'id', $post->id);
 
     block_exaport_add_to_log(SITEID, 'blog', 'delete',
-            'add_file.php?courseid='.$courseid.'&id='.$post->id.'&action=delete&confirm=1', $post->name);
+        'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);
 
     if (!$status) {
         print_error('deleteposterror', 'block_exaport', $returnurl);
@@ -280,7 +280,7 @@ function check_assignment_file($cm, $assignment, $fileid) {
     $context = context_module::instance($cm->id);
     $fs = get_file_storage();
     $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid, "filename",
-            false);
+        false);
 
     return isset($files[$fileid]) ? $files[$fileid] : null;
 }

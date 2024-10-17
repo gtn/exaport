@@ -81,10 +81,10 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         }
         if ($file = block_exaport_get_single_file($item, 'item_iconfile')) {
             $fs->create_file_from_storedfile(array(
-                    'contextid' => \context_user::instance(g::$USER->id)->id,
-                    'component' => 'block_exaport',
-                    'filearea' => 'item_iconfile',
-                    'itemid' => $newitem->id,
+                'contextid' => \context_user::instance(g::$USER->id)->id,
+                'component' => 'block_exaport',
+                'filearea' => 'item_iconfile',
+                'itemid' => $newitem->id,
             ), $file);
         }
 
@@ -102,14 +102,14 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         if (!empty($CFG->usetags)) {
             if ($CFG->branch < 31) {
                 // Moodle before v3.1.
-                include_once(g::$CFG->dirroot.'/tag/lib.php');
+                include_once(g::$CFG->dirroot . '/tag/lib.php');
                 $tags = tag_get_tags_array('block_exaportitem', $item->id);
                 tag_set('block_exaportitem', $newitem->id, $tags, 'block_exaport', \context_user::instance(g::$USER->id)->id);
             } else {
                 // Moodle v3.1.
                 $tags = \core_tag_tag::get_item_tags_array('block_exaport', 'block_exaportitem', $item->id);
                 \core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $newitem->id, \context_user::instance($USER->id),
-                        $tags);
+                    $tags);
             }
         }
     }

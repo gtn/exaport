@@ -17,10 +17,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require(__DIR__.'/inc.php');
-require_once($CFG->libdir.'/externallib.php');
-require_once($CFG->libdir.'/weblib.php');
-require_once($CFG->dirroot.'/lib/filelib.php');
+require(__DIR__ . '/inc.php');
+require_once($CFG->libdir . '/externallib.php');
+require_once($CFG->libdir . '/weblib.php');
+require_once($CFG->dirroot . '/lib/filelib.php');
 
 use block_exaport\globals as g;
 
@@ -34,7 +34,7 @@ class block_exaport_external extends external_api {
     public static function get_items_parameters() {
         return new external_function_parameters([
             'level' => new external_value(PARAM_INT, 'id of level/parent category'),
-            'type' => new external_value(PARAM_TEXT, 'shared or own category or all', VALUE_DEFAULT, 'category')
+            'type' => new external_value(PARAM_TEXT, 'shared or own category or all', VALUE_DEFAULT, 'category'),
         ]);
     }
 
@@ -52,7 +52,7 @@ class block_exaport_external extends external_api {
 
         $results = array();
 
-        if ($type == "all" || $type == "category" || $level == 0){
+        if ($type == "all" || $type == "category" || $level == 0) {
             $conditions = array("pid" => $level, "userid" => $USER->id);
             $categories = $DB->get_records("block_exaportcate", $conditions);
 
@@ -74,9 +74,9 @@ class block_exaport_external extends external_api {
 
             $items = $DB->get_records("block_exaportitem", array("userid" => $USER->id, "categoryid" => $level), '',
                 'id,name,type, 0 as parent, 0 as amount');
-//         foreach($items as $item){ //to avoid a missing required key in single structure error
-//             $item->courseid = 0;
-//         }
+            //         foreach($items as $item){ //to avoid a missing required key in single structure error
+            //             $item->courseid = 0;
+            //         }
         }
 
         if ($type == "all" || $type == "shared" || $level == 0) {
@@ -137,18 +137,18 @@ class block_exaport_external extends external_api {
      */
     public static function get_items_returns() {
         return new external_multiple_structure(
-                new external_single_structure(
-                        array(
-                                'id' => new external_value(PARAM_INT, 'id of item'),
-                                'name' => new external_value(PARAM_TEXT, 'title of item'),
-                                'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category,shared)'),
-                                'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned'),
-                                'amount' => new external_value(PARAM_INT,
-                                        'iff item is a cat, amount of items in the category, otherwise 0'),
-                                'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to', VALUE_OPTIONAL),
-                                'owneruserid' => new external_value(PARAM_INT, 'userid of the owner of this category, if it is a category', VALUE_OPTIONAL)
-                        )
+            new external_single_structure(
+                array(
+                    'id' => new external_value(PARAM_INT, 'id of item'),
+                    'name' => new external_value(PARAM_TEXT, 'title of item'),
+                    'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category,shared)'),
+                    'parent' => new external_value(PARAM_TEXT, 'iff item is a cat, parent-cat is returned'),
+                    'amount' => new external_value(PARAM_INT,
+                        'iff item is a cat, amount of items in the category, otherwise 0'),
+                    'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to', VALUE_OPTIONAL),
+                    'owneruserid' => new external_value(PARAM_INT, 'userid of the owner of this category, if it is a category', VALUE_OPTIONAL),
                 )
+            )
         );
     }
 
@@ -159,8 +159,8 @@ class block_exaport_external extends external_api {
      */
     public static function get_item_parameters() {
         return new external_function_parameters([
-                'itemid' => new external_value(PARAM_INT, 'id of item'),
-                'owneruserid' => new external_value(PARAM_INT, 'id of owner of this file (needed for items in shared categories', VALUE_DEFAULT, null),
+            'itemid' => new external_value(PARAM_INT, 'id of item'),
+            'owneruserid' => new external_value(PARAM_INT, 'id of owner of this file (needed for items in shared categories', VALUE_DEFAULT, null),
         ]);
     }
 
@@ -172,18 +172,18 @@ class block_exaport_external extends external_api {
      * @param int itemid
      * @return array of course subjects
      */
-    public static function get_item($itemid, $owneruserid=null) {
+    public static function get_item($itemid, $owneruserid = null) {
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::get_item_parameters(), array('itemid' => $itemid, 'owneruserid' => $owneruserid));
 
         $shared_item = false;
-        if ($owneruserid){
+        if ($owneruserid) {
             $userid = $owneruserid;
-            if ($owneruserid != $USER->id){
+            if ($owneruserid != $USER->id) {
                 $shared_item = true; // this item is not the Item of the USER, but of somewone who shared it... needed later on
             }
-        } else{
+        } else {
             $userid = $USER->id;
         }
 
@@ -204,17 +204,17 @@ class block_exaport_external extends external_api {
 
         if ($item->type == 'file') {
             if ($file = block_exaport_get_item_single_file($item)) {
-                if($shared_item){
-                    $item->file = "{$CFG->wwwroot}/blocks/exaport/shared_item.php?access=portfolio/id/".$userid.
-                        "&itemid=".$item->id."&wstoken=".static::wstoken();
-                }else{
-                    $item->file = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/".$userid.
-                        "&itemid=".$item->id."&wstoken=".static::wstoken();
+                if ($shared_item) {
+                    $item->file = "{$CFG->wwwroot}/blocks/exaport/shared_item.php?access=portfolio/id/" . $userid .
+                        "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
+                } else {
+                    $item->file = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $userid .
+                        "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
                 }
 
-				$item->isimage = $file->is_valid_image();
-				$item->filename = $file->get_filename();
-				$item->mimetype = $file->get_mimetype();
+                $item->isimage = $file->is_valid_image();
+                $item->filename = $file->get_filename();
+                $item->mimetype = $file->get_mimetype();
             }
         }
 
@@ -235,29 +235,29 @@ class block_exaport_external extends external_api {
      */
     public static function get_item_returns() {
         return new external_single_structure(
-                array(
-                        'id' => new external_value(PARAM_INT, 'id of item'),
-                        'name' => new external_value(PARAM_TEXT, 'title of item'),
-                        'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'),
-                        'category' => new external_value(PARAM_TEXT, 'title of category'),
-                        'url' => new external_value(PARAM_TEXT, 'url'),
-                        'intro' => new external_value(PARAM_RAW, 'description of item'),
-                        'filename' => new external_value(PARAM_TEXT, 'title of item'),
-                        'file' => new external_value(PARAM_URL, 'file url'),
-                        'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
-                        'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
-                        'comments' => new external_multiple_structure(
-                                new external_single_structure(
-                                        array(
-                                                'id' => new external_value(PARAM_INT),
-                                                'userid' => new external_value(PARAM_INT),
-                                                'userfullname' => new external_value(PARAM_TEXT),
-                                                'timemodified' => new external_value(PARAM_INT),
-                                                'entry' => new external_value(PARAM_TEXT),
-                                        )
-                                )
-                        ),
-                )
+            array(
+                'id' => new external_value(PARAM_INT, 'id of item'),
+                'name' => new external_value(PARAM_TEXT, 'title of item'),
+                'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link,category)'),
+                'category' => new external_value(PARAM_TEXT, 'title of category'),
+                'url' => new external_value(PARAM_TEXT, 'url'),
+                'intro' => new external_value(PARAM_RAW, 'description of item'),
+                'filename' => new external_value(PARAM_TEXT, 'title of item'),
+                'file' => new external_value(PARAM_URL, 'file url'),
+                'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
+                'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
+                'comments' => new external_multiple_structure(
+                    new external_single_structure(
+                        array(
+                            'id' => new external_value(PARAM_INT),
+                            'userid' => new external_value(PARAM_INT),
+                            'userfullname' => new external_value(PARAM_TEXT),
+                            'timemodified' => new external_value(PARAM_INT),
+                            'entry' => new external_value(PARAM_TEXT),
+                        )
+                    )
+                ),
+            )
         );
     }
 
@@ -268,15 +268,15 @@ class block_exaport_external extends external_api {
      */
     public static function add_item_parameters() {
         return new external_function_parameters([
-                'title' => new external_value(PARAM_TEXT, 'item title'),
-                'categoryid' => new external_value(PARAM_INT, 'categoryid'),
-                'url' => new external_value(PARAM_URL, 'url'),
-                'intro' => new external_value(PARAM_RAW, 'introduction'),
-                'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link)', VALUE_DEFAULT, ''),
-                'fileitemid' => new external_value(PARAM_INT, 'itemid for draft-area files; for "private" files is ignored',
-                        VALUE_DEFAULT, null),
-                'filename' => new external_value(PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT,
-                        ''),
+            'title' => new external_value(PARAM_TEXT, 'item title'),
+            'categoryid' => new external_value(PARAM_INT, 'categoryid'),
+            'url' => new external_value(PARAM_URL, 'url'),
+            'intro' => new external_value(PARAM_RAW, 'introduction'),
+            'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link)', VALUE_DEFAULT, ''),
+            'fileitemid' => new external_value(PARAM_INT, 'itemid for draft-area files; for "private" files is ignored',
+                VALUE_DEFAULT, null),
+            'filename' => new external_value(PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT,
+                ''),
         ]);
     }
 
@@ -291,8 +291,8 @@ class block_exaport_external extends external_api {
         global $DB, $USER;
 
         $params = self::validate_parameters(self::add_item_parameters(),
-                array('title' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro, 'type' => $type,
-                        'fileitemid' => $fileitemid, 'filename' => $filename));
+            array('title' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro, 'type' => $type,
+                'fileitemid' => $fileitemid, 'filename' => $filename));
 
         $context = context_user::instance($USER->id);
         $fs = get_file_storage();
@@ -316,17 +316,17 @@ class block_exaport_external extends external_api {
         }
 
         $itemid = $DB->insert_record("block_exaportitem",
-                array('userid' => $USER->id, 'name' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro,
-                        'type' => $type, 'timemodified' => time()));
+            array('userid' => $USER->id, 'name' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro,
+                'type' => $type, 'timemodified' => time()));
 
         // If a file is added we need to copy the file from the user/private filearea to block_exaport/item_file
         // with the itemid from above.
         if ($file) {
             $fs->create_file_from_storedfile(array(
-                    'contextid' => $context->id,
-                    'component' => 'block_exaport',
-                    'filearea' => 'item_file',
-                    'itemid' => $itemid,
+                'contextid' => $context->id,
+                'component' => 'block_exaport',
+                'filearea' => 'item_file',
+                'itemid' => $itemid,
             ), $file);
         }
 
@@ -340,9 +340,9 @@ class block_exaport_external extends external_api {
      */
     public static function add_item_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -353,17 +353,17 @@ class block_exaport_external extends external_api {
      */
     public static function update_item_parameters() {
         return new external_function_parameters([
-                'id' => new external_value(PARAM_INT, 'item id'),
-                'title' => new external_value(PARAM_TEXT, 'item title'),
-                // TODO: categoryid for later?
-                'url' => new external_value(PARAM_TEXT, 'url'),
-                'intro' => new external_value(PARAM_RAW, 'introduction'),
-                'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link)', VALUE_DEFAULT, ''),
-                'fileitemid' => new external_value(PARAM_INT,
-                        'itemid for draft-area files; for "private" files is ignored, use \'0\' to delete the file', VALUE_DEFAULT,
-                        null),
-                'filename' => new external_value(PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT,
-                        ''),
+            'id' => new external_value(PARAM_INT, 'item id'),
+            'title' => new external_value(PARAM_TEXT, 'item title'),
+            // TODO: categoryid for later?
+            'url' => new external_value(PARAM_TEXT, 'url'),
+            'intro' => new external_value(PARAM_RAW, 'introduction'),
+            'type' => new external_value(PARAM_TEXT, 'type of item (note,file,link)', VALUE_DEFAULT, ''),
+            'fileitemid' => new external_value(PARAM_INT,
+                'itemid for draft-area files; for "private" files is ignored, use \'0\' to delete the file', VALUE_DEFAULT,
+                null),
+            'filename' => new external_value(PARAM_TEXT, 'deprecated (was used for upload into private files)', VALUE_DEFAULT,
+                ''),
         ]);
     }
 
@@ -378,8 +378,8 @@ class block_exaport_external extends external_api {
         global $DB, $USER;
 
         $params = self::validate_parameters(self::update_item_parameters(),
-                array('id' => $id, 'title' => $title, 'url' => $url, 'intro' => $intro, 'type' => $type,
-                        'fileitemid' => $fileitemid, 'filename' => $filename));
+            array('id' => $id, 'title' => $title, 'url' => $url, 'intro' => $intro, 'type' => $type,
+                'fileitemid' => $fileitemid, 'filename' => $filename));
 
         $context = context_user::instance($USER->id);
         $fs = get_file_storage();
@@ -415,10 +415,10 @@ class block_exaport_external extends external_api {
             block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
 
             $fs->create_file_from_storedfile(array(
-                    'contextid' => $context->id,
-                    'component' => 'block_exaport',
-                    'filearea' => 'item_file',
-                    'itemid' => $id,
+                'contextid' => $context->id,
+                'component' => 'block_exaport',
+                'filearea' => 'item_file',
+                'itemid' => $id,
             ), $file);
         } else if ($fileitemid === 0) {
             block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
@@ -434,9 +434,9 @@ class block_exaport_external extends external_api {
      */
     public static function update_item_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -447,7 +447,7 @@ class block_exaport_external extends external_api {
      */
     public static function delete_item_parameters() {
         return new external_function_parameters(
-                array('id' => new external_value(PARAM_INT, 'item id'))
+            array('id' => new external_value(PARAM_INT, 'item id'))
         );
     }
 
@@ -470,7 +470,7 @@ class block_exaport_external extends external_api {
         if ($interaction) {
             $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $id, "eportfolioitem" => 1));
             $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-                    array("activityid" => $id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
+                array("activityid" => $id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
         }
 
         return array("success" => true);
@@ -483,16 +483,16 @@ class block_exaport_external extends external_api {
      */
     public static function delete_item_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
     public static function add_item_comment_parameters() {
         return new external_function_parameters([
-                'itemid' => new external_value(PARAM_INT),
-                'entry' => new external_value(PARAM_RAW),
+            'itemid' => new external_value(PARAM_INT),
+            'entry' => new external_value(PARAM_RAW),
         ]);
     }
 
@@ -507,10 +507,10 @@ class block_exaport_external extends external_api {
         // TODO: check if can add comment.
 
         g::$DB->insert_record("block_exaportitemcomm", [
-                'itemid' => $itemid,
-                'userid' => g::$USER->id,
-                'entry' => $entry,
-                'timemodified' => time(),
+            'itemid' => $itemid,
+            'userid' => g::$USER->id,
+            'entry' => $entry,
+            'timemodified' => time(),
         ]);
 
         return ["success" => true];
@@ -518,7 +518,7 @@ class block_exaport_external extends external_api {
 
     public static function add_item_comment_returns() {
         return new external_single_structure([
-                'success' => new external_value(PARAM_BOOL, 'status'),
+            'success' => new external_value(PARAM_BOOL, 'status'),
         ]);
     }
 
@@ -529,7 +529,7 @@ class block_exaport_external extends external_api {
      */
     public static function list_competencies_parameters() {
         return new external_function_parameters(
-                array()
+            array()
         );
 
     }
@@ -549,12 +549,12 @@ class block_exaport_external extends external_api {
         foreach ($courses as $course) {
             $context = context_course::instance($course->id);
             if (is_enrolled($context, $USER)) {
-                $query = "SELECT t.id as topdescrid, d.id,d.title,tp.title as topic,tp.id as topicid,".
-                            " s.title as subject,s.id as subjectid,d.niveauid ".
-                            " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COURSETOPICS."} c, {".BLOCK_EXACOMP_DB_DESCTOPICS."} t, ".
-                            " {".BLOCK_EXACOMP_DB_TOPICS."} tp, {".BLOCK_EXACOMP_DB_SUBJECTS."} s ".
-                            " WHERE d.id=t.descrid AND t.topicid = c.topicid AND t.topicid=tp.id AND tp.subjid = s.id ".
-                            " AND c.courseid = ?";
+                $query = "SELECT t.id as topdescrid, d.id,d.title,tp.title as topic,tp.id as topicid," .
+                    " s.title as subject,s.id as subjectid,d.niveauid " .
+                    " FROM {" . BLOCK_EXACOMP_DB_DESCRIPTORS . "} d, {" . BLOCK_EXACOMP_DB_COURSETOPICS . "} c, {" . BLOCK_EXACOMP_DB_DESCTOPICS . "} t, " .
+                    " {" . BLOCK_EXACOMP_DB_TOPICS . "} tp, {" . BLOCK_EXACOMP_DB_SUBJECTS . "} s " .
+                    " WHERE d.id=t.descrid AND t.topicid = c.topicid AND t.topicid=tp.id AND tp.subjid = s.id " .
+                    " AND c.courseid = ?";
 
                 $query .= " ORDER BY s.title,tp.title,d.sorting";
                 $alldescr = $DB->get_records_sql($query, array($course->id));
@@ -601,30 +601,30 @@ class block_exaport_external extends external_api {
      */
     public static function list_competencies_returns() {
         return new external_multiple_structure(
-                new external_single_structure(
-                        array(
-                                'id' => new external_value(PARAM_INT, 'id of subject'),
-                                'name' => new external_value(PARAM_TEXT, 'title of subject'),
-                                'topics' => new external_multiple_structure(
-                                        new external_single_structure(
-                                                array(
-                                                        'id' => new external_value(PARAM_INT, 'id of topic'),
-                                                        'name' => new external_value(PARAM_TEXT, 'title of topic'),
-                                                        'descriptors' => new external_multiple_structure(
-                                                                new external_single_structure(
-                                                                        array(
-                                                                                'id' => new external_value(PARAM_INT,
-                                                                                        'id of descriptor'),
-                                                                                'name' => new external_value(PARAM_TEXT,
-                                                                                        'name of descriptor'),
-                                                                        )
-                                                                )
-                                                        ),
-                                                )
+            new external_single_structure(
+                array(
+                    'id' => new external_value(PARAM_INT, 'id of subject'),
+                    'name' => new external_value(PARAM_TEXT, 'title of subject'),
+                    'topics' => new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'id' => new external_value(PARAM_INT, 'id of topic'),
+                                'name' => new external_value(PARAM_TEXT, 'title of topic'),
+                                'descriptors' => new external_multiple_structure(
+                                    new external_single_structure(
+                                        array(
+                                            'id' => new external_value(PARAM_INT,
+                                                'id of descriptor'),
+                                            'name' => new external_value(PARAM_TEXT,
+                                                'name of descriptor'),
                                         )
+                                    )
                                 ),
+                            )
                         )
+                    ),
                 )
+            )
         );
     }
 
@@ -635,10 +635,10 @@ class block_exaport_external extends external_api {
      */
     public static function set_item_competence_parameters() {
         return new external_function_parameters(
-                array('itemid' => new external_value(PARAM_INT, 'item id'),
-                        'descriptorid' => new external_value(PARAM_INT, 'descriptor id'),
-                        'val' => new external_value(PARAM_INT, '1 to assign, 0 to unassign'),
-                )
+            array('itemid' => new external_value(PARAM_INT, 'item id'),
+                'descriptorid' => new external_value(PARAM_INT, 'descriptor id'),
+                'val' => new external_value(PARAM_INT, '1 to assign, 0 to unassign'),
+            )
         );
 
     }
@@ -654,24 +654,24 @@ class block_exaport_external extends external_api {
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::set_item_competence_parameters(),
-                array('itemid' => $itemid, 'descriptorid' => $descriptorid, 'val' => $val));
+            array('itemid' => $itemid, 'descriptorid' => $descriptorid, 'val' => $val));
 
         if ($val == 1) {
             $item = $DB->get_record("block_exaportitem", array("id" => $itemid));
             $course = $DB->get_record("course", array("id" => $item->courseid));
             $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                    array('compid' => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1, 'activitytitle' => $item->name,
-                            'coursetitle' => $course->shortname, 'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
+                array('compid' => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1, 'activitytitle' => $item->name,
+                    'coursetitle' => $course->shortname, 'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
             $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-                    array("compid" => $descriptorid, "activityid" => $itemid, "eportfolioitem" => 1, "reviewerid" => $USER->id,
-                            "userid" => $USER->id, "role" => 0, 'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
+                array("compid" => $descriptorid, "activityid" => $itemid, "eportfolioitem" => 1, "reviewerid" => $USER->id,
+                    "userid" => $USER->id, "role" => 0, 'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
         } else if ($val == 0) {
             $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                    array('compid' => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1,
-                            'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
+                array('compid' => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1,
+                    'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
             $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-                    array("compid" => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1,
-                            'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
+                array("compid" => $descriptorid, 'activityid' => $itemid, 'eportfolioitem' => 1,
+                    'comptype' => BLOCK_EXACOMP_TYPE_DESCRIPTOR));
         }
 
         return array("success" => true);
@@ -684,9 +684,9 @@ class block_exaport_external extends external_api {
      */
     public static function set_item_competence_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -696,10 +696,7 @@ class block_exaport_external extends external_api {
      * @return external_function_parameters
      */
     public static function get_views_parameters() {
-        return new external_function_parameters(
-                array()
-        );
-
+        return new external_function_parameters([]);
     }
 
     /**
@@ -734,13 +731,13 @@ class block_exaport_external extends external_api {
      */
     public static function get_views_returns() {
         return new external_multiple_structure(
-                new external_single_structure(
-                        array(
-                                'id' => new external_value(PARAM_INT, 'id of view'),
-                                'name' => new external_value(PARAM_TEXT, 'title of view'),
-                                'description' => new external_value(PARAM_RAW, 'description of view'),
-                        )
+            new external_single_structure(
+                array(
+                    'id' => new external_value(PARAM_INT, 'id of view'),
+                    'name' => new external_value(PARAM_TEXT, 'title of view'),
+                    'description' => new external_value(PARAM_RAW, 'description of view'),
                 )
+            )
         );
     }
 
@@ -751,7 +748,7 @@ class block_exaport_external extends external_api {
      */
     public static function get_view_parameters() {
         return new external_function_parameters(
-                array('id' => new external_value(PARAM_INT, 'view id'))
+            array('id' => new external_value(PARAM_INT, 'view id'))
         );
     }
 
@@ -801,20 +798,20 @@ class block_exaport_external extends external_api {
      */
     public static function get_view_returns() {
         return new external_single_structure(
-                array(
-                        'id' => new external_value(PARAM_INT, 'id of view'),
-                        'name' => new external_value(PARAM_TEXT, 'title of view'),
-                        'description' => new external_value(PARAM_RAW, 'description of view'),
-                        'items' => new external_multiple_structure(
-                                new external_single_structure(
-                                        array(
-                                                'id' => new external_value(PARAM_INT, 'id of item'),
-                                                'name' => new external_value(PARAM_TEXT, 'title of item'),
-                                                'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
-                                        )
-                                )
-                        ),
-                )
+            array(
+                'id' => new external_value(PARAM_INT, 'id of view'),
+                'name' => new external_value(PARAM_TEXT, 'title of view'),
+                'description' => new external_value(PARAM_RAW, 'description of view'),
+                'items' => new external_multiple_structure(
+                    new external_single_structure(
+                        array(
+                            'id' => new external_value(PARAM_INT, 'id of item'),
+                            'name' => new external_value(PARAM_TEXT, 'title of item'),
+                            'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
+                        )
+                    )
+                ),
+            )
         );
     }
 
@@ -824,12 +821,10 @@ class block_exaport_external extends external_api {
      * @return external_function_parameters
      */
     public static function add_view_parameters() {
-        return new external_function_parameters(
-                array(
-                        'name' => new external_value(PARAM_TEXT, 'view title'),
-                        'description' => new external_value(PARAM_TEXT, 'description'),
-                )
-        );
+        return new external_function_parameters([
+            'name' => new external_value(PARAM_TEXT, 'view title'),
+            'description' => new external_value(PARAM_TEXT, 'description'),
+        ]);
     }
 
     /**
@@ -845,7 +840,7 @@ class block_exaport_external extends external_api {
         $params = self::validate_parameters(self::add_view_parameters(), array('name' => $name, 'description' => $description));
 
         $viewid = $DB->insert_record("block_exaportview",
-                array('userid' => $USER->id, 'name' => $name, 'description' => $description, 'timemodified' => time()));
+            array('userid' => $USER->id, 'name' => $name, 'description' => $description, 'timemodified' => time()));
 
         return array("success" => true);
     }
@@ -857,9 +852,9 @@ class block_exaport_external extends external_api {
      */
     public static function add_view_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -870,11 +865,11 @@ class block_exaport_external extends external_api {
      */
     public static function update_view_parameters() {
         return new external_function_parameters(
-                array(
-                        'id' => new external_value(PARAM_INT, 'view id'),
-                        'name' => new external_value(PARAM_TEXT, 'view title'),
-                        'description' => new external_value(PARAM_TEXT, 'description'),
-                )
+            array(
+                'id' => new external_value(PARAM_INT, 'view id'),
+                'name' => new external_value(PARAM_TEXT, 'view title'),
+                'description' => new external_value(PARAM_TEXT, 'description'),
+            )
         );
     }
 
@@ -889,8 +884,9 @@ class block_exaport_external extends external_api {
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::update_view_parameters(),
-                array('id' => $id, 'name' => $name, 'description' => $description));
+            array('id' => $id, 'name' => $name, 'description' => $description));
 
+        // TODO: check permissions
         $record = new stdClass();
         $record->id = $id;
         $record->name = $name;
@@ -907,9 +903,9 @@ class block_exaport_external extends external_api {
      */
     public static function update_view_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -920,9 +916,9 @@ class block_exaport_external extends external_api {
      */
     public static function delete_view_parameters() {
         return new external_function_parameters(
-                array(
-                        'id' => new external_value(PARAM_INT, 'view id'),
-                )
+            array(
+                'id' => new external_value(PARAM_INT, 'view id'),
+            )
         );
     }
 
@@ -950,9 +946,9 @@ class block_exaport_external extends external_api {
      */
     public static function delete_view_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -963,7 +959,7 @@ class block_exaport_external extends external_api {
      */
     public static function get_all_items_parameters() {
         return new external_function_parameters(
-                array()
+            array()
         );
     }
 
@@ -982,11 +978,11 @@ class block_exaport_external extends external_api {
 
             if ($item->type == 'file') {
                 if ($file = block_exaport_get_item_single_file($item)) {
-                    $item->file = g::$CFG->wwwroot."/blocks/exaport/portfoliofile.php?access=portfolio/id/".g::$USER->id."&itemid=".
-                    $item->id."&wstoken=".static::wstoken();
-					$item->isimage = $file->is_valid_image();
-					$item->filename = $file->get_filename();
-					$item->mimetype = $file->get_mimetype();
+                    $item->file = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . g::$USER->id . "&itemid=" .
+                        $item->id . "&wstoken=" . static::wstoken();
+                    $item->isimage = $file->is_valid_image();
+                    $item->filename = $file->get_filename();
+                    $item->mimetype = $file->get_mimetype();
                 }
             }
         }
@@ -1026,29 +1022,29 @@ class block_exaport_external extends external_api {
      */
     public static function get_all_items_returns() {
         return new external_multiple_structure(
-                new external_single_structure(
-                        array(
-                                'id' => new external_value(PARAM_INT, 'id of category'),
-                                'pid' => new external_value(PARAM_TEXT, 'parentid'),
-                                'name' => new external_value(PARAM_TEXT, 'title of category'),
-                                'items' => new external_multiple_structure(
-                                        new external_single_structure(
-                                                array(
-                                                        'id' => new external_value(PARAM_INT, 'id of item'),
-                                                        'name' => new external_value(PARAM_TEXT, 'title of item'),
-                                                        'type' => new external_value(PARAM_TEXT,
-                                                                'type of item (note,file,link,category)'),
-                                                        'url' => new external_value(PARAM_TEXT, 'url'),
-                                                        'intro' => new external_value(PARAM_RAW, 'description of item'),
-                                                        'filename' => new external_value(PARAM_TEXT, 'title of item'),
-                                                        'file' => new external_value(PARAM_URL, 'file url'),
-                                                        'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
-                                                        'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
-                                                )
-                                        )
-                                ),
+            new external_single_structure(
+                array(
+                    'id' => new external_value(PARAM_INT, 'id of category'),
+                    'pid' => new external_value(PARAM_TEXT, 'parentid'),
+                    'name' => new external_value(PARAM_TEXT, 'title of category'),
+                    'items' => new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'id' => new external_value(PARAM_INT, 'id of item'),
+                                'name' => new external_value(PARAM_TEXT, 'title of item'),
+                                'type' => new external_value(PARAM_TEXT,
+                                    'type of item (note,file,link,category)'),
+                                'url' => new external_value(PARAM_TEXT, 'url'),
+                                'intro' => new external_value(PARAM_RAW, 'description of item'),
+                                'filename' => new external_value(PARAM_TEXT, 'title of item'),
+                                'file' => new external_value(PARAM_URL, 'file url'),
+                                'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
+                                'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
+                            )
                         )
+                    ),
                 )
+            )
         );
     }
 
@@ -1059,10 +1055,10 @@ class block_exaport_external extends external_api {
      */
     public static function add_view_item_parameters() {
         return new external_function_parameters(
-                array(
-                        'viewid' => new external_value(PARAM_INT, 'view id'),
-                        'itemid' => new external_value(PARAM_INT, 'item id'),
-                )
+            array(
+                'viewid' => new external_value(PARAM_INT, 'view id'),
+                'itemid' => new external_value(PARAM_INT, 'item id'),
+            )
         );
     }
 
@@ -1083,7 +1079,7 @@ class block_exaport_external extends external_api {
         $ycoord = intval($max) + 1;
 
         $blockid = $DB->insert_record("block_exaportviewblock",
-                array("viewid" => $viewid, "itemid" => $itemid, "positionx" => 1, "positiony" => $ycoord, "type" => "item"));
+            array("viewid" => $viewid, "itemid" => $itemid, "positionx" => 1, "positiony" => $ycoord, "type" => "item"));
 
         return array("success" => true);
     }
@@ -1095,9 +1091,9 @@ class block_exaport_external extends external_api {
      */
     public static function add_view_item_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -1108,10 +1104,10 @@ class block_exaport_external extends external_api {
      */
     public static function delete_view_item_parameters() {
         return new external_function_parameters(
-                array(
-                        'viewid' => new external_value(PARAM_INT, 'view id'),
-                        'itemid' => new external_value(PARAM_INT, 'item id'),
-                )
+            array(
+                'viewid' => new external_value(PARAM_INT, 'view id'),
+                'itemid' => new external_value(PARAM_INT, 'item id'),
+            )
         );
     }
 
@@ -1141,9 +1137,9 @@ class block_exaport_external extends external_api {
      */
     public static function delete_view_item_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -1154,10 +1150,10 @@ class block_exaport_external extends external_api {
      */
     public static function view_grant_external_access_parameters() {
         return new external_function_parameters(
-                array(
-                        'id' => new external_value(PARAM_INT, 'view id'),
-                        'val' => new external_value(PARAM_INT, '1 for check, 0 for uncheck'),
-                )
+            array(
+                'id' => new external_value(PARAM_INT, 'view id'),
+                'val' => new external_value(PARAM_INT, '1 for check, 0 for uncheck'),
+            )
         );
     }
 
@@ -1195,9 +1191,9 @@ class block_exaport_external extends external_api {
      */
     public static function view_grant_external_access_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -1208,7 +1204,7 @@ class block_exaport_external extends external_api {
      */
     public static function view_get_available_users_parameters() {
         return new external_function_parameters(
-                array()
+            array()
         );
     }
 
@@ -1252,13 +1248,13 @@ class block_exaport_external extends external_api {
      */
     public static function view_get_available_users_returns() {
         return new external_multiple_structure(
-                new external_single_structure(
-                        array(
-                                'id' => new external_value(PARAM_INT, 'id of user'),
-                                'firstname' => new external_value(PARAM_TEXT, 'firstname of user'),
-                                'lastname' => new external_value(PARAM_TEXT, 'lastname of user'),
-                        )
+            new external_single_structure(
+                array(
+                    'id' => new external_value(PARAM_INT, 'id of user'),
+                    'firstname' => new external_value(PARAM_TEXT, 'firstname of user'),
+                    'lastname' => new external_value(PARAM_TEXT, 'lastname of user'),
                 )
+            )
         );
     }
 
@@ -1269,10 +1265,10 @@ class block_exaport_external extends external_api {
      */
     public static function view_grant_internal_access_all_parameters() {
         return new external_function_parameters(
-                array(
-                        'id' => new external_value(PARAM_INT, 'view id'),
-                        'val' => new external_value(PARAM_INT, '1 for check, 0 for uncheck'),
-                )
+            array(
+                'id' => new external_value(PARAM_INT, 'view id'),
+                'val' => new external_value(PARAM_INT, '1 for check, 0 for uncheck'),
+            )
         );
     }
 
@@ -1310,9 +1306,9 @@ class block_exaport_external extends external_api {
      */
     public static function view_grant_internal_access_all_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -1323,11 +1319,11 @@ class block_exaport_external extends external_api {
      */
     public static function view_grant_internal_access_parameters() {
         return new external_function_parameters(
-                array(
-                        'viewid' => new external_value(PARAM_INT, 'view id'),
-                        'userid' => new external_value(PARAM_INT, 'user id'),
-                        'val' => new external_value(PARAM_INT, '1 for check, 0 for uncheck'),
-                )
+            array(
+                'viewid' => new external_value(PARAM_INT, 'view id'),
+                'userid' => new external_value(PARAM_INT, 'user id'),
+                'val' => new external_value(PARAM_INT, '1 for check, 0 for uncheck'),
+            )
         );
     }
 
@@ -1342,7 +1338,7 @@ class block_exaport_external extends external_api {
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::view_grant_internal_access_parameters(),
-                array('viewid' => $viewid, 'userid' => $userid, 'val' => $val));
+            array('viewid' => $viewid, 'userid' => $userid, 'val' => $val));
 
         if ($val == 1) {
             $blockid = $DB->insert_record("block_exaportviewshar", array("viewid" => $viewid, "userid" => $userid));
@@ -1361,9 +1357,9 @@ class block_exaport_external extends external_api {
      */
     public static function view_grant_internal_access_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -1374,9 +1370,9 @@ class block_exaport_external extends external_api {
      */
     public static function get_category_parameters() {
         return new external_function_parameters(
-                array(
-                        'categoryid' => new external_value(PARAM_INT, 'cat id'),
-                )
+            array(
+                'categoryid' => new external_value(PARAM_INT, 'cat id'),
+            )
         );
 
     }
@@ -1404,10 +1400,10 @@ class block_exaport_external extends external_api {
      */
     public static function get_category_returns() {
         return new external_single_structure(
-                array(
-                        'name' => new external_value(PARAM_TEXT, 'title of category'),
-                        'items' => new external_value(PARAM_INT, 'amount of category items'),
-                )
+            array(
+                'name' => new external_value(PARAM_TEXT, 'title of category'),
+                'items' => new external_value(PARAM_INT, 'amount of category items'),
+            )
         );
     }
 
@@ -1418,9 +1414,9 @@ class block_exaport_external extends external_api {
      */
     public static function delete_category_parameters() {
         return new external_function_parameters(
-                array(
-                        'categoryid' => new external_value(PARAM_INT, 'cat id'),
-                )
+            array(
+                'categoryid' => new external_value(PARAM_INT, 'cat id'),
+            )
         );
     }
 
@@ -1448,9 +1444,9 @@ class block_exaport_external extends external_api {
      */
     public static function delete_category_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_BOOL, 'status'),
-                )
+            array(
+                'success' => new external_value(PARAM_BOOL, 'status'),
+            )
         );
     }
 
@@ -1461,9 +1457,9 @@ class block_exaport_external extends external_api {
      */
     public static function get_competencies_by_item_parameters() {
         return new external_function_parameters(
-                array(
-                        'itemid' => new external_value(PARAM_INT, 'item id'),
-                )
+            array(
+                'itemid' => new external_value(PARAM_INT, 'item id'),
+            )
         );
     }
 
@@ -1478,8 +1474,8 @@ class block_exaport_external extends external_api {
         $params = self::validate_parameters(self::get_competencies_by_item_parameters(), array('itemid' => $itemid));
 
         return $DB->get_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                array("activityid" => $itemid, "eportfolioitem" => 1, "comptype" => BLOCK_EXACOMP_TYPE_DESCRIPTOR), "",
-                "compid as competenceid");
+            array("activityid" => $itemid, "eportfolioitem" => 1, "comptype" => BLOCK_EXACOMP_TYPE_DESCRIPTOR), "",
+            "compid as competenceid");
     }
 
     /**
@@ -1489,11 +1485,11 @@ class block_exaport_external extends external_api {
      */
     public static function get_competencies_by_item_returns() {
         return new external_multiple_structure(
-                new external_single_structure(
-                        array(
-                                'competenceid' => new external_value(PARAM_INT, 'id of competence'),
-                        )
+            new external_single_structure(
+                array(
+                    'competenceid' => new external_value(PARAM_INT, 'id of competence'),
                 )
+            )
         );
     }
 
@@ -1504,9 +1500,9 @@ class block_exaport_external extends external_api {
      */
     public static function get_users_by_view_parameters() {
         return new external_function_parameters(
-                array(
-                        'viewid' => new external_value(PARAM_INT, 'view id'),
-                )
+            array(
+                'viewid' => new external_value(PARAM_INT, 'view id'),
+            )
         );
     }
 
@@ -1531,11 +1527,11 @@ class block_exaport_external extends external_api {
      */
     public static function get_users_by_view_returns() {
         return new external_multiple_structure(
-                new external_single_structure(
-                        array(
-                                'userid' => new external_value(PARAM_INT, 'id of user'),
-                        )
+            new external_single_structure(
+                array(
+                    'userid' => new external_value(PARAM_INT, 'id of user'),
                 )
+            )
         );
     }
 
@@ -1580,13 +1576,13 @@ class block_exaport_external extends external_api {
      */
     public static function export_file_to_externalportfolio_parameters() {
         return new external_function_parameters(
-                array(
-                        'component' => new external_value(PARAM_RAW, 'filestorage - component'),
-                        'filearea' => new external_value(PARAM_RAW, 'filestorage - filearea'),
-                        'filename' => new external_value(PARAM_RAW, 'filestorage - filename'),
-                        'filepath' => new external_value(PARAM_RAW, 'filestorage - filepath'),
-                        'itemid' => new external_value(PARAM_INT, 'filestorage - itemid'),
-                )
+            array(
+                'component' => new external_value(PARAM_RAW, 'filestorage - component'),
+                'filearea' => new external_value(PARAM_RAW, 'filestorage - filearea'),
+                'filename' => new external_value(PARAM_RAW, 'filestorage - filename'),
+                'filepath' => new external_value(PARAM_RAW, 'filestorage - filepath'),
+                'itemid' => new external_value(PARAM_INT, 'filestorage - itemid'),
+            )
         );
     }
 
@@ -1604,8 +1600,8 @@ class block_exaport_external extends external_api {
         }
 
         $params = self::validate_parameters(self::export_file_to_externalportfolio_parameters(),
-                array('component' => $component, 'filearea' => $filearea,
-                        'filename' => $filename, 'filepath' => $filepath, 'itemid' => $itemid));
+            array('component' => $component, 'filearea' => $filearea,
+                'filename' => $filename, 'filepath' => $filepath, 'itemid' => $itemid));
         if (empty($component) || empty($filearea) || empty($filename) || empty($filepath)) {
             throw new invalid_parameter_exception('There is not enough parametersy');
         };
@@ -1616,7 +1612,7 @@ class block_exaport_external extends external_api {
         unset($fileparams['author']);
 
         // Script for export.
-        require_once($CFG->dirroot.'/blocks/exacomp/upload_externalportfolio.php');
+        require_once($CFG->dirroot . '/blocks/exacomp/upload_externalportfolio.php');
         // Return variables from Global of upload_externalportfolio.php.
         return array('success' => $success, 'linktofile' => $result_querystring);
     }
@@ -1628,10 +1624,10 @@ class block_exaport_external extends external_api {
      */
     public static function export_file_to_externalportfolio_returns() {
         return new external_single_structure(
-                array(
-                        'success' => new external_value(PARAM_TEXT, 'status'),
-                        'linktofile' => new external_value(PARAM_TEXT, 'link to file'),
-                )
+            array(
+                'success' => new external_value(PARAM_TEXT, 'status'),
+                'linktofile' => new external_value(PARAM_TEXT, 'link to file'),
+            )
         );
     }
 
@@ -1644,7 +1640,7 @@ class block_exaport_external extends external_api {
      * @return array
      */
     public static function get_user_information() {
-        require_once(g::$CFG->dirroot."/user/lib.php");
+        require_once(g::$CFG->dirroot . "/user/lib.php");
         $data = user_get_user_details(g::$USER);
         unset($data['enrolledcourses']);
         unset($data['preferences']);
@@ -1654,29 +1650,29 @@ class block_exaport_external extends external_api {
 
     public static function get_user_information_returns() {
         return new external_single_structure(array(
-                'id' => new external_value(PARAM_INT, 'ID of the user'),
-                'username' => new external_value(PARAM_RAW, 'The username', VALUE_OPTIONAL),
-                'firstname' => new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL),
-                'lastname' => new external_value(PARAM_NOTAGS, 'The family name of the user', VALUE_OPTIONAL),
-                'fullname' => new external_value(PARAM_NOTAGS, 'The fullname of the user'),
-                'email' => new external_value(PARAM_TEXT, 'An email address - allow email as root@localhost', VALUE_OPTIONAL),
-                'firstaccess' => new external_value(PARAM_INT, 'first access to the site (0 if never)', VALUE_OPTIONAL),
-                'lastaccess' => new external_value(PARAM_INT, 'last access to the site (0 if never)', VALUE_OPTIONAL),
-                'auth' => new external_value(PARAM_PLUGIN, 'Auth plugins include manual, ldap, imap, etc', VALUE_OPTIONAL),
-                'confirmed' => new external_value(PARAM_INT, 'Active user: 1 if confirmed, 0 otherwise', VALUE_OPTIONAL),
-                'lang' => new external_value(PARAM_SAFEDIR, 'Language code such as "en", must exist on server', VALUE_OPTIONAL),
-                'url' => new external_value(PARAM_URL, 'URL of the user', VALUE_OPTIONAL),
-                'profileimageurlsmall' => new external_value(PARAM_URL, 'User image profile URL - small version'),
-                'profileimageurl' => new external_value(PARAM_URL, 'User image profile URL - big version'),
+            'id' => new external_value(PARAM_INT, 'ID of the user'),
+            'username' => new external_value(PARAM_RAW, 'The username', VALUE_OPTIONAL),
+            'firstname' => new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL),
+            'lastname' => new external_value(PARAM_NOTAGS, 'The family name of the user', VALUE_OPTIONAL),
+            'fullname' => new external_value(PARAM_NOTAGS, 'The fullname of the user'),
+            'email' => new external_value(PARAM_TEXT, 'An email address - allow email as root@localhost', VALUE_OPTIONAL),
+            'firstaccess' => new external_value(PARAM_INT, 'first access to the site (0 if never)', VALUE_OPTIONAL),
+            'lastaccess' => new external_value(PARAM_INT, 'last access to the site (0 if never)', VALUE_OPTIONAL),
+            'auth' => new external_value(PARAM_PLUGIN, 'Auth plugins include manual, ldap, imap, etc', VALUE_OPTIONAL),
+            'confirmed' => new external_value(PARAM_INT, 'Active user: 1 if confirmed, 0 otherwise', VALUE_OPTIONAL),
+            'lang' => new external_value(PARAM_SAFEDIR, 'Language code such as "en", must exist on server', VALUE_OPTIONAL),
+            'url' => new external_value(PARAM_URL, 'URL of the user', VALUE_OPTIONAL),
+            'profileimageurlsmall' => new external_value(PARAM_URL, 'User image profile URL - small version'),
+            'profileimageurl' => new external_value(PARAM_URL, 'User image profile URL - big version'),
         ));
     }
 
     public static function login_parameters() {
         return new external_function_parameters(array(
-                'app' => new external_value(PARAM_INT, 'app accessing this service (eg. dakora)'),
-                'app_version' => new external_value(PARAM_INT, 'version of the app (eg. 4.6.0)'),
-                'services' => new external_value(PARAM_INT, 'wanted webservice tokens (eg. exacomp,exaport)', VALUE_DEFAULT,
-                        'moodle_mobile_app,exaportservices'),
+            'app' => new external_value(PARAM_INT, 'app accessing this service (eg. dakora)'),
+            'app_version' => new external_value(PARAM_INT, 'version of the app (eg. 4.6.0)'),
+            'services' => new external_value(PARAM_INT, 'wanted webservice tokens (eg. exacomp,exaport)', VALUE_DEFAULT,
+                'moodle_mobile_app,exaportservices'),
         ));
     }
 
@@ -1687,12 +1683,12 @@ class block_exaport_external extends external_api {
      */
     public static function login_returns() {
         return new external_single_structure([
-                'user' => static::get_user_information_returns(),
-                'config' => new external_single_structure([]),
-                'tokens' => new external_multiple_structure(new external_single_structure([
-                        'service' => new external_value(PARAM_TEXT, 'name of service'),
-                        'token' => new external_value(PARAM_TEXT, 'token of the service'),
-                ]), 'requested tokens'),
+            'user' => static::get_user_information_returns(),
+            'config' => new external_single_structure([]),
+            'tokens' => new external_multiple_structure(new external_single_structure([
+                'service' => new external_value(PARAM_TEXT, 'name of service'),
+                'token' => new external_value(PARAM_TEXT, 'token of the service'),
+            ]), 'requested tokens'),
         ]);
     }
 
@@ -1704,11 +1700,10 @@ class block_exaport_external extends external_api {
      */
     public static function login() {
         return [
-                'user' => static::get_user_information(),
-                'config' => (object) [],
+            'user' => static::get_user_information(),
+            'config' => (object)[],
         ];
     }
-
 
 
     public static function get_shared_categories_parameters() {
@@ -1746,7 +1741,7 @@ class block_exaport_external extends external_api {
                 array(
                     'id' => new external_value(PARAM_INT, 'id of item'),
                     'name' => new external_value(PARAM_TEXT, 'title of item'),
-                    'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to', VALUE_OPTIONAL)
+                    'courseid' => new external_value(PARAM_INT, 'id of the course this category belongs to', VALUE_OPTIONAL),
                 )
             )
         );

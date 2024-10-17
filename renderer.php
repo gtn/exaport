@@ -16,7 +16,7 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 defined('MOODLE_INTERNAL') || die;
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 use block_exaport\globals as g;
 

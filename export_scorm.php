@@ -21,13 +21,12 @@ require_once(__DIR__ . '/lib/minixml.inc.php');
 global $DB, $CFG;
 
 $itemsArray = array();
-class block_exacomp_ZipArchive extends \ZipArchive
-{
+
+class block_exacomp_ZipArchive extends \ZipArchive {
     /**
      * @return ZipArchive
      */
-    public static function create_temp_file()
-    {
+    public static function create_temp_file() {
         global $CFG;
         $file = tempnam($CFG->tempdir, "zip");
         $zip = new ZipArchive();
@@ -35,6 +34,7 @@ class block_exacomp_ZipArchive extends \ZipArchive
         return $zip;
     }
 }
+
 global $zip, $existingfilesarray;
 $zip = block_exacomp_ZipArchive::create_temp_file();
 $existingfilesarray = array();
@@ -66,13 +66,11 @@ if (!defined('FILE_APPEND')) {
     define('FILE_APPEND', 1);
 }
 
-function spch($text)
-{
+function spch($text) {
     return htmlentities($text, ENT_QUOTES, "UTF-8");
 }
 
-function spch_text($text)
-{
+function spch_text($text) {
     $text = htmlentities($text, ENT_QUOTES, "UTF-8");
     $text = str_replace('&amp;', '&', $text);
     $text = str_replace('&lt;', '<', $text);
@@ -81,13 +79,11 @@ function spch_text($text)
     return $text;
 }
 
-function titlespch($text)
-{
+function titlespch($text) {
     return clean_param($text, PARAM_ALPHANUM);
 }
 
-function create_ressource(&$resources, $ridentifier, $filename)
-{
+function create_ressource(&$resources, $ridentifier, $filename) {
     // At an external ressource no file is needed inside resource.
     $resource = &$resources->createChild('resource');
     $resource->attribute('identifier', $ridentifier);
@@ -99,8 +95,7 @@ function create_ressource(&$resources, $ridentifier, $filename)
     return true;
 }
 
-function &create_item(&$pitem, $identifier, $titletext, $residentifier = '', $id = null)
-{
+function &create_item(&$pitem, $identifier, $titletext, $residentifier = '', $id = null) {
     // At an external ressource no file is needed inside resource.
     $item = &$pitem->createChild('item');
     $item->attribute('identifier', $identifier);
@@ -116,19 +111,17 @@ function &create_item(&$pitem, $identifier, $titletext, $residentifier = '', $id
     return $item;
 }
 
-function export_file_area_name()
-{
+function export_file_area_name() {
     global $USER;
     return "exaport/temp/export/{$USER->id}";
 }
 
-function export_data_file_area_name()
-{
+function export_data_file_area_name() {
     global $USER;
     return "exaport/temp/exportdataDir/{$USER->id}";
 }
-function add_comments($table, $bookmarkid)
-{
+
+function add_comments($table, $bookmarkid) {
     global $DB, $exportwpfile;
     $commentscontent = '';
     $conditions = array("itemid" => $bookmarkid);
@@ -138,10 +131,9 @@ function add_comments($table, $bookmarkid)
         foreach ($comments as $comment) {
             $conditions = array("id" => $comment->userid);
             $user = $DB->get_record('user', $conditions);
-            if ($exportwpfile){
+            if ($exportwpfile) {
                 $commentscontent .= userdate($comment->timemodified) . " " . fullname($user, $comment->userid) . " " . $comment->entry . "\n";
-            }
-            else{
+            } else {
                 $commentscontent .= '
             <div id="comment">
                 <div id="author"><!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->' . fullname($user, $comment->userid) .
@@ -158,8 +150,7 @@ function add_comments($table, $bookmarkid)
     return $commentscontent;
 }
 
-function get_category_items($categoryid, $viewid = null, $type = null)
-{
+function get_category_items($categoryid, $viewid = null, $type = null) {
     global $USER, $CFG, $DB;
     $conditions = array();
     if (strcmp($CFG->dbtype, "sqlsrv") == 0) {
@@ -192,8 +183,7 @@ function get_category_items($categoryid, $viewid = null, $type = null)
     return $DB->get_records_sql($itemquery, $conditions);
 }
 
-function get_category_files($categoryid, $viewid = null)
-{
+function get_category_files($categoryid, $viewid = null) {
     global $USER, $CFG, $DB;
 
     $conditions = array();
@@ -224,7 +214,7 @@ function get_category_files($categoryid, $viewid = null)
 }
 
 function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath, $exportdir, &$identifier, &$ridentifier, $viewid,
-                              &$itemscomp, $depth = 0){
+    &$itemscomp, $depth = 0) {
     global $USER, $CFG, $COURSE, $DB, $zip, $existingfilesarray, $exportwpfile;
     // Index file for category.
     $indexfilecontent = '';
@@ -302,7 +292,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
 
             list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $bookmark->name);
             if (!$exportwpfile) {
-                $zip->addFromString( $filepath, $filecontent);
+                $zip->addFromString($filepath, $filecontent);
             }
             create_ressource($resources, 'RES-' . $ridentifier, $filepath);
             create_item($xmlelement, 'ITEM-' . $identifier, $bookmark->name, 'RES-' . $ridentifier, $bookmark->id);
@@ -390,7 +380,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
 
             }
             if ($exportwpfile) {
-                $itemArray=array();
+                $itemArray = array();
                 $itemArray[] = get_category_items($id, $viewid, 'link');
                 $itemArray[] = get_category_items($id, $viewid, 'file');
                 $itemArray[] = get_category_items($id, $viewid, 'note');
@@ -403,15 +393,15 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                 $filecontent .= "xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n";
                 $filecontent .= "xmlns:wp=\"http://wordpress.org/export/1.2/\">\n";
                 $filecontent .= "<channel>\n";
-                $filecontent .= "<title>" . spch(fullname($USER, $USER->id)). "</title>\n";
+                $filecontent .= "<title>" . spch(fullname($USER, $USER->id)) . "</title>\n";
                 // Author
                 $filecontent .= "<wp:author>";
                 $filecontent .= "<wp:author_id>" . $USER->id . "</wp:author_id>\n";
-                $filecontent .= "<wp:author_login>" . "<![CDATA[".fullname($USER, $USER->id)."]]>" . "</wp:author_login>\n";
-                $filecontent .= "<wp:author_email>" . "<![CDATA[".$USER->email."]]>" . "</wp:author_email>\n";
-                $filecontent .= "<wp:author_display_name>" . "<![CDATA[".fullname($USER, $USER->id)."]]>" . "</wp:author_display_name>\n";
-                $filecontent .= "<wp:author_first_name>" . "<![CDATA[".$USER->firstname."]]>" . "</wp:author_first_name>\n";
-                $filecontent .= "<wp:author_last_name>" . "<![CDATA[".$USER->lastname."]]>" . "</wp:author_last_name>\n";
+                $filecontent .= "<wp:author_login>" . "<![CDATA[" . fullname($USER, $USER->id) . "]]>" . "</wp:author_login>\n";
+                $filecontent .= "<wp:author_email>" . "<![CDATA[" . $USER->email . "]]>" . "</wp:author_email>\n";
+                $filecontent .= "<wp:author_display_name>" . "<![CDATA[" . fullname($USER, $USER->id) . "]]>" . "</wp:author_display_name>\n";
+                $filecontent .= "<wp:author_first_name>" . "<![CDATA[" . $USER->firstname . "]]>" . "</wp:author_first_name>\n";
+                $filecontent .= "<wp:author_last_name>" . "<![CDATA[" . $USER->lastname . "]]>" . "</wp:author_last_name>\n";
                 $filecontent .= "</wp:author>\n";
 
 
@@ -420,18 +410,18 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                     foreach ($subArray as $blabla) {
                         $filecontent .= "<wp:category>\n";
                         $filecontent .= "<wp:term_id>" . $id . "</wp:term_id>\n";
-                        $filecontent .= "<wp:category_nicename>" . "<![CDATA[".spch($name)."]]>" . "</wp:category_nicename>\n";
+                        $filecontent .= "<wp:category_nicename>" . "<![CDATA[" . spch($name) . "]]>" . "</wp:category_nicename>\n";
                         $filecontent .= "</wp:category>\n";
                         $filecontent .= "<item>\n";
-                        $filecontent.= "<title>" . "<![CDATA[".$blabla->name."]]>" . "</title>\n";
-                        if (add_comments('block_exaportitemcomm', $blabla->id) != ''){
-                            $filecontent .= "<content:encoded>" . "<![CDATA[<!-- wp:peregraph --> <p>" . add_comments("block_exaportitemcomm",$blabla->id) . "</p> <!-- wp:peregraph -->]]> " . "</content:encoded>\n";
+                        $filecontent .= "<title>" . "<![CDATA[" . $blabla->name . "]]>" . "</title>\n";
+                        if (add_comments('block_exaportitemcomm', $blabla->id) != '') {
+                            $filecontent .= "<content:encoded>" . "<![CDATA[<!-- wp:peregraph --> <p>" . add_comments("block_exaportitemcomm", $blabla->id) . "</p> <!-- wp:peregraph -->]]> " . "</content:encoded>\n";
                         }
-                        if ($blabla->intro!= ''){
+                        if ($blabla->intro != '') {
 
                             $filecontent .= "<description>" . "<![CDATA[" . spch_text($blabla->intro) . "]]>" . "</description>\n";
                         }
-                        $filecontent.= "</item>\n";
+                        $filecontent .= "</item>\n";
                     }
                 }
                 $filecontent .= "</channel>\n";
@@ -525,8 +515,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
 }
 
 function rekcat($owncats, $parseddoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i, &$itemscomp,
-                $subdirname, $depth): bool
-{
+    $subdirname, $depth): bool {
     global $DB, $USER, $zip;
     $return = false;
 
@@ -582,8 +571,7 @@ function rekcat($owncats, $parseddoc, $resources, $exportdir, $identifier, $ride
     return $return;
 }
 
-function create_xml_comps($itemscomp, $exportdir)
-{
+function create_xml_comps($itemscomp, $exportdir) {
     global $USER, $zip;
     $parseddoc = new MiniXMLDoc();
 
@@ -841,7 +829,7 @@ if (block_exaport_feature_enabled('views')) {
 }
 echo ' </div>';
 echo '<input type="hidden" name="confirm" value="1" />';
-echo '<input type="submit" name="export" value="' .    get_string("createexport", "block_exaport") . '" class="btn btn-primary"/> ';
+echo '<input type="submit" name="export" value="' . get_string("createexport", "block_exaport") . '" class="btn btn-primary"/> ';
 //echo '<input type="submit" name="export-wp-file" value="' . "CREATE WP-File" . '" class="btn btn-primary"/>';
 echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
 echo '<input type="hidden" name="courseid" value="' . $courseid . '" />';
@@ -853,8 +841,7 @@ echo $OUTPUT->box_end();
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
 
-function get_htmlfile_name_path($exportpath, $exportdir, $itemname)
-{
+function get_htmlfile_name_path($exportpath, $exportdir, $itemname) {
     global $existingfilesarray;
     $filename = clean_param($itemname, PARAM_ALPHANUM);
     $ext = ".html";
@@ -877,8 +864,7 @@ function get_htmlfile_name_path($exportpath, $exportdir, $itemname)
     return array($resfilename, $filepath);
 }
 
-function create_html_header($title, $depthpath = 0)
-{
+function create_html_header($title, $depthpath = 0) {
     $filecontent = '';
     $depth = '';
     for ($i = 1; $i <= $depthpath; $i++) {

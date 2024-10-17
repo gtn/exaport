@@ -16,26 +16,26 @@
 
 jQueryExaport(function ($) {
 
-    $('.view-group-header').on('click', function () {
-        $(this).parents('.view-group').toggleClass('view-group-open');
-    });
+  $('.view-group-header').on('click', function () {
+    $(this).parents('.view-group').toggleClass('view-group-open');
+  });
 
-    // font uploader show
-    $('#fitem_id_fontuploader_toggler .felement').on('click', function () {
-        var shown = $(this).attr('data-shown');
-        var uploaderContainer = $('.uploadFont-container');
-        if (shown && shown != '0') {
-            $(this).attr('data-shown', 0);
-            uploaderContainer.hide();
-        } else {
-            $(this).attr('data-shown', 1);
-            uploaderContainer.show();
-        }
-    });
+  // font uploader show
+  $('#fitem_id_fontuploader_toggler .felement').on('click', function () {
+    var shown = $(this).attr('data-shown');
+    var uploaderContainer = $('.uploadFont-container');
+    if (shown && shown != '0') {
+      $(this).attr('data-shown', 0);
+      uploaderContainer.hide();
+    } else {
+      $(this).attr('data-shown', 1);
+      uploaderContainer.show();
+    }
+  });
 
-    // show "upload custom" font form part
-    $('.customfont-button').on('click', function () {
-        $(this).parents('.view-group').toggleClass('view-group-open');
-    });
+  // show "upload custom" font form part
+  $('.customfont-button').on('click', function () {
+    $(this).parents('.view-group').toggleClass('view-group-open');
+  });
 
 });

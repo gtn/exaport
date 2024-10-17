@@ -19,7 +19,7 @@ define('AJAX_SCRIPT', true);
 define('REQUIRE_CORRECT_ACCESS', true);
 define('NO_MOODLE_COOKIES', true);
 
-require(__DIR__.'/inc.php');
+require(__DIR__ . '/inc.php');
 
 function block_exaport_load_service($service) {
     $CFG = $GLOBALS['CFG'];
@@ -29,7 +29,7 @@ function block_exaport_load_service($service) {
     ob_start();
     try {
         $_POST['service'] = $service;
-        require(__DIR__.'/../../login/token.php');
+        require(__DIR__ . '/../../login/token.php');
     } catch (moodle_exception $e) {
         if ($e->errorcode == 'servicenotavailable') {
             return null;
@@ -56,7 +56,7 @@ required_param('app_version', PARAM_TEXT);
 
 if (optional_param('testconnection', false, PARAM_BOOL)) {
     echo json_encode([
-            'moodleName' => $DB->get_field('course', 'fullname', ['id' => 1]),
+        'moodleName' => $DB->get_field('course', 'fullname', ['id' => 1]),
     ], JSON_PRETTY_PRINT);
     exit;
 }
@@ -66,17 +66,17 @@ $exatokens = [];
 $services = optional_param('services', '', PARAM_TEXT);
 // Default services + .
 $services = array_keys(
-        ['moodle_mobile_app' => 1, 'exaportservices' => 1] + ($services ? array_flip(explode(',', $services)) : []));
+    ['moodle_mobile_app' => 1, 'exaportservices' => 1] + ($services ? array_flip(explode(',', $services)) : []));
 
 foreach ($services as $service) {
     $token = block_exaport_load_service($service);
     $exatokens[] = [
-            'service' => $service,
-            'token' => $token,
+        'service' => $service,
+        'token' => $token,
     ];
 }
 
-require_once(__DIR__.'/externallib.php');
+require_once(__DIR__ . '/externallib.php');
 
 // Get login data.
 $data = block_exaport_external::login();

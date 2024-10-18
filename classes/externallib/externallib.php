@@ -51,11 +51,13 @@ class externallib extends \external_api {
     /**
      * Returns categories and items for a particular level
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @param int level
      * @return array of course subjects
      */
     public static function get_items($level, $type) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER, $COURSE;
 
         $params = self::validate_parameters(self::get_items_parameters(), array('level' => $level, 'type' => $type));
@@ -178,11 +180,13 @@ class externallib extends \external_api {
     /**
      * Returns detailed information for a particular item
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @param int itemid
      * @return array of course subjects
      */
     public static function get_item($itemid, $owneruserid = null) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::get_item_parameters(), array('itemid' => $itemid, 'owneruserid' => $owneruserid));
@@ -293,11 +297,13 @@ class externallib extends \external_api {
     /**
      * Adds a new item to the users portfolio
      *
-     * @ws-type-write
+     * @disabled-ws-type-write
      * @param int itemid
      * @return array of course subjects
      */
     public static function add_item($title, $categoryid, $url, $intro, $type, $fileitemid, $filename) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $DB, $USER;
 
         $params = self::validate_parameters(self::add_item_parameters(),
@@ -309,7 +315,7 @@ class externallib extends \external_api {
         $file = null;
 
         if (!$file && $fileitemid) {
-            $file = reset($fs->get_area_files($context->id, "user", "draft", $fileitemid, null, false));
+            $file = current($fs->get_area_files($context->id, "user", "draft", $fileitemid, null, false));
         }
         if (!$file && $filename) {
             $file = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
@@ -380,11 +386,13 @@ class externallib extends \external_api {
     /**
      * Edit an item from the users portfolio
      *
-     * @ws-type-write
+     * @disabled-ws-type-write
      * @param int itemid
      * @return array of course subjects
      */
     public static function update_item($id, $title, $url, $intro, $type, $fileitemid, $filename) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $DB, $USER;
 
         $params = self::validate_parameters(self::update_item_parameters(),
@@ -396,7 +404,7 @@ class externallib extends \external_api {
         $file = null;
 
         if (!$file && $fileitemid) {
-            $file = reset($fs->get_area_files($context->id, "user", "draft", $fileitemid, null, false));
+            $file = current($fs->get_area_files($context->id, "user", "draft", $fileitemid, null, false));
         }
         if (!$file && $filename) {
             $file = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
@@ -452,25 +460,32 @@ class externallib extends \external_api {
 
     /**
      * Returns description of method parameters
-     *
-     * @return external_function_parameters
      */
     public static function delete_item_parameters() {
-        return new external_function_parameters(
-            array('id' => new external_value(PARAM_INT, 'item id'))
-        );
+        return new external_function_parameters([
+            'id' => new external_value(PARAM_INT, 'item id'),
+        ]);
     }
 
     /**
      * Delete an item from the users portfolio
      *
      * @ws-type-write
-     * @param int itemid
-     * @return array of course subjects
      */
-    public static function delete_item($id) {
-        global $CFG, $DB, $USER;
-        $params = self::validate_parameters(self::delete_item_parameters(), array('id' => $id));
+    public static function delete_item(int $id) {
+        global $DB, $USER;
+
+        [
+            'id' => $id,
+        ] = self::validate_parameters(self::delete_item_parameters(), [
+            'id' => $id,
+        ]);
+
+        // check permission
+        $item = $DB->get_record('block_exaportitem', [
+            'id' => $id,
+            'userid' => $USER->id,
+        ], '*', MUST_EXIST);
 
         block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
 
@@ -492,11 +507,9 @@ class externallib extends \external_api {
      * @return external_single_structure
      */
     public static function delete_item_returns() {
-        return new external_single_structure(
-            array(
-                'success' => new external_value(PARAM_BOOL, 'status'),
-            )
-        );
+        return new external_single_structure(array(
+            'success' => new external_value(PARAM_BOOL, 'status'),
+        ));
     }
 
     public static function add_item_comment_parameters() {
@@ -509,9 +522,11 @@ class externallib extends \external_api {
     /**
      * Add a comment to an item
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      */
     public static function add_item_comment($itemid, $entry) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         $params = self::validate_parameters(self::add_item_comment_parameters(), ['itemid' => $itemid, 'entry' => $entry]);
 
         // TODO: check if can add comment.
@@ -538,19 +553,19 @@ class externallib extends \external_api {
      * @return external_function_parameters
      */
     public static function list_competencies_parameters() {
-        return new external_function_parameters(
-            array()
-        );
+        return new external_function_parameters([]);
 
     }
 
     /**
      * List all available competencies
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @return array of e-Portfolio views
      */
     public static function list_competencies() {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $courses = $DB->get_records('course', array());
@@ -656,11 +671,13 @@ class externallib extends \external_api {
     /**
      * assign a competence to an item
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @param int itemid, descriptorid, val
      * @return array of course subjects
      */
     public static function set_item_competence($itemid, $descriptorid, $val) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::set_item_competence_parameters(),
@@ -716,10 +733,11 @@ class externallib extends \external_api {
      * @return array of e-Portfolio views
      */
     public static function get_views() {
-        global $CFG, $DB, $USER;
+        global $DB, $USER;
 
-        $conditions = array("userid" => $USER->id);
-        $views = $DB->get_records("block_exaportview", $conditions);
+        self::validate_parameters(self::get_views_parameters(), []);
+
+        $views = $DB->get_records("block_exaportview", ["userid" => $USER->id]);
 
         $results = array();
 
@@ -757,32 +775,40 @@ class externallib extends \external_api {
      * @return external_function_parameters
      */
     public static function get_view_parameters() {
-        return new external_function_parameters(
-            array('id' => new external_value(PARAM_INT, 'view id'))
-        );
+        return new external_function_parameters([
+            'id' => new external_value(PARAM_INT, 'view id'),
+        ]);
     }
 
     /**
      * Return detailed view
      *
      * @ws-type-read
-     * @param int id
-     * @return detailed view including list of items
      */
-    public static function get_view($id) {
+    public static function get_view(int $id) {
         global $CFG, $DB, $USER;
 
-        $params = self::validate_parameters(self::get_view_parameters(), array('id' => $id));
+        [
+            'id' => $id,
+        ] = self::validate_parameters(self::get_view_parameters(), [
+            'id' => $id,
+        ]);
 
-        $conditions = array("id" => $id);
-        $view = $DB->get_record("block_exaportview", $conditions);
+        // checking the permission
+        $view = $DB->get_record('block_exaportview', [
+            'id' => $id,
+            'userid' => $USER->id,
+        ], '*', MUST_EXIST);
 
+        $result = (object)[];
         $result->id = $view->id;
         $result->name = $view->name;
         $result->description = $view->description;
+        if ($view->externaccess) {
+            $result->external_url = block_exaport_get_external_view_url($view);
+        }
 
-        $conditions = array("viewid" => $id);
-        $items = $DB->get_records("block_exaportviewblock", $conditions);
+        $items = $DB->get_records("block_exaportviewblock", array("viewid" => $id));
 
         $result->items = array();
         foreach ($items as $item) {
@@ -807,22 +833,17 @@ class externallib extends \external_api {
      * @return external_single_structure
      */
     public static function get_view_returns() {
-        return new external_single_structure(
-            array(
-                'id' => new external_value(PARAM_INT, 'id of view'),
-                'name' => new external_value(PARAM_TEXT, 'title of view'),
-                'description' => new external_value(PARAM_RAW, 'description of view'),
-                'items' => new external_multiple_structure(
-                    new external_single_structure(
-                        array(
-                            'id' => new external_value(PARAM_INT, 'id of item'),
-                            'name' => new external_value(PARAM_TEXT, 'title of item'),
-                            'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
-                        )
-                    )
-                ),
-            )
-        );
+        return new external_single_structure(array(
+            'id' => new external_value(PARAM_INT, 'id of view'),
+            'name' => new external_value(PARAM_TEXT, 'title of view'),
+            'description' => new external_value(PARAM_RAW, 'description of view'),
+            'external_url' => new external_value(PARAM_TEXT, 'url for external (public) access', VALUE_OPTIONAL),
+            'items' => new external_multiple_structure(new external_single_structure(array(
+                'id' => new external_value(PARAM_INT, 'id of item'),
+                'name' => new external_value(PARAM_TEXT, 'title of item'),
+                'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
+            ))),
+        ));
     }
 
     /**
@@ -841,18 +862,34 @@ class externallib extends \external_api {
      * Add a new view to the users portfolio
      *
      * @ws-type-write
-     * @param String name, String description
-     * @return success
      */
-    public static function add_view($name, $description) {
-        global $CFG, $DB, $USER;
+    public static function add_view(string $name, string $description) {
+        global $DB, $USER;
 
-        $params = self::validate_parameters(self::add_view_parameters(), array('name' => $name, 'description' => $description));
+        [
+            'name' => $name,
+            'description' => $description,
+        ] = self::validate_parameters(self::add_view_parameters(), [
+            'name' => $name,
+            'description' => $description,
+        ]);
 
-        $viewid = $DB->insert_record("block_exaportview",
-            array('userid' => $USER->id, 'name' => $name, 'description' => $description, 'timemodified' => time()));
+        // Generate view hash, external share is on by default!
+        do {
+            $hash = substr(md5(microtime()), 3, 8);
+        } while ($DB->record_exists("block_exaportview", array("hash" => $hash)));
 
-        return array("success" => true);
+        $viewid = $DB->insert_record("block_exaportview", [
+            'userid' => $USER->id,
+            'name' => $name,
+            'description' => $description,
+            'timemodified' => time(),
+            'externaccess' => 1,
+            'externcomment' => 0,
+            'hash' => $hash,
+        ]);
+
+        return ["success" => true, 'id' => $viewid];
     }
 
     /**
@@ -861,11 +898,10 @@ class externallib extends \external_api {
      * @return external_single_structure
      */
     public static function add_view_returns() {
-        return new external_single_structure(
-            array(
-                'success' => new external_value(PARAM_BOOL, 'status'),
-            )
-        );
+        return new external_single_structure(array(
+            'success' => new external_value(PARAM_BOOL, 'status'),
+            'id' => new external_value(PARAM_INT),
+        ));
     }
 
     /**
@@ -874,29 +910,35 @@ class externallib extends \external_api {
      * @return external_function_parameters
      */
     public static function update_view_parameters() {
-        return new external_function_parameters(
-            array(
-                'id' => new external_value(PARAM_INT, 'view id'),
-                'name' => new external_value(PARAM_TEXT, 'view title'),
-                'description' => new external_value(PARAM_TEXT, 'description'),
-            )
-        );
+        return new external_function_parameters([
+            'id' => new external_value(PARAM_INT, 'view id'),
+            'name' => new external_value(PARAM_TEXT, 'view title'),
+            'description' => new external_value(PARAM_TEXT, 'description'),
+        ]);
     }
 
     /**
      * Edit a view from the users portfolio
-     *
-     * @ws-type-write
-     * @param int id, String name, String description
-     * @return success
      */
-    public static function update_view($id, $name, $description) {
-        global $CFG, $DB, $USER;
+    public static function update_view(int $id, string $name, string $description) {
+        global $DB, $USER;
 
-        $params = self::validate_parameters(self::update_view_parameters(),
-            array('id' => $id, 'name' => $name, 'description' => $description));
+        [
+            'id' => $id,
+            'name' => $name,
+            'description' => $description,
+        ] = self::validate_parameters(self::update_view_parameters(), [
+            'id' => $id,
+            'name' => $name,
+            'description' => $description,
+        ]);
 
-        // TODO: check permissions
+        // check permission
+        $DB->get_record('block_exaportview', [
+            'id' => $id,
+            'userid' => $USER->id,
+        ], '*', MUST_EXIST);
+
         $record = new stdClass();
         $record->id = $id;
         $record->name = $name;
@@ -912,11 +954,9 @@ class externallib extends \external_api {
      * @return external_single_structure
      */
     public static function update_view_returns() {
-        return new external_single_structure(
-            array(
-                'success' => new external_value(PARAM_BOOL, 'status'),
-            )
-        );
+        return new external_single_structure(array(
+            'success' => new external_value(PARAM_BOOL, 'status'),
+        ));
     }
 
     /**
@@ -925,26 +965,34 @@ class externallib extends \external_api {
      * @return external_function_parameters
      */
     public static function delete_view_parameters() {
-        return new external_function_parameters(
-            array(
-                'id' => new external_value(PARAM_INT, 'view id'),
-            )
-        );
+        return new external_function_parameters([
+            'id' => new external_value(PARAM_INT),
+        ]);
     }
 
     /**
      * Delete a view from the users portfolio
      *
      * @ws-type-write
-     * @param int id
-     * @return success
      */
-    public static function delete_view($id) {
-        global $CFG, $DB, $USER;
+    public static function delete_view(int $id) {
+        global $DB, $USER;
 
-        $params = self::validate_parameters(self::delete_view_parameters(), array('id' => $id));
+        [
+            'id' => $id,
+        ] = self::validate_parameters(self::delete_view_parameters(), [
+            'id' => $id,
+        ]);
+
+        // check permission
+        $DB->get_record('block_exaportview', [
+            'id' => $id,
+            'userid' => $USER->id,
+        ], '*', MUST_EXIST);
 
         $DB->delete_records("block_exaportview", array("id" => $id));
+
+        $DB->delete_records("block_exaportviewblock", array("viewid" => $id));
 
         return array("success" => true);
     }
@@ -955,29 +1003,16 @@ class externallib extends \external_api {
      * @return external_single_structure
      */
     public static function delete_view_returns() {
-        return new external_single_structure(
-            array(
-                'success' => new external_value(PARAM_BOOL, 'status'),
-            )
-        );
-    }
-
-    /**
-     * Returns description of method parameters
-     *
-     * @return external_function_parameters
-     */
-    public static function get_all_items_parameters() {
-        return new external_function_parameters(
-            array()
-        );
+        return new external_single_structure(array(
+            'success' => new external_value(PARAM_BOOL, 'status'),
+        ));
     }
 
     private static function wstoken() {
         return optional_param('wstoken', null, PARAM_ALPHANUM);
     }
 
-    public static function get_items_for_category($categoryid) {
+    private static function get_items_for_category($categoryid) {
         $items = g::$DB->get_records("block_exaportitem", array("userid" => g::$USER->id, "categoryid" => $categoryid));
         foreach ($items as $item) {
             $item->file = "";
@@ -1001,13 +1036,23 @@ class externallib extends \external_api {
     }
 
     /**
-     * Return all items, independent from level
+     * Returns description of method parameters
+     *
+     * @return external_function_parameters
+     */
+    public static function get_all_user_items_parameters() {
+        return new external_function_parameters([]);
+    }
+
+    /**
+     * Return all items from user
      *
      * @ws-type-read
-     * @return all items available
      */
-    public static function get_all_items() {
+    public static function get_all_user_items() {
         global $DB, $USER;
+
+        self::validate_parameters(self::get_all_user_items_parameters(), []);
 
         $categories = $DB->get_records("block_exaportcate", array("userid" => $USER->id));
 
@@ -1030,7 +1075,7 @@ class externallib extends \external_api {
      *
      * @return external_multiple_structure
      */
-    public static function get_all_items_returns() {
+    public static function get_all_user_items_returns() {
         return new external_multiple_structure(
             new external_single_structure(
                 array(
@@ -1064,32 +1109,52 @@ class externallib extends \external_api {
      * @return external_function_parameters
      */
     public static function add_view_item_parameters() {
-        return new external_function_parameters(
-            array(
-                'viewid' => new external_value(PARAM_INT, 'view id'),
-                'itemid' => new external_value(PARAM_INT, 'item id'),
-            )
-        );
+        return new external_function_parameters([
+            'viewid' => new external_value(PARAM_INT, 'view id'),
+            'itemid' => new external_value(PARAM_INT, 'item id'),
+        ]);
     }
 
     /**
      * Add item to a view
      *
      * @ws-type-write
-     * @param int viewid, itemid
-     * @return success
      */
-    public static function add_view_item($viewid, $itemid) {
+    public static function add_view_item(int $viewid, int $itemid) {
         global $CFG, $DB, $USER;
 
-        $params = self::validate_parameters(self::add_view_item_parameters(), array('viewid' => $viewid, 'itemid' => $itemid));
+        [
+            'viewid' => $viewid,
+            'itemid' => $itemid,
+        ] = static::validate_parameters(static::add_view_item_parameters(), [
+            'viewid' => $viewid,
+            'itemid' => $itemid,
+        ]);
 
-        $query = "SELECT MAX(positiony) from {block_exaportviewblock} WHERE viewid=?";
-        $max = $DB->get_field_sql($query, array($viewid));
-        $ycoord = intval($max) + 1;
+        // check permissions
+        $view = $DB->get_record('block_exaportview', [
+            'id' => $viewid,
+            'userid' => $USER->id,
+        ], '*', MUST_EXIST);
 
-        $blockid = $DB->insert_record("block_exaportviewblock",
-            array("viewid" => $viewid, "itemid" => $itemid, "positionx" => 1, "positiony" => $ycoord, "type" => "item"));
+        // check permission
+        $item = $DB->get_record('block_exaportitem', [
+            'id' => $itemid,
+            'userid' => $USER->id,
+        ], '*', MUST_EXIST);
+
+        $existingBlock = $DB->get_record("block_exaportviewblock", array("viewid" => $viewid, "itemid" => $itemid, "type" => "item"));
+
+        if (!$existingBlock) {
+            // only add once
+
+            $query = "SELECT MAX(positiony) from {block_exaportviewblock} WHERE viewid=?";
+            $max = $DB->get_field_sql($query, array($viewid));
+            $ycoord = intval($max) + 1;
+
+            $blockid = $DB->insert_record("block_exaportviewblock",
+                array("viewid" => $viewid, "itemid" => $itemid, "positionx" => 1, "positiony" => $ycoord, "type" => "item"));
+        }
 
         return array("success" => true);
     }
@@ -1113,22 +1178,20 @@ class externallib extends \external_api {
      * @return external_function_parameters
      */
     public static function delete_view_item_parameters() {
-        return new external_function_parameters(
-            array(
-                'viewid' => new external_value(PARAM_INT, 'view id'),
-                'itemid' => new external_value(PARAM_INT, 'item id'),
-            )
-        );
+        return new external_function_parameters([
+            'viewid' => new external_value(PARAM_INT, 'view id'),
+            'itemid' => new external_value(PARAM_INT, 'item id'),
+        ]);
     }
 
     /**
      * Remove item from a view
      *
-     * @ws-type-write
-     * @param int viewid, itemid
-     * @return success
+     * @disabled-ws-type-write
      */
     public static function delete_view_item($viewid, $itemid) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::delete_view_item_parameters(), array('viewid' => $viewid, 'itemid' => $itemid));
@@ -1170,11 +1233,11 @@ class externallib extends \external_api {
     /**
      * Grant external access to a view
      *
-     * @ws-type-write
-     * @param int id, val
-     * @return success
+     * @disabled-ws-type-write
      */
     public static function view_grant_external_access($id, $val) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::view_grant_external_access_parameters(), array('id' => $id, 'val' => $val));
@@ -1221,10 +1284,12 @@ class externallib extends \external_api {
     /**
      * Get users who can get access
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @return all items available
      */
     public static function view_get_available_users() {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $mycourses = enrol_get_users_courses($USER->id, true);
@@ -1285,11 +1350,11 @@ class externallib extends \external_api {
     /**
      * Grant internal access to a view to all users
      *
-     * @ws-type-write
-     * @param int id, val
-     * @return success
+     * @disabled-ws-type-write
      */
     public static function view_grant_internal_access_all($id, $val) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::view_grant_internal_access_all_parameters(), array('id' => $id, 'val' => $val));
@@ -1340,11 +1405,11 @@ class externallib extends \external_api {
     /**
      * Grant internal access to a view to one user
      *
-     * @ws-type-write
-     * @param int viewid, userid, val
-     * @return success
+     * @disabled-ws-type-write
      */
     public static function view_grant_internal_access($viewid, $userid, $val) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::view_grant_internal_access_parameters(),
@@ -1390,10 +1455,12 @@ class externallib extends \external_api {
     /**
      * Get category infor
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @return array of e-Portfolio views
      */
     public static function get_category($categoryid) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB;
 
         $cat = $DB->get_record("block_exaportcate", array("id" => $categoryid), "name");
@@ -1433,11 +1500,11 @@ class externallib extends \external_api {
     /**
      * Delete category
      *
-     * @ws-type-write
-     * @param int viewid, userid, val
-     * @return success
+     * @disabled-ws-type-write
      */
     public static function delete_category($categoryid) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::delete_category_parameters(), array('categoryid' => $categoryid));
@@ -1476,10 +1543,12 @@ class externallib extends \external_api {
     /**
      * Get competence ids for a ePortfolio item
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @return all items available
      */
     public static function get_competencies_by_item($itemid) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
         $params = self::validate_parameters(self::get_competencies_by_item_parameters(), array('itemid' => $itemid));
 
@@ -1519,10 +1588,12 @@ class externallib extends \external_api {
     /**
      * Get view users
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @return all items available
      */
     public static function get_users_by_view($viewid) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = self::validate_parameters(self::get_users_by_view_parameters(), array('viewid' => $viewid));
@@ -1599,10 +1670,12 @@ class externallib extends \external_api {
     /**
      * Export file to external portfolio
      *
-     * @ws-type-write
+     * @disabled-ws-type-write
      * @return all items available
      */
     public static function export_file_to_externalportfolio($component, $filearea, $filename, $filepath, $itemid) {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         if (!$CFG->block_exaport_app_externaleportfolio) {
@@ -1642,7 +1715,7 @@ class externallib extends \external_api {
     }
 
     public static function get_user_information_parameters() {
-        return new external_function_parameters(array());
+        return new external_function_parameters([]);
     }
 
     /**
@@ -1722,10 +1795,12 @@ class externallib extends \external_api {
 
     /**
      *
-     * @ws-type-read
+     * @disabled-ws-type-read
      * @return array
      */
     public static function get_shared_categories() {
+        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+
         global $CFG, $DB, $USER;
 
         $params = static::validate_parameters(self::get_shared_categories_parameters(), array());
@@ -1757,4 +1832,37 @@ class externallib extends \external_api {
         );
     }
 
+    public static function add_view_items_parameters() {
+        return new external_function_parameters(array(
+            'portfolioid' => new external_value(PARAM_INT),
+            'itemids' => new external_multiple_structure(new external_value(PARAM_INT)),
+        ));
+    }
+
+    /**
+     * @ws-type-write
+     */
+    public static function add_view_items(int $portfolioid, array $itemids) {
+        [
+            'portfolioid' => $portfolioid,
+            'itemids' => $itemids,
+        ] = static::validate_parameters(static::add_view_items_parameters(), [
+            'portfolioid' => $portfolioid,
+            'itemids' => $itemids,
+        ]);
+
+        foreach ($itemids as $itemid) {
+            static::add_view_item($portfolioid, $itemid);
+        }
+
+        return [
+            'success' => true,
+        ];
+    }
+
+    public static function add_view_items_returns() {
+        return new external_single_structure([
+            'success' => new external_value(PARAM_BOOL, 'status'),
+        ]);
+    }
 }

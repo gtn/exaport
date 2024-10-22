@@ -470,7 +470,7 @@ class externallib extends \external_api {
     /**
      * Delete an item from the users portfolio
      *
-     * @ws-type-write
+     * @disabled-ws-type-write
      */
     public static function delete_item(int $id) {
         global $DB, $USER;
@@ -722,7 +722,7 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function get_views_parameters() {
+    public static function view_list_parameters() {
         return new external_function_parameters([]);
     }
 
@@ -732,12 +732,12 @@ class externallib extends \external_api {
      * @ws-type-read
      * @return array of e-Portfolio views
      */
-    public static function get_views() {
+    public static function view_list() {
         global $DB, $USER;
 
-        self::validate_parameters(self::get_views_parameters(), []);
+        self::validate_parameters(self::view_list_parameters(), []);
 
-        $views = $DB->get_records("block_exaportview", ["userid" => $USER->id]);
+        $views = $DB->get_records("block_exaportview", ["userid" => $USER->id, 'createdinapp' => 1]);
 
         $results = array();
 
@@ -757,7 +757,7 @@ class externallib extends \external_api {
      *
      * @return external_multiple_structure
      */
-    public static function get_views_returns() {
+    public static function view_list_returns() {
         return new external_multiple_structure(
             new external_single_structure(
                 array(
@@ -774,7 +774,7 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function get_view_parameters() {
+    public static function view_details_parameters() {
         return new external_function_parameters([
             'id' => new external_value(PARAM_INT, 'view id'),
         ]);
@@ -785,12 +785,12 @@ class externallib extends \external_api {
      *
      * @ws-type-read
      */
-    public static function get_view(int $id) {
+    public static function view_details(int $id) {
         global $CFG, $DB, $USER;
 
         [
             'id' => $id,
-        ] = self::validate_parameters(self::get_view_parameters(), [
+        ] = self::validate_parameters(self::view_details_parameters(), [
             'id' => $id,
         ]);
 
@@ -816,11 +816,7 @@ class externallib extends \external_api {
                 $conditions = array("id" => $item->itemid);
                 $itemdb = $DB->get_record("block_exaportitem", $conditions);
 
-                $resultitem = new stdClass();
-                $resultitem->id = $itemdb->id;
-                $resultitem->name = $itemdb->name;
-                $resultitem->type = $itemdb->type;
-                $result->items[] = $resultitem;
+                $result->items[] = static::make_item_result($itemdb);
             }
         }
 
@@ -832,17 +828,28 @@ class externallib extends \external_api {
      *
      * @return external_single_structure
      */
-    public static function get_view_returns() {
+    public static function view_details_returns() {
         return new external_single_structure(array(
             'id' => new external_value(PARAM_INT, 'id of view'),
             'name' => new external_value(PARAM_TEXT, 'title of view'),
             'description' => new external_value(PARAM_RAW, 'description of view'),
             'external_url' => new external_value(PARAM_TEXT, 'url for external (public) access', VALUE_OPTIONAL),
-            'items' => new external_multiple_structure(new external_single_structure(array(
+            'items' => new external_multiple_structure(new external_single_structure([
                 'id' => new external_value(PARAM_INT, 'id of item'),
                 'name' => new external_value(PARAM_TEXT, 'title of item'),
-                'type' => new external_value(PARAM_TEXT, 'title of item (note,file,link,category)'),
-            ))),
+                'url' => new external_value(PARAM_TEXT, 'url'),
+                'description' => new external_value(PARAM_RAW, 'description of item'),
+                'files' => new external_multiple_structure(new external_single_structure([
+                    'filename' => new external_value(PARAM_TEXT, 'filename'),
+                    'url' => new external_value(PARAM_URL, 'file url'),
+                    'mimetype' => new external_value(PARAM_TEXT, 'mime type for file'),
+                ])),
+                // 'type' => new external_value(PARAM_TEXT, 'type of item ENUM(note,file,link)'),
+                // 'filename' => new external_value(PARAM_TEXT, 'title of item'),
+                // 'file' => new external_value(PARAM_URL, 'file url'),
+                // 'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
+                // 'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
+            ])),
         ));
     }
 
@@ -851,7 +858,7 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function add_view_parameters() {
+    public static function view_add_parameters() {
         return new external_function_parameters([
             'name' => new external_value(PARAM_TEXT, 'view title'),
             'description' => new external_value(PARAM_TEXT, 'description'),
@@ -863,13 +870,13 @@ class externallib extends \external_api {
      *
      * @ws-type-write
      */
-    public static function add_view(string $name, string $description) {
+    public static function view_add(string $name, string $description) {
         global $DB, $USER;
 
         [
             'name' => $name,
             'description' => $description,
-        ] = self::validate_parameters(self::add_view_parameters(), [
+        ] = self::validate_parameters(self::view_add_parameters(), [
             'name' => $name,
             'description' => $description,
         ]);
@@ -887,6 +894,7 @@ class externallib extends \external_api {
             'externaccess' => 1,
             'externcomment' => 0,
             'hash' => $hash,
+            'createinapp' => 1,
         ]);
 
         return ["success" => true, 'id' => $viewid];
@@ -897,7 +905,7 @@ class externallib extends \external_api {
      *
      * @return external_single_structure
      */
-    public static function add_view_returns() {
+    public static function view_add_returns() {
         return new external_single_structure(array(
             'success' => new external_value(PARAM_BOOL, 'status'),
             'id' => new external_value(PARAM_INT),
@@ -909,7 +917,7 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function update_view_parameters() {
+    public static function view_update_parameters() {
         return new external_function_parameters([
             'id' => new external_value(PARAM_INT, 'view id'),
             'name' => new external_value(PARAM_TEXT, 'view title'),
@@ -919,15 +927,17 @@ class externallib extends \external_api {
 
     /**
      * Edit a view from the users portfolio
+     *
+     * @ws-type-write
      */
-    public static function update_view(int $id, string $name, string $description) {
+    public static function view_update(int $id, string $name, string $description) {
         global $DB, $USER;
 
         [
             'id' => $id,
             'name' => $name,
             'description' => $description,
-        ] = self::validate_parameters(self::update_view_parameters(), [
+        ] = self::validate_parameters(self::view_update_parameters(), [
             'id' => $id,
             'name' => $name,
             'description' => $description,
@@ -953,7 +963,7 @@ class externallib extends \external_api {
      *
      * @return external_single_structure
      */
-    public static function update_view_returns() {
+    public static function view_update_returns() {
         return new external_single_structure(array(
             'success' => new external_value(PARAM_BOOL, 'status'),
         ));
@@ -964,7 +974,7 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function delete_view_parameters() {
+    public static function view_delete_parameters() {
         return new external_function_parameters([
             'id' => new external_value(PARAM_INT),
         ]);
@@ -975,12 +985,12 @@ class externallib extends \external_api {
      *
      * @ws-type-write
      */
-    public static function delete_view(int $id) {
+    public static function view_delete(int $id) {
         global $DB, $USER;
 
         [
             'id' => $id,
-        ] = self::validate_parameters(self::delete_view_parameters(), [
+        ] = self::validate_parameters(self::view_delete_parameters(), [
             'id' => $id,
         ]);
 
@@ -1002,7 +1012,7 @@ class externallib extends \external_api {
      *
      * @return external_single_structure
      */
-    public static function delete_view_returns() {
+    public static function view_delete_returns() {
         return new external_single_structure(array(
             'success' => new external_value(PARAM_BOOL, 'status'),
         ));
@@ -1014,25 +1024,13 @@ class externallib extends \external_api {
 
     private static function get_items_for_category($categoryid) {
         $items = g::$DB->get_records("block_exaportitem", array("userid" => g::$USER->id, "categoryid" => $categoryid));
-        foreach ($items as $item) {
-            $item->file = "";
-            $item->isimage = false;
-            $item->filename = "";
-            $item->mimetype = "";
-            $item->intro = format_text($item->intro, FORMAT_HTML);
 
-            if ($item->type == 'file') {
-                if ($file = block_exaport_get_item_single_file($item)) {
-                    $item->file = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . g::$USER->id . "&itemid=" .
-                        $item->id . "&wstoken=" . static::wstoken();
-                    $item->isimage = $file->is_valid_image();
-                    $item->filename = $file->get_filename();
-                    $item->mimetype = $file->get_mimetype();
-                }
-            }
+        $result_items = [];
+        foreach ($items as $item) {
+            $result_items[] = static::make_item_result($item);
         }
 
-        return $items;
+        return $result_items;
     }
 
     /**
@@ -1087,14 +1085,18 @@ class externallib extends \external_api {
                             array(
                                 'id' => new external_value(PARAM_INT, 'id of item'),
                                 'name' => new external_value(PARAM_TEXT, 'title of item'),
-                                'type' => new external_value(PARAM_TEXT,
-                                    'type of item (note,file,link,category)'),
                                 'url' => new external_value(PARAM_TEXT, 'url'),
-                                'intro' => new external_value(PARAM_RAW, 'description of item'),
-                                'filename' => new external_value(PARAM_TEXT, 'title of item'),
-                                'file' => new external_value(PARAM_URL, 'file url'),
-                                'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
-                                'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
+                                'description' => new external_value(PARAM_RAW, 'description of item'),
+                                'files' => new external_multiple_structure(new external_single_structure([
+                                    'filename' => new external_value(PARAM_TEXT, 'filename'),
+                                    'url' => new external_value(PARAM_URL, 'file url'),
+                                    'mimetype' => new external_value(PARAM_TEXT, 'mime type for file'),
+                                ])),
+                                // 'type' => new external_value(PARAM_TEXT, 'type of item ENUM(note,file,link)'),
+                                // 'filename' => new external_value(PARAM_TEXT, 'title of item'),
+                                // 'file' => new external_value(PARAM_URL, 'file url'),
+                                // 'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
+                                // 'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
                             )
                         )
                     ),
@@ -1108,7 +1110,7 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function add_view_item_parameters() {
+    public static function view_item_add_parameters() {
         return new external_function_parameters([
             'viewid' => new external_value(PARAM_INT, 'view id'),
             'itemid' => new external_value(PARAM_INT, 'item id'),
@@ -1120,13 +1122,13 @@ class externallib extends \external_api {
      *
      * @ws-type-write
      */
-    public static function add_view_item(int $viewid, int $itemid) {
+    public static function view_item_add(int $viewid, int $itemid) {
         global $CFG, $DB, $USER;
 
         [
             'viewid' => $viewid,
             'itemid' => $itemid,
-        ] = static::validate_parameters(static::add_view_item_parameters(), [
+        ] = static::validate_parameters(static::view_item_add_parameters(), [
             'viewid' => $viewid,
             'itemid' => $itemid,
         ]);
@@ -1164,7 +1166,7 @@ class externallib extends \external_api {
      *
      * @return external_single_structure
      */
-    public static function add_view_item_returns() {
+    public static function view_item_add_returns() {
         return new external_single_structure(
             array(
                 'success' => new external_value(PARAM_BOOL, 'status'),
@@ -1177,7 +1179,7 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function delete_view_item_parameters() {
+    public static function view_item_remove_parameters() {
         return new external_function_parameters([
             'viewid' => new external_value(PARAM_INT, 'view id'),
             'itemid' => new external_value(PARAM_INT, 'item id'),
@@ -1187,17 +1189,26 @@ class externallib extends \external_api {
     /**
      * Remove item from a view
      *
-     * @disabled-ws-type-write
+     * @ws-type-write
      */
-    public static function delete_view_item($viewid, $itemid) {
-        throw new \moodle_exception('disabled, old dakora code, needs security check!');
+    public static function view_item_remove($viewid, $itemid) {
+        global $DB, $USER;
 
-        global $CFG, $DB, $USER;
+        [
+            'viewid' => $viewid,
+            'itemid' => $itemid,
+        ] = static::validate_parameters(static::view_item_remove_parameters(), [
+            'viewid' => $viewid,
+            'itemid' => $itemid,
+        ]);
 
-        $params = self::validate_parameters(self::delete_view_item_parameters(), array('viewid' => $viewid, 'itemid' => $itemid));
-        $query = "SELECT MAX(positiony) from {block_exaportviewblock} WHERE viewid=? AND itemid=?";
-        $max = $DB->get_field_sql($query, array($viewid, $itemid));
-        $ycoord = intval($max);
+        // check permissions
+        $view = $DB->get_record('block_exaportview', [
+            'id' => $viewid,
+            'userid' => $USER->id,
+        ], '*', MUST_EXIST);
+
+        $ycoord = $DB->get_field_sql("SELECT MAX(positiony) from {block_exaportviewblock} WHERE viewid=? AND itemid=?", [$viewid, $itemid]);
         $DB->delete_records("block_exaportviewblock", array("viewid" => $viewid, "itemid" => $itemid, "positiony" => $ycoord));
 
         return array("success" => true);
@@ -1208,7 +1219,7 @@ class externallib extends \external_api {
      *
      * @return external_single_structure
      */
-    public static function delete_view_item_returns() {
+    public static function view_item_remove_returns() {
         return new external_single_structure(
             array(
                 'success' => new external_value(PARAM_BOOL, 'status'),
@@ -1832,7 +1843,7 @@ class externallib extends \external_api {
         );
     }
 
-    public static function add_view_items_parameters() {
+    public static function view_item_add_multiple_parameters() {
         return new external_function_parameters(array(
             'portfolioid' => new external_value(PARAM_INT),
             'itemids' => new external_multiple_structure(new external_value(PARAM_INT)),
@@ -1842,17 +1853,17 @@ class externallib extends \external_api {
     /**
      * @ws-type-write
      */
-    public static function add_view_items(int $portfolioid, array $itemids) {
+    public static function view_item_add_multiple(int $portfolioid, array $itemids) {
         [
             'portfolioid' => $portfolioid,
             'itemids' => $itemids,
-        ] = static::validate_parameters(static::add_view_items_parameters(), [
+        ] = static::validate_parameters(static::view_item_add_multiple_parameters(), [
             'portfolioid' => $portfolioid,
             'itemids' => $itemids,
         ]);
 
         foreach ($itemids as $itemid) {
-            static::add_view_item($portfolioid, $itemid);
+            static::view_item_add($portfolioid, $itemid);
         }
 
         return [
@@ -1860,9 +1871,33 @@ class externallib extends \external_api {
         ];
     }
 
-    public static function add_view_items_returns() {
+    public static function view_item_add_multiple_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'status'),
         ]);
+    }
+
+    private static function make_item_result(object $item): object {
+        $result_item = (object)[];
+        $result_item->id = $item->id;
+        $result_item->name = $item->name;
+
+        // $result_item->type = $item->type;
+        // $result_item->file = "";
+        // $result_item->isimage = false;
+        // $result_item->filename = "";
+        // $result_item->mimetype = "";
+        $result_item->description = format_text($item->intro, FORMAT_HTML);
+        $result_item->files = [];
+
+        foreach (block_exaport_get_item_files($item) as $file) {
+            $result_file = (object)[];
+            $result_file->url = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . g::$USER->id . "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
+            // $result_file->isimage = $file->is_valid_image();
+            $result_file->filename = $file->get_filename();
+            $result_file->mimetype = $file->get_mimetype();
+        }
+
+        return $result_item;
     }
 }

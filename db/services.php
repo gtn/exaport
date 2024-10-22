@@ -1,38 +1,38 @@
 <?php
 
 $functions = array (
-  'block_exaport_delete_item' => 
+  'block_exaport_view_list' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'delete_item',
-    'description' => 'Delete an item from the users portfolio',
-    'type' => 'write',
-  ),
-  'block_exaport_get_views' => 
-  array (
-    'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'get_views',
+    'methodname' => 'view_list',
     'description' => 'Return available views',
     'type' => 'read',
   ),
-  'block_exaport_get_view' => 
+  'block_exaport_view_details' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'get_view',
+    'methodname' => 'view_details',
     'description' => 'Return detailed view',
     'type' => 'read',
   ),
-  'block_exaport_add_view' => 
+  'block_exaport_view_add' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'add_view',
+    'methodname' => 'view_add',
     'description' => 'Add a new view to the users portfolio',
     'type' => 'write',
   ),
-  'block_exaport_delete_view' => 
+  'block_exaport_view_update' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'delete_view',
+    'methodname' => 'view_update',
+    'description' => 'Edit a view from the users portfolio',
+    'type' => 'write',
+  ),
+  'block_exaport_view_delete' => 
+  array (
+    'classname' => '\\block_exaport\\externallib\\externallib',
+    'methodname' => 'view_delete',
     'description' => 'Delete a view from the users portfolio',
     'type' => 'write',
   ),
@@ -43,11 +43,18 @@ $functions = array (
     'description' => 'Return all items from user',
     'type' => 'read',
   ),
-  'block_exaport_add_view_item' => 
+  'block_exaport_view_item_add' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'add_view_item',
+    'methodname' => 'view_item_add',
     'description' => 'Add item to a view',
+    'type' => 'write',
+  ),
+  'block_exaport_view_item_remove' => 
+  array (
+    'classname' => '\\block_exaport\\externallib\\externallib',
+    'methodname' => 'view_item_remove',
+    'description' => 'Remove item from a view',
     'type' => 'write',
   ),
   'block_exaport_login' => 
@@ -57,10 +64,10 @@ $functions = array (
     'description' => 'webservice called through token.php',
     'type' => 'read',
   ),
-  'block_exaport_add_view_items' => 
+  'block_exaport_view_item_add_multiple' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'add_view_items',
+    'methodname' => 'view_item_add_multiple',
     'description' => '',
     'type' => 'write',
   ),

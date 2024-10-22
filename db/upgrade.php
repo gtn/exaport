@@ -1177,8 +1177,20 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2024070301, 'exaport');
     }
 
+    if ($oldversion < 2024102200) {
+
+        // Define field createdinapp to be added to block_exaportview.
+        $table = new xmldb_table('block_exaportview');
+        $field = new xmldb_field('createdinapp', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, '0', 'timemodified');
+
+        // Conditionally launch add field createdinapp.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2024102200, 'exaport');
+    }
 
     return $result;
 }
-
-?>

@@ -54,6 +54,9 @@ function block_exaport_get_files($item, $type) {
     return array();
 }
 
+/**
+ * @deprecated because could result in an array with the value false [ false ], when item_file is not set?!?
+ */
 function block_exaport_get_item_files($item) {
     global $CFG;
 

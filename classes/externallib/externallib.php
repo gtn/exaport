@@ -786,7 +786,7 @@ class externallib extends \external_api {
      * @ws-type-read
      */
     public static function view_details(int $id) {
-        global $CFG, $DB, $USER;
+        global $DB, $USER;
 
         [
             'id' => $id,
@@ -894,7 +894,7 @@ class externallib extends \external_api {
             'externaccess' => 1,
             'externcomment' => 0,
             'hash' => $hash,
-            'createinapp' => 1,
+            'createdinapp' => 1,
         ]);
 
         return ["success" => true, 'id' => $viewid];
@@ -1881,6 +1881,7 @@ class externallib extends \external_api {
         $result_item = (object)[];
         $result_item->id = $item->id;
         $result_item->name = $item->name;
+        $result_item->url = $item->url;
 
         // $result_item->type = $item->type;
         // $result_item->file = "";
@@ -1890,12 +1891,13 @@ class externallib extends \external_api {
         $result_item->description = format_text($item->intro, FORMAT_HTML);
         $result_item->files = [];
 
-        foreach (block_exaport_get_item_files($item) as $file) {
+        foreach (block_exaport_get_item_files_array($item) as $file) {
             $result_file = (object)[];
             $result_file->url = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . g::$USER->id . "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
             // $result_file->isimage = $file->is_valid_image();
             $result_file->filename = $file->get_filename();
             $result_file->mimetype = $file->get_mimetype();
+            $result_item->files[] = $result_file;
         }
 
         return $result_item;

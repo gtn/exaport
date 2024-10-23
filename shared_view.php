@@ -1170,7 +1170,12 @@ if ($is_pdf) {
         throw new moodle_exception('Something wrong with PDF generator ');
         exit;
     }
-    $dompdf->stream('view.pdf'); //To popup pdf as download
+    require_once($CFG->dirroot . '/user/lib.php');
+    $user = \core_user::get_user($view->userid);
+    $userData = user_get_user_details($user, null, array('fullname'));
+    $pdfFileName = 'view-'.$userData['fullname'].'-'.$view->name.'.pdf';
+    $pdfFileName = clean_filename($pdfFileName);
+    $dompdf->stream($pdfFileName); //To popup pdf as download
     exit;
     /**/
 

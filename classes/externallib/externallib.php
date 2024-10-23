@@ -886,6 +886,14 @@ class externallib extends \external_api {
             $hash = substr(md5(microtime()), 3, 8);
         } while ($DB->record_exists("block_exaportview", array("hash" => $hash)));
 
+        // Add default PDF settings
+        // only 'username' enabled
+        $pdfsettings = [
+            'showmetadata' => 1,
+            'showusername' => 1,
+        ];
+        $pdfsettings = serialize($pdfsettings);
+
         $viewid = $DB->insert_record("block_exaportview", [
             'userid' => $USER->id,
             'name' => $name,
@@ -895,6 +903,7 @@ class externallib extends \external_api {
             'externcomment' => 0,
             'hash' => $hash,
             'createdinapp' => 1,
+            'pdf_settings' => $pdfsettings
         ]);
 
         return ["success" => true, 'id' => $viewid];

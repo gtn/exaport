@@ -37,8 +37,6 @@ if (!$view = block_exaport_get_view_from_access($access)) {
     print_error("viewnotfound", "block_exaport");
 }
 
-//$is_pdf = optional_param('ispdf', 0, PARAM_INT);
-
 // Get pdf settings
 $pdf_settings = unserialize($view->pdf_settings);
 
@@ -160,6 +158,11 @@ class pdfsettings_form extends moodleform {
 }
 
 $is_pdf = false;
+// the PDF downloading also depends from url parameters: ispf  or as pdf
+$is_pdf = optional_param('ispdf', 0, PARAM_INT);
+if (!$is_pdf) {
+    $is_pdf = optional_param('aspdf', 0, PARAM_INT);
+}
 
 $pdfForm = new pdfsettings_form($pdfsettingslink->raw_out(false), ['view' => $view]);
 

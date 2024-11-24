@@ -43,17 +43,17 @@ $functions = array (
     'description' => 'Return all items from user',
     'type' => 'read',
   ),
-  'block_exaport_view_item_add' => 
+  'block_exaport_view_block_add' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'view_item_add',
+    'methodname' => 'view_block_add',
     'description' => 'Add item to a view',
     'type' => 'write',
   ),
-  'block_exaport_view_item_remove' => 
+  'block_exaport_view_block_delete' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'view_item_remove',
+    'methodname' => 'view_block_delete',
     'description' => 'Remove item from a view',
     'type' => 'write',
   ),
@@ -64,10 +64,17 @@ $functions = array (
     'description' => 'webservice called through token.php',
     'type' => 'read',
   ),
-  'block_exaport_view_item_add_multiple' => 
+  'block_exaport_view_block_add_multiple' => 
   array (
     'classname' => '\\block_exaport\\externallib\\externallib',
-    'methodname' => 'view_item_add_multiple',
+    'methodname' => 'view_block_add_multiple',
+    'description' => '',
+    'type' => 'write',
+  ),
+  'block_exaport_view_block_sorting' => 
+  array (
+    'classname' => '\\block_exaport\\externallib\\externallib',
+    'methodname' => 'view_block_sorting',
     'description' => '',
     'type' => 'write',
   ),

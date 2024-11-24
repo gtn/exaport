@@ -737,7 +737,7 @@ class externallib extends \external_api {
 
         self::validate_parameters(self::view_list_parameters(), []);
 
-        $views = $DB->get_records("block_exaportview", ["userid" => $USER->id, 'createdinapp' => 1]);
+        $views = $DB->get_records("block_exaportview", ["userid" => $USER->id], 'name'); // , 'createdinapp' => 1]);
 
         $results = array();
 
@@ -803,21 +803,40 @@ class externallib extends \external_api {
         $result = (object)[];
         $result->id = $view->id;
         $result->name = $view->name;
-        $result->description = $view->description;
+        $result->description = $view->description ?: '';
+        $result->advanced_url = (new \moodle_url('/blocks/exaport/views_mod.php', ['action' => 'edit', 'courseid' => 1, 'id' => $view->id]))->out(false);
+        $result->externaccess = $view->externaccess;
         if ($view->externaccess) {
             $result->external_url = block_exaport_get_external_view_url($view);
         }
 
-        $items = $DB->get_records("block_exaportviewblock", array("viewid" => $id));
+        $blocks = $DB->get_records("block_exaportviewblock", array("viewid" => $id), 'positionx, positiony');
 
-        $result->items = array();
-        foreach ($items as $item) {
-            if ($item->type == "item") {
-                $conditions = array("id" => $item->itemid);
-                $itemdb = $DB->get_record("block_exaportitem", $conditions);
+        $result->blocks = [];
+        foreach ($blocks as $block) {
+            $resultBlock = (object)[
+                'id' => $block->id,
+                'type' => $block->type,
+                'itemid' => 0,
+                'title' => $block->block_title,
+                'text' => $block->text,
+                'url' => '',
+                'files' => [],
+            ];
 
-                $result->items[] = static::make_item_result($itemdb);
+            if ($block->type == "item") {
+                $conditions = array("id" => $block->itemid);
+                $item = $DB->get_record("block_exaportitem", $conditions);
+
+                $item = static::make_item_result($item);
+
+                $resultBlock->title = $item->name;
+                $resultBlock->text = $item->description;
+                $resultBlock->url = $item->url;
+                $resultBlock->files = $item->files;
             }
+
+            $result->blocks[] = $resultBlock;
         }
 
         return $result;
@@ -832,13 +851,18 @@ class externallib extends \external_api {
         return new external_single_structure(array(
             'id' => new external_value(PARAM_INT, 'id of view'),
             'name' => new external_value(PARAM_TEXT, 'title of view'),
-            'description' => new external_value(PARAM_RAW, 'description of view'),
+            'description' => new external_value(PARAM_TEXT, 'description of view'),
+            'externaccess' => new external_value(PARAM_BOOL),
             'external_url' => new external_value(PARAM_TEXT, 'url for external (public) access', VALUE_OPTIONAL),
-            'items' => new external_multiple_structure(new external_single_structure([
-                'id' => new external_value(PARAM_INT, 'id of item'),
-                'name' => new external_value(PARAM_TEXT, 'title of item'),
+            'advanced_url' => new external_value(PARAM_TEXT),
+            'blocks' => new external_multiple_structure(new external_single_structure([
+                'id' => new external_value(PARAM_INT, 'id of block'),
+                'type' => new external_value(PARAM_TEXT, 'ENUM(text,item,other) there are other values also possible!'),
+                'itemid' => new external_value(PARAM_INT, 'id of item'),
+                'title' => new external_value(PARAM_TEXT, 'title of item'),
+                'text' => new external_value(PARAM_RAW, 'description of item'),
+
                 'url' => new external_value(PARAM_TEXT, 'url'),
-                'description' => new external_value(PARAM_RAW, 'description of item'),
                 'files' => new external_multiple_structure(new external_single_structure([
                     'filename' => new external_value(PARAM_TEXT, 'filename'),
                     'url' => new external_value(PARAM_URL, 'file url'),
@@ -903,7 +927,7 @@ class externallib extends \external_api {
             'externcomment' => 0,
             'hash' => $hash,
             'createdinapp' => 1,
-            'pdf_settings' => $pdfsettings
+            'pdf_settings' => $pdfsettings,
         ]);
 
         return ["success" => true, 'id' => $viewid];
@@ -931,6 +955,7 @@ class externallib extends \external_api {
             'id' => new external_value(PARAM_INT, 'view id'),
             'name' => new external_value(PARAM_TEXT, 'view title'),
             'description' => new external_value(PARAM_TEXT, 'description'),
+            'externaccess' => new external_value(PARAM_BOOL, '', VALUE_DEFAULT, null),
         ]);
     }
 
@@ -939,17 +964,19 @@ class externallib extends \external_api {
      *
      * @ws-type-write
      */
-    public static function view_update(int $id, string $name, string $description) {
+    public static function view_update(int $id, string $name, string $description, ?bool $externaccess) {
         global $DB, $USER;
 
         [
             'id' => $id,
             'name' => $name,
             'description' => $description,
+            'externaccess' => $externaccess,
         ] = self::validate_parameters(self::view_update_parameters(), [
             'id' => $id,
             'name' => $name,
             'description' => $description,
+            'externaccess' => $externaccess,
         ]);
 
         // check permission
@@ -962,6 +989,10 @@ class externallib extends \external_api {
         $record->id = $id;
         $record->name = $name;
         $record->description = $description;
+        if ($externaccess !== null) {
+            $record->externaccess = $externaccess;
+        }
+
         $DB->update_record("block_exaportview", $record);
 
         return array("success" => true);
@@ -1119,10 +1150,12 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function view_item_add_parameters() {
+    public static function view_block_add_parameters() {
         return new external_function_parameters([
             'viewid' => new external_value(PARAM_INT, 'view id'),
-            'itemid' => new external_value(PARAM_INT, 'item id'),
+            'itemid' => new external_value(PARAM_INT, 'item id', VALUE_DEFAULT, 0),
+            'title' => new external_value(PARAM_TEXT, '', VALUE_DEFAULT, ''),
+            'text' => new external_value(PARAM_TEXT, '', VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -1131,15 +1164,19 @@ class externallib extends \external_api {
      *
      * @ws-type-write
      */
-    public static function view_item_add(int $viewid, int $itemid) {
-        global $CFG, $DB, $USER;
+    public static function view_block_add(int $viewid, int $itemid, string $title, string $text) {
+        global $DB, $USER;
 
         [
             'viewid' => $viewid,
             'itemid' => $itemid,
-        ] = static::validate_parameters(static::view_item_add_parameters(), [
+            'title' => $title,
+            'text' => $text,
+        ] = static::validate_parameters(static::view_block_add_parameters(), [
             'viewid' => $viewid,
             'itemid' => $itemid,
+            'title' => $title,
+            'text' => $text,
         ]);
 
         // check permissions
@@ -1148,23 +1185,45 @@ class externallib extends \external_api {
             'userid' => $USER->id,
         ], '*', MUST_EXIST);
 
-        // check permission
-        $item = $DB->get_record('block_exaportitem', [
-            'id' => $itemid,
-            'userid' => $USER->id,
-        ], '*', MUST_EXIST);
+        $newBlockData = null;
 
-        $existingBlock = $DB->get_record("block_exaportviewblock", array("viewid" => $viewid, "itemid" => $itemid, "type" => "item"));
+        if ($itemid) {
+            // check permission
+            $item = $DB->get_record('block_exaportitem', [
+                'id' => $itemid,
+                'userid' => $USER->id,
+            ], '*', MUST_EXIST);
 
-        if (!$existingBlock) {
-            // only add once
+            $existingBlock = $DB->get_record("block_exaportviewblock", array("viewid" => $viewid, "itemid" => $itemid, "type" => "item"));
 
+            if (!$existingBlock) {
+                // only add once
+
+                $newBlockData = [
+                    "type" => "item",
+                    "itemid" => $itemid,
+                ];
+            }
+        } elseif ($title) {
+            $newBlockData = [
+                'type' => 'text',
+                'block_title' => $title,
+                'text' => $text,
+            ];
+        } else {
+            throw new \moodle_exception('invalidparams - either itemid or header must be set');
+        }
+
+        if ($newBlockData) {
             $query = "SELECT MAX(positiony) from {block_exaportviewblock} WHERE viewid=?";
             $max = $DB->get_field_sql($query, array($viewid));
             $ycoord = intval($max) + 1;
 
-            $blockid = $DB->insert_record("block_exaportviewblock",
-                array("viewid" => $viewid, "itemid" => $itemid, "positionx" => 1, "positiony" => $ycoord, "type" => "item"));
+            $blockid = $DB->insert_record("block_exaportviewblock", [
+                    "viewid" => $viewid,
+                    "positionx" => 1,
+                    "positiony" => $ycoord,
+                ] + $newBlockData);
         }
 
         return array("success" => true);
@@ -1175,7 +1234,7 @@ class externallib extends \external_api {
      *
      * @return external_single_structure
      */
-    public static function view_item_add_returns() {
+    public static function view_block_add_returns() {
         return new external_single_structure(
             array(
                 'success' => new external_value(PARAM_BOOL, 'status'),
@@ -1188,10 +1247,10 @@ class externallib extends \external_api {
      *
      * @return external_function_parameters
      */
-    public static function view_item_remove_parameters() {
+    public static function view_block_delete_parameters() {
         return new external_function_parameters([
             'viewid' => new external_value(PARAM_INT, 'view id'),
-            'itemid' => new external_value(PARAM_INT, 'item id'),
+            'blockid' => new external_value(PARAM_INT, 'block id'),
         ]);
     }
 
@@ -1200,15 +1259,15 @@ class externallib extends \external_api {
      *
      * @ws-type-write
      */
-    public static function view_item_remove($viewid, $itemid) {
+    public static function view_block_delete($viewid, $blockid) {
         global $DB, $USER;
 
         [
             'viewid' => $viewid,
-            'itemid' => $itemid,
-        ] = static::validate_parameters(static::view_item_remove_parameters(), [
+            'blockid' => $blockid,
+        ] = static::validate_parameters(static::view_block_delete_parameters(), [
             'viewid' => $viewid,
-            'itemid' => $itemid,
+            'blockid' => $blockid,
         ]);
 
         // check permissions
@@ -1217,8 +1276,7 @@ class externallib extends \external_api {
             'userid' => $USER->id,
         ], '*', MUST_EXIST);
 
-        $ycoord = $DB->get_field_sql("SELECT MAX(positiony) from {block_exaportviewblock} WHERE viewid=? AND itemid=?", [$viewid, $itemid]);
-        $DB->delete_records("block_exaportviewblock", array("viewid" => $viewid, "itemid" => $itemid, "positiony" => $ycoord));
+        $DB->delete_records("block_exaportviewblock", array("viewid" => $viewid, "id" => $blockid));
 
         return array("success" => true);
     }
@@ -1228,7 +1286,7 @@ class externallib extends \external_api {
      *
      * @return external_single_structure
      */
-    public static function view_item_remove_returns() {
+    public static function view_block_delete_returns() {
         return new external_single_structure(
             array(
                 'success' => new external_value(PARAM_BOOL, 'status'),
@@ -1852,9 +1910,9 @@ class externallib extends \external_api {
         );
     }
 
-    public static function view_item_add_multiple_parameters() {
+    public static function view_block_add_multiple_parameters() {
         return new external_function_parameters(array(
-            'portfolioid' => new external_value(PARAM_INT),
+            'viewid' => new external_value(PARAM_INT),
             'itemids' => new external_multiple_structure(new external_value(PARAM_INT)),
         ));
     }
@@ -1862,17 +1920,17 @@ class externallib extends \external_api {
     /**
      * @ws-type-write
      */
-    public static function view_item_add_multiple(int $portfolioid, array $itemids) {
+    public static function view_block_add_multiple(int $viewid, array $itemids) {
         [
-            'portfolioid' => $portfolioid,
+            'viewid' => $viewid,
             'itemids' => $itemids,
-        ] = static::validate_parameters(static::view_item_add_multiple_parameters(), [
-            'portfolioid' => $portfolioid,
+        ] = static::validate_parameters(static::view_block_add_multiple_parameters(), [
+            'viewid' => $viewid,
             'itemids' => $itemids,
         ]);
 
         foreach ($itemids as $itemid) {
-            static::view_item_add($portfolioid, $itemid);
+            static::view_block_add($viewid, $itemid, '', '');
         }
 
         return [
@@ -1880,7 +1938,7 @@ class externallib extends \external_api {
         ];
     }
 
-    public static function view_item_add_multiple_returns() {
+    public static function view_block_add_multiple_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'status'),
         ]);
@@ -1910,5 +1968,59 @@ class externallib extends \external_api {
         }
 
         return $result_item;
+    }
+
+    public static function view_block_sorting_parameters() {
+        return new external_function_parameters(array(
+            'viewid' => new external_value(PARAM_INT),
+            'blockids' => new external_multiple_structure(
+                new external_value(PARAM_INT)
+            ),
+        ));
+    }
+
+    /**
+     * @ws-type-write
+     */
+    public static function view_block_sorting(int $viewid, array $blockids) {
+        global $DB, $USER;
+
+        [
+            'viewid' => $viewid,
+            'blockids' => $blockids,
+        ] = static::validate_parameters(static::view_block_sorting_parameters(), [
+            'viewid' => $viewid,
+            'blockids' => $blockids,
+        ]);
+
+        $view = $DB->get_record('block_exaportview', [
+            'id' => $viewid,
+            'userid' => $USER->id,
+        ], '*', MUST_EXIST);
+
+        $blocks = $DB->get_records("block_exaportviewblock", array("viewid" => $viewid));
+
+        $sorting = 1;
+        foreach ($blockids as $blockid) {
+            if (empty($blocks[$blockid])) {
+                // item not in this learningpath
+                continue;
+            }
+
+            $DB->update_record('block_exaportviewblock', [
+                'id' => $blockid,
+                'positiony' => $sorting++,
+            ]);
+        }
+
+        return [
+            'success' => true,
+        ];
+    }
+
+    public static function view_block_sorting_returns() {
+        return new external_single_structure(array(
+            'success' => new external_value(PARAM_BOOL, 'status'),
+        ));
     }
 }

@@ -827,6 +827,10 @@ class externallib extends \external_api {
             if ($block->type == "item") {
                 $conditions = array("id" => $block->itemid);
                 $item = $DB->get_record("block_exaportitem", $conditions);
+                if (!$item) {
+                    // item missing, if there is incorrect db state
+                    continue;
+                }
 
                 $item = static::make_item_result($item);
 

@@ -27,10 +27,6 @@ if ($action == "add") {
     $type = "title";
 }
 
-if (!confirm_sesskey()) {
-    print_error("badsessionkey", "block_exaport");
-}
-
 $url = '/blocks/exaport/views_mod.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
@@ -67,11 +63,15 @@ if ($id) {
 }
 
 if ($view && $action == 'userlist') {
+    require_sesskey();
+
     echo json_encode(exaport_get_shareable_courses_with_users_for_view($view->id));
     exit;
 }
 
 if ($view && $action == 'grouplist') {
+    require_sesskey();
+
     $sharedgroups = exaport_get_view_shared_groups($view->id);
 
     $groupgroups = block_exaport_get_shareable_groups_for_json();
@@ -85,10 +85,12 @@ if ($view && $action == 'grouplist') {
 }
 
 $returnurltolist = $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $courseid;
-$returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id . '&sesskey=' . sesskey() . '&action=edit';
+$returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id .  '&action=edit';
 
 // Delete item.
 if ($action == 'delete') {
+    require_sesskey();
+
     if (!$view) {
         print_error("viewnotfound", "block_exaport");
     }
@@ -629,8 +631,7 @@ if ($editform->is_cancelled()) {
             break;
     }
 
-    $returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $dbview->id . '&sesskey=' . sesskey() .
-        '&action=edit';
+    $returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $dbview->id . '&action=edit';
 
     redirect($returnurl, $message);
 }

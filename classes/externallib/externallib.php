@@ -840,6 +840,12 @@ class externallib extends \external_api {
                 $resultBlock->files = $item->files;
             }
 
+            if ($block->type == 'headline') {
+                // bei headline steht die headline im text feld, stattdessen in das title feld verschieben
+                $resultBlock->title = $resultBlock->title ?: $resultBlock->text;
+                $resultBlock->text = '';
+            }
+
             $result->blocks[] = $resultBlock;
         }
 

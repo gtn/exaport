@@ -867,7 +867,7 @@ class externallib extends \external_api {
             'advanced_url' => new external_value(PARAM_TEXT),
             'blocks' => new external_multiple_structure(new external_single_structure([
                 'id' => new external_value(PARAM_INT, 'id of block'),
-                'type' => new external_value(PARAM_TEXT, 'ENUM(text,item,other) there are other values also possible!'),
+                'type' => new external_value(PARAM_TEXT, 'ENUM(item,headline,text,other) there are other values also possible!'),
                 'itemid' => new external_value(PARAM_INT, 'id of item'),
                 'title' => new external_value(PARAM_TEXT, 'title of item'),
                 'text' => new external_value(PARAM_RAW, 'description of item'),
@@ -1163,6 +1163,7 @@ class externallib extends \external_api {
     public static function view_block_add_parameters() {
         return new external_function_parameters([
             'viewid' => new external_value(PARAM_INT, 'view id'),
+            'type' => new external_value(PARAM_TEXT, 'ENUM(item,headline,text)'),
             'itemid' => new external_value(PARAM_INT, 'item id', VALUE_DEFAULT, 0),
             'title' => new external_value(PARAM_TEXT, '', VALUE_DEFAULT, ''),
             'text' => new external_value(PARAM_TEXT, '', VALUE_DEFAULT, ''),
@@ -1174,16 +1175,18 @@ class externallib extends \external_api {
      *
      * @ws-type-write
      */
-    public static function view_block_add(int $viewid, int $itemid, string $title, string $text) {
+    public static function view_block_add(int $viewid, string $type, int $itemid, string $title, string $text) {
         global $DB, $USER;
 
         [
             'viewid' => $viewid,
+            'type' => $type,
             'itemid' => $itemid,
             'title' => $title,
             'text' => $text,
         ] = static::validate_parameters(static::view_block_add_parameters(), [
             'viewid' => $viewid,
+            'type' => $type,
             'itemid' => $itemid,
             'title' => $title,
             'text' => $text,
@@ -1197,7 +1200,12 @@ class externallib extends \external_api {
 
         $newBlockData = null;
 
-        if ($itemid) {
+        if ($type == 'item') {
+            // check values
+            if ($title || $text) {
+                throw new \moodle_exception('invalidparams - title and text must be empty for item');
+            }
+
             // check permission
             $item = $DB->get_record('block_exaportitem', [
                 'id' => $itemid,
@@ -1214,7 +1222,21 @@ class externallib extends \external_api {
                     "itemid" => $itemid,
                 ];
             }
-        } elseif ($title) {
+        } elseif ($type == 'headline') {
+            if ($itemid || $text) {
+                throw new \moodle_exception('invalidparams - itemid and text must be empty for headline');
+            }
+
+            $newBlockData = [
+                'type' => 'headline',
+                'block_title' => '',
+                'text' => $title,
+            ];
+        } elseif ($type == 'text') {
+            if ($itemid) {
+                throw new \moodle_exception('invalidparams - itemid must be empty for text');
+            }
+
             $newBlockData = [
                 'type' => 'text',
                 'block_title' => $title,

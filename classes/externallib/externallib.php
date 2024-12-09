@@ -1962,7 +1962,7 @@ class externallib extends \external_api {
         ]);
 
         foreach ($itemids as $itemid) {
-            static::view_block_add($viewid, $itemid, '', '');
+            static::view_block_add($viewid, 'item', $itemid, '', '');
         }
 
         return [

@@ -869,20 +869,14 @@ class externallib extends \external_api {
                 'id' => new external_value(PARAM_INT, 'id of block'),
                 'type' => new external_value(PARAM_TEXT, 'ENUM(item,headline,text,other) there are other values also possible!'),
                 'itemid' => new external_value(PARAM_INT, 'id of item'),
-                'title' => new external_value(PARAM_TEXT, 'title of item'),
-                'text' => new external_value(PARAM_RAW, 'description of item'),
-
+                'title' => new external_value(PARAM_TEXT, 'title'),
+                'text' => new external_value(PARAM_RAW, 'description'),
                 'url' => new external_value(PARAM_TEXT, 'url'),
                 'files' => new external_multiple_structure(new external_single_structure([
                     'filename' => new external_value(PARAM_TEXT, 'filename'),
                     'url' => new external_value(PARAM_URL, 'file url'),
                     'mimetype' => new external_value(PARAM_TEXT, 'mime type for file'),
                 ])),
-                // 'type' => new external_value(PARAM_TEXT, 'type of item ENUM(note,file,link)'),
-                // 'filename' => new external_value(PARAM_TEXT, 'title of item'),
-                // 'file' => new external_value(PARAM_URL, 'file url'),
-                // 'isimage' => new external_value(PARAM_BOOL, 'true if file is image'),
-                // 'mimetype' => new external_value(PARAM_TEXT, 'mimetype'),
             ])),
         ));
     }

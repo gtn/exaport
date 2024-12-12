@@ -1,3 +1,9 @@
+### v4.6.7 (2024121200) ###
+*webservices dakora+ bugfixes
+*pdf feature for shared view
+*show view page in diggr+
+*new diggr+ webservices
+
 ### v4.6.7 (2024101700) ###
 *scorm export rework
 

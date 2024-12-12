@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 // Called from pluginfile.php
 // to serve the file of a plugin
@@ -35,7 +35,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
     $is_for_pdf = false;
     $pdfforuserid = 0;
 
-    if ($p = array_search('forPdf', $args) ) {
+    if ($p = array_search('forPdf', $args)) {
         // added to link of the file: /forPdf/--hash--/--viewid--/--curruserid--
         $pdfforuserid = array_pop($args);
         $viewid = array_pop($args);
@@ -143,9 +143,9 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             }
 
             // View has personal information?
-            $sql = "SELECT b.* FROM {block_exaportviewblock} b".
-                    " WHERE b.viewid=? AND".
-                    " b.type='personal_information'";
+            $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
+                " WHERE b.viewid=? AND" .
+                " b.type='personal_information'";
             if (!$DB->record_exists_sql($sql, array($view->id))) {
                 return false;
             }
@@ -153,7 +153,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             // Get file.
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', 'personal_information', $view->userid,
-                    '/', $filename);
+                '/', $filename);
 
             // Serve file.
             if ($file) {
@@ -168,7 +168,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             // Get file.
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/',
-                    $filename);
+                $filename);
 
             // Serve file.
             if ($file) {
@@ -184,7 +184,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             // Get file.
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'category_icon', $categoryid, '/',
-                    $filename);
+                $filename);
 
             // Serve file.
             if ($file) {
@@ -207,7 +207,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
                 $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
                     " WHERE b.viewid=? AND" .
-                    " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype IN ('".implode("', '", $resumeitemtypes)."')";
+                    " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype IN ('" . implode("', '", $resumeitemtypes) . "')";
                 if (!$DB->record_exists_sql($sql, array($view->id))) {
                     print_error("viewnotfound", "block_exaport");
                 }
@@ -227,7 +227,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                     // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
                     $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
                         " WHERE b.viewid=? AND" .
-                        " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype IN ('".implode("', '", $resumeitemtypes)."')";
+                        " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype IN ('" . implode("', '", $resumeitemtypes) . "')";
                     if (!$DB->record_exists_sql($sql, array($view->id))) {
                         print_error("viewnotfound", "block_exaport");
                     }

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
 require_login($courseid);
@@ -24,8 +24,8 @@ block_exaport_setup_default_categories();
 
 $url = '/blocks/exaport/category.php';
 $PAGE->set_url($url, ['courseid' => $courseid,
-        'action' => optional_param('action', '', PARAM_ALPHA),
-        'id' => optional_param('id', '', PARAM_INT)]);
+    'action' => optional_param('action', '', PARAM_ALPHA),
+    'id' => optional_param('id', '', PARAM_INT)]);
 
 // Get userlist for sharing category.
 if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {
@@ -37,8 +37,8 @@ if (optional_param('action', '', PARAM_ALPHA) == 'grouplist') {
     $id = required_param('id', PARAM_INT);
 
     $category = $DB->get_record("block_exaportcate", array(
-            'id' => $id,
-            'userid' => $USER->id
+        'id' => $id,
+        'userid' => $USER->id,
     ));
     if (!$category) {
         throw new \block_exaport\moodle_exception('category_not_found');
@@ -48,8 +48,8 @@ if (optional_param('action', '', PARAM_ALPHA) == 'grouplist') {
     foreach ($groupgroups as $groupgroup) {
         foreach ($groupgroup->groups as $group) {
             $group->shared_to = $DB->record_exists('block_exaportcatgroupshar', [
-                    'catid' => $category->id,
-                    'groupid' => $group->id
+                'catid' => $category->id,
+                'groupid' => $group->id,
             ]);
         }
     }
@@ -59,14 +59,14 @@ if (optional_param('action', '', PARAM_ALPHA) == 'grouplist') {
 
 if (optional_param('action', '', PARAM_ALPHA) == 'addstdcat') {
     block_exaport_import_categories('lang_categories');
-    redirect('view_items.php?courseid='.$courseid);
+    redirect('view_items.php?courseid=' . $courseid);
 }
 if (optional_param('action', '', PARAM_ALPHA) == 'movetocategory') {
     confirm_sesskey();
 
     $category = $DB->get_record("block_exaportcate", array(
-            'id' => required_param('id', PARAM_INT),
-            'userid' => $USER->id
+        'id' => required_param('id', PARAM_INT),
+        'userid' => $USER->id,
     ));
     if (!$category) {
         die(block_exaport_get_string('category_not_found'));
@@ -76,9 +76,9 @@ if (optional_param('action', '', PARAM_ALPHA) == 'movetocategory') {
         die('target category not found');
     }
 
-    $DB->update_record('block_exaportcate', (object) array(
-            'id' => $category->id,
-            'pid' => $targetcategory->id
+    $DB->update_record('block_exaportcate', (object)array(
+        'id' => $category->id,
+        'pid' => $targetcategory->id,
     ));
 
     echo 'ok';
@@ -89,8 +89,8 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
     $id = required_param('id', PARAM_INT);
 
     $category = $DB->get_record("block_exaportcate", array(
-            'id' => $id,
-            'userid' => $USER->id
+        'id' => $id,
+        'userid' => $USER->id,
     ));
     if (!$category) {
         throw new \block_exaport\moodle_exception('category_not_found');
@@ -127,14 +127,14 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
             $message = "Could not delete your record";
         } else {
             block_exaport_add_to_log($courseid, "bookmark", "delete category", "", $category->id);
-            redirect('view_items.php?courseid='.$courseid.'&categoryid='.$category->pid);
+            redirect('view_items.php?courseid=' . $courseid . '&categoryid=' . $category->pid);
         }
     }
 
     $optionsyes = array('action' => 'delete', 'courseid' => $courseid, 'confirm' => 1, 'sesskey' => sesskey(), 'id' => $id);
     $optionsno = array(
-            'courseid' => $courseid,
-            'categoryid' => optional_param('back', '', PARAM_TEXT) == 'same' ? $category->id : $category->pid
+        'courseid' => $courseid,
+        'categoryid' => optional_param('back', '', PARAM_TEXT) == 'same' ? $category->id : $category->pid,
     );
 
     $strbookmarks = get_string("myportfolio", "block_exaport");
@@ -144,8 +144,8 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 
     echo '<br />';
     echo $OUTPUT->confirm(get_string("deletecategoryconfirm", "block_exaport", $category),
-            new moodle_url('category.php', $optionsyes),
-            new moodle_url('view_items.php', $optionsno));
+        new moodle_url('category.php', $optionsyes),
+        new moodle_url('view_items.php', $optionsno));
     echo block_exaport_wrapperdivend();
     $OUTPUT->footer();
 
@@ -191,75 +191,75 @@ class simplehtml_form extends block_exaport_moodleform {
         $mform->add_exaport_help_button('name', 'forms.category.name');
 
         $mform->addElement('filemanager',
-                'iconfile',
-                get_string('iconfile', 'block_exaport'),
-                null,
-                array('subdirs' => false,
-                        'maxfiles' => 1,
-                        'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
-                        'accepted_types' => array('image', 'web_image')));
+            'iconfile',
+            get_string('iconfile', 'block_exaport'),
+            null,
+            array('subdirs' => false,
+                'maxfiles' => 1,
+                'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
+                'accepted_types' => array('image', 'web_image')));
         $mform->add_exaport_help_button('iconfile', 'forms.category.iconfile');
 
-//        if (extension_loaded('gd') && function_exists('gd_info')) {
+        //        if (extension_loaded('gd') && function_exists('gd_info')) {
         // changed into Fontawesome and Javascript
-            $mform->addElement('advcheckbox',
-                    'iconmerge',
-                    get_string('iconfile_merge', 'block_exaport'),
-                    get_string('iconfile_merge_description', 'block_exaport'),
-                    array('group' => 1),
-                    array(0, 1));
-            $mform->add_exaport_help_button('iconmerge', 'forms.category.iconmerge');
+        $mform->addElement('advcheckbox',
+            'iconmerge',
+            get_string('iconfile_merge', 'block_exaport'),
+            get_string('iconfile_merge_description', 'block_exaport'),
+            array('group' => 1),
+            array(0, 1));
+        $mform->add_exaport_help_button('iconmerge', 'forms.category.iconmerge');
 
 
-//        };
+        //        };
 
         // Sharing.
         if (has_capability('block/exaport:shareintern', context_system::instance())) {
             $mform->addElement('checkbox', 'internshare', get_string('share', 'block_exaport'));
             $mform->setType('internshare', PARAM_INT);
             $mform->add_exaport_help_button('internshare', 'forms.category.internshare');
-            $mform->addElement('html', '<div id="internaccess-settings" class="fitem"">'.
-                    '<div class="fitemtitle"></div><div class="felement">');
+            $mform->addElement('html', '<div id="internaccess-settings" class="fitem"">' .
+                '<div class="fitemtitle"></div><div class="felement">');
 
             $mform->addElement('html', '<div style="padding: 4px 0;"><table width=100%>');
             // Share to all.
             if (block_exaport_shareall_enabled()) {
                 $mform->addElement('html', '<tr><td>');
-                $mform->addElement('html', '<input type="radio" name="shareall" value="1"'.
-                        ($category->shareall == 1 ? ' checked="checked"' : '').'/>');
-                $mform->addElement('html', '</td><td>'.get_string('internalaccessall', 'block_exaport').'</td></tr>');
+                $mform->addElement('html', '<input type="radio" name="shareall" value="1"' .
+                    ($category->shareall == 1 ? ' checked="checked"' : '') . '/>');
+                $mform->addElement('html', '</td><td>' . get_string('internalaccessall', 'block_exaport') . '</td></tr>');
                 $mform->setType('shareall', PARAM_INT);
                 $mform->addElement('html', '</td></tr>');
             }
 
             // Share to users.
             $mform->addElement('html', '<tr><td>');
-            $mform->addElement('html', '<input type="radio" name="shareall" value="0"'.
-                    (!$category->shareall ? ' checked="checked"' : '').'/>');
-            $mform->addElement('html', '</td><td>'.get_string('internalaccessusers', 'block_exaport').'</td></tr>');
+            $mform->addElement('html', '<input type="radio" name="shareall" value="0"' .
+                (!$category->shareall ? ' checked="checked"' : '') . '/>');
+            $mform->addElement('html', '</td><td>' . get_string('internalaccessusers', 'block_exaport') . '</td></tr>');
             $mform->addElement('html', '</td></tr>');
             if ($category->id > 0) {
                 $sharedusers = $DB->get_records_menu('block_exaportcatshar',
-                        array("catid" => $category->id),
-                        null,
-                        'userid, userid AS tmp');
+                    array("catid" => $category->id),
+                    null,
+                    'userid, userid AS tmp');
                 $mform->addElement('html', '<script> var sharedusersarr = [];');
                 foreach ($sharedusers as $i => $user) {
-                    $mform->addElement('html', 'sharedusersarr['.$i.'] = '.$user.';');
+                    $mform->addElement('html', 'sharedusersarr[' . $i . '] = ' . $user . ';');
                 }
                 $mform->addElement('html', '</script>');
             }
-            $mform->addElement('html', '<tr id="internaccess-users"><td></td>'.
-                    '<td><div id="sharing-userlist">userlist</div></td></tr>');
+            $mform->addElement('html', '<tr id="internaccess-users"><td></td>' .
+                '<td><div id="sharing-userlist">userlist</div></td></tr>');
 
             // Share to groups.
             $mform->addElement('html', '<tr><td>');
-            $mform->addElement('html', '<input type="radio" name="shareall" value="2"'.
-                    ($category->shareall == 2 ? ' checked="checked"' : '').'/>');
-            $mform->addElement('html', '</td><td>'.get_string('internalaccessgroups', 'block_exaport').'</td></tr>');
+            $mform->addElement('html', '<input type="radio" name="shareall" value="2"' .
+                ($category->shareall == 2 ? ' checked="checked"' : '') . '/>');
+            $mform->addElement('html', '</td><td>' . get_string('internalaccessgroups', 'block_exaport') . '</td></tr>');
             $mform->addElement('html', '</td></tr>');
-            $mform->addElement('html', '<tr id="internaccess-groups"><td></td>'.
-                    '<td><div id="sharing-grouplist">grouplist</div></td></tr>');
+            $mform->addElement('html', '<tr id="internaccess-groups"><td></td>' .
+                '<td><div id="sharing-grouplist">grouplist</div></td></tr>');
             $mform->addElement('html', '</table></div>');
             $mform->addElement('html', '</div></div>');
         };
@@ -281,7 +281,7 @@ if ($mform->is_cancelled()) {
     $same = optional_param('back', '', PARAM_TEXT);
     $id = optional_param('id', 0, PARAM_INT);
     $pid = optional_param('pid', 0, PARAM_INT);
-    redirect('view_items.php?courseid='.$courseid.'&categoryid='.($same == 'same' ? $id : $pid));
+    redirect('view_items.php?courseid=' . $courseid . '&categoryid=' . ($same == 'same' ? $id : $pid));
 } else if ($newentry = $mform->get_data()) {
     require_sesskey();
     $newentry->userid = $USER->id;
@@ -325,8 +325,8 @@ if ($mform->is_cancelled()) {
                 continue;
             }
             $DB->insert_record("block_exaportcatgroupshar", [
-                    'catid' => $newentry->id,
-                    'groupid' => $groupid,
+                'catid' => $newentry->id,
+                'groupid' => $groupid,
             ]);
         }
     }
@@ -412,15 +412,15 @@ if ($mform->is_cancelled()) {
     $filesizecheck = block_exaport_get_maxfilesize_by_draftid_check($newentry->iconfile);
     if ($userquotecheck && $filesizecheck) {
         file_save_draft_area_files($newentry->iconfile,
-                $context->id,
-                'block_exaport',
-                'category_icon',
-                $newentry->id,
-                array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+            $context->id,
+            'block_exaport',
+            'category_icon',
+            $newentry->id,
+            array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
     };
 
-    redirect('view_items.php?courseid='.$courseid.'&categoryid='.
-            ($newentry->back == 'same' ? $newentry->id : $newentry->pid));
+    redirect('view_items.php?courseid=' . $courseid . '&categoryid=' .
+        ($newentry->back == 'same' ? $newentry->id : $newentry->pid));
 } else {
     block_exaport_print_header("myportfolio");
 
@@ -449,11 +449,11 @@ if ($mform->is_cancelled()) {
     $draftitemid = file_get_submitted_draft_itemid('iconfile');
     $context = context_user::instance($USER->id);
     file_prepare_draft_area($draftitemid,
-            $context->id,
-            'block_exaport',
-            'category_icon',
-            $category->id,
-            array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+        $context->id,
+        'block_exaport',
+        'category_icon',
+        $category->id,
+        array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
     $category->iconfile = $draftitemid;
 
     $mform->set_data($category);
@@ -464,10 +464,10 @@ if ($mform->is_cancelled()) {
 
     // Translations.
     $translations = array(
-            'name', 'role', 'nousersfound',
-            'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
-            'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
-            'notify', 'checkall',
+        'name', 'role', 'nousersfound',
+        'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
+        'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
+        'notify', 'checkall',
     );
 
     $translations = array_flip($translations);

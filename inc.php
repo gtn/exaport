@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__."/../../config.php");
+require_once(__DIR__ . "/../../config.php");
 // Get rid 'warning' messages for ajax request (regardless moodle configuration)
 if (
     basename($_SERVER['SCRIPT_NAME']) == 'blocks.json.php' // ajax requests to work with blocks
@@ -26,4 +26,4 @@ if (
     @error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
     @ini_set('display_errors', '5');
 }
-require_once(__DIR__.'/lib/lib.php');
+require_once(__DIR__ . '/lib/lib.php');

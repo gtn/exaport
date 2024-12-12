@@ -35,10 +35,10 @@ $params = new stdClass();
 $params->level = 0;
 
 header('Content-Type: text/plain');
-$serverurl = $domainname.'/webservice/rest/server.php'.'?wstoken='.$token.'&wsfunction='.$functionname;
+$serverurl = $domainname . '/webservice/rest/server.php' . '?wstoken=' . $token . '&wsfunction=' . $functionname;
 require_once('./curl.php');
 $curl = new curl;
-$resp = $curl->post($serverurl.$restformat, $params);
+$resp = $curl->post($serverurl . $restformat, $params);
 echo "
 
 
@@ -49,10 +49,10 @@ $functionname = 'block_exaport_get_competencies_by_item';
 $params = new stdClass();
 $params->itemid = 2;
 $restformat = "";
-$serverurl = $domainname.'/webservice/rest/server.php'.'?wstoken='.$token.'&wsfunction='.$functionname;
+$serverurl = $domainname . '/webservice/rest/server.php' . '?wstoken=' . $token . '&wsfunction=' . $functionname;
 require_once('./curl.php');
 $curl = new curl;
-$resp = $curl->post($serverurl.$restformat, $params);
+$resp = $curl->post($serverurl . $restformat, $params);
 /*
 $functionname = 'block_exaport_add_item';
 

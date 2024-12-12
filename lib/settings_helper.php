@@ -48,11 +48,11 @@ class block_exaport_layout_configtable extends admin_setting_configtext {
             ['id' => 'header_fontSize']);
         $row->cells[] = html_writer::checkbox('s__block_exaport_layout_settings[headerBold]', '1', (@$data['header_fontSize'] ? true : false));
         $row->cells[] = html_writer::select(
-            block_exaport_layout_borderwidths(),
-            's__block_exaport_layout_settings[header_borderWidth]',
-            (@$data['header_borderWidth'] > -1 ? $data['header_borderWidth'] : -1),
-            false,
-            ['id' => 'header_borderWidth']).'<br>'.html_writer::tag('small', block_exaport_get_string('layout_settings_border_width_only_bottom'));
+                block_exaport_layout_borderwidths(),
+                's__block_exaport_layout_settings[header_borderWidth]',
+                (@$data['header_borderWidth'] > -1 ? $data['header_borderWidth'] : -1),
+                false,
+                ['id' => 'header_borderWidth']) . '<br>' . html_writer::tag('small', block_exaport_get_string('layout_settings_border_width_only_bottom'));
         $table->data[] = $row;
         // content options
         $row = new html_table_row();
@@ -114,7 +114,7 @@ class block_exaport_layout_configtable extends admin_setting_configtext {
                 $e->parentNode->removeChild($e);
             }
         }
-//         Change col-sm-9 -> col-sm-12 if it is here.
+        //         Change col-sm-9 -> col-sm-12 if it is here.
         $template = $doc->saveHTML($doc->documentElement);
         return $template;
     }

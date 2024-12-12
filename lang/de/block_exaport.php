@@ -633,35 +633,35 @@ $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = '';
 $string['forms.item.project_description'] = 'Der Grund hinter diesem Projekt';
 $string['forms.item.project_description_help'] = '<strong>Erkläre kurz den Zweck deiner Arbeit:</strong>
-			<ul> 
-				<li>Welches Problem wurde damit angesprochen?</li> 
-				<li>Welche Fähigkeiten wolltest du entwickeln?</li> 
+			<ul>
+				<li>Welches Problem wurde damit angesprochen?</li>
+				<li>Welche Fähigkeiten wolltest du entwickeln?</li>
 				<li>Was war der Kontext?</li>
 			</ul>';
 $string['forms.item.project_description_editor'] = 'Der Grund hinter diesem Projekt';
 $string['forms.item.project_description_editor_help'] = '<strong>Erkläre kurz den Zweck deiner Arbeit:</strong>
-			<ul> 
-				<li>Welches Problem wurde angesprochen?</li> 
-				<li>Welche Fähigkeiten wolltest du entwickeln?</li> 
+			<ul>
+				<li>Welches Problem wurde angesprochen?</li>
+				<li>Welche Fähigkeiten wolltest du entwickeln?</li>
 				<li>Was war der Kontext?</li>
 			</ul>';
 $string['forms.item.project_process'] = 'Umsetzung des Projekts';
 $string['forms.item.project_process_help'] = '<strong>Beschreibe deinen Weg:</strong>
-			<ul> 
-				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li> 
-				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li> 
+			<ul>
+				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li>
+				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li>
 				<li>Welche Ressourcen hast du genutzt?</li>
 			</ul>';
 $string['forms.item.project_process_editor'] = 'Umsetzung des Projekts';
 $string['forms.item.project_process_editor_help'] = '<strong>Beschreibe deinen Weg:</strong>
-			<ul> 
-				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li> 
-				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li> 
+			<ul>
+				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li>
+				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li>
 				<li>Welche Ressourcen hast du genutzt?</li>
 			</ul>';
 $string['forms.item.project_result'] = 'Ergebnisse und Erkenntnisse';
 $string['forms.item.project_result_help'] = '<strong>Fasse die Ergebnisse deines Projekts kurz zusammen:</strong>
-			<ul> 
+			<ul>
 				<li>Was hast du erreicht?</li>
 				<li>Welche Fähigkeiten und Kompetenzen hast du durch diese Arbeit entwickelt oder gestärkt?</li>
 				<li>Was hast du über dich und deine Fähigkeiten gelernt?</li>
@@ -669,7 +669,7 @@ $string['forms.item.project_result_help'] = '<strong>Fasse die Ergebnisse deines
 			</ul>';
 $string['forms.item.project_result_editor'] = 'Ergebnisse und Erkenntnisse';
 $string['forms.item.project_result_editor_help'] = '<strong>Fasse die Ergebnisse deines Projekts kurz zusammen:</strong>
-			<ul> 
+			<ul>
 				<li>Was hast du erreicht?</li>
 				<li>Welche Fähigkeiten und Kompetenzen hast du durch diese Arbeit entwickelt oder gestärkt?</li>
 				<li>Was hast du über dich und deine Fähigkeiten gelernt?</li>
@@ -800,8 +800,8 @@ $string['whyEportfolio_description'] = '<h4>Lass deine harte Arbeit nicht versch
 					Es ermöglicht dir, Arbeitsproben zu zeigen und dein <strong>Talent schnell und effektiv zu demonstrieren</strong>.
 					Letztendlich ist dein ePortfolio ein mächtiges Werkzeug, um deine <strong>Qualifikationen hervorzuheben</strong> und dich abzuheben.
 				</p>
-				<p><strong>Denke daran, dass verschiedene Rollen unterschiedliche Arten von ePortfolios erfordern können.</strong> 
-					Einige Schlüsselelemente bleiben jedoch konstant. 
+				<p><strong>Denke daran, dass verschiedene Rollen unterschiedliche Arten von ePortfolios erfordern können.</strong>
+					Einige Schlüsselelemente bleiben jedoch konstant.
 					Mit <strong>Exabis ePortfolio</strong> kannst du <strong>mehrere Ansichten erstellen</strong>, die auf bestimmte Positionen, Jobchancen oder andere Zwecke zugeschnitten sind.
 				</p>
 				<br>

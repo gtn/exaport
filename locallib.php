@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once($CFG->libdir.'/portfolio/caller.php');
+require_once($CFG->libdir . '/portfolio/caller.php');
 
 class exaport_portfolio_caller extends portfolio_module_caller_base {
 
@@ -39,11 +39,11 @@ class exaport_portfolio_caller extends portfolio_module_caller_base {
      */
     public static function expected_callbackargs() {
         return array(
-                'cmid' => false,
-                'aid' => false,
-                'area' => false,
-                'component' => false,
-                'fileid' => false,
+            'cmid' => false,
+            'aid' => false,
+            'area' => false,
+            'component' => false,
+            'fileid' => false,
         );
     }
 
@@ -73,8 +73,8 @@ class exaport_portfolio_caller extends portfolio_module_caller_base {
     /**
      * Prepares the package up before control is passed to the portfolio plugin.
      *
-     * @throws portfolio_caller_exception
      * @return mixed
+     * @throws portfolio_caller_exception
      */
     public function prepare_package() {
         return $this->prepare_package_file();

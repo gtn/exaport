@@ -38,13 +38,13 @@ function block_exaport_print_extern_item($item, $access) {
             if (!$file) {
                 continue; // Is here possible that $file is null?
             }
-            $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=".$access."&itemid=".$item->id.'&inst='.$fileindex);
+            $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=" . $access . "&itemid=" . $item->id . '&inst=' . $fileindex);
             if ($file->is_valid_image()) { // Image attachments don't get printed as links.
-                $boxcontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"".s($item->name)."\" /></div>";
+                $boxcontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . s($item->name) . "\" /></div>";
             } else {
                 $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-                $boxcontent .= "<p class=\"filelink\">".$icon.' '.
-                        $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl))."</p>";
+                $boxcontent .= "<p class=\"filelink\">" . $icon . ' ' .
+                    $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
                 if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
                     // Videoblock.
                     $boxcontent .= '
@@ -53,7 +53,7 @@ function block_exaport_print_extern_item($item, $access) {
                             <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
                                         controls preload="auto" width="640" height="480"
                                         data-setup=\'{}\'>
-                                <source src="'.$ffurl.'" type="video/mp4" />
+                                <source src="' . $ffurl . '" type="video/mp4" />
                                 <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading
                                         to a web browser that
                                         <a href="http://videojs.com/html5-video-support/" target="_blank">
@@ -67,7 +67,7 @@ function block_exaport_print_extern_item($item, $access) {
                     $boxcontent .= '</div>
                                     </div>';
                     $boxcontent .= "
-                    <script src=\"".$CFG->wwwroot."/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
+                    <script src=\"" . $CFG->wwwroot . "/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
                 };
             }
         }
@@ -80,7 +80,7 @@ function block_exaport_print_extern_item($item, $access) {
     }
 
     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
-                    'block_exaport', 'item_content', $access.'/itemid/'.$item->id);
+        'block_exaport', 'item_content', $access . '/itemid/' . $item->id);
     $intro = format_text($intro);
     $template_text_to_html = text_to_html('');
     $intro = trim($intro);
@@ -90,7 +90,7 @@ function block_exaport_print_extern_item($item, $access) {
         $intro = $item->intro;
     }
     if ($item->url && $item->url != "false") {
-        $boxcontent .= '<p><a target="_blank" href="'.s($item->url).'">'.str_replace('http://', '', $item->url).'</a></p>';
+        $boxcontent .= '<p><a target="_blank" href="' . s($item->url) . '">' . str_replace('http://', '', $item->url) . '</a></p>';
     }
     $boxcontent .= $intro;
     echo $OUTPUT->box($boxcontent);
@@ -130,10 +130,10 @@ function block_exaport_print_extcomments($itemid) {
 
         echo '<tr><td class="left side">';
 
-        echo '</td><td class="content">'."\n";
+        echo '</td><td class="content">' . "\n";
 
         echo format_text($comment->entry);
 
-        echo '</td></tr></table>'."\n\n";
+        echo '</td></tr></table>' . "\n\n";
     }
 }

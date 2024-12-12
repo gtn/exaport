@@ -18,8 +18,8 @@
 // deprecated file?
 // "Personal information" block was removed from CV and used 'About me' instead
 
-require_once(__DIR__.'/inc.php');
-require_once(__DIR__.'/lib/information_edit_form.php');
+require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/information_edit_form.php');
 
 $userid = optional_param('userid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -41,19 +41,19 @@ require_sesskey();
 $informationform = new block_exaport_personal_information_form();
 
 if ($informationform->is_cancelled()) {
-    redirect('resume.php?courseid='.$courseid);
+    redirect('resume.php?courseid=' . $courseid);
     exit;
 } else if ($fromform = $informationform->get_data()) {
     $fromform = file_postupdate_standard_editor($fromform,
-                                                'description',
-                                                $textfieldoptions,
-                                                context_user::instance($USER->id),
-                                                'block_exaport',
-                                                'personal_information',
-                                                $USER->id);
+        'description',
+        $textfieldoptions,
+        context_user::instance($USER->id),
+        'block_exaport',
+        'personal_information',
+        $USER->id);
     block_exaport_set_user_preferences(array('description' => $fromform->description, 'persinfo_timemodified' => time()));
 
-    redirect('resume.php?courseid='.$courseid);
+    redirect('resume.php?courseid=' . $courseid);
     exit;
 }
 $data = new stdClass();
@@ -64,12 +64,12 @@ $data->cataction = 'save';
 $data->edit = 1;
 
 $data = file_prepare_standard_editor($data,
-                                    'description',
-                                    $textfieldoptions,
-                                    context_user::instance($USER->id),
-                                    'block_exaport',
-                                    'personal_information',
-                                    $USER->id);
+    'description',
+    $textfieldoptions,
+    context_user::instance($USER->id),
+    'block_exaport',
+    'personal_information',
+    $USER->id);
 $informationform->set_data($data);
 
 block_exaport_print_header("resume_my");

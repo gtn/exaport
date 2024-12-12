@@ -15,56 +15,57 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 function long_preview_show(i) {
-    document.getElementById("short-preview-" + i).style.display = "none";
-    document.getElementById("long-preview-" + i).style.display = "block";
+  document.getElementById("short-preview-" + i).style.display = "none";
+  document.getElementById("long-preview-" + i).style.display = "block";
 }
+
 function long_preview_hide(i) {
-    document.getElementById("short-preview-" + i).style.display = "block";
-    document.getElementById("long-preview-" + i).style.display = "none";
+  document.getElementById("short-preview-" + i).style.display = "block";
+  document.getElementById("long-preview-" + i).style.display = "none";
 }
 
 jQueryExaport(function ($) {
-    $(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile:not(.excomdos_tile_fixed)").draggable({
-        scroll: true, // Scroll when dragging.
-        helper: "clone",
-        start: function (event, ui) { // When dragging.
-            // Set background of the current tile to white, background needed when dragging.
-            ui.helper.css('background-color', '#fff');
-        }
-    });
+  $(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile:not(.excomdos_tile_fixed)").draggable({
+    scroll: true, // Scroll when dragging.
+    helper: "clone",
+    start: function (event, ui) { // When dragging.
+      // Set background of the current tile to white, background needed when dragging.
+      ui.helper.css('background-color', '#fff');
+    }
+  });
 
-    $(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile_category").droppable({
-        activeClass: "ui-state-active",
-        hoverClass: "ui-state-hover",
-        drop: function (event, ui) {
-            // Dropping a category or an item.
-            var moveCat = ui.draggable.is('.excomdos_tile_category');
+  $(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile_category").droppable({
+    activeClass: "ui-state-active",
+    hoverClass: "ui-state-hover",
+    drop: function (event, ui) {
+      // Dropping a category or an item.
+      var moveCat = ui.draggable.is('.excomdos_tile_category');
 
-            $.ajax({
-                url: M.cfg.wwwroot + '/blocks/exaport/' + (moveCat ? 'category.php' : 'item.php'),
-                type: 'POST',
-                data: {
-                    action: 'movetocategory',
-                    'id': ui.draggable[0].className.replace(/.*(^|\s)id-([0-9]+).*/, '$2'),
-                    'categoryid': this.className.replace(/.*(^|\s)id-([0-9]+).*/, '$2'),
-                    'courseid': document.location.href.replace(/.*([&?])courseid=([0-9]+).*/, '$2'),
-                    sesskey: M.cfg.sesskey
-                },
-                success: function (res) {
-                    ui.draggable.fadeOut();
-                }
-            });
+      $.ajax({
+        url: M.cfg.wwwroot + '/blocks/exaport/' + (moveCat ? 'category.php' : 'item.php'),
+        type: 'POST',
+        data: {
+          action: 'movetocategory',
+          'id': ui.draggable[0].className.replace(/.*(^|\s)id-([0-9]+).*/, '$2'),
+          'categoryid': this.className.replace(/.*(^|\s)id-([0-9]+).*/, '$2'),
+          'courseid': document.location.href.replace(/.*([&?])courseid=([0-9]+).*/, '$2'),
+          sesskey: M.cfg.sesskey
+        },
+        success: function (res) {
+          ui.draggable.fadeOut();
         }
-    });
+      });
+    }
+  });
 
-    $('*[data-toggle="showmore"]').on('click', function(e) {
-        e.preventDefault();
-        var morecontent = $(this).attr('href');
-        if ($(morecontent).length) {
-            $(this).hide();
-            $(morecontent).show(200);
-        }
-    });
+  $('*[data-toggle="showmore"]').on('click', function (e) {
+    e.preventDefault();
+    var morecontent = $(this).attr('href');
+    if ($(morecontent).length) {
+      $(this).hide();
+      $(morecontent).show(200);
+    }
+  });
 
 
 });

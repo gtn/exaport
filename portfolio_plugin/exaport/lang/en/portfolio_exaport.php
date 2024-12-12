@@ -15,5 +15,5 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require(substr(__FILE__, 0, strpos(__FILE__, 'exaport')).'/../blocks/exaport/lib/portfolio_plugin'.
-        substr(__FILE__, strpos(__FILE__, 'exaport') + 7));
+require(substr(__FILE__, 0, strpos(__FILE__, 'exaport')) . '/../blocks/exaport/lib/portfolio_plugin' .
+    substr(__FILE__, strpos(__FILE__, 'exaport') + 7));

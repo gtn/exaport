@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 $itemid = optional_param('item_id', -1, PARAM_INT);
 $access = optional_param('access', '', PARAM_TEXT);
@@ -77,7 +77,7 @@ switch ($item->type) {
         // Thumbnail of file.
         $file = block_exaport_get_item_files($item);
         // Serve file.
-        if ($file && ($imageindex || $imageindex === 0  )) {
+        if ($file && ($imageindex || $imageindex === 0)) {
             $filevalues = array_values($file);
             $single_file = $filevalues[$imageindex];
             if ($single_file && $single_file->is_valid_image()) {
@@ -114,14 +114,14 @@ switch ($item->type) {
         $PAGE->set_context(context_system::instance());
         $icon = $output->image_url(file_file_icon($file, 90));
         // TODO: If Pdf will have a problems - look a solution with readfile below
-        header('Location: '.$icon);
+        header('Location: ' . $icon);
         break;
 
     case "link":
         $url = $item->url;
         if ($purl = parse_url($url)) {
             if (!isset($purl["scheme"]) || strpos($purl["scheme"], 'http') === false) {
-                $url = 'http://'.$url;
+                $url = 'http://' . $url;
             }
         }
 
@@ -134,17 +134,17 @@ switch ($item->type) {
                 if ($firstimg[0] == '/') {
                     /* google.com + /imgage.png
                        google.com/sub + /imgage.png. */
-                    $firstimg = preg_replace('!([^:/])/.*$!m', '$1', $url).$firstimg;
+                    $firstimg = preg_replace('!([^:/])/.*$!m', '$1', $url) . $firstimg;
                 } else {
                     /* google.com + imgage.png. */
-                    $firstimg = $url."/".$firstimg;
+                    $firstimg = $url . "/" . $firstimg;
                 }
             }
 
             // img must not be a local file, only url
             if ($purl = parse_url($firstimg)) {
                 if (!isset($purl["scheme"]) || strpos($purl["scheme"], 'http') === false) {
-                    $firstimg = 'http://'.$firstimg;
+                    $firstimg = 'http://' . $firstimg;
                 }
             }
 
@@ -167,7 +167,7 @@ switch ($item->type) {
                 exit;
                 break;
             }
-            header("Content-type: ".$type);
+            header("Content-type: " . $type);
 
             echo $imgstr;
 

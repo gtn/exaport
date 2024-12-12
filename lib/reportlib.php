@@ -164,8 +164,8 @@ class ExaportVievPdf {
         $this->pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PDF_HEADER_STRING);
 
         // set header and footer fonts
-        $this->pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-        $this->pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+        $this->pdf->setHeaderFont(array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+        $this->pdf->setFooterFont(array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
 
         // set default monospaced font
         $this->pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
@@ -1053,7 +1053,7 @@ class ExaportVievPdf {
         // }
 
         $text = format_text($html, FORMAT_HTML);
-        $text = trim($text);        
+        $text = trim($text);
         // $text = utf8_decode($text);
         $text = mb_convert_encoding($text, 'HTML-ENTITIES', 'UTF-8');
         $text = preg_replace("/(\s){2,}/", " ", $text); // many spaces to single

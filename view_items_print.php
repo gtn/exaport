@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
+require_once(__DIR__ . '/inc.php');
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
@@ -51,7 +51,7 @@ if (block_exaport_course_has_desp()) {
 } else {
     $pref = "";
 }
-echo $OUTPUT->box(text_to_html(get_string($pref."explaining", "block_exaport")), "center");
+echo $OUTPUT->box(text_to_html(get_string($pref . "explaining", "block_exaport")), "center");
 echo "</div>";
 
 $userpreferences = block_exaport_get_user_preferences();
@@ -62,16 +62,16 @@ if (!$sort && $userpreferences && isset($userpreferences->itemsort)) {
 
 // Check sorting.
 $parsedsort = block_exaport_parse_item_sort($sort, true);
-$sort = $parsedsort[0].'.'.$parsedsort[1];
+$sort = $parsedsort[0] . '.' . $parsedsort[1];
 
 $sortkey = $parsedsort[0];
 
 if ($parsedsort[1] == "desc") {
-    $newsort = $sortkey.".asc";
+    $newsort = $sortkey . ".asc";
 } else {
-    $newsort = $sortkey.".desc";
+    $newsort = $sortkey . ".desc";
 }
-$sorticon = $parsedsort[1].'.png';
+$sorticon = $parsedsort[1] . '.png';
 
 block_exaport_set_user_preferences(array('itemsort' => $sort));
 
@@ -87,7 +87,7 @@ $items = $DB->get_records_sql("
     FROM {block_exaportitem} i
     LEFT JOIN {block_exaportcate} ic on i.categoryid = ic.id
     LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-    WHERE i.userid = ? AND ".block_exaport_get_item_where().
+    WHERE i.userid = ? AND " . block_exaport_get_item_where() .
     " GROUP BY i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.categoryid, i.url, i.attachment,
     i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
     i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable, ic.name, ic.id
@@ -100,20 +100,20 @@ $table->width = "100%";
 $table->head = array();
 $table->size = array();
 
-$table->head['category'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items_print.php?courseid=$courseid&amp;type=$type&amp;".
-        "sort=".($sortkey == 'category' ? $newsort : 'category')."'>".get_string("category", "block_exaport")."</a>";
+$table->head['category'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items_print.php?courseid=$courseid&amp;type=$type&amp;" .
+    "sort=" . ($sortkey == 'category' ? $newsort : 'category') . "'>" . get_string("category", "block_exaport") . "</a>";
 $table->size['category'] = "14";
 
-$table->head['type'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items_print.php?courseid=$courseid&amp;type=$type&amp;sort=".
-        ($sortkey == 'type' ? $newsort : 'type')."'>".get_string("type", "block_exaport")."</a>";
+$table->head['type'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items_print.php?courseid=$courseid&amp;type=$type&amp;sort=" .
+    ($sortkey == 'type' ? $newsort : 'type') . "'>" . get_string("type", "block_exaport") . "</a>";
 $table->size['type'] = "14";
 
-$table->head['name'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items_print.php?courseid=$courseid&amp;type=$type&amp;sort=".
-        ($sortkey == 'name' ? $newsort : 'name')."'>".get_string("name", "block_exaport")."</a>";
+$table->head['name'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items_print.php?courseid=$courseid&amp;type=$type&amp;sort=" .
+    ($sortkey == 'name' ? $newsort : 'name') . "'>" . get_string("name", "block_exaport") . "</a>";
 $table->size['name'] = "30";
 
-$table->head['date'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items_print.php?courseid=$courseid&amp;type=$type&amp;sort=".
-        ($sortkey == 'date' ? $newsort : 'date.desc')."'>".get_string("date", "block_exaport")."</a>";
+$table->head['date'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items_print.php?courseid=$courseid&amp;type=$type&amp;sort=" .
+    ($sortkey == 'date' ? $newsort : 'date.desc') . "'>" . get_string("date", "block_exaport") . "</a>";
 $table->size['date'] = "20";
 
 $table->head[] = get_string("comments", "block_exaport");
@@ -121,10 +121,10 @@ $table->size[] = "8";
 
 // Add arrow to heading if available.
 if (isset($table->head[$sortkey])) {
-    $table->head[$sortkey] .= "<img src=\"pix/$sorticon\" alt='".get_string("updownarrow", "block_exaport")."' />";
+    $table->head[$sortkey] .= "<img src=\"pix/$sorticon\" alt='" . get_string("updownarrow", "block_exaport") . "' />";
 }
 
-$table->data = Array();
+$table->data = array();
 $lastcat = "";
 
 $itemi = -1;
@@ -149,15 +149,15 @@ foreach ($items as $item) {
     $table->data[$itemi]['name'] = $item->name;
     if ($item->intro) {
         $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
-                'block_exaport', 'item_content', 'portfolio/id/'.$item->userid.'/itemid/'.$item->id);
+            'block_exaport', 'item_content', 'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
 
         if (!$intro) {
             $tempvar = 1; // For code checker.
             // No intro.
         } else {
             // Show whole intro for printing.
-            $table->data[$itemi]['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">".
-                                                format_text($intro, FORMAT_HTML)."</td></tr></table>";
+            $table->data[$itemi]['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">" .
+                format_text($intro, FORMAT_HTML) . "</td></tr></table>";
         }
     }
 

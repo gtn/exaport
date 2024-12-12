@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->libdir.'/filelib.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/filelib.php');
 
 class block_exaport_scorm_upload_form extends block_exaport_moodleform {
 

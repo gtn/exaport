@@ -26,13 +26,13 @@ $filepath = '/'; // Put the file to the root of your private file area. //OPTION
 
 require_once('./curl.php');
 // UPLOAD IMAGE - Moodle 2.1 and later.
-$params = array('file_box' => "@".$imagepath, 'filepath' => $filepath, 'token' => $token);
+$params = array('file_box' => "@" . $imagepath, 'filepath' => $filepath, 'token' => $token);
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt($ch, CURLOPT_VERBOSE, 0);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible;)");
-curl_setopt($ch, CURLOPT_URL, $domainname.'/webservice/upload.php');
+curl_setopt($ch, CURLOPT_URL, $domainname . '/webservice/upload.php');
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 $response = curl_exec($ch);

@@ -37,15 +37,15 @@ class provider implements
     core_userlist_provider,
     \core_privacy\local\request\plugin\provider {
 
-    public static function get_metadata(collection $collection): collection{
+    public static function get_metadata(collection $collection): collection {
 
         // block_exaportuser
         $collection->add_database_table('block_exaportuser', [
             'user_id' => 'privacy:metadata:block_exaportuser:user_id',
             'description' => 'privacy:metadata:block_exaportuser:description',
             // epop: needed?
-// 'oezinstall' => '',
-// 'import_oez_tstamp' => '',
+            // 'oezinstall' => '',
+            // 'import_oez_tstamp' => '',
             'view_items_layout' => 'privacy:metadata:block_exaportuser:view_items_layout',
         ], 'privacy:metadata:block_exaportuser');
 
@@ -188,10 +188,10 @@ class provider implements
     /**
      * Get the list of contexts that contain user information for the specified user.
      *
-     * @param   int         $userid     The user to search.
+     * @param int $userid The user to search.
      * @return  contextlist   $contextlist  The contextlist containing the list of contexts used in this plugin.
      */
-    public static function get_contexts_for_userid(int $userid) : contextlist {
+    public static function get_contexts_for_userid(int $userid): contextlist {
         $contextlist = new contextlist();
 
         $contextlist->add_user_context($userid);
@@ -240,7 +240,7 @@ class provider implements
         }
     }
 
-   public static function export_resume_list_data(&$resume, $list_name, $subcontext_name, $file_area_name, $resume_context, $user) {
+    public static function export_resume_list_data(&$resume, $list_name, $subcontext_name, $file_area_name, $resume_context, $user) {
         $clean_props = ['id', 'resume_id', 'resumeid', 'sorting'];
         $file_area_name_editor = str_replace('resume_', 'resume_editor_', $file_area_name);
         if ($resume->{$list_name}) {
@@ -287,7 +287,7 @@ class provider implements
             foreach ($competences as $competence) {
                 $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, array('id' => $competence->compid), '*', IGNORE_MISSING);
                 if ($competencesdb != null) {
-                    $comptitles .= $competencesdb->title."<br>";
+                    $comptitles .= $competencesdb->title . "<br>";
                 };
             };
             $comptitles = array('competencies' => $comptitles);
@@ -295,33 +295,33 @@ class provider implements
             $contextdata = (object)array_merge((array)$contextdata, $comptitles);
             $writer = writer::with_context($resume_context);
 
-            $subcontext_name = 'Exabis ePortfolio/Curriculum Vitae/'.$subcontext_name;
+            $subcontext_name = 'Exabis ePortfolio/Curriculum Vitae/' . $subcontext_name;
             $writer->export_data([$subcontext_name], $contextdata);
         }
     }
 
 
-    public  static function attach_category_artifact_files($categories_tree, $context, $subcontext_name) {
+    public static function attach_category_artifact_files($categories_tree, $context, $subcontext_name) {
         $writer = writer::with_context($context);
 
         foreach ($categories_tree as $cat_id => $category) {
             // category icon
-            $writer->export_area_files([$subcontext_name.'/Categories'], 'block_exaport', 'category_icon', $cat_id);
+            $writer->export_area_files([$subcontext_name . '/Categories'], 'block_exaport', 'category_icon', $cat_id);
             // items
             if ($category->items) {
                 $add_tosubcontext_name = '/Artifacts';
                 foreach ($category->items as $item_id => $item) {
                     // item file
-                    $writer->export_area_files([$subcontext_name.$add_tosubcontext_name], 'block_exaport', 'item_file', $item_id);
+                    $writer->export_area_files([$subcontext_name . $add_tosubcontext_name], 'block_exaport', 'item_file', $item_id);
                     // item content (from html)
                     if ($item->intro) {
-                        $item->intro = $writer->rewrite_pluginfile_urls([$subcontext_name.$add_tosubcontext_name], 'block_exaport', 'item_content', $item_id, $item->intro);
+                        $item->intro = $writer->rewrite_pluginfile_urls([$subcontext_name . $add_tosubcontext_name], 'block_exaport', 'item_content', $item_id, $item->intro);
                     }
-                    $writer->export_area_files([$subcontext_name.$add_tosubcontext_name], 'block_exaport', 'item_content', $item_id);
+                    $writer->export_area_files([$subcontext_name . $add_tosubcontext_name], 'block_exaport', 'item_content', $item_id);
                     // item icon
-                    $writer->export_area_files([$subcontext_name.$add_tosubcontext_name.'/Icons'], 'block_exaport', 'item_iconfile', $item_id);
+                    $writer->export_area_files([$subcontext_name . $add_tosubcontext_name . '/Icons'], 'block_exaport', 'item_iconfile', $item_id);
                     // comment for item
-                    $writer->export_area_files([$subcontext_name.$add_tosubcontext_name.'/Comments'], 'block_exaport', 'item_comment_file', $item_id);
+                    $writer->export_area_files([$subcontext_name . $add_tosubcontext_name . '/Comments'], 'block_exaport', 'item_comment_file', $item_id);
                 }
             }
             // subcategory
@@ -385,7 +385,7 @@ class provider implements
             static::export_resume_list_data($resume, 'interests', 'Interests', 'resume_interests', $resume_context, $user);
 
         }
-        
+
         // artifacts data (with categories)
         $categories_tree = block_exaport_user_categories_into_tree($user->id, true, true);
         if ($categories_tree) {
@@ -397,7 +397,7 @@ class provider implements
             self::attach_category_artifact_files($categories_tree, $context, $subcontext_name);
             $categories_tree = array('categories' => $categories_tree);
             $contextdata = helper::get_context_data($context, $user);
-            $contextdata = (object) array_merge((array) $contextdata, $categories_tree);
+            $contextdata = (object)array_merge((array)$contextdata, $categories_tree);
             $writer = writer::with_context($context);
             $writer->export_data([$subcontext_name], $contextdata);
         }
@@ -462,7 +462,7 @@ class provider implements
                             if ($competencies) {
                                 $competenciesoutput = "";
                                 foreach ($competencies as $competence) {
-                                    $competenciesoutput .= $competence->title.'<br>';
+                                    $competenciesoutput .= $competence->title . '<br>';
                                 }
                                 $block_entry->competences = $competenciesoutput;
                             }
@@ -482,7 +482,7 @@ class provider implements
                                 $person_info .= $block->firstname;
                             }
                             if (isset($block->lastname)) {
-                                $person_info .= ' '.$block->lastname;
+                                $person_info .= ' ' . $block->lastname;
                             }
                         };
                         if (isset($block->email)) {
@@ -529,7 +529,7 @@ class provider implements
                                     $item_data = $resume->educations[$block->itemid];
                                     // files?
                                     // $attachments = $item_data->attachments;
-                                    $block_entry->content .= $item_data->institution.': ';
+                                    $block_entry->content .= $item_data->institution . ': ';
                                     $block_entry->content .= $item_data->qualname;
                                     if ($item_data->startdate != '' || $item_data->enddate != '') {
                                         $block_entry->content .= ' (';
@@ -537,12 +537,12 @@ class provider implements
                                             $block_entry->content .= $item_data->startdate;
                                         }
                                         if ($item_data->enddate != '') {
-                                            $block_entry->content .= ' - '.$item_data->enddate;
+                                            $block_entry->content .= ' - ' . $item_data->enddate;
                                         }
                                         $block_entry->content .= ')';
                                     }
                                     if ($item_data->qualdescription != '') {
-                                        $block_entry->content .= '; '.$item_data->qualdescription;
+                                        $block_entry->content .= '; ' . $item_data->qualdescription;
                                     }
                                 }
                                 break;
@@ -552,19 +552,19 @@ class provider implements
                                     // files?
                                     // $attachments = $item_data->attachments;
                                     $description = '';
-                                    $description .= $item_data->jobtitle.': '.$item_data->employer;
+                                    $description .= $item_data->jobtitle . ': ' . $item_data->employer;
                                     if ($item_data->startdate != '' || $item_data->enddate != '') {
                                         $description .= ' (';
                                         if ($item_data->startdate != '') {
                                             $description .= $item_data->startdate;
                                         }
                                         if ($item_data->enddate != '') {
-                                            $description .= ' - '.$item_data->enddate;
+                                            $description .= ' - ' . $item_data->enddate;
                                         }
                                         $description .= ')';
                                     }
                                     if ($item_data->positiondescription != '') {
-                                        $description .= '; '.$item_data->positiondescription;
+                                        $description .= '; ' . $item_data->positiondescription;
                                     }
                                     $block_entry->content .= $description;
                                 }
@@ -577,10 +577,10 @@ class provider implements
                                     $description = '';
                                     $description .= $item_data->title;
                                     if ($item_data->date != '') {
-                                        $description .= ' ('.$item_data->date.')';
+                                        $description .= ' (' . $item_data->date . ')';
                                     }
                                     if ($item_data->description != '') {
-                                        $description .= '; '.$item_data->description;
+                                        $description .= '; ' . $item_data->description;
                                     }
                                     $block_entry->content = $description;
                                 }
@@ -593,10 +593,10 @@ class provider implements
                                     $description = '';
                                     $description .= $item_data->title;
                                     if ($item_data->contribution != '') {
-                                        $description .= ' ('.$item_data->contribution.')';
+                                        $description .= ' (' . $item_data->contribution . ')';
                                     }
                                     if ($item_data->date != '') {
-                                        $description .= ' ('.$item_data->date.')';
+                                        $description .= ' (' . $item_data->date . ')';
                                     }
                                     if ($item_data->contributiondetails != '' || $item_data->url != '') {
                                         $description .= '; ';
@@ -604,7 +604,7 @@ class provider implements
                                             $description .= $item_data->contributiondetails;
                                         }
                                         if ($item_data->url != '') {
-                                            $description .= ' '.$item_data->url.' ';
+                                            $description .= ' ' . $item_data->url . ' ';
                                         }
                                     }
                                     $block_entry->content = $description;
@@ -616,19 +616,19 @@ class provider implements
                                     // files?
                                     // $attachments = $item_data->attachments;
                                     $description = '';
-                                    $description .= $item_data->title.' ';
+                                    $description .= $item_data->title . ' ';
                                     if ($item_data->startdate != '' || $item_data->enddate != '') {
                                         $description .= ' (';
                                         if ($item_data->startdate != '') {
                                             $description .= $item_data->startdate;
                                         }
                                         if ($item_data->enddate != '') {
-                                            $description .= ' - '.$item_data->enddate;
+                                            $description .= ' - ' . $item_data->enddate;
                                         }
                                         $description .= ')';
                                     }
                                     if ($item_data->description != '') {
-                                        $description .= '; '.$item_data->description;
+                                        $description .= '; ' . $item_data->description;
                                     }
                                     $block_entry->content = $description;
                                 }
@@ -643,19 +643,19 @@ class provider implements
                                 // $attachments = @$resume->{$block->resume_itemtype.'_attachments'};
                                 $description = '';
                                 if ($resume && $resume->{$block->resume_itemtype}) {
-                                    $description .= $resume->{$block->resume_itemtype}.' ';
+                                    $description .= $resume->{$block->resume_itemtype} . ' ';
                                 }
                                 $block_entry->content = $description;
                                 break;
                             case 'interests':
                                 $description = '';
                                 if ($resume->interests != '') {
-                                    $description .= $resume->interests.' ';
+                                    $description .= $resume->interests . ' ';
                                 }
                                 $block_entry->content = $description;
                                 break;
                             default:
-                                $block_entry->content .= '!!! '.$block->resume_itemtype.' !!!';
+                                $block_entry->content .= '!!! ' . $block->resume_itemtype . ' !!!';
                         }
 
                         break;
@@ -685,7 +685,7 @@ class provider implements
         if ($viewsArr) {
             $viewsArr = array('views' => $viewsArr);
             $contextdata = helper::get_context_data($context, $user);
-            $contextdata = (object) array_merge((array) $contextdata, $viewsArr);
+            $contextdata = (object)array_merge((array)$contextdata, $viewsArr);
             $writer = writer::with_context($context);
             $writer->export_data(['Exabis ePortfolio/Views'], $contextdata);
         }
@@ -712,14 +712,14 @@ class provider implements
             }
             $comments_arr = array('comments' => $comments_arr);
             $contextdata = helper::get_context_data($context, $user);
-            $contextdata = (object) array_merge((array) $contextdata, $comments_arr);
+            $contextdata = (object)array_merge((array)$contextdata, $comments_arr);
             $writer = writer::with_context($context);
             $writer->export_data(['Exabis ePortfolio/Comments/Artifacts'], $contextdata);
         }
 
     }
 
-    public function delete_resume_data($resume_id){
+    public function delete_resume_data($resume_id) {
 
         global $DB;
         $DB->delete_records('block_exaportresume_certif', ['resume_id' => $resume_id]);
@@ -736,7 +736,7 @@ class provider implements
     /**
      * Delete all data for all users in the specified context.
      *
-     * @param   context                 $context   The specific context to delete data for.
+     * @param context $context The specific context to delete data for.
      */
     public static function delete_data_for_all_users_in_context(context $context) {
         global $DB;
@@ -773,7 +773,7 @@ class provider implements
         return;
     }
 
-    public function delete_category_data($category_id){
+    public function delete_category_data($category_id) {
         global $DB;
         $DB->delete_records('block_exaportcatshar', ['catid' => $category_id]);
         $DB->delete_records('block_exaportcatgroupshar', ['catid' => $category_id]);
@@ -782,7 +782,7 @@ class provider implements
         return true;
     }
 
-    public function delete_atifact_data($artifact_id){
+    public function delete_atifact_data($artifact_id) {
         global $DB;
         $DB->delete_records('block_exaportitemshar', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportitemcomm', ['itemid' => $artifact_id]);
@@ -919,4 +919,5 @@ class provider implements
 
     }
 }
+
 ?>

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once(__DIR__.'/inc.php');
-require_once(__DIR__.'/lib/externlib.php');
-require_once(__DIR__.'/blockmediafunc.php');
+require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/externlib.php');
+require_once(__DIR__ . '/blockmediafunc.php');
 
 $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
@@ -30,7 +30,7 @@ $context = context_system::instance();
 $PAGE->set_context($context);
 require_login(0, true);
 
-$PAGE->requires->js(new moodle_url($CFG->wwwroot.'/blocks/exaport/javascript/vedeo-js/video.js'), true);
+$PAGE->requires->js(new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/vedeo-js/video.js'), true);
 $PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
 $item = block_exaport_get_item($itemid, $access);
 
@@ -81,7 +81,7 @@ if ($item->allowComments) {
     }
 
     $commentseditform = new block_exaport_comment_edit_form($PAGE->url,
-            array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade' => $teachervalue));
+        array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade' => $teachervalue));
 
     if ($commentseditform->is_cancelled()) {
         $tempvar = 1; // For code checker.
@@ -92,11 +92,11 @@ if ($item->allowComments) {
             case 'add':
                 block_exaport_do_add_comment($item, $fromform);
 
-                $prms = 'access='.$access.'&itemid='.$itemid;
+                $prms = 'access=' . $access . '&itemid=' . $itemid;
                 if (!empty($backtype)) {
-                    $prms .= 'backtype='.$backtype;
+                    $prms .= 'backtype=' . $backtype;
                 }
-                redirect($CFG->wwwroot.'/blocks/exaport/shared_item.php?'.$prms);
+                redirect($CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $prms);
                 break;
         }
     }
@@ -151,7 +151,7 @@ if ($item->allowComments) {
 }
 
 if ($item->access->page == 'view') {
-    $backlink = 'shared_view.php?access='.$item->access->parentAccess;
+    $backlink = 'shared_view.php?access=' . $item->access->parentAccess;
 } else {
     // Intern.
     if ($item->userid == $USER->id) {
@@ -172,7 +172,7 @@ if (block_exaport_check_competence_interaction()) {
     $hascompetences = false;
 }
 if ($backlink) {
-    echo "<br /><a href=\"{$CFG->wwwroot}/blocks/exaport/".$backlink."\">".get_string("back", "block_exaport")."</a><br /><br />";
+    echo "<br /><a href=\"{$CFG->wwwroot}/blocks/exaport/" . $backlink . "\">" . get_string("back", "block_exaport") . "</a><br /><br />";
 }
 
 echo "</div>";
@@ -199,37 +199,36 @@ function block_exaport_show_comments($item, $access) {
             echo '<td class="topic starter"><div class="author">';
             $fullname = fullname($user, $comment->userid);
             $by = new stdClass();
-            $by->name = '<a href="'.$CFG->wwwroot.'/user/view.php?id='.
-                    $user->id.'&amp;course='.$COURSE->id.'">'.$fullname.'</a>';
+            $by->name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
+                $user->id . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
             $by->date = userdate($comment->timemodified);
             print_string('bynameondate', 'forum', $by);
 
 
-
             if ($comment->userid == $USER->id) {
-                echo ' - <a href="'.s($_SERVER['REQUEST_URI'].'&commentid='.$comment->id.'&comment_delete=1&sesskey='.sesskey()).
-                        '" onclick="'.s('return confirm('.json_encode(block_exaport_get_string('comment_delete_confirmation')).')').
-                        '">'.block_exaport_get_string('delete').'</a>';
+                echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
+                    '" onclick="' . s('return confirm(' . json_encode(block_exaport_get_string('comment_delete_confirmation')) . ')') .
+                    '">' . block_exaport_get_string('delete') . '</a>';
             }
             echo '</div></td></tr>';
 
             echo '<tr><td class="left side">';
 
-            echo '</td><td class="content">'."\n";
+            echo '</td><td class="content">' . "\n";
 
             echo format_text($comment->entry);
 
             if ($file = block_exaport_get_item_comment_file($comment->id)) {
-                $fileurl = $CFG->wwwroot.
-                        "/blocks/exaport/portfoliofile.php?access={$access}&itemid={$item->id}&commentid={$comment->id}";
+                $fileurl = $CFG->wwwroot .
+                    "/blocks/exaport/portfoliofile.php?access={$access}&itemid={$item->id}&commentid={$comment->id}";
                 echo '</td></tr><tr><td class="left side">';
 
-                echo '</td><td class="content">'."\n";
-                echo get_string('file', 'block_exaport').': <a href="'.s($fileurl).'" target="_blank">'.$file->get_filename().
-                        '</a> ('.display_size($file->get_filesize()).')';
+                echo '</td><td class="content">' . "\n";
+                echo get_string('file', 'block_exaport') . ': <a href="' . s($fileurl) . '" target="_blank">' . $file->get_filename() .
+                    '</a> (' . display_size($file->get_filesize()) . ')';
             }
 
-            echo '</td></tr></table>'."\n\n";
+            echo '</td></tr></table>' . "\n\n";
         }
     }
 }
@@ -250,7 +249,7 @@ function block_exaport_do_add_comment($item, $post) {
 
             // Check for example additional info and set it.
             $exampleeval = $DB->get_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL,
-                    array('courseid' => $item->courseid, 'exampleid' => $itemexample->exampleid, 'studentid' => $item->userid));
+                array('courseid' => $item->courseid, 'exampleid' => $itemexample->exampleid, 'studentid' => $item->userid));
             if ($exampleeval) {
                 $exampleeval->additionalinfo = $post->itemgrade;
                 $DB->update_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL, $exampleeval);
@@ -262,7 +261,7 @@ function block_exaport_do_add_comment($item, $post) {
     $post->id = $DB->insert_record('block_exaportitemcomm', $post);
 
     file_save_draft_area_files($post->file, context_system::instance()->id, 'block_exaport', 'item_comment_file', $post->id,
-            array('subdirs' => 0, 'maxfiles' => 1));
+        array('subdirs' => 0, 'maxfiles' => 1));
 
-    block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type='.$item->type, $post->entry);
+    block_exaport_add_to_log(SITEID, 'exaport', 'add', 'view_item.php?type=' . $item->type, $post->entry);
 }

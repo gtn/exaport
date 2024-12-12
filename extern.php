@@ -16,4 +16,4 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 $id = optional_param('id', '', PARAM_RAW);
-header('Location: shared_portfolio.php?access=hash/'.$id);
+header('Location: shared_portfolio.php?access=hash/' . $id);

@@ -89,8 +89,8 @@ function xmldb_block_exaport_upgrade($oldversion) {
             if ($file->attachment && preg_match('!^[0-9]+$!', $file->attachment)) {
                 // Numeral attachment = filestorage id.
 
-                $sql = "UPDATE {files} SET component='block_exaport', filearea='item_file', itemid='".$file->id."' ".
-                        " WHERE component='user' AND filearea='draft' AND itemid='".$file->attachment."'";
+                $sql = "UPDATE {files} SET component='block_exaport', filearea='item_file', itemid='" . $file->id . "' " .
+                    " WHERE component='user' AND filearea='draft' AND itemid='" . $file->attachment . "'";
                 $DB->execute($sql);
 
                 $update = new stdClass();
@@ -205,11 +205,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
             }
 
             $fs->create_file_from_storedfile(array(
-                    'contextid' => $matches['contextid'],
-                    'component' => 'block_exaport',
-                    'filearea' => 'personal_information',
-                    'itemid' => $GLOBALS['test_for_userid'],
-                    'filename' => $file->get_filename()
+                'contextid' => $matches['contextid'],
+                'component' => 'block_exaport',
+                'filearea' => 'personal_information',
+                'itemid' => $GLOBALS['test_for_userid'],
+                'filename' => $file->get_filename(),
             ), $file);
 
             return '@@PLUGINFILE@@/';
@@ -220,9 +220,9 @@ function xmldb_block_exaport_upgrade($oldversion) {
             $GLOBALS['test_for_userid'] = $personalinfo->user_id;
 
             $description = preg_replace_callback(
-                    "!".preg_quote($CFG->wwwroot)."/draftfile.php/(?<contextid>[0-9]+)/user/draft/(?<draftid>[0-9]+)/!",
-                    "block_exaport_wrong_personal_information_upgrade_2012120301",
-                    $personalinfo->description);
+                "!" . preg_quote($CFG->wwwroot) . "/draftfile.php/(?<contextid>[0-9]+)/user/draft/(?<draftid>[0-9]+)/!",
+                "block_exaport_wrong_personal_information_upgrade_2012120301",
+                $personalinfo->description);
 
             $update = new stdClass();
             $update->id = $personalinfo->id;
@@ -832,7 +832,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 $sharedemails = explode(';', $view->sharedemails);
                 foreach ($sharedemails as $newemail) {
                     // Old secure phrase. For keep old links.
-                    $hash = md5($newemail.$view->id.'=='.$view->id);
+                    $hash = md5($newemail . $view->id . '==' . $view->id);
                     $insertdata = array('viewid' => $view->id, 'email' => $newemail, 'hash' => $hash);
                     $DB->insert_record('block_exaportviewemailshar', $insertdata);
                     $update->sharedemails = 1;
@@ -922,27 +922,27 @@ function xmldb_block_exaport_upgrade($oldversion) {
     if ($oldversion < 2019111202) {
         // change indexes again
         $tableswithindexes = array(
-                'block_exaportcate' => array('pid', 'userid', 'shareall', 'internshare', 'structure_shareall', 'structure_share'),
-                'block_exaportcatshar' => array('catid', 'userid'),
-                'block_exaportcatgroupshar' => array('catid', 'groupid'),
-                'block_exaportitem' => array('userid', 'type', 'categoryid', 'shareall'),
-                'block_exaportitemshar' => array('itemid', 'userid'),
-                'block_exaportitemcomm' => array('itemid', 'userid'),
-                'block_exaportview' => array('hash', 'userid', 'shareall'),
-                'block_exaportviewblock' => array('viewid', 'itemid'),
-                'block_exaportviewshar' => array('viewid', 'userid'),
-                'block_exaportviewgroupshar' => array('viewid', 'groupid'),
-                'block_exaportresume' => array('user_id'),
-                'block_exaportresume_certif' => array('resume_id'),
-                'block_exaportresume_edu' => array('resume_id'),
-                'block_exaportresume_employ' => array('resume_id'),
-                'block_exaportresume_mbrship' => array('resume_id'),
-                'block_exaportresume_public' => array('resume_id'),
-                'block_exaportresume_badges' => array('resumeid', 'badgeid'),
-                'block_exaportcompresume_mm' => array('compid', 'resumeid'),
-                'block_exaportcat_structshar' => array('catid', 'userid'),
-                'block_exaportcat_strgrshar' => array('catid', 'groupid'),
-                'block_exaportviewemailshar' => array('viewid'),
+            'block_exaportcate' => array('pid', 'userid', 'shareall', 'internshare', 'structure_shareall', 'structure_share'),
+            'block_exaportcatshar' => array('catid', 'userid'),
+            'block_exaportcatgroupshar' => array('catid', 'groupid'),
+            'block_exaportitem' => array('userid', 'type', 'categoryid', 'shareall'),
+            'block_exaportitemshar' => array('itemid', 'userid'),
+            'block_exaportitemcomm' => array('itemid', 'userid'),
+            'block_exaportview' => array('hash', 'userid', 'shareall'),
+            'block_exaportviewblock' => array('viewid', 'itemid'),
+            'block_exaportviewshar' => array('viewid', 'userid'),
+            'block_exaportviewgroupshar' => array('viewid', 'groupid'),
+            'block_exaportresume' => array('user_id'),
+            'block_exaportresume_certif' => array('resume_id'),
+            'block_exaportresume_edu' => array('resume_id'),
+            'block_exaportresume_employ' => array('resume_id'),
+            'block_exaportresume_mbrship' => array('resume_id'),
+            'block_exaportresume_public' => array('resume_id'),
+            'block_exaportresume_badges' => array('resumeid', 'badgeid'),
+            'block_exaportcompresume_mm' => array('compid', 'resumeid'),
+            'block_exaportcat_structshar' => array('catid', 'userid'),
+            'block_exaportcat_strgrshar' => array('catid', 'groupid'),
+            'block_exaportviewemailshar' => array('viewid'),
         );
         foreach ($tableswithindexes as $tablename => $indexes) {
             $table = new xmldb_table($tablename);
@@ -973,8 +973,8 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
         $manual_deleting = [];
         foreach ($filenames as $filename) {
-            $file_r_path = '/blocks/exaport/'.$filename;
-            $filePath = $CFG->dirroot.$file_r_path;
+            $file_r_path = '/blocks/exaport/' . $filename;
+            $filePath = $CFG->dirroot . $file_r_path;
             if (file_exists($filePath)) {
                 if (is_writable(dirname($filePath)) && unlink($filePath)) {
                     // file deleted
@@ -987,10 +987,10 @@ function xmldb_block_exaport_upgrade($oldversion) {
         if (count($manual_deleting) > 0) {
             $message = 'We strongly recommend to delete these files from the server:<ul>';
             foreach ($manual_deleting as $f_name) {
-                $message .= '<li>'.$f_name.'</li>';
+                $message .= '<li>' . $f_name . '</li>';
             }
             $message .= '</ul>';
-            echo '<div class="alert alert-warning alert-block fade in">'.$message.'</div>';
+            echo '<div class="alert alert-warning alert-block fade in">' . $message . '</div>';
             upgrade_log(UPGRADE_LOG_ERROR, 'block_exaport', $message, null, null);
         }
         if ($oldversion < 2022090400) {
@@ -998,7 +998,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
     }
 
-    if ($oldversion < 2022090600){
+    if ($oldversion < 2022090600) {
         // Define a new field for table block_exaportresume
         $table = new xmldb_table('block_exaportresume');
         $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, null, null, '');
@@ -1009,37 +1009,37 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2022090600, 'exaport');
     }
-	if ($oldversion < 2022092800){
+    if ($oldversion < 2022092800) {
         //    Define a new field for table block_exaportresume
         $table = new xmldb_table('block_exaportresume');
         $field = new xmldb_field('linkedinurl', XMLDB_TYPE_CHAR, '255', null, null, null, '');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-		$field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, null, null, '');
-		 if ($dbman->field_exists($table, $field)) {
-			 $dbman->drop_field($table, $field);
-		 }
+        $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, null, null, '');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
         //        Exaport savepoint reached.
         upgrade_block_savepoint(true, 2022092800, 'exaport');
     }
 
     // TODO: delete structure fields / tables.
 
-	if ($oldversion < 2022102800) {
-		// Define field timecreated to be added to block_exaportitem.
-		$table = new xmldb_table('block_exaportitem');
-		$field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'attachment');
+    if ($oldversion < 2022102800) {
+        // Define field timecreated to be added to block_exaportitem.
+        $table = new xmldb_table('block_exaportitem');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'attachment');
 
-		// Conditionally launch add field timecreated.
-		if (!$dbman->field_exists($table, $field)) {
-			$dbman->add_field($table, $field);
-		}
-		// Exaport savepoint reached.
-		upgrade_block_savepoint(true, 2022102800, 'exaport');
-	}
+        // Conditionally launch add field timecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2022102800, 'exaport');
+    }
 
-    if ($oldversion < 2023102600){
+    if ($oldversion < 2023102600) {
         // Define a new field 'pdf_settings' for table block_exaportview
         $table = new xmldb_table('block_exaportview');
         $field = new xmldb_field('pdf_settings', XMLDB_TYPE_TEXT, null, null, null, null, null, null);
@@ -1051,7 +1051,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023102600, 'exaport');
     }
 
-    if ($oldversion < 2023121800){
+    if ($oldversion < 2023121800) {
         // Define a new field 'pdf_settings' for table block_exaportview
         $table = new xmldb_table('block_exaportview');
         $field = new xmldb_field('layout_settings', XMLDB_TYPE_TEXT, null, null, null, null, null, null);
@@ -1075,7 +1075,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
             return $DB->get_record('block_exaportresume', $conditions);
         };
         $block_exaport_set_resume_params = function($userid, $params = null) use ($DB, $block_exaport_get_resume_params_record) {
-            $newresumeparams = (object) $params;
+            $newresumeparams = (object)$params;
             if ($oldresumeparams = $block_exaport_get_resume_params_record($userid)) {
                 $newresumeparams->id = $oldresumeparams->id;
                 $DB->update_record('block_exaportresume', $newresumeparams);
@@ -1092,7 +1092,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
             return $DB->get_record('block_exaportuser', $conditions);
         };
         $block_exaport_set_user_preferences = function($userid, $preferences = null) use ($DB, $block_exaport_get_user_preferences_record) {
-            $newuserpreferences = (object) $preferences;
+            $newuserpreferences = (object)$preferences;
             if ($olduserpreferences = $block_exaport_get_user_preferences_record($userid)) {
                 $newuserpreferences->id = $olduserpreferences->id;
                 $DB->update_record('block_exaportuser', $newuserpreferences);
@@ -1165,7 +1165,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     }
 
-    if ($oldversion < 2024070301){
+    if ($oldversion < 2024070301) {
         // Update a field for the table block_exaportresume
         $table = new xmldb_table('block_exaportresume');
         $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
@@ -1177,8 +1177,20 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2024070301, 'exaport');
     }
 
+    if ($oldversion < 2024102200) {
+
+        // Define field createdinapp to be added to block_exaportview.
+        $table = new xmldb_table('block_exaportview');
+        $field = new xmldb_field('createdinapp', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, '0', 'timemodified');
+
+        // Conditionally launch add field createdinapp.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2024102200, 'exaport');
+    }
 
     return $result;
 }
-
-?>

@@ -932,19 +932,8 @@ function europass_xml($resumeid = 0) {
     // contact data
 
     $communication = $dom->createElement('ContactInfo');
-    $contact_tag = $dom->createElement('Contact');
-    $country_name = $dom->createElement('Country');
-    $address = $dom->createElement('Address');
-    $communication->appendChild($address);
-    europass_fill_sub_element_text($dom, $contact_tag, 'AddressLine', $USER->address);
-    europass_fill_sub_element_text($dom, $contact_tag, 'PostalCode', $USER->postcode);
-    europass_fill_sub_element_text($dom, $country_name, 'Code', strtoupper($USER->country));
-    $country_label = $dom->createElement('Label');
-    $country_label->appendChild($dom->createTextNode(strtoupper($USER->country)));
-    $country_name->appendChild($country_label);
     $identification_tag->appendChild($communication);
-    $address->appendChild($contact_tag);
-    $contact_tag->appendChild($country_name);
+
 
     // for phone numbers we need to know country code and phone number. So, use this code
     $phone_types = ['home', 'mobile'];

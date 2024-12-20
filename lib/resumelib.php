@@ -1006,8 +1006,9 @@ function europass_xml($resumeid = 0) {
     $organization_info = $dom->createElement('Employer');
     $employments = $DB->get_records('block_exaportresume_employ', array("resume_id" => $resume->id), 'sorting');
     // $workexperiencelist = europass_xml_employers_educations($dom, 'WorkExperience', $resume->employments);
+	$work_experience = $dom->createElement('WorkExperienceList');
     foreach ($employments as $employment) {
-        $work_experience = $dom->createElement('WorkExperienceList');
+        
         $work = $dom->createElement('WorkExperience');
         // title
         $label = $dom->createElement('Label');
@@ -1071,9 +1072,9 @@ function europass_xml($resumeid = 0) {
         $work->appendChild($organization_info);
         $work->appendChild($period_tag);
         $work_experience->appendChild($work);
-        $learner_info->appendChild($work_experience);
+        
     }
-
+	$learner_info->appendChild($work_experience);
     // EducationList / Education history.
     $educations = $DB->get_records('block_exaportresume_edu', array("resume_id" => $resume->id), 'sorting');
     //[id] => 1
@@ -1252,7 +1253,7 @@ function europass_xml($resumeid = 0) {
         $publication_history = $dom->createElement('publication_history');
         foreach ($publications as $publication) {
             $publication_node = $dom->createElement('Publication');
-            $formatted_publication_description = $dom->createElement('hr:formatted_publication_description');
+            $formatted_publication_description = $dom->createElement('Description');
             $text = $dom->createTextNode(clean_for_external_xml($publication->contributiondetails));
             $formatted_publication_description->appendChild($text);
             $publication_node->appendChild($formatted_publication_description);

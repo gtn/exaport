@@ -26,9 +26,9 @@ class block_exaport_renderer extends plugin_renderer_base {
      */
     public function image_url($imagename, $component = 'moodle') {
         if (method_exists(get_parent_class($this), 'image_url')) {
-            return call_user_func_array(['parent', 'image_url'], func_get_args());
+            return call_user_func_array([parent::class, 'image_url'], func_get_args());
         } else {
-            return call_user_func_array(['parent', 'pix_url'], func_get_args());
+            return call_user_func_array([parent::class, 'pix_url'], func_get_args());
         }
     }
 

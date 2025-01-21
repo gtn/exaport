@@ -1,3 +1,6 @@
+### v4.6.7 (2025012100) ###
+*europass export changes
+
 ### v4.6.7 (2024121200) ###
 *webservices dakora+ bugfixes
 *pdf feature for shared view

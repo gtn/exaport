@@ -1224,7 +1224,7 @@ function europass_xml($resumeid = 0)
             $certification_name = $dom->createElement('Title');
             $code = $dom->createElement('Code');
             $label = $dom->createElement('Label');
-            $code->appendChild($dom->createTextNode($certification->title));
+            $code->appendChild($dom->createTextNode('honors_awards'));
             $label->appendChild($dom->createTextNode($certification->title));
             $certification_name->appendChild($code);
             $certification_name->appendChild($label);
@@ -1283,6 +1283,40 @@ function europass_xml($resumeid = 0)
         //
     }
 
+	$badges = block_exaport_resume_get_badges($resume->id);
+    if ($badges && is_array($badges)) {
+        // list($publicationsstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_public');
+        // europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_public'), '', $publicationsstring);
+        foreach ($badges as $badge) {
+			
+			$rsbadge = $DB->get_record_sql('SELECT b.*, bi.dateissued, bi.uniquehash ' .
+                    ' FROM {badge} b LEFT JOIN {badge_issued} bi ON b.id=bi.badgeid AND bi.userid=' . intval($USER->id) .
+                    ' WHERE b.id=? ',
+                    array('id' => $badge->badgeid));
+					
+            $badge_node = $dom->createElement('Achievement');
+            $badge_title = $dom->createElement('Title');
+            $badge_label = $dom->createElement('Label');
+            $badge_code= $dom->createElement('Code');
+
+            $badge_code->appendChild($dom->createTextNode("certifications"));
+            $badge_description = $dom->createElement("Description");
+            $badge_label->appendChild($dom->createTextNode($rsbadge->name));
+            $badge_description->appendChild($dom->createTextNode($rsbadge->description));
+
+            $badge_title->appendChild($badge_code);
+            $badge_title->appendChild($badge_label);
+            $badge_node->appendChild($badge_title);
+            $badge_node->appendChild($badge_description);
+
+
+            $certi->appendChild($badge_node);
+
+        }
+
+        //
+    }
+ 
     // Memberships.
 
     $mbrships= $DB->get_records('block_exaportresume_mbrship',array("resume_id" => $resume->id), 'sorting' );

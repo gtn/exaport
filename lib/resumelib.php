@@ -1299,8 +1299,8 @@ function europass_xml($resumeid = 0)
             $badge_label = $dom->createElement('Label');
             $badge_code= $dom->createElement('Code');
 
-            $badge_code->appendChild($dom->createTextNode("certifications"));
-            $badge_description = $dom->createElement("Description");
+            $badge_code->appendChild($dom->createTextNode('certifications'));
+            $badge_description = $dom->createElement('Description');
             $badge_label->appendChild($dom->createTextNode($rsbadge->name));
             $badge_description->appendChild($dom->createTextNode($rsbadge->description));
 

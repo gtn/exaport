@@ -482,7 +482,7 @@ function block_exaport_resume_get_mm_records($table, $conditions)
 }
 
 function block_exaport_resume_templating_mm_records($courseid, $type, $headertitle, $records, $filescolumn = 1, $updowncolumn = 1,
-    $editcolumn = 1)
+                                                    $editcolumn = 1)
 {
     global $CFG, $DB, $OUTPUT, $USER;
     if (count($records) < 1) {
@@ -643,12 +643,12 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
             $linktoup = '<a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid . '&action=sortchange&type=' . $type .
                 '&id1=' . $record->id . '&id2=' . $idnext . '&sesskey=' . sesskey() . '">'
                 . block_exaport_fontawesome_icon('chevron-down', 'solid', 1)
-                //                    .'<img src="pix/down_16.png" alt="'.get_string("down").'" />'
+//                    .'<img src="pix/down_16.png" alt="'.get_string("down").'" />'
                 . '</a>';
             $linktodown = '<a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid .
                 '&action=sortchange&type=' . $type . '&id1=' . $record->id . '&id2=' . $idprev . '&sesskey=' . sesskey() . '">'
                 . block_exaport_fontawesome_icon('chevron-up', 'solid', 1)
-                //                    .'<img src="pix/up_16.png" alt="'.get_string("up").'" />'
+//                    .'<img src="pix/up_16.png" alt="'.get_string("up").'" />'
                 . '</a>';
             $table->data[$itemindex]['up'] = '&nbsp';
             $table->data[$itemindex]['down'] = '&nbsp';
@@ -665,12 +665,12 @@ function block_exaport_resume_templating_mm_records($courseid, $type, $headertit
             $table->data[$itemindex]['icons'] = ' <a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid .
                 '&action=edit&type=' . $type . '&id=' . $record->id . '&sesskey=' . sesskey() . '">' .
                 block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) .
-                //                    '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+//                    '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
                 '</a>' .
                 ' <a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid . '&action=delete&type=' . $type . '&id=' .
                 $record->id . '">' .
                 block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon', 'mt-2']) .
-                //                    '<img src="pix/del.png" alt="'.get_string("delete").'"/>'.
+//                    '<img src="pix/del.png" alt="'.get_string("delete").'"/>'.
                 '</a>';
         };
     };
@@ -725,7 +725,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
                 $table->data[$itemindex]['icons'] = ' <a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' .
                     $courseid . '&action=edit&type=' . $type . 'comp&id=' . $resume->id . '&sesskey=' . sesskey() . '">' .
                     block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) .
-                    //                        '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+//                        '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
                     '</a>';
             } else {
                 $table->data[$itemindex]['icons'] = '';
@@ -771,7 +771,7 @@ function block_exaport_resume_templating_list_goals_skills($courseid, $resume, $
         $table->data[$itemindex]['icons'] = ' <a href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $courseid .
             '&action=edit&type=' . $type . $element . '&id=' . $resume->id . '&sesskey=' . sesskey() . '">' .
             block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) .
-            //                '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
+//                '<img src="pix/edit.png" alt="'.get_string("edit").'" />'.
             '</a>';
     };
 
@@ -1182,17 +1182,17 @@ function europass_xml($resumeid = 0)
 
     // Skills
     // skills - Career skills
-
+    $skillcontent= $dom->createElement('Skills');
     if ($resume->skillscareers) {
-        europassAddOthersPartToCandiadateProfile($dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscareers'), $resume->skillscareers);
+        europassAddOthersPartToCandiadateProfile($skillcontent,$dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscareers'), $resume->skillscareers);
     }
     // skills - Academic skills
     if ($resume->skillsacademic) {
-        europassAddOthersPartToCandiadateProfile($dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillsacademic'), $resume->skillsacademic);
+        europassAddOthersPartToCandiadateProfile($skillcontent,$dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillsacademic'), $resume->skillsacademic);
     }
     // skills - Personal skills
     if ($resume->skillspersonal) {
-        europassAddOthersPartToCandiadateProfile($dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillspersonal'), $resume->skillspersonal);
+        europassAddOthersPartToCandiadateProfile($skillcontent,$dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillspersonal'), $resume->skillspersonal);
     }
     // skills - Educational standards
     $skillscontent = '';
@@ -1204,8 +1204,11 @@ function europass_xml($resumeid = 0)
         };
     };
     if ($skillscontent) {
-        europassAddOthersPartToCandiadateProfile($dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscomp'), $skillscontent);
+        europassAddOthersPartToCandiadateProfile($skillcontent,$dom, $learner_info, block_exaport_get_string('resume_skills'), block_exaport_get_string('resume_skillscomp'), $skillscontent);
     }
+
+
+
 
 
     // certificates
@@ -1281,8 +1284,30 @@ function europass_xml($resumeid = 0)
     }
 
     // Memberships.
+
+    $mbrships= $DB->get_records('block_exaportresume_mbrship',array("resume_id" => $resume->id), 'sorting' );
+
+    if($mbrships && is_array($mbrships)) {
+        foreach ($mbrships as $mbrship) {
+            $membership_node = $dom->createElement('Achievement');
+            $membership_code= $dom->createElement('Code');
+            $membership_label=$dom->createElement('Label');
+            $membership_title=$dom->createElement('Title');
+            $membership_description=$dom->createElement('Description');
+
+            $membership_label->appendChild($dom->createTextNode($mbrship->title));
+            $membership_code->appendChild($dom->createTextNode("memberships"));
+            $membership_description->appendChild($dom->createTextNode($mbrship->description));
+
+
+            $membership_title->appendChild($membership_label);
+            $membership_title->appendChild($membership_code);
+            $membership_node->appendChild($membership_title);
+            $certi->appendChild($membership_node);
+        }
+    }
+
     /*
-    list($mbrshipstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_mbrship');
     if ($mbrshipstring) {
         europassAddOthersPartToCandiadateProfile($dom, $educations_list, block_exaport_get_string('resume_mbrship'), '', $mbrshipstring);
         // europass_xml_attachfile($dom, $candidate_profile, $publication_node, 'public', [$publication->id], 'DOC'); files?
@@ -1343,28 +1368,18 @@ function europass_xml($resumeid = 0)
     return $xml;
 }
 
-function europassAddOthersPartToCandiadateProfile(&$dom, &$candidateProfile, $sectionTitle, $title, $description)
+function europassAddOthersPartToCandiadateProfile($skillscontent,&$dom, &$candidateProfile, $sectionTitle, $title, $description)
 {
-    $others = $dom->createElement('others');
-    $Title = $dom->createElement('Title');
-    $text = $dom->createTextNode($sectionTitle);
-    $Title->appendChild($text);
-    $others->appendChild($Title);
-    $Other = $dom->createElement('Other');
-    if ($title) {
-        $Title = $dom->createElement('Title');
-        $text = $dom->createTextNode($title);
-        $Title->appendChild($text);
-        $Other->appendChild($Title);
-    }
-    $DescriptionNode = $dom->createElement('description');
+
+    $others = $dom->createElement('Other');
+    $DescriptionNode = $dom->createElement('Description');
     $text = $dom->createTextNode($description);
     $DescriptionNode->appendChild($text);
-    $Other->appendChild($DescriptionNode);
+    $others->appendChild($DescriptionNode);
 
-    $others->appendChild($Other);
+    $skillscontent->appendChild($others);
 
-    $candidateProfile->appendChild($others);
+    $candidateProfile->appendChild($skillscontent);
 }
 
 function get_europass_date($string_date, $format = 'Y-m-d')

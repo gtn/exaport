@@ -160,7 +160,7 @@ namespace {
 
             $tempjoin = '';
             if (is_array($usergroups) && count($usergroups) > 0) {
-                $tempjoin .= "LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id = vgshar.viewid ";
+                $tempjoin .= " LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id = vgshar.viewid";
             }
             $view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v" .
                 " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid = ?" .

@@ -1010,7 +1010,7 @@ function europass_xml($resumeid = 0)
 
 
     // user picture.
-    $fs = get_file_storage();
+    /*$fs = get_file_storage();
     $img_types = array('png', 'jpg', 'jpeg');
     $i = 0;
     do {
@@ -1021,7 +1021,7 @@ function europass_xml($resumeid = 0)
         $base64content = base64_encode('data:' . $file->get_mimetype() . ';base64,' . base64_encode($file->get_content())); // double encoding!!!!!
         europass_add_attachment($dom, $educations_list, $base64content, 'photo', 'ProfilePicture');
     };
-
+	*/
     // personal information
     /*
     $executive_summary = $dom->createElement('hr:executive_summary');

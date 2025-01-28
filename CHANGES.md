@@ -1,3 +1,6 @@
+### v4.6.7 (2025012800) ###
+*europass profile image bug
+
 ### v4.6.7 (2025012100) ###
 *europass export changes
 

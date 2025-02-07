@@ -1042,20 +1042,14 @@ function europass_xml($resumeid = 0)
         $organization_name = $dom->createElement('Name');
         $text = $dom->createTextNode(clean_for_external_xml($employment->employer));
         $organization_name->appendChild($text);
+        $address=$dom->createElement('Address');
+        $contact=$dom->createElement('Contact');
+        $addressLine=$dom->createElement('AddressLine');
+        $addressLine->appendChild($dom->createTextNode($employment->employeraddress));
+        $organization_info->appendChild($address);
+        $address->appendChild($contact);
+        $contact->appendChild($addressLine);
         $organization_info->appendChild($organization_name);
-        // address
-        /*
-        $address = clean_for_external_xml($employment->employeraddress);
-        $organization_contact = $dom->createElement('organization_contact');
-        $communication = $dom->createElement('Email');
-        $addresses = $dom->createElement('address');
-        $text = $dom->createTextNode($address);
-        $addresses->appendChild($text);
-        $communication->appendChild($addresses);
-        $organization_contact->appendChild($communication);
-        $work->appendChild($organization_contact);
-        */
-
         $position_title = $dom->createElement('Position');
         $label->appendChild($dom->createTextNode($employment->jobtitle));
         $position_title->appendChild($label);
@@ -1131,6 +1125,7 @@ function europass_xml($resumeid = 0)
         $address = $dom->createElement('Address');
         $contact = $dom->createElement('Contact');
         $country = $dom->createElement('Country');
+        $title_tag->appendChild($dom->createTextNode('Qualifications'));
         $text = $dom->createTextNode($education->country);
         $organization_info->appendChild($communication);
         $country->appendChild($text);
@@ -1139,6 +1134,12 @@ function europass_xml($resumeid = 0)
         $communication->appendChild($address);
         $education_history->appendChild($organization_info);
         $attendance_period = $dom->createElement('Period');
+        if (empty($education->qualtype) && !empty($education->qualname)){
+            $title_tag->appendChild($dom->createTextNode($education->qualname));
+        }
+        if (!empty($education->qualtype)) {
+            $title_tag->appendChild($dom->createTextNode($education->qualtype));
+        }
         // start date
         $date = get_europass_date($education->startdate);
         $data_parts = explode('.', $education->startdate);
@@ -1175,7 +1176,6 @@ function europass_xml($resumeid = 0)
         $education_history->appendChild($attendance_period);
 
         $title_tag = $dom->createElement('Title');
-        $title_tag->appendChild($dom->createTextNode('Qualifications'));
         $education_history->appendChild($title_tag);
         $educations_list->appendChild($education_history);
     }
@@ -1288,12 +1288,12 @@ function europass_xml($resumeid = 0)
         // list($publicationsstring, $elementids) = list_for_resume_elements($resume->id, 'block_exaportresume_public');
         // europassAddOthersPartToCandiadateProfile($dom, $candidate_profile, block_exaport_get_string('resume_public'), '', $publicationsstring);
         foreach ($badges as $badge) {
-			
+
 			$rsbadge = $DB->get_record_sql('SELECT b.*, bi.dateissued, bi.uniquehash ' .
                     ' FROM {badge} b LEFT JOIN {badge_issued} bi ON b.id=bi.badgeid AND bi.userid=' . intval($USER->id) .
                     ' WHERE b.id=? ',
                     array('id' => $badge->badgeid));
-					
+
             $badge_node = $dom->createElement('Achievement');
             $badge_title = $dom->createElement('Title');
             $badge_label = $dom->createElement('Label');
@@ -1316,7 +1316,7 @@ function europass_xml($resumeid = 0)
 
         //
     }
- 
+
     // Memberships.
 
     $mbrships= $DB->get_records('block_exaportresume_mbrship',array("resume_id" => $resume->id), 'sorting' );

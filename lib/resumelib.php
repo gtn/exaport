@@ -1115,25 +1115,15 @@ function europass_xml($resumeid = 0)
         $education_history = $dom->createElement('Education');
         $organization_info = $dom->createElement('Organisation');
         $organization_name = $dom->createElement('Name');
+        $title_tag = $dom->createElement('Title');
         $text = $dom->createTextNode(clean_for_external_xml($education->institution));
         $organization_name->appendChild($text);
         $organization_info->appendChild($organization_name);
-
-        // address
-        $address = clean_for_external_xml($education->country);
-        $communication = $dom->createElement('ContactInfo');
-        $address = $dom->createElement('Address');
-        $contact = $dom->createElement('Contact');
-        $country = $dom->createElement('Country');
-        $title_tag->appendChild($dom->createTextNode('Qualifications'));
-        $text = $dom->createTextNode($education->country);
-        $organization_info->appendChild($communication);
-        $country->appendChild($text);
-        $contact->appendChild($country);
-        $address->appendChild($contact);
-        $communication->appendChild($address);
+        $activities= $dom->createElement('Activities');
+        $activities->appendChild($dom->createTextNode($education->qualdescription));
         $education_history->appendChild($organization_info);
         $attendance_period = $dom->createElement('Period');
+
         if (empty($education->qualtype) && !empty($education->qualname)){
             $title_tag->appendChild($dom->createTextNode($education->qualname));
         }
@@ -1174,8 +1164,7 @@ function europass_xml($resumeid = 0)
         // current
 
         $education_history->appendChild($attendance_period);
-
-        $title_tag = $dom->createElement('Title');
+        $education_history->appendChild($activities);
         $education_history->appendChild($title_tag);
         $educations_list->appendChild($education_history);
     }

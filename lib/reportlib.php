@@ -206,7 +206,8 @@ class ExaportVievPdf {
         return $result_percent;
     }
 
-    // Function to test tcpdf functionalities. Rename it to "generateView" and change name of original "generateView" to some             ot function genarateViewDev($layout, $columns_with_blocks, $access) {
+    // Function to test tcpdf functionalities. Rename it to "generateView" and change name of original "generateView" to some other
+    function genarateViewDev($layout, $columnsWithBlocks, $access) {
 
         // set font
         $this->setDefaultFont();

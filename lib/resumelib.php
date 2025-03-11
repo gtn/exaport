@@ -948,7 +948,8 @@ function europass_xml($resumeid = 0)
     $person_name = $dom->createElement('PersonName');
     //$given_name = $dom->createElement('oa:given_name');
     $first_name = $dom->createElement('FirstName');
-    $text = $dom->createTextNode($USER->firstname);
+    $user_firstName= clean_param($USER->firstname,PARAM_ALPHANUM);
+    $text = $dom->createTextNode($user_firstName);
     $first_name->appendChild($text);
     $family_name = $dom->createElement('Surname');
     $text = $dom->createTextNode($USER->lastname);
@@ -1029,14 +1030,14 @@ function europass_xml($resumeid = 0)
     $educations_list->appendChild($executive_summary);
     */
 
-    // WorkExperienceList / Employment history.
-    $organization_info = $dom->createElement('Employer');
+
     $employments = $DB->get_records('block_exaportresume_employ', array("resume_id" => $resume->id), 'sorting');
     // $workexperiencelist = europass_xml_employers_educations($dom, 'WorkExperience', $resume->employments);
     $work_experience = $dom->createElement('WorkExperienceList');
 
     foreach ($employments as $employment) {
         $work = $dom->createElement('WorkExperience');
+        $organization_info = $dom->createElement('Employer');
         // title
         $label = $dom->createElement('Label');
         $organization_name = $dom->createElement('Name');
@@ -1058,28 +1059,38 @@ function europass_xml($resumeid = 0)
         // start date
         if ($employment->startdate) {
             $date_parts = explode('.', $employment->startdate);
-            $year = $date_parts[2];
             $start_date = $dom->createElement('From');
-            $start_date->setAttribute('year', $year);
-            $period_tag->appendChild($start_date);
+            if (count($date_parts) != 3 && $employment->startdate!='') {
+                $year = $date_parts[0];
+                $start_date->setAttribute('year', $year);
+                $period_tag->appendChild($start_date);
+            }else{
+                $year = $date_parts[2];
+                $period_tag->appendChild($start_date);
+                $start_date->setAttribute('year', $year);
+            }
         }
         // end date
         if ($employment->enddate) {
             $date_parts = explode('.', $employment->enddate);
-            $year = $date_parts[2];
+
+            if ($employment->enddate != '' && count($date_parts)) {
+                $year = $employment->enddate;
+            }else{
+                $year = $date_parts[2];
+            }
             $end_date = $dom->createElement('To');
             $end_date->setAttribute('year', $year);
             $period_tag->appendChild($end_date);
 
             $current = 'false';
             $ongoing->appendChild($dom->createTextNode('false'));
-            $period_tag->appendChild($ongoing);
         } else {
             $ongoing->appendChild($dom->createTextNode('true'));
             $current = 'true';
-            $period_tag->appendChild($ongoing);
 
         }
+        $period_tag->appendChild($ongoing);
         // current
         $current_indicator = $dom->createElement('hr:current_indicator');
         $text = $dom->createTextNode($current);
@@ -1123,7 +1134,6 @@ function europass_xml($resumeid = 0)
         $activities->appendChild($dom->createTextNode($education->qualdescription));
         $education_history->appendChild($organization_info);
         $attendance_period = $dom->createElement('Period');
-
         if (empty($education->qualtype) && !empty($education->qualname)){
             $title_tag->appendChild($dom->createTextNode($education->qualname));
         }
@@ -1132,15 +1142,20 @@ function europass_xml($resumeid = 0)
         }
         // start date
         $date = get_europass_date($education->startdate);
-        $data_parts = explode('.', $education->startdate);
-        $year = $data_parts[2];
-        $month = $data_parts[1];
-        $day = $data_parts[0];
         if ($date) {
+            $data_parts = explode('.', $education->startdate);
             $start_date = $dom->createElement('From');
-            $start_date->setAttribute('year', $year);
-            $start_date->setAttribute('month', $month);
-            $start_date->setAttribute('day', $day);
+            if (count($data_parts)!=3 && $education->startdate!='') {
+                $year = $data_parts[0];
+                $start_date->setAttribute('year', $year);
+            }else{
+                $year = $data_parts[2];
+                $month = $data_parts[1];
+                $day = $data_parts[0];
+                $start_date->setAttribute('year', $year);
+                $start_date->setAttribute('month', $month);
+                $start_date->setAttribute('day', $day);
+            }
             $attendance_period->appendChild($start_date);
         }
         // end date

@@ -1140,6 +1140,8 @@ function europass_xml($resumeid = 0)
         }
         if (!empty($education->qualtype)) {
             $title_tag->appendChild($dom->createTextNode($education->qualtype));
+        }else{
+            $title_tag->appendChild($dom->createTextNode(block_exaport_get_string("resume_qualification")));
         }
         // start date
         $date = get_europass_date($education->startdate);

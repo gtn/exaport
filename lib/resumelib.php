@@ -948,11 +948,11 @@ function europass_xml($resumeid = 0)
     $person_name = $dom->createElement('PersonName');
     //$given_name = $dom->createElement('oa:given_name');
     $first_name = $dom->createElement('FirstName');
-    $user_firstName= clean_param($USER->firstname,PARAM_ALPHANUM);
+    $user_firstName= clean_param($USER->firstname,PARAM_ALPHAEXT);
     $text = $dom->createTextNode($user_firstName);
     $first_name->appendChild($text);
     $family_name = $dom->createElement('Surname');
-    $user_lastname= clean_param($USER->lastname,PARAM_ALPHANUM);
+    $user_lastname= clean_param($USER->lastname,PARAM_ALPHAEXT);
     $text = $dom->createTextNode($user_lastname);
     $family_name->appendChild($text);
     $person_name->appendChild($first_name);

@@ -952,7 +952,8 @@ function europass_xml($resumeid = 0)
     $text = $dom->createTextNode($user_firstName);
     $first_name->appendChild($text);
     $family_name = $dom->createElement('Surname');
-    $text = $dom->createTextNode($USER->lastname);
+    $user_lastname= clean_param($USER->lastname,PARAM_ALPHANUM);
+    $text = $dom->createTextNode($user_lastname);
     $family_name->appendChild($text);
     $person_name->appendChild($first_name);
     $person_name->appendChild($family_name);

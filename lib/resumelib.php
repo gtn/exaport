@@ -1074,7 +1074,6 @@ function europass_xml($resumeid = 0)
         // end date
         if ($employment->enddate) {
             $date_parts = explode('.', $employment->enddate);
-
             if ($employment->enddate != '' && count($date_parts)) {
                 $year = $employment->enddate;
             }else{

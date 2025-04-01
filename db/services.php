@@ -207,6 +207,23 @@ $functions = array (
         'description' => 'webservice called through token.php',
         'type' => 'read',
     ),
+
+    //david changes
+
+    'block_exaport_get_custom_view_test' => array (
+      'classname' => 'block_exaport_external',
+      'methodname' => 'get_custom_view_test',
+      'classpath' => 'blocks/exaport/externallib.php',
+      'description' => 'Return detailed view all',
+      'type' => 'read',
+    ),
+    'block_exaport_get_url_media' => array (
+      'classname' => 'block_exaport_external',
+      'methodname' => 'get_url_media',
+      'classpath' => 'blocks/exaport/externallib.php',
+      'description' => 'services testing working',
+      'type' => 'read',
+    ),
 );
 
 $services = array (
@@ -243,6 +260,8 @@ $services = array (
       24 => 'block_exaport_export_file_to_externalportfolio',
       25 => 'block_exaport_login',
       26 => 'block_exaport_get_shared_categories',
+      27 => 'block_exaport_get_url_media',
+      28 => 'block_exaport_get_custom_view_test',
     ),
   ),
 );

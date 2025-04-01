@@ -718,6 +718,7 @@ if ($view) {
     $postview->blocks = json_encode(block_exaport_get_view_blocks($view));
     require_once(__DIR__.'/lib/resumelib.php');
     $resumedata = block_exaport_get_resume_params($USER->id, true);
+	if ($resumedata->cover)
     $resumedata->cover = file_rewrite_pluginfile_urls($resumedata->cover, 'pluginfile.php',
         context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resumedata->id);
     $postview->resume = json_encode($resumedata);
@@ -802,9 +803,9 @@ if ($view->id) {
 $resumeitems = block_exaport_get_resume_params($USER->id, true);
 // convert editors images:
 // cover
-$resumeitems->cover = file_rewrite_pluginfile_urls($resumeitems->cover, 'pluginfile.php',
+if ($resumedata->cover) $resumeitems->cover = file_rewrite_pluginfile_urls($resumeitems->cover, 'pluginfile.php',
     context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_cover', $resumeitems->id);
-$resumeitems->cover = block_exaport_add_view_access_parameter_to_url($resumeitems->cover, $view, ['src']);
+if ($resumedata->cover) $resumeitems->cover = block_exaport_add_view_access_parameter_to_url($resumeitems->cover, $view, ['src']);
 // goals
 $resumeitems->goalspersonal = file_rewrite_pluginfile_urls($resumeitems->goalspersonal, 'pluginfile.php',
     context_user::instance($USER->id)->id, 'block_exaport', 'resume_editor_goalspersonal', $resumeitems->id);

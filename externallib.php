@@ -21,7 +21,7 @@ require(__DIR__.'/inc.php');
 require_once($CFG->libdir.'/externallib.php');
 require_once($CFG->libdir.'/weblib.php');
 require_once($CFG->dirroot.'/lib/filelib.php');
-
+require_once(__DIR__.'/lib/resumelib.php');
 use block_exaport\globals as g;
 
 class block_exaport_external extends external_api {
@@ -1751,5 +1751,498 @@ class block_exaport_external extends external_api {
             )
         );
     }
+    // add david code *******
+
+    public static function get_url_media() {
+        global $CFG, $DB, $USER;
+        // Mensaje de prueba
+        
+
+        $message = 'the services is working';
+    
+        return $message;
+    }
+    
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function get_url_media_parameters() {
+        return new external_function_parameters(
+            // No hay parámetros
+            array(
+                'dummy_param' => new external_value(PARAM_TEXT, 'test parameter', VALUE_DEFAULT, '', NULL_NOT_ALLOWED)
+                )
+            );
+
+    }
+    /**
+     * Returns description of method result value
+     * @return external_description
+     */
+    public static function get_url_media_returns() {
+        return new external_value(PARAM_TEXT, 'Description messages');
+    }
+    
+    
+    
+    /**
+     * Returns description of method parameters
+     *
+     * @return external_function_parameters
+     */
+    public static function get_custom_view_test_parameters() {
+        return new external_function_parameters(
+                array('id' => new external_value(PARAM_INT, 'view id'))
+        );
+    }
+    /**
+     * Return detailed view
+     *
+     * @ws-type-read
+     * @param int view id
+     * @return array view including list of items
+     */
+    public static function get_custom_view_test($id) {
+        global $CFG, $DB, $USER;
+      //  echo 'executed ***********';
+        //Obtiene los detalles de la vista basados en el ID
+        $sumary_view = block_exaport_get_resume_params(3, true);
+       // echo 'sumaru from externalib testing<br>';
+        //print_r($sumary_view);
+        $conditions = array("id" => $id);
+        
+        $view = $DB->get_record("block_exaportview", $conditions);
+        // print_r("testing insidess");
+        //var_dump($view);
+        $result = new stdClass();
+        $result->id = $view->id;
+        $result->name = $view->name;
+        $result->description = $view->description;
+        
+    
+       // Obtiene los elementos asociados con la vista
+        $conditions = array("viewid" => $id);
+        $items = $DB->get_records("block_exaportviewblock", $conditions);
+        // echo 'itemsss <br>';
+        // //print_r($USER);
+        // print_r($items);
+       
+        $result->items = array();
+       
+        foreach ($items as $item) {
+            $resultitem = new stdClass();
+            $resultitem->id = $item->id;
+            $resultitem->type = $item->type;
+            $resultitem->positionx = $item->positionx;
+            $resultitem->positiony = $item->positiony;
+            $resultitem->itemid = $item->itemid;
+
+           
+    
+            switch ($item->type) {
+                case "cv_information":
+                    switch ($item->resume_itemtype) {
+                        case "edu":
+                            
+                            $resultitem->details = new stdClass();
+                            $resultitem->details->itemid = $item->itemid;
+                            $resultitem->details->resume_itemtype = "edu";
+                            $found = false; // Bandera para verificar si encontramos el itemid
+
+                            // Verifica que exista el array 'educations' dentro de sumary_view
+                            if (isset($sumary_view->educations) && is_array($sumary_view->educations)) {
+                                // Itera sobre el array para encontrar el objeto con el itemid correspondiente
+                                foreach ($sumary_view->educations as $educationId => $educationDetails) {
+                                    if ($educationId == $item->itemid) {
+                                        // Asigna los detalles de la educación cuando el itemid coincide
+                                        //$resultitem->details->startdate = $educationDetails->startdate;
+
+                                        $resultitem->details->startdate = $educationDetails->startdate;
+                                        $resultitem->details->enddate = $educationDetails->enddate;
+                                        $resultitem->details->institution = $educationDetails->institution;
+                                        $resultitem->details->institutionaddress = $educationDetails->institutionaddress;
+                                        $resultitem->details->qualtype = $educationDetails->qualtype;
+                                        $resultitem->details->qualname = $educationDetails->qualname;
+                                        $resultitem->details->qualdescription = $educationDetails->qualdescription;
+                                        //$resultitem->details->sorting = $educationDetails->sorting;
+                                        $resultitem->details->attachments = array();
+
+                                        // Si hay archivos adjuntos, añádelos
+                                        if (!empty($educationDetails->attachments)) {
+                                            foreach ($educationDetails->attachments as $attachment) {
+                                                $attachmentObj = new stdClass();
+                                                $attachmentObj->filename = $attachment['filename'];
+                                                $attachmentObj->fileurl = $attachment['fileurl'];
+                                                $resultitem->details->attachments[] = $attachmentObj;
+                                            }
+                                        }
+                                        $found = true;
+                                        break; // Detiene el bucle una vez que encuentra el itemid correspondiente
+                                    }
+                                }
+                            }
+
+                            if (!$found) {
+                                // Manejo de caso en que no se encuentre la información específica de educación para el itemid
+                                //echo "No education details found for itemid: {$item->itemid}";
+                            }                            
+                        break;
+                        
+                        case "employ":
+                            // Inicializa detalles para evitar errores si no hay datos
+                            $resultitem->details = new stdClass();
+                            $resultitem->details->itemid = $item->itemid;
+                            $resultitem->details->resume_itemtype = "employ";
+                            $found = false; // Bandera para verificar si encontramos el itemid
+                        
+                            // Verifica que exista el array 'employments' dentro de sumary_view
+                            if (isset($sumary_view->employments) && is_array($sumary_view->employments)) {
+                                // Itera sobre el array para encontrar el objeto con el itemid correspondiente para empleos
+                                foreach ($sumary_view->employments as $employmentId => $employmentDetails) {
+                                    if ($employmentId == $item->itemid) {
+                                        // Asigna los detalles del empleo cuando el itemid coincide
+                                        $resultitem->details->startdate = $employmentDetails->startdate;
+                                        $resultitem->details->enddate = $employmentDetails->enddate;
+                                        $resultitem->details->employer = $employmentDetails->employer;
+                                        $resultitem->details->employeraddress = $employmentDetails->employeraddress ?? '';
+                                        $resultitem->details->jobtitle = $employmentDetails->jobtitle;
+                                        $resultitem->details->positiondescription = $employmentDetails->positiondescription;
+                                        
+                                        // Inicializa attachments como un array vacío
+                                        $resultitem->details->attachments = [];
+                                        
+                                        // Si hay archivos adjuntos, añádelos correctamente como objetos
+                                        if (!empty($employmentDetails->attachments)) {
+                                            foreach ($employmentDetails->attachments as $attachment) {
+                                                $attachmentObj = new stdClass();
+                                                $attachmentObj->filename = $attachment['filename'];
+                                                $attachmentObj->fileurl = $attachment['fileurl'];
+                                                $resultitem->details->attachments[] = $attachmentObj;
+                                            }
+                                        }
+                                        $found = true;
+                                        break; // Detiene el bucle una vez que encuentra el itemid correspondiente
+                                    }
+                                }
+                            }
+                        
+                            if (!$found) {
+                                // Manejo de caso en que no se encuentre la información específica de empleo para el itemid
+                                //echo "No employment details found for itemid: {$item->itemid}";
+                            }
+                            break;
+                        
+                            
+                        case "certif":
+                            // Inicializa detalles para evitar errores si no hay datos
+                            $resultitem->details = new stdClass();
+                            $resultitem->details->itemid = $item->itemid;
+                            $resultitem->details->resume_itemtype = "certif";
+                            
+                            $found = false; // Bandera para verificar si encontramos el itemid
+                            
+                            // Verifica que exista el array 'certifications' dentro de sumary_view
+                            if (isset($sumary_view->certifications) && is_array($sumary_view->certifications)) {
+                                // Itera sobre el array para encontrar el objeto con el itemid correspondiente para certificaciones
+                                foreach ($sumary_view->certifications as $certificationId => $certificationDetails) {
+                                    if ($certificationId == $item->itemid) {
+                                        // Aquí, en lugar de reasignar $resultitem->details como un nuevo objeto,
+                                        // solo actualizamos sus propiedades directamente.
+                                        $resultitem->details->date = $certificationDetails->date;
+                                        $resultitem->details->title = $certificationDetails->title;
+                                        $resultitem->details->description = $certificationDetails->description ?? '';
+                                        
+                                        // Inicializa attachments como un array vacío
+                                        $resultitem->details->attachments = [];
+                                        
+                                        // Si hay archivos adjuntos, añádelos correctamente como objetos
+                                        if (!empty($certificationDetails->attachments)) {
+                                            foreach ($certificationDetails->attachments as $attachment) {
+                                                $attachmentObj = new stdClass();
+                                                $attachmentObj->filename = $attachment['filename'];
+                                                $attachmentObj->fileurl = $attachment['fileurl'];
+                                                $resultitem->details->attachments[] = $attachmentObj;
+                                            }
+                                        }
+                                        $found = true;
+                                        break; // Detiene el bucle una vez que encuentra el itemid correspondiente
+                                    }
+                                }
+                            }
+
+                            if (!$found) {
+                                //echo "No certification details found for itemid: {$item->itemid}";
+                            }
+                            break;
+
+                        case "interests":
+                            // Inicializa detalles para evitar errores si no hay datos
+                            $resultitem->details = new stdClass();
+                            $resultitem->details->itemid = $item->itemid;
+                            $resultitem->details->resume_itemtype = "interests";
+                            $found = false; // Bandera para verificar si encontramos el itemid
+                            
+                            // Suponiendo que tienes una estructura similar para intereses en $sumary_view
+                            if (isset($sumary_view->interests)) {
+                                // No necesitas iterar si interests no se asocia con un itemid específico
+                                // Asigna directamente los detalles de interests a resultitem->details
+                                $resultitem->details->interests = $sumary_view->interests;
+                                $found = true;
+
+                                // Inicializa attachments como un array vacío
+                                $resultitem->details->attachments = [];
+
+                                // Si hay archivos adjuntos para intereses, añádelos correctamente como objetos
+                                // Asumimos aquí que los attachments de intereses se manejan de manera similar
+                                if (!empty($sumary_view->interests_attachments)) {
+                                    foreach ($sumary_view->interests_attachments as $attachment) {
+                                        $attachmentObj = new stdClass();
+                                        $attachmentObj->filename = $attachment['filename'];
+                                        $attachmentObj->fileurl = $attachment['fileurl'];
+                                        $resultitem->details->attachments[] = $attachmentObj;
+                                    }
+                                }
+                            }
+
+                            if (!$found) {
+                                //echo "No interests details found for itemid: {$item->itemid}";
+                            }
+                            break;
+                        case "goalspersonal":
+
+                            $resultitem->details = new stdClass();
+                            $resultitem->details->itemid = $item->itemid;
+                            $resultitem->details->resume_itemtype = "goalspersonal";
+                            
+                            if (isset($sumary_view->goalspersonal)) {
+                                // No necesitas iterar si interests no se asocia con un itemid específico
+                                // Asigna directamente los detalles de interests a resultitem->details
+                                $resultitem->details->goalspersonal = $sumary_view->goalspersonal;
+                                //$found = true;
+
+                                // Inicializa attachments como un array vacío
+                                $resultitem->details->attachments = [];
+
+                                // Si hay archivos adjuntos para intereses, añádelos correctamente como objetos
+                                // Asumimos aquí que los attachments de intereses se manejan de manera similar
+                                if (!empty($sumary_view->goalspersonal_attachments)) {
+                                    foreach ($sumary_view->goalspersonal_attachments as $attachment) {
+                                        $attachmentObj = new stdClass();
+                                        $attachmentObj->filename = $attachment['filename'];
+                                        $attachmentObj->fileurl = $attachment['fileurl'];
+                                        $resultitem->details->attachments[] = $attachmentObj;
+                                    }
+                                }
+                            }                           
+                            break;
+                        case "goalsacademic":
+
+                            $resultitem->details = new stdClass();
+                            $resultitem->details->itemid = $item->itemid;
+                            $resultitem->details->resume_itemtype = "goalsacademic";
+                            
+                            if (isset($sumary_view->goalsacademic)) {
+                                // No necesitas iterar si interests no se asocia con un itemid específico
+                                // Asigna directamente los detalles de interests a resultitem->details
+                                $resultitem->details->goalsacademic = $sumary_view->goalsacademic;
+                                //$found = true;
+
+                                // Inicializa attachments como un array vacío
+                                $resultitem->details->attachments = [];
+
+                                // Si hay archivos adjuntos para intereses, añádelos correctamente como objetos
+                                // Asumimos aquí que los attachments de intereses se manejan de manera similar
+                                if (!empty($sumary_view->goalsacademic_attachments)) {
+                                    foreach ($sumary_view->goalsacademic_attachments as $attachment) {
+                                        $attachmentObj = new stdClass();
+                                        $attachmentObj->filename = $attachment['filename'];
+                                        $attachmentObj->fileurl = $attachment['fileurl'];
+                                        $resultitem->details->attachments[] = $attachmentObj;
+                                    }
+                                }
+                            }
+                           
+                            break;
+                        
+                        case "goalscareers":
+
+                            $resultitem->details = new stdClass();
+                            $resultitem->details->itemid = $item->itemid;
+                            $resultitem->details->resume_itemtype = "goalscareers";
+                            
+                            if (isset($sumary_view->goalscareers)) {
+                                // No necesitas iterar si interests no se asocia con un itemid específico
+                                // Asigna directamente los detalles de interests a resultitem->details
+                                $resultitem->details->goalscareers = $sumary_view->goalscareers;
+                                //$found = true;
+                                $resultitem->details->attachments = [];
+                                // Inicializa attachments como un array vacío
+                                
+
+                                // Si hay archivos adjuntos para intereses, añádelos correctamente como objetos
+                                // Asumimos aquí que los attachments de intereses se manejan de manera similar
+                                if (!empty($sumary_view->goalscareers_attachments)) {
+                                    foreach ($sumary_view->goalscareers_attachments as $attachment) {
+                                        $attachmentObj = new stdClass();
+                                        $attachmentObj->filename = $attachment['filename'];
+                                        $attachmentObj->fileurl = $attachment['fileurl'];
+                                        $resultitem->details->attachments[] = $attachmentObj;
+                                    }
+                                }
+                            }
+                           
+                            break;
+                        case "skillspersonal":
+
+                            $resultitem->details = new stdClass();
+                            $resultitem->details->itemid = $item->itemid;
+                            $resultitem->details->resume_itemtype = "skillspersonal";
+                            
+                            if (isset($sumary_view->skillspersonal)) {
+                                // No necesitas iterar si interests no se asocia con un itemid específico
+                                // Asigna directamente los detalles de interests a resultitem->details
+                                $resultitem->details->skillspersonal = $sumary_view->skillspersonal;
+                                //$found = true;
+
+                                // Inicializa attachments como un array vacío
+                                $resultitem->details->attachments = [];
+
+                                // Si hay archivos adjuntos para intereses, añádelos correctamente como objetos
+                                // Asumimos aquí que los attachments de intereses se manejan de manera similar
+                                if (!empty($sumary_view->skillspersonal_attachments)) {
+                                    foreach ($sumary_view->skillspersonal_attachments as $attachment) {
+                                        $attachmentObj = new stdClass();
+                                        $attachmentObj->filename = $attachment['filename'];
+                                        $attachmentObj->fileurl = $attachment['fileurl'];
+                                        $resultitem->details->attachments[] = $attachmentObj;
+                                    }
+                                }
+                            }
+                           
+                            break;
+                        
+
+                    }
+                    break;
+                case "item":
+                      //Manejo de elementos de tipo 'item'
+                    if (isset($item->itemid)) {
+                        $itemDetails = $DB->get_record("block_exaportitem", array("id" => $item->itemid));
+                        $resultitem->name = $itemDetails->name ?? 'Name not available';
+                        $resultitem->intro = $itemDetails->intro ?? 'Introduction not available';
+                        $resultitem->url = $itemDetails->url ?? 'Url not available'; // Asegurar que se obtiene la URL
+                        $resultitem->categoryid = $itemDetails->categoryid ?? 'Categoryid not available';
+
+                        // $resultitem->name = isset($itemDetails->name) ? $itemDetails->name : 'Name not available';
+                        // $resultitem->intro = isset($itemDetails->intro) ? $itemDetails->intro : 'Introduction not available';
+                        // $resultitem->url = isset($itemDetails->url) ? $itemDetails->url : 'Url not available';
+                        // $resultitem->categoryid = isset($itemDetails->categoryid) ? $itemDetails->categoryid : 'Categoryid not available';
+                    } else {
+                        $resultitem->name = 'name not available';
+                        $resultitem->intro = 'Introduction not available';
+                    }
+                    break;
+              
+    
+                case "personal_information":
+                    //Manejo de elementos de tipo 'personal_information'
+                   
+                    $resultitem->firstname = $item->firstname;
+                    $resultitem->lastname = $item->lastname;
+                    $resultitem->email = $item->email;
+                    $resultitem->text = $item->text;
+                    $resultitem->block_title = $item->block_title;
+                    
+                    //Aquí puedes agregar más campos específicos del tipo 'personal_information'
+                    break;
+    
+                case "headline":
+                  //  Manejo de elementos de tipo 'headline'
+                  
+                  $resultitem->text = $item->text;
+                 
+                    break;
+    
+                //Agrega casos para otros tipos si es necesario
+            }
+    
+            $result->items[] = $resultitem;
+            
+        }
+        
+        return $result;
+    }
+    /**
+     * Returns desription of method return values
+     *
+     * @return external_single_structure
+     */
+
+    public static function get_custom_view_test_returns() {
+        return new external_single_structure(
+            array(
+                'id' => new external_value(PARAM_INT, 'id of view'),
+                'name' => new external_value(PARAM_TEXT, 'title of view'),
+                'description' => new external_value(PARAM_RAW, 'description of view'),
+                'items' => new external_multiple_structure(
+                    new external_single_structure(
+                        array(
+                            'id' => new external_value(PARAM_INT, 'id of item'),
+                            'type' => new external_value(PARAM_TEXT, 'type of item (item, personal_information, headline, cv_information)'),
+                            'positionx' => new external_value(PARAM_INT, 'x position of item', VALUE_OPTIONAL),
+                            'positiony' => new external_value(PARAM_INT, 'y position of item', VALUE_OPTIONAL),
+                            'name' => new external_value(PARAM_TEXT, 'name of item', VALUE_OPTIONAL),
+                            'intro' => new external_value(PARAM_RAW, 'intro of item', VALUE_OPTIONAL),
+                            'url' => new external_value(PARAM_RAW, 'url of item', VALUE_OPTIONAL),
+                            'categoryid' => new external_value(PARAM_INT, 'category of item', VALUE_OPTIONAL),
+                            'firstname' => new external_value(PARAM_TEXT, 'first name', VALUE_OPTIONAL),
+                            'lastname' => new external_value(PARAM_TEXT, 'last name', VALUE_OPTIONAL),
+                            'email' => new external_value(PARAM_TEXT, 'email address', VALUE_OPTIONAL),
+                            'text' => new external_value(PARAM_RAW, 'text content', VALUE_OPTIONAL),
+                            'details' => new external_single_structure(
+                                array(
+                                    'itemid' => new external_value(PARAM_INT, 'ID of the CV item', VALUE_OPTIONAL),
+                                    'resume_itemtype' => new external_value(PARAM_TEXT, 'Name array', VALUE_OPTIONAL),
+                                    'startdate' => new external_value(PARAM_RAW, 'Start date of education', VALUE_OPTIONAL),
+                                    'enddate' => new external_value(PARAM_RAW, 'End date of education', VALUE_OPTIONAL),
+                                    'institution' => new external_value(PARAM_TEXT, 'Name of the institution', VALUE_OPTIONAL),
+                                    'institutionaddress' => new external_value(PARAM_TEXT, 'Address of the institution', VALUE_OPTIONAL),
+                                    'qualtype' => new external_value(PARAM_TEXT, 'Type of qualification', VALUE_OPTIONAL),
+                                    'qualname' => new external_value(PARAM_TEXT, 'Name of qualification', VALUE_OPTIONAL),
+                                    'qualdescription' => new external_value(PARAM_RAW, 'Description of qualification', VALUE_OPTIONAL),
+                                    'employer' => new external_value(PARAM_TEXT, 'Name of the employer, applicable for employment', VALUE_OPTIONAL),
+                                    'employeraddress' => new external_value(PARAM_TEXT, 'Address of the employer, applicable for employment', VALUE_OPTIONAL),
+                                    'jobtitle' => new external_value(PARAM_TEXT, 'Job title, applicable for employment', VALUE_OPTIONAL),
+                                    'positiondescription' => new external_value(PARAM_RAW, 'Description of the position, applicable for employment', VALUE_OPTIONAL),
+                                    'date' => new external_value(PARAM_RAW, 'Date of the certification, applicable for certifications', VALUE_OPTIONAL),
+                                    'title' => new external_value(PARAM_TEXT, 'Title of the certification, applicable for certifications', VALUE_OPTIONAL),
+                                    'description' => new external_value(PARAM_RAW, 'Description of the certification, applicable for certifications', VALUE_OPTIONAL),
+                                    'interests' => new external_value(PARAM_RAW, 'Interests, applicable for personal interests', VALUE_OPTIONAL),
+                                   // 'interests' => new external_value(PARAM_RAW, 'Interests, applicable for personal interests', VALUE_OPTIONAL),
+                                    'goalspersonal' => new external_value(PARAM_RAW, 'Personal goals', VALUE_OPTIONAL),
+                                    'goalsacademic' => new external_value(PARAM_RAW, 'Academic goals', VALUE_OPTIONAL),
+                                    'goalscareers' => new external_value(PARAM_RAW, 'Career goals', VALUE_OPTIONAL),
+                                    'skillspersonal' => new external_value(PARAM_RAW, 'Personal skills', VALUE_OPTIONAL),
+                                    'block_title' => new external_value(PARAM_RAW, 'Title Personal information', VALUE_OPTIONAL),
+                                    //'interests' => new external_value(PARAM_TEXT, 'Interests, applicable for personal interests', VALUE_OPTIONAL),
+                                    'attachments' => new external_multiple_structure(
+                                        new external_single_structure(
+                                            array(
+                                                'filename' => new external_value(PARAM_TEXT, 'File name of the attachment', VALUE_OPTIONAL),
+                                                'fileurl' => new external_value(PARAM_RAW, 'URL of the attachment', VALUE_OPTIONAL),
+                                            ), 'Attachment Details', VALUE_OPTIONAL
+                                        )
+                                    ), // ... otros campos para educación
+                                ), 'Details of CV information', VALUE_OPTIONAL
+                            ),
+                            // ... otros campos para tipos específicos
+                        )
+                    )
+                ),
+            )
+        );
+    }
+    
 
 }

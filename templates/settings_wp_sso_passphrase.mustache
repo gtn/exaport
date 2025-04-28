@@ -1,0 +1,18 @@
+
+
+<div class="alert alert-success small block_exaport_message">
+    <p class="my-0 mb-2">
+        {{#pix}} t/check, core, {{#str}} settings_exaport_wp_sso_passphrase_ok, block_exaport {{/str}} {{/pix}} {{#str}} settings_exaport_wp_sso_passphrase_ok, block_exaport {{/str}}<br>
+    </p>
+    <p>
+        <a href="{{testPassphraseUrl}}" target="_blank" class="btn btn-success btn-sm text-white block_exaport_test_passphrase">
+            {{#pix}} t/approve, core, {{#str}} settings_exaport_wp_sso_test_passphrase_button, block_exaport {{/str}} {{/pix}} {{#str}} settings_exaport_wp_sso_test_passphrase_button, block_exaport {{/str}}
+        </a>
+        {{#showResetButton}}
+            <a href="{{removePasssphraseUrl}}" target="_blank" class="btn btn-danger btn-sm ml-3 text-white block_exaport_remove_passphrase">
+                {{#pix}} t/block, core, {{#str}} settings_exaport_wp_sso_remove_passphrase_button, block_exaport {{/str}} {{/pix}} {{#str}} settings_exaport_wp_sso_remove_passphrase_button, block_exaport {{/str}}
+            </a>
+        {{/showResetButton}}
+    </p>
+</div>
+

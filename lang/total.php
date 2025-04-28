@@ -2885,5 +2885,81 @@ return [
         'Kachel-Layout (Alt - Unterstützung endet mit Version 4.6.7)',
         'Tiles layout (Old - ended of support from v4.6.7)',
     ],
+    'settings_export_settings_heading' => [
+        'Export-Einstellungen',
+        'Export settings',
+    ],
+    'settings_exaport_mysource' => [
+        'Source ID',
+        'Source ID',
+    ],
+    'settings_exaport_mysource_body' => [
+        'Automatisch generierte ID dieser Exaport Installation. Diese kann nicht geändert werden',
+        'Automatically generated ID of this Exaport installation. This ID can not be changed',
+    ],
+    'settings_exaport_wp_sso_url' => [
+        'Url to WordPress SSO receiver',
+        'Url to WordPress SSO receiver',
+    ],
+    'settings_exaport_wp_sso_url_body' => [
+        'The url to server which is ready to recieve commands from exaport',
+        'The url to server which is ready to recieve commands from exaport',
+    ],
+    'settings_exaport_wp_sso_passphrase' => [
+        'WordPress SSO Passphrase',
+        'WordPress SSO Passphrase',
+    ],
+    'settings_exaport_wp_sso_passphrase_body' => [
+        'The Passphrase to connect with WordPress SSO receiver',
+        'The Passphrase to connect with WordPress SSO receiver',
+    ],
+    'settings_exaport_wp_sso_enabled' => [
+        'Enable WordPress SSO connection',
+        'Enable WordPress SSO connection',
+    ],
+    'settings_exaport_wp_sso_enabled_body' => [
+        'Enable WordPress connection. Options below must be configured',
+        'Enable WordPress connection. Options below must be configured',
+    ],
+    'settings_exaport_wp_sso_error_no_url_configured' => [
+        'First set up the "block_exaport_wp_sso_url" option',
+        'First set up the "block_exaport_wp_sso_url" option',
+    ],
+    'settings_exaport_reload_settings_page' => [
+        'Reload',
+        'Reload',
+    ],
+    'settings_exaport_wp_sso_error_no_passphrase_registered' => [
+        'The passphrase must be registered in the WordPress SSO server.',
+        'The passphrase must be registered in the WordPress SSO server.',
+    ],
+    'settings_exaport_wp_sso_how_to_get_secret' => [
+        'You need to register your "block_exaport_mysource" value into WordPress SSO server and get a secret code<br />Then you need to insert the secret code into field below and get the passphrase',
+        'You need to register your "block_exaport_mysource" value into WordPress SSO server and get a secret code<br />Then you need to insert the secret code into field below and get the passphrase',
+    ],
+    'settings_exaport_wp_sso_url_to_get_secret' => [
+        'Get the secret code',
+        'Get the secret code',
+    ],
+    'settings_exaport_wp_sso_enter_secret_placeholder' => [
+        'Enter the secret code',
+        'Enter the secret code',
+    ],
+    'settings_exaport_wp_sso_request_passphrase_button' => [
+        'Request the passphrase',
+        'Request the passphrase',
+    ],
+    'settings_exaport_wp_sso_passphrase_ok' => [
+        'The passphrase is configured',
+        'The passphrase is configured',
+    ],
+    'settings_exaport_wp_sso_test_passphrase_button' => [
+        'Test',
+        'Test',
+    ],
+    'settings_exaport_wp_sso_remove_passphrase_button' => [
+        'Remove the passphrase',
+        'Remove the passphrase',
+    ],
 ];
 ?>

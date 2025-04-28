@@ -17,8 +17,11 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+require_once __DIR__ . '/lib/exabis_special_id_generator.php';
+
 require_once(__DIR__ . '/lib/lib.php');
 require_once __DIR__ . '/lib/settings_helper.php';
+require_once __DIR__ . '/lib/wplib.php';
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas',
@@ -116,6 +119,39 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('block_exaport_used_layout',
         get_string('block_exaport_used_layout', 'block_exaport'),
         get_string('block_exaport_used_layout_body', 'block_exaport', $a), 0, $layouts));
+
+    // Export settings
+    $settings->add(new admin_setting_heading('exaport/export_settings',
+        get_string('settings_export_settings_heading', 'block_exaport'),
+        ''));
+    // Generate mysource if it is empty
+    $id = $CFG->block_exaport_mysource;
+    if (!$id || !block_exaport\exabis_special_id_generator::validate_id($id)) {
+        set_config('block_exaport_mysource', block_exaport\exabis_special_id_generator::generate_random_id('EXAPORT'));
+    }
+    $settings->add(new admin_setting_configtext('block_exaport_mysource',
+        get_string('settings_exaport_mysource', 'block_exaport'),
+        get_string('settings_exaport_mysource_body', 'block_exaport'),
+        ''));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_wp_sso_enabled',
+        get_string('settings_exaport_wp_sso_enabled', 'block_exaport'),
+        get_string('settings_exaport_wp_sso_enabled_body', 'block_exaport'),
+        0));
+    $settings->add(new admin_setting_configtext_readonly('block_exaport_wp_sso_url',
+        get_string('settings_exaport_wp_sso_url', 'block_exaport'),
+        get_string('settings_exaport_wp_sso_url_body', 'block_exaport'),
+        'https://lab3.gtn-solutions.com/wp/'));
+    // add JS - like a fake option
+    $settings->add(new block_exaport_admin_setting_withjs(
+        'block_exaport_button_with_js',
+        '',
+        ''
+    ));
+    $settings->add(new admin_setting_wpSSOregister('block_exaport_wp_sso_passphrase',
+        get_string('settings_exaport_wp_sso_passphrase', 'block_exaport'),
+        '',//get_string('settings_exaport_wp_sso_passphrase_body', 'block_exaport'),
+        '--not-used-yet--'));
+
 
     // View custom template settings
     $settings->add(new admin_setting_heading('exaport/layout_settings',

@@ -577,3 +577,34 @@ document.addEventListener("DOMContentLoaded", function() {
     observer.observe(targetNode, faEventConfig);
 });
 
+function showExaportToaster(message, target = "success") {
+  if (typeof Toastify === 'undefined') {
+    return false;
+  }
+  var exaportWpToastifyOptions = {
+    duration: 3000,
+    newWindow: true,
+    gravity: "top", // `top` or `bottom`
+    position: "right", // `left`, `center` or `right`
+    stopOnFocus: true, // Prevents dismissing of toast on hover
+    style: {
+      background: "none",
+    },
+    onClick: function(){} // Callback after click
+  };
+  exaportWpToastifyOptions.text = message;
+  switch (target) {
+    case 'success':
+      exaportWpToastifyOptions.className = "bg-success text-white";
+      break;
+    case 'error':
+      exaportWpToastifyOptions.className = "bg-danger text-white";
+      exaportWpToastifyOptions.close = true;
+      exaportWpToastifyOptions.duration = 30000;
+      break;
+    case 'info':
+      exaportWpToastifyOptions.className = "bg-info text-white";
+      break;
+  };
+  Toastify(exaportWpToastifyOptions).showToast();
+}

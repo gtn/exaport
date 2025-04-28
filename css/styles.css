@@ -36,3 +36,7 @@ div.item-detail-image img {
 .exaport-icon.exaport-export-import-scorm-icon {
     opacity: 0.75;
 }
+
+.exaport-toast-close {
+    opacity: 1 !important;
+}

@@ -1211,7 +1211,7 @@ function block_exaport_get_view_blocks($view) {
             // Nothing to do here
         } else {
             $block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php',
-                context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);
+                context_user::instance($USER->id)->id, 'user', 'draft', (@$view->draft_itemid ?: 0));
             $block->itemid = null;
         }
 
@@ -2541,4 +2541,49 @@ function block_exaport_used_layout() {
 
     //    return @$CFG->block_exaport_used_layout ?: 'clean_old';
     return @$CFG->block_exaport_used_layout ?: 'moodle_bootstrap';
+}
+
+/**
+ * checks if the WordPress SSO is fully configured
+ * @return bool
+ */
+function block_exaport_wpsso_configured() {
+    global $CFG;
+    if ($CFG->block_exaport_wp_sso_enabled && block_exaport_get_wpsso_passphrase() && block_exaport_get_wpsso_url()) {
+        return true;
+    }
+
+    return false;
+}
+
+function block_exaport_get_wpsso_url() {
+    global $CFG;
+    if ($CFG->block_exaport_wp_sso_url) {
+        // CUSTOM server: possibility to use own WP server (special WP plugin is needed!)
+        return $CFG->block_exaport_wp_sso_url;
+    }
+    // FIXED GTN server
+    return 'https://lab3.gtn-solutions.com/wp/';
+}
+
+function block_exaport_get_wpsso_passphrase() {
+    global $CFG;
+
+    return $CFG->block_exaport_wp_sso_passphrase;
+}
+
+/**
+ * returns only MY views
+ * @return array
+ * @throws dml_exception
+ */
+function block_exaport_get_my_views() {
+    global $DB, $USER;
+    $query = 'SELECT *
+            FROM {block_exaportview}
+            WHERE userid = ?
+            ORDER BY name, timemodified';
+    $views = $DB->get_records_sql($query, array($USER->id));
+
+    return $views;
 }

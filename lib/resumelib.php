@@ -274,7 +274,16 @@ function block_exaport_get_resume_params_record($userid = null) {
     return $DB->get_record('block_exaportresume', $conditions);
 }
 
-function block_exaport_get_resume_params($userid = null, $full = false) {
+/**
+ * returns the CV data, organized as needed
+ * @param int $userid
+ * @param bool $full add full CV information
+ * @param bool $attachmentasarealfile add real file information (real filesystem path)
+ * @return false|mixed|stdClass
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function block_exaport_get_resume_params($userid = null, $full = false, $attachmentasarealfile = false ) {
     global $DB, $CFG;
     if ($userid === null) {
         global $USER;
@@ -297,7 +306,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         // TODO: add images?
         $fs = get_file_storage();
         $context = context_user::instance($userid);
-        $import_attachments = function($type, $recordid) use ($fs, $context, $CFG) {
+        $import_attachments = function($type, $recordid) use ($fs, $context, $CFG, $attachmentasarealfile) {
             $result = null;
             $files = $fs->get_area_files($context->id, 'block_exaport', 'resume_' . $type, $recordid, 'filename', false);
             if (count($files) > 0) {
@@ -306,7 +315,12 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
                     $filename = $file->get_filename();
                     $url = $CFG->wwwroot . '/pluginfile.php/' . $file->get_contextid() . '/block_exaport/resume_' . $type . '/' . $file->get_itemid() .
                         '/' . $filename;
-                    $result[] = array('filename' => $filename, 'fileurl' => $url);
+                    $addfiledata = array('filename' => $filename, 'fileurl' => $url);
+                    if ($attachmentasarealfile) {
+                        // add file data as a moodle file
+                        $addfiledata['moodlefile'] = $file;
+                    }
+                    $result[] = $addfiledata;
                 };
             }
             return $result;

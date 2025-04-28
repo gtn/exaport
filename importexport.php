@@ -16,12 +16,35 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/resumelib.php');
+require_once(__DIR__ . '/blockmediafunc.php');
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
 block_exaport_require_login($courseid);
 
 $context = context_system::instance();
+
+// WordPress integration
+$wpIntegration = null;
+$wpAction = optional_param('wpAction', 0, PARAM_INT);
+$action = optional_param('action', '', PARAM_RAW);
+if (block_exaport_wpsso_configured()
+    || ($wpAction && $action == 'requestPassphrase') // not configured, but the request to get passphrase
+    || ($wpAction && $action == 'removePassphrase') // remove the passphrase
+    || ($wpAction && $action == 'testPassphrase') // test the passphrase
+) {
+    require_once(__DIR__ . '/lib/wplib.php');
+    $wpIntegration = new \wpIntegration($courseid, block_exaport_get_wpsso_passphrase());
+    // Check on Ajax request.
+    if ($wpAction) {
+        $ajaxParameters = optional_param_array('parameters', [], PARAM_RAW);
+        $wpIntegration->handleWpAjaxRequest($action, $ajaxParameters);
+        exit;
+    }
+}
+
+// Regular page
 $url = '/blocks/exaport/importexport.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
@@ -74,5 +97,14 @@ if (has_capability('block/exaport:importfrommoodle', $context)) {
 }
 
 echo "</div>";
+
+if (block_exaport_wpsso_configured()) {
+    $PAGE->requires->jquery();
+    $PAGE->requires->js_call_amd('block_exaport/wpexport', 'init');
+    echo '<hr>';
+    echo $wpIntegration->exportFormView();
+
+}
+
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

@@ -21,7 +21,7 @@ require_once __DIR__ . '/lib/exabis_special_id_generator.php';
 
 require_once(__DIR__ . '/lib/lib.php');
 require_once __DIR__ . '/lib/settings_helper.php';
-require_once __DIR__ . '/lib/wplib.php';
+require_once __DIR__ . '/lib/classes/wplib.php';
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas',

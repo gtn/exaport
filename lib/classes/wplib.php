@@ -3,8 +3,8 @@
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-require_once (__DIR__.'/classes/firebaseJWT/JWT.php');
-require_once (__DIR__.'/classes/firebaseJWT/Key.php');
+require_once(__DIR__ . '/firebaseJWT/JWT.php');
+require_once(__DIR__ . '/firebaseJWT/Key.php');
 
 /**
  * Different function to work with WordPress
@@ -349,8 +349,6 @@ class wpIntegration {
             CURLOPT_SSL_VERIFYPEER => false
         ]);
 
-// file_put_contents('D:/12345post.log', print_r($flatpostData, true), FILE_APPEND);
-
         $response = curl_exec($curl);
         $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
@@ -409,7 +407,6 @@ class wpIntegration {
             $table->head['buttonRemoveFromWp'] = '';
 
             $exportedViews = $this->wpLoginData['views'];
-            // echo "<pre>debug:<strong>wplib.php:266</strong>\r\n"; print_r($exportedViews); echo '</pre>'; ; // !!!!!!!!!! delete it
 
             $table->data = array();
             $vi = -1;
@@ -1193,8 +1190,6 @@ class wpIntegration {
                 'code' => $responseObj->code,
             ];
         }
-
-        // file_put_contents('D:/wplib_9897.log', print_r($return, true), FILE_APPEND); exit; // Delete it !!!!!!!!!! $response;
 
         return $return;
 

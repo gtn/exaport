@@ -2089,7 +2089,6 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
         $cat_tree = block_exaport_get_all_categories_for_user($userid); // start with ALL categories
         $return_tree = block_exaport_get_root_category();
         $return_tree->subcategories = block_exaport_user_categories_into_tree($userid, $cat_tree, 0);
-         //file_put_contents('D://222.222', print_r($cat_tree, true));
     } else {
         # Traverse the tree and search for direct children of the root
         foreach ($cat_tree as $cat_id => $category) {

@@ -37,7 +37,7 @@ if (block_exaport_wpsso_configured()
     // needed to render templates
     $PAGE->set_context($context);
 
-    require_once(__DIR__ . '/lib/wplib.php');
+    require_once(__DIR__ . '/lib/classes/wplib.php');
     $wpIntegration = new \wpIntegration($courseid, block_exaport_get_wpsso_passphrase());
     // Check on Ajax request.
     if ($wpAction) {

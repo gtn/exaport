@@ -34,6 +34,9 @@ if (block_exaport_wpsso_configured()
     || ($wpAction && $action == 'removePassphrase') // remove the passphrase
     || ($wpAction && $action == 'testPassphrase') // test the passphrase
 ) {
+    // needed to render templates
+    $PAGE->set_context($context);
+
     require_once(__DIR__ . '/lib/wplib.php');
     $wpIntegration = new \wpIntegration($courseid, block_exaport_get_wpsso_passphrase());
     // Check on Ajax request.

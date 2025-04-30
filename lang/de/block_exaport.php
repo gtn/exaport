@@ -851,3 +851,6 @@ $string['settings_exaport_wp_sso_request_passphrase_button'] = 'Request the pass
 $string['settings_exaport_wp_sso_passphrase_ok'] = 'The passphrase is configured';
 $string['settings_exaport_wp_sso_test_passphrase_button'] = 'Test';
 $string['settings_exaport_wp_sso_remove_passphrase_button'] = 'Remove the passphrase';
+$string['wp_exported_view'] = 'Exported view';
+$string['wp_exported_view_hidden_in_wp'] = 'Exported but hidden in your WordPress';
+$string['wp_exported_view_newer_than_wp'] = 'WordPress view version is older than Moodle version';

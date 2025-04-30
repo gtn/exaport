@@ -1,15 +1,37 @@
 <?php
+// This file is part of Exabis Eportfolio (extension for Moodle)
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+namespace block_exaport;
 
-require_once(__DIR__ . '/firebaseJWT/JWT.php');
-require_once(__DIR__ . '/firebaseJWT/Key.php');
+defined('MOODLE_INTERNAL') || die();
+\block_exaport\vendor::load();
+
+use block_exaport\vendor\Firebase\JWT\JWT;
+use context_course;
+use context_user;
+use html_table;
+use html_table_cell;
+use html_table_row;
+use html_writer;
 
 /**
  * Different function to work with WordPress
  */
-class wpIntegration {
+class wp_integration {
 
     private $courseId;
     private $passphrase;
@@ -140,14 +162,14 @@ class wpIntegration {
             $loginSsoUrl = $this->getWpUrl($directLoginToken);
             $html .= '<div class="col-sm-6">
                 <a class="btn btn-primary exaport-wp-directLogin" href="' . $loginSsoUrl . '" target="_blank">
-                    '.block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []).'
+                    ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     View my WordPress profile page
                 </a>
             </div>';
             // update button
             $html .= '<div class="col-sm-6 text-right">
                 <a class="btn btn-primary exaport-wp-loginUpdate" href="' . $loginSsoUrl . '" target="_blank">
-                    '.block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []).'
+                    ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     Update my WordPress profile data
                 </a>
             </div>';
@@ -163,33 +185,33 @@ class wpIntegration {
                 $cvExportClass = '';
             }
 
-            $html .= '<div class="alert alert-info exaport-wp-cv-info '.$cvInfoClass.'">';
+            $html .= '<div class="alert alert-info exaport-wp-cv-info ' . $cvInfoClass . '">';
             // convert time to Moodle format
             if (isset($this->wpLoginData['cv']['timemodified'])) {
                 $this->wpLoginData['cv']['timemodified'] = userdate($this->wpLoginData['cv']['timemodified']);
             }
-            $html .= '<p>Your CV is already exported to WordPress at <span class="date">'.@$this->wpLoginData['cv']['timemodified'].'</span></p>';
+            $html .= '<p>Your CV is already exported to WordPress at <span class="date">' . @$this->wpLoginData['cv']['timemodified'] . '</span></p>';
             // view button
             $html .= '<a class="btn btn-success btn-sm text-white exaport-wp-cvView" href="' . @$this->wpLoginData['cv']['url'] . '" target="_blank">
-                        '.block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []).'
+                        ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         View
                        </a>';
             // update button
             $html .= '<a class="btn btn-primary btn-sm ml-3 text-white exaport-wp-cvUpdate" href="#" target="_blank">
-                        '.block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []).'
+                        ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         Update CV data in WordPress
                     </a>';
             // remove button
             $html .= '<a class="btn btn-danger btn-sm float-right text-white exaport-wp-cvRemove" href="#" target="_blank">
-                        '.block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []).'
+                        ' . block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         Remove
                        </a>';
             $html .= '</div>';
 
             // export to WordPress button
-            $html .= '<div class="'.$cvExportClass.'">
+            $html .= '<div class="' . $cvExportClass . '">
                     <a class="btn btn-primary text-white exaport-wp-cvExport" href="#" target="_blank">
-                        '.block_exaport_fontawesome_icon('arrow-up-from-bracket', 'solid', 1, [], [], [], [], [], [], [], []).'
+                        ' . block_exaport_fontawesome_icon('arrow-up-from-bracket', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         Import CV into WordPress
                     </a>
                 </div>';
@@ -247,7 +269,7 @@ class wpIntegration {
         // Add user's icon
         $usersIcon = $this->getUserIcon();
         if ($usersIcon) {
-            $usersIconHash = $this->addFileToPost($usersIcon, 'u'.$USER->id.'_');
+            $usersIconHash = $this->addFileToPost($usersIcon, 'u' . $USER->id . '_');
             $postData['icon'] = $usersIconHash;
         }
 
@@ -306,12 +328,11 @@ class wpIntegration {
                     return $data; // in case someone sends an url-encoded string by mistake
                 }
                 $output = array();
-                foreach($data as $key => $value) {
+                foreach ($data as $key => $value) {
                     $final_key = $prefix ? "{$prefix}[{$key}]" : $key;
                     if (is_array($value)) {
                         $output += $curl_postfields_flatten($value, $final_key);
-                    }
-                    else {
+                    } else {
                         $output[$final_key] = $value;
                     }
                 }
@@ -325,7 +346,7 @@ class wpIntegration {
                     if (file_exists($fileData['path'])) {
                         $flatpostData[$key] = new CURLFile($fileData['path'], $fileData['mime'], $fileData['filename']);
                     } else {
-                        throw new \Exception('File not found: '.$fileData['path']);
+                        throw new \Exception('File not found: ' . $fileData['path']);
                     }
                 }
                 $headers[] = 'Content-Type: multipart/form-data';
@@ -346,7 +367,7 @@ class wpIntegration {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_SSL_VERIFYPEER => false
+            CURLOPT_SSL_VERIFYPEER => false,
         ]);
 
         $response = curl_exec($curl);
@@ -357,7 +378,7 @@ class wpIntegration {
 
         return [
             'response' => $response,
-            'status' => $httpcode
+            'status' => $httpcode,
         ];
     }
 
@@ -370,7 +391,7 @@ class wpIntegration {
         ];
 
         $base = rtrim(block_exaport_get_wpsso_url(), '/');
-        $url  = html_entity_decode($base . '/?' . http_build_query($urlParams));
+        $url = html_entity_decode($base . '/?' . http_build_query($urlParams));
 
         return $url;
     }
@@ -390,7 +411,7 @@ class wpIntegration {
         $html .= '<h5 class="text-center">My views</h5>';
 
         if (!$views) {
-            $html .= '<div class="alert alert-light">'.get_string("noviews", "block_exaport").'</div>';
+            $html .= '<div class="alert alert-light">' . get_string("noviews", "block_exaport") . '</div>';
         } else {
 
             $table = new html_table();
@@ -414,7 +435,7 @@ class wpIntegration {
                 $row = new html_table_row();
                 // name
                 $cell = new html_table_cell();
-                $cell->text = '<a href="'.
+                $cell->text = '<a href="' .
                     s($CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $this->courseId . '&access=id/' . $USER->id . '-' . $view->id) . '" target="_blank">' .
                     format_string($view->name) . "</a>";
                 $row->cells[] = $cell;
@@ -426,7 +447,7 @@ class wpIntegration {
 
                 // exported
                 $cell = new html_table_cell();
-                $cell->text = '<span class="wp-exported-icons-wrapper" data-viewId="'.$view->id.'">';
+                $cell->text = '<span class="wp-exported-icons-wrapper" data-viewId="' . $view->id . '">';
                 if (array_key_exists($view->id, $exportedViews)) {
                     if ($exportedViews[$view->id]['status'] != 'publish') {
                         $cell->text .= block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedHidden']);
@@ -444,7 +465,7 @@ class wpIntegration {
 
                 // timemodified (WP)
                 $cell = new html_table_cell();
-                $cell->text = '<span class="wp-exported-wptimemodified-wrapper" data-viewId="'.$view->id.'">';
+                $cell->text = '<span class="wp-exported-wptimemodified-wrapper" data-viewId="' . $view->id . '">';
                 if (array_key_exists($view->id, $exportedViews)) {
                     $cell->text .= userdate($exportedViews[$view->id]['timemodified']);
                 }
@@ -459,8 +480,8 @@ class wpIntegration {
                     $dNone = '';
                     $wpUrl = $exportedViews[$view->id]['url'];
                 }
-                $cell->text = '<a class="btn btn-success btn-sm exaport-wp-viewPreview '.$dNone.'" data-viewId="'.$view->id.'" target="_blank" href="'.$wpUrl.'">
-                        '.block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []).'
+                $cell->text = '<a class="btn btn-success btn-sm exaport-wp-viewPreview ' . $dNone . '" data-viewId="' . $view->id . '" target="_blank" href="' . $wpUrl . '">
+                        ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         View in WordPress</a>';
                 $cell->attributes['class'] = ' wpView';
                 $row->cells[] = $cell;
@@ -476,12 +497,12 @@ class wpIntegration {
                     $dNoneUpdate = '';
                     $dNoneRemove = '';
                 }
-                $cell->text = '<button class="btn btn-primary btn-sm exaport-wp-viewExport '.$dNoneExport.'" data-viewId="'.$view->id.'">
-                    '.block_exaport_fontawesome_icon('arrow-up-from-bracket', 'solid', 1, [], [], [], [], [], [], [], []).'
+                $cell->text = '<button class="btn btn-primary btn-sm exaport-wp-viewExport ' . $dNoneExport . '" data-viewId="' . $view->id . '">
+                    ' . block_exaport_fontawesome_icon('arrow-up-from-bracket', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     Export to WordPress
                     </button>';
-                $cell->text .= '<button class="btn btn-primary btn-sm exaport-wp-viewUpdate '.$dNoneUpdate.'" data-viewId="'.$view->id.'">
-                    '.block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []).'
+                $cell->text .= '<button class="btn btn-primary btn-sm exaport-wp-viewUpdate ' . $dNoneUpdate . '" data-viewId="' . $view->id . '">
+                    ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     Update in WordPress
                     </button>';
                 $cell->attributes['class'] = ' wpExport';
@@ -489,8 +510,8 @@ class wpIntegration {
 
                 // 3. remove button
                 $cell = new html_table_cell();
-                $cell->text = '<button class="btn btn-danger btn-sm exaport-wp-viewRemove '.$dNoneRemove.'" data-viewId="'.$view->id.'">
-                    '.block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []).'
+                $cell->text = '<button class="btn btn-danger btn-sm exaport-wp-viewRemove ' . $dNoneRemove . '" data-viewId="' . $view->id . '">
+                    ' . block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     Remove from WordPress
                     </button>';
                 $cell->attributes['class'] = ' wpExport';
@@ -504,9 +525,9 @@ class wpIntegration {
             // Legend
             $html .= '
                 <div class="wp-viewsList-legend">
-                    '.block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exported']).' - Exported view<br>
-                    '.block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedHidden']).' - Exported, but hidden in the WordPress side<br>
-                    '.block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedOld']).' - WordPress view version is older than Moodle version
+                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exported']) . ' - Exported view<br>
+                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedHidden']) . ' - Exported, but hidden in the WordPress side<br>
+                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedOld']) . ' - WordPress view version is older than Moodle version
                 </div>
             ';
 
@@ -661,7 +682,7 @@ class wpIntegration {
                 } else {
                     if (@$block->picture) { // only if picture is enabled
                         if ($icon = $this->getUserIcon()) {
-                            $userPicture = $this->addFileToPost($icon, 'u'.$USER->id.'_');
+                            $userPicture = $this->addFileToPost($icon, 'u' . $USER->id . '_');
                         }
                     }
                 }
@@ -710,7 +731,7 @@ class wpIntegration {
                         $type_content = [
                             'name' => $badge->name,
                             // 'image' => $imageUrl,
-                            'image' => $this->addFileToPost($badgeImage, 'b'.$badge->id.'_'),
+                            'image' => $this->addFileToPost($badgeImage, 'b' . $badge->id . '_'),
                             'description' => format_text($badge->description, FORMAT_HTML),
                         ];
                     }
@@ -783,7 +804,7 @@ class wpIntegration {
                         break;
                     case 'public':
                         $mainListName = 'publications';
-                        $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url', ];
+                        $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url',];
                         break;
                     case 'mbrship':
                         $mainListName = 'profmembershipments';
@@ -805,7 +826,7 @@ class wpIntegration {
                                 $blockResumeItem[$prop] = @$item_data->{$prop} ?: '';
                             }
                             if ($block->resume_withfiles) {
-                                $blockResumeItem['attachments'] = $this->addResumeAttachmentsToBlockView($item_data->attachments, 'r'.$block->id.'_');
+                                $blockResumeItem['attachments'] = $this->addResumeAttachmentsToBlockView($item_data->attachments, 'r' . $block->id . '_');
                             } else {
                                 $blockResumeItem['attachments'] = [];
                             }
@@ -822,7 +843,7 @@ class wpIntegration {
             // types for grouped blocks
             case 'goals':
             case 'skills':
-            // types for single (non-grouped) blocks
+                // types for single (non-grouped) blocks
             case 'goalspersonal':
             case 'goalsacademic':
             case 'goalscareers':
@@ -854,7 +875,7 @@ class wpIntegration {
                             $attachments = [];
                         }
                         if ($attachments) {
-                            $blockResumeItem['attachments'] = $this->addResumeAttachmentsToBlockView($attachments, 'r'.$block->id.'_');
+                            $blockResumeItem['attachments'] = $this->addResumeAttachmentsToBlockView($attachments, 'r' . $block->id . '_');
                         }
                         if ($isGrouped) {
                             $blockResumeItem['resume_itemtype'] = $goalSkillType;
@@ -965,7 +986,7 @@ class wpIntegration {
 
                         // opt 2: files for direct POST exporting
                         // relate the item to the file
-                        $itemFiles[] = $this->addFileToPost($file, 'i'.$item->id.'_');
+                        $itemFiles[] = $this->addFileToPost($file, 'i' . $item->id . '_');
                     }
                 }
             }
@@ -1005,7 +1026,7 @@ class wpIntegration {
         $this->filesToExport[$fileHash] = [
             'path' => $filePath,
             'mime' => $mime,
-            'filename' => $filename_prefix.$filename,
+            'filename' => $filename_prefix . $filename,
         ];
 
         return $fileHash;
@@ -1080,13 +1101,13 @@ class wpIntegration {
                     $propList = ['title', 'date', 'description'];
                     break;
                 case 'publications':
-                    $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url', ];
+                    $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url',];
                     break;
                 case 'profmembershipments':
                     $propList = ['title', 'startdate', 'enddate', 'description'];
                     break;
             }
-            ${'tmp'.$partName} = [];
+            ${'tmp' . $partName} = [];
             if ($myResume->{$partName}) {
                 foreach ($myResume->{$partName} as $itemid => $propertyData) {
                     $itemTempData = [];
@@ -1095,10 +1116,10 @@ class wpIntegration {
                         $itemTempData[$prop] = @$item_data->{$prop} ?: '';
                     }
                     $itemTempData['attachments'] = $this->addResumeAttachmentsToBlockView($item_data->attachments, 'r_');
-                    ${'tmp'.$partName}[] = $itemTempData;
+                    ${'tmp' . $partName}[] = $itemTempData;
                 }
             }
-            $resumeToExport[$partName] = ${'tmp'.$partName};
+            $resumeToExport[$partName] = ${'tmp' . $partName};
 
         }
 
@@ -1152,7 +1173,7 @@ class wpIntegration {
         }
 
         $timestamp = time();
-        $data = $CFG->block_exaport_mysource.'|'.$timestamp;
+        $data = $CFG->block_exaport_mysource . '|' . $timestamp;
         $secret = required_param('secret', PARAM_RAW);
 
         $signature = hash_hmac('sha256', $data, $secret);
@@ -1163,7 +1184,7 @@ class wpIntegration {
             'signature' => $signature,
         ];
 
-        $ch = curl_init(rtrim(block_exaport_get_wpsso_url(), '/').'/wp-json/axaport-sso/getpassphrase');
+        $ch = curl_init(rtrim(block_exaport_get_wpsso_url(), '/') . '/wp-json/axaport-sso/getpassphrase');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1233,8 +1254,8 @@ class wpIntegration {
     public function exaportSettingsPasshpraseNotRegisteredForm() {
         global $OUTPUT;
 
-        $urlToPasshphraseRegister = rtrim(block_exaport_get_wpsso_url(), '/').'/exabis-e-portfolio/moodle-register/';
-        $context = (object) [
+        $urlToPasshphraseRegister = rtrim(block_exaport_get_wpsso_url(), '/') . '/exabis-e-portfolio/moodle-register/';
+        $context = (object)[
             'getSecretUrl' => $urlToPasshphraseRegister,
         ];
         $element = $OUTPUT->render_from_template('block_exaport/settings_wp_sso_passphrase_not_registered', $context);

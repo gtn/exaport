@@ -1,0 +1,13 @@
+{
+	"output": "build/vendor.phar",
+	"stub": ".dev/box/stub.php",
+	"main": false,
+	"compactors": [
+		"KevinGH\\Box\\Compactor\\Php",
+		"KevinGH\\Box\\Compactor\\PhpScoper"
+	],
+	"php-scoper": ".dev/box/php-scoper.inc.php",
+	"directories": [
+		"vendor"
+	]
+}

@@ -37,8 +37,7 @@ if (block_exaport_wpsso_configured()
     // needed to render templates
     $PAGE->set_context($context);
 
-    require_once(__DIR__ . '/lib/classes/wplib.php');
-    $wpIntegration = new \wpIntegration($courseid, block_exaport_get_wpsso_passphrase());
+    $wpIntegration = new \block_exaport\wp_integration($courseid, block_exaport_get_wpsso_passphrase());
     // Check on Ajax request.
     if ($wpAction) {
         $ajaxParameters = optional_param_array('parameters', [], PARAM_RAW);
@@ -102,7 +101,6 @@ if (has_capability('block/exaport:importfrommoodle', $context)) {
 echo "</div>";
 
 if (block_exaport_wpsso_configured()) {
-    $PAGE->requires->jquery();
     $PAGE->requires->js_call_amd('block_exaport/wpexport', 'init');
     echo '<hr>';
     echo $wpIntegration->exportFormView();

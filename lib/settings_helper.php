@@ -165,7 +165,7 @@ class admin_setting_wpSSOregister extends admin_setting_configtext {
         $currpassphrase = block_exaport_get_wpsso_passphrase();
         if (!$currpassphrase || $currpassphrase == '--not-used-yet--') {
             // NO registered passphrase
-            $wpIntegration = new \wpIntegration(0, '');
+            $wpIntegration = new \block_exaport\wp_integration(0, '');
             $element = $wpIntegration->exaportSettingsPasshpraseNotRegisteredForm();
 
             return format_admin_setting($this, $this->visiblename, $element, $this->description, false, '', NULL, $query);
@@ -173,7 +173,7 @@ class admin_setting_wpSSOregister extends admin_setting_configtext {
 
         // the passphrase os configured!
 
-        $wpIntegration = new \wpIntegration(0, '');
+        $wpIntegration = new \block_exaport\wp_integration(0, '');
         $element = $wpIntegration->exaportSettingsPasshpraseForm();
 
         return format_admin_setting($this, $this->visiblename, $element, $this->description, false, '', NULL, $query);

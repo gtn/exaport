@@ -2961,5 +2961,17 @@ return [
         'Remove the passphrase',
         'Remove the passphrase',
     ],
+    'wp_exported_view' => [
+        'Exportierte Ansicht',
+        'Exported view',
+    ],
+    'wp_exported_view_hidden_in_wp' => [
+        'Exportiert, aber in Wordpress ausgeblendet',
+        'Exported but hidden in your WordPress',
+    ],
+    'wp_exported_view_newer_than_wp' => [
+        'WordPress-Ansicht ist älter als die Moodle-Ansicht',
+        'WordPress view version is older than Moodle version',
+    ],
 ];
 ?>

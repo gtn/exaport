@@ -523,9 +523,9 @@ class wp_integration {
             // Legend
             $html .= '
                 <div class="wp-viewsList-legend">
-                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exported']) . ' - Exported view<br>
-                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedHidden']) . ' - Exported, but hidden in the WordPress side<br>
-                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedOld']) . ' - WordPress view version is older than Moodle version
+                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exported']) . ' - ' . block_exaport_get_string('wp_exported_view') . '<br>
+                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedHidden']) . ' - ' . block_exaport_get_string('wp_exported_view_hidden_in_wp') . '<br>
+                    ' . block_exaport_fontawesome_icon('check', 'solid', 1, [], [], [], [], [], [], [], ['wp-icon', 'wp-exportedOld']) . ' - ' . block_exaport_get_string('wp_exported_view_newer_than_wp') . '
                 </div>
             ';
 

@@ -144,12 +144,12 @@ class admin_setting_wpSSOregister extends admin_setting_configtext {
         if (!empty($CFG->upgraderunning) || (
                 isset($_SERVER['SCRIPT_NAME']) && strpos($_SERVER['SCRIPT_NAME'], 'admin/upgradesettings.php') !== false
             )) {
-            set_config('block_exaport_wp_sso_passphrase', '--not-used-yet--');
+            set_config('wp_sso_passphrase', '--not-used-yet--', 'block_exaport');
             return '';
         }
 
-        $wpSSOurl = block_exaport_get_wpsso_url();
-        $urlToSettings = new moodle_url('/admin/settings.php', ['section' => 'blocksettingexaport'], 'admin-block_exaport_mysource');
+        $wpSSOurl = \block_exaport\wordpress_lib::get_sso_url();
+        $urlToSettings = new moodle_url('/admin/settings.php', ['section' => 'blocksettingexaport'], 'admin-mysource');
         if (!$wpSSOurl) {
             // NO CONFIGURED message
             $context = (object)[
@@ -161,7 +161,7 @@ class admin_setting_wpSSOregister extends admin_setting_configtext {
             return format_admin_setting($this, $this->visiblename, $element, $this->description, false, '', NULL, $query);
         }
 
-        $currpassphrase = block_exaport_get_wpsso_passphrase();
+        $currpassphrase = \block_exaport\wordpress_lib::get_sso_passphrase();
         if (!$currpassphrase || $currpassphrase == '--not-used-yet--') {
             // NO registered passphrase
             $wpIntegration = new \block_exaport\wp_integration(0, '');
@@ -198,7 +198,7 @@ class block_exaport_admin_setting_withjs extends admin_setting {
         global $CFG, $PAGE;
 
         $PAGE->requires->jquery();
-        $PAGE->requires->js_call_amd('block_exaport/exaport_settings_wpsso', 'init');
+        $PAGE->requires->js_call_amd('block_exaport/wordpress_sso_settings', 'init');
 
         $script = ''; // empty string to make fake element;
 

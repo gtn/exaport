@@ -2922,8 +2922,8 @@ return [
         'Enable WordPress connection. Options below must be configured',
     ],
     'settings_exaport_wp_sso_error_no_url_configured' => [
-        'First set up the "block_exaport_wp_sso_url" option',
-        'First set up the "block_exaport_wp_sso_url" option',
+        'First set up the "block_exaport/wp_sso_url" option',
+        'First set up the "block_exaport/wp_sso_url" option',
     ],
     'settings_exaport_reload_settings_page' => [
         'Reload',
@@ -2934,8 +2934,8 @@ return [
         'The passphrase must be registered in the WordPress SSO server.',
     ],
     'settings_exaport_wp_sso_how_to_get_secret' => [
-        'You need to register your "block_exaport_mysource" value into WordPress SSO server and get a secret code<br />Then you need to insert the secret code into field below and get the passphrase',
-        'You need to register your "block_exaport_mysource" value into WordPress SSO server and get a secret code<br />Then you need to insert the secret code into field below and get the passphrase',
+        'You need to register your "block_exaport/mysource" value into WordPress SSO server and get a secret code<br />Then you need to insert the secret code into field below and get the passphrase',
+        'You need to register your "block_exaport/mysource" value into WordPress SSO server and get a secret code<br />Then you need to insert the secret code into field below and get the passphrase',
     ],
     'settings_exaport_wp_sso_url_to_get_secret' => [
         'Get the secret code',

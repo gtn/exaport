@@ -26,24 +26,28 @@ block_exaport_require_login($courseid);
 $context = context_system::instance();
 
 // WordPress integration
-$wpIntegration = null;
-$wpAction = optional_param('wpAction', 0, PARAM_INT);
+$wp_action = optional_param('wp_action', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_RAW);
-if (block_exaport_wpsso_configured()
-    || ($wpAction && $action == 'requestPassphrase') // not configured, but the request to get passphrase
-    || ($wpAction && $action == 'removePassphrase') // remove the passphrase
-    || ($wpAction && $action == 'testPassphrase') // test the passphrase
-) {
+if ($wp_action) {
+    require_sesskey();
+
+    if (($wp_action == 'requestPassphrase') // not configured, but the request to get passphrase
+        || ($wp_action == 'removePassphrase') // remove the passphrase
+        || ($wp_action == 'testPassphrase') // test the passphrase
+    ) {
+        require_admin();
+    } elseif (!\block_exaport\wordpress_lib::is_sso_configured()) {
+        throw new \moodle_exception('not is_sso_configured');
+    }
+
     // needed to render templates
     $PAGE->set_context($context);
 
-    $wpIntegration = new \block_exaport\wp_integration($courseid, block_exaport_get_wpsso_passphrase());
+    $wpIntegration = new \block_exaport\wp_integration($courseid, \block_exaport\wordpress_lib::get_sso_passphrase());
     // Check on Ajax request.
-    if ($wpAction) {
-        $ajaxParameters = optional_param_array('parameters', [], PARAM_RAW);
-        $wpIntegration->handleWpAjaxRequest($action, $ajaxParameters);
-        exit;
-    }
+    $ajaxParameters = optional_param_array('parameters', [], PARAM_RAW);
+    $wpIntegration->handleWpAjaxRequest($wp_action, $ajaxParameters);
+    exit;
 }
 
 // Regular page
@@ -100,8 +104,10 @@ if (has_capability('block/exaport:importfrommoodle', $context)) {
 
 echo "</div>";
 
-if (block_exaport_wpsso_configured()) {
-    $PAGE->requires->js_call_amd('block_exaport/wpexport', 'init');
+if (\block_exaport\wordpress_lib::is_sso_configured()) {
+    $wpIntegration = new \block_exaport\wp_integration($courseid, \block_exaport\wordpress_lib::get_sso_passphrase());
+
+    $PAGE->requires->js_call_amd('block_exaport/wordpress_export', 'init');
     echo '<hr>';
     echo $wpIntegration->exportFormView();
 

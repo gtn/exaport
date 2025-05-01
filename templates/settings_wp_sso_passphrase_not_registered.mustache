@@ -1,18 +1,17 @@
+<div class="alert alert-info small block_exaport_message">
+    <p class="my-0">
+        {{#str}} settings_exaport_wp_sso_how_to_get_secret, block_exaport {{/str}}<br>
+        <a href="{{getSecretUrl}}" target="_blank" class="btn btn-info btn-sm text-white block_exaport_get_secret_code">
+            {{#pix}} t/unlock, core, {{#str}} settings_exaport_wp_sso_url_to_get_secret, block_exaport {{/str}} {{/pix}} {{#str}} settings_exaport_wp_sso_url_to_get_secret, block_exaport {{/str}}
+        </a>
+        <br>
 
-    <div class="alert alert-info small block_exaport_message">
-        <p class="my-0">
-            {{#str}} settings_exaport_wp_sso_how_to_get_secret, block_exaport {{/str}}<br>
-            <a href="{{getSecretUrl}}" target="_blank" class="btn btn-info btn-sm text-white block_exaport_get_secret_code">
-                {{#pix}} t/unlock, core, {{#str}} settings_exaport_wp_sso_url_to_get_secret, block_exaport {{/str}} {{/pix}} {{#str}} settings_exaport_wp_sso_url_to_get_secret, block_exaport {{/str}}
-            </a>
-            <br>
+        <input type="text"
+               class="form-control form-control-sm my-2 block_exaport_secret_input"
+               placeholder="{{#str}} settings_exaport_wp_sso_enter_secret_placeholder, block_exaport {{/str}}">
 
-            <input type="text"
-                   class="form-control form-control-sm my-2 block_exaport_secret_input"
-                   placeholder="{{#str}} settings_exaport_wp_sso_enter_secret_placeholder, block_exaport {{/str}}">
-
-            <a href="{{url_to_block_settings_page}}" class="btn btn-info btn-sm text-white block_exaport_request_wp_sso_passphrase">
-                {{#pix}} i/switch, core, {{#str}} settings_exaport_wp_sso_request_passphrase_button, block_exaport {{/str}} {{/pix}} {{#str}} settings_exaport_wp_sso_request_passphrase_button, block_exaport {{/str}}
-            </a>
-        </p>
-    </div>
+        <a href="{{url_to_block_settings_page}}" class="btn btn-info btn-sm text-white block_exaport_request_wp_sso_passphrase">
+            {{#pix}} i/switch, core, {{#str}} settings_exaport_wp_sso_request_passphrase_button, block_exaport {{/str}} {{/pix}} {{#str}} settings_exaport_wp_sso_request_passphrase_button, block_exaport {{/str}}
+        </a>
+    </p>
+</div>

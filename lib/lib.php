@@ -2542,35 +2542,6 @@ function block_exaport_used_layout() {
 }
 
 /**
- * checks if the WordPress SSO is fully configured
- * @return bool
- */
-function block_exaport_wpsso_configured() {
-    global $CFG;
-    if ($CFG->block_exaport_wp_sso_enabled && block_exaport_get_wpsso_passphrase() && block_exaport_get_wpsso_url()) {
-        return true;
-    }
-
-    return false;
-}
-
-function block_exaport_get_wpsso_url() {
-    global $CFG;
-    if ($CFG->block_exaport_wp_sso_url) {
-        // CUSTOM server: possibility to use own WP server (special WP plugin is needed!)
-        return $CFG->block_exaport_wp_sso_url;
-    }
-    // FIXED GTN server
-    return 'https://lab3.gtn-solutions.com/wp/';
-}
-
-function block_exaport_get_wpsso_passphrase() {
-    global $CFG;
-
-    return $CFG->block_exaport_wp_sso_passphrase;
-}
-
-/**
  * returns only MY views
  * @return array
  * @throws dml_exception

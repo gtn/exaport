@@ -167,10 +167,10 @@ class wp_integration {
             </div>';
             // update button
             $html .= '<div class="col-sm-6 text-right">
-                <a class="btn btn-primary exaport-wp-loginUpdate" href="' . $loginSsoUrl . '" target="_blank">
+                <button class="btn btn-primary exaport-wp-loginUpdate">
                     ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     Update my WordPress profile data
-                </a>
+                </button>
             </div>';
             $html .= '</div>';
 
@@ -196,23 +196,23 @@ class wp_integration {
                         View
                        </a>';
             // update button
-            $html .= '<a class="btn btn-primary btn-sm ml-3 text-white exaport-wp-cvUpdate" href="#" target="_blank">
+            $html .= '<button type="button" class="btn btn-primary btn-sm ml-3 text-white exaport-wp-cvUpdate">
                         ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         Update CV data in WordPress
-                    </a>';
+                    </button>';
             // remove button
-            $html .= '<a class="btn btn-danger btn-sm float-right text-white exaport-wp-cvRemove" href="#" target="_blank">
+            $html .= '<button type="button" class="btn btn-danger btn-sm float-right text-white exaport-wp-cvRemove">
                         ' . block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         Remove
-                       </a>';
+                       </button>';
             $html .= '</div>';
 
             // export to WordPress button
             $html .= '<div class="' . $cvExportClass . '">
-                    <a class="btn btn-primary text-white exaport-wp-cvExport" href="#" target="_blank">
+                    <button type="button" class="btn btn-primary text-white exaport-wp-cvExport">
                         ' . block_exaport_fontawesome_icon('arrow-up-from-bracket', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         Import CV into WordPress
-                    </a>
+                    </button>
                 </div>';
 
 
@@ -294,7 +294,7 @@ class wp_integration {
             'exp' => time() + (5 * 3600), // add 5 hours (possible bug time difference) - TODO: ....
             'userid' => $USER->id,
             'email' => $USER->email,
-            'source' => $CFG->block_exaport_mysource,
+            'source' => get_config('block_exaport', 'mysource'),
         ];
         // additional data - put into JWT token
         if ($addData) {
@@ -385,10 +385,10 @@ class wp_integration {
 
         $urlParams = [
             'exaport_token' => $token,
-            'exaport_source' => $CFG->block_exaport_mysource, // needed to compare pairs: source<->passphrase
+            'exaport_source' => get_config('block_exaport', 'mysource'), // needed to compare pairs: source<->passphrase
         ];
 
-        $base = rtrim(block_exaport_get_wpsso_url(), '/');
+        $base = rtrim(\block_exaport\wordpress_lib::get_sso_url(), '/');
         $url = html_entity_decode($base . '/?' . http_build_query($urlParams));
 
         return $url;
@@ -495,11 +495,11 @@ class wp_integration {
                     $dNoneUpdate = '';
                     $dNoneRemove = '';
                 }
-                $cell->text = '<button class="btn btn-primary btn-sm exaport-wp-viewExport ' . $dNoneExport . '" data-viewId="' . $view->id . '">
+                $cell->text = '<button type="button" class="btn btn-primary btn-sm exaport-wp-viewExport ' . $dNoneExport . '" data-viewId="' . $view->id . '">
                     ' . block_exaport_fontawesome_icon('arrow-up-from-bracket', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     Export to WordPress
                     </button>';
-                $cell->text .= '<button class="btn btn-primary btn-sm exaport-wp-viewUpdate ' . $dNoneUpdate . '" data-viewId="' . $view->id . '">
+                $cell->text .= '<button type="button" class="btn btn-primary btn-sm exaport-wp-viewUpdate ' . $dNoneUpdate . '" data-viewId="' . $view->id . '">
                     ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     Update in WordPress
                     </button>';
@@ -508,7 +508,7 @@ class wp_integration {
 
                 // 3. remove button
                 $cell = new html_table_cell();
-                $cell->text = '<button class="btn btn-danger btn-sm exaport-wp-viewRemove ' . $dNoneRemove . '" data-viewId="' . $view->id . '">
+                $cell->text = '<button type="button" class="btn btn-danger btn-sm exaport-wp-viewRemove ' . $dNoneRemove . '" data-viewId="' . $view->id . '">
                     ' . block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     Remove from WordPress
                     </button>';
@@ -1106,7 +1106,7 @@ class wp_integration {
                     break;
             }
             ${'tmp' . $partName} = [];
-            if ($myResume->{$partName}) {
+            if ($myResume->{$partName} ?? false) {
                 foreach ($myResume->{$partName} as $itemid => $propertyData) {
                     $itemTempData = [];
                     $item_data = $myResume->{$partName}[$itemid];
@@ -1165,24 +1165,24 @@ class wp_integration {
             exit;
         }
 
-        if (!block_exaport_get_wpsso_url()) {
+        if (!\block_exaport\wordpress_lib::get_sso_url()) {
             echo 'No configured WP SSO url!';
             exit;
         }
 
         $timestamp = time();
-        $data = $CFG->block_exaport_mysource . '|' . $timestamp;
+        $data = get_config('block_exaport', 'mysource') . '|' . $timestamp;
         $secret = required_param('secret', PARAM_RAW);
 
         $signature = hash_hmac('sha256', $data, $secret);
 
         $payload = [
-            'exaport_source' => $CFG->block_exaport_mysource,
+            'exaport_source' => get_config('block_exaport', 'mysource'),
             'timestamp' => $timestamp,
             'signature' => $signature,
         ];
 
-        $ch = curl_init(rtrim(block_exaport_get_wpsso_url(), '/') . '/wp-json/axaport-sso/getpassphrase');
+        $ch = curl_init(rtrim(\block_exaport\wordpress_lib::get_sso_url(), '/') . '/wp-json/axaport-sso/getpassphrase');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1192,10 +1192,10 @@ class wp_integration {
         $return = [];
 
         $responseObj = json_decode($response);
-        if ($responseObj->exaport_source == $CFG->block_exaport_mysource) {
+        if ($responseObj->exaport_source == get_config('block_exaport', 'mysource')) {
             $getPassphrase = $responseObj->jwt_passphrase;
 
-            set_config('block_exaport_wp_sso_passphrase', $getPassphrase);
+            set_config('wp_sso_passphrase', $getPassphrase, 'block_exaport');
 
             $return = [
                 'result' => 'success',
@@ -1222,7 +1222,7 @@ class wp_integration {
         }
 
         // reset passphrase
-        set_config('block_exaport_wp_sso_passphrase', '');
+        set_config('wp_sso_passphrase', '', 'block_exaport');
 
         $return = [
             'result' => 'success',
@@ -1236,7 +1236,7 @@ class wp_integration {
         global $OUTPUT, $CFG;
 
         // show the reset button only if the passphrase is configured not in the main config.php
-        $showResetButton = !array_key_exists('block_exaport_wp_sso_passphrase', $CFG->config_php_settings);
+        $showResetButton = !isset($CFG->forced_plugin_settings['block_exaport']['wp_sso_passphrase']);
 
         // send "WP SSO fully configured form
         $data = [
@@ -1252,12 +1252,16 @@ class wp_integration {
     public function exaportSettingsPasshpraseNotRegisteredForm() {
         global $OUTPUT;
 
-        $urlToPasshphraseRegister = rtrim(block_exaport_get_wpsso_url(), '/') . '/exabis-e-portfolio/moodle-register/';
-        $context = (object)[
+        $urlToPasshphraseRegister = rtrim(\block_exaport\wordpress_lib::get_sso_url(), '/') . '/exabis-e-portfolio/moodle-register/'
+            . '?' . http_build_query([
+                'exaport_source' => get_config('block_exaport', 'mysource'),
+                'name' => get_site()->fullname,
+            ], arg_separator: '&');
+        $data = (object)[
             'getSecretUrl' => $urlToPasshphraseRegister,
         ];
-        $element = $OUTPUT->render_from_template('block_exaport/settings_wp_sso_passphrase_not_registered', $context);
 
+        $element = $OUTPUT->render_from_template('block_exaport/settings_wp_sso_passphrase_not_registered', $data);
         return $element;
     }
 

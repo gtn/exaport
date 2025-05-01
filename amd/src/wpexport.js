@@ -1,9 +1,9 @@
-define(['jquery', 'core/notification', 'core/toast'], function($, notification, toast) {
+define(['jquery', 'core/notification', 'core/toast'], function ($, notification, toast) {
 
   const init = () => {
 
     // Regular login button: silent creating of the wordpress account
-    $('body').on('click', '.exaport-wp-login, .exaport-wp-loginUpdate', function(e) {
+    $('body').on('click', '.exaport-wp-login, .exaport-wp-loginUpdate', function (e) {
       e.preventDefault();
       $('.exaport-wp-error').remove();
       var theButton = $(this);
@@ -13,11 +13,11 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
         action = 'loginUpdate';
         successMessage = 'Updated';
       }
-      wpRequest(action, [], function(response) {
+      wpRequest(action, [], function (response) {
         response = JSON.parse(response).response;
         if (response.success) {
           // get the form with WP functionality
-          wpRequest('wpForm', [], function(response) {
+          wpRequest('wpForm', [], function (response) {
             theButton.closest('form').html(response);
           });
           // showExaportToaster(successMessage);
@@ -42,11 +42,11 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
           closeButton: true,
         });
         // showExaportToaster('Error: 1745225660311', 'error');
-      } );
+      });
     });
 
-  // send the view into WP
-    $('body').on('click', '.exaport-wp-viewExport, .exaport-wp-viewUpdate, .exaport-wp-viewRemove', function(e) {
+    // send the view into WP
+    $('body').on('click', '.exaport-wp-viewExport, .exaport-wp-viewUpdate, .exaport-wp-viewRemove', function (e) {
       e.preventDefault();
       $('.exaport-wp-error').remove();
       var theButton = $(this);
@@ -67,7 +67,7 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
       var buttonIcon = theButton.find('.exaport-icon');
       buttonIcon.addClass('fa-spin');
 
-      wpRequest(action, data, function(response) {
+      wpRequest(action, data, function (response) {
         response = JSON.parse(response).response;
         if (response && response.success) {
           if (action == 'viewRemove') {
@@ -139,12 +139,12 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
           closeButton: true,
         });
         // showExaportToaster('Request error!', 'error');
-      } );
+      });
     });
 
 
     // Send the CV into WP
-    $('body').on('click', '.exaport-wp-cvExport, .exaport-wp-cvUpdate, .exaport-wp-cvRemove', function(e) {
+    $('body').on('click', '.exaport-wp-cvExport, .exaport-wp-cvUpdate, .exaport-wp-cvRemove', function (e) {
       e.preventDefault();
       $('.exaport-wp-error').remove();
       var data = {};
@@ -162,7 +162,7 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
       var buttonIcon = theButton.find('.exaport-icon');
       buttonIcon.addClass('fa-spin');
 
-      wpRequest(action, data, function(response) {
+      wpRequest(action, data, function (response) {
         response = JSON.parse(response).response;
         if (response && response.success) {
           if (action == 'cvRemove') {
@@ -220,15 +220,14 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
           closeButton: true,
         });
         // showExaportToaster('Request error (code: 1745230772232)!', 'error');
-      } );
+      });
     });
 
 
   };
 
-  return { init };
+  return {init};
 });
-
 
 
 function wpRequest(action, parameters, successFunction, failureFunction) {

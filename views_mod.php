@@ -85,7 +85,7 @@ if ($view && $action == 'grouplist') {
 }
 
 $returnurltolist = $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $courseid;
-$returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id .  '&action=edit';
+$returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id . '&action=edit';
 
 // Delete item.
 if ($action == 'delete') {

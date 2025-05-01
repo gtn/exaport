@@ -1,5 +1,4 @@
-
-define(['jquery', 'core/notification', 'core/toast'], function($, notification, toast) {
+define(['jquery', 'core/notification', 'core/toast'], function ($, notification, toast) {
 
   const init = () => {
 
@@ -45,7 +44,7 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
         type: 'POST',
         dataType: 'json',
         data: data,
-        xhrFields: { withCredentials: true }   // keep Moodle session
+        xhrFields: {withCredentials: true}   // keep Moodle session
       })
         .done(function (data) {
           if (data.result === 'success') {
@@ -87,7 +86,7 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
     });
 
 
-    $('body').on('change', '#id_s__block_exaport_wp_sso_enabled', function(e) {
+    $('body').on('change', '#id_s__block_exaport_wp_sso_enabled', function (e) {
       checkEnabledWpSSO();
     })
 
@@ -99,13 +98,13 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
 
       if (theValue) {
         // show related options
-        $(relatedOptions).each(function(i, elementId) {
-          $('#'+elementId).show(50);
+        $(relatedOptions).each(function (i, elementId) {
+          $('#' + elementId).show(50);
         })
       } else {
         // hide related options
-        $(relatedOptions).each(function(i, elementId) {
-          $('#'+elementId).hide(50);
+        $(relatedOptions).each(function (i, elementId) {
+          $('#' + elementId).hide(50);
         })
       }
 
@@ -114,6 +113,6 @@ define(['jquery', 'core/notification', 'core/toast'], function($, notification, 
 
   };
 
-  return { init };
+  return {init};
 });
 

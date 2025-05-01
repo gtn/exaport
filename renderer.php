@@ -18,8 +18,6 @@
 defined('MOODLE_INTERNAL') || die;
 require_once(__DIR__ . '/inc.php');
 
-use block_exaport\globals as g;
-
 class block_exaport_renderer extends plugin_renderer_base {
     /**
      * in moodle33 pix_url was renamed to image_url

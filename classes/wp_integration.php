@@ -20,10 +20,10 @@ namespace block_exaport;
 defined('MOODLE_INTERNAL') || die();
 \block_exaport\vendor::load();
 
-use Firebase\JWT\JWT;
 use context_course;
 use context_user;
 use CURLFile;
+use Firebase\JWT\JWT;
 use html_table;
 use html_table_cell;
 use html_table_row;

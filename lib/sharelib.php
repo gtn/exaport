@@ -29,7 +29,7 @@ namespace {
     }
 
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
-        global  $DB;
+        global $DB;
 
         $accesspath = explode('/', $access);
         if (count($accesspath) != 2) {

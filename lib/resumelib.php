@@ -283,7 +283,7 @@ function block_exaport_get_resume_params_record($userid = null) {
  * @throws coding_exception
  * @throws dml_exception
  */
-function block_exaport_get_resume_params($userid = null, $full = false, $attachmentasarealfile = false ) {
+function block_exaport_get_resume_params($userid = null, $full = false, $attachmentasarealfile = false) {
     global $DB, $CFG;
     if ($userid === null) {
         global $USER;

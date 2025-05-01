@@ -17,6 +17,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use block_exaport\globals as g;
 use core_privacy\local\request\transform;
 
 require_once($CFG->libdir . '/filelib.php');
@@ -31,8 +32,6 @@ if (block_exaport_check_competence_interaction()) {
 }
 
 require_once(__DIR__ . '/common.php');
-
-use block_exaport\globals as g;
 
 require_once(__DIR__ . '/lib.exaport.php');
 require_once(__DIR__ . '/sharelib.php');

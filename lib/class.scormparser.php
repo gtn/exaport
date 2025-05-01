@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once($CFG->dirroot.'/mod/scorm/datamodels/scormlib.php');
+require_once($CFG->dirroot . '/mod/scorm/datamodels/scormlib.php');
 
 /**
  * SCORMParser: Parsing a SCORM File
@@ -35,7 +35,7 @@ class SCORMParser {
      */
     public function set_error($msg) {
         $this->error = true;
-        $this->errormsg .= "Error: ".$msg."\n";
+        $this->errormsg .= "Error: " . $msg . "\n";
     }
 
     /**
@@ -46,7 +46,7 @@ class SCORMParser {
      */
     public function set_warning($msg) {
         $this->warning = true;
-        $this->warningmsg .= "Warning: ".$msg."\n";
+        $this->warningmsg .= "Warning: " . $msg . "\n";
     }
 
     /**
@@ -99,7 +99,7 @@ class SCORMParser {
             $this->dir = $regs[1];
             $imsfile = $regs[0];
         } else {
-            $this->set_error("File ".$scormfile." is no SCORM-File.");
+            $this->set_error("File " . $scormfile . " is no SCORM-File.");
             return false;
         }
 
@@ -144,9 +144,9 @@ class SCORMParser {
 
             // If the page is not visible, don't use it.
             if ((!isset($organization["data"]["ISVISIBLE"])) ||
-                    (isset($organization["data"]["ISVISIBLE"]) &&
-                            (($organization["data"]["ISVISIBLE"] == 'true') ||
-                                    ($organization["data"]["ISVISIBLE"] == '1')))
+                (isset($organization["data"]["ISVISIBLE"]) &&
+                    (($organization["data"]["ISVISIBLE"] == 'true') ||
+                        ($organization["data"]["ISVISIBLE"] == '1')))
             ) {
 
                 // If there is no Organization title, use "SCORM Import".
@@ -173,34 +173,34 @@ class SCORMParser {
                             // No local resources -> link!
                             $element['data']['url'] = $resources[$organization["data"]["IDENTIFIERREF"]]["info"]["HREF"];
                             $element['data']['extlink'] = true;
-                        } else if (is_file($this->dir.$resources[$organization["data"]["IDENTIFIERREF"]]["info"]["HREF"]) &&
-                                ($resources[$organization["data"]["IDENTIFIERREF"]]["info"]["TYPE"] == 'webcontent')
+                        } else if (is_file($this->dir . $resources[$organization["data"]["IDENTIFIERREF"]]["info"]["HREF"]) &&
+                            ($resources[$organization["data"]["IDENTIFIERREF"]]["info"]["TYPE"] == 'webcontent')
                         ) {
                             // Check every file on which the resource depends.
                             foreach ($resources[$organization["data"]["IDENTIFIERREF"]]["files"] as $file) {
-                                if (!is_file($this->dir.$file)) {
-                                    $this->set_error("File ".$this->dir.$file." not found");
+                                if (!is_file($this->dir . $file)) {
+                                    $this->set_error("File " . $this->dir . $file . " not found");
                                 }
                             }
                             foreach ($resources[$organization["data"]["IDENTIFIERREF"]]["dependency"] as $dependency) {
                                 if (!isset($resources[$dependency])) {
-                                    $this->set_error("Dependent Resource $dependency in Element ".
-                                            $organization["data"]["IDENTIFIER"]." not found!");
+                                    $this->set_error("Dependent Resource $dependency in Element " .
+                                        $organization["data"]["IDENTIFIER"] . " not found!");
                                 }
                                 foreach ($resources[$dependency]["files"] as $file) {
-                                    if (!is_file($this->dir.$file)) {
-                                        $this->set_error("File ".$this->dir.$file." not found");
+                                    if (!is_file($this->dir . $file)) {
+                                        $this->set_error("File " . $this->dir . $file . " not found");
                                     }
                                 }
                             }
                             $element['data']['url'] = $resources[$organization["data"]["IDENTIFIERREF"]]["info"]["HREF"];
                         } else {
-                            $this->set_error("File ".$resources[$organization["data"]["IDENTIFIERREF"]]["info"]["HREF"].
-                                    " in Element ".$organization["data"]["IDENTIFIER"]." not found.");
+                            $this->set_error("File " . $resources[$organization["data"]["IDENTIFIERREF"]]["info"]["HREF"] .
+                                " in Element " . $organization["data"]["IDENTIFIER"] . " not found.");
                         }
                     } else {
-                        $this->set_error("Ressource ".$organization["data"]["IDENTIFIERREF"]." in Element ".
-                                $organization["data"]["IDENTIFIER"]." not found.");
+                        $this->set_error("Ressource " . $organization["data"]["IDENTIFIERREF"] . " in Element " .
+                            $organization["data"]["IDENTIFIER"] . " not found.");
                     }
                 }
             }
@@ -251,12 +251,12 @@ class SCORMParser {
                         $submanifest = $this->parse_manifest($child["children"]);
                         $manifest["metadata"] += $submanifest["metadata"];
                         $manifest["organization"] = array_merge($manifest["organization"],
-                                $submanifest["organization"]); // Identifier des arrays sind egal, deshalb array_merge.
+                            $submanifest["organization"]); // Identifier des arrays sind egal, deshalb array_merge.
                         // Identifier des arrays m�ssen erhalten bleiben, deshalb +.
                         $manifest["resources"] += $submanifest["resources"];
                         break;
                     default:
-                        $this->set_warning("Missed Tag '".$child["name"]."' inside <manifest>");
+                        $this->set_warning("Missed Tag '" . $child["name"] . "' inside <manifest>");
                         break;
                 }
             }
@@ -298,14 +298,14 @@ class SCORMParser {
                             }
                             break;
                         default:
-                            $this->set_warning("Missed Tag '".$subelement["name"]."' inside ORGANIZATION");
+                            $this->set_warning("Missed Tag '" . $subelement["name"] . "' inside ORGANIZATION");
                             break;
                     }
                 }
                 $organization[] = $neworganization;
                 unset($neworganization);
             } else {
-                $this->set_warning("Missed Tag '".$element["name"]."' inside <organizations>");
+                $this->set_warning("Missed Tag '" . $element["name"] . "' inside <organizations>");
             }
         }
         return $organization;
@@ -335,7 +335,7 @@ class SCORMParser {
                         }
                         break;
                     default:
-                        $this->set_warning("Missed Tag '".$subelement["name"]."' inside ITEM");
+                        $this->set_warning("Missed Tag '" . $subelement["name"] . "' inside ITEM");
                         break;
                 }
             }
@@ -360,7 +360,7 @@ class SCORMParser {
                         $resources[addslashes($element["attrs"]["IDENTIFIER"])] = $this->get_resource($element);
                         break;
                     default:
-                        $this->set_warning("Missed Tag '".$element["name"]."' inside RESOURCES");
+                        $this->set_warning("Missed Tag '" . $element["name"] . "' inside RESOURCES");
                         break;
                 }
             }
@@ -384,7 +384,7 @@ class SCORMParser {
                 switch ($subelement["name"]) {
                     case 'FILE':
                         if (isset($subelement['attrs']['HREF'])) {
-                            if (is_file($this->dir.$subelement['attrs']['HREF'])) {
+                            if (is_file($this->dir . $subelement['attrs']['HREF'])) {
                                 $resource["files"][] = $subelement['attrs']['HREF'];
                             }
                             // If the file doen't exist, don't produce an error. maybe the ressource isn't needed and the user
@@ -402,7 +402,7 @@ class SCORMParser {
                         }
                         break;
                     default:
-                        $this->set_warning("Missed Tag '".$subelement["name"]."' inside RESOURCE");
+                        $this->set_warning("Missed Tag '" . $subelement["name"] . "' inside RESOURCE");
                         break;
                 }
             }

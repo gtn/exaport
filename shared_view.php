@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-use Dompdf\Adapter\CPDF;
 use Dompdf\Dompdf;
 
 require_once(__DIR__ . '/inc.php');
@@ -1175,7 +1174,7 @@ if ($is_pdf) {
     require_once($CFG->dirroot . '/user/lib.php');
     $user = \core_user::get_user($view->userid);
     $userData = user_get_user_details($user, null, array('fullname'));
-    $pdfFileName = 'Portfolio-'.$userData['fullname'].'-'.$view->name.'.pdf';
+    $pdfFileName = 'Portfolio-' . $userData['fullname'] . '-' . $view->name . '.pdf';
     $pdfFileName = clean_filename($pdfFileName);
     $dompdf->stream($pdfFileName); //To popup pdf as download
     exit;

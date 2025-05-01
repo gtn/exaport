@@ -6,6 +6,7 @@
     margin: 0;
     padding: 0;
 }
+
 #exaport .clear span {
     display: none;
 }
@@ -28,6 +29,7 @@
     width: 298px;
     float: left;
 }
+
 #exaport #view-preview {
     border: 1px solid #ddd;
     overflow: auto;
@@ -36,23 +38,29 @@
 #exaport .view-group-header {
     background: url(../../../theme/formal_white/pix/gradient_h.jpg);
 }
+
 #exaport .view-group-header div {
     padding: 6px 5px 3px 3px;
     font-weight: bold;
     /*background: url(../pix/arrow_group_right.png) 4px 7px no-repeat;*/
 }
+
 #exaport .view-group-open .view-group-header {
     border-bottom: 1px solid #ddd;
 }
+
 #exaport .view-group-open .view-group-header div {
     background-image: url(../pix/arrow_group_down.png);
 }
+
 #exaport #portfolioItems .view-group-header div {
     background: url(../pix/noteitpj.gif) 4px 7px no-repeat;
 }
+
 #exaport #portfolioExtras .view-group-header div {
     background: url(../pix/bookmarksnotes.png) 4px 7px no-repeat;
 }
+
 #exaport #view-preview .view-group-header div {
     /*background: url(../pix/myportfolio.png) 4px 7px no-repeat;*/
 }
@@ -60,16 +68,20 @@
 #exaport .view-group-body {
     display: none;
 }
+
 #exaport .view-group-open .view-group-body {
     display: block;
 }
+
 #exaport .view-group-header .change {
     font-weight: normal;
     font-size: 12px;
 }
+
 #exaport .view-group-header:hover .change {
     text-decoration: underline;
 }
+
 #exaport .view-group-open .view-group-header .change {
     display: none;
 }
@@ -83,17 +95,20 @@
     max-height: 300px;
     overflow: auto;
 }
+
 #exaport .portfolioOptions {
     list-style: none;
     margin: 0;
     padding: 0;
 }
+
 #exaport .portfolioOptions li {
     cursor: move;
     margin: 0;
     background: url(../pix/view_item_available.png) 6px 5px no-repeat;
     padding: 2px 2px 2px 26px;
 }
+
 #exaport .portfolioOptions li.selected {
     background-color: #d5f0d8;
     background-image: url(../pix/view_item_selected.png);
@@ -107,9 +122,11 @@
     padding: 0;
     min-height: 200px;
 }
+
 #exaport .portfolioDesignBlocks-left li {
     margin-left: 0;
 }
+
 #exaport .portfolioDesignBlocks li {
     background: #fff;
     border: 1px solid #ddd;
@@ -124,16 +141,20 @@
     cursor: move;
     padding: 4px 20px 4px 8px;
 }
+
 #exaport .portfolioDesignBlocks li .name {
     padding: 4px 8px;
 }
+
 #exaport .portfolioDesignBlocks li .email {
     padding: 4px 8px;
 }
+
 #exaport .portfolioDesignBlocks li .body {
     padding: 4px 8px;
     overflow: hidden;
 }
+
 #exaport .portfolioDesignBlocks li .delete {
     position: absolute;
     right: 0;
@@ -145,9 +166,11 @@
     color: red;
     opacity: 0.5;
 }
+
 #exaport .portfolioDesignBlocks li .delete:hover {
     opacity: 1;
 }
+
 #exaport .portfolioDesignBlocks li .edit {
     position: absolute;
     right: 25px;
@@ -179,6 +202,7 @@
     visibility: visible;
     min-height: 60px;
 }
+
 #exaport .portfolioDesignBlocks li .default-text {
     color: #999;
 }
@@ -194,6 +218,7 @@
     list-style-type: none;
     margin: 0.5rem 0 1rem;
 }
+
 #exaport #blocktype-list li {
     display: table-cell;
     vertical-align: top;
@@ -203,15 +228,18 @@
     line-height: 1.4em;
     white-space: normal;
 }
+
 #exaport .ie7 #blocktype-list li {
     z-index: 100;
     display: inline;
     float: left;
 }
+
 #exaport #blocktype-list .blocktype-radio {
     border: none;
     cursor: default; /* ie fix */
 }
+
 #exaport #blocktype-list .blocktype h4 {
     margin: 3px 0;
 }
@@ -239,6 +267,7 @@
     text-align: center;
     width: 150px;
 }
+
 #exaport .fl {
     float: left;
 }
@@ -256,45 +285,56 @@
     border-collapse: collapse;
     table-layout: fixed;
 }
+
 #exaport .table_layout td {
     vertical-align: top;
-    padding:0;
+    padding: 0;
 }
 
 #exaport .layout1 td {
     width: 100%;
 }
+
 #exaport .layout2 td {
     width: 50%;
 }
+
 #exaport .layout3 .td1 {
     width: 67%;
 }
+
 #exaport .layout4 .td1 {
     width: 33%;
 }
+
 #exaport .layout5 td {
     width: 33%;
 }
+
 #exaport .layout6 .td1,
 #exaport .layout6 .td3 {
     width: 25%;
 }
+
 #exaport .layout7 .td1,
 #exaport .layout7 .td3 {
     width: 15%;
 }
+
 #exaport .layout8 td {
     width: 25%;
 }
+
 #exaport .layout9 .td1,
 #exaport .layout9 .td4 {
     width: 20%;
 }
-#exaport .layout9 .td2, 
+
+#exaport .layout9 .td2,
 #exaport .layout9 .td3 {
     width: 30%;
 }
+
 #exaport .layout10 td {
     width: 20%;
 }
@@ -324,9 +364,11 @@
 #exaport #page-content #region-main .region-content {
     width: 100%;
 }
+
 #exaport #page-content #region-main {
-    width:100%;
+    width: 100%;
 }
+
 #exaport table.mceLayout {
     width: 430px !important;
 }
@@ -350,35 +392,44 @@
     max-height: 400px;
     overflow: auto;
 }
+
 #blockform #add-items-list .add-item {
     cursor: pointer;
     padding: 3px;
 }
+
 #blockform #add-items-list .add-item * {
     cursor: pointer;
 }
+
 #blockform #add-items-list .add-item:hover {
     padding: 3px;
     /*border: 1px solid black;*/
 }
+
 #blockform #add-items-list .add-item.checked {
     padding: 3px;
     background: #DEFEDE;
 }
+
 #blockform #add-items-list .add-item-category {
     padding: 10px 3px 0 3px;
     font-weight: bold;
 }
+
 #blockform #add-items-list .add-item-sub .add-item-category {
     padding-top: 0;
 }
+
 #blockform #add-items-list .add-item-sub {
     margin-left: 30px;
 }
+
 #blockform label {
     margin-top: 0.5rem;
     margin-bottom: 0;
 }
+
 #blockform .mceEditor {
     background-color: #f9f9f9;
 }
@@ -388,12 +439,15 @@
     padding-left: 30px;
     background: url('../pix/group_closed.png') no-repeat 15px 5px;
 }
+
 #exaport .course-group-open .course-group-title {
     background-image: url('../pix/group_open.png');
 }
+
 #exaport .course-group-content {
     display: none;
 }
+
 #exaport .course-group-open .course-group-content {
     display: block;
 }
@@ -416,8 +470,9 @@
 }
 
 #exaport .layout_settings.view-group {
- border: none;
+    border: none;
 }
+
 #exaport .view-group-header {
     text-align: left;
     padding: 5px;
@@ -425,15 +480,19 @@
     cursor: pointer;
     background: url('../pix/group_closed.png') no-repeat 10px;
 }
+
 #exaport .view-group-open .view-group-header {
     background: url('../pix/group_open.png') no-repeat 10px;
 }
+
 #exaport .view-group .view-group-content {
     display: none;
 }
+
 #exaport .view-group-open .view-group-content {
     display: block;
 }
+
 #exaport #exaport-view-mod .layout_settings textarea {
     height: auto !important;
 }
@@ -441,6 +500,7 @@
 #exaport .view-additional-help {
     font-size: .9167em;
 }
+
 #exaport #more_viewcontent_info {
     margin-bottom: 20px;
 }
@@ -454,28 +514,35 @@
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
 }
+
 .tippy-box[data-theme~='exaport'] .external-link:before {
     content: url("../pix/url_12.png");
     color: rgba(0, 0, 0, 0.5);
     margin-right: 3px;
 }
+
 .tippy-box[data-theme~='exaport'][data-placement^='top'] > .tippy-arrow::before {
     border-top-color: #b3b3b3;
     bottom: -8px;
 }
+
 .tippy-box[data-theme~='exaport'][data-placement^='bottom'] > .tippy-arrow::before {
     border-bottom-color: #b3b3b3;
     top: -8px;
 }
+
 .tippy-box[data-theme~='exaport'][data-placement^='left'] > .tippy-arrow::before {
     border-left-color: #b3b3b3;
 }
+
 .tippy-box[data-theme~='exaport'][data-placement^='right'] > .tippy-arrow::before {
     border-right-color: #b3b3b3;
 }
+
 .tippy-box[data-theme~='exaport'] .popover-title {
     font-weight: bold;
 }
+
 .tippy-box[data-theme~='exaport'] hr {
     margin-top: 0.2rem;
     margin-bottom: 0.5rem;
@@ -489,6 +556,7 @@
 .exaport-icon.exaport-view-block-view-icon {
     color: #7a7a7a;
 }
+
 .exaport-icon.exaport-view-block-adder-icon:hover,
 .exaport-icon.exaport-view-block-view-icon:hover {
     color: #505050;

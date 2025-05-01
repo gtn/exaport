@@ -124,7 +124,7 @@ class block_exaport_layout_configtable extends admin_setting_configtext {
 // readonly input
 class admin_setting_configtext_readonly extends admin_setting_configtext {
 
-    public function output_html($data, $query='') {
+    public function output_html($data, $query = '') {
         $html = parent::output_html($data, $query);
         $html = str_replace('<input ', '<input readonly ', $html);
         return $html;
@@ -137,14 +137,13 @@ class admin_setting_configtext_readonly extends admin_setting_configtext {
  */
 class admin_setting_wpSSOregister extends admin_setting_configtext {
 
-    public function output_html($data, $query='') {
+    public function output_html($data, $query = '') {
         global $OUTPUT, $CFG;
 
         // Ignore the form in "upgrading" settings pages
         if (!empty($CFG->upgraderunning) || (
                 isset($_SERVER['SCRIPT_NAME']) && strpos($_SERVER['SCRIPT_NAME'], 'admin/upgradesettings.php') !== false
-            ))
-        {
+            )) {
             set_config('block_exaport_wp_sso_passphrase', '--not-used-yet--');
             return '';
         }
@@ -153,7 +152,7 @@ class admin_setting_wpSSOregister extends admin_setting_configtext {
         $urlToSettings = new moodle_url('/admin/settings.php', ['section' => 'blocksettingexaport'], 'admin-block_exaport_mysource');
         if (!$wpSSOurl) {
             // NO CONFIGURED message
-            $context = (object) [
+            $context = (object)[
                 'message' => get_string('settings_exaport_wp_sso_error_no_url_configured', 'block_exaport'),
                 'reloadUrl' => $urlToSettings->out(),
             ];

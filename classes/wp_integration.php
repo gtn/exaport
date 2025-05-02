@@ -191,7 +191,8 @@ class wp_integration {
             }
             $html .= '<p>Your CV is already exported to WordPress at <span class="date">' . @$this->wpLoginData['cv']['timemodified'] . '</span></p>';
             // view button
-            $html .= '<a class="btn btn-success btn-sm text-white exaport-wp-cvView" href="' . @$this->wpLoginData['cv']['url'] . '" target="_blank">
+            $cvUrl = @$this->wpLoginData['cv']['shortUrl'] ?: @$this->wpLoginData['cv']['url'] ?: '';
+            $html .= '<a class="btn btn-success btn-sm text-white exaport-wp-cvView" href="' . $cvUrl . '" target="_blank">
                         ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
                         View
                        </a>';
@@ -268,7 +269,7 @@ class wp_integration {
         // Add user's icon
         $usersIcon = $this->getUserIcon();
         if ($usersIcon) {
-            $usersIconHash = $this->addFileToPost($usersIcon, 'u' . $USER->id . '_');
+            $usersIconHash = $this->addFileToPost($usersIcon/*, 'u' . $USER->id . '_'*/);
             $postData['icon'] = $usersIconHash;
         }
 
@@ -476,7 +477,7 @@ class wp_integration {
                 $wpUrl = '#';
                 if (array_key_exists($view->id, $exportedViews)) {
                     $dNone = '';
-                    $wpUrl = $exportedViews[$view->id]['url'];
+                    $wpUrl = @$exportedViews[$view->id]['shortUrl'] ?: @$exportedViews[$view->id]['url'] ?: '';
                 }
                 $cell->text = '<a class="btn btn-success btn-sm exaport-wp-viewPreview ' . $dNone . '" data-viewId="' . $view->id . '" target="_blank" href="' . $wpUrl . '">
                         ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
@@ -680,7 +681,7 @@ class wp_integration {
                 } else {
                     if (@$block->picture) { // only if picture is enabled
                         if ($icon = $this->getUserIcon()) {
-                            $userPicture = $this->addFileToPost($icon, 'u' . $USER->id . '_');
+                            $userPicture = $this->addFileToPost($icon/*, 'u' . $USER->id . '_'*/);
                         }
                     }
                 }
@@ -729,7 +730,7 @@ class wp_integration {
                         $type_content = [
                             'name' => $badge->name,
                             // 'image' => $imageUrl,
-                            'image' => $this->addFileToPost($badgeImage, 'b' . $badge->id . '_'),
+                            'image' => $this->addFileToPost($badgeImage/*, 'b' . $badge->id . '_'*/),
                             'description' => format_text($badge->description, FORMAT_HTML),
                         ];
                     }
@@ -802,7 +803,7 @@ class wp_integration {
                         break;
                     case 'public':
                         $mainListName = 'publications';
-                        $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url',];
+                        $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url'];
                         break;
                     case 'mbrship':
                         $mainListName = 'profmembershipments';
@@ -824,7 +825,7 @@ class wp_integration {
                                 $blockResumeItem[$prop] = @$item_data->{$prop} ?: '';
                             }
                             if ($block->resume_withfiles) {
-                                $blockResumeItem['attachments'] = $this->addResumeAttachmentsToBlockView($item_data->attachments, 'r' . $block->id . '_');
+                                $blockResumeItem['attachments'] = $this->addResumeAttachmentsToExportFlow($item_data->attachments/*, 'r' . $block->id . '_'*/);
                             } else {
                                 $blockResumeItem['attachments'] = [];
                             }
@@ -873,7 +874,7 @@ class wp_integration {
                             $attachments = [];
                         }
                         if ($attachments) {
-                            $blockResumeItem['attachments'] = $this->addResumeAttachmentsToBlockView($attachments, 'r' . $block->id . '_');
+                            $blockResumeItem['attachments'] = $this->addResumeAttachmentsToExportFlow($attachments/*, 'r' . $block->id . '_'*/);
                         }
                         if ($isGrouped) {
                             $blockResumeItem['resume_itemtype'] = $goalSkillType;
@@ -908,7 +909,7 @@ class wp_integration {
      * @param string $filenamePrefix
      * @return array
      */
-    private function addResumeAttachmentsToBlockView($attachments, $filenamePrefix = '') {
+    private function addResumeAttachmentsToExportFlow($attachments, $filenamePrefix = '') {
         global $CFG;
 
         $addAttachments = [];
@@ -984,7 +985,7 @@ class wp_integration {
 
                         // opt 2: files for direct POST exporting
                         // relate the item to the file
-                        $itemFiles[] = $this->addFileToPost($file, 'i' . $item->id . '_');
+                        $itemFiles[] = $this->addFileToPost($file/*, 'i' . $item->id . '_'*/);
                     }
                 }
             }
@@ -1051,6 +1052,8 @@ class wp_integration {
      * @return stdClass
      */
     private function prepareResume() {
+        global $DB;
+
         // prepare my resume
         static $myResume = null;
         if ($myResume === null) {
@@ -1099,7 +1102,7 @@ class wp_integration {
                     $propList = ['title', 'date', 'description'];
                     break;
                 case 'publications':
-                    $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url',];
+                    $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url'];
                     break;
                 case 'profmembershipments':
                     $propList = ['title', 'startdate', 'enddate', 'description'];
@@ -1113,7 +1116,7 @@ class wp_integration {
                     foreach ($propList as $prop) {
                         $itemTempData[$prop] = @$item_data->{$prop} ?: '';
                     }
-                    $itemTempData['attachments'] = $this->addResumeAttachmentsToBlockView($item_data->attachments, 'r_');
+                    $itemTempData['attachments'] = $this->addResumeAttachmentsToExportFlow($item_data->attachments/*, 'r_'*/);
                     ${'tmp' . $partName}[] = $itemTempData;
                 }
             }
@@ -1123,9 +1126,11 @@ class wp_integration {
 
         // Diff TEXT parts: skills, goals
         $resumeParts = [
+            'goalscomp',
             'goalspersonal',
             'goalsacademic',
             'goalscareers',
+            'skillscomp',
             'skillspersonal',
             'skillsacademic',
             'skillscareers',
@@ -1133,17 +1138,39 @@ class wp_integration {
         foreach ($resumeParts as $partName) {
             $description = '';
             $partData = [];
-            if ($myResume->{$partName}) {
-                $tempContent = $myResume->{$partName};
-                $tempContent = file_rewrite_pluginfile_urls($tempContent, 'pluginfile.php',
-                    context_user::instance($myResume->user_id)->id, 'block_exaport', 'resume_editor_' . $partName, $myResume->id);
-                $description .= format_text($tempContent, FORMAT_HTML);
-            }
-            $description = trim($description);
-            $partData['description'] = $description;
-            $attachments = @$myResume->{$partName . '_attachments'} ?: [];
-            if ($attachments) {
-                $partData['attachments'] = $this->addResumeAttachmentsToBlockView($attachments, 'r_');
+            // goalscomp and skillsomp is a list of selected descriptors from the exacomp:
+            switch ($partName) {
+                case 'goalscomp':
+                    $rtype = 'goals';
+                case 'skillscomp':
+                    if ($partName == 'skillscomp') {
+                        $rtype = 'skills';
+                    }
+                    $comptitles = '';
+                    if (block_exaport_check_competence_interaction() && @$DB->get_manager()->table_exists(BLOCK_EXACOMP_DB_DESCRIPTORS)) {
+                        $competences = $DB->get_records('block_exaportcompresume_mm', array("resumeid" => $myResume->id, "comptype" => $rtype));
+                        foreach ($competences as $competence) {
+                            $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, array('id' => $competence->compid), '*', IGNORE_MISSING);
+                            if ($competencesdb != null) {
+                                $comptitles .= $competencesdb->title . '<br>';
+                            };
+                        };
+                    }
+                    $partData['description'] = $comptitles;
+                    break;
+                default:
+                    if ($myResume->{$partName}) {
+                        $tempContent = $myResume->{$partName};
+                        $tempContent = file_rewrite_pluginfile_urls($tempContent, 'pluginfile.php',
+                            context_user::instance($myResume->user_id)->id, 'block_exaport', 'resume_editor_' . $partName, $myResume->id);
+                        $description .= format_text($tempContent, FORMAT_HTML);
+                    }
+                    $description = trim($description);
+                    $partData['description'] = $description;
+                    $attachments = @$myResume->{$partName . '_attachments'} ?: [];
+                    if ($attachments) {
+                        $partData['attachments'] = $this->addResumeAttachmentsToExportFlow($attachments/*, 'r_'*/);
+                    }
             }
             $resumeToExport[$partName] = $partData;
 

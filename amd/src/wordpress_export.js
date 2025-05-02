@@ -15,7 +15,6 @@ function buttonLoading(button, isLoading) {
 }
 
 export function init() {
-
   // Regular login button: silent creating of the wordpress account
   $(document).on('click', '.exaport-wp-login, .exaport-wp-loginUpdate', function (e) {
     e.preventDefault();
@@ -108,7 +107,8 @@ export function init() {
           // add/update 'view' button
           var viewButton = $('.exaport-wp-viewPreview[data-viewId=' + viewId + ']');
           viewButton.removeClass('d-none');
-          viewButton.attr('href', response.view.url);
+          var href = response.view.shortUrl ? response.view.shortUrl : response.view.url;
+          viewButton.attr('href', href);
           // update the "export" button to "update"
           $('.exaport-wp-viewExport[data-viewId=' + viewId + ']').addClass('d-none');
           $('.exaport-wp-viewUpdate[data-viewId=' + viewId + ']').removeClass('d-none');
@@ -197,11 +197,13 @@ export function init() {
           $('.exaport-wp-cv-info').removeClass('d-none');
           // update the data
           $('.exaport-wp-cv-info .date').text(response.cv.timemodified);
-          $('.exaport-wp-cv-info .exaport-wp-cvView').attr('href', response.cv.url);
+          var href = response.cv.shortUrl ? response.cv.shortUrl : response.cv.url;
+          $('.exaport-wp-cv-info .exaport-wp-cvView').attr('href', href);
         } else {
           // update the data
           $('.exaport-wp-cv-info .date').text(response.cv.timemodified);
-          $('.exaport-wp-cv-info .exaport-wp-cvView').attr('href', response.cv.url);
+          var href = response.cv.shortUrl ? response.cv.shortUrl : response.cv.url;
+          $('.exaport-wp-cv-info .exaport-wp-cvView').attr('href', href);
         }
         // toaster
         addToast(successMessage, {

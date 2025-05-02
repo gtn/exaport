@@ -28,6 +28,7 @@ use html_table;
 use html_table_cell;
 use html_table_row;
 use html_writer;
+use stored_file;
 
 /**
  * Different function to work with WordPress

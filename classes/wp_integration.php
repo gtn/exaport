@@ -233,8 +233,8 @@ class wp_integration {
     public function loginForm() {
         $html = '';
         $html .= '<div class="alert alert-info">';
-        $html .= '<p>You have not a user in the Wordpress server</p>';
-        $html .= '<button class="btn btn-primary exaport-wp-login">Register to WordPress</button>';
+        $html .= '<p>You do not have a user in the associated Wordpress instance</p>';
+        $html .= '<button class="btn btn-primary exaport-wp-login">Register User</button>';
         $html .= '</div>';
 
         return $html;

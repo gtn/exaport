@@ -2973,5 +2973,53 @@ return [
         'WordPress-Ansicht ist älter als die Moodle-Ansicht',
         'WordPress view version is older than Moodle version',
     ],
+    'wp_no_user_regitered' => [
+        'Es gibt noch keinen registrierten User in der zugeordneten Wordpress-Installation',
+        'You do not have a user in the associated Wordpress instance',
+    ],
+    'wp_register_user' => [
+        'Bitte registrieren Sie den User hier',
+        'Register user',
+    ],
+    'wp_view_my_profile_page' => [
+        'Meine Profilseite auf Wordpress ansehen',
+        'View my Wordpress Profile Page',
+    ],
+    'wp_update_my_profile_data' => [
+        'Aktualisiere meine Profilseite auf Wordpress',
+        'Update my WordPress profile data',
+    ],
+    'wp_import_my_cv' => [
+        'Importiere Lebenslauf in Wordpress',
+        'Import CV into WordPress',
+    ],
+    'wp_view_in' => [
+        'In Wordpress anzeigen',
+        'View in WordPress',
+    ],
+    'wp_update_in' => [
+        'In Wordpress aktualisieren',
+        'Update in WordPress',
+    ],
+    'wp_remove_from' => [
+        'von Wordpress entfernen',
+        'Remove from WordPress',
+    ],
+    'wp_my_views' => [
+        'Meine Portfolios',
+        'My views',
+    ],
+    'wp_export_to' => [
+        'Exportieren nach WordPress',
+        'Export to WordPress',
+    ],
+    'wp_exported_into' => [
+        'Status in Wordpress',
+        'Exported into WordPress',
+    ],
+    'wp_updated_on' => [
+        'nach Wordpress exportiert',
+        'WordPress updated on',
+    ],
 ];
 ?>

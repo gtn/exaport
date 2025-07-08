@@ -1,3 +1,9 @@
+
+### v4.6.7 (2025070800) ###
+*europass updates
+*deprecation notes
+*small fixes
+
 ### v4.6.7 (2025012800) ###
 *europass profile image bug
 

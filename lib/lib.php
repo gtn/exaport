@@ -766,7 +766,7 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
 function block_exaport_get_active_compids_for_item($item) {
     $comps = block_exaport_get_active_comps_for_item($item);
     if ($comps && is_array($comps) && array_key_exists('descriptors', $comps)) {
-        $ids = array_keys($comps); // TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
+        $ids = array_keys($comps['descriptors']); // TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
     } else {
         $ids = [];
     }

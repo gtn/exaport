@@ -440,12 +440,12 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     $tabtree = new tabtree($tabs, $currenttab);
     if ($tabsubitemidentifier && $tabobj = $tabtree->find($tabsubitemidentifier)) {
         // Overwrite active and selected.
-        $tabobj->active = true;
+        $tabobj->inactive = false; // TODO: WHY overwrite it? And did you mean "inactive = false" or "activated = true"?. "active" does not exist..
         $tabobj->selected = true;
     }
     if ($tabobj = $tabtree->find($tabitemidentifier)) {
         // Overwrite active and selected.
-        $tabobj->active = true;
+        $tabobj->inactive = false; // TODO: WHY overwrite it? And did you mean "inactive = false" or "activated = true"?. "active" does not exist..
         $tabobj->selected = true;
     }
 

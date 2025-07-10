@@ -2519,7 +2519,7 @@ function block_exaport_item_icon_type_options($itemtype) {
  * @param bool $limitFaToExaportContent limit fontawesome icons only for content from exabis eportfolio. Useful if there is a conflict with icons.
  * @return void
  */
-function block_exaport_add_iconpack($limitFaToExaportContent = false) {
+function block_exaport_add_iconpack($limitFaToExaportContent = true) {
     global $PAGE;
 
     if ($limitFaToExaportContent) {

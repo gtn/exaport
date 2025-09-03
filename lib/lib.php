@@ -440,12 +440,12 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     $tabtree = new tabtree($tabs, $currenttab);
     if ($tabsubitemidentifier && $tabobj = $tabtree->find($tabsubitemidentifier)) {
         // Overwrite active and selected.
-        $tabobj->active = true;
+        $tabobj->inactive = false; // TODO: WHY overwrite it? And did you mean "inactive = false" or "activated = true"?. "active" does not exist..
         $tabobj->selected = true;
     }
     if ($tabobj = $tabtree->find($tabitemidentifier)) {
         // Overwrite active and selected.
-        $tabobj->active = true;
+        $tabobj->inactive = false; // TODO: WHY overwrite it? And did you mean "inactive = false" or "activated = true"?. "active" does not exist..
         $tabobj->selected = true;
     }
 
@@ -2519,7 +2519,7 @@ function block_exaport_item_icon_type_options($itemtype) {
  * @param bool $limitFaToExaportContent limit fontawesome icons only for content from exabis eportfolio. Useful if there is a conflict with icons.
  * @return void
  */
-function block_exaport_add_iconpack($limitFaToExaportContent = false) {
+function block_exaport_add_iconpack($limitFaToExaportContent = true) {
     global $PAGE;
 
     if ($limitFaToExaportContent) {

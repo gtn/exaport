@@ -1,27 +1,28 @@
 <?php
 
+// TODO: is this even used? It will lead to problems with future PHP versions.
 
 /***************************************************************************************************
 ****************************************************************************************************
 *****
 *****      MiniXML - PHP class library for generating and parsing XML.
-*****                                    
-*****      http://minixml.psychogenic.com    
-*****                                          
+*****
+*****      http://minixml.psychogenic.com
+*****
 *****
 *****   This module is part of the miniXML XML parser/generator package.
 *****   Copyright (C) 2002-2008 Patrick Deegan
 *****   All rights reserved
-*****   
-*****   
-*****   This library is released under the terms of the GNU GPL version 3, making it available only for 
-*****   free programs ("free" here being used in the sense of the GPL, see http://www.gnu.org for more details). 
-*****   Anyone wishing to use this library within a proprietary or otherwise non-GPLed program MUST contact psychogenic.com to 
-*****   acquire a distinct license for their application.  This approach encourages the use of free software 
+*****
+*****
+*****   This library is released under the terms of the GNU GPL version 3, making it available only for
+*****   free programs ("free" here being used in the sense of the GPL, see http://www.gnu.org for more details).
+*****   Anyone wishing to use this library within a proprietary or otherwise non-GPLed program MUST contact psychogenic.com to
+*****   acquire a distinct license for their application.  This approach encourages the use of free software
 *****   while allowing for proprietary solutions that support further development.
-*****   
-*****   
-*****   
+*****
+*****
+*****
 *****   miniXML is free software: you can redistribute it and/or modify
 *****   it under the terms of the GNU General Public License as published by
 *****   the Free Software Foundation, either version 3 of the License, or
@@ -34,9 +35,9 @@
 *****
 *****   You should have received a copy of the GNU General Public License
 *****   along with miniXML.  If not, see <http://www.gnu.org/licenses/>.
-*****   
-*****   
-*****   You may contact the author, Pat Deegan, through the     
+*****
+*****
+*****   You may contact the author, Pat Deegan, through the
 *****   contact section at http://www.psychogenic.com
 *****
 *****   Much more information on using this API can be found on the
@@ -78,7 +79,7 @@ require_once(MINIXML_CLASSDIR . "/element.inc.php");
 ** The MiniXMLDoc class is the programmer's handle to MiniXML functionality.
 **
 ** A MiniXMLDoc instance is created in every program that uses MiniXML.
-** With the MiniXMLDoc object, you can access the root MiniXMLElement, 
+** With the MiniXMLDoc object, you can access the root MiniXMLElement,
 ** find/fetch/create elements and read in or output XML strings.
 **/
 class MiniXMLDoc {
@@ -86,7 +87,7 @@ class MiniXMLDoc {
 	var $xuseSimpleRegex;
 	var $xRegexIndex;
 	var $xRegex;
-	
+
 	/* MiniXMLDoc [XMLSTRING]
 	** Constructor, create and init a MiniXMLDoc object.
 	**
@@ -106,14 +107,14 @@ class MiniXMLDoc {
 		{
 			$this->fromString($string);
 		}
-		
+
 	}
-	
+
 	function init ()
 	{
 		$this->xxmlDoc = new MiniXMLElement("PSYCHOGENIC_ROOT_ELEMENT");
 	}
-	
+
 	/* getRoot
 	** Returns a reference the this document's root element
 	** (an instance of MiniXMLElement)
@@ -122,8 +123,8 @@ class MiniXMLDoc {
 	{
 		return $this->xxmlDoc;
 	}
-	
-	
+
+
 	/* setRoot NEWROOT
 	** Set the document root to the NEWROOT MiniXMLElement object.
 	**/
@@ -136,7 +137,7 @@ class MiniXMLDoc {
 			return _MiniXMLError("MiniXMLDoc::setRoot(): Trying to set non-MiniXMLElement as root");
 		}
 	}
-	
+
 	/* isElement ELEMENT
 	** Returns a true value if ELEMENT is an instance of MiniXMLElement,
 	** false otherwise.
@@ -147,11 +148,11 @@ class MiniXMLDoc {
 		{
 			return 0;
 		}
-		
+
 		return method_exists($testme, 'MiniXMLElement');
 	}
-	
-	
+
+
 	/* isNode NODE
 	** Returns a true value if NODE is an instance of MiniXMLNode,
 	** false otherwise.
@@ -162,11 +163,11 @@ class MiniXMLDoc {
 		{
 			return 0;
 		}
-		
+
 		return method_exists($testme, 'MiniXMLNode');
 	}
-	
-	
+
+
 	/* createElement NAME [VALUE]
 	** Creates a new MiniXMLElement with name NAME.
 	** This element is an orphan (has no assigned parent)
@@ -181,7 +182,7 @@ class MiniXMLDoc {
 	function &createElement ($name=NULL, $value=NULL)
 	{
 		$newElement = new MiniXMLElement($name);
-		
+
 		if (! is_null($value))
 		{
 			if (is_numeric($value))
@@ -192,17 +193,17 @@ class MiniXMLDoc {
 				$newElement->text($value);
 			}
 		}
-		
+
 		return $newElement;
 	}
-	
+
 	/* getElement NAME
 	** Searches the document for an element with name NAME.
 	**
 	** Returns a reference to the first MiniXMLElement with name NAME,
 	** if found, NULL otherwise.
 	**
-	** NOTE: The search is performed like this, returning the first 
+	** NOTE: The search is performed like this, returning the first
 	** 	 element that matches:
 	**
 	** - Check the Root Element's immediate children (in order) for a match.
@@ -212,18 +213,18 @@ class MiniXMLDoc {
 	*/
 	function &getElement ($name)
 	{
-	
+
 		$element = $this->xxmlDoc->getElement($name);
 		if (MINIXML_DEBUG > 0)
 		{
 			_MiniXMLLog("MiniXMLDoc::getElement(): Returning element $element");
 		}
-		
+
 		return $element;
-		
+
 	}
-	
-	
+
+
 	/* getElementByPath PATH
 	** Attempts to return a reference to the (first) element at PATH
 	** where PATH is the path in the structure from the root element to
@@ -256,24 +257,24 @@ class MiniXMLDoc {
 	** BUT be careful:
 	**	$accessid =& $xmlDocument->getElementByPath('partRateRequest/partList/partNum');
 	**
-	** will return the partNum element with the value "DA42".  Other partNums are 
+	** will return the partNum element with the value "DA42".  Other partNums are
 	** inaccessible by getElementByPath() - Use MiniXMLElement::getAllChildren() instead.
 	**
 	** Returns the MiniXMLElement reference if found, NULL otherwise.
 	*/
 	function &getElementByPath ($path)
 	{
-	
+
 		$element = $this->xxmlDoc->getElementByPath($path);
 		if (MINIXML_DEBUG > 0)
 		{
 			_MiniXMLLog("Returning element $element");
 		}
-		
+
 		return $element;
-		
+
 	}
-	
+
 	function fromFile ($filename)
 	{
 		$modified = stat($filename);
@@ -282,32 +283,32 @@ class MiniXMLDoc {
 			_MiniXMLError("Can't stat '$filename'");
 			return NULL;
 		}
-		
+
 		if (MINIXML_USEFROMFILECACHING > 0)
 		{
-			
+
 			$tmpName = MINIXML_FROMFILECACHEDIR . '/' . 'minixml-' . md5($filename);
-			if (MINIXML_DEBUG > 0) 
+			if (MINIXML_DEBUG > 0)
 			{
 					_MiniXMLLog("Trying to open cach file $tmpName (for '$filename')");
 			}
 			$cacheFileStat = stat($tmpName);
-			
+
 			if (is_array($cacheFileStat) && $cacheFileStat[9] > $modified[9])
 			{
-			
+
 				$fp = @fopen($tmpName,"r");
 				if ($fp)
 				{
-					if (MINIXML_DEBUG > 0) 
+					if (MINIXML_DEBUG > 0)
 					{
 						_MiniXMLLog("Reading file '$filename' from object cache instead ($tmpName)");
 					}
 					$tmpFileSize = filesize($tmpName);
 					$tmpFileContents = fread($fp, $tmpFileSize);
-					
+
 					$serializedObj = unserialize($tmpFileContents);
-					
+
 					$sRoot =& $serializedObj->getRoot();
 					if ($sRoot)
 					{
@@ -316,63 +317,63 @@ class MiniXMLDoc {
 							_MiniXMLLog("Restoring object from cache file $tmpName");
 						}
 						$this->setRoot($sRoot);
-						
+
 						/* Return immediately, such that we don't refresh the cache */
 						return $this->xxmlDoc->numChildren();
-						
+
 					} /* end if we got a root element from unserialized object */
-					
+
 				} /* end if we sucessfully opened the file */
-				
-				
+
+
 			} /* end if cache file exists and is more recent */
 		}
-		
-		
+
+
 		ob_start();
 		readfile($filename);
 		$filecontents = ob_get_contents();
 		ob_end_clean();
-		
+
 		$retVal = $this->fromString($filecontents);
-		
+
 		if (MINIXML_USEFROMFILECACHING > 0)
 		{
 			$this->saveToCache($filename);
 		}
-		
+
 		return $retVal;
-			
-		
+
+
 	}
-	
+
 	function saveToCache ($filename)
 	{
 		$tmpName = MINIXML_FROMFILECACHEDIR . '/' . 'minixml-' . md5($filename);
-		
+
 		$fp = @fopen($tmpName, "w");
-		
+
 		if (MINIXML_DEBUG > 0)
 		{
 			_MiniXMLLog("Saving object to cache as '$tmpName'");
 		}
-		
+
 		if ($fp)
 		{
-			
+
 			$serialized = serialize($this);
 			fwrite($fp, $serialized);
-			
+
 			fclose($fp);
 		} else {
 			_MiniXMLError("Could not open $tmpName for write in MiniXMLDoc::saveToCache()");
 		}
-		
+
 	}
-	
+
 	/* fromString XMLSTRING
-	** 
-	** Initialise the MiniXMLDoc (and it's root MiniXMLElement) using the 
+	**
+	** Initialise the MiniXMLDoc (and it's root MiniXMLElement) using the
 	** XML string XMLSTRING.
 	**
 	** Returns the number of immediate children the root MiniXMLElement now
@@ -381,12 +382,12 @@ class MiniXMLDoc {
 	function fromString (&$XMLString)
 	{
 		$useSimpleFlag = $this->xuseSimpleRegex;
-		
-		
+
+
 		if ($this->xuseSimpleRegex || ! preg_match('/<!DOCTYPE|<!ENTITY|<!\[CDATA/smi', $XMLString))
 		{
 			$this->xuseSimpleRegex = 1;
-			
+
 			$this->xRegexIndex = array(
 							'biname'	=> 1,
 							'biattr'	=> 2,
@@ -400,7 +401,7 @@ class MiniXMLDoc {
 							'plainrest'	=> 12
 				);
 			$regex = MINIXML_SIMPLE_REGEX;
-			
+
 		} else {
 
 			$this->xRegexIndex = array(
@@ -422,41 +423,41 @@ class MiniXMLDoc {
 				);
 			$regex = MINIXML_COMPLETE_REGEX;
 		}
-		
+
 		$this->xRegex = $regex;
-		
+
 		$XMLString = preg_replace('/.*<\?\s*xml[^>]+>/', '', $XMLString);
-		
-		
+
+
 		$this->fromSubString($this->xxmlDoc, $XMLString);
-		
+
 		$this->xuseSimpleRegex = $useSimpleFlag;
-		
+
 		return $this->xxmlDoc->numChildren();
-		
+
 	}
-	
-	
+
+
 	function fromArray (&$init, $params=NULL)
 	{
-		
+
 		$this->init();
-		
-		
+
+
 		if (! is_array($init) )
 		{
-			
+
 			return _MiniXMLError("MiniXMLDoc::fromArray(): Must Pass an ARRAY to initialize from");
 		}
-		
+
 		if (! is_array($params) )
 		{
 			$params = array();
 		}
-		
+
 		if ( $params["attributes"] && is_array($params["attributes"]) )
 		{
-			
+
 			$attribs = array();
 			foreach ($params["attributes"] as $attribName => $value)
 			{
@@ -464,7 +465,7 @@ class MiniXMLDoc {
 				{
 					$attribs[$attribName] = array();
 				}
-				
+
 				if (is_array($value))
 				{
 					foreach ($value as $v)
@@ -485,27 +486,27 @@ class MiniXMLDoc {
 					}
 				}
 			}
-			
+
 			// completely replace old attributes by our optimized array
 			$params["attributes"] = $attribs;
 		} else {
 			$params["attributes"] = array();
 		}
-		
+
 		foreach ($init as $keyname => $value)
 		{
 			$sub = $this->_fromArray_getExtractSub($value);
-			
-		
+
+
 			$this->$sub($keyname, $value, $this->xxmlDoc, $params);
-		
+
 		}
-		
-		
+
+
 		return $this->xxmlDoc->numChildren();
-		
+
 	}
-	
+
 	function _fromArray_getExtractSub ($v)
 	{
 		// is it a string, a numerical array or an associative array?
@@ -519,79 +520,79 @@ class MiniXMLDoc {
 			} else {
 				$sub .= "AssociativeARRAY";
 			}
-			
+
 		} else {
 			$sub .= "STRING";
 		}
-		
-	
+
+
 		return $sub;
 	}
-	
-	
-	
-	
-		
+
+
+
+
+
 	function _fromArray_extractAssociativeARRAY ($name, &$value, &$parent, &$params)
 	{
-		
+
 		$thisElement =& $parent->createChild($name);
-		
+
 		foreach ($value as $key => $val)
 		{
-		
+
 			$sub = $this->_fromArray_getExtractSub($val);
-			
-		
+
+
 			$this->$sub($key, $val, $thisElement, $params);
-		
+
 		}
-		
+
 		return;
 	}
 
 	function _fromArray_extractARRAY ($name, &$value, &$parent, &$params)
 	{
-		
+
 		foreach ($value as $val)
 		{
 			$sub = $this->_fromArray_getExtractSub($val);
-			
-		
+
+
 			$this->$sub($name, $val, $parent, $params);
-			
+
 		}
-		
+
 		return;
 	}
-		
+
 
 	function _fromArray_extractSTRING ($name, $value="", &$parent, &$params)
 	{
-		
+
 		$pname = $parent->name();
-		
-		if ( 
+
+		if (
 			( array_key_exists($pname, $params['attributes']) && is_array($params['attributes'][$pname])
 			  && array_key_exists($name, $params['attributes'][$pname]) && $params['attributes'][$pname][$name])
-		     || ( 
-		     	  array_key_exists('-all', $params['attributes']) && is_array($params['attributes']['-all']) 
+		     || (
+		     	  array_key_exists('-all', $params['attributes']) && is_array($params['attributes']['-all'])
 			  && array_key_exists($name, $params['attributes']['-all']) && $params['attributes']['-all'][$name])
 		   )
 		{
 			$parent->attribute($name, $value);
 		} elseif ($name == '-content') {
-		
+
 			$parent->text($value);
 		} else {
 			$parent->createChild($name, $value);
 		}
-		
+
 		return;
 	}
 
-	
-	
+
+
 	function time ($msg)
 	{
 		error_log("\nMiniXML msg '$msg', time: ". time() . "\n");
@@ -601,29 +602,29 @@ class MiniXMLDoc {
 	function fromSubString (&$parentElement, &$XMLString)
 	{
 		//$this->time('fromSubStr');
-		
+
 		if (is_null($parentElement) || empty($XMLString) || preg_match('/^\s*$/', $XMLString))
 		{
 			return;
 		}
-		if (MINIXML_DEBUG > 0) 
+		if (MINIXML_DEBUG > 0)
 		{
 			_MiniXMLLog("Called fromSubString() with parent '" . $parentElement->name() . "'\n");
 		}
-		
+
 		if ($this->xuseSimpleRegex)
 		{
 			$tailEndIndexes = array(5, 7, 10, 12);
 		} else {
 			$tailEndIndexes = array(5, 7, 10, 12, 15, 19, 21);
 		}
-		
+
 		$numTailEndIndexes = count($tailEndIndexes);
-		
-		$mcp = array();		
+
+		$mcp = array();
 		if (preg_match_all($this->xRegex, $XMLString, $mcp))
 		{
-			
+
 			$numMatches = count($mcp[0]);
 			unset($mcp[0]); // no longer need the 0th array
 			for($i=0; $i < $numMatches; $i++)
@@ -631,24 +632,24 @@ class MiniXMLDoc {
 
 				$uname = $mcp[$this->xRegexIndex['uname']][$i];
 				$comment = $mcp[$this->xRegexIndex['comment']][$i];
-				
+
 				if ($this->xuseSimpleRegex)
 				{
 					$cdata = NULL;
 					$doctypecont = NULL;
 					$entityname = NULL;
-					
+
 				} else {
-				
+
 					$cdata = $mcp[$this->xRegexIndex['cdata']][$i];
 					$doctypecont = $mcp[$this->xRegexIndex['doctypecont']][$i];
 					$entityname = $mcp[$this->xRegexIndex['entityname']][$i];
-					
+
 				}
-				
-				
+
+
 				$plaintext = $mcp[$this->xRegexIndex['plaintxt']][$i];
-				
+
 				// check all the 'tailend' (i.e. rest of string) matches for more content
 				$moreContent = '';
 				$idx = 0;
@@ -658,113 +659,113 @@ class MiniXMLDoc {
 					{
 						$moreContent = $mcp[$tailEndIndexes[$idx]][$i];
 					}
-					
+
 					$idx++;
 				}
-				
-				
-				
+
+
+
 				if ($uname)
 				{
 					// _MiniXMLLog ("Got UNARY $uname");
 					$newElement =& $parentElement->createChild($uname);
 					$this->_extractAttributesFromString($newElement, $mcp[$this->xRegexIndex['uattr']][$i]);
 					unset($newElement);
-	
+
 				} elseif ($comment) {
 					//_MiniXMLLog ("Got comment $comment");
 					$parentElement->comment($comment);
-					
+
 				} elseif ($cdata) {
 					//_MiniXMLLog ("Got cdata $cdata");
 					$parentElement->appendChild(new MiniXMLElementCData($cdata));
-					
+
 				} elseif ($doctypecont) {
 					//_MiniXMLLog ("Got doctype $doctypedef '" . $mcp[11][$i] . "'");
 					$newElement = new MiniXMLElementDocType($mcp[$this->xRegexIndex['doctypedef']][$i]);
 					$appendedChild =& $parentElement->appendChild($newElement);
-					
+
 					unset($newElement);
-					
+
 					$this->fromSubString($appendedChild, $doctypecont);
-					
+
 					unset($appendedChild);
-					
+
 				} elseif ($entityname ) {
 					//_MiniXMLLog ("Got entity $entityname");
 					$newElement = new MiniXMLElementEntity ($entityname, $mcp[$this->xRegexIndex['entitydef']][$i]);
 					$parentElement->appendChild($newElement);
-					
+
 					unset($newElement);
-					
+
 				} elseif ($plaintext) {
-				
+
 					if (! preg_match('/^\s+$/', $plaintext))
 					{
 						$parentElement->createNode($plaintext);
 					}
-					
+
 				} elseif($mcp[$this->xRegexIndex['biname']]) {
-				
+
 					// _MiniXMLLog("Got BIN NAME: " . $mcp[$this->xRegexIndex['biname']][$i]);
-					
+
 					$nencl = $mcp[$this->xRegexIndex['biencl']][$i];
 					$finaltxt = $mcp[$this->xRegexIndex['biendtxt']][$i];
-					
+
 					$newElement =& $parentElement->createChild($mcp[$this->xRegexIndex['biname']][$i]);
-					
+
 					$this->_extractAttributesFromString($newElement, $mcp[$this->xRegexIndex['biattr']][$i]);
-					
-					
-					
+
+
+
 					$plaintxtMatches = array();
 					if (preg_match("/^\s*([^\s<][^<]*)/", $nencl, $plaintxtMatches))
 					{
 						$txt = $plaintxtMatches[1];
 						$newElement->createNode($txt);
-						
+
 						$nencl = preg_replace("/^\s*([^<]+)/", "", $nencl);
 					}
-					
+
 
 					if ($nencl && !preg_match('/^\s*$/', $nencl))
 					{
 						$this->fromSubString($newElement, $nencl);
 					}
-					
-					
+
+
 					unset($newElement);
-					
+
 					if ($finaltxt)
 					{
 						$parentElement->createNode($finaltxt);
 					}
-					
-					
+
+
 				} /* end switch over type of match */
-				
+
 				if (! empty($moreContent))
 				{
 					$this->fromSubString($parentElement, $moreContent);
 				}
-			
-				
+
+
 			} /* end loop over all matches */
-			
+
 			unset($parentElement);
-			
+
 		} /* end if there was a match */
-		
+
 	} /* end method fromSubString */
-		
-	
+
+
 	/* toString [DEPTH]
 	** Converts this MiniXMLDoc object to a string and returns it.
 	**
 	** The optional DEPTH may be passed to set the space offset for the
 	** first element.
 	**
-	** If the optional DEPTH is set to MINIXML_NOWHITESPACES.  
+	** If the optional DEPTH is set to MINIXML_NOWHITESPACES.
 	** When it is, no \n or whitespaces will be inserted in the xml string
 	** (ie it will all be on a single line with no spaces between the tags.
 	**
@@ -773,7 +774,7 @@ class MiniXMLDoc {
 	function toString ($depth=0)
 	{
 		$retString = $this->xxmlDoc->toString($depth);
-		
+
 		if ($depth == MINIXML_NOWHITESPACES)
 		{
 			$xmlhead = "<?xml version=\"1.0\"\\1?>";
@@ -785,47 +786,47 @@ class MiniXMLDoc {
 		$replace = array($xmlhead,
 				"");
 		$retString = preg_replace($search, $replace, $retString);
-		
-		
+
+
 		if (MINIXML_DEBUG > 0)
 		{
 			_MiniXMLLog("MiniXML::toString() Returning XML:\n$retString\n\n");
 		}
-		
-		
+
+
 		return $retString;
 	}
-	
-	
+
+
 	/* toArray
 	**
-	** Transforms the XML structure currently represented by the MiniXML Document object 
+	** Transforms the XML structure currently represented by the MiniXML Document object
 	** into an array.
-	** 
-	** More docs to come - for the moment, use var_dump($miniXMLDoc->toArray()) to see 
+	**
+	** More docs to come - for the moment, use var_dump($miniXMLDoc->toArray()) to see
 	** what's going on :)
 	*/
-	
+
 	function & toArray ()
 	{
-		
+
 		$retVal = $this->xxmlDoc->toStructure();
-	
+
 		if (is_array($retVal))
 		{
 			return $retVal;
 		}
-		
+
 		$retArray = array(
 					'-content'	=> $retVal,
 				);
-		
+
 		return $retArray;
 	}
 
-	
-	
-	
+
+
+
 	/* getValue()
 	** Utility function, call the root MiniXMLElement's getValue()
 	*/
@@ -833,9 +834,9 @@ class MiniXMLDoc {
 	{
 		return $this->xxmlDoc->getValue();
 	}
-	
-	
-	
+
+
+
 	/* dump
 	** Debugging aid, dump returns a nicely formatted dump of the current structure of the
 	** MiniXMLDoc object.
@@ -844,39 +845,39 @@ class MiniXMLDoc {
 	{
 		return serialize($this);
 	}
-	
-	
-	
+
+
+
 	// _extractAttributesFromString
 	// private method for extracting and setting the attributs from a
 	// ' a="b" c = "d"' string
 	function _extractAttributesFromString (&$element, &$attrString)
 	{
-	
+
 		if (! $attrString)
 		{
 			return NULL;
 		}
-		
+
 		$count = 0;
 		$attribs = array();
-		// Set the attribs 
+		// Set the attribs
 		preg_match_all('/([^\s]+)\s*=\s*([\'"])([^\2]*?)\2/sm', $attrString, $attribs);
-		
+
 		$numAttribs = count($attribs[0]);
-		
+
 		for ($i = 0; $i < $numAttribs; $i++)
 		{
 			$attrname = $attribs[1][$i];
 			$attrval = $attribs[3][$i];
-			
+
 			if ($attrname)
 			{
 				$element->attribute($attrname, $attrval, '');
 				$count++;
 			}
 		}
-		
+
 		return $count;
 	}
 
@@ -885,8 +886,8 @@ class MiniXMLDoc {
 	{
 		$this->xxmlDoc = null;
 	}
-		
-	
+
+
 }
 
 
@@ -894,7 +895,7 @@ class MiniXMLDoc {
 /***************************************************************************************************
 ****************************************************************************************************
 *****
-*****					   MiniXML 
+*****					   MiniXML
 *****
 ****************************************************************************************************
 ***************************************************************************************************/
@@ -903,15 +904,15 @@ class MiniXMLDoc {
 **
 ** Avoid using me - I involve needless overhead.
 **
-** Utility class - this is just an name aliase for the 
-** MiniXMLDoc class as I keep repeating the mistake of 
+** Utility class - this is just an name aliase for the
+** MiniXMLDoc class as I keep repeating the mistake of
 ** trying to create
 **
 ** $xml = new MiniXML();
 **
 */
 class MiniXML extends MiniXMLDoc {
-	
+
 	//function MiniXML ()
 	function __construct ()
 	{

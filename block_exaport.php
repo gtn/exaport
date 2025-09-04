@@ -62,37 +62,37 @@ class block_exaport extends block_list {
 
         $output = block_exaport_get_renderer();
 
-        $icon = '<img src="' . $output->image_url('whyeportfolio', 'block_exaport') . '" class="icon" alt="" />';
+        $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/whyeportfolio.svg' . '" class="icon" alt="" />';
         $this->content->items[] = '<a title="' . block_exaport_get_string('whyEportfolio') . '" ' .
             ' href="' . $CFG->wwwroot . '/blocks/exaport/whyeportfolio.php?courseid=' . $COURSE->id . '">' .
             $icon . block_exaport_get_string('whyEportfolio') . '</a>';
 
-        $icon = '<img src="' . $output->image_url('resume', 'block_exaport') . '" class="icon" alt="" />';
+        $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/resume.svg' . '" class="icon" alt="" />';
         $this->content->items[] = '<a title="' . block_exaport_get_string('resume_my') . '" ' .
             ' href="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id . '">' .
             $icon . block_exaport_get_string('resume_my') . '</a>';
 
-        $icon = '<img src="' . $output->image_url('my_portfolio', 'block_exaport') . '" class="icon" alt="" />';
+        $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/my_portfolio.svg' . '" class="icon" alt="" />';
         $this->content->items[] = '<a title="' . block_exaport_get_string('myportfoliotitle') . '" ' .
             ' href="' . $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id . '">' .
             $icon . block_exaport_get_string('myportfolio') . '</a>';
 
-        $icon = '<img src="' . $output->image_url('myviews', 'block_exaport') . '" class="icon" alt="" />';
+        $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/myviews.svg' . '" class="icon" alt="" />';
         $this->content->items[] = '<a title="' . block_exaport_get_string('views') . '" ' .
             ' href="' . $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id . '">' .
             $icon . block_exaport_get_string('views') . '</a>';
 
-        $icon = '<img src="' . $output->image_url('shared_views', 'block_exaport') . '" class="icon" alt="" />';
+        $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/shared_views.svg' . '" class="icon" alt="" />';
         $this->content->items[] = '<a title="' . block_exaport_get_string('shared_views') . '" ' .
             ' href="' . $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id . '">' .
             $icon . block_exaport_get_string('shared_views') . '</a>';
 
-        $icon = '<img src="' . $output->image_url('shared_categories', 'block_exaport') . '" class="icon" alt="" />';
+        $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/shared_categories.svg' . '" class="icon" alt="" />';
         $this->content->items[] = '<a title="' . block_exaport_get_string('shared_categories') . '" ' .
             ' href="' . $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $COURSE->id . '">' .
             $icon . block_exaport_get_string('shared_categories') . '</a>';
 
-        $icon = '<img src="' . $output->image_url('importexport', 'block_exaport') . '" class="icon" alt="" />';
+        $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/importexport.svg' . '" class="icon" alt="" />';
         $this->content->items[] = '<a title="' . block_exaport_get_string('importexport') . '" ' .
             ' href="' . $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id . '">' .
             $icon . block_exaport_get_string('importexport') . '</a>';

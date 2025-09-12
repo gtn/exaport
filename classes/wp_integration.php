@@ -163,14 +163,14 @@ class wp_integration {
             $html .= '<div class="col-sm-6">
                 <a class="btn btn-primary exaport-wp-directLogin" href="' . $loginSsoUrl . '" target="_blank">
                     ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                    ' . block_exaport_get_string('wp_view_my_profile_page') . '
+                    View my WordPress profile page
                 </a>
             </div>';
             // update button
             $html .= '<div class="col-sm-6 text-right">
                 <button class="btn btn-primary exaport-wp-loginUpdate">
                     ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                    ' . block_exaport_get_string('wp_update_my_profile_data') . '
+                    Update my WordPress profile data
                 </button>
             </div>';
             $html .= '</div>';
@@ -213,7 +213,7 @@ class wp_integration {
             $html .= '<div class="' . $cvExportClass . '">
                     <button type="button" class="btn btn-primary text-white exaport-wp-cvExport">
                         ' . block_exaport_fontawesome_icon('arrow-up-from-bracket', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                        ' . block_exaport_get_string('wp_import_my_cv') . '
+                        Import CV into WordPress
                     </button>
                 </div>';
 
@@ -233,8 +233,8 @@ class wp_integration {
     public function loginForm() {
         $html = '';
         $html .= '<div class="alert alert-info">';
-        $html .= '<p>'.block_exacomp_get_string('wp_no_user_regitered').'</p>';
-        $html .= '<button class="btn btn-primary exaport-wp-login">'.block_exaport_get_string('wp_register_user').'</button>';
+        $html .= '<p>You do not have a user in the associated Wordpress instance</p>';
+        $html .= '<button class="btn btn-primary exaport-wp-login">Register User</button>';
         $html .= '</div>';
 
         return $html;
@@ -408,7 +408,7 @@ class wp_integration {
         // The list of existing views
         $views = block_exaport_get_my_views();
 
-        $html .= '<h5 class="text-center">' . block_exaport_get_string('wp_my_views') . '</h5>';
+        $html .= '<h5 class="text-center">My views</h5>';
 
         if (!$views) {
             $html .= '<div class="alert alert-light">' . get_string("noviews", "block_exaport") . '</div>';
@@ -421,8 +421,8 @@ class wp_integration {
 
             $table->head['name'] = get_string("name", "block_exaport");
             $table->head['timemodified'] = get_string("date", "block_exaport");
-            $table->head['exported'] = block_exaport_get_string('wp_exported_into');
-            $table->head['timemodifiedWp'] = block_exaport_get_string('wp_updated_on');
+            $table->head['exported'] = 'Exported into WordPress';
+            $table->head['timemodifiedWp'] = 'WordPress updated on';
             $table->head['wpView'] = '';
             $table->head['buttonUpdateExportToWp'] = '';
             $table->head['buttonRemoveFromWp'] = '';
@@ -482,7 +482,7 @@ class wp_integration {
                 }
                 $cell->text = '<a class="btn btn-success btn-sm exaport-wp-viewPreview ' . $dNone . '" data-viewId="' . $view->id . '" target="_blank" href="' . $wpUrl . '">
                         ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                        ' . block_exaport_get_string('wp_view_in') . '</a>';
+                        View in WordPress</a>';
                 $cell->attributes['class'] = ' wpView';
                 $row->cells[] = $cell;
 
@@ -499,11 +499,11 @@ class wp_integration {
                 }
                 $cell->text = '<button type="button" class="btn btn-primary btn-sm exaport-wp-viewExport ' . $dNoneExport . '" data-viewId="' . $view->id . '">
                     ' . block_exaport_fontawesome_icon('arrow-up-from-bracket', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                    ' . block_exaport_get_string('wp_export_to') . '
+                    Export to WordPress
                     </button>';
                 $cell->text .= '<button type="button" class="btn btn-primary btn-sm exaport-wp-viewUpdate ' . $dNoneUpdate . '" data-viewId="' . $view->id . '">
                     ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                    ' . block_exaport_get_string('wp_update_in'). '
+                    Update in WordPress
                     </button>';
                 $cell->attributes['class'] = ' wpExport';
                 $row->cells[] = $cell;
@@ -512,7 +512,7 @@ class wp_integration {
                 $cell = new html_table_cell();
                 $cell->text = '<button type="button" class="btn btn-danger btn-sm exaport-wp-viewRemove ' . $dNoneRemove . '" data-viewId="' . $view->id . '">
                     ' . block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                    ' . block_exaport_get_string('wp_remove_from') . '
+                    Remove from WordPress
                     </button>';
                 $cell->attributes['class'] = ' wpExport';
                 $row->cells[] = $cell;

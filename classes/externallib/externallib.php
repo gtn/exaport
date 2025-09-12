@@ -2049,32 +2049,4 @@ class externallib extends \external_api {
             'success' => new external_value(PARAM_BOOL, 'status'),
         ));
     }
-
-    public static function wordpress_status_parameters() {
-        return new external_function_parameters([]);
-    }
-
-    /**
-     * Get info about the WordPress portfolio connection
-     *
-     * @ws-type-read
-     */
-    public static function wordpress_status() {
-        static::validate_parameters(static::wordpress_status_parameters(), []);
-
-        return [
-            'is_sso_configured' => \block_exaport\wordpress_lib::is_sso_configured(),
-        ];
-    }
-
-    /**
-     * Returns desription of method return values
-     *
-     * @return external_single_structure
-     */
-    public static function wordpress_status_returns() {
-        return new external_single_structure([
-            'is_sso_configured' => new external_value(PARAM_BOOL, 'status'),
-        ]);
-    }
 }

@@ -527,7 +527,8 @@ if ($editform->is_cancelled()) {
                 if (count($notifyusers) > 0) {
                     foreach ($notifyusers as $notifyuser) {
                         // Only notify if he also is shared.
-                        if (isset($shareusers[$notifyuser])) {
+                        // if (isset($shareusers[$notifyuser])) { returns false if array contains 3 and $notifyuser is string "3" !!!
+                        if (in_array((int)$notifyuser, $shareusers, true)) {
                             // Notify.
                             $notificationdata = new \core\message\message();
                             $notificationdata->component = 'block_exaport';

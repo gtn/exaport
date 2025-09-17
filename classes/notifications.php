@@ -46,7 +46,8 @@ class notifications {
         }
 
         // Get all teachers in the course
-        $teachers = $this->get_course_teachers($courseid);
+        // $teachers = $this->get_course_teachers($courseid);
+        $teachers = block_exaport_get_course_teachers();
 
         if (empty($teachers)) {
             return;
@@ -61,9 +62,9 @@ class notifications {
 
         $messagetext = get_string('emailbody_itemcreated', 'block_exaport', array(
             'username' => fullname($user),
-            'itemname' => $item->name,
+            // 'itemname' => $item->name,
             'coursename' => $course->fullname,
-            'itemurl' => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $itemid . '&action=edit'
+            // 'itemurl' => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $itemid . '&action=edit'
         ));
 
         $messagedata->fullmessage = $messagetext;
@@ -78,21 +79,21 @@ class notifications {
         }
     }
 
-    /**
-     * Get all teachers in a course.
-     *
-     * @param int $courseid
-     * @return array
-     */
-    private function get_course_teachers($courseid) {
-        global $DB;
-
-        $context = \context_course::instance($courseid);
-
-        // Get users with teacher capabilities
-        $teachers = get_enrolled_users($context, 'moodle/course:update');
-
-        return $teachers;
-    }
+    // /**
+    //  * Get all teachers in a course.
+    //  *
+    //  * @param int $courseid
+    //  * @return array
+    //  */
+    // private function get_course_teachers($courseid) {
+    //     global $DB;
+    //
+    //     $context = \context_course::instance($courseid);
+    //
+    //     // Get users with teacher capabilities
+    //     $teachers = get_enrolled_users($context, 'moodle/course:update');
+    //
+    //     return $teachers;
+    // }
 }
 

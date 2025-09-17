@@ -843,12 +843,6 @@ $string['eventitemcreated'] = 'Exaport item created';
 $string['messageprovider:itemcreated'] = 'Notification when an exaport item is created';
 $string['emailsubject_itemcreated'] = 'New portfolio item created in {$a}';
 $string['emailbody_itemcreated'] = 'Hello,
-
-{$a->username} has created a new portfolio item "{$a->itemname}" in the course "{$a->coursename}".
-
-You can view the item here: {$a->itemurl}
-
-Best regards,
-The system';
+{$a->username} has created a new portfolio item in the course "{$a->coursename}".';
 $string['emailsmall_itemcreated'] = 'New portfolio item created';
 

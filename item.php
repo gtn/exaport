@@ -570,6 +570,20 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 
     // Insert the new entry.
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
+
+        // Trigger event for item creation
+        $event = \block_exaport\event\item_created::create(array(
+            'objectid' => $post->id,
+            'courseid' => $courseid,
+            'userid' => $USER->id,
+            'context' => context_user::instance($USER->id),
+            'other' => array(
+                'itemname' => $post->name,
+                'itemtype' => $post->type
+            )
+        ));
+        $event->trigger();
+
         $postupdate = false;
         foreach ($usetextareas as $fieldname => $usetextarea) {
             if (!$usetextarea) {
@@ -625,6 +639,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
                         "userid" => $USER->id, "role" => 0));
             }
         }
+        // TODO: is this deprecated? START
         block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add',
             $post->name);
 
@@ -637,6 +652,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
             core_tag_tag::set_item_tags('block_exaport', 'block_exaportitem', $post->id, context_user::instance($USER->id),
                 $post->tags);
         }
+        // TODO: is this deprecated? END
     } else {
         print_error('addposterror', 'block_exaport', $returnurl);
     }

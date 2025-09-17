@@ -24,4 +24,13 @@ $messageproviders = array(
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ),
     ),
+    'itemcreated' => array(
+        'capability' => 'moodle/course:update',
+        'defaults' => array(
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+        ),
+    ),
 );
+
+

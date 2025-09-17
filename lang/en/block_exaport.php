@@ -79,7 +79,7 @@ $string['go'] = 'Go!';
 $string['hidesummary'] = '(hide summary)';
 $string['managecategories'] = 'Manage categories';
 $string['mandatoryfields'] = 'The field\'s name, category and intro are required. Please fill them in.';
-$string['mandatoryfieldsforcat'] = 'The field name is required. Please fill them in.';
+$string['mandatoryfieldsforcat'] = 'The field name is required. Please fill it in.';
 $string['myportfolio'] = 'My Portfolio Artefacts';
 $string['myportfoliotitle'] = 'Exabis ePortfolio module: Add your links and files here.';
 $string['newlink'] = 'Add new link';
@@ -835,3 +835,20 @@ $string['block_exaport_used_layout'] = 'Used layout';
 $string['block_exaport_used_layout_body'] = 'Change the layout if you have some appearance problems. Right now it is used only for artefact list.';
 $string['block_exaport_used_layout_moodle_bootstrap'] = 'Cards layout';
 $string['block_exaport_used_layout_clean_old'] = 'Tiles layout (Old - ended of support from v4.6.7)';
+
+// Event strings
+$string['eventitemcreated'] = 'Exaport item created';
+
+// Message strings
+$string['messageprovider:itemcreated'] = 'Notification when an exaport item is created';
+$string['emailsubject_itemcreated'] = 'New portfolio item created in {$a}';
+$string['emailbody_itemcreated'] = 'Hello,
+
+{$a->username} has created a new portfolio item "{$a->itemname}" in the course "{$a->coursename}".
+
+You can view the item here: {$a->itemurl}
+
+Best regards,
+The system';
+$string['emailsmall_itemcreated'] = 'New portfolio item created';
+

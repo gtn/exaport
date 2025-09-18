@@ -330,6 +330,7 @@ $string['listofartefacts'] = 'W&aumlhle ein Element aus';
 $string['listofbadges'] = 'Liste von Badges';
 $string['addButton'] = 'Hinzufügen';
 $string['saveButton'] = 'Speichern';
+$string['saveViewButton'] = 'Portfolio speichern';
 $string['cancelButton'] = 'Abbrechen';
 $string['blocktitle2'] = 'Blocktitel';
 $string['blockcontent'] = 'Blockinhalt';

@@ -1200,6 +1200,10 @@ return [
         'Speichern',
         'Save',
     ],
+    'saveViewButton' => [
+        'Portfolio speichern',
+        'Save view',
+    ],
     'cancelButton' => [
         'Abbrechen',
         'Cancel',

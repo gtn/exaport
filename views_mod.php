@@ -266,15 +266,15 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                 break;
         }
         if ($this->_customdata['view']) {
-            $this->add_action_buttons(false, get_string('savechanges'));
+            $this->add_action_buttons(false, get_string('saveViewButton', 'block_exaport'));
         } else {
-            $this->add_action_buttons(false, get_string('add'));
+            $this->add_action_buttons(false, get_string('add')); // TODO: when creating a new view THIS should be run, right? It isn't...
         }
     }
 
     public function add_action_buttons($cancel = true, $submitlabel = null) {
         if (is_null($submitlabel)) {
-            $submitlabel = get_string('savechanges');
+            $submitlabel = get_string('saveViewButton', 'block_exaport');
         }
         $mform =& $this->_form;
         if ($cancel) {

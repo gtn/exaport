@@ -330,6 +330,7 @@ $string['listofartefacts'] = 'List of Artefacts';
 $string['listofbadges'] = 'List of Badges';
 $string['addButton'] = 'Add';
 $string['saveButton'] = 'Save';
+$string['saveViewButton'] = 'Save view';
 $string['cancelButton'] = 'Cancel';
 $string['blocktitle2'] = 'Block title';
 $string['blockcontent'] = 'Block content';

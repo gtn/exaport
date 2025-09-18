@@ -514,16 +514,17 @@ if ($editform->is_cancelled()) {
             // Add new shared users.
             if ($dbview->internaccess && !$dbview->shareall) {
                 $shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+                $notifyusers = optional_param_array('notifyusers', array(), PARAM_INT);
 
                 foreach ($shareusers as $shareuser) {
                     $shareuser = clean_param($shareuser, PARAM_INT);
                     $shareitem = new stdClass();
                     $shareitem->viewid = $dbview->id;
                     $shareitem->userid = $shareuser;
+                    $shareitem->notify = in_array($shareuser, $notifyusers) ? 1 : 0;
                     $DB->insert_record("block_exaportviewshar", $shareitem);
                 }
                 // Message users, if they have shared.
-                $notifyusers = optional_param_array('notifyusers', array(), PARAM_RAW);
                 if (count($notifyusers) > 0) {
                     foreach ($notifyusers as $notifyuser) {
                         // Only notify if he also is shared.

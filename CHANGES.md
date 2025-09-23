@@ -1,3 +1,6 @@
+### v4.6.7 (2025092300) ###
+* new icons
+* Deprecations & Bugfixes
 
 ### v4.6.7 (2025070800) ###
 *europass updates

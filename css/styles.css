@@ -36,3 +36,8 @@ div.item-detail-image img {
 .exaport-icon.exaport-export-import-scorm-icon {
     opacity: 0.75;
 }
+
+#exaport .view-group-content .table-responsive {
+    width: 100%;
+    display: block;
+}

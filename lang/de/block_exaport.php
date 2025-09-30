@@ -797,7 +797,7 @@ $string['whyEportfolio_description'] = '<h4>Machen Sie Arbeit sichtbar: Ihr digi
             <h4>Was ist ein ePortfolio?</h4>
             <br>
             <p>Ein ePortfolio ist mehr als nur ein digitaler Lebenslauf. Es ist eine persönliche Sammlung Ihrer Arbeiten, die Ihre Fähigkeiten und Erfahrungen lebendig darstellt. Anders als ein klassischer CV bietet es echte Nachweise: Arbeitsproben, Reflexionen und den Kontext, in dem Sie Ihre Kompetenzen erworben haben.</p>
-            <p>Mit Exabis ePortfolio können Sie <strong>mehrere Ansichten erstellen</strong>, passgenau für bestimmte Bewerbungen, Jobchancen oder Präsentationen. So zeigen Sie immer das, was für die jeweilige Situation am wichtigsten ist.</p>
+            <p>Mit Exabis ePortfolio können Sie mehrere Ansichten erstellen, passgenau für bestimmte Bewerbungen, Jobchancen oder Präsentationen. So zeigen Sie immer das, was für die jeweilige Situation am wichtigsten ist.</p>
             <br>
             <h4>Wie erstellst du dein ePortfolio?</h4>
             <br>
@@ -807,7 +807,7 @@ $string['whyEportfolio_description'] = '<h4>Machen Sie Arbeit sichtbar: Ihr digi
                 <li><strong>Reflektieren:</strong> Ergänzen Sie kurze Beschreibungen, die Ihre Kompetenzen verdeutlichen und den Kontext erklären.</li>
                 <li><strong>Gestalten:</strong> Bauen Sie ein Portfolio Schritt für Schritt auf und entwickeln Sie es laufend weiter.</li>
             </ol>
-            <p>MitExabis ePortfolio geht das unkompliziert, flexibel und effizient. Sie haben jederzeit die Kontrolle darüber, wie Sie sich und Ihr Können präsentieren und machen sichtbar, was Sie einzigartig macht.</p>';
+            <p>Mit Exabis ePortfolio geht das unkompliziert, flexibel und effizient. Sie haben jederzeit die Kontrolle darüber, wie Sie sich und Ihr Können präsentieren und machen sichtbar, was Sie einzigartig macht.</p>';
 $string['cofigureblock_cvinfo_help'] = 'Du wirst den aktuellen Status der ausgewählten Elemente in deinem Lebenslauf sehen. Der Blockinhalt wird aktualisiert, wenn du später Änderungen an irgendwelchen Elementen in deinem Lebenslauf vornimmst.';
 $string['cofigureblock_cvinfo_cover'] = 'Über mich';
 $string['cofigureblock_cvinfo_cover_actual'] = 'Aktuellen Lebenslauf "Über mich" Inhalt hinzufügen';

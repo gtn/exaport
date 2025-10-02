@@ -233,8 +233,8 @@ class wp_integration {
     public function loginForm() {
         $html = '';
         $html .= '<div class="alert alert-info">';
-        $html .= '<p>You have not a user in the Wordpress server</p>';
-        $html .= '<button class="btn btn-primary exaport-wp-login">Register to WordPress</button>';
+        $html .= '<p>You do not have a user in the associated Wordpress instance</p>';
+        $html .= '<button class="btn btn-primary exaport-wp-login">Register User</button>';
         $html .= '</div>';
 
         return $html;
@@ -1089,24 +1089,28 @@ class wp_integration {
             'certifications',
             'publications',
             'profmembershipments',
+            'badges',
         ];
 
         foreach ($resumeParts as $partName) {
             switch ($partName) {
                 case 'educations':
-                    $propList = ['institution', 'qualname', 'qualdescription', 'startdate', 'enddate'];
+                    $propList = ['id', 'institution', 'institutionaddress', 'qualname', 'qualtype', 'qualdescription', 'startdate', 'enddate'];
                     break;
                 case 'employments':
-                    $propList = ['jobtitle', 'employer', 'positiondescription', 'startdate', 'enddate'];
+                    $propList = ['id', 'jobtitle', 'employer', 'employeraddress', 'positiondescription', 'startdate', 'enddate'];
                     break;
                 case 'certifications':
-                    $propList = ['title', 'date', 'description'];
+                    $propList = ['id', 'title', 'date', 'description'];
                     break;
                 case 'publications':
-                    $propList = ['title', 'contribution', 'date', 'contributiondetails', 'url'];
+                    $propList = ['id', 'title', 'contribution', 'date', 'contributiondetails', 'url'];
                     break;
                 case 'profmembershipments':
-                    $propList = ['title', 'startdate', 'enddate', 'description'];
+                    $propList = ['id', 'title', 'startdate', 'enddate', 'description'];
+                    break;
+                case 'badges':
+                    $propList = ['id', 'name', 'description', 'date', 'image'];
                     break;
             }
             ${'tmp' . $partName} = [];

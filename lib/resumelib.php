@@ -1060,37 +1060,41 @@ function europass_xml($resumeid = 0) {
         $organization_name = $dom->createElement('Name');
         $text = $dom->createTextNode(clean_for_external_xml($employment->employer));
         $organization_name->appendChild($text);
-        $address = $dom->createElement('Address');
-        $contact = $dom->createElement('Contact');
-        $addressLine = $dom->createElement('AddressLine');
-        $addressLine->appendChild($dom->createTextNode($employment->employeraddress));
-        $organization_info->appendChild($address);
-        $address->appendChild($contact);
-        $contact->appendChild($addressLine);
         $organization_info->appendChild($organization_name);
         $position_title = $dom->createElement('Position');
         $label->appendChild($dom->createTextNode($employment->jobtitle));
         $position_title->appendChild($label);
         $period_tag = $dom->createElement('Period');
         $ongoing = $dom->createElement('Current');
+        $isOngoing= false;
+        $currentYear= (int) date("Y");
         // start date
         if ($employment->startdate) {
             $start_date = $dom->createElement('From');
             $year = extractYear($employment->startdate);
             $period_tag->appendChild($start_date);
             $start_date->setAttribute('year', $year);
+            $start_date->setAttribute('month', "01");
+            $start_date->setAttribute('day', "01");
         }
         // end date
+        if (!$employment->enddate){
+            $ongoing->appendChild($dom->createTextNode('true'));
+        }
         if ($employment->enddate) {
             $year = extractYear($employment->enddate);
-            if ($year) {
+            $isOngoing = $currentYear < (int)$year;
+            if ($year && !$isOngoing) {
                 $end_date = $dom->createElement('To');
                 $end_date->setAttribute('year', $year);
+                $end_date->setAttribute('month', "01");
+                $end_date->setAttribute('day', "01");
                 $ongoing->appendChild($dom->createTextNode('false'));
                 $period_tag->appendChild($end_date);
             }
-        } else {
-            $ongoing->appendChild($dom->createTextNode('true'));
+            if($isOngoing) {
+                $ongoing->appendChild($dom->createTextNode('true'));
+            }
         }
         $period_tag->appendChild($ongoing);
         $description = $dom->createElement('Activities');
@@ -1314,6 +1318,8 @@ function europass_xml($resumeid = 0) {
             $membership_title->appendChild($membership_label);
             $membership_title->appendChild($membership_code);
             $membership_node->appendChild($membership_title);
+            $membership_node->appendChild($membership_description);
+
             $certi->appendChild($membership_node);
         }
     }

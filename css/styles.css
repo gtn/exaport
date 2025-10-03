@@ -7,7 +7,6 @@ div.item-detail-image {
     -moz-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
     box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
 }
-
 div.item-detail-image img {
     max-width: 800px;
     max-height: 600px;
@@ -38,6 +37,12 @@ div.item-detail-image img {
 .exaport-icon.exaport-export-import-scorm-icon {
     opacity: 0.75;
 }
+
+#exaport .view-group-content .table-responsive {
+    width: 100%;
+    display: block;
+}
+
 
 .exaport-toast-close {
     opacity: 1 !important;

@@ -439,12 +439,12 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     $tabtree = new tabtree($tabs, $currenttab);
     if ($tabsubitemidentifier && $tabobj = $tabtree->find($tabsubitemidentifier)) {
         // Overwrite active and selected.
-        $tabobj->active = true;
+        $tabobj->inactive = false; // TODO: WHY overwrite it? And did you mean "inactive = false" or "activated = true"?. "active" does not exist..
         $tabobj->selected = true;
     }
     if ($tabobj = $tabtree->find($tabitemidentifier)) {
         // Overwrite active and selected.
-        $tabobj->active = true;
+        $tabobj->inactive = false; // TODO: WHY overwrite it? And did you mean "inactive = false" or "activated = true"?. "active" does not exist..
         $tabobj->selected = true;
     }
 
@@ -765,7 +765,7 @@ function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
 function block_exaport_get_active_compids_for_item($item) {
     $comps = block_exaport_get_active_comps_for_item($item);
     if ($comps && is_array($comps) && array_key_exists('descriptors', $comps)) {
-        $ids = array_keys($comps); // TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
+        $ids = array_keys($comps['descriptors']); // TODO this ignores the topics, which didn't exist before anyways RW 2021.04.06
     } else {
         $ids = [];
     }
@@ -2517,7 +2517,7 @@ function block_exaport_item_icon_type_options($itemtype) {
  * @param bool $limitFaToExaportContent limit fontawesome icons only for content from exabis eportfolio. Useful if there is a conflict with icons.
  * @return void
  */
-function block_exaport_add_iconpack($limitFaToExaportContent = false) {
+function block_exaport_add_iconpack($limitFaToExaportContent = true) {
     global $PAGE;
 
     if ($limitFaToExaportContent) {

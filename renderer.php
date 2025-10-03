@@ -24,11 +24,14 @@ class block_exaport_renderer extends plugin_renderer_base {
      */
     public function image_url($imagename, $component = 'moodle') {
         if (method_exists(get_parent_class($this), 'image_url')) {
-            return call_user_func_array([parent::class, 'image_url'], func_get_args());
+            // return call_user_func_array(['parent::class', 'image_url'], func_get_args());
+            return parent::image_url($imagename, $component);
         } else {
-            return call_user_func_array([parent::class, 'pix_url'], func_get_args());
+            // return call_user_func_array(['parent::class', 'pix_url'], func_get_args());
+            return parent::pix_url($imagename, $component);
         }
     }
+
 
     public function get_theme_dir() {
         return $this->get_theme_config()->dir;

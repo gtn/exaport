@@ -1204,6 +1204,10 @@ return [
         'Portfolio speichern',
         'Save view',
     ],
+    'saveAndNotifyButton' => [
+        'Portfolio speichern und Benachrichtigungen senden',
+        'Save view and send notifications',
+    ],
     'cancelButton' => [
         'Abbrechen',
         'Cancel',

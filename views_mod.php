@@ -276,6 +276,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
         if (is_null($submitlabel)) {
             $submitlabel = get_string('saveViewButton', 'block_exaport');
         }
+        $submitandnotifylabel = get_string('saveAndNotifyButton', 'block_exaport');
         $mform =& $this->_form;
         if ($cancel) {
             // When two elements we need a group
@@ -287,6 +288,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
         } else {
             // No group needed
             $mform->addElement('submit', 'submitbutton', $submitlabel, ['class' => 'btn btn-primary']);
+            $mform->addElement('submit', 'submitandnotifybutton', $submitandnotifylabel, ['class' => 'btn btn-primary']);
             $mform->closeHeaderBefore('submitbutton');
         }
     }
@@ -508,7 +510,8 @@ if ($editform->is_cancelled()) {
             $message = block_exaport_get_string('view_saved');
 
             // Notification logic for "save and notify" button.
-            if (optional_param('notify', 0, PARAM_INT)) {
+            // this checks if that button was clicked. It is null, if the submittbutton was clicked instead
+            if (optional_param('submitandnotifybutton', '', PARAM_RAW)) {
                 // Notify shared users.
                 $sharedusers = exaport_get_view_shared_users($dbview->id);
                 foreach ($sharedusers as $userid => $shareinfo) {
@@ -1361,7 +1364,8 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 
 if ($type != 'title') {
     echo '<div style="padding-top: 20px; text-align: center; clear: both;">';
-    echo $form['elements_by_name']['submitbutton']['html'];
+    echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitbutton']['html'] . '</span>';
+    echo '<span>' . $form['elements_by_name']['submitandnotifybutton']['html'] . '</span>';
     echo '</div>';
     echo '</div></form>';
 }

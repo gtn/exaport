@@ -85,7 +85,7 @@ if ($view && $action == 'grouplist') {
 }
 
 $returnurltolist = $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $courseid;
-$returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id .  '&action=edit';
+$returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id . '&action=edit';
 
 // Delete item.
 if ($action == 'delete') {
@@ -266,15 +266,15 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                 break;
         }
         if ($this->_customdata['view']) {
-            $this->add_action_buttons(false, get_string('savechanges'));
+            $this->add_action_buttons(false, get_string('saveViewButton', 'block_exaport'));
         } else {
-            $this->add_action_buttons(false, get_string('add'));
+            $this->add_action_buttons(false, get_string('add')); // TODO: when creating a new view THIS should be run, right? It isn't...
         }
     }
 
     public function add_action_buttons($cancel = true, $submitlabel = null) {
         if (is_null($submitlabel)) {
-            $submitlabel = get_string('savechanges');
+            $submitlabel = get_string('saveViewButton', 'block_exaport');
         }
         $mform =& $this->_form;
         if ($cancel) {
@@ -514,20 +514,22 @@ if ($editform->is_cancelled()) {
             // Add new shared users.
             if ($dbview->internaccess && !$dbview->shareall) {
                 $shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+                $notifyusers = optional_param_array('notifyusers', array(), PARAM_INT);
 
                 foreach ($shareusers as $shareuser) {
                     $shareuser = clean_param($shareuser, PARAM_INT);
                     $shareitem = new stdClass();
                     $shareitem->viewid = $dbview->id;
                     $shareitem->userid = $shareuser;
+                    $shareitem->notify = in_array($shareuser, $notifyusers) ? 1 : 0;
                     $DB->insert_record("block_exaportviewshar", $shareitem);
                 }
                 // Message users, if they have shared.
-                $notifyusers = optional_param_array('notifyusers', array(), PARAM_RAW);
                 if (count($notifyusers) > 0) {
                     foreach ($notifyusers as $notifyuser) {
                         // Only notify if he also is shared.
-                        if (isset($shareusers[$notifyuser])) {
+                        // if (isset($shareusers[$notifyuser])) { returns false if array contains 3 and $notifyuser is string "3" !!!
+                        if (in_array((int)$notifyuser, $shareusers, true)) {
                             // Notify.
                             $notificationdata = new \core\message\message();
                             $notificationdata->component = 'block_exaport';

@@ -1,0 +1,20 @@
+
+.exaport-wp-integration .wp-icon {
+    font-size: 1.25rem;
+}
+
+.exaport-wp-integration .wp-exported {
+    color: #357a32;
+}
+
+.exaport-wp-integration .wp-exportedHidden {
+    color: rgba(5, 5, 5, 0.3);
+}
+
+.exaport-wp-integration .wp-exportedOld {
+    color: rgba(202, 49, 32, 0.5);
+}
+
+.exaport-wp-integration .wp-viewsList-legend {
+    font-size: 0.75rem;
+}

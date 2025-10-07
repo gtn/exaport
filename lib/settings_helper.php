@@ -120,3 +120,88 @@ class block_exaport_layout_configtable extends admin_setting_configtext {
     }
 
 }
+
+// readonly input
+class admin_setting_configtext_readonly extends admin_setting_configtext {
+
+    public function output_html($data, $query = '') {
+        $html = parent::output_html($data, $query);
+        $html = str_replace('<input ', '<input readonly ', $html);
+        return $html;
+    }
+
+}
+
+/**
+ * special class to get/request passphrase for WordPress SSO integration
+ */
+class admin_setting_wpSSOregister extends admin_setting_configtext {
+
+    public function output_html($data, $query = '') {
+        global $OUTPUT, $CFG;
+
+        // Ignore the form in "upgrading" settings pages
+        if (!empty($CFG->upgraderunning) || (
+                isset($_SERVER['SCRIPT_NAME']) && strpos($_SERVER['SCRIPT_NAME'], 'admin/upgradesettings.php') !== false
+            )) {
+            set_config('wp_sso_passphrase', '--not-used-yet--', 'block_exaport');
+            return '';
+        }
+
+        $wpSSOurl = \block_exaport\wordpress_lib::get_sso_url();
+        $urlToSettings = new moodle_url('/admin/settings.php', ['section' => 'blocksettingexaport'], 'admin-mysource');
+        if (!$wpSSOurl) {
+            // NO CONFIGURED message
+            $context = (object)[
+                'message' => get_string('settings_exaport_wp_sso_error_no_url_configured', 'block_exaport'),
+                'reloadUrl' => $urlToSettings->out(),
+            ];
+            $element = $OUTPUT->render_from_template('block_exaport/settings_wp_sso_passphrase_no_wpurl_configured', $context);
+
+            return format_admin_setting($this, $this->visiblename, $element, $this->description, false, '', NULL, $query);
+        }
+
+        $currpassphrase = \block_exaport\wordpress_lib::get_sso_passphrase();
+        if (!$currpassphrase || $currpassphrase == '--not-used-yet--') {
+            // NO registered passphrase
+            $wpIntegration = new \block_exaport\wp_integration(0, '');
+            $element = $wpIntegration->exaportSettingsPasshpraseNotRegisteredForm();
+
+            return format_admin_setting($this, $this->visiblename, $element, $this->description, false, '', NULL, $query);
+        }
+
+        // the passphrase os configured!
+
+        $wpIntegration = new \block_exaport\wp_integration(0, '');
+        $element = $wpIntegration->exaportSettingsPasshpraseForm();
+
+        return format_admin_setting($this, $this->visiblename, $element, $this->description, false, '', NULL, $query);
+
+    }
+}
+
+// Add custom JS into settings.php
+class block_exaport_admin_setting_withjs extends admin_setting {
+    public function __construct($name, $visiblename, $description = '') {
+        parent::__construct($name, $visiblename, $description, '');
+    }
+
+    public function get_setting() {
+        return true;
+    }
+
+    public function write_setting($data) {
+        return '';
+    }
+
+    public function output_html($data, $query = '') {
+        global $CFG, $PAGE;
+
+        $PAGE->requires->jquery();
+        $PAGE->requires->js_call_amd('block_exaport/wordpress_sso_settings', 'init');
+
+        $script = ''; // empty string to make fake element;
+
+        return format_admin_setting($this, $this->visiblename, $script, $this->description, false, '', '', $query);
+    }
+}

@@ -17,6 +17,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use block_exaport\globals as g;
 use core_privacy\local\request\transform;
 
 require_once($CFG->libdir . '/filelib.php');
@@ -31,8 +32,6 @@ if (block_exaport_check_competence_interaction()) {
 }
 
 require_once(__DIR__ . '/common.php');
-
-use block_exaport\globals as g;
 
 require_once(__DIR__ . '/lib.exaport.php');
 require_once(__DIR__ . '/sharelib.php');
@@ -1211,7 +1210,7 @@ function block_exaport_get_view_blocks($view) {
             // Nothing to do here
         } else {
             $block->print_text = file_rewrite_pluginfile_urls($block->text, 'draftfile.php',
-                context_user::instance($USER->id)->id, 'user', 'draft', $view->draft_itemid);
+                context_user::instance($USER->id)->id, 'user', 'draft', (@$view->draft_itemid ?: 0));
             $block->itemid = null;
         }
 
@@ -2089,7 +2088,6 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
         $cat_tree = block_exaport_get_all_categories_for_user($userid); // start with ALL categories
         $return_tree = block_exaport_get_root_category();
         $return_tree->subcategories = block_exaport_user_categories_into_tree($userid, $cat_tree, 0);
-         //file_put_contents('D://222.222', print_r($cat_tree, true));
     } else {
         # Traverse the tree and search for direct children of the root
         foreach ($cat_tree as $cat_id => $category) {
@@ -2541,4 +2539,20 @@ function block_exaport_used_layout() {
 
     //    return @$CFG->block_exaport_used_layout ?: 'clean_old';
     return @$CFG->block_exaport_used_layout ?: 'moodle_bootstrap';
+}
+
+/**
+ * returns only MY views
+ * @return array
+ * @throws dml_exception
+ */
+function block_exaport_get_my_views() {
+    global $DB, $USER;
+    $query = 'SELECT *
+            FROM {block_exaportview}
+            WHERE userid = ?
+            ORDER BY name, timemodified';
+    $views = $DB->get_records_sql($query, array($USER->id));
+
+    return $views;
 }

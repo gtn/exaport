@@ -274,7 +274,16 @@ function block_exaport_get_resume_params_record($userid = null) {
     return $DB->get_record('block_exaportresume', $conditions);
 }
 
-function block_exaport_get_resume_params($userid = null, $full = false) {
+/**
+ * returns the CV data, organized as needed
+ * @param int $userid
+ * @param bool $full add full CV information
+ * @param bool $attachmentasarealfile add real file information (real filesystem path)
+ * @return false|mixed|stdClass
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function block_exaport_get_resume_params($userid = null, $full = false, $attachmentasarealfile = false) {
     global $DB, $CFG;
     if ($userid === null) {
         global $USER;
@@ -297,7 +306,7 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
         // TODO: add images?
         $fs = get_file_storage();
         $context = context_user::instance($userid);
-        $import_attachments = function($type, $recordid) use ($fs, $context, $CFG) {
+        $import_attachments = function($type, $recordid) use ($fs, $context, $CFG, $attachmentasarealfile) {
             $result = null;
             $files = $fs->get_area_files($context->id, 'block_exaport', 'resume_' . $type, $recordid, 'filename', false);
             if (count($files) > 0) {
@@ -306,7 +315,12 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
                     $filename = $file->get_filename();
                     $url = $CFG->wwwroot . '/pluginfile.php/' . $file->get_contextid() . '/block_exaport/resume_' . $type . '/' . $file->get_itemid() .
                         '/' . $filename;
-                    $result[] = array('filename' => $filename, 'fileurl' => $url);
+                    $addfiledata = array('filename' => $filename, 'fileurl' => $url);
+                    if ($attachmentasarealfile) {
+                        // add file data as a moodle file
+                        $addfiledata['moodlefile'] = $file;
+                    }
+                    $result[] = $addfiledata;
                 };
             }
             return $result;
@@ -373,8 +387,22 @@ function block_exaport_get_resume_params($userid = null, $full = false) {
                     ' WHERE b.id=? ',
                     array('id' => $badges_mm_rec->badgeid));
                 $badge_entry = new stdClass();
+                $badge_entry->id = $badge->id;
                 $badge_entry->name = $badge->name;
                 $badge_entry->image = block_exaport_get_user_badge_image($badge, true);
+                // Add image file as attachment
+                $attachment = block_exaport_get_user_badge_image($badge, false, true);
+                $badge_entry->attachments = [];
+                if ($attachment instanceof stored_file) {
+                    $filename = $attachment->get_filename();
+                    $url = $badge_entry->image; // the same url as ->image
+                    $addfiledata = array('filename' => $filename, 'fileurl' => $url);
+                    if ($attachmentasarealfile) {
+                        // add file data as a moodle file
+                        $addfiledata['moodlefile'] = $attachment;
+                    }
+                    $badge_entry->attachments = [$addfiledata];
+                }
                 $badge_entry->description = $badge->description;
                 $badge_entry->date = userdate($badge->dateissued, get_string('strftimedate', 'langconfig'));
                 $badges_data[] = $badge_entry;
@@ -822,20 +850,34 @@ function block_exaport_resume_competences_form($resume, $id, $typeblock) {
     return false;
 }
 
-function block_exaport_get_user_badge_image($badge, $just_url = false) {
+function block_exaport_get_user_badge_image($badge, $just_url = false, $return_file = false) {
     // $src = '/pluginfile.php/'.context_user::instance($badge->usercreated)->id.'/badges/userbadge/'.$badge->id.'/'.
     // $badge->uniquehash;
     // Find badge by id.
     if (!$badge) {
         return '';
     }
-    if (!$badge->courseid) {
-        // For badges with courseid = NULL.
-        $src = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
-    } else {
+    $context_id = 1;
+    if ($badge->courseid) {
         $context = context_course::instance($badge->courseid);
-        $src = (string)moodle_url::make_pluginfile_url($context->id,
-            'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+        $context_id = $context->id;
+    }
+    if ($return_file) {
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context_id, 'badges', 'badgeimage', $badge->id, false);
+        $file = null;
+        foreach ($files as $filet) {
+            if ($filet->get_filename() !== '.') {
+                // only f1 ???
+                if (strpos($filet->get_filename(), 'f1') === 0) {
+                    $file = $filet;
+                    break;
+                }
+            }
+        }
+        return $file;
+    } else {
+        $src = (string)moodle_url::make_pluginfile_url($context_id, 'badges', 'badgeimage', $badge->id, '/', 'f1');
     }
     if ($just_url) {
         return $src;

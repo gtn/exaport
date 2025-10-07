@@ -24,7 +24,7 @@
 }
 
 .excomdos_cont.layout_clean_old .excomdos_changeview {
-    float:right;
+    float: right;
 }
 
 .excomdos_cont .excomdos_changeview img {
@@ -47,11 +47,11 @@
 }
 
 .excomdos_cont .excomdos_listtable tr:nth-child(2n+2) {
-  background-color: #f9f9f9;
+    background-color: #f9f9f9;
 }
 
 .excomdos_cont .excomdos_listicon {
-    width:42px;
+    width: 42px;
     text-align: center;
 }
 
@@ -65,11 +65,15 @@
 }
 
 .excomdos_cont .excomdos_listtable tr td.excomdos_listlastcol {
-    word-wrap: break-word;.
-    max-width: 300px;
+    word-wrap: break-word;
+
+    .
+    max-width:
+
+    300px;
     min-width: 200px;
-     overflow: hidden;
-     width: 2em;
+    overflow: hidden;
+    width: 2em;
 }
 
 .excomdos_cont .excomdos_subcollast {
@@ -86,24 +90,27 @@
 
 
 .excomdos_cont.layout_clean_old .excomdos_tile {
-    width:12.5em;
-    height:12.5em;
+    width: 12.5em;
+    height: 12.5em;
     border: 1px solid #E3DFD4;
     padding: 0.625em;
-    overflow:hidden;
-    float:left;
-    margin:0.5em;
+    overflow: hidden;
+    float: left;
+    margin: 0.5em;
 
     -webkit-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
     -moz-box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
     box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.21);
 }
+
 .excomdos_cont.layout_clean_old .excomdos_tile:hover {
     box-shadow: 1px 1px 3px rgba(36, 36, 36, 0.5);
 }
+
 .excomdos_cont .excomdos_tile.ui-state-active {
     background: #ffc;
 }
+
 .excomdos_cont .excomdos_tile.ui-state-hover {
     background: #ccc;
 }
@@ -149,10 +156,12 @@
 .excomdos_cont .excomdos_tileimage img {
     max-width: 100%;
 }
+
 .excomdos_cont.layout_exaport_bootstrap .excomdos_tileimage img,
 .excomdos_cont.layout_moodle_bootstrap .excomdos_tileimage img {
     max-height: 150px;
 }
+
 .excomdos_cont.layout_clean_old .excomdos_tileimage img {
     max-width: 12.5em;
     max-height: 7.361em;
@@ -166,15 +175,18 @@
 .excomdos_cont .excomdos_tileinfo_time {
     font-size: 85%;
 }
+
 .excomdos_cont.layout_clean_old .excomdos_tileinfo_time {
     font-size: 70%;
     display: block;
     overflow: hidden;
 }
+
 .excomdos_cont .excomdos_tilehead .excomdos_tileinfo_type .type_title {
     font-size: 85%;
     margin-left: 3px;
 }
+
 .excomdos_cont.layout_clean_old .excomdos_tilehead .excomdos_tileinfo_type .type_title {
     font-size: 70%;
     margin-left: 3px;
@@ -184,6 +196,7 @@
 .excomdos_cont .excomdos_tilehead .excomdos_tileedit {
     display: block;
 }
+
 .excomdos_cont.layout_clean_old .excomdos_tilehead .excomdos_tileedit {
     position: absolute;
     right: 0;
@@ -200,12 +213,14 @@
 }
 
 .excomdos_cont .exomdos_tiletitle {
-    overflow:hidden;
+    overflow: hidden;
     word-wrap: break-word;
 }
+
 .excomdos_cont .exomdos_tiletitle a {
     color: #000;
 }
+
 .excomdos_cont.layout_clean_old .exomdos_tiletitle {
     font-size: 85%;
 }
@@ -214,13 +229,16 @@
     font-size: 0.85rem;
     margin: 2.5em 0;
 }
+
 .excomdos_cont.layout_clean_old .excomdos_additem {
     height: 60px;
 }
+
 .excomdos_cont.excomdos_cont-type-shared .excomdos_additem {
     font-size: 0.85rem;
     margin: 0;
 }
+
 .excomdos_cont.layout_clean_old .excomdos_additem_content {
     float: left;
 }
@@ -229,7 +247,7 @@
     text-align: center;
     margin-right: 1.5em;
     vertical-align: middle;
-    display:inline-block;
+    display: inline-block;
 }
 
 .excomdos_cont .excomdos_additem .exaport-icon {
@@ -238,7 +256,7 @@
 
 .excomdos_cont .excomdos_changeview span {
     vertical-align: middle;
-    display:inline-block;
+    display: inline-block;
 }
 
 .excomdos_cont .excomdos_additem img,
@@ -249,18 +267,21 @@
 .excomdos_cat_path .cat_path_item.active {
     font-weight: bold;
 }
+
 .excomdos_cat_path .cat_path_delimeter {
     margin: 1rem 7px;
 }
+
 .excomdos_cat_path img {
     margin-right: 3px;
 }
+
 .excomdos_cont a > img {
     text-decoration: none !important;
-    border:0px !important;
-    outline:none;
+    border: 0px !important;
+    outline: none;
     border-width: 0px;
-    outline-width:0px;
+    outline-width: 0px;
     border-bottom: none;
 }
 

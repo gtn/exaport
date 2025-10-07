@@ -1,3 +1,6 @@
+### v4.6.7 (2025092300) ###
+* new icons
+* Deprecations & Bugfixes
 
 ### v4.6.7 (2025070800) ###
 *europass updates
@@ -5,32 +8,40 @@
 *small fixes
 
 ### v4.6.7 (2025012800) ###
+
 *europass profile image bug
 
 ### v4.6.7 (2025012100) ###
+
 *europass export changes
 
 ### v4.6.7 (2024121200) ###
+
 *webservices dakora+ bugfixes
 *pdf feature for shared view
 *show view page in diggr+
 *new diggr+ webservices
 
 ### v4.6.7 (2024101700) ###
+
 *scorm export rework
 
 ### v4.6.7 (2024072300) ###
+
 *small fixes
 
 ### v4.6.7 (2024062700) ###
+
 *fetch string problem fixed
 
 ### v4.6.7 (2024062100) ###
+
 *update problem fixed
 *PHP8 deprecations
 *small fix for the new user
 
 ### v4.6.7 (2024060600) ###
+
 New features:
 *added block_exaport_disable_externaccess: Disables the "External Access" sharing option for views. (This allows administrators to control external sharing permissions.)
 *added block_exaport_disable_shareemails: Disables the "Share by Email" sharing option for views. (This allows administrators to control email sharing permissions.)
@@ -44,34 +55,42 @@ Improvements:
 *introduced a single, versatile artifact type that allows users to add various content options.
 
 ### v4.6.7 (2023121200) ###
-* moodle 4.3 compatibility 
+
+* moodle 4.3 compatibility
 * dakora, possibility of multiple assignments
 * allow as_pdf=1 for diggr+ files
 * fix issues when creating a pdf from exaport-views
 
 ### v4.6.7 (2023091600) ###
+
 * php8 fixes
 * fix several bugs with exaport view editing
 
 ### v4.6.7 (2023071500) ###
+
 * Webservice Bufixing for Dakora+
 
 ### v4.6.7 (2022112100) ###
+
 * Moodle Codestyle fixes
 
 ### v4.6.7 (2022092800)  ###
-* Increase downwards compatibility 	
-* Privacy API integration, 	
-* GDPR backward compability fixes 
+
+* Increase downwards compatibility
+* Privacy API integration,
+* GDPR backward compability fixes
 
 ### v4.6.7 (2022092800) ###
+
 * Privacy API integration, GDPRs
 
 ### v4.6.7 (2022090200) ###
-* Moodle 4.0 compatibility 
+
+* Moodle 4.0 compatibility
 * securty fixes, deleted old code
 
 ### v4.6.4 (2020011700) ###
+
 * Upgrade-bugfix
 * minor adjustments for Dakora-app
 * changes of wording
@@ -80,22 +99,27 @@ Improvements:
 * shared category bugfix
 
 ### v4.6.3 ###
+
 * update of javascript library to use dynamic drag&drop in views
 * bug correction in automatic adding of artifacts to views
 * update of export to Europass
 * multiple files in "file" artifact are now possible
 
 ### v4.6.1 ###
+
 * new Webservice token.php
 
 ### v4.6.0 ###
+
 * bugfixes
 * moodle3.3 update
 
 ### v4.5.1 ###
+
 * bugfixes
 
 ### 2016-09-21 Version 4.5.0: ###
+
 * bugfixes
 * usability improvements
 
@@ -126,18 +150,23 @@ Improvements:
 * Chinese language file added
 
 ### 2013-16-11 Version 4.1 ###
+
 * Thank you to Silvia Alcaraz-Dominguez from Universitat de Barcelona (Faculty of Pedagogy) for translating the module to Catalan Usability-enhancements - grouping of published views
 
 ### 2013-10-09 Version 4.1 ###
+
 * new my portfolio area - no more categories, tiles, print-version new shared views better integration of external content in views (can be added as artefacts)
 
 ### 2013-05-03 Version 4.0.5 ###
+
 * link items can be commented in views, size for pop up for artefact selection increases dynamically
 
 ### 2013-03-22 Version 4.0.5 ###
+
 * implemented multiple categories, new views-concept (mahara-style), access for smartphone-app epop (www.epop.at)
 
 ### 2012-06-01 Version 4.0.5 ###
+
 * updated-script for data-transfer from previous versions included (thanks to eThink eduacation for the support!)
 
 ### 2012-06-01 Version 4.0.4 ###
@@ -282,14 +311,16 @@ Version Version 2.2
 * Removed bug when exporting external portfolios (comment-column was not created when you didn't update the plugin)
 * When sharing a portfolio entry your own name is now shown.
 * Problem with not finding the mimeinfo()-function (white page when editing a file portfolio entry)
-* Added capability system. Comment: The Exabis ePortfolio-rights have to be set globally (Assign global roles). Comment: the capability shareextern needs shareintern. You can only share extern if both shareintern and shareextern are set. allowposts is used to prevents posts on other (shared) bookmarks. You can always post on your own bookmark.
+* Added capability system. Comment: The Exabis ePortfolio-rights have to be set globally (Assign global roles). Comment: the capability shareextern needs shareintern. You can only share extern if both shareintern and shareextern are set.
+  allowposts is used to prevents posts on other (shared) bookmarks. You can always post on your own bookmark.
 * Changed directory structure: put all the code inside eportfolio/. You can delete the direcotries bookmark/ and portfolio_export/ that were needed in previous installations. Please delete them after installing the new version.
 * Removed direcory files/ and the file inside (mimetypes.php) because moodle is capable of the function mimetypes(). This file is not needed any more.
 * Changes place where the exported SCORM-files (.zip) are saved. Put that back into the course-directories because elsewhere they would not be accessable with file.php.
 * Comment: Didn't change place where the files of the bookmark are saved: Advantages:
-    * Files are accessible now
-    * This version is compatible with previous versions <= 2.01 Disadvantage:
-    * When a course is deleted the portfolio-files that were uploaded within this course are also deleted. Unfortunately there is no other way to implement this at the moment. The whole thing is a limitation of moodle that files can only be accessed within course-directories (with file.php). I heard of plans to solve this problems in future moodle versions. If anyone knows a better solution please tell me :)
+  * Files are accessible now
+  * This version is compatible with previous versions <= 2.01 Disadvantage:
+  * When a course is deleted the portfolio-files that were uploaded within this course are also deleted. Unfortunately there is no other way to implement this at the moment. The whole thing is a limitation of moodle that files can only be
+    accessed within course-directories (with file.php). I heard of plans to solve this problems in future moodle versions. If anyone knows a better solution please tell me :)
 * Changed location of images to eportfolio/pix because there were problems one some installations.
 
 ### 2007-08-05 Version 2.01 ###

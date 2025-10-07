@@ -2,6 +2,7 @@
 
 exaport is a free Moodle plugin designed to build up ePortfolios with an individual structure. Students can create, collect and share outcomes of their learning process in the form of a digital portfolio.
 This module enables the following functionality:
+
 - linking ePortfolio-artefacts to competences
 - publishing of views with a selection of material
 - export to Europass for CVs
@@ -21,33 +22,31 @@ Download directly from Github:
 Save the zip file somewhere onto your local computer and extract all the files
 Transfer the folder “exaport” to the blocks-directory of Moodle
 Login as admin and start the installation procedure
-Installation is done, trainers may use the block in their courses. 
-
+Installation is done, trainers may use the block in their courses.
 
 For more information on setting up the plug-in please refer to the documentation.
 
-
 # USAGE:
+
 ePortfolios can be built up individually or collaboratively
 Under the first tab, My CV, the user will find his/her informational page. This can also be seen as a basic introductory page for the personal CV.
 Materials, so-called artifacts, can be collected and published selectively using views
-Portfolio users can directly upload their own data via file-upload, add links to other external websites (i.e. social media resources such as YouTube etc.) or add some notes in their portfolios. Artifacts can be added within categories, new categories can be created.
+Portfolio users can directly upload their own data via file-upload, add links to other external websites (i.e. social media resources such as YouTube etc.) or add some notes in their portfolios. Artifacts can be added within categories, new
+categories can be created.
 Learning products can be linked to competences (see Exabis Competence Grids)
-The Exabis ePortfolio module can be associated with the module Exabis Competence Grid, used for adaptive learning scenarios and enables competence association with portfolios. Competencies can be added by clicking "choose competences associated with your upload”. 
-
+The Exabis ePortfolio module can be associated with the module Exabis Competence Grid, used for adaptive learning scenarios and enables competence association with portfolios. Competencies can be added by clicking "choose competences
+associated with your upload”.
 
 Export to Europass for CVs
 This is done via the tab “Export to Europass”  (for more information related to the Europass, please visit www.europass.eu).
-
 
 Export to SCORM-format
 For this a view has to be selected, then the export can be done. The file can be adjusted offline with every SCORM-Editor. With the same function, certain SCORM-packages can be imported as well.
 For more information, refer to the documentation.
 
-
 # LICENCE:
 
-Exabis E-Portfolio is a free software: you can redistribute it and/or modify it. It is published under the terms of the GNU General Public License (Free Software Foundation), either version 3 of the License, or any later version. 
+Exabis E-Portfolio is a free software: you can redistribute it and/or modify it. It is published under the terms of the GNU General Public License (Free Software Foundation), either version 3 of the License, or any later version.
 This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # DISCLAIMER
@@ -69,4 +68,5 @@ Originally exabis ePortfolio was developed in the year 2007 with kind support of
 It was then certified as the first Moodle-Block that was reviewed by the Moodle-core team (Peter Skoda).
 
 # AUTHOR
+
 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>

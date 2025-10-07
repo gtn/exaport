@@ -330,6 +330,7 @@ $string['listofartefacts'] = 'W&aumlhle ein Element aus';
 $string['listofbadges'] = 'Liste von Badges';
 $string['addButton'] = 'Hinzufügen';
 $string['saveButton'] = 'Speichern';
+$string['saveViewButton'] = 'Portfolio speichern';
 $string['cancelButton'] = 'Abbrechen';
 $string['blocktitle2'] = 'Blocktitel';
 $string['blockcontent'] = 'Blockinhalt';
@@ -787,33 +788,26 @@ $string['privacy:metadata:block_exaportresume:skillsacademic'] = 'akademische F�
 $string['privacy:metadata:block_exaportresume:skillscareers'] = 'Karriere Fähigkeiten';
 $string['privacy:metadata:core_files'] = 'Exabis ePortfolio speichert Dateien, die vom Benutzer hochgeladen wurden, um Teil von Artefakten, Lebenslaufeinträgen und Kommentaren zu werden.';
 $string['whyEportfolio'] = 'Warum ein ePortfolio?';
-$string['whyEportfolio_description'] = '<h4>Lass deine harte Arbeit nicht verschwinden: Erstelle dein digitales Portfolio</h4>
-				<br>
-				<p>Stell dir vor, all die Mühe, die du in Aufgaben, Präsentationen und Projekte steckst. Hast du jemals das Gefühl, dass es nach der Abgabe einfach in einer Schublade verschwindet?</p>
-				<p>Aber hier ist die gute Nachricht: Diese Projekte sind <strong>Beweise für deine Fähigkeiten und dein Wissen</strong>, und du kannst sie nutzen, um potenzielle Arbeitgeber oder Kunden zu beeindrucken!</p>
-				<p><strong>Erstelle dein digitales Portfolio</strong> und präsentiere deine besten Arbeiten, von Präsentationen, Aufgaben und Projekten bis hin zu Videos. Es ist einfacher, als du denkst!</p>
-				<br>
-				<h4>Was ist ein ePortfolio?</h4>
-				<br>
-				<p>Ein <strong>ePortfolio</strong> (elektronisches Portfolio) ist eine <strong>digitale Sammlung</strong>, die deine <strong>Fähigkeiten, dein Wissen und deine Erfahrungen</strong> präsentiert.
-					Während dein Lebenslauf sich auf deine Ausbildung und Berufserfahrung konzentriert, geht dein ePortfolio darüber hinaus und bietet <strong>Beweise und Kontext</strong> für deine Fähigkeiten.
-					Es ermöglicht dir, Arbeitsproben zu zeigen und dein <strong>Talent schnell und effektiv zu demonstrieren</strong>.
-					Letztendlich ist dein ePortfolio ein mächtiges Werkzeug, um deine <strong>Qualifikationen hervorzuheben</strong> und dich abzuheben.
-				</p>
-				<p><strong>Denke daran, dass verschiedene Rollen unterschiedliche Arten von ePortfolios erfordern können.</strong>
-					Einige Schlüsselelemente bleiben jedoch konstant.
-					Mit <strong>Exabis ePortfolio</strong> kannst du <strong>mehrere Ansichten erstellen</strong>, die auf bestimmte Positionen, Jobchancen oder andere Zwecke zugeschnitten sind.
-				</p>
-				<br>
-				<h4>Wie erstelle ich mein ePortfolio?</h4>
-				<br>
-				<ol>
-					<li><strong>Sammle deine Arbeiten</strong>: Beginne damit, alle deine Projekte, Präsentationen und Aufgaben zu überprüfen.</li>
-					<li><strong>Wähle deine besten Arbeiten aus</strong>: Wähle die Stücke aus, die deine stärksten Fähigkeiten zeigen und die positives Feedback erhalten haben.</li>
-					<li><strong>Reflektiere und beschreibe</strong>: Überlege, welche Fähigkeiten und Kompetenzen jedes Stück demonstriert. Schreibe eine kurze Beschreibung, um Kontext zu bieten.</li>
-					<li><strong>Erstelle und iteriere</strong>: Scheue dich nicht davor, zu experimentieren und dein ePortfolio im Laufe der Zeit zu verfeinern, während du lernst und wächst.</li>
-				</ol>
-				<p><strong>Exabis ePortfolio</strong> kann dich durch jeden Schritt führen und den Prozess der Erstellung deines ePortfolios reibungslos und effizient gestalten.</p>';
+$string['whyEportfolio_description'] = '<h4>Machen Sie Arbeit sichtbar: Ihr digitales Portfolio</h4>
+            <br>
+            <p>Sie investieren viel Zeit und Energie in Aufgaben, Projekte oder Weiterbildungen. Oft verschwinden diese Ergebnisse jedoch nach der Abgabe oder dem Kursende in der Schublade, dabei spiegeln sie Ihr Können, Ihre Kreativität und Ihr Wissen wider.</p>
+            <p>Mit einem <strong>ePortfolio</strong> haben Sie die Möglichkeit, Ihre Arbeiten, erworbenen Kompetenzen und Lernfortschritte sichtbar zu machen. So entsteht eine Sammlung, die Sie nicht nur für sich selbst dokumentieren, sondern auch mit Lehrenden, Institutionen oder potenziellen Arbeitgeber:innen teilen können.</p>
+            <p>Von Präsentationen über Projektberichte bis hin zu Videos oder Zertifikaten – Ihr Portfolio macht Leistungen greifbar. Auch Microcredentials können integriert werden und unterstreichen Ihre Erfolge in Aus- und Weiterbildung.</p>
+            <br>
+            <h4>Was ist ein ePortfolio?</h4>
+            <br>
+            <p>Ein ePortfolio ist mehr als nur ein digitaler Lebenslauf. Es ist eine persönliche Sammlung Ihrer Arbeiten, die Ihre Fähigkeiten und Erfahrungen lebendig darstellt. Anders als ein klassischer CV bietet es echte Nachweise: Arbeitsproben, Reflexionen und den Kontext, in dem Sie Ihre Kompetenzen erworben haben.</p>
+            <p>Mit Exabis ePortfolio können Sie mehrere Ansichten erstellen, passgenau für bestimmte Bewerbungen, Jobchancen oder Präsentationen. So zeigen Sie immer das, was für die jeweilige Situation am wichtigsten ist.</p>
+            <br>
+            <h4>Wie erstellst du dein ePortfolio?</h4>
+            <br>
+            <ol>
+                <li><strong>Sammeln:</strong> Tragen Sie Ihre Arbeiten zusammen, seien es Aufgaben, Präsentationen, Projekte, Videos oder Ähnliches.</li>
+                <li><strong>Auswählen:</strong> Entscheiden Sie sich für Ihre besten Arbeiten, die Ihre Stärken am deutlichsten zeigen.</li>
+                <li><strong>Reflektieren:</strong> Ergänzen Sie kurze Beschreibungen, die Ihre Kompetenzen verdeutlichen und den Kontext erklären.</li>
+                <li><strong>Gestalten:</strong> Bauen Sie ein Portfolio Schritt für Schritt auf und entwickeln Sie es laufend weiter.</li>
+            </ol>
+            <p>Mit Exabis ePortfolio geht das unkompliziert, flexibel und effizient. Sie haben jederzeit die Kontrolle darüber, wie Sie sich und Ihr Können präsentieren und machen sichtbar, was Sie einzigartig macht.</p>';
 $string['cofigureblock_cvinfo_help'] = 'Du wirst den aktuellen Status der ausgewählten Elemente in deinem Lebenslauf sehen. Der Blockinhalt wird aktualisiert, wenn du später Änderungen an irgendwelchen Elementen in deinem Lebenslauf vornimmst.';
 $string['cofigureblock_cvinfo_cover'] = 'Über mich';
 $string['cofigureblock_cvinfo_cover_actual'] = 'Aktuellen Lebenslauf "Über mich" Inhalt hinzufügen';
@@ -832,3 +826,25 @@ $string['block_exaport_used_layout'] = 'Verwendetes Layout';
 $string['block_exaport_used_layout_body'] = 'Ändern Sie das Layout, falls es Darstellungsprobleme gibt. Momentan wird es nur für die Artefaktliste verwendet.';
 $string['block_exaport_used_layout_moodle_bootstrap'] = 'Karten-Layout';
 $string['block_exaport_used_layout_clean_old'] = 'Kachel-Layout (Alt - Unterstützung endet mit Version 4.6.7)';
+$string['settings_export_settings_heading'] = 'Export-Einstellungen';
+$string['settings_exaport_mysource'] = 'Source ID';
+$string['settings_exaport_mysource_body'] = 'Automatisch generierte ID dieser Exaport Installation. Diese kann nicht geändert werden';
+$string['settings_exaport_wp_sso_url'] = 'Url to WordPress SSO receiver';
+$string['settings_exaport_wp_sso_url_body'] = 'The url to server which is ready to recieve commands from exaport';
+$string['settings_exaport_wp_sso_passphrase'] = 'WordPress SSO Passphrase';
+$string['settings_exaport_wp_sso_passphrase_body'] = 'The Passphrase to connect with WordPress SSO receiver';
+$string['settings_exaport_wp_sso_enabled'] = 'Enable WordPress SSO connection';
+$string['settings_exaport_wp_sso_enabled_body'] = 'Enable WordPress connection. Options below must be configured';
+$string['settings_exaport_wp_sso_error_no_url_configured'] = 'First set up the "block_exaport/wp_sso_url" option';
+$string['settings_exaport_reload_settings_page'] = 'Reload';
+$string['settings_exaport_wp_sso_error_no_passphrase_registered'] = 'The passphrase must be registered in the WordPress SSO server.';
+$string['settings_exaport_wp_sso_how_to_get_secret'] = 'You need to register your "block_exaport/mysource" value into WordPress SSO server and get a secret code<br />Then you need to insert the secret code into field below and get the passphrase';
+$string['settings_exaport_wp_sso_url_to_get_secret'] = 'Get the secret code';
+$string['settings_exaport_wp_sso_enter_secret_placeholder'] = 'Enter the secret code';
+$string['settings_exaport_wp_sso_request_passphrase_button'] = 'Request the passphrase';
+$string['settings_exaport_wp_sso_passphrase_ok'] = 'The passphrase is configured';
+$string['settings_exaport_wp_sso_test_passphrase_button'] = 'Test';
+$string['settings_exaport_wp_sso_remove_passphrase_button'] = 'Remove the passphrase';
+$string['wp_exported_view'] = 'Exportierte Ansicht';
+$string['wp_exported_view_hidden_in_wp'] = 'Exportiert, aber in Wordpress ausgeblendet';
+$string['wp_exported_view_newer_than_wp'] = 'WordPress-Ansicht ist älter als die Moodle-Ansicht';

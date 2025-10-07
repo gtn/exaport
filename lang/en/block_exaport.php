@@ -330,6 +330,7 @@ $string['listofartefacts'] = 'List of Artefacts';
 $string['listofbadges'] = 'List of Badges';
 $string['addButton'] = 'Add';
 $string['saveButton'] = 'Save';
+$string['saveViewButton'] = 'Save view';
 $string['cancelButton'] = 'Cancel';
 $string['blocktitle2'] = 'Block title';
 $string['blockcontent'] = 'Block content';
@@ -788,33 +789,26 @@ $string['privacy:metadata:block_exaportresume:skillsacademic'] = 'academic skill
 $string['privacy:metadata:block_exaportresume:skillscareers'] = 'careers skills';
 $string['privacy:metadata:core_files'] = 'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.';
 $string['whyEportfolio'] = 'Why ePortfolio';
-$string['whyEportfolio_description'] = '   <h4>Don\'t Let Your Hard Work Disappear: Build Your Digital Portfolio</h4>
+$string['whyEportfolio_description'] = '   <h4>Make Your Work Visible: Your Digital Portfolio</h4>
                 <br>
-                <p>Imagine all the effort you put into assignments, presentations, and projects. Do you ever feel like it just gets buried in a drawer after it\'s submitted?</p>
-                <p>But here\'s the good news: those projects are <strong>proof of your skills and knowledge</strong>, and you can use them to impress potential employers or clients!</p>
-                <p><strong>Build your digital portfolio</strong> and showcase your best work, from presentations, assignments, and projects to videos. It\'s easier than you think!</p>
+                <p>You invest a lot of time and energy in tasks, projects, or further training. However, these results often disappear after submission or the end of the course, even though they reflect your skills, creativity, and knowledge.</p>
+                <p>An ePortfolio gives you the opportunity to showcase your work, acquired skills, and learning progress. This creates a collection that you can not only document for yourself, but also share with teachers, institutions, or potential employers.</p>
+                <p>From presentations and project reports to videos and certificates, your portfolio makes your achievements tangible. Microcredentials can also be integrated to highlight your successes in education and training.</p>
                 <br>
                 <h4>What is an ePortfolio?</h4>
                 <br>
-                <p>An <strong>ePortfolio</strong> (electronic portfolio) is a <strong>digital collection</strong> that showcases your <strong>skills, knowledge, and experiences</strong>.
-                    While your CV focuses on your education and work history, your ePortfolio goes beyond that, providing <strong>proof and context</strong> for your skills.
-                    It lets you showcase your work samples and <strong>demonstrate your talent</strong> quickly and effectively.
-                    Ultimately, your ePortfolio is a powerful tool to <strong>highlight your qualifications</strong> and set you apart.
-                </p>
-                <p><strong>Remember, different roles may require different types of ePortfolios.</strong>
-                    However, some key elements remain constant.
-                    <strong>Exabis ePortfolio</strong> allows you to <strong>create multiple views</strong> tailored to specific positions, job opportunities, or other purposes.
-                </p>
+                <p> An ePortfolio is more than just a digital resume. It is a personal collection of your work that vividly demonstrates your abilities and experiences. Unlike a traditional CV, it provides real evidence: work samples, reflections, and the context in which you developed your skills.</p>
+                <p>With Exabis ePortfolio, you can create multiple views tailored to specific applications, job opportunities, or presentations. This way, you always highlight what is most relevant for the situation.</p>
                 <br>
-                <h4>How to Build Your ePortfolio</h4>
+                <h4>How do you create your ePortfolio?</h4>
                 <br>
                 <ol>
-                    <li><strong>Gather your work</strong>: Start by reviewing all your projects, presentations, and assignments.</li>
-                    <li><strong>Choose your best work</strong>: Select the pieces that showcase your strongest skills and those that have received positive feedback.</li>
-                    <li><strong>Reflect and describe</strong>: Think about the skills and competencies each piece demonstrates. Write a brief description to provide context.</li>
-                    <li><strong>Build and iterate</strong>: Don\'t be afraid to experiment and refine your ePortfolio as you learn and grow.</li>
+                    <li><strong>Collect:</strong> Gather your work, including assignments, presentations, projects, videos, or similar items.</li>
+                    <li><strong>Select:</strong> Choose your strongest pieces that best demonstrate your skills.</li>
+                    <li><strong>Reflect:</strong> Add short descriptions to explain your competencies and the context in which they were developed.</li>
+                    <li><strong>Build:</strong> Assemble your portfolio step by step and continue to refine it over time.</li>
                 </ol>
-                <p><strong>Exabis ePortfolio</strong> can guide you through each step, making the process of building your ePortfolio smooth and efficient.</p>
+                <p>Exabis ePortfolio makes this process simple, flexible, and efficient. You always stay in control of how you present yourself and your skills, making visible what makes you unique.</p>
 ';
 $string['cofigureblock_cvinfo_help'] = 'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.';
 $string['cofigureblock_cvinfo_cover'] = 'About me';
@@ -835,6 +829,28 @@ $string['block_exaport_used_layout'] = 'Used layout';
 $string['block_exaport_used_layout_body'] = 'Change the layout if you have some appearance problems. Right now it is used only for artefact list.';
 $string['block_exaport_used_layout_moodle_bootstrap'] = 'Cards layout';
 $string['block_exaport_used_layout_clean_old'] = 'Tiles layout (Old - ended of support from v4.6.7)';
+$string['settings_export_settings_heading'] = 'Export settings';
+$string['settings_exaport_mysource'] = 'Source ID';
+$string['settings_exaport_mysource_body'] = 'Automatically generated ID of this Exaport installation. This ID can not be changed';
+$string['settings_exaport_wp_sso_url'] = 'Url to WordPress SSO receiver';
+$string['settings_exaport_wp_sso_url_body'] = 'The url to server which is ready to recieve commands from exaport';
+$string['settings_exaport_wp_sso_passphrase'] = 'WordPress SSO Passphrase';
+$string['settings_exaport_wp_sso_passphrase_body'] = 'The Passphrase to connect with WordPress SSO receiver';
+$string['settings_exaport_wp_sso_enabled'] = 'Enable WordPress SSO connection';
+$string['settings_exaport_wp_sso_enabled_body'] = 'Enable WordPress connection. Options below must be configured';
+$string['settings_exaport_wp_sso_error_no_url_configured'] = 'First set up the "block_exaport/wp_sso_url" option';
+$string['settings_exaport_reload_settings_page'] = 'Reload';
+$string['settings_exaport_wp_sso_error_no_passphrase_registered'] = 'The passphrase must be registered in the WordPress SSO server.';
+$string['settings_exaport_wp_sso_how_to_get_secret'] = 'You need to register your "block_exaport/mysource" value into WordPress SSO server and get a secret code<br />Then you need to insert the secret code into field below and get the passphrase';
+$string['settings_exaport_wp_sso_url_to_get_secret'] = 'Get the secret code';
+$string['settings_exaport_wp_sso_enter_secret_placeholder'] = 'Enter the secret code';
+$string['settings_exaport_wp_sso_request_passphrase_button'] = 'Request the passphrase';
+$string['settings_exaport_wp_sso_passphrase_ok'] = 'The passphrase is configured';
+$string['settings_exaport_wp_sso_test_passphrase_button'] = 'Test';
+$string['settings_exaport_wp_sso_remove_passphrase_button'] = 'Remove the passphrase';
+$string['wp_exported_view'] = 'Exported view';
+$string['wp_exported_view_hidden_in_wp'] = 'Exported but hidden in your WordPress';
+$string['wp_exported_view_newer_than_wp'] = 'WordPress view version is older than Moodle version';
 
 // Event strings
 $string['eventitemcreated'] = 'Exaport item created';

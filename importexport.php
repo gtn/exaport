@@ -16,12 +16,41 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/resumelib.php');
+require_once(__DIR__ . '/blockmediafunc.php');
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
 block_exaport_require_login($courseid);
 
 $context = context_system::instance();
+
+// WordPress integration
+$wp_action = optional_param('wp_action', '', PARAM_TEXT);
+$action = optional_param('action', '', PARAM_RAW);
+if ($wp_action) {
+    require_sesskey();
+
+    if (($wp_action == 'requestPassphrase') // not configured, but the request to get passphrase
+        || ($wp_action == 'removePassphrase') // remove the passphrase
+        || ($wp_action == 'testPassphrase') // test the passphrase
+    ) {
+        require_admin();
+    } elseif (!\block_exaport\wordpress_lib::is_sso_configured()) {
+        throw new \moodle_exception('not is_sso_configured');
+    }
+
+    // needed to render templates
+    $PAGE->set_context($context);
+
+    $wpIntegration = new \block_exaport\wp_integration($courseid, \block_exaport\wordpress_lib::get_sso_passphrase());
+    // Check on Ajax request.
+    $ajaxParameters = optional_param_array('parameters', [], PARAM_RAW);
+    $wpIntegration->handleWpAjaxRequest($wp_action, $ajaxParameters);
+    exit;
+}
+
+// Regular page
 $url = '/blocks/exaport/importexport.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 
@@ -74,5 +103,15 @@ if (has_capability('block/exaport:importfrommoodle', $context)) {
 }
 
 echo "</div>";
+
+if (\block_exaport\wordpress_lib::is_sso_configured()) {
+    $wpIntegration = new \block_exaport\wp_integration($courseid, \block_exaport\wordpress_lib::get_sso_passphrase());
+
+    $PAGE->requires->js_call_amd('block_exaport/wordpress_export', 'init');
+    echo '<hr>';
+    echo $wpIntegration->exportFormView();
+
+}
+
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

@@ -31,7 +31,9 @@ if (file_exists($tinylibpath)) {
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "add", PARAM_ALPHA);
 
-define('SUBMIT_BUTTON_TEXT', get_string($action == 'add' ? 'addButton' : 'saveButton', 'block_exaport'));
+// define('SUBMIT_BUTTON_TEXT', get_string($action == 'add' ? 'addButton' : 'saveButton', 'block_exaport'));
+define('SUBMIT_BUTTON_TEXT', get_string('saveViewButton', 'block_exaport')); // both saving the changes of an item and adding new items will always save all changes to the view (e.g. new ordering of the items)
+
 
 $url = '/blocks/exaport/blocks.json.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);

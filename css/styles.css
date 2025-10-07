@@ -24,6 +24,7 @@ div.item-detail-image img {
     color: red;
     opacity: 0.5;
 }
+
 .exaport-icon.exaport-remove-icon:hover {
     opacity: 1;
 }
@@ -35,4 +36,14 @@ div.item-detail-image img {
 
 .exaport-icon.exaport-export-import-scorm-icon {
     opacity: 0.75;
+}
+
+#exaport .view-group-content .table-responsive {
+    width: 100%;
+    display: block;
+}
+
+
+.exaport-toast-close {
+    opacity: 1 !important;
 }

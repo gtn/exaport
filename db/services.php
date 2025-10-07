@@ -78,6 +78,13 @@ $functions = array (
     'description' => '',
     'type' => 'write',
   ),
+  'block_exaport_wordpress_status' => 
+  array (
+    'classname' => '\\block_exaport\\externallib\\externallib',
+    'methodname' => 'wordpress_status',
+    'description' => 'Get info about the WordPress portfolio connection',
+    'type' => 'read',
+  ),
 );
 
 $services = array (

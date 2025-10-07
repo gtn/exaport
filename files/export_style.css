@@ -13,9 +13,9 @@ div#exa_ex {
     border-radius: 6px;
     background-color: #fff;
     min-height: 100%;
-    -webkit-box-shadow: 0px 0px 3px 0px rgba(179,179,179,1);
-    -moz-box-shadow: 0px 0px 3px 0px rgba(179,179,179,1);
-    box-shadow: 0px 0px 3px 0px rgba(179,179,179,1);
+    -webkit-box-shadow: 0px 0px 3px 0px rgba(179, 179, 179, 1);
+    -moz-box-shadow: 0px 0px 3px 0px rgba(179, 179, 179, 1);
+    box-shadow: 0px 0px 3px 0px rgba(179, 179, 179, 1);
 }
 
 div#exa_ex a {
@@ -54,12 +54,12 @@ div#exa_ex div#competences {
 
 div#exa_ex ul {
     list-style: none;
-    padding:0;
-    margin:0 0 35px;
+    padding: 0;
+    margin: 0 0 35px;
 }
 
 div#exa_ex ul:last-child {
-    margin:0;
+    margin: 0;
 }
 
 div#exa_ex ul li {

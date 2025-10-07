@@ -29,7 +29,7 @@ namespace {
     }
 
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
-        global  $DB;
+        global $DB;
 
         $accesspath = explode('/', $access);
         if (count($accesspath) != 2) {
@@ -399,7 +399,9 @@ namespace {
     function exaport_get_view_shared_users($viewid) {
         global $DB;
 
-        $sharedusers = $DB->get_records_menu('block_exaportviewshar', array("viewid" => $viewid), null, 'userid, userid AS tmp');
+        // $sharedusers = $DB->get_records_menu('block_exaportviewshar', array("viewid" => $viewid), null, 'userid, userid AS tmp');
+        $sharedusers = $DB->get_records('block_exaportviewshar', array('viewid' => $viewid), null, 'userid, notify'); // the first field "userid" will be used as key, which is important!
+        // TODO: check if for all usages it works still
 
         return $sharedusers;
     }
@@ -464,9 +466,11 @@ namespace {
             foreach ($course->users as $user) {
                 if (isset($sharedusers[$user->id])) {
                     $user->shared_to = true;
+                    $user->notify_user = (bool)$sharedusers[$user->id]->notify;
                     unset($sharedusers[$user->id]);
                 } else {
                     $user->shared_to = false;
+                    $user->notify_user = false;
                 }
             }
         }

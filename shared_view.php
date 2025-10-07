@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-use Dompdf\Adapter\CPDF;
 use Dompdf\Dompdf;
 
 require_once(__DIR__ . '/inc.php');
@@ -365,7 +364,7 @@ $general_content .= '<table class="table_layout layout' . $view->layout . '""><t
 $data_for_pdf = array(); // for old pdf view
 $data_for_pdf_blocks = array(); // for new pdf view
 
-$addAttachementsToBlockView = function($attachments, $block) {
+$addAttachmentsToBlockView = function($attachments, $block) {
     $body_content = '';
     if ($block->resume_withfiles && $attachments && is_array($attachments) && count($attachments) > 0) {
         $body_content .= '<ul class="resume_attachments ' . $block->resume_itemtype . '_attachments">';
@@ -648,7 +647,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                             $description .= '<span class="edu_qualdescription">' . $item_data->qualdescription . '</span>';
                                         }
                                         $attachments = $item_data->attachments;
-                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $description .= $addAttachmentsToBlockView($attachments, $block);
                                         $items[] = $description;
                                     }
                                 }
@@ -679,7 +678,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                             $description .= '<span class="employ_positiondescription">' . $item_data->positiondescription . '</span>';
                                         }
                                         $attachments = $item_data->attachments;
-                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $description .= $addAttachmentsToBlockView($attachments, $block);
                                         $items[] = $description;
                                     }
                                 }
@@ -693,7 +692,6 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 foreach ($itemIds as $itemid) {
                                     if ($resume->certifications[$itemid]) {
                                         $item_data = $resume->certifications[$itemid];
-                                        $attachments = $item_data->attachments;
                                         $description = '';
                                         $description .= '<span class="certif_title">' . $item_data->title . '</span> ';
                                         if ($item_data->date != '') {
@@ -703,7 +701,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                             $description .= '<span class="certif_description">' . $item_data->description . '</span>';
                                         }
                                         $attachments = $item_data->attachments;
-                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $description .= $addAttachmentsToBlockView($attachments, $block);
                                         $items[] = $description;
                                     }
                                 }
@@ -737,7 +735,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                             $description .= '</span>';
                                         }
                                         $attachments = $item_data->attachments;
-                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $description .= $addAttachmentsToBlockView($attachments, $block);
                                         $items[] = $description;
                                     }
                                 }
@@ -746,7 +744,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                             break;
                         case 'mbrship':
                             $items = [];
-                            if ($block->text && $resume && $resume->publications) {
+                            if ($block->text && $resume && $resume->profmembershipments) {
                                 $itemIds = explode(',', $block->text);
                                 foreach ($itemIds as $itemid) {
                                     if ($resume->profmembershipments[$itemid]) {
@@ -767,7 +765,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                             $description .= '<span class="mbrship_description">' . $item_data->description . '</span>';
                                         }
                                         $attachments = $item_data->attachments;
-                                        $description .= $addAttachementsToBlockView($attachments, $block);
+                                        $description .= $addAttachmentsToBlockView($attachments, $block);
                                         $items[] = $description;
                                     }
                                 }
@@ -789,7 +787,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                         $description .= '<span class="' . $goalSkillType . '_text">' . $tempContent . '</span> ';
                                     }
                                     $attachments = @$resume->{$goalSkillType . '_attachments'};
-                                    $description .= $addAttachementsToBlockView($attachments, $block);
+                                    $description .= $addAttachmentsToBlockView($attachments, $block);
                                     $description = trim($description);
                                     if ($description) {
                                         $items[] = $description;
@@ -1176,7 +1174,7 @@ if ($is_pdf) {
     require_once($CFG->dirroot . '/user/lib.php');
     $user = \core_user::get_user($view->userid);
     $userData = user_get_user_details($user, null, array('fullname'));
-    $pdfFileName = 'Portfolio-'.$userData['fullname'].'-'.$view->name.'.pdf';
+    $pdfFileName = 'Portfolio-' . $userData['fullname'] . '-' . $view->name . '.pdf';
     $pdfFileName = clean_filename($pdfFileName);
     $dompdf->stream($pdfFileName); //To popup pdf as download
     exit;

@@ -18,18 +18,16 @@
 defined('MOODLE_INTERNAL') || die;
 require_once(__DIR__ . '/inc.php');
 
-use block_exaport\globals as g;
-
 class block_exaport_renderer extends plugin_renderer_base {
     /**
      * in moodle33 pix_url was renamed to image_url
      */
     public function image_url($imagename, $component = 'moodle') {
         if (method_exists(get_parent_class($this), 'image_url')) {
-            // return call_user_func_array(['parent', 'image_url'], func_get_args());
+            // return call_user_func_array(['parent::class', 'image_url'], func_get_args());
             return parent::image_url($imagename, $component);
         } else {
-            // return call_user_func_array(['parent', 'pix_url'], func_get_args());
+            // return call_user_func_array(['parent::class', 'pix_url'], func_get_args());
             return parent::pix_url($imagename, $component);
         }
     }

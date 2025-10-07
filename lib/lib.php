@@ -425,7 +425,7 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
                     '&type=layout&action=edit'), get_string("viewlayout", "block_exaport"), '', true);
             $tabs['views']->subtree[] = new tabobject('content',
                 s($CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $COURSE->id . '&id=' . $id . '&sesskey=' . sesskey() .
-                    '&action=edit'), get_string("viewcontent", "block_exaport"), '', true);
+                    '&type=content&action=edit'), get_string("viewcontent", "block_exaport"), '', true);
             if (has_capability('block/exaport:shareextern', context_system::instance()) ||
                 has_capability('block/exaport:shareintern', context_system::instance())
             ) {

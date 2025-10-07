@@ -570,19 +570,19 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 
     // Insert the new entry.
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
-
-        // Trigger event for item creation
-        $event = \block_exaport\event\item_created::create(array(
-            'objectid' => $post->id,
-            'courseid' => $courseid,
-            'userid' => $USER->id,
-            'context' => context_user::instance($USER->id),
-            'other' => array(
-                'itemname' => $post->name,
-                'itemtype' => $post->type
-            )
-        ));
-        $event->trigger();
+        //
+        // // Trigger event for item creation
+        // $event = \block_exaport\event\item_created::create(array(
+        //     'objectid' => $post->id,
+        //     'courseid' => $courseid,
+        //     'userid' => $USER->id,
+        //     'context' => context_user::instance($USER->id),
+        //     'other' => array(
+        //         'itemname' => $post->name,
+        //         'itemtype' => $post->type
+        //     )
+        // ));
+        // $event->trigger();
 
         $postupdate = false;
         foreach ($usetextareas as $fieldname => $usetextarea) {

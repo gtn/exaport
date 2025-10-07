@@ -20,7 +20,6 @@ var exaportViewEdit = {};
 Y.use('moodle-core-notification-dialogue');
 
 (function ($) {
-
   var $E = window.block_exaport;
 
   var newItem = null, lastclicked = null;
@@ -57,6 +56,7 @@ Y.use('moodle-core-notification-dialogue');
     },
 
     addItem: function (id) {
+      debugger;
 
       if (!this.checkFields()) {
         return;
@@ -87,7 +87,7 @@ Y.use('moodle-core-notification-dialogue');
     },
 
     addBadge: function (id) {
-
+      debugger;
       if (!this.checkFields()) {
         return;
       }
@@ -123,7 +123,7 @@ Y.use('moodle-core-notification-dialogue');
     },
 
     addText: function (id) {
-
+      debugger;
       if (!this.checkFields()) {
         return;
       }
@@ -145,7 +145,7 @@ Y.use('moodle-core-notification-dialogue');
     },
 
     addHeadline: function (id) {
-
+      debugger;
       if (!this.checkFields()) {
         return;
       }
@@ -196,7 +196,7 @@ Y.use('moodle-core-notification-dialogue');
     },
 
     addMedia: function (id) {
-
+      debugger;
       if (!this.checkFields()) {
         return;
       }

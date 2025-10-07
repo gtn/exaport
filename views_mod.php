@@ -419,8 +419,9 @@ if ($editform->is_cancelled()) {
             }
 
             // Notification logic for "save and notify" button.
-            // this checks if that button was clicked. It is null, if the submittbutton was clicked instead
-            if (optional_param('TODO', '', PARAM_RAW)) {
+            // Check if the submit and notify button was clicked
+            $clickedButton = optional_param('clicked_button', '', PARAM_RAW);
+            if ($clickedButton === 'submit_block_and_notify') {
                 exaport_send_notifications($dbview, $courseid);
             }
 
@@ -516,8 +517,10 @@ if ($editform->is_cancelled()) {
             $message = block_exaport_get_string('view_saved');
 
             // Notification logic for "save and notify" button.
-            // this checks if that button was clicked. It is null, if the submittbutton was clicked instead
-            if (optional_param('submitandnotifybutton', '', PARAM_RAW)) {
+            // Check if the submit and notify button was clicked
+        // TODO: not needed here, right?
+            $clickedButton = optional_param('clicked_button', '', PARAM_RAW);
+            if ($clickedButton === 'submit_block_and_notify') {
                 exaport_send_notifications($dbview, $courseid);
             }
 

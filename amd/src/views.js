@@ -75,6 +75,19 @@ define(['jquery',
         },
 
         addPersonalInfo: function (id) {
+          // Check which button triggered the form submission
+          var activeElement = document.activeElement;
+          var clickedButton = null;
+          if (activeElement && activeElement.type === 'submit') {
+            if (activeElement.name === 'submit_block') {
+              console.log('Regular submit button clicked');
+              clickedButton = 'submit_block';
+            } else if (activeElement.name === 'submit_block_and_notify') {
+              console.log('Submit and notify button clicked');
+              clickedButton = 'submit_block_and_notify';
+            }
+          }
+
           if (!this.checkFields()) {
             return;
           }
@@ -115,10 +128,23 @@ define(['jquery',
           generateItem('update', $(newItem));
           dialogue.hide();
           newItem = null;
-          saveBlockData();
+          saveBlockData(clickedButton);
         },
 
         addHeadline: function (id) {
+          // Check which button triggered the form submission
+          var activeElement = document.activeElement;
+          var clickedButton = null;
+          if (activeElement && activeElement.type === 'submit') {
+            if (activeElement.name === 'submit_block') {
+              console.log('Regular submit button clicked');
+              clickedButton = 'submit_block';
+            } else if (activeElement.name === 'submit_block_and_notify') {
+              console.log('Submit and notify button clicked');
+              clickedButton = 'submit_block_and_notify';
+            }
+          }
+
           if (!this.checkFields()) {
             return;
           }
@@ -134,10 +160,23 @@ define(['jquery',
           // ...$E.last_popup.remove();.
           newItem = null;
           dialogue.hide();
-          saveBlockData();
+          saveBlockData(clickedButton);
         },
 
         addText: function (id) {
+          // Check which button triggered the form submission
+          var activeElement = document.activeElement;
+          var clickedButton = null;
+          if (activeElement && activeElement.type === 'submit') {
+            if (activeElement.name === 'submit_block') {
+              console.log('Regular submit button clicked');
+              clickedButton = 'submit_block';
+            } else if (activeElement.name === 'submit_block_and_notify') {
+              console.log('Submit and notify button clicked');
+              clickedButton = 'submit_block_and_notify';
+            }
+          }
+
           if (!this.checkFields()) {
             return;
           }
@@ -163,10 +202,22 @@ define(['jquery',
           generateItem('update', $(newItem));
           dialogue.hide();
           newItem = null;
-          saveBlockData();
+          saveBlockData(clickedButton);
         },
 
         addItem: function (id) {
+          // Check which button triggered the form submission
+          var activeElement = document.activeElement;
+          var clickedButton = null;
+          if (activeElement && activeElement.type === 'submit') {
+            if (activeElement.name === 'submit_block') {
+              console.log('Regular submit button clicked');
+              clickedButton = 'submit_block';
+            } else if (activeElement.name === 'submit_block_and_notify') {
+              console.log('Submit and notify button clicked');
+              clickedButton = 'submit_block_and_notify';
+            }
+          }
 
           if (!this.checkFields()) {
             return;
@@ -193,10 +244,23 @@ define(['jquery',
           });
           dialogue.hide();
           newItem = null;
-          saveBlockData();
+          saveBlockData(clickedButton);
         },
 
         addCvInfo: function (id) {
+          // Check which button triggered the form submission
+          var activeElement = document.activeElement;
+          var clickedButton = null;
+          if (activeElement && activeElement.type === 'submit') {
+            if (activeElement.name === 'submit_block') {
+              console.log('Regular submit button clicked');
+              clickedButton = 'submit_block';
+            } else if (activeElement.name === 'submit_block_and_notify') {
+              console.log('Submit and notify button clicked');
+              clickedButton = 'submit_block_and_notify';
+            }
+          }
+
           if (!this.checkFields()) {
             return;
           }
@@ -282,10 +346,23 @@ define(['jquery',
           }
           dialogue.hide();
           newItem = null;
-          saveBlockData();
+          saveBlockData(clickedButton);
         },
 
         addMedia: function (id) {
+          // Check which button triggered the form submission
+          var activeElement = document.activeElement;
+          var clickedButton = null;
+          if (activeElement && activeElement.type === 'submit') {
+            if (activeElement.name === 'submit_block') {
+              console.log('Regular submit button clicked');
+              clickedButton = 'submit_block';
+            } else if (activeElement.name === 'submit_block_and_notify') {
+              console.log('Submit and notify button clicked');
+              clickedButton = 'submit_block_and_notify';
+            }
+          }
+
           if (!this.checkFields()) {
             return;
           }
@@ -304,10 +381,23 @@ define(['jquery',
           generateItem('update', $(newItem));
           dialogue.hide();
           newItem = null;
-          saveBlockData();
+          saveBlockData(clickedButton);
         },
 
         addBadge: function (id) {
+          // Check which button triggered the form submission
+          var activeElement = document.activeElement;
+          var clickedButton = null;
+          if (activeElement && activeElement.type === 'submit') {
+            if (activeElement.name === 'submit_block') {
+              console.log('Regular submit button clicked');
+              clickedButton = 'submit_block';
+            } else if (activeElement.name === 'submit_block_and_notify') {
+              console.log('Submit and notify button clicked');
+              clickedButton = 'submit_block_and_notify';
+            }
+          }
+
           if (!this.checkFields()) {
             return;
           }
@@ -331,7 +421,7 @@ define(['jquery',
           });
           dialogue.hide();
           newItem = null;
-          saveBlockData();
+          saveBlockData(clickedButton);
         },
 
         checkFields: function () {
@@ -1124,9 +1214,15 @@ define(['jquery',
       updateBlockData();
     }
 
-    function saveBlockData() {
+    function saveBlockData(clickedButton) {
       var data = $('form#view_edit_form').serializeArray();
       data.push({name: 'ajax', value: 1});
+
+      // Add information about which button was clicked
+      if (clickedButton) {
+        data.push({name: 'clicked_button', value: clickedButton});
+      }
+
       console.log('views.js:1126');
       console.log(data);// !!!!!!!!!! delete it
       showPreloadinator($('#view-preview'), '', true);

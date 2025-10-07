@@ -37,4 +37,3 @@ class item_created extends \core\event\base {
         ));
     }
 }
-

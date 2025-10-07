@@ -79,7 +79,7 @@ $string['go'] = 'Go!';
 $string['hidesummary'] = '(hide summary)';
 $string['managecategories'] = 'Manage categories';
 $string['mandatoryfields'] = 'The field\'s name, category and intro are required. Please fill them in.';
-$string['mandatoryfieldsforcat'] = 'The field name is required. Please fill it in.';
+$string['mandatoryfieldsforcat'] = 'The field name is required. Please fill them in.';
 $string['myportfolio'] = 'My Portfolio Artefacts';
 $string['myportfoliotitle'] = 'Exabis ePortfolio module: Add your links and files here.';
 $string['newlink'] = 'Add new link';
@@ -331,6 +331,7 @@ $string['listofbadges'] = 'List of Badges';
 $string['addButton'] = 'Add';
 $string['saveButton'] = 'Save';
 $string['saveViewButton'] = 'Save view';
+$string['saveAndNotifyButton'] = 'Save view and send notifications';
 $string['cancelButton'] = 'Cancel';
 $string['blocktitle2'] = 'Block title';
 $string['blockcontent'] = 'Block content';
@@ -851,14 +852,4 @@ $string['settings_exaport_wp_sso_remove_passphrase_button'] = 'Remove the passph
 $string['wp_exported_view'] = 'Exported view';
 $string['wp_exported_view_hidden_in_wp'] = 'Exported but hidden in your WordPress';
 $string['wp_exported_view_newer_than_wp'] = 'WordPress view version is older than Moodle version';
-
-// Event strings
-$string['eventitemcreated'] = 'Exaport item created';
-
-// Message strings
-$string['messageprovider:itemcreated'] = 'Notification when an exaport item is created';
-$string['emailsubject_itemcreated'] = 'New portfolio item created in {$a}';
-$string['emailbody_itemcreated'] = 'Hello,
-{$a->username} has created a new portfolio item in the course "{$a->coursename}".';
-$string['emailsmall_itemcreated'] = 'New portfolio item created';
-
+$string['saveAndNotifyButton'] = 'Save view and send notifications';

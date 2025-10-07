@@ -396,6 +396,70 @@ namespace {
         return $courses;
     }
 
+    function exaport_send_notifications($dbview, $courseid) {
+        // Notify shared users.
+        global $USER, $DB, $CFG;
+        $sharedusers = exaport_get_view_shared_users($dbview->id);
+        foreach ($sharedusers as $userid => $shareinfo) {
+            if (!empty($shareinfo->notify)) {
+                $notificationdata = new \core\message\message();
+                $notificationdata->component = 'block_exaport';
+                $notificationdata->name = 'sharing';
+                $notificationdata->userfrom = $USER;
+                $notificationdata->userto = $DB->get_record('user', array('id' => $userid));
+                $notificationdata->subject = get_string('i_shared', 'block_exaport');
+                $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbview->id;
+                $notificationdata->fullmessageformat = FORMAT_PLAIN;
+                $notificationdata->fullmessagehtml = '';
+                $notificationdata->smallmessage = '';
+                $notificationdata->notification = 1;
+                message_send($notificationdata);
+            }
+        }
+
+        // Notify users in shared groups.
+        $sharedgroups = exaport_get_view_shared_groups($dbview->id);
+        if (!empty($sharedgroups)) {
+            // Get all cohort members for each shared group
+            foreach ($sharedgroups as $groupid) {
+                $cohortmembers = $DB->get_records('cohort_members', array('cohortid' => $groupid));
+                foreach ($cohortmembers as $member) {
+                    // Skip if user is the owner of the view
+                    if ($member->userid == $USER->id) {
+                        continue;
+                    }
+
+                    // Check if this user already got a notification (might be directly shared too)
+                    if (isset($sharedusers[$member->userid]) && !empty($sharedusers[$member->userid]->notify)) {
+                        continue; // Already notified
+                    }
+
+                    $notificationdata = new \core\message\message();
+                    $notificationdata->component = 'block_exaport';
+                    $notificationdata->name = 'sharing';
+                    $notificationdata->userfrom = $USER;
+                    $notificationdata->userto = $DB->get_record('user', array('id' => $member->userid));
+                    $notificationdata->subject = get_string('i_shared', 'block_exaport');
+                    $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbview->id;
+                    $notificationdata->fullmessageformat = FORMAT_PLAIN;
+                    $notificationdata->fullmessagehtml = '';
+                    $notificationdata->smallmessage = '';
+                    $notificationdata->notification = 1;
+                    message_send($notificationdata);
+                }
+            }
+        }
+
+        // Notify shared emails.
+        $sharedemails = exaport_get_view_shared_emails($dbview->id);
+        if ($dbview->sharedemails && count($sharedemails) > 0) {
+            $oldemails = []; // No previous state, just send to all.
+            $newemails = array_values($sharedemails);
+            $hashesforemails = $DB->get_records_menu('block_exaportviewemailshar', array('viewid' => $dbview->id), '', 'email, hash');
+            block_exaport_emailaccess_sendemails($dbview, $oldemails, $newemails, $hashesforemails);
+        }
+    }
+
     function exaport_get_view_shared_users($viewid) {
         global $DB;
 

@@ -590,9 +590,11 @@ $string['browseportfolio'] = 'Inhalt anzeigen';
 
 // === Message.
 $string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit mir teilt';
+$string['messageprovider:viewupdated'] = 'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert';
 
 // === Not Used Anymore.
-$string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
+$string['i_shared'] = 'Ich habe eine View aktualisiert, die ich mit Ihnen geteilt habe';
+$string['i_updated'] = 'Ich habe eine View mit Ihnen geteilt';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';

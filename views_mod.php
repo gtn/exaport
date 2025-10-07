@@ -153,7 +153,9 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
             $mform->addElement('hidden', 'name');
         }
 
-        switch ($this->_customdata['type']) {
+        $type = $this->_customdata['type'];
+
+        switch ($type) {
             case "title":
                 $mform->addElement('text', 'name', get_string("title", "block_exaport"), 'maxlength="255" size="60"');
                 $mform->setType('name', PARAM_TEXT);
@@ -266,13 +268,13 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                 break;
         }
         if ($this->_customdata['view']) {
-            $this->add_action_buttons(false, get_string('saveViewButton', 'block_exaport'));
+            $this->add_action_buttons(false, get_string('saveViewButton', 'block_exaport'), $this->_customdata['view'], $type);
         } else {
-            $this->add_action_buttons(false, get_string('add')); // TODO: when creating a new view THIS should be run, right? It isn't...
+            $this->add_action_buttons(false, get_string('add'), null, $type); // TODO: when creating a new view THIS should be run, right? It isn't...
         }
     }
 
-    public function add_action_buttons($cancel = true, $submitlabel = null) {
+    public function add_action_buttons($cancel = true, $submitlabel = null, $view = null, $type = null) {
         if (is_null($submitlabel)) {
             $submitlabel = get_string('saveViewButton', 'block_exaport');
         }
@@ -288,7 +290,10 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
         } else {
             // No group needed
             $mform->addElement('submit', 'submitbutton', $submitlabel, ['class' => 'btn btn-primary']);
-            $mform->addElement('submit', 'submitandnotifybutton', $submitandnotifylabel, ['class' => 'btn btn-primary']);
+            // check if there any sharing, if not: no notify button
+            if ((!empty($view) && exaport_is_any_notifying_enabled_for_view($view)) || $type == 'share') {
+                $mform->addElement('submit', 'submitandnotifybutton', $submitandnotifylabel, ['class' => 'btn btn-primary']);
+            }
             $mform->closeHeaderBefore('submitbutton');
         }
     }
@@ -643,8 +648,20 @@ if ($editform->is_cancelled()) {
             // Save layout settings into DB
             $view->layout_settings = $customLayoutSettings_serialized;
             $DB->update_record('block_exaportview', $view);
+
+            // Notification logic for "save and notify" button.
+            // this checks if that button was clicked. It is null, if the submittbutton was clicked instead
+            if (optional_param('submitandnotifybutton', '', PARAM_RAW)) {
+                exaport_send_notifications($dbview, $courseid);
+            }
+
             break;
         default:
+            // Notification logic for "save and notify" button.
+            // this checks if that button was clicked. It is null, if the submittbutton was clicked instead
+            if (optional_param('submitandnotifybutton', '', PARAM_RAW)) {
+                exaport_send_notifications($dbview, $courseid); // TODO: what to send in this case
+            }
             break;
     }
 
@@ -1312,7 +1329,9 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 
 if ($type != 'title') {
     echo '<div style="padding-top: 20px; text-align: center; clear: both;">';
-    echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitbutton']['html'] . '</span>';
+    if($type != 'share') {
+        echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitbutton']['html'] . '</span>';
+    }
     echo '<span>' . $form['elements_by_name']['submitandnotifybutton']['html'] . '</span>';
     echo '</div>';
     echo '</div></form>';

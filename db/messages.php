@@ -24,12 +24,12 @@ $messageproviders = array(
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ),
     ),
-    // 'itemcreated' => array(
-    //     'defaults' => array(
-    //         'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
-    //         'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
-    //     ),
-    // ),
+    'viewupdated' => array(
+        'defaults' => array(
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ),
+    ),
 );
 
 

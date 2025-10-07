@@ -592,9 +592,11 @@ $string['lang_categories'] = '';
 
 // === Message.
 $string['messageprovider:sharing'] = 'Sharing notifications';
+$string['messageprovider:viewupdated'] = 'View updated notifications';
 
 // === Not Used Anymore.
 $string['i_shared'] = 'I shared an eportfolio view with you';
+$string['i_updated'] = 'I updated an eportfolio view I shared with you';
 $string['addstdcat'] = 'import standard categories';
 $string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';

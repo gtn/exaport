@@ -2114,10 +2114,19 @@ return [
         'Sharing notifications',
     ],
 
+    'messageprovider:sharing' => [
+        'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert',
+        'View updated notifications',
+    ],
+
     // === Not Used Anymore.
     'i_shared' => [
         'Ich habe eine View mit Ihnen geteilt',
         'I shared an eportfolio view with you',
+    ],
+    'i_updated' => [
+        'Ich habe eine View aktualisiert, die ich mit Ihnen geteilt habe',
+        'I updated an eportfolio view I shared with you',
     ],
     'addstdcat' => [
         'Standardkategorien importieren',

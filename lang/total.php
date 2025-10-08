@@ -2976,5 +2976,13 @@ return [
         'WordPress-Ansicht ist älter als die Moodle-Ansicht',
         'WordPress view version is older than Moodle version',
     ],
+    'alwaysnotifywhenshare' => [
+        'Immer benachrichtigen, wenn geteilt wird',
+        'Always notify when sharing',
+    ],
+    'alwaysnotifywhenshare_description' => [
+        'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.',
+        'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.',
+    ],
 ];
 ?>

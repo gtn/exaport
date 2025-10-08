@@ -852,3 +852,7 @@ $string['wp_exported_view'] = 'Exportierte Ansicht';
 $string['wp_exported_view_hidden_in_wp'] = 'Exportiert, aber in Wordpress ausgeblendet';
 $string['wp_exported_view_newer_than_wp'] = 'WordPress-Ansicht ist älter als die Moodle-Ansicht';
 $string['saveAndNotifyButton'] = 'Portfolio speichern und Benachrichtigungen senden';
+// $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
+// $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';
+$string['alwaysnotifywhenshare'] = 'Immer benachrichtigen, wenn geteilt wird';
+$string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.';

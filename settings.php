@@ -163,5 +163,9 @@ if ($ADMIN->fulltree) {
     //  the table with layout settings
     $settings->add(new block_exaport_layout_configtable('block_exaport_layout_settings', block_exaport_get_string('settings_layout_settings_description'), '', ''));
 
+    $settings->add(new admin_setting_configcheckbox('block_exaport/alwaysnotifywhenshare',
+        get_string('alwaysnotifywhenshare', 'block_exaport'),
+        get_string('alwaysnotifywhenshare_description', 'block_exaport'),
+        0));
 
 }

@@ -42,6 +42,9 @@ if (!$COURSE) {
 block_exaport_add_iconpack(true);
 
 // Include JS script.
+// add the alwaysnotifywhenshare setting to the JS config
+// $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+// $PAGE->requires->js_call_amd('block_exaport/views', 'initialise', [['alwaysnotifywhenshare' => $alwaysnotifywhenshare]]);
 $PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
 // $config = ['paths' => ['block_exaport/popover' => $CFG->wwwroot.'/blocks/exaport/javascript/popover.min']];
 // $requirejs = 'require.config(' . json_encode($config) . ')';

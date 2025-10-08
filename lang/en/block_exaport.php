@@ -347,6 +347,7 @@ $string['aboutme'] = 'About me';
 $string['aboutme_description'] = 'Predefined by CV information, but can be editabled for every block';
 $string['notify'] = 'notify';
 $string['sharejs'] = 'share';
+$string['viewmustbesafed'] = 'Preselected due to global settings. The view must be saved before this "share" setting will take effect';
 $string['mediacontent'] = 'URL or embed code *';
 $string['height'] = 'Height';
 $string['width'] = 'Width';
@@ -591,8 +592,7 @@ $string['browseportfolio'] = 'Browse this portfolio';
 $string['lang_categories'] = '';
 
 // === Message.
-$string['messageprovider:sharing'] = 'Sharing notifications';
-$string['messageprovider:viewupdated'] = 'View updated notifications';
+$string['messageprovider:sharing'] = 'View updated notifications';
 
 // === Not Used Anymore.
 $string['i_shared'] = 'I shared an eportfolio view with you';
@@ -854,8 +854,5 @@ $string['settings_exaport_wp_sso_remove_passphrase_button'] = 'Remove the passph
 $string['wp_exported_view'] = 'Exported view';
 $string['wp_exported_view_hidden_in_wp'] = 'Exported but hidden in your WordPress';
 $string['wp_exported_view_newer_than_wp'] = 'WordPress view version is older than Moodle version';
-$string['saveAndNotifyButton'] = 'Save view and send notifications';
 $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
 $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';
-
-

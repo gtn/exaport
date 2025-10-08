@@ -347,6 +347,7 @@ $string['aboutme'] = 'Über mich';
 $string['aboutme_description'] = 'Vordefiniert durch Lebenslaufinformationen, kann jedoch für jeden Block bearbeitet werden.';
 $string['notify'] = 'Benachrichtigen';
 $string['sharejs'] = 'teilen';
+$string['viewmustbesafed'] = 'Vorausgewählt auf Grund globaler Einstellungen. Das Portfolio muss gespeichert werden, bevor diese "Teilen"-Einstellung wirksam wird';
 $string['mediacontent'] = 'URL oder eingebetteter Code*';
 $string['height'] = 'H&ouml;he';
 $string['width'] = 'Breite';
@@ -589,12 +590,11 @@ $string['browseportfolio'] = 'Inhalt anzeigen';
 // === Language categories.
 
 // === Message.
-$string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit mir teilt';
-$string['messageprovider:viewupdated'] = 'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert';
+$string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert';
 
 // === Not Used Anymore.
-$string['i_shared'] = 'Ich habe eine View aktualisiert, die ich mit Ihnen geteilt habe';
-$string['i_updated'] = 'Ich habe eine View mit Ihnen geteilt';
+$string['i_shared'] = 'Ich habe eine View mit Ihnen geteilt';
+$string['i_updated'] = 'Ich habe eine View aktualisiert, die ich mit Ihnen geteilt habe';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';
@@ -851,8 +851,5 @@ $string['settings_exaport_wp_sso_remove_passphrase_button'] = 'Remove the passph
 $string['wp_exported_view'] = 'Exportierte Ansicht';
 $string['wp_exported_view_hidden_in_wp'] = 'Exportiert, aber in Wordpress ausgeblendet';
 $string['wp_exported_view_newer_than_wp'] = 'WordPress-Ansicht ist älter als die Moodle-Ansicht';
-$string['saveAndNotifyButton'] = 'Portfolio speichern und Benachrichtigungen senden';
-// $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
-// $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';
 $string['alwaysnotifywhenshare'] = 'Immer benachrichtigen, wenn geteilt wird';
 $string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.';

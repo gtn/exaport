@@ -480,6 +480,7 @@ namespace block_exaport\common {
         $totalfile = $langdir . '/total.php';
         $langfile = $langdir . '/' . $lang . '/' . _plugin_name() . '.php';
 
+        // if (true) { // quickfix
         if (file_exists($totalfile) && file_exists($langfile) && ($time = filemtime($totalfile)) != filemtime($langfile) &&
             is_writable($langfile)
         ) {

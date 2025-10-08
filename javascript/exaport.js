@@ -151,6 +151,11 @@
                   html += '</td><td align=\"center\" width="5%" style="padding-right: 20px;">';
                   html += '<input class="notifyusers" type="checkbox"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
                   html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
+
+                  // workaround for disabled checkboxes not submittting: https://stackoverflow.com/questions/4727974/how-to-post-submit-an-input-checkbox-that-is-disabled
+                  html += '<input class="notifyusers" type="hidden"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
+                  html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
+
                   html += "<br />" + $E.translate('notify');
                 }
                 html += "</td><td align=\"center\" width='45%'>" + user.name + "</td><td align=\"center\" width='45%'>" + user.rolename + "</td></tr>";
@@ -249,7 +254,7 @@
 
         // Disable notifyusers if alwaysNotify is true
         if (alwaysNotifyBool) {
-            $('.notifyusers').prop('disabled', true);
+            $('.notifyusers[type="checkbox"]').prop('disabled', true);
         }
       });
     },

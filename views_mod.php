@@ -284,6 +284,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
         $submitandnotifylabel = get_string('saveAndNotifyButton', 'block_exaport');
         $mform =& $this->_form;
         if ($cancel) {
+            // TODO: when does this happen?
             // When two elements we need a group
             $buttonarray = array();
             $buttonarray[] = &$mform->createElement('submit', 'submitbutton', $submitlabel);
@@ -294,7 +295,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
             // No group needed
             $mform->addElement('submit', 'submitbutton', $submitlabel, ['class' => 'btn btn-primary']);
             // check if there any sharing, if not: no notify button
-            if ((!empty($view) && exaport_is_any_notifying_enabled_for_view($view)) || $type == 'share') {
+            if ((!empty($view) && exaport_is_any_notifying_enabled_for_view($view))) {
                 $mform->addElement('submit', 'submitandnotifybutton', $submitandnotifylabel, ['class' => 'btn btn-primary']);
             }
             $mform->closeHeaderBefore('submitbutton');
@@ -1336,10 +1337,10 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 
 if ($type != 'title') {
     echo '<div style="padding-top: 20px; text-align: center; clear: both;">';
-    if($type != 'share') {
-        echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitbutton']['html'] . '</span>';
+    echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitbutton']['html'] . '</span>';
+    if ($type != 'share') {
+        echo '<span>' . $form['elements_by_name']['submitandnotifybutton']['html'] . '</span>';
     }
-    echo '<span>' . $form['elements_by_name']['submitandnotifybutton']['html'] . '</span>';
     echo '</div>';
     echo '</div></form>';
 }

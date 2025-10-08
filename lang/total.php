@@ -1268,6 +1268,10 @@ return [
         'teilen',
         'share',
     ],
+    'viewmustbesafed' => [
+        'Vorausgewählt auf Grund globaler Einstellungen. Das Portfolio muss gespeichert werden, bevor diese "Teilen"-Einstellung wirksam wird',
+        'Preselected due to global settings. The view must be saved before this "share" setting will take effect',
+    ],
     'mediacontent' => [
         'URL oder eingebetteter Code*',
         'URL or embed code *',

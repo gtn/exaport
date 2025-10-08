@@ -149,11 +149,17 @@
                 if (type == 'views_mod') {
                   html += "<br />" + $E.translate('sharejs');
                   html += '</td><td align=\"center\" width="5%" style="padding-right: 20px;">';
+
                   html += '<input class="notifyusers" type="checkbox"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
                   html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
 
                   // workaround for disabled checkboxes not submittting: https://stackoverflow.com/questions/4727974/how-to-post-submit-an-input-checkbox-that-is-disabled
                   if (alwaysNotifyBool) {
+                    // if the user.notify_user differs from the checked state of the checkbox, the checkbox should be red and a hover info should write "asdf"
+                    if ((user.notify_user && !user.shared_to) || (!user.notify_user && user.shared_to)) {
+                      html += ' <span title="' + $E.translate('viewmustbesafed') + '" style="color: red; font-weight: bold;">(!)</span> ';
+                    }
+
                     html += '<input class="notifyusers" type="hidden"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
                     html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
                   }

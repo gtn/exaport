@@ -411,27 +411,39 @@ namespace {
             ($view->sharedemails && $DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id))); // TODO: check this in general
         return $shared;
     }
+
+    function exaport_notify_single_user($dbviewid, $notifyuserid, $name, $subject, $courseid){
+        // Notify.
+        global $USER, $DB, $CFG;
+        $notificationdata = new \core\message\message();
+        $notificationdata->component = 'block_exaport';
+        $notificationdata->name = $name;
+        $notificationdata->userfrom = $USER;
+        $notificationdata->userto = $DB->get_record('user', array('id' => $notifyuserid));
+        $notificationdata->subject = $subject;
+        $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbviewid;
+        $notificationdata->fullmessageformat = FORMAT_PLAIN;
+        $notificationdata->fullmessagehtml = '';
+        $notificationdata->smallmessage = '';
+        $notificationdata->notification = 1;
+        message_send($notificationdata);
+    }
     function exaport_send_notifications($dbview, $courseid, $update = true) {
         // Notify shared users.
         global $USER, $DB, $CFG;
+        //if courseid is null, get it from $COURSE
+        if ($courseid == null) {
+            global $COURSE;
+            $courseid = $COURSE->id;
+        }
+
         $subject = $update ? get_string('i_updated', 'block_exaport') : get_string('i_shared', 'block_exaport');
         $name = $update ? 'viewupdated' : 'sharing';
 
         $sharedusers = exaport_get_view_shared_users($dbview->id);
         foreach ($sharedusers as $userid => $shareinfo) {
             if (!empty($shareinfo->notify)) {
-                $notificationdata = new \core\message\message();
-                $notificationdata->component = 'block_exaport';
-                $notificationdata->name = $name;
-                $notificationdata->userfrom = $USER;
-                $notificationdata->userto = $DB->get_record('user', array('id' => $userid));
-                $notificationdata->subject = $subject;
-                $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbview->id;
-                $notificationdata->fullmessageformat = FORMAT_PLAIN;
-                $notificationdata->fullmessagehtml = '';
-                $notificationdata->smallmessage = '';
-                $notificationdata->notification = 1;
-                message_send($notificationdata);
+                exaport_notify_single_user($dbview->id, $userid, $name, $subject, $courseid);
             }
         }
 

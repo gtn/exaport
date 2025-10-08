@@ -555,6 +555,7 @@ if ($editform->is_cancelled()) {
                         // if (isset($shareusers[$notifyuser])) { returns false if array contains 3 and $notifyuser is string "3" !!!
                         if (in_array((int)$notifyuser, $shareusers, true)) {
                             // Notify.
+                            /*
                             $notificationdata = new \core\message\message();
                             $notificationdata->component = 'block_exaport';
                             $notificationdata->name = 'sharing';
@@ -562,6 +563,7 @@ if ($editform->is_cancelled()) {
                             $notificationdata->userto = $DB->get_record('user', array('id' => $notifyuser));
                             // TODO: subject + message text.
                             $notificationdata->subject = get_string('i_shared', 'block_exaport');
+                            // TODO: courseid=1??? Doesn't seem to matter...
                             $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=1&' .
                                 'access=id/' . $USER->id . '-' . $dbview->id;
                             $notificationdata->fullmessageformat = FORMAT_PLAIN;
@@ -570,6 +572,8 @@ if ($editform->is_cancelled()) {
                             $notificationdata->notification = 1;
 
                             $mailresult = message_send($notificationdata);
+                            */
+                            exaport_notify_single_user($dbview->id, $notifyuser, 'sharing', get_string('i_shared', 'block_exaport'), $courseid);
                         }
                     }
                 }
@@ -803,7 +807,7 @@ $translations = array(
     'file', 'note', 'link',
     'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
     'notify', 'emailaccess',
-    'checkall',
+    'checkall', 'viewmustbesafed'
 );
 
 $translations = array_flip($translations);

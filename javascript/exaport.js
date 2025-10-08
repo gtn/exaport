@@ -115,9 +115,11 @@
 
       $('#sharing-userlist').html('loading userlist...');
 
+
       $.getJSON(document.location.href, {action: 'userlist'}, function (courses) {
         var html = '';
-
+        var alwaysNotify = document.getElementById('alwaysnotifywhenshare').value;
+        var alwaysNotifyBool = alwaysNotify === "true" || alwaysNotify === "1"; // Convert to boolean
         if (!$.empty(courses)) {
           $.each(courses, function (tmp, course) {
             html += '<fieldset class="course-group"><legend class="course-group-title">';
@@ -199,12 +201,17 @@
           // Enable/disable notifyuser, according to shared users checkbox.
           var $notifyboxes = $(this).closest('tr').find('.notifyusers');
 
-          $notifyboxes.attr('disabled', !this.checked);
-          if (!this.checked) {
-            $notifyboxes.prop('checked', false);
+          if (alwaysNotifyBool) {
+              $notifyboxes.prop('checked', this.checked);
+          } else {
+              $notifyboxes.attr('disabled', !this.checked);
+              if (!this.checked) {
+                  $notifyboxes.prop('checked', false);
+              }
           }
 
           // Check/uncheck all users.
+          // TODO: what does this do??
           var $courseCheckboxes = $('#sharing-userlist .shareusers:checkbox[courseid=' + $(this).attr('courseid') + ']');
           $('#sharing-userlist .shareusers-check-all[courseid=' + $(this).attr('courseid') + ']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
         });
@@ -219,10 +226,14 @@
             }
 
             var $notifyboxes = $(this).closest('tr').find('.notifyusers');
-            $notifyboxes.attr('disabled', !this.checked);
-            if (!this.checked) {
-              $notifyboxes.prop('checked', false);
-            }
+              if (alwaysNotifyBool) {
+                  $notifyboxes.prop('checked', this.checked);
+              } else {
+                  $notifyboxes.attr('disabled', !this.checked);
+                  if (!this.checked) {
+                      $notifyboxes.prop('checked', false);
+                  }
+              }
           });
           if (flag == 0) {
             $(this).find('table > tbody > tr > td > input.shareusers-check-all').prop('checked', true);
@@ -235,6 +246,11 @@
         });
         // Open all shared courses.
         $('.course-group').has('input:checked').addClass('course-group-open');
+
+        // Disable notifyusers if alwaysNotify is true
+        if (alwaysNotifyBool) {
+            $('.notifyusers').prop('disabled', true);
+        }
       });
     },
 

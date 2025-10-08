@@ -67,7 +67,7 @@ if ($id) {
 
 if ($view && $action == 'userlist') {
     require_sesskey();
-
+    // this gets called in exaport.js by  $.getJSON(document.location.href, {action: 'userlist'} and returns the necessary data
     echo json_encode(exaport_get_shareable_courses_with_users_for_view($view->id));
     exit;
 }
@@ -1244,6 +1244,10 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         echo ': <span id="view-share-text"></span></div></div>';
         echo '<div class="">';
         echo '<div style="padding: 18px 22px"><table class="table_share">';
+
+        // Output a hidden field with the config value alwaysnotifywhenshare
+        $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+        echo '<input type="hidden" id="alwaysnotifywhenshare" value="' . htmlspecialchars($alwaysnotifywhenshare) . '" />';
 
         if (block_exaport_externaccess_enabled() && has_capability('block/exaport:shareextern', context_system::instance())) {
 

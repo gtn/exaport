@@ -153,8 +153,10 @@
                   html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
 
                   // workaround for disabled checkboxes not submittting: https://stackoverflow.com/questions/4727974/how-to-post-submit-an-input-checkbox-that-is-disabled
-                  html += '<input class="notifyusers" type="hidden"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
-                  html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
+                  if (alwaysNotifyBool) {
+                    html += '<input class="notifyusers" type="hidden"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
+                    html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
+                  }
 
                   html += "<br />" + $E.translate('notify');
                 }
@@ -204,14 +206,17 @@
         // Stop slow loading.
         $('#sharing-userlist .shareusers:checkbox').click(function () {
           // Enable/disable notifyuser, according to shared users checkbox.
-          var $notifyboxes = $(this).closest('tr').find('.notifyusers');
+          var $notifyboxeshidden = $(this).closest('tr').find('.notifyusers[type="hidden"]');
+          var $notifyboxescheckbox = $(this).closest('tr').find('.notifyusers[type="checkbox"]');
+          // based on alwaysNotifyBool the CHECKBOXES should always be disabled, but the hidden field should be enabled/disabled
 
           if (alwaysNotifyBool) {
-              $notifyboxes.prop('checked', this.checked);
+            $notifyboxeshidden.attr('disabled', !this.checked); // the hidden field should be enabled/disabled. The checkbox stays disabled and is always disabled.
+            $notifyboxescheckbox.prop('checked', this.checked);
           } else {
-              $notifyboxes.attr('disabled', !this.checked);
+            $notifyboxescheckbox.attr('disabled', !this.checked);
               if (!this.checked) {
-                  $notifyboxes.prop('checked', false);
+                $notifyboxescheckbox.prop('checked', false);
               }
           }
 
@@ -230,6 +235,7 @@
               flag = 1;
             }
 
+            // TODO FIX THIS FOR GROUPS
             var $notifyboxes = $(this).closest('tr').find('.notifyusers');
               if (alwaysNotifyBool) {
                   $notifyboxes.prop('checked', this.checked);

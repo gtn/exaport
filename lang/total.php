@@ -383,17 +383,31 @@ return [
         'Input an email address per line<br />Each email will receive a unique link with access to this view. Deleting the email will remove access to this view.',
     ],
     'emailaccessmessagesubject' => [
-        'Eine View wurde mit dir geteilt',
+        'Ein ePortfolio wurde mit dir geteilt',
         'New shared View for you',
     ],
     'emailaccessmessage' => [
-        'Hallo! {$a->sendername} hat eine die View "{$a->viewname}" mit dir geteilt. Sie kann hier abgerufen werden: {$a->url}',
+        'Hallo! {$a->sendername} hat das ePortfolio "{$a->viewname}" mit dir geteilt. Es kann hier abgerufen werden: {$a->url}',
         'Hello! {$a->sendername} has shared the view "{$a->viewname}" for you. You can view it here: {$a->url}',
     ],
     'emailaccessmessageHTML' => [
-        'Hallo!<br />{$a->sendername} hat eine die View "{$a->viewname}" mit dir geteilt.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
+        'Hallo!<br />{$a->sendername} hat das ePortfolio "{$a->viewname}" mit dir geteilt.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
         'Hello!<br />{$a->sendername} has shared the view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
+
+    'emailaccessmessagesubject_updatedview' => [
+        'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe',
+        'I updated an eportfolio view I shared with you',
+    ],
+    'emailaccessmessage_updatedview' => [
+        'Hallo! {$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert. Es kann hier abgerufen werden: {$a->url}',
+        'Hello! {$a->sendername} has updated the view "{$a->viewname}" he shared with you. You can view it here: {$a->url}',
+    ],
+    'emailaccessmessageHTML_updatedview' => [
+        'Hallo!<br />{$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
+        'Hello!<br />{$a->sendername} has updated the view "{$a->viewname}" he shared with you.<br />You can view it <a href="{$a->url}">here</a>.',
+    ],
+
     'showallusers' => [
         'Zeige Benutzer aller meiner Kurse',
         'Show users of all my courses',
@@ -2125,11 +2139,11 @@ return [
 
     // === Not Used Anymore.
     'i_shared' => [
-        'Ich habe eine View mit Ihnen geteilt',
+        'Ich habe ein Eportfolio mit Ihnen geteilt',
         'I shared an eportfolio view with you',
     ],
     'i_updated' => [
-        'Ich habe eine View aktualisiert, die ich mit Ihnen geteilt habe',
+        'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe',
         'I updated an eportfolio view I shared with you',
     ],
     'addstdcat' => [

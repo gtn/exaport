@@ -481,9 +481,9 @@ namespace {
         }
 
         // Notify shared emails.
-        // TODO: test if this works
+        // TODO: test if this works... does it do what we want?
         $sharedemails = exaport_get_view_shared_emails($dbview->id);
-        if ($dbview->sharedemails && count($sharedemails) > 0) {
+        if ($sharedemails && count($sharedemails) > 0) {
             $oldemails = []; // No previous state, just send to all.
             $newemails = array_values($sharedemails);
             $hashesforemails = $DB->get_records_menu('block_exaportviewemailshar', array('viewid' => $dbview->id), '', 'email, hash');

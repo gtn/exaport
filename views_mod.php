@@ -1352,7 +1352,7 @@ if ($type != 'title') {
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();
 
-function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $hashesforemails) {
+function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $hashesforemails, $updatedview = false) {
     global $CFG, $USER, $DB;
 
     $userfrom = $USER;
@@ -1364,13 +1364,19 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $accessphrase = $hashesforemails[$email];
                 $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?access=email/' . $view->hash . '-' . $accessphrase;
-                $messagesubject = get_string("emailaccessmessagesubject", "block_exaport");
                 $a = new stdClass();
                 $a->url = $url;
                 $a->sendername = fullname($USER);
                 $a->viewname = $view->name;
-                $messagetext = get_string("emailaccessmessage", "block_exaport", $a);
-                $messagehtml = get_string("emailaccessmessageHTML", "block_exaport", $a);
+                if($updatedview){
+                    $messagesubject = get_string("emailaccessmessagesubject_updatedview", "block_exaport");
+                    $messagetext = get_string("emailaccessmessage_updatedview", "block_exaport", $a);
+                    $messagehtml = get_string("emailaccessmessageHTML_updatedview", "block_exaport", $a);
+                } else {
+                    $messagesubject = get_string("emailaccessmessagesubject", "block_exaport");
+                    $messagetext = get_string("emailaccessmessage", "block_exaport", $a);
+                    $messagehtml = get_string("emailaccessmessageHTML", "block_exaport", $a);
+                }
 
                 // Find user by email.
                 $userconditions = array('email' => $email);

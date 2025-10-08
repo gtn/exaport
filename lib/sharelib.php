@@ -487,7 +487,7 @@ namespace {
             $oldemails = []; // No previous state, just send to all.
             $newemails = array_values($sharedemails);
             $hashesforemails = $DB->get_records_menu('block_exaportviewemailshar', array('viewid' => $dbview->id), '', 'email, hash');
-            block_exaport_emailaccess_sendemails($dbview, $oldemails, $newemails, $hashesforemails);
+            block_exaport_emailaccess_sendemails($dbview, $oldemails, $newemails, $hashesforemails, true);
         }
     }
 

@@ -401,11 +401,11 @@ return [
     ],
     'emailaccessmessage_updatedview' => [
         'Hallo! {$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert. Es kann hier abgerufen werden: {$a->url}',
-        'Hello! {$a->sendername} has updated the view "{$a->viewname}" he shared with you. You can view it here: {$a->url}',
+        'Hello! {$a->sendername} has updated the view "{$a->viewname}" they shared with you. You can view it here: {$a->url}',
     ],
     'emailaccessmessageHTML_updatedview' => [
         'Hallo!<br />{$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
-        'Hello!<br />{$a->sendername} has updated the view "{$a->viewname}" he shared with you.<br />You can view it <a href="{$a->url}">here</a>.',
+        'Hello!<br />{$a->sendername} has updated the view "{$a->viewname}" they shared with you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
 
     'showallusers' => [

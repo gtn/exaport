@@ -1384,7 +1384,11 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
                     // Send moodle message if the user exists.
                     $message = new \core\message\message();
                     $message->component = 'block_exaport';
-                    $message->name = 'sharing';
+                    if($updatedview){
+                        $message->name = 'viewupdated';
+                    } else{
+                        $message->name = 'sharing';
+                    }
                     $message->userfrom = $userfrom;
                     $message->userto = $touser;
                     $message->subject = $messagesubject;

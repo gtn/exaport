@@ -421,9 +421,11 @@ namespace {
         $notificationdata->userfrom = $USER;
         $notificationdata->userto = $DB->get_record('user', array('id' => $notifyuserid));
         $notificationdata->subject = $subject;
-        $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbviewid;
-        $notificationdata->fullmessageformat = FORMAT_PLAIN;
-        $notificationdata->fullmessagehtml = '';
+        $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbviewid;
+        $notificationdata->fullmessage = $url;
+        // $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbviewid;
+        $notificationdata->fullmessageformat = FORMAT_HTML;
+        $notificationdata->fullmessagehtml = '<a href="' . $url . '">' . $url . '</a>';;
         $notificationdata->smallmessage = '';
         $notificationdata->notification = 1;
         message_send($notificationdata);

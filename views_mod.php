@@ -1342,7 +1342,9 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 if ($type != 'title') {
     echo '<div style="padding-top: 20px; text-align: center; clear: both;">';
     echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitbutton']['html'] . '</span>';
-    if ($type != 'share') {
+    // check if the button submitandnotifybutton exists and should be shown
+    if ($type != 'share' && isset($form['elements_by_name']['submitandnotifybutton'])) {
+    // if ($type != 'share') {
         echo '<span>' . $form['elements_by_name']['submitandnotifybutton']['html'] . '</span>';
     }
     echo '</div>';

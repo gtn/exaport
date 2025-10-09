@@ -338,6 +338,7 @@ $string['listofartefacts'] = 'List of Artefacts';
 $string['listofbadges'] = 'List of Badges';
 $string['addButton'] = 'Add';
 $string['saveButton'] = 'Save';
+$string['saveViewShareSettingsButton'] = 'Share';
 $string['saveViewButton'] = 'Save view';
 $string['saveAndNotifyButton'] = 'Save view and send notifications';
 $string['cancelButton'] = 'Cancel';

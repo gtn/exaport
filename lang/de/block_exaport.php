@@ -338,6 +338,7 @@ $string['listofartefacts'] = 'W&aumlhle ein Element aus';
 $string['listofbadges'] = 'Liste von Badges';
 $string['addButton'] = 'Hinzufügen';
 $string['saveButton'] = 'Speichern';
+$string['saveViewShareSettingsButton'] = 'Portfolio teilen';
 $string['saveViewButton'] = 'Portfolio speichern';
 $string['saveAndNotifyButton'] = 'Portfolio speichern und Benachrichtigungen senden';
 $string['cancelButton'] = 'Abbrechen';

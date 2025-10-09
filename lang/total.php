@@ -1218,6 +1218,10 @@ return [
         'Speichern',
         'Save',
     ],
+    'saveViewShareSettingsButton' => [
+        'Portfolio teilen',
+        'Share',
+    ],
     'saveViewButton' => [
         'Portfolio speichern',
         'Save view',

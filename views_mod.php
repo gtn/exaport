@@ -282,6 +282,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
             $submitlabel = get_string('saveViewButton', 'block_exaport');
         }
         $submitandnotifylabel = get_string('saveAndNotifyButton', 'block_exaport');
+        $submitandsharelabel = get_string('saveViewShareSettingsButton', 'block_exaport');
         $mform =& $this->_form;
         if ($cancel) {
             // TODO: when does this happen?
@@ -293,12 +294,17 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
             $mform->closeHeaderBefore('buttonar');
         } else {
             // No group needed
-            $mform->addElement('submit', 'submitbutton', $submitlabel, ['class' => 'btn btn-primary']);
             // check if there any sharing, if not: no notify button
             if ((!empty($view) && exaport_is_any_notifying_enabled_for_view($view))) {
                 $mform->addElement('submit', 'submitandnotifybutton', $submitandnotifylabel, ['class' => 'btn btn-primary']);
             }
-            $mform->closeHeaderBefore('submitbutton');
+            if($type == 'share'){
+                $mform->addElement('submit', 'submitandsharebutton', $submitandsharelabel, ['class' => 'btn btn-primary']);
+                $mform->closeHeaderBefore('submitandsharebutton');
+            } else{
+                $mform->addElement('submit', 'submitbutton', $submitlabel, ['class' => 'btn btn-primary']);
+                $mform->closeHeaderBefore('submitbutton');
+            }
         }
     }
 
@@ -1350,8 +1356,11 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 }
 
 if ($type != 'title') {
-    echo '<div style="padding-top: 20px; text-align: center; clear: both;">';
-    echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitbutton']['html'] . '</span>';
+    echo '<div style="padding-top: 20px; text-align: center; clear: both;">';if( $type == 'share'){
+        echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitandsharebutton']['html'] . '</span>';
+    } else{
+        echo '<span style="margin-right: 8px;">' . $form['elements_by_name']['submitbutton']['html'] . '</span>';
+    }
     // check if the button submitandnotifybutton exists and should be shown
     if ($type != 'share' && isset($form['elements_by_name']['submitandnotifybutton'])) {
     // if ($type != 'share') {

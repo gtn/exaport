@@ -2136,9 +2136,9 @@ return [
         'Sharing notifications',
     ],
 
-    'messageprovider:sharing' => [
+    'messageprovider:viewupdated' => [
         'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert',
-        'View updated notifications',
+        'Updated view notifications',
     ],
 
     // === Not Used Anymore.

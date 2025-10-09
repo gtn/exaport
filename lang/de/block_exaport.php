@@ -598,7 +598,8 @@ $string['browseportfolio'] = 'Inhalt anzeigen';
 // === Language categories.
 
 // === Message.
-$string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert';
+$string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit mir teilt';
+$string['messageprovider:viewupdated'] = 'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert';
 
 // === Not Used Anymore.
 // 'i_shared' => [

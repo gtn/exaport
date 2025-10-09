@@ -600,7 +600,8 @@ $string['browseportfolio'] = 'Browse this portfolio';
 $string['lang_categories'] = '';
 
 // === Message.
-$string['messageprovider:sharing'] = 'View updated notifications';
+$string['messageprovider:sharing'] = 'Sharing notifications';
+$string['messageprovider:viewupdated'] = 'Updated view notifications';
 
 // === Not Used Anymore.
 // 'i_shared' => [

@@ -115,7 +115,12 @@ $string['emailaccessdescription'] = 'Gib eine Email Adresse pro Zeile ein<br />J
 $string['emailaccessmessagesubject'] = 'Ein ePortfolio wurde mit dir geteilt';
 $string['emailaccessmessage'] = 'Hallo! {$a->sendername} hat das ePortfolio "{$a->viewname}" mit dir geteilt. Es kann hier abgerufen werden: {$a->url}';
 $string['emailaccessmessageHTML'] = 'Hallo!<br />{$a->sendername} hat das ePortfolio "{$a->viewname}" mit dir geteilt.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden';
-$string['emailaccessmessagesubject_updatedview'] = 'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe';
+
+// 'emailaccessmessagesubject_updatedview' => [
+//     'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe',
+//     'I updated an eportfolio view I shared with you',
+// ],
+$string['emailaccessmessagesubject_updatedview'] = '{$a->sendername} hat Änderungen an einem E-Portfolio vorgenommen, das mit Ihnen geteilt ist.';
 $string['emailaccessmessage_updatedview'] = 'Hallo! {$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert. Es kann hier abgerufen werden: {$a->url}';
 $string['emailaccessmessageHTML_updatedview'] = 'Hallo!<br />{$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden';
 $string['showallusers'] = 'Zeige Benutzer aller meiner Kurse';
@@ -596,8 +601,12 @@ $string['browseportfolio'] = 'Inhalt anzeigen';
 $string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert';
 
 // === Not Used Anymore.
-$string['i_shared'] = 'Ich habe ein Eportfolio mit Ihnen geteilt';
-$string['i_updated'] = 'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe';
+// 'i_shared' => [
+//     'Ich habe ein Eportfolio mit Ihnen geteilt',
+//     'I shared an eportfolio view with you',
+// ],
+$string['i_shared'] = '{$a->sendername} hat die ePortfolio Ansicht {$a->title} mit Ihnen geteilt';
+$string['i_updated'] = '{$a->sendername} hat Änderungen an einem E-Portfolio vorgenommen, das mit Ihnen geteilt ist.';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';

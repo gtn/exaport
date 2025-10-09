@@ -395,9 +395,13 @@ return [
         'Hello!<br />{$a->sendername} has shared the view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
 
+    // 'emailaccessmessagesubject_updatedview' => [
+    //     'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe',
+    //     'I updated an eportfolio view I shared with you',
+    // ],
     'emailaccessmessagesubject_updatedview' => [
-        'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe',
-        'I updated an eportfolio view I shared with you',
+        '{$a->sendername} hat Änderungen an einem E-Portfolio vorgenommen, das mit Ihnen geteilt ist.',
+        '{$a->sendername} made changes to an e-portfolio view shared with you.',
     ],
     'emailaccessmessage_updatedview' => [
         'Hallo! {$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert. Es kann hier abgerufen werden: {$a->url}',
@@ -2138,13 +2142,17 @@ return [
     ],
 
     // === Not Used Anymore.
+    // 'i_shared' => [
+    //     'Ich habe ein Eportfolio mit Ihnen geteilt',
+    //     'I shared an eportfolio view with you',
+    // ],
     'i_shared' => [
-        'Ich habe ein Eportfolio mit Ihnen geteilt',
-        'I shared an eportfolio view with you',
+        '{$a->sendername} hat die ePortfolio Ansicht {$a->title} mit Ihnen geteilt',
+        '{$a->sendername} shared the e-portfolio view {$a->title} with you',
     ],
     'i_updated' => [
-        'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe',
-        'I updated an eportfolio view I shared with you',
+        '{$a->sendername} hat Änderungen an einem E-Portfolio vorgenommen, das mit Ihnen geteilt ist.',
+        '{$a->sendername} made changes to an e-portfolio view shared with you.',
     ],
     'addstdcat' => [
         'Standardkategorien importieren',

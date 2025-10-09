@@ -573,7 +573,17 @@ if ($editform->is_cancelled()) {
 
                             $mailresult = message_send($notificationdata);
                             */
-                            exaport_notify_single_user($dbview->id, $notifyuser, 'sharing', get_string('i_shared', 'block_exaport'), $courseid);
+                            $a = (object)[
+                                'sendername' => fullname($USER),
+                                'title' => $dbview->name,
+                            ];
+                            exaport_notify_single_user(
+                                $dbview->id,
+                                $notifyuser,
+                                'sharing',
+                                get_string('i_shared', 'block_exaport', $a),
+                                $courseid
+                            );
                         }
                     }
                 }
@@ -1371,7 +1381,8 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
                 $a->sendername = fullname($USER);
                 $a->viewname = $view->name;
                 if($updatedview){
-                    $messagesubject = get_string("emailaccessmessagesubject_updatedview", "block_exaport");
+                    // Subject requires {$a->sendername} placeholder -> pass $a.
+                    $messagesubject = get_string("emailaccessmessagesubject_updatedview", "block_exaport", $a);
                     $messagetext = get_string("emailaccessmessage_updatedview", "block_exaport", $a);
                     $messagehtml = get_string("emailaccessmessageHTML_updatedview", "block_exaport", $a);
                 } else {

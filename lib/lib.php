@@ -1104,7 +1104,7 @@ function fill_view_with_artefacts($viewid, $existingartefacts = '') {
  * @return nothing
  */
 function block_exaport_share_view_to_teachers($viewid) {
-    global $DB, $COURSE;
+    global $DB, $COURSE, $USER;
     if ($viewid > 0) {
         $allteachers = block_exaport_get_course_teachers();
         $allsharedusers = block_exaport_get_shared_users($viewid);
@@ -1138,14 +1138,16 @@ function block_exaport_share_view_to_teachers($viewid) {
                 };
                 // if the setting alwaysnotifywhenshare is enabled, send notification to all teachers
                 if ($alwaysnotifywhenshare) {
-                    $subject = get_string('i_shared', 'block_exaport');
+                    $a = (object)[
+                        'sendername' => fullname($USER),
+                        'title' => $view->name,
+                    ];
+                    $subject = get_string('i_shared', 'block_exaport', $a);
                     $name = 'sharing';
                     exaport_notify_single_user($viewid, $userid, $name, $subject, $COURSE->id); // TODO courseid is fine like this?
                 }
             };
         };
-
-
     };
 }
 

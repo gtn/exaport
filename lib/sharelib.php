@@ -433,14 +433,18 @@ namespace {
     function exaport_send_notifications($dbview, $courseid, $update = true) {
         // Notify shared users.
         global $USER, $DB, $CFG;
-        //if courseid is null, get it from $COURSE
-        if ($courseid == null) {
-            global $COURSE;
-            $courseid = $COURSE->id;
-        }
-
-        $subject = $update ? get_string('i_updated', 'block_exaport') : get_string('i_shared', 'block_exaport');
-        $name = $update ? 'viewupdated' : 'sharing';
+         //if courseid is null, get it from $COURSE
+         if ($courseid == null) {
+             global $COURSE;
+             $courseid = $COURSE->id;
+         }
+         // Prepare placeholders for subject strings requiring {$a->sendername} and {$a->title}.
+         $a = (object)[
+             'sendername' => fullname($USER),
+             'title' => $dbview->name,
+         ];
+         $subject = $update ? get_string('i_updated', 'block_exaport', $a) : get_string('i_shared', 'block_exaport', $a);
+         $name = $update ? 'viewupdated' : 'sharing';
 
         $sharedusers = exaport_get_view_shared_users($dbview->id);
         foreach ($sharedusers as $userid => $shareinfo) {

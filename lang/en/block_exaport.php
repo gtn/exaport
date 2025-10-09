@@ -115,7 +115,12 @@ $string['emailaccessdescription'] = 'Input an email address per line<br />Each e
 $string['emailaccessmessagesubject'] = 'New shared View for you';
 $string['emailaccessmessage'] = 'Hello! {$a->sendername} has shared the view "{$a->viewname}" for you. You can view it here: {$a->url}';
 $string['emailaccessmessageHTML'] = 'Hello!<br />{$a->sendername} has shared the view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.';
-$string['emailaccessmessagesubject_updatedview'] = 'I updated an eportfolio view I shared with you';
+
+// 'emailaccessmessagesubject_updatedview' => [
+//     'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe',
+//     'I updated an eportfolio view I shared with you',
+// ],
+$string['emailaccessmessagesubject_updatedview'] = '{$a->sendername} made changes to an e-portfolio view shared with you.';
 $string['emailaccessmessage_updatedview'] = 'Hello! {$a->sendername} has updated the view "{$a->viewname}" they shared with you. You can view it here: {$a->url}';
 $string['emailaccessmessageHTML_updatedview'] = 'Hello!<br />{$a->sendername} has updated the view "{$a->viewname}" they shared with you.<br />You can view it <a href="{$a->url}">here</a>.';
 $string['showallusers'] = 'Show users of all my courses';
@@ -598,8 +603,12 @@ $string['lang_categories'] = '';
 $string['messageprovider:sharing'] = 'View updated notifications';
 
 // === Not Used Anymore.
-$string['i_shared'] = 'I shared an eportfolio view with you';
-$string['i_updated'] = 'I updated an eportfolio view I shared with you';
+// 'i_shared' => [
+//     'Ich habe ein Eportfolio mit Ihnen geteilt',
+//     'I shared an eportfolio view with you',
+// ],
+$string['i_shared'] = '{$a->sendername} shared the e-portfolio view {$a->title} with you';
+$string['i_updated'] = '{$a->sendername} made changes to an e-portfolio view shared with you.';
 $string['addstdcat'] = 'import standard categories';
 $string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';

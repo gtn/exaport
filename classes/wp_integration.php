@@ -152,9 +152,15 @@ class wp_integration {
 
         $userLoggedIn = $this->checkWpLogin();
         if ($userLoggedIn) {
+            /*
             $html .= '
                 <div class="alert alert-info">
                     You are logged in to WordPress as the user <strong>' . $this->wpLoginData['login'] . '</strong> (id: ' . $this->wpLoginData['id'] . ' <span class="text-danger">!!! remove ID after developing !!!</span>)
+                </div>';
+            */
+            $html .= '
+                <div class="alert alert-info">
+                    You are logged in to WordPress as the user <strong>' . $this->wpLoginData['login'] . '</strong>
                 </div>';
             $html .= '<div class="row my-2">';
             // "view my WP profile" button

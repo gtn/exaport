@@ -2155,8 +2155,8 @@ return [
         '{$a->sendername} shared the e-portfolio view {$a->title} with you',
     ],
     'i_updated' => [
-        '{$a->sendername} hat Änderungen an einem E-Portfolio vorgenommen, das mit Ihnen geteilt ist.',
-        '{$a->sendername} made changes to an e-portfolio view shared with you.',
+        '{$a->sendername} hat Änderungen an dem E-Portfolio {$a->title} vorgenommen, welches mit Ihnen geteilt ist.',
+        '{$a->sendername} made changes to the e-portfolio view {$a->title} shared with you.',
     ],
     'addstdcat' => [
         'Standardkategorien importieren',

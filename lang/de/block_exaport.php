@@ -608,7 +608,7 @@ $string['messageprovider:viewupdated'] = 'Nachricht, wenn ein Benutzer seine get
 //     'I shared an eportfolio view with you',
 // ],
 $string['i_shared'] = '{$a->sendername} hat die ePortfolio Ansicht {$a->title} mit Ihnen geteilt';
-$string['i_updated'] = '{$a->sendername} hat Änderungen an einem E-Portfolio vorgenommen, das mit Ihnen geteilt ist.';
+$string['i_updated'] = '{$a->sendername} hat Änderungen an dem E-Portfolio {$a->title} vorgenommen, welches mit Ihnen geteilt ist.';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';

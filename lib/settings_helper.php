@@ -197,7 +197,7 @@ class block_exaport_admin_setting_withjs extends admin_setting {
     public function output_html($data, $query = '') {
         global $CFG, $PAGE;
 
-        $PAGE->requires->jquery();
+        // $PAGE->requires->jquery();
         $PAGE->requires->js_call_amd('block_exaport/wordpress_sso_settings', 'init');
 
         $script = ''; // empty string to make fake element;

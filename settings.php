@@ -115,6 +115,12 @@ if ($ADMIN->fulltree) {
     $layouts = array_combine($layoutKeys, array_map(function($layoutKey) {
         return get_string('block_exaport_used_layout_' . $layoutKey, 'block_exaport');
     }, $layoutKeys));
+
+    $settings->add(new admin_setting_configcheckbox('block_exaport/alwaysnotifywhenshare',
+        get_string('alwaysnotifywhenshare', 'block_exaport'),
+        get_string('alwaysnotifywhenshare_description', 'block_exaport'),
+        0));
+
     $settings->add(new admin_setting_configselect('block_exaport_used_layout',
         get_string('block_exaport_used_layout', 'block_exaport'),
         get_string('block_exaport_used_layout_body', 'block_exaport', $a), 0, $layouts));
@@ -164,10 +170,5 @@ if ($ADMIN->fulltree) {
         get_string('block_exaport_allowcustomlayout_body', 'block_exaport'), 0));
     //  the table with layout settings
     $settings->add(new block_exaport_layout_configtable('block_exaport_layout_settings', block_exaport_get_string('settings_layout_settings_description'), '', ''));
-
-    $settings->add(new admin_setting_configcheckbox('block_exaport/alwaysnotifywhenshare',
-        get_string('alwaysnotifywhenshare', 'block_exaport'),
-        get_string('alwaysnotifywhenshare_description', 'block_exaport'),
-        0));
 
 }

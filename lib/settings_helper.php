@@ -96,9 +96,9 @@ class block_exaport_layout_configtable extends admin_setting_configtext {
         $template = format_admin_setting($this, $this->visiblename, $return,
             $this->description, true, '', '', $query);
         // Hide some html for better view of these settings.
-        $doc = new DOMDocument();
-        $template = mb_convert_encoding($template, 'HTML-ENTITIES', 'UTF-8');
-        $doc->loadHTML($template, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $doc = new DOMDocument('1.0', 'UTF-8');
+        // $template = mb_convert_encoding($template, 'HTML-ENTITIES', 'UTF-8');
+        $doc->loadHTML('<?xml encoding="UTF-8">' . $template, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $selector = new DOMXPath($doc);
         // Delete div with classes.
         $deletedivs = array('form-defaultinfo');
@@ -197,7 +197,7 @@ class block_exaport_admin_setting_withjs extends admin_setting {
     public function output_html($data, $query = '') {
         global $CFG, $PAGE;
 
-        $PAGE->requires->jquery();
+        // $PAGE->requires->jquery();
         $PAGE->requires->js_call_amd('block_exaport/wordpress_sso_settings', 'init');
 
         $script = ''; // empty string to make fake element;

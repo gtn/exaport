@@ -1,4 +1,4 @@
-# pro-web Version 12.09.2024
+# File: .editorconfig | Version: 2025082700 | Author: pro-web.at
 
 # top-most EditorConfig file
 root = true
@@ -13,13 +13,25 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 max_line_length = 240
 
+# disable formatting for these dirs
+[{vendor/**,react-app/**,react-apps/**,amd/build/**}]
+ij_formatter_enabled = false
+
+# disable formatting for these files
+[{package.json,composer.json,db/install.xml,.travis.yml,*.svg}]
+ij_formatter_enabled = false
+
 # TS/JS-Files
-[*.{ts,js,less}]
+[*.{ts,js}]
 indent_size = 2
 
 # JSON-Files
 [*.json]
-indent_style = tab
+indent_size = 2
+
+# MD-Files
+[*.md]
+indent_size = 2
 
 # ReST-Files
 [*.rst]
@@ -28,11 +40,6 @@ max_line_length = 80
 
 # YAML-Files
 [*.{yaml,yml}]
-indent_size = 2
-
-# package.json
-# .travis.yml
-[{package.json,.travis.yml}]
 indent_size = 2
 
 # TypoScript

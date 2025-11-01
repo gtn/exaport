@@ -822,6 +822,7 @@ class externallib extends \external_api {
                 'text' => $block->text,
                 'url' => '',
                 'files' => [],
+                'resume_itemtype' => null,
             ];
 
             if ($block->type == "item") {
@@ -846,6 +847,11 @@ class externallib extends \external_api {
                 $resultBlock->text = '';
             }
 
+            if ($block->type == 'cv_information' || $block->type == 'cv_group') {
+                $resultBlock->resume_itemtype = $block->resume_itemtype;
+            }
+
+
             $result->blocks[] = $resultBlock;
         }
 
@@ -867,7 +873,7 @@ class externallib extends \external_api {
             'advanced_url' => new external_value(PARAM_TEXT),
             'blocks' => new external_multiple_structure(new external_single_structure([
                 'id' => new external_value(PARAM_INT, 'id of block'),
-                'type' => new external_value(PARAM_TEXT, 'ENUM(item,headline,text,other) there are other values also possible!'),
+                'type' => new external_value(PARAM_TEXT, 'ENUM(item,headline,text,personal_information,cv_information,cv_group)'),
                 'itemid' => new external_value(PARAM_INT, 'id of item'),
                 'title' => new external_value(PARAM_TEXT, 'title'),
                 'text' => new external_value(PARAM_RAW, 'description'),
@@ -877,6 +883,7 @@ class externallib extends \external_api {
                     'url' => new external_value(PARAM_URL, 'file url'),
                     'mimetype' => new external_value(PARAM_TEXT, 'mime type for file'),
                 ])),
+                'resume_itemtype' => new external_value(PARAM_TEXT, 'only for type=cv_information and cv_group', VALUE_DEFAULT, null),
             ])),
         ));
     }

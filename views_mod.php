@@ -1259,7 +1259,7 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
 
     case 'share' :
         echo '<div class="view-sharing view-group">';
-        echo '<div class="view-group-header"><div>';
+        echo '<div class=""><div>'; // instead of view-group-header just no classe, as it does not do anything when clicked itself but show what is clicked INSIDE.
         echo block_exaport_fontawesome_icon('share-from-square', 'solid', 1);
         echo get_string('view_sharing', 'block_exaport');
         echo ': <span id="view-share-text"></span></div></div>';

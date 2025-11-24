@@ -16,6 +16,8 @@
 
 namespace block_exaport {
 
+    defined('MOODLE_INTERNAL') || die();
+
     class exabis_special_id_generator {
         /*
         generates a 25 digit id

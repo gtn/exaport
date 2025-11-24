@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+defined('MOODLE_INTERNAL') || die();
+
 function block_exaport_get_user_from_hash($hash) {
     trigger_error('deprecated');
     $conditions = array("user_hash" => $hash);

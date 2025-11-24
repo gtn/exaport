@@ -15,8 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-require_once($CFG->libdir . '/portfolio/caller.php');
+defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->libdir . '/portfolio/caller.php');
 class exaport_portfolio_caller extends portfolio_module_caller_base {
 
     /** @var int callback arg - the id of artefact we export */

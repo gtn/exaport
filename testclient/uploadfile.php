@@ -15,6 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+require __DIR__.'/../inc.php';
+
+require_admin();
+
 // GLOBAL SETTINGS - CHANGE THEM !
 $token = 'c20e48d5114cb56363084d24c4d15da4';
 $domainname = 'http://localhost:8888/moodle26/';

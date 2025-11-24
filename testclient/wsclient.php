@@ -15,6 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+require __DIR__.'/../inc.php';
+
+require_admin();
+
 // $token = '6f8233ff407d082557f51006bd494489'; // Flo.
 $token = '41ec1df3194f653a072a68ac9241b537'; // Michy.
 $domainname = 'http://localhost/moodle271/';

@@ -19,6 +19,8 @@ namespace {
 
     use block_exaport\globals as g;
 
+    defined('MOODLE_INTERNAL') || die();
+
     function block_exaport_get_external_view_url(stdClass $view, $userid = -1) {
         global $CFG, $USER;
         if ($userid == -1) {

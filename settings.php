@@ -17,7 +17,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once __DIR__ . '/lib/exabis_special_id_generator.php';
+// require_once __DIR__ . '/lib/exabis_special_id_generator.php';
 
 require_once(__DIR__ . '/lib/lib.php');
 require_once __DIR__ . '/lib/settings_helper.php';

@@ -19,6 +19,8 @@ namespace block_exaport;
 
 use block_exaport\globals as g;
 
+defined('MOODLE_INTERNAL') || die();
+
 // Copy shared structure tree to user.
 function copy_category_to_myself($categoryid) {
     $rootcat = g::$DB->get_record("block_exaportcate", array('id' => $categoryid));

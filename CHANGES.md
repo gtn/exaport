@@ -1,3 +1,6 @@
+### v4.6.7 (2025112700) ###
+*security fixes
+
 ### v4.6.7 (2025092300) ###
 * new icons
 * Deprecations & Bugfixes

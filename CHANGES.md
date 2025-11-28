@@ -1,5 +1,7 @@
 ### v4.6.7 (2025112700) ###
-*security fixes
+* security fixes
+* reworked sharing-notifications for views: one notification for sharing, one for updating shared notification
+* added admin setting to enable automatically notifying when sharing views
 
 ### v4.6.7 (2025092300) ###
 * new icons

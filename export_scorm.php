@@ -22,21 +22,10 @@ global $DB, $CFG;
 
 $itemsArray = array();
 
-class block_exacomp_ZipArchive extends \ZipArchive {
-    /**
-     * @return ZipArchive
-     */
-    public static function create_temp_file() {
-        global $CFG;
-        $file = tempnam($CFG->tempdir, "zip");
-        $zip = new ZipArchive();
-        $zip->open($file, ZipArchive::OVERWRITE);
-        return $zip;
-    }
-}
-
 global $zip, $existingfilesarray;
-$zip = block_exacomp_ZipArchive::create_temp_file();
+$file = tempnam($CFG->tempdir, "zip");
+$zip = new ZipArchive();
+$zip->open($file, ZipArchive::OVERWRITE);
 $existingfilesarray = array();
 
 $courseid = optional_param("courseid", 0, PARAM_INT);

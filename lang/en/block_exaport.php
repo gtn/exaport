@@ -868,5 +868,40 @@ $string['settings_exaport_wp_sso_remove_passphrase_button'] = 'Remove the passph
 $string['wp_exported_view'] = 'Exported view';
 $string['wp_exported_view_hidden_in_wp'] = 'Exported but hidden in your WordPress';
 $string['wp_exported_view_newer_than_wp'] = 'WordPress view version is older than Moodle version';
+
+// WordPress SSO - JavaScript messages
+$string['wp_enter_secret'] = 'Enter the secret! ';
+$string['wp_something_went_wrong'] = 'Something went wrong!';
+$string['wp_logged_in'] = 'Logged in';
+$string['wp_updated'] = 'Updated';
+$string['wp_exported'] = 'Exported';
+$string['wp_removed'] = 'Removed';
+$string['wp_request_error'] = 'Request error!';
+$string['wp_request_error_code'] = 'Request error (code: {$a})!';
+
+// WordPress Integration - PHP messages
+$string['wp_integration_title'] = 'WordPress integration';
+$string['wp_logged_in_as'] = 'You are logged in to WordPress as the user';
+$string['wp_view_profile_page'] = 'View my WordPress profile page';
+$string['wp_update_profile_data'] = 'Update my WordPress profile data';
+$string['wp_curriculum_vitae'] = 'Curriculum Vitae';
+$string['wp_cv_exported_at'] = 'Your CV is already exported to WordPress at';
+$string['wp_view'] = 'View';
+$string['wp_update_cv_data'] = 'Update CV data in WordPress';
+$string['wp_remove'] = 'Remove';
+$string['wp_import_cv'] = 'Import CV into WordPress';
+$string['wp_no_user_instance'] = 'You do not have a user in the associated WordPress instance';
+$string['wp_register_user'] = 'Register User';
+$string['wp_my_views'] = 'My views';
+$string['wp_exported_into'] = 'Exported into WordPress';
+$string['wp_updated_on'] = 'WordPress updated on';
+$string['wp_view_in_wordpress'] = 'View in WordPress';
+$string['wp_export_to_wordpress'] = 'Export to WordPress';
+$string['wp_update_in_wordpress'] = 'Update in WordPress';
+$string['wp_remove_from_wordpress'] = 'Remove from WordPress';
+$string['wp_no_admin_rights'] = 'You do not have admin rights';
+$string['wp_no_configured_url'] = 'No configured WP SSO url!';
+$string['wp_connection_not_successful'] = 'Connection not successful';
+
 $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
 $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';

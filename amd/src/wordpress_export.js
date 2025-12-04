@@ -3,6 +3,39 @@ import $ from 'jquery';
 // import Notification from 'core/notification';
 import {add as addToast} from 'core/toast';
 import Config from 'core/config';
+import {get_strings as getStrings} from 'core/str';
+
+// Load all strings at initialization
+var strings = {};
+
+function loadStrings() {
+  var stringKeys = [
+    {key: 'wp_logged_in', component: 'block_exaport'},
+    {key: 'wp_updated', component: 'block_exaport'},
+    {key: 'wp_exported', component: 'block_exaport'},
+    {key: 'wp_removed', component: 'block_exaport'},
+    {key: 'wp_request_error', component: 'block_exaport'},
+    {key: 'wp_request_error_code', component: 'block_exaport'},
+  ];
+
+  getStrings(stringKeys). then(function(results) {
+    strings. logged_in = results[0];
+    strings.updated = results[1];
+    strings. exported = results[2];
+    strings.removed = results[3];
+    strings.request_error = results[4];
+    strings. request_error_code = results[5];
+    return true;
+  }).fail(function() {
+    // Fallback to English
+    strings.logged_in = 'Logged in';
+    strings.updated = 'Updated';
+    strings.exported = 'Exported';
+    strings.removed = 'Removed';
+    strings.request_error = 'Request error! ';
+    strings.request_error_code = 'Request error (code: {$a})!';
+  });
+}
 
 function buttonLoading(button, isLoading) {
   // disable the button to prevent double click
@@ -15,16 +48,19 @@ function buttonLoading(button, isLoading) {
 }
 
 export function init() {
+  // Load strings first
+  loadStrings();
+
   // Regular login button: silent creating of the wordpress account
   $(document).on('click', '.exaport-wp-login, .exaport-wp-loginUpdate', function (e) {
     e.preventDefault();
     $('.exaport-wp-error').remove();
     var theButton = $(this);
     var action = 'login';
-    var successMessage = 'Logged in';
+    var successMessage = strings.logged_in || 'Logged in';
     if (theButton.hasClass('exaport-wp-loginUpdate')) {
       action = 'loginUpdate';
-      successMessage = 'Updated';
+      successMessage = strings.updated || 'Updated';
     }
 
     buttonLoading(theButton, true);
@@ -56,7 +92,7 @@ export function init() {
     }, function () {
       buttonLoading(theButton, false);
 
-      addToast('Error: 1745225660311', {
+      addToast(strings.request_error_code.replace('{$a}', '1745225660311') || 'Error: 1745225660311', {
         type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
         autohide: false,        // disappears after a few seconds
         closeButton: true,
@@ -75,13 +111,13 @@ export function init() {
       viewId: viewId
     };
     var action = 'viewExport';
-    var successMessage = 'Exported';
+    var successMessage = strings.exported || 'Exported';
     if (theButton.hasClass('exaport-wp-viewUpdate')) {
       action = 'viewUpdate';
-      var successMessage = 'Updated';
+      successMessage = strings.updated || 'Updated';
     } else if (theButton.hasClass('exaport-wp-viewRemove')) {
       action = 'viewRemove';
-      var successMessage = 'Removed';
+      successMessage = strings.removed || 'Removed';
     }
 
     buttonLoading(theButton, true);
@@ -139,7 +175,7 @@ export function init() {
         // theButton.after('<div class="alert alert-danger alert-sm .exaport-wp-error">' + response.message + '</div>');
       }
       if (!response) {
-        addToast('Request error!', {
+        addToast(strings.request_error || 'Request error!', {
           type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
           autohide: false,        // disappears after a few seconds
           closeButton: true,
@@ -154,7 +190,7 @@ export function init() {
       buttonLoading(theButton, false);
 
       // toaster
-      addToast('Request error!', {
+      addToast(strings.request_error || 'Request error!', {
         type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
         autohide: false,        // disappears after a few seconds
         closeButton: true,
@@ -171,13 +207,13 @@ export function init() {
     var data = {};
     var theButton = $(this);
     var action = 'cvExport';
-    var successMessage = 'Exported';
+    var successMessage = strings.exported || 'Exported';
     if (theButton.hasClass('exaport-wp-cvUpdate')) {
       action = 'cvUpdate';
-      var successMessage = 'Updated';
+      successMessage = strings.updated || 'Updated';
     } else if (theButton.hasClass('exaport-wp-cvRemove')) {
       action = 'cvRemove';
-      var successMessage = 'Removed';
+      successMessage = strings.removed || 'Removed';
     }
     // rotate the icon
     buttonLoading(theButton, true);
@@ -222,7 +258,7 @@ export function init() {
         // showExaportToaster(response.message, 'error');
       }
       if (!response) {
-        addToast('Request error!', {
+        addToast(strings.request_error || 'Request error!', {
           type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
           autohide: false,        // disappears after a few seconds
           closeButton: true,
@@ -236,7 +272,7 @@ export function init() {
       // stop rotation
       buttonLoading(theButton, false);
       // toaster
-      addToast('Request error (code: 1745230772232)!', {
+      addToast(strings.request_error_code.replace('{$a}', '1745230772232') || 'Request error (code: 1745230772232)!', {
         type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
         autohide: false,        // disappears after a few seconds
         closeButton: true,

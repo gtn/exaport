@@ -3,6 +3,7 @@ import $ from 'jquery';
 // import Notification from 'core/notification';
 import {add as addToast} from 'core/toast';
 import Config from 'core/config';
+import {get_string as getString} from 'core/str';
 
 export function init() {
   $('#admin-block_exaport_button_with_js').hide();
@@ -31,7 +32,11 @@ export function init() {
       case 'requestPassphrase':
         var secret = $.trim($('.block_exaport_secret_input').val());
         if (!secret) {
-          alert('Enter the secret!');
+          getString('wp_enter_secret', 'block_exaport').then(function(str) {
+            alert(str);
+          }).fail(function() {
+            alert('Enter the secret!');
+          });
           return false;
         }
         data.secret = secret;
@@ -64,10 +69,18 @@ export function init() {
           );*/
 
         } else if (data.result === 'error') {
-          addToast('Error <br>' + data.message, {
-            type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
-            autohide: false,        // disappears after a few seconds
-            closeButton: true,
+          getString('error', 'core').then(function(errorStr) {
+            addToast(errorStr + ' <br>' + data.message, {
+              type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
+              autohide: false,        // disappears after a few seconds
+              closeButton: true,
+            });
+          }).fail(function() {
+            addToast('Error <br>' + data.message, {
+              type: 'danger',
+              autohide: false,
+              closeButton: true,
+            });
           });
           /*notification.alert(
             'Done',
@@ -78,10 +91,18 @@ export function init() {
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
-        addToast('Something went wrong!', {
-          type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
-          autohide: false,        // disappears after a few seconds
-          closeButton: true,
+        getString('wp_something_went_wrong', 'block_exaport').then(function(str) {
+          addToast(str, {
+            type: 'danger',       // 'success' | 'info' | 'warning' | 'danger'
+            autohide: false,        // disappears after a few seconds
+            closeButton: true,
+          });
+        }).fail(function() {
+          addToast('Something went wrong!', {
+            type: 'danger',
+            autohide: false,
+            closeButton: true,
+          });
         });
         console.log('error:', errorThrown, 'code: 1745419297633');
         // alert('Something was wrong!');

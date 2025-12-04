@@ -35,6 +35,7 @@ function block_exaport_print_extern_item($item, $access) {
     echo $OUTPUT->tag_list($tags, null, 'exaport-artifact-tags', 0, null, false);
 
     $boxcontent = '';
+    $filescontent = '';
     if ($files = block_exaport_get_item_files($item)) {
         foreach ($files as $fileindex => $file) {
             if (!$file) {
@@ -42,14 +43,14 @@ function block_exaport_print_extern_item($item, $access) {
             }
             $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=" . $access . "&itemid=" . $item->id . '&inst=' . $fileindex);
             if ($file->is_valid_image()) { // Image attachments don't get printed as links.
-                $boxcontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . s($item->name) . "\" /></div>";
+                $filescontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . s($item->name) . "\" /></div>";
             } else {
                 $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-                $boxcontent .= "<p class=\"filelink\">" . $icon . ' ' .
+                $filescontent .= "<p class=\"filelink\">" . $icon . ' ' .
                     $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
                 if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
                     // Videoblock.
-                    $boxcontent .= '
+                    $filescontent .= '
                     <div id="video_block">
                         <div id="video_content">
                             <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
@@ -65,20 +66,28 @@ function block_exaport_print_extern_item($item, $access) {
                         <div id="video_error" style="display: none;" class="incompatible_video">';
                     $a = new stdClass ();
                     $a->link = $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl));
-                    $boxcontent .= get_string('incompatible_video', 'block_exaport', $a);
-                    $boxcontent .= '</div>
+                    $filescontent .= get_string('incompatible_video', 'block_exaport', $a);
+                    $filescontent .= '</div>
                                     </div>';
-                    $boxcontent .= "
+                    $filescontent .= "
                     <script src=\"" . $CFG->wwwroot . "/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
                 };
             }
         }
     }
 
-    if (!$boxcontent && !$item->url) {
+    if (!$filescontent && !$item->url) {
         if ($item->type != 'note') { // notes can be without files
             $boxcontent = block_exaport_get_string('filenotfound');
         }
+    }
+
+    // Display files/attachments with heading if they exist
+    if ($filescontent) {
+        $boxcontent .= '<div class="item-project-section">';
+        $boxcontent .= '<h4>' . get_string('file', 'block_exaport') . '</h4>';
+        $boxcontent .= $filescontent;
+        $boxcontent .= '</div>';
     }
 
     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
@@ -91,10 +100,62 @@ function block_exaport_print_extern_item($item, $access) {
         // in this case it is possible that it is cleaned media link. Get it again
         $intro = $item->intro;
     }
+
+    // Display URL with heading if it exists
     if ($item->url && $item->url != "false") {
+        $boxcontent .= '<div class="item-project-section">';
+        $boxcontent .= '<h4>' . get_string('url', 'block_exaport') . '</h4>';
         $boxcontent .= '<p><a target="_blank" href="' . s($item->url) . '">' . str_replace('http://', '', $item->url) . '</a></p>';
+        $boxcontent .= '</div>';
     }
-    $boxcontent .= $intro;
+
+    // Display short description (intro field) with heading
+    if ($intro) {
+        $boxcontent .= '<div class="item-project-section">';
+        $boxcontent .= '<h4>' . get_string('shortdescription', 'block_exaport') . '</h4>';
+        $boxcontent .= $intro;
+        $boxcontent .= '</div>';
+    }
+
+    // Display project information fields if they exist
+    if (@$item->project_description || @$item->project_process || @$item->project_result) {
+        // The why behind this project
+        if (@$item->project_description) {
+            $boxcontent .= '<div class="item-project-section">';
+            $boxcontent .= '<h4>' . get_string('project_description', 'block_exaport') . '</h4>';
+            $content = file_rewrite_pluginfile_urls($item->project_description, 'pluginfile. php',
+                context_user::instance($item->userid)->id,
+                'block_exaport', 'item_content_project_description',
+                $access . '/itemid/' . $item->id);
+            $boxcontent .= format_text($content);
+            $boxcontent .= '</div>';
+        }
+
+        // Making it happen
+        if (@$item->project_process) {
+            $boxcontent .= '<div class="item-project-section">';
+            $boxcontent .= '<h4>' . get_string('project_process', 'block_exaport') . '</h4>';
+            $content = file_rewrite_pluginfile_urls($item->project_process, 'pluginfile.php',
+                context_user::instance($item->userid)->id,
+                'block_exaport', 'item_content_project_process',
+                $access . '/itemid/' . $item->id);
+            $boxcontent .= format_text($content);
+            $boxcontent .= '</div>';
+        }
+
+        // Results and learnings
+        if (@$item->project_result) {
+            $boxcontent .= '<div class="item-project-section">';
+            $boxcontent .= '<h4>' . get_string('project_result', 'block_exaport') . '</h4>';
+            $content = file_rewrite_pluginfile_urls($item->project_result, 'pluginfile.php',
+                context_user::instance($item->userid)->id,
+                'block_exaport', 'item_content_project_result',
+                $access . '/itemid/' . $item->id);
+            $boxcontent .= format_text($content);
+            $boxcontent .= '</div>';
+        }
+    }
+
     echo $OUTPUT->box($boxcontent);
 }
 

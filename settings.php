@@ -17,7 +17,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-// require_once __DIR__ . '/lib/exabis_special_id_generator.php';
+require_once __DIR__ . '/lib/exabis_special_id_generator.php';
 
 require_once(__DIR__ . '/lib/lib.php');
 require_once __DIR__ . '/lib/settings_helper.php';
@@ -125,7 +125,7 @@ if ($ADMIN->fulltree) {
         get_string('block_exaport_used_layout', 'block_exaport'),
         get_string('block_exaport_used_layout_body', 'block_exaport', $a), 0, $layouts));
 
-    /*
+
     // Export settings
     $settings->add(new admin_setting_heading('exaport/export_settings',
         get_string('settings_export_settings_heading', 'block_exaport'),
@@ -159,7 +159,7 @@ if ($ADMIN->fulltree) {
         '--not-used-yet--'));
 
 
-    */
+
     // View custom template settings
     $settings->add(new admin_setting_heading('exaport/layout_settings',
         get_string('settings_layout_settings_heading', 'block_exaport'),

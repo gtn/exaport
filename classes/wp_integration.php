@@ -1193,11 +1193,21 @@ class wp_integration {
         global $CFG, $OUTPUT, $USER;
 
         if (!is_siteadmin()) {
-            throw new \moodle_exception('nopermissions');
+            echo json_encode([
+                'result' => 'error',
+                'message' => block_exaport_get_string('wp_no_admin_rights'),
+                'code' => 'nopermissions',
+            ]);
+            exit;
         }
 
         if (!\block_exaport\wordpress_lib::get_sso_url()) {
-            throw new \moodle_exception(block_exaport_get_string('wp_no_configured_url'));
+            echo json_encode([
+                'result' => 'error',
+                'message' => block_exaport_get_string('wp_no_configured_url'),
+                'code' => 'invalid_config',
+            ]);
+            exit;
         }
 
         $timestamp = time();
@@ -1218,8 +1228,6 @@ class wp_integration {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
         curl_close($ch);
-
-        $return = [];
 
         $responseObj = json_decode($response);
         if ($responseObj->exaport_source == get_config('block_exaport', 'mysource')) {
@@ -1247,7 +1255,12 @@ class wp_integration {
     public function ssoPassphraseRemove() {
 
         if (!is_siteadmin()) {
-            throw new \moodle_exception('nopermissions');
+            echo json_encode([
+                'result' => 'error',
+                'message' => block_exaport_get_string('wp_no_admin_rights'),
+                'code' => 'nopermissions',
+            ]);
+            exit;
         }
 
         // reset passphrase

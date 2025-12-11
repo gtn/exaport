@@ -118,6 +118,12 @@ class wp_integration {
                 echo json_encode($removeResult);
                 exit;
                 break;
+            case 'profileRemove':
+                // Remove the whole WordPress profile (user and all related data)
+                $removeResult = $this->removeProfile();
+                echo json_encode($removeResult);
+                exit;
+                break;
             case 'requestPassphrase':
                 $requestResult = $this->ssoPassphraseRequest();
                 echo json_encode($requestResult);
@@ -161,18 +167,23 @@ class wp_integration {
             $directLoginToken = $this->generateJWTtoken('directLogin');
             $loginSsoUrl = $this->getWpUrl($directLoginToken);
             $html .= '<div class="col-sm-6">
-            <a class="btn btn-primary exaport-wp-directLogin" href="' . $loginSsoUrl . '" target="_blank">
-                ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                ' . block_exaport_get_string('wp_view_profile_page') . '
-            </a>
-        </div>';
+                <a class="btn btn-primary exaport-wp-directLogin" href="' . $loginSsoUrl . '" target="_blank">
+                    ' . block_exaport_fontawesome_icon('eye', 'solid', 1, [], [], [], [], [], [], [], []) . '
+                    ' . block_exaport_get_string('wp_view_profile_page') . '
+                </a>
+            </div>';
             // update button
             $html .= '<div class="col-sm-6 text-right">
-            <button class="btn btn-primary exaport-wp-loginUpdate">
-                ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
-                ' . block_exaport_get_string('wp_update_profile_data') . '
-            </button>
-        </div>';
+                <button class="btn btn-primary exaport-wp-loginUpdate">
+                    ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
+                    ' . block_exaport_get_string('wp_update_profile_data') . '
+                </button>
+            </div>';
+            $html .= '<button class="btn btn-danger float-right exaport-wp-profileRemove">
+                    ' . block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []) . '
+                    ' . block_exaport_get_string('wp_remove_profile') . '
+                </button>
+            </div>';
             $html .= '</div>';
 
             // CV import button
@@ -598,6 +609,15 @@ class wp_integration {
     public function removeCV() {
         // generate the token
         $exportToken = $this->generateJWTtoken('removeCv');
+        // send the request to WP
+        $exportResponse = $this->sendTokenToWP($exportToken);
+
+        return $exportResponse;
+    }
+
+    public function removeProfile() {
+        // generate the token
+        $exportToken = $this->generateJWTtoken('removeProfile');
         // send the request to WP
         $exportResponse = $this->sendTokenToWP($exportToken);
 

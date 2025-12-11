@@ -280,6 +280,63 @@ export function init() {
       // showExaportToaster('Request error (code: 1745230772232)!', 'error');
     });
   });
+
+  // Remove the whole WordPress profile
+  $(document).on('click', '.exaport-wp-profileRemove', function (e) {
+    e.preventDefault();
+    $('.exaport-wp-error').remove();
+
+    // Confirm before removing
+    if (! confirm('Are you sure you want to remove your entire WordPress profile?  This will delete all your data including CV and views.')) {
+      return;
+    }
+
+    var theButton = $(this);
+    var action = 'profileRemove';
+    var successMessage = strings.removed || 'Removed';
+
+    buttonLoading(theButton, true);
+
+    wpRequest(action, {}, function (response) {
+      response = JSON.parse(response).response;
+      if (response && response.success) {
+        // Reload the form to show login button again
+        wpRequest('wpForm', [], function (response) {
+          theButton.closest('form').html(response);
+        });
+        addToast(successMessage, {
+          type: 'success',
+          autohide: true,
+        });
+      }
+      if (response && response.error) {
+        addToast(response.message, {
+          type: 'danger',
+          autohide: false,
+          closeButton: true,
+        });
+      }
+      if (!response) {
+        addToast(strings.request_error || 'Request error!', {
+          type: 'danger',
+          autohide: false,
+          closeButton: true,
+        });
+      }
+
+      // stop rotation
+      buttonLoading(theButton, false);
+    }, function () {
+      // stop rotation
+      buttonLoading(theButton, false);
+
+      addToast(strings.request_error_code. replace('{$a}', '1745590000010') || 'Request error (code: 1745590000010)!', {
+        type: 'danger',
+        autohide: false,
+        closeButton:  true,
+      });
+    });
+  });
 }
 
 

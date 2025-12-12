@@ -899,6 +899,7 @@ $string['wp_remove_from_wordpress'] = 'Aus WordPress entfernen';
 $string['wp_no_admin_rights'] = 'Du hast keine Administratorrechte';
 $string['wp_no_configured_url'] = 'Keine konfigurierte WP-SSO-URL!';
 $string['wp_connection_not_successful'] = 'Verbindung nicht erfolgreich';
+$string['wp_remove_profile'] = 'Gesamtes Profil aus WordPress entfernen';
 
 $string['alwaysnotifywhenshare'] = 'Immer benachrichtigen, wenn geteilt wird';
 $string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.';

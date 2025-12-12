@@ -178,8 +178,7 @@ class wp_integration {
                     ' . block_exaport_fontawesome_icon('arrows-rotate', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     ' . block_exaport_get_string('wp_update_profile_data') . '
                 </button>
-            </div>';
-            $html .= '<button class="btn btn-danger float-right exaport-wp-profileRemove">
+                <button class="btn btn-danger btn-sm ml-2 exaport-wp-profileRemove">
                     ' . block_exaport_fontawesome_icon('trash-can', 'solid', 1, [], [], [], [], [], [], [], []) . '
                     ' . block_exaport_get_string('wp_remove_profile') . '
                 </button>

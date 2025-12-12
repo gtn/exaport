@@ -18,15 +18,15 @@ function loadStrings() {
     {key: 'wp_request_error_code', component: 'block_exaport'},
   ];
 
-  getStrings(stringKeys). then(function(results) {
-    strings. logged_in = results[0];
+  getStrings(stringKeys).then(function (results) {
+    strings.logged_in = results[0];
     strings.updated = results[1];
-    strings. exported = results[2];
+    strings.exported = results[2];
     strings.removed = results[3];
     strings.request_error = results[4];
-    strings. request_error_code = results[5];
+    strings.request_error_code = results[5];
     return true;
-  }).fail(function() {
+  }).fail(function () {
     // Fallback to English
     strings.logged_in = 'Logged in';
     strings.updated = 'Updated';
@@ -287,7 +287,7 @@ export function init() {
     $('.exaport-wp-error').remove();
 
     // Confirm before removing
-    if (! confirm('Are you sure you want to remove your entire WordPress profile?  This will delete all your data including CV and views.')) {
+    if (!confirm('Are you sure you want to remove your entire WordPress profile?  This will delete all your data including CV and views and your word press user itself.')) {
       return;
     }
 
@@ -330,10 +330,10 @@ export function init() {
       // stop rotation
       buttonLoading(theButton, false);
 
-      addToast(strings.request_error_code. replace('{$a}', '1745590000010') || 'Request error (code: 1745590000010)!', {
+      addToast(strings.request_error_code.replace('{$a}', '1745590000010') || 'Request error (code: 1745590000010)!', {
         type: 'danger',
         autohide: false,
-        closeButton:  true,
+        closeButton: true,
       });
     });
   });

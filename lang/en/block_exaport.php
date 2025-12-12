@@ -902,6 +902,7 @@ $string['wp_remove_from_wordpress'] = 'Remove from WordPress';
 $string['wp_no_admin_rights'] = 'You do not have admin rights';
 $string['wp_no_configured_url'] = 'No configured WP SSO url!';
 $string['wp_connection_not_successful'] = 'Connection not successful';
+$string['wp_remove_profile'] = 'Remove entire WordPress profile';
 
 $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
 $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';

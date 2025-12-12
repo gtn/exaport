@@ -68,6 +68,7 @@ class wp_integration {
                 break;
             case 'viewRemove':
                 $viewId = @$parameters['viewId'];
+                // TODO:
                 // check - only MY!!
                 $views = block_exaport_get_my_views();
                 if (array_key_exists($viewId, $views)) {
@@ -113,12 +114,15 @@ class wp_integration {
                 exit;
                 break;
             case 'cvRemove':
+                // TODO: check but on the wp-side, so noone can craft a request to delete of someone else
                 // check - only MY!!
                 $removeResult = $this->removeCV();
                 echo json_encode($removeResult);
                 exit;
                 break;
             case 'profileRemove':
+                // TODO:
+                // check - only MY!!
                 // Remove the whole WordPress profile (user and all related data)
                 $removeResult = $this->removeProfile();
                 echo json_encode($removeResult);

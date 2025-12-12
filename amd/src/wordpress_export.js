@@ -287,7 +287,7 @@ export function init() {
     $('.exaport-wp-error').remove();
 
     // Confirm before removing
-    if (!confirm('Are you sure you want to remove your entire WordPress profile?  This will delete all your data including CV and views and your word press user itself.')) {
+    if (!confirm('Are you sure you want to remove your entire WordPress profile?  This will delete all your data including CV and views and your Wordpress user itself.')) {
       return;
     }
 
@@ -300,13 +300,16 @@ export function init() {
     wpRequest(action, {}, function (response) {
       response = JSON.parse(response).response;
       if (response && response.success) {
-        // Reload the form to show login button again
-        wpRequest('wpForm', [], function (response) {
-          theButton.closest('form').html(response);
-        });
-        addToast(successMessage, {
-          type: 'success',
-          autohide: true,
+        // Reload the ENTIRE form to show login button again
+        // This will clear CV, Views, and show the "Register User" button
+        wpRequest('wpForm', [], function (formHtml) {
+          $('.exaport-wp-form').html(formHtml);
+
+          // Show success message after the form is reloaded
+          addToast(successMessage, {
+            type: 'success',
+            autohide: true,
+          });
         });
       }
       if (response && response.error) {

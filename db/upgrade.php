@@ -1219,7 +1219,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
     if ($oldversion < 2026010701) {
         // Make the intro field in block_exaportitem optional (not required)
         $table = new xmldb_table('block_exaportitem');
-        $field = new xmldb_field('intro', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $field = new xmldb_field('intro', XMLDB_TYPE_TEXT, null, null, null, false, null);
         
         if ($dbman->field_exists($table, $field)) {
             $dbman->change_field_notnull($table, $field);

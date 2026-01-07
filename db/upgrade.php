@@ -1220,7 +1220,9 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // Make the intro field in block_exaportitem optional (not required).
         $table = new xmldb_table('block_exaportitem');
         $field = new xmldb_field('intro');
-        $field->set_attributes(XMLDB_TYPE_TEXT, null, null, null, null, null, null);
+        // Set attributes for TEXT field that allows NULL values.
+        // Parameters: type, precision, unsigned, notnull, sequence, default, previous.
+        $field->set_attributes(XMLDB_TYPE_TEXT, null, null, null, null, null);
         
         // Change field to allow NULL values.
         $dbman->change_field_notnull($table, $field);

@@ -1421,7 +1421,7 @@ function block_exaport_get_course_teachers($exceptmyself = true) {
     $query = "SELECT u.id as userid, u.id AS tmp
     FROM {user} u
     JOIN {role_assignments} ra ON ra.userid = u.id
-    WHERE ra.contextid=? AND ra.roleid = '3' AND u.deleted = 0";
+    WHERE ra.contextid=? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0";
     $exastudteachers = $DB->get_records_sql($query, [$context->id]);
 
     // If exacomp is not installed this function returns an emtpy array.
@@ -1449,7 +1449,7 @@ function block_exaport_user_is_teacher($userid = null) {
       FROM {role_assignments} ra
       JOIN {user} u ON ra.userid = u.id
       JOIN {context} c ON c.id = ra.contextid
-      WHERE c.contextlevel = ? AND u.id = ? AND ra.roleid = '3' AND u.deleted = 0 ";
+      WHERE c.contextlevel = ? AND u.id = ? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0 ";
     $roles = $DB->get_records_sql($query, [CONTEXT_COURSE, $userid]);
     if (count($roles) > 0) {
         return true;
@@ -1469,7 +1469,7 @@ function block_exaport_get_students_for_teacher($userid = null, $courseid = 0) {
       JOIN {user} u ON ra.userid = u.id
       JOIN {context} c ON c.id = ra.contextid
       JOIN {course} course ON course.id = c.instanceid
-      WHERE c.contextlevel = ? AND u.id = ? AND ra.roleid = '3' AND u.deleted = 0 ";
+      WHERE c.contextlevel = ? AND u.id = ? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0 ";
     $courses = $DB->get_records_sql($query, [CONTEXT_COURSE, $userid]);
     foreach ($courses as $course) {
         // Get students of current course

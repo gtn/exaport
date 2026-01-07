@@ -1217,13 +1217,13 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026010701) {
-        // Make the intro field in block_exaportitem optional (not required)
+        // Make the intro field in block_exaportitem optional (not required).
         $table = new xmldb_table('block_exaportitem');
-        $field = new xmldb_field('intro', XMLDB_TYPE_TEXT, null, null, null, false, null);
+        $field = new xmldb_field('intro');
+        $field->set_attributes(XMLDB_TYPE_TEXT, null, null, null, null, null, null);
         
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->change_field_notnull($table, $field);
-        }
+        // Change field to allow NULL values.
+        $dbman->change_field_notnull($table, $field);
 
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2026010701, 'exaport');

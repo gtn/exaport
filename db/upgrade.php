@@ -1192,18 +1192,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2024102200, 'exaport');
     }
 
-    if ($oldversion < 2025091802) {
-        $table = new xmldb_table('block_exaportviewshar');
-        $field = new xmldb_field('notify', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'userid');
-
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2025091802, 'exaport');
-    }
-
     if ($oldversion < 2025101401) {
         // Update a field for the table block_exaportresume
         $table = new xmldb_table('block_exaportresume');
@@ -1223,12 +1211,24 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // Set attributes for TEXT field that allows NULL values.
         // Parameters: type, precision, unsigned, notnull, sequence, default, previous.
         $field->set_attributes(XMLDB_TYPE_TEXT, null, null, null, null, null);
-        
+
         // Change field to allow NULL values.
         $dbman->change_field_notnull($table, $field);
 
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2026010701, 'exaport');
+    }
+
+    if ($oldversion < 2026010803) {
+        $table = new xmldb_table('block_exaportviewshar');
+        $field = new xmldb_field('notify', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'userid');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026010803, 'exaport');
     }
 
     return $result;

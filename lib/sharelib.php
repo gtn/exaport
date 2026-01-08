@@ -410,7 +410,7 @@ namespace {
          */
         $shared = $DB->record_exists('block_exaportviewshar', array('viewid' => $view->id, 'notify' => 1)) ||
             $DB->record_exists('block_exaportviewgroupshar', array('viewid' => $view->id)) || // TODO: add notify to group sharing?
-            ($view->sharedemails && $DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id))); // TODO: check this in general
+            (isset($view->sharedemails) && $view->sharedemails && $DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id))); // TODO: check this in general
         return $shared;
     }
 

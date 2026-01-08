@@ -187,7 +187,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $mform->setType($textareafield, PARAM_RAW);
                 // Required for all item types
                 //                if ($type == 'note' && $textareafield == 'intro') {
-                $mform->addRule($textareafield, get_string('intronotempty', 'block_exaport'), 'required', null, 'client');
+                // Intro field is now optional - validation rule removed
                 //                }
                 $mform->add_exaport_help_button($textareafield, 'forms.item.' . $textareafield);
             } else {
@@ -198,9 +198,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $mform->addElement('editor', $textareafield . '_editor', get_string($stringmarker, 'block_exaport'), null,
                     $this->_customdata['textfieldoptions']);
                 $mform->setType($textareafield . '_editor', PARAM_RAW);
-                if ($textareafield == 'intro') {
-                    $mform->addRule($textareafield . '_editor', get_string('intronotempty', 'block_exaport'), 'required', null, 'client');
-                }
+                // Intro field is now optional - validation rule removed
                 $mform->add_exaport_help_button($textareafield . '_editor', 'forms.item.' . $textareafield . '_editor');
             }
         }

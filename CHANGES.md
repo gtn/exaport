@@ -1,3 +1,9 @@
+### v5.1 (2026020500) ###
+* Use same version as latest moodle release
+
+### v4.6.7 (2026010804) ###
+* bugfixes
+
 ### v4.6.7 (2025112700) ###
 * security fixes
 * reworked sharing-notifications for views: one notification for sharing, one for updating shared notification

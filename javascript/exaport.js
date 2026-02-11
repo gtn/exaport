@@ -113,13 +113,14 @@
       }
       this.userlist_loaded = true;
 
-      $('#sharing-userlist').html('loading userlist...');
+      $('#sharing-userlist').html('loading userlist...1234');
 
 
       $.getJSON(document.location.href, {action: 'userlist'}, function (courses) {
         var html = '';
-        var alwaysNotify = document.getElementById('alwaysnotifywhenshare').value;
-        var alwaysNotifyBool = alwaysNotify === "true" || alwaysNotify === "1"; // Convert to boolean
+        debugger;
+        var alwaysNotify = document.getElementById('alwaysnotifywhenshare')?.value ?? "false";
+        var alwaysNotifyBool = alwaysNotify === "true" || alwaysNotify === "1";
         if (!$.empty(courses)) {
           $.each(courses, function (tmp, course) {
             html += '<fieldset class="course-group"><legend class="course-group-title">';

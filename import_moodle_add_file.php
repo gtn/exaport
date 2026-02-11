@@ -143,7 +143,7 @@ if ($exteditform->is_cancelled()) {
 
     switch ($action) {
         case 'add':
-            do_add($cm, $fromform, $exteditform, $returnurl, $courseid, $checkedfile);
+            do_add($cm, $fromform, $exteditform, $returnurl, $courseid, $checkedfile, $assignment);
             break;
 
         case 'edit':
@@ -210,7 +210,7 @@ function do_edit($post, $blogeditform, $returnurl, $courseid) {
 /**
  * Write a new blog entry into database
  */
-function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile) {
+function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile, $assignment) {
     global $CFG, $USER, $DB, $COURSE;
 
     $post->userid = $USER->id;
@@ -256,6 +256,31 @@ function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile) 
                     "activitytitle" => $post->name, "coursetitle" => $COURSE->shortname));
         }
     }
+
+    // Get and save feedback files from the assignment
+    $feedbackfiles = get_assignment_feedback_files($cm, $assignment);
+
+    if (!empty($feedbackfiles)) {
+        // Create a comment entry to hold the feedback files
+        $comment = new stdClass();
+        $comment->itemid = $post->id;
+        $comment->userid = $USER->id;
+        $comment->entry = get_string('feedbackfromteacher', 'block_exaport');
+        $comment->timemodified = time();
+
+        $comment->id = $DB->insert_record('block_exaportitemcomm', $comment);
+
+        // Save each feedback file to the comment
+        $filerecordbase = new stdClass();
+        $filerecordbase->contextid = context_system::instance()->id;
+        $filerecordbase->component = 'block_exaport';
+        $filerecordbase->filearea = 'item_comment_file';
+        $filerecordbase->itemid = $comment->id;
+
+        foreach ($feedbackfiles as $feedbackfile) {
+            $fs->create_file_from_storedfile($filerecordbase, $feedbackfile);
+        }
+    }
 }
 
 /**
@@ -283,4 +308,47 @@ function check_assignment_file($cm, $assignment, $fileid) {
         false);
 
     return isset($files[$fileid]) ? $files[$fileid] : null;
+}
+
+/**
+ * Get feedback files from an assignment submission
+ *
+ * @param object $cm Course module object
+ * @param object $assignment Assignment data including submissionid
+ * @return array Array of stored_file objects representing feedback files
+ */
+function get_assignment_feedback_files($cm, $assignment) {
+    global $USER, $DB;
+
+    $modassign = block_exaport_assignmentversion();
+    $context = context_module::instance($cm->id);
+    $fs = get_file_storage();
+
+    $feedbackfiles = array();
+
+    // Only handle new assign module (modern Moodle)
+    if ($modassign->new) {
+        // Get the grade record for this submission
+        // The feedback files are linked to the grade, not the submission directly
+        $grade = $DB->get_record('assign_grades',
+            array('assignment' => $assignment->assignment, 'userid' => $USER->id),
+            '*', IGNORE_MULTIPLE);
+
+        if ($grade) {
+            // Check if assignfeedback_file plugin is being used
+            $feedbackfilerecord = $DB->get_record('assignfeedback_file',
+                array('assignment' => $assignment->assignment, 'grade' => $grade->id));
+
+            if ($feedbackfilerecord) {
+                // Get feedback files from the file storage
+                // Component: assignfeedback_file, Filearea: feedback_files, Itemid: grade id
+                $feedbackfiles = $fs->get_area_files($context->id, 'assignfeedback_file', 'feedback_files',
+                    $grade->id, "filename", false);
+            }
+        }
+    }
+    // Legacy assignment module doesn't have the same feedback file structure
+    // For simplicity, we'll skip legacy support for feedback files
+
+    return $feedbackfiles;
 }

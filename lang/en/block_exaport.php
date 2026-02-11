@@ -870,3 +870,4 @@ $string['wp_exported_view_hidden_in_wp'] = 'Exported but hidden in your WordPres
 $string['wp_exported_view_newer_than_wp'] = 'WordPress view version is older than Moodle version';
 $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
 $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';
+$string['feedbackfromteacher'] = 'Feedback from teacher';

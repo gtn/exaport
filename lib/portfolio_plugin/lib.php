@@ -62,6 +62,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
         }
 
         $fs = get_file_storage();
+        $caller = $this->exporter->get('caller');
 
         // Save files to first category, so read that id.
         // $categoryid = $DB->get_field_sql("SELECT id FROM {block_exaportcate} ".
@@ -92,7 +93,52 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
                 $fs->create_file_from_storedfile($filerecord, $file);
 
                 $this->lastitem = $item;
+
+                // NEW: Save feedback files if available
+                $this->save_feedback_files($item->id, $caller, $fs);
             }
+        }
+    }
+
+    /**
+     * Save teacher feedback files as a comment on the portfolio item
+     *
+     * @param int $itemid The portfolio item ID
+     * @param object $caller The portfolio caller object
+     * @param file_storage $fs File storage instance
+     */
+    protected function save_feedback_files($itemid, $caller, $fs) {
+        global $USER, $DB;
+
+        // Check if caller has feedback files
+        if (!method_exists($caller, 'get_feedback_files')) {
+            return;
+        }
+
+        $feedbackfiles = $caller->get_feedback_files();
+
+        if (empty($feedbackfiles)) {
+            return;
+        }
+
+        // Create a comment entry to hold the feedback files
+        $comment = new stdClass();
+        $comment->itemid = $itemid;
+        $comment->userid = $USER->id;
+        $comment->entry = get_string('feedbackfromteacher', 'block_exaport');
+        $comment->timemodified = time();
+
+        $comment->id = $DB->insert_record('block_exaportitemcomm', $comment);
+
+        // Save each feedback file to the comment
+        $filerecordbase = new stdClass();
+        $filerecordbase->contextid = context_system::instance()->id;
+        $filerecordbase->component = 'block_exaport';
+        $filerecordbase->filearea = 'item_comment_file';
+        $filerecordbase->itemid = $comment->id;
+
+        foreach ($feedbackfiles as $feedbackfile) {
+            $fs->create_file_from_storedfile($filerecordbase, $feedbackfile);
         }
     }
 

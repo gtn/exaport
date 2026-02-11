@@ -110,12 +110,16 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
     protected function save_feedback_files($itemid, $caller, $fs) {
         global $USER, $DB;
 
-        // Check if caller has feedback files
-        if (!method_exists($caller, 'get_feedback_files')) {
-            return;
+        // Try to get feedback files from the caller
+        $feedbackfiles = array();
+        
+        // Check if caller has the get_feedback_files method (our custom caller)
+        if (method_exists($caller, 'get_feedback_files')) {
+            $feedbackfiles = $caller->get_feedback_files();
+        } else {
+            // Try to fetch feedback files directly from assignment context
+            $feedbackfiles = $this->get_feedback_files_from_context($caller);
         }
-
-        $feedbackfiles = $caller->get_feedback_files();
 
         if (empty($feedbackfiles)) {
             return;
@@ -140,6 +144,65 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
         foreach ($feedbackfiles as $feedbackfile) {
             $fs->create_file_from_storedfile($filerecordbase, $feedbackfile);
         }
+    }
+
+    /**
+     * Get feedback files from assignment context
+     * 
+     * This method attempts to extract assignment information from the portfolio caller
+     * and fetch feedback files directly.
+     *
+     * @param object $caller The portfolio caller object
+     * @return array Array of stored_file objects
+     */
+    protected function get_feedback_files_from_context($caller) {
+        global $USER, $DB;
+
+        $feedbackfiles = array();
+
+        try {
+            // Try to get course module from the caller
+            $cm = null;
+            
+            // Check different ways to get the course module
+            if (method_exists($caller, 'get_course_module')) {
+                $cm = $caller->get_course_module();
+            } else if (isset($caller->cm)) {
+                $cm = $caller->cm;
+            } else if (method_exists($caller, 'get') && $caller->get('cmid')) {
+                $cm = get_coursemodule_from_id('assign', $caller->get('cmid'));
+            }
+
+            if (!$cm || $cm->modname !== 'assign') {
+                return $feedbackfiles;
+            }
+
+            $context = context_module::instance($cm->id);
+            $fs = get_file_storage();
+
+            // Get the grade record for this assignment
+            $grade = $DB->get_record('assign_grades',
+                array('assignment' => $cm->instance, 'userid' => $USER->id),
+                '*', IGNORE_MULTIPLE);
+
+            if ($grade) {
+                // Check if assignfeedback_file plugin is being used
+                $feedbackfilerecord = $DB->get_record('assignfeedback_file',
+                    array('assignment' => $cm->instance, 'grade' => $grade->id));
+
+                if ($feedbackfilerecord) {
+                    // Get feedback files from the file storage
+                    $feedbackfiles = $fs->get_area_files($context->id,
+                        'assignfeedback_file', 'feedback_files',
+                        $grade->id, "filename", false);
+                }
+            }
+        } catch (Exception $e) {
+            // Gracefully handle errors - don't break export if feedback fetch fails
+            debugging('Error fetching feedback files from context: ' . $e->getMessage(), DEBUG_NORMAL);
+        }
+
+        return $feedbackfiles;
     }
 
     public function get_interactive_continue_url() {

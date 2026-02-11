@@ -1,17 +1,20 @@
 # Teacher Feedback Files in Assignment Export
 
 ## Overview
-This feature enables students to export assignment submissions from Moodle Assignments to Exaport while preserving teacher feedback files. When a student imports an assignment submission into their portfolio, any feedback files provided by the teacher are automatically included as comments on the portfolio item.
+This feature enables students to export assignment submissions from Moodle Assignments to Exaport while preserving teacher feedback files. When a student imports an assignment submission into their portfolio (either through direct import or the portfolio export button), any feedback files provided by the teacher are automatically included as comments on the portfolio item.
 
 ## Feature Details
 
 ### What's New
 - **Automatic Feedback File Import**: When importing assignment submissions, teacher feedback files are now automatically retrieved and saved
+- **Two Export Paths Supported**: Works with both direct import and portfolio export button
 - **Feedback as Comments**: Feedback files are stored as comments on the portfolio item with the label "Feedback from teacher"
 - **Multiple Files Support**: Handles multiple feedback files from teachers
 - **Graceful Handling**: Works seamlessly whether feedback files exist or not
 
 ### User Experience
+
+#### Method 1: Direct Import from Exaport
 1. Student submits assignment in Moodle
 2. Teacher provides feedback including file attachments (e.g., annotated PDFs, marking rubrics)
 3. Student navigates to Exaport and imports the assignment submission
@@ -19,28 +22,62 @@ This feature enables students to export assignment submissions from Moodle Assig
    - Original submission files (existing behavior)
    - Teacher feedback files as a comment (new feature)
 
+#### Method 2: Export to Portfolio Button
+1. Student submits assignment in Moodle
+2. Teacher provides feedback including file attachments
+3. Student clicks "Export to portfolio" button directly from the assignment view
+4. The portfolio item is created with:
+   - Original submission files (existing behavior)
+   - Teacher feedback files as a comment (new feature)
+
 ## Technical Implementation
 
 ### Modified Files
-- `import_moodle_add_file.php`: Main import handler
+- `import_moodle_add_file.php`: Direct import handler
   - Added `get_assignment_feedback_files()` function
   - Modified `do_add()` function to save feedback files
+- `lib/portfolio_plugin/lib.php`: Portfolio export handler
+  - Added `save_feedback_files()` method
+  - Added `get_feedback_files_from_context()` method
+  - Integrated feedback file retrieval in `send_package()` method
+- `locallib.php`: Portfolio caller for assignment exports
+  - Added `exaport_portfolio_caller` class
+  - Implemented `get_feedback_files_for_export()` method
+  - Provides `get_feedback_files()` method for plugin
 - `lang/en/block_exaport.php`: Language strings
   - Added `feedbackfromteacher` string
 
 ### How It Works
 
-#### 1. Feedback File Retrieval (`get_assignment_feedback_files()`)
-- Retrieves feedback files from Moodle's assignment grading system
-- Uses the `assignfeedback_file` component with `feedback_files` filearea
-- Accesses files via the grade record (not submission record)
-- Only supports modern assign module (Moodle 2.3+)
+#### Direct Import Path (import_moodle_add_file.php)
 
-#### 2. Feedback File Storage
-- Creates a comment entry in `block_exaportitemcomm` table
-- Saves files to the `item_comment_file` filearea
-- Links files to the comment using Moodle's file API
-- Uses system context for file storage
+1. **Feedback File Retrieval** (`get_assignment_feedback_files()`)
+   - Retrieves feedback files from Moodle's assignment grading system
+   - Uses the `assignfeedback_file` component with `feedback_files` filearea
+   - Accesses files via the grade record (not submission record)
+   - Only supports modern assign module (Moodle 2.3+)
+
+2. **Feedback File Storage**
+   - Creates a comment entry in `block_exaportitemcomm` table
+   - Saves files to the `item_comment_file` filearea
+   - Links files to the comment using Moodle's file API
+   - Uses system context for file storage
+
+#### Portfolio Export Path (lib/portfolio_plugin/lib.php)
+
+1. **Export Initiation**
+   - User clicks "Export to portfolio" in assignment view
+   - Moodle's portfolio system calls `portfolio_plugin_exaport::send_package()`
+   
+2. **Feedback File Retrieval** (`get_feedback_files_from_context()`)
+   - Attempts to extract course module information from portfolio caller
+   - Queries assignment grading tables for feedback files
+   - Falls back gracefully if caller doesn't provide needed information
+
+3. **Feedback File Storage** (`save_feedback_files()`)
+   - Creates comment entry on portfolio item
+   - Copies all feedback files to comment file area
+   - Handles both custom and standard portfolio callers
 
 ### Database Queries
 The implementation queries the following Moodle tables:
@@ -49,8 +86,10 @@ The implementation queries the following Moodle tables:
 - `files`: To retrieve the actual feedback file objects (via Moodle file API)
 
 ### Code Flow
+
+#### Direct Import Flow
 ```
-User imports assignment submission
+User imports assignment submission via Exaport
   ↓
 do_add() creates portfolio item
   ↓
@@ -61,6 +100,25 @@ If feedback files exist:
   - Copy each feedback file to comment's file area
   ↓
 Portfolio item created with submission and feedback
+```
+
+#### Portfolio Export Flow
+```
+User clicks "Export to portfolio" in assignment
+  ↓
+Moodle calls portfolio_plugin_exaport::send_package()
+  ↓
+For each submission file:
+  - Create portfolio item
+  - Call save_feedback_files()
+    ↓
+    get_feedback_files_from_context() or caller->get_feedback_files()
+    ↓
+    If feedback files exist:
+      - Create comment with "Feedback from teacher" text
+      - Copy each feedback file to comment's file area
+  ↓
+Portfolio items created with submission and feedback
 ```
 
 ## Edge Cases Handled
@@ -84,16 +142,14 @@ Portfolio item created with submission and feedback
 
 ## Limitations
 
-### Portfolio Plugin Export
-The generic portfolio export mechanism (when clicking "Export to portfolio" from assignment view) does not currently support feedback files. This would require:
-- Access to assignment context from the portfolio exporter
-- Ability to identify the source module and retrieve associated data
-- This could be a future enhancement
-
 ### Feedback Types
 - Only file-based feedback is imported
 - Text feedback, inline comments, and rubric grades are not imported
 - These are stored differently in Moodle and would require separate implementation
+
+### Legacy Assignments
+- Legacy assignment module (pre-Moodle 2.3) is not fully supported for feedback files in portfolio export
+- Direct import path supports modern assign module only
 
 ## Security Considerations
 
@@ -110,7 +166,11 @@ The generic portfolio export mechanism (when clicking "Export to portfolio" from
 ## Testing Recommendations
 
 ### Manual Testing Scenarios
-1. **Basic Case**: Import assignment with feedback files
+
+#### Direct Import Path Testing
+1. **Basic Case**: Import assignment with feedback files via Exaport import
+   - Navigate to Exaport > Import from Moodle
+   - Select assignment with feedback files
    - Verify files appear as comment on portfolio item
    - Verify files are downloadable
 
@@ -122,26 +182,48 @@ The generic portfolio export mechanism (when clicking "Export to portfolio" from
    - Verify all files are included
    - Verify each file is accessible
 
-4. **Large Files**: Import assignment with large feedback files
-   - Verify import completes successfully
+#### Portfolio Export Path Testing
+1. **Export Button**: Use "Export to portfolio" from assignment
+   - Navigate to assignment with feedback files
+   - Click "Export to portfolio" button
+   - Select Exaport as destination
+   - Complete export process
+   - Verify portfolio item includes feedback files as comment
+
+2. **No Feedback**: Export assignment without feedback via export button
+   - Verify export succeeds without errors
+   - Verify no empty comment is created
+
+3. **Multiple Submissions**: Export multiple assignment files
+   - Verify each file gets its own portfolio item
+   - Verify feedback is attached to all relevant items
+
+#### General Testing
+4. **Large Files**: Test with large feedback files (both paths)
+   - Verify import/export completes successfully
    - Verify file integrity
+
+5. **Different File Types**: Test various feedback file types
+   - PDFs, images, documents, etc.
+   - Verify all file types are handled correctly
 
 ### Automated Testing
 Currently, no automated tests exist for this feature. Recommended test cases:
 - Mock assignment submission with feedback files
-- Test feedback file retrieval
+- Test feedback file retrieval for both paths
 - Test comment creation
 - Test file storage
 - Test error handling
+- Test portfolio caller integration
 
 ## Future Enhancements
 
 ### Potential Improvements
-1. **Portfolio Plugin Support**: Enable feedback files in generic portfolio export
-2. **Feedback Text**: Include text feedback in the comment
-3. **Inline Annotations**: Import inline comments if available
-4. **Rubric Feedback**: Include rubric feedback in portfolio item
-5. **Legacy Support**: Add feedback file support for legacy assignments
+1. **Feedback Text**: Include text feedback in the comment (in addition to files)
+2. **Inline Annotations**: Import inline comments if available
+3. **Rubric Feedback**: Include rubric feedback in portfolio item
+4. **Legacy Support**: Add feedback file support for legacy assignments
+5. **Bulk Export**: Optimize feedback retrieval for bulk exports
 
 ### Configuration Options
 Future versions could include:

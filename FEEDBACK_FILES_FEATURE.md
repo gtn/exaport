@@ -1,7 +1,7 @@
 # Teacher Feedback Files in Assignment Export
 
 ## Overview
-This feature enables students to export assignment submissions from Moodle Assignments to Exaport while preserving teacher feedback files. When a student imports an assignment submission into their portfolio (either through direct import or the portfolio export button), any feedback files provided by the teacher are automatically included as comments on the portfolio item.
+This feature enables students to export assignment submissions from Moodle Assignments to Exaport while preserving teacher feedback files. Whether importing through Exaport's direct import or using the portfolio export button, any feedback files provided by the teacher are automatically included as comments on the portfolio item.
 
 ## Feature Details
 

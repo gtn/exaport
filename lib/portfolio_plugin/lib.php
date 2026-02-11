@@ -169,11 +169,14 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
                 $cm = $caller->get_course_module();
             } else if (isset($caller->cm)) {
                 $cm = $caller->cm;
-            } else if (method_exists($caller, 'get') && $caller->get('cmid')) {
-                $cm = get_coursemodule_from_id('assign', $caller->get('cmid'));
+            } else if (method_exists($caller, 'get')) {
+                $cmid = $caller->get('cmid');
+                if ($cmid) {
+                    $cm = get_coursemodule_from_id('assign', $cmid);
+                }
             }
 
-            if (!$cm || $cm->modname !== 'assign') {
+            if (!$cm || !isset($cm->modname) || $cm->modname !== 'assign') {
                 return $feedbackfiles;
             }
 
@@ -194,7 +197,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
                     // Get feedback files from the file storage
                     $feedbackfiles = $fs->get_area_files($context->id,
                         'assignfeedback_file', 'feedback_files',
-                        $grade->id, "filename", false);
+                        $grade->id, 'filename', false);
                 }
             }
         } catch (Exception $e) {

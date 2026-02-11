@@ -257,7 +257,10 @@ function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile, 
         }
     }
 
-    // Get and save feedback files from the assignment
+    // Get and save feedback files from the assignment.
+    // Note: This feature automatically retrieves teacher feedback files and stores them
+    // as comments on the portfolio item. The implementation handles multiple feedback files
+    // and gracefully handles cases where no feedback exists.
     $feedbackfiles = get_assignment_feedback_files($cm, $assignment);
 
     if (!empty($feedbackfiles)) {
@@ -330,6 +333,8 @@ function get_assignment_feedback_files($cm, $assignment) {
     if ($modassign->new) {
         // Get the grade record for this submission
         // The feedback files are linked to the grade, not the submission directly
+        // IGNORE_MULTIPLE: If there are multiple grades (e.g., multiple attempts or regrades),
+        // we take the first one which is typically the most recent or active grade record
         $grade = $DB->get_record('assign_grades',
             array('assignment' => $assignment->assignment, 'userid' => $USER->id),
             '*', IGNORE_MULTIPLE);

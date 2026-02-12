@@ -918,12 +918,18 @@ function block_exaport_get_assignments_for_import($modassign) {
                 a.name,
                 a.course,
                 c.fullname AS coursename,
-                CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END AS has_submission
+                CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END AS has_submission,
+                CASE WHEN sf.id IS NOT NULL THEN 1 ELSE 0 END AS has_file,
+                CASE WHEN sot.id IS NOT NULL THEN 1 ELSE 0 END AS has_onlinetext
             FROM {assign} a
             LEFT JOIN {assign_submission} s
                 ON s.assignment = a.id
                 AND s.userid = ?
                 AND s.status = 'submitted'
+            LEFT JOIN {assignsubmission_file} sf
+                ON sf.submission = s.id
+            LEFT JOIN {assignsubmission_onlinetext} sot
+                ON sot.submission = s.id
             LEFT JOIN {assign_grades} ag
                 ON ag.assignment = a.id
                 AND ag.userid = ?
@@ -2602,9 +2608,10 @@ function block_exaport_get_my_views() {
  * @param stored_file|null $file Optional submission file to attach
  * @param int $categoryid Category ID for the artifact (default: 0 = main)
  * @param int $courseid Course ID
+ * @param string|null $onlinetext Optional online text content
  * @return int The created item ID
  */
-function block_exaport_create_item_from_assignment($assignment, $file = null, $categoryid = 0, $courseid = 0) {
+function block_exaport_create_item_from_assignment($assignment, $file = null, $categoryid = 0, $courseid = 0, $onlinetext = null) {
     global $USER, $DB;
 
     $fs = get_file_storage();
@@ -2614,7 +2621,7 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
     $item->userid = $USER->id;
     $item->name = $assignment->name; // Use assignment name, not filename
     $item->type = $file ? 'file' : 'note'; // file if submission exists, otherwise note
-    $item->intro = '';
+    $item->intro = $onlinetext ? $onlinetext : ''; // Use online text if provided
     $item->categoryid = $categoryid;
     $item->courseid = $courseid;
     $item->timemodified = time();

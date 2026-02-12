@@ -40,7 +40,7 @@ $modassign = block_exaport_assignmentversion();
 $assignments = block_exaport_get_assignments_for_import($modassign);
 
 $table = new html_table();
-$table->head = array(get_string("modulename", $modassign->title), get_string("time"), get_string("file"),
+$table->head = array(get_string("modulename", $modassign->title), get_string("time"), get_string("fileortext", "block_exaport"),
     get_string("course", "block_exaport"), get_string("action"));
 $table->align = array("LEFT", "LEFT", "LEFT", "LEFT", "RIGHT");
 $table->size = array("20%", "20%", "25%", "20%", "15%");
@@ -58,24 +58,51 @@ if ($assignments) {
         
         // Check if this assignment has a submission
         $hassubmission = isset($assignment->has_submission) ? $assignment->has_submission : true;
+        $hasfile = isset($assignment->has_file) ? $assignment->has_file : false;
+        $hasonlinetext = isset($assignment->has_onlinetext) ? $assignment->has_onlinetext : false;
         
         if ($hassubmission && $assignment->submissionid > 0) {
-            // Assignment has submission files
-            $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid,
-                "filename", false);
+            // Assignment has submission - check for files first
+            if ($hasfile) {
+                $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid,
+                    "filename", false);
 
-            foreach ($files as $file) {
-                $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-                $filename = $file->get_filename();
-                $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
-                    $file->get_itemid(), $file->get_filepath(), $file->get_filename())->out();
+                foreach ($files as $file) {
+                    $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+                    $filename = $file->get_filename();
+                    $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+                        $file->get_itemid(), $file->get_filepath(), $file->get_filename())->out();
 
-                $button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
-                    '&amp;submissionid=' . $assignment->submissionid . '&amp;fileid=' . $file->get_pathnamehash() . '">' .
-                    get_string("add_this_file", "block_exaport") . '</a>';
+                    $button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
+                        '&amp;submissionid=' . $assignment->submissionid . '&amp;fileid=' . $file->get_pathnamehash() . '">' .
+                        get_string("add_this_file", "block_exaport") . '</a>';
 
-                $table->data[] = array($assignment->name, userdate($assignment->timemodified), $icon .
-                    ' <a href="' . s($url) . '" >' . $filename . '</a><br />', $assignment->coursename, $button);
+                    $table->data[] = array($assignment->name, userdate($assignment->timemodified), $icon .
+                        ' <a href="' . s($url) . '" >' . $filename . '</a><br />', $assignment->coursename, $button);
+                }
+            }
+            
+            // Check for online text submission
+            if ($hasonlinetext) {
+                $onlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
+                if ($onlinetext && !empty($onlinetext->onlinetext)) {
+                    $icon = $OUTPUT->pix_icon('i/edit', get_string('onlinetext', 'block_exaport'));
+                    // Get preview of text (first 100 chars)
+                    $textpreview = format_text($onlinetext->onlinetext, $onlinetext->onlineformat);
+                    $textpreview = strip_tags($textpreview);
+                    $textpreview = core_text::substr($textpreview, 0, 100);
+                    if (core_text::strlen($textpreview) == 100) {
+                        $textpreview .= '...';
+                    }
+                    
+                    $button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
+                        '&amp;submissionid=' . $assignment->submissionid . '&amp;onlinetext=1">' .
+                        get_string("add_this_file", "block_exaport") . '</a>';
+
+                    $table->data[] = array($assignment->name, userdate($assignment->timemodified), 
+                        $icon . ' ' . get_string('onlinetext', 'block_exaport') . ': ' . s($textpreview), 
+                        $assignment->coursename, $button);
+                }
             }
         } else {
             // Assignment has no submission but has feedback - show as importable

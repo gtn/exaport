@@ -25,6 +25,7 @@ $fileid = optional_param('fileid', '', PARAM_FILE);
 $submissionid = optional_param('submissionid', 0, PARAM_INT);
 $aid = optional_param('aid', 0, PARAM_INT); // Assignment ID for no-submission case
 $nosubmission = optional_param('nosubmission', 0, PARAM_INT); // Flag for no submission
+$onlinetext = optional_param('onlinetext', 0, PARAM_INT); // Flag for online text submission
 
 $modassign = block_exaport_assignmentversion();
 
@@ -40,8 +41,20 @@ if ($nosubmission && $aid) {
     } else {
         print_error('Legacy assignments not supported for no-submission import');
     }
+} else if ($onlinetext && $submissionid) {
+    // Online text case - get assignment from submission
+    if ($modassign->new) {
+        $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
+            " a.name, a.course, c.fullname AS coursename " .
+            " FROM {assign_submission} s " .
+            " INNER JOIN {assign} a ON s.assignment=a.id " .
+            " LEFT JOIN {course} c on a.course = c.id " .
+            " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+    } else {
+        print_error('Legacy assignments not supported for online text import');
+    }
 } else {
-    // Normal case - get from submission
+    // Normal case - get from submission with file
     if ($modassign->new) {
         $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
             " a.name, a.course, c.fullname AS coursename " .
@@ -71,6 +84,7 @@ if (!$cm) {
 
 $post = new stdClass();
 $checkedfile = null;
+$checkedonlinetext = null;
 $action = 'add';
 
 $context = context_system::instance();
@@ -93,8 +107,15 @@ if ($submissionid == 0 && !$nosubmission) {
     error("No assignment given!");
 }
 
-// Check for submission file if not no-submission case
-if (!$nosubmission) {
+// Check for submission content
+if ($onlinetext && !$nosubmission) {
+    // Get online text submission
+    $checkedonlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
+    if (!$checkedonlinetext || empty($checkedonlinetext->onlinetext)) {
+        print_error("invalidonlinetextatthisassignment", "block_exaport");
+    }
+} else if (!$nosubmission) {
+    // Check for submission file if not no-submission case
     if (!($checkedfile = check_assignment_file($cm, $assignment, $fileid))) {
         print_error("invalidfileatthisassignment", "block_exaport");
     }
@@ -145,12 +166,15 @@ if ($action == 'add') {
     }
     $existing->action = $action;
     $existing->courseid = $courseid;
-    $existing->type = $nosubmission ? 'note' : 'file';
+    $existing->type = ($nosubmission || $onlinetext) ? 'note' : 'file';
     $existing->dir = "";
     $existing->name = $assignment->name; // Use assignment name
     $existing->categoryid = "";
     $existing->intro = "";
     $existing->filename = $checkedfile ? $checkedfile->get_filename() : '';
+    if ($checkedonlinetext) {
+        $existing->intro = format_text($checkedonlinetext->onlinetext, $checkedonlinetext->onlineformat);
+    }
     $existing->submission = $submissionid;
     if (!empty($cm->id)) {
         $existing->activityid = $cm->id;
@@ -171,7 +195,7 @@ if ($exteditform->is_cancelled()) {
 
     switch ($action) {
         case 'add':
-            do_add($cm, $fromform, $exteditform, $returnurl, $courseid, $checkedfile, $assignment);
+            do_add($cm, $fromform, $exteditform, $returnurl, $courseid, $checkedfile, $assignment, $checkedonlinetext);
             break;
 
         case 'edit':
@@ -211,6 +235,9 @@ echo "<div class='block_eportfolio_center'>\n";
 
 if ($checkedfile) {
     echo $OUTPUT->box(block_exaport_print_file($checkedfile));
+} else if ($checkedonlinetext) {
+    $textcontent = format_text($checkedonlinetext->onlinetext, $checkedonlinetext->onlineformat);
+    echo $OUTPUT->box('<h4>' . get_string('onlinetext', 'block_exaport') . '</h4>' . $textcontent);
 } else {
     echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
 }
@@ -242,11 +269,17 @@ function do_edit($post, $blogeditform, $returnurl, $courseid) {
 /**
  * Write a new item from assignment into database using shared function
  */
-function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile, $assignment) {
+function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile, $assignment, $onlinetextobj = null) {
     global $CFG, $USER, $DB, $COURSE;
 
+    // Prepare online text if available
+    $onlinetext = null;
+    if ($onlinetextobj && !empty($onlinetextobj->onlinetext)) {
+        $onlinetext = format_text($onlinetextobj->onlinetext, $onlinetextobj->onlineformat);
+    }
+
     // Use the shared function to create item with feedback
-    $itemid = block_exaport_create_item_from_assignment($assignment, $checkedfile, $post->categoryid, $courseid);
+    $itemid = block_exaport_create_item_from_assignment($assignment, $checkedfile, $post->categoryid, $courseid, $onlinetext);
 
     block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'import_moodle_add_file.php?courseid=' . $courseid . '&id=' . $itemid,
         $assignment->name);

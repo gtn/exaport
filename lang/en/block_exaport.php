@@ -874,3 +874,7 @@ $string['feedbackfromteacher'] = 'Feedback from teacher';
 $string['add_this_assignment'] = 'Add this assignment';
 $string['nosubmissionfile'] = 'No submission file';
 $string['teacher'] = 'Teacher';
+$string['onlinetext'] = 'Online text';
+$string['fileortext'] = 'File/Text';
+$string['textpreview'] = 'Text preview';
+$string['invalidonlinetextatthisassignment'] = 'Invalid online text at this assignment!';

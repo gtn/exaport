@@ -114,12 +114,14 @@ if ($onlinetext && !$nosubmission) {
     if (!$checkedonlinetext || empty($checkedonlinetext->onlinetext)) {
         print_error("invalidonlinetextatthisassignment", "block_exaport");
     }
-} else if (!$nosubmission) {
-    // Check for submission file if not no-submission case
+} else if (!$nosubmission && !empty($fileid)) {
+    // Check for submission file only if fileid is provided
     if (!($checkedfile = check_assignment_file($cm, $assignment, $fileid))) {
         print_error("invalidfileatthisassignment", "block_exaport");
     }
 }
+// If no fileid and no onlinetext flag, we might have a submission without files/text
+// This is OK - we'll create artifact with just the assignment name
 
 if ($id) {
     $conditions = array("id" => $id, "userid" => $USER->id);
@@ -218,6 +220,7 @@ switch ($action) {
         $post->courseid = $courseid;
         $post->submissionid = $submissionid;
         $post->fileid = $fileid;
+        $post->name = $assignment->name; // Prefill the title with assignment name
         $straction = get_string('new');
         break;
     default :

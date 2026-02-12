@@ -2784,14 +2784,32 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
 
     // Only create comment if there's feedback text or files
     if (($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) || !empty($feedbackfiles)) {
-        // Get teacher information
-        $teacher = $DB->get_record('user', array('id' => $grade->grader), 'id, firstname, lastname');
-        $teachername = $teacher ? fullname($teacher) : get_string('teacher', 'block_exaport');
+        // Check if grader identity should be hidden (blindmarking setting)
+        // Use assign API to respect all privacy settings
+        $showgrader = true;
+        
+        // Check if blindmarking is enabled and student can't see hidden grader
+        if ($assign->is_blind_marking()) {
+            // When blindmarking is enabled, check if student has permission to see grader
+            $showgrader = has_capability('mod/assign:showhiddengrader', $context, $USER->id);
+        }
+        
+        // Determine grader name and userid for comment
+        if ($showgrader && $grade->grader) {
+            // Get teacher information only if allowed to see grader identity
+            $teacher = $DB->get_record('user', array('id' => $grade->grader), 'id, firstname, lastname');
+            $teachername = $teacher ? fullname($teacher) : get_string('teacher', 'block_exaport');
+            $commentuserid = $grade->grader; // Use teacher's ID
+        } else {
+            // Use anonymous grader name
+            $teachername = get_string('hiddengrader', 'block_exaport');
+            $commentuserid = $USER->id; // Use student's ID to avoid exposing grader
+        }
 
         // Create comment entry
         $comment = new stdClass();
         $comment->itemid = $itemid;
-        $comment->userid = $grade->grader; // Use teacher's ID, not student's
+        $comment->userid = $commentuserid;
         $comment->timemodified = time();
 
         // Build comment text

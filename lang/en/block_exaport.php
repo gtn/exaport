@@ -884,3 +884,4 @@ $string['modulebeingdeleted'] = 'This module is being deleted';
 $string['notenrolled'] = 'You are not enrolled in this course';
 $string['invalidmodule'] = 'Invalid module type';
 $string['invalidassignment'] = 'Invalid assignment';
+$string['hiddengrader'] = 'Hidden grader';

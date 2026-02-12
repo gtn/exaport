@@ -2796,7 +2796,7 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
         
         // Determine grader userid for comment
         // Use special value -1 to indicate hidden grader (avoids exposing real userid)
-        if ($showgrader && $grade->grader) {
+        if ($showgrader && !empty($grade->grader)) {
             $commentuserid = $grade->grader; // Use teacher's real ID
         } else {
             // Use -1 to indicate grader identity is hidden
@@ -2847,15 +2847,16 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
 function block_exaport_get_comment_author_name($userid, $viewerid = null) {
     global $DB;
     
-    // Check for hidden grader marker
-    if ($userid == -1) {
+    // Check for hidden grader marker (use strict comparison)
+    if ($userid === -1) {
         return get_string('hiddengrader', 'block_exaport');
     }
     
     // Get user record and return full name
     $user = $DB->get_record('user', array('id' => $userid));
     if ($user) {
-        return fullname($user);
+        // Pass viewerid to respect privacy capabilities
+        return fullname($user, $viewerid);
     }
     
     // Fallback if user not found

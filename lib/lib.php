@@ -908,14 +908,28 @@ function block_exaport_assignmentversion() {
 function block_exaport_get_assignments_for_import($modassign) {
     global $USER, $DB;
     if ($modassign->new) {
-        $assignments = $DB->get_records_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified," .
-            " a.name, a.course, c.fullname AS coursename" .
-            " FROM {assignsubmission_file} sf " .
-            " INNER JOIN {assign_submission} s ON sf.submission=s.id " .
-            " INNER JOIN {assign} a ON s.assignment=a.id " .
-            " LEFT JOIN {course} c on a.course = c.id " .
-            " WHERE s.userid=?", array($USER->id));
+        // Get assignments with submissions OR with grades (teacher feedback)
+        // This includes cases where teacher provided feedback without student submission
+        $assignments = $DB->get_records_sql("
+            SELECT DISTINCT 
+                COALESCE(s.id, ag.id * -1) AS submissionid,
+                a.id AS aid, 
+                a.id AS assignment,
+                COALESCE(s.timemodified, ag.timemodified) AS timemodified,
+                a.name, 
+                a.course, 
+                c.fullname AS coursename,
+                CASE WHEN s.id IS NULL THEN 0 ELSE 1 END AS has_submission
+            FROM {assign} a
+            LEFT JOIN {assign_submission} s ON s.assignment = a.id AND s.userid = ?
+            LEFT JOIN {assignsubmission_file} sf ON sf.submission = s.id
+            LEFT JOIN {assign_grades} ag ON ag.assignment = a.id AND ag.userid = ?
+            LEFT JOIN {course} c ON a.course = c.id
+            WHERE (sf.id IS NOT NULL OR ag.id IS NOT NULL)
+            ORDER BY timemodified DESC
+        ", array($USER->id, $USER->id));
     } else {
+        // Legacy assignments - keep existing behavior
         $assignments = $DB->get_records_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified," .
             " a.name, a.course, a.assignmenttype, c.fullname AS coursename " .
             " FROM {assignment_submissions} s " .
@@ -2571,4 +2585,148 @@ function block_exaport_get_my_views() {
     $views = $DB->get_records_sql($query, array($USER->id));
 
     return $views;
+}
+
+/**
+ * Create a portfolio artifact from an assignment with feedback
+ * 
+ * This is the shared function used by both import paths (direct import and portfolio export)
+ * to create portfolio artifacts from Moodle assignments with teacher feedback.
+ *
+ * @param object $assignment Assignment data with properties: aid, assignment, name, coursename
+ * @param stored_file|null $file Optional submission file to attach
+ * @param int $categoryid Category ID for the artifact (default: 0 = main)
+ * @param int $courseid Course ID
+ * @return int The created item ID
+ */
+function block_exaport_create_item_from_assignment($assignment, $file = null, $categoryid = 0, $courseid = 0) {
+    global $USER, $DB;
+
+    $fs = get_file_storage();
+    
+    // Create the portfolio item using assignment name
+    $item = new stdClass();
+    $item->userid = $USER->id;
+    $item->name = $assignment->name; // Use assignment name, not filename
+    $item->type = $file ? 'file' : 'note'; // file if submission exists, otherwise note
+    $item->intro = '';
+    $item->categoryid = $categoryid;
+    $item->courseid = $courseid;
+    $item->timemodified = time();
+    $item->attachment = $file ? $file->get_itemid() : '';
+
+    // Insert the item
+    $item->id = $DB->insert_record('block_exaportitem', $item);
+
+    // Save submission file if provided
+    if ($file) {
+        $filerecord = new stdClass();
+        $filerecord->contextid = context_user::instance($USER->id)->id;
+        $filerecord->component = 'block_exaport';
+        $filerecord->filearea = 'item_file';
+        $filerecord->itemid = $item->id;
+        $fs->create_file_from_storedfile($filerecord, $file);
+    }
+
+    // Get course module
+    $modassign = block_exaport_assignmentversion();
+    $cm = get_coursemodule_from_instance($modassign->title, $assignment->aid);
+    
+    if ($cm) {
+        // Add competences if applicable
+        if (block_exaport_check_competence_interaction()) {
+            $comps = $DB->get_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $cm->id));
+            foreach ($comps as $comp) {
+                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
+                    array("activityid" => $item->id, "eportfolioitem" => 1, "compid" => $comp->descrid,
+                        "activitytitle" => $item->name, "coursetitle" => $assignment->coursename ?? ''));
+            }
+        }
+
+        // Add teacher feedback (both comment text and files)
+        block_exaport_add_teacher_feedback_to_item($item->id, $cm, $assignment->assignment);
+    }
+
+    return $item->id;
+}
+
+/**
+ * Add teacher feedback (comment text and files) to a portfolio item
+ * 
+ * This function retrieves feedback from the teacher (grader) and adds it as a comment
+ * on the portfolio item. It handles both feedback comment text and feedback files.
+ *
+ * @param int $itemid The portfolio item ID
+ * @param object $cm Course module object
+ * @param int $assignmentid The assignment ID
+ */
+function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid) {
+    global $USER, $DB;
+
+    $modassign = block_exaport_assignmentversion();
+    if (!$modassign->new) {
+        // Legacy assignments not supported for feedback
+        return;
+    }
+
+    $context = context_module::instance($cm->id);
+    $fs = get_file_storage();
+
+    // Get the grade record for this assignment and user
+    $grade = $DB->get_record('assign_grades',
+        array('assignment' => $assignmentid, 'userid' => $USER->id),
+        '*', IGNORE_MULTIPLE);
+
+    if (!$grade) {
+        return; // No grade/feedback
+    }
+
+    // Get feedback comment text
+    $feedbackcomment = $DB->get_record('assignfeedback_comments',
+        array('assignment' => $assignmentid, 'grade' => $grade->id));
+
+    // Get feedback files
+    $feedbackfilerecord = $DB->get_record('assignfeedback_file',
+        array('assignment' => $assignmentid, 'grade' => $grade->id));
+
+    $feedbackfiles = array();
+    if ($feedbackfilerecord) {
+        $feedbackfiles = $fs->get_area_files($context->id, 'assignfeedback_file', 'feedback_files',
+            $grade->id, 'filename', false);
+    }
+
+    // Only create comment if there's feedback text or files
+    if (($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) || !empty($feedbackfiles)) {
+        // Get teacher information
+        $teacher = $DB->get_record('user', array('id' => $grade->grader), 'id, firstname, lastname');
+        $teachername = $teacher ? fullname($teacher) : get_string('teacher', 'block_exaport');
+
+        // Create comment entry
+        $comment = new stdClass();
+        $comment->itemid = $itemid;
+        $comment->userid = $grade->grader; // Use teacher's ID, not student's
+        $comment->timemodified = time();
+        
+        // Build comment text
+        $commenttext = get_string('feedbackfromteacher', 'block_exaport');
+        if ($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) {
+            $commenttext .= "\n\n" . $feedbackcomment->commenttext;
+        }
+        $comment->entry = $commenttext;
+
+        $comment->id = $DB->insert_record('block_exaportitemcomm', $comment);
+
+        // Save feedback files to the comment
+        if (!empty($feedbackfiles)) {
+            $filerecordbase = new stdClass();
+            $filerecordbase->contextid = context_system::instance()->id;
+            $filerecordbase->component = 'block_exaport';
+            $filerecordbase->filearea = 'item_comment_file';
+            $filerecordbase->itemid = $comment->id;
+
+            foreach ($feedbackfiles as $feedbackfile) {
+                $fs->create_file_from_storedfile($filerecordbase, $feedbackfile);
+            }
+        }
+    }
 }

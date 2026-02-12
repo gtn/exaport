@@ -16,33 +16,58 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
+require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 
 $id = optional_param('id', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $confirm = optional_param('confirm', '', PARAM_BOOL);
 $fileid = optional_param('fileid', '', PARAM_FILE);
 $submissionid = optional_param('submissionid', 0, PARAM_INT);
+$aid = optional_param('aid', 0, PARAM_INT); // Assignment ID for no-submission case
+$nosubmission = optional_param('nosubmission', 0, PARAM_INT); // Flag for no submission
 
 $modassign = block_exaport_assignmentversion();
 
-if ($modassign->new) {
-    $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
-        " a.name, a.course, c.fullname AS coursename " .
-        " FROM {assignsubmission_file} sf " .
-        " INNER JOIN {assign_submission} s ON sf.submission=s.id " .
-        " INNER JOIN {assign} a ON s.assignment=a.id " .
-        " LEFT JOIN {course} c on a.course = c.id " .
-        " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+// Get assignment data
+if ($nosubmission && $aid) {
+    // No submission case - get assignment data directly
+    if ($modassign->new) {
+        $assignment = $DB->get_record_sql("SELECT a.id AS aid, a.id AS assignment, a.name, a.course, c.fullname AS coursename " .
+            " FROM {assign} a " .
+            " LEFT JOIN {course} c on a.course = c.id " .
+            " WHERE a.id=?", array($aid));
+        $assignment->submissionid = 0; // No submission
+    } else {
+        print_error('Legacy assignments not supported for no-submission import');
+    }
 } else {
-    $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
-        " a.name, a.course, a.assignmenttype, c.fullname AS coursename " .
-        " FROM {assignment_submissions} s " .
-        " JOIN {assignment} a ON s.assignment=a.id " .
-        " LEFT JOIN {course} c on a.course = c.id " .
-        " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+    // Normal case - get from submission
+    if ($modassign->new) {
+        $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
+            " a.name, a.course, c.fullname AS coursename " .
+            " FROM {assignsubmission_file} sf " .
+            " INNER JOIN {assign_submission} s ON sf.submission=s.id " .
+            " INNER JOIN {assign} a ON s.assignment=a.id " .
+            " LEFT JOIN {course} c on a.course = c.id " .
+            " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+    } else {
+        $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
+            " a.name, a.course, a.assignmenttype, c.fullname AS coursename " .
+            " FROM {assignment_submissions} s " .
+            " JOIN {assignment} a ON s.assignment=a.id " .
+            " LEFT JOIN {course} c on a.course = c.id " .
+            " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+    }
+}
+
+if (!$assignment) {
+    print_error("invalidassignment", "block_exaport");
 }
 
 $cm = get_coursemodule_from_instance($modassign->title, $assignment->aid);
+if (!$cm) {
+    print_error('invalidcoursemodule');
+}
 
 $post = new stdClass();
 $checkedfile = null;
@@ -64,12 +89,15 @@ if (!block_exaport_has_categories($USER->id)) {
     print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
 }
 
-if ($submissionid == 0) {
+if ($submissionid == 0 && !$nosubmission) {
     error("No assignment given!");
 }
 
-if (!($checkedfile = check_assignment_file($cm, $assignment, $fileid))) {
-    print_error("invalidfileatthisassignment", "block_exaport");
+// Check for submission file if not no-submission case
+if (!$nosubmission) {
+    if (!($checkedfile = check_assignment_file($cm, $assignment, $fileid))) {
+        print_error("invalidfileatthisassignment", "block_exaport");
+    }
 }
 
 if ($id) {
@@ -117,12 +145,12 @@ if ($action == 'add') {
     }
     $existing->action = $action;
     $existing->courseid = $courseid;
-    $existing->type = 'file';
+    $existing->type = $nosubmission ? 'note' : 'file';
     $existing->dir = "";
-    $existing->name = "";
+    $existing->name = $assignment->name; // Use assignment name
     $existing->categoryid = "";
     $existing->intro = "";
-    $existing->filename = $checkedfile->get_filename();
+    $existing->filename = $checkedfile ? $checkedfile->get_filename() : '';
     $existing->submission = $submissionid;
     if (!empty($cm->id)) {
         $existing->activityid = $cm->id;
@@ -181,7 +209,11 @@ $filecontext = context_module::instance($cm->id);
 
 echo "<div class='block_eportfolio_center'>\n";
 
-echo $OUTPUT->box(block_exaport_print_file($checkedfile));
+if ($checkedfile) {
+    echo $OUTPUT->box(block_exaport_print_file($checkedfile));
+} else {
+    echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
+}
 echo "</div>";
 
 $exteditform->set_data($post);
@@ -208,82 +240,16 @@ function do_edit($post, $blogeditform, $returnurl, $courseid) {
 }
 
 /**
- * Write a new blog entry into database
+ * Write a new item from assignment into database using shared function
  */
 function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile, $assignment) {
     global $CFG, $USER, $DB, $COURSE;
 
-    $post->userid = $USER->id;
-    $post->timemodified = time();
-    $post->courseid = $courseid;
-    $post->intro = '';
-    $post->type = 'file';
-    $post->attachment = $checkedfile->get_itemid();
+    // Use the shared function to create item with feedback
+    $itemid = block_exaport_create_item_from_assignment($assignment, $checkedfile, $post->categoryid, $courseid);
 
-    // Insert the new blog entry.
-    $post->id = $DB->insert_record('block_exaportitem', $post);
-
-    $textfieldoptions = array('trusttext' => true,
-        'subdirs' => true,
-        'maxfiles' => 99,
-        'context' => context_user::instance($USER->id));
-    $post->introformat = FORMAT_HTML;
-
-    $post = file_postupdate_standard_editor($post, 'intro', $textfieldoptions, context_user::instance($USER->id), 'block_exaport',
-        'item_content', $post->id);
-
-    $filerecord = new stdClass();
-    $context = context_user::instance($USER->id);
-    $filerecord->contextid = $context->id;
-    $filerecord->component = 'block_exaport';
-    $filerecord->filearea = 'item_file';
-    $filerecord->itemid = $post->id;
-
-    $fs = get_file_storage();
-    $fs->create_file_from_storedfile($filerecord, $checkedfile);
-
-    // Insert the new blog entry.
-    $DB->update_record('block_exaportitem', $post);
-
-    if (block_exaport_check_competence_interaction()) {
-
-        // Kompetenzen checken und erneut speichern.
-        // TODO Test if missing activitytype = 1 has influence.
-        $comps = $DB->get_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $cm->id));
-        foreach ($comps as $comp) {
-            $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                array("activityid" => $post->id, "eportfolioitem" => 1, "compid" => $comp->descrid,
-                    "activitytitle" => $post->name, "coursetitle" => $COURSE->shortname));
-        }
-    }
-
-    // Get and save feedback files from the assignment.
-    // Note: This feature automatically retrieves teacher feedback files and stores them
-    // as comments on the portfolio item. The implementation handles multiple feedback files
-    // and gracefully handles cases where no feedback exists.
-    $feedbackfiles = get_assignment_feedback_files($cm, $assignment);
-
-    if (!empty($feedbackfiles)) {
-        // Create a comment entry to hold the feedback files
-        $comment = new stdClass();
-        $comment->itemid = $post->id;
-        $comment->userid = $USER->id;
-        $comment->entry = get_string('feedbackfromteacher', 'block_exaport');
-        $comment->timemodified = time();
-
-        $comment->id = $DB->insert_record('block_exaportitemcomm', $comment);
-
-        // Save each feedback file to the comment
-        $filerecordbase = new stdClass();
-        $filerecordbase->contextid = context_system::instance()->id;
-        $filerecordbase->component = 'block_exaport';
-        $filerecordbase->filearea = 'item_comment_file';
-        $filerecordbase->itemid = $comment->id;
-
-        foreach ($feedbackfiles as $feedbackfile) {
-            $fs->create_file_from_storedfile($filerecordbase, $feedbackfile);
-        }
-    }
+    block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'import_moodle_add_file.php?courseid=' . $courseid . '&id=' . $itemid,
+        $assignment->name);
 }
 
 /**
@@ -311,49 +277,4 @@ function check_assignment_file($cm, $assignment, $fileid) {
         false);
 
     return isset($files[$fileid]) ? $files[$fileid] : null;
-}
-
-/**
- * Get feedback files from an assignment submission
- *
- * @param object $cm Course module object
- * @param object $assignment Assignment data including submissionid
- * @return array Array of stored_file objects representing feedback files
- */
-function get_assignment_feedback_files($cm, $assignment) {
-    global $USER, $DB;
-
-    $modassign = block_exaport_assignmentversion();
-    $context = context_module::instance($cm->id);
-    $fs = get_file_storage();
-
-    $feedbackfiles = array();
-
-    // Only handle new assign module (modern Moodle)
-    if ($modassign->new) {
-        // Get the grade record for this submission
-        // The feedback files are linked to the grade, not the submission directly
-        // IGNORE_MULTIPLE: If there are multiple grades (e.g., multiple attempts or regrades),
-        // we take the first one which is typically the most recent or active grade record
-        $grade = $DB->get_record('assign_grades',
-            array('assignment' => $assignment->assignment, 'userid' => $USER->id),
-            '*', IGNORE_MULTIPLE);
-
-        if ($grade) {
-            // Check if assignfeedback_file plugin is being used
-            $feedbackfilerecord = $DB->get_record('assignfeedback_file',
-                array('assignment' => $assignment->assignment, 'grade' => $grade->id));
-
-            if ($feedbackfilerecord) {
-                // Get feedback files from the file storage
-                // Component: assignfeedback_file, Filearea: feedback_files, Itemid: grade id
-                $feedbackfiles = $fs->get_area_files($context->id, 'assignfeedback_file', 'feedback_files',
-                    $grade->id, "filename", false);
-            }
-        }
-    }
-    // Legacy assignment module doesn't have the same feedback file structure
-    // For simplicity, we'll skip legacy support for feedback files
-
-    return $feedbackfiles;
 }

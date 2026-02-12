@@ -53,115 +53,75 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
     }
 
     public function send_package() {
-        global $USER, $DB;
+        global $USER, $DB, $CFG;
+
+        require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
 
         $files = $this->exporter->get_tempfiles();
-        if (empty($files)) {
-            // Not files, do nothing.
+        $caller = $this->exporter->get('caller');
+
+        // Try to get assignment context from caller
+        $assignment = $this->get_assignment_from_caller($caller);
+
+        if (empty($files) && !$assignment) {
+            // No files and no assignment context, nothing to do
             return;
         }
 
-        $fs = get_file_storage();
-        $caller = $this->exporter->get('caller');
-
-        // Save files to first category, so read that id.
-        // $categoryid = $DB->get_field_sql("SELECT id FROM {block_exaportcate} ".
-        // " WHERE userid = ? ORDER BY name LIMIT 1", array($USER->id));
-        // Save to main category. SZ: 30.09.2020
+        // Save files to main category
         $categoryid = 0;
 
-        foreach ($files as $file) {
+        if ($assignment) {
+            // We have assignment context - use shared function
+            // This handles both submission files and teacher feedback
+            foreach ($files as $file) {
+                $itemid = block_exaport_create_item_from_assignment($assignment, $file, $categoryid, 0);
+                // Store last item for redirect
+                $this->lastitem = $DB->get_record('block_exaportitem', array('id' => $itemid));
+            }
+            
+            // If no files but have assignment (feedback only case)
+            if (empty($files)) {
+                $itemid = block_exaport_create_item_from_assignment($assignment, null, $categoryid, 0);
+                $this->lastitem = $DB->get_record('block_exaportitem', array('id' => $itemid));
+            }
+        } else {
+            // No assignment context - fallback to old behavior
+            $fs = get_file_storage();
+            foreach ($files as $file) {
+                $item = new stdClass;
+                $item->userid = $USER->id;
+                $item->timemodified = time();
+                $item->courseid = 0;
+                $item->name = $file->get_filename();
+                $item->type = 'file';
+                $item->intro = '';
+                $item->categoryid = $categoryid;
 
-            $item = new stdClass;
-            $item->userid = $USER->id;
-            $item->timemodified = time();
-            $item->courseid = 0;
-            $item->name = $file->get_filename();
-            $item->type = 'file';
-            $item->intro = '';
-            $item->categoryid = $categoryid;
+                if ($item->id = $DB->insert_record('block_exaportitem', $item)) {
+                    $filerecord = new stdClass();
+                    $filerecord->contextid = context_user::instance($USER->id)->id;
+                    $filerecord->component = 'block_exaport';
+                    $filerecord->filearea = 'item_file';
+                    $filerecord->itemid = $item->id;
 
-            // Insert.
-            if ($item->id = $DB->insert_record('block_exaportitem', $item)) {
-
-                $filerecord = new stdClass();
-                $filerecord->contextid = context_user::instance($USER->id)->id;
-                $filerecord->component = 'block_exaport';
-                $filerecord->filearea = 'item_file';
-                $filerecord->itemid = $item->id;
-
-                $fs->create_file_from_storedfile($filerecord, $file);
-
-                $this->lastitem = $item;
-
-                // NEW: Save feedback files if available
-                $this->save_feedback_files($item->id, $caller, $fs);
+                    $fs->create_file_from_storedfile($filerecord, $file);
+                    $this->lastitem = $item;
+                }
             }
         }
     }
 
     /**
-     * Save teacher feedback files as a comment on the portfolio item
-     *
-     * @param int $itemid The portfolio item ID
-     * @param object $caller The portfolio caller object
-     * @param file_storage $fs File storage instance
-     */
-    protected function save_feedback_files($itemid, $caller, $fs) {
-        global $USER, $DB;
-
-        // Try to get feedback files from the caller
-        $feedbackfiles = array();
-        
-        // Check if caller has the get_feedback_files method (our custom caller)
-        if (method_exists($caller, 'get_feedback_files')) {
-            $feedbackfiles = $caller->get_feedback_files();
-        } else {
-            // Try to fetch feedback files directly from assignment context
-            $feedbackfiles = $this->get_feedback_files_from_context($caller);
-        }
-
-        if (empty($feedbackfiles)) {
-            return;
-        }
-
-        // Create a comment entry to hold the feedback files
-        $comment = new stdClass();
-        $comment->itemid = $itemid;
-        $comment->userid = $USER->id;
-        $comment->entry = get_string('feedbackfromteacher', 'block_exaport');
-        $comment->timemodified = time();
-
-        $comment->id = $DB->insert_record('block_exaportitemcomm', $comment);
-
-        // Save each feedback file to the comment
-        $filerecordbase = new stdClass();
-        $filerecordbase->contextid = context_system::instance()->id;
-        $filerecordbase->component = 'block_exaport';
-        $filerecordbase->filearea = 'item_comment_file';
-        $filerecordbase->itemid = $comment->id;
-
-        foreach ($feedbackfiles as $feedbackfile) {
-            $fs->create_file_from_storedfile($filerecordbase, $feedbackfile);
-        }
-    }
-
-    /**
-     * Get feedback files from assignment context
-     * 
-     * This method attempts to extract assignment information from the portfolio caller
-     * and fetch feedback files directly.
+     * Try to extract assignment information from the portfolio caller
      *
      * @param object $caller The portfolio caller object
-     * @return array Array of stored_file objects
+     * @return object|null Assignment object with properties: aid, assignment, name, coursename
      */
-    protected function get_feedback_files_from_context($caller) {
+    protected function get_assignment_from_caller($caller) {
         global $USER, $DB;
-
-        $feedbackfiles = array();
 
         try {
-            // Try to get course module from the caller
             $cm = null;
             
             // Check different ways to get the course module
@@ -177,35 +137,29 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
             }
 
             if (!$cm || !isset($cm->modname) || $cm->modname !== 'assign') {
-                return $feedbackfiles;
+                return null;
             }
 
-            $context = context_module::instance($cm->id);
-            $fs = get_file_storage();
-
-            // Get the grade record for this assignment
-            $grade = $DB->get_record('assign_grades',
-                array('assignment' => $cm->instance, 'userid' => $USER->id),
-                '*', IGNORE_MULTIPLE);
-
-            if ($grade) {
-                // Check if assignfeedback_file plugin is being used
-                $feedbackfilerecord = $DB->get_record('assignfeedback_file',
-                    array('assignment' => $cm->instance, 'grade' => $grade->id));
-
-                if ($feedbackfilerecord) {
-                    // Get feedback files from the file storage
-                    $feedbackfiles = $fs->get_area_files($context->id,
-                        'assignfeedback_file', 'feedback_files',
-                        $grade->id, 'filename', false);
-                }
+            // Get assignment details
+            $assign = $DB->get_record('assign', array('id' => $cm->instance));
+            if (!$assign) {
+                return null;
             }
+
+            $course = $DB->get_record('course', array('id' => $assign->course));
+
+            // Build assignment object compatible with shared function
+            $assignment = new stdClass();
+            $assignment->aid = $assign->id;
+            $assignment->assignment = $assign->id;
+            $assignment->name = $assign->name;
+            $assignment->coursename = $course ? $course->fullname : '';
+
+            return $assignment;
         } catch (Exception $e) {
-            // Gracefully handle errors - don't break export if feedback fetch fails
-            debugging('Error fetching feedback files from context: ' . $e->getMessage(), DEBUG_NORMAL);
+            debugging('Error extracting assignment from caller: ' . $e->getMessage(), DEBUG_NORMAL);
+            return null;
         }
-
-        return $feedbackfiles;
     }
 
     public function get_interactive_continue_url() {

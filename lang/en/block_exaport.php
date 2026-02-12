@@ -871,3 +871,6 @@ $string['wp_exported_view_newer_than_wp'] = 'WordPress view version is older tha
 $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
 $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';
 $string['feedbackfromteacher'] = 'Feedback from teacher';
+$string['add_this_assignment'] = 'Add this assignment';
+$string['nosubmissionfile'] = 'No submission file';
+$string['teacher'] = 'Teacher';

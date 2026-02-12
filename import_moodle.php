@@ -55,26 +55,38 @@ if ($assignments) {
         $course = $DB->get_record('course', array("id" => $courseid));
         $context = context_module::instance($cm->id);
         $fs = get_file_storage();
-        $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid,
-            "filename", false);
+        
+        // Check if this assignment has a submission
+        $hassubmission = isset($assignment->has_submission) ? $assignment->has_submission : true;
+        
+        if ($hassubmission && $assignment->submissionid > 0) {
+            // Assignment has submission files
+            $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid,
+                "filename", false);
 
-        foreach ($files as $file) {
+            foreach ($files as $file) {
+                $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+                $filename = $file->get_filename();
+                $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+                    $file->get_itemid(), $file->get_filepath(), $file->get_filename())->out();
 
-            $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+                $button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
+                    '&amp;submissionid=' . $assignment->submissionid . '&amp;fileid=' . $file->get_pathnamehash() . '">' .
+                    get_string("add_this_file", "block_exaport") . '</a>';
 
-            $filename = $file->get_filename();
-            $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
-                $file->get_itemid(), $file->get_filepath(), $file->get_filename())->out();
-
+                $table->data[] = array($assignment->name, userdate($assignment->timemodified), $icon .
+                    ' <a href="' . s($url) . '" >' . $filename . '</a><br />', $assignment->coursename, $button);
+            }
+        } else {
+            // Assignment has no submission but has feedback - show as importable
             $button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
-                '&amp;submissionid=' . $assignment->submissionid . '&amp;fileid=' . $file->get_pathnamehash() . '">' .
-                get_string("add_this_file", "block_exaport") . '</a>';
+                '&amp;submissionid=' . abs($assignment->submissionid) . '&amp;aid=' . $assignment->aid . 
+                '&amp;nosubmission=1">' .
+                get_string("add_this_assignment", "block_exaport") . '</a>';
 
-            $table->data[] = array($assignment->name, userdate($assignment->timemodified), $icon .
-                ' <a href="' . s($url) . '" >' . $filename . '</a><br />', $assignment->coursename, $button);
-
+            $table->data[] = array($assignment->name, userdate($assignment->timemodified), 
+                get_string('nosubmissionfile', 'block_exaport'), $assignment->coursename, $button);
         }
-
     }
     $output .= html_writer::table($table);
     echo $output;

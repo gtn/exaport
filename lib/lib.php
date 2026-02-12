@@ -923,11 +923,6 @@ function block_exaport_get_assignments_for_import($modassign) {
                 CASE WHEN sf.id IS NOT NULL THEN 1 ELSE 0 END AS has_file,
                 CASE WHEN sot.id IS NOT NULL THEN 1 ELSE 0 END AS has_onlinetext
             FROM {assign} a
-            INNER JOIN {course} c ON a.course = c.id
-            INNER JOIN {course_modules} cm ON cm.instance = a.id AND cm.module = (
-                SELECT id FROM {modules} WHERE name = 'assign'
-            )
-            INNER JOIN {context} ctx ON ctx.instanceid = cm.id AND ctx.contextlevel = 70
             LEFT JOIN {assign_submission} s
                 ON s.assignment = a.id
                 AND s.userid = ?
@@ -939,17 +934,45 @@ function block_exaport_get_assignments_for_import($modassign) {
             LEFT JOIN {assign_grades} ag
                 ON ag.assignment = a.id
                 AND ag.userid = ?
+            LEFT JOIN {course} c ON a.course = c.id
             WHERE (s.id IS NOT NULL OR ag.id IS NOT NULL)
-            AND cm.visible = 1
-            AND cm.deletioninprogress = 0
-            AND EXISTS (
-                SELECT 1 FROM {role_assignments} ra
-                INNER JOIN {context} ectx ON ra.contextid = ectx.id
-                WHERE ra.userid = ?
-                AND (ectx.id = ctx.id OR (ectx.contextlevel < 70 AND ctx.path LIKE CONCAT(ectx.path, '%')))
-            )
             ORDER BY COALESCE(s.timemodified, ag.timemodified) DESC
-        ", array($USER->id, $USER->id, $USER->id));
+        ", array($USER->id, $USER->id));
+
+        // Filter results with proper Moodle security checks
+        $validassignments = array();
+        foreach ($assignments as $assignment) {
+            $course = $DB->get_record('course', array('id' => $assignment->course));
+            if (!$course) {
+                continue; // Skip invalid course
+            }
+
+            $cm = get_coursemodule_from_instance('assign', $assignment->aid, $course->id);
+            if (!$cm) {
+                continue; // Skip if module not found
+            }
+
+            // Check enrollment using Moodle's function
+            $context = context_module::instance($cm->id);
+            if (!is_enrolled($context, $USER->id, '', true)) {
+                continue; // Skip if not enrolled
+            }
+
+            // Check visibility using Moodle's API
+            $modinfo = get_fast_modinfo($course);
+            if (!isset($modinfo->cms[$cm->id]) || !$modinfo->cms[$cm->id]->uservisible) {
+                continue; // Skip if not visible to user
+            }
+
+            // Check if being deleted
+            if ($cm->deletioninprogress) {
+                continue; // Skip if being deleted
+            }
+
+            $validassignments[] = $assignment;
+        }
+
+        return $validassignments;
     } else {
         // Legacy assignments
         $assignments = $DB->get_records_sql("
@@ -2695,7 +2718,7 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
     }
 
     $context = context_module::instance($cm->id);
-    
+
     // Security check: Verify user can view this assignment
     if (!has_capability('mod/assign:view', $context, $USER->id)) {
         debugging('User does not have permission to view assignment feedback', DEBUG_DEVELOPER);
@@ -2754,13 +2777,13 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
     // Validate grader has appropriate role
     if ($grade->grader) {
         $gradercontext = context_course::instance($course->id);
-        
+
         // Validate grader has teaching capability
         if (!has_capability('mod/assign:grade', $gradercontext, $grade->grader)) {
             debugging('Warning: Grade record has invalid grader ID - grader lacks mod/assign:grade capability', DEBUG_DEVELOPER);
             return;
         }
-        
+
         // Prevent self-grading attribution
         if ($grade->grader == $USER->id) {
             debugging('Warning: Student cannot be grader of their own work', DEBUG_DEVELOPER);
@@ -2787,13 +2810,13 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
         // Check if grader identity should be hidden (blindmarking setting)
         // Use assign API to respect all privacy settings
         $showgrader = true;
-        
+
         // Check if blindmarking is enabled and student can't see hidden grader
         if ($assign->is_blind_marking()) {
             // When blindmarking is enabled, check if student has permission to see grader
             $showgrader = has_capability('mod/assign:showhiddengrader', $context, $USER->id);
         }
-        
+
         // Determine grader userid for comment
         // Use special value -1 to indicate hidden grader (avoids exposing real userid)
         if ($showgrader && !empty($grade->grader)) {
@@ -2846,19 +2869,19 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
  */
 function block_exaport_get_comment_author_name($userid, $viewerid = null) {
     global $DB;
-    
+
     // Check for hidden grader marker (use strict comparison)
     if ($userid === -1) {
         return get_string('hiddengrader', 'block_exaport');
     }
-    
+
     // Get user record and return full name
     $user = $DB->get_record('user', array('id' => $userid));
     if ($user) {
         // Pass viewerid to respect privacy capabilities
         return fullname($user, $viewerid);
     }
-    
+
     // Fallback if user not found
     return get_string('unknownuser', 'block_exaport');
 }

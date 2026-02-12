@@ -178,6 +178,11 @@ if ($action == 'add') {
         $existing->intro = format_text($checkedonlinetext->onlinetext, $checkedonlinetext->onlineformat);
     }
     $existing->submission = $submissionid;
+    $existing->submissionid = $submissionid;
+    $existing->fileid = $fileid;
+    $existing->nosubmission = $nosubmission;
+    $existing->onlinetext = $onlinetext;
+    $existing->aid = $aid;
     if (!empty($cm->id)) {
         $existing->activityid = $cm->id;
     } else {
@@ -221,6 +226,9 @@ switch ($action) {
         $post->submissionid = $submissionid;
         $post->fileid = $fileid;
         $post->name = $assignment->name; // Prefill the title with assignment name
+        $post->nosubmission = $nosubmission;
+        $post->onlinetext = $onlinetext;
+        $post->aid = $aid;
         $straction = get_string('new');
         break;
     default :

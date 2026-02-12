@@ -909,6 +909,7 @@ function block_exaport_get_assignments_for_import($modassign) {
     global $USER, $DB;
     if ($modassign->new) {
         // Show assignments where: student submitted something OR teacher provided feedback
+        // Enhanced with visibility and enrollment checks
         $assignments = $DB->get_records_sql("
             SELECT DISTINCT
                 COALESCE(s.id, ag.id * -1) AS submissionid,
@@ -922,6 +923,11 @@ function block_exaport_get_assignments_for_import($modassign) {
                 CASE WHEN sf.id IS NOT NULL THEN 1 ELSE 0 END AS has_file,
                 CASE WHEN sot.id IS NOT NULL THEN 1 ELSE 0 END AS has_onlinetext
             FROM {assign} a
+            INNER JOIN {course} c ON a.course = c.id
+            INNER JOIN {course_modules} cm ON cm.instance = a.id AND cm.module = (
+                SELECT id FROM {modules} WHERE name = 'assign'
+            )
+            INNER JOIN {context} ctx ON ctx.instanceid = cm.id AND ctx.contextlevel = 70
             LEFT JOIN {assign_submission} s
                 ON s.assignment = a.id
                 AND s.userid = ?
@@ -933,10 +939,17 @@ function block_exaport_get_assignments_for_import($modassign) {
             LEFT JOIN {assign_grades} ag
                 ON ag.assignment = a.id
                 AND ag.userid = ?
-            LEFT JOIN {course} c ON a.course = c.id
-            WHERE s.id IS NOT NULL OR ag.id IS NOT NULL
+            WHERE (s.id IS NOT NULL OR ag.id IS NOT NULL)
+            AND cm.visible = 1
+            AND cm.deletioninprogress = 0
+            AND EXISTS (
+                SELECT 1 FROM {role_assignments} ra
+                INNER JOIN {context} ectx ON ra.contextid = ectx.id
+                WHERE ra.userid = ?
+                AND (ectx.id = ctx.id OR ectx.contextlevel < 70 AND ectx.path LIKE CONCAT(ectx.path, '%'))
+            )
             ORDER BY COALESCE(s.timemodified, ag.timemodified) DESC
-        ", array($USER->id, $USER->id));
+        ", array($USER->id, $USER->id, $USER->id));
     } else {
         // Legacy assignments
         $assignments = $DB->get_records_sql("
@@ -2673,7 +2686,7 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
  * @param int $assignmentid The assignment ID
  */
 function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid) {
-    global $USER, $DB;
+    global $USER, $DB, $CFG;
 
     $modassign = block_exaport_assignmentversion();
     if (!$modassign->new) {
@@ -2682,6 +2695,35 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
     }
 
     $context = context_module::instance($cm->id);
+    
+    // Security check: Verify user can view this assignment
+    if (!has_capability('mod/assign:view', $context, $USER->id)) {
+        debugging('User does not have permission to view assignment feedback', DEBUG_DEVELOPER);
+        return;
+    }
+
+    // Get assignment details
+    $assignment = $DB->get_record('assign', array('id' => $assignmentid));
+    if (!$assignment) {
+        return;
+    }
+
+    // Get course for additional checks
+    $course = $DB->get_record('course', array('id' => $assignment->course));
+    if (!$course) {
+        return;
+    }
+
+    // Use Moodle's assign API to check if feedback is viewable
+    require_once($CFG->dirroot . '/mod/assign/locallib.php');
+    $assign = new assign($context, $cm, $course);
+
+    // Check if user can view their submission
+    if (!$assign->can_view_submission($USER->id)) {
+        debugging('User cannot view submission for this assignment', DEBUG_DEVELOPER);
+        return;
+    }
+
     $fs = get_file_storage();
 
     // Get the grade record for this assignment and user
@@ -2691,6 +2733,39 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
 
     if (!$grade) {
         return; // No grade/feedback
+    }
+
+    // Validate that grade has been saved/released (timemodified > 0)
+    if (!$grade->timemodified || $grade->timemodified == 0) {
+        debugging('Grade has not been saved or released yet', DEBUG_DEVELOPER);
+        return;
+    }
+
+    // Check if grades are released using grade API
+    $gradinginfo = grade_get_grades($course->id, 'mod', 'assign', $assignment->id, $USER->id);
+    if (!empty($gradinginfo->items)) {
+        $gradeitem = $gradinginfo->items[0];
+        if (isset($gradeitem->grades[$USER->id]) && $gradeitem->grades[$USER->id]->hidden) {
+            debugging('Grade is hidden, feedback not accessible', DEBUG_DEVELOPER);
+            return; // Grade is hidden
+        }
+    }
+
+    // Validate grader has appropriate role
+    if ($grade->grader) {
+        $grader_context = context_course::instance($course->id);
+        
+        // Validate grader has teaching capability
+        if (!has_capability('mod/assign:grade', $grader_context, $grade->grader)) {
+            debugging('Warning: Grade record has invalid grader ID - grader lacks mod/assign:grade capability', DEBUG_DEVELOPER);
+            return;
+        }
+        
+        // Prevent self-grading attribution
+        if ($grade->grader == $USER->id) {
+            debugging('Warning: Student cannot be grader of their own work', DEBUG_DEVELOPER);
+            return;
+        }
     }
 
     // Get feedback comment text

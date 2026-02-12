@@ -2203,7 +2203,7 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
                         foreach ($comments as &$comment) {
                             $comment->timemodified = transform::datetime(@$comment->timemodified);
                             // Use helper function to respect privacy
-                            $comment->fromUser = block_exaport_get_comment_author_name($comment->userid, $userid);
+                            $comment->fromUser = block_exaport_get_comment_author_name($comment->userid);
                             unset($comment->userid);
                             unset($comment->id);
                             unset($comment->itemid);
@@ -2864,13 +2864,12 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
  * an appropriate display name. For normal comments, it returns the user's full name.
  *
  * @param int $userid The userid from the comment record
- * @param int|null $viewerid Optional viewer's userid for permission checks
  * @return string The display name for the comment author
  */
-function block_exaport_get_comment_author_name($userid, $viewerid = null) {
+function block_exaport_get_comment_author_name($userid) {
     global $DB;
 
-    // Check for hidden grader marker (use strict comparison)
+    // Check for hidden grader marker
     if ($userid == -1) {
         return get_string('hiddenuser', 'block_exaport');
     }
@@ -2878,8 +2877,7 @@ function block_exaport_get_comment_author_name($userid, $viewerid = null) {
     // Get user record and return full name
     $user = $DB->get_record('user', array('id' => $userid));
     if ($user) {
-        // Pass viewerid to respect privacy capabilities
-        return fullname($user, $viewerid);
+        return fullname($user);
     }
 
     // Fallback if user not found

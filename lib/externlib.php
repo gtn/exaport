@@ -182,7 +182,8 @@ function block_exaport_print_extcomments($itemid) {
         // Check if this is a hidden grader (userid = -1, use strict comparison)
         if ($comment->userid == -1) {
             // Show anonymous user icon for hidden grader
-            echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
+            // echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
+            // since this above does not work: just show nothing for hidden grader
         } else {
             echo $OUTPUT->user_picture($user);
         }

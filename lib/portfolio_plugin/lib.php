@@ -79,7 +79,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
                 // Store last item for redirect
                 $this->lastitem = $DB->get_record('block_exaportitem', array('id' => $itemid));
             }
-            
+
             // If no files but have assignment (feedback only case)
             if (empty($files)) {
                 $itemid = block_exaport_create_item_from_assignment($assignment, null, $categoryid, 0);
@@ -123,7 +123,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
 
         try {
             $cm = null;
-            
+
             // Check different ways to get the course module
             if (method_exists($caller, 'get_course_module')) {
                 $cm = $caller->get_course_module();
@@ -194,9 +194,9 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
 
             return $assignment;
         } catch (Exception $e) {
-            // Log detailed error server-side only
+            // Log detailed error only in DEBUG_DEVELOPER
             debugging('Error extracting assignment from caller: ' . $e->getMessage(), DEBUG_DEVELOPER);
-            
+
             // For production, return null gracefully
             // Don't expose error details to users
             return null;

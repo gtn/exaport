@@ -54,12 +54,12 @@ if ($nosubmission && $aid) {
         print_error('Legacy assignments not supported for online text import');
     }
 } else {
-    // Normal case - get from submission with file
+    // Normal case - get from submission (no specific flag set)
+    // This handles cases where we have a submission but don't know if it has files or text
     if ($modassign->new) {
         $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
             " a.name, a.course, c.fullname AS coursename " .
-            " FROM {assignsubmission_file} sf " .
-            " INNER JOIN {assign_submission} s ON sf.submission=s.id " .
+            " FROM {assign_submission} s " .
             " INNER JOIN {assign} a ON s.assignment=a.id " .
             " LEFT JOIN {course} c on a.course = c.id " .
             " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));

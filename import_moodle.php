@@ -75,7 +75,7 @@ if ($assignments) {
 
                     $button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
                         '&amp;submissionid=' . $assignment->submissionid . '&amp;fileid=' . $file->get_pathnamehash() . '">' .
-                        get_string("add_this_file", "block_exaport") . '</a>';
+                        get_string("add_this_assignment", "block_exaport") . '</a>';
 
                     $table->data[] = array($assignment->name, userdate($assignment->timemodified), $icon .
                         ' <a href="' . s($url) . '" >' . $filename . '</a><br />', $assignment->coursename, $button);
@@ -97,7 +97,7 @@ if ($assignments) {
                     
                     $button = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
                         '&amp;submissionid=' . $assignment->submissionid . '&amp;onlinetext=1">' .
-                        get_string("add_this_file", "block_exaport") . '</a>';
+                        get_string("add_this_assignment", "block_exaport") . '</a>';
 
                     $table->data[] = array($assignment->name, userdate($assignment->timemodified), 
                         $icon . ' ' . get_string('onlinetext', 'block_exaport') . ': ' . s($textpreview), 

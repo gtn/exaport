@@ -51,7 +51,7 @@ function block_exaport_get_comment_author_name($userid, $viewerid = null) {
 
     // Check for hidden grader marker (use strict comparison)
     if ($userid == -1) {
-        return get_string('hiddengrader', 'block_exaport');
+        return get_string('hiddenuser', 'block_exaport');
     }
 
     // Get user record and return full name
@@ -153,7 +153,7 @@ Updated every location where comments are displayed:
    - Shows anonymous icon for hidden graders
 
 6. **lang/en/block_exaport.php**
-   - Added 'hiddengrader' string
+   - Added 'hiddenuser' string
    - Added 'unknownuser' string
 
 ## Testing Scenarios

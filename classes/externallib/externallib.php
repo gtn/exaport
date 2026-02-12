@@ -234,6 +234,7 @@ class externallib extends \external_api {
 
         $item->comments = g::$DB->get_records('block_exaportitemcomm', ['itemid' => $item->id], 'timemodified ASC');
         foreach ($item->comments as $comment) {
+            // TODO: optimize: read user only once, or maybe add to sql statement?
             // Use helper function to get author name respecting privacy
             $comment->userfullname = block_exaport_get_comment_author_name($comment->userid);
         }

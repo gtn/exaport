@@ -946,7 +946,7 @@ function block_exaport_get_assignments_for_import($modassign) {
                 SELECT 1 FROM {role_assignments} ra
                 INNER JOIN {context} ectx ON ra.contextid = ectx.id
                 WHERE ra.userid = ?
-                AND (ectx.id = ctx.id OR ectx.contextlevel < 70 AND ectx.path LIKE CONCAT(ectx.path, '%'))
+                AND (ectx.id = ctx.id OR (ectx.contextlevel < 70 AND ctx.path LIKE CONCAT(ectx.path, '%')))
             )
             ORDER BY COALESCE(s.timemodified, ag.timemodified) DESC
         ", array($USER->id, $USER->id, $USER->id));
@@ -2753,10 +2753,10 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
 
     // Validate grader has appropriate role
     if ($grade->grader) {
-        $grader_context = context_course::instance($course->id);
+        $gradercontext = context_course::instance($course->id);
         
         // Validate grader has teaching capability
-        if (!has_capability('mod/assign:grade', $grader_context, $grade->grader)) {
+        if (!has_capability('mod/assign:grade', $gradercontext, $grade->grader)) {
             debugging('Warning: Grade record has invalid grader ID - grader lacks mod/assign:grade capability', DEBUG_DEVELOPER);
             return;
         }

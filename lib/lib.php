@@ -2871,7 +2871,7 @@ function block_exaport_get_comment_author_name($userid, $viewerid = null) {
     global $DB;
 
     // Check for hidden grader marker (use strict comparison)
-    if ($userid === -1) {
+    if ($userid == -1) {
         return get_string('hiddengrader', 'block_exaport');
     }
 

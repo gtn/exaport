@@ -194,9 +194,10 @@ function block_exaport_show_comments($item, $access) {
 
             echo '<tr class="header"><td class="picture left">';
             // Check if this is a hidden grader (userid = -1, use strict comparison)
-            if ($comment->userid === -1) {
+            if ($comment->userid == -1) {
                 // Show anonymous user icon for hidden grader
-                echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
+                // echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
+                // since this above does not work: just show nothing for hidden grader
             } else {
                 echo $OUTPUT->user_picture($user);
             }
@@ -207,7 +208,7 @@ function block_exaport_show_comments($item, $access) {
             require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
             $fullname = block_exaport_get_comment_author_name($comment->userid);
             $by = new stdClass();
-            if ($comment->userid === -1) {
+            if ($comment->userid == -1) {
                 // Don't link to user profile for hidden grader
                 $by->name = $fullname;
             } else {

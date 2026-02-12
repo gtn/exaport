@@ -39,7 +39,7 @@ This approach:
 ### 2. Centralized Helper Function
 
 Created `block_exaport_get_comment_author_name()` helper function that:
-- Checks for userid === -1 (hidden grader marker)
+- Checks for userid == -1 (hidden grader marker)
 - Returns "Hidden grader" for anonymous feedback
 - Returns user's full name for normal comments
 - Respects viewer's privacy capabilities via viewerid parameter
@@ -48,19 +48,19 @@ Created `block_exaport_get_comment_author_name()` helper function that:
 ```php
 function block_exaport_get_comment_author_name($userid, $viewerid = null) {
     global $DB;
-    
+
     // Check for hidden grader marker (use strict comparison)
-    if ($userid === -1) {
+    if ($userid == -1) {
         return get_string('hiddengrader', 'block_exaport');
     }
-    
+
     // Get user record and return full name
     $user = $DB->get_record('user', array('id' => $userid));
     if ($user) {
         // Pass viewerid to respect privacy capabilities
         return fullname($user, $viewerid);
     }
-    
+
     // Fallback if user not found
     return get_string('unknownuser', 'block_exaport');
 }

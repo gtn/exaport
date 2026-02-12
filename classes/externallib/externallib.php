@@ -235,7 +235,6 @@ class externallib extends \external_api {
         $item->comments = g::$DB->get_records('block_exaportitemcomm', ['itemid' => $item->id], 'timemodified ASC');
         foreach ($item->comments as $comment) {
             // Use helper function to get author name respecting privacy
-            require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
             $comment->userfullname = block_exaport_get_comment_author_name($comment->userid);
         }
 

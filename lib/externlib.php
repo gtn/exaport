@@ -180,7 +180,7 @@ function block_exaport_print_extcomments($itemid) {
 
         echo '<tr class="header"><td class="picture left">';
         // Check if this is a hidden grader (userid = -1, use strict comparison)
-        if ($comment->userid === -1) {
+        if ($comment->userid == -1) {
             // Show anonymous user icon for hidden grader
             echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
         } else {

@@ -2,7 +2,7 @@
 
 ## Problem
 
-When the "Hide grader identity from students" (blindmarking) setting is enabled in a Moodle assignment, students should not be able to see which teacher graded their work. However, when students exported assignment feedback to their ePortfolio, the teacher's name was being displayed, violating this privacy setting.
+When the "Hide grader identity from students" setting is enabled in a Moodle assignment, students should not be able to see which teacher graded their work. However, when students exported assignment feedback to their ePortfolio, the teacher's name was being displayed, violating this privacy setting.
 
 ## Root Cause
 
@@ -10,7 +10,7 @@ The original code in `block_exaport_add_teacher_feedback_to_item()` was:
 1. Directly querying the database to get grader information
 2. Using `fullname($teacher)` without checking if the grader identity should be hidden
 3. Always storing the teacher's userid in the comment record
-4. Not using Moodle's assignment API to check blindmarking settings
+4. Not using Moodle's assignment API to check the grader identity settings
 
 ## Solution
 
@@ -19,18 +19,22 @@ The original code in `block_exaport_add_teacher_feedback_to_item()` was:
 Instead of direct database queries, we now use Moodle's built-in assignment API:
 
 ```php
-// Check if blindmarking is enabled using Moodle API
-if ($assign->is_blind_marking()) {
-    // When blindmarking is enabled, check if student has permission to see grader
+// Check if grader identity is hidden from students using Moodle API
+if ($assign->is_hidden_grader()) {
+    // When grader identity is hidden, check if student has permission to see grader
     $showgrader = has_capability('mod/assign:showhiddengrader', $context, $USER->id);
 }
 ```
 
 This approach:
 - Uses Moodle's standard API methods
-- Respects all privacy settings automatically
+- Respects the correct privacy setting (`is_hidden_grader()` not `is_blind_marking()`)
 - Is future-proof as Moodle evolves
 - Follows Moodle best practices
+
+**Important distinction:**
+- `is_blind_marking()` - Hides STUDENT identities from graders during marking
+- `is_hidden_grader()` - Hides GRADER identity from students (the correct one for this use case)
 
 ### 2. Centralized Helper Function
 
@@ -121,13 +125,13 @@ Updated every location where comments are displayed:
 
 ### Better Privacy Handling
 - Respects viewer's privacy capabilities via viewerid parameter
-- Checks multiple privacy settings (blindmarking + capability)
+- Checks the correct privacy setting (is_hidden_grader + capability)
 - Follows Moodle's privacy best practices
 
 ## Files Modified
 
 1. **lib/lib.php**
-   - Modified `block_exaport_add_teacher_feedback_to_item()` to check blindmarking
+   - Modified `block_exaport_add_teacher_feedback_to_item()` to check is_hidden_grader
    - Added `block_exaport_get_comment_author_name()` helper function
    - Updated GDPR export to use helper function
 
@@ -154,15 +158,15 @@ Updated every location where comments are displayed:
 
 ## Testing Scenarios
 
-### Scenario 1: Blindmarking Enabled, Student Exports
+### Scenario 1: is_hidden_grader Enabled, Student Exports
 - **Expected**: Comment shows "Hidden grader", no teacher name
 - **Result**: ✓ Privacy protected
 
-### Scenario 2: Blindmarking Disabled, Student Exports
+### Scenario 2: is_hidden_grader Disabled, Student Exports
 - **Expected**: Comment shows teacher's full name
 - **Result**: ✓ Normal behavior maintained
 
-### Scenario 3: Blindmarking Enabled, User with showhiddengrader Capability
+### Scenario 3: is_hidden_grader Enabled, User with showhiddengrader Capability
 - **Expected**: Comment shows teacher's full name (manager/admin can see)
 - **Result**: ✓ Capability respected
 
@@ -176,7 +180,7 @@ Updated every location where comments are displayed:
 
 ## Benefits
 
-1. **Privacy Protection**: Students cannot see grader identity when blindmarking is enabled
+1. **Privacy Protection**: Students cannot see grader identity when is_hidden_grader is enabled
 2. **Moodle-like**: Uses standard Moodle APIs and patterns
 3. **Future-proof**: Will work with future Moodle versions and privacy enhancements
 4. **Generic**: Handles all assignment privacy settings automatically
@@ -194,7 +198,7 @@ Updated every location where comments are displayed:
 
 ## Compliance
 
-- ✓ Respects Moodle's blindmarking setting
+- ✓ Respects Moodle's is_hidden_grader setting (not is_blind_marking)
 - ✓ Respects mod/assign:showhiddengrader capability
 - ✓ Follows Moodle security best practices
 - ✓ GDPR-compliant (respects user privacy)

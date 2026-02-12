@@ -2807,13 +2807,13 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
 
     // Only create comment if there's feedback text or files
     if (($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) || !empty($feedbackfiles)) {
-        // Check if grader identity should be hidden (blindmarking setting)
-        // Use assign API to respect all privacy settings
+        // Check if grader identity should be hidden
+        // Use assign API to respect privacy settings
         $showgrader = true;
 
-        // Check if blindmarking is enabled and student can't see hidden grader
-        if ($assign->is_blind_marking()) {
-            // When blindmarking is enabled, check if student has permission to see grader
+        // Check if grader identity is hidden from students (is_hidden_grader setting)
+        if ($assign->is_hidden_grader()) {
+            // When grader identity is hidden, check if student has permission to see grader
             $showgrader = has_capability('mod/assign:showhiddengrader', $context, $USER->id);
         }
 

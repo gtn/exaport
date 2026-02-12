@@ -925,7 +925,7 @@ function block_exaport_get_assignments_for_import($modassign) {
             LEFT JOIN {assignsubmission_file} sf ON sf.submission = s.id
             LEFT JOIN {assign_grades} ag ON ag.assignment = a.id AND ag.userid = ?
             LEFT JOIN {course} c ON a.course = c.id
-            WHERE (sf.id IS NOT NULL OR ag.id IS NOT NULL)
+            WHERE (s.id IS NOT NULL OR ag.id IS NOT NULL)
             ORDER BY timemodified DESC
         ", array($USER->id, $USER->id));
     } else {

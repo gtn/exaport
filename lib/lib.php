@@ -908,34 +908,39 @@ function block_exaport_assignmentversion() {
 function block_exaport_get_assignments_for_import($modassign) {
     global $USER, $DB;
     if ($modassign->new) {
-        // Get assignments with submissions OR with grades (teacher feedback)
-        // This includes cases where teacher provided feedback without student submission
+        // Show assignments where: student submitted something OR teacher provided feedback
         $assignments = $DB->get_records_sql("
-            SELECT DISTINCT 
+            SELECT DISTINCT
                 COALESCE(s.id, ag.id * -1) AS submissionid,
-                a.id AS aid, 
+                a.id AS aid,
                 a.id AS assignment,
                 COALESCE(s.timemodified, ag.timemodified) AS timemodified,
-                a.name, 
-                a.course, 
+                a.name,
+                a.course,
                 c.fullname AS coursename,
-                CASE WHEN s.id IS NULL THEN 0 ELSE 1 END AS has_submission
+                CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END AS has_submission
             FROM {assign} a
-            LEFT JOIN {assign_submission} s ON s.assignment = a.id AND s.userid = ?
-            LEFT JOIN {assignsubmission_file} sf ON sf.submission = s.id
-            LEFT JOIN {assign_grades} ag ON ag.assignment = a.id AND ag.userid = ?
+            LEFT JOIN {assign_submission} s
+                ON s.assignment = a.id
+                AND s.userid = ?
+                AND s.status = 'submitted'
+            LEFT JOIN {assign_grades} ag
+                ON ag.assignment = a.id
+                AND ag.userid = ?
             LEFT JOIN {course} c ON a.course = c.id
-            WHERE (s.id IS NOT NULL OR ag.id IS NOT NULL)
-            ORDER BY timemodified DESC
+            WHERE s.id IS NOT NULL OR ag.id IS NOT NULL
+            ORDER BY COALESCE(s.timemodified, ag.timemodified) DESC
         ", array($USER->id, $USER->id));
     } else {
-        // Legacy assignments - keep existing behavior
-        $assignments = $DB->get_records_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified," .
-            " a.name, a.course, a.assignmenttype, c.fullname AS coursename " .
-            " FROM {assignment_submissions} s " .
-            " JOIN {assignment} a ON s.assignment=a.id " .
-            " LEFT JOIN {course} c on a.course = c.id " .
-            " WHERE s.userid=?", array($USER->id));
+        // Legacy assignments
+        $assignments = $DB->get_records_sql("
+            SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified,
+                a.name, a.course, a.assignmenttype, c.fullname AS coursename
+            FROM {assignment_submissions} s
+            JOIN {assignment} a ON s.assignment = a.id
+            LEFT JOIN {course} c ON a.course = c.id
+            WHERE s.userid = ?
+        ", array($USER->id));
     }
     return $assignments;
 }
@@ -2589,7 +2594,7 @@ function block_exaport_get_my_views() {
 
 /**
  * Create a portfolio artifact from an assignment with feedback
- * 
+ *
  * This is the shared function used by both import paths (direct import and portfolio export)
  * to create portfolio artifacts from Moodle assignments with teacher feedback.
  *
@@ -2603,7 +2608,7 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
     global $USER, $DB;
 
     $fs = get_file_storage();
-    
+
     // Create the portfolio item using assignment name
     $item = new stdClass();
     $item->userid = $USER->id;
@@ -2631,7 +2636,7 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
     // Get course module
     $modassign = block_exaport_assignmentversion();
     $cm = get_coursemodule_from_instance($modassign->title, $assignment->aid);
-    
+
     if ($cm) {
         // Add competences if applicable
         if (block_exaport_check_competence_interaction()) {
@@ -2652,7 +2657,7 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
 
 /**
  * Add teacher feedback (comment text and files) to a portfolio item
- * 
+ *
  * This function retrieves feedback from the teacher (grader) and adds it as a comment
  * on the portfolio item. It handles both feedback comment text and feedback files.
  *
@@ -2706,7 +2711,7 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
         $comment->itemid = $itemid;
         $comment->userid = $grade->grader; // Use teacher's ID, not student's
         $comment->timemodified = time();
-        
+
         // Build comment text
         $commenttext = get_string('feedbackfromteacher', 'block_exaport');
         if ($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) {

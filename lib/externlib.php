@@ -179,11 +179,19 @@ function block_exaport_print_extcomments($itemid) {
         echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
         echo '<tr class="header"><td class="picture left">';
-        echo $OUTPUT->user_picture($user);
+        // Check if this is a hidden grader (userid = -1)
+        if ($comment->userid == -1) {
+            // Show anonymous user icon for hidden grader
+            echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
+        } else {
+            echo $OUTPUT->user_picture($user);
+        }
         echo '</td>';
 
         echo '<td class="topic starter"><div class="author">';
-        $fullname = fullname($user, $comment->userid);
+        // Use helper function to get author name respecting privacy
+        require_once(__DIR__ . '/lib.php');
+        $fullname = block_exaport_get_comment_author_name($comment->userid);
         $by = new object();
         $by->name = $fullname;
         $by->date = userdate($comment->timemodified);

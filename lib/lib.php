@@ -2179,8 +2179,8 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
                     if ($comments && count($comments) > 0) {
                         foreach ($comments as &$comment) {
                             $comment->timemodified = transform::datetime(@$comment->timemodified);
-                            $user_obj = $DB->get_record('user', ['id' => $comment->userid]);
-                            $comment->fromUser = fullname($user_obj, $userid);
+                            // Use helper function to respect privacy
+                            $comment->fromUser = block_exaport_get_comment_author_name($comment->userid, $userid);
                             unset($comment->userid);
                             unset($comment->id);
                             unset($comment->itemid);
@@ -2794,16 +2794,14 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
             $showgrader = has_capability('mod/assign:showhiddengrader', $context, $USER->id);
         }
         
-        // Determine grader name and userid for comment
+        // Determine grader userid for comment
+        // Use special value -1 to indicate hidden grader (avoids exposing real userid)
         if ($showgrader && $grade->grader) {
-            // Get teacher information only if allowed to see grader identity
-            $teacher = $DB->get_record('user', array('id' => $grade->grader), 'id, firstname, lastname');
-            $teachername = $teacher ? fullname($teacher) : get_string('teacher', 'block_exaport');
-            $commentuserid = $grade->grader; // Use teacher's ID
+            $commentuserid = $grade->grader; // Use teacher's real ID
         } else {
-            // Use anonymous grader name
-            $teachername = get_string('hiddengrader', 'block_exaport');
-            $commentuserid = $USER->id; // Use student's ID to avoid exposing grader
+            // Use -1 to indicate grader identity is hidden
+            // Display code will check for this and show "Hidden grader"
+            $commentuserid = -1;
         }
 
         // Create comment entry
@@ -2834,4 +2832,32 @@ function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid)
             }
         }
     }
+}
+
+/**
+ * Get the display name for a comment author, respecting grader privacy settings
+ *
+ * This function checks if the comment userid is -1 (hidden grader marker) and returns
+ * an appropriate display name. For normal comments, it returns the user's full name.
+ *
+ * @param int $userid The userid from the comment record
+ * @param int|null $viewerid Optional viewer's userid for permission checks
+ * @return string The display name for the comment author
+ */
+function block_exaport_get_comment_author_name($userid, $viewerid = null) {
+    global $DB;
+    
+    // Check for hidden grader marker
+    if ($userid == -1) {
+        return get_string('hiddengrader', 'block_exaport');
+    }
+    
+    // Get user record and return full name
+    $user = $DB->get_record('user', array('id' => $userid));
+    if ($user) {
+        return fullname($user);
+    }
+    
+    // Fallback if user not found
+    return get_string('unknownuser', 'block_exaport');
 }

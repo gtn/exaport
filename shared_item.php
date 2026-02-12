@@ -193,14 +193,27 @@ function block_exaport_show_comments($item, $access) {
             echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
             echo '<tr class="header"><td class="picture left">';
-            echo $OUTPUT->user_picture($user);
+            // Check if this is a hidden grader (userid = -1)
+            if ($comment->userid == -1) {
+                // Show anonymous user icon for hidden grader
+                echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
+            } else {
+                echo $OUTPUT->user_picture($user);
+            }
             echo '</td>';
 
             echo '<td class="topic starter"><div class="author">';
-            $fullname = fullname($user, $comment->userid);
+            // Use helper function to get author name respecting privacy
+            require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
+            $fullname = block_exaport_get_comment_author_name($comment->userid);
             $by = new stdClass();
-            $by->name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
-                $user->id . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
+            if ($comment->userid == -1) {
+                // Don't link to user profile for hidden grader
+                $by->name = $fullname;
+            } else {
+                $by->name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
+                    $user->id . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
+            }
             $by->date = userdate($comment->timemodified);
             print_string('bynameondate', 'forum', $by);
 

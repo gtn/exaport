@@ -123,20 +123,22 @@ function export_data_file_area_name() {
 
 function add_comments($table, $bookmarkid) {
     global $DB, $exportwpfile;
+    require_once(__DIR__ . '/lib/lib.php');
     $commentscontent = '';
     $conditions = array("itemid" => $bookmarkid);
     $comments = $DB->get_records($table, $conditions);
     $i = 1;
     if ($comments) {
         foreach ($comments as $comment) {
-            $conditions = array("id" => $comment->userid);
-            $user = $DB->get_record('user', $conditions);
+            // Use helper function to get author name respecting privacy
+            $authorname = block_exaport_get_comment_author_name($comment->userid);
+            
             if ($exportwpfile) {
-                $commentscontent .= userdate($comment->timemodified) . " " . fullname($user, $comment->userid) . " " . $comment->entry . "\n";
+                $commentscontent .= userdate($comment->timemodified) . " " . $authorname . " " . $comment->entry . "\n";
             } else {
                 $commentscontent .= '
             <div id="comment">
-                <div id="author"><!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->' . fullname($user, $comment->userid) .
+                <div id="author"><!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###-->' . $authorname .
                     '<!--###BOOKMARK_COMMENT(' . $i . ')_AUTHOR###--></div>
                 <div id="date"><!--###BOOKMARK_COMMENT(' . $i . ')_TIME###-->' . userdate($comment->timemodified) .
                     '<!--###BOOKMARK_COMMENT(' . $i . ')_TIME###--></div>

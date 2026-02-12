@@ -229,6 +229,10 @@ switch ($action) {
         $post->nosubmission = $nosubmission;
         $post->onlinetext = $onlinetext;
         $post->aid = $aid;
+        // Prefill intro field with online text content for display during creation
+        if ($checkedonlinetext) {
+            $post->intro = format_text($checkedonlinetext->onlinetext, $checkedonlinetext->onlineformat);
+        }
         $straction = get_string('new');
         break;
     default :

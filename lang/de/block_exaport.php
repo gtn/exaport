@@ -867,3 +867,6 @@ $string['wp_exported_view_hidden_in_wp'] = 'Exportiert, aber in Wordpress ausgeb
 $string['wp_exported_view_newer_than_wp'] = 'WordPress-Ansicht ist älter als die Moodle-Ansicht';
 $string['alwaysnotifywhenshare'] = 'Immer benachrichtigen, wenn geteilt wird';
 $string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.';
+$string['submission_fileortext'] = 'Abgabe: File/Text';
+$string['feedback_fileortext'] = 'Feedback: File/Text';
+$string['no_submission_no_feedback'] = 'Weder Abgabe noch Feedback vorhanden';

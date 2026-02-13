@@ -26,6 +26,7 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 $confirm = optional_param('confirm', '', PARAM_BOOL);
 $fileid = optional_param('fileid', '', PARAM_FILE);
 $submissionid = optional_param('submissionid', 0, PARAM_INT);
+$gradeid = optional_param('gradeid', 0, PARAM_INT);  // NEW
 $aid = optional_param('aid', 0, PARAM_INT); // Assignment ID for no-submission case
 $nosubmission = optional_param('nosubmission', 0, PARAM_INT); // Flag for no submission
 $onlinetext = optional_param('onlinetext', 0, PARAM_INT); // Flag for online text submission
@@ -33,47 +34,50 @@ $onlinetext = optional_param('onlinetext', 0, PARAM_INT); // Flag for online tex
 $modassign = block_exaport_assignmentversion();
 
 // Get assignment data
-if ($nosubmission && $aid) {
-    // No submission case - get assignment data directly
-    if ($modassign->new) {
-        $assignment = $DB->get_record_sql("SELECT a.id AS aid, a.id AS assignment, a.name, a.course, c.fullname AS coursename " .
-            " FROM {assign} a " .
+if ($modassign->new) {
+    // Build base query
+    $sql = "SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
+        " a.name, a.course, c.fullname AS coursename ";
+    $params = array($USER->id);
+    
+    if ($nosubmission && $gradeid > 0) {
+        // Feedback-only case: join via grades
+        $sql .= " FROM {assign} a " .
+            " LEFT JOIN {assign_submission} s ON s.assignment = a.id AND s.userid = ? " .
+            " INNER JOIN {assign_grades} ag ON ag.assignment = a.id AND ag.userid = ? AND ag.id = ? " .
             " LEFT JOIN {course} c on a.course = c.id " .
-            " WHERE a.id=?", array($aid));
-        $assignment->submissionid = 0; // No submission
-    } else {
-        print_error('Legacy assignments not supported for no-submission import');
-    }
-} else if ($onlinetext && $submissionid) {
-    // Online text case - get assignment from submission
-    if ($modassign->new) {
-        $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
-            " a.name, a.course, c.fullname AS coursename " .
-            " FROM {assign_submission} s " .
+            " WHERE a.id = ?";
+        $params[] = $USER->id;
+        $params[] = $gradeid;
+        $params[] = $aid;
+    } else if ($submissionid > 0) {
+        // Submission case
+        $sql .= " FROM {assign_submission} s " .
             " INNER JOIN {assign} a ON s.assignment=a.id " .
             " LEFT JOIN {course} c on a.course = c.id " .
-            " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
+            " WHERE s.userid=? AND s.id=?";
+        $params[] = $submissionid;
+    } else if ($aid > 0) {
+        // Assignment case without specific submission or grade ID
+        // This handles cases like online text submissions or any other submission type
+        $sql .= " FROM {assign} a " .
+            " LEFT JOIN {assign_submission} s ON s.assignment = a.id AND s.userid = ? " .
+            " LEFT JOIN {course} c on a.course = c.id " .
+            " WHERE a.id = ?";
+        $params[] = $aid;
     } else {
-        print_error('Legacy assignments not supported for online text import');
+        \block_exaport\common\print_error('invalidparameters', 'block_exaport');
     }
+    
+    $assignment = $DB->get_record_sql($sql, $params);
 } else {
-    // Normal case - get from submission (no specific flag set)
-    // This handles cases where we have a submission but don't know if it has files or text
-    if ($modassign->new) {
-        $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
-            " a.name, a.course, c.fullname AS coursename " .
-            " FROM {assign_submission} s " .
-            " INNER JOIN {assign} a ON s.assignment=a.id " .
-            " LEFT JOIN {course} c on a.course = c.id " .
-            " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
-    } else {
-        $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
-            " a.name, a.course, a.assignmenttype, c.fullname AS coursename " .
-            " FROM {assignment_submissions} s " .
-            " JOIN {assignment} a ON s.assignment=a.id " .
-            " LEFT JOIN {course} c on a.course = c.id " .
-            " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
-    }
+    // Legacy code unchanged
+    $assignment = $DB->get_record_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified, " .
+        " a.name, a.course, a.assignmenttype, c.fullname AS coursename " .
+        " FROM {assignment_submissions} s " .
+        " JOIN {assignment} a ON s.assignment = a.id " .
+        " LEFT JOIN {course} c on a.course = c.id " .
+        " WHERE s.userid=? AND s.id=?", array($USER->id, $submissionid));
 }
 
 if (!$assignment) {
@@ -114,12 +118,18 @@ if (!is_enrolled($modulecontext, $USER->id, '', true)) {
 }
 
 // For no-submission case, verify feedback actually exists
-if ($nosubmission && $aid) {
-    // Check if there's actually feedback to import
-    $grade = $DB->get_record('assign_grades',
-        array('assignment' => $aid, 'userid' => $USER->id));
-
-    if (!$grade || $grade->grade < 0) {
+if ($nosubmission && $gradeid > 0) {
+    // Get grade record
+    $grade = $DB->get_record('assign_grades', array('id' => $gradeid, 'userid' => $USER->id));
+    if (!$grade) {
+        \block_exaport\common\print_error('invalidgradeid', 'block_exaport');
+    }
+    // Verify this grade belongs to this assignment
+    if ($grade->assignment != $assignment->aid) {
+        \block_exaport\common\print_error('invalidgradeid', 'block_exaport');
+    }
+    // Verify grade is actually released (grade >= 0)
+    if ($grade->grade < 0) {
         print_error('nofeedbackavailable', 'block_exaport');
     }
 
@@ -127,6 +137,13 @@ if ($nosubmission && $aid) {
     $assignrecord = $DB->get_record('assign', array('id' => $aid));
     if (!$assignrecord) {
         print_error('invalidassignment', 'block_exaport');
+    }
+} else if ($submissionid > 0) {
+    // Verify submission exists and belongs to user
+    $submission = $DB->get_record('assign_submission', 
+        array('id' => $submissionid, 'userid' => $USER->id, 'assignment' => $assignment->aid));
+    if (!$submission) {
+        \block_exaport\common\print_error('invalidsubmissionid', 'block_exaport');
     }
 }
 
@@ -147,21 +164,33 @@ if (!$course = $DB->get_record("course", $conditions)) {
     print_error("invalidcourseid", "block_exaport");
 }
 
-if ($submissionid == 0 && !$nosubmission) {
+if ($submissionid == 0 && $gradeid == 0 && !$nosubmission) {
     error("No assignment given!");
 }
 
 // Check for submission content
-if ($onlinetext && !$nosubmission) {
-    // Get online text submission
-    $checkedonlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
-    if (!$checkedonlinetext || empty($checkedonlinetext->onlinetext)) {
-        print_error("invalidonlinetextatthisassignment", "block_exaport");
+if ($nosubmission && $gradeid > 0) {
+    // Check for feedback files
+    $fs = get_file_storage();
+    $filecontext = context_module::instance($cm->id);
+    $files = $fs->get_area_files($filecontext->id, 'assignfeedback_file', 'feedback_files', $gradeid, "filename", false);
+    if (empty($files) && empty($fileid)) {
+        \block_exaport\common\print_error('nofeedbackfiles', 'block_exaport');
     }
-} else if (!$nosubmission && !empty($fileid)) {
-    // Check for submission file only if fileid is provided
-    if (!($checkedfile = check_assignment_file($cm, $assignment, $fileid))) {
-        print_error("invalidfileatthisassignment", "block_exaport");
+} else if (!$nosubmission) {
+    // Check for submission file if fileid is provided
+    if (!empty($fileid)) {
+        if (!($checkedfile = check_assignment_file($cm, $assignment, $fileid))) {
+            print_error("invalidfileatthisassignment", "block_exaport");
+        }
+    }
+    
+    // Check for online text submission if onlinetext flag is set
+    if ($onlinetext) {
+        $checkedonlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
+        if (!$checkedonlinetext || empty($checkedonlinetext->onlinetext)) {
+            print_error("invalidonlinetextatthisassignment", "block_exaport");
+        }
     }
 }
 // If no fileid and no onlinetext flag, we might have a submission without files/text
@@ -223,6 +252,7 @@ if ($action == 'add') {
     }
     $existing->submission = $submissionid;
     $existing->submissionid = $submissionid;
+    $existing->gradeid = $gradeid;
     $existing->fileid = $fileid;
     $existing->nosubmission = $nosubmission;
     $existing->onlinetext = $onlinetext;
@@ -268,6 +298,7 @@ switch ($action) {
         $post->action = $action;
         $post->courseid = $courseid;
         $post->submissionid = $submissionid;
+        $post->gradeid = $gradeid;
         $post->fileid = $fileid;
         $post->name = $assignment->name; // Prefill the title with assignment name
         $post->nosubmission = $nosubmission;
@@ -294,12 +325,11 @@ $filecontext = context_module::instance($cm->id);
 
 echo "<div class='block_eportfolio_center'>\n";
 
+// Only show files in block_eportfolio_center, never online text
 if ($checkedfile) {
     echo $OUTPUT->box(block_exaport_print_file($checkedfile));
-} else if ($checkedonlinetext) {
-    $textcontent = format_text($checkedonlinetext->onlinetext, $checkedonlinetext->onlineformat);
-    echo $OUTPUT->box('<h4>' . get_string('onlinetext', 'block_exaport') . '</h4>' . $textcontent);
 } else {
+    // If no file, show message (online text should be in intro_editor, not here)
     echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
 }
 echo "</div>";

@@ -17,6 +17,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/lib.php'); // needed for block_exaport_get_comment_author_name
 function block_exaport_get_user_from_hash($hash) {
     trigger_error('deprecated');
     $conditions = array("user_hash" => $hash);
@@ -191,7 +192,6 @@ function block_exaport_print_extcomments($itemid) {
 
         echo '<td class="topic starter"><div class="author">';
         // Use helper function to get author name respecting privacy
-        require_once(__DIR__ . '/lib.php');
         $fullname = block_exaport_get_comment_author_name($comment->userid);
         $by = new object();
         $by->name = $fullname;

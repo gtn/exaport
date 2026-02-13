@@ -205,7 +205,6 @@ function block_exaport_show_comments($item, $access) {
 
             echo '<td class="topic starter"><div class="author">';
             // Use helper function to get author name respecting privacy
-            require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
             $fullname = block_exaport_get_comment_author_name($comment->userid);
             $by = new stdClass();
             if ($comment->userid == -1) {

@@ -123,7 +123,6 @@ function export_data_file_area_name() {
 
 function add_comments($table, $bookmarkid) {
     global $DB, $exportwpfile;
-    require_once(__DIR__ . '/lib/lib.php');
     $commentscontent = '';
     $conditions = array("itemid" => $bookmarkid);
     $comments = $DB->get_records($table, $conditions);
@@ -132,7 +131,7 @@ function add_comments($table, $bookmarkid) {
         foreach ($comments as $comment) {
             // Use helper function to get author name respecting privacy
             $authorname = block_exaport_get_comment_author_name($comment->userid);
-            
+
             if ($exportwpfile) {
                 $commentscontent .= userdate($comment->timemodified) . " " . $authorname . " " . $comment->entry . "\n";
             } else {

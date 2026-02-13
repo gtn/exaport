@@ -40,7 +40,7 @@ $modassign = block_exaport_assignmentversion();
 $assignments = block_exaport_get_assignments_for_import($modassign);
 
 $table = new html_table();
-$table->head = array(get_string("modulename", $modassign->title), get_string("time"), 
+$table->head = array(get_string("modulename", $modassign->title), get_string("time"),
     get_string("submission_fileortext", "block_exaport"),
     get_string("feedback_fileortext", "block_exaport"),
     get_string("course", "block_exaport"), get_string("action"));
@@ -57,17 +57,17 @@ if ($assignments) {
         $course = $DB->get_record('course', array("id" => $courseid));
         $context = context_module::instance($cm->id);
         $fs = get_file_storage();
-        
+
         // Initialize cells for this assignment
         $submissioncell = '';
         $feedbackcell = '';
         $actioncell = '';
-        
+
         // Check if this assignment has a submission
         $hassubmission = isset($assignment->has_submission) ? $assignment->has_submission : true;
         $hasfile = isset($assignment->has_file) ? $assignment->has_file : false;
         $hasonlinetext = isset($assignment->has_onlinetext) ? $assignment->has_onlinetext : false;
-        
+
         // SUBMISSION CONTENT
         if ($hassubmission && $assignment->submissionid > 0) {
             // Check for submission files
@@ -84,12 +84,13 @@ if ($assignments) {
                     $submissioncell .= $icon . ' <a href="' . s($url) . '" >' . $filename . '</a><br />';
                 }
             }
-            
+
             // Check for online text submission
             if ($hasonlinetext) {
                 $onlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
                 if ($onlinetext && !empty($onlinetext->onlinetext)) {
-                    $icon = $OUTPUT->pix_icon('i/edit', get_string('onlinetext', 'block_exaport'));
+                    // $icon = $OUTPUT->pix_icon('i/edit', get_string('onlinetext', 'block_exaport')); this seems like you could edit it --> dont show icon
+                    $icon = '';
                     // Get preview of text (first 100 chars)
                     $textpreview = format_text($onlinetext->onlinetext, $onlinetext->onlineformat);
                     $textpreview = strip_tags($textpreview);
@@ -97,12 +98,12 @@ if ($assignments) {
                     if (core_text::strlen($textpreview) == 100) {
                         $textpreview .= '...';
                     }
-                    
+
                     $submissioncell .= $icon . ' ' . get_string('onlinetext', 'block_exaport') . ': ' . s($textpreview) . '<br />';
                 }
             }
         }
-        
+
         // FEEDBACK CONTENT
         // Get feedback for this assignment
         $grade = $DB->get_record('assign_grades', array('assignment' => $assignment->aid, 'userid' => $USER->id));
@@ -110,11 +111,11 @@ if ($assignments) {
             // Check for feedback files
             $feedbackfilerecord = $DB->get_record('assignfeedback_file',
                 array('assignment' => $assignment->aid, 'grade' => $grade->id));
-            
+
             if ($feedbackfilerecord) {
                 $feedbackfiles = $fs->get_area_files($context->id, 'assignfeedback_file', 'feedback_files',
                     $grade->id, 'filename', false);
-                
+
                 foreach ($feedbackfiles as $file) {
                     $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
                     $filename = $file->get_filename();
@@ -124,12 +125,13 @@ if ($assignments) {
                     $feedbackcell .= $icon . ' <a href="' . s($url) . '" >' . $filename . '</a><br />';
                 }
             }
-            
+
             // Check for feedback comments
             $feedbackcomment = $DB->get_record('assignfeedback_comments',
                 array('assignment' => $assignment->aid, 'grade' => $grade->id));
             if ($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) {
-                $icon = $OUTPUT->pix_icon('i/edit', get_string('feedbackfromteacher', 'block_exaport'));
+                // $icon = $OUTPUT->pix_icon('i/edit', get_string('feedbackfromteacher', 'block_exaport')); // this seems like you could edit it --> dont show icon
+                $icon = '';
                 // Get preview of comment text (first 50 chars)
                 $commentpreview = strip_tags($feedbackcomment->commenttext);
                 $commentpreview = core_text::substr($commentpreview, 0, 50);
@@ -139,7 +141,7 @@ if ($assignments) {
                 $feedbackcell .= $icon . ' ' . get_string('feedbackfromteacher', 'block_exaport') . ': ' . s($commentpreview) . '<br />';
             }
         }
-        
+
         // ACTION BUTTON
         // Determine action button or message
         if (empty($submissioncell) && empty($feedbackcell)) {
@@ -147,16 +149,16 @@ if ($assignments) {
             $actioncell = get_string('no_submission_no_feedback', 'block_exaport');
         } else {
             // Create import button with sanitized parameters
-            $actioncell = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . 
-                (int)$courseid . '&amp;submissionid=' . (int)abs($assignment->submissionid) . 
+            $actioncell = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' .
+                (int)$courseid . '&amp;submissionid=' . (int)abs($assignment->submissionid) .
                 '&amp;aid=' . (int)$assignment->aid . '">' .
                 get_string("add_this_assignment", "block_exaport") . '</a>';
         }
-        
+
         // Remove all trailing <br /> tags (handle multiple consecutive tags)
         $submissioncell = preg_replace('/(<br \/>)+$/', '', $submissioncell);
         $feedbackcell = preg_replace('/(<br \/>)+$/', '', $feedbackcell);
-        
+
         // Use dash for empty cells
         if (trim($submissioncell) === '') {
             $submissioncell = '-';
@@ -164,7 +166,7 @@ if ($assignments) {
         if (trim($feedbackcell) === '') {
             $feedbackcell = '-';
         }
-        
+
         // Add single row for this assignment
         $table->data[] = array(
             $assignment->name,

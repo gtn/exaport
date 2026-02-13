@@ -123,7 +123,7 @@ if ($assignments) {
         // FEEDBACK CONTENT
         // Get feedback for this assignment
         $grade = $DB->get_record('assign_grades', array('assignment' => $assignment->aid, 'userid' => $USER->id));
-        if ($grade && isset($grade->grade) && $grade->grade >= 0) {
+        if ($grade) {
             // SECURITY: Check if feedback is actually released
             $assigncourse = $DB->get_record('course', array('id' => $assignment->course));
             $assignobj = new assign($context, $cm, $assigncourse);

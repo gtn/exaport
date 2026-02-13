@@ -17,7 +17,6 @@
 
 global $PAGE, $DB, $OUTPUT, $SITE;
 require_once(__DIR__ . '/inc.php');
-require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 
 $id = optional_param('id', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);

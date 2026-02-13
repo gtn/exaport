@@ -35,9 +35,6 @@ class exaport_portfolio_caller extends portfolio_module_caller_base {
     /** @var int callback arg - the cmid of the assignment we export */
     protected $cmid;
 
-    /** @var array Feedback files from the assignment */
-    protected $feedbackfiles = array();
-
     /**
      * Callback arg for a single file export.
      */
@@ -63,8 +60,6 @@ class exaport_portfolio_caller extends portfolio_module_caller_base {
     /**
      * Load data needed for the portfolio export.
      *
-     *This includes fetching teacher feedback files if available.
-     *
      * If the assignment type implements portfolio_load_data(), the processing is delegated
      * to it. Otherwise, the caller must provide either fileid (to export single file) or
      * submissionid and filearea (to export all data attached to the given submission file area)
@@ -73,73 +68,7 @@ class exaport_portfolio_caller extends portfolio_module_caller_base {
      * @throws     portfolio_caller_exception
      */
     public function load_data() {
-        global $USER, $DB;
-
-        // Load feedback files if we have a course module ID
-        if ($this->cmid) {
-            $this->feedbackfiles = $this->get_feedback_files_for_export();
-        }
-
         return true;
-    }
-
-    /**
-     * Get feedback files from the assignment for the current user
-     *
-     * @return array Array of stored_file objects
-     */
-    protected function get_feedback_files_for_export() {
-        global $USER, $DB;
-
-        $feedbackfiles = array();
-
-        try {
-            $cm = get_coursemodule_from_id('assign', $this->cmid);
-            if (!$cm) {
-                return $feedbackfiles;
-            }
-
-            $context = context_module::instance($cm->id);
-            $fs = get_file_storage();
-
-            // Get the user's submission for this assignment
-            $submission = $DB->get_record('assign_submission',
-                array('assignment' => $cm->instance, 'userid' => $USER->id),
-                '*', IGNORE_MULTIPLE);
-
-            if ($submission) {
-                // Get the grade record
-                $grade = $DB->get_record('assign_grades',
-                    array('assignment' => $cm->instance, 'userid' => $USER->id),
-                    '*', IGNORE_MULTIPLE);
-
-                if ($grade) {
-                    // Check for feedback files
-                    $feedbackfilerecord = $DB->get_record('assignfeedback_file',
-                        array('assignment' => $cm->instance, 'grade' => $grade->id));
-
-                    if ($feedbackfilerecord) {
-                        $feedbackfiles = $fs->get_area_files($context->id,
-                            'assignfeedback_file', 'feedback_files',
-                            $grade->id, "filename", false);
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            // Gracefully handle errors - don't break export if feedback fetch fails
-            debugging('Error fetching feedback files: ' . $e->getMessage(), DEBUG_NORMAL);
-        }
-
-        return $feedbackfiles;
-    }
-
-    /**
-     * Get the loaded feedback files
-     *
-     * @return array
-     */
-    public function get_feedback_files() {
-        return $this->feedbackfiles;
     }
 
     /**

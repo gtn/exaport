@@ -89,8 +89,6 @@ if ($assignments) {
             if ($hasonlinetext) {
                 $onlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
                 if ($onlinetext && !empty($onlinetext->onlinetext)) {
-                    // $icon = $OUTPUT->pix_icon('i/edit', get_string('onlinetext', 'block_exaport')); this seems like you could edit it --> dont show icon
-                    $icon = '';
                     // Get preview of text (first 100 chars)
                     $textpreview = format_text($onlinetext->onlinetext, $onlinetext->onlineformat);
                     $textpreview = strip_tags($textpreview);
@@ -99,7 +97,7 @@ if ($assignments) {
                         $textpreview .= '...';
                     }
 
-                    $submissioncell .= $icon . ' ' . get_string('onlinetext', 'block_exaport') . ': ' . s($textpreview) . '<br />';
+                    $submissioncell .= get_string('onlinetext', 'block_exaport') . ': ' . s($textpreview) . '<br />';
                 }
             }
         }
@@ -130,15 +128,13 @@ if ($assignments) {
             $feedbackcomment = $DB->get_record('assignfeedback_comments',
                 array('assignment' => $assignment->aid, 'grade' => $grade->id));
             if ($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) {
-                // $icon = $OUTPUT->pix_icon('i/edit', get_string('feedbackfromteacher', 'block_exaport')); // this seems like you could edit it --> dont show icon
-                $icon = '';
                 // Get preview of comment text (first 50 chars)
                 $commentpreview = strip_tags($feedbackcomment->commenttext);
                 $commentpreview = core_text::substr($commentpreview, 0, 50);
                 if (core_text::strlen($commentpreview) == 50) {
                     $commentpreview .= '...';
                 }
-                $feedbackcell .= $icon . ' ' . get_string('feedbackfromteacher', 'block_exaport') . ': ' . s($commentpreview) . '<br />';
+                $feedbackcell .= get_string('feedbackfromteacher', 'block_exaport') . ': ' . s($commentpreview) . '<br />';
             }
         }
 

@@ -79,7 +79,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
                 // Store last item for redirect
                 $this->lastitem = $DB->get_record('block_exaportitem', array('id' => $itemid));
             }
-            
+
             // If no files but have assignment (feedback only case)
             if (empty($files)) {
                 $itemid = block_exaport_create_item_from_assignment($assignment, null, $categoryid, 0);
@@ -123,7 +123,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
 
         try {
             $cm = null;
-            
+
             // Check different ways to get the course module
             if (method_exists($caller, 'get_course_module')) {
                 $cm = $caller->get_course_module();
@@ -136,6 +136,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
                 }
             }
 
+            // Validate course module
             if (!$cm || !isset($cm->modname) || $cm->modname !== 'assign') {
                 return null;
             }
@@ -147,17 +148,57 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
             }
 
             $course = $DB->get_record('course', array('id' => $assign->course));
+            if (!$course) {
+                return null;
+            }
+
+            // Verify course module belongs to the expected course
+            if ($cm->course != $course->id) {
+                debugging('Course module does not belong to expected course', DEBUG_DEVELOPER);
+                return null;
+            }
+
+            $context = context_module::instance($cm->id);
+
+            // Check if assignment is available to student
+            if (!$cm->visible && !has_capability('moodle/course:viewhiddenactivities', $context)) {
+                debugging('Assignment is hidden and user cannot view hidden activities', DEBUG_DEVELOPER);
+                return null; // Hidden assignment
+            }
+
+            // Check if module is being deleted
+            if (isset($cm->deletioninprogress) && $cm->deletioninprogress) {
+                debugging('Assignment is being deleted', DEBUG_DEVELOPER);
+                return null;
+            }
+
+            // Verify user is enrolled in the course
+            if (!is_enrolled($context, $USER->id, '', true)) {
+                debugging('User is not enrolled in the course', DEBUG_DEVELOPER);
+                return null; // Not enrolled
+            }
+
+            // Check assignment dates (if applicable)
+            $now = time();
+            if ($assign->allowsubmissionsfromdate > 0 && $now < $assign->allowsubmissionsfromdate) {
+                debugging('Assignment is not yet available (before start date)', DEBUG_DEVELOPER);
+                return null; // Not yet available
+            }
 
             // Build assignment object compatible with shared function
             $assignment = new stdClass();
             $assignment->aid = $assign->id;
             $assignment->assignment = $assign->id;
             $assignment->name = $assign->name;
-            $assignment->coursename = $course ? $course->fullname : '';
+            $assignment->coursename = $course->fullname;
 
             return $assignment;
         } catch (Exception $e) {
-            debugging('Error extracting assignment from caller: ' . $e->getMessage(), DEBUG_NORMAL);
+            // Log error only in DEBUG_DEVELOPER
+            debugging('Error extracting assignment from caller.', DEBUG_DEVELOPER);
+
+            // For production, return null gracefully
+            // Don't expose error details to users
             return null;
         }
     }

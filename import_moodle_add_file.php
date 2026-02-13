@@ -82,6 +82,51 @@ if (!$cm) {
     print_error('invalidcoursemodule');
 }
 
+// Security validations for course module and assignment
+$modulecontext = context_module::instance($cm->id);
+
+// Validate course module modname is 'assign'
+if ($cm->modname !== 'assign') {
+    print_error('invalidmodule', 'block_exaport');
+}
+
+// Verify course module belongs to the expected course
+if ($cm->course != $assignment->course) {
+    print_error('invalidcoursemodule');
+}
+
+// Check if assignment is visible to student
+if (!$cm->visible && !has_capability('moodle/course:viewhiddenactivities', $modulecontext)) {
+    print_error('assignmentnotvisible', 'block_exaport');
+}
+
+// Check if module is being deleted
+if (isset($cm->deletioninprogress) && $cm->deletioninprogress) {
+    print_error('modulebeingdeleted', 'block_exaport');
+}
+
+// Verify user is enrolled in the course
+if (!is_enrolled($modulecontext, $USER->id, '', true)) {
+    print_error('notenrolled', 'block_exaport');
+}
+
+// For no-submission case, verify feedback actually exists
+if ($nosubmission && $aid) {
+    // Check if there's actually feedback to import
+    $grade = $DB->get_record('assign_grades',
+        array('assignment' => $aid, 'userid' => $USER->id));
+    
+    if (!$grade || $grade->grade < 0) {
+        print_error('nofeedbackavailable', 'block_exaport');
+    }
+    
+    // Verify assignment record exists
+    $assignrecord = $DB->get_record('assign', array('id' => $aid));
+    if (!$assignrecord) {
+        print_error('invalidassignment', 'block_exaport');
+    }
+}
+
 $post = new stdClass();
 $checkedfile = null;
 $checkedonlinetext = null;

@@ -146,21 +146,22 @@ if ($assignments) {
             // Neither submission nor feedback available
             $actioncell = get_string('no_submission_no_feedback', 'block_exaport');
         } else {
-            // Create import button
-            $actioncell = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . $courseid .
-                '&amp;submissionid=' . abs($assignment->submissionid) . '&amp;aid=' . $assignment->aid . '">' .
+            // Create import button with sanitized parameters
+            $actioncell = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' . 
+                (int)$courseid . '&amp;submissionid=' . (int)abs($assignment->submissionid) . 
+                '&amp;aid=' . (int)$assignment->aid . '">' .
                 get_string("add_this_assignment", "block_exaport") . '</a>';
         }
         
-        // Remove trailing <br /> tags
-        $submissioncell = preg_replace('/<br \/>$/', '', $submissioncell);
-        $feedbackcell = preg_replace('/<br \/>$/', '', $feedbackcell);
+        // Remove all trailing <br /> tags (handle multiple consecutive tags)
+        $submissioncell = preg_replace('/(<br \/>)+$/', '', $submissioncell);
+        $feedbackcell = preg_replace('/(<br \/>)+$/', '', $feedbackcell);
         
         // Use dash for empty cells
-        if (empty($submissioncell)) {
+        if (trim($submissioncell) === '') {
             $submissioncell = '-';
         }
-        if (empty($feedbackcell)) {
+        if (trim($feedbackcell) === '') {
             $feedbackcell = '-';
         }
         

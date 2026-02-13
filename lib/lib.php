@@ -910,6 +910,10 @@ function block_exaport_get_assignments_for_import($modassign) {
     if ($modassign->new) {
         // Show assignments where: student submitted something OR teacher provided feedback
         // Enhanced with visibility and enrollment checks
+
+        // todo: this gets the assignments and the file of the submission, but NOT of the feedback..
+        // the feedbackfiles are gotten later on. This is inconsistent, but was done due to historically growing the functionality.
+        // leave for now, it works
         $assignments = $DB->get_records_sql("
             SELECT DISTINCT
                 a.id AS aid,                       -- Primary key (never NULL) - used as array key

@@ -17,7 +17,7 @@
 
 global $DB, $OUTPUT, $CFG;
 require_once(__DIR__ . '/inc.php');
-require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
+require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
 $output = "";
 $courseid = optional_param("courseid", 0, PARAM_INT);
@@ -51,11 +51,18 @@ $table->data = array();
 
 if ($assignments) {
     foreach ($assignments as $assignment) {
-        if (!$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid)) {
-            print_error('invalidcoursemodule');
+        if (!$cm = get_coursemodule_from_instance($modassign->title, $assignment->aid, $assignment->course)) {
+            continue; // Skip - can't find module
         }
-        $course = $DB->get_record('course', array("id" => $courseid));
+
         $context = context_module::instance($cm->id);
+
+        // SECURITY: Check if user can view and submit to this assignment
+        if (!has_capability('mod/assign:view', $context) ||
+            !has_capability('mod/assign:submit', $context)) {
+            continue; // Skip - user shouldn't access this
+        }
+
         $fs = get_file_storage();
 
         // Initialize cells for this assignment
@@ -105,36 +112,42 @@ if ($assignments) {
         // FEEDBACK CONTENT
         // Get feedback for this assignment
         $grade = $DB->get_record('assign_grades', array('assignment' => $assignment->aid, 'userid' => $USER->id));
-        if ($grade) {
-            // Check for feedback files
-            $feedbackfilerecord = $DB->get_record('assignfeedback_file',
-                array('assignment' => $assignment->aid, 'grade' => $grade->id));
+        if ($grade && isset($grade->grade) && $grade->grade >= 0) {
+            // SECURITY: Check if feedback is actually released
+            $assigncourse = $DB->get_record('course', array('id' => $assignment->course));
+            $assignobj = new assign($context, $cm, $assigncourse);
+            // Check if student can view their submission/feedback
+            if ($assignobj->can_view_submission($USER->id)) {
+                // Check for feedback files
+                $feedbackfilerecord = $DB->get_record('assignfeedback_file',
+                    array('assignment' => $assignment->aid, 'grade' => $grade->id));
 
-            if ($feedbackfilerecord) {
-                $feedbackfiles = $fs->get_area_files($context->id, 'assignfeedback_file', 'feedback_files',
-                    $grade->id, 'filename', false);
+                if ($feedbackfilerecord) {
+                    $feedbackfiles = $fs->get_area_files($context->id, 'assignfeedback_file', 'feedback_files',
+                        $grade->id, 'filename', false);
 
-                foreach ($feedbackfiles as $file) {
-                    $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-                    $filename = $file->get_filename();
-                    $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
-                        $file->get_itemid(), $file->get_filepath(), $file->get_filename())->out();
+                    foreach ($feedbackfiles as $file) {
+                        $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+                        $filename = $file->get_filename();
+                        $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+                            $file->get_itemid(), $file->get_filepath(), $file->get_filename())->out();
 
-                    $feedbackcell .= $icon . ' <a href="' . s($url) . '" >' . $filename . '</a><br />';
+                        $feedbackcell .= $icon . ' <a href="' . s($url) . '" >' . $filename . '</a><br />';
+                    }
                 }
-            }
 
-            // Check for feedback comments
-            $feedbackcomment = $DB->get_record('assignfeedback_comments',
-                array('assignment' => $assignment->aid, 'grade' => $grade->id));
-            if ($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) {
-                // Get preview of comment text (first 50 chars)
-                $commentpreview = strip_tags($feedbackcomment->commenttext);
-                $commentpreview = core_text::substr($commentpreview, 0, 50);
-                if (core_text::strlen($commentpreview) == 50) {
-                    $commentpreview .= '...';
+                // Check for feedback comments
+                $feedbackcomment = $DB->get_record('assignfeedback_comments',
+                    array('assignment' => $assignment->aid, 'grade' => $grade->id));
+                if ($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) {
+                    // Get preview of comment text (first 50 chars)
+                    $commentpreview = strip_tags($feedbackcomment->commenttext);
+                    $commentpreview = core_text::substr($commentpreview, 0, 50);
+                    if (core_text::strlen($commentpreview) == 50) {
+                        $commentpreview .= '...';
+                    }
+                    $feedbackcell .= get_string('feedbackfromteacher', 'block_exaport') . ': ' . s($commentpreview) . '<br />';
                 }
-                $feedbackcell .= get_string('feedbackfromteacher', 'block_exaport') . ': ' . s($commentpreview) . '<br />';
             }
         }
 

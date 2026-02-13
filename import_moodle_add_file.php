@@ -16,8 +16,10 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 global $PAGE, $DB, $OUTPUT, $SITE;
+
+use function block_exaport\common\print_error;
+
 require_once(__DIR__ . '/inc.php');
-require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 
 $id = optional_param('id', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);

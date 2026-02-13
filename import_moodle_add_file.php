@@ -176,16 +176,20 @@ if ($nosubmission && $gradeid > 0) {
     if (empty($files) && empty($fileid)) {
         \block_exaport\common\print_error('nofeedbackfiles', 'block_exaport');
     }
-} else if ($onlinetext && !$nosubmission) {
-    // Get online text submission
-    $checkedonlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
-    if (!$checkedonlinetext || empty($checkedonlinetext->onlinetext)) {
-        print_error("invalidonlinetextatthisassignment", "block_exaport");
+} else if (!$nosubmission) {
+    // Check for submission file if fileid is provided
+    if (!empty($fileid)) {
+        if (!($checkedfile = check_assignment_file($cm, $assignment, $fileid))) {
+            print_error("invalidfileatthisassignment", "block_exaport");
+        }
     }
-} else if (!$nosubmission && !empty($fileid)) {
-    // Check for submission file only if fileid is provided
-    if (!($checkedfile = check_assignment_file($cm, $assignment, $fileid))) {
-        print_error("invalidfileatthisassignment", "block_exaport");
+    
+    // Check for online text submission if onlinetext flag is set
+    if ($onlinetext) {
+        $checkedonlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
+        if (!$checkedonlinetext || empty($checkedonlinetext->onlinetext)) {
+            print_error("invalidonlinetextatthisassignment", "block_exaport");
+        }
     }
 }
 // If no fileid and no onlinetext flag, we might have a submission without files/text
@@ -320,13 +324,17 @@ $filecontext = context_module::instance($cm->id);
 
 echo "<div class='block_eportfolio_center'>\n";
 
+// Only show files in block_eportfolio_center, never online text
 if ($checkedfile) {
     echo $OUTPUT->box(block_exaport_print_file($checkedfile));
-} else if ($checkedonlinetext) {
-    $textcontent = format_text($checkedonlinetext->onlinetext, $checkedonlinetext->onlineformat);
-    echo $OUTPUT->box('<h4>' . get_string('onlinetext', 'block_exaport') . '</h4>' . $textcontent);
 } else {
-    echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
+    // If no file, show appropriate message (not online text)
+    if ($checkedonlinetext) {
+        // Online text exists but should be shown in intro_editor, not here
+        echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
+    } else {
+        echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
+    }
 }
 echo "</div>";
 

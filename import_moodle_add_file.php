@@ -57,8 +57,9 @@ if ($modassign->new) {
             " LEFT JOIN {course} c on a.course = c.id " .
             " WHERE s.userid=? AND s.id=?";
         $params[] = $submissionid;
-    } else if ($onlinetext && $aid > 0) {
-        // Online text case without specific submission ID
+    } else if ($aid > 0) {
+        // Assignment case without specific submission or grade ID
+        // This handles cases like online text submissions or any other submission type
         $sql .= " FROM {assign} a " .
             " LEFT JOIN {assign_submission} s ON s.assignment = a.id AND s.userid = ? " .
             " LEFT JOIN {course} c on a.course = c.id " .

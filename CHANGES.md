@@ -1,7 +1,10 @@
-### v5.1 (2026020500) ###
-* Use same version as latest moodle release
+### v5.1 (2026021300) ###
 * **New Feature**: Teacher feedback files are now automatically included when importing assignment submissions to portfolio
 * Assignment import now includes feedback files from teachers as comments on portfolio items
+* **Security Enhancement**: Added comprehensive permission checks and validation for feedback file access following Moodle capability system
+
+### v5.1 (2026020500) ###
+* Use same version as latest moodle release
 
 ### v4.6.7 (2026010804) ###
 * bugfixes

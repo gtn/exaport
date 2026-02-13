@@ -912,7 +912,8 @@ function block_exaport_get_assignments_for_import($modassign) {
         // Enhanced with visibility and enrollment checks
         $assignments = $DB->get_records_sql("
             SELECT DISTINCT
-                COALESCE(s.id, ag.id * -1) AS submissionid,
+                s.id AS submissionid,              -- Can be NULL (no submission)
+                ag.id AS gradeid,                  -- Can be NULL (no feedback)
                 a.id AS aid,
                 a.id AS assignment,
                 COALESCE(s.timemodified, ag.timemodified) AS timemodified,

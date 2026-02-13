@@ -187,9 +187,6 @@ function block_exaport_show_comments($item, $access) {
 
     if ($comments) {
         foreach ($comments as $comment) {
-            $conditions = array("id" => $comment->userid);
-            $user = $DB->get_record('user', $conditions);
-
             echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
             echo '<tr class="header"><td class="picture left">';
@@ -199,6 +196,7 @@ function block_exaport_show_comments($item, $access) {
                 // echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
                 // since this above does not work: just show nothing for hidden grader
             } else {
+                $user = $DB->get_record('user', array('id' => $comment->userid));
                 echo $OUTPUT->user_picture($user);
             }
             echo '</td>';
@@ -212,7 +210,7 @@ function block_exaport_show_comments($item, $access) {
                 $by->name = $fullname;
             } else {
                 $by->name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
-                    $user->id . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
+                    $comment->userid . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
             }
             $by->date = userdate($comment->timemodified);
             print_string('bynameondate', 'forum', $by);

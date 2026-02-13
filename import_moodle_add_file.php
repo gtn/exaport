@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+global $PAGE, $DB, $OUTPUT, $SITE;
 require_once(__DIR__ . '/inc.php');
 require_once("{$CFG->dirroot}/blocks/exaport/lib/lib.php");
 
@@ -115,11 +116,11 @@ if ($nosubmission && $aid) {
     // Check if there's actually feedback to import
     $grade = $DB->get_record('assign_grades',
         array('assignment' => $aid, 'userid' => $USER->id));
-    
+
     if (!$grade || $grade->grade < 0) {
         print_error('nofeedbackavailable', 'block_exaport');
     }
-    
+
     // Verify assignment record exists
     $assignrecord = $DB->get_record('assign', array('id' => $aid));
     if (!$assignrecord) {
@@ -142,10 +143,6 @@ require_capability('block/exaport:use', $context);
 $conditions = array("id" => $courseid);
 if (!$course = $DB->get_record("course", $conditions)) {
     print_error("invalidcourseid", "block_exaport");
-}
-
-if (!block_exaport_has_categories($USER->id)) {
-    print_error("nocategories", "block_exaport", "view.php?courseid=" . $courseid);
 }
 
 if ($submissionid == 0 && !$nosubmission) {
@@ -352,6 +349,7 @@ function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile, 
  */
 function do_delete($post, $returnurl, $courseid) {
 
+    global $DB;
     $status = $DB->delete_records('block_exaportitem', 'id', $post->id);
 
     block_exaport_add_to_log(SITEID, 'blog', 'delete',

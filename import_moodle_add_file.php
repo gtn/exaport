@@ -328,13 +328,8 @@ echo "<div class='block_eportfolio_center'>\n";
 if ($checkedfile) {
     echo $OUTPUT->box(block_exaport_print_file($checkedfile));
 } else {
-    // If no file, show appropriate message (not online text)
-    if ($checkedonlinetext) {
-        // Online text exists but should be shown in intro_editor, not here
-        echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
-    } else {
-        echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
-    }
+    // If no file, show message (online text should be in intro_editor, not here)
+    echo $OUTPUT->box(get_string('nosubmissionfile', 'block_exaport'));
 }
 echo "</div>";
 

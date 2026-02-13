@@ -16,6 +16,9 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 global $PAGE, $DB, $OUTPUT, $SITE;
+
+use function block_exaport\common\print_error;
+
 require_once(__DIR__ . '/inc.php');
 
 $id = optional_param('id', 0, PARAM_INT);

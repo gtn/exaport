@@ -890,5 +890,5 @@ $string['invalidassignment'] = 'Invalid assignment';
 $string['invalidgradeid'] = 'Invalid grade ID';
 $string['nofeedbackfiles'] = 'No feedback files available';
 $string['invalidsubmissionid'] = 'Invalid submission ID';
-$string['hiddenuser'] = 'Hidden grader';
-$string['unknownuser'] = 'Unknown user';
+$string['hiddenuser'] = 'hidden grader';
+$string['unknownuser'] = 'unknown user';

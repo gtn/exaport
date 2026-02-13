@@ -317,7 +317,7 @@ switch ($action) {
                     } else {
                         $icon = $OUTPUT->pix_icon(file_file_icon($fileobject), '');
                         $extracontent .= "<p>" . $icon . ' ' .
-                            $OUTPUT->action_link($ffurl, format_string($post->name), new popup_action ('click', $ffurl)) . "</p>";
+                            $OUTPUT->action_link($ffurl, $fileobject->get_filename(), new popup_action ('click', $ffurl)) . "</p>";
                     }
 
                     // Filemanager for editing file.

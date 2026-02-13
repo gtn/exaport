@@ -48,7 +48,7 @@ function block_exaport_print_extern_item($item, $access) {
             } else {
                 $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
                 $filescontent .= "<p class=\"filelink\">" . $icon . ' ' .
-                    $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
+                    $OUTPUT->action_link($ffurl, format_string($file->get_filename()), new popup_action ('click', $ffurl)) . "</p>";
                 if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
                     // Videoblock.
                     $filescontent .= '
@@ -66,7 +66,7 @@ function block_exaport_print_extern_item($item, $access) {
                         </div>
                         <div id="video_error" style="display: none;" class="incompatible_video">';
                     $a = new stdClass ();
-                    $a->link = $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl));
+                    $a->link = $OUTPUT->action_link($ffurl, format_string($file->get_filename()), new popup_action ('click', $ffurl));
                     $filescontent .= get_string('incompatible_video', 'block_exaport', $a);
                     $filescontent .= '</div>
                                     </div>';

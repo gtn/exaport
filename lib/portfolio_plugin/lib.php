@@ -53,153 +53,46 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
     }
 
     public function send_package() {
-        global $USER, $DB, $CFG;
-
-        require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
+        global $USER, $DB;
 
         $files = $this->exporter->get_tempfiles();
-        $caller = $this->exporter->get('caller');
-
-        // Try to get assignment context from caller
-        $assignment = $this->get_assignment_from_caller($caller);
-
-        if (empty($files) && !$assignment) {
-            // No files and no assignment context, nothing to do
+        if (empty($files)) {
+            // Not files, do nothing.
             return;
         }
 
-        // Save files to main category
+        $fs = get_file_storage();
+
+        // Save files to first category, so read that id.
+        // $categoryid = $DB->get_field_sql("SELECT id FROM {block_exaportcate} ".
+        // " WHERE userid = ? ORDER BY name LIMIT 1", array($USER->id));
+        // Save to main category. SZ: 30.09.2020
         $categoryid = 0;
 
-        if ($assignment) {
-            // We have assignment context - use shared function
-            // This handles both submission files and teacher feedback
-            foreach ($files as $file) {
-                $itemid = block_exaport_create_item_from_assignment($assignment, $file, $categoryid, 0);
-                // Store last item for redirect
-                $this->lastitem = $DB->get_record('block_exaportitem', array('id' => $itemid));
+        foreach ($files as $file) {
+
+            $item = new stdClass;
+            $item->userid = $USER->id;
+            $item->timemodified = time();
+            $item->courseid = 0;
+            $item->name = $file->get_filename();
+            $item->type = 'file';
+            $item->intro = '';
+            $item->categoryid = $categoryid;
+
+            // Insert.
+            if ($item->id = $DB->insert_record('block_exaportitem', $item)) {
+
+                $filerecord = new stdClass();
+                $filerecord->contextid = context_user::instance($USER->id)->id;
+                $filerecord->component = 'block_exaport';
+                $filerecord->filearea = 'item_file';
+                $filerecord->itemid = $item->id;
+
+                $fs->create_file_from_storedfile($filerecord, $file);
+
+                $this->lastitem = $item;
             }
-
-            // If no files but have assignment (feedback only case)
-            if (empty($files)) {
-                $itemid = block_exaport_create_item_from_assignment($assignment, null, $categoryid, 0);
-                $this->lastitem = $DB->get_record('block_exaportitem', array('id' => $itemid));
-            }
-        } else {
-            // No assignment context - fallback to old behavior
-            $fs = get_file_storage();
-            foreach ($files as $file) {
-                $item = new stdClass;
-                $item->userid = $USER->id;
-                $item->timemodified = time();
-                $item->courseid = 0;
-                $item->name = $file->get_filename();
-                $item->type = 'file';
-                $item->intro = '';
-                $item->categoryid = $categoryid;
-
-                if ($item->id = $DB->insert_record('block_exaportitem', $item)) {
-                    $filerecord = new stdClass();
-                    $filerecord->contextid = context_user::instance($USER->id)->id;
-                    $filerecord->component = 'block_exaport';
-                    $filerecord->filearea = 'item_file';
-                    $filerecord->itemid = $item->id;
-
-                    $fs->create_file_from_storedfile($filerecord, $file);
-                    $this->lastitem = $item;
-                }
-            }
-        }
-    }
-
-    /**
-     * Try to extract assignment information from the portfolio caller
-     *
-     * @param object $caller The portfolio caller object
-     * @return object|null Assignment object with properties: aid, assignment, name, coursename
-     */
-    protected function get_assignment_from_caller($caller) {
-        global $USER, $DB;
-
-        try {
-            $cm = null;
-
-            // Check different ways to get the course module
-            if (method_exists($caller, 'get_course_module')) {
-                $cm = $caller->get_course_module();
-            } else if (isset($caller->cm)) {
-                $cm = $caller->cm;
-            } else if (method_exists($caller, 'get')) {
-                $cmid = $caller->get('cmid');
-                if ($cmid) {
-                    $cm = get_coursemodule_from_id('assign', $cmid);
-                }
-            }
-
-            // Validate course module
-            if (!$cm || !isset($cm->modname) || $cm->modname !== 'assign') {
-                return null;
-            }
-
-            // Get assignment details
-            $assign = $DB->get_record('assign', array('id' => $cm->instance));
-            if (!$assign) {
-                return null;
-            }
-
-            $course = $DB->get_record('course', array('id' => $assign->course));
-            if (!$course) {
-                return null;
-            }
-
-            // Verify course module belongs to the expected course
-            if ($cm->course != $course->id) {
-                debugging('Course module does not belong to expected course', DEBUG_DEVELOPER);
-                return null;
-            }
-
-            $context = context_module::instance($cm->id);
-
-            // Check if assignment is available to student
-            if (!$cm->visible && !has_capability('moodle/course:viewhiddenactivities', $context)) {
-                debugging('Assignment is hidden and user cannot view hidden activities', DEBUG_DEVELOPER);
-                return null; // Hidden assignment
-            }
-
-            // Check if module is being deleted
-            if (isset($cm->deletioninprogress) && $cm->deletioninprogress) {
-                debugging('Assignment is being deleted', DEBUG_DEVELOPER);
-                return null;
-            }
-
-            // Verify user is enrolled in the course
-            if (!is_enrolled($context, $USER->id, '', true)) {
-                debugging('User is not enrolled in the course', DEBUG_DEVELOPER);
-                return null; // Not enrolled
-            }
-
-            // Check assignment dates (if applicable)
-            $now = time();
-            if ($assign->allowsubmissionsfromdate > 0 && $now < $assign->allowsubmissionsfromdate) {
-                debugging('Assignment is not yet available (before start date)', DEBUG_DEVELOPER);
-                return null; // Not yet available
-            }
-
-            // Build assignment object compatible with shared function
-            $assignment = new stdClass();
-            $assignment->aid = $assign->id;
-            $assignment->assignment = $assign->id;
-            $assignment->name = $assign->name;
-            $assignment->coursename = $course->fullname;
-
-            return $assignment;
-        } catch (Exception $e) {
-            // Log error only in DEBUG_DEVELOPER
-            debugging('Error extracting assignment from caller.', DEBUG_DEVELOPER);
-
-            // For production, return null gracefully
-            // Don't expose error details to users
-            return null;
         }
     }
 

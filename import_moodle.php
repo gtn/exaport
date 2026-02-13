@@ -157,11 +157,20 @@ if ($assignments) {
             // Neither submission nor feedback available
             $actioncell = get_string('no_submission_no_feedback', 'block_exaport');
         } else {
-            // Create import button with sanitized parameters
-            $actioncell = '<a href="' . $CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php?courseid=' .
-                (int)$courseid . '&amp;submissionid=' . (int)abs($assignment->submissionid) .
-                '&amp;aid=' . (int)$assignment->aid . '">' .
-                get_string("add_this_assignment", "block_exaport") . '</a>';
+            // Build import URL
+            $urlparams = array(
+                'courseid' => (int)$courseid,  // todo: $courseid or $assignment->course?
+                'submissionid' => (int)abs($assignment->submissionid),
+                'aid' => (int)$assignment->aid
+            );
+
+            // Flag if there's no submission (only feedback)
+            if (!$hassubmission || $assignment->submissionid <= 0) {
+                $urlparams['nosubmission'] = 1;
+            }
+
+            $importurl = new moodle_url($CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php', $urlparams);
+            $actioncell = html_writer::link($importurl, get_string("add_this_assignment", "block_exaport"));
         }
 
         // Remove all trailing <br /> tags (handle multiple consecutive tags)

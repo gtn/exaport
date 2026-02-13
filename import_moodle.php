@@ -152,6 +152,10 @@ if ($assignments) {
                 get_string("add_this_assignment", "block_exaport") . '</a>';
         }
         
+        // Remove trailing <br /> tags
+        $submissioncell = preg_replace('/<br \/>$/', '', $submissioncell);
+        $feedbackcell = preg_replace('/<br \/>$/', '', $feedbackcell);
+        
         // Use dash for empty cells
         if (empty($submissioncell)) {
             $submissioncell = '-';

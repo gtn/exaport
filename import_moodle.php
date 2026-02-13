@@ -75,6 +75,10 @@ if ($assignments) {
         $hasfile = isset($assignment->has_file) ? $assignment->has_file : false;
         $hasonlinetext = isset($assignment->has_onlinetext) ? $assignment->has_onlinetext : false;
 
+        // Track first file ID for import URL
+        $firstfileid = null;
+        $hasonlinetextcontent = false;
+
         // SUBMISSION CONTENT
         if ($hassubmission && $assignment->submissionid > 0) {
             // Check for submission files
@@ -82,7 +86,12 @@ if ($assignments) {
                 $files = $fs->get_area_files($context->id, $modassign->component, $modassign->filearea, $assignment->submissionid,
                     "filename", false);
 
-                foreach ($files as $file) {
+                foreach ($files as $fileid => $file) {
+                    // Store the first file's ID for the import URL
+                    if ($firstfileid === null) {
+                        $firstfileid = $fileid;
+                    }
+                    
                     $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
                     $filename = $file->get_filename();
                     $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
@@ -96,6 +105,8 @@ if ($assignments) {
             if ($hasonlinetext) {
                 $onlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
                 if ($onlinetext && !empty($onlinetext->onlinetext)) {
+                    $hasonlinetextcontent = true;
+                    
                     // Get preview of text (first 100 chars)
                     $textpreview = format_text($onlinetext->onlinetext, $onlinetext->onlineformat);
                     $textpreview = strip_tags($textpreview);
@@ -112,7 +123,7 @@ if ($assignments) {
         // FEEDBACK CONTENT
         // Get feedback for this assignment
         $grade = $DB->get_record('assign_grades', array('assignment' => $assignment->aid, 'userid' => $USER->id));
-        if ($grade && isset($grade->grade) && $grade->grade >= 0) {
+        if ($grade) {
             // SECURITY: Check if feedback is actually released
             $assigncourse = $DB->get_record('course', array('id' => $assignment->course));
             $assignobj = new assign($context, $cm, $assigncourse);
@@ -157,18 +168,32 @@ if ($assignments) {
             // Neither submission nor feedback available
             $actioncell = get_string('no_submission_no_feedback', 'block_exaport');
         } else {
-            // Build import URL
+            // Build import URL with proper parameters
             $urlparams = array(
-                'courseid' => (int)$courseid,  // todo: $courseid or $assignment->course?
-                'submissionid' => (int)abs($assignment->submissionid),
+                'courseid' => (int)$assignment->course,
                 'aid' => (int)$assignment->aid
             );
-
-            // Flag if there's no submission (only feedback)
-            if (!$hassubmission || $assignment->submissionid <= 0) {
+            
+            // If submission exists, pass submission ID
+            if (!empty($assignment->submissionid)) {
+                $urlparams['submissionid'] = (int)$assignment->submissionid;
+                
+                // Add fileid if we have a file
+                if ($firstfileid !== null) {
+                    $urlparams['fileid'] = $firstfileid;
+                }
+                
+                // Add onlinetext flag if we have online text content
+                if ($hasonlinetextcontent) {
+                    $urlparams['onlinetext'] = 1;
+                }
+            }
+            // Otherwise, pass grade ID and flag as no-submission
+            else if (!empty($assignment->gradeid)) {
+                $urlparams['gradeid'] = (int)$assignment->gradeid;
                 $urlparams['nosubmission'] = 1;
             }
-
+            
             $importurl = new moodle_url($CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php', $urlparams);
             $actioncell = html_writer::link($importurl, get_string("add_this_assignment", "block_exaport"));
         }

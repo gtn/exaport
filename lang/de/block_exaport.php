@@ -870,3 +870,6 @@ $string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrol
 $string['submission_fileortext'] = 'Abgabe: File/Text';
 $string['feedback_fileortext'] = 'Feedback: File/Text';
 $string['no_submission_no_feedback'] = 'Weder Abgabe noch Feedback vorhanden';
+$string['invalidgradeid'] = 'Ungültige Bewertungs-ID';
+$string['nofeedbackfiles'] = 'Keine Feedback-Dateien vorhanden';
+$string['invalidsubmissionid'] = 'Ungültige Abgabe-ID';

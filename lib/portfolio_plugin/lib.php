@@ -194,8 +194,8 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
 
             return $assignment;
         } catch (Exception $e) {
-            // Log detailed error only in DEBUG_DEVELOPER
-            debugging('Error extracting assignment from caller: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            // Log error only in DEBUG_DEVELOPER
+            debugging('Error extracting assignment from caller.', DEBUG_DEVELOPER);
 
             // For production, return null gracefully
             // Don't expose error details to users

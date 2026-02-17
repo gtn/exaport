@@ -666,8 +666,6 @@ function block_exaport_check_competence_interaction() {
 }
 
 function block_exaport_build_comp_table($item, $role = "teacher", $competences = null) {
-    global $DB;
-
     // TODO: refactor: use block_exaport_get_active_comps_for_item instead.
     // $sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id ".
     // " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY."} da ".
@@ -679,7 +677,7 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences =
     $topics = $competences["topics"];
 
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
-                <tr><td><h2>" . $item->name . "</h2></td></tr>";
+                <tr><td><h4 class='m-0'>" . $item->name . "</h4></td></tr>";
 
     if ($role == "teacher") {
         $disteacher = " ";

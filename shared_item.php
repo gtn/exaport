@@ -132,6 +132,15 @@ if (count($data) > 0) {
 echo "<div>\n";
 block_exaport_print_extern_item($item, $access);
 
+if (block_exaport_check_competence_interaction()) {
+    $competences = block_exaport_get_active_comps_for_item($item);
+    if ($competences) {
+        // Für alle rollen? Keine interaktion?
+        block_exaport_build_comp_table($item, null, $competences);
+        echo '<br>';
+    }
+}
+
 if ($item->allowComments) {
     $newcomment = new stdClass();
     $newcomment->action = 'add';
@@ -160,17 +169,6 @@ if ($item->access->page == 'view') {
     $backlink = '';
 }
 
-if (block_exaport_check_competence_interaction()) {
-    // Begin.
-    $competences = block_exaport_get_active_comps_for_item($item);
-    if ($competences) {
-        // Für alle rollen? Keine interaktion?
-        block_exaport_build_comp_table($item, null, $competences);
-    }
-    // End.
-} else {
-    $hascompetences = false;
-}
 if ($backlink) {
     echo "<br /><a href=\"{$CFG->wwwroot}/blocks/exaport/" . $backlink . "\">" . get_string("back", "block_exaport") . "</a><br /><br />";
 }

@@ -314,11 +314,11 @@ $string['copyitemtocourse'] = 'Copia al curs';
 $string['desp_language'] = 'Idioma Portafoli Digital Europeu';
 $string['cofigureblock'] = "Configurar bloc";
 $string['selectitems'] = "Seleccionar items";
-$string['cofigureblock_text'] = "tria text";
-$string['cofigureblock_header'] = "tria títol";
-$string['cofigureblock_item'] = "tria item";
-$string['cofigureblock_media'] = "tria recurs";
-$string['cofigureblock_personalinfo'] = "tria informació personal";
+$string['configureblock_text'] = "tria text";
+$string['configureblock_headline'] = "tria títol";
+$string['configureblock_item'] = "tria item";
+$string['configureblock_media'] = "tria recurs";
+$string['configureblock_personal_information'] = "tria informació personal";
 
 // Desp.
 $string['back_to_desp'] = 'torna a la llengua del portafoli';

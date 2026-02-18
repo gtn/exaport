@@ -1376,31 +1376,31 @@ return [
         'W&aumlehle Elemente aus',
         'Select items',
     ],
-    'cofigureblock_text' => [
+    'configureblock_text' => [
         'Text',
         'Choose text',
     ],
-    'cofigureblock_header' => [
+    'configureblock_headline' => [
         'Konfiguration der Kopfzeile',
         'Choose headline',
     ],
-    'cofigureblock_item' => [
+    'configureblock_item' => [
         'Auswahl der Artefakte',
         'Choose artefact',
     ],
-    'cofigureblock_media' => [
+    'configureblock_media' => [
         'Medieneintrag',
         'Choose media',
     ],
-    'cofigureblock_personalinfo' => [
+    'configureblock_personal_information' => [
         'Pers&ouml;nliche Information',
         'Choose personal info',
     ],
-    'cofigureblock_cvinfo' => [
+    'configureblock_cv_information' => [
         'Lebenslauf Information',
         'Choose cv info',
     ],
-    'cofigureblock_badge' => [
+    'configureblock_badge' => [
         'Badges auswählen',
         'Choose Badges',
     ],

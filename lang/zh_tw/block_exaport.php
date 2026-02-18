@@ -329,12 +329,12 @@ $string['copyitemtocourse'] = '複製到課程到課程';
 $string['desp_language'] = '資源共享平台的語言';
 $string['cofigureblock'] = "配置版塊";
 $string['selectitems'] = "選擇條目";
-$string['cofigureblock_text'] = "選擇文本";
-$string['cofigureblock_header'] = "選擇標題";
-$string['cofigureblock_item'] = "選擇條目";
-$string['cofigureblock_media'] = "選擇媒體";
-$string['cofigureblock_personalinfo'] = "選擇個人信息";
-$string['cofigureblock_badge'] = "選擇徽章";
+$string['configureblock_text'] = "選擇文本";
+$string['configureblock_headline'] = "選擇標題";
+$string['configureblock_item'] = "選擇條目";
+$string['configureblock_media'] = "選擇媒體";
+$string['configureblock_personal_information'] = "選擇個人信息";
+$string['configureblock_badge'] = "選擇徽章";
 
 // Desp.
 $string['back_to_desp'] = '返回資源共享平台';

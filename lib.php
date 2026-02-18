@@ -17,6 +17,8 @@
 
 require_once(__DIR__ . '/inc.php');
 
+use block_exaport\blockedit;
+
 // Called from pluginfile.php
 // to serve the file of a plugin
 // urlformat:
@@ -281,4 +283,36 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         default:
             die('wrong file area');
     }
+}
+
+/**
+ * Fragment callback for loading block edit forms via the Fragment API.
+ * Moodle automatically captures $PAGE->requires JS (editor init) and delivers it alongside the HTML.
+ */
+function block_exaport_output_fragment_blockedit($args) {
+    global $CFG;
+
+    require_login();
+
+    $type = clean_param($args['type_block'] ?? '', PARAM_TEXT);
+    $id = clean_param($args['item_id'] ?? 0, PARAM_INT);
+    // Set draft_itemid in $_POST so file_get_submitted_draft_itemid() works.
+    if (!empty($args['draft_itemid'])) {
+        $_POST['text'] = ['itemid' => clean_param($args['draft_itemid'], PARAM_INT)];
+    }
+
+    $formdata = blockedit::load_form($id, $type);
+
+    // Initialize the HTML editor for block types that have a textarea.
+    // Calling use_editor() queues JS via $PAGE->requires, which the Fragment API captures automatically.
+    if ($formdata->type == 'text' || $formdata->type == 'personal_information') {
+        $editor = editors_get_preferred_editor(FORMAT_HTML);
+        $editor->use_editor('id_block_text', [
+            'maxfiles' => EDITOR_UNLIMITED_FILES,
+            'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
+            'autosave' => false,
+        ]);
+    }
+
+    return $formdata->html;
 }

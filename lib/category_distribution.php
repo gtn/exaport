@@ -344,6 +344,10 @@ function block_exaport_add_template_category($courseid, $name, $pid = 0) {
         array($courseid, $pid)
     );
     // MAX returns null when no records exist, false on error.
+    if ($maxsort === false) {
+        debugging('Database error getting max sortorder', DEBUG_DEVELOPER);
+        return false;
+    }
     $sortorder = ($maxsort === null) ? 0 : $maxsort + 1;
 
     $record = new stdClass();

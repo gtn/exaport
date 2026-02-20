@@ -75,11 +75,8 @@ if ($action === 'add_category' && confirm_sesskey()) {
     $pid = optional_param('pid', 0, PARAM_INT);
     
     // Verify parent belongs to this course (if not root).
-    if ($pid != 0) {
-        $parent = $DB->get_record('block_exaport_course_templ', array('id' => $pid, 'courseid' => $courseid));
-        if (!$parent) {
-            print_error('Invalid parent category');
-        }
+    if ($pid !== 0) {
+        block_exaport_verify_template_category($pid, $courseid);
     }
     
     $name = trim($name);
@@ -98,10 +95,7 @@ if ($action === 'rename_category' && confirm_sesskey()) {
     $name = required_param('name', PARAM_TEXT);
     
     // Verify category belongs to this course.
-    $category = $DB->get_record('block_exaport_course_templ', array('id' => $id, 'courseid' => $courseid));
-    if (!$category) {
-        print_error('Invalid category');
-    }
+    block_exaport_verify_template_category($id, $courseid);
     
     $name = trim($name);
     if (!empty($name) && strlen($name) <= 255) {
@@ -119,17 +113,11 @@ if ($action === 'move_category' && confirm_sesskey()) {
     $newpid = required_param('newpid', PARAM_INT);
     
     // Verify category belongs to this course.
-    $category = $DB->get_record('block_exaport_course_templ', array('id' => $id, 'courseid' => $courseid));
-    if (!$category) {
-        print_error('Invalid category');
-    }
+    block_exaport_verify_template_category($id, $courseid);
     
     // Verify new parent belongs to this course (if not root).
-    if ($newpid != 0) {
-        $parent = $DB->get_record('block_exaport_course_templ', array('id' => $newpid, 'courseid' => $courseid));
-        if (!$parent) {
-            print_error('Invalid parent category');
-        }
+    if ($newpid !== 0) {
+        block_exaport_verify_template_category($newpid, $courseid);
     }
     
     block_exaport_move_template_category($id, $newpid);
@@ -141,10 +129,7 @@ if ($action === 'remove_category' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
     
     // Verify category belongs to this course.
-    $category = $DB->get_record('block_exaport_course_templ', array('id' => $id, 'courseid' => $courseid));
-    if (!$category) {
-        print_error('Invalid category');
-    }
+    block_exaport_verify_template_category($id, $courseid);
     
     block_exaport_remove_template_category($id);
     $message = get_string('category_removed', 'block_exaport');
@@ -233,6 +218,25 @@ echo '</div>';
 echo '</form>';
 
 echo $OUTPUT->footer();
+
+/**
+ * Verify that a template category belongs to the given course
+ *
+ * @param int $categoryid Template category ID
+ * @param int $courseid Course ID
+ * @return stdClass Category record
+ * @throws moodle_exception if category not found or doesn't belong to course
+ */
+function block_exaport_verify_template_category($categoryid, $courseid) {
+    global $DB;
+    
+    $category = $DB->get_record('block_exaport_course_templ', array('id' => $categoryid, 'courseid' => $courseid));
+    if (!$category) {
+        print_error('Invalid category');
+    }
+    
+    return $category;
+}
 
 /**
  * Render template tree recursively
@@ -345,7 +349,7 @@ function moveCategory(id) {
     message += <?php echo json_encode(get_string('move_to_root', 'block_exaport') . ': 0' . "\n"); ?>;
     <?php
     foreach ($all_template_nodes as $node) {
-        if ($node->id != $id) { // Can't move to itself.
+        if ($node->id !== $id) { // Can't move to itself.
             echo "message += " . json_encode($node->name . ': ' . $node->id . "\n") . ";\n";
         }
     }

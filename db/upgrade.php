@@ -1239,17 +1239,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $table->add_field('pid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
         $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('share_to_teachers', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
 
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        // Foreign key named after the field, per Moodle XMLDB conventions.
+        // Foreign keys automatically create indexes, so no separate index needed on courseid.
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
 
-        // IMPORTANT: key and index names must NOT collide.
-        // Old (broken): key name 'courseid' + index name 'courseid'
-        // New (fixed):  key name 'courseid_fk' + index name 'idx_courseid'
-        $table->add_key('courseid_fk', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
-
-        $table->add_index('idx_courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
-        $table->add_index('idx_pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
+        // Only add index for pid (non-foreign-key field).
+        $table->add_index('pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
 
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
@@ -1263,11 +1262,8 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
 
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-
-        // IMPORTANT: key and index names must NOT collide here either.
-        $table->add_key('courseid_fk', XMLDB_KEY_FOREIGN_UNIQUE, array('courseid'), 'course', array('id'));
-
-        $table->add_index('idx_courseid', XMLDB_INDEX_UNIQUE, array('courseid'));
+        // Foreign-unique key creates unique index automatically, no separate index needed.
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN_UNIQUE, array('courseid'), 'course', array('id'));
 
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
@@ -1300,19 +1296,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2026021801, 'exaport');
-    }
-
-    if ($oldversion < 2026021802) {
-        $table = new xmldb_table('block_exaport_course_templ');
-
-        // Add share_to_teachers field.
-        $field = new xmldb_field('share_to_teachers', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'sortorder');
-        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2026021802, 'exaport');
     }
 
     return $result;

@@ -1231,5 +1231,70 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026010803, 'exaport');
     }
 
+    if ($oldversion < 2026021801) {
+        // Create table for per-course category templates.
+        $table = new xmldb_table('block_exaport_course_templ');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('pid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+
+        $table->add_index('courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+        $table->add_index('pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Create table for distribution settings.
+        $table = new xmldb_table('block_exaport_templ_dist');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('auto_distribute', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN_UNIQUE, array('courseid'), 'course', array('id'));
+
+        $table->add_index('courseid', XMLDB_INDEX_UNIQUE, array('courseid'));
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Set default starter templates in config if not already set.
+        $default_templates = array(
+            array(
+                'name' => 'Coach Intensive',
+                'tree' => array(
+                    'name' => 'Coach Intensive',
+                    'children' => array(
+                        array('name' => 'Coachees'),
+                        array('name' => 'Eindbeoordeling'),
+                        array('name' => 'Eindreflectie'),
+                        array('name' => 'Feedback praktijkdagen'),
+                        array('name' => 'Getekende verklaringen'),
+                        array('name' => 'Intervisie'),
+                        array('name' => 'Leerjournaals'),
+                        array('name' => 'Mondeling examen'),
+                    ),
+                ),
+            ),
+        );
+
+        $existing = get_config('block_exaport', 'starter_templates');
+        if (!$existing) {
+            set_config('starter_templates', json_encode($default_templates), 'block_exaport');
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026021801, 'exaport');
+    }
+
     return $result;
 }

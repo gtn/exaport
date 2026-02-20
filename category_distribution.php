@@ -184,6 +184,10 @@ $PAGE->requires->js_call_amd('block_exaport/category_distribution', 'init', arra
             'selectParent' => get_string('move_category_select_parent', 'block_exaport'),
             'moveToRoot' => get_string('move_to_root', 'block_exaport'),
             'enterParentId' => get_string('enter_parent_id', 'block_exaport'),
+            'addSubcategory' => get_string('add_subcategory', 'block_exaport'),
+            'renameCategory' => get_string('rename_category', 'block_exaport'),
+            'moveCategory' => get_string('move_category', 'block_exaport'),
+            'save' => get_string('save', 'core'),
         ),
         'nodes' => $js_nodes,
     )
@@ -303,16 +307,14 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
             json_encode(get_string('remove_from_template_confirm', 'block_exaport')) . ');">' .
             get_string('remove_from_template', 'block_exaport') . '</a>';
 
-        echo '</div>';
+        // Share to teachers toggle button.
+        $is_shared = isset($node['share_to_teachers']) && $node['share_to_teachers'];
+        $share_class = $is_shared ? 'btn-warning' : 'btn-outline-warning';
+        echo '<button type="button" class="btn btn-sm ' . $share_class . '" ' .
+            'data-action="toggle-share" data-id="' . $node['id'] . '" data-shared="' . ($is_shared ? '1' : '0') . '" ' .
+            'title="' . s(get_string('share_to_teachers_help', 'block_exaport')) . '">' .
+            get_string('share_to_teachers', 'block_exaport') . '</button>';
 
-        // Share to teachers checkbox.
-        $share_checked = isset($node['share_to_teachers']) && $node['share_to_teachers'] ? 'checked' : '';
-        echo '<div class="ml-2">';
-        echo '<label class="form-check-label" title="' . s(get_string('share_to_teachers_help', 'block_exaport')) . '">';
-        echo '<input type="checkbox" class="form-check-input" ' . $share_checked . ' ' .
-            'data-action="toggle-share" data-id="' . $node['id'] . '">';
-        echo ' ' . get_string('share_to_teachers', 'block_exaport');
-        echo '</label>';
         echo '</div>';
 
         echo '</div>';

@@ -914,7 +914,7 @@ $string['category_renamed'] = 'Category renamed successfully';
 $string['category_removed'] = 'Category removed from template';
 $string['capability_required'] = 'You do not have permission to manage category distribution';
 $string['invalid_template_json'] = 'Invalid template JSON format';
-$string['share_to_teachers'] = 'Share newly created categories to course teachers';
-$string['share_to_teachers_help'] = 'When enabled, categories created through distribution will be shared with teachers from the course. Existing categories are not affected.';
+$string['share_to_teachers'] = 'Toggle: Shared Category';
+$string['share_to_teachers_help'] = 'Future creations of this category will share those categories to the course teachers of this course';
 
 

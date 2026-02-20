@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery'], function($) {
+define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], function($, ModalFactory, ModalEvents, Str) {
     
     var config = {};
     
@@ -68,13 +68,35 @@ define(['jquery'], function($) {
      * @param {int} pid Parent category ID
      */
     var addSubcategory = function(pid) {
-        var name = prompt(config.strings.categoryNameRequired);
-        if (name) {
-            submitForm('add_category', {
-                'pid': pid,
-                'name': name
+        ModalFactory.create({
+            type: ModalFactory.types.SAVE_CANCEL,
+            title: config.strings.addSubcategory || 'Add Subcategory',
+            body: '<div class="form-group">' +
+                  '<label for="category-name-input">' + config.strings.categoryNameRequired + '</label>' +
+                  '<input type="text" class="form-control" id="category-name-input" autofocus>' +
+                  '</div>'
+        }).then(function(modal) {
+            modal.setSaveButtonText(config.strings.save || 'Save');
+            
+            modal.getRoot().on(ModalEvents.save, function() {
+                var name = modal.getRoot().find('#category-name-input').val();
+                if (name) {
+                    submitForm('add_category', {
+                        'pid': pid,
+                        'name': name
+                    });
+                }
             });
-        }
+            
+            modal.show();
+            
+            // Focus input after modal is shown
+            modal.getRoot().on(ModalEvents.shown, function() {
+                modal.getRoot().find('#category-name-input').focus();
+            });
+            
+            return modal;
+        });
     };
     
     /**
@@ -83,13 +105,38 @@ define(['jquery'], function($) {
      * @param {string} oldname Current category name
      */
     var renameCategory = function(id, oldname) {
-        var name = prompt(config.strings.categoryNameRequired, oldname);
-        if (name && name !== oldname) {
-            submitForm('rename_category', {
-                'id': id,
-                'name': name
+        ModalFactory.create({
+            type: ModalFactory.types.SAVE_CANCEL,
+            title: config.strings.renameCategory || 'Rename Category',
+            body: '<div class="form-group">' +
+                  '<label for="category-name-input">' + config.strings.categoryNameRequired + '</label>' +
+                  '<input type="text" class="form-control" id="category-name-input" value="' + 
+                  $('<div>').text(oldname).html() + '" autofocus>' +
+                  '</div>'
+        }).then(function(modal) {
+            modal.setSaveButtonText(config.strings.save || 'Save');
+            
+            modal.getRoot().on(ModalEvents.save, function() {
+                var name = modal.getRoot().find('#category-name-input').val();
+                if (name && name !== oldname) {
+                    submitForm('rename_category', {
+                        'id': id,
+                        'name': name
+                    });
+                }
             });
-        }
+            
+            modal.show();
+            
+            // Focus and select input after modal is shown
+            modal.getRoot().on(ModalEvents.shown, function() {
+                var input = modal.getRoot().find('#category-name-input')[0];
+                input.focus();
+                input.select();
+            });
+            
+            return modal;
+        });
     };
     
     /**
@@ -97,38 +144,50 @@ define(['jquery'], function($) {
      * @param {int} id Category ID
      */
     var moveCategory = function(id) {
-        var message = config.strings.selectParent + "\n\n";
-        message += config.strings.moveToRoot + ': 0' + "\n";
-        
-        // Add all nodes as options (passed in config)
+        // Build options for select
+        var options = '<option value="0">' + config.strings.moveToRoot + '</option>';
         if (config.nodes) {
             config.nodes.forEach(function(node) {
                 if (node.id !== id) { // Can't move to itself
-                    message += node.name + ': ' + node.id + "\n";
+                    options += '<option value="' + node.id + '">' + $('<div>').text(node.name).html() + '</option>';
                 }
             });
         }
         
-        message += "\n" + config.strings.enterParentId + ':';
-        
-        var newpid = prompt(message, '0');
-        if (newpid !== null) {
-            submitForm('move_category', {
-                'id': id,
-                'newpid': newpid || '0'
+        ModalFactory.create({
+            type: ModalFactory.types.SAVE_CANCEL,
+            title: config.strings.moveCategory || 'Move Category',
+            body: '<div class="form-group">' +
+                  '<label for="parent-select">' + config.strings.selectParent + '</label>' +
+                  '<select class="form-control" id="parent-select">' + options + '</select>' +
+                  '</div>'
+        }).then(function(modal) {
+            modal.setSaveButtonText(config.strings.save || 'Save');
+            
+            modal.getRoot().on(ModalEvents.save, function() {
+                var newpid = modal.getRoot().find('#parent-select').val();
+                submitForm('move_category', {
+                    'id': id,
+                    'newpid': newpid || '0'
+                });
             });
-        }
+            
+            modal.show();
+            
+            return modal;
+        });
     };
     
     /**
      * Toggle share to teachers setting for a category
      * @param {int} id Category ID
-     * @param {boolean} checked Whether the checkbox is checked
+     * @param {boolean} currentState Current share state
      */
-    var toggleShareToTeachers = function(id, checked) {
+    var toggleShareToTeachers = function(id, currentState) {
+        var newState = !currentState;
         submitForm('toggle_share_to_teachers', {
             'id': id,
-            'share_to_teachers': checked ? '1' : '0'
+            'share_to_teachers': newState ? '1' : '0'
         });
     };
     
@@ -159,10 +218,11 @@ define(['jquery'], function($) {
             moveCategory(id);
         });
         
-        $(document).on('change', '[data-action="toggle-share"]', function() {
+        $(document).on('click', '[data-action="toggle-share"]', function(e) {
+            e.preventDefault();
             var id = $(this).data('id');
-            var checked = $(this).is(':checked');
-            toggleShareToTeachers(id, checked);
+            var currentState = $(this).data('shared') === '1';
+            toggleShareToTeachers(id, currentState);
         });
     };
     

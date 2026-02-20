@@ -73,6 +73,7 @@ if ($action === 'toggle_auto_distribute' && confirm_sesskey()) {
 if ($action === 'add_category' && confirm_sesskey()) {
     $name = required_param('name', PARAM_TEXT);
     $pid = optional_param('pid', 0, PARAM_INT);
+    $share_to_teachers = optional_param('share_to_teachers', 0, PARAM_INT);
     
     // Verify parent belongs to this course (if not root).
     if ($pid !== 0) {
@@ -81,7 +82,7 @@ if ($action === 'add_category' && confirm_sesskey()) {
     
     $name = trim($name);
     if (!empty($name) && strlen($name) <= 255) {
-        block_exaport_add_template_category($courseid, $name, $pid);
+        block_exaport_add_template_category($courseid, $name, $pid, $share_to_teachers);
         $message = get_string('category_added', 'block_exaport');
     } else {
         $message = get_string('category_name_required', 'block_exaport');
@@ -133,6 +134,24 @@ if ($action === 'remove_category' && confirm_sesskey()) {
     
     block_exaport_remove_template_category($id);
     $message = get_string('category_removed', 'block_exaport');
+    redirect($url, $message, null, 'success');
+}
+
+if ($action === 'toggle_share_to_teachers' && confirm_sesskey()) {
+    $id = required_param('id', PARAM_INT);
+    $share_to_teachers = required_param('share_to_teachers', PARAM_INT);
+    
+    // Verify category belongs to this course.
+    $category = block_exaport_verify_template_category($id, $courseid);
+    
+    // Update share_to_teachers flag.
+    $DB->update_record('block_exaport_course_templ', (object)array(
+        'id' => $id,
+        'share_to_teachers' => $share_to_teachers,
+        'timemodified' => time(),
+    ));
+    
+    $message = get_string('changessaved');
     redirect($url, $message, null, 'success');
 }
 
@@ -275,6 +294,22 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
             get_string('remove_from_template', 'block_exaport') . '</a>';
 
         echo '</div>';
+        
+        // Share to teachers checkbox.
+        $share_checked = isset($node['share_to_teachers']) && $node['share_to_teachers'] ? 'checked' : '';
+        $share_url = new moodle_url($url, array(
+            'action' => 'toggle_share_to_teachers',
+            'id' => $node['id'],
+            'sesskey' => sesskey()
+        ));
+        echo '<div class="ml-2">';
+        echo '<label class="form-check-label" title="' . s(get_string('share_to_teachers_help', 'block_exaport')) . '">';
+        echo '<input type="checkbox" class="form-check-input" ' . $share_checked . ' onchange="toggleShareToTeachers(' . 
+            $node['id'] . ', this.checked)">';
+        echo ' ' . get_string('share_to_teachers', 'block_exaport');
+        echo '</label>';
+        echo '</div>';
+        
         echo '</div>';
 
         // Render children.
@@ -380,6 +415,30 @@ function moveCategory(id) {
         document.body.appendChild(form);
         form.submit();
     }
+}
+
+function toggleShareToTeachers(id, checked) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = <?php echo json_encode($url->out()); ?>;
+
+    var fields = {
+        'sesskey': <?php echo json_encode(sesskey()); ?>,
+        'action': 'toggle_share_to_teachers',
+        'id': id,
+        'share_to_teachers': checked ? '1' : '0'
+    };
+
+    for (var key in fields) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = fields[key];
+        form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
 }
 </script>
 

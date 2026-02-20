@@ -40,8 +40,8 @@ class observer {
             return;
         }
 
-        // Distribute to the newly enrolled user.
-        block_exaport_distribute_to_user($userid, $template);
+        // Distribute to the newly enrolled user (pass courseid for teacher sharing).
+        block_exaport_distribute_to_user($userid, $template, 0, $courseid);
     }
 }
 

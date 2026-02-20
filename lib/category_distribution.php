@@ -70,6 +70,7 @@ function block_exaport_build_template_tree($nodes, $pid = 0) {
             $item = array(
                 'id' => $node->id,
                 'name' => $node->name,
+                'share_to_teachers' => isset($node->share_to_teachers) ? $node->share_to_teachers : 0,
                 'children' => $children,
             );
             $tree[] = $item;
@@ -116,6 +117,7 @@ function block_exaport_save_template_nodes($courseid, $tree, $pid, &$sortorder) 
         $record->pid = $pid;
         $record->name = $node['name'];
         $record->sortorder = $sortorder++;
+        $record->share_to_teachers = isset($node['share_to_teachers']) ? $node['share_to_teachers'] : 0;
         $record->timemodified = time();
 
         $newid = $DB->insert_record('block_exaport_course_templ', $record);
@@ -197,9 +199,11 @@ function block_exaport_category_exists_at_path($userid, $name, $pid) {
  * @param int $userid User ID
  * @param string $name Category name
  * @param int $pid Parent category ID
+ * @param int $courseid Course ID (for teacher sharing)
+ * @param bool $share_to_teachers Whether to share to course teachers if newly created
  * @return array ['created' => bool, 'categoryid' => int]
  */
-function block_exaport_create_category_if_not_exists($userid, $name, $pid) {
+function block_exaport_create_category_if_not_exists($userid, $name, $pid, $courseid = 0, $share_to_teachers = false) {
     global $DB;
 
     // Check if exists.
@@ -218,7 +222,39 @@ function block_exaport_create_category_if_not_exists($userid, $name, $pid) {
 
     $categoryid = $DB->insert_record('block_exaportcate', $category);
 
+    // Share to course teachers if requested.
+    if ($share_to_teachers && $courseid > 0) {
+        block_exaport_share_category_to_teachers($categoryid, $courseid);
+    }
+
     return array('created' => true, 'categoryid' => $categoryid);
+}
+
+/**
+ * Share a category to all teachers in a course
+ *
+ * @param int $categoryid Category ID
+ * @param int $courseid Course ID
+ * @return void
+ */
+function block_exaport_share_category_to_teachers($categoryid, $courseid) {
+    global $DB;
+
+    // Get course context.
+    $context = context_course::instance($courseid);
+    
+    // Get teachers - users with editingteacher or teacher role.
+    $teachers = get_enrolled_users($context, 'block/exaport:distributecategories', 0, 'u.id', null, 0, 0, true);
+    
+    foreach ($teachers as $teacher) {
+        // Check if sharing already exists.
+        if (!$DB->record_exists('block_exaportcatshar', array('catid' => $categoryid, 'userid' => $teacher->id))) {
+            $share = new stdClass();
+            $share->catid = $categoryid;
+            $share->userid = $teacher->id;
+            $DB->insert_record('block_exaportcatshar', $share);
+        }
+    }
 }
 
 /**
@@ -227,13 +263,15 @@ function block_exaport_create_category_if_not_exists($userid, $name, $pid) {
  * @param int $userid User ID
  * @param array $tree Template tree structure
  * @param int $parent_catid Parent category ID in user's categories
+ * @param int $courseid Course ID (for teacher sharing)
  * @return array Statistics ['created' => int, 'skipped' => int]
  */
-function block_exaport_distribute_to_user($userid, $tree, $parent_catid = 0) {
+function block_exaport_distribute_to_user($userid, $tree, $parent_catid = 0, $courseid = 0) {
     $stats = array('created' => 0, 'skipped' => 0);
 
     foreach ($tree as $node) {
-        $result = block_exaport_create_category_if_not_exists($userid, $node['name'], $parent_catid);
+        $share_to_teachers = isset($node['share_to_teachers']) ? $node['share_to_teachers'] : 0;
+        $result = block_exaport_create_category_if_not_exists($userid, $node['name'], $parent_catid, $courseid, $share_to_teachers);
 
         if ($result['created']) {
             $stats['created']++;
@@ -243,7 +281,7 @@ function block_exaport_distribute_to_user($userid, $tree, $parent_catid = 0) {
 
         // Process children.
         if (!empty($node['children'])) {
-            $child_stats = block_exaport_distribute_to_user($userid, $node['children'], $result['categoryid']);
+            $child_stats = block_exaport_distribute_to_user($userid, $node['children'], $result['categoryid'], $courseid);
             $stats['created'] += $child_stats['created'];
             $stats['skipped'] += $child_stats['skipped'];
         }
@@ -279,7 +317,7 @@ function block_exaport_distribute_to_course($courseid) {
             continue;
         }
 
-        $stats = block_exaport_distribute_to_user($student->id, $template);
+        $stats = block_exaport_distribute_to_user($student->id, $template, 0, $courseid);
         $total_stats['created'] += $stats['created'];
         $total_stats['skipped'] += $stats['skipped'];
         $total_stats['students']++;
@@ -333,9 +371,10 @@ function block_exaport_update_distribution_settings($courseid, $auto_distribute)
  * @param int $courseid Course ID
  * @param string $name Category name
  * @param int $pid Parent ID (0 for root)
+ * @param int $share_to_teachers Whether to share to teachers (default 0)
  * @return int New category ID
  */
-function block_exaport_add_template_category($courseid, $name, $pid = 0) {
+function block_exaport_add_template_category($courseid, $name, $pid = 0, $share_to_teachers = 0) {
     global $DB;
 
     // Get max sortorder for this parent.
@@ -355,6 +394,7 @@ function block_exaport_add_template_category($courseid, $name, $pid = 0) {
     $record->pid = $pid;
     $record->name = $name;
     $record->sortorder = $sortorder;
+    $record->share_to_teachers = $share_to_teachers;
     $record->timemodified = time();
 
     return $DB->insert_record('block_exaport_course_templ', $record);

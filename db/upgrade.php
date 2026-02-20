@@ -1296,5 +1296,41 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026021801, 'exaport');
     }
 
+    if ($oldversion < 2026021802) {
+        // Fix index name collision in block_exaport_course_templ.
+        $table = new xmldb_table('block_exaport_course_templ');
+        
+        // Drop old indexes with conflicting names.
+        $index = new xmldb_index('courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+        
+        $index = new xmldb_index('pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+        
+        // Add new indexes with non-conflicting names.
+        $index = new xmldb_index('idx_courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        
+        $index = new xmldb_index('idx_pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        
+        // Add share_to_teachers field.
+        $field = new xmldb_field('share_to_teachers', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'sortorder');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026021802, 'exaport');
+    }
+
     return $result;
 }

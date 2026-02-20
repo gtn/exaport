@@ -456,6 +456,7 @@
         <FIELD NAME="pid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="parent id within template"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="share_to_teachers" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="share newly created categories to course teachers"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
@@ -463,8 +464,8 @@
         <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="courseid" UNIQUE="false" FIELDS="courseid"/>
-        <INDEX NAME="pid" UNIQUE="false" FIELDS="pid"/>
+        <INDEX NAME="idx_courseid" UNIQUE="false" FIELDS="courseid"/>
+        <INDEX NAME="idx_pid" UNIQUE="false" FIELDS="pid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_exaport_templ_dist" COMMENT="category distribution settings per course">

@@ -139,9 +139,10 @@ function block_exaport_load_starter_template($courseid, $template_name) {
 
     foreach ($templates as $template) {
         if ($template['name'] === $template_name) {
-            // Convert the tree structure and save.
-            $tree = block_exaport_normalize_template_tree($template['tree']);
-            return block_exaport_save_course_template($courseid, array($tree));
+            // Normalize and save the tree structure directly.
+            $normalized = block_exaport_normalize_template_tree($template['tree']);
+            // Save as array with single root.
+            return block_exaport_save_course_template($courseid, array($normalized));
         }
     }
 
@@ -342,7 +343,8 @@ function block_exaport_add_template_category($courseid, $name, $pid = 0) {
         'SELECT MAX(sortorder) FROM {block_exaport_course_templ} WHERE courseid = ? AND pid = ?',
         array($courseid, $pid)
     );
-    $sortorder = ($maxsort !== null && $maxsort !== false) ? $maxsort + 1 : 0;
+    // MAX returns null when no records exist, false on error.
+    $sortorder = ($maxsort === null) ? 0 : $maxsort + 1;
 
     $record = new stdClass();
     $record->courseid = $courseid;

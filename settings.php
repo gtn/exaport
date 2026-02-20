@@ -179,6 +179,6 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtextarea('block_exaport/starter_templates',
         get_string('settings_starter_templates', 'block_exaport'),
         get_string('settings_starter_templates_description', 'block_exaport'),
-        '', PARAM_RAW, 60, 10));
+        '', PARAM_TEXT, 60, 10));
 
 }

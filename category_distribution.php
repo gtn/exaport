@@ -257,8 +257,8 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
             get_string('add_subcategory', 'block_exaport') . '</button>';
 
         // Rename.
-        echo '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="renameCategory(' . $node['id'] . ', \'' .
-            addslashes($node['name']) . '\')">' . get_string('rename_category', 'block_exaport') . '</button>';
+        echo '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="renameCategory(' . $node['id'] . ', ' .
+            json_encode($node['name']) . ')">' . get_string('rename_category', 'block_exaport') . '</button>';
 
         // Move.
         echo '<button type="button" class="btn btn-sm btn-outline-info" onclick="moveCategory(' . $node['id'] . ')">' .
@@ -285,14 +285,14 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
 
 <script>
 function addSubcategory(pid) {
-    var name = prompt('<?php echo addslashes(get_string('category_name_required', 'block_exaport')); ?>');
+    var name = prompt(<?php echo json_encode(get_string('category_name_required', 'block_exaport')); ?>);
     if (name) {
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = '<?php echo $url->out(); ?>';
+        form.action = <?php echo json_encode($url->out()); ?>;
 
         var fields = {
-            'sesskey': '<?php echo sesskey(); ?>',
+            'sesskey': <?php echo json_encode(sesskey()); ?>,
             'action': 'add_category',
             'pid': pid,
             'name': name
@@ -312,14 +312,14 @@ function addSubcategory(pid) {
 }
 
 function renameCategory(id, oldname) {
-    var name = prompt('<?php echo addslashes(get_string('category_name_required', 'block_exaport')); ?>', oldname);
+    var name = prompt(<?php echo json_encode(get_string('category_name_required', 'block_exaport')); ?>, oldname);
     if (name && name !== oldname) {
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = '<?php echo $url->out(); ?>';
+        form.action = <?php echo json_encode($url->out()); ?>;
 
         var fields = {
-            'sesskey': '<?php echo sesskey(); ?>',
+            'sesskey': <?php echo json_encode(sesskey()); ?>,
             'action': 'rename_category',
             'id': id,
             'name': name
@@ -341,25 +341,25 @@ function renameCategory(id, oldname) {
 function moveCategory(id) {
     // Create a simple dialog using prompt as fallback
     // In a real implementation, this should use Moodle's modal dialog
-    var message = '<?php echo addslashes(get_string('move_category_select_parent', 'block_exaport')); ?>\n\n';
-    message += '<?php echo addslashes(get_string('move_to_root', 'block_exaport')); ?>: 0\n';
+    var message = <?php echo json_encode(get_string('move_category_select_parent', 'block_exaport') . "\n\n"); ?>;
+    message += <?php echo json_encode(get_string('move_to_root', 'block_exaport') . ': 0' . "\n"); ?>;
     <?php
     foreach ($all_template_nodes as $node) {
         if ($node->id != $id) { // Can't move to itself.
-            echo "message += '" . addslashes($node->name) . ": {$node->id}\\n';\n";
+            echo "message += " . json_encode($node->name . ': ' . $node->id . "\n") . ";\n";
         }
     }
     ?>
-    message += '\n<?php echo addslashes(get_string('enter_parent_id', 'block_exaport')); ?>:';
+    message += <?php echo json_encode("\n" . get_string('enter_parent_id', 'block_exaport') . ':'); ?>;
 
     var newpid = prompt(message, '0');
     if (newpid !== null) {
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = '<?php echo $url->out(); ?>';
+        form.action = <?php echo json_encode($url->out()); ?>;
 
         var fields = {
-            'sesskey': '<?php echo sesskey(); ?>',
+            'sesskey': <?php echo json_encode(sesskey()); ?>,
             'action': 'move_category',
             'id': id,
             'newpid': newpid || '0'

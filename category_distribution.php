@@ -41,7 +41,7 @@ $messagetype = 'success';
 
 if ($action === 'load_template' && confirm_sesskey()) {
     $template_name = required_param('template_name', PARAM_TEXT);
-    if (block_exaport_load_starter_template($courseid, $template_name)) {
+    if (category_template::load_starter_template($courseid, $template_name)) {
         $message = get_string('starter_template_loaded', 'block_exaport');
     } else {
         $message = get_string('distribution_error', 'block_exaport', 'Template not found');
@@ -51,7 +51,7 @@ if ($action === 'load_template' && confirm_sesskey()) {
 }
 
 if ($action === 'distribute_now' && confirm_sesskey()) {
-    $stats = block_exaport_distribute_to_course($courseid);
+    $stats = category_distributor::distribute_to_course($courseid);
     if (isset($stats['error'])) {
         $message = get_string('no_template_to_distribute', 'block_exaport');
         $messagetype = 'error';
@@ -67,7 +67,7 @@ if ($action === 'distribute_now' && confirm_sesskey()) {
 
 if ($action === 'toggle_auto_distribute' && confirm_sesskey()) {
     $auto_distribute = required_param('auto_distribute', PARAM_INT);
-    block_exaport_update_distribution_settings($courseid, $auto_distribute);
+    category_distributor::update_settings($courseid, $auto_distribute);
     $message = get_string('changessaved');
     redirect($url, $message, null, 'success');
 }
@@ -123,7 +123,7 @@ if ($action === 'move_category' && confirm_sesskey()) {
         category_template::verify_category($newpid, $courseid);
     }
 
-    block_exaport_move_template_category($id, $newpid);
+    category_template::move_category($id, $newpid);
     $message = get_string('category_moved', 'block_exaport');
     redirect($url, $message, null, 'success');
 }
@@ -134,7 +134,7 @@ if ($action === 'remove_category' && confirm_sesskey()) {
     // Verify category belongs to this course.
     category_template::verify_category($id, $courseid);
 
-    block_exaport_remove_template_category($id);
+    category_template::remove_category($id);
     $message = get_string('category_removed', 'block_exaport');
     redirect($url, $message, null, 'success');
 }

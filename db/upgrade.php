@@ -1242,10 +1242,14 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
 
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
 
-        $table->add_index('courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
-        $table->add_index('pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
+        // IMPORTANT: key and index names must NOT collide.
+        // Old (broken): key name 'courseid' + index name 'courseid'
+        // New (fixed):  key name 'courseid_fk' + index name 'idx_courseid'
+        $table->add_key('courseid_fk', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+
+        $table->add_index('idx_courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+        $table->add_index('idx_pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
 
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
@@ -1259,9 +1263,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
 
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_key('courseid', XMLDB_KEY_FOREIGN_UNIQUE, array('courseid'), 'course', array('id'));
 
-        $table->add_index('courseid', XMLDB_INDEX_UNIQUE, array('courseid'));
+        // IMPORTANT: key and index names must NOT collide here either.
+        $table->add_key('courseid_fk', XMLDB_KEY_FOREIGN_UNIQUE, array('courseid'), 'course', array('id'));
+
+        $table->add_index('idx_courseid', XMLDB_INDEX_UNIQUE, array('courseid'));
 
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
@@ -1297,37 +1303,14 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026021802) {
-        // Fix index name collision in block_exaport_course_templ.
         $table = new xmldb_table('block_exaport_course_templ');
-        
-        // Drop old indexes with conflicting names.
-        $index = new xmldb_index('courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
-        if ($dbman->index_exists($table, $index)) {
-            $dbman->drop_index($table, $index);
-        }
-        
-        $index = new xmldb_index('pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
-        if ($dbman->index_exists($table, $index)) {
-            $dbman->drop_index($table, $index);
-        }
-        
-        // Add new indexes with non-conflicting names.
-        $index = new xmldb_index('idx_courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
-        if (!$dbman->index_exists($table, $index)) {
-            $dbman->add_index($table, $index);
-        }
-        
-        $index = new xmldb_index('idx_pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
-        if (!$dbman->index_exists($table, $index)) {
-            $dbman->add_index($table, $index);
-        }
-        
+
         // Add share_to_teachers field.
         $field = new xmldb_field('share_to_teachers', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'sortorder');
-        if (!$dbman->field_exists($table, $field)) {
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2026021802, 'exaport');
     }

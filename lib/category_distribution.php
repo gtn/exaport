@@ -243,7 +243,7 @@ function block_exaport_share_category_to_teachers($categoryid, $courseid) {
     // Get course context.
     $context = context_course::instance($courseid);
     
-    // Get teachers - users with editingteacher or teacher role.
+    // Get teachers - users with block/exaport:distributecategories capability.
     $teachers = get_enrolled_users($context, 'block/exaport:distributecategories', 0, 'u.id', null, 0, 0, true);
     
     foreach ($teachers as $teacher) {

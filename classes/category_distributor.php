@@ -78,29 +78,24 @@ class category_distributor {
 
         // Share to course teachers if requested (ONLY for newly created categories).
         if ($share_to_teachers && $courseid > 0) {
-            self::share_new_category_to_teachers($categoryid, $courseid, true);
+            self::share_new_category_to_teachers($categoryid, $courseid);
         }
 
         return array('created' => true, 'categoryid' => $categoryid);
     }
 
     /**
-     * Share a category to all teachers in a course.
+     * Share a NEWLY created category to all teachers in a course.
      *
-     * IMPORTANT: This must ONLY make changes when the category is newly created.
+     * IMPORTANT: This method must only ever be called for categories that were
+     * just created by this distributor (no side effects for existing categories).
      *
-     * @param int $categoryid Category ID
+     * @param int $categoryid Category ID (must be newly created)
      * @param int $courseid Course ID
-     * @param bool $isnewlycreated Must be true to perform any DB writes
      * @return void
      */
-    private static function share_new_category_to_teachers($categoryid, $courseid, $isnewlycreated = false) {
+    private static function share_new_category_to_teachers($categoryid, $courseid) {
         global $DB;
-
-        // Hard guard: NEVER modify sharing/internshare for existing categories.
-        if (!$isnewlycreated) {
-            return;
-        }
 
         // Get course context.
         $context = \context_course::instance($courseid);
@@ -109,7 +104,7 @@ class category_distributor {
         $teachers = get_enrolled_users($context, 'block/exaport:distributecategories', 0, 'u.id', null, 0, 0, true);
 
         foreach ($teachers as $teacher) {
-            // Create share record if missing (writes are allowed only for new categories).
+            // Create share record if missing.
             if (!$DB->record_exists('block_exaportcatshar', array('catid' => $categoryid, 'userid' => $teacher->id))) {
                 $share = new \stdClass();
                 $share->catid = $categoryid;
@@ -118,7 +113,7 @@ class category_distributor {
             }
         }
 
-        // Mark category as internally shared (writes are allowed only for new categories).
+        // Mark category as internally shared.
         $DB->set_field('block_exaportcate', 'internshare', 1, array('id' => $categoryid));
     }
 

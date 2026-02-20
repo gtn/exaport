@@ -57,7 +57,7 @@ class category_distributor {
      * @param bool $share_to_teachers Whether to share to course teachers if newly created
      * @return array ['created' => bool, 'categoryid' => int]
      */
-    public static function create_category_if_not_exists($userid, $name, $pid, $courseid = 0, $share_to_teachers = false) {
+    private static function create_category_if_not_exists($userid, $name, $pid, $courseid = 0, $share_to_teachers = false) {
         global $DB;
 
         // Check if exists.
@@ -76,23 +76,31 @@ class category_distributor {
 
         $categoryid = $DB->insert_record('block_exaportcate', $category);
 
-        // Share to course teachers if requested.
+        // Share to course teachers if requested (ONLY for newly created categories).
         if ($share_to_teachers && $courseid > 0) {
-            self::share_category_to_teachers($categoryid, $courseid);
+            self::share_new_category_to_teachers($categoryid, $courseid, true);
         }
 
         return array('created' => true, 'categoryid' => $categoryid);
     }
 
     /**
-     * Share a category to all teachers in a course
+     * Share a category to all teachers in a course.
+     *
+     * IMPORTANT: This must ONLY make changes when the category is newly created.
      *
      * @param int $categoryid Category ID
      * @param int $courseid Course ID
+     * @param bool $isnewlycreated Must be true to perform any DB writes
      * @return void
      */
-    private static function share_category_to_teachers($categoryid, $courseid) {
+    private static function share_new_category_to_teachers($categoryid, $courseid, $isnewlycreated = false) {
         global $DB;
+
+        // Hard guard: NEVER modify sharing/internshare for existing categories.
+        if (!$isnewlycreated) {
+            return;
+        }
 
         // Get course context.
         $context = \context_course::instance($courseid);
@@ -101,7 +109,7 @@ class category_distributor {
         $teachers = get_enrolled_users($context, 'block/exaport:distributecategories', 0, 'u.id', null, 0, 0, true);
 
         foreach ($teachers as $teacher) {
-            // Check if sharing already exists.
+            // Create share record if missing (writes are allowed only for new categories).
             if (!$DB->record_exists('block_exaportcatshar', array('catid' => $categoryid, 'userid' => $teacher->id))) {
                 $share = new \stdClass();
                 $share->catid = $categoryid;
@@ -109,6 +117,9 @@ class category_distributor {
                 $DB->insert_record('block_exaportcatshar', $share);
             }
         }
+
+        // Mark category as internally shared (writes are allowed only for new categories).
+        $DB->set_field('block_exaportcate', 'internshare', 1, array('id' => $categoryid));
     }
 
     /**
@@ -158,7 +169,6 @@ class category_distributor {
 
         // Get enrolled students.
         $context = \context_course::instance($courseid);
-        // Get users with student role (typically 'student' archetype).
         $students = get_enrolled_users($context, '', 0, 'u.id', null, 0, 0, true);
 
         $total_stats = array('created' => 0, 'skipped' => 0, 'students' => 0);

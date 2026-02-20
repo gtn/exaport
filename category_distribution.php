@@ -165,6 +165,30 @@ $settings = category_distributor::get_settings($courseid);
 // Get all template nodes for move operations.
 $all_template_nodes = $DB->get_records('block_exaport_course_templ', array('courseid' => $courseid), 'sortorder ASC');
 
+// Prepare nodes array for JavaScript.
+$js_nodes = array();
+foreach ($all_template_nodes as $node) {
+    $js_nodes[] = array(
+        'id' => $node->id,
+        'name' => $node->name,
+    );
+}
+
+// Initialize AMD module with configuration.
+$PAGE->requires->js_call_amd('block_exaport/category_distribution', 'init', array(
+    array(
+        'url' => $url->out(false),
+        'sesskey' => sesskey(),
+        'strings' => array(
+            'categoryNameRequired' => get_string('category_name_required', 'block_exaport'),
+            'selectParent' => get_string('move_category_select_parent', 'block_exaport'),
+            'moveToRoot' => get_string('move_to_root', 'block_exaport'),
+            'enterParentId' => get_string('enter_parent_id', 'block_exaport'),
+        ),
+        'nodes' => $js_nodes,
+    )
+));
+
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('category_distribution_title', 'block_exaport'));
@@ -259,15 +283,18 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
         echo '<div class="btn-group btn-group-sm ml-2" role="group">';
 
         // Add subcategory.
-        echo '<button type="button" class="btn btn-sm btn-outline-primary" onclick="addSubcategory(' . $node['id'] . ')">' .
+        echo '<button type="button" class="btn btn-sm btn-outline-primary" ' .
+            'data-action="add-subcategory" data-pid="' . $node['id'] . '">' .
             get_string('add_subcategory', 'block_exaport') . '</button>';
 
         // Rename.
-        echo '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="renameCategory(' . $node['id'] . ', ' .
-            json_encode($node['name']) . ')">' . get_string('rename_category', 'block_exaport') . '</button>';
+        echo '<button type="button" class="btn btn-sm btn-outline-secondary" ' .
+            'data-action="rename-category" data-id="' . $node['id'] . '" data-name="' . s($node['name']) . '">' .
+            get_string('rename_category', 'block_exaport') . '</button>';
 
         // Move.
-        echo '<button type="button" class="btn btn-sm btn-outline-info" onclick="moveCategory(' . $node['id'] . ')">' .
+        echo '<button type="button" class="btn btn-sm btn-outline-info" ' .
+            'data-action="move-category" data-id="' . $node['id'] . '">' .
             get_string('move_category', 'block_exaport') . '</button>';
 
         // Remove.
@@ -280,15 +307,10 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
 
         // Share to teachers checkbox.
         $share_checked = isset($node['share_to_teachers']) && $node['share_to_teachers'] ? 'checked' : '';
-        $share_url = new moodle_url($url, array(
-            'action' => 'toggle_share_to_teachers',
-            'id' => $node['id'],
-            'sesskey' => sesskey()
-        ));
         echo '<div class="ml-2">';
         echo '<label class="form-check-label" title="' . s(get_string('share_to_teachers_help', 'block_exaport')) . '">';
-        echo '<input type="checkbox" class="form-check-input" ' . $share_checked . ' onchange="toggleShareToTeachers(' .
-            $node['id'] . ', this.checked)">';
+        echo '<input type="checkbox" class="form-check-input" ' . $share_checked . ' ' .
+            'data-action="toggle-share" data-id="' . $node['id'] . '">';
         echo ' ' . get_string('share_to_teachers', 'block_exaport');
         echo '</label>';
         echo '</div>';
@@ -304,126 +326,6 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
     echo '</ul>';
 }
 ?>
-
-<script>
-function addSubcategory(pid) {
-    var name = prompt(<?php echo json_encode(get_string('category_name_required', 'block_exaport')); ?>);
-    if (name) {
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = <?php echo json_encode($url->out()); ?>;
-
-        var fields = {
-            'sesskey': <?php echo json_encode(sesskey()); ?>,
-            'action': 'add_category',
-            'pid': pid,
-            'name': name
-        };
-
-        for (var key in fields) {
-            var input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = fields[key];
-            form.appendChild(input);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-function renameCategory(id, oldname) {
-    var name = prompt(<?php echo json_encode(get_string('category_name_required', 'block_exaport')); ?>, oldname);
-    if (name && name !== oldname) {
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = <?php echo json_encode($url->out()); ?>;
-
-        var fields = {
-            'sesskey': <?php echo json_encode(sesskey()); ?>,
-            'action': 'rename_category',
-            'id': id,
-            'name': name
-        };
-
-        for (var key in fields) {
-            var input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = fields[key];
-            form.appendChild(input);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-function moveCategory(id) {
-    // Create a simple dialog using prompt as fallback
-    // In a real implementation, this should use Moodle's modal dialog
-    var message = <?php echo json_encode(get_string('move_category_select_parent', 'block_exaport') . "\n\n"); ?>;
-    message += <?php echo json_encode(get_string('move_to_root', 'block_exaport') . ': 0' . "\n"); ?>;
-    <?php
-    foreach ($all_template_nodes as $node) {
-        if ($node->id !== $id) { // Can't move to itself.
-            echo "message += " . json_encode($node->name . ': ' . $node->id . "\n") . ";\n";
-        }
-    }
-    ?>
-    message += <?php echo json_encode("\n" . get_string('enter_parent_id', 'block_exaport') . ':'); ?>;
-
-    var newpid = prompt(message, '0');
-    if (newpid !== null) {
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = <?php echo json_encode($url->out()); ?>;
-
-        var fields = {
-            'sesskey': <?php echo json_encode(sesskey()); ?>,
-            'action': 'move_category',
-            'id': id,
-            'newpid': newpid || '0'
-        };
-
-        for (var key in fields) {
-            var input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = fields[key];
-            form.appendChild(input);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-function toggleShareToTeachers(id, checked) {
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = <?php echo json_encode($url->out()); ?>;
-
-    var fields = {
-        'sesskey': <?php echo json_encode(sesskey()); ?>,
-        'action': 'toggle_share_to_teachers',
-        'id': id,
-        'share_to_teachers': checked ? '1' : '0'
-    };
-
-    for (var key in fields) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = fields[key];
-        form.appendChild(input);
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-}
-</script>
 
 <style>
 .exaport-template-tree {

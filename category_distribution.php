@@ -299,20 +299,21 @@ function renameCategory(id, oldname) {
 }
 
 function moveCategory(id) {
-    var options = '<option value="0"><?php echo addslashes(get_string('move_to_root', 'block_exaport')); ?></option>';
+    // Create a simple dialog using prompt as fallback
+    // In a real implementation, this should use Moodle's modal dialog
+    var message = '<?php echo addslashes(get_string('move_category_select_parent', 'block_exaport')); ?>\n\n';
+    message += '<?php echo addslashes(get_string('move_to_root', 'block_exaport')); ?>: 0\n';
     <?php
     foreach ($all_template_nodes as $node) {
-        if ($node->id != $id) { // Can't move to itself
-            echo "options += '<option value=\"{$node->id}\">" . addslashes($node->name) . "</option>';\n";
+        if ($node->id != $id) { // Can't move to itself.
+            echo "message += '" . addslashes($node->name) . ": {$node->id}\\n';\n";
         }
     }
     ?>
+    message += '\n<?php echo addslashes(get_string('category_name_required', 'block_exaport')); ?>:';
 
-    var select = '<select id="move-parent-select" class="form-control">' + options + '</select>';
-    var message = '<?php echo addslashes(get_string('move_category_select_parent', 'block_exaport')); ?><br><br>' + select;
-
-    if (confirm(message)) {
-        var newpid = document.getElementById('move-parent-select').value;
+    var newpid = prompt(message, '0');
+    if (newpid !== null) {
         var form = document.createElement('form');
         form.method = 'POST';
         form.action = '<?php echo $url->out(); ?>';

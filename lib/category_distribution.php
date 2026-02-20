@@ -381,6 +381,16 @@ function block_exaport_rename_template_category($categoryid, $newname) {
 function block_exaport_move_template_category($categoryid, $newpid) {
     global $DB;
 
+    // Prevent moving to self or descendant.
+    if ($categoryid == $newpid) {
+        return false;
+    }
+
+    $descendants = block_exaport_get_template_category_descendants($categoryid);
+    if (in_array($newpid, $descendants)) {
+        return false;
+    }
+
     $record = new stdClass();
     $record->id = $categoryid;
     $record->pid = $newpid;

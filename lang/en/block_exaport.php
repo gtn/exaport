@@ -35,6 +35,7 @@ $string['exaport:shareintern'] = 'Internal sharing of views';
 $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
+$string['exaport:distributecategories'] = 'Manage category distribution';
 $string['exaport:viewartifactsfromstudents'] = 'Can see portfolio artefacts of own students';
 $string['new'] = 'New';
 $string['addbookmark'] = 'Add bookmark';

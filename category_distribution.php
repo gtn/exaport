@@ -181,8 +181,8 @@ if (!empty($templates)) {
         echo '<option value="' . s($template['name']) . '">' . s($template['name']) . '</option>';
     }
     echo '</select> ';
-    echo '<button type="submit" class="btn btn-secondary" onclick="return confirm(\'' .
-        get_string('starter_template_load_confirm', 'block_exaport') . '\');">' .
+    echo '<button type="submit" class="btn btn-secondary" onclick="return confirm(' .
+        json_encode(get_string('starter_template_load_confirm', 'block_exaport')) . ');">' .
         get_string('starter_template_load', 'block_exaport') . '</button>';
     echo '</div>';
     echo '</form>';
@@ -289,8 +289,8 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
 
         // Remove.
         $removeurl = new moodle_url($url, array('action' => 'remove_category', 'id' => $node['id'], 'sesskey' => sesskey()));
-        echo '<a href="' . $removeurl->out() . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(\'' .
-            get_string('remove_from_template_confirm', 'block_exaport') . '\');">' .
+        echo '<a href="' . $removeurl->out() . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(' .
+            json_encode(get_string('remove_from_template_confirm', 'block_exaport')) . ');">' .
             get_string('remove_from_template', 'block_exaport') . '</a>';
 
         echo '</div>';

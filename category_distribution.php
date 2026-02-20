@@ -16,7 +16,9 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
-require_once(__DIR__ . '/lib/category_distribution.php');
+
+use block_exaport\category_template;
+use block_exaport\category_distributor;
 
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_TEXT);
@@ -77,12 +79,12 @@ if ($action === 'add_category' && confirm_sesskey()) {
 
     // Verify parent belongs to this course (if not root).
     if ($pid !== 0) {
-        block_exaport_verify_template_category($pid, $courseid);
+        category_template::verify_category($pid, $courseid);
     }
 
     $name = trim($name);
     if (!empty($name) && strlen($name) <= 255) {
-        block_exaport_add_template_category($courseid, $name, $pid, $share_to_teachers);
+        category_template::add_category($courseid, $name, $pid, $share_to_teachers);
         $message = get_string('category_added', 'block_exaport');
     } else {
         $message = get_string('category_name_required', 'block_exaport');
@@ -96,11 +98,11 @@ if ($action === 'rename_category' && confirm_sesskey()) {
     $name = required_param('name', PARAM_TEXT);
 
     // Verify category belongs to this course.
-    block_exaport_verify_template_category($id, $courseid);
+    category_template::verify_category($id, $courseid);
 
     $name = trim($name);
     if (!empty($name) && strlen($name) <= 255) {
-        block_exaport_rename_template_category($id, $name);
+        category_template::rename_category($id, $name);
         $message = get_string('category_renamed', 'block_exaport');
     } else {
         $message = get_string('category_name_required', 'block_exaport');
@@ -114,11 +116,11 @@ if ($action === 'move_category' && confirm_sesskey()) {
     $newpid = required_param('newpid', PARAM_INT);
 
     // Verify category belongs to this course.
-    block_exaport_verify_template_category($id, $courseid);
+    category_template::verify_category($id, $courseid);
 
     // Verify new parent belongs to this course (if not root).
     if ($newpid !== 0) {
-        block_exaport_verify_template_category($newpid, $courseid);
+        category_template::verify_category($newpid, $courseid);
     }
 
     block_exaport_move_template_category($id, $newpid);
@@ -130,7 +132,7 @@ if ($action === 'remove_category' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
 
     // Verify category belongs to this course.
-    block_exaport_verify_template_category($id, $courseid);
+    category_template::verify_category($id, $courseid);
 
     block_exaport_remove_template_category($id);
     $message = get_string('category_removed', 'block_exaport');
@@ -142,7 +144,7 @@ if ($action === 'toggle_share_to_teachers' && confirm_sesskey()) {
     $share_to_teachers = required_param('share_to_teachers', PARAM_INT);
 
     // Verify category belongs to this course.
-    $category = block_exaport_verify_template_category($id, $courseid);
+    $category = category_template::verify_category($id, $courseid);
 
     // Update share_to_teachers flag.
     $DB->update_record('block_exaport_course_templ', (object)array(
@@ -156,9 +158,9 @@ if ($action === 'toggle_share_to_teachers' && confirm_sesskey()) {
 }
 
 // Get current data.
-$templates = block_exaport_get_starter_templates();
-$course_template = block_exaport_get_course_template($courseid);
-$settings = block_exaport_get_distribution_settings($courseid);
+$templates = category_template::get_starter_templates();
+$course_template = category_template::get_course_template($courseid);
+$settings = category_distributor::get_settings($courseid);
 
 // Get all template nodes for move operations.
 $all_template_nodes = $DB->get_records('block_exaport_course_templ', array('courseid' => $courseid), 'sortorder ASC');
@@ -237,25 +239,6 @@ echo '</div>';
 echo '</form>';
 
 echo $OUTPUT->footer();
-
-/**
- * Verify that a template category belongs to the given course
- *
- * @param int $categoryid Template category ID
- * @param int $courseid Course ID
- * @return stdClass Category record
- * @throws moodle_exception if category not found or doesn't belong to course
- */
-function block_exaport_verify_template_category($categoryid, $courseid) {
-    global $DB;
-
-    $category = $DB->get_record('block_exaport_course_templ', array('id' => $categoryid, 'courseid' => $courseid));
-    if (!$category) {
-        print_error('Invalid category');
-    }
-
-    return $category;
-}
 
 /**
  * Render template tree recursively

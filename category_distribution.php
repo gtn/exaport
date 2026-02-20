@@ -19,7 +19,7 @@ require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/lib/category_distribution.php');
 
 $courseid = required_param('courseid', PARAM_INT);
-$action = optional_param('action', '', PARAM_ALPHA);
+$action = optional_param('action', '', PARAM_TEXT);
 
 require_login($courseid);
 
@@ -74,12 +74,12 @@ if ($action === 'add_category' && confirm_sesskey()) {
     $name = required_param('name', PARAM_TEXT);
     $pid = optional_param('pid', 0, PARAM_INT);
     $share_to_teachers = optional_param('share_to_teachers', 0, PARAM_INT);
-    
+
     // Verify parent belongs to this course (if not root).
     if ($pid !== 0) {
         block_exaport_verify_template_category($pid, $courseid);
     }
-    
+
     $name = trim($name);
     if (!empty($name) && strlen($name) <= 255) {
         block_exaport_add_template_category($courseid, $name, $pid, $share_to_teachers);
@@ -94,10 +94,10 @@ if ($action === 'add_category' && confirm_sesskey()) {
 if ($action === 'rename_category' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
     $name = required_param('name', PARAM_TEXT);
-    
+
     // Verify category belongs to this course.
     block_exaport_verify_template_category($id, $courseid);
-    
+
     $name = trim($name);
     if (!empty($name) && strlen($name) <= 255) {
         block_exaport_rename_template_category($id, $name);
@@ -112,15 +112,15 @@ if ($action === 'rename_category' && confirm_sesskey()) {
 if ($action === 'move_category' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
     $newpid = required_param('newpid', PARAM_INT);
-    
+
     // Verify category belongs to this course.
     block_exaport_verify_template_category($id, $courseid);
-    
+
     // Verify new parent belongs to this course (if not root).
     if ($newpid !== 0) {
         block_exaport_verify_template_category($newpid, $courseid);
     }
-    
+
     block_exaport_move_template_category($id, $newpid);
     $message = get_string('category_moved', 'block_exaport');
     redirect($url, $message, null, 'success');
@@ -128,10 +128,10 @@ if ($action === 'move_category' && confirm_sesskey()) {
 
 if ($action === 'remove_category' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
-    
+
     // Verify category belongs to this course.
     block_exaport_verify_template_category($id, $courseid);
-    
+
     block_exaport_remove_template_category($id);
     $message = get_string('category_removed', 'block_exaport');
     redirect($url, $message, null, 'success');
@@ -140,17 +140,17 @@ if ($action === 'remove_category' && confirm_sesskey()) {
 if ($action === 'toggle_share_to_teachers' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
     $share_to_teachers = required_param('share_to_teachers', PARAM_INT);
-    
+
     // Verify category belongs to this course.
     $category = block_exaport_verify_template_category($id, $courseid);
-    
+
     // Update share_to_teachers flag.
     $DB->update_record('block_exaport_course_templ', (object)array(
         'id' => $id,
         'share_to_teachers' => $share_to_teachers,
         'timemodified' => time(),
     ));
-    
+
     $message = get_string('changessaved');
     redirect($url, $message, null, 'success');
 }
@@ -248,12 +248,12 @@ echo $OUTPUT->footer();
  */
 function block_exaport_verify_template_category($categoryid, $courseid) {
     global $DB;
-    
+
     $category = $DB->get_record('block_exaport_course_templ', array('id' => $categoryid, 'courseid' => $courseid));
     if (!$category) {
         print_error('Invalid category');
     }
-    
+
     return $category;
 }
 
@@ -294,7 +294,7 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
             get_string('remove_from_template', 'block_exaport') . '</a>';
 
         echo '</div>';
-        
+
         // Share to teachers checkbox.
         $share_checked = isset($node['share_to_teachers']) && $node['share_to_teachers'] ? 'checked' : '';
         $share_url = new moodle_url($url, array(
@@ -304,12 +304,12 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
         ));
         echo '<div class="ml-2">';
         echo '<label class="form-check-label" title="' . s(get_string('share_to_teachers_help', 'block_exaport')) . '">';
-        echo '<input type="checkbox" class="form-check-input" ' . $share_checked . ' onchange="toggleShareToTeachers(' . 
+        echo '<input type="checkbox" class="form-check-input" ' . $share_checked . ' onchange="toggleShareToTeachers(' .
             $node['id'] . ', this.checked)">';
         echo ' ' . get_string('share_to_teachers', 'block_exaport');
         echo '</label>';
         echo '</div>';
-        
+
         echo '</div>';
 
         // Render children.

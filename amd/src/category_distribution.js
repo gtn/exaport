@@ -23,9 +23,9 @@
  */
 
 define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], function($, ModalFactory, ModalEvents, Str) {
-    
+
     var config = {};
-    
+
     /**
      * Submit a form with the given action and fields
      * @param {string} action The action to perform
@@ -35,19 +35,19 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
         var form = document.createElement('form');
         form.method = 'POST';
         form.action = config.url;
-        
+
         var allFields = {
             'sesskey': config.sesskey,
             'action': action
         };
-        
+
         // Merge additional fields
         for (var key in fields) {
             if (fields.hasOwnProperty(key)) {
                 allFields[key] = fields[key];
             }
         }
-        
+
         // Create hidden inputs
         for (var fieldKey in allFields) {
             if (allFields.hasOwnProperty(fieldKey)) {
@@ -58,11 +58,11 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
                 form.appendChild(input);
             }
         }
-        
+
         document.body.appendChild(form);
         form.submit();
     };
-    
+
     /**
      * Add a subcategory to a parent
      * @param {int} pid Parent category ID
@@ -77,7 +77,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
                   '</div>'
         }).then(function(modal) {
             modal.setSaveButtonText(config.strings.save || 'Save');
-            
+
             modal.getRoot().on(ModalEvents.save, function() {
                 var name = modal.getRoot().find('#category-name-input').val();
                 if (name) {
@@ -87,18 +87,18 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
                     });
                 }
             });
-            
+
             modal.show();
-            
+
             // Focus input after modal is shown
             modal.getRoot().on(ModalEvents.shown, function() {
                 modal.getRoot().find('#category-name-input').focus();
             });
-            
+
             return modal;
         });
     };
-    
+
     /**
      * Rename a category
      * @param {int} id Category ID
@@ -110,12 +110,12 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
             title: config.strings.renameCategory || 'Rename Category',
             body: '<div class="form-group">' +
                   '<label for="category-name-input">' + config.strings.categoryNameRequired + '</label>' +
-                  '<input type="text" class="form-control" id="category-name-input" value="' + 
+                  '<input type="text" class="form-control" id="category-name-input" value="' +
                   $('<div>').text(oldname).html() + '" autofocus>' +
                   '</div>'
         }).then(function(modal) {
             modal.setSaveButtonText(config.strings.save || 'Save');
-            
+
             modal.getRoot().on(ModalEvents.save, function() {
                 var name = modal.getRoot().find('#category-name-input').val();
                 if (name && name !== oldname) {
@@ -125,20 +125,20 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
                     });
                 }
             });
-            
+
             modal.show();
-            
+
             // Focus and select input after modal is shown
             modal.getRoot().on(ModalEvents.shown, function() {
                 var input = modal.getRoot().find('#category-name-input')[0];
                 input.focus();
                 input.select();
             });
-            
+
             return modal;
         });
     };
-    
+
     /**
      * Move a category to a new parent
      * @param {int} id Category ID
@@ -153,7 +153,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
                 }
             });
         }
-        
+
         ModalFactory.create({
             type: ModalFactory.types.SAVE_CANCEL,
             title: config.strings.moveCategory || 'Move Category',
@@ -163,7 +163,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
                   '</div>'
         }).then(function(modal) {
             modal.setSaveButtonText(config.strings.save || 'Save');
-            
+
             modal.getRoot().on(ModalEvents.save, function() {
                 var newpid = modal.getRoot().find('#parent-select').val();
                 submitForm('move_category', {
@@ -171,13 +171,13 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
                     'newpid': newpid || '0'
                 });
             });
-            
+
             modal.show();
-            
+
             return modal;
         });
     };
-    
+
     /**
      * Toggle share to teachers setting for a category
      * @param {int} id Category ID
@@ -190,42 +190,42 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
             'share_to_teachers': newState ? '1' : '0'
         });
     };
-    
+
     /**
      * Initialize the category distribution module
      * @param {object} cfg Configuration object
      */
     var init = function(cfg) {
         config = cfg;
-        
+
         // Attach event handlers using data attributes
         $(document).on('click', '[data-action="add-subcategory"]', function(e) {
             e.preventDefault();
             var pid = $(this).data('pid');
             addSubcategory(pid);
         });
-        
+
         $(document).on('click', '[data-action="rename-category"]', function(e) {
             e.preventDefault();
             var id = $(this).data('id');
             var name = $(this).data('name');
             renameCategory(id, name);
         });
-        
+
         $(document).on('click', '[data-action="move-category"]', function(e) {
             e.preventDefault();
             var id = $(this).data('id');
             moveCategory(id);
         });
-        
+
         $(document).on('click', '[data-action="toggle-share"]', function(e) {
             e.preventDefault();
             var id = $(this).data('id');
-            var currentState = $(this).data('shared') === '1';
+            var currentState = $(this).data('shared') == '1'; // === would not work, as it is int
             toggleShareToTeachers(id, currentState);
         });
     };
-    
+
     return {
         init: init
     };

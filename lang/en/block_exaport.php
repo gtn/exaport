@@ -904,6 +904,7 @@ $string['no_students_enrolled'] = 'No students enrolled in this course';
 $string['no_template_to_distribute'] = 'No template to distribute. Please create or load a template first.';
 $string['distribution_error'] = 'Distribution error: {$a}';
 $string['category_name_required'] = 'Category name is required';
+$string['enter_parent_id'] = 'Enter parent category ID (0 for root)';
 $string['template_must_have_one_root'] = 'Template must have exactly one root category';
 $string['move_category_select_parent'] = 'Select new parent category';
 $string['move_to_root'] = 'Move to root';

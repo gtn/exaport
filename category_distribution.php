@@ -310,7 +310,7 @@ function moveCategory(id) {
         }
     }
     ?>
-    message += '\n<?php echo addslashes(get_string('category_name_required', 'block_exaport')); ?>:';
+    message += '\n<?php echo addslashes(get_string('enter_parent_id', 'block_exaport')); ?>:';
 
     var newpid = prompt(message, '0');
     if (newpid !== null) {

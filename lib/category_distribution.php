@@ -267,7 +267,8 @@ function block_exaport_distribute_to_course($courseid) {
 
     // Get enrolled students.
     $context = context_course::instance($courseid);
-    $students = get_enrolled_users($context, 'moodle/course:isincontext', 0, 'u.id', null, 0, 0, true);
+    // Get users with student role (typically 'student' archetype).
+    $students = get_enrolled_users($context, '', 0, 'u.id', null, 0, 0, true);
 
     $total_stats = array('created' => 0, 'skipped' => 0, 'students' => 0);
 
@@ -341,7 +342,7 @@ function block_exaport_add_template_category($courseid, $name, $pid = 0) {
         'SELECT MAX(sortorder) FROM {block_exaport_course_templ} WHERE courseid = ? AND pid = ?',
         array($courseid, $pid)
     );
-    $sortorder = $maxsort !== false ? $maxsort + 1 : 0;
+    $sortorder = ($maxsort !== null && $maxsort !== false) ? $maxsort + 1 : 0;
 
     $record = new stdClass();
     $record->courseid = $courseid;

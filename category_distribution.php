@@ -73,7 +73,17 @@ if ($action === 'toggle_auto_distribute' && confirm_sesskey()) {
 if ($action === 'add_category' && confirm_sesskey()) {
     $name = required_param('name', PARAM_TEXT);
     $pid = optional_param('pid', 0, PARAM_INT);
-    if (!empty($name)) {
+    
+    // Verify parent belongs to this course (if not root).
+    if ($pid != 0) {
+        $parent = $DB->get_record('block_exaport_course_templ', array('id' => $pid, 'courseid' => $courseid));
+        if (!$parent) {
+            print_error('Invalid parent category');
+        }
+    }
+    
+    $name = trim($name);
+    if (!empty($name) && strlen($name) <= 255) {
         block_exaport_add_template_category($courseid, $name, $pid);
         $message = get_string('category_added', 'block_exaport');
     } else {
@@ -86,7 +96,15 @@ if ($action === 'add_category' && confirm_sesskey()) {
 if ($action === 'rename_category' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
     $name = required_param('name', PARAM_TEXT);
-    if (!empty($name)) {
+    
+    // Verify category belongs to this course.
+    $category = $DB->get_record('block_exaport_course_templ', array('id' => $id, 'courseid' => $courseid));
+    if (!$category) {
+        print_error('Invalid category');
+    }
+    
+    $name = trim($name);
+    if (!empty($name) && strlen($name) <= 255) {
         block_exaport_rename_template_category($id, $name);
         $message = get_string('category_renamed', 'block_exaport');
     } else {
@@ -99,6 +117,21 @@ if ($action === 'rename_category' && confirm_sesskey()) {
 if ($action === 'move_category' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
     $newpid = required_param('newpid', PARAM_INT);
+    
+    // Verify category belongs to this course.
+    $category = $DB->get_record('block_exaport_course_templ', array('id' => $id, 'courseid' => $courseid));
+    if (!$category) {
+        print_error('Invalid category');
+    }
+    
+    // Verify new parent belongs to this course (if not root).
+    if ($newpid != 0) {
+        $parent = $DB->get_record('block_exaport_course_templ', array('id' => $newpid, 'courseid' => $courseid));
+        if (!$parent) {
+            print_error('Invalid parent category');
+        }
+    }
+    
     block_exaport_move_template_category($id, $newpid);
     $message = get_string('category_moved', 'block_exaport');
     redirect($url, $message, null, 'success');
@@ -106,6 +139,13 @@ if ($action === 'move_category' && confirm_sesskey()) {
 
 if ($action === 'remove_category' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
+    
+    // Verify category belongs to this course.
+    $category = $DB->get_record('block_exaport_course_templ', array('id' => $id, 'courseid' => $courseid));
+    if (!$category) {
+        print_error('Invalid category');
+    }
+    
     block_exaport_remove_template_category($id);
     $message = get_string('category_removed', 'block_exaport');
     redirect($url, $message, null, 'success');

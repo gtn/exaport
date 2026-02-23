@@ -1410,22 +1410,52 @@ function block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlso
  * @return array
  */
 function block_exaport_get_course_teachers($exceptmyself = true) {
+    // For backward compatibility, get courseid from param if not provided
+    $courseid = optional_param('courseid', 0, PARAM_INT);
+    return block_exaport_get_course_teachers_by_courseid($courseid, $exceptmyself);
+}
+
+/**
+ * Get all teachers in a course by role shortname
+ *
+ * @param int $courseid Course ID
+ * @param bool $exceptmyself Exclude current user
+ * @return array Array of user IDs
+ */
+function block_exaport_get_course_teachers_by_courseid($courseid, $exceptmyself = true) {
     global $DB, $USER;
 
-    $courseid = optional_param('courseid', 0, PARAM_INT);
     $context = context_course::instance($courseid);
 
-    // Role id='3' - teachers. '4'- assistents.
+    // Get teacher roles by shortname (not hardcoded IDs).
+    $editingteacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+    $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
+
+    $roleids = [];
+    if ($editingteacherrole) {
+        $roleids[] = $editingteacherrole->id;
+    }
+    if ($teacherrole) {
+        $roleids[] = $teacherrole->id;
+    }
+
+    if (empty($roleids)) {
+        return [];
+    }
+
+    list($insql, $inparams) = $DB->get_in_or_equal($roleids, SQL_PARAMS_NAMED);
+    $params = array_merge(['contextid' => $context->id], $inparams);
+
     $query = "SELECT u.id as userid, u.id AS tmp
     FROM {user} u
     JOIN {role_assignments} ra ON ra.userid = u.id
-    WHERE ra.contextid=? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0";
-    $exastudteachers = $DB->get_records_sql($query, [$context->id]);
+    WHERE ra.contextid = :contextid AND ra.roleid $insql AND u.deleted = 0";
+    $teachers = $DB->get_records_sql($query, $params);
 
-    // If exacomp is not installed this function returns an emtpy array.
+    // If exacomp is not installed this function returns an empty array.
     $exacompteachers = get_enrolled_users($context, 'block/exacomp:teacher');
 
-    $teachers = $exastudteachers + $exacompteachers;
+    $teachers = $teachers + $exacompteachers;
 
     if ($exceptmyself) {
         unset($teachers[$USER->id]);
@@ -1436,19 +1466,65 @@ function block_exaport_get_course_teachers($exceptmyself = true) {
     return $teachers;
 }
 
+/**
+ * Get all students in a course by role shortname
+ *
+ * @param int $courseid Course ID
+ * @return array Array of user IDs
+ */
+function block_exaport_get_course_students_by_courseid($courseid) {
+    global $DB;
+
+    $context = context_course::instance($courseid);
+
+    // Get student role by shortname (not hardcoded ID).
+    $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+
+    if (!$studentrole) {
+        return [];
+    }
+
+    $query = "SELECT u.id as userid, u.id AS tmp
+    FROM {user} u
+    JOIN {role_assignments} ra ON ra.userid = u.id
+    WHERE ra.contextid = :contextid AND ra.roleid = :roleid AND u.deleted = 0";
+    $students = $DB->get_records_sql($query, ['contextid' => $context->id, 'roleid' => $studentrole->id]);
+
+    return array_keys($students);
+}
+
 // This user is a teacher of any course?
 function block_exaport_user_is_teacher($userid = null) {
     global $DB, $USER;
     if ($userid === null) {
         $userid = $USER->id;
     }
-    // Role 3 = teacher
+
+    // Get teacher roles by shortname (not hardcoded IDs).
+    $editingteacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+    $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
+
+    $roleids = [];
+    if ($editingteacherrole) {
+        $roleids[] = $editingteacherrole->id;
+    }
+    if ($teacherrole) {
+        $roleids[] = $teacherrole->id;
+    }
+
+    if (empty($roleids)) {
+        return false;
+    }
+
+    list($insql, $inparams) = $DB->get_in_or_equal($roleids, SQL_PARAMS_NAMED);
+    $params = array_merge(['contextlevel' => CONTEXT_COURSE, 'userid' => $userid], $inparams);
+
     $query = "SELECT DISTINCT u.id as userid, u.id AS tmp
       FROM {role_assignments} ra
       JOIN {user} u ON ra.userid = u.id
       JOIN {context} c ON c.id = ra.contextid
-      WHERE c.contextlevel = ? AND u.id = ? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0 ";
-    $roles = $DB->get_records_sql($query, [CONTEXT_COURSE, $userid]);
+      WHERE c.contextlevel = :contextlevel AND u.id = :userid AND ra.roleid $insql AND u.deleted = 0 ";
+    $roles = $DB->get_records_sql($query, $params);
     if (count($roles) > 0) {
         return true;
     }
@@ -1461,22 +1537,48 @@ function block_exaport_get_students_for_teacher($userid = null, $courseid = 0) {
         $userid = $USER->id;
     }
     $students = array();
-    // Across all enrolled cources
+
+    // Get teacher roles by shortname (not hardcoded IDs).
+    $editingteacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+    $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
+
+    $teacherroleids = [];
+    if ($editingteacherrole) {
+        $teacherroleids[] = $editingteacherrole->id;
+    }
+    if ($teacherrole) {
+        $teacherroleids[] = $teacherrole->id;
+    }
+
+    if (empty($teacherroleids)) {
+        return $students;
+    }
+
+    // Get student role by shortname (not hardcoded ID).
+    $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+    if (!$studentrole) {
+        return $students;
+    }
+
+    list($insql, $inparams) = $DB->get_in_or_equal($teacherroleids, SQL_PARAMS_NAMED);
+    $params = array_merge(['contextlevel' => CONTEXT_COURSE, 'userid' => $userid], $inparams);
+
+    // Across all enrolled courses
     $query = "SELECT c.id as contextid, c.instanceid as courseid, course.fullname AS coursetitle, u.id as userid
       FROM {role_assignments} ra
       JOIN {user} u ON ra.userid = u.id
       JOIN {context} c ON c.id = ra.contextid
       JOIN {course} course ON course.id = c.instanceid
-      WHERE c.contextlevel = ? AND u.id = ? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0 ";
-    $courses = $DB->get_records_sql($query, [CONTEXT_COURSE, $userid]);
+      WHERE c.contextlevel = :contextlevel AND u.id = :userid AND ra.roleid $insql AND u.deleted = 0 ";
+    $courses = $DB->get_records_sql($query, $params);
     foreach ($courses as $course) {
         // Get students of current course
         $querystudents = "SELECT u.*
                   FROM {role_assignments} ra
                   JOIN {user} u ON ra.userid = u.id
                   JOIN {context} c ON c.id = ra.contextid
-                  WHERE c.contextlevel = ? AND c.instanceid = ? AND ra.roleid = '5' AND u.deleted = 0 ";
-        $users = $DB->get_records_sql($querystudents, [CONTEXT_COURSE, $course->courseid]);
+                  WHERE c.contextlevel = ? AND c.instanceid = ? AND ra.roleid = ? AND u.deleted = 0 ";
+        $users = $DB->get_records_sql($querystudents, [CONTEXT_COURSE, $course->courseid, $studentrole->id]);
         foreach ($users as $user) {
             if (!array_key_exists($user->id, $students)) {
                 $user->name = fullname($user);

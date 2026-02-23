@@ -97,18 +97,16 @@ class category_distributor {
     private static function share_new_category_to_teachers($categoryid, $courseid) {
         global $DB;
 
-        // Get course context.
-        $context = \context_course::instance($courseid);
+        // Get teachers by role shortname using the existing function.
+        require_once(__DIR__ . '/../lib/lib.php');
+        $teacherids = block_exaport_get_course_teachers_by_courseid($courseid, false);
 
-        // Get teachers - users with block/exaport:distributecategories capability.
-        $teachers = get_enrolled_users($context, 'block/exaport:distributecategories', 0, 'u.id', null, 0, 0, true);
-
-        foreach ($teachers as $teacher) {
+        foreach ($teacherids as $teacherid) {
             // Create share record if missing.
-            if (!$DB->record_exists('block_exaportcatshar', array('catid' => $categoryid, 'userid' => $teacher->id))) {
+            if (!$DB->record_exists('block_exaportcatshar', array('catid' => $categoryid, 'userid' => $teacherid))) {
                 $share = new \stdClass();
                 $share->catid = $categoryid;
-                $share->userid = $teacher->id;
+                $share->userid = $teacherid;
                 $DB->insert_record('block_exaportcatshar', $share);
             }
         }
@@ -162,19 +160,14 @@ class category_distributor {
             return array('created' => 0, 'skipped' => 0, 'students' => 0, 'error' => 'no_template');
         }
 
-        // Get enrolled students.
-        $context = \context_course::instance($courseid);
-        $students = get_enrolled_users($context, '', 0, 'u.id', null, 0, 0, true);
+        // Get enrolled students by role shortname using the existing function.
+        require_once(__DIR__ . '/../lib/lib.php');
+        $studentids = block_exaport_get_course_students_by_courseid($courseid);
 
         $total_stats = array('created' => 0, 'skipped' => 0, 'students' => 0);
 
-        foreach ($students as $student) {
-            // Skip if user has capability to distribute (teachers).
-            if (has_capability('block/exaport:distributecategories', $context, $student->id)) {
-                continue;
-            }
-
-            $stats = self::distribute_to_user($student->id, $template, 0, $courseid);
+        foreach ($studentids as $studentid) {
+            $stats = self::distribute_to_user($studentid, $template, 0, $courseid);
             $total_stats['created'] += $stats['created'];
             $total_stats['skipped'] += $stats['skipped'];
             $total_stats['students']++;

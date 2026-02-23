@@ -19,6 +19,8 @@ namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/../lib/lib.php');
+
 /**
  * Category distribution class
  *
@@ -98,7 +100,6 @@ class category_distributor {
         global $DB;
 
         // Get teachers by role shortname using the existing function.
-        require_once(__DIR__ . '/../lib/lib.php');
         $teacherids = block_exaport_get_course_teachers_by_courseid($courseid, false);
 
         foreach ($teacherids as $teacherid) {
@@ -161,7 +162,6 @@ class category_distributor {
         }
 
         // Get enrolled students by role shortname using the existing function.
-        require_once(__DIR__ . '/../lib/lib.php');
         $studentids = block_exaport_get_course_students_by_courseid($courseid);
 
         $total_stats = array('created' => 0, 'skipped' => 0, 'students' => 0);

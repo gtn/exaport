@@ -97,6 +97,15 @@ class block_exaport extends block_list {
             ' href="' . $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id . '">' .
             $icon . block_exaport_get_string('importexport') . '</a>';
 
+        // Add category distribution link for teachers.
+        $coursecontext = context_course::instance($COURSE->id);
+        if (has_capability('block/exaport:distributecategories', $coursecontext)) {
+            $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/shared_categories.svg' . '" width="16" height="16" class="icon" alt="" />';
+            $this->content->items[] = '<a title="' . block_exaport_get_string('category_distribution') . '" ' .
+                ' href="' . $CFG->wwwroot . '/blocks/exaport/category_distribution.php?courseid=' . $COURSE->id . '">' .
+                $icon . block_exaport_get_string('category_distribution') . '</a>';
+        }
+
         return $this->content;
     }
 }

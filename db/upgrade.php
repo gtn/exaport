@@ -1231,5 +1231,180 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026010803, 'exaport');
     }
 
+    if ($oldversion < 2026021801) {
+        // Create table for per-course category templates.
+        $table = new xmldb_table('block_exaport_course_templ');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('pid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('share_to_teachers', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        // Foreign key named after the field, per Moodle XMLDB conventions.
+        // Foreign keys automatically create indexes, so no separate index needed on courseid.
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+
+        // Only add index for pid (non-foreign-key field).
+        $table->add_index('pid', XMLDB_INDEX_NOTUNIQUE, array('pid'));
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Create table for distribution settings.
+        $table = new xmldb_table('block_exaport_templ_dist');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('auto_distribute', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        // Foreign-unique key creates unique index automatically, no separate index needed.
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN_UNIQUE, array('courseid'), 'course', array('id'));
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Set default starter templates in config if not already set.
+        $default_templates = array(
+            array(
+                'name' => 'Coach Intensive',
+                'tree' => array(
+                    'name' => 'Coach Intensive',
+                    'share_to_teachers' => 0,
+                    'children' => array(
+                        array('name' => 'Coachees', 'share_to_teachers' => 0),
+                        array('name' => 'Eindbeoordeling', 'share_to_teachers' => 0),
+                        array('name' => 'Eindreflectie', 'share_to_teachers' => 0),
+                        array('name' => 'Feedback praktijkdagen', 'share_to_teachers' => 0),
+                        array('name' => 'Getekende verklaringen', 'share_to_teachers' => 0),
+                        array('name' => 'Intervisie', 'share_to_teachers' => 0),
+                        array('name' => 'Leerjournaals', 'share_to_teachers' => 0),
+                        array('name' => 'Mondeling examen', 'share_to_teachers' => 0),
+                    ),
+                ),
+            ),
+        );
+
+        $existing = get_config('block_exaport', 'starter_templates');
+        if (!$existing) {
+            set_config('starter_templates', json_encode($default_templates), 'block_exaport');
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026021801, 'exaport');
+    }
+
+    if ($oldversion < 2026022401) {
+        // Add auto_distribute_views field to block_exaport_templ_dist table.
+        $table = new xmldb_table('block_exaport_templ_dist');
+        $field = new xmldb_field('auto_distribute_views', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'auto_distribute');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Create table for per-course view templates.
+        $table = new xmldb_table('block_exaport_view_templ');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '1000', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('description', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('share_to_teachers', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        // Foreign key named after the field, per Moodle XMLDB conventions.
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Set default starter view templates in config if not already set.
+        $default_view_templates = array(
+            array(
+                'name' => 'Coach Intensive',
+                'views' => array(
+                    array(
+                        'name' => 'Portfolio',
+                        'description' => 'This view has been automatically created',
+                        'share_to_teachers' => 1,
+                    ),
+                ),
+            ),
+        );
+
+        $existing = get_config('block_exaport', 'starter_view_templates');
+        if (!$existing) {
+            set_config('starter_view_templates', json_encode($default_view_templates), 'block_exaport');
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026022401, 'exaport');
+    }
+
+    if ($oldversion < 2026022403) {
+        // Update existing starter templates to include share_to_teachers field.
+        $templates_json = get_config('block_exaport', 'starter_templates');
+        if (!empty($templates_json)) {
+            $templates = json_decode($templates_json, true);
+            if (is_array($templates)) {
+                $updated = false;
+                foreach ($templates as &$template) {
+                    if (isset($template['tree'])) {
+                        // Add share_to_teachers to root if not present.
+                        if (!isset($template['tree']['share_to_teachers'])) {
+                            $template['tree']['share_to_teachers'] = 0;
+                            $updated = true;
+                        }
+                        // Add share_to_teachers to all children if not present.
+                        if (isset($template['tree']['children']) && is_array($template['tree']['children'])) {
+                            foreach ($template['tree']['children'] as &$child) {
+                                if (!isset($child['share_to_teachers'])) {
+                                    $child['share_to_teachers'] = 0;
+                                    $updated = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                if ($updated) {
+                    set_config('starter_templates', json_encode($templates), 'block_exaport');
+                }
+            }
+        }
+
+        // Update Portfolio view description if still empty.
+        $view_templates_json = get_config('block_exaport', 'starter_view_templates');
+        if (!empty($view_templates_json)) {
+            $view_templates = json_decode($view_templates_json, true);
+            if (is_array($view_templates)) {
+                $updated = false;
+                foreach ($view_templates as &$template) {
+                    if (isset($template['views']) && is_array($template['views'])) {
+                        foreach ($template['views'] as &$view) {
+                            if ($view['name'] === 'Portfolio' && empty($view['description'])) {
+                                $view['description'] = 'This view has been automatically created';
+                                $updated = true;
+                            }
+                        }
+                    }
+                }
+                if ($updated) {
+                    set_config('starter_view_templates', json_encode($view_templates), 'block_exaport');
+                }
+            }
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026022403, 'exaport');
+    }
+
     return $result;
 }

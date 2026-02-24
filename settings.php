@@ -171,4 +171,19 @@ if ($ADMIN->fulltree) {
     //  the table with layout settings
     $settings->add(new block_exaport_layout_configtable('block_exaport_layout_settings', block_exaport_get_string('settings_layout_settings_description'), '', ''));
 
+    // Category distribution starter templates
+    $settings->add(new admin_setting_heading('exaport/category_distribution_settings',
+        get_string('settings_category_distribution_heading', 'block_exaport'),
+        get_string('settings_category_distribution_description', 'block_exaport')));
+
+    $settings->add(new admin_setting_configtextarea('block_exaport/starter_templates',
+        get_string('settings_starter_templates', 'block_exaport'),
+        get_string('settings_starter_templates_description', 'block_exaport'),
+        '', PARAM_TEXT, 60, 10));
+
+    $settings->add(new admin_setting_configtextarea('block_exaport/starter_view_templates',
+        get_string('settings_starter_view_templates', 'block_exaport'),
+        get_string('settings_starter_view_templates_description', 'block_exaport'),
+        '', PARAM_TEXT, 60, 10));
+
 }

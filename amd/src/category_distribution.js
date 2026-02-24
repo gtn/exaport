@@ -192,6 +192,93 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
     };
 
     /**
+     * Add a new view
+     */
+    var addView = function() {
+        ModalFactory.create({
+            type: ModalFactory.types.SAVE_CANCEL,
+            title: config.strings.addView || 'Add View',
+            body: '<div class="form-group">' +
+                  '<label for="view-name-input">' + config.strings.viewNameRequired + '</label>' +
+                  '<input type="text" class="form-control" id="view-name-input" autofocus>' +
+                  '</div>'
+        }).then(function(modal) {
+            modal.setSaveButtonText(config.strings.save || 'Save');
+
+            modal.getRoot().on(ModalEvents.save, function() {
+                var name = modal.getRoot().find('#view-name-input').val();
+                if (name) {
+                    submitForm('add_view', {
+                        'name': name
+                    });
+                }
+            });
+
+            modal.show();
+
+            // Focus input after modal is shown
+            modal.getRoot().on(ModalEvents.shown, function() {
+                modal.getRoot().find('#view-name-input').focus();
+            });
+
+            return modal;
+        });
+    };
+
+    /**
+     * Rename a view
+     * @param {int} id View ID
+     * @param {string} oldname Current view name
+     */
+    var renameView = function(id, oldname) {
+        ModalFactory.create({
+            type: ModalFactory.types.SAVE_CANCEL,
+            title: config.strings.renameView || 'Rename View',
+            body: '<div class="form-group">' +
+                  '<label for="view-name-input">' + config.strings.viewNameRequired + '</label>' +
+                  '<input type="text" class="form-control" id="view-name-input" value="' +
+                  $('<div>').text(oldname).html() + '" autofocus>' +
+                  '</div>'
+        }).then(function(modal) {
+            modal.setSaveButtonText(config.strings.save || 'Save');
+
+            modal.getRoot().on(ModalEvents.save, function() {
+                var name = modal.getRoot().find('#view-name-input').val();
+                if (name && name !== oldname) {
+                    submitForm('rename_view', {
+                        'id': id,
+                        'name': name
+                    });
+                }
+            });
+
+            modal.show();
+
+            // Focus and select input after modal is shown
+            modal.getRoot().on(ModalEvents.shown, function() {
+                var input = modal.getRoot().find('#view-name-input')[0];
+                input.focus();
+                input.select();
+            });
+
+            return modal;
+        });
+    };
+
+    /**
+     * Toggle share to teachers setting for a view
+     * @param {int} id View ID
+     * @param {boolean} currentState Current share state
+     */
+    var toggleViewShareToTeachers = function(id, currentState) {
+        var newState = !currentState;
+        submitForm('toggle_view_share', {
+            'id': id,
+            'share_to_teachers': newState ? '1' : '0'
+        });
+    };
+
+    /**
      * Initialize the category distribution module
      * @param {object} cfg Configuration object
      */
@@ -223,6 +310,26 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
             var id = $(this).data('id');
             var currentState = $(this).data('shared') == '1'; // === would not work, as it is int
             toggleShareToTeachers(id, currentState);
+        });
+
+        // View event handlers
+        $(document).on('click', '[data-action="add-view"]', function(e) {
+            e.preventDefault();
+            addView();
+        });
+
+        $(document).on('click', '[data-action="rename-view"]', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            renameView(id, name);
+        });
+
+        $(document).on('click', '[data-action="toggle-view-share"]', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var currentState = $(this).data('shared') == '1';
+            toggleViewShareToTeachers(id, currentState);
         });
     };
 

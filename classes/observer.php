@@ -16,7 +16,7 @@ defined('MOODLE_INTERNAL') || die();
 class observer {
 
     /**
-     * Handle user enrolment event to auto-distribute categories
+     * Handle user enrolment event to auto-distribute categories and views
      *
      * @param \core\event\user_enrolment_created $event
      */
@@ -24,20 +24,27 @@ class observer {
         $courseid = $event->courseid;
         $userid = $event->relateduserid;
 
-        // Check if auto-distribution is enabled for this course.
-        $settings = category_distributor::get_settings($courseid);
-        if (!$settings->auto_distribute) {
-            return;
+        // Check if auto-distribution is enabled for categories.
+        $category_settings = category_distributor::get_settings($courseid);
+        if ($category_settings->auto_distribute) {
+            // Get course template.
+            $template = category_template::get_course_template($courseid);
+            if (!empty($template)) {
+                // Distribute to the newly enrolled user (pass courseid for teacher sharing).
+                category_distributor::distribute_to_user($userid, $template, 0, $courseid);
+            }
         }
 
-        // Get course template.
-        $template = category_template::get_course_template($courseid);
-        if (empty($template)) {
-            return;
+        // Check if auto-distribution is enabled for views.
+        $view_settings = view_distributor::get_settings($courseid);
+        if ($view_settings->auto_distribute_views) {
+            // Get course view template.
+            $view_template = view_template::get_course_template($courseid);
+            if (!empty($view_template)) {
+                // Distribute views to the newly enrolled user.
+                view_distributor::distribute_to_user($userid, $view_template, $courseid);
+            }
         }
-
-        // Distribute to the newly enrolled user (pass courseid for teacher sharing).
-        category_distributor::distribute_to_user($userid, $template, 0, $courseid);
     }
 }
 

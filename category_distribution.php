@@ -19,6 +19,8 @@ require_once(__DIR__ . '/inc.php');
 
 use block_exaport\category_template;
 use block_exaport\category_distributor;
+use block_exaport\view_template;
+use block_exaport\view_distributor;
 
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_TEXT);
@@ -157,10 +159,107 @@ if ($action === 'toggle_share_to_teachers' && confirm_sesskey()) {
     redirect($url, $message, null, 'success');
 }
 
+// View template actions.
+if ($action === 'load_view_template' && confirm_sesskey()) {
+    $template_name = required_param('template_name', PARAM_TEXT);
+    if (view_template::load_starter_template($courseid, $template_name)) {
+        $message = get_string('starter_template_loaded', 'block_exaport');
+    } else {
+        $message = get_string('distribution_error', 'block_exaport', 'Template not found');
+        $messagetype = 'error';
+    }
+    redirect($url, $message, null, $messagetype);
+}
+
+if ($action === 'add_view' && confirm_sesskey()) {
+    $name = required_param('name', PARAM_TEXT);
+    $description = optional_param('description', '', PARAM_TEXT);
+    $share_to_teachers = optional_param('share_to_teachers', 0, PARAM_INT);
+
+    $name = trim($name);
+    if (!empty($name) && strlen($name) <= 255) {
+        view_template::add_view($courseid, $name, $description, $share_to_teachers);
+        $message = get_string('view_added', 'block_exaport');
+    } else {
+        $message = get_string('view_name_required', 'block_exaport');
+        $messagetype = 'error';
+    }
+    redirect($url, $message, null, $messagetype);
+}
+
+if ($action === 'rename_view' && confirm_sesskey()) {
+    $id = required_param('id', PARAM_INT);
+    $name = required_param('name', PARAM_TEXT);
+
+    // Verify view belongs to this course.
+    view_template::verify_view($id, $courseid);
+
+    $name = trim($name);
+    if (!empty($name) && strlen($name) <= 255) {
+        view_template::rename_view($id, $name);
+        $message = get_string('view_renamed', 'block_exaport');
+    } else {
+        $message = get_string('view_name_required', 'block_exaport');
+        $messagetype = 'error';
+    }
+    redirect($url, $message, null, $messagetype);
+}
+
+if ($action === 'remove_view' && confirm_sesskey()) {
+    $id = required_param('id', PARAM_INT);
+
+    // Verify view belongs to this course.
+    view_template::verify_view($id, $courseid);
+
+    view_template::remove_view($id);
+    $message = get_string('view_removed', 'block_exaport');
+    redirect($url, $message, null, 'success');
+}
+
+if ($action === 'toggle_view_share' && confirm_sesskey()) {
+    $id = required_param('id', PARAM_INT);
+    $share_to_teachers = required_param('share_to_teachers', PARAM_INT);
+
+    // Verify view belongs to this course.
+    view_template::verify_view($id, $courseid);
+
+    view_template::toggle_share_to_teachers($id, $share_to_teachers);
+    $message = get_string('changessaved');
+    redirect($url, $message, null, 'success');
+}
+
+if ($action === 'distribute_views_now' && confirm_sesskey()) {
+    $stats = view_distributor::distribute_to_course($courseid);
+    if (isset($stats['error'])) {
+        $message = get_string('no_views_to_distribute', 'block_exaport');
+        $messagetype = 'error';
+    } else {
+        $summary = get_string('distribution_complete', 'block_exaport') . '<br>';
+        $summary .= get_string('students_processed', 'block_exaport', $stats['students']) . '<br>';
+        $summary .= get_string('views_created', 'block_exaport', $stats['created']) . '<br>';
+        $summary .= get_string('views_skipped', 'block_exaport', $stats['skipped']);
+        $message = $summary;
+    }
+    redirect($url, $message, null, $messagetype);
+}
+
+if ($action === 'toggle_auto_distribute_views' && confirm_sesskey()) {
+    $auto_distribute_views = optional_param('auto_distribute_views', 0, PARAM_INT);
+    $settings = view_distributor::get_settings($courseid);
+    view_distributor::update_settings($courseid, $auto_distribute_views);
+    $message = get_string('changessaved');
+    redirect($url, $message, null, 'success');
+}
+
 // Get current data.
 $templates = category_template::get_starter_templates();
 $course_template = category_template::get_course_template($courseid);
 $settings = category_distributor::get_settings($courseid);
+
+// Get view templates.
+$view_templates = view_template::get_starter_templates();
+$course_view_template = view_template::get_course_template($courseid);
+$view_settings = view_distributor::get_settings($courseid);
 
 // Get all template nodes for move operations.
 $all_template_nodes = $DB->get_records('block_exaport_course_templ', array('courseid' => $courseid), 'sortorder ASC');
@@ -187,6 +286,9 @@ $PAGE->requires->js_call_amd('block_exaport/category_distribution', 'init', arra
             'addSubcategory' => get_string('add_subcategory', 'block_exaport'),
             'renameCategory' => get_string('rename_category', 'block_exaport'),
             'moveCategory' => get_string('move_category', 'block_exaport'),
+            'addView' => get_string('add_view', 'block_exaport'),
+            'renameView' => get_string('rename_view', 'block_exaport'),
+            'viewNameRequired' => get_string('view_name_required', 'block_exaport'),
             'save' => get_string('save', 'core'),
         ),
         'nodes' => $js_nodes,
@@ -266,6 +368,80 @@ echo '<label class="form-check-label" for="auto-dist">' .
 echo '</div>';
 echo '</form>';
 
+// Separator.
+echo '<hr style="margin: 40px 0;">';
+
+// VIEW DISTRIBUTION SECTION.
+echo $OUTPUT->heading(get_string('view_distribution', 'block_exaport'), 2);
+echo html_writer::tag('p', get_string('view_distribution_description', 'block_exaport'));
+
+// Section 4: Load Starter View Template.
+echo $OUTPUT->heading(get_string('starter_view_template_select', 'block_exaport'), 3);
+
+if (!empty($view_templates)) {
+    echo '<form method="post" action="' . $url->out() . '" id="load-view-template-form">';
+    echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
+    echo '<input type="hidden" name="action" value="load_view_template">';
+    echo '<div class="form-group">';
+    echo '<select name="template_name" class="form-control" style="display: inline-block; width: auto;">';
+    foreach ($view_templates as $template) {
+        echo '<option value="' . s($template['name']) . '">' . s($template['name']) . '</option>';
+    }
+    echo '</select> ';
+    echo '<button type="submit" class="btn btn-secondary" onclick="return confirm(' .
+        json_encode(get_string('starter_template_load_confirm', 'block_exaport')) . ');">' .
+        get_string('starter_template_load', 'block_exaport') . '</button>';
+    echo '</div>';
+    echo '</form>';
+} else {
+    echo '<p>' . get_string('invalid_template_json', 'block_exaport') . '</p>';
+}
+
+// Section 5: Current View Template.
+echo $OUTPUT->heading(get_string('current_view_template', 'block_exaport'), 3);
+
+if (empty($course_view_template)) {
+    echo '<p>' . get_string('view_template_empty', 'block_exaport') . '</p>';
+    echo '<form method="post" action="' . $url->out() . '">';
+    echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
+    echo '<input type="hidden" name="action" value="add_view">';
+    echo '<div class="form-inline">';
+    echo '<input type="text" name="name" class="form-control" placeholder="' .
+        get_string('view_name_required', 'block_exaport') . '" required> ';
+    echo '<button type="submit" class="btn btn-primary">' .
+        get_string('add_view', 'block_exaport') . '</button>';
+    echo '</div>';
+    echo '</form>';
+} else {
+    // Display view list.
+    echo '<div class="exaport-view-template-list">';
+    block_exaport_render_view_template_list($course_view_template, $url);
+    echo '</div>';
+}
+
+// Section 6: View Distribution Controls.
+echo $OUTPUT->heading(get_string('distribute_views', 'block_exaport'), 3);
+
+echo '<form method="post" action="' . $url->out() . '" style="margin-bottom: 20px;">';
+echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
+echo '<input type="hidden" name="action" value="distribute_views_now">';
+echo '<button type="submit" class="btn btn-primary"' .
+    (empty($course_view_template) ? ' disabled' : '') . '>' .
+    get_string('distribute_views_now', 'block_exaport') . '</button>';
+echo '</form>';
+
+echo '<form method="post" action="' . $url->out() . '">';
+echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
+echo '<input type="hidden" name="action" value="toggle_auto_distribute_views">';
+echo '<div class="form-check">';
+$checked_views = $view_settings->auto_distribute_views ? 'checked' : '';
+echo '<input type="checkbox" name="auto_distribute_views" value="1" class="form-check-input" id="auto-dist-views" ' .
+    $checked_views . ' onchange="this.form.submit();">';
+echo '<label class="form-check-label" for="auto-dist-views">' .
+    get_string('auto_distribute_views_on_enrolment', 'block_exaport') . '</label>';
+echo '</div>';
+echo '</form>';
+
 echo $OUTPUT->footer();
 
 /**
@@ -327,6 +503,58 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
     }
     echo '</ul>';
 }
+
+/**
+ * Render view template list
+ *
+ * @param array $views View list
+ * @param moodle_url $url Base URL
+ */
+function block_exaport_render_view_template_list($views, $url) {
+    echo '<ul class="list-group">';
+    foreach ($views as $view) {
+        echo '<li class="list-group-item">';
+        echo '<div class="d-flex align-items-center justify-content-between">';
+        echo '<div><strong>' . s($view['name']) . '</strong>';
+        if (!empty($view['description'])) {
+            echo '<br><small class="text-muted">' . s($view['description']) . '</small>';
+        }
+        echo '</div>';
+
+        // Actions.
+        echo '<div class="btn-group btn-group-sm" role="group">';
+
+        // Rename.
+        echo '<button type="button" class="btn btn-sm btn-outline-secondary" ' .
+            'data-action="rename-view" data-id="' . $view['id'] . '" data-name="' . s($view['name']) . '">' .
+            get_string('rename_view', 'block_exaport') . '</button>';
+
+        // Remove.
+        $removeurl = new moodle_url($url, array('action' => 'remove_view', 'id' => $view['id'], 'sesskey' => sesskey()));
+        echo '<a href="' . $removeurl->out() . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(' .
+            json_encode(get_string('remove_view_confirm', 'block_exaport')) . ');">' .
+            get_string('remove_view', 'block_exaport') . '</a>';
+
+        // Share to teachers toggle button.
+        $is_shared = isset($view['share_to_teachers']) && $view['share_to_teachers'];
+        $share_class = $is_shared ? 'btn-warning' : 'btn-outline-warning';
+        echo '<button type="button" class="btn btn-sm ' . $share_class . '" ' .
+            'data-action="toggle-view-share" data-id="' . $view['id'] . '" data-shared="' . ($is_shared ? '1' : '0') . '" ' .
+            'title="' . s(get_string('share_to_teachers_help', 'block_exaport')) . '">' .
+            get_string('share_to_teachers', 'block_exaport') . '</button>';
+
+        echo '</div>';
+        echo '</div>';
+        echo '</li>';
+    }
+    echo '</ul>';
+
+    // Add new view button.
+    echo '<div style="margin-top: 15px;">';
+    echo '<button type="button" class="btn btn-sm btn-outline-primary" data-action="add-view">' .
+        get_string('add_view', 'block_exaport') . '</button>';
+    echo '</div>';
+}
 ?>
 
 <style>
@@ -341,5 +569,11 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
 }
 .exaport-template-tree li {
     padding: 5px 0;
+}
+.exaport-view-template-list {
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 </style>

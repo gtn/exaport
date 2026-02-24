@@ -369,6 +369,13 @@ $string['capability_required'] = 'U heeft geen toestemming om categorieverdeling
 $string['invalid_template_json'] = 'Ongeldig sjabloon JSON-formaat';
 $string['share_to_teachers'] = 'Schakelen: Gedeelde categorie';
 $string['share_to_teachers_help'] = 'Toekomstige aanmaak van deze categorie zal deze categorieën delen met de cursusdocenten van deze cursus';
+$string['confirm_distribute_categories_title'] = 'Categorieverdeling bevestigen';
+$string['confirm_distribute_categories_body'] = 'Weet u zeker dat u de categoriestructuur wilt distribueren naar alle ingeschreven studenten? Dit maakt categorieën aan voor studenten die deze nog niet hebben. Deze actie kan niet ongedaan worden gemaakt. Zodra gedistribueerd, worden de categorieën aangemaakt.';
+$string['confirm_distribute_views_title'] = 'Weergavedistributie bevestigen';
+$string['confirm_distribute_views_body'] = 'Weet u zeker dat u de weergavesjablonen wilt distribueren naar alle ingeschreven studenten? Dit maakt weergaven aan voor studenten die deze nog niet hebben. Deze actie kan niet ongedaan worden gemaakt. Zodra gedistribueerd, worden de weergaven aangemaakt.';
+$string['distribute'] = 'Distribueren';
+$string['distribute_categories'] = 'Categorieën distribueren';
+$string['distribute_categories_now'] = 'Categorieën nu distribueren';
 
 // View distribution strings.
 $string['view_distribution'] = 'Weergavedistributie';

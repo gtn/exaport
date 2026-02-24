@@ -62,6 +62,7 @@ if ($cataction) {
         switch ($cataction) {
             case "add":
                 $newentry->userid = $USER->id;
+                $newentry->creatorid = $USER->id;
                 if ($pid > 0) {
                     $newentry->pid = $pid;
                 } else {

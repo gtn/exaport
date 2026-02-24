@@ -3192,6 +3192,34 @@ return [
         'Zukünftige Erstellungen dieser Kategorie werden diese Kategorien mit den Kurslehrenden dieses Kurses teilen',
         'Future creations of this category will share those categories to the course teachers of this course',
     ],
+    'confirm_distribute_categories_title' => [
+        'Kategorieverteilung bestätigen',
+        'Confirm Category Distribution',
+    ],
+    'confirm_distribute_categories_body' => [
+        'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Kategorien für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Kategorien erstellt.',
+        'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them. This action cannot be undone. Once distributed, the categories are created.',
+    ],
+    'confirm_distribute_views_title' => [
+        'Ansichtenverteilung bestätigen',
+        'Confirm View Distribution',
+    ],
+    'confirm_distribute_views_body' => [
+        'Sind Sie sicher, dass Sie die Ansichtsvorlagen an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Ansichten für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Ansichten erstellt.',
+        'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them. This action cannot be undone. Once distributed, the views are created.',
+    ],
+    'distribute' => [
+        'Verteilen',
+        'Distribute',
+    ],
+    'distribute_categories' => [
+        'Kategorien verteilen',
+        'Distribute Categories',
+    ],
+    'distribute_categories_now' => [
+        'Kategorien jetzt verteilen',
+        'Distribute Categories Now',
+    ],
     // View distribution strings.
     'view_distribution' => [
         'Ansichten-Verteilung',

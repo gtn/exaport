@@ -1275,15 +1275,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 'name' => 'Coach Intensive',
                 'tree' => array(
                     'name' => 'Coach Intensive',
+                    'share_to_teachers' => 0,
                     'children' => array(
-                        array('name' => 'Coachees'),
-                        array('name' => 'Eindbeoordeling'),
-                        array('name' => 'Eindreflectie'),
-                        array('name' => 'Feedback praktijkdagen'),
-                        array('name' => 'Getekende verklaringen'),
-                        array('name' => 'Intervisie'),
-                        array('name' => 'Leerjournaals'),
-                        array('name' => 'Mondeling examen'),
+                        array('name' => 'Coachees', 'share_to_teachers' => 0),
+                        array('name' => 'Eindbeoordeling', 'share_to_teachers' => 0),
+                        array('name' => 'Eindreflectie', 'share_to_teachers' => 0),
+                        array('name' => 'Feedback praktijkdagen', 'share_to_teachers' => 0),
+                        array('name' => 'Getekende verklaringen', 'share_to_teachers' => 0),
+                        array('name' => 'Intervisie', 'share_to_teachers' => 0),
+                        array('name' => 'Leerjournaals', 'share_to_teachers' => 0),
+                        array('name' => 'Mondeling examen', 'share_to_teachers' => 0),
                     ),
                 ),
             ),
@@ -1332,7 +1333,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 'views' => array(
                     array(
                         'name' => 'Portfolio',
-                        'description' => '',
+                        'description' => 'This view has been automatically created',
                         'share_to_teachers' => 1,
                     ),
                 ),
@@ -1346,6 +1347,63 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
         // Exaport savepoint reached.
         upgrade_block_savepoint(true, 2026022401, 'exaport');
+    }
+
+    if ($oldversion < 2026022402) {
+        // Update existing starter templates to include share_to_teachers field.
+        $templates_json = get_config('block_exaport', 'starter_templates');
+        if (!empty($templates_json)) {
+            $templates = json_decode($templates_json, true);
+            if (is_array($templates)) {
+                $updated = false;
+                foreach ($templates as &$template) {
+                    if (isset($template['tree'])) {
+                        // Add share_to_teachers to root if not present.
+                        if (!isset($template['tree']['share_to_teachers'])) {
+                            $template['tree']['share_to_teachers'] = 0;
+                            $updated = true;
+                        }
+                        // Add share_to_teachers to all children if not present.
+                        if (isset($template['tree']['children']) && is_array($template['tree']['children'])) {
+                            foreach ($template['tree']['children'] as &$child) {
+                                if (!isset($child['share_to_teachers'])) {
+                                    $child['share_to_teachers'] = 0;
+                                    $updated = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                if ($updated) {
+                    set_config('starter_templates', json_encode($templates), 'block_exaport');
+                }
+            }
+        }
+
+        // Update Portfolio view description if still empty.
+        $view_templates_json = get_config('block_exaport', 'starter_view_templates');
+        if (!empty($view_templates_json)) {
+            $view_templates = json_decode($view_templates_json, true);
+            if (is_array($view_templates)) {
+                $updated = false;
+                foreach ($view_templates as &$template) {
+                    if (isset($template['views']) && is_array($template['views'])) {
+                        foreach ($template['views'] as &$view) {
+                            if ($view['name'] === 'Portfolio' && empty($view['description'])) {
+                                $view['description'] = 'This view has been automatically created';
+                                $updated = true;
+                            }
+                        }
+                    }
+                }
+                if ($updated) {
+                    set_config('starter_view_templates', json_encode($view_templates), 'block_exaport');
+                }
+            }
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026022402, 'exaport');
     }
 
     return $result;

@@ -226,12 +226,14 @@ function block_exaport_import_categories($categoriesstring) {
             $newentry->name = trim($category, '-');
             $newentry->pid = $lastmainid;
             if (!$DB->record_exists('block_exaportcate', array("name" => trim($category, '-')))) {
+                $newentry->creatorid = !empty($USER->id) ? $USER->id : 0;
                 $DB->insert_record("block_exaportcate", $newentry);
             }
         } else {
             $newentry->name = $category;
             $newentry->pid = 0;
             if (!$DB->record_exists('block_exaportcate', array("name" => $category))) {
+                $newentry->creatorid = !empty($USER->id) ? $USER->id : 0;
                 $lastmainid = $DB->insert_record("block_exaportcate", $newentry);
             } else {
                 $lastmainid = $DB->get_field('block_exaportcate', 'id', array("name" => $category));

@@ -919,9 +919,9 @@ $string['invalid_template_json'] = 'Invalid template JSON format';
 $string['share_to_teachers'] = 'Toggle: Shared Category';
 $string['share_to_teachers_help'] = 'Future creations of this category will share those categories to the course teachers of this course';
 $string['confirm_distribute_categories_title'] = 'Confirm Category Distribution';
-$string['confirm_distribute_categories_body'] = 'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them.';
+$string['confirm_distribute_categories_body'] = 'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them. This action cannot be undone. Once distributed, the categories are created.';
 $string['confirm_distribute_views_title'] = 'Confirm View Distribution';
-$string['confirm_distribute_views_body'] = 'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them.';
+$string['confirm_distribute_views_body'] = 'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them. This action cannot be undone. Once distributed, the views are created.';
 $string['distribute'] = 'Distribute';
 
 // View distribution strings.

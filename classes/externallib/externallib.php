@@ -939,6 +939,7 @@ class externallib extends \external_api {
             'hash' => $hash,
             'createdinapp' => 1,
             'pdf_settings' => $pdfsettings,
+            'creatorid' => $USER->id,
         ]);
 
         return ["success" => true, 'id' => $viewid];

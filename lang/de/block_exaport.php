@@ -913,6 +913,13 @@ $string['capability_required'] = 'Sie haben keine Berechtigung zur Verwaltung de
 $string['invalid_template_json'] = 'Ungültiges Vorlagen-JSON-Format';
 $string['share_to_teachers'] = 'Umschalten: Geteilte Kategorie';
 $string['share_to_teachers_help'] = 'Zukünftige Erstellungen dieser Kategorie werden diese Kategorien mit den Kurslehrenden dieses Kurses teilen';
+$string['confirm_distribute_categories_title'] = 'Kategorieverteilung bestätigen';
+$string['confirm_distribute_categories_body'] = 'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Kategorien für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Kategorien erstellt.';
+$string['confirm_distribute_views_title'] = 'Ansichtenverteilung bestätigen';
+$string['confirm_distribute_views_body'] = 'Sind Sie sicher, dass Sie die Ansichtsvorlagen an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Ansichten für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Ansichten erstellt.';
+$string['distribute'] = 'Verteilen';
+$string['distribute_categories'] = 'Kategorien verteilen';
+$string['distribute_categories_now'] = 'Kategorien jetzt verteilen';
 
 // View distribution strings.
 $string['view_distribution'] = 'Ansichten-Verteilung';

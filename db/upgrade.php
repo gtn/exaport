@@ -1406,5 +1406,26 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026022403, 'exaport');
     }
 
+    if ($oldversion < 2026022404) {
+        // Add creatorid field to block_exaportcate table.
+        $table = new xmldb_table('block_exaportcate');
+        $field = new xmldb_field('creatorid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'iconmerge');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add creatorid field to block_exaportview table.
+        $table = new xmldb_table('block_exaportview');
+        $field = new xmldb_field('creatorid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'layout_settings');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026022404, 'exaport');
+    }
+
     return $result;
 }

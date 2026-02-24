@@ -279,6 +279,44 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
     };
 
     /**
+     * Show confirmation dialog before distributing categories
+     */
+    var confirmDistributeCategories = function() {
+        ModalFactory.create({
+            type: ModalFactory.types.SAVE_CANCEL,
+            title: config.strings.confirmDistributeCategoriesTitle || 'Confirm Distribution',
+            body: config.strings.confirmDistributeCategoriesBody || 'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them.'
+        }).then(function(modal) {
+            modal.setSaveButtonText(config.strings.distribute || 'Distribute');
+
+            modal.getRoot().on(ModalEvents.save, function() {
+                submitForm('distribute_now', {});
+            });
+
+            modal.show();
+        });
+    };
+
+    /**
+     * Show confirmation dialog before distributing views
+     */
+    var confirmDistributeViews = function() {
+        ModalFactory.create({
+            type: ModalFactory.types.SAVE_CANCEL,
+            title: config.strings.confirmDistributeViewsTitle || 'Confirm Distribution',
+            body: config.strings.confirmDistributeViewsBody || 'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them.'
+        }).then(function(modal) {
+            modal.setSaveButtonText(config.strings.distribute || 'Distribute');
+
+            modal.getRoot().on(ModalEvents.save, function() {
+                submitForm('distribute_views_now', {});
+            });
+
+            modal.show();
+        });
+    };
+
+    /**
      * Initialize the category distribution module
      * @param {object} cfg Configuration object
      */
@@ -330,6 +368,17 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
             var id = $(this).data('id');
             var currentState = $(this).data('shared') == '1';
             toggleViewShareToTeachers(id, currentState);
+        });
+
+        // Distribution confirmation handlers
+        $(document).on('click', '[data-action="distribute-categories"]', function(e) {
+            e.preventDefault();
+            confirmDistributeCategories();
+        });
+
+        $(document).on('click', '[data-action="distribute-views"]', function(e) {
+            e.preventDefault();
+            confirmDistributeViews();
         });
     };
 

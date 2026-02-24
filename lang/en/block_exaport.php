@@ -893,6 +893,8 @@ $string['move_category'] = 'Move';
 $string['remove_from_template'] = 'Remove from Template';
 $string['remove_from_template_confirm'] = 'Remove this category from the template? This does not delete student categories.';
 $string['distribute_now'] = 'Distribute Now';
+$string['distribute_categories'] = 'Distribute Categories';
+$string['distribute_categories_now'] = 'Distribute Categories Now';
 $string['auto_distribute_on_enrolment'] = 'Auto-distribute on new enrolments';
 $string['distribution_in_progress'] = 'Distribution in progress...';
 $string['distribution_complete'] = 'Distribution complete';
@@ -916,6 +918,11 @@ $string['capability_required'] = 'You do not have permission to manage category 
 $string['invalid_template_json'] = 'Invalid template JSON format';
 $string['share_to_teachers'] = 'Toggle: Shared Category';
 $string['share_to_teachers_help'] = 'Future creations of this category will share those categories to the course teachers of this course';
+$string['confirm_distribute_categories_title'] = 'Confirm Category Distribution';
+$string['confirm_distribute_categories_body'] = 'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them.';
+$string['confirm_distribute_views_title'] = 'Confirm View Distribution';
+$string['confirm_distribute_views_body'] = 'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them.';
+$string['distribute'] = 'Distribute';
 
 // View distribution strings.
 $string['view_distribution'] = 'View Distribution';

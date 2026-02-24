@@ -3014,5 +3014,182 @@ return [
         'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.',
         'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.',
     ],
+
+    // Category distribution.
+    'exaport:distributecategories' => [
+        'Kategorie-Verteilung verwalten',
+        'Manage category distribution',
+    ],
+    'settings_category_distribution_heading' => [
+        'Einstellungen zur Kategorie-Verteilung',
+        'Category Distribution Settings',
+    ],
+    'settings_category_distribution_description' => [
+        'Konfiguriere Starter-Vorlagen für kursverwaltete Kategorie-Verteilung',
+        'Configure starter templates for course-managed category distribution',
+    ],
+    'settings_starter_templates' => [
+        'Starter-Vorlagen',
+        'Starter Templates',
+    ],
+    'settings_starter_templates_description' => [
+        'JSON-Array von Starter-Vorlagen für die Kategorie-Verteilung. Jede Vorlage muss "name" und "tree" (mit verschachtelten children) haben. Standard für Coach Intensive Vorlage beibehalten.',
+        'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children). Leave default for Coach Intensive template.',
+    ],
+    'category_distribution' => [
+        'Kategorie-Verteilung',
+        'Category Distribution',
+    ],
+    'category_distribution_title' => [
+        'Kategorie-Verteilung',
+        'Category Distribution',
+    ],
+    'category_distribution_description' => [
+        'Kategoriestrukturen an Lernende verteilen',
+        'Manage and distribute category structures to students',
+    ],
+    'starter_template_select' => [
+        'Starter-Vorlage auswählen',
+        'Select Starter Template',
+    ],
+    'starter_template_load' => [
+        'Vorlage laden',
+        'Load Template',
+    ],
+    'starter_template_load_confirm' => [
+        'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Dies wirkt sich erst auf Lernende aus, wenn Sie verteilen. Fortfahren?',
+        'Loading this template will replace the current course template. This does not affect student categories until you distribute. Continue?',
+    ],
+    'starter_template_loaded' => [
+        'Starter-Vorlage erfolgreich geladen',
+        'Starter template loaded successfully',
+    ],
+    'current_template' => [
+        'Aktuelle Kursvorlage',
+        'Current Course Template',
+    ],
+    'template_empty' => [
+        'Keine Vorlage definiert. Laden Sie eine Starter-Vorlage oder erstellen Sie Kategorien manuell.',
+        'No template defined. Load a starter template or create categories manually.',
+    ],
+    'add_root_category' => [
+        'Hauptkategorie hinzufügen',
+        'Add Root Category',
+    ],
+    'add_subcategory' => [
+        'Unterkategorie hinzufügen',
+        'Add Subcategory',
+    ],
+    'rename_category' => [
+        'Umbenennen',
+        'Rename',
+    ],
+    'move_category' => [
+        'Verschieben',
+        'Move',
+    ],
+    'remove_from_template' => [
+        'Aus Vorlage entfernen',
+        'Remove from Template',
+    ],
+    'remove_from_template_confirm' => [
+        'Diese Kategorie aus der Vorlage entfernen? Löscht keine Lernenden-Kategorien.',
+        'Remove this category from the template? This does not delete student categories.',
+    ],
+    'distribute_now' => [
+        'Jetzt verteilen',
+        'Distribute Now',
+    ],
+    'auto_distribute_on_enrolment' => [
+        'Automatisch verteilen bei neuen Einschreibungen',
+        'Auto-distribute on new enrolments',
+    ],
+    'distribution_in_progress' => [
+        'Verteilung läuft...',
+        'Distribution in progress...',
+    ],
+    'distribution_complete' => [
+        'Verteilung abgeschlossen',
+        'Distribution complete',
+    ],
+    'distribution_summary' => [
+        'Verteilungs-Zusammenfassung',
+        'Distribution Summary',
+    ],
+    'categories_created' => [
+        'Kategorien erstellt: {$a}',
+        'Categories created: {$a}',
+    ],
+    'categories_skipped' => [
+        'Kategorien übersprungen (existieren bereits): {$a}',
+        'Categories skipped (already exist): {$a}',
+    ],
+    'students_processed' => [
+        'Lernende bearbeitet: {$a}',
+        'Students processed: {$a}',
+    ],
+    'no_students_enrolled' => [
+        'Keine Lernende in diesem Kurs eingeschrieben',
+        'No students enrolled in this course',
+    ],
+    'no_template_to_distribute' => [
+        'Keine Vorlage zu verteilen. Bitte erstellen oder laden Sie zuerst eine Vorlage.',
+        'No template to distribute. Please create or load a template first.',
+    ],
+    'distribution_error' => [
+        'Verteilungsfehler: {$a}',
+        'Distribution error: {$a}',
+    ],
+    'category_name_required' => [
+        'Kategoriename ist erforderlich',
+        'Category name is required',
+    ],
+    'enter_parent_id' => [
+        'Eltern-Kategorie-ID eingeben (0 für Wurzel)',
+        'Enter parent category ID (0 for root)',
+    ],
+    'template_must_have_one_root' => [
+        'Vorlage muss genau eine Wurzelkategorie haben',
+        'Template must have exactly one root category',
+    ],
+    'move_category_select_parent' => [
+        'Neue Elternkategorie auswählen',
+        'Select new parent category',
+    ],
+    'move_to_root' => [
+        'Zur Wurzel verschieben',
+        'Move to root',
+    ],
+    'category_moved' => [
+        'Kategorie erfolgreich verschoben',
+        'Category moved successfully',
+    ],
+    'category_added' => [
+        'Kategorie erfolgreich hinzugefügt',
+        'Category added successfully',
+    ],
+    'category_renamed' => [
+        'Kategorie erfolgreich umbenannt',
+        'Category renamed successfully',
+    ],
+    'category_removed' => [
+        'Kategorie aus Vorlage entfernt',
+        'Category removed from template',
+    ],
+    'capability_required' => [
+        'Sie haben keine Berechtigung zur Verwaltung der Kategorie-Verteilung',
+        'You do not have permission to manage category distribution',
+    ],
+    'invalid_template_json' => [
+        'Ungültiges Vorlagen-JSON-Format',
+        'Invalid template JSON format',
+    ],
+    'share_to_teachers' => [
+        'Umschalten: Geteilte Kategorie',
+        'Toggle: Shared Category',
+    ],
+    'share_to_teachers_help' => [
+        'Zukünftige Erstellungen dieser Kategorie werden diese Kategorien mit den Kurslehrenden dieses Kurses teilen',
+        'Future creations of this category will share those categories to the course teachers of this course',
+    ],
 ];
-?>

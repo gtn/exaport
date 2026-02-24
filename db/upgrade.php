@@ -1349,7 +1349,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026022401, 'exaport');
     }
 
-    if ($oldversion < 2026022402) {
+    if ($oldversion < 2026022403) {
         // Update existing starter templates to include share_to_teachers field.
         $templates_json = get_config('block_exaport', 'starter_templates');
         if (!empty($templates_json)) {
@@ -1403,7 +1403,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2026022402, 'exaport');
+        upgrade_block_savepoint(true, 2026022403, 'exaport');
     }
 
     return $result;

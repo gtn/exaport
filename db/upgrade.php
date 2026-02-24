@@ -1298,5 +1298,55 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026021801, 'exaport');
     }
 
+    if ($oldversion < 2026022001) {
+        // Add auto_distribute_views field to block_exaport_templ_dist table.
+        $table = new xmldb_table('block_exaport_templ_dist');
+        $field = new xmldb_field('auto_distribute_views', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'auto_distribute');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Create table for per-course view templates.
+        $table = new xmldb_table('block_exaport_view_templ');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '1000', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('description', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('share_to_teachers', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        // Foreign key named after the field, per Moodle XMLDB conventions.
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Set default starter view templates in config if not already set.
+        $default_view_templates = array(
+            array(
+                'name' => 'Coach Intensive',
+                'views' => array(
+                    array(
+                        'name' => 'Portfolio',
+                        'description' => '',
+                        'share_to_teachers' => 1,
+                    ),
+                ),
+            ),
+        );
+
+        $existing = get_config('block_exaport', 'starter_view_templates');
+        if (!$existing) {
+            set_config('starter_view_templates', json_encode($default_view_templates), 'block_exaport');
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026022001, 'exaport');
+    }
+
     return $result;
 }

@@ -290,6 +290,11 @@ $PAGE->requires->js_call_amd('block_exaport/category_distribution', 'init', arra
             'renameView' => get_string('rename_view', 'block_exaport'),
             'viewNameRequired' => get_string('view_name_required', 'block_exaport'),
             'save' => get_string('save', 'core'),
+            'confirmDistributeCategoriesTitle' => get_string('confirm_distribute_categories_title', 'block_exaport'),
+            'confirmDistributeCategoriesBody' => get_string('confirm_distribute_categories_body', 'block_exaport'),
+            'confirmDistributeViewsTitle' => get_string('confirm_distribute_views_title', 'block_exaport'),
+            'confirmDistributeViewsBody' => get_string('confirm_distribute_views_body', 'block_exaport'),
+            'distribute' => get_string('distribute', 'block_exaport'),
         ),
         'nodes' => $js_nodes,
     )
@@ -346,15 +351,13 @@ if (empty($course_template)) {
 }
 
 // Section 3: Distribution Controls.
-echo $OUTPUT->heading(get_string('distribute_now', 'block_exaport'), 3);
+echo $OUTPUT->heading(get_string('distribute_categories', 'block_exaport'), 3);
 
-echo '<form method="post" action="' . $url->out() . '" style="margin-bottom: 20px;">';
-echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
-echo '<input type="hidden" name="action" value="distribute_now">';
-echo '<button type="submit" class="btn btn-primary"' .
+echo '<div style="margin-bottom: 20px;">';
+echo '<button type="button" class="btn btn-primary" data-action="distribute-categories"' .
     (empty($course_template) ? ' disabled' : '') . '>' .
-    get_string('distribute_now', 'block_exaport') . '</button>';
-echo '</form>';
+    get_string('distribute_categories_now', 'block_exaport') . '</button>';
+echo '</div>';
 
 echo '<form method="post" action="' . $url->out() . '">';
 echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
@@ -422,13 +425,11 @@ if (empty($course_view_template)) {
 // Section 6: View Distribution Controls.
 echo $OUTPUT->heading(get_string('distribute_views', 'block_exaport'), 3);
 
-echo '<form method="post" action="' . $url->out() . '" style="margin-bottom: 20px;">';
-echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
-echo '<input type="hidden" name="action" value="distribute_views_now">';
-echo '<button type="submit" class="btn btn-primary"' .
+echo '<div style="margin-bottom: 20px;">';
+echo '<button type="button" class="btn btn-primary" data-action="distribute-views"' .
     (empty($course_view_template) ? ' disabled' : '') . '>' .
     get_string('distribute_views_now', 'block_exaport') . '</button>';
-echo '</form>';
+echo '</div>';
 
 echo '<form method="post" action="' . $url->out() . '">';
 echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';

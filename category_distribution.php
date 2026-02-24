@@ -515,9 +515,9 @@ function block_exaport_render_view_template_list($views, $url) {
     foreach ($views as $view) {
         echo '<li class="list-group-item">';
         echo '<div class="d-flex align-items-center justify-content-between">';
-        echo '<div><strong>' . s($view['name']) . '</strong>';
-        if (!empty($view['description'])) {
-            echo '<br><small class="text-muted">' . s($view['description']) . '</small>';
+        echo '<div><strong>' . s($view->name) . '</strong>';
+        if (!empty($view->description)) {
+            echo '<br><small class="text-muted">' . s($view->description) . '</small>';
         }
         echo '</div>';
 
@@ -526,20 +526,20 @@ function block_exaport_render_view_template_list($views, $url) {
 
         // Rename.
         echo '<button type="button" class="btn btn-sm btn-outline-secondary" ' .
-            'data-action="rename-view" data-id="' . $view['id'] . '" data-name="' . s($view['name']) . '">' .
+            'data-action="rename-view" data-id="' . $view->id . '" data-name="' . s($view->name) . '">' .
             get_string('rename_view', 'block_exaport') . '</button>';
 
         // Remove.
-        $removeurl = new moodle_url($url, array('action' => 'remove_view', 'id' => $view['id'], 'sesskey' => sesskey()));
+        $removeurl = new moodle_url($url, array('action' => 'remove_view', 'id' => $view->id, 'sesskey' => sesskey()));
         echo '<a href="' . $removeurl->out() . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(' .
             json_encode(get_string('remove_view_confirm', 'block_exaport')) . ');">' .
             get_string('remove_view', 'block_exaport') . '</a>';
 
         // Share to teachers toggle button.
-        $is_shared = isset($view['share_to_teachers']) && $view['share_to_teachers'];
+        $is_shared = isset($view->share_to_teachers) && $view->share_to_teachers;
         $share_class = $is_shared ? 'btn-warning' : 'btn-outline-warning';
         echo '<button type="button" class="btn btn-sm ' . $share_class . '" ' .
-            'data-action="toggle-view-share" data-id="' . $view['id'] . '" data-shared="' . ($is_shared ? '1' : '0') . '" ' .
+            'data-action="toggle-view-share" data-id="' . $view->id . '" data-shared="' . ($is_shared ? '1' : '0') . '" ' .
             'title="' . s(get_string('share_to_teachers_help', 'block_exaport')) . '">' .
             get_string('share_to_teachers', 'block_exaport') . '</button>';
 

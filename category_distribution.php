@@ -456,11 +456,11 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
     echo '<ul class="list-unstyled" style="margin-left: ' . ($level * 20) . 'px;">';
     foreach ($tree as $node) {
         echo '<li style="margin-bottom: 10px;">';
-        echo '<div class="d-flex align-items-center">';
-        echo '<strong>' . s($node['name']) . '</strong> ';
+        echo '<div class="d-flex align-items-center justify-content-between">';
+        echo '<strong>' . s($node['name']) . '</strong>';
 
         // Actions.
-        echo '<div class="btn-group btn-group-sm ml-2" role="group">';
+        echo '<div class="btn-group btn-group-sm" role="group">';
 
         // Add subcategory.
         echo '<button type="button" class="btn btn-sm btn-outline-primary" ' .

@@ -76,7 +76,7 @@ class view_distributor {
         $view->externcomment = 0;
         $view->langid = 0;
         $view->layout = 2;  // Default layout.
-        $view->creatorid = isset($USER->id) ? $USER->id : 0;
+        $view->creatorid = !empty($USER->id) ? $USER->id : 0;
 
         $viewid = $DB->insert_record('block_exaportview', $view);
 

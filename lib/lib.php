@@ -1046,7 +1046,7 @@ function block_exaport_create_user_category($title, $userid, $parentid = 0, $cou
     global $DB, $USER;
 
     if (!$DB->record_exists('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid))) {
-        $creatorid = isset($USER->id) ? $USER->id : 0;
+        $creatorid = !empty($USER->id) ? $USER->id : 0;
         $id = $DB->insert_record('block_exaportcate', array(
             'userid' => $userid,
             'name' => $title,

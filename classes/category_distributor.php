@@ -75,7 +75,7 @@ class category_distributor {
         $category->pid = $pid;
         $category->courseid = 0;  // Global category.
         $category->timemodified = time();
-        $category->creatorid = isset($USER->id) ? $USER->id : 0;
+        $category->creatorid = !empty($USER->id) ? $USER->id : 0;
 
         $categoryid = $DB->insert_record('block_exaportcate', $category);
 

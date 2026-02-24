@@ -294,7 +294,6 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
             });
 
             modal.show();
-            return modal;
         });
     };
 
@@ -314,7 +313,6 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
             });
 
             modal.show();
-            return modal;
         });
     };
 

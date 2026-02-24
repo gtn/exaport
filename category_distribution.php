@@ -66,7 +66,7 @@ if ($action === 'distribute_now' && confirm_sesskey()) {
 }
 
 if ($action === 'toggle_auto_distribute' && confirm_sesskey()) {
-    $auto_distribute = required_param('auto_distribute', PARAM_INT);
+    $auto_distribute = optional_param('auto_distribute', 0,  PARAM_INT); // when the checkbox is unchecked, it is not sent as a param ==> default to 0
     category_distributor::update_settings($courseid, $auto_distribute);
     $message = get_string('changessaved');
     redirect($url, $message, null, 'success');

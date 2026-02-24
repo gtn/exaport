@@ -1430,6 +1430,7 @@ function block_exaport_get_course_teachers_by_courseid($courseid, $exceptmyself 
     // Get teacher roles by shortname (not hardcoded IDs).
     $editingteacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
     $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
+    $managerrole = $DB->get_record('role', ['shortname' => 'manager']); // exacompteacher capability is assigned to to managers also anyways, but exacomp is not always installed
 
     $roleids = [];
     if ($editingteacherrole) {
@@ -1437,6 +1438,9 @@ function block_exaport_get_course_teachers_by_courseid($courseid, $exceptmyself 
     }
     if ($teacherrole) {
         $roleids[] = $teacherrole->id;
+    }
+    if ($managerrole) {
+        $roleids[] = $managerrole->id;
     }
 
     if (empty($roleids)) {

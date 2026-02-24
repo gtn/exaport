@@ -1298,7 +1298,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026021801, 'exaport');
     }
 
-    if ($oldversion < 2026022001) {
+    if ($oldversion < 2026022401) {
         // Add auto_distribute_views field to block_exaport_templ_dist table.
         $table = new xmldb_table('block_exaport_templ_dist');
         $field = new xmldb_field('auto_distribute_views', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'auto_distribute');
@@ -1345,7 +1345,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         // Exaport savepoint reached.
-        upgrade_block_savepoint(true, 2026022001, 'exaport');
+        upgrade_block_savepoint(true, 2026022401, 'exaport');
     }
 
     return $result;

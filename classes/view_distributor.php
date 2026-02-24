@@ -57,7 +57,7 @@ class view_distributor {
      * @return array ['created' => bool, 'viewid' => int]
      */
     private static function create_view_if_not_exists($userid, $name, $description, $courseid = 0, $share_to_teachers = false) {
-        global $DB;
+        global $DB, $USER;
 
         // Check if exists.
         $existing = self::view_exists($userid, $name);
@@ -76,6 +76,7 @@ class view_distributor {
         $view->externcomment = 0;
         $view->langid = 0;
         $view->layout = 2;  // Default layout.
+        $view->creatorid = isset($USER->id) ? $USER->id : 0;
 
         $viewid = $DB->insert_record('block_exaportview', $view);
 

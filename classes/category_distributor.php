@@ -60,7 +60,7 @@ class category_distributor {
      * @return array ['created' => bool, 'categoryid' => int]
      */
     private static function create_category_if_not_exists($userid, $name, $pid, $courseid = 0, $share_to_teachers = false) {
-        global $DB;
+        global $DB, $USER;
 
         // Check if exists.
         $existing = self::category_exists_at_path($userid, $name, $pid);
@@ -75,6 +75,7 @@ class category_distributor {
         $category->pid = $pid;
         $category->courseid = 0;  // Global category.
         $category->timemodified = time();
+        $category->creatorid = isset($USER->id) ? $USER->id : 0;
 
         $categoryid = $DB->insert_record('block_exaportcate', $category);
 

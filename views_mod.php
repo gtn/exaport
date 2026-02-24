@@ -383,6 +383,7 @@ if ($editform->is_cancelled()) {
         case 'add':
 
             $dbview->userid = $USER->id;
+            $dbview->creatorid = $USER->id;
             if (empty($dbview->layout) || $dbview->layout == 0) {
                 $dbview->layout = 2;
             }

@@ -913,3 +913,24 @@ $string['capability_required'] = 'Sie haben keine Berechtigung zur Verwaltung de
 $string['invalid_template_json'] = 'Ungültiges Vorlagen-JSON-Format';
 $string['share_to_teachers'] = 'Umschalten: Geteilte Kategorie';
 $string['share_to_teachers_help'] = 'Zukünftige Erstellungen dieser Kategorie werden diese Kategorien mit den Kurslehrenden dieses Kurses teilen';
+
+// View distribution strings.
+$string['view_distribution'] = 'Ansichten-Verteilung';
+$string['view_distribution_description'] = 'Verwalten und verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.';
+$string['starter_view_template_select'] = 'Starter-Ansichtsvorlage auswählen';
+$string['current_view_template'] = 'Aktuelle Ansichtsvorlage';
+$string['view_template_empty'] = 'Keine Ansichten in der Vorlage. Fügen Sie eine Ansicht hinzu, um zu beginnen.';
+$string['add_view'] = 'Ansicht hinzufügen';
+$string['rename_view'] = 'Ansicht umbenennen';
+$string['remove_view'] = 'Ansicht entfernen';
+$string['remove_view_confirm'] = 'Sind Sie sicher, dass Sie diese Ansicht aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Ansichten von Lernenden.';
+$string['view_name_required'] = 'Ansichtsname ist erforderlich';
+$string['view_added'] = 'Ansicht zur Vorlage hinzugefügt';
+$string['view_renamed'] = 'Ansicht erfolgreich umbenannt';
+$string['view_removed'] = 'Ansicht aus Vorlage entfernt';
+$string['distribute_views'] = 'Ansichten verteilen';
+$string['distribute_views_now'] = 'Ansichten jetzt verteilen';
+$string['auto_distribute_views_on_enrolment'] = 'Ansichten automatisch bei neuen Einschreibungen verteilen';
+$string['no_views_to_distribute'] = 'Keine Ansichtsvorlage zum Verteilen definiert';
+$string['views_created'] = 'Ansichten erstellt: {$a}';
+$string['views_skipped'] = 'Ansichten übersprungen (existieren bereits): {$a}';

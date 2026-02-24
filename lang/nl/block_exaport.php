@@ -369,3 +369,24 @@ $string['capability_required'] = 'U heeft geen toestemming om categorieverdeling
 $string['invalid_template_json'] = 'Ongeldig sjabloon JSON-formaat';
 $string['share_to_teachers'] = 'Schakelen: Gedeelde categorie';
 $string['share_to_teachers_help'] = 'Toekomstige aanmaak van deze categorie zal deze categorieën delen met de cursusdocenten van deze cursus';
+
+// View distribution strings.
+$string['view_distribution'] = 'Weergavedistributie';
+$string['view_distribution_description'] = 'Beheer en distribueer weergavesjablonen naar studenten. Weergaven zijn portfolio\'s die studenten kunnen gebruiken om hun werk te tonen.';
+$string['starter_view_template_select'] = 'Selecteer starter weergavesjabloon';
+$string['current_view_template'] = 'Huidig weergavesjabloon';
+$string['view_template_empty'] = 'Geen weergaven in sjabloon. Voeg een weergave toe om te beginnen.';
+$string['add_view'] = 'Weergave toevoegen';
+$string['rename_view'] = 'Weergave hernoemen';
+$string['remove_view'] = 'Weergave verwijderen';
+$string['remove_view_confirm'] = 'Weet u zeker dat u deze weergave uit het sjabloon wilt verwijderen? Dit verwijdert geen bestaande studentweergaven.';
+$string['view_name_required'] = 'Weergavenaam is vereist';
+$string['view_added'] = 'Weergave toegevoegd aan sjabloon';
+$string['view_renamed'] = 'Weergave succesvol hernoemd';
+$string['view_removed'] = 'Weergave uit sjabloon verwijderd';
+$string['distribute_views'] = 'Weergaven distribueren';
+$string['distribute_views_now'] = 'Weergaven nu distribueren';
+$string['auto_distribute_views_on_enrolment'] = 'Weergaven automatisch bij nieuwe inschrijvingen distribueren';
+$string['no_views_to_distribute'] = 'Geen weergavesjabloon gedefinieerd om te distribueren';
+$string['views_created'] = 'Weergaven aangemaakt: {$a}';
+$string['views_skipped'] = 'Weergaven overgeslagen (bestaan al): {$a}';

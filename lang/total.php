@@ -3192,4 +3192,81 @@ return [
         'Zukünftige Erstellungen dieser Kategorie werden diese Kategorien mit den Kurslehrenden dieses Kurses teilen',
         'Future creations of this category will share those categories to the course teachers of this course',
     ],
+    // View distribution strings.
+    'view_distribution' => [
+        'Ansichten-Verteilung',
+        'View Distribution',
+    ],
+    'view_distribution_description' => [
+        'Verwalten und verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.',
+        'Manage and distribute view templates to students. Views are portfolios that students can use to showcase their work.',
+    ],
+    'starter_view_template_select' => [
+        'Starter-Ansichtsvorlage auswählen',
+        'Select Starter View Template',
+    ],
+    'current_view_template' => [
+        'Aktuelle Ansichtsvorlage',
+        'Current View Template',
+    ],
+    'view_template_empty' => [
+        'Keine Ansichten in der Vorlage. Fügen Sie eine Ansicht hinzu, um zu beginnen.',
+        'No views in template. Add a view to get started.',
+    ],
+    'add_view' => [
+        'Ansicht hinzufügen',
+        'Add View',
+    ],
+    'rename_view' => [
+        'Ansicht umbenennen',
+        'Rename View',
+    ],
+    'remove_view' => [
+        'Ansicht entfernen',
+        'Remove View',
+    ],
+    'remove_view_confirm' => [
+        'Sind Sie sicher, dass Sie diese Ansicht aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Ansichten von Lernenden.',
+        'Are you sure you want to remove this view from the template? This will not delete existing student views.',
+    ],
+    'view_name_required' => [
+        'Ansichtsname ist erforderlich',
+        'View name is required',
+    ],
+    'view_added' => [
+        'Ansicht zur Vorlage hinzugefügt',
+        'View added to template',
+    ],
+    'view_renamed' => [
+        'Ansicht erfolgreich umbenannt',
+        'View renamed successfully',
+    ],
+    'view_removed' => [
+        'Ansicht aus Vorlage entfernt',
+        'View removed from template',
+    ],
+    'distribute_views' => [
+        'Ansichten verteilen',
+        'Distribute Views',
+    ],
+    'distribute_views_now' => [
+        'Ansichten jetzt verteilen',
+        'Distribute Views Now',
+    ],
+    'auto_distribute_views_on_enrolment' => [
+        'Ansichten automatisch bei neuen Einschreibungen verteilen',
+        'Automatically distribute views to new enrolments',
+    ],
+    'no_views_to_distribute' => [
+        'Keine Ansichtsvorlage zum Verteilen definiert',
+        'No view template defined to distribute',
+    ],
+    'views_created' => [
+        'Ansichten erstellt: {$a}',
+        'Views created: {$a}',
+    ],
+    'views_skipped' => [
+        'Ansichten übersprungen (existieren bereits): {$a}',
+        'Views skipped (already exist): {$a}',
+    ],
 ];

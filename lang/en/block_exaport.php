@@ -917,4 +917,25 @@ $string['invalid_template_json'] = 'Invalid template JSON format';
 $string['share_to_teachers'] = 'Toggle: Shared Category';
 $string['share_to_teachers_help'] = 'Future creations of this category will share those categories to the course teachers of this course';
 
+// View distribution strings.
+$string['view_distribution'] = 'View Distribution';
+$string['view_distribution_description'] = 'Manage and distribute view templates to students. Views are portfolios that students can use to showcase their work.';
+$string['starter_view_template_select'] = 'Select Starter View Template';
+$string['current_view_template'] = 'Current View Template';
+$string['view_template_empty'] = 'No views in template. Add a view to get started.';
+$string['add_view'] = 'Add View';
+$string['rename_view'] = 'Rename View';
+$string['remove_view'] = 'Remove View';
+$string['remove_view_confirm'] = 'Are you sure you want to remove this view from the template? This will not delete existing student views.';
+$string['view_name_required'] = 'View name is required';
+$string['view_added'] = 'View added to template';
+$string['view_renamed'] = 'View renamed successfully';
+$string['view_removed'] = 'View removed from template';
+$string['distribute_views'] = 'Distribute Views';
+$string['distribute_views_now'] = 'Distribute Views Now';
+$string['auto_distribute_views_on_enrolment'] = 'Automatically distribute views to new enrolments';
+$string['no_views_to_distribute'] = 'No view template defined to distribute';
+$string['views_created'] = 'Views created: {$a}';
+$string['views_skipped'] = 'Views skipped (already exist): {$a}';
+
 

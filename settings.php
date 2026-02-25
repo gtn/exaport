@@ -176,14 +176,48 @@ if ($ADMIN->fulltree) {
         get_string('settings_category_distribution_heading', 'block_exaport'),
         get_string('settings_category_distribution_description', 'block_exaport')));
 
+    // Generic starter category templates (JSON).
+    $default_templates = json_encode(array(
+        array(
+            'name' => 'Generic starter template',
+            'tree' => array(
+                'name' => 'Portfolio',
+                'share_to_teachers' => 0,
+                'children' => array(
+                    array('name' => 'Evidence', 'share_to_teachers' => 0),
+                    array('name' => 'Reflections', 'share_to_teachers' => 0),
+                    array('name' => 'Feedback', 'share_to_teachers' => 0),
+                    array('name' => 'Assessments', 'share_to_teachers' => 0),
+                ),
+            ),
+        ),
+    ), JSON_UNESCAPED_UNICODE);
+
     $settings->add(new admin_setting_configtextarea('block_exaport/starter_templates',
         get_string('settings_starter_templates', 'block_exaport'),
         get_string('settings_starter_templates_description', 'block_exaport'),
-        '', PARAM_TEXT, 60, 10));
+        $default_templates,
+        PARAM_TEXT, 60, 10));
+
+    // Generic starter view templates (JSON).
+    $default_view_templates = json_encode(array(
+        array(
+            'name' => 'Generic starter template',
+            'views' => array(
+                array(
+                    'name' => 'PortfolioÖÖ',
+                    'description' => 'This view has been automatically created',
+                    'share_to_teachers' => 1,
+                ),
+            ),
+        ),
+    ), JSON_UNESCAPED_UNICODE);
 
     $settings->add(new admin_setting_configtextarea('block_exaport/starter_view_templates',
         get_string('settings_starter_view_templates', 'block_exaport'),
         get_string('settings_starter_view_templates_description', 'block_exaport'),
-        '', PARAM_TEXT, 60, 10));
+        $default_view_templates,
+        PARAM_TEXT, 60, 10));
+
 
 }

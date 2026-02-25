@@ -347,12 +347,12 @@ if (empty($course_template)) {
     // Display tree.
     echo '<div class="exaport-template-tree">';
     block_exaport_render_template_tree($course_template, $url, $all_template_nodes);
-    echo '</div>';
     
     // Add new root category button (similar to views).
     echo '<div style="margin-top: 15px;">';
     echo '<button type="button" class="btn btn-sm btn-outline-primary" data-action="add-category">' .
         get_string('add_category', 'block_exaport') . '</button>';
+    echo '</div>';
     echo '</div>';
 }
 

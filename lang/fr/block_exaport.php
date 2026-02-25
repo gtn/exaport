@@ -512,11 +512,11 @@ $string['i_shared'] = 'I shared an eportfolio view with you';
 $string['addstdcat'] = 'import standard categories';
 $string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';
 
-// Category distribution.
+// Category distribution.  TODO translate
 $string['settings_category_distribution_heading'] = 'Preset structure';
 $string['settings_category_distribution_description'] = 'Configure starter templates for course-managed category and view distribution';
 $string['settings_starter_templates'] = 'Starter Templates';
-$string['settings_starter_templates_description'] = 'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children). Leave default for Coach Intensive template.';
+$string['settings_starter_templates_description'] = 'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children).';
 $string['category_distribution'] = 'Preset structure';
 $string['category_distribution_title'] = 'Preset structure';
 $string['category_distribution_description'] = 'Manage and distribute category and view structures to students';
@@ -586,4 +586,4 @@ $string['views_created'] = 'Views created: {$a}';
 $string['views_skipped'] = 'Views skipped (already exist): {$a}';
 
 $string['settings_starter_view_templates'] = 'Starter View Templates';
-$string['settings_starter_view_templates_description'] = 'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers). Leave default for generic template.';
+$string['settings_starter_view_templates_description'] = 'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers).';

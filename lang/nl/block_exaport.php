@@ -399,4 +399,4 @@ $string['views_created'] = 'Weergaven aangemaakt: {$a}';
 $string['views_skipped'] = 'Weergaven overgeslagen (bestaan al): {$a}';
 
 $string['settings_starter_view_templates'] = 'Starter View Templates';
-$string['settings_starter_view_templates_description'] = 'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers). Leave default for generic template.';
+$string['settings_starter_view_templates_description'] = 'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers).';

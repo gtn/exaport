@@ -873,7 +873,7 @@ $string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrol
 $string['settings_category_distribution_heading'] = 'Struktur vorgeben';
 $string['settings_category_distribution_description'] = 'Konfiguriere Starter-Vorlagen für kursverwaltete Kategorie- und Ansichtenverteilung';
 $string['settings_starter_templates'] = 'Starter-Vorlagen';
-$string['settings_starter_templates_description'] = 'JSON-Array von Starter-Vorlagen für die Kategorie-Verteilung. Jede Vorlage muss "name" und "tree" (mit verschachtelten children) haben. Standard für Coach Intensive Vorlage beibehalten.';
+$string['settings_starter_templates_description'] = 'JSON-Array von Starter-Vorlagen für die Kategorie-Verteilung. Jede Vorlage muss "name" und "tree" (mit verschachtelten children) haben.';
 $string['category_distribution'] = 'Struktur vorgeben';
 $string['category_distribution_title'] = 'Struktur vorgeben';
 $string['category_distribution_description'] = 'Kategorien- und Ansichtsstrukturen an Lernende verwalten und verteilen';
@@ -943,4 +943,4 @@ $string['views_created'] = 'Ansichten erstellt: {$a}';
 $string['views_skipped'] = 'Ansichten übersprungen (existieren bereits): {$a}';
 
 $string['settings_starter_view_templates'] = 'Starter-Ansichtsvorlagen';
-$string['settings_starter_view_templates_description'] = 'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben. Standard für generische Vorlage beibehalten.';
+$string['settings_starter_view_templates_description'] = 'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben.';

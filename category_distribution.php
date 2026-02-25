@@ -25,17 +25,13 @@ use block_exaport\view_distributor;
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_TEXT);
 
-require_login($courseid);
+block_exaport_require_login($courseid);
 
 $context = context_course::instance($courseid);
 require_capability('block/exaport:distributecategories', $context);
 
 $url = new moodle_url('/blocks/exaport/category_distribution.php', array('courseid' => $courseid));
 $PAGE->set_url($url);
-$PAGE->set_context($context);
-$PAGE->set_pagelayout('incourse');
-$PAGE->set_title(get_string('category_distribution', 'block_exaport'));
-$PAGE->set_heading(get_string('category_distribution_title', 'block_exaport'));
 
 // Handle actions.
 $message = '';
@@ -300,9 +296,8 @@ $PAGE->requires->js_call_amd('block_exaport/category_distribution', 'init', arra
     )
 ));
 
-echo $OUTPUT->header();
+block_exaport_print_header("category_distribution");
 
-echo $OUTPUT->heading(get_string('category_distribution_title', 'block_exaport'));
 echo html_writer::tag('p', get_string('category_distribution_description', 'block_exaport'));
 
 // Section 1: Load Starter Template.
@@ -449,6 +444,7 @@ echo '<label class="form-check-label" for="auto-dist-views">' .
 echo '</div>';
 echo '</form>';
 
+echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();
 
 /**

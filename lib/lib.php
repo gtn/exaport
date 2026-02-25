@@ -408,6 +408,14 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     $tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id,
         $tabtitle, '', true);
 
+    // Add category distribution tab for users with the capability.
+    $context = context_course::instance($COURSE->id);
+    if (has_capability('block/exaport:distributecategories', $context)) {
+        $tabs['category_distribution'] = new tabobject('category_distribution',
+            $CFG->wwwroot . '/blocks/exaport/category_distribution.php?courseid=' . $COURSE->id,
+            get_string('category_distribution', 'block_exaport'), '', true);
+    }
+
     $tabitemidentifier = $itemidentifier ? preg_replace('!_.*!', '', $itemidentifier) : '';
     $tabsubitemidentifier = $subitemidentifier ? preg_replace('!_.*!', '', $subitemidentifier) : '';
 

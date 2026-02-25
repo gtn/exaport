@@ -479,22 +479,12 @@ $string['block_exaport_multiplefilesinitem_body'] = 'limit: 10 files';
 $string['block_exaport_copytomyportfolio'] = 'Enable "Copy to my portfolio"';
 $string['block_exaport_copytomyportfolio_body'] = 'User will be able copy artefacts from shared category into own portfolio';
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
-// 'block_exaport_app_alloweditdelete_head_alternative' => [
-//     'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
-//     'Students are allowed to edit and delete items after teacher reviews',
-// ],
+$string['block_exaport_app_alloweditdelete_head_alternative'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';
 $string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Teacher can see ALL artefacts of own students';
-// 'block_exaport_teachercanseeartifactsofstudents_head_alternative' => [
-//     'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
-//     'Teacher can see ALL artefacts of own students',
-// ],
+$string['block_exaport_teachercanseeartifactsofstudents_head_alternative'] = 'Teacher can see ALL artefacts of own students';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.';
-// 'block_exaport_teachercanseeartifactsofstudents_body_alternative' => [
-//     'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.',
-//     'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
-// ],
 $string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'Add required user profile field';
 $string['block_exaport_confirm_profilefield_create'] = 'Do you really want to add the required profile field?';
 $string['block_exaport_confirm_profilefield_exists'] = 'Profile field for trusted teacher already exists';

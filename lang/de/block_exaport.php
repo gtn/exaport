@@ -479,23 +479,13 @@ $string['block_exaport_multiplefilesinitem_body'] = 'Limit: 10 Dateien';
 $string['block_exaport_copytomyportfolio'] = 'Aktiviere "In mein Portfolio kopieren"';
 $string['block_exaport_copytomyportfolio_body'] = 'Benutzer können Artefakte aus einer geteilten Kategorie in ihr eigenes Portfolio kopieren.';
 $string['block_exaport_app_alloweditdelete_head'] = 'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.';
-// 'block_exaport_app_alloweditdelete_head_alternative' => [
-//     'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
-//     'Students are allowed to edit and delete items after teacher reviews',
-// ],
+$string['block_exaport_app_alloweditdelete_head_alternative'] = 'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 $string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';
 $string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen';
-// 'block_exaport_teachercanseeartifactsofstudents_head_alternative' => [
-//     'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
-//     'Teacher can see ALL artefacts of own students',
-// ],
+$string['block_exaport_teachercanseeartifactsofstudents_head_alternative'] = 'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.';
-// 'block_exaport_teachercanseeartifactsofstudents_body_alternative' => [
-//     'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.',
-//     'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
-// ],
-$string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen';
+$string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'Erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen';
 $string['block_exaport_confirm_profilefield_create'] = 'Willst du wirklich das Profilfeld für vertrauenswürdige Trainer erstellen?';
 $string['block_exaport_confirm_profilefield_exists'] = 'Das erforderliche Feld existiert bereits';
 $string['block_exaport_profilefield_created'] = 'Das erforderliche Feld wurde hinzugefügt';

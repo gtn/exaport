@@ -3021,12 +3021,12 @@ return [
         'Manage category distribution',
     ],
     'settings_category_distribution_heading' => [
-        'Einstellungen zur Kategorie-Verteilung',
-        'Category Distribution Settings',
+        'Struktur vorgeben',
+        'Preset structure',
     ],
     'settings_category_distribution_description' => [
-        'Konfiguriere Starter-Vorlagen für kursverwaltete Kategorie-Verteilung',
-        'Configure starter templates for course-managed category distribution',
+        'Konfiguriere Starter-Vorlagen für kursverwaltete Kategorie- und Ansichtenverteilung',
+        'Configure starter templates for course-managed category and view distribution',
     ],
     'settings_starter_templates' => [
         'Starter-Vorlagen',
@@ -3037,16 +3037,16 @@ return [
         'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children). Leave default for Coach Intensive template.',
     ],
     'category_distribution' => [
-        'Kategorie-Verteilung',
-        'Category Distribution',
+        'Struktur vorgeben',
+        'Preset structure',
     ],
     'category_distribution_title' => [
-        'Kategorie-Verteilung',
-        'Category Distribution',
+        'Struktur vorgeben',
+        'Preset structure',
     ],
     'category_distribution_description' => [
-        'Kategoriestrukturen an Lernende verteilen',
-        'Manage and distribute category structures to students',
+        'Kategorien- und Ansichtsstrukturen an Lernende verwalten und verteilen',
+        'Manage and distribute category and view structures to students',
     ],
     'starter_template_select' => [
         'Starter-Vorlage auswählen',
@@ -3177,8 +3177,8 @@ return [
         'Category removed from template',
     ],
     'capability_required' => [
-        'Sie haben keine Berechtigung zur Verwaltung der Kategorie-Verteilung',
-        'You do not have permission to manage category distribution',
+        'Sie haben keine Berechtigung zur Verwaltung von Strukturvorgaben',
+        'You do not have permission to manage preset structure',
     ],
     'invalid_template_json' => [
         'Ungültiges Vorlagen-JSON-Format',
@@ -3193,16 +3193,16 @@ return [
         'Future creations of this category will share those categories to the course teachers of this course',
     ],
     'confirm_distribute_categories_title' => [
-        'Kategorieverteilung bestätigen',
-        'Confirm Category Distribution',
+        'Verteilung bestätigen',
+        'Confirm Distribution',
     ],
     'confirm_distribute_categories_body' => [
         'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Kategorien für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Kategorien erstellt.',
         'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them. This action cannot be undone. Once distributed, the categories are created.',
     ],
     'confirm_distribute_views_title' => [
-        'Ansichtenverteilung bestätigen',
-        'Confirm View Distribution',
+        'Verteilung bestätigen',
+        'Confirm Distribution',
     ],
     'confirm_distribute_views_body' => [
         'Sind Sie sicher, dass Sie die Ansichtsvorlagen an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Ansichten für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Ansichten erstellt.',

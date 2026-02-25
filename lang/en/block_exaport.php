@@ -873,13 +873,13 @@ $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
 $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';
 
 // Category distribution.
-$string['settings_category_distribution_heading'] = 'Category Distribution Settings';
-$string['settings_category_distribution_description'] = 'Configure starter templates for course-managed category distribution';
+$string['settings_category_distribution_heading'] = 'Preset structure';
+$string['settings_category_distribution_description'] = 'Configure starter templates for course-managed category and view distribution';
 $string['settings_starter_templates'] = 'Starter Templates';
 $string['settings_starter_templates_description'] = 'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children). Leave default for Coach Intensive template.';
-$string['category_distribution'] = 'Category Distribution';
-$string['category_distribution_title'] = 'Category Distribution';
-$string['category_distribution_description'] = 'Manage and distribute category structures to students';
+$string['category_distribution'] = 'Preset structure';
+$string['category_distribution_title'] = 'Preset structure';
+$string['category_distribution_description'] = 'Manage and distribute category and view structures to students';
 $string['starter_template_select'] = 'Select Starter Template';
 $string['starter_template_load'] = 'Load Template';
 $string['starter_template_load_confirm'] = 'Loading this template will replace the current course template. This does not affect student categories until you distribute. Continue?';
@@ -914,13 +914,13 @@ $string['category_moved'] = 'Category moved successfully';
 $string['category_added'] = 'Category added successfully';
 $string['category_renamed'] = 'Category renamed successfully';
 $string['category_removed'] = 'Category removed from template';
-$string['capability_required'] = 'You do not have permission to manage category distribution';
+$string['capability_required'] = 'You do not have permission to manage preset structure';
 $string['invalid_template_json'] = 'Invalid template JSON format';
 $string['share_to_teachers'] = 'Toggle: Shared Category';
 $string['share_to_teachers_help'] = 'Future creations of this category will share those categories to the course teachers of this course';
-$string['confirm_distribute_categories_title'] = 'Confirm Category Distribution';
+$string['confirm_distribute_categories_title'] = 'Confirm Distribution';
 $string['confirm_distribute_categories_body'] = 'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them. This action cannot be undone. Once distributed, the categories are created.';
-$string['confirm_distribute_views_title'] = 'Confirm View Distribution';
+$string['confirm_distribute_views_title'] = 'Confirm Distribution';
 $string['confirm_distribute_views_body'] = 'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them. This action cannot be undone. Once distributed, the views are created.';
 $string['distribute'] = 'Distribute';
 

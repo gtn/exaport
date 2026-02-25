@@ -340,6 +340,7 @@ $string['starter_template_loaded'] = 'Startsjabloon succesvol geladen';
 $string['current_template'] = 'Huidig cursussjabloon';
 $string['template_empty'] = 'Geen sjabloon gedefinieerd. Laad een startsjabloon of maak handmatig categorieën aan.';
 $string['add_root_category'] = 'Hoofdcategorie toevoegen';
+$string['add_category'] = 'Categorie toevoegen';
 $string['add_subcategory'] = 'Subcategorie toevoegen';
 $string['rename_category'] = 'Hernoemen';
 $string['move_category'] = 'Verplaatsen';

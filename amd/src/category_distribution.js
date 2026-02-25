@@ -324,6 +324,12 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
         config = cfg;
 
         // Attach event handlers using data attributes
+        $(document).on('click', '[data-action="add-category"]', function(e) {
+            e.preventDefault();
+            // Add root category (pid = 0)
+            addSubcategory(0);
+        });
+
         $(document).on('click', '[data-action="add-subcategory"]', function(e) {
             e.preventDefault();
             var pid = $(this).data('pid');

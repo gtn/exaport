@@ -3096,6 +3096,10 @@ return [
         'Hauptkategorie hinzufügen',
         'Add Root Category',
     ],
+    'add_category' => [
+        'Kategorie hinzufügen',
+        'Add Category',
+    ],
     'add_subcategory' => [
         'Unterkategorie hinzufügen',
         'Add Subcategory',

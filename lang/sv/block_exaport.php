@@ -296,6 +296,7 @@ $string['starter_template_loaded'] = 'Starter template loaded successfully';
 $string['current_template'] = 'Current Course Template';
 $string['template_empty'] = 'No template defined. Load a starter template or create categories manually.';
 $string['add_root_category'] = 'Add Root Category';
+$string['add_category'] = 'Add Category';
 $string['add_subcategory'] = 'Add Subcategory';
 $string['rename_category'] = 'Rename';
 $string['move_category'] = 'Move';

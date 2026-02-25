@@ -895,6 +895,7 @@ $string['starter_template_loaded'] = 'Starter-Vorlage erfolgreich geladen';
 $string['current_template'] = 'Aktuelle Kursvorlage';
 $string['template_empty'] = 'Keine Vorlage definiert. Laden Sie eine Starter-Vorlage oder erstellen Sie Kategorien manuell.';
 $string['add_root_category'] = 'Hauptkategorie hinzufügen';
+$string['add_category'] = 'Kategorie hinzufügen';
 $string['add_subcategory'] = 'Unterkategorie hinzufügen';
 $string['rename_category'] = 'Umbenennen';
 $string['move_category'] = 'Verschieben';

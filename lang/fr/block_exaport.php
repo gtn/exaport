@@ -387,6 +387,7 @@ $string['desp_einleitung'] = 'Here is your portfolio. You can show others what y
 $string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'Interaction with block Exabis Competence Grid, in case it is installed';
 $string['settings_allow_loginas_head'] = 'Allow login as';
+$string['settings_allow_loginas_head_alternative'] = 'Allow login as';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
@@ -394,8 +395,8 @@ $string['settings_disable_shareall_head'] = 'Disable sharing with all users';
 $string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
 $string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
 $string['settings_disable_external_comments_body'] = '';
-$string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
-$string['block_exaport_app_externaleportfolio_body'] = 'For App';
+// $string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
+// $string['block_exaport_app_externaleportfolio_body'] = 'For App';
 $string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis ePortfolio';
 $string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_userquota'] = 'User quota for Exabis ePortfolio';

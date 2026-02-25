@@ -24,7 +24,7 @@ require_once __DIR__ . '/lib/settings_helper.php';
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas',
-        get_string('settings_allow_loginas_head', 'block_exaport'),
+        get_string('settings_allow_loginas_head_alternative', 'block_exaport'),
         get_string('settings_allow_loginas_body', 'block_exaport'), 0, 1, 0));
 
     // Zusammenspiel exabis ePortfolio - exabis Competences.
@@ -56,9 +56,11 @@ if ($ADMIN->fulltree) {
         get_string('settings_disable_external_comments_body', 'block_exaport',
             $CFG->wwwroot . '/blocks/exaport/admin.php?action=remove_shareall&sesskey=' . sesskey()), 0));
 
+    /*
     $settings->add(new admin_setting_configcheckbox('block_exaport_app_externaleportfolio',
         get_string('block_exaport_app_externaleportfolio_head', 'block_exaport'),
         get_string('block_exaport_app_externaleportfolio_body', 'block_exaport'), 0));
+    */
 
     // Max size of uploading file.
     $maxbytes = 0;

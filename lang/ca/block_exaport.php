@@ -380,6 +380,7 @@ $string['desp_einleitung'] = 'Aquí està el teu portafoli. Pots mostrar a altre
 $string['settings_interaktion_exacomp_head'] = 'Interacció entre el portafoli digital Exabis i les competències exabis';
 $string['settings_interaktion_exacomp_body'] = 'Interacció amb el bloc de competències d\'exabis, si està instal·lat.';
 $string['settings_allow_loginas_head'] = 'Permetre entrada amb';
+$string['settings_allow_loginas_head_alternative'] = 'Permetre entrada amb';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Crear categories Idioma Portafoli Digital Europeu';
 $string['settings_create_desp_categories_body'] = '';

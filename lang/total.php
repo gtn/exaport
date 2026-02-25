@@ -1575,7 +1575,7 @@ return [
         'Here is your portfolio. You can show others what you have accomplished by yourself.',
     ],
     'settings_interaktion_exacomp_head' => [
-        'Interaktion exabis ePortfolio - Exabis Competence Grid',
+        'Verknüpfung von Exabis ePortfolio und Exabis Kompetenzraster aktivieren',
         'Interaction exabis ePortfolio - Exabis Competence Grid',
     ],
     'settings_interaktion_exacomp_body' => [
@@ -1583,8 +1583,12 @@ return [
         'Interaction with block Exabis Competence Grid, in case it is installed',
     ],
     'settings_allow_loginas_head' => [
-        '"Login als" erlauben',
-        'Allow login as',
+        '"Anmelden als" erlauben',
+        'Allow "login as"',
+    ],
+    'settings_allow_loginas_head_alternative' => [
+        '"Anmelden als" erlauben',
+        'Allow "login as"',
     ],
     'settings_allow_loginas_body' => [
         '',
@@ -1599,7 +1603,7 @@ return [
         '',
     ],
     'settings_disable_shareall_head' => [
-        'Mit allen Benutzer::innen teilen deaktivieren',
+        '"Mit allen Benutzer:innen teilen" deaktivieren',
         'Disable sharing with all users',
     ],
     'settings_disable_shareall_body' => [
@@ -1630,14 +1634,14 @@ return [
         '',
         '',
     ],
-    'block_exaport_app_externaleportfolio_head' => [
-        'Dateien in Mahara speichern',
-        'Save files to mahara if checked, save to exaport if not checked',
-    ],
-    'block_exaport_app_externaleportfolio_body' => [
-        'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.',
-        'For App',
-    ],
+    // 'block_exaport_app_externaleportfolio_head' => [
+    //     'Dateien in Mahara speichern',
+    //     'Save files to mahara if checked, save to exaport if not checked',
+    // ],
+    // 'block_exaport_app_externaleportfolio_body' => [
+    //     'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.',
+    //     'For App',
+    // ],
     'block_exaport_maxbytes' => [
         'Maximale Upload-Dateigröße in Exabis ePortfolio',
         'Maximum uploaded file size in Exabis ePortfolio',

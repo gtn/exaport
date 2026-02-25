@@ -1790,7 +1790,18 @@ class externallib extends \external_api {
 
         global $CFG, $DB, $USER;
 
+        /*
         if (!$CFG->block_exaport_app_externaleportfolio) {
+            return array('success' => 'export_to_exaport', 'linktofile' => '');
+        }
+        */
+        // The block_exaport_app_externaleportfolio has been removed ==> check the old config value for app_externaleportfolio to avoid errors in old versions
+        if(isset($CFG->block_exaport_app_externaleportfolio)) {
+            $block_exaport_app_externaleportfolio = $CFG->block_exaport_app_externaleportfolio;
+        } else {
+            $block_exaport_app_externaleportfolio = false; // default to false, which was the previous default value and makes sense, since the setting does not exist anymore
+        }
+        if (!$block_exaport_app_externaleportfolio) {
             return array('success' => 'export_to_exaport', 'linktofile' => '');
         }
 

@@ -396,6 +396,7 @@ $string['desp_einleitung'] = '这是人铁档案袋. 你可以向别人展示你
 $string['settings_interaktion_exacomp_head'] = 'exabis ePortfolio - Exabis Competence Grid交互';
 $string['settings_interaktion_exacomp_body'] = '如果有安装Exabis Competence Grid版块则交互';
 $string['settings_allow_loginas_head'] = '允许登录为';
+$string['settings_allow_loginas_head_alternative'] = '允许登录为';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = '创建资源共享平台分类';
 $string['settings_create_desp_categories_body'] = '';

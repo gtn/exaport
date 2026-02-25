@@ -207,7 +207,7 @@ if ($ADMIN->fulltree) {
             'name' => 'Generic starter template',
             'views' => array(
                 array(
-                    'name' => 'PortfolioÖÖ',
+                    'name' => 'Portfolio',
                     'description' => 'This view has been automatically created',
                     'share_to_teachers' => 1,
                 ),

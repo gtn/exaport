@@ -35,7 +35,6 @@ $string['exaport:shareintern'] = 'Internal sharing of views';
 $string['exaport:shareextern'] = 'External sharing of views';
 $string['exaport:allowposts'] = 'Allow posting';
 $string['exaport:competences'] = 'Allow competences';
-$string['exaport:distributecategories'] = 'Manage category distribution';
 $string['exaport:viewartifactsfromstudents'] = 'Can see portfolio artefacts of own students';
 $string['new'] = 'New';
 $string['addbookmark'] = 'Add bookmark';
@@ -450,7 +449,8 @@ $string['competences'] = 'competences';
 $string['desp_einleitung'] = 'Here is your portfolio. You can show others what you have accomplished by yourself.';
 $string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'Interaction with block Exabis Competence Grid, in case it is installed';
-$string['settings_allow_loginas_head'] = 'Allow login as';
+$string['settings_allow_loginas_head'] = 'Allow "login as"';
+$string['settings_allow_loginas_head_alternative'] = 'Allow "login as"';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
@@ -462,8 +462,14 @@ $string['settings_disable_shareemails_head'] = 'Disable Sharing-Option "Share by
 $string['settings_disable_shareemails_body'] = '';
 $string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external view';
 $string['settings_disable_external_comments_body'] = '';
-$string['block_exaport_app_externaleportfolio_head'] = 'Save files to mahara if checked, save to exaport if not checked';
-$string['block_exaport_app_externaleportfolio_body'] = 'For App';
+// 'block_exaport_app_externaleportfolio_head' => [
+//     'Dateien in Mahara speichern',
+//     'Save files to mahara if checked, save to exaport if not checked',
+// ],
+// 'block_exaport_app_externaleportfolio_body' => [
+//     'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.',
+//     'For App',
+// ],
 $string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis ePortfolio';
 $string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_userquota'] = 'User quota for Exabis ePortfolio';
@@ -473,9 +479,11 @@ $string['block_exaport_multiplefilesinitem_body'] = 'limit: 10 files';
 $string['block_exaport_copytomyportfolio'] = 'Enable "Copy to my portfolio"';
 $string['block_exaport_copytomyportfolio_body'] = 'User will be able copy artefacts from shared category into own portfolio';
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
+$string['block_exaport_app_alloweditdelete_head_alternative'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';
 $string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Teacher can see ALL artefacts of own students';
+$string['block_exaport_teachercanseeartifactsofstudents_head_alternative'] = 'Teacher can see ALL artefacts of own students';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.';
 $string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'Add required user profile field';
 $string['block_exaport_confirm_profilefield_create'] = 'Do you really want to add the required profile field?';
@@ -873,13 +881,16 @@ $string['alwaysnotifywhenshare'] = 'Always notify when sharing';
 $string['alwaysnotifywhenshare_description'] = 'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.';
 
 // Category distribution.
-$string['settings_category_distribution_heading'] = 'Category Distribution Settings';
-$string['settings_category_distribution_description'] = 'Configure starter templates for course-managed category distribution';
+$string['exaport:distributecategories'] = 'Manage category distribution';
+$string['settings_category_distribution_heading'] = 'Preset structure';
+$string['settings_category_distribution_description'] = 'Configure starter templates for course-managed category and view distribution';
 $string['settings_starter_templates'] = 'Starter Templates';
-$string['settings_starter_templates_description'] = 'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children). Leave default for Coach Intensive template.';
-$string['category_distribution'] = 'Category Distribution';
-$string['category_distribution_title'] = 'Category Distribution';
-$string['category_distribution_description'] = 'Manage and distribute category structures to students';
+$string['settings_starter_templates_description'] = 'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children).';
+$string['settings_starter_view_templates'] = 'Starter View Templates';
+$string['settings_starter_view_templates_description'] = 'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers).';
+$string['category_distribution'] = 'Preset structure';
+$string['category_distribution_title'] = 'Preset structure';
+$string['category_distribution_description'] = 'Manage and distribute category and view structures to students';
 $string['starter_template_select'] = 'Select Starter Template';
 $string['starter_template_load'] = 'Load Template';
 $string['starter_template_load_confirm'] = 'Loading this template will replace the current course template. This does not affect student categories until you distribute. Continue?';
@@ -887,14 +898,13 @@ $string['starter_template_loaded'] = 'Starter template loaded successfully';
 $string['current_template'] = 'Current Course Template';
 $string['template_empty'] = 'No template defined. Load a starter template or create categories manually.';
 $string['add_root_category'] = 'Add Root Category';
+$string['add_category'] = 'Add Category';
 $string['add_subcategory'] = 'Add Subcategory';
 $string['rename_category'] = 'Rename';
 $string['move_category'] = 'Move';
 $string['remove_from_template'] = 'Remove from Template';
 $string['remove_from_template_confirm'] = 'Remove this category from the template? This does not delete student categories.';
 $string['distribute_now'] = 'Distribute Now';
-$string['distribute_categories'] = 'Distribute Categories';
-$string['distribute_categories_now'] = 'Distribute Categories Now';
 $string['auto_distribute_on_enrolment'] = 'Auto-distribute on new enrolments';
 $string['distribution_in_progress'] = 'Distribution in progress...';
 $string['distribution_complete'] = 'Distribution complete';
@@ -914,16 +924,17 @@ $string['category_moved'] = 'Category moved successfully';
 $string['category_added'] = 'Category added successfully';
 $string['category_renamed'] = 'Category renamed successfully';
 $string['category_removed'] = 'Category removed from template';
-$string['capability_required'] = 'You do not have permission to manage category distribution';
+$string['capability_required'] = 'You do not have permission to manage preset structure';
 $string['invalid_template_json'] = 'Invalid template JSON format';
 $string['share_to_teachers'] = 'Toggle: Shared Category';
 $string['share_to_teachers_help'] = 'Future creations of this category will share those categories to the course teachers of this course';
-$string['confirm_distribute_categories_title'] = 'Confirm Category Distribution';
+$string['confirm_distribute_categories_title'] = 'Confirm Distribution';
 $string['confirm_distribute_categories_body'] = 'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them. This action cannot be undone. Once distributed, the categories are created.';
-$string['confirm_distribute_views_title'] = 'Confirm View Distribution';
+$string['confirm_distribute_views_title'] = 'Confirm Distribution';
 $string['confirm_distribute_views_body'] = 'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them. This action cannot be undone. Once distributed, the views are created.';
 $string['distribute'] = 'Distribute';
-
+$string['distribute_categories'] = 'Distribute Categories';
+$string['distribute_categories_now'] = 'Distribute Categories Now';
 // View distribution strings.
 $string['view_distribution'] = 'View Distribution';
 $string['view_distribution_description'] = 'Manage and distribute view templates to students. Views are portfolios that students can use to showcase their work.';
@@ -944,5 +955,3 @@ $string['auto_distribute_views_on_enrolment'] = 'Automatically distribute views 
 $string['no_views_to_distribute'] = 'No view template defined to distribute';
 $string['views_created'] = 'Views created: {$a}';
 $string['views_skipped'] = 'Views skipped (already exist): {$a}';
-
-

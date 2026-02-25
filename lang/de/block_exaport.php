@@ -941,3 +941,6 @@ $string['auto_distribute_views_on_enrolment'] = 'Ansichten automatisch bei neuen
 $string['no_views_to_distribute'] = 'Keine Ansichtsvorlage zum Verteilen definiert';
 $string['views_created'] = 'Ansichten erstellt: {$a}';
 $string['views_skipped'] = 'Ansichten übersprungen (existieren bereits): {$a}';
+
+$string['settings_starter_view_templates'] = 'Starter-Ansichtsvorlagen';
+$string['settings_starter_view_templates_description'] = 'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben. Standard für generische Vorlage beibehalten.';

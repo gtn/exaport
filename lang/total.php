@@ -3036,6 +3036,14 @@ return [
         'JSON-Array von Starter-Vorlagen für die Kategorie-Verteilung. Jede Vorlage muss "name" und "tree" (mit verschachtelten children) haben. Standard für Coach Intensive Vorlage beibehalten.',
         'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children). Leave default for Coach Intensive template.',
     ],
+    'settings_starter_view_templates' => [
+        'Starter-Ansichtsvorlagen',
+        'Starter View Templates',
+    ],
+    'settings_starter_view_templates_description' => [
+        'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben. Standard für generische Vorlage beibehalten.',
+        'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers). Leave default for generic template.',
+    ],
     'category_distribution' => [
         'Struktur vorgeben',
         'Preset structure',

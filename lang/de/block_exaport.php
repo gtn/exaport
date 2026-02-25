@@ -36,7 +36,6 @@ $string['exaport:shareextern'] = 'Externes Teilen von Views';
 $string['exaport:allowposts'] = 'Kommentare erlauben';
 $string['exaport:competences'] = 'Kompetenzen erlauben';
 $string['exaport:viewartifactsfromstudents'] = 'Portfolio Artefakte der eigenen SuS sehen';
-$string['exaport:distributecategories'] = 'Kategorie-Verteilung verwalten';
 $string['new'] = 'Neu';
 $string['addbookmark'] = 'Bookmark hinzufügen';
 $string['addcategory'] = 'Kategorie hinzufügen';
@@ -463,21 +462,39 @@ $string['settings_disable_shareemails_head'] = 'Teilen Option "Per E-Mail teilen
 $string['settings_disable_shareemails_body'] = '';
 $string['settings_disable_external_comments_head'] = 'Teilen von Kommentaren in externen Views deaktivieren';
 $string['settings_disable_external_comments_body'] = '';
-// $string['block_exaport_app_externaleportfolio_head'] = 'Dateien in Mahara speichern';
-// $string['block_exaport_app_externaleportfolio_body'] = 'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.';
+// 'block_exaport_app_externaleportfolio_head' => [
+//     'Dateien in Mahara speichern',
+//     'Save files to mahara if checked, save to exaport if not checked',
+// ],
+// 'block_exaport_app_externaleportfolio_body' => [
+//     'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.',
+//     'For App',
+// ],
 $string['block_exaport_maxbytes'] = 'Maximale Upload-Dateigröße in Exabis ePortfolio';
 $string['block_exaport_maxbytes_body'] = 'Maximale Dateigröße, die Dateien haben können, die im Exabis ePortfolio hochgeladen werden. <br> Wert für diese Seite ist: {$a->sitemaxbytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_userquota'] = 'Benutzer-Dateikontingent Exabis ePortfolio';
 $string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_multiplefilesinitem'] = 'Mehrere Dateien in Datei-Artefakt hochladen';
-$string['block_exaport_multiplefilesinitem_body'] = 'limit: 10 Dateien';
+$string['block_exaport_multiplefilesinitem_body'] = 'Limit: 10 Dateien';
 $string['block_exaport_copytomyportfolio'] = 'Aktiviere "In mein Portfolio kopieren"';
 $string['block_exaport_copytomyportfolio_body'] = 'Benutzer können Artefakte aus einer geteilten Kategorie in ihr eigenes Portfolio kopieren.';
-$string['block_exaport_app_alloweditdelete_head'] = 'Schüler/:innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen';
+$string['block_exaport_app_alloweditdelete_head'] = 'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.';
+// 'block_exaport_app_alloweditdelete_head_alternative' => [
+//     'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
+//     'Students are allowed to edit and delete items after teacher reviews',
+// ],
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 $string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';
-$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Trainer/in hat Zugriff auf alle Artefakte eigene Schüler/:innen';
-$string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Vertrauenswürdige Trainer/:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der Teilnehmer/:innen für jede/n als vertrauenswürdig definierte/n Trainer/in generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/:innen.';
+$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen';
+// 'block_exaport_teachercanseeartifactsofstudents_head_alternative' => [
+//     'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
+//     'Teacher can see ALL artefacts of own students',
+// ],
+$string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.';
+// 'block_exaport_teachercanseeartifactsofstudents_body_alternative' => [
+//     'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.',
+//     'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
+// ],
 $string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen';
 $string['block_exaport_confirm_profilefield_create'] = 'Willst du wirklich das Profilfeld für vertrauenswürdige Trainer erstellen?';
 $string['block_exaport_confirm_profilefield_exists'] = 'Das erforderliche Feld existiert bereits';
@@ -871,10 +888,13 @@ $string['alwaysnotifywhenshare'] = 'Immer benachrichtigen, wenn geteilt wird';
 $string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.';
 
 // Category distribution.
+$string['exaport:distributecategories'] = 'Kategorie-Verteilung verwalten';
 $string['settings_category_distribution_heading'] = 'Struktur vorgeben';
 $string['settings_category_distribution_description'] = 'Konfiguriere Starter-Vorlagen für kursverwaltete Kategorie- und Ansichtenverteilung';
 $string['settings_starter_templates'] = 'Starter-Vorlagen';
 $string['settings_starter_templates_description'] = 'JSON-Array von Starter-Vorlagen für die Kategorie-Verteilung. Jede Vorlage muss "name" und "tree" (mit verschachtelten children) haben.';
+$string['settings_starter_view_templates'] = 'Vorlage für Portfolio-Grundstruktur';
+$string['settings_starter_view_templates_description'] = 'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben.';
 $string['category_distribution'] = 'Struktur vorgeben';
 $string['category_distribution_title'] = 'Struktur vorgeben';
 $string['category_distribution_description'] = 'Kategorien- und Ansichtsstrukturen an Lernende verteilen';
@@ -921,7 +941,6 @@ $string['confirm_distribute_views_body'] = 'Sind Sie sicher, dass Sie die Ansich
 $string['distribute'] = 'Verteilen';
 $string['distribute_categories'] = 'Kategorien verteilen';
 $string['distribute_categories_now'] = 'Kategorien jetzt verteilen';
-
 // View distribution strings.
 $string['view_distribution'] = 'Ansichten-Verteilung';
 $string['view_distribution_description'] = 'Verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.';
@@ -942,6 +961,3 @@ $string['auto_distribute_views_on_enrolment'] = 'Ansichten automatisch bei neuen
 $string['no_views_to_distribute'] = 'Keine Ansichtsvorlage zum Verteilen definiert';
 $string['views_created'] = 'Ansichten erstellt: {$a}';
 $string['views_skipped'] = 'Ansichten übersprungen (existieren bereits): {$a}';
-
-$string['settings_starter_view_templates'] = 'Starter-Ansichtsvorlagen';
-$string['settings_starter_view_templates_description'] = 'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben.';

@@ -1663,7 +1663,7 @@ return [
         'Multiple files in "File" artefact',
     ],
     'block_exaport_multiplefilesinitem_body' => [
-        'limit: 10 Dateien',
+        'Limit: 10 Dateien',
         'limit: 10 files',
     ],
     'block_exaport_copytomyportfolio' => [
@@ -1675,9 +1675,13 @@ return [
         'User will be able copy artefacts from shared category into own portfolio',
     ],
     'block_exaport_app_alloweditdelete_head' => [
-        'Schüler/:innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen',
+        'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
         'Students are allowed to edit and delete items after teacher reviews',
     ],
+    // 'block_exaport_app_alloweditdelete_head_alternative' => [
+    //     'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
+    //     'Students are allowed to edit and delete items after teacher reviews',
+    // ],
     'block_exaport_app_alloweditdelete_body' => [
         'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll',
         'Only useful in combination with Exabis Competence Grid and dakora',
@@ -1687,13 +1691,21 @@ return [
         'Delete all shareall?',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head' => [
-        'Trainer/in hat Zugriff auf alle Artefakte eigene Schüler/:innen',
+        'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
         'Teacher can see ALL artefacts of own students',
     ],
+    // 'block_exaport_teachercanseeartifactsofstudents_head_alternative' => [
+    //     'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
+    //     'Teacher can see ALL artefacts of own students',
+    // ],
     'block_exaport_teachercanseeartifactsofstudents_body' => [
-        'Vertrauenswürdige Trainer/:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der Teilnehmer/:innen für jede/n als vertrauenswürdig definierte/n Trainer/in generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/:innen.',
+        'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.',
         'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
     ],
+    // 'block_exaport_teachercanseeartifactsofstudents_body_alternative' => [
+    //     'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.',
+    //     'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
+    // ],
     'block_exaport_teachercanseeartifactsofstudents_configurationlink' => [
         'erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen',
         'Add required user profile field',
@@ -3041,7 +3053,7 @@ return [
         'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children).',
     ],
     'settings_starter_view_templates' => [
-        'Starter-Ansichtsvorlagen',
+        'Vorlage für Portfolio-Grundstruktur',
         'Starter View Templates',
     ],
     'settings_starter_view_templates_description' => [

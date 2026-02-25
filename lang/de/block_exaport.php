@@ -876,7 +876,7 @@ $string['settings_starter_templates'] = 'Starter-Vorlagen';
 $string['settings_starter_templates_description'] = 'JSON-Array von Starter-Vorlagen für die Kategorie-Verteilung. Jede Vorlage muss "name" und "tree" (mit verschachtelten children) haben.';
 $string['category_distribution'] = 'Struktur vorgeben';
 $string['category_distribution_title'] = 'Struktur vorgeben';
-$string['category_distribution_description'] = 'Kategorien- und Ansichtsstrukturen an Lernende verwalten und verteilen';
+$string['category_distribution_description'] = 'Kategorien- und Ansichtsstrukturen an Lernende verteilen';
 $string['starter_template_select'] = 'Starter-Vorlage auswählen';
 $string['starter_template_load'] = 'Vorlage laden';
 $string['starter_template_load_confirm'] = 'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Dies wirkt sich erst auf Lernende aus, wenn Sie verteilen. Fortfahren?';
@@ -923,7 +923,7 @@ $string['distribute_categories_now'] = 'Kategorien jetzt verteilen';
 
 // View distribution strings.
 $string['view_distribution'] = 'Ansichten-Verteilung';
-$string['view_distribution_description'] = 'Verwalten und verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.';
+$string['view_distribution_description'] = 'Verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.';
 $string['starter_view_template_select'] = 'Starter-Ansichtsvorlage auswählen';
 $string['current_view_template'] = 'Aktuelle Ansichtsvorlage';
 $string['view_template_empty'] = 'Keine Ansichten in der Vorlage. Fügen Sie eine Ansicht hinzu, um zu beginnen.';

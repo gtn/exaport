@@ -3053,7 +3053,7 @@ return [
         'Preset structure',
     ],
     'category_distribution_description' => [
-        'Kategorien- und Ansichtsstrukturen an Lernende verwalten und verteilen',
+        'Kategorien- und Ansichtsstrukturen an Lernende verteilen',
         'Manage and distribute category and view structures to students',
     ],
     'starter_template_select' => [
@@ -3234,7 +3234,7 @@ return [
         'View Distribution',
     ],
     'view_distribution_description' => [
-        'Verwalten und verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.',
+        'Verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.',
         'Manage and distribute view templates to students. Views are portfolios that students can use to showcase their work.',
     ],
     'starter_view_template_select' => [

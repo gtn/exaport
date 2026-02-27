@@ -1525,22 +1525,17 @@ function block_exaport_get_course_students_by_courseid($courseid) {
 function block_exaport_is_enrolled_as_student($userid, $courseid) {
     global $DB;
 
-    // Cache the student role ID to avoid repeated database queries.
-    static $studentroleid = null;
-    
-    if ($studentroleid === null) {
-        // Get student role by shortname (not hardcoded ID).
-        $studentrole = $DB->get_record('role', ['shortname' => 'student']);
-        
-        if (!$studentrole) {
-            // If student role doesn't exist, cache false.
-            $studentroleid = false;
-            return false;
-        }
-        
-        $studentroleid = $studentrole->id;
+    // Get student role by shortname (not hardcoded ID).
+    $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+
+    if (!$studentrole) {
+        // If student role doesn't exist, cache false.
+        $studentroleid = false;
+        return false;
     }
-    
+
+    $studentroleid = $studentrole->id;
+
     if ($studentroleid === false) {
         return false;
     }

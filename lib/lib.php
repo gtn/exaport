@@ -1514,33 +1514,6 @@ function block_exaport_get_course_students_by_courseid($courseid) {
     return array_keys($students);
 }
 
-/**
- * Check if a specific user has the student role in a course
- *
- * @param int $userid User ID
- * @param int $courseid Course ID
- * @return bool True if user has student role, false otherwise
- */
-function block_exaport_user_has_student_role($userid, $courseid) {
-    global $DB;
-
-    $context = context_course::instance($courseid);
-
-    // Get student role by shortname (not hardcoded ID).
-    $studentrole = $DB->get_record('role', ['shortname' => 'student']);
-
-    if (!$studentrole) {
-        return false;
-    }
-
-    // Check if this user has the student role in this course context.
-    return $DB->record_exists('role_assignments', [
-        'userid' => $userid,
-        'roleid' => $studentrole->id,
-        'contextid' => $context->id,
-    ]);
-}
-
 // This user is a teacher of any course?
 function block_exaport_user_is_teacher($userid = null) {
     global $DB, $USER;

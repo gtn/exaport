@@ -13,9 +13,5 @@ $observers = array(
         'eventname' => '\core\event\user_enrolment_created',
         'callback' => '\block_exaport\observer::user_enrolment_created',
     ),
-    array(
-        'eventname' => '\core\event\user_enrolment_updated',
-        'callback' => '\block_exaport\observer::user_enrolment_updated',
-    ),
 );
 

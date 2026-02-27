@@ -24,11 +24,6 @@ class observer {
         $courseid = $event->courseid;
         $userid = $event->relateduserid;
 
-        // Only distribute if the user has the student role.
-        if (!block_exaport_user_has_student_role($userid, $courseid)) {
-            return;
-        }
-
         // Check if auto-distribution is enabled for categories.
         $category_settings = category_distributor::get_settings($courseid);
         if ($category_settings->auto_distribute) {
@@ -47,44 +42,6 @@ class observer {
             $view_template = view_template::get_course_template($courseid);
             if (!empty($view_template)) {
                 // Distribute views to the newly enrolled user.
-                view_distributor::distribute_to_user($userid, $view_template, $courseid);
-            }
-        }
-    }
-
-    /**
-     * Handle user enrolment update event to auto-distribute when role changes to student
-     *
-     * @param \core\event\user_enrolment_updated $event
-     */
-    public static function user_enrolment_updated(\core\event\user_enrolment_updated $event) {
-        $courseid = $event->courseid;
-        $userid = $event->relateduserid;
-
-        // Only distribute if the user NOW has the student role.
-        // This handles cases where someone's role is changed to student.
-        if (!block_exaport_user_has_student_role($userid, $courseid)) {
-            return;
-        }
-
-        // Check if auto-distribution is enabled for categories.
-        $category_settings = category_distributor::get_settings($courseid);
-        if ($category_settings->auto_distribute) {
-            // Get course template.
-            $template = category_template::get_course_template($courseid);
-            if (!empty($template)) {
-                // Distribute to the user (pass courseid for teacher sharing).
-                category_distributor::distribute_to_user($userid, $template, 0, $courseid);
-            }
-        }
-
-        // Check if auto-distribution is enabled for views.
-        $view_settings = view_distributor::get_settings($courseid);
-        if ($view_settings->auto_distribute_views) {
-            // Get course view template.
-            $view_template = view_template::get_course_template($courseid);
-            if (!empty($view_template)) {
-                // Distribute views to the user.
                 view_distributor::distribute_to_user($userid, $view_template, $courseid);
             }
         }

@@ -1525,35 +1525,19 @@ function block_exaport_get_course_students_by_courseid($courseid) {
 function block_exaport_is_enrolled_as_student($userid, $courseid) {
     global $DB;
 
-    // Get student role by shortname (not hardcoded ID).
-    $studentrole = $DB->get_record('role', ['shortname' => 'student']);
-
-    if (!$studentrole) {
-        // If student role doesn't exist, cache false.
-        $studentroleid = false;
-        return false;
-    }
-
-    $studentroleid = $studentrole->id;
-
-    if ($studentroleid === false) {
-        return false;
-    }
-
-    // Get course context.
     $context = context_course::instance($courseid);
 
-    // Use Moodle's built-in function to check if user is enrolled.
+    // Must be actively enrolled.
     if (!is_enrolled($context, $userid, '', true)) {
         return false;
     }
 
-    // Check if user has the student role in this course.
-    return $DB->record_exists('role_assignments', [
-        'userid' => $userid,
-        'roleid' => $studentroleid,
-        'contextid' => $context->id
-    ]);
+    $studentroleid = $DB->get_field('role', 'id', ['shortname' => 'student'], IGNORE_MISSING);
+    if (!$studentroleid) {
+        return false;
+    }
+
+    return user_has_role_assignment($userid, (int)$studentroleid, $context->id);
 }
 
 // This user is a teacher of any course?

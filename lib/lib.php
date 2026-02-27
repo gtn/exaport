@@ -1514,6 +1514,53 @@ function block_exaport_get_course_students_by_courseid($courseid) {
     return array_keys($students);
 }
 
+/**
+ * Check if a user is enrolled in a specific course with the student role.
+ * This checks the actual enrollment with the "student" role shortname.
+ *
+ * @param int $userid User ID
+ * @param int $courseid Course ID
+ * @return bool True if user is enrolled in this course as a student
+ */
+function block_exaport_is_enrolled_as_student($userid, $courseid) {
+    global $DB;
+
+    // Get student role by shortname (not hardcoded ID).
+    $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+    
+    if (!$studentrole) {
+        return false;
+    }
+
+    // Get course context.
+    $context = context_course::instance($courseid);
+
+    // Check if user has an active enrollment in this course.
+    $sql = "SELECT ue.id
+            FROM {user_enrolments} ue
+            JOIN {enrol} e ON e.id = ue.enrolid
+            WHERE e.courseid = :courseid
+              AND ue.userid = :userid
+              AND ue.status = :active";
+    
+    $enrolled = $DB->record_exists_sql($sql, [
+        'courseid' => $courseid,
+        'userid' => $userid,
+        'active' => ENROL_USER_ACTIVE
+    ]);
+    
+    if (!$enrolled) {
+        return false;
+    }
+
+    // Check if user has the student role in this course.
+    return $DB->record_exists('role_assignments', [
+        'userid' => $userid,
+        'roleid' => $studentrole->id,
+        'contextid' => $context->id
+    ]);
+}
+
 // This user is a teacher of any course?
 function block_exaport_user_is_teacher($userid = null) {
     global $DB, $USER;

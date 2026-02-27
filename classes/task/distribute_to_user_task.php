@@ -24,6 +24,12 @@ class distribute_to_user_task extends \core\task\adhoc_task {
     public function execute() {
         $data = $this->get_custom_data();
         
+        // Validate required data.
+        if (empty($data->userid) || empty($data->courseid)) {
+            mtrace("Invalid task data: missing userid or courseid");
+            return;
+        }
+        
         $userid = $data->userid;
         $courseid = $data->courseid;
         

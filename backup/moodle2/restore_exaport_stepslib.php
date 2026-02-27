@@ -28,9 +28,9 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         $paths = array();
 
         // Define the paths for the data we want to restore.
-        $paths[] = new restore_path_element('course_template', '/block_exaport/course_templates/course_template');
-        $paths[] = new restore_path_element('view_template', '/block_exaport/view_templates/view_template');
-        $paths[] = new restore_path_element('distribution_setting', '/block_exaport/distribution_settings/distribution_setting');
+        $paths[] = new restore_path_element('course_template', '/block/block_exaport/course_templates/course_template');
+        $paths[] = new restore_path_element('view_template', '/block/block_exaport/view_templates/view_template');
+        $paths[] = new restore_path_element('distribution_setting', '/block/block_exaport/distribution_settings/distribution_setting');
 
         return $paths;
     }

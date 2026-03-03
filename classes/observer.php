@@ -16,35 +16,43 @@ defined('MOODLE_INTERNAL') || die();
 class observer {
 
     /**
-     * Handle user enrolment event to auto-distribute categories and views
+     * Queue distribution task when user is enrolled in a course.
+     * The task will execute after enrollment is complete.
      *
      * @param \core\event\user_enrolment_created $event
      */
     public static function user_enrolment_created(\core\event\user_enrolment_created $event) {
-        $courseid = $event->courseid;
-        $userid = $event->relateduserid;
+        self::queue_distribution_task($event->courseid, $event->relateduserid);
+    }
 
-        // Check if auto-distribution is enabled for categories.
-        $category_settings = category_distributor::get_settings($courseid);
-        if ($category_settings->auto_distribute) {
-            // Get course template.
-            $template = category_template::get_course_template($courseid);
-            if (!empty($template)) {
-                // Distribute to the newly enrolled user (pass courseid for teacher sharing).
-                category_distributor::distribute_to_user($userid, $template, 0, $courseid);
-            }
-        }
+    /**
+     * Queue distribution task when user enrollment is updated.
+     * This handles cases where someone's role is changed to student.
+     *
+     * @param \core\event\user_enrolment_updated $event
+     */
+    public static function user_enrolment_updated(\core\event\user_enrolment_updated $event) {
+        self::queue_distribution_task($event->courseid, $event->relateduserid);
+    }
 
-        // Check if auto-distribution is enabled for views.
-        $view_settings = view_distributor::get_settings($courseid);
-        if ($view_settings->auto_distribute_views) {
-            // Get course view template.
-            $view_template = view_template::get_course_template($courseid);
-            if (!empty($view_template)) {
-                // Distribute views to the newly enrolled user.
-                view_distributor::distribute_to_user($userid, $view_template, $courseid);
-            }
-        }
+    /**
+     * Queue an ad-hoc task to distribute categories and views to a user.
+     *
+     * @param int $courseid Course ID
+     * @param int $userid User ID
+     */
+    private static function queue_distribution_task($courseid, $userid) {
+        // Create ad-hoc task.
+        $task = new \block_exaport\task\distribute_to_user_task();
+        
+        // Set custom data.
+        $task->set_custom_data([
+            'courseid' => $courseid,
+            'userid' => $userid,
+        ]);
+        
+        // Queue the task.
+        \core\task\manager::queue_adhoc_task($task);
     }
 }
 

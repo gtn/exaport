@@ -408,6 +408,14 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     $tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id,
         $tabtitle, '', true);
 
+    // Add category distribution tab for users with the capability.
+    $context = context_course::instance($COURSE->id);
+    if (has_capability('block/exaport:distributecategories', $context)) {
+        $tabs['category_distribution'] = new tabobject('category_distribution',
+            $CFG->wwwroot . '/blocks/exaport/category_distribution.php?courseid=' . $COURSE->id,
+            get_string('category_distribution', 'block_exaport'), '', true);
+    }
+
     $tabitemidentifier = $itemidentifier ? preg_replace('!_.*!', '', $itemidentifier) : '';
     $tabsubitemidentifier = $subitemidentifier ? preg_replace('!_.*!', '', $subitemidentifier) : '';
 
@@ -1504,6 +1512,32 @@ function block_exaport_get_course_students_by_courseid($courseid) {
     $students = $DB->get_records_sql($query, ['contextid' => $context->id, 'roleid' => $studentrole->id]);
 
     return array_keys($students);
+}
+
+/**
+ * Check if a user is enrolled in a specific course with the student role.
+ * This checks the actual enrollment with the "student" role shortname.
+ *
+ * @param int $userid User ID
+ * @param int $courseid Course ID
+ * @return bool True if user is enrolled in this course as a student
+ */
+function block_exaport_is_enrolled_as_student($userid, $courseid) {
+    global $DB;
+
+    $context = context_course::instance($courseid);
+
+    // Must be actively enrolled.
+    if (!is_enrolled($context, $userid, '', true)) {
+        return false;
+    }
+
+    $studentroleid = $DB->get_field('role', 'id', ['shortname' => 'student'], IGNORE_MISSING);
+    if (!$studentroleid) {
+        return false;
+    }
+
+    return user_has_role_assignment($userid, (int)$studentroleid, $context->id);
 }
 
 // This user is a teacher of any course?

@@ -45,7 +45,7 @@ block_exaport_add_iconpack(true);
 // add the alwaysnotifywhenshare setting to the JS config
 // $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
 // $PAGE->requires->js_call_amd('block_exaport/views', 'initialise', [['alwaysnotifywhenshare' => $alwaysnotifywhenshare]]);
-$PAGE->requires->js_call_amd('block_exaport/views', 'initialise');
+$PAGE->requires->js_call_amd('block_exaport/views', 'initialise', [context_system::instance()->id]);
 // $config = ['paths' => ['block_exaport/popover' => $CFG->wwwroot.'/blocks/exaport/javascript/popover.min']];
 // $requirejs = 'require.config(' . json_encode($config) . ')';
 // $PAGE->requires->js_amd_inline($requirejs);
@@ -383,6 +383,7 @@ if ($editform->is_cancelled()) {
         case 'add':
 
             $dbview->userid = $USER->id;
+            $dbview->creatorid = $USER->id;
             if (empty($dbview->layout) || $dbview->layout == 0) {
                 $dbview->layout = 2;
             }
@@ -823,7 +824,9 @@ $translations = array(
     'file', 'note', 'link',
     'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
     'notify', 'emailaccess',
-    'checkall', 'viewmustbesafed'
+    'checkall', 'viewmustbesafed',
+    'configureblock_item', 'configureblock_personal_information', 'configureblock_cv_information',
+    'configureblock_text', 'configureblock_headline', 'configureblock_media', 'configureblock_badge',
 );
 
 $translations = array_flip($translations);
@@ -893,7 +896,6 @@ $resumeitems->interests = block_exaport_add_view_access_parameter_to_url(@$resum
 ?>
     <script type="text/javascript">
 
-        var portfolioItems = <?php echo json_encode($portfolioitems); ?>;
         var resumeItems = <?php echo json_encode($resumeitems); ?>;
         ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
 

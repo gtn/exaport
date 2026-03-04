@@ -44,6 +44,7 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
     $newcat->timemodified = $currcat->timemodified;
     $newcat->courseid = g::$COURSE->id;
     $newcat->description = $currcat->description;
+    $newcat->creatorid = !empty(g::$USER->id) ? g::$USER->id : 0;
     $newcat->id = g::$DB->insert_record("block_exaportcate", $newcat);
 
     $children = g::$DB->get_records("block_exaportcate", array('pid' => $currcat->id));

@@ -226,12 +226,14 @@ function block_exaport_import_categories($categoriesstring) {
             $newentry->name = trim($category, '-');
             $newentry->pid = $lastmainid;
             if (!$DB->record_exists('block_exaportcate', array("name" => trim($category, '-')))) {
+                $newentry->creatorid = !empty($USER->id) ? $USER->id : 0;
                 $DB->insert_record("block_exaportcate", $newentry);
             }
         } else {
             $newentry->name = $category;
             $newentry->pid = 0;
             if (!$DB->record_exists('block_exaportcate', array("name" => $category))) {
+                $newentry->creatorid = !empty($USER->id) ? $USER->id : 0;
                 $lastmainid = $DB->insert_record("block_exaportcate", $newentry);
             } else {
                 $lastmainid = $DB->get_field('block_exaportcate', 'id', array("name" => $category));
@@ -405,6 +407,14 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     }*/
     $tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id,
         $tabtitle, '', true);
+
+    // Add category distribution tab for users with the capability.
+    $context = context_course::instance($COURSE->id);
+    if (has_capability('block/exaport:distributecategories', $context)) {
+        $tabs['category_distribution'] = new tabobject('category_distribution',
+            $CFG->wwwroot . '/blocks/exaport/category_distribution.php?courseid=' . $COURSE->id,
+            get_string('category_distribution', 'block_exaport'), '', true);
+    }
 
     $tabitemidentifier = $itemidentifier ? preg_replace('!_.*!', '', $itemidentifier) : '';
     $tabsubitemidentifier = $subitemidentifier ? preg_replace('!_.*!', '', $subitemidentifier) : '';
@@ -666,8 +676,6 @@ function block_exaport_check_competence_interaction() {
 }
 
 function block_exaport_build_comp_table($item, $role = "teacher", $competences = null) {
-    global $DB;
-
     // TODO: refactor: use block_exaport_get_active_comps_for_item instead.
     // $sql = "SELECT CONCAT(CONCAT(da.id,'_'),d.id) as uniquid,d.title, d.id ".
     // " FROM {".BLOCK_EXACOMP_DB_DESCRIPTORS."} d, {".BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY."} da ".
@@ -679,7 +687,7 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences =
     $topics = $competences["topics"];
 
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
-                <tr><td><h2>" . $item->name . "</h2></td></tr>";
+                <tr><td><h4 class='m-0'>" . $item->name . "</h4></td></tr>";
 
     if ($role == "teacher") {
         $disteacher = " ";
@@ -1111,10 +1119,17 @@ function block_exaport_get_user_category($title, $userid) {
 }
 
 function block_exaport_create_user_category($title, $userid, $parentid = 0, $courseid = 0) {
-    global $DB;
+    global $DB, $USER;
 
     if (!$DB->record_exists('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid))) {
-        $id = $DB->insert_record('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid, 'courseid' => $courseid));
+        $creatorid = !empty($USER->id) ? $USER->id : 0;
+        $id = $DB->insert_record('block_exaportcate', array(
+            'userid' => $userid,
+            'name' => $title,
+            'pid' => $parentid,
+            'courseid' => $courseid,
+            'creatorid' => $creatorid
+        ));
 
         return $DB->get_record('block_exaportcate', array('id' => $id));
     }
@@ -1478,22 +1493,56 @@ function block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlso
  * @return array
  */
 function block_exaport_get_course_teachers($exceptmyself = true) {
+    // For backward compatibility, get courseid from param if not provided
+    $courseid = optional_param('courseid', 0, PARAM_INT);
+    return block_exaport_get_course_teachers_by_courseid($courseid, $exceptmyself);
+}
+
+/**
+ * Get all teachers in a course by role shortname
+ *
+ * @param int $courseid Course ID
+ * @param bool $exceptmyself Exclude current user
+ * @return array Array of user IDs
+ */
+function block_exaport_get_course_teachers_by_courseid($courseid, $exceptmyself = true) {
     global $DB, $USER;
 
-    $courseid = optional_param('courseid', 0, PARAM_INT);
     $context = context_course::instance($courseid);
 
-    // Role id='3' - teachers. '4'- assistents.
+    // Get teacher roles by shortname (not hardcoded IDs).
+    $editingteacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+    $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
+    $managerrole = $DB->get_record('role', ['shortname' => 'manager']); // exacompteacher capability is assigned to to managers also anyways, but exacomp is not always installed
+
+    $roleids = [];
+    if ($editingteacherrole) {
+        $roleids[] = $editingteacherrole->id;
+    }
+    if ($teacherrole) {
+        $roleids[] = $teacherrole->id;
+    }
+    if ($managerrole) {
+        $roleids[] = $managerrole->id;
+    }
+
+    if (empty($roleids)) {
+        return [];
+    }
+
+    list($insql, $inparams) = $DB->get_in_or_equal($roleids, SQL_PARAMS_NAMED);
+    $params = array_merge(['contextid' => $context->id], $inparams);
+
     $query = "SELECT u.id as userid, u.id AS tmp
     FROM {user} u
     JOIN {role_assignments} ra ON ra.userid = u.id
-    WHERE ra.contextid=? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0";
-    $exastudteachers = $DB->get_records_sql($query, [$context->id]);
+    WHERE ra.contextid = :contextid AND ra.roleid $insql AND u.deleted = 0";
+    $teachers = $DB->get_records_sql($query, $params);
 
-    // If exacomp is not installed this function returns an emtpy array.
+    // If exacomp is not installed this function returns an empty array.
     $exacompteachers = get_enrolled_users($context, 'block/exacomp:teacher');
 
-    $teachers = $exastudteachers + $exacompteachers;
+    $teachers = $teachers + $exacompteachers;
 
     if ($exceptmyself) {
         unset($teachers[$USER->id]);
@@ -1504,19 +1553,91 @@ function block_exaport_get_course_teachers($exceptmyself = true) {
     return $teachers;
 }
 
+/**
+ * Get all students in a course by role shortname
+ *
+ * @param int $courseid Course ID
+ * @return array Array of user IDs
+ */
+function block_exaport_get_course_students_by_courseid($courseid) {
+    global $DB;
+
+    $context = context_course::instance($courseid);
+
+    // Get student role by shortname (not hardcoded ID).
+    $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+
+    if (!$studentrole) {
+        return [];
+    }
+
+    $query = "SELECT u.id as userid, u.id AS tmp
+    FROM {user} u
+    JOIN {role_assignments} ra ON ra.userid = u.id
+    WHERE ra.contextid = :contextid AND ra.roleid = :roleid AND u.deleted = 0";
+    $students = $DB->get_records_sql($query, ['contextid' => $context->id, 'roleid' => $studentrole->id]);
+
+    return array_keys($students);
+}
+
+/**
+ * Check if a user is enrolled in a specific course with the student role.
+ * This checks the actual enrollment with the "student" role shortname.
+ *
+ * @param int $userid User ID
+ * @param int $courseid Course ID
+ * @return bool True if user is enrolled in this course as a student
+ */
+function block_exaport_is_enrolled_as_student($userid, $courseid) {
+    global $DB;
+
+    $context = context_course::instance($courseid);
+
+    // Must be actively enrolled.
+    if (!is_enrolled($context, $userid, '', true)) {
+        return false;
+    }
+
+    $studentroleid = $DB->get_field('role', 'id', ['shortname' => 'student'], IGNORE_MISSING);
+    if (!$studentroleid) {
+        return false;
+    }
+
+    return user_has_role_assignment($userid, (int)$studentroleid, $context->id);
+}
+
 // This user is a teacher of any course?
 function block_exaport_user_is_teacher($userid = null) {
     global $DB, $USER;
     if ($userid === null) {
         $userid = $USER->id;
     }
-    // Role 3 = teacher
+
+    // Get teacher roles by shortname (not hardcoded IDs).
+    $editingteacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+    $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
+
+    $roleids = [];
+    if ($editingteacherrole) {
+        $roleids[] = $editingteacherrole->id;
+    }
+    if ($teacherrole) {
+        $roleids[] = $teacherrole->id;
+    }
+
+    if (empty($roleids)) {
+        return false;
+    }
+
+    list($insql, $inparams) = $DB->get_in_or_equal($roleids, SQL_PARAMS_NAMED);
+    $params = array_merge(['contextlevel' => CONTEXT_COURSE, 'userid' => $userid], $inparams);
+
     $query = "SELECT DISTINCT u.id as userid, u.id AS tmp
       FROM {role_assignments} ra
       JOIN {user} u ON ra.userid = u.id
       JOIN {context} c ON c.id = ra.contextid
-      WHERE c.contextlevel = ? AND u.id = ? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0 ";
-    $roles = $DB->get_records_sql($query, [CONTEXT_COURSE, $userid]);
+      WHERE c.contextlevel = :contextlevel AND u.id = :userid AND ra.roleid $insql AND u.deleted = 0 ";
+    $roles = $DB->get_records_sql($query, $params);
     if (count($roles) > 0) {
         return true;
     }
@@ -1529,22 +1650,48 @@ function block_exaport_get_students_for_teacher($userid = null, $courseid = 0) {
         $userid = $USER->id;
     }
     $students = array();
-    // Across all enrolled cources
+
+    // Get teacher roles by shortname (not hardcoded IDs).
+    $editingteacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+    $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
+
+    $teacherroleids = [];
+    if ($editingteacherrole) {
+        $teacherroleids[] = $editingteacherrole->id;
+    }
+    if ($teacherrole) {
+        $teacherroleids[] = $teacherrole->id;
+    }
+
+    if (empty($teacherroleids)) {
+        return $students;
+    }
+
+    // Get student role by shortname (not hardcoded ID).
+    $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+    if (!$studentrole) {
+        return $students;
+    }
+
+    list($insql, $inparams) = $DB->get_in_or_equal($teacherroleids, SQL_PARAMS_NAMED);
+    $params = array_merge(['contextlevel' => CONTEXT_COURSE, 'userid' => $userid], $inparams);
+
+    // Across all enrolled courses
     $query = "SELECT c.id as contextid, c.instanceid as courseid, course.fullname AS coursetitle, u.id as userid
       FROM {role_assignments} ra
       JOIN {user} u ON ra.userid = u.id
       JOIN {context} c ON c.id = ra.contextid
       JOIN {course} course ON course.id = c.instanceid
-      WHERE c.contextlevel = ? AND u.id = ? AND (ra.roleid = '3' OR ra.roleid = '4') AND u.deleted = 0 ";
-    $courses = $DB->get_records_sql($query, [CONTEXT_COURSE, $userid]);
+      WHERE c.contextlevel = :contextlevel AND u.id = :userid AND ra.roleid $insql AND u.deleted = 0 ";
+    $courses = $DB->get_records_sql($query, $params);
     foreach ($courses as $course) {
         // Get students of current course
         $querystudents = "SELECT u.*
                   FROM {role_assignments} ra
                   JOIN {user} u ON ra.userid = u.id
                   JOIN {context} c ON c.id = ra.contextid
-                  WHERE c.contextlevel = ? AND c.instanceid = ? AND ra.roleid = '5' AND u.deleted = 0 ";
-        $users = $DB->get_records_sql($querystudents, [CONTEXT_COURSE, $course->courseid]);
+                  WHERE c.contextlevel = ? AND c.instanceid = ? AND ra.roleid = ? AND u.deleted = 0 ";
+        $users = $DB->get_records_sql($querystudents, [CONTEXT_COURSE, $course->courseid, $studentrole->id]);
         foreach ($users as $user) {
             if (!array_key_exists($user->id, $students)) {
                 $user->name = fullname($user);

@@ -10,12 +10,35 @@ if (strlen($path) > 255 || preg_match('/[<>"\'\x00-\x1F]/', $path)) {
     throw new moodle_exception('invalid_path', 'block_exaport');
 }
 
-// Auto-detect course if not provided
-if (!$courseid) {
-    // get it from course, or page-course or default to 1, which is the site course. Works for the globally functioning exaport
-    $courseid = $COURSE->id ?? $PAGE->course->id ?? 1;
+// Try to detect courseid from referer if not provided
+if (!$courseid && !empty($_SERVER['HTTP_REFERER'])) {
+    $referer = $_SERVER['HTTP_REFERER'];
+
+    // Check if coming from a course page
+    if (preg_match('/\/course\/view\.php\?id=(\d+)/', $referer, $matches)) {
+        $courseid = (int)$matches[1];
+    }
+    // Check if coming from a module page (like assignment)
+    else if (preg_match('/\/mod\/[^\/]+\/view\.php\?id=(\d+)/', $referer, $matches)) {
+        $moduleid = (int)$matches[1];
+        try {
+            $cm = get_coursemodule_from_id('', $moduleid);
+            if ($cm) {
+                $courseid = $cm->course;
+            }
+        } catch (Exception $e) {
+            // Module not found, continue without courseid
+        }
+    }
 }
 
+// If still no courseid, use current course
+// (will be SITEID if accessed outside course context)
+if (!$courseid) {
+    $courseid = $COURSE->id;
+}
+
+// Login check
 block_exaport_require_login($courseid);
 
 // Split the path into parts
@@ -29,6 +52,7 @@ if (count($pathParts) > 20) {
 // Find the category by traversing the path
 $categoryid = 0; // Start at root
 $currentUserId = $USER->id;
+$foundCategory = null;
 
 foreach ($pathParts as $categoryName) {
     // Additional validation on each segment
@@ -36,23 +60,48 @@ foreach ($pathParts as $categoryName) {
         throw new moodle_exception('category_not_found', 'block_exaport');
     }
 
-    $category = $DB->get_record('block_exaportcate', [
+    // Build base query conditions (without courseid filter)
+    $conditions = [
         'userid' => $currentUserId,
         'pid' => $categoryid,
         'name' => $categoryName,
-    ]);
+    ];
 
-    if (!$category) {
-        // Use generic error message to prevent enumeration
+    // Get ALL matching categories
+    $categories = $DB->get_records('block_exaportcate', $conditions, 'timemodified DESC');
+
+    if (empty($categories)) {
+        // No category found at all
         throw new moodle_exception('category_not_found', 'block_exaport');
     }
 
+    // Priority 1: Try to find category with matching courseid (if not SITEID)
+    $category = null;
+    if ($courseid != SITEID) {
+        foreach ($categories as $cat) {
+            if ($cat->courseid == $courseid) {
+                $category = $cat;
+                break; // Found exact match, use it (already sorted by timemodified DESC)
+            }
+        }
+    }
+
+    // Priority 2: If no courseid match, use the first one (most recent due to sort)
+    if (!$category) {
+        $category = reset($categories);
+    }
+
     $categoryid = $category->id;
+    $foundCategory = $category;
 }
+
+// Use the courseid from the found category for the redirect
+// This ensures we always use the correct course context
+$finalCourseid = $foundCategory->courseid;
 
 // Redirect to the actual view_items.php with resolved category ID
 $redirectUrl = new moodle_url('/blocks/exaport/view_items.php', [
-    'courseid' => $courseid,
+    'courseid' => $finalCourseid,
     'categoryid' => $categoryid,
 ]);
 

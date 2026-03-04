@@ -1376,31 +1376,31 @@ return [
         'W&aumlehle Elemente aus',
         'Select items',
     ],
-    'cofigureblock_text' => [
+    'configureblock_text' => [
         'Text',
         'Choose text',
     ],
-    'cofigureblock_header' => [
+    'configureblock_headline' => [
         'Konfiguration der Kopfzeile',
         'Choose headline',
     ],
-    'cofigureblock_item' => [
+    'configureblock_item' => [
         'Auswahl der Artefakte',
         'Choose artefact',
     ],
-    'cofigureblock_media' => [
+    'configureblock_media' => [
         'Medieneintrag',
         'Choose media',
     ],
-    'cofigureblock_personalinfo' => [
+    'configureblock_personal_information' => [
         'Pers&ouml;nliche Information',
         'Choose personal info',
     ],
-    'cofigureblock_cvinfo' => [
+    'configureblock_cv_information' => [
         'Lebenslauf Information',
         'Choose cv info',
     ],
-    'cofigureblock_badge' => [
+    'configureblock_badge' => [
         'Badges auswählen',
         'Choose Badges',
     ],
@@ -1575,7 +1575,7 @@ return [
         'Here is your portfolio. You can show others what you have accomplished by yourself.',
     ],
     'settings_interaktion_exacomp_head' => [
-        'Interaktion exabis ePortfolio - Exabis Competence Grid',
+        'Verknüpfung von Exabis ePortfolio und Exabis Kompetenzraster aktivieren',
         'Interaction exabis ePortfolio - Exabis Competence Grid',
     ],
     'settings_interaktion_exacomp_body' => [
@@ -1583,8 +1583,12 @@ return [
         'Interaction with block Exabis Competence Grid, in case it is installed',
     ],
     'settings_allow_loginas_head' => [
-        '"Login als" erlauben',
-        'Allow login as',
+        '"Anmelden als" erlauben',
+        'Allow "login as"',
+    ],
+    'settings_allow_loginas_head_alternative' => [
+        '"Anmelden als" erlauben',
+        'Allow "login as"',
     ],
     'settings_allow_loginas_body' => [
         '',
@@ -1599,7 +1603,7 @@ return [
         '',
     ],
     'settings_disable_shareall_head' => [
-        'Mit allen Benutzer::innen teilen deaktivieren',
+        '"Mit allen Benutzer:innen teilen" deaktivieren',
         'Disable sharing with all users',
     ],
     'settings_disable_shareall_body' => [
@@ -1630,14 +1634,14 @@ return [
         '',
         '',
     ],
-    'block_exaport_app_externaleportfolio_head' => [
-        'Dateien in Mahara speichern',
-        'Save files to mahara if checked, save to exaport if not checked',
-    ],
-    'block_exaport_app_externaleportfolio_body' => [
-        'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.',
-        'For App',
-    ],
+    // 'block_exaport_app_externaleportfolio_head' => [
+    //     'Dateien in Mahara speichern',
+    //     'Save files to mahara if checked, save to exaport if not checked',
+    // ],
+    // 'block_exaport_app_externaleportfolio_body' => [
+    //     'App: Setze das Häkchen um Dateien in Mahara zu speichern, ansonsten werden Datein im exabis ePortfolio hinterlegt.',
+    //     'For App',
+    // ],
     'block_exaport_maxbytes' => [
         'Maximale Upload-Dateigröße in Exabis ePortfolio',
         'Maximum uploaded file size in Exabis ePortfolio',
@@ -1659,7 +1663,7 @@ return [
         'Multiple files in "File" artefact',
     ],
     'block_exaport_multiplefilesinitem_body' => [
-        'limit: 10 Dateien',
+        'Limit: 10 Dateien',
         'limit: 10 files',
     ],
     'block_exaport_copytomyportfolio' => [
@@ -1671,7 +1675,11 @@ return [
         'User will be able copy artefacts from shared category into own portfolio',
     ],
     'block_exaport_app_alloweditdelete_head' => [
-        'Schüler/:innen dürfen trotz Lehrerbeurteilungen ePortfolio Items editieren und löschen',
+        'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
+        'Students are allowed to edit and delete items after teacher reviews',
+    ],
+    'block_exaport_app_alloweditdelete_head_alternative' => [
+        'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
         'Students are allowed to edit and delete items after teacher reviews',
     ],
     'block_exaport_app_alloweditdelete_body' => [
@@ -1683,15 +1691,19 @@ return [
         'Delete all shareall?',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head' => [
-        'Trainer/in hat Zugriff auf alle Artefakte eigene Schüler/:innen',
+        'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
+        'Teacher can see ALL artefacts of own students',
+    ],
+    'block_exaport_teachercanseeartifactsofstudents_head_alternative' => [
+        'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
         'Teacher can see ALL artefacts of own students',
     ],
     'block_exaport_teachercanseeartifactsofstudents_body' => [
-        'Vertrauenswürdige Trainer/:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der Teilnehmer/:innen für jede/n als vertrauenswürdig definierte/n Trainer/in generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/:innen.',
+        'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.',
         'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
     ],
     'block_exaport_teachercanseeartifactsofstudents_configurationlink' => [
-        'erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen',
+        'Erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen',
         'Add required user profile field',
     ],
     'block_exaport_confirm_profilefield_create' => [
@@ -3014,5 +3026,299 @@ return [
         'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.',
         'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.',
     ],
+
+    // Category distribution.
+    'exaport:distributecategories' => [
+        'Kategorie-Verteilung verwalten',
+        'Manage category distribution',
+    ],
+    'settings_category_distribution_heading' => [
+        'Struktur vorgeben',
+        'Preset structure',
+    ],
+    'settings_category_distribution_description' => [
+        'Konfiguriere Starter-Vorlagen für kursverwaltete Kategorie- und Ansichtenverteilung',
+        'Configure starter templates for course-managed category and view distribution',
+    ],
+    'settings_starter_templates' => [
+        'Starter-Vorlagen',
+        'Starter Templates',
+    ],
+    'settings_starter_templates_description' => [
+        'JSON-Array von Starter-Vorlagen für die Kategorie-Verteilung. Jede Vorlage muss "name" und "tree" (mit verschachtelten children) haben.',
+        'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children).',
+    ],
+    'settings_starter_view_templates' => [
+        'Vorlage für Portfolio-Grundstruktur',
+        'Starter View Templates',
+    ],
+    'settings_starter_view_templates_description' => [
+        'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben.',
+        'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers).',
+    ],
+    'category_distribution' => [
+        'Struktur vorgeben',
+        'Preset structure',
+    ],
+    'category_distribution_title' => [
+        'Struktur vorgeben',
+        'Preset structure',
+    ],
+    'category_distribution_description' => [
+        'Kategorien- und Ansichtsstrukturen an Lernende verteilen',
+        'Manage and distribute category and view structures to students',
+    ],
+    'starter_template_select' => [
+        'Starter-Vorlage auswählen',
+        'Select Starter Template',
+    ],
+    'starter_template_load' => [
+        'Vorlage laden',
+        'Load Template',
+    ],
+    'starter_template_load_confirm' => [
+        'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Dies wirkt sich erst auf Lernende aus, wenn Sie verteilen. Fortfahren?',
+        'Loading this template will replace the current course template. This does not affect student categories until you distribute. Continue?',
+    ],
+    'starter_template_loaded' => [
+        'Starter-Vorlage erfolgreich geladen',
+        'Starter template loaded successfully',
+    ],
+    'current_template' => [
+        'Aktuelle Kursvorlage',
+        'Current Course Template',
+    ],
+    'template_empty' => [
+        'Keine Vorlage definiert. Laden Sie eine Starter-Vorlage oder erstellen Sie Kategorien manuell.',
+        'No template defined. Load a starter template or create categories manually.',
+    ],
+    'add_root_category' => [
+        'Hauptkategorie hinzufügen',
+        'Add Root Category',
+    ],
+    'add_category' => [
+        'Kategorie hinzufügen',
+        'Add Category',
+    ],
+    'add_subcategory' => [
+        'Unterkategorie hinzufügen',
+        'Add Subcategory',
+    ],
+    'rename_category' => [
+        'Umbenennen',
+        'Rename',
+    ],
+    'move_category' => [
+        'Verschieben',
+        'Move',
+    ],
+    'remove_from_template' => [
+        'Aus Vorlage entfernen',
+        'Remove from Template',
+    ],
+    'remove_from_template_confirm' => [
+        'Diese Kategorie aus der Vorlage entfernen? Löscht keine Lernenden-Kategorien.',
+        'Remove this category from the template? This does not delete student categories.',
+    ],
+    'distribute_now' => [
+        'Jetzt verteilen',
+        'Distribute Now',
+    ],
+    'auto_distribute_on_enrolment' => [
+        'Automatisch verteilen bei neuen Einschreibungen',
+        'Auto-distribute on new enrolments',
+    ],
+    'distribution_in_progress' => [
+        'Verteilung läuft...',
+        'Distribution in progress...',
+    ],
+    'distribution_complete' => [
+        'Verteilung abgeschlossen',
+        'Distribution complete',
+    ],
+    'distribution_summary' => [
+        'Verteilungs-Zusammenfassung',
+        'Distribution Summary',
+    ],
+    'categories_created' => [
+        'Kategorien erstellt: {$a}',
+        'Categories created: {$a}',
+    ],
+    'categories_skipped' => [
+        'Kategorien übersprungen (existieren bereits): {$a}',
+        'Categories skipped (already exist): {$a}',
+    ],
+    'students_processed' => [
+        'Lernende bearbeitet: {$a}',
+        'Students processed: {$a}',
+    ],
+    'no_students_enrolled' => [
+        'Keine Lernende in diesem Kurs eingeschrieben',
+        'No students enrolled in this course',
+    ],
+    'no_template_to_distribute' => [
+        'Keine Vorlage zu verteilen. Bitte erstellen oder laden Sie zuerst eine Vorlage.',
+        'No template to distribute. Please create or load a template first.',
+    ],
+    'distribution_error' => [
+        'Verteilungsfehler: {$a}',
+        'Distribution error: {$a}',
+    ],
+    'category_name_required' => [
+        'Kategoriename ist erforderlich',
+        'Category name is required',
+    ],
+    'enter_parent_id' => [
+        'Eltern-Kategorie-ID eingeben (0 für Wurzel)',
+        'Enter parent category ID (0 for root)',
+    ],
+    'template_must_have_one_root' => [
+        'Vorlage muss genau eine Wurzelkategorie haben',
+        'Template must have exactly one root category',
+    ],
+    'move_category_select_parent' => [
+        'Neue Elternkategorie auswählen',
+        'Select new parent category',
+    ],
+    'move_to_root' => [
+        'Zur Wurzel verschieben',
+        'Move to root',
+    ],
+    'category_moved' => [
+        'Kategorie erfolgreich verschoben',
+        'Category moved successfully',
+    ],
+    'category_added' => [
+        'Kategorie erfolgreich hinzugefügt',
+        'Category added successfully',
+    ],
+    'category_renamed' => [
+        'Kategorie erfolgreich umbenannt',
+        'Category renamed successfully',
+    ],
+    'category_removed' => [
+        'Kategorie aus Vorlage entfernt',
+        'Category removed from template',
+    ],
+    'capability_required' => [
+        'Sie haben keine Berechtigung zur Verwaltung von Strukturvorgaben',
+        'You do not have permission to manage preset structure',
+    ],
+    'invalid_template_json' => [
+        'Ungültiges Vorlagen-JSON-Format',
+        'Invalid template JSON format',
+    ],
+    'share_to_teachers' => [
+        'Umschalten: Geteilte Kategorie',
+        'Toggle: Shared Category',
+    ],
+    'share_to_teachers_help' => [
+        'Zukünftige Erstellungen dieser Kategorie werden diese Kategorien mit den Kurslehrenden dieses Kurses teilen',
+        'Future creations of this category will share those categories to the course teachers of this course',
+    ],
+    'confirm_distribute_categories_title' => [
+        'Verteilung bestätigen',
+        'Confirm Distribution',
+    ],
+    'confirm_distribute_categories_body' => [
+        'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Kategorien für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Kategorien erstellt.',
+        'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them. This action cannot be undone. Once distributed, the categories are created.',
+    ],
+    'confirm_distribute_views_title' => [
+        'Verteilung bestätigen',
+        'Confirm Distribution',
+    ],
+    'confirm_distribute_views_body' => [
+        'Sind Sie sicher, dass Sie die Ansichtsvorlagen an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Ansichten für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Ansichten erstellt.',
+        'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them. This action cannot be undone. Once distributed, the views are created.',
+    ],
+    'distribute' => [
+        'Verteilen',
+        'Distribute',
+    ],
+    'distribute_categories' => [
+        'Kategorien verteilen',
+        'Distribute Categories',
+    ],
+    'distribute_categories_now' => [
+        'Kategorien jetzt verteilen',
+        'Distribute Categories Now',
+    ],
+    // View distribution strings.
+    'view_distribution' => [
+        'Ansichten-Verteilung',
+        'View Distribution',
+    ],
+    'view_distribution_description' => [
+        'Verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.',
+        'Manage and distribute view templates to students. Views are portfolios that students can use to showcase their work.',
+    ],
+    'starter_view_template_select' => [
+        'Starter-Ansichtsvorlage auswählen',
+        'Select Starter View Template',
+    ],
+    'current_view_template' => [
+        'Aktuelle Ansichtsvorlage',
+        'Current View Template',
+    ],
+    'view_template_empty' => [
+        'Keine Ansichten in der Vorlage. Fügen Sie eine Ansicht hinzu, um zu beginnen.',
+        'No views in template. Add a view to get started.',
+    ],
+    'add_view' => [
+        'Ansicht hinzufügen',
+        'Add View',
+    ],
+    'rename_view' => [
+        'Ansicht umbenennen',
+        'Rename View',
+    ],
+    'remove_view' => [
+        'Ansicht entfernen',
+        'Remove View',
+    ],
+    'remove_view_confirm' => [
+        'Sind Sie sicher, dass Sie diese Ansicht aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Ansichten von Lernenden.',
+        'Are you sure you want to remove this view from the template? This will not delete existing student views.',
+    ],
+    'view_name_required' => [
+        'Ansichtsname ist erforderlich',
+        'View name is required',
+    ],
+    'view_added' => [
+        'Ansicht zur Vorlage hinzugefügt',
+        'View added to template',
+    ],
+    'view_renamed' => [
+        'Ansicht erfolgreich umbenannt',
+        'View renamed successfully',
+    ],
+    'view_removed' => [
+        'Ansicht aus Vorlage entfernt',
+        'View removed from template',
+    ],
+    'distribute_views' => [
+        'Ansichten verteilen',
+        'Distribute Views',
+    ],
+    'distribute_views_now' => [
+        'Ansichten jetzt verteilen',
+        'Distribute Views Now',
+    ],
+    'auto_distribute_views_on_enrolment' => [
+        'Ansichten automatisch bei neuen Einschreibungen verteilen',
+        'Automatically distribute views to new enrolments',
+    ],
+    'no_views_to_distribute' => [
+        'Keine Ansichtsvorlage zum Verteilen definiert',
+        'No view template defined to distribute',
+    ],
+    'views_created' => [
+        'Ansichten erstellt: {$a}',
+        'Views created: {$a}',
+    ],
+    'views_skipped' => [
+        'Ansichten übersprungen (existieren bereits): {$a}',
+        'Views skipped (already exist): {$a}',
+    ],
 ];
-?>

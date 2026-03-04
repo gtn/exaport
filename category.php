@@ -293,8 +293,11 @@ if ($mform->is_cancelled()) {
     }
 
     if ($newentry->id) {
+        // keep creatorid as is.. not "updatedby" but "CREATORid" so keep it
         $DB->update_record("block_exaportcate", $newentry);
     } else {
+        // add creatorid
+        $newentry->creatorid = $USER->id;
         $newentry->id = $DB->insert_record("block_exaportcate", $newentry);
     }
 

@@ -24,7 +24,7 @@ require_once __DIR__ . '/lib/settings_helper.php';
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas',
-        get_string('settings_allow_loginas_head', 'block_exaport'),
+        get_string('settings_allow_loginas_head_alternative', 'block_exaport'),
         get_string('settings_allow_loginas_body', 'block_exaport'), 0, 1, 0));
 
     // Zusammenspiel exabis ePortfolio - exabis Competences.
@@ -56,9 +56,11 @@ if ($ADMIN->fulltree) {
         get_string('settings_disable_external_comments_body', 'block_exaport',
             $CFG->wwwroot . '/blocks/exaport/admin.php?action=remove_shareall&sesskey=' . sesskey()), 0));
 
+    /*
     $settings->add(new admin_setting_configcheckbox('block_exaport_app_externaleportfolio',
         get_string('block_exaport_app_externaleportfolio_head', 'block_exaport'),
         get_string('block_exaport_app_externaleportfolio_body', 'block_exaport'), 0));
+    */
 
     // Max size of uploading file.
     $maxbytes = 0;
@@ -83,7 +85,7 @@ if ($ADMIN->fulltree) {
         get_string('block_exaport_userquota_body', 'block_exaport', $a), $defaultuserquota));
 
     $settings->add(new admin_setting_configcheckbox('block_exaport_app_alloweditdelete',
-        get_string('block_exaport_app_alloweditdelete_head', 'block_exaport'),
+        get_string('block_exaport_app_alloweditdelete_head_alternative', 'block_exaport'),
         get_string('block_exaport_app_alloweditdelete_body', 'block_exaport'), 1));
 
     // Teacher can see all artifacts from own students
@@ -98,7 +100,7 @@ if ($ADMIN->fulltree) {
         $linktocreateuserproperty = '';
     }
     $settings->add(new admin_setting_configcheckbox('block_exaport_teachercanseeartifactsofstudents',
-        get_string('block_exaport_teachercanseeartifactsofstudents_head', 'block_exaport'),
+        get_string('block_exaport_teachercanseeartifactsofstudents_head_alternative', 'block_exaport'),
         get_string('block_exaport_teachercanseeartifactsofstudents_body', 'block_exaport', $linktocreateuserproperty), 0));
 
     // Items with multiple files
@@ -170,5 +172,54 @@ if ($ADMIN->fulltree) {
         get_string('block_exaport_allowcustomlayout_body', 'block_exaport'), 0));
     //  the table with layout settings
     $settings->add(new block_exaport_layout_configtable('block_exaport_layout_settings', block_exaport_get_string('settings_layout_settings_description'), '', ''));
+
+    // Category distribution starter templates
+    $settings->add(new admin_setting_heading('exaport/category_distribution_settings',
+        get_string('settings_category_distribution_heading', 'block_exaport'),
+        get_string('settings_category_distribution_description', 'block_exaport')));
+
+    // Generic starter category templates (JSON).
+    $default_templates = json_encode(array(
+        array(
+            'name' => 'Generic starter template',
+            'tree' => array(
+                'name' => 'Portfolio',
+                'share_to_teachers' => 0,
+                'children' => array(
+                    array('name' => 'Evidence', 'share_to_teachers' => 0),
+                    array('name' => 'Reflections', 'share_to_teachers' => 0),
+                    array('name' => 'Feedback', 'share_to_teachers' => 0),
+                    array('name' => 'Assessments', 'share_to_teachers' => 0),
+                ),
+            ),
+        ),
+    ), JSON_UNESCAPED_UNICODE);
+
+    $settings->add(new admin_setting_configtextarea('block_exaport/starter_templates',
+        get_string('settings_starter_templates', 'block_exaport'),
+        get_string('settings_starter_templates_description', 'block_exaport'),
+        $default_templates,
+        PARAM_TEXT, 60, 10));
+
+    // Generic starter view templates (JSON).
+    $default_view_templates = json_encode(array(
+        array(
+            'name' => 'Generic starter template',
+            'views' => array(
+                array(
+                    'name' => 'Portfolio',
+                    'description' => 'This view has been automatically created',
+                    'share_to_teachers' => 1,
+                ),
+            ),
+        ),
+    ), JSON_UNESCAPED_UNICODE);
+
+    $settings->add(new admin_setting_configtextarea('block_exaport/starter_view_templates',
+        get_string('settings_starter_view_templates', 'block_exaport'),
+        get_string('settings_starter_view_templates_description', 'block_exaport'),
+        $default_view_templates,
+        PARAM_TEXT, 60, 10));
+
 
 }

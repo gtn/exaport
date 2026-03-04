@@ -295,6 +295,7 @@ function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null,
                         $newentry->timemodified = time();
                         $newentry->course = $COURSE->id;
                         $newentry->userid = $USER->id;
+                        $newentry->creatorid = $USER->id;
 
                         if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
                             $OUTPUT->notification("Could not insert category!");
@@ -316,6 +317,7 @@ function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null,
                         $newentry->course = $COURSE->id;
                         $newentry->userid = $USER->id;
                         $newentry->pid = $previd;
+                        $newentry->creatorid = $USER->id;
 
                         if (!$entryid = $DB->insert_record("block_exaportcate", $newentry)) {
                             $OUTPUT->notification("Could not insert category!");

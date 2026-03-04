@@ -369,8 +369,9 @@
     width: 100%;
 }
 
-#exaport table.mceLayout {
-    width: 430px !important;
+/* Ensure TinyMCE editor has enough height inside modals. */
+.modal .tox-sidebar-wrap {
+    min-height: 400px;
 }
 
 #exaport input.submit {

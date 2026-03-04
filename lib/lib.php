@@ -916,20 +916,86 @@ function block_exaport_assignmentversion() {
 function block_exaport_get_assignments_for_import($modassign) {
     global $USER, $DB;
     if ($modassign->new) {
-        $assignments = $DB->get_records_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified," .
-            " a.name, a.course, c.fullname AS coursename" .
-            " FROM {assignsubmission_file} sf " .
-            " INNER JOIN {assign_submission} s ON sf.submission=s.id " .
-            " INNER JOIN {assign} a ON s.assignment=a.id " .
-            " LEFT JOIN {course} c on a.course = c.id " .
-            " WHERE s.userid=?", array($USER->id));
+        // Show assignments where: student submitted something OR teacher provided feedback
+        // Enhanced with visibility and enrollment checks
+
+        // todo: this gets the assignments and the file of the submission, but NOT of the feedback..
+        // the feedbackfiles are gotten later on. This is inconsistent, but was done due to historically growing the functionality.
+        // leave for now, it works
+        $assignments = $DB->get_records_sql("
+            SELECT DISTINCT
+                a.id AS aid,                       -- Primary key (never NULL) - used as array key
+                s.id AS submissionid,              -- Can be NULL (no submission)
+                ag.id AS gradeid,                  -- Can be NULL (no feedback)
+                a.id AS assignment,
+                COALESCE(s.timemodified, ag.timemodified) AS timemodified,
+                a.name,
+                a.course,
+                c.fullname AS coursename,
+                CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END AS has_submission,
+                CASE WHEN sf.id IS NOT NULL THEN 1 ELSE 0 END AS has_file,
+                CASE WHEN sot.id IS NOT NULL THEN 1 ELSE 0 END AS has_onlinetext
+            FROM {assign} a
+            LEFT JOIN {assign_submission} s
+                ON s.assignment = a.id
+                AND s.userid = ?
+                AND s.status = 'submitted'
+            LEFT JOIN {assignsubmission_file} sf
+                ON sf.submission = s.id
+            LEFT JOIN {assignsubmission_onlinetext} sot
+                ON sot.submission = s.id
+            LEFT JOIN {assign_grades} ag
+                ON ag.assignment = a.id
+                AND ag.userid = ?
+            LEFT JOIN {course} c ON a.course = c.id
+            WHERE (s.id IS NOT NULL OR ag.id IS NOT NULL)
+            ORDER BY COALESCE(s.timemodified, ag.timemodified) DESC
+        ", array($USER->id, $USER->id));
+
+        // Filter results with proper Moodle security checks
+        $validassignments = array();
+        foreach ($assignments as $assignment) {
+            $course = $DB->get_record('course', array('id' => $assignment->course));
+            if (!$course) {
+                continue; // Skip invalid course
+            }
+
+            $cm = get_coursemodule_from_instance('assign', $assignment->aid, $course->id);
+            if (!$cm) {
+                continue; // Skip if module not found
+            }
+
+            // Check enrollment using Moodle's function
+            $context = context_module::instance($cm->id);
+            if (!is_enrolled($context, $USER->id, '', true)) {
+                continue; // Skip if not enrolled
+            }
+
+            // Check visibility using Moodle's API
+            $modinfo = get_fast_modinfo($course);
+            if (!isset($modinfo->cms[$cm->id]) || !$modinfo->cms[$cm->id]->uservisible) {
+                continue; // Skip if not visible to user
+            }
+
+            // Check if being deleted
+            if ($cm->deletioninprogress) {
+                continue; // Skip if being deleted
+            }
+
+            $validassignments[] = $assignment;
+        }
+
+        return $validassignments;
     } else {
-        $assignments = $DB->get_records_sql("SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified," .
-            " a.name, a.course, a.assignmenttype, c.fullname AS coursename " .
-            " FROM {assignment_submissions} s " .
-            " JOIN {assignment} a ON s.assignment=a.id " .
-            " LEFT JOIN {course} c on a.course = c.id " .
-            " WHERE s.userid=?", array($USER->id));
+        // Legacy assignments
+        $assignments = $DB->get_records_sql("
+            SELECT s.id AS submissionid, a.id AS aid, s.assignment, s.timemodified,
+                a.name, a.course, a.assignmenttype, c.fullname AS coursename
+            FROM {assignment_submissions} s
+            JOIN {assignment} a ON s.assignment = a.id
+            LEFT JOIN {course} c ON a.course = c.id
+            WHERE s.userid = ?
+        ", array($USER->id));
     }
     return $assignments;
 }
@@ -2288,8 +2354,8 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
                     if ($comments && count($comments) > 0) {
                         foreach ($comments as &$comment) {
                             $comment->timemodified = transform::datetime(@$comment->timemodified);
-                            $user_obj = $DB->get_record('user', ['id' => $comment->userid]);
-                            $comment->fromUser = fullname($user_obj, $userid);
+                            // Use helper function to respect privacy
+                            $comment->fromUser = block_exaport_get_comment_author_name($comment->userid);
                             unset($comment->userid);
                             unset($comment->id);
                             unset($comment->itemid);
@@ -2718,4 +2784,254 @@ function block_exaport_get_my_views() {
     $views = $DB->get_records_sql($query, array($USER->id));
 
     return $views;
+}
+
+/**
+ * Create a portfolio artifact from an assignment with feedback
+ *
+ * This is the shared function used by both import paths (direct import and portfolio export)
+ * to create portfolio artifacts from Moodle assignments with teacher feedback.
+ *
+ * @param object $assignment Assignment data with properties: aid, assignment, name, coursename
+ * @param stored_file|null $file Optional submission file to attach
+ * @param int $categoryid Category ID for the artifact (default: 0 = main)
+ * @param int $courseid Course ID
+ * @param string|null $onlinetext Optional online text content
+ * @return int The created item ID
+ */
+function block_exaport_create_item_from_assignment($assignment, $file = null, $categoryid = 0, $courseid = 0, $onlinetext = null) {
+    global $USER, $DB;
+
+    $fs = get_file_storage();
+
+    // Create the portfolio item using assignment name
+    $item = new stdClass();
+    $item->userid = $USER->id;
+    $item->name = $assignment->name; // Use assignment name, not filename
+    $item->type = $file ? 'file' : 'note'; // file if submission exists, otherwise note
+    $item->intro = $onlinetext ? $onlinetext : ''; // Use online text if provided
+    $item->categoryid = $categoryid;
+    $item->courseid = $courseid;
+    $item->timemodified = time();
+    $item->attachment = $file ? $file->get_itemid() : '';
+
+    // Insert the item
+    $item->id = $DB->insert_record('block_exaportitem', $item);
+
+    // Save submission file if provided
+    if ($file) {
+        $filerecord = new stdClass();
+        $filerecord->contextid = context_user::instance($USER->id)->id;
+        $filerecord->component = 'block_exaport';
+        $filerecord->filearea = 'item_file';
+        $filerecord->itemid = $item->id;
+        $fs->create_file_from_storedfile($filerecord, $file);
+    }
+
+    // Get course module
+    $modassign = block_exaport_assignmentversion();
+    $cm = get_coursemodule_from_instance($modassign->title, $assignment->aid);
+
+    if ($cm) {
+        // Add competences if applicable
+        if (block_exaport_check_competence_interaction()) {
+            $comps = $DB->get_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $cm->id));
+            foreach ($comps as $comp) {
+                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
+                    array("activityid" => $item->id, "eportfolioitem" => 1, "compid" => $comp->descrid,
+                        "activitytitle" => $item->name, "coursetitle" => $assignment->coursename ?? ''));
+            }
+        }
+
+        // Add teacher feedback (both comment text and files)
+        block_exaport_add_teacher_feedback_to_item($item->id, $cm, $assignment->assignment);
+    }
+
+    return $item->id;
+}
+
+/**
+ * Add teacher feedback (comment text and files) to a portfolio item
+ *
+ * This function retrieves feedback from the teacher (grader) and adds it as a comment
+ * on the portfolio item. It handles both feedback comment text and feedback files.
+ *
+ * @param int $itemid The portfolio item ID
+ * @param object $cm Course module object
+ * @param int $assignmentid The assignment ID
+ */
+function block_exaport_add_teacher_feedback_to_item($itemid, $cm, $assignmentid) {
+    global $USER, $DB, $CFG;
+
+    $modassign = block_exaport_assignmentversion();
+    if (!$modassign->new) {
+        // Legacy assignments not supported for feedback
+        return;
+    }
+
+    $context = context_module::instance($cm->id);
+
+    // Security check: Verify user can view this assignment
+    if (!has_capability('mod/assign:view', $context, $USER->id)) {
+        debugging('User does not have permission to view assignment feedback', DEBUG_DEVELOPER);
+        return;
+    }
+
+    // Get assignment details
+    $assignment = $DB->get_record('assign', array('id' => $assignmentid));
+    if (!$assignment) {
+        return;
+    }
+
+    // Get course for additional checks
+    $course = $DB->get_record('course', array('id' => $assignment->course));
+    if (!$course) {
+        return;
+    }
+
+    // Use Moodle's assign API to check if feedback is viewable
+    require_once($CFG->dirroot . '/mod/assign/locallib.php');
+    $assign = new assign($context, $cm, $course);
+
+    // Check if user can view their submission
+    if (!$assign->can_view_submission($USER->id)) {
+        debugging('User cannot view submission for this assignment', DEBUG_DEVELOPER);
+        return;
+    }
+
+    $fs = get_file_storage();
+
+    // Get the grade record for this assignment and user
+    $grade = $DB->get_record('assign_grades',
+        array('assignment' => $assignmentid, 'userid' => $USER->id),
+        '*', IGNORE_MULTIPLE);
+
+    if (!$grade) {
+        return; // No grade/feedback
+    }
+
+    // Validate that grade has been saved/released (timemodified > 0)
+    if (!$grade->timemodified || $grade->timemodified == 0) {
+        debugging('Grade has not been saved or released yet', DEBUG_DEVELOPER);
+        return;
+    }
+
+    // Check if grades are released using grade API
+    $gradinginfo = grade_get_grades($course->id, 'mod', 'assign', $assignment->id, $USER->id);
+    if (!empty($gradinginfo->items)) {
+        $gradeitem = $gradinginfo->items[0];
+        if (isset($gradeitem->grades[$USER->id]) && $gradeitem->grades[$USER->id]->hidden) {
+            debugging('Grade is hidden, feedback not accessible', DEBUG_DEVELOPER);
+            return; // Grade is hidden
+        }
+    }
+
+    // Validate grader has appropriate role
+    if ($grade->grader) {
+        $gradercontext = context_course::instance($course->id);
+
+        // Validate grader has teaching capability
+        if (!has_capability('mod/assign:grade', $gradercontext, $grade->grader)) {
+            debugging('Warning: Grade record has invalid grader ID - grader lacks mod/assign:grade capability', DEBUG_DEVELOPER);
+            return;
+        }
+
+        // Prevent self-grading attribution
+        if ($grade->grader == $USER->id) {
+            debugging('Warning: Student cannot be grader of their own work', DEBUG_DEVELOPER);
+            return;
+        }
+    }
+
+    // Get feedback comment text
+    $feedbackcomment = $DB->get_record('assignfeedback_comments',
+        array('assignment' => $assignmentid, 'grade' => $grade->id));
+
+    // Get feedback files
+    $feedbackfilerecord = $DB->get_record('assignfeedback_file',
+        array('assignment' => $assignmentid, 'grade' => $grade->id));
+
+    $feedbackfiles = array();
+    if ($feedbackfilerecord) {
+        $feedbackfiles = $fs->get_area_files($context->id, 'assignfeedback_file', 'feedback_files',
+            $grade->id, 'filename', false);
+    }
+
+    // Only create comment if there's feedback text or files
+    if (($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) || !empty($feedbackfiles)) {
+        // Check if grader identity should be hidden
+        // Use assign API to respect privacy settings
+        $showgrader = true;
+
+        // Check if grader identity is hidden from students (is_hidden_grader setting)
+        if ($assign->is_hidden_grader()) {
+            // When grader identity is hidden, check if student has permission to see grader
+            $showgrader = has_capability('mod/assign:showhiddengrader', $context, $USER->id);
+        }
+
+        // Determine grader userid for comment
+        // Use special value -1 to indicate hidden grader (avoids exposing real userid)
+        if ($showgrader && !empty($grade->grader)) {
+            $commentuserid = $grade->grader; // Use teacher's real ID
+        } else {
+            // Use -1 to indicate grader identity is hidden
+            // Display code will check for this and show "Hidden grader"
+            $commentuserid = -1;
+        }
+
+        // Create comment entry
+        $comment = new stdClass();
+        $comment->itemid = $itemid;
+        $comment->userid = $commentuserid;
+        $comment->timemodified = time();
+
+        // Build comment text
+        $commenttext = get_string('feedbackfromteacher', 'block_exaport');
+        if ($feedbackcomment && !empty(trim($feedbackcomment->commenttext))) {
+            $commenttext .= "\n\n" . $feedbackcomment->commenttext;
+        }
+        $comment->entry = $commenttext;
+
+        $comment->id = $DB->insert_record('block_exaportitemcomm', $comment);
+
+        // Save feedback files to the comment
+        if (!empty($feedbackfiles)) {
+            $filerecordbase = new stdClass();
+            $filerecordbase->contextid = context_system::instance()->id;
+            $filerecordbase->component = 'block_exaport';
+            $filerecordbase->filearea = 'item_comment_file';
+            $filerecordbase->itemid = $comment->id;
+
+            foreach ($feedbackfiles as $feedbackfile) {
+                $fs->create_file_from_storedfile($filerecordbase, $feedbackfile);
+            }
+        }
+    }
+}
+
+/**
+ * Get the display name for a comment author, respecting grader privacy settings
+ *
+ * This function checks if the comment userid is -1 (hidden grader marker) and returns
+ * an appropriate display name. For normal comments, it returns the user's full name.
+ *
+ * @param int $userid The userid from the comment record
+ * @return string The display name for the comment author
+ */
+function block_exaport_get_comment_author_name($userid) {
+    global $DB;
+
+    // Check for hidden grader marker
+    if ($userid == -1) {
+        return get_string('hiddenuser', 'block_exaport');
+    }
+
+    // Get user record and return full name
+    $user = $DB->get_record('user', array('id' => $userid));
+    if ($user) {
+        return fullname($user);
+    }
+
+    // Fallback if user not found
+    return get_string('unknownuser', 'block_exaport');
 }

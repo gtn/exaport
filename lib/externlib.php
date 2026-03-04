@@ -17,6 +17,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/lib.php'); // needed for block_exaport_get_comment_author_name
 function block_exaport_get_user_from_hash($hash) {
     trigger_error('deprecated');
     $conditions = array("user_hash" => $hash);
@@ -47,7 +48,7 @@ function block_exaport_print_extern_item($item, $access) {
             } else {
                 $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
                 $filescontent .= "<p class=\"filelink\">" . $icon . ' ' .
-                    $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl)) . "</p>";
+                    $OUTPUT->action_link($ffurl, format_string($file->get_filename()), new popup_action ('click', $ffurl)) . "</p>";
                 if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
                     // Videoblock.
                     $filescontent .= '
@@ -65,7 +66,7 @@ function block_exaport_print_extern_item($item, $access) {
                         </div>
                         <div id="video_error" style="display: none;" class="incompatible_video">';
                     $a = new stdClass ();
-                    $a->link = $OUTPUT->action_link($ffurl, format_string($item->name), new popup_action ('click', $ffurl));
+                    $a->link = $OUTPUT->action_link($ffurl, format_string($file->get_filename()), new popup_action ('click', $ffurl));
                     $filescontent .= get_string('incompatible_video', 'block_exaport', $a);
                     $filescontent .= '</div>
                                     </div>';
@@ -179,11 +180,19 @@ function block_exaport_print_extcomments($itemid) {
         echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
         echo '<tr class="header"><td class="picture left">';
-        echo $OUTPUT->user_picture($user);
+        // Check if this is a hidden grader (userid = -1, use strict comparison)
+        if ($comment->userid == -1) {
+            // Show anonymous user icon for hidden grader
+            // echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
+            // since this above does not work: just show nothing for hidden grader
+        } else {
+            echo $OUTPUT->user_picture($user);
+        }
         echo '</td>';
 
         echo '<td class="topic starter"><div class="author">';
-        $fullname = fullname($user, $comment->userid);
+        // Use helper function to get author name respecting privacy
+        $fullname = block_exaport_get_comment_author_name($comment->userid);
         $by = new object();
         $by->name = $fullname;
         $by->date = userdate($comment->timemodified);

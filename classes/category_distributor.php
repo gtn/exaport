@@ -43,7 +43,8 @@ class category_distributor {
             'userid' => $userid,
             'name' => $name,
             'pid' => $pid,
-            'courseid' => 0,  // Global categories only.
+            // ignore the courseid... when updating anything in a category (e.g. sharing) a courseid of the current is added... but we dont want the same named category multiple times
+            // 'courseid' => 0,
         ));
 
         return $existing ? $existing->id : false;
@@ -73,7 +74,8 @@ class category_distributor {
         $category->userid = $userid;
         $category->name = $name;
         $category->pid = $pid;
-        $category->courseid = 0;  // Global category.
+        // Courseid it will get overwritten just when updating the sharing for example... so we use a courseid also here, but we ignore it for the check if the category already exists
+        $category->courseid = $courseid;
         $category->timemodified = time();
         $category->creatorid = !empty($USER->id) ? $USER->id : 0;
 

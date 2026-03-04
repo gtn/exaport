@@ -32,8 +32,8 @@ if (!$courseid && !empty($_SERVER['HTTP_REFERER'])) {
     }
 }
 
-// If still no courseid, use current course (always set after inc.php)
-// will typically be the SITE course
+// If still no courseid, use current course
+// (will be SITEID if accessed outside course context)
 if (!$courseid) {
     $courseid = $COURSE->id;
 }
@@ -60,26 +60,35 @@ foreach ($pathParts as $categoryName) {
         throw new moodle_exception('category_not_found', 'block_exaport');
     }
 
-    // Build query conditions
+    // Build base query conditions (without courseid filter)
     $conditions = [
         'userid' => $currentUserId,
         'pid' => $categoryid,
         'name' => $categoryName,
     ];
 
-    // If we have a specific course (not site course), filter by it
-    if ($courseid != SITEID) {
-        $conditions['courseid'] = $courseid;
-        $category = $DB->get_record('block_exaportcate', $conditions);
-    } else {
-        // Site course: get all matching categories and pick the most recent
-        $categories = $DB->get_records('block_exaportcate', $conditions, 'timemodified DESC');
-        $category = $categories ? reset($categories) : false;
+    // Get ALL matching categories
+    $categories = $DB->get_records('block_exaportcate', $conditions, 'timemodified DESC');
+
+    if (empty($categories)) {
+        // No category found at all
+        throw new moodle_exception('category_not_found', 'block_exaport');
     }
 
+    // Priority 1: Try to find category with matching courseid (if not SITEID)
+    $category = null;
+    if ($courseid != SITEID) {
+        foreach ($categories as $cat) {
+            if ($cat->courseid == $courseid) {
+                $category = $cat;
+                break; // Found exact match, use it (already sorted by timemodified DESC)
+            }
+        }
+    }
+
+    // Priority 2: If no courseid match, use the first one (most recent due to sort)
     if (!$category) {
-        // Use generic error message to prevent enumeration
-        throw new moodle_exception('category_not_found', 'block_exaport');
+        $category = reset($categories);
     }
 
     $categoryid = $category->id;

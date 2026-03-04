@@ -32,17 +32,13 @@ if (!$courseid && !empty($_SERVER['HTTP_REFERER'])) {
     }
 }
 
-// Auto-detect course if not provided (fallback)
+// Auto-detect course if not provided (Fallback to SITEID)
 if (!$courseid) {
-    $courseid = $COURSE->id ?? $PAGE->course->id ?? 0;
+    $courseid = $COURSE->id ?? $PAGE->course->id ?? SITEID;
 }
 
 // Login check
-if ($courseid > 0) {
-    block_exaport_require_login($courseid);
-} else {
-    require_login();
-}
+block_exaport_require_login($courseid);
 
 // Split the path into parts
 $pathParts = array_filter(explode('/', trim($path, '/')));
@@ -71,7 +67,7 @@ foreach ($pathParts as $categoryName) {
     ];
 
     // If we have a courseid, filter by it
-    if ($courseid > 0) {
+    if ($courseid > 0 && $courseid !== SITEID) {
         $conditions['courseid'] = $courseid;
         $category = $DB->get_record('block_exaportcate', $conditions);
     } else {
@@ -91,7 +87,7 @@ foreach ($pathParts as $categoryName) {
 
 // Use the courseid from the found category for the redirect
 // This ensures we always use the correct course context
-$finalCourseid = $foundCategory ? $foundCategory->courseid : ($courseid > 0 ? $courseid : 1);
+$finalCourseid = $foundCategory ? $foundCategory->courseid : ($courseid > 0 ? $courseid : SITEID);
 
 // Redirect to the actual view_items.php with resolved category ID
 $redirectUrl = new moodle_url('/blocks/exaport/view_items.php', [

@@ -17,13 +17,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$observers = [
+$callbacks = [
     [
-        'eventname' => '\core\event\course_module_created',
-        'callback' => '\block_exaport\event_observer::course_module_created',
-    ],
-    [
-        'eventname' => '\core\event\course_module_updated',
-        'callback' => '\block_exaport\event_observer::course_module_updated',
+        'hook' => \core\hook\form_coursemodule_standard_elements::class,
+        'callback' => [\block_exaport\hook_listener::class, 'form_coursemodule_standard_elements'],
     ],
 ];

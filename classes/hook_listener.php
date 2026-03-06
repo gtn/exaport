@@ -19,24 +19,25 @@ namespace block_exaport;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Hook listener for exaport block.
+ * Handles course module form element injection for exaport block.
  */
 class hook_listener {
 
     /**
      * Adds a dropdown field to the assignment activity settings form.
      *
-     * @param \core\hook\form_coursemodule_standard_elements $hook
+     * Called via {@see block_exaport_coursemodule_standard_elements()} in lib.php,
+     * which is invoked by Moodle's plugin callback mechanism
+     * ({@see moodleform_mod::plugin_extend_coursemodule_standard_elements()}).
+     *
+     * @param \moodleform_mod $formwrapper The moodle quickforms wrapper object.
+     * @param \MoodleQuickForm $mform The actual form object.
      * @return void
      */
-    public static function form_coursemodule_standard_elements(
-        \core\hook\form_coursemodule_standard_elements $hook
-    ): void {
-        if ($hook->get_cmtype() !== 'assign') {
+    public static function coursemodule_standard_elements(\moodleform_mod $formwrapper, \MoodleQuickForm $mform): void {
+        if (($formwrapper->get_current()->modulename ?? null) !== 'assign') {
             return;
         }
-
-        $mform = $hook->get_form();
 
         $options = [
             'testvalue1' => get_string('testvalue1', 'block_exaport'),

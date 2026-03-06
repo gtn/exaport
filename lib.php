@@ -316,3 +316,14 @@ function block_exaport_output_fragment_blockedit($args) {
 
     return $formdata->html;
 }
+
+/**
+ * Inject custom elements into the course module settings form for assignment activities.
+ *
+ * @param \moodleform_mod $formwrapper The moodle quickforms wrapper object.
+ * @param \MoodleQuickForm $mform The actual form object (required to modify the form).
+ * @return void
+ */
+function block_exaport_coursemodule_standard_elements($formwrapper, $mform): void {
+    \block_exaport\hook_listener::coursemodule_standard_elements($formwrapper, $mform);
+}

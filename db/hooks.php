@@ -16,9 +16,4 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$callbacks = [
-    [
-        'hook' => \core\hook\form_coursemodule_standard_elements::class,
-        'callback' => [\block_exaport\hook_listener::class, 'form_coursemodule_standard_elements'],
-    ],
-];
+$callbacks = [];

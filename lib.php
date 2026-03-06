@@ -335,6 +335,7 @@ function block_exaport_coursemodule_standard_elements(\moodleform_mod $formwrapp
         'testvalue3' => get_string('testvalue3', 'block_exaport'),
     ];
 
+    // TODO: currently puts in in the last area (tags).. put it somewhere else
     $mform->addElement(
         'select',
         'block_exaport_assignment_option',

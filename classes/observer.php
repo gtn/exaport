@@ -81,6 +81,7 @@ class observer {
             return;
         }
         // TODO: Save block_exaport_assignment_option value for the updated assignment.
+        // TODO: e.g. with this? optional_param('block_exaport_assignment_option', 0, PARAM_TEXT);
     }
 }
 

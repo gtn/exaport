@@ -44,15 +44,43 @@ class observer {
     private static function queue_distribution_task($courseid, $userid) {
         // Create ad-hoc task.
         $task = new \block_exaport\task\distribute_to_user_task();
-        
+
         // Set custom data.
         $task->set_custom_data([
             'courseid' => $courseid,
             'userid' => $userid,
         ]);
-        
+
         // Queue the task.
         \core\task\manager::queue_adhoc_task($task);
+    }
+
+    /**
+     * Handles course module created event.
+     * Placeholder for saving block_exaport_assignment_option data when an assignment is created.
+     *
+     * @param \core\event\course_module_created $event
+     * @return void
+     */
+    public static function course_module_created(\core\event\course_module_created $event): void {
+        if (($event->other['modulename'] ?? null) !== 'assign') {
+            return;
+        }
+        // TODO: Save block_exaport_assignment_option value for the newly created assignment.
+    }
+
+    /**
+     * Handles course module updated event.
+     * Placeholder for saving block_exaport_assignment_option data when an assignment is updated.
+     *
+     * @param \core\event\course_module_updated $event
+     * @return void
+     */
+    public static function course_module_updated(\core\event\course_module_updated $event): void {
+        if (($event->other['modulename'] ?? null) !== 'assign') {
+            return;
+        }
+        // TODO: Save block_exaport_assignment_option value for the updated assignment.
     }
 }
 

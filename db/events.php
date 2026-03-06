@@ -19,11 +19,11 @@ $observers = array(
     ),
     array(
         'eventname' => '\core\event\course_module_created',
-        'callback' => '\block_exaport\event_observer::course_module_created',
+        'callback' => '\block_exaport\observer::course_module_created',
     ),
     array(
         'eventname' => '\core\event\course_module_updated',
-        'callback' => '\block_exaport\event_observer::course_module_updated',
+        'callback' => '\block_exaport\observer::course_module_updated',
     ),
 );
 

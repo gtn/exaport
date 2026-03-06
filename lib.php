@@ -324,6 +324,21 @@ function block_exaport_output_fragment_blockedit($args) {
  * @param \MoodleQuickForm $mform The actual form object (required to modify the form).
  * @return void
  */
-function block_exaport_coursemodule_standard_elements($formwrapper, $mform): void {
-    \block_exaport\hook_listener::coursemodule_standard_elements($formwrapper, $mform);
+function block_exaport_coursemodule_standard_elements(\moodleform_mod $formwrapper, \MoodleQuickForm $mform): void {
+    if (($formwrapper->get_current()->modulename ?? null) !== 'assign') {
+        return;
+    }
+
+    $options = [
+        'testvalue1' => get_string('testvalue1', 'block_exaport'),
+        'testvalue2' => get_string('testvalue2', 'block_exaport'),
+        'testvalue3' => get_string('testvalue3', 'block_exaport'),
+    ];
+
+    $mform->addElement(
+        'select',
+        'block_exaport_assignment_option',
+        get_string('assignment_option', 'block_exaport'),
+        $options
+    );
 }

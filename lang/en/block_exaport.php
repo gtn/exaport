@@ -977,3 +977,9 @@ $string['auto_distribute_views_on_enrolment'] = 'Automatically distribute views 
 $string['no_views_to_distribute'] = 'No view template defined to distribute';
 $string['views_created'] = 'Views created: {$a}';
 $string['views_skipped'] = 'Views skipped (already exist): {$a}';
+
+// === Assignment settings ===
+$string['assignment_option'] = 'Exaport Assignment Option';
+$string['testvalue1'] = 'Test Value 1';
+$string['testvalue2'] = 'Test Value 2';
+$string['testvalue3'] = 'Test Value 3';

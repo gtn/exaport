@@ -31,6 +31,10 @@ if (!$courseid && !empty($_SERVER['HTTP_REFERER'])) {
         }
     }
 }
+// if referrer is empty get courseid from $user->lastcourseaccess
+if (!$courseid) {
+        $courseid=getNewestCourse($USER->lastcourseaccess);
+}
 
 // If still no courseid, use current course
 // (will be SITEID if accessed outside course context)
@@ -54,6 +58,7 @@ $categoryid = 0; // Start at root
 $currentUserId = $USER->id;
 $foundCategory = null;
 
+$courseid_temp=$courseid;
 foreach ($pathParts as $categoryName) {
     // Additional validation on each segment
     if (strlen($categoryName) > 100) {
@@ -93,16 +98,51 @@ foreach ($pathParts as $categoryName) {
 
     $categoryid = $category->id;
     $foundCategory = $category;
+    if ($foundCategory->courseid !== null && $foundCategory->courseid !=0) $courseid_temp=$foundCategory->courseid;
+  
 }
 
 // Use the courseid from the found category for the redirect
 // This ensures we always use the correct course context
 $finalCourseid = $foundCategory->courseid;
 
+if ($finalCourseid==0) $finalCourseid=$courseid_temp;
+  
 // Redirect to the actual view_items.php with resolved category ID
 $redirectUrl = new moodle_url('/blocks/exaport/view_items.php', [
     'courseid' => $finalCourseid,
     'categoryid' => $categoryid,
 ]);
+
+function getNewestCourse(array $lastcourseaccess) {
+    $newestOver69 = null;
+    $newestOver69Time = 0;
+
+    $newestAny = null;
+    $newestAnyTime = 0;
+
+    foreach ($lastcourseaccess as $courseid => $timestamp) {
+
+        // Neuester Kurs insgesamt
+        if ($timestamp > $newestAnyTime) {
+            $newestAnyTime = $timestamp;
+            $newestAny = $courseid;
+        }
+
+        // Neuester Kurs mit ID > 69
+        if ($courseid > 69 && $timestamp > $newestOver69Time) {
+            $newestOver69Time = $timestamp;
+            $newestOver69 = $courseid;
+        }
+    }
+
+    // Regel 1: Kurs > 69 bevorzugen
+    if ($newestOver69 !== null) {
+        return $newestOver69;
+    }
+
+    // Regel 2: sonst neuesten allgemein
+    return $newestAny;
+}
 
 redirect($redirectUrl);

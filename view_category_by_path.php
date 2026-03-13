@@ -123,25 +123,24 @@ function getNewestCourse(array $lastcourseaccess) {
 
     foreach ($lastcourseaccess as $courseid => $timestamp) {
 
-        // Neuester Kurs insgesamt
+        // Newest Course
         if ($timestamp > $newestAnyTime) {
             $newestAnyTime = $timestamp;
             $newestAny = $courseid;
         }
 
-        // Neuester Kurs mit ID > 69
+        // Lastcourseaccess is not reliably up-to-date. Therefore, prefer the newer courses (ID > 69).
         if ($courseid > 69 && $timestamp > $newestOver69Time) {
             $newestOver69Time = $timestamp;
             $newestOver69 = $courseid;
         }
     }
 
-    // Regel 1: Kurs > 69 bevorzugen
+    //  prefer the newer courses (ID > 69)
     if ($newestOver69 !== null) {
         return $newestOver69;
     }
 
-    // Regel 2: sonst neuesten allgemein
     return $newestAny;
 }
 

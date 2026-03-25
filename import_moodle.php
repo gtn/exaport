@@ -75,8 +75,9 @@ if ($assignments) {
         $hasfile = isset($assignment->has_file) ? $assignment->has_file : false;
         $hasonlinetext = isset($assignment->has_onlinetext) ? $assignment->has_onlinetext : false;
 
-        // Track first file ID for import URL
+        // Track first file ID for import URL and collect all files
         $firstfileid = null;
+        $submissionfiles = array();
         $hasonlinetextcontent = false;
 
         // SUBMISSION CONTENT
@@ -91,7 +92,10 @@ if ($assignments) {
                     if ($firstfileid === null) {
                         $firstfileid = $fileid;
                     }
-                    
+
+                    // Store file info for action links
+                    $submissionfiles[$fileid] = $file;
+
                     $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
                     $filename = $file->get_filename();
                     $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
@@ -106,7 +110,7 @@ if ($assignments) {
                 $onlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $assignment->submissionid));
                 if ($onlinetext && !empty($onlinetext->onlinetext)) {
                     $hasonlinetextcontent = true;
-                    
+
                     // Get preview of text (first 100 chars)
                     $textpreview = format_text($onlinetext->onlinetext, $onlinetext->onlineformat);
                     $textpreview = strip_tags($textpreview);
@@ -168,34 +172,63 @@ if ($assignments) {
             // Neither submission nor feedback available
             $actioncell = get_string('no_submission_no_feedback', 'block_exaport');
         } else {
-            // Build import URL with proper parameters
-            $urlparams = array(
-                'courseid' => (int)$assignment->course,
-                'aid' => (int)$assignment->aid
-            );
-            
-            // If submission exists, pass submission ID
-            if (!empty($assignment->submissionid)) {
-                $urlparams['submissionid'] = (int)$assignment->submissionid;
-                
-                // Add fileid if we have a file
-                if ($firstfileid !== null) {
-                    $urlparams['fileid'] = $firstfileid;
+            // Check if we have multiple submission files
+            if (count($submissionfiles) > 1) {
+                // MULTIPLE FILES: Create one link per file
+                $actionlinks = array();
+
+                foreach ($submissionfiles as $fileid => $file) {
+                    // Build import URL with this specific file
+                    $urlparams = array(
+                        'courseid' => (int)$assignment->course,
+                        'aid' => (int)$assignment->aid,
+                        'submissionid' => (int)$assignment->submissionid,
+                        'fileid' => $fileid
+                    );
+
+                    // Add onlinetext flag if we have online text content
+                    if ($hasonlinetextcontent) {
+                        $urlparams['onlinetext'] = 1;
+                    }
+
+                    $importurl = new moodle_url($CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php', $urlparams);
+                    $linktext = get_string("add_this_assignment", "block_exaport") . ' (' . s($file->get_filename()) . ')';
+                    $actionlinks[] = html_writer::link($importurl, $linktext);
                 }
-                
-                // Add onlinetext flag if we have online text content
-                if ($hasonlinetextcontent) {
-                    $urlparams['onlinetext'] = 1;
+
+                // Join all links with line breaks
+                $actioncell = implode('<br />', $actionlinks);
+            } else {
+                // SINGLE FILE OR NO FILE: Original behavior - single link
+                // Build import URL with proper parameters
+                $urlparams = array(
+                    'courseid' => (int)$assignment->course,
+                    'aid' => (int)$assignment->aid
+                );
+
+                // If submission exists, pass submission ID
+                if (!empty($assignment->submissionid)) {
+                    $urlparams['submissionid'] = (int)$assignment->submissionid;
+
+                    // Add fileid if we have a file
+                    if ($firstfileid !== null) {
+                        $urlparams['fileid'] = $firstfileid;
+                    }
+
+                    // Add onlinetext flag if we have online text content
+                    if ($hasonlinetextcontent) {
+                        $urlparams['onlinetext'] = 1;
+                    }
                 }
+                // Otherwise, pass grade ID and flag as no-submission
+                else if (!empty($assignment->gradeid)) {
+                    $urlparams['gradeid'] = (int)$assignment->gradeid;
+                    $urlparams['nosubmission'] = 1;
+                }
+
+                $importurl = new moodle_url($CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php', $urlparams);
+                $actioncell = html_writer::link($importurl, get_string("add_this_assignment", "block_exaport"));
             }
-            // Otherwise, pass grade ID and flag as no-submission
-            else if (!empty($assignment->gradeid)) {
-                $urlparams['gradeid'] = (int)$assignment->gradeid;
-                $urlparams['nosubmission'] = 1;
-            }
-            
-            $importurl = new moodle_url($CFG->wwwroot . '/blocks/exaport/import_moodle_add_file.php', $urlparams);
-            $actioncell = html_writer::link($importurl, get_string("add_this_assignment", "block_exaport"));
         }
 
         // Remove all trailing <br /> tags (handle multiple consecutive tags)

@@ -30,6 +30,67 @@ namespace {
         return $CFG->wwwroot . '/blocks/exaport/shared_view.php?access=hash/' . $userid . '-' . $view->hash;
     }
 
+    /**
+     * Generate external URL for a shared category.
+     *
+     * @param stdClass $category Category object with hash field
+     * @param int $userid Owner user ID (-1 for current user)
+     * @return string The external URL
+     */
+    function block_exaport_get_external_category_url(stdClass $category, $userid = -1) {
+        global $CFG, $USER;
+        if ($userid == -1) {
+            $userid = $USER->id;
+        }
+        return $CFG->wwwroot . '/blocks/exaport/shared_category.php?access=hash/' . $userid . '-' . $category->hash;
+    }
+
+    /**
+     * Get a category from an external access string (hash-based).
+     * Returns the category if access is valid, null otherwise.
+     * This is strictly read-only access.
+     *
+     * @param string $access Access string in format "hash/<userid>-<hash>"
+     * @return stdClass|null Category object with access info, or null
+     */
+    function block_exaport_get_category_from_access($access) {
+        global $DB;
+
+        $accesspath = explode('/', $access);
+        if (count($accesspath) != 2) {
+            return null;
+        }
+
+        if ($accesspath[0] !== 'hash') {
+            return null;
+        }
+
+        $hash = $accesspath[1];
+        $hash = explode('-', $hash);
+
+        if (count($hash) != 2) {
+            return null;
+        }
+
+        $userid = clean_param($hash[0], PARAM_INT);
+        $hash = clean_param($hash[1], PARAM_ALPHANUM);
+
+        if (empty($userid) || empty($hash)) {
+            return null;
+        }
+
+        // Look up the category by userid, hash, and externaccess flag.
+        $conditions = array("userid" => $userid, "hash" => $hash, "externaccess" => 1);
+        if (!$category = $DB->get_record("block_exaportcate", $conditions)) {
+            return null;
+        }
+
+        $category->access = new stdClass();
+        $category->access->request = 'extern';
+
+        return $category;
+    }
+
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
         global $DB;
 

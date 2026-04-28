@@ -977,3 +977,10 @@ $string['auto_distribute_views_on_enrolment'] = 'Automatically distribute views 
 $string['no_views_to_distribute'] = 'No view template defined to distribute';
 $string['views_created'] = 'Views created: {$a}';
 $string['views_skipped'] = 'Views skipped (already exist): {$a}';
+
+// Shared category external access.
+$string['externaccess_category_readonly'] = 'This link allows read-only access. Visitors can only view the category contents - no editing, uploading, or deleting is possible.';
+$string['shared_category_readonly'] = 'You are viewing a shared category. This is a read-only view.';
+$string['shared_category_notfound'] = 'Shared category not found or access denied.';
+$string['shared_category'] = 'Shared Category';
+

@@ -1326,5 +1326,31 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026022404, 'exaport');
     }
 
+    if ($oldversion < 2026032501) {
+        // Add externaccess field to block_exaportcate table.
+        $table = new xmldb_table('block_exaportcate');
+        $field = new xmldb_field('externaccess', XMLDB_TYPE_INTEGER, '3', null, null, null, '0', 'creatorid');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add hash field to block_exaportcate table.
+        $field = new xmldb_field('hash', XMLDB_TYPE_CHAR, '32', null, null, null, null, 'externaccess');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add index on hash field.
+        $index = new xmldb_index('hash', XMLDB_INDEX_NOTUNIQUE, array('hash'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026032501, 'exaport');
+    }
+
     return $result;
 }

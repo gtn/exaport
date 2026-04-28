@@ -163,7 +163,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
         $id = optional_param('id', 0, PARAM_INT);
         $category = $DB->get_record_sql('
-            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge
+            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
             ', array($USER->id, $id));
@@ -172,6 +172,8 @@ class simplehtml_form extends block_exaport_moodleform {
             $category->shareall = 0;
             $category->id = 0;
             $category->iconmerge = 0;
+            $category->externaccess = 0;
+            $category->hash = '';
         };
 
         // Don't forget the underscore!
@@ -264,6 +266,24 @@ class simplehtml_form extends block_exaport_moodleform {
             $mform->addElement('html', '</div></div>');
         };
 
+        // External access (read-only link for non-logged-in users).
+        if (block_exaport_externaccess_enabled()
+            && has_capability('block/exaport:shareextern', context_system::instance())) {
+            $mform->addElement('checkbox', 'externaccess', get_string('externalaccess', 'block_exaport'));
+            $mform->setType('externaccess', PARAM_INT);
+
+            // Show the external link if already enabled and category exists.
+            if ($category->id > 0 && $category->externaccess && $category->hash) {
+                $url = block_exaport_get_external_category_url($category, $USER->id);
+                $mform->addElement('html', '<div id="externaccess-category-settings" class="fitem">' .
+                    '<div class="fitemtitle"></div><div class="felement">' .
+                    '<div style="padding: 4px;"><a href="' . s($url) . '" target="_blank">' . s($url) . '</a></div>' .
+                    '<div class="alert alert-info" style="margin-top: 5px;">' .
+                    get_string('externaccess_category_readonly', 'block_exaport') .
+                    '</div></div></div>');
+            }
+        }
+
         $this->add_action_buttons();
     }
 
@@ -290,6 +310,24 @@ if ($mform->is_cancelled()) {
         $newentry->internshare = optional_param('internshare', 0, PARAM_INT);
     } else {
         $newentry->internshare = 0;
+    }
+
+    // Handle external access.
+    if (block_exaport_externaccess_enabled()
+        && has_capability('block/exaport:shareextern', context_system::instance())) {
+        $newentry->externaccess = !empty($newentry->externaccess) ? 1 : 0;
+    } else {
+        $newentry->externaccess = 0;
+    }
+
+    // Generate hash for category if not yet set.
+    if ($newentry->externaccess) {
+        $existingcat = $newentry->id ? $DB->get_record('block_exaportcate', ['id' => $newentry->id], 'hash') : null;
+        if (!$existingcat || empty($existingcat->hash)) {
+            do {
+                $newentry->hash = substr(md5(random_bytes(16)), 0, 32);
+            } while ($DB->record_exists("block_exaportcate", array("hash" => $newentry->hash)));
+        }
     }
 
     if ($newentry->id) {
@@ -430,7 +468,7 @@ if ($mform->is_cancelled()) {
     $category = null;
     if ($id = optional_param('id', 0, PARAM_INT)) {
         $category = $DB->get_record_sql('
-            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge
+            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
         ', array($USER->id, $id));

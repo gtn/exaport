@@ -423,6 +423,42 @@ namespace {
                 $item->allowComments = true;
                 $item->showComments = true;
             }
+        } else if (preg_match('!^category/(.+)$!', $access, $matches)) {
+            // External category access mode (read-only).
+            if (!$category = block_exaport_get_category_from_access($matches[1])) {
+                return;
+            }
+
+            // Verify the item belongs to the category owner.
+            $conditions = array("id" => $itemid, "userid" => $category->userid);
+            if (!$item = $DB->get_record("block_exaportitem", $conditions)) {
+                return;
+            }
+
+            // Verify the item is in this category or a subcategory of it.
+            $incategory = false;
+            $checkcat = $item->categoryid;
+            $maxdepth = 50;
+            while ($checkcat && $maxdepth-- > 0) {
+                if ($checkcat == $category->id) {
+                    $incategory = true;
+                    break;
+                }
+                $parentcat = $DB->get_field('block_exaportcate', 'pid', ['id' => $checkcat, 'userid' => $category->userid]);
+                if (!$parentcat) {
+                    break;
+                }
+                $checkcat = $parentcat;
+            }
+            if (!$incategory) {
+                return;
+            }
+
+            $item->access = $category->access;
+            $item->access->page = 'category';
+            // Strictly read-only: no comments at all.
+            $item->allowComments = false;
+            $item->showComments = false;
         } else {
             return;
         }

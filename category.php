@@ -262,27 +262,30 @@ class simplehtml_form extends block_exaport_moodleform {
             $mform->addElement('html', '</td></tr>');
             $mform->addElement('html', '<tr id="internaccess-groups"><td></td>' .
                 '<td><div id="sharing-grouplist">grouplist</div></td></tr>');
+
+            // External access (read-only link for non-logged-in users) — inside sharing submenu.
+            if (block_exaport_externaccess_enabled()
+                && has_capability('block/exaport:shareextern', context_system::instance())) {
+                $mform->addElement('html', '<tr><td colspan="2"><hr style="margin: 8px 0;" /></td></tr>');
+                $mform->addElement('html', '<tr><td>');
+                $mform->addElement('html', '<input type="checkbox" name="externaccess" value="1"' .
+                    ($category->externaccess ? ' checked="checked"' : '') . '/>');
+                $mform->addElement('html', '</td><td>' . get_string('externalaccess', 'block_exaport') . '</td></tr>');
+
+                // Show the external link if already enabled and category exists.
+                if ($category->id > 0 && $category->externaccess && $category->hash) {
+                    $url = block_exaport_get_external_category_url($category, $USER->id);
+                    $mform->addElement('html', '<tr id="externaccess-category-settings"><td></td><td>' .
+                        '<div style="padding: 4px;"><a href="' . s($url) . '" target="_blank">' . s($url) . '</a></div>' .
+                        '<div class="alert alert-info" style="margin-top: 5px;">' .
+                        get_string('externaccess_category_readonly', 'block_exaport') .
+                        '</div></td></tr>');
+                }
+            }
+
             $mform->addElement('html', '</table></div>');
             $mform->addElement('html', '</div></div>');
         };
-
-        // External access (read-only link for non-logged-in users).
-        if (block_exaport_externaccess_enabled()
-            && has_capability('block/exaport:shareextern', context_system::instance())) {
-            $mform->addElement('checkbox', 'externaccess', get_string('externalaccess', 'block_exaport'));
-            $mform->setType('externaccess', PARAM_INT);
-
-            // Show the external link if already enabled and category exists.
-            if ($category->id > 0 && $category->externaccess && $category->hash) {
-                $url = block_exaport_get_external_category_url($category, $USER->id);
-                $mform->addElement('html', '<div id="externaccess-category-settings" class="fitem">' .
-                    '<div class="fitemtitle"></div><div class="felement">' .
-                    '<div style="padding: 4px;"><a href="' . s($url) . '" target="_blank">' . s($url) . '</a></div>' .
-                    '<div class="alert alert-info" style="margin-top: 5px;">' .
-                    get_string('externaccess_category_readonly', 'block_exaport') .
-                    '</div></div></div>');
-            }
-        }
 
         $this->add_action_buttons();
     }
@@ -315,7 +318,7 @@ if ($mform->is_cancelled()) {
     // Handle external access.
     if (block_exaport_externaccess_enabled()
         && has_capability('block/exaport:shareextern', context_system::instance())) {
-        $newentry->externaccess = !empty($newentry->externaccess) ? 1 : 0;
+        $newentry->externaccess = optional_param('externaccess', 0, PARAM_INT) ? 1 : 0;
     } else {
         $newentry->externaccess = 0;
     }

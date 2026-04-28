@@ -24,6 +24,7 @@
  */
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/externlib.php');
 require_once(__DIR__ . '/blockmediafunc.php');
 
 $access = optional_param('access', '', PARAM_TEXT);
@@ -94,6 +95,9 @@ $PAGE->set_heading(get_string('shared_category', 'block_exaport'));
 
 block_exaport_init_js_css();
 
+$PAGE->requires->js(new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/vedeo-js/video.js'), true);
+$PAGE->requires->css('/blocks/exaport/javascript/vedeo-js/video-js.css');
+
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($currentcategory->name));
 
@@ -153,9 +157,12 @@ $subcategories = $DB->get_records('block_exaportcate', [
     'userid' => $rootcategory->userid,
 ], 'name ASC');
 
+// The access string for items within this category, used for file serving via portfoliofile.php.
+$categoryaccess = 'category/' . $access;
+
 // Get items in this category.
 $items = $DB->get_records_sql("
-    SELECT i.id, i.type, i.name, i.intro, i.timemodified
+    SELECT i.*
     FROM {block_exaportitem} i
     WHERE i.categoryid = ?
         AND i.userid = ?
@@ -181,35 +188,16 @@ if ($subcategories) {
     echo '</div>';
 }
 
-// Display items (read-only, no edit/delete/comment links).
+// Display items with rich content (read-only, no edit/delete/comment).
 if ($items) {
     echo '<h3>' . get_string('artefacts', 'block_exaport') . '</h3>';
-    $table = new html_table();
-    $table->width = "100%";
-    $table->head = [
-        get_string('name'),
-        get_string('type', 'block_exaport'),
-        get_string('date', 'block_exaport'),
-    ];
-    $table->data = [];
 
     foreach ($items as $item) {
-        $itemname = format_string($item->name);
-        // Show intro as tooltip/description but no link to edit or interact.
-        if ($item->intro) {
-            $itemname .= '<br /><small>' . format_text($item->intro) . '</small>';
-        }
-
-        $typename = get_string($item->type, 'block_exaport');
-
-        $table->data[] = [
-            $itemname,
-            $typename,
-            userdate($item->timemodified),
-        ];
+        $item->intro = process_media_url($item->intro, 320, 240);
+        echo '<div class="shared-category-artefact" style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">';
+        block_exaport_print_extern_item($item, $categoryaccess);
+        echo '</div>';
     }
-
-    echo html_writer::table($table);
 }
 
 if (empty($subcategories) && empty($items)) {

@@ -468,6 +468,9 @@ if ($type == 'mine' && $currentcategory->id > 0) {
         $currentcategoryPathItemButtons .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
         //        $currentcategoryPathItemButtons .= ' <img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
     }
+    if (!empty($currentcategory->externaccess)) {
+        $currentcategoryPathItemButtons .= block_exaport_fontawesome_icon('globe', 'solid', 1);
+    }
     $currentcategoryPathItemButtons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $currentcategory->id .
         '&action=edit&back=same">'
         . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
@@ -563,6 +566,9 @@ if ($layout == 'details') {
                 $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
                 //                $table->data[$itemind]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
+            if (!empty($category->externaccess)) {
+                $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('globe', 'solid', 1);
+            }
             if (@$category->structure_share) {
                 $table->data[$itemind]['icons'] .= ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
             }
@@ -855,6 +861,9 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
                 $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
                 //                            echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
+            if (!empty($category->externaccess)) {
+                $categoryContent .= block_exaport_fontawesome_icon('globe', 'solid', 1);
+            }
             if (@$category->structure_share) {
                 $categoryContent .= ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
             };
@@ -1064,6 +1073,9 @@ function block_exaport_category_template_bootstrap_card($category, $courseid, $t
                     (isset($category->shareall) && $category->shareall == 1))) {
                 $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
             };
+            if (!empty($category->externaccess)) {
+                $categoryContent .= block_exaport_fontawesome_icon('globe', 'solid', 1);
+            }
             /*if (@$category->structure_share) {
                 $categoryContent .= ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
             };*/

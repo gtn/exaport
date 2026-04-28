@@ -29,6 +29,9 @@ require_once(__DIR__ . '/blockmediafunc.php');
 $access = optional_param('access', '', PARAM_TEXT);
 $subcategoryid = optional_param('subcategoryid', 0, PARAM_INT);
 
+/** Maximum category nesting depth to prevent infinite loops. */
+define('BLOCK_EXAPORT_MAX_CATEGORY_DEPTH', 50);
+
 $context = context_system::instance();
 $PAGE->set_context($context);
 
@@ -64,7 +67,7 @@ if ($subcategoryid > 0) {
     // Walk up the parent chain to verify this subcategory is actually under the root category.
     $verified = false;
     $checkcat = $currentcategory;
-    $maxdepth = 50; // Prevent infinite loops.
+    $maxdepth = BLOCK_EXAPORT_MAX_CATEGORY_DEPTH; // Prevent infinite loops.
     while ($checkcat && $maxdepth-- > 0) {
         if ($checkcat->id == $rootcategory->id) {
             $verified = true;
@@ -112,7 +115,7 @@ if ($currentcategory->id != $rootcategory->id) {
     // Build breadcrumb from root to current.
     $crumbchain = [];
     $cat = $currentcategory;
-    $maxdepth = 50;
+    $maxdepth = BLOCK_EXAPORT_MAX_CATEGORY_DEPTH;
     while ($cat && $maxdepth-- > 0) {
         array_unshift($crumbchain, $cat);
         if ($cat->id == $rootcategory->id) {
@@ -152,7 +155,7 @@ $subcategories = $DB->get_records('block_exaportcate', [
 
 // Get items in this category.
 $items = $DB->get_records_sql("
-    SELECT i.id, i.type, i.name, i.intro, i.url, i.timemodified, i.attachment
+    SELECT i.id, i.type, i.name, i.intro, i.timemodified
     FROM {block_exaportitem} i
     WHERE i.categoryid = ?
         AND i.userid = ?
@@ -194,11 +197,7 @@ if ($items) {
         $itemname = format_string($item->name);
         // Show intro as tooltip/description but no link to edit or interact.
         if ($item->intro) {
-            $itemname .= '<br /><small>' . format_text(
-                    $item->intro,
-                    FORMAT_HTML,
-                    ['noclean' => false, 'filter' => true]
-                ) . '</small>';
+            $itemname .= '<br /><small>' . format_text($item->intro) . '</small>';
         }
 
         $typename = get_string($item->type, 'block_exaport');

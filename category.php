@@ -325,7 +325,7 @@ if ($mform->is_cancelled()) {
         $existingcat = $newentry->id ? $DB->get_record('block_exaportcate', ['id' => $newentry->id], 'hash') : null;
         if (!$existingcat || empty($existingcat->hash)) {
             do {
-                $newentry->hash = substr(md5(random_bytes(16)), 0, 32);
+                $newentry->hash = md5(random_bytes(16));
             } while ($DB->record_exists("block_exaportcate", array("hash" => $newentry->hash)));
         }
     }

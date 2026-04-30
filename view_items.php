@@ -324,8 +324,15 @@ if ($type == 'sharedstudent') {
     $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true);
 }
 
-$PAGE->set_url($currentcategory->url);
-$PAGE->set_context(context_system::instance());
+$url = '/blocks/exaport/view_items.php';
+$urlparams = ['courseid' => $courseid, 'categoryid' => $categoryid];
+if ($type && $type != 'mine') {
+    $urlparams['type'] = $type;
+}
+if ($userid) {
+    $urlparams['userid'] = $userid;
+}
+$PAGE->set_url($url, $urlparams);
 
 block_exaport_add_iconpack();
 

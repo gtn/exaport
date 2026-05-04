@@ -1326,5 +1326,24 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026022404, 'exaport');
     }
 
+    if ($oldversion < 2026050401) {
+        $table = new xmldb_table('block_exaportitem');
+
+        $field = new xmldb_field('project_description', XMLDB_TYPE_TEXT, null, null, null, null, null, 'intro');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('project_process', XMLDB_TYPE_TEXT, null, null, null, null, null, 'project_description');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('project_result', XMLDB_TYPE_TEXT, null, null, null, null, null, 'project_process');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026050401, 'exaport');
+    }
+
     return $result;
 }

@@ -325,7 +325,7 @@ if ($type == 'sharedstudent') {
 }
 
 $PAGE->set_url($currentcategory->url);
-$PAGE->set_context(context_system::instance());
+// $PAGE->set_context(context_system::instance());
 
 block_exaport_add_iconpack();
 

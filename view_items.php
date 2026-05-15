@@ -414,8 +414,10 @@ if ($type == 'sharedstudent') {
         if ($items) {
             $itemids = array_keys($items);
             [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
+            // Use ic.id as the first column so get_records_sql has a unique key
+            // (an item can belong to multiple categories, so ic.itemid is not unique).
             $itemcategories = $DB->get_records_sql("
-                SELECT ic.itemid, c.id, c.name
+                SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
                 FROM {block_exaportitemcate} ic
                 JOIN {block_exaportcate} c ON c.id = ic.cateid
                 WHERE ic.itemid $iteminsql
@@ -424,6 +426,7 @@ if ($type == 'sharedstudent') {
 
             $categoriesbyitem = [];
             foreach ($itemcategories as $itemcategory) {
+                $itemcategory->name = block_exaport_category_full_path_name($itemcategory->id, $categories);
                 if (!isset($categoriesbyitem[$itemcategory->itemid])) {
                     $categoriesbyitem[$itemcategory->itemid] = [];
                 }
@@ -435,7 +438,7 @@ if ($type == 'sharedstudent') {
                     // Keep a fallback badge for items that still only have legacy categoryid.
                     $item->flatcategories = [(object)[
                         'id' => $item->categoryid,
-                        'name' => $categories[$item->categoryid]->name,
+                        'name' => block_exaport_category_full_path_name($item->categoryid, $categories),
                     ]];
                 }
             }
@@ -514,7 +517,8 @@ if ($type == 'mine' && $layout == 'folder') {
             continue;
         }
         $selected = in_array((int)$category->id, $flatcategoryids) ? ' selected="selected"' : '';
-        echo '<option value="' . (int)$category->id . '"' . $selected . '>' . format_string($category->name) . '</option>';
+        $fullname = block_exaport_category_full_path_name($category->id, $categories);
+        echo '<option value="' . (int)$category->id . '"' . $selected . '>' . format_string($fullname) . '</option>';
     }
     echo '</select> ';
     echo '<button type="submit">' . get_string('filter') . '</button>';
@@ -960,6 +964,29 @@ function block_exaport_render_item_category_badges($item) {
         return '';
     }
     return html_writer::div(implode('', $badges), 'mt-2');
+}
+
+/**
+ * Build the full hierarchical path name for a category, e.g. "haustiere / hunde".
+ *
+ * @param int $categoryid The category id.
+ * @param array $categories Associative array of all categories keyed by id (must have ->name and ->pid).
+ * @return string The full path name with " / " separators.
+ */
+function block_exaport_category_full_path_name($categoryid, array $categories) {
+    $parts = [];
+    $id = $categoryid;
+    $visited = [];
+    while ($id && isset($categories[$id])) {
+        if (isset($visited[$id])) {
+            break; // Prevent infinite loop on circular references.
+        }
+        $visited[$id] = true;
+        $parts[] = $categories[$id]->name;
+        $id = $categories[$id]->pid ?? 0;
+    }
+    $parts = array_reverse($parts);
+    return implode(' / ', $parts);
 }
 
 function block_exaport_category_path($category, $courseid = 1, $currentcategoryPathItemButtons = '') {

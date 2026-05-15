@@ -105,11 +105,12 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
         $mform->add_exaport_help_button('name', 'forms.item.title');
 
-        $mform->addElement('select', 'categoryid', get_string("category", "block_exaport"), array());
-        $mform->addRule('categoryid', get_string("categorynotempty", "block_exaport"), 'required', null, 'client');
-        $mform->setDefault('categoryid', 0);
+        // Keep category selection multi-value, while item->categoryid is still stored for backward compatibility.
+        $mform->addElement('autocomplete', 'categoryids', get_string("category", "block_exaport"), array(), ['multiple' => true]);
+        $mform->setType('categoryids', PARAM_RAW);
+        $mform->setDefault('categoryids', []);
         $this->category_select_setup($this->_customdata['cattype'], $this->_customdata['catid']);
-        $mform->add_exaport_help_button('categoryid', 'forms.item.categoryid');
+        $mform->add_exaport_help_button('categoryids', 'forms.item.categoryid');
 
 
         // 'link' input for all types:
@@ -258,7 +259,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->setDefault('allowedit', 0);
 
             $mform->disabledIf('name', 'allowedit', 'neq', 1);
-            $mform->disabledIf('categoryid', 'allowedit', 'neq', 1);
+            $mform->disabledIf('categoryids', 'allowedit', 'neq', 1);
             $mform->disabledIf('url', 'allowedit', 'neq', 1);
             $mform->disabledIf('file', 'allowedit', 'neq', 1);
             $mform->disabledIf('intro', 'allowedit', 'neq', 1);
@@ -277,7 +278,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
     public function category_select_setup($categorytype = '', $selectedcat = 0) {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;
-        $categorysselect = &$mform->getElement('categoryid');
+        $categorysselect = &$mform->getElement('categoryids');
         $categorysselect->removeOptions();
 
         if ($categorytype == 'shared') {

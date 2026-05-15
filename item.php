@@ -185,6 +185,7 @@ if ($action == 'movetocategory' && $allowedit) {
         'id' => $existing->id,
         'categoryid' => $targetcategory->id,
     ));
+    block_exaport_sync_item_categories($existing->id, [$targetcategory->id]);
 
     echo 'ok';
     exit;
@@ -216,6 +217,10 @@ if ($editform->is_cancelled()) {
     die("nosubmitbutton");
 } else if (($fromform = $editform->get_data()) && $allowedit) {
     require_sesskey();
+
+    $selectedcategoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
+    $fromform->categoryid = $selectedcategoryids ? reset($selectedcategoryids) : 0;
+    $fromform->categoryids = $selectedcategoryids;
 
     switch ($action) {
         case 'add':
@@ -256,6 +261,7 @@ switch ($action) {
         $post->action = $action;
         $post->courseid = $courseid;
         $post->categoryid = $categoryid;
+        $post->categoryids = $categoryid > 0 ? [$categoryid] : [];
 
         $straction = get_string('new');
         break;
@@ -270,6 +276,12 @@ switch ($action) {
         $post->project_process = $existing->project_process;
         $post->project_result = $existing->project_result;
         $post->categoryid = $existing->categoryid;
+        $post->categoryids = array_map('intval', $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?',
+            [$existing->id]));
+        if (!$post->categoryids && $existing->categoryid > 0) {
+            // Keep legacy category visible if relation rows are not present yet.
+            $post->categoryids = [$existing->categoryid];
+        }
         $post->userid = $existing->userid;
         $post->action = $action;
         $post->courseid = $courseid;
@@ -499,6 +511,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     };
 
     if ($DB->update_record('block_exaportitem', $post)) {
+        block_exaport_sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
         block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit',
             $post->name);
     } else {
@@ -570,6 +583,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 
     // Insert the new entry.
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
+        block_exaport_sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
         //
         // // Trigger event for item creation
         // $event = \block_exaport\event\item_created::create(array(
@@ -669,6 +683,7 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
     block_exaport_file_remove($post);
 
     $conditions = array("id" => $post->id);
+    $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);
     $status = $DB->delete_records('block_exaportitem', $conditions);
 
     $interaction = block_exaport_check_competence_interaction();
@@ -684,6 +699,29 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
     if (!$status) {
         print_error('deleteposterror', 'block_exaport', $returnurl);
+    }
+}
+
+function block_exaport_normalize_item_categoryids($categoryids) {
+    if (!is_array($categoryids)) {
+        $categoryids = [];
+    }
+    $categoryids = array_map('intval', $categoryids);
+    $categoryids = array_values(array_unique(array_filter($categoryids, function($categoryid) {
+        return $categoryid > 0;
+    })));
+    return $categoryids;
+}
+
+function block_exaport_sync_item_categories($itemid, array $categoryids) {
+    global $DB;
+
+    $DB->delete_records('block_exaportitemcate', ['itemid' => $itemid]);
+    foreach ($categoryids as $categoryid) {
+        $DB->insert_record('block_exaportitemcate', (object)[
+            'itemid' => (int)$itemid,
+            'cateid' => (int)$categoryid,
+        ]);
     }
 }
 

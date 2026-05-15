@@ -97,7 +97,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="type" TYPE="char" LENGTH="8" NOTNULL="true" DEFAULT="note" SEQUENCE="false"/>
-        <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="TODO: Remove categoryid field from block_exaportitem in a future upgrade once all code paths use block_exaportitemcate exclusively."/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
@@ -135,6 +135,23 @@
         <INDEX NAME="type" UNIQUE="false" FIELDS="type"/>
         <INDEX NAME="categoryid" UNIQUE="false" FIELDS="categoryid"/>
         <INDEX NAME="shareall" UNIQUE="false" FIELDS="shareall"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_exaportitemcate" COMMENT="Multi-category assignments for items">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="cateid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
+        <KEY NAME="cateid" TYPE="foreign" FIELDS="cateid" REFTABLE="block_exaportcate" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="itemid_cateid" UNIQUE="true" FIELDS="itemid, cateid"/>
+        <INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
+        <INDEX NAME="cateid" UNIQUE="false" FIELDS="cateid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_exaportitemshar" COMMENT="block_exaportitemshar table retrofitted from MySQL">

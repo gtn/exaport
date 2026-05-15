@@ -1345,5 +1345,39 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026050401, 'exaport');
     }
 
+    if ($oldversion < 2026051501) {
+        // Add item-category relation table for multi-category assignments.
+        $table = new xmldb_table('block_exaportitemcate');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('cateid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('itemid', XMLDB_KEY_FOREIGN, array('itemid'), 'block_exaportitem', array('id'));
+        $table->add_key('cateid', XMLDB_KEY_FOREIGN, array('cateid'), 'block_exaportcate', array('id'));
+        $table->add_index('itemid_cateid', XMLDB_INDEX_UNIQUE, array('itemid', 'cateid'));
+        $table->add_index('itemid', XMLDB_INDEX_NOTUNIQUE, array('itemid'));
+        $table->add_index('cateid', XMLDB_INDEX_NOTUNIQUE, array('cateid'));
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Keep legacy categoryid in sync during transition to the relation table.
+        // TODO: Remove categoryid field from block_exaportitem in a future upgrade once all code paths use block_exaportitemcate exclusively.
+        $legacyitems = $DB->get_recordset_select('block_exaportitem', 'categoryid > 0', null, '', 'id, categoryid');
+        foreach ($legacyitems as $legacyitem) {
+            $relation = [
+                'itemid' => $legacyitem->id,
+                'cateid' => $legacyitem->categoryid,
+            ];
+            if (!$DB->record_exists('block_exaportitemcate', $relation)) {
+                $DB->insert_record('block_exaportitemcate', (object)$relation);
+            }
+        }
+        $legacyitems->close();
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026051501, 'exaport');
+    }
+
     return $result;
 }

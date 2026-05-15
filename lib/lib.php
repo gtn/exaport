@@ -2413,16 +2413,32 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
 
 function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sort = '', $withShared = false) {
     global $DB;
-    $where = ' i.categoryid = ? ';
+    $params = [];
+    if ($categoryid > 0) {
+        // Accept both legacy categoryid relation and the new item-category relation.
+        $where = ' (i.categoryid = ? OR EXISTS (
+            SELECT 1
+              FROM {block_exaportitemcate} ic
+             WHERE ic.itemid = i.id
+               AND ic.cateid = ?
+        )) ';
+        $params[] = $categoryid;
+        $params[] = $categoryid;
+    } else {
+        $where = ' i.categoryid = ? ';
+        $params[] = $categoryid;
+    }
     if ($withShared) {
         if ($categoryid > 0) {
             // add items from other users if the category is shared
         } else {
             // only own
             $where .= ' AND i.userid = ? ';
+            $params[] = $userid;
         }
     } else {
         $where .= ' AND i.userid = ? ';
+        $params[] = $userid;
     }
     $where .= " AND " . block_exaport_get_item_where() . " ";
     $items = $DB->get_records_sql("
@@ -2436,7 +2452,7 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sor
                 i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
                 i.iseditable, i.example_url, i.parentid
             $sort
-        ", [$categoryid, $userid]);
+        ", $params);
 
     return $items;
 }

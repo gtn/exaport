@@ -150,8 +150,6 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="itemid_cateid" UNIQUE="true" FIELDS="itemid, cateid"/>
-        <INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
-        <INDEX NAME="cateid" UNIQUE="false" FIELDS="cateid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_exaportitemshar" COMMENT="block_exaportitemshar table retrofitted from MySQL">

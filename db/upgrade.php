@@ -1355,8 +1355,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $table->add_key('itemid', XMLDB_KEY_FOREIGN, array('itemid'), 'block_exaportitem', array('id'));
         $table->add_key('cateid', XMLDB_KEY_FOREIGN, array('cateid'), 'block_exaportcate', array('id'));
         $table->add_index('itemid_cateid', XMLDB_INDEX_UNIQUE, array('itemid', 'cateid'));
-        $table->add_index('itemid', XMLDB_INDEX_NOTUNIQUE, array('itemid'));
-        $table->add_index('cateid', XMLDB_INDEX_NOTUNIQUE, array('cateid'));
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }

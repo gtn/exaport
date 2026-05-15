@@ -557,8 +557,8 @@ if (in_array($type, ['mine', 'shared'])) {
     */
     // Anzeigen wenn kategorien vorhanden zum importieren aus sprachfile.
     if ($type == 'mine') {
-        $categories = trim(get_string("lang_categories", "block_exaport"));
-        if ($categories) {
+        $langcategories = trim(get_string("lang_categories", "block_exaport"));
+        if ($langcategories) {
             echo '<span><a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?action=addstdcat&courseid=' . $courseid . '">' .
                 '<img src="pix/folder_new_32.png" /><br />' . get_string("addstdcat", "block_exaport") . "</a></span>";
         }

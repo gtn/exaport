@@ -218,9 +218,10 @@ if ($editform->is_cancelled()) {
 } else if (($fromform = $editform->get_data()) && $allowedit) {
     require_sesskey();
 
-    $selectedcategoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
-    $fromform->categoryid = $selectedcategoryids ? reset($selectedcategoryids) : 0;
-    $fromform->categoryids = $selectedcategoryids;
+    $categoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
+    // Keep legacy field populated with the first selected category during the transition period.
+    $fromform->categoryid = $categoryids ? reset($categoryids) : 0;
+    $fromform->categoryids = $categoryids;
 
     switch ($action) {
         case 'add':
@@ -276,8 +277,11 @@ switch ($action) {
         $post->project_process = $existing->project_process;
         $post->project_result = $existing->project_result;
         $post->categoryid = $existing->categoryid;
-        $post->categoryids = array_map('intval', $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?',
-            [$existing->id]));
+        $post->categoryids = [];
+        if (block_exaport_itemcate_table_exists()) {
+            $post->categoryids = array_map('intval', $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?',
+                [$existing->id]));
+        }
         if (!$post->categoryids && $existing->categoryid > 0) {
             // Keep legacy category visible if relation rows are not present yet.
             $post->categoryids = [$existing->categoryid];
@@ -716,6 +720,10 @@ function block_exaport_normalize_item_categoryids($categoryids) {
 function block_exaport_sync_item_categories($itemid, array $categoryids) {
     global $DB;
 
+    if (!block_exaport_itemcate_table_exists()) {
+        return;
+    }
+
     $DB->delete_records('block_exaportitemcate', ['itemid' => $itemid]);
     foreach ($categoryids as $categoryid) {
         $DB->insert_record('block_exaportitemcate', (object)[
@@ -723,6 +731,16 @@ function block_exaport_sync_item_categories($itemid, array $categoryids) {
             'cateid' => (int)$categoryid,
         ]);
     }
+}
+
+function block_exaport_itemcate_table_exists() {
+    global $DB;
+
+    static $itemcatetableexists = null;
+    if ($itemcatetableexists === null) {
+        $itemcatetableexists = $DB->get_manager()->table_exists(new xmldb_table('block_exaportitemcate'));
+    }
+    return $itemcatetableexists;
 }
 
 function block_exaport_convert_item_type(&$post) {

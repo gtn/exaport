@@ -107,7 +107,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
         // Keep category selection multi-value, while item->categoryid is still stored for backward compatibility.
         $mform->addElement('autocomplete', 'categoryids', get_string("category", "block_exaport"), array(), ['multiple' => true]);
-        $mform->setType('categoryids', PARAM_RAW);
+        $mform->setType('categoryids', PARAM_SEQUENCE);
         $mform->setDefault('categoryids', []);
         $this->category_select_setup($this->_customdata['cattype'], $this->_customdata['catid']);
         $mform->add_exaport_help_button('categoryids', 'forms.item.categoryid');

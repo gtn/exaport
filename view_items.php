@@ -373,9 +373,9 @@ if ($type == 'sharedstudent') {
         $parentcategory = null;
         $subcategories = [];
 
-        $validcategoryids = array_keys($categories);
+        $validcategoryids = array_fill_keys(array_keys($categories), true);
         $flatcategoryids = array_values(array_filter(array_map('intval', $flatcategoryids), function($categoryid) use ($validcategoryids) {
-            return $categoryid > 0 && in_array($categoryid, $validcategoryids);
+            return $categoryid > 0 && isset($validcategoryids[$categoryid]);
         }));
 
         if ($flatcategoryids) {
@@ -471,9 +471,10 @@ block_exaport_set_user_preferences(array('itemsort' => $sort, 'view_items_layout
 
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
+    $folderlayoutvalue = ($folderlayout == 'details') ? 'details' : 'tiles';
     echo get_string("categories", "block_exaport") . ": ";
     echo '<select onchange="document.location.href=\'' . $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid .
-        '&layout=folder&folderlayout=' . $folderlayout . '&categoryid=\'+this.value;">';
+        '&layout=folder&folderlayout=' . $folderlayoutvalue . '&categoryid=\'+this.value;">';
     echo '<option value="">';
     echo $rootcategory->name;
     if ($rootcategory->item_cnt) {
@@ -830,7 +831,8 @@ if ($layout == 'folder' && $folderlayout == 'details') {
     if ($layout == 'folder') {
         // Show a link to parent category only for folder mode navigation.
         if ($parentcategory) {
-            echo block_exaport_category_list_item($currentcategory, $courseid, $type, $currentcategory, $parentcategory);
+            $parentlinkcategory = $currentcategory;
+            echo block_exaport_category_list_item($parentlinkcategory, $courseid, $type, $currentcategory, $parentcategory);
         }
 
         foreach ($subcategories as $category) {
@@ -952,9 +954,12 @@ function block_exaport_render_item_category_badges($item) {
     }
     $badges = [];
     foreach ($item->flatcategories as $category) {
-        $badges[] = html_writer::tag('span', format_string($category->name), ['class' => 'badge badge-secondary mr-1']);
+        $badges[] = html_writer::tag('span', format_string($category->name), ['class' => 'badge badge-secondary']) . ' ';
     }
-    return $badges ? html_writer::div(implode('', $badges), 'mt-2') : '';
+    if (!$badges) {
+        return '';
+    }
+    return html_writer::div(implode('', $badges), 'mt-2');
 }
 
 function block_exaport_category_path($category, $courseid = 1, $currentcategoryPathItemButtons = '') {

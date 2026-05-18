@@ -8,7 +8,7 @@
  * @copyright  2024 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery'], function($) {
+define([], function() {
 
     var selectedCategories = {}; // {id: name}
     var searchInput;
@@ -16,39 +16,6 @@ define(['jquery'], function($) {
     var sortSelect;
     var chipsContainer;
     var clearAllLabel = 'Clear all filters';
-
-    /**
-     * Deselect a category in the underlying select and notify autocomplete.
-     * @param {string} id Category ID to deselect.
-     */
-    function deselectCategory(id) {
-        if (!categorySelect) {
-            return;
-        }
-        var options = categorySelect.options;
-        for (var i = 0; i < options.length; i++) {
-            if (options[i].value === id) {
-                options[i].selected = false;
-                break;
-            }
-        }
-        // Trigger change so autocomplete UI updates its selection display.
-        $(categorySelect).trigger('change');
-    }
-
-    /**
-     * Deselect all categories in the underlying select.
-     */
-    function deselectAllCategories() {
-        if (!categorySelect) {
-            return;
-        }
-        var options = categorySelect.options;
-        for (var i = 0; i < options.length; i++) {
-            options[i].selected = false;
-        }
-        $(categorySelect).trigger('change');
-    }
 
     /**
      * Render chips and "remove all" button into the chips container.
@@ -74,7 +41,6 @@ define(['jquery'], function($) {
             closeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 delete selectedCategories[id];
-                deselectCategory(id);
                 renderChips();
                 filterItems();
             });
@@ -93,7 +59,6 @@ define(['jquery'], function($) {
         removeAll.appendChild(closeAll);
         removeAll.addEventListener('click', function() {
             selectedCategories = {};
-            deselectAllCategories();
             renderChips();
             filterItems();
         });
@@ -166,6 +131,117 @@ define(['jquery'], function($) {
         });
     }
 
+    /**
+     * Build a custom searchable dropdown to replace the native select element.
+     * The widget uses the same form-control styling and fits in the same space.
+     */
+    function buildSearchableDropdown() {
+        if (!categorySelect) {
+            return;
+        }
+        var wrapper = categorySelect.parentElement;
+        var options = [];
+        for (var i = 1; i < categorySelect.options.length; i++) { // Skip placeholder at index 0.
+            options.push({id: categorySelect.options[i].value, name: categorySelect.options[i].text});
+        }
+        var placeholder = categorySelect.options[0] ? categorySelect.options[0].text : 'Category';
+
+        // Hide the native select.
+        categorySelect.style.display = 'none';
+
+        // Create the container.
+        var container = document.createElement('div');
+        container.className = 'exaport-searchable-select';
+        container.style.cssText = 'position: relative; width: 100%;';
+
+        // Create search input (styled like the select).
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.placeholder = placeholder;
+        input.setAttribute('autocomplete', 'off');
+
+        // Create dropdown list.
+        var dropdown = document.createElement('div');
+        dropdown.className = 'exaport-searchable-select-dropdown';
+        dropdown.style.cssText = 'display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1050;'
+            + ' max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid #ced4da;'
+            + ' border-top: none; border-radius: 0 0 0.25rem 0.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
+
+        /**
+         * Render dropdown options filtered by search text.
+         * @param {string} filter Text to filter options by.
+         */
+        function renderOptions(filter) {
+            dropdown.innerHTML = '';
+            var lowerFilter = (filter || '').toLowerCase();
+            var hasResults = false;
+            options.forEach(function(opt) {
+                if (lowerFilter && opt.name.toLowerCase().indexOf(lowerFilter) === -1) {
+                    return;
+                }
+                hasResults = true;
+                var item = document.createElement('div');
+                item.className = 'exaport-searchable-select-item';
+                item.style.cssText = 'padding: 0.4em 0.75em; cursor: pointer; font-size: 0.9rem;';
+                item.textContent = opt.name;
+                item.setAttribute('data-id', opt.id);
+
+                // Grey out already-selected categories.
+                if (selectedCategories[opt.id]) {
+                    item.style.color = '#999';
+                    item.style.fontStyle = 'italic';
+                }
+
+                item.addEventListener('mousedown', function(e) {
+                    e.preventDefault(); // Prevent input blur.
+                    if (!selectedCategories[opt.id]) {
+                        selectedCategories[opt.id] = opt.name;
+                        renderChips();
+                        filterItems();
+                    }
+                    input.value = '';
+                    dropdown.style.display = 'none';
+                });
+                item.addEventListener('mouseenter', function() {
+                    item.style.backgroundColor = '#f0f0f0';
+                });
+                item.addEventListener('mouseleave', function() {
+                    item.style.backgroundColor = '';
+                });
+                dropdown.appendChild(item);
+            });
+            if (!hasResults) {
+                var noResult = document.createElement('div');
+                noResult.style.cssText = 'padding: 0.4em 0.75em; color: #999; font-size: 0.9rem;';
+                noResult.textContent = '—';
+                dropdown.appendChild(noResult);
+            }
+        }
+
+        // Show dropdown on focus.
+        input.addEventListener('focus', function() {
+            renderOptions(input.value);
+            dropdown.style.display = 'block';
+        });
+
+        // Filter on input.
+        input.addEventListener('input', function() {
+            renderOptions(input.value);
+            dropdown.style.display = 'block';
+        });
+
+        // Hide dropdown on blur.
+        input.addEventListener('blur', function() {
+            dropdown.style.display = 'none';
+            input.value = '';
+        });
+
+        container.appendChild(input);
+        container.appendChild(dropdown);
+        wrapper.appendChild(container);
+    }
+
     return {
         /**
          * Initialise the flat filter module.
@@ -186,21 +262,8 @@ define(['jquery'], function($) {
                 });
             }
 
-            // Bind category autocomplete multiselect: sync selections to chips on change.
-            if (categorySelect) {
-                $(categorySelect).on('change', function() {
-                    // Sync selectedCategories from the select's current state.
-                    selectedCategories = {};
-                    var options = categorySelect.options;
-                    for (var i = 0; i < options.length; i++) {
-                        if (options[i].selected && options[i].value) {
-                            selectedCategories[options[i].value] = options[i].text;
-                        }
-                    }
-                    renderChips();
-                    filterItems();
-                });
-            }
+            // Replace native category select with a custom searchable dropdown.
+            buildSearchableDropdown();
 
             // Bind sort dropdown.
             if (sortSelect) {

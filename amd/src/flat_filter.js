@@ -35,7 +35,8 @@ define([], function() {
         }
         ids.forEach(function(id) {
             var chip = document.createElement('span');
-            chip.className = 'badge badge-primary d-inline-flex align-items-center mr-1 mb-1';
+            // badge-primary for BS4 (Moodle 3.x), bg-primary for BS5 (Moodle 4.x).
+            chip.className = 'badge badge-primary bg-primary d-inline-flex align-items-center mr-1 mb-1';
             chip.style.cssText = 'font-size: 0.85rem; padding: 0.35em 0.6em; cursor: pointer; gap: 0.3em;';
             chip.textContent = selectedCategories[id] + ' ';
             var closeBtn = document.createElement('span');
@@ -52,9 +53,9 @@ define([], function() {
             chipsContainer.appendChild(chip);
         });
 
-        // "Remove all" button.
+        // "Remove all" button — badge-danger for BS4, bg-danger for BS5.
         var removeAll = document.createElement('span');
-        removeAll.className = 'badge badge-danger d-inline-flex align-items-center mr-1 mb-1';
+        removeAll.className = 'badge badge-danger bg-danger d-inline-flex align-items-center mr-1 mb-1';
         removeAll.style.cssText = 'font-size: 0.85rem; padding: 0.35em 0.6em; cursor: pointer; gap: 0.3em;';
         removeAll.textContent = clearAllLabel + ' ';
         var closeAll = document.createElement('span');
@@ -176,18 +177,19 @@ define([], function() {
         input.setAttribute('autocomplete', 'off');
         input.style.cssText = 'padding-right: 2em;';
 
-        // Dropdown arrow indicator — provides visual cue that this input opens a list.
+        // Dropdown arrow indicator — uses Moodle's standard form-autocomplete-downarrow class
+        // so the arrow inherits the current theme's styling (icon, colour, size).
         var arrow = document.createElement('span');
-        arrow.innerHTML = '&#9662;'; // Small down-pointing triangle.
-        arrow.style.cssText = 'position: absolute; right: 0.75em; top: 50%; transform: translateY(-50%);'
-            + ' pointer-events: none; font-size: 0.9em; color: #555;';
+        arrow.className = 'form-autocomplete-downarrow position-absolute p-1';
+        arrow.style.cssText = 'right: 0; top: 0; bottom: 0; display: flex; align-items: center;'
+            + ' pointer-events: none;';
+        arrow.setAttribute('aria-hidden', 'true');
 
-        // Create dropdown list.
+        // Create dropdown list — uses Bootstrap utility classes for theme-consistent styling.
         var dropdown = document.createElement('div');
-        dropdown.className = 'exaport-searchable-select-dropdown';
+        dropdown.className = 'exaport-searchable-select-dropdown bg-white border rounded-bottom shadow-sm';
         dropdown.style.cssText = 'display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1050;'
-            + ' max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid #ced4da;'
-            + ' border-top: none; border-radius: 0 0 0.25rem 0.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
+            + ' max-height: 200px; overflow-y: auto; border-top: none;';
 
         /**
          * Render dropdown options filtered by search text.

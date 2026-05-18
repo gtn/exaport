@@ -10,15 +10,19 @@
  */
 define([], function() {
 
-    var selectedCategories = {}; // {id: name}
-    var searchInput;
-    var categorySelect;
-    var sortSelect;
-    var chipsContainer;
-    var clearAllLabel = 'Clear all filters';
+    // Module-level state: we keep references to DOM elements and selection state here
+    // so all functions can access them without re-querying the DOM.
+    var selectedCategories = {}; // Map of {categoryId: categoryName} for currently active filters.
+    var searchInput;        // Text search input element.
+    var categorySelect;     // The native <select> (hidden, used as data source for the custom dropdown).
+    var sortSelect;         // Sort-by dropdown.
+    var chipsContainer;     // Container where selected category chips are rendered below the filter bar.
+    var clearAllLabel = 'Clear all filters'; // Translatable via init() parameter.
 
     /**
-     * Render chips and "remove all" button into the chips container.
+     * Render category chips and a "remove all" button into the chips container.
+     * Each chip represents one active category filter and can be removed individually.
+     * This is the visual counterpart to the selectedCategories state object.
      */
     function renderChips() {
         if (!chipsContainer) {
@@ -66,7 +70,8 @@ define([], function() {
     }
 
     /**
-     * Filter and sort items based on current state.
+     * Filter and sort visible items based on current search text and selected categories.
+     * Items are shown/hidden via display style — no DOM removal, so state is preserved.
      */
     function filterItems() {
         var searchText = (searchInput ? searchInput.value : '').toLowerCase();
@@ -90,7 +95,8 @@ define([], function() {
     }
 
     /**
-     * Sort visible items based on the sort dropdown.
+     * Sort visible items by reordering DOM elements within their parent container.
+     * Reads the currently selected sort field/direction from the sort dropdown.
      */
     function sortItems() {
         if (!sortSelect) {
@@ -132,8 +138,15 @@ define([], function() {
     }
 
     /**
-     * Build a custom searchable dropdown to replace the native select element.
-     * The widget uses the same form-control styling and fits in the same space.
+     * Build a custom searchable dropdown to replace the native <select> element.
+     *
+     * Why custom instead of Moodle's core/form-autocomplete?
+     * - We need multi-select with chips rendered OUTSIDE the dropdown (in a separate container).
+     * - The dropdown must stay open after each selection for rapid multi-pick.
+     * - Selected items must disappear from the list (not just grey out).
+     * - Moodle's autocomplete creates its own chip UI which conflicts with our layout.
+     *
+     * The native <select> is hidden but kept in DOM as the data source for options.
      */
     function buildSearchableDropdown() {
         if (!categorySelect) {
@@ -141,7 +154,8 @@ define([], function() {
         }
         var wrapper = categorySelect.parentElement;
         var options = [];
-        for (var i = 1; i < categorySelect.options.length; i++) { // Skip placeholder at index 0.
+        // Extract options from the native select (skip index 0 which is the placeholder).
+        for (var i = 1; i < categorySelect.options.length; i++) {
             options.push({id: categorySelect.options[i].value, name: categorySelect.options[i].text});
         }
         var placeholder = categorySelect.options[0] ? categorySelect.options[0].text : 'Category';
@@ -162,9 +176,9 @@ define([], function() {
         input.setAttribute('autocomplete', 'off');
         input.style.cssText = 'padding-right: 2em;';
 
-        // Dropdown arrow indicator.
+        // Dropdown arrow indicator — provides visual cue that this input opens a list.
         var arrow = document.createElement('span');
-        arrow.innerHTML = '&#9662;';
+        arrow.innerHTML = '&#9662;'; // Small down-pointing triangle.
         arrow.style.cssText = 'position: absolute; right: 0.75em; top: 50%; transform: translateY(-50%);'
             + ' pointer-events: none; font-size: 0.9em; color: #555;';
 
@@ -177,6 +191,9 @@ define([], function() {
 
         /**
          * Render dropdown options filtered by search text.
+         * Already-selected categories are excluded (not greyed) so chips
+         * visually "move out" of the dropdown into the area below.
+         *
          * @param {string} filter Text to filter options by.
          */
         function renderOptions(filter) {
@@ -199,11 +216,14 @@ define([], function() {
                 item.setAttribute('data-id', opt.id);
 
                 item.addEventListener('mousedown', function(e) {
-                    e.preventDefault(); // Prevent input blur.
+                    // Use mousedown (not click) so we can preventDefault() to stop
+                    // the input from losing focus — this keeps the dropdown open.
+                    e.preventDefault();
                     selectedCategories[opt.id] = opt.name;
                     renderChips();
                     filterItems();
-                    // Re-render options to remove the just-selected item, keep dropdown open.
+                    // Re-render the dropdown list to remove the just-selected item.
+                    // Dropdown stays open for rapid multi-selection.
                     renderOptions(input.value);
                 });
                 item.addEventListener('mouseenter', function() {
@@ -234,10 +254,10 @@ define([], function() {
             dropdown.style.display = 'block';
         });
 
-        // Hide dropdown on blur.
+        // Hide dropdown when input loses focus (e.g., user clicks elsewhere).
         input.addEventListener('blur', function() {
             dropdown.style.display = 'none';
-            input.value = '';
+            input.value = ''; // Clear search text so full list shows on next open.
         });
 
         container.appendChild(input);

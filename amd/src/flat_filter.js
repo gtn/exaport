@@ -173,20 +173,20 @@ define([], function() {
         // Create search input (styled like the select) with a dropdown arrow.
         var input = document.createElement('input');
         input.type = 'text';
+        input.id = 'exaport-category-search';
         input.className = 'form-control';
         input.placeholder = placeholder;
         input.setAttribute('autocomplete', 'off');
         input.style.cssText = 'padding-right: 2em;';
 
         // Dropdown arrow indicator — replicates Moodle's core/form-autocomplete pattern:
-        // a <span class="form-autocomplete-downarrow"> containing an inline SVG triangle.
+        // a <span class="form-autocomplete-downarrow"> wrapping an <i class="icon fa fa-caret-down">.
         var arrow = document.createElement('span');
         arrow.className = 'form-autocomplete-downarrow';
         arrow.style.cssText = 'position: absolute; right: 0.5em; top: 50%; transform: translateY(-50%);'
             + ' pointer-events: none; line-height: 1;';
         arrow.setAttribute('aria-hidden', 'true');
-        arrow.innerHTML = '<svg width="16" height="16" focusable="false" viewBox="0 0 16 16">'
-            + '<polygon points="4,6 12,6 8,10" fill="currentColor"/></svg>';
+        arrow.innerHTML = '<i class="icon fa fa-caret-down fa-fw" aria-hidden="true"></i>';
 
         // Create dropdown list — uses Bootstrap utility classes for theme-consistent styling.
         var dropdown = document.createElement('div');

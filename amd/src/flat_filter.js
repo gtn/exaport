@@ -101,12 +101,12 @@ define([], function() {
         var field = parts[0]; // "date" or "name"
         var dir = parts[1]; // "asc" or "desc"
 
-        var container = document.querySelector('.exaport-flat-item');
-        if (!container) {
+        var allItems = document.querySelectorAll('.exaport-flat-item');
+        if (allItems.length === 0) {
             return;
         }
-        var parent = container.parentElement;
-        var items = Array.from(parent.querySelectorAll('.exaport-flat-item'));
+        var parent = allItems[0].parentElement;
+        var items = Array.from(allItems);
 
         items.sort(function(a, b) {
             var valA, valB;

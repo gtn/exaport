@@ -1,15 +1,14 @@
 /**
  * AMD module for dynamic filtering of items in the flat layout view.
  *
- * Provides real-time text search, multi-select category chip filtering
- * (using Moodle's core/form-autocomplete for the search multiselect),
+ * Provides real-time text search, multi-select category chip filtering,
  * sorting, and a "remove all filters" button.
  *
  * @module     block_exaport/flat_filter
  * @copyright  2024 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/form-autocomplete'], function($, Autocomplete) {
+define([], function() {
 
     var selectedCategories = {}; // {id: name}
     var searchInput;
@@ -17,37 +16,6 @@ define(['jquery', 'core/form-autocomplete'], function($, Autocomplete) {
     var sortSelect;
     var chipsContainer;
     var clearAllLabel = 'Clear all filters';
-
-    /**
-     * Sync selectedCategories from the actual select element state.
-     */
-    function syncFromSelect() {
-        selectedCategories = {};
-        if (!categorySelect) {
-            return;
-        }
-        var options = categorySelect.options;
-        for (var i = 0; i < options.length; i++) {
-            if (options[i].selected && options[i].value) {
-                selectedCategories[options[i].value] = options[i].text;
-            }
-        }
-    }
-
-    /**
-     * Sync the select element state from selectedCategories (after chip removal).
-     */
-    function syncToSelect() {
-        if (!categorySelect) {
-            return;
-        }
-        var options = categorySelect.options;
-        for (var i = 0; i < options.length; i++) {
-            options[i].selected = !!selectedCategories[options[i].value];
-        }
-        // Trigger change so autocomplete UI updates.
-        $(categorySelect).trigger('change');
-    }
 
     /**
      * Render chips and "remove all" button into the chips container.
@@ -73,7 +41,6 @@ define(['jquery', 'core/form-autocomplete'], function($, Autocomplete) {
             closeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 delete selectedCategories[id];
-                syncToSelect();
                 renderChips();
                 filterItems();
             });
@@ -92,7 +59,6 @@ define(['jquery', 'core/form-autocomplete'], function($, Autocomplete) {
         removeAll.appendChild(closeAll);
         removeAll.addEventListener('click', function() {
             selectedCategories = {};
-            syncToSelect();
             renderChips();
             filterItems();
         });
@@ -178,31 +144,24 @@ define(['jquery', 'core/form-autocomplete'], function($, Autocomplete) {
             sortSelect = document.getElementById('exaport-flat-sort-select');
             chipsContainer = document.getElementById('exaport-flat-filter-chips');
 
-            // Enhance category select with Moodle's autocomplete (search multiselect).
-            if (categorySelect) {
-                Autocomplete.enhance(
-                    '#exaport-flat-category-select',  // selector
-                    false,    // tags (no free-text tagging)
-                    false,    // ajax (no ajax source)
-                    '',       // placeholder
-                    false,    // caseSensitive
-                    true,     // showSuggestions
-                    '',       // noSelectionString
-                    true      // closeSuggestionsOnSelect
-                );
-
-                // Listen for changes on the underlying select.
-                $(categorySelect).on('change', function() {
-                    syncFromSelect();
-                    renderChips();
-                    filterItems();
-                });
-            }
-
             // Bind text search input event.
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     filterItems();
+                });
+            }
+
+            // Bind category dropdown: selecting an option adds it as a chip.
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function() {
+                    var val = categorySelect.value;
+                    if (val && !selectedCategories[val]) {
+                        selectedCategories[val] = categorySelect.options[categorySelect.selectedIndex].text;
+                        renderChips();
+                        filterItems();
+                    }
+                    // Reset dropdown to placeholder.
+                    categorySelect.value = '';
                 });
             }
 

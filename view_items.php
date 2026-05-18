@@ -27,6 +27,7 @@ $type = optional_param('type', '', PARAM_TEXT);
 $layout = optional_param('layout', '', PARAM_TEXT);
 $folderlayout = optional_param('folderlayout', '', PARAM_TEXT);
 $flatcategoryids = optional_param_array('flatcategoryids', [], PARAM_INT);
+$flatsearch = optional_param('flatsearch', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_TEXT);
 
 $wstoken = optional_param('wstoken', null, PARAM_RAW);
@@ -378,6 +379,14 @@ if ($type == 'sharedstudent') {
             return $categoryid > 0 && isset($validcategoryids[$categoryid]);
         }));
 
+        // Build optional text search condition.
+        $searchsql = '';
+        $searchparams = [];
+        if ($flatsearch !== '') {
+            $searchsql = ' AND ' . $DB->sql_like('i.name', '?', false);
+            $searchparams = ['%' . $DB->sql_like_escape($flatsearch) . '%'];
+        }
+
         if ($flatcategoryids) {
             [$insql, $inparams] = $DB->get_in_or_equal($flatcategoryids, SQL_PARAMS_QM);
             $items = $DB->get_records_sql("
@@ -388,13 +397,14 @@ if ($type == 'sharedstudent') {
                 WHERE ic.cateid $insql
                   AND i.userid = ?
                   AND " . block_exaport_get_item_where() . "
+                  $searchsql
                 GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
                     i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
                     i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
                     i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
                     i.iseditable, i.example_url, i.parentid
                 $sqlsort
-            ", array_merge($inparams, [$USER->id]));
+            ", array_merge($inparams, [$USER->id], $searchparams));
         } else {
             $items = $DB->get_records_sql("
                 SELECT DISTINCT i.*, COUNT(com.id) As comments
@@ -402,13 +412,14 @@ if ($type == 'sharedstudent') {
                 LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
                 WHERE i.userid = ?
                   AND " . block_exaport_get_item_where() . "
+                  $searchsql
                 GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
                     i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
                     i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
                     i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
                     i.iseditable, i.example_url, i.parentid
                 $sqlsort
-            ", [$USER->id]);
+            ", array_merge([$USER->id], $searchparams));
         }
 
         if ($items) {
@@ -507,11 +518,16 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_category_select($categoriesbyparent, $currentcategory->id);
     echo '</select>';
 } else if ($type == 'mine' && $layout == 'flat') {
-    echo '<form method="get" action="' . $CFG->wwwroot . '/blocks/exaport/view_items.php" class="mb-3">';
+    echo '<form method="get" action="' . $CFG->wwwroot . '/blocks/exaport/view_items.php" class="' . ($useBootstrapLayout ? 'd-flex flex-wrap align-items-center gap-2 mb-3' : 'mb-3') . '">';
     echo '<input type="hidden" name="courseid" value="' . (int)$courseid . '">';
     echo '<input type="hidden" name="layout" value="flat">';
-    echo block_exaport_get_string("categories") . ': ';
-    echo '<select name="flatcategoryids[]" multiple="multiple" size="6">';
+    // Text search input.
+    echo '<div class="' . ($useBootstrapLayout ? 'input-group' : '') . '" style="' . ($useBootstrapLayout ? 'max-width: 300px;' : '') . '">';
+    echo '<input type="text" name="flatsearch" class="form-control" placeholder="' . get_string('search') . '..." value="' . s($flatsearch) . '">';
+    echo '</div>';
+    // Category filter dropdown.
+    echo '<select name="flatcategoryids[]" class="form-control custom-select" style="max-width: 250px;">';
+    echo '<option value="">' . block_exaport_get_string("categories") . ' (' . get_string('all') . ')</option>';
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {
             continue;
@@ -520,8 +536,8 @@ if ($type == 'mine' && $layout == 'folder') {
         $fullname = block_exaport_category_full_path_name($category->id, $categories);
         echo '<option value="' . (int)$category->id . '"' . $selected . '>' . format_string($fullname) . '</option>';
     }
-    echo '</select> ';
-    echo '<button type="submit">' . get_string('filter') . '</button>';
+    echo '</select>';
+    echo '<button type="submit" class="btn btn-primary">' . get_string('search') . '</button>';
     echo '</form>';
 }
 

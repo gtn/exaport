@@ -487,10 +487,12 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="exaport-flat-filter mb-3">';
     // Text search input (filters on keyup via AMD module).
     echo '<div class="mb-2">';
+    echo '<label class="sr-only" for="exaport-flat-search">' . get_string('search') . '</label>';
     echo '<input type="text" id="exaport-flat-search" class="form-control" placeholder="' . get_string('search') . '..." style="max-width: 400px;">';
     echo '</div>';
     // Category multi-select (enhanced by Moodle autocomplete via AMD module).
     echo '<div class="mb-2" style="max-width: 400px;">';
+    echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string("category", "block_exaport") . '</label>';
     echo '<select id="exaport-flat-category-select" class="form-control" multiple="multiple">';
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {

@@ -483,24 +483,27 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_category_select($categoriesbyparent, $currentcategory->id);
     echo '</select>';
 } else if ($type == 'mine' && $layout == 'flat') {
-    // Dynamic client-side filter bar: text input + clickable category chips.
+    // Dynamic client-side filter bar: text input + autocomplete multi-select for categories.
     echo '<div class="exaport-flat-filter mb-3">';
-    // Text search input (filters on keyup).
+    // Text search input (filters on keyup via AMD module).
     echo '<div class="mb-2">';
     echo '<input type="text" id="exaport-flat-search" class="form-control" placeholder="' . get_string('search') . '..." style="max-width: 400px;">';
     echo '</div>';
-    // Category chips (multi-select, click to toggle).
-    echo '<div id="exaport-flat-category-chips" class="d-flex flex-wrap gap-1">';
+    // Category multi-select (enhanced by Moodle autocomplete via AMD module).
+    echo '<div class="mb-2" style="max-width: 400px;">';
+    echo '<select id="exaport-flat-category-select" class="form-control" multiple="multiple">';
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {
             continue;
         }
         $fullname = block_exaport_category_full_path_name($category->id, $categories);
-        echo '<button type="button" class="btn btn-sm btn-outline-secondary exaport-category-chip" data-catid="' . (int)$category->id . '">'
-            . format_string($fullname) . '</button>';
+        echo '<option value="' . (int)$category->id . '">' . format_string($fullname) . '</option>';
     }
+    echo '</select>';
     echo '</div>';
     echo '</div>';
+    // Load AMD module for filtering.
+    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', ['exaport-flat-category-select']);
 }
 
 echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
@@ -816,55 +819,6 @@ if ($layout == 'folder' && $folderlayout == 'details') {
 echo '<div style="clear: both;">&nbsp;</div>';
 echo "</div>";
 echo block_exaport_wrapperdivend();
-
-// Client-side dynamic filter JavaScript for flat layout.
-if ($type == 'mine' && $layout == 'flat') {
-    echo '<script>
-(function() {
-    var searchInput = document.getElementById("exaport-flat-search");
-    var chips = document.querySelectorAll(".exaport-category-chip");
-    var items = document.querySelectorAll(".exaport-flat-item");
-    var selectedCats = [];
-
-    function filterItems() {
-        var searchText = (searchInput ? searchInput.value : "").toLowerCase();
-        items.forEach(function(item) {
-            var name = item.getAttribute("data-item-name") || "";
-            var catIdsStr = item.getAttribute("data-category-ids") || "";
-            var catIds = catIdsStr ? catIdsStr.split(",").map(Number) : [];
-
-            var matchesSearch = !searchText || name.indexOf(searchText) !== -1;
-            var matchesCategory = selectedCats.length === 0 || selectedCats.some(function(catId) {
-                return catIds.indexOf(catId) !== -1;
-            });
-
-            item.style.display = (matchesSearch && matchesCategory) ? "" : "none";
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener("input", filterItems);
-    }
-
-    chips.forEach(function(chip) {
-        chip.addEventListener("click", function() {
-            var catId = parseInt(chip.getAttribute("data-catid"), 10);
-            var idx = selectedCats.indexOf(catId);
-            if (idx === -1) {
-                selectedCats.push(catId);
-                chip.classList.remove("btn-outline-secondary");
-                chip.classList.add("btn-primary");
-            } else {
-                selectedCats.splice(idx, 1);
-                chip.classList.remove("btn-primary");
-                chip.classList.add("btn-outline-secondary");
-            }
-            filterItems();
-        });
-    });
-})();
-</script>';
-}
 
 echo $OUTPUT->footer();
 

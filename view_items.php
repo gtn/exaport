@@ -483,15 +483,7 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_category_select($categoriesbyparent, $currentcategory->id);
     echo '</select>';
 } else if ($type == 'mine' && $layout == 'flat') {
-    // Dynamic client-side filter bar: text input + autocomplete category selector (same as item.php).
-    echo '<div class="exaport-flat-filter mb-3">';
-    // Text search input (filters on keyup via AMD module).
-    echo '<div class="mb-2">';
-    echo '<label class="sr-only" for="exaport-flat-search">' . get_string('search') . '</label>';
-    echo '<input type="text" id="exaport-flat-search" class="form-control" placeholder="' . get_string('search') . '..." style="max-width: 400px;">';
-    echo '</div>';
-    // Category autocomplete multi-select — rendered via moodleform for identical appearance to item.php.
-    require_once(__DIR__ . '/classes/flat_filter_form.php');
+    // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     $filtercategories = [];
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {
@@ -499,12 +491,44 @@ if ($type == 'mine' && $layout == 'folder') {
         }
         $filtercategories[(int)$category->id] = block_exaport_category_full_path_name($category->id, $categories);
     }
-    $filterform = new block_exaport_flat_filter_form(null, ['categories' => $filtercategories],
-        'post', '', ['id' => 'exaport-flat-filter-form', 'class' => 'mb-0']);
-    $filterform->display();
+
+    echo '<div class="exaport-flat-filter mb-3">';
+    // Row 1: search + category dropdown + sort dropdown.
+    echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    // Search input.
+    echo '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
+    echo '<label class="sr-only" for="exaport-flat-search">' . get_string('search') . '</label>';
+    echo '<input type="text" id="exaport-flat-search" class="form-control" placeholder="' . get_string('search') . '...">';
     echo '</div>';
+    // Category dropdown (select one to add as chip filter).
+    echo '<div style="min-width: 200px; max-width: 350px;">';
+    echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string('category', 'block_exaport') . '</label>';
+    echo '<select id="exaport-flat-category-select" class="form-control custom-select">';
+    echo '<option value="">' . get_string('category', 'block_exaport') . '</option>';
+    foreach ($filtercategories as $catid => $catname) {
+        echo '<option value="' . $catid . '">' . s($catname) . '</option>';
+    }
+    echo '</select>';
+    echo '</div>';
+    // Sort dropdown.
+    echo '<div style="min-width: 180px; max-width: 250px;">';
+    echo '<label class="sr-only" for="exaport-flat-sort-select">' . get_string('sort') . '</label>';
+    echo '<select id="exaport-flat-sort-select" class="form-control custom-select">';
+    echo '<option value="date-desc">' . get_string('date', 'block_exaport') . ' ↓</option>';
+    echo '<option value="date-asc">' . get_string('date', 'block_exaport') . ' ↑</option>';
+    echo '<option value="name-asc">' . get_string('name', 'block_exaport') . ' A-Z</option>';
+    echo '<option value="name-desc">' . get_string('name', 'block_exaport') . ' Z-A</option>';
+    echo '</select>';
+    echo '</div>';
+    echo '</div>';
+    // Row 2: active filter chips + remove all button (rendered by JS).
+    echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    echo '</div>';
+
     // Load AMD module for filtering.
-    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', ['id_categoryids']);
+    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
+        get_string('clearAllFilers', 'block_exaport')
+    ]);
 }
 
 echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
@@ -1291,7 +1315,7 @@ function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type,
     }
 
     $itemContent = '
-        <div class="col mb-4 exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '">
+        <div class="col mb-4 exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">
 				<div class="card h-100 excomdos_tile excomdos_tile_item id-13 ui-draggable ui-draggable-handle">
 					<div class="card-header excomdos_tilehead d-flex justify-content-between flex-wrap">
 						<div class="excomdos_tileinfo">

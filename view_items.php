@@ -500,11 +500,10 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<label class="sr-only" for="exaport-flat-search">' . get_string('search') . '</label>';
     echo '<input type="text" id="exaport-flat-search" class="form-control" placeholder="' . get_string('search') . '...">';
     echo '</div>';
-    // Category dropdown (select one to add as chip filter).
-    echo '<div style="min-width: 200px; max-width: 350px;">';
+    // Category autocomplete multi-select (enhanced by core/form-autocomplete via JS).
+    echo '<div style="min-width: 200px; flex: 1; max-width: 450px;">';
     echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string('category', 'block_exaport') . '</label>';
-    echo '<select id="exaport-flat-category-select" class="form-control custom-select">';
-    echo '<option value="">' . get_string('category', 'block_exaport') . '</option>';
+    echo '<select id="exaport-flat-category-select" multiple="multiple" class="form-control">';
     foreach ($filtercategories as $catid => $catname) {
         echo '<option value="' . $catid . '">' . s($catname) . '</option>';
     }

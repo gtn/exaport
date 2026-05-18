@@ -247,22 +247,66 @@ define([], function() {
             }
         }
 
+        // Track the currently highlighted index for keyboard navigation.
+        var highlightedIndex = -1;
+
+        /**
+         * Update visual highlight on dropdown items.
+         */
+        function updateHighlight() {
+            var items = dropdown.querySelectorAll('.exaport-searchable-select-item');
+            items.forEach(function(el, idx) {
+                el.style.backgroundColor = (idx === highlightedIndex) ? '#f0f0f0' : '';
+            });
+            // Scroll highlighted item into view.
+            if (items[highlightedIndex]) {
+                items[highlightedIndex].scrollIntoView({block: 'nearest'});
+            }
+        }
+
         // Show dropdown on focus.
         input.addEventListener('focus', function() {
+            highlightedIndex = -1;
             renderOptions(input.value);
             dropdown.style.display = 'block';
         });
 
         // Filter on input.
         input.addEventListener('input', function() {
+            highlightedIndex = -1;
             renderOptions(input.value);
             dropdown.style.display = 'block';
+        });
+
+        // Keyboard navigation: ArrowDown, ArrowUp, Enter, Escape.
+        input.addEventListener('keydown', function(e) {
+            var items = dropdown.querySelectorAll('.exaport-searchable-select-item');
+            if (!items.length) {
+                return;
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                highlightedIndex = (highlightedIndex + 1) % items.length;
+                updateHighlight();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+                updateHighlight();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (highlightedIndex >= 0 && items[highlightedIndex]) {
+                    items[highlightedIndex].dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                }
+            } else if (e.key === 'Escape') {
+                input.blur();
+            }
         });
 
         // Hide dropdown when input loses focus (e.g., user clicks elsewhere).
         input.addEventListener('blur', function() {
             dropdown.style.display = 'none';
             input.value = ''; // Clear search text so full list shows on next open.
+            highlightedIndex = -1;
         });
 
         container.appendChild(input);

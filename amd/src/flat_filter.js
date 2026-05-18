@@ -1,20 +1,21 @@
 /**
  * AMD module for dynamic filtering of items in the flat layout view.
  *
- * Provides real-time text search and multi-select category filtering
- * using Moodle's core/form-autocomplete for the category selector.
+ * Provides real-time text search and multi-select category filtering.
+ * The category selector is rendered by Moodle's autocomplete form element
+ * (same as item.php) so no manual enhancement is needed here.
  *
  * @module     block_exaport/flat_filter
  * @copyright  2024 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/form-autocomplete'], function($, Autocomplete) {
+define(['jquery'], function($) {
 
     /**
      * Filter items based on current search text and selected categories.
      *
      * @param {HTMLElement} searchInput The text search input element.
-     * @param {HTMLElement} categorySelect The multi-select element for categories.
+     * @param {HTMLElement} categorySelect The hidden multi-select element for categories.
      */
     function filterItems(searchInput, categorySelect) {
         var searchText = (searchInput ? searchInput.value : '').toLowerCase();
@@ -54,11 +55,6 @@ define(['jquery', 'core/form-autocomplete'], function($, Autocomplete) {
             var searchInput = document.getElementById('exaport-flat-search');
             var categorySelect = document.getElementById(selectId);
 
-            // Enhance the select with Moodle's autocomplete (multiple selection).
-            if (categorySelect) {
-                Autocomplete.enhance(categorySelect, false, false, '', false, true, '', true);
-            }
-
             // Bind text search input event.
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
@@ -67,6 +63,7 @@ define(['jquery', 'core/form-autocomplete'], function($, Autocomplete) {
             }
 
             // Bind category select change event.
+            // Moodle's autocomplete form element updates the hidden select on change.
             if (categorySelect) {
                 $(categorySelect).on('change', function() {
                     filterItems(searchInput, categorySelect);

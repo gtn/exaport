@@ -483,29 +483,28 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_category_select($categoriesbyparent, $currentcategory->id);
     echo '</select>';
 } else if ($type == 'mine' && $layout == 'flat') {
-    // Dynamic client-side filter bar: text input + autocomplete multi-select for categories.
+    // Dynamic client-side filter bar: text input + autocomplete category selector (same as item.php).
     echo '<div class="exaport-flat-filter mb-3">';
     // Text search input (filters on keyup via AMD module).
     echo '<div class="mb-2">';
     echo '<label class="sr-only" for="exaport-flat-search">' . get_string('search') . '</label>';
     echo '<input type="text" id="exaport-flat-search" class="form-control" placeholder="' . get_string('search') . '..." style="max-width: 400px;">';
     echo '</div>';
-    // Category multi-select (enhanced by Moodle autocomplete via AMD module).
-    echo '<div class="mb-2" style="max-width: 400px;">';
-    echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string("category", "block_exaport") . '</label>';
-    echo '<select id="exaport-flat-category-select" class="form-control" multiple="multiple">';
+    // Category autocomplete multi-select — rendered via moodleform for identical appearance to item.php.
+    require_once(__DIR__ . '/classes/flat_filter_form.php');
+    $filtercategories = [];
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {
             continue;
         }
-        $fullname = block_exaport_category_full_path_name($category->id, $categories);
-        echo '<option value="' . (int)$category->id . '">' . format_string($fullname) . '</option>';
+        $filtercategories[(int)$category->id] = block_exaport_category_full_path_name($category->id, $categories);
     }
-    echo '</select>';
-    echo '</div>';
+    $filterform = new block_exaport_flat_filter_form(null, ['categories' => $filtercategories],
+        'post', '', ['id' => 'exaport-flat-filter-form', 'class' => 'mb-0']);
+    $filterform->display();
     echo '</div>';
     // Load AMD module for filtering.
-    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', ['exaport-flat-category-select']);
+    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', ['id_categoryids']);
 }
 
 echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';

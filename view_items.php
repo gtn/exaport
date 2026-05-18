@@ -26,8 +26,6 @@ $userid = optional_param('userid', 0, PARAM_INT);
 $type = optional_param('type', '', PARAM_TEXT);
 $layout = optional_param('layout', '', PARAM_TEXT);
 $folderlayout = optional_param('folderlayout', '', PARAM_TEXT);
-$flatcategoryids = optional_param_array('flatcategoryids', [], PARAM_INT);
-$flatsearch = optional_param('flatsearch', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_TEXT);
 
 $wstoken = optional_param('wstoken', null, PARAM_RAW);
@@ -374,53 +372,20 @@ if ($type == 'sharedstudent') {
         $parentcategory = null;
         $subcategories = [];
 
-        $validcategoryids = array_fill_keys(array_keys($categories), true);
-        $flatcategoryids = array_values(array_filter(array_map('intval', $flatcategoryids), function($categoryid) use ($validcategoryids) {
-            return $categoryid > 0 && isset($validcategoryids[$categoryid]);
-        }));
-
-        // Build optional text search condition.
-        $searchsql = '';
-        $searchparams = [];
-        if ($flatsearch !== '') {
-            $searchsql = ' AND ' . $DB->sql_like('i.name', '?', false);
-            $searchparams = ['%' . $DB->sql_like_escape($flatsearch) . '%'];
-        }
-
-        if ($flatcategoryids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($flatcategoryids, SQL_PARAMS_QM);
-            $items = $DB->get_records_sql("
-                SELECT DISTINCT i.*, COUNT(com.id) As comments
-                FROM {block_exaportitem} i
-                JOIN {block_exaportitemcate} ic ON ic.itemid = i.id
-                LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-                WHERE ic.cateid $insql
-                  AND i.userid = ?
-                  AND " . block_exaport_get_item_where() . "
-                  $searchsql
-                GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
-                    i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-                    i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-                    i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-                    i.iseditable, i.example_url, i.parentid
-                $sqlsort
-            ", array_merge($inparams, [$USER->id], $searchparams));
-        } else {
-            $items = $DB->get_records_sql("
-                SELECT DISTINCT i.*, COUNT(com.id) As comments
-                FROM {block_exaportitem} i
-                LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-                WHERE i.userid = ?
-                  AND " . block_exaport_get_item_where() . "
-                  $searchsql
-                GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
-                    i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-                    i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-                    i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-                    i.iseditable, i.example_url, i.parentid
-                $sqlsort
-            ", array_merge([$USER->id], $searchparams));
-        }
+        // Load all items in flat mode (filtering is done client-side via JavaScript).
+        $items = $DB->get_records_sql("
+            SELECT DISTINCT i.*, COUNT(com.id) As comments
+            FROM {block_exaportitem} i
+            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+            WHERE i.userid = ?
+              AND " . block_exaport_get_item_where() . "
+            GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
+                i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
+                i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
+                i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
+                i.iseditable, i.example_url, i.parentid
+            $sqlsort
+        ", [$USER->id]);
 
         if ($items) {
             $itemids = array_keys($items);
@@ -518,27 +483,24 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_category_select($categoriesbyparent, $currentcategory->id);
     echo '</select>';
 } else if ($type == 'mine' && $layout == 'flat') {
-    echo '<form method="get" action="' . $CFG->wwwroot . '/blocks/exaport/view_items.php" class="' . ($useBootstrapLayout ? 'd-flex flex-wrap align-items-center gap-2 mb-3' : 'mb-3') . '">';
-    echo '<input type="hidden" name="courseid" value="' . (int)$courseid . '">';
-    echo '<input type="hidden" name="layout" value="flat">';
-    // Text search input.
-    echo '<div class="' . ($useBootstrapLayout ? 'input-group' : '') . '" style="' . ($useBootstrapLayout ? 'max-width: 300px;' : '') . '">';
-    echo '<input type="text" name="flatsearch" class="form-control" placeholder="' . get_string('search') . '..." value="' . s($flatsearch) . '">';
+    // Dynamic client-side filter bar: text input + clickable category chips.
+    echo '<div class="exaport-flat-filter mb-3">';
+    // Text search input (filters on keyup).
+    echo '<div class="mb-2">';
+    echo '<input type="text" id="exaport-flat-search" class="form-control" placeholder="' . get_string('search') . '..." style="max-width: 400px;">';
     echo '</div>';
-    // Category filter dropdown.
-    echo '<select name="flatcategoryids[]" class="form-control custom-select" style="max-width: 250px;">';
-    echo '<option value="">' . block_exaport_get_string("categories") . ' (' . get_string('all') . ')</option>';
+    // Category chips (multi-select, click to toggle).
+    echo '<div id="exaport-flat-category-chips" class="d-flex flex-wrap gap-1">';
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {
             continue;
         }
-        $selected = in_array((int)$category->id, $flatcategoryids) ? ' selected="selected"' : '';
         $fullname = block_exaport_category_full_path_name($category->id, $categories);
-        echo '<option value="' . (int)$category->id . '"' . $selected . '>' . format_string($fullname) . '</option>';
+        echo '<button type="button" class="btn btn-sm btn-outline-secondary exaport-category-chip" data-catid="' . (int)$category->id . '">'
+            . format_string($fullname) . '</button>';
     }
-    echo '</select>';
-    echo '<button type="submit" class="btn btn-primary">' . get_string('search') . '</button>';
-    echo '</form>';
+    echo '</div>';
+    echo '</div>';
 }
 
 echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
@@ -854,6 +816,56 @@ if ($layout == 'folder' && $folderlayout == 'details') {
 echo '<div style="clear: both;">&nbsp;</div>';
 echo "</div>";
 echo block_exaport_wrapperdivend();
+
+// Client-side dynamic filter JavaScript for flat layout.
+if ($type == 'mine' && $layout == 'flat') {
+    echo '<script>
+(function() {
+    var searchInput = document.getElementById("exaport-flat-search");
+    var chips = document.querySelectorAll(".exaport-category-chip");
+    var items = document.querySelectorAll(".exaport-flat-item");
+    var selectedCats = [];
+
+    function filterItems() {
+        var searchText = (searchInput ? searchInput.value : "").toLowerCase();
+        items.forEach(function(item) {
+            var name = item.getAttribute("data-item-name") || "";
+            var catIdsStr = item.getAttribute("data-category-ids") || "";
+            var catIds = catIdsStr ? catIdsStr.split(",").map(Number) : [];
+
+            var matchesSearch = !searchText || name.indexOf(searchText) !== -1;
+            var matchesCategory = selectedCats.length === 0 || selectedCats.some(function(catId) {
+                return catIds.indexOf(catId) !== -1;
+            });
+
+            item.style.display = (matchesSearch && matchesCategory) ? "" : "none";
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", filterItems);
+    }
+
+    chips.forEach(function(chip) {
+        chip.addEventListener("click", function() {
+            var catId = parseInt(chip.getAttribute("data-catid"), 10);
+            var idx = selectedCats.indexOf(catId);
+            if (idx === -1) {
+                selectedCats.push(catId);
+                chip.classList.remove("btn-outline-secondary");
+                chip.classList.add("btn-primary");
+            } else {
+                selectedCats.splice(idx, 1);
+                chip.classList.remove("btn-primary");
+                chip.classList.add("btn-outline-secondary");
+            }
+            filterItems();
+        });
+    });
+})();
+</script>';
+}
+
 echo $OUTPUT->footer();
 
 function block_exaport_get_item_comp_icon($item) {
@@ -1315,8 +1327,16 @@ function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type,
     $iconTypeProps = block_exaport_item_icon_type_options($item->type);
     $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
 
+    // Build category IDs for client-side filtering.
+    $itemCatIds = [];
+    if (!empty($item->flatcategories) && is_array($item->flatcategories)) {
+        foreach ($item->flatcategories as $cat) {
+            $itemCatIds[] = (int)$cat->id;
+        }
+    }
+
     $itemContent = '
-        <div class="col mb-4">
+        <div class="col mb-4 exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '">
 				<div class="card h-100 excomdos_tile excomdos_tile_item id-13 ui-draggable ui-draggable-handle">
 					<div class="card-header excomdos_tilehead d-flex justify-content-between flex-wrap">
 						<div class="excomdos_tileinfo">

@@ -178,13 +178,15 @@ define([], function() {
         input.setAttribute('autocomplete', 'off');
         input.style.cssText = 'padding-right: 2em;';
 
-        // Dropdown arrow indicator — uses Moodle's standard form-autocomplete-downarrow class
-        // so the arrow inherits the current theme's styling (icon, colour, size).
+        // Dropdown arrow indicator — replicates Moodle's core/form-autocomplete pattern:
+        // a <span class="form-autocomplete-downarrow"> containing an inline SVG triangle.
         var arrow = document.createElement('span');
-        arrow.className = 'form-autocomplete-downarrow position-absolute p-1';
-        arrow.style.cssText = 'right: 0; top: 0; bottom: 0; display: flex; align-items: center;'
-            + ' pointer-events: none;';
+        arrow.className = 'form-autocomplete-downarrow';
+        arrow.style.cssText = 'position: absolute; right: 0.5em; top: 50%; transform: translateY(-50%);'
+            + ' pointer-events: none; line-height: 1;';
         arrow.setAttribute('aria-hidden', 'true');
+        arrow.innerHTML = '<svg width="16" height="16" focusable="false" viewBox="0 0 16 16">'
+            + '<polygon points="4,6 12,6 8,10" fill="currentColor"/></svg>';
 
         // Create dropdown list — uses Bootstrap utility classes for theme-consistent styling.
         var dropdown = document.createElement('div');

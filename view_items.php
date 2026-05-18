@@ -541,52 +541,10 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</form>';
 }
 
-echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-column flex-sm-row' : '') . '">';
-if (in_array($type, ['mine', 'shared'])) {
-    $cattype = '';
-    if ($type == 'shared') {
-        $cattype = '&cattype=shared';
-    }
-    echo '<div class="excomdos_additem_content">';
-    if ($type == 'mine') {
-        echo '<span><a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid . '">'
-            . block_exaport_fontawesome_icon('folder', 'solid', 2, [], ['color' => '#7a7a7a'], [], 'add') . '<br />'
-            . get_string("category", "block_exaport") . "</a></span>";
-    }
-    // Add "Mixed" artefact
-    echo '<span><a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?action=add&courseid=' . $courseid . '&categoryid=' . $categoryid . $cattype
-        . '&type=mixed">'
-        . block_exaport_fontawesome_icon('clone', 'solid', 2, [], [], ['data-fa-transform' => 'flip-h flip-v'],
-            'add', [], [], ['data-fa-transform' => 'shrink-7 down-4 right-8'])
-        . '<br />' . get_string("add_mixed", "block_exaport") . "</a></span>";
-    // Next types are disabled after adding 'mixed' type. Real artefact type will be changed after filling fields.
-    // These types are hidden only in this view. All other functions are working with types as before.
-    /*
-    // Add "Link" artefact.
-    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
-            '&type=link">'.
-            '<img src="pix/link_new_32.png" /><br />'.get_string("link", "block_exaport")."</a></span>";
-    // Add "File" artefact.
-    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
-            '&type=file">'.
-            '<img src="pix/file_new_32.png" /><br />'.get_string("file", "block_exaport")."</a></span>";
-    // Add "Note" artefact.
-    echo '<span><a href="'.$CFG->wwwroot.'/blocks/exaport/item.php?action=add&courseid='.$courseid.'&categoryid='.$categoryid.$cattype.
-            '&type=note">'.
-            '<img src="pix/note_new_32.png" /><br />'.get_string("note", "block_exaport")."</a></span>";
-    */
-    // Anzeigen wenn kategorien vorhanden zum importieren aus sprachfile.
-    if ($type == 'mine') {
-        $langcategories = trim(get_string("lang_categories", "block_exaport"));
-        if ($langcategories) {
-            echo '<span><a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?action=addstdcat&courseid=' . $courseid . '">' .
-                '<img src="pix/folder_new_32.png" /><br />' . get_string("addstdcat", "block_exaport") . "</a></span>";
-        }
-    }
-    echo '</div>';
-}
+echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 
-echo '<div class="excomdos_changeview ' . ($useBootstrapLayout ? 'my-4 my-sm-0 align-self-end align-self-sm-center' : '') . '"><p>';
+// Left side: view toggle buttons.
+echo '<div class="excomdos_changeview ' . ($useBootstrapLayout ? 'my-2 align-self-center' : '') . '"><p>';
 echo '<span><a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '">'
     . block_exaport_fontawesome_icon('folder-open', 'regular', '2')
     . '<br />' . get_string('category', 'block_exaport') . "</a></span>";
@@ -604,14 +562,40 @@ if ($layout == 'folder') {
             . '<br />' . block_exaport_get_string("tiles") . "</a></span>";
     }
 }
-
 if ($type == 'mine') {
     echo '<span><a target="_blank" href="' . $CFG->wwwroot . '/blocks/exaport/view_items_print.php?courseid=' . $courseid . '">'
         . block_exaport_fontawesome_icon('print', 'solid', '2')
-        //            .'<img src="pix/view_print.png" alt="Tile View" />'
         . '<br />' . get_string("printerfriendly", "group") . "</a></span>";
 }
-echo '</p></div></div>';
+echo '</p></div>';
+
+// Right side: consolidated "Create" dropdown button.
+if (in_array($type, ['mine', 'shared'])) {
+    $cattype = '';
+    if ($type == 'shared') {
+        $cattype = '&cattype=shared';
+    }
+    $createartefacturl = $CFG->wwwroot . '/blocks/exaport/item.php?action=add&courseid=' . $courseid . '&categoryid=' . $categoryid . $cattype . '&type=mixed';
+    $createcategoryurl = $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid;
+
+    echo '<div class="excomdos_create_dropdown ' . ($useBootstrapLayout ? 'my-2 align-self-center' : '') . '" style="position: relative; display: inline-block;">';
+    echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';
+    echo block_exaport_fontawesome_icon('plus', 'solid', 1) . ' ' . get_string('create');
+    echo '</button>';
+    echo '<div class="dropdown-menu dropdown-menu-right dropdown-menu-end">';
+    echo '<a class="dropdown-item" href="' . $createartefacturl . '">'
+        . block_exaport_fontawesome_icon('clone', 'solid', 1) . ' '
+        . get_string("add_mixed", "block_exaport") . '</a>';
+    if ($type == 'mine') {
+        echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
+            . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '
+            . get_string("category", "block_exaport") . '</a>';
+    }
+    echo '</div>';
+    echo '</div>';
+}
+
+echo '</div>';
 
 if ($layout == 'folder') {
     echo '<div class="excomdos_cat">';

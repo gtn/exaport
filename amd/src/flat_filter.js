@@ -18,6 +18,7 @@ define([], function() {
     var sortSelect;         // Sort-by dropdown.
     var chipsContainer;     // Container where selected category chips are rendered below the filter bar.
     var clearAllLabel = 'Clear all filters'; // Translatable via init() parameter.
+    var searchCategoryLabel = 'Search Category...'; // Translatable via init() parameter.
 
     /**
      * Render category chips and a "remove all" button into the chips container.
@@ -159,7 +160,7 @@ define([], function() {
         for (var i = 1; i < categorySelect.options.length; i++) {
             options.push({id: categorySelect.options[i].value, name: categorySelect.options[i].text});
         }
-        var placeholder = categorySelect.options[0] ? categorySelect.options[0].text : 'Category';
+        var placeholder = searchCategoryLabel;
 
         // Hide the native select.
         categorySelect.style.display = 'none';
@@ -273,9 +274,11 @@ define([], function() {
          * Initialise the flat filter module.
          *
          * @param {string} clearAllString The translated "clear all filters" label.
+         * @param {string} searchCategoryString The translated "Search Category..." placeholder.
          */
-        init: function(clearAllString) {
+        init: function(clearAllString, searchCategoryString) {
             clearAllLabel = clearAllString || clearAllLabel;
+            searchCategoryLabel = searchCategoryString || searchCategoryLabel;
             searchInput = document.getElementById('exaport-flat-search');
             categorySelect = document.getElementById('exaport-flat-category-select');
             sortSelect = document.getElementById('exaport-flat-sort-select');

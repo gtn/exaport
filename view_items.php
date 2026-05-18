@@ -527,7 +527,8 @@ if ($type == 'mine' && $layout == 'folder') {
 
     // Load AMD module for filtering.
     $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
-        get_string('clearAllFilers', 'block_exaport')
+        get_string('clearAllFilers', 'block_exaport'),
+        get_string('searchcategory', 'block_exaport')
     ]);
 }
 

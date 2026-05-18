@@ -365,6 +365,7 @@ $string['filterByTag'] = 'Filter by tag';
 $string['tagarea_block_exaportitem'] = 'My Portfolio Artefacts';
 $string['searchByTitle'] = 'Search';
 $string['clearAllFilers'] = 'Clear all filters';
+$string['searchcategory'] = 'Search Category...';
 $string['sharedwith'] = 'Shared with';
 $string['sharedwith_user_cnt'] = 'Shared with {$a} users';
 $string['sharedwith_onlyme'] = 'Shared only with me';

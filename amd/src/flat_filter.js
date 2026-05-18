@@ -154,12 +154,19 @@ define([], function() {
         container.className = 'exaport-searchable-select';
         container.style.cssText = 'position: relative; width: 100%;';
 
-        // Create search input (styled like the select).
+        // Create search input (styled like the select) with a dropdown arrow.
         var input = document.createElement('input');
         input.type = 'text';
         input.className = 'form-control';
         input.placeholder = placeholder;
         input.setAttribute('autocomplete', 'off');
+        input.style.cssText = 'padding-right: 2em;';
+
+        // Dropdown arrow indicator.
+        var arrow = document.createElement('span');
+        arrow.innerHTML = '&#9662;';
+        arrow.style.cssText = 'position: absolute; right: 0.75em; top: 50%; transform: translateY(-50%);'
+            + ' pointer-events: none; font-size: 0.9em; color: #555;';
 
         // Create dropdown list.
         var dropdown = document.createElement('div');
@@ -177,6 +184,10 @@ define([], function() {
             var lowerFilter = (filter || '').toLowerCase();
             var hasResults = false;
             options.forEach(function(opt) {
+                // Hide already-selected categories entirely.
+                if (selectedCategories[opt.id]) {
+                    return;
+                }
                 if (lowerFilter && opt.name.toLowerCase().indexOf(lowerFilter) === -1) {
                     return;
                 }
@@ -187,21 +198,13 @@ define([], function() {
                 item.textContent = opt.name;
                 item.setAttribute('data-id', opt.id);
 
-                // Grey out already-selected categories.
-                if (selectedCategories[opt.id]) {
-                    item.style.color = '#999';
-                    item.style.fontStyle = 'italic';
-                }
-
                 item.addEventListener('mousedown', function(e) {
                     e.preventDefault(); // Prevent input blur.
-                    if (!selectedCategories[opt.id]) {
-                        selectedCategories[opt.id] = opt.name;
-                        renderChips();
-                        filterItems();
-                    }
-                    input.value = '';
-                    dropdown.style.display = 'none';
+                    selectedCategories[opt.id] = opt.name;
+                    renderChips();
+                    filterItems();
+                    // Re-render options to remove the just-selected item, keep dropdown open.
+                    renderOptions(input.value);
                 });
                 item.addEventListener('mouseenter', function() {
                     item.style.backgroundColor = '#f0f0f0';
@@ -238,6 +241,7 @@ define([], function() {
         });
 
         container.appendChild(input);
+        container.appendChild(arrow);
         container.appendChild(dropdown);
         wrapper.appendChild(container);
     }

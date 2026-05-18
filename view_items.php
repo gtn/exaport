@@ -842,15 +842,6 @@ if ($layout == 'folder' && $folderlayout == 'details') {
         foreach ($subcategories as $category) {
             echo block_exaport_category_list_item($category, $courseid, $type, $currentcategory, null);
         }
-    } else if ($layout == 'flat' && $type == 'mine') {
-        foreach ($categories as $category) {
-            if ((int)$category->id === 0) {
-                continue;
-            }
-            $category->url = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid .
-                '&layout=folder&categoryid=' . $category->id . '&folderlayout=' . $folderlayout;
-            echo block_exaport_category_list_item($category, $courseid, $type, $currentcategory, null);
-        }
     }
 
     foreach ($items as $item) {

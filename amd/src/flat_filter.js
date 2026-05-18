@@ -8,7 +8,7 @@
  * @copyright  2024 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
+define(['jquery'], function($) {
 
     var selectedCategories = {}; // {id: name}
     var searchInput;
@@ -16,6 +16,39 @@ define([], function() {
     var sortSelect;
     var chipsContainer;
     var clearAllLabel = 'Clear all filters';
+
+    /**
+     * Deselect a category in the underlying select and notify autocomplete.
+     * @param {string} id Category ID to deselect.
+     */
+    function deselectCategory(id) {
+        if (!categorySelect) {
+            return;
+        }
+        var options = categorySelect.options;
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].value === id) {
+                options[i].selected = false;
+                break;
+            }
+        }
+        // Trigger change so autocomplete UI updates its selection display.
+        $(categorySelect).trigger('change');
+    }
+
+    /**
+     * Deselect all categories in the underlying select.
+     */
+    function deselectAllCategories() {
+        if (!categorySelect) {
+            return;
+        }
+        var options = categorySelect.options;
+        for (var i = 0; i < options.length; i++) {
+            options[i].selected = false;
+        }
+        $(categorySelect).trigger('change');
+    }
 
     /**
      * Render chips and "remove all" button into the chips container.
@@ -41,6 +74,7 @@ define([], function() {
             closeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 delete selectedCategories[id];
+                deselectCategory(id);
                 renderChips();
                 filterItems();
             });
@@ -59,6 +93,7 @@ define([], function() {
         removeAll.appendChild(closeAll);
         removeAll.addEventListener('click', function() {
             selectedCategories = {};
+            deselectAllCategories();
             renderChips();
             filterItems();
         });
@@ -151,17 +186,19 @@ define([], function() {
                 });
             }
 
-            // Bind category dropdown: selecting an option adds it as a chip.
+            // Bind category autocomplete multiselect: sync selections to chips on change.
             if (categorySelect) {
-                categorySelect.addEventListener('change', function() {
-                    var val = categorySelect.value;
-                    if (val && !selectedCategories[val]) {
-                        selectedCategories[val] = categorySelect.options[categorySelect.selectedIndex].text;
-                        renderChips();
-                        filterItems();
+                $(categorySelect).on('change', function() {
+                    // Sync selectedCategories from the select's current state.
+                    selectedCategories = {};
+                    var options = categorySelect.options;
+                    for (var i = 0; i < options.length; i++) {
+                        if (options[i].selected && options[i].value) {
+                            selectedCategories[options[i].value] = options[i].text;
+                        }
                     }
-                    // Reset dropdown to placeholder.
-                    categorySelect.value = '';
+                    renderChips();
+                    filterItems();
                 });
             }
 

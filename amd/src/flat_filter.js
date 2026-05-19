@@ -37,8 +37,8 @@ define([], function() {
         ids.forEach(function(id) {
             var chip = document.createElement('span');
             // badge-primary for BS4 (Moodle 3.x), bg-primary for BS5 (Moodle 4.x).
-            chip.className = 'badge badge-primary bg-primary d-inline-flex align-items-center mr-1 mb-1';
-            chip.style.cssText = 'font-size: 0.85rem; padding: 0.35em 0.6em; cursor: pointer; gap: 0.3em;';
+            chip.className = 'badge bg-secondary text-dark m-1';
+            chip.style.cssText = 'font-size: 100%';
             chip.textContent = selectedCategories[id] + ' ';
             var closeBtn = document.createElement('span');
             closeBtn.innerHTML = '&times;';
@@ -56,7 +56,7 @@ define([], function() {
 
         // "Remove all" button — badge-danger for BS4, bg-danger for BS5.
         var removeAll = document.createElement('span');
-        removeAll.className = 'badge badge-danger bg-danger d-inline-flex align-items-center mr-1 mb-1';
+        removeAll.className = 'badge bg-primary text-light m-1';
         removeAll.style.cssText = 'font-size: 0.85rem; padding: 0.35em 0.6em; cursor: pointer; gap: 0.3em;';
         removeAll.textContent = clearAllLabel + ' ';
         var closeAll = document.createElement('span');

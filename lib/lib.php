@@ -2416,20 +2416,18 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
 }
 
 
-function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sort = '', $withShared = false, $includesubcategories = []) {
+function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sort = '', $withShared = false) {
     global $DB;
     $params = [];
     if ($categoryid > 0) {
-        // Collect all category IDs to filter on.
-        $catids = array_merge([$categoryid], $includesubcategories);
-        [$insql, $inparams] = $DB->get_in_or_equal($catids, SQL_PARAMS_QM);
-        $where = " EXISTS (
+        // Use the item-category relation table exclusively.
+        $where = ' EXISTS (
             SELECT 1
               FROM {block_exaportitemcate} ic
              WHERE ic.itemid = i.id
-               AND ic.cateid $insql
-        ) ";
-        $params = array_merge($params, $inparams);
+               AND ic.cateid = ?
+        ) ';
+        $params[] = $categoryid;
     } else {
         // Uncategorized items: no entry in the itemcate table.
         $where = ' NOT EXISTS (

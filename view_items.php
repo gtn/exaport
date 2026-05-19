@@ -22,7 +22,6 @@ use block_exaport\globals as g;
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
-$show_subcategories = optional_param('show_subcategories', -1, PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT);
 $type = optional_param('type', '', PARAM_TEXT);
 $layout = optional_param('layout', '', PARAM_TEXT);
@@ -50,12 +49,6 @@ $userpreferences = block_exaport_get_user_preferences();
 
 if (!$sort && $userpreferences && isset($userpreferences->itemsort)) {
     $sort = $userpreferences->itemsort;
-}
-
-// Handle "show items from subcategories" preference.
-if ($show_subcategories === -1) {
-    // Not passed in URL – use stored preference (default: off).
-    $show_subcategories = (isset($userpreferences->show_subcategories)) ? (int)$userpreferences->show_subcategories : 0;
 }
 
 if ($type != 'shared' && $type != 'sharedstudent') {
@@ -411,26 +404,7 @@ if ($type == 'sharedstudent') {
         }
     } else {
         // Folder mode keeps legacy category navigation behavior.
-        $subcatids = [];
-        if ($show_subcategories && $currentcategory->id > 0) {
-            // Collect all descendant category IDs recursively.
-            $visited = [];
-            $stack = [$currentcategory->id];
-            while ($stack) {
-                $pid = array_pop($stack);
-                if (isset($visited[$pid])) {
-                    continue;
-                }
-                $visited[$pid] = true;
-                if (!empty($categoriesbyparent[$pid])) {
-                    foreach ($categoriesbyparent[$pid] as $child) {
-                        $subcatids[] = $child->id;
-                        $stack[] = $child->id;
-                    }
-                }
-            }
-        }
-        $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true, $subcatids);
+        $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true);
     }
 }
 
@@ -455,7 +429,7 @@ echo $OUTPUT->box($infobox, "center");
 echo "</div>";
 
 // Save user preferences.
-block_exaport_set_user_preferences(array('itemsort' => $sort, 'view_items_layout' => $layout, 'show_subcategories' => $show_subcategories));
+block_exaport_set_user_preferences(array('itemsort' => $sort, 'view_items_layout' => $layout));
 
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
@@ -491,16 +465,6 @@ if ($type == 'mine' && $layout == 'folder') {
 
     block_exaport_print_category_select($categoriesbyparent, $currentcategory->id);
     echo '</select>';
-
-    // "Show items from subcategories" checkbox.
-    $checkboxurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid .
-        '&layout=folder&folderlayout=' . $folderlayoutvalue . '&categoryid=' . $currentcategory->id .
-        '&show_subcategories=' . ($show_subcategories ? '0' : '1');
-    echo ' <label style="margin-left:1em;font-weight:normal;">';
-    echo '<input type="checkbox" onchange="document.location.href=\'' . $checkboxurl . '\';"' .
-        ($show_subcategories ? ' checked="checked"' : '') . '> ';
-    echo get_string('show_items_from_subcategories', 'block_exaport');
-    echo '</label>';
 } else if ($type == 'mine' && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     $filtercategories = [];

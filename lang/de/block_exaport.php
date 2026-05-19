@@ -952,4 +952,3 @@ $string['auto_distribute_views_on_enrolment'] = 'Ansichten automatisch bei neuen
 $string['no_views_to_distribute'] = 'Keine Ansichtsvorlage zum Verteilen definiert';
 $string['views_created'] = 'Ansichten erstellt: {$a}';
 $string['views_skipped'] = 'Ansichten übersprungen (existieren bereits): {$a}';
-$string['show_items_from_subcategories'] = 'Einträge aus Unterkategorien anzeigen';

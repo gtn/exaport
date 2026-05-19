@@ -133,7 +133,10 @@ class blockedit {
             [$insql, $inparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
             $itemcaterows = $DB->get_records_sql("SELECT id, itemid, cateid FROM {block_exaportitemcate} WHERE itemid $insql", $inparams);
             foreach ($itemcaterows as $row) {
-                $itemcatemapping[$row->itemid] = $row->cateid;
+                // Use the first category found for display purposes.
+                if (!isset($itemcatemapping[$row->itemid])) {
+                    $itemcatemapping[$row->itemid] = (int)$row->cateid;
+                }
             }
         }
         // Save items to category.

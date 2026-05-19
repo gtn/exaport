@@ -718,10 +718,6 @@ function block_exaport_sync_item_categories($itemid, array $categoryids) {
     }
 }
 
-function block_exaport_itemcate_table_exists() {
-    return true;
-}
-
 function block_exaport_convert_item_type(&$post) {
     // 1. default type is 'note'
     $post->type = 'note';

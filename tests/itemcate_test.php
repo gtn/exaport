@@ -91,13 +91,6 @@ final class itemcate_test extends \advanced_testcase {
         return $itemid;
     }
 
-    private function ensure_itemcate_table(): void {
-        global $DB;
-        if (!$DB->get_manager()->table_exists(new \xmldb_table('block_exaportitemcate'))) {
-            $this->markTestSkipped('block_exaportitemcate table is not available in this schema state.');
-        }
-    }
-
     public function test_create_category(): void {
         global $DB;
 
@@ -115,7 +108,6 @@ final class itemcate_test extends \advanced_testcase {
 
     public function test_create_item_multiple_categories(): void {
         global $DB;
-        $this->ensure_itemcate_table();
 
         $cat1 = $this->create_category('Cat 1');
         $cat2 = $this->create_category('Cat 2');
@@ -138,7 +130,6 @@ final class itemcate_test extends \advanced_testcase {
 
     public function test_migration_populates_junction_table(): void {
         global $DB;
-        $this->ensure_itemcate_table();
 
         $categoryid = $this->create_category('Migration cat');
         $itemid = $this->create_item($categoryid, 'Migrated item');
@@ -149,7 +140,6 @@ final class itemcate_test extends \advanced_testcase {
 
     public function test_item_appears_in_all_assigned_categories(): void {
         global $DB;
-        $this->ensure_itemcate_table();
 
         $cat1 = $this->create_category('Cat A');
         $cat2 = $this->create_category('Cat B');

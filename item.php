@@ -65,7 +65,6 @@ if ($action == 'copytoself') {
 
     unset($copy->id);
     $copy->userid = $USER->id;
-    $copy->categoryid = 0;
     $copy->timemodified = time();
     $copy->shareall = 0;
     $copy->externaccess = 0;
@@ -204,8 +203,9 @@ foreach (POSSIBLE_IFRAME_FIELDS as $itemfield) {
 }
 
 $categoryidforform = $categoryid;
-if ($cattype == 'shared' && $categoryid === 0) {
-    $categoryidforform = $existing->categoryid;
+if ($cattype == 'shared' && $categoryid === 0 && $existing) {
+    $existingcateid = $DB->get_field_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$existing->id]);
+    $categoryidforform = $existingcateid ? (int)$existingcateid : 0;
 }
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type,
     array('current' => $existing, 'useTextareas' => $usetextareas, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
@@ -219,8 +219,6 @@ if ($editform->is_cancelled()) {
     require_sesskey();
 
     $categoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
-    // Keep legacy field populated with the first selected category during the transition period.
-    $fromform->categoryid = $categoryids ? reset($categoryids) : 0;
     $fromform->categoryids = $categoryids;
 
     switch ($action) {
@@ -261,7 +259,6 @@ switch ($action) {
     case 'add':
         $post->action = $action;
         $post->courseid = $courseid;
-        $post->categoryid = $categoryid;
         $post->categoryids = $categoryid > 0 ? [$categoryid] : [];
 
         $straction = get_string('new');
@@ -276,16 +273,8 @@ switch ($action) {
         $post->project_description = $existing->project_description;
         $post->project_process = $existing->project_process;
         $post->project_result = $existing->project_result;
-        $post->categoryid = $existing->categoryid;
-        $post->categoryids = [];
-        if (block_exaport_itemcate_table_exists()) {
-            $post->categoryids = array_map('intval', $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?',
-                [$existing->id]));
-        }
-        if (!$post->categoryids && $existing->categoryid > 0) {
-            // Keep legacy category visible if relation rows are not present yet.
-            $post->categoryids = [$existing->categoryid];
-        }
+        $post->categoryids = array_map('intval', $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?',
+            [$existing->id]));
         $post->userid = $existing->userid;
         $post->action = $action;
         $post->courseid = $courseid;
@@ -720,10 +709,6 @@ function block_exaport_normalize_item_categoryids($categoryids) {
 function block_exaport_sync_item_categories($itemid, array $categoryids) {
     global $DB;
 
-    if (!block_exaport_itemcate_table_exists()) {
-        return;
-    }
-
     $DB->delete_records('block_exaportitemcate', ['itemid' => $itemid]);
     foreach ($categoryids as $categoryid) {
         $DB->insert_record('block_exaportitemcate', (object)[
@@ -734,13 +719,7 @@ function block_exaport_sync_item_categories($itemid, array $categoryids) {
 }
 
 function block_exaport_itemcate_table_exists() {
-    global $DB;
-
-    static $itemcatetableexists = null;
-    if ($itemcatetableexists === null) {
-        $itemcatetableexists = $DB->get_manager()->table_exists(new xmldb_table('block_exaportitemcate'));
-    }
-    return $itemcatetableexists;
+    return true;
 }
 
 function block_exaport_convert_item_type(&$post) {

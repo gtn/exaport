@@ -105,7 +105,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
         $mform->add_exaport_help_button('name', 'forms.item.title');
 
-        // Keep category selection multi-value, while item->categoryid is still stored for backward compatibility.
+        // Category selection uses multi-value, synced to block_exaportitemcate relation table.
         $mform->addElement('autocomplete', 'categoryids', get_string("category", "block_exaport"), array(), ['multiple' => true]);
         $mform->setType('categoryids', PARAM_SEQUENCE);
         $mform->setDefault('categoryids', []);

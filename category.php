@@ -111,14 +111,25 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
             $DB->delete_records('block_exaportcate', array('pid' => $id));
 
             // Delete itemsharing.
-            if ($entries = $DB->get_records('block_exaportitem', array("categoryid" => $id))) {
-                foreach ($entries as $entry) {
+            $catitems = $DB->get_records_sql('
+                SELECT i.id FROM {block_exaportitem} i
+                JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
+            ', [$id]);
+            if ($catitems) {
+                foreach ($catitems as $entry) {
                     $DB->delete_records('block_exaportitemshar', array('itemid' => $entry->id));
                 }
             }
 
-            // Delete items.
-            $DB->delete_records('block_exaportitem', array('categoryid' => $id));
+            // Delete items that belong exclusively to this category.
+            foreach ($catitems as $entry) {
+                // Remove the category link.
+                $DB->delete_records('block_exaportitemcate', ['itemid' => $entry->id, 'cateid' => $id]);
+                // If the item has no more categories, delete it.
+                if (!$DB->record_exists('block_exaportitemcate', ['itemid' => $entry->id])) {
+                    $DB->delete_records('block_exaportitem', ['id' => $entry->id]);
+                }
+            }
         }
 
         block_exaport_recursive_delete_category($category->id);

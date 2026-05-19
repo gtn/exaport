@@ -84,7 +84,6 @@ class provider implements
         $collection->add_database_table('block_exaportitem', [
             'userid' => 'privacy:metadata:block_exaportitem:userid',
             'type' => 'privacy:metadata:block_exaportitem:type',
-            'categoryid' => 'privacy:metadata:block_exaportitem:categoryid',
             'name' => 'privacy:metadata:block_exaportitem:name',
             'url' => 'privacy:metadata:block_exaportitem:url',
             'intro' => 'privacy:metadata:block_exaportitem:intro',

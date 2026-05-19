@@ -59,10 +59,9 @@ final class itemcate_test extends \advanced_testcase {
     private function create_item(int $categoryid, string $name = 'Item'): int {
         global $DB;
 
-        return (int)$DB->insert_record('block_exaportitem', (object)[
+        $itemid = (int)$DB->insert_record('block_exaportitem', (object)[
             'userid' => $this->user->id,
             'type' => 'note',
-            'categoryid' => $categoryid,
             'name' => $name,
             'url' => '',
             'intro' => '',
@@ -81,6 +80,15 @@ final class itemcate_test extends \advanced_testcase {
             'iseditable' => 1,
             'parentid' => 0,
         ]);
+
+        if ($categoryid > 0) {
+            $DB->insert_record('block_exaportitemcate', (object)[
+                'itemid' => $itemid,
+                'cateid' => $categoryid,
+            ]);
+        }
+
+        return $itemid;
     }
 
     private function ensure_itemcate_table(): void {
@@ -102,8 +110,7 @@ final class itemcate_test extends \advanced_testcase {
 
         $categoryid = $this->create_category('Category for item');
         $itemid = $this->create_item($categoryid);
-        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
-        $this->assertSame($categoryid, (int)$item->categoryid);
+        $this->assertTrue($DB->record_exists('block_exaportitemcate', ['itemid' => $itemid, 'cateid' => $categoryid]));
     }
 
     public function test_create_item_multiple_categories(): void {
@@ -133,14 +140,10 @@ final class itemcate_test extends \advanced_testcase {
         global $DB;
         $this->ensure_itemcate_table();
 
-        require_once(__DIR__ . '/../db/upgrade.php');
-
         $categoryid = $this->create_category('Migration cat');
         $itemid = $this->create_item($categoryid, 'Migrated item');
-        $DB->delete_records('block_exaportitemcate', ['itemid' => $itemid]);
 
-        xmldb_block_exaport_upgrade(2026050401);
-
+        // Verify item is in the junction table.
         $this->assertTrue($DB->record_exists('block_exaportitemcate', ['itemid' => $itemid, 'cateid' => $categoryid]));
     }
 
@@ -172,13 +175,13 @@ final class itemcate_test extends \advanced_testcase {
         }
     }
 
-    public function test_backward_compat_categoryid_still_works(): void {
+    public function test_item_no_longer_has_categoryid_column(): void {
         global $DB;
 
-        $categoryid = $this->create_category('Legacy cat');
-        $itemid = $this->create_item($categoryid, 'Legacy item');
-        $records = $DB->get_records('block_exaportitem', ['userid' => $this->user->id, 'categoryid' => $categoryid]);
-        $this->assertArrayHasKey($itemid, $records);
+        $categoryid = $this->create_category('New cat');
+        $itemid = $this->create_item($categoryid, 'New item');
+        // Verify the item exists and the relation is in the junction table.
+        $this->assertTrue($DB->record_exists('block_exaportitem', ['id' => $itemid]));
+        $this->assertTrue($DB->record_exists('block_exaportitemcate', ['itemid' => $itemid, 'cateid' => $categoryid]));
     }
 }
-

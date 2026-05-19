@@ -491,7 +491,6 @@ if ($editform->is_cancelled()) {
                             $newitem = new stdClass;
                             $newitem->name = $block->block_title;
                             $newitem->type = 'note';
-                            $newitem->categoryid = 0;
                             $newitem->userid = $USER->id;
                             $newitem->intro = $block->contentmedia;
                             $newitem->timemodified = time();

@@ -66,7 +66,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
         // Save files to first category, so read that id.
         // $categoryid = $DB->get_field_sql("SELECT id FROM {block_exaportcate} ".
         // " WHERE userid = ? ORDER BY name LIMIT 1", array($USER->id));
-        // Save to main category. SZ: 30.09.2020
+        // Save to main category (uncategorized).
         $categoryid = 0;
 
         foreach ($files as $file) {
@@ -78,10 +78,12 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
             $item->name = $file->get_filename();
             $item->type = 'file';
             $item->intro = '';
-            $item->categoryid = $categoryid;
 
             // Insert.
             if ($item->id = $DB->insert_record('block_exaportitem', $item)) {
+                if ($categoryid > 0) {
+                    block_exaport_sync_item_categories($item->id, [$categoryid]);
+                }
 
                 $filerecord = new stdClass();
                 $filerecord->contextid = context_user::instance($USER->id)->id;

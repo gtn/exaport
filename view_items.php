@@ -118,14 +118,9 @@ if ($type == 'sharedstudent') {
                                 {$categorycolumns}
                                 , COUNT(DISTINCT i.id) AS item_cnt
                             FROM {block_exaportcate} c
+                            LEFT JOIN {block_exaportitemcate} ic ON ic.cateid = c.id
                             LEFT JOIN {block_exaportitem} i ON (
-                                i.categoryid = c.id
-                                OR EXISTS (
-                                    SELECT 1
-                                    FROM {block_exaportitemcate} ic
-                                    WHERE ic.itemid = i.id
-                                      AND ic.cateid = c.id
-                                )
+                                i.id = ic.itemid
                             ) AND " . block_exaport_get_item_where() . "
                             WHERE c.userid = ?
                             GROUP BY
@@ -180,20 +175,20 @@ if ($type == 'sharedstudent') {
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
             WHERE i.userid = ?
-                AND (i.categoryid = ? OR EXISTS (
+                AND EXISTS (
                     SELECT 1
                     FROM {block_exaportitemcate} ic
                     WHERE ic.itemid = i.id
                       AND ic.cateid = ?
-                ))
+                )
                 AND " . block_exaport_get_item_where() .
-            " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
+            " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
             i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
             i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
             i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
             i.iseditable, i.example_url, i.parentid
             $sqlsort
-        ", [$selecteduser->id, $currentcategory->id, $currentcategory->id]);
+        ", [$selecteduser->id, $currentcategory->id]);
     }
 
 } else if ($type == 'shared') {
@@ -239,14 +234,9 @@ if ($type == 'sharedstudent') {
                 {$categorycolumns}
                 , COUNT(DISTINCT i.id) AS item_cnt
             FROM {block_exaportcate} c
+            LEFT JOIN {block_exaportitemcate} ic ON ic.cateid = c.id
             LEFT JOIN {block_exaportitem} i ON (
-                i.categoryid = c.id
-                OR EXISTS (
-                    SELECT 1
-                    FROM {block_exaportitemcate} ic
-                    WHERE ic.itemid = i.id
-                      AND ic.cateid = c.id
-                )
+                i.id = ic.itemid
             ) AND " . block_exaport_get_item_where() . "
             WHERE c.userid = ?
             GROUP BY
@@ -312,21 +302,21 @@ if ($type == 'sharedstudent') {
             SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE (i.categoryid = ? OR EXISTS (
+            WHERE EXISTS (
                     SELECT 1
                     FROM {block_exaportitemcate} ic
                     WHERE ic.itemid = i.id
                       AND ic.cateid = ?
-                ))
+                )
                 AND " . $usercondition . "
                 AND " . block_exaport_get_item_where() .
-            " GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
+            " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
             i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
             i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
             i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
             i.iseditable, i.example_url, i.parentid
             $sqlsort
-        ", [$currentcategory->id, $currentcategory->id]);
+        ", [$currentcategory->id]);
     }
 
 } else {
@@ -379,7 +369,7 @@ if ($type == 'sharedstudent') {
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
             WHERE i.userid = ?
               AND " . block_exaport_get_item_where() . "
-            GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
+            GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
                 i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
                 i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
                 i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
@@ -410,13 +400,6 @@ if ($type == 'sharedstudent') {
             }
             foreach ($items as $item) {
                 $item->flatcategories = $categoriesbyitem[$item->id] ?? [];
-                if (!$item->flatcategories && !empty($item->categoryid) && isset($categories[$item->categoryid])) {
-                    // Keep a fallback badge for items that still only have legacy categoryid.
-                    $item->flatcategories = [(object)[
-                        'id' => $item->categoryid,
-                        'name' => block_exaport_category_full_path_name($item->categoryid, $categories),
-                    ]];
-                }
             }
         }
     } else {

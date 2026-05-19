@@ -185,7 +185,6 @@ function import_user_image($unzipdir, $url) {
 
         $new = new stdClass();
         $new->userid = $USER->id;
-        $new->categoryid = 5;
         $new->name = $url;
         $new->intro = $path;
         $new->timemodified = time();
@@ -400,7 +399,6 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
         ) {
             $new = new stdClass();
             $new->userid = $USER->id;
-            $new->categoryid = $category;
             $new->name = block_exaport_clean_title($title);
             $new->url = block_exaport_clean_url(substr($content, $starturl, $endurl - $starturl));
             $new->intro = block_exaport_clean_text(substr($content, $startdesc, $enddesc - $startdesc));
@@ -409,6 +407,9 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
             $new->course = $COURSE->id;
 
             if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+                if ($category > 0) {
+                    block_exaport_sync_item_categories($new->id, [$category]);
+                }
                 if (isset($xml) && isset($id)) {
                     import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
                 }
@@ -429,7 +430,6 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
         if (is_file(dirname($filepath) . '/' . block_exaport_clean_path($allfiles[0]))) {
             $new = new stdClass();
             $new->userid = $USER->id;
-            $new->categoryid = $category;
             $new->name = block_exaport_clean_title($title);
             $new->intro = block_exaport_clean_text(substr($content, $startdesc, $enddesc - $startdesc));
             $new->timemodified = time();
@@ -437,6 +437,9 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
             $new->course = $COURSE->id;
 
             if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+                if ($category > 0) {
+                    block_exaport_sync_item_categories($new->id, [$category]);
+                }
                 if (isset($xml) && isset($id)) {
                     import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
                 }
@@ -487,7 +490,6 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
         if ((($enddesc = strpos($content, '<!--###BOOKMARK_NOTE_DESC###-->', $startdesc)) !== false)) {
             $new = new stdClass();
             $new->userid = $USER->id;
-            $new->categoryid = $category;
             $new->name = block_exaport_clean_title($title);
             $new->intro = block_exaport_clean_text(substr($content, $startdesc, $enddesc - $startdesc));
             $new->timemodified = time();
@@ -495,6 +497,9 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
             $new->course = $COURSE->id;
 
             if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
+                if ($category > 0) {
+                    block_exaport_sync_item_categories($new->id, [$category]);
+                }
                 if (isset($xml) && isset($id)) {
                     import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
                 }

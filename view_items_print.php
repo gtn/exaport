@@ -80,15 +80,16 @@ $sqlsort = block_exaport_item_sort_to_sql($parsedsort, true);
 $condition = array($USER->id);
 
 $items = $DB->get_records_sql("
-    SELECT i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.categoryid, i.url,
+    SELECT i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.url,
     i.attachment, i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
     i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
     i.iseditable, ic.name AS cname, ic.id AS catid, COUNT(com.id) As comments
     FROM {block_exaportitem} i
-    LEFT JOIN {block_exaportcate} ic on i.categoryid = ic.id
+    LEFT JOIN {block_exaportitemcate} icat ON icat.itemid = i.id
+    LEFT JOIN {block_exaportcate} ic on icat.cateid = ic.id
     LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
     WHERE i.userid = ? AND " . block_exaport_get_item_where() .
-    " GROUP BY i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.categoryid, i.url, i.attachment,
+    " GROUP BY i.id, i.name, i.intro, i.timemodified, i.userid, i.type, i.url, i.attachment,
     i.courseid, i.shareall, i.externaccess, i.externcomment, i.sortorder,
     i.isoez, i.fileurl, i.beispiel_url, i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid, i.iseditable, ic.name, ic.id
     $sqlsort

@@ -1377,5 +1377,24 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026051501, 'exaport');
     }
 
+    if ($oldversion < 2026051902) {
+        // Drop the legacy categoryid column from block_exaportitem.
+        $table = new xmldb_table('block_exaportitem');
+
+        // First drop the index on categoryid if it exists.
+        $index = new xmldb_index('categoryid', XMLDB_INDEX_NOTUNIQUE, ['categoryid']);
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        // Now drop the field.
+        $field = new xmldb_field('categoryid');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_block_savepoint(true, 2026051902, 'exaport');
+    }
+
     return $result;
 }

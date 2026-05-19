@@ -17,6 +17,8 @@ define([], function() {
     var categorySelect;     // The native <select> (hidden, used as data source for the custom dropdown).
     var sortSelect;         // Sort-by dropdown.
     var chipsContainer;     // Container where selected category chips are rendered below the filter bar.
+    var subcategoriesCheckbox; // "Show items from subcategories" checkbox.
+    var categoryChildrenMap = {}; // Map of {parentId: [childId, ...]} for expanding filters to subcategories.
     var clearAllLabel = 'Clear all filters'; // Translatable via init() parameter.
     var searchCategoryLabel = 'Search Category...'; // Translatable via init() parameter.
 
@@ -68,12 +70,54 @@ define([], function() {
     }
 
     /**
+     * Given a category ID, collect all descendant category IDs recursively
+     * using the categoryChildrenMap.
+     *
+     * @param {number} catId The parent category ID.
+     * @return {number[]} Array of all descendant category IDs.
+     */
+    function getDescendantCatIds(catId) {
+        var descendants = [];
+        var stack = [catId];
+        var visited = {};
+        while (stack.length > 0) {
+            var current = stack.pop();
+            if (visited[current]) {
+                continue;
+            }
+            visited[current] = true;
+            var children = categoryChildrenMap[current];
+            if (children) {
+                for (var i = 0; i < children.length; i++) {
+                    descendants.push(children[i]);
+                    stack.push(children[i]);
+                }
+            }
+        }
+        return descendants;
+    }
+
+    /**
      * Filter and sort visible items based on current search text and selected categories.
      * Items are shown/hidden via display style — no DOM removal, so state is preserved.
      */
     function filterItems() {
         var searchText = (searchInput ? searchInput.value : '').toLowerCase();
         var selectedCatIds = Object.keys(selectedCategories).map(Number);
+
+        // If "show subcategories" is checked, expand each selected category to include descendants.
+        var includeSubcats = subcategoriesCheckbox && subcategoriesCheckbox.checked;
+        var matchCatIds = selectedCatIds.slice();
+        if (includeSubcats && selectedCatIds.length > 0) {
+            selectedCatIds.forEach(function(catId) {
+                var descendants = getDescendantCatIds(catId);
+                for (var i = 0; i < descendants.length; i++) {
+                    if (matchCatIds.indexOf(descendants[i]) === -1) {
+                        matchCatIds.push(descendants[i]);
+                    }
+                }
+            });
+        }
 
         var items = document.querySelectorAll('.exaport-flat-item');
         items.forEach(function(item) {
@@ -82,7 +126,7 @@ define([], function() {
             var catIds = catIdsStr ? catIdsStr.split(',').map(Number) : [];
 
             var matchesSearch = !searchText || name.indexOf(searchText) !== -1;
-            var matchesCategory = selectedCatIds.length === 0 || selectedCatIds.some(function(catId) {
+            var matchesCategory = matchCatIds.length === 0 || matchCatIds.some(function(catId) {
                 return catIds.indexOf(catId) !== -1;
             });
 
@@ -317,18 +361,28 @@ define([], function() {
          *
          * @param {string} clearAllString The translated "clear all filters" label.
          * @param {string} searchCategoryString The translated "Search Category..." placeholder.
+         * @param {Object} childrenMap Map of parent category ID to array of child category IDs.
          */
-        init: function(clearAllString, searchCategoryString) {
+        init: function(clearAllString, searchCategoryString, childrenMap) {
             clearAllLabel = clearAllString || clearAllLabel;
             searchCategoryLabel = searchCategoryString || searchCategoryLabel;
+            categoryChildrenMap = childrenMap || {};
             searchInput = document.getElementById('exaport-flat-search');
             categorySelect = document.getElementById('exaport-flat-category-select');
             sortSelect = document.getElementById('exaport-flat-sort-select');
             chipsContainer = document.getElementById('exaport-flat-filter-chips');
+            subcategoriesCheckbox = document.getElementById('exaport-flat-subcategories-checkbox');
 
             // Bind text search input event.
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
+                    filterItems();
+                });
+            }
+
+            // Bind subcategories checkbox.
+            if (subcategoriesCheckbox) {
+                subcategoriesCheckbox.addEventListener('change', function() {
                     filterItems();
                 });
             }

@@ -555,14 +555,33 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     echo '</div>';
     echo '</div>';
-    // Row 2: active filter chips + remove all button (rendered by JS).
+    // Row 2: "show items from subcategories" checkbox + active filter chips.
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"> ';
+    echo get_string('show_items_from_subcategories', 'block_exaport');
+    echo '</label>';
+    echo '</div>';
     echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
     echo '</div>';
+
+    // Build category children map for JS (parent_id => [child_id, ...]).
+    $categorychildrenmap = [];
+    foreach ($categories as $cat) {
+        if ((int)$cat->id === 0) {
+            continue;
+        }
+        $pid = (int)$cat->pid;
+        if (!isset($categorychildrenmap[$pid])) {
+            $categorychildrenmap[$pid] = [];
+        }
+        $categorychildrenmap[$pid][] = (int)$cat->id;
+    }
 
     // Load AMD module for filtering.
     $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
         get_string('clearAllFilers', 'block_exaport'),
-        get_string('searchcategory', 'block_exaport')
+        get_string('searchcategory', 'block_exaport'),
+        $categorychildrenmap
     ]);
 }
 

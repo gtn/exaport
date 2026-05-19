@@ -58,11 +58,7 @@ define([], function() {
         var removeAll = document.createElement('span');
         removeAll.className = 'badge bg-primary text-light m-1';
         removeAll.style.cssText = 'font-size: 0.85rem; padding: 0.35em 0.6em; cursor: pointer; gap: 0.3em;';
-        var closeAll = document.createElement('span');
-        closeAll.innerHTML = '&times;';
-        closeAll.style.cssText = 'margin-right: 0.3em; font-size: 1.1em; line-height: 1;';
-        removeAll.appendChild(closeAll);
-        removeAll.appendChild(document.createTextNode(clearAllLabel));
+        removeAll.textContent = clearAllLabel;
         removeAll.addEventListener('click', function() {
             selectedCategories = {};
             renderChips();

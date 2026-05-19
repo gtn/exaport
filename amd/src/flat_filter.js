@@ -39,10 +39,9 @@ define([], function() {
             // badge-primary for BS4 (Moodle 3.x), bg-primary for BS5 (Moodle 4.x).
             chip.className = 'badge bg-secondary text-dark m-1';
             chip.style.cssText = 'font-size: 100%';
-            chip.textContent = selectedCategories[id] + ' ';
             var closeBtn = document.createElement('span');
             closeBtn.innerHTML = '&times;';
-            closeBtn.style.cssText = 'margin-left: 0.3em; font-size: 1.1em; line-height: 1; cursor: pointer;';
+            closeBtn.style.cssText = 'margin-right: 0.3em; font-size: 1.1em; line-height: 1; cursor: pointer;';
             closeBtn.setAttribute('aria-label', 'Remove');
             closeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -51,6 +50,7 @@ define([], function() {
                 filterItems();
             });
             chip.appendChild(closeBtn);
+            chip.appendChild(document.createTextNode(selectedCategories[id]));
             chipsContainer.appendChild(chip);
         });
 
@@ -58,11 +58,11 @@ define([], function() {
         var removeAll = document.createElement('span');
         removeAll.className = 'badge bg-primary text-light m-1';
         removeAll.style.cssText = 'font-size: 0.85rem; padding: 0.35em 0.6em; cursor: pointer; gap: 0.3em;';
-        removeAll.textContent = clearAllLabel + ' ';
         var closeAll = document.createElement('span');
         closeAll.innerHTML = '&times;';
-        closeAll.style.cssText = 'margin-left: 0.3em; font-size: 1.1em; line-height: 1;';
+        closeAll.style.cssText = 'margin-right: 0.3em; font-size: 1.1em; line-height: 1;';
         removeAll.appendChild(closeAll);
+        removeAll.appendChild(document.createTextNode(clearAllLabel));
         removeAll.addEventListener('click', function() {
             selectedCategories = {};
             renderChips();

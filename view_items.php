@@ -526,14 +526,12 @@ if ($type == 'mine' && $layout == 'folder') {
     $createcategoryurl = $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid;
     echo '<div class="ms-auto" style="position: relative; display: inline-block;">';
     echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';
-    echo block_exaport_fontawesome_icon('plus', 'solid', 1) . ' ' . get_string('create');
+    echo get_string('create');
     echo '</button>';
     echo '<div class="dropdown-menu dropdown-menu-right dropdown-menu-end">';
     echo '<a class="dropdown-item" href="' . $createartefacturl . '">'
-        . block_exaport_fontawesome_icon('clone', 'solid', 1) . ' '
         . get_string("add_mixed", "block_exaport") . '</a>';
     echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
-        . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '
         . get_string("category", "block_exaport") . '</a>';
     echo '</div>';
     echo '</div>';

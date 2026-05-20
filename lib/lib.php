@@ -2443,9 +2443,6 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sor
         if ($categoryid > 0) {
             // TODO: just shows ALL items?? Seems bad
             // add items from other users if the category is shared
-            // For now, only return own items.
-            $where .= ' AND i.userid = ? ';
-            $params[] = $userid;
         } else {
             // only own
             $where .= ' AND i.userid = ? ';

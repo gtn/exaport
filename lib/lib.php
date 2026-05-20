@@ -2434,13 +2434,14 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sor
         ) ";
         $params = array_merge($params, $inparams);
     } else {
-        // Uncategorized items: no entry in the itemcate table.
+        // Uncategorized items: no entry in the itemcate table. This is DIFFERENT to "all items" which is used in the flat mode.
         $where = ' NOT EXISTS (
             SELECT 1 FROM {block_exaportitemcate} ic WHERE ic.itemid = i.id
         ) ';
     }
     if ($withShared) {
         if ($categoryid > 0) {
+            // TODO: just shows ALL items?? Seems bad
             // add items from other users if the category is shared
         } else {
             // only own

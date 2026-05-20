@@ -1381,6 +1381,23 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // The categoryid column is kept in block_exaportitem for backward compatibility
         // (reverting to an older plugin version should not break). All code paths now use
         // block_exaportitemcate exclusively. The column will be dropped in a future release.
+
+        // the removal code for the future:
+        // Drop the legacy categoryid column from block_exaportitem.
+        // $table = new xmldb_table('block_exaportitem');
+        //
+        // // First drop the index on categoryid if it exists.
+        // $index = new xmldb_index('categoryid', XMLDB_INDEX_NOTUNIQUE, ['categoryid']);
+        // if ($dbman->index_exists($table, $index)) {
+        //     $dbman->drop_index($table, $index);
+        // }
+        //
+        // // Now drop the field.
+        // $field = new xmldb_field('categoryid');
+        // if ($dbman->field_exists($table, $field)) {
+        //     $dbman->drop_field($table, $field);
+        // }
+
         upgrade_block_savepoint(true, 2026051902, 'exaport');
     }
 

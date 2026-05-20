@@ -2441,7 +2441,7 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sor
     }
     if ($withShared) {
         if ($categoryid > 0) {
-            // TODO: just shows ALL items?? ... it shows all items from THAT category, since it is a shared one. Is that how it is inteded exactly?
+            // TODO: just shows ALL items?? ... it shows all items from THAT category. If it was shared once or currently is shared, it can contain entries from other users.
             // add items from other users if the category is shared
         } else {
             // only own

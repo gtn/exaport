@@ -370,19 +370,7 @@ if ($type == 'sharedstudent') {
         $subcategories = [];
 
         // Load all items in flat mode (filtering is done client-side via JavaScript).
-        $items = $DB->get_records_sql("
-            SELECT DISTINCT i.*, COUNT(com.id) As comments
-            FROM {block_exaportitem} i
-            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE i.userid = ?
-              AND " . block_exaport_get_item_where() . "
-            GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
-                i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-                i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-                i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-                i.iseditable, i.example_url, i.parentid
-            $sqlsort
-        ", [$USER->id]);
+        $items = block_exaport_get_items_by_category_and_user($USER->id, null, $sqlsort);
 
         if ($items) {
             $itemids = array_keys($items);

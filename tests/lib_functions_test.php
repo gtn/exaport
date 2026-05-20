@@ -270,4 +270,22 @@ final class lib_functions_test extends \advanced_testcase {
         $items = block_exaport_get_items_by_category_and_user($this->user->id, $cat);
         $this->assertEmpty($items);
     }
+
+    /**
+     * Test: passing null as categoryid returns all items regardless of category.
+     */
+    public function test_get_items_all_with_null_category(): void {
+        $cat1 = $this->create_category('Cat A');
+        $cat2 = $this->create_category('Cat B');
+
+        $item1 = $this->create_item($cat1, 'Item in cat1');
+        $item2 = $this->create_item($cat2, 'Item in cat2');
+        $item3 = $this->create_item(0, 'Uncategorized item');
+
+        // null means "all items" - should return everything.
+        $items = block_exaport_get_items_by_category_and_user($this->user->id, null);
+        $this->assertArrayHasKey($item1, $items);
+        $this->assertArrayHasKey($item2, $items);
+        $this->assertArrayHasKey($item3, $items);
+    }
 }

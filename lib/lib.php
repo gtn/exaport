@@ -2419,7 +2419,10 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
 function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sort = '', $withShared = false, $includesubcategories = []) {
     global $DB;
     $params = [];
-    if ($categoryid > 0) {
+    if ($categoryid === null) {
+        // All items regardless of category (used by flat mode).
+        $where = ' 1=1 ';
+    } else if ($categoryid > 0) {
         // Collect all category IDs to filter on.
         $catids = array_merge([$categoryid], $includesubcategories);
         [$insql, $inparams] = $DB->get_in_or_equal($catids, SQL_PARAMS_QM);

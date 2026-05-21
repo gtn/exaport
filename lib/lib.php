@@ -1078,11 +1078,6 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
         'item_cnt' => '',
         'url' => g::$CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . g::$COURSE->id . '&type=shared&userid=' . $userid,
         'userid' => $userid ? $userid : '',
-        /*      'item_cnt' => $DB->get_field_sql('
-                    SELECT COUNT(i.id) AS item_cnt
-                    FROM {block_exaportitem} i
-                    WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
-                ', array($USER->id))  */
     );
 }
 

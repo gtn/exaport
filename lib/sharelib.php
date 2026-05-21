@@ -775,7 +775,6 @@ namespace {
             " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
             " FROM {user} u " .
             " JOIN {block_exaportcate} c ON u.id = c.userid " .
-            // ($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
             " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?" .
 
             " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid " .

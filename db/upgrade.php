@@ -1360,7 +1360,8 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         // Keep legacy categoryid in sync during transition to the relation table.
-        // TODO: Remove categoryid field from block_exaportitem in a future upgrade once all code paths use block_exaportitemcate exclusively.
+        // The categoryid column is kept in the schema for downgrade safety only; all code paths now use block_exaportitemcate exclusively.
+        // A future upgrade step will drop the categoryid column once rollback is no longer needed.
         $legacyitems = $DB->get_recordset_select('block_exaportitem', 'categoryid > 0', null, '', 'id, categoryid');
         foreach ($legacyitems as $legacyitem) {
             $relation = [

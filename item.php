@@ -72,6 +72,13 @@ if ($action == 'copytoself') {
     $copy->shareall = 0;
 
     $newitemid = $DB->insert_record('block_exaportitem', $copy);
+
+    // Copy category assignments from the source item to the new item.
+    $sourcecatids = $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$id]);
+    if ($sourcecatids) {
+        block_exaport_sync_item_categories($newitemid, $sourcecatids);
+    }
+
     if ($copy->type == 'file') {
         $fs = get_file_storage();
         $fileinfo = array(
@@ -180,10 +187,6 @@ if ($action == 'movetocategory' && $allowedit) {
         die('target category not found');
     }
 
-    $DB->update_record('block_exaportitem', (object)array(
-        'id' => $existing->id,
-        'categoryid' => $targetcategory->id,
-    ));
     block_exaport_sync_item_categories($existing->id, [$targetcategory->id]);
 
     echo 'ok';

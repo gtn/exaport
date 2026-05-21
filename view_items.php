@@ -1047,9 +1047,10 @@ function block_exaport_build_categories_by_parent(array $categories) {
  * @return array The items array with ->flatcategories populated.
  */
 function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
-    global $DB;
+    global $DB, $USER;
 
     if ($allowedcategoryids !== null && !$allowedcategoryids) {
+        // Keep the shared flat-mode behavior while avoiding an empty IN() SQL clause.
         return [];
     }
 
@@ -1061,7 +1062,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     $itemids = array_keys($items);
     [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
-    $restrictcategoryuser = !empty($categories[0]->url) && strpos((string)$categories[0]->url, 'type=sharedstudent') !== false;
+    $restrictcategoryuser = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
 
     $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
             FROM {block_exaportitemcate} ic

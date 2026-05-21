@@ -227,7 +227,7 @@
 
 .excomdos_cont .excomdos_additem {
     font-size: 0.85rem;
-    margin: 2.5em 0;
+    margin: 1em 0;
 }
 
 .excomdos_cont.layout_clean_old .excomdos_additem {
@@ -262,6 +262,17 @@
 .excomdos_cont .excomdos_additem img,
 .excomdos_cont .excomdos_additem .exaport-icon {
     margin-bottom: 0.3em;
+}
+
+/* Layout toggle buttons */
+.exaport-layout-toggle .btn,
+.exaport-view-toggle .btn {
+    text-decoration: none;
+}
+
+.exaport-layout-toggle .btn .exaport-icon,
+.exaport-view-toggle .btn .exaport-icon {
+    margin-right: 0.25em;
 }
 
 .excomdos_cat_path .cat_path_item.active {

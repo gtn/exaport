@@ -1043,8 +1043,8 @@ function block_exaport_build_categories_by_parent(array $categories) {
  * @param array $categories All categories keyed by id (for path name resolution).
  * @param string $sqlsort SQL ORDER BY clause.
  * @param array|null $allowedcategoryids Category filter behavior:
- *     - null: load all item categories, except when viewing another user's items in flat mode, where categories stay limited
- *       to that viewed user's own categories.
+ *     - null: load all categories for the viewed user in flat mode; this is all categories for your own items, or only that
+ *       other user's own categories when viewing someone else's items.
  *     - empty array: return no items.
  *     - non-empty array: only include these category IDs and remove items with no matching categories.
  * @return array The items array with ->flatcategories populated.
@@ -1065,7 +1065,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     $itemids = array_keys($items);
     [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
-    $isViewingOtherUser = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+    $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
 
     $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
             FROM {block_exaportitemcate} ic
@@ -1073,7 +1073,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
             WHERE ic.itemid $iteminsql";
     $params = $iteminparams;
 
-    if ($isViewingOtherUser) {
+    if ($is_viewing_other_user) {
         $sql .= " AND c.userid = ?";
         $params[] = $userid;
     }

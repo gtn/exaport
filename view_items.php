@@ -1042,9 +1042,11 @@ function block_exaport_build_categories_by_parent(array $categories) {
  * @param int $userid The user whose items to load.
  * @param array $categories All categories keyed by id (for path name resolution).
  * @param string $sqlsort SQL ORDER BY clause.
- * @param array|null $allowedcategoryids If null, all item categories are loaded unless this is flat-mode viewing of another
- *     user's items, in which case categories are restricted to those owned by that viewed user. If an empty array is passed,
- *     no items are returned. Otherwise, only these category IDs are included and items with no matching categories are removed.
+ * @param array|null $allowedcategoryids Category filter behavior:
+ *     - null: load all item categories, except when viewing another user's items in flat mode, where categories stay limited
+ *       to that viewed user's own categories.
+ *     - empty array: return no items.
+ *     - non-empty array: only include these category IDs and remove items with no matching categories.
  * @return array The items array with ->flatcategories populated.
  */
 function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
@@ -1063,7 +1065,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     $itemids = array_keys($items);
     [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
-    $isviewingotheruseritems = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+    $isViewingOtherUser = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
 
     $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
             FROM {block_exaportitemcate} ic
@@ -1071,7 +1073,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
             WHERE ic.itemid $iteminsql";
     $params = $iteminparams;
 
-    if ($isviewingotheruseritems) {
+    if ($isViewingOtherUser) {
         $sql .= " AND c.userid = ?";
         $params[] = $userid;
     }

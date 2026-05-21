@@ -289,6 +289,20 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
  * Fragment callback for loading block edit forms via the Fragment API.
  * Moodle automatically captures $PAGE->requires JS (editor init) and delivers it alongside the HTML.
  */
+/**
+ * Return list of user preferences that this plugin is allowed to set via AJAX (core_user_set_user_preferences).
+ * Required since Moodle 4.x for web-service-based preference persistence.
+ *
+ * @return string[]
+ */
+function block_exaport_allowed_user_preferences() {
+    return [
+        'block_exaport_folderlayout',
+        'block_exaport_sort',
+        'block_exaport_show_subcategories',
+    ];
+}
+
 function block_exaport_output_fragment_blockedit($args) {
     global $CFG;
 

@@ -448,6 +448,8 @@ block_exaport_set_user_preferences(array('itemsort' => $sort, 'view_items_layout
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
     $folderlayoutvalue = ($folderlayout == 'details') ? 'details' : 'tiles';
+    echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo '<div>';
     echo get_string("categories", "block_exaport") . ": ";
     echo '<select onchange="document.location.href=\'' . $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid .
         '&layout=folder&folderlayout=' . $folderlayoutvalue . '&categoryid=\'+this.value;">';
@@ -489,6 +491,12 @@ if ($type == 'mine' && $layout == 'folder') {
         ($show_subcategories ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
+    echo '</div>';
+    // Create button (pushed to right).
+    echo '<div class="ms-auto">';
+    block_exaport_print_create_button($courseid, $categoryid, $type);
+    echo '</div>';
+    echo '</div>';
 } else if ($type == 'mine' && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     $filtercategories = [];
@@ -500,7 +508,7 @@ if ($type == 'mine' && $layout == 'folder') {
     }
 
     echo '<div class="exaport-flat-filter mb-3">';
-    // Row 1: search + category dropdown + sort dropdown.
+    // Row 1: search + category dropdown + sort dropdown + create button.
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     // Search input.
     echo '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
@@ -528,19 +536,8 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</select>';
     echo '</div>';
     // Create button (pushed to right).
-    $cattype = '';
-    $createartefacturl = $CFG->wwwroot . '/blocks/exaport/item.php?action=add&courseid=' . $courseid . '&categoryid=' . $categoryid . $cattype . '&type=mixed';
-    $createcategoryurl = $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid;
-    echo '<div class="ms-auto" style="position: relative; display: inline-block;">';
-    echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';
-    echo get_string('create');
-    echo '</button>';
-    echo '<div class="dropdown-menu dropdown-menu-right dropdown-menu-end">';
-    echo '<a class="dropdown-item" href="' . $createartefacturl . '">'
-        . get_string("add_mixed", "block_exaport") . '</a>';
-    echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
-        . get_string("category", "block_exaport") . '</a>';
-    echo '</div>';
+    echo '<div class="ms-auto">';
+    block_exaport_print_create_button($courseid, $categoryid, $type);
     echo '</div>';
     echo '</div>';
     // Row 2: "show items from subcategories" checkbox + active filter chips.
@@ -575,59 +572,32 @@ if ($type == 'mine' && $layout == 'folder') {
 
 echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 
-// Left side: folder/flat display toggle.
-echo '<div class="excomdos_changeview ' . ($useBootstrapLayout ? 'my-2 align-self-center' : '') . '"><p>';
-echo '<span><a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '">'
-    . block_exaport_fontawesome_icon('folder-open', 'regular', '2')
-    . '<br />' . get_string('category', 'block_exaport') . "</a></span>";
-echo '<span><a href="' . $PAGE->url->out(true, ['layout' => 'flat']) . '">'
-    . block_exaport_fontawesome_icon('table-cells', 'solid', '2')
-    . '<br />' . get_string('all') . "</a></span>";
-echo '</p></div>';
+// Left side: folder/flat display toggle (btn-group style).
+echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
+echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+    . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
+    . ' ' . get_string('category', 'block_exaport') . '</a>';
+echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat']) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+    . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
+    . ' ' . get_string('all') . '</a>';
+echo '</div>';
 
-// Right side: tiles/details toggle + printer-friendly button.
-echo '<div class="excomdos_changeview ' . ($useBootstrapLayout ? 'my-2 align-self-center' : '') . '"><p>';
-if ($folderlayout == 'tiles') {
-    echo '<span><a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '">'
-        . block_exaport_fontawesome_icon('list', 'solid', '2')
-        . '<br />' . block_exaport_get_string("details") . "</a></span>";
-} else {
-    echo '<span><a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '">'
-        . block_exaport_fontawesome_icon('table-cells-large', 'solid', '2')
-        . '<br />' . block_exaport_get_string("tiles") . "</a></span>";
-}
+// Right side: tiles/details toggle (btn-group style) + printer-friendly button.
+echo '<div class="d-flex align-items-center" style="gap: 0.5rem;">';
+echo '<div class="btn-group exaport-view-toggle" role="group" aria-label="View">';
+echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+    . block_exaport_fontawesome_icon('table-cells-large', 'solid', 1)
+    . ' ' . block_exaport_get_string("tiles") . '</a>';
+echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+    . block_exaport_fontawesome_icon('list', 'solid', 1)
+    . ' ' . block_exaport_get_string("details") . '</a>';
+echo '</div>';
 if ($type == 'mine') {
-    echo '<span><a target="_blank" href="' . $CFG->wwwroot . '/blocks/exaport/view_items_print.php?courseid=' . $courseid . '">'
-        . block_exaport_fontawesome_icon('print', 'solid', '2')
-        . '<br />' . get_string("printerfriendly", "group") . "</a></span>";
+    echo '<a target="_blank" href="' . $CFG->wwwroot . '/blocks/exaport/view_items_print.php?courseid=' . $courseid . '" class="btn btn-sm btn-outline-secondary">'
+        . block_exaport_fontawesome_icon('print', 'solid', 1)
+        . ' ' . get_string("printerfriendly", "group") . '</a>';
 }
-echo '</p></div>';
-
-// Right side: consolidated "Create" dropdown button.
-if (in_array($type, ['mine', 'shared']) && !($type == 'mine' && $layout == 'flat')) {
-    $cattype = '';
-    if ($type == 'shared') {
-        $cattype = '&cattype=shared';
-    }
-    $createartefacturl = $CFG->wwwroot . '/blocks/exaport/item.php?action=add&courseid=' . $courseid . '&categoryid=' . $categoryid . $cattype . '&type=mixed';
-    $createcategoryurl = $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid;
-
-    echo '<div class="excomdos_create_dropdown ' . ($useBootstrapLayout ? 'my-2 align-self-center' : '') . '" style="position: relative; display: inline-block;">';
-    echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';
-    echo block_exaport_fontawesome_icon('plus', 'solid', 1) . ' ' . get_string('create');
-    echo '</button>';
-    echo '<div class="dropdown-menu dropdown-menu-right dropdown-menu-end">';
-    echo '<a class="dropdown-item" href="' . $createartefacturl . '">'
-        . block_exaport_fontawesome_icon('clone', 'solid', 1) . ' '
-        . get_string("add_mixed", "block_exaport") . '</a>';
-    if ($type == 'mine') {
-        echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
-            . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '
-            . get_string("category", "block_exaport") . '</a>';
-    }
-    echo '</div>';
-    echo '</div>';
-}
+echo '</div>';
 
 echo '</div>';
 
@@ -926,6 +896,35 @@ function block_exaport_get_item_comp_icon($item) {
         . block_exaport_fontawesome_icon('list', 'solid', 1)
         //        .'<img src="pix/comp.png" alt="'.'competences'.'" />'
         . '</a>';
+}
+
+/**
+ * Prints the unified "Create" dropdown button (artefact + category).
+ */
+function block_exaport_print_create_button($courseid, $categoryid, $type) {
+    global $CFG;
+    $cattype = '';
+    if ($type == 'shared') {
+        $cattype = '&cattype=shared';
+    }
+    $createartefacturl = $CFG->wwwroot . '/blocks/exaport/item.php?action=add&courseid=' . $courseid . '&categoryid=' . $categoryid . $cattype . '&type=mixed';
+    $createcategoryurl = $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid;
+
+    echo '<div style="position: relative; display: inline-block;">';
+    echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';
+    echo block_exaport_fontawesome_icon('plus', 'solid', 1) . ' ' . get_string('create');
+    echo '</button>';
+    echo '<div class="dropdown-menu dropdown-menu-right dropdown-menu-end">';
+    echo '<a class="dropdown-item" href="' . $createartefacturl . '">'
+        . block_exaport_fontawesome_icon('clone', 'solid', 1) . ' '
+        . get_string("add_mixed", "block_exaport") . '</a>';
+    if ($type == 'mine') {
+        echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
+            . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '
+            . get_string("category", "block_exaport") . '</a>';
+    }
+    echo '</div>';
+    echo '</div>';
 }
 
 function block_exaport_get_item_project_icon($item) {

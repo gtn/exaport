@@ -46,16 +46,22 @@ if ($wstoken) {
 
 $context = context_system::instance();
 
-$userpreferences = block_exaport_get_user_preferences();
-
-if (!$sort && $userpreferences && isset($userpreferences->itemsort)) {
-    $sort = $userpreferences->itemsort;
+// Fall back to stored user preferences when not provided via URL.
+$layoutfromurl = $layout;
+if (!$layout) {
+    $layout = get_user_preferences('block_exaport_layout', 'folder');
 }
-
-// Handle "show items from subcategories" preference.
+$folderlayoutfromurl = $folderlayout;
+if (!$folderlayout) {
+    $folderlayout = get_user_preferences('block_exaport_folderlayout', 'tiles');
+}
+$sortfromurl = $sort;
+if (!$sort) {
+    $sort = get_user_preferences('block_exaport_sort', 'date.desc');
+}
+$showsubcategoriesfromurl = $show_subcategories;
 if ($show_subcategories === -1) {
-    // Not passed in URL – use stored preference (default: off).
-    $show_subcategories = (isset($userpreferences->show_subcategories)) ? (int)$userpreferences->show_subcategories : 0;
+    $show_subcategories = (int)get_user_preferences('block_exaport_show_subcategories', 0);
 }
 
 if ($type != 'shared' && $type != 'sharedstudent') {
@@ -68,25 +74,25 @@ if (in_array($layout, ['tiles', 'details'])) {
     $folderlayout = $layout;
     $layout = 'folder';
 }
-if (!$layout && isset($userpreferences->view_items_layout)) {
-    $layout = $userpreferences->view_items_layout;
-}
 if (!in_array($layout, ['folder', 'flat'])) {
     $layout = 'folder';
-}
-if (!$folderlayout) {
-    if (isset($userpreferences->view_items_folder_layout) && in_array($userpreferences->view_items_folder_layout, ['tiles', 'details'])) {
-        $folderlayout = $userpreferences->view_items_folder_layout;
-    } else if (isset($userpreferences->view_items_layout) && in_array($userpreferences->view_items_layout, ['tiles', 'details'])) {
-        // Backward compatibility for pre-folder/flat stored value.
-        $folderlayout = $userpreferences->view_items_layout;
-    }
 }
 if ($folderlayout != 'details') {
     $folderlayout = 'tiles';
 }
 if ($type != 'mine' && $layout == 'flat') {
     $layout = 'folder';
+}
+
+// Persist preferences on page load when explicitly provided via URL.
+if ($layoutfromurl !== '') {
+    set_user_preference('block_exaport_layout', $layout);
+}
+if ($folderlayoutfromurl !== '' || $layoutfromurl !== '') {
+    set_user_preference('block_exaport_folderlayout', $folderlayout);
+}
+if ($showsubcategoriesfromurl !== -1) {
+    set_user_preference('block_exaport_show_subcategories', (int)$show_subcategories);
 }
 
 // Check sorting.
@@ -102,6 +108,10 @@ if ($parsedsort[1] == "desc") {
 }
 $sorticon = $parsedsort[1] . '.png';
 $sqlsort = block_exaport_item_sort_to_sql($parsedsort, false);
+
+if ($sortfromurl !== '') {
+    set_user_preference('block_exaport_sort', $sort);
+}
 
 block_exaport_setup_default_categories();
 
@@ -399,31 +409,12 @@ if ($type == 'sharedstudent') {
         }
     } else {
         // Folder mode keeps legacy category navigation behavior.
-        $subcatids = [];
-        if ($show_subcategories && $currentcategory->id > 0) {
-            // Collect all descendant category IDs recursively.
-            $visited = [];
-            $stack = [$currentcategory->id];
-            while ($stack) {
-                $pid = array_pop($stack);
-                if (isset($visited[$pid])) {
-                    continue;
-                }
-                $visited[$pid] = true;
-                if (!empty($categoriesbyparent[$pid])) {
-                    foreach ($categoriesbyparent[$pid] as $child) {
-                        $subcatids[] = $child->id;
-                        $stack[] = $child->id;
-                    }
-                }
-            }
-        }
-        $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true, $subcatids);
+        $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true);
     }
 }
 
-// Build the canonical page URL with all current state params so that toggle links preserve settings.
-$pageparams = ['courseid' => $courseid, 'layout' => $layout, 'folderlayout' => $folderlayout];
+// Build canonical URL with only navigation-defining params.
+$pageparams = ['courseid' => $courseid];
 if ($categoryid) {
     $pageparams['categoryid'] = $categoryid;
 }
@@ -453,17 +444,12 @@ echo $OUTPUT->box($infobox, "center");
 
 echo "</div>";
 
-// Save user preferences.
-block_exaport_set_user_preferences(array('itemsort' => $sort, 'view_items_layout' => $layout, 'view_items_folder_layout' => $folderlayout, 'show_subcategories' => $show_subcategories));
-
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
-    $folderlayoutvalue = ($folderlayout == 'details') ? 'details' : 'tiles';
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<div>';
     echo get_string("categories", "block_exaport") . ": ";
-    echo '<select onchange="document.location.href=\'' . $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid .
-        '&layout=folder&folderlayout=' . $folderlayoutvalue . '&categoryid=\'+this.value;">';
+    echo '<select onchange="document.location.href=\'' . $PAGE->url->out(false) . '&categoryid=\'+encodeURIComponent(this.value);">';
     echo '<option value="">';
     echo $rootcategory->name;
     if ($rootcategory->item_cnt) {
@@ -492,16 +478,6 @@ if ($type == 'mine' && $layout == 'folder') {
 
     block_exaport_print_category_select($categoriesbyparent, $currentcategory->id);
     echo '</select>';
-
-    // "Show items from subcategories" checkbox.
-    $checkboxurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid .
-        '&layout=folder&folderlayout=' . $folderlayoutvalue . '&categoryid=' . $currentcategory->id .
-        '&show_subcategories=' . ($show_subcategories ? '0' : '1');
-    echo ' <label style="margin-left:1em;font-weight:normal;">';
-    echo '<input type="checkbox" onchange="document.location.href=\'' . $checkboxurl . '\';"' .
-        ($show_subcategories ? ' checked="checked"' : '') . '> ';
-    echo get_string('show_items_from_subcategories', 'block_exaport');
-    echo '</label>';
     echo '</div>';
     // Create button (pushed to right).
     echo '<div class="ms-auto">';
@@ -516,6 +492,11 @@ if ($type == 'mine' && $layout == 'folder') {
             continue;
         }
         $filtercategories[(int)$category->id] = block_exaport_category_full_path_name($category->id, $categories);
+    }
+
+    $flatsort = str_replace('.', '-', $sort);
+    if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc'])) {
+        $flatsort = 'date-desc';
     }
 
     echo '<div class="exaport-flat-filter mb-3">';
@@ -540,10 +521,10 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<div style="min-width: 180px; max-width: 250px;">';
     echo '<label class="sr-only" for="exaport-flat-sort-select">' . get_string('sort') . '</label>';
     echo '<select id="exaport-flat-sort-select" class="form-control custom-select">';
-    echo '<option value="date-desc">' . get_string('date', 'block_exaport') . ' ↓</option>';
-    echo '<option value="date-asc">' . get_string('date', 'block_exaport') . ' ↑</option>';
-    echo '<option value="name-asc">' . get_string('name', 'block_exaport') . ' A-Z</option>';
-    echo '<option value="name-desc">' . get_string('name', 'block_exaport') . ' Z-A</option>';
+    echo '<option value="date-desc"' . ($flatsort === 'date-desc' ? ' selected="selected"' : '') . '>' . get_string('date', 'block_exaport') . ' ↓</option>';
+    echo '<option value="date-asc"' . ($flatsort === 'date-asc' ? ' selected="selected"' : '') . '>' . get_string('date', 'block_exaport') . ' ↑</option>';
+    echo '<option value="name-asc"' . ($flatsort === 'name-asc' ? ' selected="selected"' : '') . '>' . get_string('name', 'block_exaport') . ' A-Z</option>';
+    echo '<option value="name-desc"' . ($flatsort === 'name-desc' ? ' selected="selected"' : '') . '>' . get_string('name', 'block_exaport') . ' Z-A</option>';
     echo '</select>';
     echo '</div>';
     // Create button (pushed to right).
@@ -553,7 +534,7 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     // Row 2: "show items from subcategories" checkbox + active filter chips.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"> ';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
@@ -585,10 +566,10 @@ echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-co
 
 // Left side: folder/flat display toggle (btn-group style).
 echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
-echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
     . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
     . ' ' . get_string('category', 'block_exaport') . '</a>';
-echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat']) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
     . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
     . ' ' . get_string('all') . '</a>';
 echo '</div>';
@@ -596,10 +577,10 @@ echo '</div>';
 // Right side: tiles/details toggle (btn-group style) + printer-friendly button.
 echo '<div class="d-flex align-items-center" style="gap: 0.5rem;">';
 echo '<div class="btn-group exaport-view-toggle" role="group" aria-label="View">';
-echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="tiles">'
     . block_exaport_fontawesome_icon('table-cells-large', 'solid', 1)
     . ' ' . block_exaport_get_string("tiles") . '</a>';
-echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="details">'
     . block_exaport_fontawesome_icon('list', 'solid', 1)
     . ' ' . block_exaport_get_string("details") . '</a>';
 echo '</div>';
@@ -611,6 +592,8 @@ if ($type == 'mine') {
 echo '</div>';
 
 echo '</div>';
+
+$PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
 
 if ($layout == 'folder') {
     echo '<div class="excomdos_cat">';
@@ -664,10 +647,10 @@ if ($type == 'mine' && $currentcategory->id > 0) {
     echo '</div>';
 }
 
-if ($folderlayout == 'details') {
-    // For flat mode, render the table manually so we can add data attributes for JS filtering.
-    // For folder mode, use html_table as before.
-    $useManualTable = ($layout == 'flat');
+echo '<div class="exaport-view-section exaport-view-details' . ($folderlayout == 'details' ? ' is-active' : '') . '" data-exaport-view="details"' . ($folderlayout == 'details' ? '' : ' style="display:none;"') . '>';
+// For flat mode, render the table manually so we can add data attributes for JS filtering.
+// For folder mode, use html_table as before.
+$useManualTable = ($layout == 'flat');
 
     $table = new html_table();
     $table->width = "100%";
@@ -675,16 +658,25 @@ if ($folderlayout == 'details') {
     $table->head = array();
     $table->size = array();
 
-    $table->head['type'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=$layout&folderlayout=details&categoryid=$categoryid&sort=" .
-        ($sortkey == 'type' ? $newsort : 'type') . "'>" . get_string("type", "block_exaport") . "</a>";
+    if ($layout == 'flat') {
+        $table->head['type'] = get_string("type", "block_exaport");
+    } else {
+        $table->head['type'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'type' ? $newsort : 'type'), 'folderlayout' => 'details']) . '">' . get_string("type", "block_exaport") . '</a>';
+    }
     $table->size['type'] = "10";
 
-    $table->head['name'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=$layout&folderlayout=details&categoryid=$categoryid&sort=" .
-        ($sortkey == 'name' ? $newsort : 'name') . "'>" . get_string("name", "block_exaport") . "</a>";
+    if ($layout == 'flat') {
+        $table->head['name'] = get_string("name", "block_exaport");
+    } else {
+        $table->head['name'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'name' ? $newsort : 'name'), 'folderlayout' => 'details']) . '">' . get_string("name", "block_exaport") . '</a>';
+    }
     $table->size['name'] = "60";
 
-    $table->head['date'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=$layout&folderlayout=details&categoryid=$categoryid&sort=" .
-        ($sortkey == 'date' ? $newsort : 'date.desc') . "'>" . get_string("date", "block_exaport") . "</a>";
+    if ($layout == 'flat') {
+        $table->head['date'] = get_string("date", "block_exaport");
+    } else {
+        $table->head['date'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'date' ? $newsort : 'date.desc'), 'folderlayout' => 'details']) . '">' . get_string("date", "block_exaport") . '</a>';
+    }
     $table->size['date'] = "20";
 
     $table->head['icons'] = '';
@@ -860,7 +852,7 @@ if ($folderlayout == 'details') {
         }
     }
 
-    if ($useManualTable) {
+if ($useManualTable) {
         // Render table header and category rows using html_table, then manually render item rows with data attributes.
         echo html_writer::table($table);
         // Now render item rows as a separate table with data attributes on each row.
@@ -882,31 +874,33 @@ if ($folderlayout == 'details') {
             echo '</tr>';
         }
         echo '</tbody></table>';
-    } else {
-        echo html_writer::table($table);
-    }
 } else {
-    echo '<div class="excomdos_tiletable ' . ($useBootstrapLayout ? 'row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5' : '') . '">';
-    echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
-
-    if ($layout == 'folder') {
-        // Show a link to parent category only for folder mode navigation.
-        if ($parentcategory) {
-            $parentlinkcategory = $currentcategory;
-            echo block_exaport_category_list_item($parentlinkcategory, $courseid, $type, $currentcategory, $parentcategory);
-        }
-
-        foreach ($subcategories as $category) {
-            echo block_exaport_category_list_item($category, $courseid, $type, $currentcategory, null);
-        }
-    }
-
-    foreach ($items as $item) {
-        echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory);
-    }
-
-    echo '</div>';
+    echo html_writer::table($table);
 }
+echo '</div>';
+
+echo '<div class="exaport-view-section exaport-view-tiles' . ($folderlayout == 'tiles' ? ' is-active' : '') . '" data-exaport-view="tiles"' . ($folderlayout == 'tiles' ? '' : ' style="display:none;"') . '>';
+echo '<div class="excomdos_tiletable ' . ($useBootstrapLayout ? 'row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5' : '') . '">';
+echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
+
+if ($layout == 'folder') {
+    // Show a link to parent category only for folder mode navigation.
+    if ($parentcategory) {
+        $parentlinkcategory = $currentcategory;
+        echo block_exaport_category_list_item($parentlinkcategory, $courseid, $type, $currentcategory, $parentcategory);
+    }
+
+    foreach ($subcategories as $category) {
+        echo block_exaport_category_list_item($category, $courseid, $type, $currentcategory, null);
+    }
+}
+
+foreach ($items as $item) {
+    echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory);
+}
+
+echo '</div>';
+echo '</div>';
 
 echo '<div style="clear: both;">&nbsp;</div>';
 echo "</div>";
@@ -1185,10 +1179,16 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
 function block_exaport_artefact_template_tile($item, $courseid, $type, $categoryid, $currentcategory) {
     global $CFG, $USER, $DB;
     $itemContent = '';
+    $itemcatids = [];
+    if (!empty($item->flatcategories) && is_array($item->flatcategories)) {
+        foreach ($item->flatcategories as $cat) {
+            $itemcatids[] = (int)$cat->id;
+        }
+    }
 
     $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
     $itemContent .= '
-        <div class="excomdos_tile excomdos_tile_item id-' . $item->id . '">
+        <div class="excomdos_tile excomdos_tile_item exaport-flat-item id-' . $item->id . '" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemcatids)) . '" data-item-date="' . (int)$item->timemodified . '">
             <div class="excomdos_tilehead">
                     <span class="excomdos_tileinfo">';
     $iconTypeProps = block_exaport_item_icon_type_options($item->type);

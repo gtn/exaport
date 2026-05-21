@@ -149,33 +149,35 @@ define([], function() {
         var field = parts[0]; // "date" or "name"
         var dir = parts[1]; // "asc" or "desc"
 
-        var allItems = document.querySelectorAll('.exaport-flat-item');
-        if (allItems.length === 0) {
-            return;
-        }
-        var parent = allItems[0].parentElement;
-        var items = Array.from(allItems);
-
-        items.sort(function(a, b) {
-            var valA, valB;
-            if (field === 'date') {
-                valA = parseInt(a.getAttribute('data-item-date') || '0', 10);
-                valB = parseInt(b.getAttribute('data-item-date') || '0', 10);
-            } else {
-                valA = a.getAttribute('data-item-name') || '';
-                valB = b.getAttribute('data-item-name') || '';
+        // Sort within each view section independently to avoid moving items across sections.
+        document.querySelectorAll('.exaport-view-section[data-exaport-view]').forEach(function(section) {
+            var items = Array.from(section.querySelectorAll('.exaport-flat-item'));
+            if (items.length === 0) {
+                return;
             }
-            var cmp;
-            if (typeof valA === 'number') {
-                cmp = valA - valB;
-            } else {
-                cmp = valA.localeCompare(valB);
-            }
-            return dir === 'asc' ? cmp : -cmp;
-        });
+            var parent = items[0].parentElement;
 
-        items.forEach(function(item) {
-            parent.appendChild(item);
+            items.sort(function(a, b) {
+                var valA, valB;
+                if (field === 'date') {
+                    valA = parseInt(a.getAttribute('data-item-date') || '0', 10);
+                    valB = parseInt(b.getAttribute('data-item-date') || '0', 10);
+                } else {
+                    valA = a.getAttribute('data-item-name') || '';
+                    valB = b.getAttribute('data-item-name') || '';
+                }
+                var cmp;
+                if (typeof valA === 'number') {
+                    cmp = valA - valB;
+                } else {
+                    cmp = valA.localeCompare(valB);
+                }
+                return dir === 'asc' ? cmp : -cmp;
+            });
+
+            items.forEach(function(item) {
+                parent.appendChild(item);
+            });
         });
     }
 

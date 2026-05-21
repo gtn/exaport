@@ -1,0 +1,121 @@
+/**
+ * State handling for view_items.php (tiles/details toggle and preference persistence).
+ *
+ * @module     block_exaport/view_items_state
+ * @copyright  2026 gtn gmbh
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+define(['core/ajax'], function(Ajax) {
+    /**
+     * Save a user preference in the background.
+     *
+     * // Oriented on theme_boost drawer state persistence (drawer-open-index) via core_user_set_user_preferences.
+     * // User preference naming pattern is oriented on mod/forum display mode persistence.
+     *
+     * @param {string} name
+     * @param {string|number} value
+     */
+    function savePreference(name, value) {
+        Ajax.call([{
+            methodname: 'core_user_set_user_preferences',
+            args: {
+                preferences: [{
+                    name: 'block_exaport_' + name,
+                    value: String(value)
+                }]
+            }
+        }], true, false);
+    }
+
+    function setActiveView(folderlayout) {
+        var details = document.querySelector('.exaport-view-section[data-exaport-view="details"]');
+        var tiles = document.querySelector('.exaport-view-section[data-exaport-view="tiles"]');
+        if (!details || !tiles) {
+            return;
+        }
+
+        var showdetails = folderlayout === 'details';
+        details.style.display = showdetails ? '' : 'none';
+        tiles.style.display = showdetails ? 'none' : '';
+        details.classList.toggle('is-active', showdetails);
+        tiles.classList.toggle('is-active', !showdetails);
+
+        document.querySelectorAll('.exaport-view-toggle-action').forEach(function(button) {
+            var active = button.getAttribute('data-folderlayout') === folderlayout;
+            button.classList.toggle('btn-primary', active);
+            button.classList.toggle('btn-outline-secondary', !active);
+        });
+    }
+
+    function bindViewToggle() {
+        document.querySelectorAll('.exaport-view-toggle-action').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                var folderlayout = link.getAttribute('data-folderlayout');
+                if (folderlayout !== 'tiles' && folderlayout !== 'details') {
+                    return;
+                }
+                e.preventDefault();
+                setActiveView(folderlayout);
+                savePreference('folderlayout', folderlayout);
+            });
+        });
+    }
+
+    function bindFlatPreferencePersistence(layout) {
+        if (layout !== 'flat') {
+            return;
+        }
+
+        var sortFlatItems = function(sortvalue) {
+            var parts = sortvalue.split('-');
+            var field = parts[0];
+            var dir = parts[1] || 'desc';
+            document.querySelectorAll('.exaport-view-section[data-exaport-view]').forEach(function(section) {
+                var items = Array.prototype.slice.call(section.querySelectorAll('.exaport-flat-item'));
+                if (!items.length) {
+                    return;
+                }
+                var parent = items[0].parentElement;
+                items.sort(function(a, b) {
+                    var valA;
+                    var valB;
+                    if (field === 'name') {
+                        valA = a.getAttribute('data-item-name') || '';
+                        valB = b.getAttribute('data-item-name') || '';
+                        return dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    }
+                    valA = parseInt(a.getAttribute('data-item-date') || '0', 10);
+                    valB = parseInt(b.getAttribute('data-item-date') || '0', 10);
+                    return dir === 'asc' ? valA - valB : valB - valA;
+                });
+                items.forEach(function(item) {
+                    parent.appendChild(item);
+                });
+            });
+        };
+
+        var sortSelect = document.getElementById('exaport-flat-sort-select');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function() {
+                sortFlatItems(sortSelect.value);
+                savePreference('sort', sortSelect.value.replace('-', '.'));
+            });
+            sortFlatItems(sortSelect.value);
+        }
+
+        var subcategoriesCheckbox = document.getElementById('exaport-flat-subcategories-checkbox');
+        if (subcategoriesCheckbox) {
+            subcategoriesCheckbox.addEventListener('change', function() {
+                savePreference('show_subcategories', subcategoriesCheckbox.checked ? 1 : 0);
+            });
+        }
+    }
+
+    return {
+        init: function(folderlayout, layout) {
+            setActiveView(folderlayout === 'details' ? 'details' : 'tiles');
+            bindViewToggle();
+            bindFlatPreferencePersistence(layout);
+        }
+    };
+});

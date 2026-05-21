@@ -450,7 +450,7 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<div>';
     echo get_string("categories", "block_exaport") . ": ";
-    echo '<select onchange="document.location.href=\'' . $PAGE->url->out(false, ['categoryid' => '__CATEGORY__']) . '\'.replace(\'__CATEGORY__\', this.value);">';
+    echo '<select onchange="document.location.href=\'' . $PAGE->url->out(false) . '&categoryid=\'+encodeURIComponent(this.value);">';
     echo '<option value="">';
     echo $rootcategory->name;
     if ($rootcategory->item_cnt) {

@@ -1042,7 +1042,8 @@ function block_exaport_build_categories_by_parent(array $categories) {
  * @param int $userid The user whose items to load.
  * @param array $categories All categories keyed by id (for path name resolution).
  * @param string $sqlsort SQL ORDER BY clause.
- * @param array|null $allowedcategoryids If set, only include these category IDs. Items with no matching categories are removed.
+ * @param array|null $allowedcategoryids If null, no category filtering is applied. If an empty array is passed, no items are returned.
+ *     Otherwise, only these category IDs are included and items with no matching categories are removed.
  * @return array The items array with ->flatcategories populated.
  */
 function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
@@ -1060,12 +1061,18 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     $itemids = array_keys($items);
     [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
+    $restrictcategoryuser = !empty($categories[0]->url) && strpos((string)$categories[0]->url, 'type=sharedstudent') !== false;
 
     $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
             FROM {block_exaportitemcate} ic
             JOIN {block_exaportcate} c ON c.id = ic.cateid
             WHERE ic.itemid $iteminsql";
     $params = $iteminparams;
+
+    if ($restrictcategoryuser) {
+        $sql .= " AND c.userid = ?";
+        $params[] = $userid;
+    }
 
     if ($allowedcategoryids !== null) {
         [$catinsql, $catinparams] = $DB->get_in_or_equal($allowedcategoryids, SQL_PARAMS_QM);

@@ -89,7 +89,7 @@ if ($type != 'mine' && $layout == 'flat') {
 if ($layoutfromurl !== '') {
     set_user_preference('block_exaport_layout', $layout);
 }
-if ($folderlayoutfromurl !== '' || in_array($layoutfromurl, ['tiles', 'details'])) {
+if ($folderlayoutfromurl !== '' || in_array($layoutfromurl, ['tiles', 'details']) || $layoutfromurl !== '') {
     set_user_preference('block_exaport_folderlayout', $folderlayout);
 }
 if ($showsubcategoriesfromurl !== -1) {
@@ -567,10 +567,10 @@ echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-co
 
 // Left side: folder/flat display toggle (btn-group style).
 echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
-echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
     . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
     . ' ' . get_string('category', 'block_exaport') . '</a>';
-echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat']) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
     . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
     . ' ' . get_string('all') . '</a>';
 echo '</div>';

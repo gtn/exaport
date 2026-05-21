@@ -422,7 +422,18 @@ if ($type == 'sharedstudent') {
     }
 }
 
-$PAGE->set_url($currentcategory->url);
+// Build the canonical page URL with all current state params so that toggle links preserve settings.
+$pageparams = ['courseid' => $courseid, 'layout' => $layout, 'folderlayout' => $folderlayout];
+if ($categoryid) {
+    $pageparams['categoryid'] = $categoryid;
+}
+if ($type && $type != 'mine') {
+    $pageparams['type'] = $type;
+}
+if ($userid) {
+    $pageparams['userid'] = $userid;
+}
+$PAGE->set_url(new moodle_url('/blocks/exaport/view_items.php', $pageparams));
 // $PAGE->set_context(context_system::instance());
 
 block_exaport_add_iconpack();
@@ -654,6 +665,10 @@ if ($type == 'mine' && $currentcategory->id > 0) {
 }
 
 if ($folderlayout == 'details') {
+    // For flat mode, render the table manually so we can add data attributes for JS filtering.
+    // For folder mode, use html_table as before.
+    $useManualTable = ($layout == 'flat');
+
     $table = new html_table();
     $table->width = "100%";
 
@@ -737,6 +752,9 @@ if ($folderlayout == 'details') {
         }
     }
 
+    // For flat mode, we'll collect item row data separately to render with data attributes.
+    $flatItemRows = [];
+
     $itemscnt = count($items);
     foreach ($items as $item) {
         $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' .
@@ -744,7 +762,7 @@ if ($folderlayout == 'details') {
 
         $itemind++;
 
-        $table->data[$itemind] = array();
+        $rowdata = array();
 
         //        $imgtype = '<img src="pix/'.$item->type.'_32.png" alt="'.get_string($item->type, "block_exaport").'">';
         //        $imgtype = '<img src="pix/'.$item->type.'_icon.png" alt="'.get_string($item->type, "block_exaport").'" title="'.get_string($item->type, "block_exaport").'" width="32">';
@@ -752,9 +770,9 @@ if ($folderlayout == 'details') {
         $iconTypeProps = block_exaport_item_icon_type_options($item->type);
         $imgtype = block_exaport_fontawesome_icon($iconTypeProps['iconName'], $iconTypeProps['iconStyle'], 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']);
 
-        $table->data[$itemind]['type'] = $imgtype;
+        $rowdata['type'] = $imgtype;
 
-        $table->data[$itemind]['name'] = "<a href=\"" . s($url) . "\">" . $item->name . "</a>";
+        $rowdata['name'] = "<a href=\"" . s($url) . "\">" . $item->name . "</a>";
         if ($item->intro) {
             $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                 'block_exaport', 'item_content', 'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
@@ -769,11 +787,11 @@ if ($folderlayout == 'details') {
                 // No intro.
             } else if ($shortintro == $intro) {
                 // Very short one.
-                $table->data[$itemind]['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">" .
+                $rowdata['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">" .
                     format_text($intro, FORMAT_HTML) . "</td></tr></table>";
             } else {
                 // Display show/hide buttons.
-                $table->data[$itemind]['name'] .= '<div><div id="short-preview-' . $itemind . '"><div>' . $shortintro . '...</div>
+                $rowdata['name'] .= '<div><div id="short-preview-' . $itemind . '"><div>' . $shortintro . '...</div>
                         <a href="javascript:long_preview_show(' . $itemind . ')">[' . get_string('more') . '...]</a>
                         </div>
                         <div id="long-preview-' . $itemind . '" style="display: none;"><div>' . $intro . '</div>
@@ -782,15 +800,20 @@ if ($folderlayout == 'details') {
             }
         }
 
-        $table->data[$itemind]['date'] = userdate($item->timemodified);
+        $rowdata['date'] = userdate($item->timemodified);
 
         $icons = '';
 
         // Link to export to my portfolio.
         if ($currentcategory->id == -1) {
-            $table->data[$itemind]['icons'] = '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid .
+            $rowdata['icons'] = '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid .
                 '&id=' . $item->id . '&sesskey=' . sesskey() . '&action=copytoself' . '">' .
                 '<img src="pix/import.png" title="' . get_string('make_it_yours', "block_exaport") . '"></a>';
+            if ($useManualTable) {
+                $flatItemRows[] = ['data' => $rowdata, 'item' => $item];
+            } else {
+                $table->data[$itemind] = $rowdata;
+            }
             continue;
         };
 
@@ -828,10 +851,40 @@ if ($folderlayout == 'details') {
 
         $icons = '<span class="excomdos_listicons">' . $icons . '</span>';
 
-        $table->data[$itemind]['icons'] = $icons;
+        $rowdata['icons'] = $icons;
+
+        if ($useManualTable) {
+            $flatItemRows[] = ['data' => $rowdata, 'item' => $item];
+        } else {
+            $table->data[$itemind] = $rowdata;
+        }
     }
 
-    echo html_writer::table($table);
+    if ($useManualTable) {
+        // Render table header and category rows using html_table, then manually render item rows with data attributes.
+        echo html_writer::table($table);
+        // Now render item rows as a separate table with data attributes on each row.
+        echo '<table class="generaltable" width="100%"><tbody>';
+        foreach ($flatItemRows as $flatRow) {
+            $item = $flatRow['item'];
+            $row = $flatRow['data'];
+            $itemCatIds = [];
+            if (!empty($item->flatcategories) && is_array($item->flatcategories)) {
+                foreach ($item->flatcategories as $cat) {
+                    $itemCatIds[] = (int)$cat->id;
+                }
+            }
+            echo '<tr class="exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
+            echo '<td style="width:10%">' . ($row['type'] ?? '') . '</td>';
+            echo '<td style="width:60%">' . ($row['name'] ?? '') . '</td>';
+            echo '<td style="width:20%">' . ($row['date'] ?? '') . '</td>';
+            echo '<td style="width:10%">' . ($row['icons'] ?? '') . '</td>';
+            echo '</tr>';
+        }
+        echo '</tbody></table>';
+    } else {
+        echo html_writer::table($table);
+    }
 } else {
     echo '<div class="excomdos_tiletable ' . ($useBootstrapLayout ? 'row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5' : '') . '">';
     echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';

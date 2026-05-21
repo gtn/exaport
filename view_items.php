@@ -218,7 +218,7 @@ if ($type == 'sharedstudent') {
 
         foreach ($subCategories as $category) {
             $userpicture = new user_picture($category);
-            $userpicture->size = ($layout == 'tiles' ? 100 : 32);
+            $userpicture->size = ($folderlayout == 'tiles' ? 100 : 32);
             $category->icon = $userpicture->get_url($PAGE);
         }
 
@@ -443,7 +443,7 @@ echo $OUTPUT->box($infobox, "center");
 echo "</div>";
 
 // Save user preferences.
-block_exaport_set_user_preferences(array('itemsort' => $sort, 'view_items_layout' => $layout, 'show_subcategories' => $show_subcategories));
+block_exaport_set_user_preferences(array('itemsort' => $sort, 'view_items_layout' => $layout, 'view_items_folder_layout' => $folderlayout, 'show_subcategories' => $show_subcategories));
 
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
@@ -575,7 +575,7 @@ if ($type == 'mine' && $layout == 'folder') {
 
 echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 
-// Left side: view toggle buttons.
+// Left side: folder/flat display toggle.
 echo '<div class="excomdos_changeview ' . ($useBootstrapLayout ? 'my-2 align-self-center' : '') . '"><p>';
 echo '<span><a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '">'
     . block_exaport_fontawesome_icon('folder-open', 'regular', '2')
@@ -583,16 +583,18 @@ echo '<span><a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '">'
 echo '<span><a href="' . $PAGE->url->out(true, ['layout' => 'flat']) . '">'
     . block_exaport_fontawesome_icon('table-cells', 'solid', '2')
     . '<br />' . get_string('all') . "</a></span>";
-if ($layout == 'folder') {
-    if ($folderlayout == 'tiles') {
-        echo '<span><a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => 'details']) . '">'
-            . block_exaport_fontawesome_icon('list', 'solid', '2')
-            . '<br />' . block_exaport_get_string("details") . "</a></span>";
-    } else {
-        echo '<span><a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => 'tiles']) . '">'
-            . block_exaport_fontawesome_icon('table-cells-large', 'solid', '2')
-            . '<br />' . block_exaport_get_string("tiles") . "</a></span>";
-    }
+echo '</p></div>';
+
+// Right side: tiles/details toggle + printer-friendly button.
+echo '<div class="excomdos_changeview ' . ($useBootstrapLayout ? 'my-2 align-self-center' : '') . '"><p>';
+if ($folderlayout == 'tiles') {
+    echo '<span><a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '">'
+        . block_exaport_fontawesome_icon('list', 'solid', '2')
+        . '<br />' . block_exaport_get_string("details") . "</a></span>";
+} else {
+    echo '<span><a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '">'
+        . block_exaport_fontawesome_icon('table-cells-large', 'solid', '2')
+        . '<br />' . block_exaport_get_string("tiles") . "</a></span>";
 }
 if ($type == 'mine') {
     echo '<span><a target="_blank" href="' . $CFG->wwwroot . '/blocks/exaport/view_items_print.php?courseid=' . $courseid . '">'
@@ -681,22 +683,22 @@ if ($type == 'mine' && $currentcategory->id > 0) {
     echo '</div>';
 }
 
-if ($layout == 'folder' && $folderlayout == 'details') {
+if ($folderlayout == 'details') {
     $table = new html_table();
     $table->width = "100%";
 
     $table->head = array();
     $table->size = array();
 
-    $table->head['type'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=folder&folderlayout=details&categoryid=$categoryid&sort=" .
+    $table->head['type'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=$layout&folderlayout=details&categoryid=$categoryid&sort=" .
         ($sortkey == 'type' ? $newsort : 'type') . "'>" . get_string("type", "block_exaport") . "</a>";
     $table->size['type'] = "10";
 
-    $table->head['name'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=folder&folderlayout=details&categoryid=$categoryid&sort=" .
+    $table->head['name'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=$layout&folderlayout=details&categoryid=$categoryid&sort=" .
         ($sortkey == 'name' ? $newsort : 'name') . "'>" . get_string("name", "block_exaport") . "</a>";
     $table->size['name'] = "60";
 
-    $table->head['date'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=folder&folderlayout=details&categoryid=$categoryid&sort=" .
+    $table->head['date'] = "<a href='{$CFG->wwwroot}/blocks/exaport/view_items.php?courseid=$courseid&layout=$layout&folderlayout=details&categoryid=$categoryid&sort=" .
         ($sortkey == 'date' ? $newsort : 'date.desc') . "'>" . get_string("date", "block_exaport") . "</a>";
     $table->size['date'] = "20";
 

@@ -1042,8 +1042,9 @@ function block_exaport_build_categories_by_parent(array $categories) {
  * @param int $userid The user whose items to load.
  * @param array $categories All categories keyed by id (for path name resolution).
  * @param string $sqlsort SQL ORDER BY clause.
- * @param array|null $allowedcategoryids If null, no category filtering is applied. If an empty array is passed, no items are returned.
- *     Otherwise, only these category IDs are included and items with no matching categories are removed.
+ * @param array|null $allowedcategoryids If null, no category filtering is applied. When viewing another user's items without
+ *     category filtering, categories are restricted to those owned by that user. If an empty array is passed, no items are
+ *     returned. Otherwise, only these category IDs are included and items with no matching categories are removed.
  * @return array The items array with ->flatcategories populated.
  */
 function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
@@ -1062,7 +1063,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     $itemids = array_keys($items);
     [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
-    $restrictcategoryuser = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+    $shouldrestricttousercategories = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
 
     $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
             FROM {block_exaportitemcate} ic
@@ -1070,7 +1071,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
             WHERE ic.itemid $iteminsql";
     $params = $iteminparams;
 
-    if ($restrictcategoryuser) {
+    if ($shouldrestricttousercategories) {
         $sql .= " AND c.userid = ?";
         $params[] = $userid;
     }

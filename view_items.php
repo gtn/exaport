@@ -1042,15 +1042,15 @@ function block_exaport_build_categories_by_parent(array $categories) {
  * @param int $userid The user whose items to load.
  * @param array $categories All categories keyed by id (for path name resolution).
  * @param string $sqlsort SQL ORDER BY clause.
- * @param array|null $allowedcategoryids If null, no category filtering is applied. When viewing another user's items without
- *     category filtering, categories are restricted to those owned by that user. If an empty array is passed, no items are
- *     returned. Otherwise, only these category IDs are included and items with no matching categories are removed.
+ * @param array|null $allowedcategoryids If null, all item categories are loaded unless this is flat-mode viewing of another
+ *     user's items, in which case categories are restricted to those owned by that viewed user. If an empty array is passed,
+ *     no items are returned. Otherwise, only these category IDs are included and items with no matching categories are removed.
  * @return array The items array with ->flatcategories populated.
  */
 function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
     global $DB, $USER;
 
-    if ($allowedcategoryids !== null && !$allowedcategoryids) {
+    if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
         // Keep the shared flat-mode behavior while avoiding an empty IN() SQL clause.
         return [];
     }
@@ -1063,7 +1063,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     $itemids = array_keys($items);
     [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
-    $shouldrestricttousercategories = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+    $isviewingotheruseritems = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
 
     $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
             FROM {block_exaportitemcate} ic
@@ -1071,7 +1071,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
             WHERE ic.itemid $iteminsql";
     $params = $iteminparams;
 
-    if ($shouldrestricttousercategories) {
+    if ($isviewingotheruseritems) {
         $sql .= " AND c.userid = ?";
         $params[] = $userid;
     }

@@ -46,7 +46,7 @@ if ($wstoken) {
 
 $context = context_system::instance();
 
-// Oriented on mod/forum/view.php — forum_displaymode / forum_discussionlistsortorder preference pattern.
+// Fall back to stored user preferences when not provided via URL.
 $layoutfromurl = $layout;
 if (!$layout) {
     $layout = get_user_preferences('block_exaport_layout', 'folder');
@@ -84,12 +84,11 @@ if ($type != 'mine' && $layout == 'flat') {
     $layout = 'folder';
 }
 
-// Persist on page load if explicitly provided (same approach as mod_forum).
-// Oriented on mod/forum/view.php — forum_displaymode / forum_discussionlistsortorder preference pattern.
+// Persist preferences on page load when explicitly provided via URL.
 if ($layoutfromurl !== '') {
     set_user_preference('block_exaport_layout', $layout);
 }
-if ($folderlayoutfromurl !== '' || in_array($layoutfromurl, ['tiles', 'details']) || $layoutfromurl !== '') {
+if ($folderlayoutfromurl !== '' || $layoutfromurl !== '') {
     set_user_preference('block_exaport_folderlayout', $folderlayout);
 }
 if ($showsubcategoriesfromurl !== -1) {

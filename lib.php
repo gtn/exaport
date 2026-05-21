@@ -286,10 +286,6 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 }
 
 /**
- * Fragment callback for loading block edit forms via the Fragment API.
- * Moodle automatically captures $PAGE->requires JS (editor init) and delivers it alongside the HTML.
- */
-/**
  * Return a list of all the user preferences used by block_exaport.
  *
  * @uses core_user::is_current_user
@@ -298,6 +294,12 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
  */
 function block_exaport_user_preferences(): array {
     $preferences = [];
+    $preferences['block_exaport_layout'] = [
+        'type' => PARAM_ALPHA,
+        'null' => NULL_NOT_ALLOWED,
+        'default' => 'folder',
+        'permissioncallback' => [core_user::class, 'is_current_user'],
+    ];
     $preferences['block_exaport_folderlayout'] = [
         'type' => PARAM_ALPHA,
         'null' => NULL_NOT_ALLOWED,
@@ -319,6 +321,10 @@ function block_exaport_user_preferences(): array {
     return $preferences;
 }
 
+/**
+ * Fragment callback for loading block edit forms via the Fragment API.
+ * Moodle automatically captures $PAGE->requires JS (editor init) and delivers it alongside the HTML.
+ */
 function block_exaport_output_fragment_blockedit($args) {
     global $CFG;
 

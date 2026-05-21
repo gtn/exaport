@@ -54,6 +54,23 @@ define(['core/ajax'], function(Ajax) {
                 e.preventDefault();
                 setActiveView(folderlayout);
                 savePreference('folderlayout', folderlayout);
+
+                // Keep the URL in sync with the JS-driven toggle so that any subsequent
+                // full-page navigation (e.g. switching folder ↔ flat) carries the correct
+                // folderlayout value.  We use replaceState (not pushState) because this is
+                // a display preference, not a new navigation step – the same pattern Moodle
+                // core uses in admin/amd/src/plugins_overview.js (window.history.replaceState).
+                var url = new URL(window.location.href);
+                url.searchParams.set('folderlayout', folderlayout);
+                history.replaceState(null, '', url);
+
+                // Also patch the server-rendered href attributes on the folder/flat toggle
+                // links so they carry the now-current folderlayout when the user clicks them.
+                document.querySelectorAll('.exaport-layout-toggle a').forEach(function(link) {
+                    var linkUrl = new URL(link.href, window.location.href);
+                    linkUrl.searchParams.set('folderlayout', folderlayout);
+                    link.href = linkUrl.toString();
+                });
             });
         });
     }

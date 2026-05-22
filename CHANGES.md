@@ -1,3 +1,12 @@
+### v5.1 (2026052200) ###
+* category link added: You can now create a link by name that leads every user to their own exaquest-category with that name
+* importing assignments into exaportfolio now adds the feedbackfiles of teachers as well. General rework of this import. Security fixes / respecting settings like "dont show graders name" from moodle settings.
+* category distribution mechanism added: teachers can create predefined exaportfolio categories and distribute them to students. Either manually, or on enrolment. Students can then use these categories to organize their portfolio items. This allows teachers to guide students in structuring their portfolios and ensures consistency across the class. On creation, a sharing can be set, but later teachers can not alter the categories or the sharing settings of their students. Teachers can fully create their own categories they want to distribute, or choose from predefined templates.
+* the categorydistribution mechanism has also been developed for views, so teachers can create predefined views and distribute them to students.
+* bugfix: added fields like project_description to block_exaportitem for all installations that have been first installed in a certain timeframe
+* bugfix: missing navbar in view_items has been added.
+
+
 ### v5.1 (2026021300) ###
 * **New Feature**: Teacher feedback files are now automatically included when importing assignment submissions to portfolio
 * Assignment import now includes feedback files from teachers as comments on portfolio items

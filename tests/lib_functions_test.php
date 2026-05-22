@@ -290,7 +290,7 @@ final class lib_functions_test extends \advanced_testcase {
     }
 
     /**
-     * Test: passing an array of category ids returns items in any of these categories.
+     * Test: passing an array of category ids returns own-user items in any of these categories.
      */
     public function test_get_items_with_category_array(): void {
         $cat1 = $this->create_category('Cat A');

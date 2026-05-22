@@ -1057,10 +1057,13 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
         // Keep the shared flat-mode behavior while avoiding an empty IN() SQL clause.
         return [];
     }
-
-    // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
-    // but they get filtered a few lines later with the unset()
-    $items = block_exaport_get_items_by_category_and_user($userid, null, $sqlsort);
+    if ($allowedcategoryids !== null) {
+        $items = block_exaport_get_items_by_category_and_user(0, $allowedcategoryids, $sqlsort, true);
+    } else {
+        // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
+        // but they get filtered a few lines later with the unset()
+        $items = block_exaport_get_items_by_category_and_user($userid, null, $sqlsort);
+    }
 
     if (!$items) {
         return [];

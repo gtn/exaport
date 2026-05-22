@@ -2411,15 +2411,28 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
 }
 
 
-function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sort = '', $withShared = false, $includesubcategories = []) {
+function block_exaport_get_items_by_category_and_user($userid, $categoryfilter, $sort = '', $withShared = false, $includesubcategories = []) {
     global $DB;
     $params = [];
-    if ($categoryid === null) {
+    if ($categoryfilter === null) {
         // All items regardless of category (used by flat mode).
         $where = ' 1=1 ';
-    } else if ($categoryid > 0) {
+    } else if (is_array($categoryfilter)) {
+        if (empty($categoryfilter)) {
+            $where = ' 1=0 ';
+        } else {
+            [$insql, $inparams] = $DB->get_in_or_equal($categoryfilter, SQL_PARAMS_QM);
+            $where = " EXISTS (
+                SELECT 1
+                  FROM {block_exaportitemcate} ic
+                 WHERE ic.itemid = i.id
+                   AND ic.cateid $insql
+            ) ";
+            $params = array_merge($params, $inparams);
+        }
+    } else if ($categoryfilter > 0) {
         // Collect all category IDs to filter on.
-        $catids = array_merge([$categoryid], $includesubcategories);
+        $catids = array_merge([$categoryfilter], $includesubcategories);
         [$insql, $inparams] = $DB->get_in_or_equal($catids, SQL_PARAMS_QM);
         $where = " EXISTS (
             SELECT 1
@@ -2435,7 +2448,7 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sor
         ) ';
     }
     if ($withShared) {
-        if ($categoryid > 0) {
+        if (is_array($categoryfilter) || $categoryfilter > 0) {
             // TODO: just shows ALL items?? ... it shows all items from THAT category. If it was shared once or currently is shared, it can contain entries from other users.
             // add items from other users if the category is shared
         } else {

@@ -5,6 +5,9 @@
 * the categorydistribution mechanism has also been developed for views, so teachers can create predefined views and distribute them to students.
 * bugfix: added fields like project_description to block_exaportitem for all installations that have been first installed in a certain timeframe
 * bugfix: missing navbar in view_items has been added.
+* Display skills of shared items
+* block editing logic refactored a
+* europass xml new version
 
 
 ### v5.1 (2026021300) ###

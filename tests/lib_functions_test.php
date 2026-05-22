@@ -288,4 +288,64 @@ final class lib_functions_test extends \advanced_testcase {
         $this->assertArrayHasKey($item2, $items);
         $this->assertArrayHasKey($item3, $items);
     }
+
+    /**
+     * Test: passing an array of category ids returns own-user items in any of these categories.
+     */
+    public function test_get_items_with_category_array(): void {
+        $cat1 = $this->create_category('Cat A');
+        $cat2 = $this->create_category('Cat B');
+        $cat3 = $this->create_category('Cat C');
+
+        $item1 = $this->create_item($cat1, 'Item in cat1');
+        $item2 = $this->create_item($cat2, 'Item in cat2');
+        $item3 = $this->create_item($cat3, 'Item in cat3');
+
+        $items = block_exaport_get_items_by_category_and_user($this->user->id, [$cat1, $cat2]);
+        $this->assertArrayHasKey($item1, $items);
+        $this->assertArrayHasKey($item2, $items);
+        $this->assertArrayNotHasKey($item3, $items);
+    }
+
+    /**
+     * Test: withShared + category array includes matching items from other users.
+     */
+    public function test_get_items_with_shared_and_category_array(): void {
+        global $DB;
+
+        $otheruser = $this->getDataGenerator()->create_user();
+        $cat = $this->create_category('Shared cat');
+        $myitem = $this->create_item($cat, 'My item');
+
+        $otheritem = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $otheruser->id,
+            'type' => 'note',
+            'categoryid' => 0,
+            'name' => 'Other item',
+            'url' => '',
+            'intro' => 'Other content',
+            'attachment' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'courseid' => $this->course->id,
+            'shareall' => 0,
+            'externaccess' => 0,
+            'externcomment' => 0,
+            'sortorder' => 0,
+            'isoez' => 0,
+            'langid' => 0,
+            'source' => 0,
+            'sourceid' => 0,
+            'iseditable' => 1,
+            'parentid' => 0,
+        ]);
+        $DB->insert_record('block_exaportitemcate', (object)[
+            'itemid' => $otheritem,
+            'cateid' => $cat,
+        ]);
+
+        $items = block_exaport_get_items_by_category_and_user($this->user->id, [$cat], '', true);
+        $this->assertArrayHasKey($myitem, $items);
+        $this->assertArrayHasKey($otheritem, $items);
+    }
 }

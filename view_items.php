@@ -548,10 +548,10 @@ echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-co
 echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
 echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
     . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
-    . ' ' . get_string('category', 'block_exaport') . '</a>';
+    . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
 echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
     . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
-    . ' ' . get_string('all') . '</a>';
+    . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
 echo '</div>';
 
 // Right side: tiles/details toggle (btn-group style) + printer-friendly button.

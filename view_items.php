@@ -1049,7 +1049,7 @@ function block_exaport_build_categories_by_parent(array $categories) {
  *     - empty array: return no items.
  *     - non-empty array: only include these category IDs and remove items with no matching categories.
  * @param bool $allusers If true, load items from all users (i.userid > 0) and rely on $allowedcategoryids as the category
- *     security boundary. Used by shared flat mode.
+ *     security boundary. Used by shared flat mode and requires a non-null category allow-list.
  * @return array The items array with ->flatcategories populated.
  */
 function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null, $allusers = false) {
@@ -1057,6 +1057,9 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
         // Keep the shared flat-mode behavior while avoiding an empty IN() SQL clause.
+        return [];
+    }
+    if ($allusers && $allowedcategoryids === null) {
         return [];
     }
 

@@ -1065,6 +1065,9 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     $itemids = array_keys($items);
     [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
+
+    // Belt-and-suspenders: restrict to the viewed user's own categories,
+    // even though items are already scoped by userid.
     $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
 
     $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
@@ -1073,6 +1076,8 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
             WHERE ic.itemid $iteminsql";
     $params = $iteminparams;
 
+    // Belt-and-suspenders: restrict to the viewed user's own categories,
+    // even though items are already scoped by userid.
     if ($is_viewing_other_user) {
         $sql .= " AND c.userid = ?";
         $params[] = $userid;

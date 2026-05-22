@@ -318,7 +318,7 @@ if ($type == 'sharedstudent') {
             $currentcategory = $rootcategory;
             $parentcategory = null;
             $subcategories = [];
-            $items = block_exaport_load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories), true);
+            $items = block_exaport_load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
         } else {
             $usercondition = ' i.userid = ' . intval($selecteduser->id) . ' ';
             if ($type == 'shared') {
@@ -1048,48 +1048,17 @@ function block_exaport_build_categories_by_parent(array $categories) {
  *       other user's own categories when viewing someone else's items.
  *     - empty array: return no items.
  *     - non-empty array: only include these category IDs and remove items with no matching categories.
- * @param bool $allusers If true, load items from all users (i.userid > 0) and rely on $allowedcategoryids as the category
- *     security boundary. Used by shared flat mode and requires a non-null category allow-list.
  * @return array The items array with ->flatcategories populated.
  */
-function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null, $allusers = false) {
+function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
     global $DB, $USER;
 
     if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
         // Keep the shared flat-mode behavior while avoiding an empty IN() SQL clause.
         return [];
     }
-    if ($allusers && $allowedcategoryids === null) {
-        return [];
-    }
-
-    if ($allusers) {
-        $params = [];
-        $where = ' i.userid > 0 ';
-        if ($allowedcategoryids !== null) {
-            [$catinsql, $catinparams] = $DB->get_in_or_equal($allowedcategoryids, SQL_PARAMS_QM);
-            $where .= " AND EXISTS (
-                SELECT 1
-                FROM {block_exaportitemcate} ic
-                WHERE ic.itemid = i.id
-                    AND ic.cateid $catinsql
-            ) ";
-            $params = array_merge($params, $catinparams);
-        }
-        $where .= " AND " . block_exaport_get_item_where() . " ";
-
-        $items = $DB->get_records_sql("
-            SELECT DISTINCT i.*, COUNT(com.id) AS comments
-            FROM {block_exaportitem} i
-            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE $where
-            GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
-                i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-                i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-                i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-                i.iseditable, i.example_url, i.parentid
-            $sqlsort
-        ", $params);
+    if ($allowedcategoryids !== null) {
+        $items = block_exaport_get_items_by_category_and_user(0, $allowedcategoryids, $sqlsort, true);
     } else {
         // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
         // but they get filtered a few lines later with the unset()
@@ -1105,7 +1074,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
 
     // Belt-and-suspenders: restrict to the viewed user's own categories,
     // even though items are already scoped by userid.
-    $is_viewing_other_user = !$allusers && $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+    $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
 
     $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
             FROM {block_exaportitemcate} ic

@@ -1058,6 +1058,8 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
         return [];
     }
 
+    // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
+    // but they get filtered a few lines later with the unset()
     $items = block_exaport_get_items_by_category_and_user($userid, null, $sqlsort);
 
     if (!$items) {
@@ -1105,7 +1107,7 @@ function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $al
     foreach ($items as $itemid => $item) {
         $item->flatcategories = $categoriesbyitem[$item->id] ?? [];
         if ($allowedcategoryids !== null && !$item->flatcategories) {
-            unset($items[$itemid]);
+            unset($items[$itemid]); // this is crucial! This unsets all items that should not be displayed
         }
     }
 

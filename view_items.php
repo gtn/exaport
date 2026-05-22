@@ -538,7 +538,8 @@ if ($type == 'mine' && $layout == 'folder') {
     $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
         get_string('clearAllFilers', 'block_exaport'),
         get_string('searchcategory', 'block_exaport'),
-        $categorychildrenmap
+        $categorychildrenmap,
+        (int)$categoryid
     ]);
 }
 

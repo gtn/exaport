@@ -388,8 +388,9 @@ if ($type == 'sharedstudent') {
         // TODO: A "show shared files" toggle (admin setting or UI checkbox) could be added here
         // to let users/admins control whether shared items appear in flat mode. If disabled,
         // pass null instead of category IDs to revert to own-items-only behavior.
-        $owncategoryids = array_filter(array_keys($categories), fn($id) => $id > 0);
-        $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, $owncategoryids ?: null);
+        // Filter out the root category (id=0) which is a virtual placeholder, not a real DB category.
+        $usercategoryids = array_filter(array_keys($categories), fn($id) => $id > 0);
+        $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
     } else {
         // Folder mode keeps legacy category navigation behavior.
         $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true);

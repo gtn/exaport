@@ -23,6 +23,7 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
 $show_subcategories = optional_param('show_subcategories', -1, PARAM_INT);
+$show_otherusers = optional_param('show_otherusers', -1, PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT);
 $type = optional_param('type', '', PARAM_TEXT);
 $layout = optional_param('layout', '', PARAM_TEXT);
@@ -63,6 +64,10 @@ $showsubcategoriesfromurl = $show_subcategories;
 if ($show_subcategories === -1) {
     $show_subcategories = (int)get_user_preferences('block_exaport_show_subcategories', 0);
 }
+$showothersusersfromurl = $show_otherusers;
+if ($show_otherusers === -1) {
+    $show_otherusers = (int)get_user_preferences('block_exaport_show_otherusers', 1);
+}
 
 if ($type != 'shared' && $type != 'sharedstudent') {
     $type = 'mine';
@@ -89,6 +94,9 @@ if ($folderlayoutfromurl !== '' || $layoutfromurl !== '') {
 }
 if ($showsubcategoriesfromurl !== -1) {
     set_user_preference('block_exaport_show_subcategories', (int)$show_subcategories);
+}
+if ($showothersusersfromurl !== -1) {
+    set_user_preference('block_exaport_show_otherusers', (int)$show_otherusers);
 }
 
 // Check sorting.
@@ -390,10 +398,14 @@ if ($type == 'sharedstudent') {
         // pass null instead of category IDs to revert to own-items-only behavior.
         // Filter out the root category (id=0) which is a virtual placeholder, not a real DB category.
         $usercategoryids = array_filter(array_keys($categories), fn($id) => $id > 0);
-        $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
+        if ($show_otherusers) {
+            $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
+        } else {
+            $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, null);
+        }
     } else {
         // Folder mode keeps legacy category navigation behavior.
-        $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true);
+        $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, $show_otherusers ? true : false);
     }
 }
 
@@ -468,6 +480,13 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_create_button($courseid, $categoryid, $type);
     echo '</div>';
     echo '</div>';
+    // Show other users checkbox for folder mode.
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-show-otherusers-checkbox"' . ($show_otherusers ? ' checked="checked"' : '') . '> ';
+    echo get_string('show_items_from_other_users', 'block_exaport');
+    echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
+    echo '</label>';
+    echo '</div>';
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     $filtercategories = [];
@@ -523,6 +542,10 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_subcategories', 'block_exaport');
+    echo '</label>';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-show-otherusers-checkbox"' . ($show_otherusers ? ' checked="checked"' : '') . '> ';
+    echo get_string('show_items_from_other_users', 'block_exaport');
+    echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
     echo '</label>';
     echo '</div>';
     echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';

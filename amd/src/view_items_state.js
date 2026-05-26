@@ -130,6 +130,17 @@ define(['core/ajax'], function(Ajax) {
             setActiveView(folderlayout === 'details' ? 'details' : 'tiles');
             bindViewToggle();
             bindFlatPreferencePersistence(layout);
+
+            var otherUsersCheckbox = document.getElementById('exaport-show-otherusers-checkbox');
+            if (otherUsersCheckbox) {
+                otherUsersCheckbox.addEventListener('change', function() {
+                    savePreference('show_otherusers', otherUsersCheckbox.checked ? 1 : 0);
+                    // Reload because this affects server-side item loading.
+                    var url = new URL(window.location.href);
+                    url.searchParams.set('show_otherusers', otherUsersCheckbox.checked ? 1 : 0);
+                    window.location.href = url.toString();
+                });
+            }
         }
     };
 });

@@ -957,5 +957,7 @@ $string['no_views_to_distribute'] = 'No view template defined to distribute';
 $string['views_created'] = 'Views created: {$a}';
 $string['views_skipped'] = 'Views skipped (already exist): {$a}';
 $string['show_items_from_subcategories'] = 'Show items from subcategories';
+$string['show_items_from_other_users'] = 'Show items from other users in your shared categories';
+$string['show_items_from_other_users_help'] = 'In case you shared one or more of your categories, other users are able to add items into your categories. With this checkbox you can decide if you want to see them, or not.';
 $string['layout_mode_folder'] = 'Folder';
 $string['layout_mode_flat'] = 'Flat';

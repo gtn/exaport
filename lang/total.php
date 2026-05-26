@@ -1346,6 +1346,10 @@ return [
         'Flach',
         'Flat',
     ],
+    'searchcategory' => [
+        'Kategorie suchen...',
+        'Search Category...',
+    ],
     'sharedwith' => [
         'Geteilt mit',
         'Shared with',

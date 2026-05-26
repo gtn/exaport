@@ -957,3 +957,5 @@ $string['no_views_to_distribute'] = 'No view template defined to distribute';
 $string['views_created'] = 'Views created: {$a}';
 $string['views_skipped'] = 'Views skipped (already exist): {$a}';
 $string['show_items_from_subcategories'] = 'Show items from subcategories';
+$string['layout_mode_folder'] = 'Folder';
+$string['layout_mode_flat'] = 'Flat';

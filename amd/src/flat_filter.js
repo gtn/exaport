@@ -364,8 +364,9 @@ define([], function() {
          * @param {string} clearAllString The translated "clear all filters" label.
          * @param {string} searchCategoryString The translated "Search Category..." placeholder.
          * @param {Object} childrenMap Map of parent category ID to array of child category IDs.
+         * @param {number} preSelectedCategoryId Optional pre-selected category ID to add as chip on load.
          */
-        init: function(clearAllString, searchCategoryString, childrenMap) {
+        init: function(clearAllString, searchCategoryString, childrenMap, preSelectedCategoryId) {
             clearAllLabel = clearAllString || clearAllLabel;
             searchCategoryLabel = searchCategoryString || searchCategoryLabel;
             categoryChildrenMap = childrenMap || {};
@@ -397,6 +398,25 @@ define([], function() {
                 sortSelect.addEventListener('change', function() {
                     sortItems();
                 });
+            }
+
+            // Pre-select category if provided (e.g. when navigating from folder view).
+            if (preSelectedCategoryId && preSelectedCategoryId > 0 && categorySelect) {
+                var catName = '';
+                for (var i = 0; i < categorySelect.options.length; i++) {
+                    if (Number(categorySelect.options[i].value) === Number(preSelectedCategoryId)) {
+                        catName = categorySelect.options[i].text;
+                        break;
+                    }
+                }
+                if (catName) {
+                    selectedCategories[preSelectedCategoryId] = catName;
+                    if (subcategoriesCheckbox) {
+                        subcategoriesCheckbox.checked = true;
+                    }
+                    renderChips();
+                    filterItems();
+                }
             }
         }
     };

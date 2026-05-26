@@ -80,10 +80,6 @@ if (!in_array($layout, ['folder', 'flat'])) {
 if ($folderlayout != 'details') {
     $folderlayout = 'tiles';
 }
-if ($type != 'mine' && $layout == 'flat') {
-    $layout = 'folder';
-}
-
 // Persist preferences on page load when explicitly provided via URL.
 if ($layoutfromurl !== '') {
     set_user_preference('block_exaport_layout', $layout);
@@ -152,13 +148,7 @@ if ($type == 'sharedstudent') {
         }
 
         // Build a tree according to parent.
-        $categoriesbyparent = array();
-        foreach ($categories as $category) {
-            if (!isset($categoriesbyparent[$category->pid])) {
-                $categoriesbyparent[$category->pid] = array();
-            }
-            $categoriesbyparent[$category->pid][] = $category;
-        }
+        $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
 
         // The main root category for student.
         $rootcategory = block_exaport_get_root_category($selecteduser->id);
@@ -186,26 +176,34 @@ if ($type == 'sharedstudent') {
 
         $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
 
-        // Common items.
-        $items = $DB->get_records_sql("
-            SELECT DISTINCT i.*, COUNT(com.id) As comments
-            FROM {block_exaportitem} i
-            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE i.userid = ?
-                AND EXISTS (
-                    SELECT 1
-                    FROM {block_exaportitemcate} ic
-                    WHERE ic.itemid = i.id
-                      AND ic.cateid = ?
-                )
-                AND " . block_exaport_get_item_where() .
-            " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
-            i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-            i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-            i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-            i.iseditable, i.example_url, i.parentid
-            $sqlsort
-        ", [$selecteduser->id, $currentcategory->id]);
+        if ($layout == 'flat') {
+            // Flat mode always lists the selected student's items globally.
+            $currentcategory = $rootcategory;
+            $parentcategory = null;
+            $subcategories = [];
+            $items = block_exaport_load_flat_items($selecteduser->id, $categories, $sqlsort);
+        } else {
+            // Common items.
+            $items = $DB->get_records_sql("
+                SELECT DISTINCT i.*, COUNT(com.id) As comments
+                FROM {block_exaportitem} i
+                LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+                WHERE i.userid = ?
+                    AND EXISTS (
+                        SELECT 1
+                        FROM {block_exaportitemcate} ic
+                        WHERE ic.itemid = i.id
+                          AND ic.cateid = ?
+                    )
+                    AND " . block_exaport_get_item_where() .
+                " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
+                i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
+                i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
+                i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
+                i.iseditable, i.example_url, i.parentid
+                $sqlsort
+            ", [$selecteduser->id, $currentcategory->id]);
+        }
     }
 
 } else if ($type == 'shared') {
@@ -275,18 +273,13 @@ if ($type == 'sharedstudent') {
             return false;
         }
 
-        // Build a tree according to parent.
-        $categoriesbyparent = [];
         foreach ($categories as $category) {
             $category->url = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . '&type=shared&userid=' . $userid .
                 '&categoryid=' . $category->id;
             $category->icon = block_exaport_get_category_icon($category);
-
-            if (!isset($categoriesbyparent[$category->pid])) {
-                $categoriesbyparent[$category->pid] = array();
-            }
-            $categoriesbyparent[$category->pid][] = $category;
         }
+        // Build a tree according to parent.
+        $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
 
         if (!isset($categories[$categoryid])) {
             throw new moodle_exception('not allowed');
@@ -310,30 +303,48 @@ if ($type == 'sharedstudent') {
             throw new moodle_exception('not allowed');
         }
 
-        $usercondition = ' i.userid = ' . intval($selecteduser->id) . ' ';
-        if ($type == 'shared') {
-            $usercondition = ' i.userid > 0 ';
-        }
+        if ($layout == 'flat') {
+            // Flat mode lists all shared items, limited to categories shared to the current user.
+            $allowedcategories = [];
+            foreach ($categories as $category) {
+                if ((int)$category->id === 0) {
+                    continue;
+                }
+                if (category_allowed($selecteduser, $categories, $category)) {
+                    $allowedcategories[(int)$category->id] = $category;
+                }
+            }
 
-        $items = $DB->get_records_sql("
-            SELECT DISTINCT i.*, COUNT(com.id) As comments
-            FROM {block_exaportitem} i
-            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE EXISTS (
-                    SELECT 1
-                    FROM {block_exaportitemcate} ic
-                    WHERE ic.itemid = i.id
-                      AND ic.cateid = ?
-                )
-                AND " . $usercondition . "
-                AND " . block_exaport_get_item_where() .
-            " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
-            i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-            i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-            i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-            i.iseditable, i.example_url, i.parentid
-            $sqlsort
-        ", [$currentcategory->id]);
+            $currentcategory = $rootcategory;
+            $parentcategory = null;
+            $subcategories = [];
+            $items = block_exaport_load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
+        } else {
+            $usercondition = ' i.userid = ' . intval($selecteduser->id) . ' ';
+            if ($type == 'shared') {
+                $usercondition = ' i.userid > 0 ';
+            }
+
+            $items = $DB->get_records_sql("
+                SELECT DISTINCT i.*, COUNT(com.id) As comments
+                FROM {block_exaportitem} i
+                LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+                WHERE EXISTS (
+                        SELECT 1
+                        FROM {block_exaportitemcate} ic
+                        WHERE ic.itemid = i.id
+                          AND ic.cateid = ?
+                    )
+                    AND " . $usercondition . "
+                    AND " . block_exaport_get_item_where() .
+                " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
+                i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
+                i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
+                i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
+                i.iseditable, i.example_url, i.parentid
+                $sqlsort
+            ", [$currentcategory->id]);
+        }
     }
 
 } else {
@@ -346,13 +357,7 @@ if ($type == 'sharedstudent') {
     }
 
     // Build a tree according to parent.
-    $categoriesbyparent = array();
-    foreach ($categories as $category) {
-        if (!isset($categoriesbyparent[$category->pid])) {
-            $categoriesbyparent[$category->pid] = array();
-        }
-        $categoriesbyparent[$category->pid][] = $category;
-    }
+    $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
 
     // The main root category.
     $rootcategory = block_exaport_get_root_category();
@@ -378,35 +383,14 @@ if ($type == 'sharedstudent') {
         $currentcategory = $rootcategory;
         $parentcategory = null;
         $subcategories = [];
-
-        // Load all items in flat mode (filtering is done client-side via JavaScript).
-        $items = block_exaport_get_items_by_category_and_user($USER->id, null, $sqlsort);
-
-        if ($items) {
-            $itemids = array_keys($items);
-            [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
-            // Use ic.id as the first column so get_records_sql has a unique key
-            // (an item can belong to multiple categories, so ic.itemid is not unique).
-            $itemcategories = $DB->get_records_sql("
-                SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
-                FROM {block_exaportitemcate} ic
-                JOIN {block_exaportcate} c ON c.id = ic.cateid
-                WHERE ic.itemid $iteminsql
-                ORDER BY c.name ASC
-            ", $iteminparams);
-
-            $categoriesbyitem = [];
-            foreach ($itemcategories as $itemcategory) {
-                $itemcategory->name = block_exaport_category_full_path_name($itemcategory->id, $categories);
-                if (!isset($categoriesbyitem[$itemcategory->itemid])) {
-                    $categoriesbyitem[$itemcategory->itemid] = [];
-                }
-                $categoriesbyitem[$itemcategory->itemid][] = $itemcategory;
-            }
-            foreach ($items as $item) {
-                $item->flatcategories = $categoriesbyitem[$item->id] ?? [];
-            }
-        }
+        // Use the user's category IDs so shared items (e.g. teacher-placed) are included,
+        // matching the folder mode behavior where $withShared=true shows items from any user.
+        // TODO: A "show shared files" toggle (admin setting or UI checkbox) could be added here
+        // to let users/admins control whether shared items appear in flat mode. If disabled,
+        // pass null instead of category IDs to revert to own-items-only behavior.
+        // Filter out the root category (id=0) which is a virtual placeholder, not a real DB category.
+        $usercategoryids = array_filter(array_keys($categories), fn($id) => $id > 0);
+        $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
     } else {
         // Folder mode keeps legacy category navigation behavior.
         $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, true);
@@ -484,11 +468,14 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_create_button($courseid, $categoryid, $type);
     echo '</div>';
     echo '</div>';
-} else if ($type == 'mine' && $layout == 'flat') {
+} else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     $filtercategories = [];
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {
+            continue;
+        }
+        if ($type == 'shared' && !category_allowed($selecteduser, $categories, $category)) {
             continue;
         }
         $filtercategories[(int)$category->id] = block_exaport_category_full_path_name($category->id, $categories);
@@ -558,7 +545,8 @@ if ($type == 'mine' && $layout == 'folder') {
     $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
         get_string('clearAllFilers', 'block_exaport'),
         get_string('searchcategory', 'block_exaport'),
-        $categorychildrenmap
+        $categorychildrenmap,
+        (int)$categoryid
     ]);
 }
 
@@ -568,10 +556,10 @@ echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-co
 echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
 echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
     . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
-    . ' ' . get_string('category', 'block_exaport') . '</a>';
+    . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
 echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
     . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
-    . ' ' . get_string('all') . '</a>';
+    . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
 echo '</div>';
 
 // Right side: tiles/details toggle (btn-group style) + printer-friendly button.
@@ -1036,6 +1024,104 @@ function block_exaport_render_item_category_badges($item) {
         return '';
     }
     return html_writer::div(implode('', $badges), 'mt-2');
+}
+
+/**
+ * Build a category tree keyed by parent id.
+ *
+ * @param array $categories
+ * @return array
+ */
+function block_exaport_build_categories_by_parent(array $categories) {
+    $categoriesbyparent = [];
+    foreach ($categories as $category) {
+        if (!isset($categoriesbyparent[$category->pid])) {
+            $categoriesbyparent[$category->pid] = [];
+        }
+        $categoriesbyparent[$category->pid][] = $category;
+    }
+
+    return $categoriesbyparent;
+}
+
+/**
+ * Load all items for flat mode and attach flatcategories to each item.
+ *
+ * @param int $userid The user whose items to load.
+ * @param array $categories All categories keyed by id (for path name resolution).
+ * @param string $sqlsort SQL ORDER BY clause.
+ * @param array|null $allowedcategoryids Category filter behavior:
+ *     - null: load all categories for the viewed user in flat mode; this is all categories for your own items, or only that
+ *       other user's own categories when viewing someone else's items.
+ *     - empty array: return no items.
+ *     - non-empty array: only include these category IDs and remove items with no matching categories.
+ * @return array The items array with ->flatcategories populated.
+ */
+function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
+    global $DB, $USER;
+
+    if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
+        // Keep the shared flat-mode behavior while avoiding an empty IN() SQL clause.
+        return [];
+    }
+    if ($allowedcategoryids !== null) {
+        $items = block_exaport_get_items_by_category_and_user(0, $allowedcategoryids, $sqlsort, true);
+    } else {
+        // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
+        // but they get filtered a few lines later with the unset()
+        $items = block_exaport_get_items_by_category_and_user($userid, null, $sqlsort);
+    }
+
+    if (!$items) {
+        return [];
+    }
+
+    $itemids = array_keys($items);
+    [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
+
+    // Belt-and-suspenders: restrict to the viewed user's own categories,
+    // even though items are already scoped by userid.
+    $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+
+    $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
+            FROM {block_exaportitemcate} ic
+            JOIN {block_exaportcate} c ON c.id = ic.cateid
+            WHERE ic.itemid $iteminsql";
+    $params = $iteminparams;
+
+    // Belt-and-suspenders: restrict to the viewed user's own categories,
+    // even though items are already scoped by userid.
+    if ($is_viewing_other_user) {
+        $sql .= " AND c.userid = ?";
+        $params[] = $userid;
+    }
+
+    if ($allowedcategoryids !== null) {
+        [$catinsql, $catinparams] = $DB->get_in_or_equal($allowedcategoryids, SQL_PARAMS_QM);
+        $sql .= " AND c.id $catinsql";
+        $params = array_merge($params, $catinparams);
+    }
+
+    $sql .= " ORDER BY c.name ASC";
+    $itemcategories = $DB->get_records_sql($sql, $params);
+
+    $categoriesbyitem = [];
+    foreach ($itemcategories as $itemcategory) {
+        $itemcategory->name = block_exaport_category_full_path_name($itemcategory->id, $categories);
+        if (!isset($categoriesbyitem[$itemcategory->itemid])) {
+            $categoriesbyitem[$itemcategory->itemid] = [];
+        }
+        $categoriesbyitem[$itemcategory->itemid][] = $itemcategory;
+    }
+
+    foreach ($items as $itemid => $item) {
+        $item->flatcategories = $categoriesbyitem[$item->id] ?? [];
+        if ($allowedcategoryids !== null && !$item->flatcategories) {
+            unset($items[$itemid]); // this is crucial! This unsets all items that should not be displayed
+        }
+    }
+
+    return $items;
 }
 
 /**

@@ -383,21 +383,32 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
             get_string("back_to_desp", "block_exaport"), '', true);
     }
 
-    if (get_string("whyEportfolio_description", "block_exaport") !== '[[whyEportfolio_description]]') { // only for translated description
+    if (get_string("whyEportfolio_description", "block_exaport") !== '[[whyEportfolio_description]]' // only for translated description
+            && !empty($CFG->block_exaport_enable_whyeportfolio)) {
         $tabs['whyEportfolio'] = new tabobject('whyEportfolio', $CFG->wwwroot . '/blocks/exaport/whyeportfolio.php?courseid=' . $COURSE->id,
             get_string("whyEportfolio", "block_exaport"), '', true);
     }
-    $tabs['resume_my'] = new tabobject('resume_my', $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id,
-        get_string("resume_my", "block_exaport"), '', true);
-    $tabs['myportfolio'] = new tabobject('myportfolio', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id,
-        block_exaport_get_string("myportfolio"), '', true);
-    $tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id,
-        get_string("views", "block_exaport"), '', true);
-    $tabs['shared_views'] = new tabobject('shared_views', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id,
-        block_exaport_get_string("shared_views"), '', true);
-    $tabs['shared_categories'] = new tabobject('shared_categories',
-        $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $COURSE->id,
-        block_exaport_get_string("shared_categories"), '', true);
+    if (!empty($CFG->block_exaport_enable_resume)) {
+        $tabs['resume_my'] = new tabobject('resume_my', $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id,
+            get_string("resume_my", "block_exaport"), '', true);
+    }
+    if (!empty($CFG->block_exaport_enable_myportfolio)) {
+        $tabs['myportfolio'] = new tabobject('myportfolio', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id,
+            block_exaport_get_string("myportfolio"), '', true);
+    }
+    if (!empty($CFG->block_exaport_enable_views)) {
+        $tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id,
+            get_string("views", "block_exaport"), '', true);
+    }
+    if (!empty($CFG->block_exaport_enable_shared_views)) {
+        $tabs['shared_views'] = new tabobject('shared_views', $CFG->wwwroot . '/blocks/exaport/shared_views.php?courseid=' . $COURSE->id,
+            block_exaport_get_string("shared_views"), '', true);
+    }
+    if (!empty($CFG->block_exaport_enable_shared_categories)) {
+        $tabs['shared_categories'] = new tabobject('shared_categories',
+            $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $COURSE->id,
+            block_exaport_get_string("shared_categories"), '', true);
+    }
     $tabtitle = get_string("importexport", "block_exaport");
     /*$scriptname = basename($_SERVER['SCRIPT_NAME']);
     if ($scriptname == 'export_scorm.php') {
@@ -405,12 +416,14 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     } elseif ($scriptname == 'import_file.php') {
         $tabtitle = get_string("import_short", "block_exaport");
     }*/
-    $tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id,
-        $tabtitle, '', true);
+    if (!empty($CFG->block_exaport_enable_importexport)) {
+        $tabs['importexport'] = new tabobject('importexport', $CFG->wwwroot . '/blocks/exaport/importexport.php?courseid=' . $COURSE->id,
+            $tabtitle, '', true);
+    }
 
     // Add category distribution tab for users with the capability.
     $context = context_course::instance($COURSE->id);
-    if (has_capability('block/exaport:distributecategories', $context)) {
+    if (!empty($CFG->block_exaport_enable_category_distribution) && has_capability('block/exaport:distributecategories', $context)) {
         $tabs['category_distribution'] = new tabobject('category_distribution',
             $CFG->wwwroot . '/blocks/exaport/category_distribution.php?courseid=' . $COURSE->id,
             get_string('category_distribution', 'block_exaport'), '', true);

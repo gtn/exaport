@@ -39,6 +39,10 @@ if (!$COURSE) {
     print_error("invalidcourseid", "block_exaport");
 }
 
+if (empty($CFG->block_exaport_enable_views)) {
+    print_error('areaisdisabled', 'block_exaport');
+}
+
 block_exaport_add_iconpack(true);
 
 // Include JS script.

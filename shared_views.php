@@ -29,6 +29,10 @@ require_login($courseid);
 $context = context_system::instance();
 require_capability('block/exaport:use', $context);
 
+if (empty($CFG->block_exaport_enable_shared_views)) {
+    print_error('areaisdisabled', 'block_exaport');
+}
+
 $url = '/blocks/exaport/shared_views.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 

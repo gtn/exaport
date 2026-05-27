@@ -44,6 +44,10 @@ if (!$course = $DB->get_record("course", $conditions)) {
     print_error("invalidinstance", "block_exaport");
 }
 
+if (empty($CFG->block_exaport_enable_resume)) {
+    print_error('areaisdisabled', 'block_exaport');
+}
+
 // Get XML for europass.
 if ($action == 'xmleuropass_export') {
     $xml = europass_xml($resume->id);

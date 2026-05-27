@@ -58,6 +58,10 @@ if ($type == 'mine' && empty($CFG->block_exaport_enable_myportfolio)) {
     print_error('areaisdisabled', 'block_exaport');
 }
 
+if (($type == 'shared' || $type == 'sharedstudent') && empty($CFG->block_exaport_enable_shared_categories)) {
+    print_error('areaisdisabled', 'block_exaport');
+}
+
 // What's the display layout: tiles / details?
 if (!$layout && isset($userpreferences->view_items_layout)) {
     $layout = $userpreferences->view_items_layout;

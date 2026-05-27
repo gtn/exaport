@@ -2931,7 +2931,7 @@ return [
         'Tiles layout (Old - ended of support from v4.6.7)',
     ],
     // === Navigation area settings.
-    'settings_enable_areas_heading' => [
+    'settings_navigation_areas_heading' => [
         'Navigationsbereiche',
         'Navigation areas',
     ],

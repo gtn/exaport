@@ -544,17 +544,18 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_create_button($courseid, $categoryid, $type);
     echo '</div>';
     echo '</div>';
-    // Row 2: "show items from subcategories" checkbox + active filter chips.
+    // Row 2: "show items from other users" checkbox.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
-    echo get_string('show_items_from_subcategories', 'block_exaport');
-    echo '</label>';
     echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-show-otherusers-checkbox"' . ($show_otherusers ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_other_users', 'block_exaport');
     echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
     echo '</label>';
     echo '</div>';
-    echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    // Row 3: "show items from subcategories" checkbox.
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
+    echo get_string('show_items_from_subcategories', 'block_exaport');
+    echo '</label>';
     echo '</div>';
 
     // Build category children map for JS (parent_id => [child_id, ...]).

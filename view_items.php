@@ -557,6 +557,8 @@ if ($type == 'mine' && $layout == 'folder') {
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
+    echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    echo '</div>';
 
     // Build category children map for JS (parent_id => [child_id, ...]).
     $categorychildrenmap = [];

@@ -30,6 +30,10 @@ block_exaport_require_login($courseid);
 $context = context_course::instance($courseid);
 require_capability('block/exaport:distributecategories', $context);
 
+if (empty($CFG->block_exaport_enable_category_distribution)) {
+    print_error('areaisdisabled', 'block_exaport');
+}
+
 $url = new moodle_url('/blocks/exaport/category_distribution.php', array('courseid' => $courseid));
 $PAGE->set_url($url);
 

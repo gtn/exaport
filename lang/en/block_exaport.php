@@ -977,3 +977,23 @@ $string['auto_distribute_views_on_enrolment'] = 'Automatically distribute views 
 $string['no_views_to_distribute'] = 'No view template defined to distribute';
 $string['views_created'] = 'Views created: {$a}';
 $string['views_skipped'] = 'Views skipped (already exist): {$a}';
+
+// Navigation areas settings.
+$string['settings_navigation_areas_heading'] = 'Navigation areas';
+$string['settings_enable_whyeportfolio_head'] = 'Enable "Why ePortfolio" area';
+$string['settings_enable_whyeportfolio_body'] = '';
+$string['settings_enable_resume_head'] = 'Enable "My CV" area';
+$string['settings_enable_resume_body'] = '';
+$string['settings_enable_myportfolio_head'] = 'Enable "My Portfolio Artefacts" area';
+$string['settings_enable_myportfolio_body'] = '';
+$string['settings_enable_views_head'] = 'Enable "My Views" area';
+$string['settings_enable_views_body'] = '';
+$string['settings_enable_shared_views_head'] = 'Enable "Shared Views" area';
+$string['settings_enable_shared_views_body'] = '';
+$string['settings_enable_shared_categories_head'] = 'Enable "Shared Categories" area';
+$string['settings_enable_shared_categories_body'] = '';
+$string['settings_enable_importexport_head'] = 'Enable "Import/Export" area';
+$string['settings_enable_importexport_body'] = '';
+$string['settings_enable_category_distribution_head'] = 'Enable "Preset structure" area';
+$string['settings_enable_category_distribution_body'] = '';
+$string['areaisdisabled'] = 'This area has been disabled by the administrator.';

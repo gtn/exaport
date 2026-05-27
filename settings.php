@@ -162,6 +162,35 @@ if ($ADMIN->fulltree) {
 
 
     */
+    // Navigation areas.
+    $settings->add(new admin_setting_heading('exaport/navigation_areas',
+        get_string('settings_navigation_areas_heading', 'block_exaport'),
+        ''));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_whyeportfolio',
+        get_string('settings_enable_whyeportfolio_head', 'block_exaport'),
+        get_string('settings_enable_whyeportfolio_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_resume',
+        get_string('settings_enable_resume_head', 'block_exaport'),
+        get_string('settings_enable_resume_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_myportfolio',
+        get_string('settings_enable_myportfolio_head', 'block_exaport'),
+        get_string('settings_enable_myportfolio_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_views',
+        get_string('settings_enable_views_head', 'block_exaport'),
+        get_string('settings_enable_views_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_shared_views',
+        get_string('settings_enable_shared_views_head', 'block_exaport'),
+        get_string('settings_enable_shared_views_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_shared_categories',
+        get_string('settings_enable_shared_categories_head', 'block_exaport'),
+        get_string('settings_enable_shared_categories_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_importexport',
+        get_string('settings_enable_importexport_head', 'block_exaport'),
+        get_string('settings_enable_importexport_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_category_distribution',
+        get_string('settings_enable_category_distribution_head', 'block_exaport'),
+        get_string('settings_enable_category_distribution_body', 'block_exaport'), 1));
+
     // View custom template settings
     $settings->add(new admin_setting_heading('exaport/layout_settings',
         get_string('settings_layout_settings_heading', 'block_exaport'),

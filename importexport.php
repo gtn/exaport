@@ -25,6 +25,10 @@ block_exaport_require_login($courseid);
 
 $context = context_system::instance();
 
+if (empty($CFG->block_exaport_enable_importexport)) {
+    print_error('areaisdisabled', 'block_exaport');
+}
+
 // WordPress integration
 $wp_action = optional_param('wp_action', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_RAW);

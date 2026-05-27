@@ -28,6 +28,10 @@ if (!$course = $DB->get_record("course", $conditions)) {
     print_error("invalidinstance", "block_exaport");
 }
 
+if (empty($CFG->block_exaport_enable_whyeportfolio)) {
+    print_error('areaisdisabled', 'block_exaport');
+}
+
 $url = '/blocks/exaport/whyeportfolio.php';
 $PAGE->set_url($url, ['courseid' => $courseid]);
 

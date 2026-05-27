@@ -671,8 +671,13 @@ if ($editform->is_cancelled()) {
             $customLayoutSettings_serialized = serialize($customLayoutSettings);
 
             // Save layout settings into DB
+        /*
+         * this does not seem to work... it overwrites the view, e.g. the field "layout" that has just been set by $DB->update_record('block_exaportview', $dbview)
             $view->layout_settings = $customLayoutSettings_serialized;
             $DB->update_record('block_exaportview', $view);
+        */
+            // instead: only set that field
+            $DB->set_field('block_exaportview', 'layout_settings', $customLayoutSettings_serialized, ['id' => $dbview->id]);
 
             // Notification logic for "save and notify" button.
             // this checks if that button was clicked. It is null, if the submittbutton was clicked instead

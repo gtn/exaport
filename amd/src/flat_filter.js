@@ -3,6 +3,8 @@
  *
  * Provides real-time text search, multi-select category chip filtering,
  * sorting, and a "remove all filters" button.
+ * Supports restoring filter state from sessionStorage after page reloads
+ * (e.g. when toggling "show items from other users").
  *
  * @module     block_exaport/flat_filter
  * @copyright  2024 gtn gmbh
@@ -357,6 +359,59 @@ define([], function() {
         wrapper.appendChild(container);
     }
 
+    /**
+     * Try to restore filter state from sessionStorage (saved before a page reload).
+     * Clears the stored state after restoration so it doesn't persist across
+     * manual navigations.
+     */
+    function restoreFilterStateFromSession() {
+        var saved = sessionStorage.getItem('exaport_flat_filters');
+        if (!saved) {
+            return false;
+        }
+        sessionStorage.removeItem('exaport_flat_filters');
+
+        var state;
+        try {
+            state = JSON.parse(saved);
+        } catch (e) {
+            return false;
+        }
+
+        var restored = false;
+
+        // Restore search text.
+        if (state.search && searchInput) {
+            searchInput.value = state.search;
+            restored = true;
+        }
+
+        // Restore sort.
+        if (state.sort && sortSelect) {
+            sortSelect.value = state.sort;
+            restored = true;
+        }
+
+        // Restore selected categories.
+        if (state.categories && typeof state.categories === 'object') {
+            // Validate that the categories still exist in the select options.
+            if (categorySelect) {
+                var validOptions = {};
+                for (var i = 0; i < categorySelect.options.length; i++) {
+                    validOptions[categorySelect.options[i].value] = categorySelect.options[i].text;
+                }
+                Object.keys(state.categories).forEach(function(catId) {
+                    if (validOptions[catId]) {
+                        selectedCategories[catId] = validOptions[catId];
+                        restored = true;
+                    }
+                });
+            }
+        }
+
+        return restored;
+    }
+
     return {
         /**
          * Initialise the flat filter module.
@@ -375,6 +430,9 @@ define([], function() {
             sortSelect = document.getElementById('exaport-flat-sort-select');
             chipsContainer = document.getElementById('exaport-flat-filter-chips');
             subcategoriesCheckbox = document.getElementById('exaport-flat-subcategories-checkbox');
+
+            // Try to restore filter state from sessionStorage (after a reload).
+            var restoredFromSession = restoreFilterStateFromSession();
 
             // Bind text search input event.
             if (searchInput) {
@@ -400,8 +458,12 @@ define([], function() {
                 });
             }
 
-            // Pre-select category if provided (e.g. when navigating from folder view).
-            if (preSelectedCategoryId && preSelectedCategoryId > 0 && categorySelect) {
+            // If state was restored from session, render chips and apply filters.
+            if (restoredFromSession) {
+                renderChips();
+                filterItems();
+            } else if (preSelectedCategoryId && preSelectedCategoryId > 0 && categorySelect) {
+                // Pre-select category if provided (e.g. when navigating from folder view).
                 var catName = '';
                 for (var i = 0; i < categorySelect.options.length; i++) {
                     if (Number(categorySelect.options[i].value) === Number(preSelectedCategoryId)) {

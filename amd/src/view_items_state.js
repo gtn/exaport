@@ -24,6 +24,52 @@ define(['core/ajax'], function(Ajax) {
         }])[0];
     }
 
+    /**
+     * Save current flat filter state to sessionStorage before a page reload.
+     * This allows the flat_filter module to restore the state after the reload.
+     */
+    function saveFilterStateToSession() {
+        var state = {};
+        var searchInput = document.getElementById('exaport-flat-search');
+        if (searchInput && searchInput.value) {
+            state.search = searchInput.value;
+        }
+        var sortSelect = document.getElementById('exaport-flat-sort-select');
+        if (sortSelect) {
+            state.sort = sortSelect.value;
+        }
+        // Get active category chips from the flat_filter module's DOM.
+        var chipsContainer = document.getElementById('exaport-flat-filter-chips');
+        if (chipsContainer) {
+            var chips = chipsContainer.querySelectorAll('.badge.bg-secondary');
+            var categories = {};
+            chips.forEach(function(chip) {
+                // Each chip has a close button then text node with category name.
+                // We need to extract the category id — stored in the chip's close handler.
+                // Instead, read from the native select to map name -> id.
+                var name = chip.textContent.replace('×', '').trim();
+                if (name) {
+                    // Find matching option in category select.
+                    var catSelect = document.getElementById('exaport-flat-category-select');
+                    if (catSelect) {
+                        for (var i = 0; i < catSelect.options.length; i++) {
+                            if (catSelect.options[i].text === name) {
+                                categories[catSelect.options[i].value] = name;
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+            if (Object.keys(categories).length > 0) {
+                state.categories = categories;
+            }
+        }
+        if (Object.keys(state).length > 0) {
+            sessionStorage.setItem('exaport_flat_filters', JSON.stringify(state));
+        }
+    }
+
     function setActiveView(folderlayout) {
         var details = document.querySelector('.exaport-view-section[data-exaport-view="details"]');
         var tiles = document.querySelector('.exaport-view-section[data-exaport-view="tiles"]');
@@ -135,6 +181,8 @@ define(['core/ajax'], function(Ajax) {
             if (otherUsersCheckbox) {
                 otherUsersCheckbox.addEventListener('change', function() {
                     savePreference('show_otherusers', otherUsersCheckbox.checked ? 1 : 0);
+                    // Save filter state before reload so it can be restored.
+                    saveFilterStateToSession();
                     // Reload because this affects server-side item loading.
                     var url = new URL(window.location.href);
                     url.searchParams.set('show_otherusers', otherUsersCheckbox.checked ? 1 : 0);

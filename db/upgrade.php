@@ -1346,6 +1346,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026051501) {
+        // TODO: change version before merge
         // Add item-category relation table for multi-category assignments.
         $table = new xmldb_table('block_exaportitemcate');
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
@@ -1379,6 +1380,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026051902) {
+        // TODO: change version before implementing this
         // The categoryid column is kept in block_exaportitem for backward compatibility
         // (reverting to an older plugin version should not break). All code paths now use
         // block_exaportitemcate exclusively. The column will be dropped in a future release.

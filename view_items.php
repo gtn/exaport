@@ -56,9 +56,7 @@ if ($type != 'shared' && $type != 'sharedstudent') {
 
 if ($type == 'mine' && empty($CFG->block_exaport_enable_myportfolio)) {
     print_error('areaisdisabled', 'block_exaport');
-}
-
-if (($type == 'shared' || $type == 'sharedstudent') && empty($CFG->block_exaport_enable_shared_categories)) {
+} else if (($type == 'shared' || $type == 'sharedstudent') && empty($CFG->block_exaport_enable_shared_categories)) {
     print_error('areaisdisabled', 'block_exaport');
 }
 

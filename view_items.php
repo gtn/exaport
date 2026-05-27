@@ -73,6 +73,12 @@ if ($type != 'shared' && $type != 'sharedstudent') {
     $type = 'mine';
 }
 
+if ($type == 'mine' && empty($CFG->block_exaport_enable_myportfolio)) {
+    print_error('areaisdisabled', 'block_exaport');
+} elseif (($type == 'shared' || $type == 'sharedstudent') && empty($CFG->block_exaport_enable_shared_categories)) {
+    print_error('areaisdisabled', 'block_exaport');
+}
+
 // Main layout mode switch: folder (legacy navigation) or flat (all items).
 if (in_array($layout, ['tiles', 'details'])) {
     // Backward compatibility for old URL layout values.

@@ -2930,6 +2930,79 @@ return [
         'Kachel-Layout (Alt - Unterstützung endet mit Version 4.6.7)',
         'Tiles layout (Old - ended of support from v4.6.7)',
     ],
+    // === Navigation area settings.
+    'settings_enable_areas_heading' => [
+        'Navigationsbereiche',
+        'Navigation areas',
+    ],
+    'settings_enable_whyeportfolio_head' => [
+        'Bereich "Warum ePortfolio" anzeigen',
+        'Show "Why ePortfolio" area',
+    ],
+    'settings_enable_whyeportfolio_body' => [
+        'Den Navigationsbereich "Warum ePortfolio" ein-/ausblenden.',
+        'Show or hide the "Why ePortfolio" navigation area.',
+    ],
+    'settings_enable_resume_head' => [
+        'Bereich "Mein Lebenslauf" anzeigen',
+        'Show "My CV" area',
+    ],
+    'settings_enable_resume_body' => [
+        'Den Navigationsbereich "Mein Lebenslauf" ein-/ausblenden.',
+        'Show or hide the "My CV" navigation area.',
+    ],
+    'settings_enable_myportfolio_head' => [
+        'Bereich "Meine Portfolio Artefakte" anzeigen',
+        'Show "My Portfolio Artefacts" area',
+    ],
+    'settings_enable_myportfolio_body' => [
+        'Den Navigationsbereich "Meine Portfolio Artefakte" ein-/ausblenden.',
+        'Show or hide the "My Portfolio Artefacts" navigation area.',
+    ],
+    'settings_enable_views_head' => [
+        'Bereich "Meine Portfolios" anzeigen',
+        'Show "My Portfolios" area',
+    ],
+    'settings_enable_views_body' => [
+        'Den Navigationsbereich "Meine Portfolios" ein-/ausblenden.',
+        'Show or hide the "My Portfolios" navigation area.',
+    ],
+    'settings_enable_shared_views_head' => [
+        'Bereich "Geteilte Portfolios" anzeigen',
+        'Show "Shared Portfolios" area',
+    ],
+    'settings_enable_shared_views_body' => [
+        'Den Navigationsbereich "Geteilte Portfolios" ein-/ausblenden.',
+        'Show or hide the "Shared Portfolios" navigation area.',
+    ],
+    'settings_enable_shared_categories_head' => [
+        'Bereich "Geteilte Kategorien" anzeigen',
+        'Show "Shared Categories" area',
+    ],
+    'settings_enable_shared_categories_body' => [
+        'Den Navigationsbereich "Geteilte Kategorien" ein-/ausblenden.',
+        'Show or hide the "Shared Categories" navigation area.',
+    ],
+    'settings_enable_importexport_head' => [
+        'Bereich "Import/Export" anzeigen',
+        'Show "Import/Export" area',
+    ],
+    'settings_enable_importexport_body' => [
+        'Den Navigationsbereich "Import/Export" ein-/ausblenden.',
+        'Show or hide the "Import/Export" navigation area.',
+    ],
+    'settings_enable_category_distribution_head' => [
+        'Bereich "Struktur vorgeben" anzeigen',
+        'Show "Preset structure" area',
+    ],
+    'settings_enable_category_distribution_body' => [
+        'Den Navigationsbereich "Struktur vorgeben" ein-/ausblenden.',
+        'Show or hide the "Preset structure" navigation area.',
+    ],
+    'areaisdisabled' => [
+        'Dieser Bereich wurde von der Administration deaktiviert.',
+        'This area has been disabled by the administrator.',
+    ],
     'settings_export_settings_heading' => [
         'Export-Einstellungen',
         'Export settings',

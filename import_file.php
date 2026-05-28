@@ -16,6 +16,7 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/item.php');
 require_once(__DIR__ . '/lib/edit_form.php');
 require_once(__DIR__ . '/lib/minixml.inc.php');
 require_once(__DIR__ . '/lib/class.scormparser.php');

@@ -19,7 +19,8 @@ require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/lib/externlib.php');
 require_once(__DIR__ . '/blockmediafunc.php');
 
-use function block_exaport\common\print_error;
+$access = optional_param('access', 0, PARAM_TEXT);
+$itemid = optional_param('itemid', 0, PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 $commentid = optional_param('commentid', 0, PARAM_INT);
 $commentdelete = optional_param('comment_delete', 0, PARAM_INT);

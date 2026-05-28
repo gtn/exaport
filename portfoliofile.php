@@ -17,7 +17,7 @@
 
 require_once(__DIR__ . '/inc.php');
 
-use function block_exaport\common\print_error;
+// Syntax:
 // Files in the portfolio:
 // portfoliofile.php/files/$userid/$portfolioid/filename.ext
 // Exported SCORM-File (user has to be logged in)

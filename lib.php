@@ -18,7 +18,6 @@
 require_once(__DIR__ . '/inc.php');
 
 use block_exaport\blockedit;
-use function block_exaport\common\print_error;
 
 // Called from pluginfile.php
 // to serve the file of a plugin

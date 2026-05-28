@@ -17,7 +17,8 @@
 
 require_once(__DIR__ . '/inc.php');
 
-use function block_exaport\common\print_error;
+$courseid = required_param('courseid', PARAM_INT);
+$id = required_param('id', PARAM_INT);
 $q = trim(optional_param('q', '', PARAM_TEXT));
 
 block_exaport_require_login($courseid);

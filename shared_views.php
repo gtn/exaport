@@ -18,7 +18,6 @@
 require_once(__DIR__ . '/inc.php');
 
 use block_exaport\globals as g;
-use function block_exaport\common\print_error;
 
 $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);

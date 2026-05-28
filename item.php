@@ -78,7 +78,7 @@ if ($action == 'copytoself') {
     // Copy category assignments from the source item to the new item.
     $sourcecatids = $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$id]);
     if ($sourcecatids) {
-        block_exaport_sync_item_categories($newitemid, $sourcecatids);
+        item_category_helper::sync_item_categories($newitemid, $sourcecatids);
     }
 
     if ($copy->type == 'file') {
@@ -189,7 +189,7 @@ if ($action == 'movetocategory' && $allowedit) {
         die('target category not found');
     }
 
-    block_exaport_sync_item_categories($existing->id, [$targetcategory->id]);
+    item_category_helper::sync_item_categories($existing->id, [$targetcategory->id]);
 
     echo 'ok';
     exit;
@@ -509,7 +509,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     };
 
     if ($DB->update_record('block_exaportitem', $post)) {
-        block_exaport_sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
+        item_category_helper::sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
         block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit',
             $post->name);
     } else {
@@ -581,7 +581,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 
     // Insert the new entry.
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
-        block_exaport_sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
+        item_category_helper::sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
         //
         // // Trigger event for item creation
         // $event = \block_exaport\event\item_created::create(array(
@@ -709,18 +709,6 @@ function block_exaport_normalize_item_categoryids($categoryids) {
         return $categoryid > 0;
     })));
     return $categoryids;
-}
-
-function block_exaport_sync_item_categories($itemid, array $categoryids) {
-    global $DB;
-
-    $DB->delete_records('block_exaportitemcate', ['itemid' => $itemid]);
-    foreach ($categoryids as $categoryid) {
-        $DB->insert_record('block_exaportitemcate', (object)[
-            'itemid' => (int)$itemid,
-            'cateid' => (int)$categoryid,
-        ]);
-    }
 }
 
 function block_exaport_convert_item_type(&$post) {

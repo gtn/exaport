@@ -71,7 +71,7 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
 
         $newitem->id = g::$DB->insert_record('block_exaportitem', $newitem);
         // Assign the new item to the new category.
-        block_exaport_sync_item_categories($newitem->id, [$newcat->id]);
+        item_category_helper::sync_item_categories($newitem->id, [$newcat->id]);
 
         // Files.
         $fs = get_file_storage();

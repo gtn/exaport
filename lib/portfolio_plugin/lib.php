@@ -82,7 +82,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
             // Insert.
             if ($item->id = $DB->insert_record('block_exaportitem', $item)) {
                 if ($categoryid > 0) {
-                    block_exaport_sync_item_categories($item->id, [$categoryid]);
+                    item_category_helper::sync_item_categories($item->id, [$categoryid]);
                 }
 
                 $filerecord = new stdClass();

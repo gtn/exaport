@@ -345,7 +345,7 @@ class externallib extends \external_api {
 
         // Sync the category via the relation table.
         if ($categoryid > 0) {
-            block_exaport_sync_item_categories($itemid, [$categoryid]);
+            item_category_helper::sync_item_categories($itemid, [$categoryid]);
         }
 
         // If a file is added we need to copy the file from the user/private filearea to block_exaport/item_file

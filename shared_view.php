@@ -16,6 +16,7 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 use Dompdf\Dompdf;
+use function block_exaport\common\print_error;
 
 require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/blockmediafunc.php');

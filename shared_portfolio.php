@@ -17,7 +17,7 @@
 
 require_once(__DIR__ . '/inc.php');
 
-$access = optional_param('access', 0, PARAM_TEXT);
+use function block_exaport\common\print_error;
 
 require_login(0, true);
 

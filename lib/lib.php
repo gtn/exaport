@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use block_exaport\globals as g;
 use core_privacy\local\request\transform;
+use function block_exaport\common\print_error;
 
 require_once($CFG->libdir . '/filelib.php');
 

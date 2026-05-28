@@ -19,7 +19,7 @@ require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/lib/resumelib.php');
 require_once(__DIR__ . '/blockmediafunc.php');
 
-$courseid = optional_param('courseid', 0, PARAM_INT);
+use function block_exaport\common\print_error;
 
 block_exaport_require_login($courseid);
 

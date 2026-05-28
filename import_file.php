@@ -21,7 +21,7 @@ require_once(__DIR__ . '/lib/minixml.inc.php');
 require_once(__DIR__ . '/lib/class.scormparser.php');
 require_once(__DIR__ . '/lib/information_edit_form.php');
 
-global $DB;
+use function block_exaport\common\print_error;
 
 $userid = optional_param('userid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);

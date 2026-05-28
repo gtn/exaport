@@ -21,8 +21,6 @@ require_once(__DIR__ . '/blockmediafunc.php');
 
 use function block_exaport\common\print_error;
 
-$courseid = optional_param('courseid', 0, PARAM_INT);
-
 block_exaport_require_login($courseid);
 
 $context = context_system::instance();

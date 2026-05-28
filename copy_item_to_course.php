@@ -18,10 +18,6 @@
 require_once(__DIR__ . '/inc.php');
 
 use function block_exaport\common\print_error;
-
-$courseid = required_param('courseid', PARAM_INT);
-$action = optional_param("action", "", PARAM_ALPHA);
-$itemid = optional_param('itemid', 0, PARAM_INT);
 $sharecourseid = optional_param('sharecourseid', '', PARAM_INT); // Array of integer.
 
 $backtype = optional_param('backtype', 'all', PARAM_ALPHA);

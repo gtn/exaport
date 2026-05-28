@@ -365,6 +365,13 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     global $CFG, $COURSE, $PAGE;
 
     block_exaport_init_js_css();
+    // Suppress course secondary navigation (course tabs) if disabled in settings.
+    if (empty($CFG->block_exaport_show_course_navbar)) {
+        if (method_exists($PAGE, 'set_secondary_navigation')) {
+            // Moodle 4.0+.
+            $PAGE->set_secondary_navigation(false);
+        }
+    }
 
     // Navigationspfad.
     $navlinks = array();

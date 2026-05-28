@@ -95,26 +95,30 @@ if ($item->allowComments) {
 
                 $prms = 'access=' . $access . '&itemid=' . $itemid;
                 if (!empty($backtype)) {
-                    $prms .= 'backtype=' . $backtype;
+                    $prms .= '&backtype=' . $backtype;
                 }
                 redirect($CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $prms);
                 break;
             case 'edit':
-                $editcommentid = optional_param('commentid', 0, PARAM_INT);
-                $conditions = array('id' => $editcommentid, 'userid' => $USER->id, 'itemid' => $itemid);
+                $conditions = array('id' => $commentid, 'userid' => $USER->id, 'itemid' => $itemid);
                 if ($DB->count_records('block_exaportitemcomm', $conditions) == 1) {
                     require_sesskey();
                     $updatecomment = new stdClass();
-                    $updatecomment->id = $editcommentid;
+                    $updatecomment->id = $commentid;
                     $updatecomment->entry = $fromform->entry['text'];
                     $updatecomment->timemodified = time();
                     $DB->update_record('block_exaportitemcomm', $updatecomment);
 
                     $fs = get_file_storage();
-                    if ($draftitemid = $fromform->file) {
-                        $contextid = context_system::instance()->id;
-                        $fs->delete_area_files($contextid, 'block_exaport', 'item_comment_file', $editcommentid);
-                        file_save_draft_area_files($draftitemid, $contextid, 'block_exaport', 'item_comment_file', $editcommentid);
+                    $draftitemid = (int)$fromform->file;
+                    if ($draftitemid) {
+                        $draftfiles = $fs->get_area_files(context_user::instance($USER->id)->id,
+                            'user', 'draft', $draftitemid, 'id', false);
+                        if ($draftfiles) {
+                            $contextid = context_system::instance()->id;
+                            $fs->delete_area_files($contextid, 'block_exaport', 'item_comment_file', $commentid);
+                            file_save_draft_area_files($draftitemid, $contextid, 'block_exaport', 'item_comment_file', $commentid);
+                        }
                     }
                 }
                 $prms = 'access=' . $access . '&itemid=' . $itemid;
@@ -193,7 +197,7 @@ if ($item->allowComments) {
         $newcomment->backtype = $backtype;
     }
 
-    block_exaport_show_comments($item, $access);
+    block_exaport_show_comments($item, $access, $backtype);
 
     $commentseditform->set_data($newcomment);
     $commentseditform->display();
@@ -220,7 +224,7 @@ echo block_exaport_wrapperdivend();
 
 echo $OUTPUT->footer();
 
-function block_exaport_show_comments($item, $access) {
+function block_exaport_show_comments($item, $access, $backtype = '') {
     global $CFG, $USER, $COURSE, $DB, $OUTPUT;
     $conditions = array("itemid" => $item->id);
     $comments = $DB->get_records("block_exaportitemcomm", $conditions, 'timemodified DESC');
@@ -258,7 +262,7 @@ function block_exaport_show_comments($item, $access) {
 
             if ($comment->userid == $USER->id) {
                 echo ' - <a href="' . s(new moodle_url('/blocks/exaport/shared_item.php',
-                        array('access' => $access, 'itemid' => $item->id, 'comment_edit' => $comment->id))) .
+                        array('access' => $access, 'itemid' => $item->id, 'comment_edit' => $comment->id, 'backtype' => $backtype))) .
                     '">' . block_exaport_get_string('editcomment') . '</a>';
                 echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
                     '" onclick="' . s('return confirm(' . json_encode(block_exaport_get_string('comment_delete_confirmation')) . ')') .

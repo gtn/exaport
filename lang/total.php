@@ -2999,6 +2999,14 @@ return [
         'Den Navigationsbereich "Struktur vorgeben" ein-/ausblenden.',
         'Show or hide the "Preset structure" navigation area.',
     ],
+    'settings_show_course_navbar_head' => [
+        'Kurs-Navigationsleiste anzeigen',
+        'Show course navigation bar',
+    ],
+    'settings_show_course_navbar_body' => [
+        'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren für eine übersichtlichere Ansicht ohne Kurs-Tabs.',
+        'When enabled, the Moodle course navigation bar (Course, Participants, Grades, etc.) is shown on ePortfolio pages. Disable to show a cleaner interface without course tabs.',
+    ],
     'areaisdisabled' => [
         'Dieser Bereich wurde von der Administration deaktiviert.',
         'This area has been disabled by the administrator.',

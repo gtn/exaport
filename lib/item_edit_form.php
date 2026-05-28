@@ -38,6 +38,10 @@ class block_exaport_comment_edit_form extends block_exaport_moodleform {
         $mform->setType('itemid', PARAM_INT);
         $mform->setDefault('itemid', 0);
 
+        $mform->addElement('hidden', 'commentid');
+        $mform->setType('commentid', PARAM_INT);
+        $mform->setDefault('commentid', 0);
+
         $mform->addElement('hidden', 'userid');
         $mform->setType('userid', PARAM_INT);
         $mform->setDefault('userid', 0);

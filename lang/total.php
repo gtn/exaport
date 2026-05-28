@@ -582,6 +582,10 @@ return [
         'Kommentar hinzufügen',
         'Add comment',
     ],
+    'editcomment' => [
+        'Kommentar bearbeiten',
+        'Edit comment',
+    ],
     'externcomment' => [
         'Kommentare mitver&ouml;ffentlichen',
         'Share comments in external portfolio',

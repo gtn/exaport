@@ -167,6 +167,7 @@ $string['bookmarksnotes'] = 'Notes';
 $string['noguestpost'] = 'Guests don\'t have access here!';
 $string['comments'] = 'Comments';
 $string['addcomment'] = 'Add comment';
+$string['editcomment'] = 'Edit comment';
 $string['externcomment'] = 'Share comments in external portfolio';
 $string['itemgrading'] = 'Grading';
 $string['gradeitem'] = 'Grade the item';

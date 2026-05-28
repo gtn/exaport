@@ -167,6 +167,7 @@ $string['bookmarksnotes'] = 'Notizen';
 $string['noguestpost'] = 'G&auml;ste haben hier keinen Zugriff!';
 $string['comments'] = 'Kommentare';
 $string['addcomment'] = 'Kommentar hinzufügen';
+$string['editcomment'] = 'Kommentar bearbeiten';
 $string['externcomment'] = 'Kommentare mitver&ouml;ffentlichen';
 $string['itemgrading'] = 'Beurteilung';
 $string['gradeitem'] = 'Abgabe beurteilen';

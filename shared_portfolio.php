@@ -19,6 +19,8 @@ require_once(__DIR__ . '/inc.php');
 
 use function block_exaport\common\print_error;
 
+$access = optional_param('access', 0, PARAM_TEXT);
+
 require_login(0, true);
 
 if (!$user = block_exaport_get_user_from_access($access)) {

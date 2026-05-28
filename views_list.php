@@ -19,6 +19,9 @@ require_once(__DIR__ . '/inc.php');
 
 use function block_exaport\common\print_error;
 
+$courseid = optional_param('courseid', 0, PARAM_INT);
+$sort = optional_param('sort', '', PARAM_RAW);
+
 block_exaport_require_login($courseid);
 
 $url = '/blocks/exaport/views_list.php';

@@ -19,11 +19,14 @@ require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/lib/externlib.php');
 require_once(__DIR__ . '/blockmediafunc.php');
 
+use function block_exaport\common\print_error;
+
 $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 $commentid = optional_param('commentid', 0, PARAM_INT);
 $commentdelete = optional_param('comment_delete', 0, PARAM_INT);
+$commentedit = optional_param('comment_edit', 0, PARAM_INT);
 $backtype = optional_param('backtype', 0, PARAM_TEXT);
 
 $context = context_system::instance();
@@ -81,7 +84,8 @@ if ($item->allowComments) {
     }
 
     $commentseditform = new block_exaport_comment_edit_form($PAGE->url,
-        array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade' => $teachervalue));
+        array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade' => $teachervalue,
+            'is_editing' => ($commentedit > 0)));
 
     if ($commentseditform->is_cancelled()) {
         $tempvar = 1; // For code checker.
@@ -94,7 +98,35 @@ if ($item->allowComments) {
 
                 $prms = 'access=' . $access . '&itemid=' . $itemid;
                 if (!empty($backtype)) {
-                    $prms .= 'backtype=' . $backtype;
+                    $prms .= '&backtype=' . $backtype;
+                }
+                redirect($CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $prms);
+                break;
+            case 'edit':
+                require_sesskey();
+                $conditions = array('id' => $commentid, 'userid' => $USER->id, 'itemid' => $itemid);
+                if ($DB->count_records('block_exaportitemcomm', $conditions) == 1) {
+                    $updatecomment = new stdClass();
+                    $updatecomment->id = $commentid;
+                    $updatecomment->entry = $fromform->entry['text'];
+                    $updatecomment->timemodified = time();
+                    $DB->update_record('block_exaportitemcomm', $updatecomment);
+
+                    $fs = get_file_storage();
+                    if (isset($fromform->file) && $fromform->file !== '') {
+                        $draftitemid = (int)$fromform->file;
+                        $draftfiles = $fs->get_area_files(context_user::instance($USER->id)->id,
+                            'user', 'draft', $draftitemid, 'id', false);
+                        if ($draftfiles) {
+                            $contextid = context_system::instance()->id;
+                            $fs->delete_area_files($contextid, 'block_exaport', 'item_comment_file', $commentid);
+                            file_save_draft_area_files($draftitemid, $contextid, 'block_exaport', 'item_comment_file', $commentid);
+                        }
+                    }
+                }
+                $prms = 'access=' . $access . '&itemid=' . $itemid;
+                if (!empty($backtype)) {
+                    $prms .= '&backtype=' . $backtype;
                 }
                 redirect($CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $prms);
                 break;
@@ -143,18 +175,45 @@ if (block_exaport_check_competence_interaction()) {
 
 if ($item->allowComments) {
     $newcomment = new stdClass();
-    $newcomment->action = 'add';
-    $newcomment->courseid = $COURSE->id;
-    $newcomment->timemodified = time();
-    $newcomment->itemid = $itemid;
-    $newcomment->userid = $USER->id;
-    $newcomment->access = $access;
-    $newcomment->backtype = $backtype;
+    if ($commentedit > 0) {
+        $editingcomment = $DB->get_record('block_exaportitemcomm',
+            array('id' => $commentedit, 'userid' => $USER->id, 'itemid' => $itemid));
+        if ($editingcomment) {
+            $newcomment->action = 'edit';
+            $newcomment->commentid = $editingcomment->id;
+            $newcomment->itemid = $itemid;
+            $newcomment->entry = array('text' => $editingcomment->entry, 'format' => FORMAT_HTML);
+            $draftitemid = file_get_submitted_draft_itemid('file');
+            if ($existingfile = block_exaport_get_item_comment_file($editingcomment->id)) {
+                file_prepare_draft_area($draftitemid, $existingfile->get_contextid(), 'block_exaport',
+                    'item_comment_file', $editingcomment->id);
+            }
+            $newcomment->file = $draftitemid;
+        }
+    }
+    if (!isset($newcomment->action)) {
+        $newcomment->action = 'add';
+        $newcomment->courseid = $COURSE->id;
+        $newcomment->timemodified = time();
+        $newcomment->itemid = $itemid;
+        $newcomment->userid = $USER->id;
+        $newcomment->access = $access;
+        $newcomment->backtype = $backtype;
+    }
 
-    block_exaport_show_comments($item, $access);
+    block_exaport_show_comments($item, $access, $backtype, $commentedit > 0 ? $commentedit : 0);
 
     $commentseditform->set_data($newcomment);
     $commentseditform->display();
+
+    if ($commentedit > 0) {
+        $prms = 'access=' . urlencode($access) . '&itemid=' . $itemid;
+        if (!empty($backtype)) {
+            $prms .= '&backtype=' . urlencode($backtype);
+        }
+        $cancelurl = $CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $prms;
+        echo '<p><a href="' . s($cancelurl) . '">' . block_exaport_get_string('cancel_edit_comment') . '</a></p>';
+    }
 } else if ($item->showComments) {
     block_exaport_print_extcomments($item->id);
 }
@@ -178,13 +237,26 @@ echo block_exaport_wrapperdivend();
 
 echo $OUTPUT->footer();
 
-function block_exaport_show_comments($item, $access) {
+function block_exaport_show_comments($item, $access, $backtype = '', $editingcommentid = 0) {
     global $CFG, $USER, $COURSE, $DB, $OUTPUT;
+
+    // Build a clean base URL from known parameters to avoid URL growth and injection.
+    $baseparams = 'access=' . urlencode($access) . '&itemid=' . (int)$item->id;
+    if (!empty($backtype)) {
+        $baseparams .= '&backtype=' . urlencode($backtype);
+    }
+    $baseurl = $CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $baseparams;
+
     $conditions = array("itemid" => $item->id);
     $comments = $DB->get_records("block_exaportitemcomm", $conditions, 'timemodified DESC');
 
     if ($comments) {
         foreach ($comments as $comment) {
+            // When editing a comment, only render that specific comment.
+            if ($editingcommentid > 0 && $comment->id != $editingcommentid) {
+                continue;
+            }
+
             echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
             echo '<tr class="header"><td class="picture left">';
@@ -213,9 +285,10 @@ function block_exaport_show_comments($item, $access) {
             $by->date = userdate($comment->timemodified);
             print_string('bynameondate', 'forum', $by);
 
-
-            if ($comment->userid == $USER->id) {
-                echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
+            if ($comment->userid == $USER->id && $editingcommentid == 0) {
+                echo ' - <a href="' . s($baseurl . '&comment_edit=' . $comment->id) .
+                    '">' . block_exaport_get_string('editcomment') . '</a>';
+                echo ' - <a href="' . s($baseurl . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
                     '" onclick="' . s('return confirm(' . json_encode(block_exaport_get_string('comment_delete_confirmation')) . ')') .
                     '">' . block_exaport_get_string('delete') . '</a>';
             }

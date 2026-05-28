@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use block_exaport\globals as g;
 use core_privacy\local\request\transform;
+use function block_exaport\common\print_error;
 
 require_once($CFG->libdir . '/filelib.php');
 
@@ -365,6 +366,13 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
     global $CFG, $COURSE, $PAGE;
 
     block_exaport_init_js_css();
+    // Hide course secondary navigation (course tabs) if disabled in settings.
+    if (isset($CFG->block_exaport_show_course_navbar) && empty($CFG->block_exaport_show_course_navbar)) {
+        if (method_exists($PAGE, 'set_secondary_navigation')) {
+            // Moodle 4.0+.
+            $PAGE->set_secondary_navigation(false);
+        }
+    }
 
     // Navigationspfad.
     $navlinks = array();

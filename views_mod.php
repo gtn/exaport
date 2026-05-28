@@ -18,6 +18,8 @@
 require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/blockmediafunc.php');
 
+use function block_exaport\common\print_error;
+
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
 $confirm = optional_param("confirm", "", PARAM_BOOL);

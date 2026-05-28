@@ -116,6 +116,10 @@ return [
         'zurück',
         'Back',
     ],
+    'cancel_edit_comment' => [
+        'Kommentarbearbeitung abbrechen',
+        'cancel comment editing',
+    ],
     'close' => [
         'Schließen',
         'close',
@@ -581,6 +585,14 @@ return [
     'addcomment' => [
         'Kommentar hinzufügen',
         'Add comment',
+    ],
+    'editcomment' => [
+        'Kommentar bearbeiten',
+        'Edit comment',
+    ],
+    'savecommentchanges' => [
+        'Änderungen speichern',
+        'Save changes',
     ],
     'externcomment' => [
         'Kommentare mitver&ouml;ffentlichen',
@@ -3022,6 +3034,14 @@ return [
     'settings_enable_category_distribution_body' => [
         'Den Navigationsbereich "Struktur vorgeben" ein-/ausblenden.',
         'Show or hide the "Preset structure" navigation area.',
+    ],
+    'settings_show_course_navbar_head' => [
+        'Kurs-Navigationsleiste anzeigen',
+        'Show course navigation bar',
+    ],
+    'settings_show_course_navbar_body' => [
+        'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren für eine übersichtlichere Ansicht ohne Kurs-Tabs.',
+        'When enabled, the Moodle course navigation bar (Course, Participants, Grades, etc.) is shown on ePortfolio pages. Disable to show a cleaner interface without course tabs.',
     ],
     'areaisdisabled' => [
         'Dieser Bereich wurde von der Administration deaktiviert.',

@@ -116,6 +116,10 @@ return [
         'zurück',
         'Back',
     ],
+    'cancel_edit_comment' => [
+        'Kommentarbearbeitung abbrechen',
+        'cancel comment editing',
+    ],
     'close' => [
         'Schließen',
         'close',
@@ -581,6 +585,14 @@ return [
     'addcomment' => [
         'Kommentar hinzufügen',
         'Add comment',
+    ],
+    'editcomment' => [
+        'Kommentar bearbeiten',
+        'Edit comment',
+    ],
+    'savecommentchanges' => [
+        'Änderungen speichern',
+        'Save changes',
     ],
     'externcomment' => [
         'Kommentare mitver&ouml;ffentlichen',

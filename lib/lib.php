@@ -18,6 +18,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use block_exaport\globals as g;
+use block_exaport\item_category_helper;
 use core_privacy\local\request\transform;
 use function block_exaport\common\print_error;
 
@@ -3095,18 +3096,4 @@ function block_exaport_get_comment_author_name($userid) {
 
     // Fallback if user not found
     return get_string('unknownuser', 'block_exaport');
-}
-
-class item_category_helper {
-    public static function sync_item_categories($itemid, array $categoryids) {
-        global $DB;
-
-        $DB->delete_records('block_exaportitemcate', ['itemid' => $itemid]);
-        foreach ($categoryids as $categoryid) {
-            $DB->insert_record('block_exaportitemcate', (object)[
-                'itemid' => (int)$itemid,
-                'cateid' => (int)$categoryid,
-            ]);
-        }
-    }
 }

@@ -22,6 +22,7 @@ require_once(__DIR__ . '/lib/class.scormparser.php');
 require_once(__DIR__ . '/lib/information_edit_form.php');
 
 use function block_exaport\common\print_error;
+use block_exaport\item_category_helper;
 
 global $DB;
 

@@ -17,6 +17,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use block_exaport\item_category_helper;
+
 require_once($CFG->libdir . '/portfoliolib.php');
 
 class portfolio_plugin_exaport extends portfolio_plugin_push_base {

@@ -25,6 +25,7 @@ require_once($CFG->libdir . '/weblib.php');
 require_once($CFG->dirroot . '/lib/filelib.php');
 
 use block_exaport\globals as g;
+use block_exaport\item_category_helper;
 use context_course;
 use context_user;
 use external_function_parameters;

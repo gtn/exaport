@@ -116,6 +116,10 @@ return [
         'zurück',
         'Back',
     ],
+    'back_to_item' => [
+        'Kommentarbearbeitung abbrechen',
+        'cancel comment editing',
+    ],
     'close' => [
         'Schließen',
         'close',

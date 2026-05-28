@@ -43,6 +43,7 @@ $string['attachment'] = 'Anhang';
 $string['attachincluded'] = 'Anhang?';
 $string['awaiting'] = '(\\$a wartend)';
 $string['back'] = 'zurück';
+$string['cancel_edit_comment'] = 'Kommentarbearbeitung abbrechen';
 $string['close'] = 'Schließen';
 $string['backtocourse'] = 'zurück zum Kurs';
 $string['categories'] = 'Kategorien';

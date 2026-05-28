@@ -212,7 +212,7 @@ if ($item->allowComments) {
             $prms .= '&backtype=' . urlencode($backtype);
         }
         $cancelurl = $CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $prms;
-        echo '<p><a href="' . s($cancelurl) . '">' . block_exaport_get_string('back') . '</a></p>';
+        echo '<p><a href="' . s($cancelurl) . '">' . block_exaport_get_string('back_to_item') . '</a></p>';
     }
 } else if ($item->showComments) {
     block_exaport_print_extcomments($item->id);

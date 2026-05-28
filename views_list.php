@@ -17,6 +17,8 @@
 
 require_once(__DIR__ . '/inc.php');
 
+use function block_exaport\common\print_error;
+
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 

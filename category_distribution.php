@@ -21,6 +21,7 @@ use block_exaport\category_template;
 use block_exaport\category_distributor;
 use block_exaport\view_template;
 use block_exaport\view_distributor;
+use function block_exaport\common\print_error;
 
 $courseid = required_param('courseid', PARAM_INT);
 $action = optional_param('action', '', PARAM_TEXT);

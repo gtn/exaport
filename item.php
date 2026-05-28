@@ -17,6 +17,8 @@
 
 require_once(__DIR__ . '/inc.php');
 
+use function block_exaport\common\print_error;
+
 const POSSIBLE_IFRAME_FIELDS = ['intro', 'project_description', 'project_process', 'project_result'];
 
 $courseid = optional_param('courseid', 0, PARAM_INT);

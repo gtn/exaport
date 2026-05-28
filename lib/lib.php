@@ -2876,7 +2876,7 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
 
     // Sync category via the relation table.
     if ($categoryid > 0) {
-        block_exaport_sync_item_categories($item->id, [$categoryid]);
+        item_category_helper::sync_item_categories($item->id, [$categoryid]);
     }
 
     // Save submission file if provided
@@ -3095,4 +3095,18 @@ function block_exaport_get_comment_author_name($userid) {
 
     // Fallback if user not found
     return get_string('unknownuser', 'block_exaport');
+}
+
+class item_category_helper {
+    public static function sync_item_categories($itemid, array $categoryids) {
+        global $DB;
+
+        $DB->delete_records('block_exaportitemcate', ['itemid' => $itemid]);
+        foreach ($categoryids as $categoryid) {
+            $DB->insert_record('block_exaportitemcate', (object)[
+                'itemid' => (int)$itemid,
+                'cateid' => (int)$categoryid,
+            ]);
+        }
+    }
 }

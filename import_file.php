@@ -410,7 +410,7 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
 
             if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
                 if ($category > 0) {
-                    block_exaport_sync_item_categories($new->id, [$category]);
+                    item_category_helper::sync_item_categories($new->id, [$category]);
                 }
                 if (isset($xml) && isset($id)) {
                     import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
@@ -440,7 +440,7 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
 
             if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
                 if ($category > 0) {
-                    block_exaport_sync_item_categories($new->id, [$category]);
+                    item_category_helper::sync_item_categories($new->id, [$category]);
                 }
                 if (isset($xml) && isset($id)) {
                     import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
@@ -500,7 +500,7 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
 
             if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
                 if ($category > 0) {
-                    block_exaport_sync_item_categories($new->id, [$category]);
+                    item_category_helper::sync_item_categories($new->id, [$category]);
                 }
                 if (isset($xml) && isset($id)) {
                     import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);

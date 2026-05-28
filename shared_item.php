@@ -236,10 +236,8 @@ function block_exaport_show_comments($item, $access, $backtype = '', $editingcom
     if ($comments) {
         foreach ($comments as $comment) {
             $iscurrentlyediting = ($editingcommentid > 0 && $comment->id == $editingcommentid);
-            $tableattrs = 'cellspacing="0" class="forumpost blogpost blog" width="100%"';
-            if ($iscurrentlyediting) {
-                $tableattrs .= ' style="border: 2px solid #f0ad4e; border-radius: 4px;"';
-            }
+            $tableattrs = 'cellspacing="0" class="forumpost blogpost blog' .
+                ($iscurrentlyediting ? ' block_exaport_comment_editing' : '') . '" width="100%"';
             echo '<table ' . $tableattrs . '>';
 
             echo '<tr class="header"><td class="picture left">';

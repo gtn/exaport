@@ -116,7 +116,7 @@ return [
         'zurück',
         'Back',
     ],
-    'back_to_item' => [
+    'cancel_edit_comment' => [
         'Kommentarbearbeitung abbrechen',
         'cancel comment editing',
     ],

@@ -84,7 +84,8 @@ if ($item->allowComments) {
     }
 
     $commentseditform = new block_exaport_comment_edit_form($PAGE->url,
-        array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade' => $teachervalue));
+        array('gradingpermission' => block_exaport_has_grading_permission($itemid), 'itemgrade' => $teachervalue,
+            'is_editing' => ($commentedit > 0)));
 
     if ($commentseditform->is_cancelled()) {
         $tempvar = 1; // For code checker.
@@ -200,7 +201,7 @@ if ($item->allowComments) {
         $newcomment->backtype = $backtype;
     }
 
-    block_exaport_show_comments($item, $access, $backtype);
+    block_exaport_show_comments($item, $access, $backtype, $commentedit > 0 ? $commentedit : 0);
 
     $commentseditform->set_data($newcomment);
     $commentseditform->display();
@@ -227,14 +228,19 @@ echo block_exaport_wrapperdivend();
 
 echo $OUTPUT->footer();
 
-function block_exaport_show_comments($item, $access, $backtype = '') {
+function block_exaport_show_comments($item, $access, $backtype = '', $editingcommentid = 0) {
     global $CFG, $USER, $COURSE, $DB, $OUTPUT;
     $conditions = array("itemid" => $item->id);
     $comments = $DB->get_records("block_exaportitemcomm", $conditions, 'timemodified DESC');
 
     if ($comments) {
         foreach ($comments as $comment) {
-            echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
+            $iscurrentlyediting = ($editingcommentid > 0 && $comment->id == $editingcommentid);
+            $tableattrs = 'cellspacing="0" class="forumpost blogpost blog" width="100%"';
+            if ($iscurrentlyediting) {
+                $tableattrs .= ' style="border: 2px solid #f0ad4e; border-radius: 4px;"';
+            }
+            echo '<table ' . $tableattrs . '>';
 
             echo '<tr class="header"><td class="picture left">';
             // Check if this is a hidden grader (userid = -1, use strict comparison)
@@ -264,8 +270,12 @@ function block_exaport_show_comments($item, $access, $backtype = '') {
 
 
             if ($comment->userid == $USER->id) {
-                echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&comment_edit=' . $comment->id) .
-                    '">' . block_exaport_get_string('editcomment') . '</a>';
+                if ($iscurrentlyediting) {
+                    echo ' - <em>' . block_exaport_get_string('comment_currently_editing') . '</em>';
+                } else {
+                    echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&comment_edit=' . $comment->id) .
+                        '">' . block_exaport_get_string('editcomment') . '</a>';
+                }
                 echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
                     '" onclick="' . s('return confirm(' . json_encode(block_exaport_get_string('comment_delete_confirmation')) . ')') .
                     '">' . block_exaport_get_string('delete') . '</a>';

@@ -586,6 +586,14 @@ return [
         'Kommentar bearbeiten',
         'Edit comment',
     ],
+    'savecommentchanges' => [
+        'Änderungen speichern',
+        'Save changes',
+    ],
+    'comment_currently_editing' => [
+        'Wird gerade bearbeitet',
+        'Currently editing this comment',
+    ],
     'externcomment' => [
         'Kommentare mitver&ouml;ffentlichen',
         'Share comments in external portfolio',

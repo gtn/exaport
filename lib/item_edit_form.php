@@ -46,7 +46,10 @@ class block_exaport_comment_edit_form extends block_exaport_moodleform {
         $mform->setType('userid', PARAM_INT);
         $mform->setDefault('userid', 0);
 
-        $mform->addElement('header', 'comment', get_string("addcomment", "block_exaport"));
+        $isediting = !empty($this->_customdata['is_editing']);
+
+        $mform->addElement('header', 'comment',
+            get_string($isediting ? 'editcomment' : 'addcomment', 'block_exaport'));
 
         $mform->addElement('editor', 'entry', get_string("comment", "block_exaport"), null,
             array('rows' => 10, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
@@ -72,7 +75,10 @@ class block_exaport_comment_edit_form extends block_exaport_moodleform {
         }
         */
 
-        $this->add_action_buttons(false, get_string('add'));
+        $submitlabel = $isediting
+            ? get_string('savecommentchanges', 'block_exaport')
+            : get_string('add');
+        $this->add_action_buttons(false, $submitlabel);
 
     }
 

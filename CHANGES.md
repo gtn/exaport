@@ -1,3 +1,9 @@
+### v5.1 (2026052800) ###
+* New admin setting: Administrators can now individually show or hide each navigation area (Why ePortfolio, My CV, My Portfolio Artefacts, My Views, Shared Portfolios, Shared Categories, Import/Export, Preset Structure) via the plugin settings page. Hidden areas are blocked from user access.
+* New admin setting: The Moodle course navigation bar (Course, Participants, Grades, etc.) can be hidden on all Exaport pages for a cleaner interface.
+* New feature: Users can now edit their own comments on portfolio items. An "Edit" link appears next to the existing "Delete" link.
+* Bugfix: View layout was being overwritten by layout_settings in some cases.
+
 ### v5.1 (2026052200) ###
 * category link added: You can now create a link by name that leads every user to their own exaquest-category with that name
 * importing assignments into exaportfolio now adds the feedbackfiles of teachers as well. General rework of this import. Security fixes / respecting settings like "dont show graders name" from moodle settings.
@@ -8,7 +14,6 @@
 * Display skills of shared items
 * block editing logic refactored a
 * europass xml new version
-
 
 ### v5.1 (2026021300) ###
 * **New Feature**: Teacher feedback files are now automatically included when importing assignment submissions to portfolio

@@ -18,6 +18,7 @@
 require_once(__DIR__ . '/inc.php');
 
 use function block_exaport\common\print_error;
+use block_exaport\item_category_helper;
 
 const POSSIBLE_IFRAME_FIELDS = ['intro', 'project_description', 'project_process', 'project_result'];
 

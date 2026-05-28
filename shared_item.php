@@ -180,6 +180,7 @@ if ($item->allowComments) {
         if ($editingcomment) {
             $newcomment->action = 'edit';
             $newcomment->commentid = $editingcomment->id;
+            $newcomment->itemid = $itemid;
             $newcomment->entry = array('text' => $editingcomment->entry, 'format' => FORMAT_HTML);
             $draftitemid = file_get_submitted_draft_itemid('file');
             if ($existingfile = block_exaport_get_item_comment_file($editingcomment->id)) {

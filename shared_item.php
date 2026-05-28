@@ -100,9 +100,9 @@ if ($item->allowComments) {
                 redirect($CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $prms);
                 break;
             case 'edit':
+                require_sesskey();
                 $conditions = array('id' => $commentid, 'userid' => $USER->id, 'itemid' => $itemid);
                 if ($DB->count_records('block_exaportitemcomm', $conditions) == 1) {
-                    require_sesskey();
                     $updatecomment = new stdClass();
                     $updatecomment->id = $commentid;
                     $updatecomment->entry = $fromform->entry['text'];
@@ -110,8 +110,8 @@ if ($item->allowComments) {
                     $DB->update_record('block_exaportitemcomm', $updatecomment);
 
                     $fs = get_file_storage();
-                    $draftitemid = (int)$fromform->file;
-                    if ($draftitemid) {
+                    if (isset($fromform->file) && $fromform->file !== '') {
+                        $draftitemid = (int)$fromform->file;
                         $draftfiles = $fs->get_area_files(context_user::instance($USER->id)->id,
                             'user', 'draft', $draftitemid, 'id', false);
                         if ($draftfiles) {

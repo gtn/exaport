@@ -205,6 +205,15 @@ if ($item->allowComments) {
 
     $commentseditform->set_data($newcomment);
     $commentseditform->display();
+
+    if ($commentedit > 0) {
+        $prms = 'access=' . urlencode($access) . '&itemid=' . $itemid;
+        if (!empty($backtype)) {
+            $prms .= '&backtype=' . urlencode($backtype);
+        }
+        $cancelurl = $CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $prms;
+        echo '<p><a href="' . s($cancelurl) . '">' . block_exaport_get_string('back') . '</a></p>';
+    }
 } else if ($item->showComments) {
     block_exaport_print_extcomments($item->id);
 }
@@ -230,15 +239,25 @@ echo $OUTPUT->footer();
 
 function block_exaport_show_comments($item, $access, $backtype = '', $editingcommentid = 0) {
     global $CFG, $USER, $COURSE, $DB, $OUTPUT;
+
+    // Build a clean base URL from known parameters to avoid URL growth and injection.
+    $baseparams = 'access=' . urlencode($access) . '&itemid=' . (int)$item->id;
+    if (!empty($backtype)) {
+        $baseparams .= '&backtype=' . urlencode($backtype);
+    }
+    $baseurl = $CFG->wwwroot . '/blocks/exaport/shared_item.php?' . $baseparams;
+
     $conditions = array("itemid" => $item->id);
     $comments = $DB->get_records("block_exaportitemcomm", $conditions, 'timemodified DESC');
 
     if ($comments) {
         foreach ($comments as $comment) {
-            $iscurrentlyediting = ($editingcommentid > 0 && $comment->id == $editingcommentid);
-            $tableattrs = 'cellspacing="0" class="forumpost blogpost blog' .
-                ($iscurrentlyediting ? ' block_exaport_comment_editing' : '') . '" width="100%"';
-            echo '<table ' . $tableattrs . '>';
+            // When editing a comment, only render that specific comment.
+            if ($editingcommentid > 0 && $comment->id != $editingcommentid) {
+                continue;
+            }
+
+            echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
 
             echo '<tr class="header"><td class="picture left">';
             // Check if this is a hidden grader (userid = -1, use strict comparison)
@@ -266,15 +285,10 @@ function block_exaport_show_comments($item, $access, $backtype = '', $editingcom
             $by->date = userdate($comment->timemodified);
             print_string('bynameondate', 'forum', $by);
 
-
-            if ($comment->userid == $USER->id) {
-                if ($iscurrentlyediting) {
-                    echo ' - <em>' . block_exaport_get_string('comment_currently_editing') . '</em>';
-                } else {
-                    echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&comment_edit=' . $comment->id) .
-                        '">' . block_exaport_get_string('editcomment') . '</a>';
-                }
-                echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
+            if ($comment->userid == $USER->id && $editingcommentid == 0) {
+                echo ' - <a href="' . s($baseurl . '&comment_edit=' . $comment->id) .
+                    '">' . block_exaport_get_string('editcomment') . '</a>';
+                echo ' - <a href="' . s($baseurl . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
                     '" onclick="' . s('return confirm(' . json_encode(block_exaport_get_string('comment_delete_confirmation')) . ')') .
                     '">' . block_exaport_get_string('delete') . '</a>';
             }

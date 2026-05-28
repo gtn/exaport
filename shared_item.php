@@ -263,8 +263,7 @@ function block_exaport_show_comments($item, $access, $backtype = '') {
 
 
             if ($comment->userid == $USER->id) {
-                echo ' - <a href="' . s(new moodle_url('/blocks/exaport/shared_item.php',
-                        array('access' => $access, 'itemid' => $item->id, 'comment_edit' => $comment->id, 'backtype' => $backtype))) .
+                echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&comment_edit=' . $comment->id) .
                     '">' . block_exaport_get_string('editcomment') . '</a>';
                 echo ' - <a href="' . s($_SERVER['REQUEST_URI'] . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
                     '" onclick="' . s('return confirm(' . json_encode(block_exaport_get_string('comment_delete_confirmation')) . ')') .

@@ -31,12 +31,23 @@ jQueryExaport(function ($) {
     start: function (event, ui) { // When dragging.
       // Set background of the current tile to white, background needed when dragging.
       ui.helper.css('background-color', '#fff');
+      // Fix for Moodle 5.x: Bootstrap/flexbox CSS causes the clone to stretch to full
+      // viewport height. Constrain it to the original element's size so it renders
+      // correctly and drop targets are not obscured.
+      ui.helper.css({
+        'width': $(this).outerWidth() + 'px',
+        'height': $(this).outerHeight() + 'px',
+        'max-height': $(this).outerHeight() + 'px',
+        'overflow': 'hidden',
+        'z-index': 9999
+      });
     }
   });
 
   $(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile_category").droppable({
     activeClass: "ui-state-active",
     hoverClass: "ui-state-hover",
+    tolerance: "pointer", // Fix for Moodle 5.x: use cursor position for drop detection instead of overlap
     drop: function (event, ui) {
       // Dropping a category or an item.
       var moveCat = ui.draggable.is('.excomdos_tile_category');

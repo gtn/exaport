@@ -1345,5 +1345,64 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026050401, 'exaport');
     }
 
+    if ($oldversion < 2026052900) {
+        // TODO: change version before merge
+        // Add item-category relation table for multi-category assignments.
+        $table = new xmldb_table('block_exaportitemcate');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('cateid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('itemid', XMLDB_KEY_FOREIGN, array('itemid'), 'block_exaportitem', array('id'));
+        $table->add_key('cateid', XMLDB_KEY_FOREIGN, array('cateid'), 'block_exaportcate', array('id'));
+        $table->add_index('itemid_cateid', XMLDB_INDEX_UNIQUE, array('itemid', 'cateid'));
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Keep legacy categoryid in sync during transition to the relation table.
+        // The categoryid column is kept in the schema for downgrade safety only; all code paths now use block_exaportitemcate exclusively.
+        // A future upgrade step will drop the categoryid column once rollback is no longer needed.
+        $legacyitems = $DB->get_recordset_select('block_exaportitem', 'categoryid > 0', null, '', 'id, categoryid');
+        foreach ($legacyitems as $legacyitem) {
+            $relation = [
+                'itemid' => $legacyitem->id,
+                'cateid' => $legacyitem->categoryid,
+            ];
+            if (!$DB->record_exists('block_exaportitemcate', $relation)) {
+                $DB->insert_record('block_exaportitemcate', (object)$relation);
+            }
+        }
+        $legacyitems->close();
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026052900, 'exaport');
+    }
+
+    if ($oldversion < 2026052900) {
+        // TODO: change version before implementing this
+        // The categoryid column is kept in block_exaportitem for backward compatibility
+        // (reverting to an older plugin version should not break). All code paths now use
+        // block_exaportitemcate exclusively. The column will be dropped in a future release.
+
+        // the removal code for the future:
+        // Drop the legacy categoryid column from block_exaportitem.
+        // $table = new xmldb_table('block_exaportitem');
+        //
+        // // First drop the index on categoryid if it exists.
+        // $index = new xmldb_index('categoryid', XMLDB_INDEX_NOTUNIQUE, ['categoryid']);
+        // if ($dbman->index_exists($table, $index)) {
+        //     $dbman->drop_index($table, $index);
+        // }
+        //
+        // // Now drop the field.
+        // $field = new xmldb_field('categoryid');
+        // if ($dbman->field_exists($table, $field)) {
+        //     $dbman->drop_field($table, $field);
+        // }
+
+        upgrade_block_savepoint(true, 2026052900, 'exaport');
+    }
+
     return $result;
 }

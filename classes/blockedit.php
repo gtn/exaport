@@ -93,9 +93,10 @@ class blockedit {
 
         // Read all categories.
         $categories = $DB->get_records_sql('
-        SELECT c.id, c.name, c.pid, COUNT(i.id) AS item_cnt
+        SELECT c.id, c.name, c.pid, COUNT(DISTINCT i.id) AS item_cnt
         FROM {block_exaportcate} c
-        LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND ' . block_exaport_get_item_where() . '
+        LEFT JOIN {block_exaportitemcate} ic ON ic.cateid = c.id
+        LEFT JOIN {block_exaportitem} i ON i.id = ic.itemid AND ' . block_exaport_get_item_where() . '
         WHERE c.userid = ?
         GROUP BY c.id
         ORDER BY c.name ASC
@@ -115,23 +116,37 @@ class blockedit {
         $categories[0] = $rootcategory;
 
         $items = $DB->get_records_sql("
-            SELECT i.id, i.name, i.type, i.categoryid, COUNT(com.id) As comments
+            SELECT i.id, i.name, i.type, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
             WHERE i.userid = ? AND " . block_exaport_get_item_where() . "
-            GROUP BY i.id, i.name, i.type, i.categoryid
+            GROUP BY i.id, i.name, i.type
             ORDER BY i.name
         ", array($USER->id));
 
         $itemsbycategory = array();
         $itemidlist = array();
+        // Build item-to-category mapping from itemcate table.
+        $itemids = array_keys($items);
+        $itemcatemapping = [];
+        if ($itemids) {
+            [$insql, $inparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
+            $itemcaterows = $DB->get_records_sql("SELECT id, itemid, cateid FROM {block_exaportitemcate} WHERE itemid $insql", $inparams);
+            foreach ($itemcaterows as $row) {
+                // Use the first category found for display purposes.
+                if (!isset($itemcatemapping[$row->itemid])) {
+                    $itemcatemapping[$row->itemid] = (int)$row->cateid;
+                }
+            }
+        }
         // Save items to category.
         foreach ($items as $item) {
-            if (empty($itemsbycategory[$item->categoryid])) {
-                $itemsbycategory[$item->categoryid] = array();
+            $catid = $itemcatemapping[$item->id] ?? 0;
+            if (empty($itemsbycategory[$catid])) {
+                $itemsbycategory[$catid] = array();
             }
             $item->tags = block_exaport_get_item_tags($item->id);
-            $itemsbycategory[$item->categoryid][] = $item;
+            $itemsbycategory[$catid][] = $item;
             $itemidlist[] = $item->id;
         }
 

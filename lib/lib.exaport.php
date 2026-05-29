@@ -52,12 +52,15 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         _copy_category_to_myself_iterator($category, $newcat->id);
     }
 
-    $items = g::$DB->get_records('block_exaportitem', ['categoryid' => $currcat->id]);
+    $items = g::$DB->get_records_sql('
+        SELECT i.*
+        FROM {block_exaportitem} i
+        JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
+    ', [$currcat->id]);
     foreach ($items as $item) {
         $newitem = new \stdClass();
         $newitem->userid = g::$USER->id;
         $newitem->type = $item->type;
-        $newitem->categoryid = $newcat->id;
         $newitem->name = $item->name;
         $newitem->url = $item->url;
         $newitem->intro = $item->intro;
@@ -67,6 +70,8 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         $newitem->sortorder = $item->sortorder;
 
         $newitem->id = g::$DB->insert_record('block_exaportitem', $newitem);
+        // Assign the new item to the new category.
+        item_category_helper::sync_item_categories($newitem->id, [$newcat->id]);
 
         // Files.
         $fs = get_file_storage();

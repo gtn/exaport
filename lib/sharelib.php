@@ -775,7 +775,6 @@ namespace {
             " COUNT(DISTINCT cshar_total.userid) AS cnt_shared_users, COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups  " .
             " FROM {user} u " .
             " JOIN {block_exaportcate} c ON u.id = c.userid " .
-            // ($itemwhere ? " JOIN {block_exaportitem} i ON c.id = i.categoryid "." " : "").
             " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?" .
 
             " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid " .
@@ -831,7 +830,7 @@ namespace {
             } else {
                 $items = $itemid;
             }
-            $cat_from_items = $DB->get_records_sql_menu(' SELECT DISTINCT categoryid, categoryid as tmp FROM {block_exaportitem} WHERE id IN (' . implode(',', $items) . ') ');
+            $cat_from_items = $DB->get_records_sql_menu(' SELECT DISTINCT ic.cateid, ic.cateid as tmp FROM {block_exaportitemcate} ic JOIN {block_exaportitem} i ON i.id = ic.itemid WHERE i.id IN (' . implode(',', $items) . ') ');
             $sharedcategories = array_intersect($sharedcategories, $cat_from_items);
         }
 
@@ -854,10 +853,11 @@ namespace {
                 $query = "SELECT DISTINCT i.id, i.name, i.type, i.intro as intro, i.url AS link, ic.name AS cname, " .
                     " ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) As comments" .
                     " FROM {block_exaportitem} i" .
-                    " LEFT JOIN {block_exaportcate} ic on i.categoryid = ic.id" .
+                    " LEFT JOIN {block_exaportitemcate} icat ON icat.itemid = i.id" .
+                    " LEFT JOIN {block_exaportcate} ic on icat.cateid = ic.id" .
                     " LEFT JOIN {block_exaportcate} ic2 on ic.pid = ic2.id" .
                     " LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id" .
-                    " WHERE i.userid=? AND categoryid IN (" . $catlist . ")" .
+                    " WHERE i.userid=? AND icat.cateid IN (" . $catlist . ")" .
                     " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid" .
                     " ORDER BY i.name";
                 $useritems = $DB->get_records_sql($query, array($userid));
@@ -884,8 +884,9 @@ namespace {
             foreach ($sharedusers as $key => $userid) {
                 $sharedartefactsbyuser[$key]['userid'] = $userid;
                 $sharedartefactsbyuser[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $userid)));
-                $items = $DB->get_records_sql('SELECT * FROM {block_exaportitem} ' .
-                    ' WHERE userid=? AND categoryid IN (' . $sharedcategorieslist . ')',
+                $items = $DB->get_records_sql('SELECT i.* FROM {block_exaportitem} i ' .
+                    ' JOIN {block_exaportitemcate} ic ON ic.itemid = i.id' .
+                    ' WHERE i.userid=? AND ic.cateid IN (' . $sharedcategorieslist . ')',
                     array('userid' => $userid));
                 $sharedartefactsbyuser[$key]['items'] = $items;
                 // Delete empty categories.
@@ -923,9 +924,11 @@ namespace {
         }
         // Check items in self category (other users can put items to my category
         if ($item = $DB->get_record('block_exaportitem', ['id' => $itemid])) {
-            if ($item->categoryid > 0) { // not root category
-                $itemcat = $DB->get_record('block_exaportcate', ['id' => $item->categoryid]);
-                if ($itemcat->userid == $USER->id) {
+            // Check if item belongs to a category owned by current user.
+            $itemcatids = $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$itemid]);
+            foreach ($itemcatids as $catid) {
+                $itemcat = $DB->get_record('block_exaportcate', ['id' => $catid]);
+                if ($itemcat && $itemcat->userid == $USER->id) {
                     return $item->userid;
                 }
             }
@@ -937,7 +940,7 @@ namespace {
                     $sharedcatids = array_merge($sharedcatids, array_keys($shcat->categories));
                 }
             }
-            if (in_array($item->categoryid, $sharedcatids)) {
+            if (array_intersect($itemcatids, $sharedcatids)) {
                 return $item->userid;
             }
         }

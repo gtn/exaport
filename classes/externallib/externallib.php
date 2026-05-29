@@ -25,6 +25,7 @@ require_once($CFG->libdir . '/weblib.php');
 require_once($CFG->dirroot . '/lib/filelib.php');
 
 use block_exaport\globals as g;
+use block_exaport\item_category_helper;
 use context_course;
 use context_user;
 use external_function_parameters;
@@ -84,8 +85,12 @@ class externallib extends \external_api {
                 $results[] = $result;
             }
 
-            $items = $DB->get_records("block_exaportitem", array("userid" => $USER->id, "categoryid" => $level), '',
-                'id,name,type, 0 as parent, 0 as amount');
+            $items = $DB->get_records_sql("
+                SELECT i.id, i.name, i.type, 0 as parent, 0 as amount
+                FROM {block_exaportitem} i
+                JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
+                WHERE i.userid = ?
+            ", [$level, $USER->id]);
             //         foreach($items as $item){ //to avoid a missing required key in single structure error
             //             $item->courseid = 0;
             //         }
@@ -131,8 +136,11 @@ class externallib extends \external_api {
                 }
 
                 // same as for "category" but without the userid constraint
-                $items = $DB->get_records("block_exaportitem", array("categoryid" => $level), '',
-                    'id,name,type, 0 as parent, 0 as amount, userid as owneruserid');
+                $items = $DB->get_records_sql("
+                    SELECT i.id, i.name, i.type, 0 as parent, 0 as amount, i.userid as owneruserid
+                    FROM {block_exaportitem} i
+                    JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
+                ", [$level]);
 
             }
         }
@@ -202,8 +210,9 @@ class externallib extends \external_api {
         }
 
         $conditions = array("id" => $itemid, "userid" => $userid);
-        $item = $DB->get_record("block_exaportitem", $conditions, 'id,userid,type,categoryid,name,intro,url', MUST_EXIST);
-        $category = $DB->get_field("block_exaportcate", "name", array("id" => $item->categoryid));
+        $item = $DB->get_record("block_exaportitem", $conditions, 'id,userid,type,name,intro,url', MUST_EXIST);
+        $cateid = $DB->get_field_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$item->id]);
+        $category = $cateid ? $DB->get_field("block_exaportcate", "name", array("id" => $cateid)) : '';
 
         if (!$category) {
             $category = "Hauptkategorie";
@@ -332,8 +341,13 @@ class externallib extends \external_api {
         }
 
         $itemid = $DB->insert_record("block_exaportitem",
-            array('userid' => $USER->id, 'name' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro,
+            array('userid' => $USER->id, 'name' => $title, 'url' => $url, 'intro' => $intro,
                 'type' => $type, 'timemodified' => time()));
+
+        // Sync the category via the relation table.
+        if ($categoryid > 0) {
+            item_category_helper::sync_item_categories($itemid, [$categoryid]);
+        }
 
         // If a file is added we need to copy the file from the user/private filearea to block_exaport/item_file
         // with the itemid from above.
@@ -1075,7 +1089,12 @@ class externallib extends \external_api {
     }
 
     private static function get_items_for_category($categoryid) {
-        $items = g::$DB->get_records("block_exaportitem", array("userid" => g::$USER->id, "categoryid" => $categoryid));
+        $items = g::$DB->get_records_sql("
+            SELECT i.*
+            FROM {block_exaportitem} i
+            JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
+            WHERE i.userid = ?
+        ", [$categoryid, g::$USER->id]);
 
         $result_items = [];
         foreach ($items as $item) {
@@ -1577,7 +1596,7 @@ class externallib extends \external_api {
 
         $cat = $DB->get_record("block_exaportcate", array("id" => $categoryid), "name");
 
-        $amount = $DB->count_records('block_exaportitem', array('categoryid' => $categoryid));
+        $amount = $DB->count_records('block_exaportitemcate', array('cateid' => $categoryid));
 
         return array('name' => $cat->name, 'items' => $amount);
     }
@@ -1731,7 +1750,7 @@ class externallib extends \external_api {
     private static function block_exaport_count_items($categoryid, $items = 0) {
         global $DB;
 
-        $items += $DB->count_records('block_exaportitem', array('categoryid' => $categoryid));
+        $items += $DB->count_records('block_exaportitemcate', array('cateid' => $categoryid));
 
         foreach ($DB->get_records('block_exaportcate', array('pid' => $categoryid)) as $child) {
             $items += self::block_exaport_count_items($child->id, $items);
@@ -1752,14 +1771,23 @@ class externallib extends \external_api {
         $DB->delete_records('block_exaportcate', array('pid' => $id));
 
         // Delete itemsharing.
-        if ($entries = $DB->get_records('block_exaportitem', array("categoryid" => $id))) {
-            foreach ($entries as $entry) {
+        $catitems = $DB->get_records_sql('
+            SELECT i.id FROM {block_exaportitem} i
+            JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
+        ', [$id]);
+        if ($catitems) {
+            foreach ($catitems as $entry) {
                 $DB->delete_records('block_exaportitemshar', array('itemid' => $entry->id));
             }
         }
 
-        // Delete items.
-        $DB->delete_records('block_exaportitem', array('categoryid' => $id));
+        // Delete items that belong exclusively to this category.
+        foreach ($catitems as $entry) {
+            $DB->delete_records('block_exaportitemcate', ['itemid' => $entry->id, 'cateid' => $id]);
+            if (!$DB->record_exists('block_exaportitemcate', ['itemid' => $entry->id])) {
+                $DB->delete_records('block_exaportitem', ['id' => $entry->id]);
+            }
+        }
     }
 
     /**

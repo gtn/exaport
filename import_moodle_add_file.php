@@ -244,7 +244,6 @@ if ($action == 'add') {
     $existing->type = ($nosubmission || $onlinetext) ? 'note' : 'file';
     $existing->dir = "";
     $existing->name = $assignment->name; // Use assignment name
-    $existing->categoryid = "";
     $existing->intro = "";
     $existing->filename = $checkedfile ? $checkedfile->get_filename() : '';
     if ($checkedonlinetext) {

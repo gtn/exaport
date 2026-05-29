@@ -1338,6 +1338,30 @@ return [
         'Alle Filter zurücksetzen',
         'Clear all filters',
     ],
+    'show_items_from_subcategories' => [
+        'Einträge aus Unterkategorien anzeigen',
+        'Show items from subcategories',
+    ],
+    'show_items_from_other_users' => [
+        'Einträge von anderen Benutzern in deinen geteilten Kategorien anzeigen',
+        'Show items from other users in your shared categories',
+    ],
+    'show_items_from_other_users_help' => [
+        'Falls du eine oder mehrere deiner Kategorien geteilt hast, können andere Benutzer Einträge in deine Kategorien hinzufügen. Mit diesem Kontrollkästchen kannst du entscheiden, ob du sie sehen möchtest oder nicht.',
+        'In case you shared one or more of your categories, other users are able to add items into your categories. With this checkbox you can decide if you want to see them, or not.',
+    ],
+    'layout_mode_folder' => [
+        'Ordner',
+        'Folder',
+    ],
+    'layout_mode_flat' => [
+        'Flach',
+        'Flat',
+    ],
+    'searchcategory' => [
+        'Kategorie suchen...',
+        'Search Category...',
+    ],
     'sharedwith' => [
         'Geteilt mit',
         'Shared with',

@@ -18,6 +18,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use block_exaport\globals as g;
+use block_exaport\item_category_helper;
 use core_privacy\local\request\transform;
 use function block_exaport\common\print_error;
 
@@ -1081,7 +1082,9 @@ function block_exaport_get_root_category($userid = null) {
         'item_cnt' => $DB->get_field_sql('
                     SELECT COUNT(i.id) AS item_cnt
                     FROM {block_exaportitem} i
-                    WHERE i.userid = ? AND i.categoryid = 0 AND ' . block_exaport_get_item_where() . '
+                    WHERE i.userid = ? AND NOT EXISTS (
+                        SELECT 1 FROM {block_exaportitemcate} ic WHERE ic.itemid = i.id
+                    ) AND ' . block_exaport_get_item_where() . '
                 ', array($userid)),
 
     );
@@ -1097,11 +1100,6 @@ function block_exaport_get_shareditems_category($name = null, $userid = null) {
         'item_cnt' => '',
         'url' => g::$CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . g::$COURSE->id . '&type=shared&userid=' . $userid,
         'userid' => $userid ? $userid : '',
-        /*      'item_cnt' => $DB->get_field_sql('
-                    SELECT COUNT(i.id) AS item_cnt
-                    FROM {block_exaportitem} i
-                    WHERE i.userid = ? AND i.categoryid = 0 AND '.block_exaport_get_item_where().'
-                ', array($USER->id))  */
     );
 }
 
@@ -1375,7 +1373,8 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
     $query = "SELECT i.id, i.name, i.type, i.intro AS intro, i.url AS link, ic.name AS cname, ic.id AS catid, " .
         " ic2.name AS cname_parent, i.userid, COUNT(com.id) AS comments" .
         " FROM {block_exaportitem} i" .
-        " LEFT JOIN {block_exaportcate} ic ON i.categoryid = ic.id" .
+        " LEFT JOIN {block_exaportitemcate} icat ON icat.itemid = i.id" .
+        " LEFT JOIN {block_exaportcate} ic ON icat.cateid = ic.id" .
         " LEFT JOIN {block_exaportcate} ic2 ON ic.pid = ic2.id" .
         " LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id" .
         " WHERE " . $where .
@@ -1979,9 +1978,10 @@ function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx =
 
     // Build the SQL query.
     /* $ctxselect = context_helper::get_preload_record_columns_sql('ctx'); */
-    $query = "SELECT i.id, i.name, i.type, i.userid, cat.name AS categoryname, i.categoryid, i.courseid
+    $query = "SELECT i.id, i.name, i.type, i.userid, cat.name AS categoryname, cat.id AS categoryid, i.courseid
                 FROM {block_exaportitem} i
-                LEFT JOIN {block_exaportcate} cat ON i.categoryid = cat.id
+                LEFT JOIN {block_exaportitemcate} icat ON icat.itemid = i.id
+                LEFT JOIN {block_exaportcate} cat ON icat.cateid = cat.id
                 JOIN {tag_instance} tt ON i.id = tt.itemid
                 WHERE tt.itemtype = :itemtype
                     AND tt.tagid = :tagid
@@ -2283,9 +2283,10 @@ function block_exaport_get_all_categories_for_user($userid) {
     $categories = $DB->get_records_sql("
         SELECT
             {$categorycolumns}
-            , COUNT(i.id) AS item_cnt
+            , COUNT(DISTINCT i.id) AS item_cnt
         FROM {block_exaportcate} c
-        LEFT JOIN {block_exaportitem} i ON i.categoryid=c.id AND " . block_exaport_get_item_where() . "
+        LEFT JOIN {block_exaportitemcate} ic ON ic.cateid = c.id
+        LEFT JOIN {block_exaportitem} i ON i.id = ic.itemid AND " . block_exaport_get_item_where() . "
         WHERE c.userid = ?
         GROUP BY
             {$categorycolumns}
@@ -2358,7 +2359,7 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
     // TODO: here is cleaning of all parameters which is not saw for the user. Is this right?
     $clean_category_parameters = ['id', 'pid', 'userid', 'courseid', 'subjid', 'topicid', 'source', 'sourceid', 'parent_ids', 'parent_titles', 'stid',
         'sourcemod', 'name_short', 'item_cnt'];
-    $clean_item_parameters = ['id', 'userid', 'categoryid', 'courseid', 'sortorder', 'beispiel_url', 'langid', 'beispiel_angabe', 'source', 'sourceid',
+    $clean_item_parameters = ['id', 'userid', 'courseid', 'sortorder', 'beispiel_url', 'langid', 'beispiel_angabe', 'source', 'sourceid',
         'iseditable', 'example_url', 'parentid', 'exampid'];
 
     foreach ($cat_tree as $cat_id => &$category) {
@@ -2432,18 +2433,54 @@ function block_exaport_user_categories_into_tree($userid, $with_artifacts = fals
 }
 
 
-function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sort = '', $withShared = false) {
+function block_exaport_get_items_by_category_and_user($userid, $categoryfilter, $sort = '', $withShared = false, $includesubcategories = []) {
     global $DB;
-    $where = ' i.categoryid = ? ';
+    $params = [];
+    if ($categoryfilter === null) {
+        // All items regardless of category (used by flat mode).
+        $where = ' 1=1 ';
+    } else if (is_array($categoryfilter)) {
+        if (empty($categoryfilter)) {
+            $where = ' 1=0 ';
+        } else {
+            [$insql, $inparams] = $DB->get_in_or_equal($categoryfilter, SQL_PARAMS_QM);
+            $where = " EXISTS (
+                SELECT 1
+                  FROM {block_exaportitemcate} ic
+                 WHERE ic.itemid = i.id
+                   AND ic.cateid $insql
+            ) ";
+            $params = array_merge($params, $inparams);
+        }
+    } else if ($categoryfilter > 0) {
+        // Collect all category IDs to filter on.
+        $catids = array_merge([$categoryfilter], $includesubcategories);
+        [$insql, $inparams] = $DB->get_in_or_equal($catids, SQL_PARAMS_QM);
+        $where = " EXISTS (
+            SELECT 1
+              FROM {block_exaportitemcate} ic
+             WHERE ic.itemid = i.id
+               AND ic.cateid $insql
+        ) ";
+        $params = array_merge($params, $inparams);
+    } else {
+        // Uncategorized items: no entry in the itemcate table. This is DIFFERENT to "all items" which is used in the flat mode.
+        $where = ' NOT EXISTS (
+            SELECT 1 FROM {block_exaportitemcate} ic WHERE ic.itemid = i.id
+        ) ';
+    }
     if ($withShared) {
-        if ($categoryid > 0) {
+        if (is_array($categoryfilter) || $categoryfilter > 0) {
+            // TODO: just shows ALL items?? ... it shows all items from THAT category. If it was shared once or currently is shared, it can contain entries from other users.
             // add items from other users if the category is shared
         } else {
             // only own
             $where .= ' AND i.userid = ? ';
+            $params[] = $userid;
         }
     } else {
         $where .= ' AND i.userid = ? ';
+        $params[] = $userid;
     }
     $where .= " AND " . block_exaport_get_item_where() . " ";
     $items = $DB->get_records_sql("
@@ -2451,13 +2488,13 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryid, $sor
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
             WHERE $where
-            GROUP BY i.id, i.userid, i.type, i.categoryid, i.name, i.url, i.intro,
+            GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
                 i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
                 i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
                 i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
                 i.iseditable, i.example_url, i.parentid
             $sort
-        ", [$categoryid, $userid]);
+        ", $params);
 
     return $items;
 }
@@ -2831,13 +2868,17 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
     $item->name = $assignment->name; // Use assignment name, not filename
     $item->type = $file ? 'file' : 'note'; // file if submission exists, otherwise note
     $item->intro = $onlinetext ? $onlinetext : ''; // Use online text if provided
-    $item->categoryid = $categoryid;
     $item->courseid = $courseid;
     $item->timemodified = time();
     $item->attachment = $file ? $file->get_itemid() : '';
 
     // Insert the item
     $item->id = $DB->insert_record('block_exaportitem', $item);
+
+    // Sync category via the relation table.
+    if ($categoryid > 0) {
+        item_category_helper::sync_item_categories($item->id, [$categoryid]);
+    }
 
     // Save submission file if provided
     if ($file) {

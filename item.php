@@ -18,6 +18,7 @@
 require_once(__DIR__ . '/inc.php');
 
 use function block_exaport\common\print_error;
+use block_exaport\item_category_helper;
 
 const POSSIBLE_IFRAME_FIELDS = ['intro', 'project_description', 'project_process', 'project_result'];
 
@@ -67,7 +68,6 @@ if ($action == 'copytoself') {
 
     unset($copy->id);
     $copy->userid = $USER->id;
-    $copy->categoryid = 0;
     $copy->timemodified = time();
     $copy->shareall = 0;
     $copy->externaccess = 0;
@@ -75,6 +75,13 @@ if ($action == 'copytoself') {
     $copy->shareall = 0;
 
     $newitemid = $DB->insert_record('block_exaportitem', $copy);
+
+    // Copy category assignments from the source item to the new item.
+    $sourcecatids = $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$id]);
+    if ($sourcecatids) {
+        item_category_helper::sync_item_categories($newitemid, $sourcecatids);
+    }
+
     if ($copy->type == 'file') {
         $fs = get_file_storage();
         $fileinfo = array(
@@ -183,10 +190,7 @@ if ($action == 'movetocategory' && $allowedit) {
         die('target category not found');
     }
 
-    $DB->update_record('block_exaportitem', (object)array(
-        'id' => $existing->id,
-        'categoryid' => $targetcategory->id,
-    ));
+    item_category_helper::sync_item_categories($existing->id, [$targetcategory->id]);
 
     echo 'ok';
     exit;
@@ -205,8 +209,9 @@ foreach (POSSIBLE_IFRAME_FIELDS as $itemfield) {
 }
 
 $categoryidforform = $categoryid;
-if ($cattype == 'shared' && $categoryid === 0) {
-    $categoryidforform = $existing->categoryid;
+if ($cattype == 'shared' && $categoryid === 0 && $existing) {
+    $existingcateid = $DB->get_field_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$existing->id]);
+    $categoryidforform = $existingcateid ? (int)$existingcateid : 0;
 }
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type,
     array('current' => $existing, 'useTextareas' => $usetextareas, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
@@ -218,6 +223,9 @@ if ($editform->is_cancelled()) {
     die("nosubmitbutton");
 } else if (($fromform = $editform->get_data()) && $allowedit) {
     require_sesskey();
+
+    $categoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
+    $fromform->categoryids = $categoryids;
 
     switch ($action) {
         case 'add':
@@ -257,7 +265,7 @@ switch ($action) {
     case 'add':
         $post->action = $action;
         $post->courseid = $courseid;
-        $post->categoryid = $categoryid;
+        $post->categoryids = $categoryid > 0 ? [$categoryid] : [];
 
         $straction = get_string('new');
         break;
@@ -271,7 +279,8 @@ switch ($action) {
         $post->project_description = $existing->project_description;
         $post->project_process = $existing->project_process;
         $post->project_result = $existing->project_result;
-        $post->categoryid = $existing->categoryid;
+        $post->categoryids = array_map('intval', $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?',
+            [$existing->id]));
         $post->userid = $existing->userid;
         $post->action = $action;
         $post->courseid = $courseid;
@@ -501,6 +510,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     };
 
     if ($DB->update_record('block_exaportitem', $post)) {
+        item_category_helper::sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
         block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit',
             $post->name);
     } else {
@@ -572,6 +582,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 
     // Insert the new entry.
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
+        item_category_helper::sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
         //
         // // Trigger event for item creation
         // $event = \block_exaport\event\item_created::create(array(
@@ -671,6 +682,7 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
     block_exaport_file_remove($post);
 
     $conditions = array("id" => $post->id);
+    $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);
     $status = $DB->delete_records('block_exaportitem', $conditions);
 
     $interaction = block_exaport_check_competence_interaction();
@@ -687,6 +699,17 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
     if (!$status) {
         print_error('deleteposterror', 'block_exaport', $returnurl);
     }
+}
+
+function block_exaport_normalize_item_categoryids($categoryids) {
+    if (!is_array($categoryids)) {
+        $categoryids = [];
+    }
+    $categoryids = array_map('intval', $categoryids);
+    $categoryids = array_values(array_unique(array_filter($categoryids, function($categoryid) {
+        return $categoryid > 0;
+    })));
+    return $categoryids;
 }
 
 function block_exaport_convert_item_type(&$post) {

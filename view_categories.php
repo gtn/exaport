@@ -147,13 +147,22 @@ if ($cataction) {
                         if (!$DB->delete_records('block_exaportcate', $conditions)) {
                             $message = "Could not delete your record";
                         } else {
-                            $conditions = array("categoryid" => $delid);
-                            if ($entries = $DB->get_records_select('block_exaportitem', null, $conditions, '', 'id')) {
-                                foreach ($entries as $entry) {
+                            // Delete items in this category via itemcate.
+                            $catitems = $DB->get_records_sql('
+                                SELECT i.id FROM {block_exaportitem} i
+                                JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
+                            ', [$delid]);
+                            if ($catitems) {
+                                foreach ($catitems as $entry) {
                                     $DB->delete_records('block_exaportitemshar', array('itemid' => $entry->id));
                                 }
                             }
-                            $DB->delete_records('block_exaportitem', array('categoryid' => $delid));
+                            foreach ($catitems as $entry) {
+                                $DB->delete_records('block_exaportitemcate', ['itemid' => $entry->id, 'cateid' => $delid]);
+                                if (!$DB->record_exists('block_exaportitemcate', ['itemid' => $entry->id])) {
+                                    $DB->delete_records('block_exaportitem', ['id' => $entry->id]);
+                                }
+                            }
 
                             block_exaport_add_to_log($courseid, "bookmark", "delete category", "", $newentry->id);
                             $message = get_string("categorydeleted", "block_exaport");

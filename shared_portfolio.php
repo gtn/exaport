@@ -55,7 +55,8 @@ $conditions[] = $user->id;
 $items = $DB->get_records_sql(
     "SELECT i.id, i.type, i.url, i.name, i.intro, i.attachment, i.timemodified, ic.name AS cname, ic2.name AS cname_parent
     FROM {block_exaportitem} i
-    JOIN {block_exaportcate} ic ON i.categoryid = ic.id
+    LEFT JOIN {block_exaportitemcate} icat ON icat.itemid = i.id
+    LEFT JOIN {block_exaportcate} ic ON icat.cateid = ic.id
     $extratable
     LEFT JOIN {block_exaportcate} ic2 on ic.pid = ic2.id
     WHERE i.userid=? AND $extrawhere

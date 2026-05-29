@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], function($, ModalFactory, ModalEvents, Str) {
+define(['jquery', 'core/modal_save_cancel', 'core/modal_events', 'core/str'], function($, ModalSaveCancel, ModalEvents, Str) {
 
     var config = {};
 
@@ -68,8 +68,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
      * @param {int} pid Parent category ID
      */
     var addSubcategory = function(pid) {
-        ModalFactory.create({
-            type: ModalFactory.types.SAVE_CANCEL,
+        ModalSaveCancel.create({
             title: config.strings.addSubcategory || 'Add Subcategory',
             body: '<div class="form-group">' +
                   '<label for="category-name-input">' + config.strings.categoryNameRequired + '</label>' +
@@ -105,8 +104,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
      * @param {string} oldname Current category name
      */
     var renameCategory = function(id, oldname) {
-        ModalFactory.create({
-            type: ModalFactory.types.SAVE_CANCEL,
+        ModalSaveCancel.create({
             title: config.strings.renameCategory || 'Rename Category',
             body: '<div class="form-group">' +
                   '<label for="category-name-input">' + config.strings.categoryNameRequired + '</label>' +
@@ -154,8 +152,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
             });
         }
 
-        ModalFactory.create({
-            type: ModalFactory.types.SAVE_CANCEL,
+        ModalSaveCancel.create({
             title: config.strings.moveCategory || 'Move Category',
             body: '<div class="form-group">' +
                   '<label for="parent-select">' + config.strings.selectParent + '</label>' +
@@ -195,8 +192,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
      * Add a new view
      */
     var addView = function() {
-        ModalFactory.create({
-            type: ModalFactory.types.SAVE_CANCEL,
+        ModalSaveCancel.create({
             title: config.strings.addView || 'Add View',
             body: '<div class="form-group">' +
                   '<label for="view-name-input">' + config.strings.viewNameRequired + '</label>' +
@@ -231,8 +227,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
      * @param {string} oldname Current view name
      */
     var renameView = function(id, oldname) {
-        ModalFactory.create({
-            type: ModalFactory.types.SAVE_CANCEL,
+        ModalSaveCancel.create({
             title: config.strings.renameView || 'Rename View',
             body: '<div class="form-group">' +
                   '<label for="view-name-input">' + config.strings.viewNameRequired + '</label>' +
@@ -282,8 +277,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
      * Show confirmation dialog before distributing categories
      */
     var confirmDistributeCategories = function() {
-        ModalFactory.create({
-            type: ModalFactory.types.SAVE_CANCEL,
+        ModalSaveCancel.create({
             title: config.strings.confirmDistributeCategoriesTitle || 'Confirm Distribution',
             body: config.strings.confirmDistributeCategoriesBody || 'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them.'
         }).then(function(modal) {
@@ -301,8 +295,7 @@ define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], functi
      * Show confirmation dialog before distributing views
      */
     var confirmDistributeViews = function() {
-        ModalFactory.create({
-            type: ModalFactory.types.SAVE_CANCEL,
+        ModalSaveCancel.create({
             title: config.strings.confirmDistributeViewsTitle || 'Confirm Distribution',
             body: config.strings.confirmDistributeViewsBody || 'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them.'
         }).then(function(modal) {

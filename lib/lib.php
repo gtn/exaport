@@ -1108,7 +1108,13 @@ function block_exaport_badges_enabled() {
 
     if ($CFG->enablebadges) {
         require_once($CFG->libdir . '/badgeslib.php');
-        require_once($CFG->dirroot . '/badges/lib/awardlib.php');
+        // Backwards compatibility: In Moodle 5.2, badges/lib/awardlib.php was removed and its
+        // functions (process_manual_award, process_manual_revoke) were moved into the
+        // \core_badges\award_manager class (MDL-83902). On Moodle < 5.2 we still need to include
+        // the old file because the global functions do not exist otherwise.
+        if (file_exists($CFG->dirroot . '/badges/lib/awardlib.php')) {
+            require_once($CFG->dirroot . '/badges/lib/awardlib.php');
+        }
     }
 
     return $CFG->enablebadges;

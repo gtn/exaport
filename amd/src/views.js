@@ -4,11 +4,11 @@ var exaportViewEdit;
 define(['jquery',
   'jqueryui',
   'block_exaport/touchpunch',
-  'core/modal_factory',
+  'core/modal',
   'core/modal_events',
   'core/fragment',
   'core/templates'
-], function ($, jqui, jquitp, modalFactory, modalEvents, Fragment, Templates) {
+], function ($, jqui, jquitp, Modal, modalEvents, Fragment, Templates) {
 
   var helpDialogue;
   var contextId;
@@ -1084,7 +1084,7 @@ define(['jquery',
     };
 
     if (!blockEditModal) {
-      blockEditModal = await modalFactory.create(defaultModalOptions);
+      blockEditModal = await Modal.create(defaultModalOptions);
       blockEditModal.getRoot().on(modalEvents.shown, function () {
         if (blockEditCtx) {
           hidePreloadinator(blockEditCtx.item, blockEditCtx.isNew ? '.blocktype' : '');
@@ -1201,11 +1201,11 @@ define(['jquery',
         helpDialogue.setBody(content);
         helpDialogue.show();
       } else {
-        modalFactory.create({
+        Modal.create({
           title: title,
           body: content,
           footer: '',
-        }, trigger).done(function (modal) {
+        }).then(function (modal) {
           helpDialogue = modal;
           helpDialogue.setTitle(title);
           helpDialogue.setBody(content);

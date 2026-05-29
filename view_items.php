@@ -1531,7 +1531,7 @@ function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type,
 
     $itemContent = '
         <div class="col mb-4 exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">
-				<div class="card h-100 excomdos_tile excomdos_tile_item id-13 ui-draggable ui-draggable-handle">
+				<div class="card h-100 excomdos_tile excomdos_tile_item id-' . $item->id . ' ui-draggable ui-draggable-handle">
 					<div class="card-header excomdos_tilehead d-flex justify-content-between flex-wrap">
 						<div class="excomdos_tileinfo">
 							<span class="excomdos_tileinfo_type">'

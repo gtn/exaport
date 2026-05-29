@@ -62,3 +62,14 @@
 #exaport .block_eportfolio_fieldsetborder {
     border: 1px solid;
 }
+
+/* Visual feedback when dragging items over category drop targets */
+.excomdos_tile_category.ui-droppable-active {
+    outline: 2px dashed #6c757d;
+    outline-offset: -2px;
+}
+.excomdos_tile_category.ui-droppable-hover {
+    outline: 3px solid #0066cc;
+    outline-offset: -3px;
+    background-color: rgba(0, 102, 204, 0.08);
+}

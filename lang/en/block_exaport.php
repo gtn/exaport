@@ -739,11 +739,11 @@ $string['what_is_embed_code_content'] = '<p>Embed code is code that is generated
                     <ol>
                         <li>
                             Entire embed link shows the following:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
+                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quot;https://player.vimeo.com/video/1233456789&quot; width=&quot;640&quot; height=&quot;360&quot; frameborder=&quot;0&quot; allow=&quot;autoplay; fullscreen&quot; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quot;https://vimeo.com/1233456789&quot;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quot;https://vimeo.com/user98765432&quot;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quot;https://vimeo.com&quot;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
                         </li>
                         <li>
                             You only need to copy the <strong>&lt;<i>iframe</i>&gt;</strong> portion:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
+                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quot;https://player.vimeo.com/video/1233456789&quot; width=&quot;640&quot; height=&quot;360&quot; frameborder=&quot;0&quot; allow=&quot;autoplay; fullscreen&quot; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
                         </li>
                     </ol>
                 <li>Past this code to exabis E-portfolio textarea field.</li>

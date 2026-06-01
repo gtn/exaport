@@ -616,6 +616,16 @@ echo '</div>';
 echo '</div>';
 
 $PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
+$PAGE->requires->js_amd_inline('
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) {
+            return;
+        }
+        document.querySelectorAll("[data-bs-toggle=\'tooltip\']").forEach(function (el) {
+            bootstrap.Tooltip.getOrCreateInstance(el);
+        });
+    });
+');
 
 if ($layout == 'folder') {
     echo '<div class="excomdos_cat">';
@@ -918,7 +928,7 @@ if ($layout == 'folder') {
 }
 
 foreach ($items as $item) {
-    echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory);
+    echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, ($layout == 'folder'));
 }
 
 echo '</div>';
@@ -965,6 +975,49 @@ function block_exaport_get_item_comp_icon($item) {
         . block_exaport_fontawesome_icon('list', 'solid', 1)
         //        .'<img src="pix/comp.png" alt="'.'competences'.'" />'
         . '</a>';
+}
+
+/**
+ * Renders the competencies footer badge for Bootstrap card mode.
+ *
+ * @param stdClass $item
+ * @return string
+ */
+function block_exaport_get_item_comp_footer_badge($item) {
+    if (!block_exaport_check_competence_interaction()) {
+        return '';
+    }
+
+    $comps = block_exaport_get_active_comps_for_item($item);
+    if (!$comps) {
+        return '';
+    }
+
+    $titles = [];
+    foreach (['descriptors', 'topics'] as $key) {
+        if (!empty($comps[$key]) && is_array($comps[$key])) {
+            foreach ($comps[$key] as $comp) {
+                if (!empty($comp->title)) {
+                    $titles[] = $comp->title;
+                }
+            }
+        }
+    }
+
+    if (!$titles) {
+        return '';
+    }
+
+    $items = '';
+    foreach ($titles as $title) {
+        $items .= html_writer::tag('li', format_string($title));
+    }
+    $tooltiphtml = html_writer::tag('ul', $items, ['class' => 'tooltiplist']);
+
+    return '<span class="eportoflio-comment me-2">'
+        . '<i class="icon icon-comment fa fa-lightbulb" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' . s($tooltiphtml) . '"></i>'
+        . '<span class="eportfolio-comment-count">' . count($titles) . '</span>'
+        . '</span>';
 }
 
 /**
@@ -1469,11 +1522,11 @@ function block_exaport_category_list_item($category, $courseid, $type, $currentc
 /**
  * Different templates of artefact list. Depends on exaport settings
  */
-function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory) {
+function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, $foldermode = false) {
     $template = block_exaport_used_layout();
     switch ($template) {
         case 'moodle_bootstrap':
-            return block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory);
+            return block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory, $foldermode);
             break;
         case 'exaport_bootstrap': // may we do not need this at all?
             return '<div>TODO: !!!!!! ' . $template . ' !!!!!!!</div>';
@@ -1488,95 +1541,59 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
 
 function block_exaport_category_template_bootstrap_card($category, $courseid, $type, $currentcategory, $parentcategory = null) {
     global $CFG;
-    $categoryContent = '';
 
-    // When showing the "go up" tile: mark it as fixed (not draggable) and use
-    // the parent category's ID so that dropping onto it moves items there.
-    $tileFixedClass = $parentcategory ? 'excomdos_tile_fixed ' : '';
-    $tileTargetId = $parentcategory ? $parentcategory->id : $category->id;
-    // Resolve the display name now so we can add data-item-name to the wrapper.
-    $tileName = $parentcategory ? $parentcategory->name : $category->name;
-    $pinnedAttr = $parentcategory ? ' data-pinned="true"' : '';
-    $categoryContent .= '
-    <div class="col mb-4 exaport-folder-category"' . $pinnedAttr . ' data-item-name="' . s(strtolower($tileName)) . '">
-				<div class="card h-100 excomdos_tile ' . $tileFixedClass . 'excomdos_tile_category id-' . $tileTargetId . '">
-					<div class="card-header excomdos_tilehead d-flex justify-content-between">
-						<span class="excomdos_tileinfo">
-							';
-    if ($parentcategory) {
-        $categoryContent .= block_exaport_get_string('category_up');
-    } elseif ($currentcategory->id == -1) {
-        $categoryContent .= block_exaport_get_string('user');
-    } else {
-        $categoryContent .= block_exaport_get_string('category');
-    }
-    $categoryContent .= '</span>';
-    // edit buttons
-    if (!$parentcategory) {
-        if ($type == 'shared' || $type == 'sharedstudent') {
-            $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
-        } else {
-            // Type == mine.
-            if (@$category->internshare && (count(exaport_get_category_shared_users($category->id)) > 0 ||
-                    count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                    (isset($category->shareall) && $category->shareall == 1))) {
-                $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
-            };
-            /*if (@$category->structure_share) {
-                $categoryContent .= ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
-            };*/
-            $categoryContent .= '
-						<span class="excomdos_tileedit">
-							<a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=edit' . '">'
-                . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
-                . '</a>
-							<a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=delete' . '">'
-                . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon'])
-                . '</a>
-						</span>';
-        }
-    }
-    if ($parentcategory) {
-        $categoryThumbUrl = $parentcategory->url;
-        $categoryName = $parentcategory->name;
-        $categoryIcon = block_exaport_fontawesome_icon('folder-open', 'regular', '6', [], [], [], 'up', [], [], [], ['exaport-items-category-big']);
-    } else {
-        $categoryThumbUrl = $category->url;
-        $categoryName = $category->name;
-        if ($category->icon) {
-            if ($category->iconmerge) {
-                // icon merge (also look JS - exaport.js - block_exaport_check_fontawesome_icon_merging()):
-                $categoryIcon = block_exaport_fontawesome_icon('folder-open', 'regular', '6', ['icon-for-merging'], [], ['data-categoryId' => $category->id], '', [], [], [], ['exaport-items-category-big']);
-                $categoryIcon .= '<img id="mergeImageIntoCategory' . $category->id . '" src="' . $category->icon . '?tcacheremove=' . date('dmYhis') . '" style="display:none;">';
-                $categoryIcon .= '<canvas id="mergedCanvas' . $category->id . '" class="category-merged-icon" width="115" height="115" style="display: none;"></canvas>';
-            } else {
-                // just picture instead of folder icon:
-                $categoryIcon = '<img src="' . $category->icon . '">';
-            }
-        } else {
-            $categoryIcon = block_exaport_fontawesome_icon('folder-open', 'regular', '6', [], [], [], '', [], [], [], ['exaport-items-category-big']);
-        }
-    }
-    $categoryContent .= '
-                    </div>
-					<div class="card-body excomdos_tileimage d-flex justify-content-center align-items-center">
-						<a href="' . $categoryThumbUrl . '">
-						    ' . $categoryIcon . '
-						</a>
-					</div>
-					<div class="card-extitle exomdos_tiletitle">
-						<a href="' . $categoryThumbUrl . '">' . $categoryName . '</a>
-					</div>
-				</div>
-			</div>
-    ';
+    $isparenttile = (bool)$parentcategory;
+    $tiletargetid = $isparenttile ? (int)$parentcategory->id : (int)$category->id;
+    $tilename = $isparenttile ? $parentcategory->name : $category->name;
+    $tileurl = $isparenttile ? $parentcategory->url : $category->url;
+    $outerclasses = $isparenttile ? 'col mb-4 exaport-folder-category' : 'col col-card-folder mb-4 exaport-folder-category';
+    $tilefixedclass = $isparenttile ? 'excomdos_tile_fixed ' : '';
 
-    return $categoryContent;
+    $content = '<div class="' . $outerclasses . '" data-item-name="' . s(strtolower($tilename)) . '" data-pinned="' . ($isparenttile ? 'true' : 'false') . '">';
+    $content .= '<div class="card card-eportfolio h-100 excomdos_tile ' . $tilefixedclass . 'excomdos_tile_category id-' . $tiletargetid . '">';
+
+    if (!$isparenttile) {
+        $content .= '<div class="card-top d-flex justify-content-end">';
+        $content .= '<span class="eportfolio-card-more">';
+        $content .= '<a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">'
+            . block_exaport_fontawesome_icon('ellipsis-vertical', 'regular', 1)
+            . '</a>';
+        $content .= '<ul class="dropdown-menu dropdown-menu-end">';
+        $content .= '<li><a class="dropdown-item" href="' . s($tileurl) . '">'
+            . block_exaport_fontawesome_icon('eye', 'regular', 1) . ' '
+            . block_exaport_get_string('view') . '</a></li>';
+        if ($type == 'mine') {
+            $content .= '<li><a class="dropdown-item" href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=edit">'
+                . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . ' '
+                . block_exaport_get_string('edit') . '</a></li>';
+            $content .= '<li><a class="dropdown-item" href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=delete">'
+                . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']) . ' '
+                . block_exaport_get_string('delete') . '</a></li>';
+        }
+        $content .= '</ul>';
+        $content .= '</span>';
+        $content .= '</div>';
+    }
+
+    $content .= '<div class="card-body position-relative">';
+    $content .= '<h5 class="card-title">';
+    $content .= '<a href="' . s($tileurl) . '" class="stretched-link">';
+    if ($isparenttile) {
+        $content .= block_exaport_fontawesome_icon('folder-open', 'regular', 1, ['icon', 'fa-fw', 'me-1'], [], ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top', 'data-bs-title' => block_exaport_get_string('category_up')], 'up');
+    } else {
+        $content .= '<i class="icon fa fa-folder fa-fw me-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="' . s(block_exaport_get_string('category')) . '"></i>';
+    }
+    $content .= format_string($tilename) . '</a></h5>';
+    $content .= '</div>';
+    $content .= '<div class="card-footer d-flex justify-content-end align-items-center"></div>';
+    $content .= '</div></div>';
+
+    return $content;
 }
 
 ;
 
-function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory) {
+function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory, $foldermode = false) {
     global $CFG, $USER, $DB;
 
     $iconTypeProps = block_exaport_item_icon_type_options($item->type);
@@ -1588,6 +1605,70 @@ function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type,
         foreach ($item->flatcategories as $cat) {
             $itemCatIds[] = (int)$cat->id;
         }
+    }
+
+    if ($foldermode) {
+        $itemtitle = format_string($item->name);
+        $typelabel = get_string($item->type, 'block_exaport');
+        $introtext = '';
+        if (!empty($item->intro)) {
+            $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
+                'block_exaport', 'item_content', 'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
+            $introtext = shorten_text(trim(strip_tags($intro)), 140, true);
+        }
+
+        $itemContent = '<div class="col mb-4 exaport-folder-item" data-item-name="' . s(strtolower($item->name)) . '" data-item-date="' . (int)$item->timemodified . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '">';
+        $itemContent .= '<div class="card card-eportfolio h-100 excomdos_tile excomdos_tile_item id-' . $item->id . ' ui-draggable ui-draggable-handle">';
+        $itemContent .= '<div class="card-top d-flex justify-content-between">';
+        $itemContent .= '<h5 class="card-title"><a href="' . s($url) . '">'
+            . '<i class="icon fa fa-' . s($iconTypeProps['iconName']) . ' fa-fw me-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="' . s($typelabel) . '"></i>'
+            . $itemtitle . '</a></h5>';
+        $itemContent .= '<span class="eportfolio-card-more">';
+        $itemContent .= '<a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">'
+            . block_exaport_fontawesome_icon('ellipsis-vertical', 'regular', 1)
+            . '</a>';
+        $itemContent .= '<ul class="dropdown-menu dropdown-menu-end">';
+        $itemContent .= '<li><a class="dropdown-item" href="' . s($url) . '">'
+            . block_exaport_fontawesome_icon('eye', 'regular', 1) . ' '
+            . block_exaport_get_string('view') . '</a></li>';
+
+        $cattype = '';
+        if ($type == 'shared') {
+            $cattype = '&cattype=shared';
+        }
+        if ($item->userid == $USER->id) {
+            $itemContent .= '<li><a class="dropdown-item" href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=edit' . $cattype . '">'
+                . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . ' '
+                . block_exaport_get_string('edit') . '</a></li>';
+            if (block_exaport_item_is_editable($item->id)) {
+                $itemContent .= '<li><a class="dropdown-item" href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=delete&categoryid=' . $categoryid . $cattype . '">'
+                    . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']) . ' '
+                    . block_exaport_get_string('delete') . '</a></li>';
+            }
+        }
+        $itemContent .= '</ul></span></div>';
+
+        $itemContent .= '<div class="card-body">';
+        if ($introtext !== '') {
+            $itemContent .= '<p class="card-text">' . s($introtext) . '</p>';
+        }
+        $itemContent .= '</div>';
+
+        $itemContent .= '<div class="card-footer d-flex justify-content-between align-items-center">';
+        $itemContent .= '<span class="eportoflio-date">' . date('d.m.Y H:i', $item->timemodified) . '</span>';
+        $itemContent .= '<div>';
+        $itemContent .= block_exaport_get_item_comp_footer_badge($item);
+        if (!empty($item->comments) && (int)$item->comments > 0) {
+            $commentlabel = (int)$item->comments . ' ' . block_exaport_get_string(((int)$item->comments === 1) ? 'comment' : 'comments');
+            $itemContent .= '<span class="eportoflio-comment me-2">'
+                . '<i class="icon icon-comment fa fa-comment-dots" aria-hidden="true" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="' . s($commentlabel) . '"></i>'
+                . '<span class="eportfolio-comment-count">' . (int)$item->comments . '</span>'
+                . '</span>';
+        }
+        $itemContent .= '</div></div>';
+        $itemContent .= '</div></div>';
+
+        return $itemContent;
     }
 
     $itemContent = '

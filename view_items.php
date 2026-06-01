@@ -59,7 +59,7 @@ if (!$folderlayout) {
 }
 $sortfromurl = $sort;
 if (!$sort) {
-    $sort = get_user_preferences('block_exaport_sort', 'date.desc');
+    $sort = get_user_preferences('block_exaport_sort', 'date-desc');
 }
 $showsubcategoriesfromurl = $show_subcategories;
 if ($show_subcategories === -1) {
@@ -121,7 +121,8 @@ $sorticon = $parsedsort[1] . '.png';
 $sqlsort = block_exaport_item_sort_to_sql($parsedsort, false);
 
 if ($sortfromurl !== '') {
-    set_user_preference('block_exaport_sort', $sort);
+    // Store with hyphen separator — PARAM_ALPHANUMEXT does not allow dots.
+    set_user_preference('block_exaport_sort', $parsedsort[0] . '-' . $parsedsort[1]);
 }
 
 block_exaport_setup_default_categories();
@@ -447,6 +448,12 @@ echo $OUTPUT->box($infobox, "center");
 
 echo "</div>";
 
+// Normalise sort value for use in select dropdowns (e.g. "date.desc" → "date-desc").
+$flatsort = str_replace('.', '-', $sort);
+if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc'])) {
+    $flatsort = 'date-desc';
+}
+
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
@@ -494,6 +501,11 @@ if ($type == 'mine' && $layout == 'folder') {
     echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
     echo '</label>';
     echo '</div>';
+    // Search + sort controls for folder mode.
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-folder');
+    echo '</div>';
+    $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser) {
@@ -514,19 +526,11 @@ if ($type == 'mine' && $layout == 'folder') {
         $filtercategories[(int)$category->id] = block_exaport_category_full_path_name($category->id, $categories);
     }
 
-    $flatsort = str_replace('.', '-', $sort);
-    if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc'])) {
-        $flatsort = 'date-desc';
-    }
-
     echo '<div class="exaport-flat-filter mb-3">';
     // Row 1: search + category dropdown + sort dropdown + create button.
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    // Search input.
-    echo '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
-    echo '<label class="sr-only" for="exaport-flat-search">' . get_string('search') . '</label>';
-    echo '<input type="text" id="exaport-flat-search" class="form-control" placeholder="' . get_string('search') . '...">';
-    echo '</div>';
+    // Search input + sort dropdown (shared helper, no duplication).
+    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-flat');
     // Category filter dropdown (simple select; chip multiselect handled by JS).
     echo '<div style="min-width: 200px; max-width: 350px;">';
     echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string('category', 'block_exaport') . '</label>';
@@ -535,16 +539,6 @@ if ($type == 'mine' && $layout == 'folder') {
     foreach ($filtercategories as $catid => $catname) {
         echo '<option value="' . $catid . '">' . s($catname) . '</option>';
     }
-    echo '</select>';
-    echo '</div>';
-    // Sort dropdown.
-    echo '<div style="min-width: 180px; max-width: 250px;">';
-    echo '<label class="sr-only" for="exaport-flat-sort-select">' . get_string('sort') . '</label>';
-    echo '<select id="exaport-flat-sort-select" class="form-control custom-select">';
-    echo '<option value="date-desc"' . ($flatsort === 'date-desc' ? ' selected="selected"' : '') . '>' . get_string('date', 'block_exaport') . ' ↓</option>';
-    echo '<option value="date-asc"' . ($flatsort === 'date-asc' ? ' selected="selected"' : '') . '>' . get_string('date', 'block_exaport') . ' ↑</option>';
-    echo '<option value="name-asc"' . ($flatsort === 'name-asc' ? ' selected="selected"' : '') . '>' . get_string('name', 'block_exaport') . ' A-Z</option>';
-    echo '<option value="name-desc"' . ($flatsort === 'name-desc' ? ' selected="selected"' : '') . '>' . get_string('name', 'block_exaport') . ' Z-A</option>';
     echo '</select>';
     echo '</div>';
     // Create button (pushed to right).
@@ -1002,6 +996,50 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
     echo '</div>';
 }
 
+/**
+ * Renders the shared search input and sort dropdown HTML fragment.
+ *
+ * Called from both the flat-layout filter bar and the folder-layout controls so
+ * there is no duplicated rendering logic.  The $idprefix distinguishes the two
+ * contexts: 'exaport-flat' for flat mode (handled by flat_filter AMD module) and
+ * 'exaport-folder' for folder mode (handled by folder_filter AMD module).
+ *
+ * @param string $selectedsort  Currently active sort value in "key-dir" format, e.g. "date-desc".
+ * @param string $idprefix      Element ID prefix, e.g. 'exaport-flat' or 'exaport-folder'.
+ * @return string               HTML fragment (two <div> elements: search input + sort select).
+ */
+function block_exaport_render_search_and_sort_controls($selectedsort, $idprefix) {
+    $html = '';
+
+    // Search input.
+    $searchid = $idprefix . '-search';
+    $html .= '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
+    $html .= '<label class="sr-only" for="' . s($searchid) . '">' . get_string('search') . '</label>';
+    $html .= '<input type="text" id="' . s($searchid) . '" class="form-control"'
+        . ' placeholder="' . s(get_string('search')) . '...">';
+    $html .= '</div>';
+
+    // Sort dropdown.
+    $sortid = $idprefix . '-sort-select';
+    $opts = [
+        'date-desc' => get_string('date', 'block_exaport') . ' ↓',
+        'date-asc'  => get_string('date', 'block_exaport') . ' ↑',
+        'name-asc'  => get_string('name', 'block_exaport') . ' A-Z',
+        'name-desc' => get_string('name', 'block_exaport') . ' Z-A',
+    ];
+    $html .= '<div style="min-width: 180px; max-width: 250px;">';
+    $html .= '<label class="sr-only" for="' . s($sortid) . '">' . get_string('sort') . '</label>';
+    $html .= '<select id="' . s($sortid) . '" class="form-control custom-select">';
+    foreach ($opts as $val => $label) {
+        $selected = ($selectedsort === $val) ? ' selected="selected"' : '';
+        $html .= '<option value="' . s($val) . '"' . $selected . '>' . s($label) . '</option>';
+    }
+    $html .= '</select>';
+    $html .= '</div>';
+
+    return $html;
+}
+
 function block_exaport_get_item_project_icon($item) {
     global $DB, $OUTPUT;
 
@@ -1220,14 +1258,20 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
     global $CFG, $USER, $DB;
     $categoryContent = '';
 
-    $categoryContent .= '<div class="excomdos_tile ';
+    // Resolve the display name early for data attributes.
+    $tileName = $parentcategory ? $parentcategory->name : $category->name;
+    $pinnedAttr = $parentcategory ? ' data-pinned="true"' : '';
+    // Build the CSS class incrementally (same logic as before, just with the new classes added).
+    $tileClasses = 'excomdos_tile exaport-folder-category';
     if ($parentcategory || ($parentcategory === null) && ($type == 'shared' || $type == 'sharedstudent')) {
-        $categoryContent .= 'excomdos_tile_fixed';
+        $tileClasses .= ' excomdos_tile_fixed';
     }
     // When showing the "go up" tile, use the parent category's ID so that
     // dropping an item onto this tile moves it into the parent category.
     $tileTargetId = $parentcategory ? $parentcategory->id : $category->id;
-    $categoryContent .= ' excomdos_tile_category id-' . $tileTargetId . '">
+    $tileClasses .= ' excomdos_tile_category id-' . $tileTargetId;
+    $categoryContent .= '<div class="' . $tileClasses . '"'
+        . $pinnedAttr . ' data-item-name="' . s(strtolower($tileName)) . '">
         <div class="excomdos_tilehead">
                 <span class="excomdos_tileinfo">';
     if ($parentcategory) {
@@ -1450,8 +1494,11 @@ function block_exaport_category_template_bootstrap_card($category, $courseid, $t
     // the parent category's ID so that dropping onto it moves items there.
     $tileFixedClass = $parentcategory ? 'excomdos_tile_fixed ' : '';
     $tileTargetId = $parentcategory ? $parentcategory->id : $category->id;
+    // Resolve the display name now so we can add data-item-name to the wrapper.
+    $tileName = $parentcategory ? $parentcategory->name : $category->name;
+    $pinnedAttr = $parentcategory ? ' data-pinned="true"' : '';
     $categoryContent .= '
-    <div class="col mb-4">
+    <div class="col mb-4 exaport-folder-category"' . $pinnedAttr . ' data-item-name="' . s(strtolower($tileName)) . '">
 				<div class="card h-100 excomdos_tile ' . $tileFixedClass . 'excomdos_tile_category id-' . $tileTargetId . '">
 					<div class="card-header excomdos_tilehead d-flex justify-content-between">
 						<span class="excomdos_tileinfo">

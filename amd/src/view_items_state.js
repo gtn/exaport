@@ -25,20 +25,24 @@ define(['core/ajax'], function(Ajax) {
     }
 
     /**
-     * Save current flat filter state to sessionStorage before a page reload.
-     * This allows the flat_filter module to restore the state after the reload.
+     * Save current filter state to sessionStorage before a page reload.
+     * This allows the flat_filter or folder_filter module to restore the state after the reload.
      */
     function saveFilterStateToSession() {
         var state = {};
-        var searchInput = document.getElementById('exaport-flat-search');
+
+        // Try flat mode elements first, then folder mode elements.
+        var searchInput = document.getElementById('exaport-flat-search')
+            || document.getElementById('exaport-folder-search');
         if (searchInput && searchInput.value) {
             state.search = searchInput.value;
         }
-        var sortSelect = document.getElementById('exaport-flat-sort-select');
+        var sortSelect = document.getElementById('exaport-flat-sort-select')
+            || document.getElementById('exaport-folder-sort-select');
         if (sortSelect) {
             state.sort = sortSelect.value;
         }
-        // Get active category chips from the flat_filter module's DOM.
+        // Get active category chips from the flat_filter module's DOM (flat mode only).
         var chipsContainer = document.getElementById('exaport-flat-filter-chips');
         if (chipsContainer) {
             var chips = chipsContainer.querySelectorAll('.badge.bg-secondary');
@@ -66,7 +70,10 @@ define(['core/ajax'], function(Ajax) {
             }
         }
         if (Object.keys(state).length > 0) {
-            sessionStorage.setItem('exaport_flat_filters', JSON.stringify(state));
+            // Use different storage keys for flat and folder modes so they don't interfere.
+            var storageKey = document.getElementById('exaport-folder-search')
+                ? 'exaport_folder_filters' : 'exaport_flat_filters';
+            sessionStorage.setItem(storageKey, JSON.stringify(state));
         }
     }
 
@@ -158,7 +165,8 @@ define(['core/ajax'], function(Ajax) {
         if (sortSelect) {
             sortSelect.addEventListener('change', function() {
                 sortFlatItems(sortSelect.value);
-                savePreference('sort', sortSelect.value.replace('-', '.'));
+                // Save with hyphen format as-is (e.g. "date-asc") — matches PARAM_ALPHANUMEXT.
+                savePreference('sort', sortSelect.value);
             });
             sortFlatItems(sortSelect.value);
         }

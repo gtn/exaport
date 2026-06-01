@@ -310,7 +310,7 @@ function block_exaport_user_preferences(): array {
     $preferences['block_exaport_sort'] = [
         'type' => PARAM_ALPHANUMEXT,
         'null' => NULL_NOT_ALLOWED,
-        'default' => 'date.desc',
+        'default' => 'date-desc',
         'permissioncallback' => [core_user::class, 'is_current_user'],
     ];
     $preferences['block_exaport_show_subcategories'] = [

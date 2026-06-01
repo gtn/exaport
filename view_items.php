@@ -1217,7 +1217,10 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
     if ($parentcategory || ($parentcategory === null) && ($type == 'shared' || $type == 'sharedstudent')) {
         $categoryContent .= 'excomdos_tile_fixed';
     }
-    $categoryContent .= ' excomdos_tile_category id-' . $category->id . '">
+    // When showing the "go up" tile, use the parent category's ID so that
+    // dropping an item onto this tile moves it into the parent category.
+    $tileTargetId = $parentcategory ? $parentcategory->id : $category->id;
+    $categoryContent .= ' excomdos_tile_category id-' . $tileTargetId . '">
         <div class="excomdos_tilehead">
                 <span class="excomdos_tileinfo">';
     if ($parentcategory) {
@@ -1436,9 +1439,13 @@ function block_exaport_category_template_bootstrap_card($category, $courseid, $t
     global $CFG;
     $categoryContent = '';
 
+    // When showing the "go up" tile: mark it as fixed (not draggable) and use
+    // the parent category's ID so that dropping onto it moves items there.
+    $tileFixedClass = $parentcategory ? 'excomdos_tile_fixed ' : '';
+    $tileTargetId = $parentcategory ? $parentcategory->id : $category->id;
     $categoryContent .= '
     <div class="col mb-4">
-				<div class="card h-100 excomdos_tile excomdos_tile_category id-' . $category->id . ' ">
+				<div class="card h-100 excomdos_tile ' . $tileFixedClass . 'excomdos_tile_category id-' . $tileTargetId . '">
 					<div class="card-header excomdos_tilehead d-flex justify-content-between">
 						<span class="excomdos_tileinfo">
 							';

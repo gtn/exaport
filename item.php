@@ -190,7 +190,9 @@ if ($action == 'movetocategory' && $allowedit) {
         die('target category not found');
     }
 
-    item_category_helper::sync_item_categories($existing->id, [$targetcategory->id]);
+    // If target is root (id=0), uncategorize = delete all category rows (no insert)
+    $new_category_ids = $targetcategory->id > 0 ? [$targetcategory->id] : [];
+    item_category_helper::sync_item_categories($existing->id, $new_category_ids);
 
     echo 'ok';
     exit;

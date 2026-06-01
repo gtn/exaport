@@ -165,7 +165,8 @@ define(['core/ajax'], function(Ajax) {
         if (sortSelect) {
             sortSelect.addEventListener('change', function() {
                 sortFlatItems(sortSelect.value);
-                savePreference('sort', sortSelect.value.replace('-', '.'));
+                // Save with hyphen format as-is (e.g. "date-asc") — matches PARAM_ALPHANUMEXT.
+                savePreference('sort', sortSelect.value);
             });
             sortFlatItems(sortSelect.value);
         }

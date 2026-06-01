@@ -125,12 +125,11 @@ define(['core/ajax'], function(Ajax) {
             // Bind sort dropdown: reload page with the new sort URL parameter and save preference.
             if (sortSelect) {
                 sortSelect.addEventListener('change', function() {
-                    // Convert select value (e.g. "date-desc") to URL param (e.g. "date.desc").
-                    var sortVal = sortSelect.value.replace(/-/g, '.');
-                    // Also save preference via AJAX for consistency with flat mode.
-                    savePreference('sort', sortVal);
+                    // Save with hyphen format as-is (e.g. "date-asc") — matches PARAM_ALPHANUMEXT.
+                    savePreference('sort', sortSelect.value);
+                    // URL param also uses hyphen format; PHP parse_sort handles both.
                     var url = new URL(window.location.href);
-                    url.searchParams.set('sort', sortVal);
+                    url.searchParams.set('sort', sortSelect.value);
                     window.location.href = url.toString();
                 });
             }

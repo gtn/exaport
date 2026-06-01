@@ -59,7 +59,7 @@ if (!$folderlayout) {
 }
 $sortfromurl = $sort;
 if (!$sort) {
-    $sort = get_user_preferences('block_exaport_sort', 'date.desc');
+    $sort = get_user_preferences('block_exaport_sort', 'date-desc');
 }
 $showsubcategoriesfromurl = $show_subcategories;
 if ($show_subcategories === -1) {
@@ -121,7 +121,8 @@ $sorticon = $parsedsort[1] . '.png';
 $sqlsort = block_exaport_item_sort_to_sql($parsedsort, false);
 
 if ($sortfromurl !== '') {
-    set_user_preference('block_exaport_sort', $sort);
+    // Store with hyphen separator — PARAM_ALPHANUMEXT does not allow dots.
+    set_user_preference('block_exaport_sort', $parsedsort[0] . '-' . $parsedsort[1]);
 }
 
 block_exaport_setup_default_categories();

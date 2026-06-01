@@ -1546,6 +1546,7 @@ function block_exaport_category_template_bootstrap_card($category, $courseid, $t
     $tile = $parentcategory ?: $category;
     $tileurl = $tile->url;
     $tilename = format_string($tile->name);
+    $tilefiltername = core_text::strtolower(trim(strip_tags(format_string($tile->name))));
     $pinnedattr = $parentcategory ? ' data-pinned="true"' : '';
     $titleicon = $parentcategory
         ? block_exaport_fontawesome_icon('folder-open', 'regular', 1, [], [], [], 'up')
@@ -1556,7 +1557,7 @@ function block_exaport_category_template_bootstrap_card($category, $courseid, $t
     $editurl = $showeditdelete ? $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=edit' : '';
     $deleteurl = $showeditdelete ? $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=delete' : '';
 
-    $categorycontent .= '<div class="col mb-4 exaport-folder-category col-card-folder"' . $pinnedattr . ' data-item-name="' . s(core_text::strtolower($tile->name)) . '">';
+    $categorycontent .= '<div class="col mb-4 exaport-folder-category col-card-folder"' . $pinnedattr . ' data-item-name="' . s($tilefiltername) . '">';
     $categorycontent .= '<div class="card card-eportfolio h-100 excomdos_tile ' . $tilefixedclass . 'excomdos_tile_category id-' . $tiletargetid . '">';
     $categorycontent .= '<div class="card-top d-flex justify-content-end">';
     if ($showdropdown) {
@@ -1589,8 +1590,9 @@ function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type,
             }
         }
 
+        $itemfiltername = core_text::strtolower(trim(strip_tags(format_string($item->name))));
         $itemContent = '
-        <div class="col mb-4 exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">
+        <div class="col mb-4 exaport-flat-item" data-item-name="' . s($itemfiltername) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">
 				<div class="card h-100 excomdos_tile excomdos_tile_item id-' . $item->id . ' ui-draggable ui-draggable-handle">
 					<div class="card-header excomdos_tilehead d-flex justify-content-between flex-wrap">
 						<div class="excomdos_tileinfo">
@@ -1684,8 +1686,9 @@ function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type,
     }
 
     $itemname = format_string($item->name);
+    $itemfiltername = core_text::strtolower(trim(strip_tags($itemname)));
     $intropreview = block_exaport_get_item_intro_preview($item);
-    $itemcontent = '<div class="col mb-4 exaport-flat-item" data-item-name="' . s(core_text::strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
+    $itemcontent = '<div class="col mb-4 exaport-flat-item" data-item-name="' . s($itemfiltername) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
     $itemcontent .= '<div class="card card-eportfolio h-100 excomdos_tile excomdos_tile_item id-' . $item->id . ' ui-draggable ui-draggable-handle">';
     $itemcontent .= '<div class="card-top d-flex justify-content-between">';
     $itemcontent .= '<h5 class="card-title"><a href="' . s($url) . '">' . block_exaport_fontawesome_icon($iconTypeProps['iconName'], $iconTypeProps['iconStyle'], 1, ['artefact_icon']) . $itemname . '</a></h5>';

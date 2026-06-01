@@ -496,13 +496,10 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
-    if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser && $categoryid > 0 && isset($categories[$categoryid])) {
+    if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser) {
         echo '<div class="excomdos_cat">';
-        echo block_exaport_get_string('current_category') . ': ';
         echo block_exaport_fontawesome_icon('circle-user', 'solid', 1)
-            . s($selecteduser->name) . '&nbsp;/&nbsp;'
-            . block_exaport_fontawesome_icon('folder', 'regular', 1, [], ['color' => '#7a7a7a'])
-            . '&nbsp;' . s($categories[$categoryid]->name);
+            . get_string('shared_categories_of', 'block_exaport', s($selecteduser->name));
         echo '</div>';
     }
 

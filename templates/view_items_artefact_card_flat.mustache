@@ -1,0 +1,83 @@
+{{!
+    Artefact card in flat/grid mode for the bootstrap layout (moodle_bootstrap).
+    Used by block_exaport_artefact_template_bootstrap_card() in view_items.php
+    when $foldermode is false.
+
+    Context variables:
+        itemnamelower       - Lowercase item name for data-item-name attribute
+        catids              - Comma-separated category IDs for data-category-ids attribute
+        timemodified        - Unix timestamp for data-item-date attribute
+        itemid              - Integer item id
+        url                 - URL to the artefact detail page
+        itemname            - Display name of the item (auto-escaped by mustache)
+        typeicon            - Pre-rendered HTML for the type icon
+        typestring          - Localised type label string
+        copytoself          - Boolean: tile is in the "copy to portfolio" state (currentcategory.id == -1)
+        copytoselfurl       - URL for the "make it yours" copy action (copytoself only)
+        copytoselftooltip   - Localised tooltip for the copy-to-self button
+        hascomments         - Boolean: item has at least one comment
+        commentcount        - Integer comment count
+        commenticon         - Pre-rendered HTML for the comment icon
+        projecticon         - Pre-rendered HTML for the project info icon (may be empty)
+        compicon            - Pre-rendered HTML for the competence icon (may be empty)
+        typemineorshared    - Boolean: type is "mine" or "shared" (show edit/delete/user icons)
+        isownitem           - Boolean: current user owns this item
+        editurl             - URL for the edit action
+        editicon            - Pre-rendered HTML for the edit icon
+        deleteurl           - URL for the delete action
+        trashicon           - Pre-rendered HTML for the delete icon
+        ownername           - Full name of the item owner (shown in tooltip when not own item)
+        usericon            - Pre-rendered HTML for the user icon
+        thumburl            - URL to the item thumbnail image
+        categorybadges      - Pre-rendered HTML for category badge pills (may be empty)
+        dateformatted       - Human-readable date string for the card footer
+}}
+<div class="col mb-4 exaport-flat-item"
+     data-item-name="{{itemnamelower}}"
+     data-category-ids="{{catids}}"
+     data-item-date="{{timemodified}}">
+    <div class="card h-100 excomdos_tile excomdos_tile_item id-{{itemid}} ui-draggable ui-draggable-handle">
+        <div class="card-header excomdos_tilehead d-flex justify-content-between flex-wrap">
+            <div class="excomdos_tileinfo">
+                <span class="excomdos_tileinfo_type">
+                    {{{typeicon}}}<span class="type_title">{{typestring}}</span>
+                </span>
+            </div>
+            <div class="excomdos_tileedit">
+                {{#copytoself}}
+                <a href="{{copytoselfurl}}">
+                    <img src="pix/import.png" title="{{copytoselftooltip}}">
+                </a>
+                {{/copytoself}}
+                {{^copytoself}}
+                {{#hascomments}}
+                <span class="excomdos_listcomments">{{commentcount}}{{{commenticon}}}</span>
+                {{/hascomments}}
+                {{{projecticon}}}
+                {{{compicon}}}
+                {{#typemineorshared}}
+                {{#isownitem}}
+                <a href="{{editurl}}">{{{editicon}}}</a>
+                <a href="{{deleteurl}}" class="item_delete_icon">{{{trashicon}}}</a>
+                {{/isownitem}}
+                {{^isownitem}}
+                <a class="" role="button" data-container="body" title="{{ownername}}">{{{usericon}}}</a>
+                {{/isownitem}}
+                {{/typemineorshared}}
+                {{/copytoself}}
+            </div>
+        </div>
+        <div class="card-body excomdos_tileimage d-flex justify-content-center align-items-center">
+            <a href="{{url}}">
+                <img height="75" alt="{{itemname}}" title="{{itemname}}" src="{{thumburl}}"/>
+            </a>
+        </div>
+        <div class="card-extitle exomdos_tiletitle">
+            <a href="{{url}}">{{itemname}}</a>
+            {{{categorybadges}}}
+        </div>
+        <div class="card-footer excomdos_tileinfo_time mt-2">
+            {{dateformatted}}
+        </div>
+    </div>
+</div>

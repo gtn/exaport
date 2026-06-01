@@ -320,3 +320,68 @@
     right: 0;
     top: 0;
 }
+
+/* New eportfolio card base */
+.card-eportfolio {
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+}
+
+.card-eportfolio .card-top {
+    min-height: 2.25rem;
+    padding: .5rem .75rem .25rem;
+}
+
+.card-eportfolio .card-title {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    font-size: .95rem;
+    margin-bottom: 0;
+    overflow: hidden;
+}
+
+.card-eportfolio .card-body {
+    color: #555;
+    font-size: .85rem;
+    padding: .5rem .75rem;
+}
+
+.card-eportfolio .card-footer {
+    background: transparent;
+    border-top: 1px solid #f0f0f0;
+    color: #777;
+    font-size: .8rem;
+    padding: .35rem .75rem;
+}
+
+/* 3-dot more menu */
+.eportfolio-card-more .dropdown-toggle::after {
+    display: none;
+}
+
+.eportfolio-card-more > a {
+    color: #999;
+    padding: .1rem .3rem;
+}
+
+.eportfolio-card-more > a:hover {
+    color: #333;
+}
+
+/* Date */
+.eportfolio-date {
+    color: #888;
+}
+
+/* Comment / competency count icons */
+.eportfolio-comment-count,
+.eportfolio-share-count {
+    font-size: .75rem;
+    margin-left: .1rem;
+}
+
+/* Folder cards */
+.col-card-folder .card-eportfolio {
+    background-color: #fafafa;
+}

@@ -26,8 +26,8 @@ $string['pluginname'] = 'Exabis ePortfolio';
 // === Shown in block title and all headers.
 $string['blocktitle'] = 'Exabis ePortfolio';
 $string['exaport:use'] = 'Nutzung';
-$string['exaport:addinstance'] = 'Exabis ePortfolio zum Kurs hinzuf&uuml;gen';
-$string['exaport:myaddinstance'] = 'Exabis ePortfolie zur Startseite hinzuf&uuml;gen';
+$string['exaport:addinstance'] = 'Exabis ePortfolio zum Kurs hinzuf&uumlgen';
+$string['exaport:myaddinstance'] = 'Exabis ePortfolie zur Startseite hinzuf&uumlgen';
 $string['exaport:export'] = 'Export von SCORM-Files';
 $string['exaport:import'] = 'Import von SCORM-Files';
 $string['exaport:importfrommoodle'] = 'Import von Moodle';
@@ -737,11 +737,11 @@ $string['what_is_embed_code_content'] = '<p>Einbettungscode ist ein Code, der vo
 					<ol>
 						<li>
 							Der gesamte Einbettungslink zeigt Folgendes:<br>
-							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quot;https://player.vimeo.com/video/1233456789&quot; width=&quot;640&quot; height=&quot;360&quot; frameborder=&quot;0&quot; allow=&quot;autoplay; fullscreen&quot; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quot;https://vimeo.com/1233456789&quot;&gt;1- Automation Opening[2]&lt;/a&gt; von &lt;a href=&quot;https://vimeo.com/user98765432&quot;&gt;R1 Marketing&lt;/a&gt; auf &lt;a href=&quot;https://vimeo.com&quot;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
+							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; von &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; auf &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
 						</li>
 						<li>
 							Du musst nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil kopieren:<br>
-							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quot;https://player.vimeo.com/video/1233456789&quot; width=&quot;640&quot; height=&quot;360&quot; frameborder=&quot;0&quot; allow=&quot;autoplay; fullscreen&quot; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
+							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
 						</li>
 					</ol>
 				<li>Füge diesen Code in das Textfeld von exabis E-portfolio ein.</li>

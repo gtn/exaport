@@ -49,7 +49,7 @@ define([], function() {
             if (sortSelect) {
                 sortSelect.addEventListener('change', function() {
                     // Convert select value (e.g. "date-desc") to URL param (e.g. "date.desc").
-                    var sortVal = sortSelect.value.replace('-', '.');
+                    var sortVal = sortSelect.value.replace(/-/g, '.');
                     var url = new URL(window.location.href);
                     url.searchParams.set('sort', sortVal);
                     window.location.href = url.toString();

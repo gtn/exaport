@@ -11,7 +11,93 @@
  * @copyright  2024 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
+define(['core/ajax'], function(Ajax) {
+
+    /**
+     * Save a user preference in the background.
+     *
+     * @param {string} name
+     * @param {string|number} value
+     */
+    function savePreference(name, value) {
+        Ajax.call([{
+            methodname: 'core_user_set_user_preferences',
+            args: {
+                preferences: [{
+                    name: 'block_exaport_' + name,
+                    value: String(value)
+                }]
+            }
+        }])[0];
+    }
+
+    /**
+     * Try to restore folder filter state from sessionStorage (saved before a page reload).
+     * Clears the stored state after restoration.
+     *
+     * @param {HTMLElement} searchInput
+     * @param {HTMLElement} sortSelect
+     * @return {boolean} Whether state was restored.
+     */
+    function restoreFilterStateFromSession(searchInput, sortSelect) {
+        var saved = sessionStorage.getItem('exaport_folder_filters');
+        if (!saved) {
+            return false;
+        }
+        sessionStorage.removeItem('exaport_folder_filters');
+
+        var state;
+        try {
+            state = JSON.parse(saved);
+        } catch (e) {
+            return false;
+        }
+
+        var restored = false;
+
+        // Restore search text.
+        if (state.search && searchInput) {
+            searchInput.value = state.search;
+            restored = true;
+        }
+
+        // Restore sort selection.
+        if (state.sort && sortSelect) {
+            sortSelect.value = state.sort;
+            restored = true;
+        }
+
+        return restored;
+    }
+
+    /**
+     * Apply the search filter to visible items and categories.
+     *
+     * @param {HTMLElement} searchInput
+     */
+    function applySearchFilter(searchInput) {
+        if (!searchInput) {
+            return;
+        }
+        var searchText = searchInput.value.toLowerCase();
+
+        // Filter item tiles (.exaport-flat-item have data-item-name).
+        document.querySelectorAll('.exaport-flat-item[data-item-name]').forEach(function(tile) {
+            var name = tile.getAttribute('data-item-name') || '';
+            tile.style.display = (!searchText || name.indexOf(searchText) !== -1) ? '' : 'none';
+        });
+
+        // Filter category tiles — but never hide the pinned "back" tile.
+        document.querySelectorAll('.exaport-folder-category[data-item-name]').forEach(function(tile) {
+            if (tile.getAttribute('data-pinned') === 'true') {
+                // Pinned tile is always visible.
+                tile.style.display = '';
+                return;
+            }
+            var name = tile.getAttribute('data-item-name') || '';
+            tile.style.display = (!searchText || name.indexOf(searchText) !== -1) ? '' : 'none';
+        });
+    }
 
     return {
         /**
@@ -21,35 +107,28 @@ define([], function() {
             var searchInput = document.getElementById('exaport-folder-search');
             var sortSelect = document.getElementById('exaport-folder-sort-select');
 
+            // Try to restore filter state from sessionStorage (after a reload).
+            var restoredFromSession = restoreFilterStateFromSession(searchInput, sortSelect);
+
             // Bind text search: filter tiles in real time.
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
-                    var searchText = searchInput.value.toLowerCase();
-
-                    // Filter item tiles (.exaport-flat-item have data-item-name).
-                    document.querySelectorAll('.exaport-flat-item[data-item-name]').forEach(function(tile) {
-                        var name = tile.getAttribute('data-item-name') || '';
-                        tile.style.display = (!searchText || name.indexOf(searchText) !== -1) ? '' : 'none';
-                    });
-
-                    // Filter category tiles — but never hide the pinned "back" tile.
-                    document.querySelectorAll('.exaport-folder-category[data-item-name]').forEach(function(tile) {
-                        if (tile.getAttribute('data-pinned') === 'true') {
-                            // Pinned tile is always visible.
-                            tile.style.display = '';
-                            return;
-                        }
-                        var name = tile.getAttribute('data-item-name') || '';
-                        tile.style.display = (!searchText || name.indexOf(searchText) !== -1) ? '' : 'none';
-                    });
+                    applySearchFilter(searchInput);
                 });
             }
 
-            // Bind sort dropdown: reload page with the new sort URL parameter.
+            // If state was restored, apply the search filter immediately.
+            if (restoredFromSession) {
+                applySearchFilter(searchInput);
+            }
+
+            // Bind sort dropdown: reload page with the new sort URL parameter and save preference.
             if (sortSelect) {
                 sortSelect.addEventListener('change', function() {
                     // Convert select value (e.g. "date-desc") to URL param (e.g. "date.desc").
                     var sortVal = sortSelect.value.replace(/-/g, '.');
+                    // Also save preference via AJAX for consistency with flat mode.
+                    savePreference('sort', sortVal);
                     var url = new URL(window.location.href);
                     url.searchParams.set('sort', sortVal);
                     window.location.href = url.toString();

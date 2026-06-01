@@ -1591,8 +1591,6 @@ function block_exaport_category_template_bootstrap_card($category, $courseid, $t
     return $content;
 }
 
-;
-
 function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory, $foldermode = false) {
     global $CFG, $USER, $DB;
 

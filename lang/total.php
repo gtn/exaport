@@ -2095,6 +2095,10 @@ return [
         'Geteilte Kategorien',
         'Shared Categories',
     ],
+    'shared_categories_of' => [
+        'Geteilte Kategorien von {$a}',
+        'Shared categories of {$a}',
+    ],
     'nothingstructureshared' => [
         'Keine geteilten Strukturen',
         'Nobody is sharing a structure with you',

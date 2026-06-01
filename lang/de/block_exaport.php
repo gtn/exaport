@@ -602,6 +602,7 @@ $string['create_as_note'] = 'Als Artefakt hinzufügen';
 $string['category_not_found'] = 'Kategorie nicht gefunden';
 $string['root_category'] = 'Hauptkategorie';
 $string['current_category'] = 'Aktuelle Kategorie';
+$string['shared_categories_of'] = 'Geteilte Kategorien von {$a}';
 $string['change_layout'] = 'Darstellung wechseln';
 $string['details'] = 'Details';
 $string['tiles'] = 'Kacheln';

@@ -496,6 +496,13 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
+    if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser) {
+        echo '<div class="excomdos_cat">';
+        echo block_exaport_fontawesome_icon('circle-user', 'solid', 1)
+            . get_string('shared_categories_of', 'block_exaport', s($selecteduser->name));
+        echo '</div>';
+    }
+
     $filtercategories = [];
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {

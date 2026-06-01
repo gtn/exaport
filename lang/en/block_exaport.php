@@ -603,6 +603,7 @@ $string['create_as_note'] = 'Create as Artefact';
 $string['category_not_found'] = 'Category not found';
 $string['root_category'] = 'Root Category';
 $string['current_category'] = 'Current Category';
+$string['shared_categories_of'] = 'Shared categories of {$a}';
 $string['change_layout'] = 'Change Layout';
 $string['details'] = 'Details';
 $string['tiles'] = 'Tiles';

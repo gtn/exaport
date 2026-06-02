@@ -151,3 +151,7 @@
 #exaport .eportfolio-categories .badge {
     font-size: .78rem;
 }
+#exaport .exaport-flat-item,
+#exaport .exaport-folder-category {
+    min-height: 10rem;
+}

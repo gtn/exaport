@@ -26,7 +26,7 @@ use templatable;
 /**
  * Output class for the category card tile (Bootstrap/folder-mode layout).
  *
- * Renders block_exaport/view_items_category_card.
+ * Renders block_exaport/category_card.
  */
 class category_card implements renderable, templatable {
 
@@ -108,6 +108,6 @@ class category_card implements renderable, templatable {
      * @return string
      */
     public function get_template_name(): string {
-        return 'block_exaport/view_items_category_card';
+        return 'block_exaport/category_card';
     }
 }

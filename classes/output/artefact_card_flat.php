@@ -24,7 +24,7 @@ use renderer_base;
 /**
  * Output class for the artefact card in flat/grid mode (Bootstrap layout).
  *
- * Renders block_exaport/view_items_artefact_card_flat.
+ * Renders block_exaport/artefact_card_flat.
  */
 class artefact_card_flat extends artefact_card {
 
@@ -74,6 +74,6 @@ class artefact_card_flat extends artefact_card {
      * @return string
      */
     public function get_template_name(): string {
-        return 'block_exaport/view_items_artefact_card_flat';
+        return 'block_exaport/artefact_card_flat';
     }
 }

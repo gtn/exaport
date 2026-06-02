@@ -151,3 +151,40 @@
 #exaport .eportfolio-categories .badge {
     font-size: .78rem;
 }
+/* Uniform card height for both item and category column wrappers */
+#exaport .exaport-flat-item,
+#exaport .exaport-folder-category {
+    height: 13rem;
+}
+/* Artefact cards (items) fill their column fully */
+#exaport .exaport-flat-item .card-eportfolio {
+    height: 100% !important;
+}
+/* card-body stretches between card-top and card-footer, laid out as a column */
+#exaport .card-eportfolio .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+}
+/* Text zone: grows to fill remaining space, text clamped to 2 lines */
+#exaport .card-eportfolio .card-body-text {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+#exaport .card-eportfolio .card-body-text .card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+/* Chips zone: fixed single-row height, overflowing chips clipped with a right-edge fade */
+#exaport .card-eportfolio .card-body-chips {
+    flex: 0 0 1.8rem;
+    overflow: hidden;
+    white-space: nowrap;
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}

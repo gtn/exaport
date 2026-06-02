@@ -61,8 +61,12 @@
             </span>
         </div>
         <div class="card-body">
-            {{#introtext}}<p class="card-text">{{introtext}}</p>{{/introtext}}
-            {{#categorybadges}}<div class="mt-1">{{{categorybadges}}}</div>{{/categorybadges}}
+            <div class="card-body-text">
+                {{#introtext}}<p class="card-text">{{introtext}}</p>{{/introtext}}
+            </div>
+            <div class="card-body-chips">
+                {{{categorybadges}}}
+            </div>
         </div>
         <div class="card-footer d-flex justify-content-between align-items-center">
             <span class="eportoflio-date">{{dateformatted}}</span>

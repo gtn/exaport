@@ -1154,7 +1154,7 @@ function block_exaport_render_item_category_badges($item) {
     if (!$badges) {
         return '';
     }
-    return html_writer::div(implode('', $badges), 'mt-2');
+    return html_writer::div(implode('', $badges), 'eportfolio-categories');
 }
 
 function block_exaport_category_path($category, $courseid = 1, $currentcategoryPathItemButtons = '') {

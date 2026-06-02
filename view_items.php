@@ -164,7 +164,7 @@ if ($type == 'sharedstudent') {
         }
 
         // Build a tree according to parent.
-        $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
+        $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
 
         // The main root category for student.
         $rootcategory = block_exaport_get_root_category($selecteduser->id);
@@ -197,7 +197,7 @@ if ($type == 'sharedstudent') {
             $currentcategory = $rootcategory;
             $parentcategory = null;
             $subcategories = [];
-            $items = block_exaport_load_flat_items($selecteduser->id, $categories, $sqlsort);
+            $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort);
         } else {
             // Common items.
             $items = $DB->get_records_sql("
@@ -295,7 +295,7 @@ if ($type == 'sharedstudent') {
             $category->icon = block_exaport_get_category_icon($category);
         }
         // Build a tree according to parent.
-        $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
+        $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
 
         if (!isset($categories[$categoryid])) {
             throw new moodle_exception('not allowed');
@@ -334,7 +334,7 @@ if ($type == 'sharedstudent') {
             $currentcategory = $rootcategory;
             $parentcategory = null;
             $subcategories = [];
-            $items = block_exaport_load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
+            $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
         } else {
             $usercondition = ' i.userid = ' . intval($selecteduser->id) . ' ';
             if ($type == 'shared') {
@@ -373,7 +373,7 @@ if ($type == 'sharedstudent') {
     }
 
     // Build a tree according to parent.
-    $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
+    $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
 
     // The main root category.
     $rootcategory = block_exaport_get_root_category();
@@ -407,9 +407,9 @@ if ($type == 'sharedstudent') {
         // Filter out the root category (id=0) which is a virtual placeholder, not a real DB category.
         $usercategoryids = array_filter(array_keys($categories), fn($id) => $id > 0);
         if ($show_otherusers) {
-            $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
+            $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
         } else {
-            $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, null);
+            $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, null);
         }
     } else {
         // Folder mode keeps legacy category navigation behavior.
@@ -523,7 +523,7 @@ if ($type == 'mine' && $layout == 'folder') {
         if ($type == 'shared' && !category_allowed($selecteduser, $categories, $category)) {
             continue;
         }
-        $filtercategories[(int)$category->id] = block_exaport_category_full_path_name($category->id, $categories);
+        $filtercategories[(int)$category->id] = \block_exaport\category_helper::full_path_name($category->id, $categories);
     }
 
     echo '<div class="exaport-flat-filter mb-3">';

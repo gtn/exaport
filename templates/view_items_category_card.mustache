@@ -13,6 +13,10 @@
         typemine            - Boolean: current user owns this category (show edit/delete)
         editurl             - URL for the edit action
         deleteurl           - URL for the delete action
+        ellipsisicon        - Pre-rendered HTML for the "⋮" dropdown toggle icon
+        viewicon            - Pre-rendered HTML for the "view" menu item icon
+        editicon            - Pre-rendered HTML for the "edit" menu item icon
+        deleteicon          - Pre-rendered HTML for the "delete" menu item icon
         viewlabel           - Localised "View" label
         editlabel           - Localised "Edit" label
         deletelabel         - Localised "Delete" label
@@ -25,18 +29,18 @@
         <div class="card-top d-flex justify-content-end">
             <span class="eportfolio-card-more">
                 <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-solid fa-ellipsis-vertical"></i></span>
+                    {{{ellipsisicon}}}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item" href="{{tileurl}}"><span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-regular fa-eye"></i></span> {{viewlabel}}</a>
+                        <a class="dropdown-item" href="{{tileurl}}">{{{viewicon}}} {{viewlabel}}</a>
                     </li>
                     {{#typemine}}
                     <li>
-                        <a class="dropdown-item" href="{{editurl}}"><span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-regular fa-pen-to-square"></i></span> {{editlabel}}</a>
+                        <a class="dropdown-item" href="{{editurl}}">{{{editicon}}} {{editlabel}}</a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="{{deleteurl}}"><span class="exaport-icon fa-layers fa-fw fa-1x exaport-remove-icon"><i class="fa-regular fa-trash-can"></i></span> {{deletelabel}}</a>
+                        <a class="dropdown-item" href="{{deleteurl}}">{{{deleteicon}}} {{deletelabel}}</a>
                     </li>
                     {{/typemine}}
                 </ul>

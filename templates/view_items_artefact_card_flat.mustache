@@ -17,13 +17,17 @@
         copytoselftooltip   - Localised tooltip for the copy-to-self button
         hascomments         - Boolean: item has at least one comment
         commentcount        - Integer comment count
+        commenticon         - Pre-rendered HTML for the comment icon
         projecticon         - Pre-rendered HTML for the project info icon (may be empty)
         compicon            - Pre-rendered HTML for the competence icon (may be empty)
         typemineorshared    - Boolean: type is "mine" or "shared" (show edit/delete/user icons)
         isownitem           - Boolean: current user owns this item
         editurl             - URL for the edit action
+        editicon            - Pre-rendered HTML for the edit icon
         deleteurl           - URL for the delete action
+        trashicon           - Pre-rendered HTML for the delete icon
         ownername           - Full name of the item owner (shown in tooltip when not own item)
+        usericon            - Pre-rendered HTML for the user icon
         thumburl            - URL to the item thumbnail image
         categorybadges      - Pre-rendered HTML for category badge pills (may be empty)
         dateformatted       - Human-readable date string for the card footer
@@ -47,17 +51,17 @@
                 {{/copytoself}}
                 {{^copytoself}}
                 {{#hascomments}}
-                <span class="excomdos_listcomments">{{commentcount}}<span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-regular fa-comment"></i></span></span>
+                <span class="excomdos_listcomments">{{commentcount}}{{{commenticon}}}</span>
                 {{/hascomments}}
                 {{{projecticon}}}
                 {{{compicon}}}
                 {{#typemineorshared}}
                 {{#isownitem}}
-                <a href="{{editurl}}"><span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-regular fa-pen-to-square"></i></span></a>
-                <a href="{{deleteurl}}" class="item_delete_icon"><span class="exaport-icon fa-layers fa-fw fa-1x exaport-remove-icon"><i class="fa-regular fa-trash-can"></i></span></a>
+                <a href="{{editurl}}">{{{editicon}}}</a>
+                <a href="{{deleteurl}}" class="item_delete_icon">{{{trashicon}}}</a>
                 {{/isownitem}}
                 {{^isownitem}}
-                <a class="" role="button" data-container="body" title="{{ownername}}"><span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-solid fa-circle-user"></i></span></a>
+                <a class="" role="button" data-container="body" title="{{ownername}}">{{{usericon}}}</a>
                 {{/isownitem}}
                 {{/typemineorshared}}
                 {{/copytoself}}

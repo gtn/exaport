@@ -1152,12 +1152,12 @@ function block_exaport_render_item_category_badges($item) {
         $fullpath = format_string($category->name);
         $parts = explode(' / ', $fullpath);
         $shortlabel = trim(end($parts));
-        $attrs = ['class' => 'badge badge-secondary'];
-        if (count($parts) > 1) {
-            $attrs['data-bs-toggle'] = 'tooltip';
-            $attrs['data-bs-placement'] = 'top';
-            $attrs['data-bs-title'] = $fullpath;
-        }
+        $attrs = [
+            'class' => 'badge badge-secondary',
+            'data-bs-toggle' => 'tooltip',
+            'data-bs-placement' => 'top',
+            'data-bs-title' => $fullpath,
+        ];
         $badges[] = html_writer::tag('span', $shortlabel, $attrs) . ' ';
     }
     if (!$badges) {

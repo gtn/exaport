@@ -150,6 +150,7 @@
 }
 #exaport .eportfolio-categories .badge {
     font-size: .78rem;
+    cursor: default;
 }
 /* Uniform card height for both item and category column wrappers */
 #exaport .exaport-flat-item,

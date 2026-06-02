@@ -19,6 +19,46 @@ defined('MOODLE_INTERNAL') || die;
 require_once(__DIR__ . '/inc.php');
 
 class block_exaport_renderer extends plugin_renderer_base {
+
+    /**
+     * Render a category card tile (Bootstrap/folder-mode layout).
+     *
+     * @param \block_exaport\output\category_card $card
+     * @return string HTML
+     */
+    public function render_category_card(\block_exaport\output\category_card $card): string {
+        return $this->render_from_template(
+            'block_exaport/view_items_category_card',
+            $card->export_for_template($this)
+        );
+    }
+
+    /**
+     * Render an artefact card in folder-navigation mode (Bootstrap layout).
+     *
+     * @param \block_exaport\output\artefact_card_folder $card
+     * @return string HTML
+     */
+    public function render_artefact_card_folder(\block_exaport\output\artefact_card_folder $card): string {
+        return $this->render_from_template(
+            'block_exaport/view_items_artefact_card_folder',
+            $card->export_for_template($this)
+        );
+    }
+
+    /**
+     * Render an artefact card in flat/grid mode (Bootstrap layout).
+     *
+     * @param \block_exaport\output\artefact_card_flat $card
+     * @return string HTML
+     */
+    public function render_artefact_card_flat(\block_exaport\output\artefact_card_flat $card): string {
+        return $this->render_from_template(
+            'block_exaport/view_items_artefact_card_flat',
+            $card->export_for_template($this)
+        );
+    }
+
     /**
      * in moodle33 pix_url was renamed to image_url
      */

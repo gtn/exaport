@@ -1157,127 +1157,6 @@ function block_exaport_render_item_category_badges($item) {
     return html_writer::div(implode('', $badges), 'mt-2');
 }
 
-/**
- * Build a category tree keyed by parent id.
- *
- * @param array $categories
- * @return array
- */
-function block_exaport_build_categories_by_parent(array $categories) {
-    $categoriesbyparent = [];
-    foreach ($categories as $category) {
-        if (!isset($categoriesbyparent[$category->pid])) {
-            $categoriesbyparent[$category->pid] = [];
-        }
-        $categoriesbyparent[$category->pid][] = $category;
-    }
-
-    return $categoriesbyparent;
-}
-
-/**
- * Load all items for flat mode and attach flatcategories to each item.
- *
- * @param int $userid The user whose items to load.
- * @param array $categories All categories keyed by id (for path name resolution).
- * @param string $sqlsort SQL ORDER BY clause.
- * @param array|null $allowedcategoryids Category filter behavior:
- *     - null: load all categories for the viewed user in flat mode; this is all categories for your own items, or only that
- *       other user's own categories when viewing someone else's items.
- *     - empty array: return no items.
- *     - non-empty array: only include these category IDs and remove items with no matching categories.
- * @return array The items array with ->flatcategories populated.
- */
-function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
-    global $DB, $USER;
-
-    if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
-        // Keep the shared flat-mode behavior while avoiding an empty IN() SQL clause.
-        return [];
-    }
-    if ($allowedcategoryids !== null) {
-        $items = block_exaport_get_items_by_category_and_user(0, $allowedcategoryids, $sqlsort, true);
-    } else {
-        // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
-        // but they get filtered a few lines later with the unset()
-        $items = block_exaport_get_items_by_category_and_user($userid, null, $sqlsort);
-    }
-
-    if (!$items) {
-        return [];
-    }
-
-    $itemids = array_keys($items);
-    [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
-
-    // Belt-and-suspenders: restrict to the viewed user's own categories,
-    // even though items are already scoped by userid.
-    $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
-
-    $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
-            FROM {block_exaportitemcate} ic
-            JOIN {block_exaportcate} c ON c.id = ic.cateid
-            WHERE ic.itemid $iteminsql";
-    $params = $iteminparams;
-
-    // Belt-and-suspenders: restrict to the viewed user's own categories,
-    // even though items are already scoped by userid.
-    if ($is_viewing_other_user) {
-        $sql .= " AND c.userid = ?";
-        $params[] = $userid;
-    }
-
-    if ($allowedcategoryids !== null) {
-        [$catinsql, $catinparams] = $DB->get_in_or_equal($allowedcategoryids, SQL_PARAMS_QM);
-        $sql .= " AND c.id $catinsql";
-        $params = array_merge($params, $catinparams);
-    }
-
-    $sql .= " ORDER BY c.name ASC";
-    $itemcategories = $DB->get_records_sql($sql, $params);
-
-    $categoriesbyitem = [];
-    foreach ($itemcategories as $itemcategory) {
-        $itemcategory->name = block_exaport_category_full_path_name($itemcategory->id, $categories);
-        if (!isset($categoriesbyitem[$itemcategory->itemid])) {
-            $categoriesbyitem[$itemcategory->itemid] = [];
-        }
-        $categoriesbyitem[$itemcategory->itemid][] = $itemcategory;
-    }
-
-    foreach ($items as $itemid => $item) {
-        $item->flatcategories = $categoriesbyitem[$item->id] ?? [];
-        if ($allowedcategoryids !== null && !$item->flatcategories) {
-            unset($items[$itemid]); // this is crucial! This unsets all items that should not be displayed
-        }
-    }
-
-    return $items;
-}
-
-/**
- * Build the full hierarchical path name for a category, e.g. "haustiere / hunde".
- *
- * @param int $categoryid The category id.
- * @param array $categories Associative array of all categories keyed by id (must have ->name and ->pid).
- * @return string The full path name with " / " separators.
- */
-function block_exaport_category_full_path_name($categoryid, array $categories) {
-    $parts = [];
-    $id = $categoryid;
-    $visited = [];
-    while ($id && isset($categories[$id])) {
-        if (isset($visited[$id])) {
-            break; // Prevent infinite loop on circular references.
-        }
-        $visited[$id] = true;
-        $parts[] = $categories[$id]->name;
-        $id = $categories[$id]->pid ?? 0;
-    }
-    $parts = array_reverse($parts);
-    return implode(' / ', $parts);
-}
-
 function block_exaport_category_path($category, $courseid = 1, $currentcategoryPathItemButtons = '') {
     global $DB, $CFG;
     $pathItem = function($id, $title, $courseid, $selected = false, $currentcategoryPathItemButtons = '') use ($CFG) {
@@ -1503,10 +1382,13 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
  * Different templates of category list. Depends on exaport settings
  */
 function block_exaport_category_list_item($category, $courseid, $type, $currentcategory, $parentcategory = null) {
+    global $PAGE;
     $template = block_exaport_used_layout();
     switch ($template) {
         case 'moodle_bootstrap':
-            return block_exaport_category_template_bootstrap_card($category, $courseid, $type, $currentcategory, $parentcategory);
+            return $PAGE->get_renderer('block_exaport')->render(
+                new \block_exaport\output\category_card($category, $courseid, $type, $currentcategory, $parentcategory)
+            );
             break;
         case 'exaport_bootstrap': // may we do not need this at all?
             return '<div>TODO: !!!!!! ' . $template . ' category !!!!!!!</div>';
@@ -1523,10 +1405,19 @@ function block_exaport_category_list_item($category, $courseid, $type, $currentc
  * Different templates of artefact list. Depends on exaport settings
  */
 function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, $foldermode = false) {
+    global $PAGE;
     $template = block_exaport_used_layout();
     switch ($template) {
         case 'moodle_bootstrap':
-            return block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory, $foldermode);
+            if ($foldermode) {
+                return $PAGE->get_renderer('block_exaport')->render(
+                    new \block_exaport\output\artefact_card_folder($item, $courseid, $type, $categoryid, $currentcategory)
+                );
+            } else {
+                return $PAGE->get_renderer('block_exaport')->render(
+                    new \block_exaport\output\artefact_card_flat($item, $courseid, $type, $categoryid, $currentcategory)
+                );
+            }
             break;
         case 'exaport_bootstrap': // may we do not need this at all?
             return '<div>TODO: !!!!!! ' . $template . ' !!!!!!!</div>';
@@ -1539,141 +1430,3 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
 
 }
 
-function block_exaport_category_template_bootstrap_card($category, $courseid, $type, $currentcategory, $parentcategory = null) {
-    global $CFG, $OUTPUT;
-
-    $isparenttile = (bool)$parentcategory;
-    $tiletargetid = $isparenttile ? (int)$parentcategory->id : (int)$category->id;
-    $tilename = $isparenttile ? $parentcategory->name : $category->name;
-    $tileurl = $isparenttile ? (string)$parentcategory->url : (string)$category->url;
-    $outerclasses = $isparenttile ? 'col mb-4 exaport-folder-category' : 'col col-card-folder mb-4 exaport-folder-category';
-    $tilefixedclass = $isparenttile ? 'excomdos_tile_fixed ' : '';
-
-    $context = [
-        'outerclasses'  => $outerclasses,
-        'tilenamelower' => strtolower($tilename),
-        'isparenttile'  => $isparenttile,
-        'tiletargetid'  => $tiletargetid,
-        'tilefixedclass' => $tilefixedclass,
-        'tileurl'       => $tileurl,
-        'tilename'      => $tilename,
-        'typemine'      => ($type == 'mine'),
-        'editurl'       => $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=edit',
-        'deleteurl'     => $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=delete',
-        'ellipsisicon'  => block_exaport_fontawesome_icon('ellipsis-vertical', 'solid', 1),
-        'viewicon'      => block_exaport_fontawesome_icon('eye', 'regular', 1),
-        'editicon'      => block_exaport_fontawesome_icon('pen-to-square', 'regular', 1),
-        'deleteicon'    => block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']),
-        'viewlabel'     => block_exaport_get_string('view'),
-        'editlabel'     => block_exaport_get_string('edit'),
-        'deletelabel'   => block_exaport_get_string('delete'),
-        'folderupicon'  => block_exaport_fontawesome_icon('folder-open', 'regular', 1, ['icon', 'fa-fw', 'me-1'], [],
-                            ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top',
-                             'data-bs-title'  => block_exaport_get_string('category_up')], 'up'),
-        'categorylabel' => block_exaport_get_string('category'),
-    ];
-
-    return $OUTPUT->render_from_template('block_exaport/view_items_category_card', $context);
-}
-
-function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory, $foldermode = false) {
-    global $CFG, $USER, $DB, $OUTPUT;
-
-    $iconTypeProps = block_exaport_item_icon_type_options($item->type);
-    $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
-
-    // Build category IDs for client-side filtering.
-    $itemCatIds = [];
-    if (!empty($item->flatcategories) && is_array($item->flatcategories)) {
-        foreach ($item->flatcategories as $cat) {
-            $itemCatIds[] = (int)$cat->id;
-        }
-    }
-
-    if ($foldermode) {
-        $typelabel = get_string($item->type, 'block_exaport');
-        $introtext = '';
-        if (!empty($item->intro)) {
-            $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
-                'block_exaport', 'item_content', 'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
-            $introtext = shorten_text(trim(strip_tags($intro)), 140, true);
-        }
-
-        $cattype = ($type == 'shared') ? '&cattype=shared' : '';
-        $isownitem = ($item->userid == $USER->id);
-        $commentcount = (int)($item->comments ?? 0);
-        $commentlabel = $commentcount . ' ' . block_exaport_get_string($commentcount === 1 ? 'comment' : 'comments');
-
-        $context = [
-            'url'           => $url,
-            'itemnamelower' => strtolower($item->name),
-            'timemodified'  => (int)$item->timemodified,
-            'catids'        => implode(',', $itemCatIds),
-            'itemid'        => (int)$item->id,
-            'typeicon'      => '<i class="icon fa fa-' . s($iconTypeProps['iconName']) . ' fa-fw me-1"'
-                                . ' data-bs-toggle="tooltip" data-bs-placement="top"'
-                                . ' data-bs-title="' . s($typelabel) . '"></i>',
-            'itemname'      => $item->name,
-            'ellipsisicon'  => block_exaport_fontawesome_icon('ellipsis-vertical', 'solid', 1),
-            'viewlabel'     => block_exaport_get_string('view'),
-            'viewicon'      => block_exaport_fontawesome_icon('eye', 'regular', 1),
-            'canedit'       => $isownitem,
-            'editurl'       => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=edit' . $cattype,
-            'editicon'      => block_exaport_fontawesome_icon('pen-to-square', 'regular', 1),
-            'editlabel'     => block_exaport_get_string('edit'),
-            'candelete'     => $isownitem && block_exaport_item_is_editable($item->id),
-            'deleteurl'     => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=delete&categoryid=' . $categoryid . $cattype,
-            'deleteicon'    => block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']),
-            'deletelabel'   => block_exaport_get_string('delete'),
-            'introtext'     => $introtext,
-            'dateformatted' => date('d.m.Y H:i', $item->timemodified),
-            'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
-            'hascomments'   => $commentcount > 0,
-            'commentcount'  => $commentcount,
-            'commentlabel'  => $commentlabel,
-        ];
-
-        return $OUTPUT->render_from_template('block_exaport/view_items_artefact_card_folder', $context);
-    }
-
-    // Flat / grid mode.
-    $copytoself = ($currentcategory->id == -1);
-    $isownitem = ($item->userid == $USER->id);
-    $ownername = '';
-    if (!$isownitem) {
-        $itemuser = $DB->get_record('user', ['id' => $item->userid]);
-        $ownername = $itemuser ? fullname($itemuser) : '';
-    }
-
-    $context = [
-        'itemnamelower'     => strtolower($item->name),
-        'catids'            => implode(',', $itemCatIds),
-        'timemodified'      => (int)$item->timemodified,
-        'itemid'            => (int)$item->id,
-        'url'               => $url,
-        'itemname'          => $item->name,
-        'typeicon'          => block_exaport_fontawesome_icon($iconTypeProps['iconName'], $iconTypeProps['iconStyle'], 1, ['artefact_icon']),
-        'typestring'        => get_string($item->type, 'block_exaport'),
-        'copytoself'        => $copytoself,
-        'copytoselfurl'     => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&sesskey=' . sesskey() . '&action=copytoself',
-        'copytoselftooltip' => get_string('make_it_yours', 'block_exaport'),
-        'hascomments'       => ($item->comments > 0),
-        'commentcount'      => (int)$item->comments,
-        'commenticon'       => block_exaport_fontawesome_icon('comment', 'regular', 1, [], [], [], '', [], [], [], []),
-        'projecticon'       => block_exaport_get_item_project_icon($item),
-        'compicon'          => block_exaport_get_item_comp_icon($item),
-        'typemineorshared'  => in_array($type, ['mine', 'shared']),
-        'isownitem'         => $isownitem,
-        'editurl'           => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=edit' . (($type == 'shared') ? '&cattype=shared' : ''),
-        'editicon'          => block_exaport_fontawesome_icon('pen-to-square', 'regular', 1),
-        'deleteurl'         => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=delete&categoryid=' . $categoryid . (($type == 'shared') ? '&cattype=shared' : ''),
-        'trashicon'         => block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']),
-        'ownername'         => $ownername,
-        'usericon'          => block_exaport_fontawesome_icon('circle-user', 'solid', 1),
-        'thumburl'          => $CFG->wwwroot . '/blocks/exaport/item_thumb.php?item_id=' . $item->id,
-        'categorybadges'    => block_exaport_render_item_category_badges($item),
-        'dateformatted'     => date('d.m.Y H:i', $item->timemodified),
-    ];
-
-    return $OUTPUT->render_from_template('block_exaport/view_items_artefact_card_flat', $context);
-}

@@ -29,11 +29,68 @@ function block_exaport_get_user_from_hash($hash) {
     }
 }
 
+/**
+ * Fetch category badge HTML for a single item in the shared detail view.
+ *
+ * @param int $itemid
+ * @param int $userid Owner of the item (used to build full path names).
+ * @return string HTML string of category badges, or empty string when no categories.
+ */
+function block_exaport_extern_item_category_badges(int $itemid, int $userid): string {
+    global $DB;
+
+    // Load all categories belonging to this item's owner so we can build full path names.
+    $allcategories = $DB->get_records('block_exaportcate', ['userid' => $userid], '', 'id, name, pid');
+
+    // Resolve the full path name for a given category id.
+    $fullpath = function(int $catid) use ($allcategories): string {
+        $parts = [];
+        $id = $catid;
+        $visited = [];
+        while ($id && isset($allcategories[$id])) {
+            if (isset($visited[$id])) {
+                break;
+            }
+            $visited[$id] = true;
+            $parts[] = $allcategories[$id]->name;
+            $id = (int)($allcategories[$id]->pid ?? 0);
+        }
+        return implode(' / ', array_reverse($parts));
+    };
+
+    $rows = $DB->get_records_sql(
+        "SELECT ic.id AS icid, c.id, c.name
+           FROM {block_exaportitemcate} ic
+           JOIN {block_exaportcate} c ON c.id = ic.cateid
+          WHERE ic.itemid = ?
+          ORDER BY c.name ASC",
+        [$itemid]
+    );
+
+    if (!$rows) {
+        return '';
+    }
+
+    $badges = [];
+    foreach ($rows as $row) {
+        $label = $fullpath((int)$row->id) ?: format_string($row->name);
+        $badges[] = html_writer::tag('span', $label, ['class' => 'badge badge-secondary']);
+    }
+
+    return html_writer::div(implode(' ', $badges), 'eportfolio-categories');
+}
+
 function block_exaport_print_extern_item($item, $access) {
-    global $CFG, $OUTPUT;
+    global $CFG, $OUTPUT, $DB;
     echo $OUTPUT->heading(format_string($item->name));
     $tags = \core_tag_tag::get_item_tags('block_exaport', 'block_exaportitem', $item->id);
     echo $OUTPUT->tag_list($tags, null, 'exaport-artifact-tags', 0, null, false);
+
+    // Display category badges.
+    $categorybadges = block_exaport_extern_item_category_badges($item->id, $item->userid);
+    if ($categorybadges) {
+        echo $categorybadges;
+    }
 
     $boxcontent = '';
     $filescontent = '';

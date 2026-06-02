@@ -67,13 +67,4 @@ class artefact_card_flat extends artefact_card {
             'categorybadges'    => block_exaport_render_item_category_badges($item),
         ];
     }
-
-    /**
-     * Return the mustache template name.
-     *
-     * @return string
-     */
-    public function get_template_name(): string {
-        return 'block_exaport/artefact_card_flat';
-    }
 }

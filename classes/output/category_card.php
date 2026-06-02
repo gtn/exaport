@@ -101,13 +101,4 @@ class category_card implements renderable, templatable {
             'categorylabel'  => block_exaport_get_string('category'),
         ];
     }
-
-    /**
-     * Return the mustache template name.
-     *
-     * @return string
-     */
-    public function get_template_name(): string {
-        return 'block_exaport/category_card';
-    }
 }

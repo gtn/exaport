@@ -69,13 +69,4 @@ class artefact_card_folder extends artefact_card {
             'commentlabel' => $commentlabel,
         ];
     }
-
-    /**
-     * Return the mustache template name.
-     *
-     * @return string
-     */
-    public function get_template_name(): string {
-        return 'block_exaport/artefact_card_folder';
-    }
 }

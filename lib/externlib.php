@@ -73,14 +73,14 @@ function block_exaport_extern_item_category_badges(int $itemid, int $userid): st
 
     $badges = [];
     foreach ($rows as $row) {
-        $fullpath = $fullpath((int)$row->id) ?: format_string($row->name);
-        $parts = explode(' / ', $fullpath);
+        $label = $fullpath((int)$row->id) ?: format_string($row->name);
+        $parts = explode(' / ', $label);
         $shortlabel = trim(end($parts));
         $attrs = ['class' => 'badge badge-secondary'];
         if (count($parts) > 1) {
             $attrs['data-bs-toggle'] = 'tooltip';
             $attrs['data-bs-placement'] = 'top';
-            $attrs['data-bs-title'] = $fullpath;
+            $attrs['data-bs-title'] = $label;
         }
         $badges[] = html_writer::tag('span', $shortlabel, $attrs);
     }

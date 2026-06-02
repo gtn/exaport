@@ -1149,7 +1149,14 @@ function block_exaport_render_item_category_badges($item) {
     }
     $badges = [];
     foreach ($item->flatcategories as $category) {
-        $badges[] = html_writer::tag('span', format_string($category->name), ['class' => 'badge badge-secondary']) . ' ';
+        $fullpath = format_string($category->name);
+        $parts = explode(' / ', $fullpath);
+        $shortlabel = trim(end($parts));
+        $attrs = ['class' => 'badge badge-secondary'];
+        if (count($parts) > 1) {
+            $attrs['title'] = $fullpath;
+        }
+        $badges[] = html_writer::tag('span', $shortlabel, $attrs) . ' ';
     }
     if (!$badges) {
         return '';

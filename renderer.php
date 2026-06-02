@@ -41,5 +41,17 @@ class block_exaport_renderer extends plugin_renderer_base {
     public function get_theme_config() {
         return $this->page->theme;
     }
+
+    /**
+     * Render an artefact card in flat/grid mode using the shared folder card template.
+     *
+     * The flat card is identical to the folder card except it also shows category chips.
+     *
+     * @param \block_exaport\output\artefact_card_flat $card
+     * @return string
+     */
+    public function render_artefact_card_flat(\block_exaport\output\artefact_card_flat $card): string {
+        return $this->render_from_template('block_exaport/artefact_card_folder', $card->export_for_template($this));
+    }
 }
 

@@ -24,9 +24,10 @@ use renderer_base;
 /**
  * Output class for the artefact card in flat/grid mode (Bootstrap layout).
  *
- * Renders block_exaport/artefact_card_flat.
+ * Extends artefact_card_folder and adds category badge chips shown only in flat mode.
+ * Rendered via block_exaport/artefact_card_folder template (see renderer.php).
  */
-class artefact_card_flat extends artefact_card {
+class artefact_card_flat extends artefact_card_folder {
 
     /**
      * Export the data required by the mustache template.
@@ -35,36 +36,8 @@ class artefact_card_flat extends artefact_card {
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
-        global $CFG, $DB, $USER;
-
-        $item            = $this->item;
-        $courseid        = $this->courseid;
-        $currentcategory = $this->currentcategory;
-
-        $iconTypeProps = block_exaport_item_icon_type_options($item->type);
-        $copytoself    = ($currentcategory->id == -1);
-        $isownitem     = ($item->userid == $USER->id);
-        $ownername     = '';
-        if (!$isownitem) {
-            $itemuser  = $DB->get_record('user', ['id' => $item->userid]);
-            $ownername = $itemuser ? fullname($itemuser) : '';
-        }
-
-        return $this->base_export_data() + [
-            'typeicon'          => block_exaport_fontawesome_icon($iconTypeProps['iconName'], $iconTypeProps['iconStyle'], 1, ['artefact_icon']),
-            'typestring'        => get_string($item->type, 'block_exaport'),
-            'copytoself'        => $copytoself,
-            'copytoselfurl'     => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid
-                                   . '&id=' . $item->id . '&sesskey=' . sesskey() . '&action=copytoself',
-            'copytoselftooltip' => get_string('make_it_yours', 'block_exaport'),
-            'commenticon'       => block_exaport_fontawesome_icon('comment', 'regular', 1, [], [], [], '', [], [], [], []),
-            'projecticon'       => block_exaport_get_item_project_icon($item),
-            'compicon'          => block_exaport_get_item_comp_icon($item),
-            'typemineorshared'  => in_array($this->type, ['mine', 'shared']),
-            'ownername'         => $ownername,
-            'usericon'          => block_exaport_fontawesome_icon('circle-user', 'solid', 1),
-            'thumburl'          => $CFG->wwwroot . '/blocks/exaport/item_thumb.php?item_id=' . $item->id,
-            'categorybadges'    => block_exaport_render_item_category_badges($item),
+        return parent::export_for_template($output) + [
+            'categorybadges' => block_exaport_render_item_category_badges($this->item),
         ];
     }
 }

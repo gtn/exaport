@@ -1,7 +1,7 @@
 {{!
-    Artefact card in folder-navigation mode for the bootstrap layout (moodle_bootstrap).
+    Artefact card for the bootstrap layout (moodle_bootstrap).
     Used by block_exaport_artefact_template_bootstrap_card() in view_items.php
-    when $foldermode is true.
+    for both folder-navigation mode and flat/grid mode.
 
     Context variables:
         url             - URL to the artefact detail page
@@ -28,8 +28,9 @@
         hascomments     - Boolean: item has at least one comment
         commentcount    - Integer comment count
         commentlabel    - Localised comment count tooltip string
+        categorybadges  - Pre-rendered HTML for category badge pills (flat mode only, may be empty)
 }}
-<div class="col mb-4 exaport-folder-item"
+<div class="col mb-4 exaport-flat-item"
      data-item-name="{{itemnamelower}}"
      data-item-date="{{timemodified}}"
      data-category-ids="{{catids}}">
@@ -61,6 +62,7 @@
         </div>
         <div class="card-body">
             {{#introtext}}<p class="card-text">{{introtext}}</p>{{/introtext}}
+            {{#categorybadges}}<div class="mt-1">{{{categorybadges}}}</div>{{/categorybadges}}
         </div>
         <div class="card-footer d-flex justify-content-between align-items-center">
             <span class="eportoflio-date">{{dateformatted}}</span>

@@ -100,7 +100,7 @@ class category_helper {
 
         // Belt-and-suspenders: restrict to the viewed user's own categories,
         // even though items are already scoped by userid.
-        $isviewingotheruser = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+        $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
 
         $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
                 FROM {block_exaportitemcate} ic
@@ -110,7 +110,7 @@ class category_helper {
 
         // Belt-and-suspenders: restrict to the viewed user's own categories,
         // even though items are already scoped by userid.
-        if ($isviewingotheruser) {
+        if ($is_viewing_other_user) {
             $sql .= " AND c.userid = ?";
             $params[] = $userid;
         }

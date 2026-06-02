@@ -11,16 +11,12 @@
         itemid          - Integer item id
         typeicon        - Pre-rendered HTML for the type icon (with tooltip)
         itemname        - Display name of the item (auto-escaped by mustache)
-        ellipsisicon    - Pre-rendered HTML for the "⋮" dropdown toggle icon
         viewlabel       - Localised "View" label
-        viewicon        - Pre-rendered HTML for the view icon
         canedit         - Boolean: show "Edit" menu entry
         editurl         - URL for the edit action
-        editicon        - Pre-rendered HTML for the edit icon
         editlabel       - Localised "Edit" label
         candelete       - Boolean: show "Delete" menu entry
         deleteurl       - URL for the delete action
-        deleteicon      - Pre-rendered HTML for the delete icon
         deletelabel     - Localised "Delete" label
         introtext       - Short plain-text intro excerpt (empty string when absent)
         dateformatted   - Human-readable date string for the card footer
@@ -40,20 +36,20 @@
             </h5>
             <span class="eportfolio-card-more">
                 <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    {{{ellipsisicon}}}
+                    <span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-solid fa-ellipsis-vertical"></i></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item" href="{{url}}">{{{viewicon}}} {{viewlabel}}</a>
+                        <a class="dropdown-item" href="{{url}}"><span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-regular fa-eye"></i></span> {{viewlabel}}</a>
                     </li>
                     {{#canedit}}
                     <li>
-                        <a class="dropdown-item" href="{{editurl}}">{{{editicon}}} {{editlabel}}</a>
+                        <a class="dropdown-item" href="{{editurl}}"><span class="exaport-icon fa-layers fa-fw fa-1x"><i class="fa-regular fa-pen-to-square"></i></span> {{editlabel}}</a>
                     </li>
                     {{/canedit}}
                     {{#candelete}}
                     <li>
-                        <a class="dropdown-item" href="{{deleteurl}}">{{{deleteicon}}} {{deletelabel}}</a>
+                        <a class="dropdown-item" href="{{deleteurl}}"><span class="exaport-icon fa-layers fa-fw fa-1x exaport-remove-icon"><i class="fa-regular fa-trash-can"></i></span> {{deletelabel}}</a>
                     </li>
                     {{/candelete}}
                 </ul>

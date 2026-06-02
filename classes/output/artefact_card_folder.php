@@ -20,45 +20,14 @@ namespace block_exaport\output;
 defined('MOODLE_INTERNAL') || die();
 
 use context_user;
-use renderable;
 use renderer_base;
-use templatable;
 
 /**
  * Output class for the artefact card in folder-navigation mode (Bootstrap layout).
  *
  * Renders block_exaport/view_items_artefact_card_folder.
  */
-class artefact_card_folder implements renderable, templatable {
-
-    /** @var \stdClass $item */
-    protected $item;
-
-    /** @var int $courseid */
-    protected $courseid;
-
-    /** @var string $type */
-    protected $type;
-
-    /** @var int $categoryid */
-    protected $categoryid;
-
-    /**
-     * Constructor.
-     *
-     * @param \stdClass $item        The artefact/item record.
-     * @param int       $courseid    The course id.
-     * @param string    $type        Access type, e.g. 'mine' or 'shared'.
-     * @param int       $categoryid  The current category id (used for delete URL).
-     * @param \stdClass $currentcategory The currently active category (kept for API parity).
-     */
-    public function __construct(\stdClass $item, int $courseid, string $type, int $categoryid,
-                                \stdClass $currentcategory) {
-        $this->item       = $item;
-        $this->courseid   = $courseid;
-        $this->type       = $type;
-        $this->categoryid = $categoryid;
-    }
+class artefact_card_folder extends artefact_card {
 
     /**
      * Export the data required by the mustache template.
@@ -67,26 +36,10 @@ class artefact_card_folder implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
-        global $CFG, $USER;
-
-        $item           = $this->item;
-        $courseid       = $this->courseid;
-        $type           = $this->type;
-        $categoryid     = $this->categoryid;
-
+        $item         = $this->item;
         $iconTypeProps = block_exaport_item_icon_type_options($item->type);
-        $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid
-               . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
+        $typelabel    = get_string($item->type, 'block_exaport');
 
-        // Build category IDs for client-side filtering.
-        $itemCatIds = [];
-        if (!empty($item->flatcategories) && is_array($item->flatcategories)) {
-            foreach ($item->flatcategories as $cat) {
-                $itemCatIds[] = (int)$cat->id;
-            }
-        }
-
-        $typelabel = get_string($item->type, 'block_exaport');
         $introtext = '';
         if (!empty($item->intro)) {
             $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php',
@@ -96,40 +49,24 @@ class artefact_card_folder implements renderable, templatable {
             $introtext = shorten_text(trim(strip_tags($intro)), 140, true);
         }
 
-        $cattype      = ($type == 'shared') ? '&cattype=shared' : '';
-        $isownitem    = ($item->userid == $USER->id);
-        $commentcount = (int)($item->comments ?? 0);
+        $base         = $this->base_export_data();
+        $commentcount = $base['commentcount'];
         $commentlabel = $commentcount . ' ' . block_exaport_get_string($commentcount === 1 ? 'comment' : 'comments');
 
-        return [
-            'url'           => $url,
-            'itemnamelower' => strtolower($item->name),
-            'timemodified'  => (int)$item->timemodified,
-            'catids'        => implode(',', $itemCatIds),
-            'itemid'        => (int)$item->id,
-            'typeicon'      => '<i class="icon fa fa-' . s($iconTypeProps['iconName']) . ' fa-fw me-1"'
-                               . ' data-bs-toggle="tooltip" data-bs-placement="top"'
-                               . ' data-bs-title="' . s($typelabel) . '"></i>',
-            'itemname'      => $item->name,
-            'ellipsisicon'  => block_exaport_fontawesome_icon('ellipsis-vertical', 'solid', 1),
-            'viewlabel'     => block_exaport_get_string('view'),
-            'viewicon'      => block_exaport_fontawesome_icon('eye', 'regular', 1),
-            'canedit'       => $isownitem,
-            'editurl'       => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid
-                               . '&id=' . $item->id . '&action=edit' . $cattype,
-            'editicon'      => block_exaport_fontawesome_icon('pen-to-square', 'regular', 1),
-            'editlabel'     => block_exaport_get_string('edit'),
-            'candelete'     => $isownitem && block_exaport_item_is_editable($item->id),
-            'deleteurl'     => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid
-                               . '&id=' . $item->id . '&action=delete&categoryid=' . $categoryid . $cattype,
-            'deleteicon'    => block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']),
-            'deletelabel'   => block_exaport_get_string('delete'),
-            'introtext'     => $introtext,
-            'dateformatted' => date('d.m.Y H:i', $item->timemodified),
-            'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
-            'hascomments'   => $commentcount > 0,
-            'commentcount'  => $commentcount,
-            'commentlabel'  => $commentlabel,
+        return $base + [
+            'typeicon'     => '<i class="icon fa fa-' . s($iconTypeProps['iconName']) . ' fa-fw me-1"'
+                              . ' data-bs-toggle="tooltip" data-bs-placement="top"'
+                              . ' data-bs-title="' . s($typelabel) . '"></i>',
+            'ellipsisicon' => block_exaport_fontawesome_icon('ellipsis-vertical', 'solid', 1),
+            'viewlabel'    => block_exaport_get_string('view'),
+            'viewicon'     => block_exaport_fontawesome_icon('eye', 'regular', 1),
+            'canedit'      => $base['isownitem'],
+            'editlabel'    => block_exaport_get_string('edit'),
+            'candelete'    => $base['isownitem'] && block_exaport_item_is_editable($item->id),
+            'deletelabel'  => block_exaport_get_string('delete'),
+            'introtext'    => $introtext,
+            'compbadge'    => block_exaport_get_item_comp_footer_badge($item),
+            'commentlabel' => $commentlabel,
         ];
     }
 

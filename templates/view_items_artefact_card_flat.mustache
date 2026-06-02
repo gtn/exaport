@@ -25,7 +25,7 @@
         editurl             - URL for the edit action
         editicon            - Pre-rendered HTML for the edit icon
         deleteurl           - URL for the delete action
-        trashicon           - Pre-rendered HTML for the delete icon
+        deleteicon          - Pre-rendered HTML for the delete icon
         ownername           - Full name of the item owner (shown in tooltip when not own item)
         usericon            - Pre-rendered HTML for the user icon
         thumburl            - URL to the item thumbnail image
@@ -58,7 +58,7 @@
                 {{#typemineorshared}}
                 {{#isownitem}}
                 <a href="{{editurl}}">{{{editicon}}}</a>
-                <a href="{{deleteurl}}" class="item_delete_icon">{{{trashicon}}}</a>
+                <a href="{{deleteurl}}" class="item_delete_icon">{{{deleteicon}}}</a>
                 {{/isownitem}}
                 {{^isownitem}}
                 <a class="" role="button" data-container="body" title="{{ownername}}">{{{usericon}}}</a>

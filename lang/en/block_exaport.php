@@ -376,6 +376,7 @@ $string['layout_mode_flat'] = 'Flat';
 $string['searchcategory'] = 'Search Category...';
 $string['sharedwith'] = 'Shared with';
 $string['sharedwith_user_cnt'] = 'Shared with {$a} users';
+$string['sharedwithotherusers'] = 'shared with other users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';

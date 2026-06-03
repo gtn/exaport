@@ -23,11 +23,32 @@ use context_user;
 use renderer_base;
 
 /**
- * Output class for the artefact card in folder-navigation mode (Bootstrap layout).
+ * Output class for the artefact card (Bootstrap layout).
  *
+ * Used for both folder-navigation mode and flat/grid mode.
+ * Pass $showcategories = true to render category badge chips in the card.
  * Renders block_exaport/artefact_card_folder.
  */
 class artefact_card_folder extends artefact_card {
+
+    /** @var bool $showcategories */
+    protected bool $showcategories;
+
+    /**
+     * Constructor.
+     *
+     * @param \stdClass $item            The artefact/item record.
+     * @param int       $courseid        The course id.
+     * @param string    $type            Access type, e.g. 'mine' or 'shared'.
+     * @param int       $categoryid      The current category id (used for delete URL).
+     * @param \stdClass $currentcategory The currently active category.
+     * @param bool      $showcategories  Whether to show category badge chips.
+     */
+    public function __construct(\stdClass $item, int $courseid, string $type, int $categoryid,
+                                \stdClass $currentcategory, bool $showcategories = false) {
+        parent::__construct($item, $courseid, $type, $categoryid, $currentcategory);
+        $this->showcategories = $showcategories;
+    }
 
     /**
      * Export the data required by the mustache template.
@@ -67,6 +88,8 @@ class artefact_card_folder extends artefact_card {
             'introtext'    => $introtext,
             'compbadge'    => block_exaport_get_item_comp_footer_badge($item),
             'commentlabel' => $commentlabel,
-        ];
+        ] + ($this->showcategories ? [
+            'categorybadges' => block_exaport_render_item_category_badges($this->item),
+        ] : []);
     }
 }

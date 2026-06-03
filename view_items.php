@@ -1424,7 +1424,7 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
                 );
             } else {
                 return $PAGE->get_renderer('block_exaport')->render(
-                    new \block_exaport\output\artefact_card_flat($item, $courseid, $type, $categoryid, $currentcategory)
+                    new \block_exaport\output\artefact_card_folder($item, $courseid, $type, $categoryid, $currentcategory, true)
                 );
             }
             break;

@@ -376,6 +376,7 @@ $string['layout_mode_flat'] = 'Flach';
 $string['searchcategory'] = 'Kategorie suchen...';
 $string['sharedwith'] = 'Geteilt mit';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
+$string['sharedwithotherusers'] = 'mit anderen Benutzern geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
 $string['sharedwith_shareall'] = 'Mit allen Benutzer::innen geteilt';
 $string['sharedwith_shareexternal'] = 'Geteilte externe Views';
@@ -628,6 +629,7 @@ $string['messageprovider:viewupdated'] = 'Nachricht, wenn ein Benutzer seine get
 // ],
 $string['i_shared'] = '{$a->sendername} hat die ePortfolio Ansicht {$a->title} mit Ihnen geteilt';
 $string['i_updated'] = '{$a->sendername} hat Änderungen an dem E-Portfolio {$a->title} vorgenommen, welches mit Ihnen geteilt ist.';
+$string['i_updated_category'] = '{$a->sendername} hat ein neues Artefakt zur geteilten Kategorie "{$a->title}" hinzugefügt';
 $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';

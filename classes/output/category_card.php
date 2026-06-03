@@ -105,7 +105,7 @@ class category_card extends card {
                 [
                     'data-bs-toggle' => 'tooltip',
                     'data-bs-placement' => 'top',
-                    'data-bs-title' => 'shared with other users',
+                    'data-bs-title' => block_exaport_get_string('sharedwithotherusers'),
                 ]
             ),
             'categorylabel'  => block_exaport_get_string('category'),

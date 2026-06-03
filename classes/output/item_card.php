@@ -19,32 +19,29 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
-use renderable;
+use context_user;
 use renderer_base;
-use templatable;
 
 /**
- * Abstract base class for artefact card output objects (Bootstrap layout).
+ * Output class for the item card (Bootstrap layout).
  *
- * Holds the shared constructor, properties, and data that is common to
- * both the flat/grid card and the folder-navigation card.
+ * Used for both folder-navigation mode and flat/grid mode.
+ * Pass $showcategories = true to render category badge chips in the card.
+ * Renders block_exaport/item_card.
  */
-abstract class artefact_card implements renderable, templatable {
+class item_card extends card {
 
     /** @var \stdClass $item */
     protected $item;
-
-    /** @var int $courseid */
-    protected $courseid;
-
-    /** @var string $type */
-    protected $type;
 
     /** @var int $categoryid */
     protected $categoryid;
 
     /** @var \stdClass $currentcategory */
     protected $currentcategory;
+
+    /** @var bool $showcategories */
+    protected bool $showcategories;
 
     /**
      * Constructor.
@@ -54,22 +51,24 @@ abstract class artefact_card implements renderable, templatable {
      * @param string    $type            Access type, e.g. 'mine' or 'shared'.
      * @param int       $categoryid      The current category id (used for delete URL).
      * @param \stdClass $currentcategory The currently active category.
+     * @param bool      $showcategories  Whether to show category badge chips.
      */
     public function __construct(\stdClass $item, int $courseid, string $type, int $categoryid,
-                                \stdClass $currentcategory) {
+                                \stdClass $currentcategory, bool $showcategories = false) {
+        parent::__construct($courseid, $type);
         $this->item            = $item;
-        $this->courseid        = $courseid;
-        $this->type            = $type;
         $this->categoryid      = $categoryid;
         $this->currentcategory = $currentcategory;
+        $this->showcategories  = $showcategories;
     }
 
     /**
-     * Return the data fields shared by all artefact card variants.
+     * Export the data required by the mustache template.
      *
+     * @param renderer_base $output
      * @return array
      */
-    protected function base_export_data(): array {
+    public function export_for_template(renderer_base $output): array {
         global $CFG, $USER;
 
         $item       = $this->item;
@@ -92,7 +91,21 @@ abstract class artefact_card implements renderable, templatable {
         $isownitem    = ($item->userid == $USER->id);
         $commentcount = (int)($item->comments ?? 0);
 
-        return [
+        $iconTypeProps = block_exaport_item_icon_type_options($item->type);
+        $typelabel     = get_string($item->type, 'block_exaport');
+
+        $introtext = '';
+        if (!empty($item->intro)) {
+            $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php',
+                context_user::instance($item->userid)->id,
+                'block_exaport', 'item_content',
+                'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
+            $introtext = shorten_text(trim(strip_tags($intro)), 140, true);
+        }
+
+        $commentlabel = $commentcount . ' ' . block_exaport_get_string($commentcount === 1 ? 'comment' : 'comments');
+
+        return $this->base_icons() + [
             'itemnamelower' => strtolower($item->name),
             'catids'        => implode(',', $itemcatids),
             'timemodified'  => (int)$item->timemodified,
@@ -102,13 +115,21 @@ abstract class artefact_card implements renderable, templatable {
             'isownitem'     => $isownitem,
             'editurl'       => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid
                                . '&id=' . $item->id . '&action=edit' . $cattype,
-            'editicon'      => block_exaport_fontawesome_icon('pen-to-square', 'regular', 1),
             'deleteurl'     => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid
                                . '&id=' . $item->id . '&action=delete&categoryid=' . $categoryid . $cattype,
-            'deleteicon'    => block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']),
             'hascomments'   => $commentcount > 0,
             'commentcount'  => $commentcount,
             'dateformatted' => date('d.m.Y H:i', $item->timemodified),
-        ];
+            'typeicon'      => '<i class="icon fa fa-' . s($iconTypeProps['iconName']) . ' fa-fw me-1"'
+                               . ' data-bs-toggle="tooltip" data-bs-placement="top"'
+                               . ' data-bs-title="' . s($typelabel) . '"></i>',
+            'canedit'       => $isownitem,
+            'candelete'     => $isownitem && block_exaport_item_is_editable($item->id),
+            'introtext'     => $introtext,
+            'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
+            'commentlabel'  => $commentlabel,
+        ] + ($this->showcategories ? [
+            'categorybadges' => block_exaport_render_item_category_badges($this->item),
+        ] : []);
     }
 }

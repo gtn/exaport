@@ -19,25 +19,17 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
-use renderable;
 use renderer_base;
-use templatable;
 
 /**
  * Output class for the category card tile (Bootstrap/folder-mode layout).
  *
  * Renders block_exaport/category_card.
  */
-class category_card implements renderable, templatable {
+class category_card extends card {
 
     /** @var \stdClass $category */
     protected $category;
-
-    /** @var int $courseid */
-    protected $courseid;
-
-    /** @var string $type */
-    protected $type;
 
     /** @var \stdClass|null $parentcategory */
     protected $parentcategory;
@@ -45,17 +37,16 @@ class category_card implements renderable, templatable {
     /**
      * Constructor.
      *
-     * @param \stdClass      $category       The category record.
-     * @param int            $courseid       The course id.
-     * @param string         $type           Access type, e.g. 'mine' or 'shared'.
+     * @param \stdClass      $category        The category record.
+     * @param int            $courseid        The course id.
+     * @param string         $type            Access type, e.g. 'mine' or 'shared'.
      * @param \stdClass      $currentcategory The currently active category (unused in context build but kept for API parity).
      * @param \stdClass|null $parentcategory  When non-null, this tile links up to the parent category.
      */
     public function __construct(\stdClass $category, int $courseid, string $type, \stdClass $currentcategory,
                                 ?\stdClass $parentcategory = null) {
-        $this->category = $category;
-        $this->courseid = $courseid;
-        $this->type = $type;
+        parent::__construct($courseid, $type);
+        $this->category       = $category;
         $this->parentcategory = $parentcategory;
     }
 
@@ -75,7 +66,7 @@ class category_card implements renderable, templatable {
         $outerclasses = $isparenttile ? 'col mb-4 exaport-folder-category' : 'col col-card-folder mb-4 exaport-folder-category';
         $tilefixedclass = $isparenttile ? 'excomdos_tile_fixed ' : '';
 
-        return [
+        return $this->base_icons() + [
             'outerclasses'   => $outerclasses,
             'tilenamelower'  => strtolower($tilename),
             'isparenttile'   => $isparenttile,
@@ -88,13 +79,6 @@ class category_card implements renderable, templatable {
                                 . '&id=' . $this->category->id . '&action=edit',
             'deleteurl'      => $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $this->courseid
                                 . '&id=' . $this->category->id . '&action=delete',
-            'ellipsisicon'   => block_exaport_fontawesome_icon('ellipsis-vertical', 'solid', 1),
-            'viewicon'       => block_exaport_fontawesome_icon('eye', 'regular', 1),
-            'editicon'       => block_exaport_fontawesome_icon('pen-to-square', 'regular', 1),
-            'deleteicon'     => block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']),
-            'viewlabel'      => block_exaport_get_string('view'),
-            'editlabel'      => block_exaport_get_string('edit'),
-            'deletelabel'    => block_exaport_get_string('delete'),
             'folderupicon'   => block_exaport_fontawesome_icon('folder-open', 'regular', 1, ['icon', 'fa-fw', 'me-1'], [],
                                     ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top',
                                      'data-bs-title'  => block_exaport_get_string('category_up')], 'up'),

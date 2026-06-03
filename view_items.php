@@ -1420,11 +1420,11 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
         case 'moodle_bootstrap':
             if ($foldermode) {
                 return $PAGE->get_renderer('block_exaport')->render(
-                    new \block_exaport\output\artefact_card_folder($item, $courseid, $type, $categoryid, $currentcategory)
+                    new \block_exaport\output\item_card($item, $courseid, $type, $categoryid, $currentcategory)
                 );
             } else {
                 return $PAGE->get_renderer('block_exaport')->render(
-                    new \block_exaport\output\artefact_card_folder($item, $courseid, $type, $categoryid, $currentcategory, true)
+                    new \block_exaport\output\item_card($item, $courseid, $type, $categoryid, $currentcategory, true)
                 );
             }
             break;

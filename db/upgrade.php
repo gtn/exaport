@@ -1404,5 +1404,18 @@ function xmldb_block_exaport_upgrade($oldversion) {
     //     upgrade_block_savepoint(true, 2026052902, 'exaport');
     // }
 
+    if ($oldversion < 2026060300) {
+        // Add notify field to block_exaportcatshar table.
+        $table = new xmldb_table('block_exaportcatshar');
+        $field = new xmldb_field('notify', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'userid');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026060300, 'exaport');
+    }
+
     return $result;
 }

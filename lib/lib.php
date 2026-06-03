@@ -2886,6 +2886,9 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
     // Sync category via the relation table.
     if ($categoryid > 0) {
         item_category_helper::sync_item_categories($item->id, [$categoryid]);
+
+        // Send notifications to users who have this category shared with notify=1.
+        exaport_send_category_notifications($categoryid, $courseid);
     }
 
     // Save submission file if provided

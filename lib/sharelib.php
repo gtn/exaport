@@ -415,22 +415,83 @@ namespace {
     }
 
     function exaport_notify_single_user($dbviewid, $notifyuserid, $name, $subject, $courseid){
-        // Notify.
-        global $USER, $DB, $CFG;
+        global $USER, $CFG;
+        $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbviewid;
+        exaport_send_notification($notifyuserid, $name, $subject, $url);
+    }
+
+    /**
+     * Generic low-level notification helper.
+     *
+     * @param int    $notifyuserid  Recipient user ID.
+     * @param string $name          Message provider name (e.g. 'viewupdated', 'categoryupdated').
+     * @param string $subject       Notification subject string.
+     * @param string $url           Full URL to include in the notification body.
+     */
+    function exaport_send_notification($notifyuserid, $name, $subject, $url) {
+        global $USER, $DB;
         $notificationdata = new \core\message\message();
         $notificationdata->component = 'block_exaport';
         $notificationdata->name = $name;
         $notificationdata->userfrom = $USER;
         $notificationdata->userto = $DB->get_record('user', array('id' => $notifyuserid));
         $notificationdata->subject = $subject;
-        $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbviewid;
         $notificationdata->fullmessage = $url;
-        // $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbviewid;
         $notificationdata->fullmessageformat = FORMAT_HTML;
-        $notificationdata->fullmessagehtml = '<a href="' . $url . '">' . $url . '</a>';;
+        $notificationdata->fullmessagehtml = '<a href="' . $url . '">' . $url . '</a>';
         $notificationdata->smallmessage = '';
         $notificationdata->notification = 1;
         message_send($notificationdata);
+    }
+
+    /**
+     * Send notifications to all users who have a shared category with notify=1 enabled,
+     * when a new item is added to that category.
+     *
+     * @param int $categoryid  The category ID the item was added to.
+     * @param int $courseid    The course ID (used to build the URL).
+     */
+    function exaport_send_category_notifications($categoryid, $courseid) {
+        global $USER, $DB, $CFG;
+
+        $category = $DB->get_record('block_exaportcate', array('id' => $categoryid));
+        if (!$category || !$category->internshare) {
+            return;
+        }
+
+        $a = (object)[
+            'sendername' => fullname($USER),
+            'title' => $category->name,
+        ];
+        $subject = get_string('i_updated_category', 'block_exaport', $a);
+        $url = $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $courseid;
+
+        // Notify individual shared users with notify=1.
+        $notifieduserids = array();
+        $sharedusers = $DB->get_records('block_exaportcatshar', array('catid' => $categoryid));
+        foreach ($sharedusers as $share) {
+            if (empty($share->notify) || $share->userid == $USER->id) {
+                continue;
+            }
+            exaport_send_notification($share->userid, 'categoryupdated', $subject, $url);
+            $notifieduserids[$share->userid] = true;
+        }
+
+        // Notify members of shared groups (cohorts).
+        $sharedgroups = $DB->get_records('block_exaportcatgroupshar', array('catid' => $categoryid));
+        foreach ($sharedgroups as $groupshare) {
+            $members = $DB->get_records('cohort_members', array('cohortid' => $groupshare->groupid));
+            foreach ($members as $member) {
+                if ($member->userid == $USER->id) {
+                    continue;
+                }
+                if (isset($notifieduserids[$member->userid])) {
+                    continue; // Already notified via individual share.
+                }
+                exaport_send_notification($member->userid, 'categoryupdated', $subject, $url);
+                $notifieduserids[$member->userid] = true;
+            }
+        }
     }
     function exaport_send_notifications($dbview, $courseid, $update = true) {
         // Notify shared users.
@@ -458,6 +519,7 @@ namespace {
         // Notify users in shared groups.
         $sharedgroups = exaport_get_view_shared_groups($dbview->id);
         if (!empty($sharedgroups)) {
+            $viewurl = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbview->id;
             // Get all cohort members for each shared group
             foreach ($sharedgroups as $groupid) {
                 $cohortmembers = $DB->get_records('cohort_members', array('cohortid' => $groupid));
@@ -472,18 +534,7 @@ namespace {
                         continue; // Already notified
                     }
 
-                    $notificationdata = new \core\message\message();
-                    $notificationdata->component = 'block_exaport';
-                    $notificationdata->name = $name;
-                    $notificationdata->userfrom = $USER;
-                    $notificationdata->userto = $DB->get_record('user', array('id' => $member->userid));
-                    $notificationdata->subject = $subject;
-                    $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid . '&access=id/' . $USER->id . '-' . $dbview->id;
-                    $notificationdata->fullmessageformat = FORMAT_PLAIN;
-                    $notificationdata->fullmessagehtml = '';
-                    $notificationdata->smallmessage = '';
-                    $notificationdata->notification = 1;
-                    message_send($notificationdata);
+                    exaport_send_notification($member->userid, $name, $subject, $viewurl);
                 }
             }
         }

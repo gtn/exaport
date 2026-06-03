@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die;
 require_once(__DIR__ . '/inc.php');
 
 class block_exaport_renderer extends plugin_renderer_base {
+
     /**
      * in moodle33 pix_url was renamed to image_url
      */
@@ -40,5 +41,6 @@ class block_exaport_renderer extends plugin_renderer_base {
     public function get_theme_config() {
         return $this->page->theme;
     }
+
 }
 

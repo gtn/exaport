@@ -339,6 +339,7 @@ function block_exaport_init_js_css() {
     $PAGE->requires->js('/blocks/exaport/javascript/exaport.js', true);
 
     $PAGE->requires->css('/blocks/exaport/css/styles.css');
+    $PAGE->requires->css('/blocks/exaport/css/eportfolio-cards.css');
 
     $scriptname = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
     if (file_exists($CFG->dirroot . '/blocks/exaport/css/' . $scriptname . '.css')) {

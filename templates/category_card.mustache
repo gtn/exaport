@@ -1,0 +1,61 @@
+{{!
+    Category card tile for the bootstrap layout (moodle_bootstrap).
+    Used by block_exaport_category_template_bootstrap_card() in view_items.php.
+
+    Context variables:
+        outerclasses        - CSS class string for the outer wrapper div
+        tilenamelower       - Lowercase category name for data-item-name attribute
+        isparenttile        - Boolean: true when this tile links *up* to the parent category
+        tiletargetid        - Integer id of the target category (for drag-drop)
+        tilefixedclass      - Extra CSS class string (non-empty only for parent tile)
+        tileurl             - URL the tile links to
+        tilename            - Display name of the category (auto-escaped by mustache)
+        typemine            - Boolean: current user owns this category (show edit/delete)
+        editurl             - URL for the edit action
+        deleteurl           - URL for the delete action
+        ellipsisicon        - Pre-rendered HTML for the "⋮" dropdown toggle icon
+        viewicon            - Pre-rendered HTML for the "view" menu item icon
+        editicon            - Pre-rendered HTML for the "edit" menu item icon
+        deleteicon          - Pre-rendered HTML for the "delete" menu item icon
+        viewlabel           - Localised "View" label
+        editlabel           - Localised "Edit" label
+        deletelabel         - Localised "Delete" label
+        folderupicon        - Pre-rendered HTML for the folder-open-up icon (parent tile only)
+        categorylabel       - Localised "Category" tooltip text (regular tile only)
+}}
+<div class="{{outerclasses}}" data-item-name="{{tilenamelower}}" data-pinned="{{#isparenttile}}true{{/isparenttile}}{{^isparenttile}}false{{/isparenttile}}">
+    <div class="card card-eportfolio h-100 excomdos_tile {{tilefixedclass}}excomdos_tile_category id-{{tiletargetid}}">
+        {{^isparenttile}}
+        <div class="card-top d-flex justify-content-end">
+            <span class="eportfolio-card-more">
+                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{{ellipsisicon}}}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{tileurl}}">{{{viewicon}}} {{viewlabel}}</a>
+                    </li>
+                    {{#typemine}}
+                    <li>
+                        <a class="dropdown-item" href="{{editurl}}">{{{editicon}}} {{editlabel}}</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{deleteurl}}">{{{deleteicon}}} {{deletelabel}}</a>
+                    </li>
+                    {{/typemine}}
+                </ul>
+            </span>
+        </div>
+        {{/isparenttile}}
+        <div class="card-body position-relative">
+            <h5 class="card-title">
+                <a href="{{tileurl}}" class="stretched-link">
+                    {{#isparenttile}}{{{folderupicon}}}{{/isparenttile}}
+                    {{^isparenttile}}<i class="icon fa fa-folder fa-fw me-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{categorylabel}}"></i>{{/isparenttile}}
+                    {{tilename}}
+                </a>
+            </h5>
+        </div>
+        <div class="card-footer d-flex justify-content-end align-items-center"><span class="invisible">&nbsp;</span></div>
+    </div>
+</div>

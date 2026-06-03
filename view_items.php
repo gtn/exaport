@@ -164,7 +164,7 @@ if ($type == 'sharedstudent') {
         }
 
         // Build a tree according to parent.
-        $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
+        $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
 
         // The main root category for student.
         $rootcategory = block_exaport_get_root_category($selecteduser->id);
@@ -197,7 +197,7 @@ if ($type == 'sharedstudent') {
             $currentcategory = $rootcategory;
             $parentcategory = null;
             $subcategories = [];
-            $items = block_exaport_load_flat_items($selecteduser->id, $categories, $sqlsort);
+            $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort);
         } else {
             // Common items.
             $items = $DB->get_records_sql("
@@ -295,7 +295,7 @@ if ($type == 'sharedstudent') {
             $category->icon = block_exaport_get_category_icon($category);
         }
         // Build a tree according to parent.
-        $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
+        $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
 
         if (!isset($categories[$categoryid])) {
             throw new moodle_exception('not allowed');
@@ -334,7 +334,7 @@ if ($type == 'sharedstudent') {
             $currentcategory = $rootcategory;
             $parentcategory = null;
             $subcategories = [];
-            $items = block_exaport_load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
+            $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
         } else {
             $usercondition = ' i.userid = ' . intval($selecteduser->id) . ' ';
             if ($type == 'shared') {
@@ -373,7 +373,7 @@ if ($type == 'sharedstudent') {
     }
 
     // Build a tree according to parent.
-    $categoriesbyparent = block_exaport_build_categories_by_parent($categories);
+    $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
 
     // The main root category.
     $rootcategory = block_exaport_get_root_category();
@@ -407,9 +407,9 @@ if ($type == 'sharedstudent') {
         // Filter out the root category (id=0) which is a virtual placeholder, not a real DB category.
         $usercategoryids = array_filter(array_keys($categories), fn($id) => $id > 0);
         if ($show_otherusers) {
-            $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
+            $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
         } else {
-            $items = block_exaport_load_flat_items($USER->id, $categories, $sqlsort, null);
+            $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, null);
         }
     } else {
         // Folder mode keeps legacy category navigation behavior.
@@ -523,7 +523,7 @@ if ($type == 'mine' && $layout == 'folder') {
         if ($type == 'shared' && !category_allowed($selecteduser, $categories, $category)) {
             continue;
         }
-        $filtercategories[(int)$category->id] = block_exaport_category_full_path_name($category->id, $categories);
+        $filtercategories[(int)$category->id] = \block_exaport\category_helper::full_path_name($category->id, $categories);
     }
 
     echo '<div class="exaport-flat-filter mb-3">';
@@ -616,6 +616,16 @@ echo '</div>';
 echo '</div>';
 
 $PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
+$PAGE->requires->js_amd_inline('
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) {
+            return;
+        }
+        document.querySelectorAll("[data-bs-toggle=\'tooltip\']").forEach(function (el) {
+            bootstrap.Tooltip.getOrCreateInstance(el);
+        });
+    });
+');
 
 if ($layout == 'folder') {
     echo '<div class="excomdos_cat">';
@@ -918,7 +928,7 @@ if ($layout == 'folder') {
 }
 
 foreach ($items as $item) {
-    echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory);
+    echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, ($layout == 'folder'));
 }
 
 echo '</div>';
@@ -965,6 +975,49 @@ function block_exaport_get_item_comp_icon($item) {
         . block_exaport_fontawesome_icon('list', 'solid', 1)
         //        .'<img src="pix/comp.png" alt="'.'competences'.'" />'
         . '</a>';
+}
+
+/**
+ * Renders the competencies footer badge for Bootstrap card mode.
+ *
+ * @param stdClass $item
+ * @return string
+ */
+function block_exaport_get_item_comp_footer_badge($item) {
+    if (!block_exaport_check_competence_interaction()) {
+        return '';
+    }
+
+    $comps = block_exaport_get_active_comps_for_item($item);
+    if (!$comps) {
+        return '';
+    }
+
+    $titles = [];
+    foreach (['descriptors', 'topics'] as $key) {
+        if (!empty($comps[$key]) && is_array($comps[$key])) {
+            foreach ($comps[$key] as $comp) {
+                if (!empty($comp->title)) {
+                    $titles[] = $comp->title;
+                }
+            }
+        }
+    }
+
+    if (!$titles) {
+        return '';
+    }
+
+    $items = '';
+    foreach ($titles as $title) {
+        $items .= html_writer::tag('li', format_string($title));
+    }
+    $tooltiphtml = html_writer::tag('ul', $items, ['class' => 'tooltiplist']);
+
+    return '<span class="eportoflio-comment me-2">'
+        . '<i class="icon icon-comment fa fa-lightbulb" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' . s($tooltiphtml) . '"></i>'
+        . '<span class="eportfolio-comment-count">' . count($titles) . '</span>'
+        . '</span>';
 }
 
 /**
@@ -1096,133 +1149,21 @@ function block_exaport_render_item_category_badges($item) {
     }
     $badges = [];
     foreach ($item->flatcategories as $category) {
-        $badges[] = html_writer::tag('span', format_string($category->name), ['class' => 'badge badge-secondary']) . ' ';
+        $fullpath = format_string($category->name);
+        $parts = explode(' / ', $fullpath);
+        $shortlabel = trim(end($parts));
+        $attrs = [
+            'class' => 'badge badge-secondary',
+            'data-bs-toggle' => 'tooltip',
+            'data-bs-placement' => 'top',
+            'data-bs-title' => $fullpath,
+        ];
+        $badges[] = html_writer::tag('span', $shortlabel, $attrs) . ' ';
     }
     if (!$badges) {
         return '';
     }
-    return html_writer::div(implode('', $badges), 'mt-2');
-}
-
-/**
- * Build a category tree keyed by parent id.
- *
- * @param array $categories
- * @return array
- */
-function block_exaport_build_categories_by_parent(array $categories) {
-    $categoriesbyparent = [];
-    foreach ($categories as $category) {
-        if (!isset($categoriesbyparent[$category->pid])) {
-            $categoriesbyparent[$category->pid] = [];
-        }
-        $categoriesbyparent[$category->pid][] = $category;
-    }
-
-    return $categoriesbyparent;
-}
-
-/**
- * Load all items for flat mode and attach flatcategories to each item.
- *
- * @param int $userid The user whose items to load.
- * @param array $categories All categories keyed by id (for path name resolution).
- * @param string $sqlsort SQL ORDER BY clause.
- * @param array|null $allowedcategoryids Category filter behavior:
- *     - null: load all categories for the viewed user in flat mode; this is all categories for your own items, or only that
- *       other user's own categories when viewing someone else's items.
- *     - empty array: return no items.
- *     - non-empty array: only include these category IDs and remove items with no matching categories.
- * @return array The items array with ->flatcategories populated.
- */
-function block_exaport_load_flat_items($userid, array $categories, $sqlsort, $allowedcategoryids = null) {
-    global $DB, $USER;
-
-    if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
-        // Keep the shared flat-mode behavior while avoiding an empty IN() SQL clause.
-        return [];
-    }
-    if ($allowedcategoryids !== null) {
-        $items = block_exaport_get_items_by_category_and_user(0, $allowedcategoryids, $sqlsort, true);
-    } else {
-        // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
-        // but they get filtered a few lines later with the unset()
-        $items = block_exaport_get_items_by_category_and_user($userid, null, $sqlsort);
-    }
-
-    if (!$items) {
-        return [];
-    }
-
-    $itemids = array_keys($items);
-    [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
-
-    // Belt-and-suspenders: restrict to the viewed user's own categories,
-    // even though items are already scoped by userid.
-    $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
-
-    $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
-            FROM {block_exaportitemcate} ic
-            JOIN {block_exaportcate} c ON c.id = ic.cateid
-            WHERE ic.itemid $iteminsql";
-    $params = $iteminparams;
-
-    // Belt-and-suspenders: restrict to the viewed user's own categories,
-    // even though items are already scoped by userid.
-    if ($is_viewing_other_user) {
-        $sql .= " AND c.userid = ?";
-        $params[] = $userid;
-    }
-
-    if ($allowedcategoryids !== null) {
-        [$catinsql, $catinparams] = $DB->get_in_or_equal($allowedcategoryids, SQL_PARAMS_QM);
-        $sql .= " AND c.id $catinsql";
-        $params = array_merge($params, $catinparams);
-    }
-
-    $sql .= " ORDER BY c.name ASC";
-    $itemcategories = $DB->get_records_sql($sql, $params);
-
-    $categoriesbyitem = [];
-    foreach ($itemcategories as $itemcategory) {
-        $itemcategory->name = block_exaport_category_full_path_name($itemcategory->id, $categories);
-        if (!isset($categoriesbyitem[$itemcategory->itemid])) {
-            $categoriesbyitem[$itemcategory->itemid] = [];
-        }
-        $categoriesbyitem[$itemcategory->itemid][] = $itemcategory;
-    }
-
-    foreach ($items as $itemid => $item) {
-        $item->flatcategories = $categoriesbyitem[$item->id] ?? [];
-        if ($allowedcategoryids !== null && !$item->flatcategories) {
-            unset($items[$itemid]); // this is crucial! This unsets all items that should not be displayed
-        }
-    }
-
-    return $items;
-}
-
-/**
- * Build the full hierarchical path name for a category, e.g. "haustiere / hunde".
- *
- * @param int $categoryid The category id.
- * @param array $categories Associative array of all categories keyed by id (must have ->name and ->pid).
- * @return string The full path name with " / " separators.
- */
-function block_exaport_category_full_path_name($categoryid, array $categories) {
-    $parts = [];
-    $id = $categoryid;
-    $visited = [];
-    while ($id && isset($categories[$id])) {
-        if (isset($visited[$id])) {
-            break; // Prevent infinite loop on circular references.
-        }
-        $visited[$id] = true;
-        $parts[] = $categories[$id]->name;
-        $id = $categories[$id]->pid ?? 0;
-    }
-    $parts = array_reverse($parts);
-    return implode(' / ', $parts);
+    return html_writer::div(implode('', $badges), 'eportfolio-categories');
 }
 
 function block_exaport_category_path($category, $courseid = 1, $currentcategoryPathItemButtons = '') {
@@ -1450,10 +1391,13 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
  * Different templates of category list. Depends on exaport settings
  */
 function block_exaport_category_list_item($category, $courseid, $type, $currentcategory, $parentcategory = null) {
+    global $PAGE;
     $template = block_exaport_used_layout();
     switch ($template) {
         case 'moodle_bootstrap':
-            return block_exaport_category_template_bootstrap_card($category, $courseid, $type, $currentcategory, $parentcategory);
+            return $PAGE->get_renderer('block_exaport')->render(
+                new \block_exaport\output\category_card($category, $courseid, $type, $currentcategory, $parentcategory)
+            );
             break;
         case 'exaport_bootstrap': // may we do not need this at all?
             return '<div>TODO: !!!!!! ' . $template . ' category !!!!!!!</div>';
@@ -1469,11 +1413,20 @@ function block_exaport_category_list_item($category, $courseid, $type, $currentc
 /**
  * Different templates of artefact list. Depends on exaport settings
  */
-function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory) {
+function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, $foldermode = false) {
+    global $PAGE;
     $template = block_exaport_used_layout();
     switch ($template) {
         case 'moodle_bootstrap':
-            return block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory);
+            if ($foldermode) {
+                return $PAGE->get_renderer('block_exaport')->render(
+                    new \block_exaport\output\item_card($item, $courseid, $type, $categoryid, $currentcategory)
+                );
+            } else {
+                return $PAGE->get_renderer('block_exaport')->render(
+                    new \block_exaport\output\item_card($item, $courseid, $type, $categoryid, $currentcategory, true)
+                );
+            }
             break;
         case 'exaport_bootstrap': // may we do not need this at all?
             return '<div>TODO: !!!!!! ' . $template . ' !!!!!!!</div>';
@@ -1486,183 +1439,3 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
 
 }
 
-function block_exaport_category_template_bootstrap_card($category, $courseid, $type, $currentcategory, $parentcategory = null) {
-    global $CFG;
-    $categoryContent = '';
-
-    // When showing the "go up" tile: mark it as fixed (not draggable) and use
-    // the parent category's ID so that dropping onto it moves items there.
-    $tileFixedClass = $parentcategory ? 'excomdos_tile_fixed ' : '';
-    $tileTargetId = $parentcategory ? $parentcategory->id : $category->id;
-    // Resolve the display name now so we can add data-item-name to the wrapper.
-    $tileName = $parentcategory ? $parentcategory->name : $category->name;
-    $pinnedAttr = $parentcategory ? ' data-pinned="true"' : '';
-    $categoryContent .= '
-    <div class="col mb-4 exaport-folder-category"' . $pinnedAttr . ' data-item-name="' . s(strtolower($tileName)) . '">
-				<div class="card h-100 excomdos_tile ' . $tileFixedClass . 'excomdos_tile_category id-' . $tileTargetId . '">
-					<div class="card-header excomdos_tilehead d-flex justify-content-between">
-						<span class="excomdos_tileinfo">
-							';
-    if ($parentcategory) {
-        $categoryContent .= block_exaport_get_string('category_up');
-    } elseif ($currentcategory->id == -1) {
-        $categoryContent .= block_exaport_get_string('user');
-    } else {
-        $categoryContent .= block_exaport_get_string('category');
-    }
-    $categoryContent .= '</span>';
-    // edit buttons
-    if (!$parentcategory) {
-        if ($type == 'shared' || $type == 'sharedstudent') {
-            $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
-        } else {
-            // Type == mine.
-            if (@$category->internshare && (count(exaport_get_category_shared_users($category->id)) > 0 ||
-                    count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                    (isset($category->shareall) && $category->shareall == 1))) {
-                $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
-            };
-            /*if (@$category->structure_share) {
-                $categoryContent .= ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
-            };*/
-            $categoryContent .= '
-						<span class="excomdos_tileedit">
-							<a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=edit' . '">'
-                . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
-                . '</a>
-							<a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $category->id . '&action=delete' . '">'
-                . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon'])
-                . '</a>
-						</span>';
-        }
-    }
-    if ($parentcategory) {
-        $categoryThumbUrl = $parentcategory->url;
-        $categoryName = $parentcategory->name;
-        $categoryIcon = block_exaport_fontawesome_icon('folder-open', 'regular', '6', [], [], [], 'up', [], [], [], ['exaport-items-category-big']);
-    } else {
-        $categoryThumbUrl = $category->url;
-        $categoryName = $category->name;
-        if ($category->icon) {
-            if ($category->iconmerge) {
-                // icon merge (also look JS - exaport.js - block_exaport_check_fontawesome_icon_merging()):
-                $categoryIcon = block_exaport_fontawesome_icon('folder-open', 'regular', '6', ['icon-for-merging'], [], ['data-categoryId' => $category->id], '', [], [], [], ['exaport-items-category-big']);
-                $categoryIcon .= '<img id="mergeImageIntoCategory' . $category->id . '" src="' . $category->icon . '?tcacheremove=' . date('dmYhis') . '" style="display:none;">';
-                $categoryIcon .= '<canvas id="mergedCanvas' . $category->id . '" class="category-merged-icon" width="115" height="115" style="display: none;"></canvas>';
-            } else {
-                // just picture instead of folder icon:
-                $categoryIcon = '<img src="' . $category->icon . '">';
-            }
-        } else {
-            $categoryIcon = block_exaport_fontawesome_icon('folder-open', 'regular', '6', [], [], [], '', [], [], [], ['exaport-items-category-big']);
-        }
-    }
-    $categoryContent .= '
-                    </div>
-					<div class="card-body excomdos_tileimage d-flex justify-content-center align-items-center">
-						<a href="' . $categoryThumbUrl . '">
-						    ' . $categoryIcon . '
-						</a>
-					</div>
-					<div class="card-extitle exomdos_tiletitle">
-						<a href="' . $categoryThumbUrl . '">' . $categoryName . '</a>
-					</div>
-				</div>
-			</div>
-    ';
-
-    return $categoryContent;
-}
-
-;
-
-function block_exaport_artefact_template_bootstrap_card($item, $courseid, $type, $categoryid, $currentcategory) {
-    global $CFG, $USER, $DB;
-
-    $iconTypeProps = block_exaport_item_icon_type_options($item->type);
-    $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
-
-    // Build category IDs for client-side filtering.
-    $itemCatIds = [];
-    if (!empty($item->flatcategories) && is_array($item->flatcategories)) {
-        foreach ($item->flatcategories as $cat) {
-            $itemCatIds[] = (int)$cat->id;
-        }
-    }
-
-    $itemContent = '
-        <div class="col mb-4 exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">
-				<div class="card h-100 excomdos_tile excomdos_tile_item id-' . $item->id . ' ui-draggable ui-draggable-handle">
-					<div class="card-header excomdos_tilehead d-flex justify-content-between flex-wrap">
-						<div class="excomdos_tileinfo">
-							<span class="excomdos_tileinfo_type">'
-        . block_exaport_fontawesome_icon($iconTypeProps['iconName'], $iconTypeProps['iconStyle'], 1, ['artefact_icon'])
-        . '<span class="type_title">' . get_string($item->type, "block_exaport") . '</span></span>
-						</div>
-						<div class="excomdos_tileedit">';
-
-    if ($currentcategory->id == -1) {
-        // Link to export to portfolio.
-        $itemContent .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&sesskey=' .
-            sesskey() . '&action=copytoself' . '"><img src="pix/import.png" title="' .
-            get_string('make_it_yours', "block_exaport") . '"></a>';
-    } else {
-        if ($item->comments > 0) {
-            $itemContent .= ' <span class="excomdos_listcomments">' . $item->comments
-                . block_exaport_fontawesome_icon('comment', 'regular', 1, [], [], [], '', [], [], [], [])
-                . '</span>';
-        }
-        $itemContent .= block_exaport_get_item_project_icon($item);
-        $itemContent .= block_exaport_get_item_comp_icon($item);
-
-        if (in_array($type, ['mine', 'shared'])) {
-            $cattype = '';
-            if ($type == 'shared') {
-                $cattype = '&cattype=shared';
-            }
-            if ($item->userid == $USER->id) { // only for self!
-                $itemContent .= '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=edit' . $cattype . '">'
-                    . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
-                    . '</a>';
-            }
-            if (($type == 'mine' && $allowedit = block_exaport_item_is_editable($item->id)) // strange condition. If exacomp is not used - always allowed!
-                || $item->userid == $USER->id) {
-                if ($item->userid == $USER->id) {
-                    $itemContent .= '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=delete&categoryid=' . $categoryid . $cattype . '" class="item_delete_icon">'
-                        . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon'])
-                        . '</a>';
-                }
-            } else if (!$allowedit = block_exaport_item_is_editable($item->id)) {
-                $itemContent .= '<img src="pix/deleteview.png" alt="file">';
-            }
-            if ($item->userid != $USER->id) {
-                $itemuser = $DB->get_record('user', ['id' => $item->userid]);
-                // user icon
-                $itemContent .= '<a class="" role="button" data-container="body"
-                            title="' . fullname($itemuser) . '">'
-                    . block_exaport_fontawesome_icon('circle-user', 'solid', 1)
-                    . '</a>';
-            }
-        }
-    }
-
-    $itemContent .= '</div>
-					</div>
-					<div class="card-body excomdos_tileimage d-flex justify-content-center align-items-center">
-					    <a href="' . $url . '">
-					        <img height="75" alt="' . $item->name . '" title="' . $item->name . '" src="' . $CFG->wwwroot . '/blocks/exaport/item_thumb.php?item_id=' . $item->id . '"/>
-                        </a>
-					</div>
-					<div class="card-extitle exomdos_tiletitle">
-						<a href="' . $url . '">' . $item->name . '</a>
-						' . block_exaport_render_item_category_badges($item) . '
-					</div>
-					<div class="card-footer excomdos_tileinfo_time mt-2">
-                        ' . date('d.m.Y H:i', $item->timemodified) . '
-					</div>
-				</div>
-			</div>
-    ';
-
-    return $itemContent;
-}

@@ -1,0 +1,191 @@
+#exaport .tertiary-exabis-navigation {
+    padding-bottom: 25px;
+}
+#exaport .tertiary-exabis-navigation .navigation {
+    border-bottom: 1px solid var(--bs-border-color);
+    background-color: #fff;
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem;
+}
+#exaport .exaport-portfolio-toolbar .input-group,
+#exaport .exaport-portfolio-toolbar .form-select {
+    width: 100%;
+}
+#exaport .exaport-portfolio-toolbar .icon {
+    margin-right: 0;
+}
+#exaport .card-eportfolio .card-top {
+    padding: 1rem 1rem 0 1rem;
+}
+#exaport .card-eportfolio .card-title {
+    line-height: 1.4;
+}
+#exaport .card-eportfolio .card-title a:hover,
+#exaport .card-eportfolio .card-title a:focus {
+    text-decoration: none;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+#exaport .card-eportfolio .card-title .icon {
+    color: #000;
+    color: rgba(0, 0, 0, 0.796);
+}
+#exaport .card-eportfolio .card-body {
+    padding: .5rem 1rem 1rem 1rem;
+}
+#exaport .card-eportfolio .eportfolio-categories {
+    font-size: .8rem;
+}
+#exaport .card-eportfolio .eportfolio-categories .badge {
+    font-size: .72rem;
+    background-color: #e9ecef !important;
+}
+#exaport .card-eportfolio .eportoflio-share .icon {
+    margin-right: 0;
+}
+#exaport .card-eportfolio .eportoflio-share .icon.icon-shared,
+#exaport .card-eportfolio .eportoflio-comment .icon.icon-comment {
+    margin-right: .2rem;
+}
+#exaport .card-eportfolio .eportoflio-date,
+#exaport .card-eportfolio .eportfolio-share-count,
+#exaport .card-eportfolio .eportfolio-comment-count {
+    font-size: .8rem;
+}
+#exaport .eportfolio-card-more .dropdown-toggle {
+    color: #000;
+}
+#exaport .eportfolio-card-more .dropdown-toggle:after {
+    content: "";
+    display: none;
+}
+#exaport .col-card-collection-group {
+    position: relative;
+}
+#exaport .card-collection-outer {
+    position: relative;
+}
+#exaport .card-eportfolio {
+    position: relative;
+    z-index: 3;
+    background: #fff;
+    border: .0625rem solid rgba(0,0,0,.175);
+    border-radius: .5rem;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+#exaport .card-stack-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border: .0625rem solid rgba(0,0,0,.175);
+    border-radius: .5rem;
+    pointer-events: none;
+}
+#exaport .card-stack-layer-1 {
+    top: -.2rem;
+    left: .2rem;
+    z-index: 2;
+}
+#exaport .card-stack-layer-2 {
+    top: -.4rem;
+    left: .4rem;
+    z-index: 1;
+    box-shadow: 2px 2px 4px rgba(0,0,0,.15);
+}
+#exaport .col-card-folder .card-eportfolio {
+    position: relative;
+    border-radius: 0 0.75rem 0.75rem 0rem;
+    margin-top: 1.2rem;
+}
+#exaport .col-card-folder .card-eportfolio::before {
+    content: "";
+    position: absolute;
+    top: -1.15rem;
+    left: -1px;
+    width: 8rem;
+    height: 1.2rem;
+    background: var(--bs-card-bg, #fff);
+    border: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0,0,0,.175));
+    border-radius: 0.75rem 0.75rem 0 0;
+    background-color: #efefef;
+    border-bottom: 0;
+}
+#exaport .col-card-folder .card-eportfolio::after {
+    content: "";
+    position: absolute;
+    top: -1.15rem;
+    left: 6.7rem;
+    width: 2.2rem;
+    height: 1.2rem;
+    background: var(--bs-card-bg, #fff);
+    border-top: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0,0,0,.175));
+    border-right: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0,0,0,.175));
+    transform: skewX(35deg);
+    transform-origin: left bottom;
+    border-radius: 0 0.45rem 0 0;
+    background-color: #efefef;
+}
+#exaport .col-card-folder .card-eportfolio {
+    height: calc(100% - 1.2rem) !important;
+}
+.tooltip .tooltip-inner {
+    text-align: left;
+}
+.tooltiplist {
+    margin: 0;
+    padding-left: 1rem;
+}
+.tooltiplist li {
+    margin: 0;
+    padding: 0;
+}
+#exaport .exaport-category-view .badge {
+    font-size: 0.70rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.7rem;
+}
+#exaport .eportfolio-categories .badge {
+    font-size: .78rem;
+    cursor: default;
+}
+/* Uniform card height for both item and category column wrappers */
+#exaport .exaport-flat-item,
+#exaport .exaport-folder-category {
+    height: 13rem;
+}
+/* Artefact cards (items) fill their column fully */
+#exaport .exaport-flat-item .card-eportfolio {
+    height: 100% !important;
+}
+/* card-body stretches between card-top and card-footer, laid out as a column */
+#exaport .card-eportfolio .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+}
+/* Text zone: grows to fill remaining space, text clamped to 2 lines */
+#exaport .card-eportfolio .card-body-text {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+#exaport .card-eportfolio .card-body-text .card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+/* Chips zone: fixed single-row height, overflowing chips clipped with a right-edge fade */
+#exaport .card-eportfolio .card-body-chips {
+    flex: 0 0 1.8rem;
+    overflow: hidden;
+    white-space: nowrap;
+    -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
+    mask-image: linear-gradient(to right, black 70%, transparent 100%);
+}

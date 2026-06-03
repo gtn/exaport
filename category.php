@@ -32,7 +32,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {
     $id = optional_param('id', 0, PARAM_INT);
 
     if ($id > 0 && !$DB->get_record('block_exaportcate', ['id' => $id, 'userid' => $USER->id])) {
-        $id = 0;
+        $id = 0; // not your category, don't expose sharing info
     }
 
     $courses = exaport_get_shareable_courses_with_users('');

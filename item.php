@@ -586,6 +586,19 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
         $newcategoryids = block_exaport_normalize_item_categoryids($post->categoryids ?? []);
         item_category_helper::sync_item_categories($post->id, $newcategoryids);
+        //
+        // // Trigger event for item creation
+        // $event = \block_exaport\event\item_created::create(array(
+        //     'objectid' => $post->id,
+        //     'courseid' => $courseid,
+        //     'userid' => $USER->id,
+        //     'context' => context_user::instance($USER->id),
+        //     'other' => array(
+        //         'itemname' => $post->name,
+        //         'itemtype' => $post->type
+        //     )
+        // ));
+        // $event->trigger();
 
         // Send notifications to users who have shared categories containing this item with notify=1.
         foreach ($newcategoryids as $newcatid) {

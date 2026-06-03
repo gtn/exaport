@@ -113,12 +113,14 @@
       }
       this.userlist_loaded = true;
 
-      $('#sharing-userlist').html('loading userlist...1234');
+      $('#sharing-userlist').html('loading userlist...');
 
-
-      $.getJSON(document.location.href, {action: 'userlist'}, function (courses) {
+      var params = {action: 'userlist'};
+      if (type == 'cat_mod') {
+        params.id = $('input[name="id"]').val() || 0;
+      }
+      $.getJSON(document.location.href, params, function (courses) {
         var html = '';
-        debugger;
         var alwaysNotify = document.getElementById('alwaysnotifywhenshare')?.value ?? "false";
         var alwaysNotifyBool = alwaysNotify === "true" || alwaysNotify === "1";
         if (!$.empty(courses)) {

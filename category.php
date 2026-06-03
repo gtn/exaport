@@ -249,7 +249,7 @@ class simplehtml_form extends block_exaport_moodleform {
             $mform->addElement('checkbox', 'internshare', get_string('share', 'block_exaport'));
             $mform->setType('internshare', PARAM_INT);
             $mform->add_exaport_help_button('internshare', 'forms.category.internshare');
-            $mform->addElement('html', '<div id="internaccess-settings" class="fitem"">' .
+            $mform->addElement('html', '<div id="internaccess-settings" class="fitem">' .
                 '<div class="fitemtitle"></div><div class="felement">');
 
             // Output a hidden field with the config value alwaysnotifywhenshare (mirrors views_mod.php).

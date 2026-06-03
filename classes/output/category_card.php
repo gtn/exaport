@@ -65,11 +65,25 @@ class category_card extends card {
         $tileurl      = $isparenttile ? (string)$this->parentcategory->url : (string)$this->category->url;
         $outerclasses = $isparenttile ? 'col mb-4 exaport-folder-category' : 'col col-card-folder mb-4 exaport-folder-category';
         $tilefixedclass = $isparenttile ? 'excomdos_tile_fixed ' : '';
+        $isshared = false;
+
+        if (!$isparenttile) {
+            if ($this->type == 'shared' || $this->type == 'sharedstudent') {
+                $isshared = true;
+            } else if ($this->type == 'mine' && !empty($this->category->internshare)) {
+                $isshared = (
+                    count(exaport_get_category_shared_users($this->category->id)) > 0 ||
+                    count(exaport_get_category_shared_groups($this->category->id)) > 0 ||
+                    (!empty($this->category->shareall) && (int)$this->category->shareall == 1)
+                );
+            }
+        }
 
         return $this->base_icons() + [
             'outerclasses'   => $outerclasses,
             'tilenamelower'  => strtolower($tilename),
             'isparenttile'   => $isparenttile,
+            'isshared'       => $isshared,
             'tiletargetid'   => $tiletargetid,
             'tilefixedclass' => $tilefixedclass,
             'tileurl'        => $tileurl,
@@ -82,6 +96,18 @@ class category_card extends card {
             'folderupicon'   => block_exaport_fontawesome_icon('folder-open', 'regular', 1, ['icon', 'fa-fw', 'me-1'], [],
                                     ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top',
                                      'data-bs-title'  => block_exaport_get_string('category_up')], 'up'),
+            'sharedicon'     => block_exaport_fontawesome_icon(
+                'share-nodes',
+                'solid',
+                1,
+                ['icon', 'icon-shared'],
+                [],
+                [
+                    'data-bs-toggle' => 'tooltip',
+                    'data-bs-placement' => 'top',
+                    'data-bs-title' => 'shared with other users',
+                ]
+            ),
             'categorylabel'  => block_exaport_get_string('category'),
         ];
     }

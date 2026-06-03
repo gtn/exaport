@@ -21,6 +21,8 @@
         editlabel           - Localised "Edit" label
         deletelabel         - Localised "Delete" label
         folderupicon        - Pre-rendered HTML for the folder-open-up icon (parent tile only)
+        isshared            - Boolean: category is shared (show share icon in footer)
+        sharedicon          - Pre-rendered HTML for share icon
         categorylabel       - Localised "Category" tooltip text (regular tile only)
 }}
 <div class="{{outerclasses}}" data-item-name="{{tilenamelower}}" data-pinned="{{#isparenttile}}true{{/isparenttile}}{{^isparenttile}}false{{/isparenttile}}">
@@ -56,6 +58,9 @@
                 </a>
             </h5>
         </div>
-        <div class="card-footer d-flex justify-content-end align-items-center"><span class="invisible">&nbsp;</span></div>
+        <div class="card-footer d-flex justify-content-end align-items-center">
+            {{#isshared}}<span class="eportoflio-share">{{{sharedicon}}}</span>{{/isshared}}
+            {{^isshared}}<span class="invisible">&nbsp;</span>{{/isshared}}
+        </div>
     </div>
 </div>

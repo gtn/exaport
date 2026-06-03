@@ -133,7 +133,7 @@
             if (!$.empty(course.users)) {
               html += "<table width=\"70%\">";
               html += "<tr><th align=\"center\">&nbsp;</th>";
-              if (type == 'views_mod') {
+              if (type == 'views_mod' || type == 'cat_mod') {
                 html += "<th align=\"center\">&nbsp;</th>";
               }
               html += "<th align=\"left\">" + $E.translate('name') + "</th><th align=\"right\">" + $E.translate('role') + "</th></tr>";
@@ -147,7 +147,7 @@
                 html += '<tr><td align=\"center\" width="5%">';
                 html += '<input class="shareusers" type="checkbox" courseid="' + course.id + '" name="shareusers[' + user.id + ']" ';
                 html += ' value="' + user.id + '"' + (user.shared_to ? ' checked="checked"' : '') + ' />';
-                if (type == 'views_mod') {
+                if (type == 'views_mod' || type == 'cat_mod') {
                   html += "<br />" + $E.translate('sharejs');
                   html += '</td><td align=\"center\" width="5%" style="padding-right: 20px;">';
 

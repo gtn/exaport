@@ -29,7 +29,27 @@ $PAGE->set_url($url, ['courseid' => $courseid,
 
 // Get userlist for sharing category.
 if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {
-    echo json_encode(exaport_get_shareable_courses_with_users(''));
+    $id = optional_param('id', 0, PARAM_INT);
+
+    $courses = exaport_get_shareable_courses_with_users('');
+
+    if ($id > 0) {
+        // Mark users that are already shared to this category (with their notify state).
+        $sharedusers = $DB->get_records('block_exaportcatshar', array('catid' => $id), null, 'userid, notify');
+        foreach ($courses as $course) {
+            foreach ($course->users as $user) {
+                if (isset($sharedusers[$user->id])) {
+                    $user->shared_to = true;
+                    $user->notify_user = (bool)$sharedusers[$user->id]->notify;
+                } else {
+                    $user->shared_to = false;
+                    $user->notify_user = false;
+                }
+            }
+        }
+    }
+
+    echo json_encode($courses);
     exit;
 }
 // Get grouplist for sharing category.
@@ -232,6 +252,11 @@ class simplehtml_form extends block_exaport_moodleform {
             $mform->addElement('html', '<div id="internaccess-settings" class="fitem"">' .
                 '<div class="fitemtitle"></div><div class="felement">');
 
+            // Output a hidden field with the config value alwaysnotifywhenshare (mirrors views_mod.php).
+            $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+            $mform->addElement('html',
+                '<input type="hidden" id="alwaysnotifywhenshare" value="' . htmlspecialchars($alwaysnotifywhenshare) . '" />');
+
             $mform->addElement('html', '<div style="padding: 4px 0;"><table width=100%>');
             // Share to all.
             if (block_exaport_shareall_enabled()) {
@@ -317,11 +342,18 @@ if ($mform->is_cancelled()) {
     // Add new shared users.
     if ($newentry->internshare && !$newentry->shareall) {
         $shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+        $notifyusers = optional_param_array('notifyusers', array(), PARAM_INT);
+        $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
         foreach ($shareusers as $shareuser) {
             $shareuser = clean_param($shareuser, PARAM_INT);
             $shareitem = new stdClass();
             $shareitem->catid = $newentry->id;
             $shareitem->userid = $shareuser;
+            if ($alwaysnotifywhenshare) {
+                $shareitem->notify = 1;
+            } else {
+                $shareitem->notify = in_array($shareuser, $notifyusers) ? 1 : 0;
+            }
             $DB->insert_record("block_exaportcatshar", $shareitem);
         };
     };
@@ -481,7 +513,7 @@ if ($mform->is_cancelled()) {
         'name', 'role', 'nousersfound',
         'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
         'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
-        'notify', 'checkall',
+        'notify', 'checkall', 'viewmustbesafed',
     );
 
     $translations = array_flip($translations);

@@ -630,6 +630,7 @@ $string['messageprovider:viewupdated'] = 'Updated view notifications';
 // ],
 $string['i_shared'] = '{$a->sendername} shared the e-portfolio view {$a->title} with you';
 $string['i_updated'] = '{$a->sendername} made changes to the e-portfolio view {$a->title} shared with you.';
+$string['i_updated_category'] = '{$a->sendername} added a new artefact to the shared category "{$a->title}"';
 $string['addstdcat'] = 'import standard categories';
 $string['incompatible_video'] = 'To view this video please use the direct link: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';

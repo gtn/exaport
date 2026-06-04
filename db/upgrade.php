@@ -1417,5 +1417,23 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026060300, 'exaport');
     }
 
+    if ($oldversion < 2026060400) {
+        // Add hash field for public category sharing URLs.
+        $table = new xmldb_table('block_exaportcate');
+        $field = new xmldb_field('hash', XMLDB_TYPE_CHAR, '8', null, null, null, null, 'creatorid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add externaccess toggle to enable/disable category public links explicitly.
+        $field = new xmldb_field('externaccess', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'hash');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Exaport savepoint reached.
+        upgrade_block_savepoint(true, 2026060400, 'exaport');
+    }
+
     return $result;
 }

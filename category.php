@@ -198,7 +198,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
         $id = optional_param('id', 0, PARAM_INT);
         $category = $DB->get_record_sql('
-            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge
+            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
             ', array($USER->id, $id));
@@ -206,7 +206,10 @@ class simplehtml_form extends block_exaport_moodleform {
             $category = new stdClass;
             $category->shareall = 0;
             $category->id = 0;
+            $category->userid = $USER->id;
             $category->iconmerge = 0;
+            $category->externaccess = 0;
+            $category->hash = null;
         };
 
         // Don't forget the underscore!
@@ -249,6 +252,21 @@ class simplehtml_form extends block_exaport_moodleform {
         //        };
 
         // Sharing.
+        if (block_exaport_externaccess_enabled() && has_capability('block/exaport:shareextern', context_system::instance())) {
+            $mform->addElement('checkbox', 'externaccess', get_string('externalaccess', 'block_exaport'));
+            $mform->setType('externaccess', PARAM_INT);
+
+            if ($category->id > 0 && !empty($category->externaccess) && !empty($category->hash)) {
+                // We only print links for persisted records because we must never expose a URL before a stable hash exists in the DB.
+                $externurl = block_exaport_get_external_category_url($category, $category->userid);
+                $mform->addElement('html', '<div id="externaccess-settings" class="fitem">' .
+                    '<div class="fitemtitle"></div><div class="felement">' .
+                    '<div style="padding: 4px;"><strong>' . get_string('externaccess_category', 'block_exaport') . ':</strong> ' .
+                    '<a href="' . $externurl . '" target="_blank">' . $externurl . '</a></div>' .
+                    '</div></div>');
+            }
+        }
+
         if (has_capability('block/exaport:shareintern', context_system::instance())) {
             $mform->addElement('checkbox', 'internshare', get_string('share', 'block_exaport'));
             $mform->setType('internshare', PARAM_INT);
@@ -325,11 +343,42 @@ if ($mform->is_cancelled()) {
 } else if ($newentry = $mform->get_data()) {
     require_sesskey();
     $newentry->userid = $USER->id;
+
+    $existingcategory = null;
+    if (!empty($newentry->id)) {
+        // Re-load ownership-scoped state for security-sensitive fields so forged form values cannot target foreign records.
+        $existingcategory = $DB->get_record('block_exaportcate', ['id' => $newentry->id, 'userid' => $USER->id], 'id, hash');
+        if (!$existingcategory) {
+            throw new \block_exaport\moodle_exception('category_not_found');
+        }
+    }
+
     $newentry->shareall = optional_param('shareall', 0, PARAM_INT);
     if (optional_param('internshare', 0, PARAM_INT) > 0) {
         $newentry->internshare = optional_param('internshare', 0, PARAM_INT);
     } else {
         $newentry->internshare = 0;
+    }
+
+    $canmanageexternaccess = block_exaport_externaccess_enabled()
+        && has_capability('block/exaport:shareextern', context_system::instance());
+    if (!$canmanageexternaccess || empty($newentry->externaccess)) {
+        // Fail closed: if capability/setting is missing we force disable, regardless of incoming POST data.
+        $newentry->externaccess = 0;
+    } else {
+        $newentry->externaccess = 1;
+    }
+
+    if (!empty($existingcategory) && !empty($existingcategory->hash)) {
+        // Preserve existing hash for stable URLs; rotating links unexpectedly would invalidate already shared URLs.
+        $newentry->hash = $existingcategory->hash;
+    }
+    if ($newentry->externaccess && empty($newentry->hash)) {
+        // Generate lazily so categories that are never externally shared do not get unnecessary public tokens.
+        do {
+            $hash = substr(md5(microtime()), 3, 8);
+        } while ($DB->record_exists("block_exaportcate", array("hash" => $hash)));
+        $newentry->hash = $hash;
     }
 
     if ($newentry->id) {
@@ -477,7 +526,7 @@ if ($mform->is_cancelled()) {
     $category = null;
     if ($id = optional_param('id', 0, PARAM_INT)) {
         $category = $DB->get_record_sql('
-            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge
+            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
         ', array($USER->id, $id));

@@ -27,11 +27,11 @@ use function block_exaport\common\print_error;
  *
  * @param stdClass $category
  * @param int $ownerid
- * @param string $access
+ * @param string $canonicalaccess
  * @param array $visited
  * @return string
  */
-function block_exaport_render_shared_category_node($category, $ownerid, $access, &$visited) {
+function block_exaport_render_shared_category_node($category, $ownerid, $canonicalaccess, &$visited) {
     global $DB, $CFG;
 
     if (isset($visited[$category->id])) {
@@ -67,9 +67,10 @@ function block_exaport_render_shared_category_node($category, $ownerid, $access,
                     context_user::instance($item->userid)->id,
                     'block_exaport',
                     'item_content',
-                    'category/' . $access . '/itemid/' . $item->id
+                    'category/' . $canonicalaccess . '/itemid/' . $item->id
                 );
-                $content .= '<div>' . format_text($intro, FORMAT_HTML, ['noclean' => true]) . '</div>';
+                // Keep Moodle's default text cleaning enabled for external pages to reduce stored-XSS risk.
+                $content .= '<div>' . format_text($intro, FORMAT_HTML) . '</div>';
             }
 
             if ($item->type === 'file') {
@@ -88,7 +89,7 @@ function block_exaport_render_shared_category_node($category, $ownerid, $access,
                     foreach ($files as $file) {
                         // Access path intentionally mirrors shared_view.php and is verified in block_exaport_get_item().
                         $downloadurl = $CFG->wwwroot . '/pluginfile.php/' . context_user::instance($item->userid)->id .
-                            '/block_exaport/item_file/category/' . $access . '/itemid/' . $item->id . '/' .
+                            '/block_exaport/item_file/category/' . $canonicalaccess . '/itemid/' . $item->id . '/' .
                             rawurlencode($file->get_filename());
                         $content .= '<li><a href="' . s($downloadurl) . '">' . s($file->get_filename()) . '</a></li>';
                     }
@@ -106,7 +107,7 @@ function block_exaport_render_shared_category_node($category, $ownerid, $access,
     if ($children) {
         $content .= '<ul class="shared-category-children">';
         foreach ($children as $child) {
-            $content .= block_exaport_render_shared_category_node($child, $ownerid, $access, $visited);
+            $content .= block_exaport_render_shared_category_node($child, $ownerid, $canonicalaccess, $visited);
         }
         $content .= '</ul>';
     }
@@ -117,6 +118,10 @@ function block_exaport_render_shared_category_node($category, $ownerid, $access,
 
 $rawaccess = optional_param('access', '', PARAM_TEXT);
 $access = clean_param($rawaccess, PARAM_TEXT);
+if (!preg_match('!^hash/[0-9]+-[a-zA-Z0-9]{8}$!', $access)) {
+    // Fail fast on malformed input so we never construct file URLs from unexpected path fragments.
+    print_error('category_not_found', 'block_exaport');
+}
 
 // Same login model as shared_view.php: allow guest context for public links while still using Moodle session controls.
 require_login(0, true);
@@ -132,6 +137,10 @@ if (!block_exaport_externaccess_enabled()) {
 if (!$category = block_exaport_get_category_from_access($access)) {
     print_error('category_not_found', 'block_exaport');
 }
+$canonicalaccess = clean_param('hash/' . $category->userid . '-' . $category->hash, PARAM_TEXT);
+if (!preg_match('!^hash/[0-9]+-[a-zA-Z0-9]{8}$!', $canonicalaccess)) {
+    print_error('category_not_found', 'block_exaport');
+}
 
 $owner = $DB->get_record('user', ['id' => $category->userid, 'deleted' => 0]);
 if (!$owner) {
@@ -140,7 +149,7 @@ if (!$owner) {
 
 $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
 $PAGE->set_title(get_string('externaccess', 'block_exaport'));
-$PAGE->set_heading(get_string('externaccess', 'block_exaport') . ' ' . fullname($owner, $owner->id));
+$PAGE->set_heading(get_string('externaccess', 'block_exaport') . ' ' . fullname($owner));
 
 echo $OUTPUT->header();
 echo block_exaport_wrapperdivstart();
@@ -148,7 +157,7 @@ echo block_exaport_wrapperdivstart();
 echo '<h2>' . format_string($category->name) . '</h2>';
 echo '<ul class="shared-category-tree">';
 $visited = [];
-echo block_exaport_render_shared_category_node($category, $category->userid, $access, $visited);
+echo block_exaport_render_shared_category_node($category, $category->userid, $canonicalaccess, $visited);
 echo '</ul>';
 
 echo block_exaport_wrapperdivend();

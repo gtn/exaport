@@ -253,7 +253,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
         // Sharing.
         if (block_exaport_externaccess_enabled() && has_capability('block/exaport:shareextern', context_system::instance())) {
-            $mform->addElement('checkbox', 'externaccess', get_string('externalaccess', 'block_exaport'));
+            $mform->addElement('checkbox', 'externaccess', get_string('externaccess_category', 'block_exaport'));
             $mform->setType('externaccess', PARAM_INT);
 
             if ($category->id > 0 && !empty($category->externaccess) && !empty($category->hash)) {
@@ -376,6 +376,7 @@ if ($mform->is_cancelled()) {
     if ($newentry->externaccess && empty($newentry->hash)) {
         // Generate lazily so categories that are never externally shared do not get unnecessary public tokens.
         do {
+            // Intentionally mirror views_mod.php so category external links follow the same token format and behavior.
             $hash = substr(md5(microtime()), 3, 8);
         } while ($DB->record_exists("block_exaportcate", array("hash" => $hash)));
         $newentry->hash = $hash;

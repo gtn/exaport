@@ -243,7 +243,8 @@ namespace {
 
         $userid = clean_param($hashparts[0], PARAM_INT);
         $hash = clean_param($hashparts[1], PARAM_ALPHANUM);
-        if (empty($userid) || empty($hash)) {
+        if (empty($userid) || empty($hash) || strlen($hash) !== 8) {
+            // Category hashes are fixed-length (CHAR(8)); reject any unexpected token length early.
             return;
         }
 
@@ -448,8 +449,8 @@ namespace {
                 return;
             }
 
-            list($insql, $params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_QM);
-            array_unshift($params, $itemid, $category->userid);
+            [$insql, $params] = $DB->get_in_or_equal($categoryids, SQL_PARAMS_QM);
+            $params = array_merge([$itemid, $category->userid], $params);
             $sql = "SELECT i.*
                       FROM {block_exaportitem} i
                       JOIN {block_exaportitemcate} ic ON ic.itemid = i.id

@@ -146,8 +146,9 @@ if ($item->access->page == 'view') {
     $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
     $categoryowner = $DB->get_record('user', ['id' => $item->userid, 'deleted' => 0]);
     $PAGE->set_title(get_string('externaccess', 'block_exaport'));
+    // set_heading() does not auto-escape, so escape the user-controlled name to prevent XSS.
     $PAGE->set_heading(get_string('externaccess', 'block_exaport') .
-        ($categoryowner ? ' ' . fullname($categoryowner) : ''));
+        ($categoryowner ? ' ' . s(fullname($categoryowner)) : ''));
     echo $OUTPUT->header();
 } else if ($item->access->page == 'portfolio') {
     if ($item->userid == $USER->id) {

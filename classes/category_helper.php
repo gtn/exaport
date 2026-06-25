@@ -17,6 +17,8 @@
 
 namespace block_exaport;
 
+use block_exaport\globals as g;
+
 defined('MOODLE_INTERNAL') || die();
 
 class category_helper {
@@ -152,7 +154,7 @@ class category_helper {
     public static function load_owner_categories(int $userid): array {
         global $DB;
 
-        $categorycolumns = \block_exaport\globals::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+        $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
         return $DB->get_records_sql("
             SELECT
                 {$categorycolumns}

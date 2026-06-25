@@ -198,8 +198,10 @@ require_once("$CFG->libdir/formslib.php");
 function block_exaport_generate_unique_category_hash(): string {
     global $DB;
 
+    // Keep 4 bytes (= 8 hex chars) to stay compatible with existing external access tokens.
+    $hashbytes = 4;
     do {
-        $hash = bin2hex(random_bytes(4));
+        $hash = bin2hex(random_bytes($hashbytes));
     } while ($DB->record_exists('block_exaportcate', ['hash' => $hash]));
 
     return $hash;

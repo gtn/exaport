@@ -298,14 +298,16 @@ class simplehtml_form extends block_exaport_moodleform {
                     (!empty($category->externaccess) ? ' checked="checked"' : '') . ' />');
                 $mform->addElement('html', '</td><td>' . get_string('externalaccess', 'block_exaport') . '</td></tr>');
 
+                $externlinkhtml = '<span class="text-muted">' . get_string('savechanges') . '</span>';
                 if (!empty($category->hash)) {
                     // Existing categories keep their hash so already shared links stay stable.
                     $externurl = block_exaport_get_external_category_url($category, $category->userid);
-                    $mform->addElement('html', '<tr id="externaccess-settings"><td></td><td>');
-                    $mform->addElement('html',
-                        '<div style="padding: 4px;"><a href="' . $externurl . '" target="_blank">' . $externurl . '</a></div>');
-                    $mform->addElement('html', '</td></tr>');
+                    $externlinkhtml = '<a href="' . $externurl . '" target="_blank">' . $externurl . '</a>';
                 }
+                // Keep this row visible for both existing and new categories so the sharing UI stays predictable.
+                $mform->addElement('html', '<tr id="externaccess-settings"><td></td><td>');
+                $mform->addElement('html', '<div style="padding: 4px;">' . $externlinkhtml . '</div>');
+                $mform->addElement('html', '</td></tr>');
 
                 // "Share comments in external portfolio" checkbox (mirrors view externcomment).
                 if (block_exaport_external_comments_enabled()) {

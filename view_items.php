@@ -882,11 +882,12 @@ $useManualTable = ($layout == 'flat');
 
         if ($type == 'mine' && $category->id > 0) {
             $table->data[$itemind]['icons'] = '<span class="excomdos_listicons">';
-            if ((isset($category->internshare) && $category->internshare == 1) &&
+            if (!empty($category->externaccess) || (
+                (isset($category->internshare) && $category->internshare == 1) &&
                 (count(exaport_get_category_shared_users($category->id)) > 0 ||
                     count(exaport_get_category_shared_groups($category->id)) > 0 ||
                     (isset($category->shareall) && $category->shareall == 1))
-            ) {
+            )) {
                 $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
                 //                $table->data[$itemind]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
@@ -1382,9 +1383,10 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
             //                        echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
         } else {
             // Type == mine.
-            if (@$category->internshare && (count(exaport_get_category_shared_users($category->id)) > 0 ||
+            if (!empty($category->externaccess) || (
+                @$category->internshare && (count(exaport_get_category_shared_users($category->id)) > 0 ||
                     count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                    (isset($category->shareall) && $category->shareall == 1))) {
+                    (isset($category->shareall) && $category->shareall == 1)))) {
                 $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
                 //                            echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };

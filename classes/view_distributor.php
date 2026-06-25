@@ -81,7 +81,7 @@ class view_distributor {
         $viewid = $DB->insert_record('block_exaportview', $view);
 
         // Generate hash for the view.
-        $hash = substr(bin2hex(random_bytes(4)), 0, 8);
+        $hash = bin2hex(random_bytes(4));
         $DB->set_field('block_exaportview', 'hash', $hash, array('id' => $viewid));
 
         // Share to course teachers if requested (ONLY for newly created views).
@@ -210,7 +210,7 @@ class view_distributor {
         global $DB;
 
         $settings = $DB->get_record('block_exaport_templ_dist', array('courseid' => $courseid));
-        
+
         if ($settings) {
             $settings->auto_distribute_views = $auto_distribute_views ? 1 : 0;
             $settings->timemodified = time();

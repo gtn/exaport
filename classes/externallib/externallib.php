@@ -932,7 +932,7 @@ class externallib extends \external_api {
 
         // Generate view hash, external share is on by default!
         do {
-            $hash = substr(bin2hex(random_bytes(4)), 0, 8);
+            $hash = bin2hex(random_bytes(4));
         } while ($DB->record_exists("block_exaportview", array("hash" => $hash)));
 
         // Add default PDF settings

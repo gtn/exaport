@@ -45,6 +45,9 @@ $authenticationinfo = null;
 if ($access && preg_match('!^hash/[0-9]+-[a-zA-Z0-9]{8}$!', $access)) {
     // External category access: allow guest context like shared_view.php.
     require_login(0, true);
+    if (!block_exaport_externaccess_enabled()) {
+        print_error('areaisdisabled', 'block_exaport');
+    }
 
     $externaccess_category = block_exaport_get_category_from_access($access);
     if (!$externaccess_category) {

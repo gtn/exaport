@@ -36,7 +36,7 @@ namespace {
             $userid = $USER->id;
         }
         // We intentionally mirror the view URL format because that access parser pattern is already well-tested.
-        return $CFG->wwwroot . '/blocks/exaport/shared_category.php?access=hash/' . $userid . '-' . $category->hash;
+        return $CFG->wwwroot . '/blocks/exaport/view_items.php?access=hash/' . $userid . '-' . $category->hash;
     }
 
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
@@ -467,7 +467,8 @@ namespace {
             $item->access->page = 'category';
             // External viewers are anonymous guests, so interactive operations are intentionally disabled.
             $item->allowComments = false;
-            $item->showComments = false;
+            // Show comments read-only if the category owner enabled externcomment and the global setting allows it.
+            $item->showComments = block_exaport_external_comments_enabled() && !empty($category->externcomment);
         } else {
             return;
         }

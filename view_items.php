@@ -31,6 +31,10 @@ $layout = optional_param('layout', '', PARAM_TEXT);
 $folderlayout = optional_param('folderlayout', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_TEXT);
 
+// External category access via hash (mirrors shared_view.php access pattern).
+$access = optional_param('access', '', PARAM_TEXT);
+$externaccess_category = null;
+
 $wstoken = optional_param('wstoken', null, PARAM_RAW);
 
 require_once($CFG->dirroot . '/webservice/lib.php');
@@ -38,7 +42,23 @@ require_once($CFG->dirroot . '/webservice/lib.php');
 $useBootstrapLayout = block_exaport_use_bootstrap_layout();
 
 $authenticationinfo = null;
-if ($wstoken) {
+if ($access && preg_match('!^hash/[0-9]+-[a-zA-Z0-9]{8}$!', $access)) {
+    // External category access: allow guest context like shared_view.php.
+    require_login(0, true);
+
+    if (!block_exaport_externaccess_enabled()) {
+        print_error('areaisdisabled', 'block_exaport');
+    }
+
+    $externaccess_category = block_exaport_get_category_from_access($access);
+    if (!$externaccess_category) {
+        print_error('category_not_found', 'block_exaport');
+    }
+
+    $type = 'extern_category';
+    $categoryid = $externaccess_category->id;
+    $userid = $externaccess_category->userid;
+} else if ($wstoken) {
     $webservicelib = new webservice();
     $authenticationinfo = $webservicelib->authenticate_user($wstoken);
 } else {
@@ -70,7 +90,7 @@ if ($show_otherusers === -1) {
     $show_otherusers = (int)get_user_preferences('block_exaport_show_otherusers', 1);
 }
 
-if ($type != 'shared' && $type != 'sharedstudent') {
+if ($type != 'shared' && $type != 'sharedstudent' && $type != 'extern_category') {
     $type = 'mine';
 }
 
@@ -363,6 +383,93 @@ if ($type == 'sharedstudent') {
         }
     }
 
+} else if ($type == 'extern_category' && $externaccess_category) {
+    // External category access mode: public hash-based access (mirrors shared_view.php).
+    $canonicalaccess = 'hash/' . $externaccess_category->userid . '-' . $externaccess_category->hash;
+
+    $owner = $DB->get_record('user', ['id' => $externaccess_category->userid, 'deleted' => 0]);
+    if (!$owner) {
+        print_error('category_not_found', 'block_exaport');
+    }
+
+    // Load all categories for this owner.
+    $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+    $categories = $DB->get_records_sql("
+        SELECT
+            {$categorycolumns}
+            , COUNT(DISTINCT i.id) AS item_cnt
+        FROM {block_exaportcate} c
+        LEFT JOIN {block_exaportitemcate} ic ON ic.cateid = c.id
+        LEFT JOIN {block_exaportitem} i ON (
+            i.id = ic.itemid
+        ) AND " . block_exaport_get_item_where() . "
+        WHERE c.userid = ?
+        GROUP BY
+            {$categorycolumns}
+        ORDER BY c.name ASC
+    ", array($externaccess_category->userid));
+
+    foreach ($categories as $category) {
+        $category->url = $CFG->wwwroot . '/blocks/exaport/view_items.php?access=' . $canonicalaccess .
+            '&categoryid=' . $category->id;
+        $category->icon = block_exaport_get_category_icon($category);
+    }
+
+    $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
+
+    if (!isset($categories[$categoryid])) {
+        print_error('category_not_found', 'block_exaport');
+    }
+
+    $currentcategory = $categories[$categoryid];
+
+    // Only allow navigation within the shared category's subtree.
+    // Check that the current category is the shared root or a descendant of it.
+    $allowedids = block_exaport_get_owned_category_tree_ids($externaccess_category->id, $externaccess_category->userid);
+    if (!in_array((int)$currentcategory->id, $allowedids)) {
+        print_error('category_not_found', 'block_exaport');
+    }
+
+    $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
+    // Filter subcategories to only those within the shared tree.
+    $subcategories = array_filter($subcategories, function($cat) use ($allowedids) {
+        return in_array((int)$cat->id, $allowedids);
+    });
+
+    if ($currentcategory->id != $externaccess_category->id && isset($categories[$currentcategory->pid])
+            && in_array((int)$currentcategory->pid, $allowedids)) {
+        $parentcategory = $categories[$currentcategory->pid];
+    } else if ($currentcategory->id != $externaccess_category->id) {
+        // Go back to shared root.
+        $parentcategory = $categories[$externaccess_category->id];
+    } else {
+        $parentcategory = null;
+    }
+
+    // Load items for the current category (owner's items only).
+    $items = $DB->get_records_sql("
+        SELECT DISTINCT i.*, COUNT(com.id) As comments
+        FROM {block_exaportitem} i
+        LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+        WHERE i.userid = ?
+            AND EXISTS (
+                SELECT 1
+                FROM {block_exaportitemcate} ic
+                WHERE ic.itemid = i.id
+                  AND ic.cateid = ?
+            )
+            AND " . block_exaport_get_item_where() .
+        " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
+        i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
+        i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
+        i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
+        i.iseditable, i.example_url, i.parentid
+        $sqlsort
+    ", [$externaccess_category->userid, $currentcategory->id]);
+
+    // Force folder layout for external access (no flat mode for external viewers).
+    $layout = 'folder';
+
 } else {
     // Read all categories.
     $categories = block_exaport_get_all_categories_for_user($USER->id);
@@ -418,35 +525,53 @@ if ($type == 'sharedstudent') {
 }
 
 // Build canonical URL with only navigation-defining params.
-$pageparams = ['courseid' => $courseid];
-if ($categoryid) {
-    $pageparams['categoryid'] = $categoryid;
-}
-if ($type && $type != 'mine') {
-    $pageparams['type'] = $type;
-}
-if ($userid) {
-    $pageparams['userid'] = $userid;
-}
-$PAGE->set_url(new moodle_url('/blocks/exaport/view_items.php', $pageparams));
-// $PAGE->set_context(context_system::instance());
+if ($type == 'extern_category' && $externaccess_category) {
+    $pageparams = ['access' => $access];
+    if ($categoryid != $externaccess_category->id) {
+        $pageparams['categoryid'] = $categoryid;
+    }
+    $PAGE->set_url(new moodle_url('/blocks/exaport/view_items.php', $pageparams));
+    $PAGE->set_context(context_system::instance());
 
-block_exaport_add_iconpack();
+    $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
+    $PAGE->set_title(get_string('externaccess', 'block_exaport'));
+    $PAGE->set_heading(get_string('externaccess', 'block_exaport') . ' ' . fullname($owner));
 
-block_exaport_print_header($type == 'shared' || $type == 'sharedstudent' ? 'shared_categories' : "myportfolio");
+    block_exaport_add_iconpack();
 
-echo "<div class='box generalbox'>";
-if (block_exaport_course_has_desp()) {
-    $pref = "desp_";
+    echo $OUTPUT->header();
+    echo block_exaport_wrapperdivstart();
 } else {
-    $pref = "";
-}
-$infobox = text_to_html(get_string($pref . "explaining", "block_exaport"));
-$infobox .= '<a href="#more_artefacts_info" data-toggle="showmore">' . get_string('moreinfolink', 'block_exaport') . '</a>';
-$infobox .= '<div id="more_artefacts_info" style="display: none;">' . get_string('explainingmoredata', 'block_exaport') . '</div>';
-echo $OUTPUT->box($infobox, "center");
+    $pageparams = ['courseid' => $courseid];
+    if ($categoryid) {
+        $pageparams['categoryid'] = $categoryid;
+    }
+    if ($type && $type != 'mine') {
+        $pageparams['type'] = $type;
+    }
+    if ($userid) {
+        $pageparams['userid'] = $userid;
+    }
+    $PAGE->set_url(new moodle_url('/blocks/exaport/view_items.php', $pageparams));
+    // $PAGE->set_context(context_system::instance());
 
-echo "</div>";
+    block_exaport_add_iconpack();
+
+    block_exaport_print_header($type == 'shared' || $type == 'sharedstudent' ? 'shared_categories' : "myportfolio");
+
+    echo "<div class='box generalbox'>";
+    if (block_exaport_course_has_desp()) {
+        $pref = "desp_";
+    } else {
+        $pref = "";
+    }
+    $infobox = text_to_html(get_string($pref . "explaining", "block_exaport"));
+    $infobox .= '<a href="#more_artefacts_info" data-toggle="showmore">' . get_string('moreinfolink', 'block_exaport') . '</a>';
+    $infobox .= '<div id="more_artefacts_info" style="display: none;">' . get_string('explainingmoredata', 'block_exaport') . '</div>';
+    echo $OUTPUT->box($infobox, "center");
+
+    echo "</div>";
+}
 
 // Normalise sort value for use in select dropdowns (e.g. "date.desc" → "date-desc").
 $flatsort = str_replace('.', '-', $sort);
@@ -584,6 +709,11 @@ if ($type == 'mine' && $layout == 'folder') {
     ]);
 }
 
+if ($type == 'extern_category') {
+    // External category access: show category heading, no layout/filter controls.
+    echo '<h2>' . format_string($currentcategory->name) . '</h2>';
+} else {
+
 echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 
 // Left side: folder/flat display toggle (btn-group style).
@@ -615,6 +745,9 @@ echo '</div>';
 
 echo '</div>';
 
+} // end of non-extern_category controls
+
+if ($type != 'extern_category') {
 $PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
 $PAGE->requires->js_amd_inline('
     document.addEventListener("DOMContentLoaded", function () {
@@ -626,8 +759,9 @@ $PAGE->requires->js_amd_inline('
         });
     });
 ');
+}
 
-if ($layout == 'folder') {
+if ($layout == 'folder' && $type != 'extern_category') {
     echo '<div class="excomdos_cat">';
     echo block_exaport_get_string('current_category') . ': ';
 
@@ -781,8 +915,12 @@ $useManualTable = ($layout == 'flat');
 
     $itemscnt = count($items);
     foreach ($items as $item) {
-        $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' .
-            $item->id;
+        if ($type == 'extern_category' && $externaccess_category) {
+            $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
+        } else {
+            $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' .
+                $item->id;
+        }
 
         $itemind++;
 
@@ -828,6 +966,11 @@ $useManualTable = ($layout == 'flat');
 
         $icons = '';
 
+        if ($type == 'extern_category') {
+            // External category access: no interactive icons, items are read-only.
+            $icons = '';
+        } else {
+
         // Link to export to my portfolio.
         if ($currentcategory->id == -1) {
             $rowdata['icons'] = '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid .
@@ -872,6 +1015,8 @@ $useManualTable = ($layout == 'flat');
                 $icons .= '<img src="pix/deleteview.png" alt="' . get_string("delete") . '">';
             }
         }
+
+        } // end of else (non-extern_category icons)
 
         $icons = '<span class="excomdos_listicons">' . $icons . '</span>';
 
@@ -928,6 +1073,9 @@ if ($layout == 'folder') {
 }
 
 foreach ($items as $item) {
+    if ($type == 'extern_category' && $externaccess_category) {
+        $item->extern_item_url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
+    }
     echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, ($layout == 'folder'));
 }
 

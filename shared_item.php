@@ -140,6 +140,15 @@ if ($item->access->page == 'view') {
     } else {
         block_exaport_print_header("shared_views");
     }
+} else if ($item->access->page == 'category') {
+    // External category access: use simple page header (similar to shared_view.php).
+    $PAGE->set_context(context_system::instance());
+    $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
+    $categoryowner = $DB->get_record('user', ['id' => $item->userid, 'deleted' => 0]);
+    $PAGE->set_title(get_string('externaccess', 'block_exaport'));
+    $PAGE->set_heading(get_string('externaccess', 'block_exaport') .
+        ($categoryowner ? ' ' . fullname($categoryowner) : ''));
+    echo $OUTPUT->header();
 } else if ($item->access->page == 'portfolio') {
     if ($item->userid == $USER->id) {
         block_exaport_print_header("myportfolio");
@@ -220,6 +229,8 @@ if ($item->allowComments) {
 
 if ($item->access->page == 'view') {
     $backlink = 'shared_view.php?access=' . $item->access->parentAccess;
+} else if ($item->access->page == 'category') {
+    $backlink = 'view_items.php?access=' . $item->access->parentAccess;
 } else {
     // Intern.
     if ($item->userid == $USER->id) {

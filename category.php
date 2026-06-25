@@ -198,7 +198,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
         $id = optional_param('id', 0, PARAM_INT);
         $category = $DB->get_record_sql('
-            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash
+            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash, c.externcomment
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
             ', array($USER->id, $id));
@@ -210,6 +210,7 @@ class simplehtml_form extends block_exaport_moodleform {
             $category->iconmerge = 0;
             $category->externaccess = 0;
             $category->hash = null;
+            $category->externcomment = 0;
         };
 
         // Don't forget the underscore!
@@ -289,13 +290,22 @@ class simplehtml_form extends block_exaport_moodleform {
                         $externhash = substr(bin2hex(random_bytes(4)), 0, 8);
                     } while ($DB->record_exists("block_exaportcate", array("hash" => $externhash)));
                 }
-                $externurl = $CFG->wwwroot . '/blocks/exaport/shared_category.php?access=hash/' .
+                $externurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?access=hash/' .
                     $category->userid . '-' . $externhash;
 
                 $mform->addElement('html', '<tr id="externaccess-settings"><td></td><td>');
                 $mform->addElement('html',
                     '<div style="padding: 4px;"><a href="' . $externurl . '" target="_blank">' . $externurl . '</a></div>');
                 $mform->addElement('html', '</td></tr>');
+
+                // "Share comments in external portfolio" checkbox (mirrors view externcomment).
+                if (block_exaport_external_comments_enabled()) {
+                    $mform->addElement('html', '<tr id="externcomment-settings"><td style="padding-right: 10px; width: 10px">');
+                    $mform->addElement('html',
+                        '<input type="checkbox" id="id_externcomment" name="externcomment" value="1"' .
+                        (!empty($category->externcomment) ? ' checked="checked"' : '') . ' />');
+                    $mform->addElement('html', '</td><td>' . get_string('externcomment', 'block_exaport') . '</td></tr>');
+                }
 
                 // Store the pre-generated hash so it is submitted with the form.
                 $mform->addElement('hidden', 'hashvalue', $externhash);
@@ -410,6 +420,13 @@ if ($mform->is_cancelled()) {
         $newentry->externaccess = 0;
     } else {
         $newentry->externaccess = 1;
+    }
+
+    // Save externcomment setting (share comments in external portfolio).
+    if ($canmanageexternaccess && block_exaport_external_comments_enabled()) {
+        $newentry->externcomment = optional_param('externcomment', 0, PARAM_INT) ? 1 : 0;
+    } else {
+        $newentry->externcomment = 0;
     }
 
     if (!empty($existingcategory) && !empty($existingcategory->hash)) {

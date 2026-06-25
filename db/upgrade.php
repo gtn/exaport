@@ -1435,5 +1435,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026060400, 'exaport');
     }
 
+    if ($oldversion < 2026062500) {
+        // Add externcomment field to block_exaportcate for sharing comments in external category view.
+        $table = new xmldb_table('block_exaportcate');
+        $field = new xmldb_field('externcomment', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'externaccess');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_block_savepoint(true, 2026062500, 'exaport');
+    }
+
     return $result;
 }

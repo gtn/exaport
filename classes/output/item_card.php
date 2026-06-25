@@ -76,8 +76,13 @@ class item_card extends card {
         $type       = $this->type;
         $categoryid = $this->categoryid;
 
-        $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid
-               . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
+        // For external category access, use the pre-computed URL.
+        if ($type === 'extern_category' && !empty($item->extern_item_url)) {
+            $url = $item->extern_item_url;
+        } else {
+            $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid
+                   . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
+        }
 
         // Build category IDs for client-side filtering.
         $itemcatids = [];
@@ -123,8 +128,8 @@ class item_card extends card {
             'typeicon'      => '<i class="icon fa fa-' . s($iconTypeProps['iconName']) . ' fa-fw me-1"'
                                . ' data-bs-toggle="tooltip" data-bs-placement="top"'
                                . ' data-bs-title="' . s($typelabel) . '"></i>',
-            'canedit'       => $isownitem,
-            'candelete'     => $isownitem && block_exaport_item_is_editable($item->id),
+            'canedit'       => $isownitem && $type !== 'extern_category',
+            'candelete'     => $isownitem && $type !== 'extern_category' && block_exaport_item_is_editable($item->id),
             'introtext'     => $introtext,
             'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
             'commentlabel'  => $commentlabel,

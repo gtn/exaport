@@ -35,8 +35,10 @@ jQueryExaport(function ($) {
     // External Access sub-checkbox: show/hide the external link.
     if ($form.find(':input[name="externaccess"]').is(':checked')) {
       $('#externaccess-settings').show();
+      $('#externcomment-settings').show();
     } else {
       $('#externaccess-settings').hide();
+      $('#externcomment-settings').hide();
     }
 
     // Internal Access sub-checkbox: show/hide the internal sharing options.

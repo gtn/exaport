@@ -46,10 +46,6 @@ if ($access && preg_match('!^hash/[0-9]+-[a-zA-Z0-9]{8}$!', $access)) {
     // External category access: allow guest context like shared_view.php.
     require_login(0, true);
 
-    if (!block_exaport_externaccess_enabled()) {
-        print_error('areaisdisabled', 'block_exaport');
-    }
-
     $externaccess_category = block_exaport_get_category_from_access($access);
     if (!$externaccess_category) {
         print_error('category_not_found', 'block_exaport');
@@ -93,6 +89,7 @@ if ($show_otherusers === -1) {
 if ($type != 'shared' && $type != 'sharedstudent' && $type != 'extern_category') {
     $type = 'mine';
 }
+$isexterncategory = ($type === 'extern_category');
 
 if ($type == 'mine' && empty($CFG->block_exaport_enable_myportfolio)) {
     print_error('areaisdisabled', 'block_exaport');
@@ -383,8 +380,8 @@ if ($type == 'sharedstudent') {
         }
     }
 
-} else if ($type == 'extern_category' && $externaccess_category) {
-    // External category access mode: public hash-based access (mirrors shared_view.php).
+} else if ($isexterncategory && $externaccess_category) {
+    // External category mode is public/read-only: we only expose one owner's shared subtree.
     $canonicalaccess = 'hash/' . $externaccess_category->userid . '-' . $externaccess_category->hash;
 
     $owner = $DB->get_record('user', ['id' => $externaccess_category->userid, 'deleted' => 0]);
@@ -392,26 +389,11 @@ if ($type == 'sharedstudent') {
         print_error('category_not_found', 'block_exaport');
     }
 
-    // Load all categories for this owner.
-    $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
-    $categories = $DB->get_records_sql("
-        SELECT
-            {$categorycolumns}
-            , COUNT(DISTINCT i.id) AS item_cnt
-        FROM {block_exaportcate} c
-        LEFT JOIN {block_exaportitemcate} ic ON ic.cateid = c.id
-        LEFT JOIN {block_exaportitem} i ON (
-            i.id = ic.itemid
-        ) AND " . block_exaport_get_item_where() . "
-        WHERE c.userid = ?
-        GROUP BY
-            {$categorycolumns}
-        ORDER BY c.name ASC
-    ", array($externaccess_category->userid));
+    $categories = \block_exaport\category_helper::load_owner_categories($externaccess_category->userid);
+    $externalcategorybaseurl = block_exaport_get_external_category_url($externaccess_category, $externaccess_category->userid);
 
     foreach ($categories as $category) {
-        $category->url = $CFG->wwwroot . '/blocks/exaport/view_items.php?access=' . $canonicalaccess .
-            '&categoryid=' . $category->id;
+        $category->url = $externalcategorybaseurl . '&categoryid=' . $category->id;
         $category->icon = block_exaport_get_category_icon($category);
     }
 
@@ -423,8 +405,7 @@ if ($type == 'sharedstudent') {
 
     $currentcategory = $categories[$categoryid];
 
-    // Only allow navigation within the shared category's subtree.
-    // Check that the current category is the shared root or a descendant of it.
+    // External viewers may navigate only inside the shared root category and its descendants.
     $allowedids = block_exaport_get_owned_category_tree_ids($externaccess_category->id, $externaccess_category->userid);
     if (!in_array((int)$currentcategory->id, $allowedids)) {
         print_error('category_not_found', 'block_exaport');
@@ -446,26 +427,11 @@ if ($type == 'sharedstudent') {
         $parentcategory = null;
     }
 
-    // Load items for the current category (owner's items only).
-    $items = $DB->get_records_sql("
-        SELECT DISTINCT i.*, COUNT(com.id) As comments
-        FROM {block_exaportitem} i
-        LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-        WHERE i.userid = ?
-            AND EXISTS (
-                SELECT 1
-                FROM {block_exaportitemcate} ic
-                WHERE ic.itemid = i.id
-                  AND ic.cateid = ?
-            )
-            AND " . block_exaport_get_item_where() .
-        " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
-        i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
-        i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
-        i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
-        i.iseditable, i.example_url, i.parentid
+    $items = \block_exaport\category_helper::load_owner_category_items(
+        $externaccess_category->userid,
+        $currentcategory->id,
         $sqlsort
-    ", [$externaccess_category->userid, $currentcategory->id]);
+    );
 
     // Force folder layout for external access (no flat mode for external viewers).
     $layout = 'folder';
@@ -524,8 +490,16 @@ if ($type == 'sharedstudent') {
     }
 }
 
+$isexternalreadonlyitems = $isexterncategory && !empty($canonicalaccess);
+if ($isexternalreadonlyitems) {
+    foreach ($items as $item) {
+        // Read-only external item links must keep the category access token (not portfolio/id/...).
+        $item->extern_item_url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
+    }
+}
+
 // Build canonical URL with only navigation-defining params.
-if ($type == 'extern_category' && $externaccess_category) {
+if ($isexterncategory && $externaccess_category) {
     $pageparams = ['access' => $access];
     if ($categoryid != $externaccess_category->id) {
         $pageparams['categoryid'] = $categoryid;
@@ -537,11 +511,6 @@ if ($type == 'extern_category' && $externaccess_category) {
     $PAGE->set_title(get_string('externaccess', 'block_exaport'));
     // set_heading() does not auto-escape, so escape the user-controlled name to prevent XSS.
     $PAGE->set_heading(get_string('externaccess', 'block_exaport') . ' ' . s(fullname($owner)));
-
-    block_exaport_add_iconpack();
-
-    echo $OUTPUT->header();
-    echo block_exaport_wrapperdivstart();
 } else {
     $pageparams = ['courseid' => $courseid];
     if ($categoryid) {
@@ -555,9 +524,14 @@ if ($type == 'extern_category' && $externaccess_category) {
     }
     $PAGE->set_url(new moodle_url('/blocks/exaport/view_items.php', $pageparams));
     // $PAGE->set_context(context_system::instance());
+}
 
-    block_exaport_add_iconpack();
+block_exaport_add_iconpack();
 
+if ($isexterncategory && $externaccess_category) {
+    echo $OUTPUT->header();
+    echo block_exaport_wrapperdivstart();
+} else {
     block_exaport_print_header($type == 'shared' || $type == 'sharedstudent' ? 'shared_categories' : "myportfolio");
 
     echo "<div class='box generalbox'>";
@@ -570,7 +544,6 @@ if ($type == 'extern_category' && $externaccess_category) {
     $infobox .= '<a href="#more_artefacts_info" data-toggle="showmore">' . get_string('moreinfolink', 'block_exaport') . '</a>';
     $infobox .= '<div id="more_artefacts_info" style="display: none;">' . get_string('explainingmoredata', 'block_exaport') . '</div>';
     echo $OUTPUT->box($infobox, "center");
-
     echo "</div>";
 }
 
@@ -710,59 +683,54 @@ if ($type == 'mine' && $layout == 'folder') {
     ]);
 }
 
-if ($type == 'extern_category') {
+if ($isexterncategory) {
     // External category access: show category heading, no layout/filter controls.
     echo '<h2>' . format_string($currentcategory->name) . '</h2>';
 } else {
+    echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 
-echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
+    // Left side: folder/flat display toggle (btn-group style).
+    echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
+    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+        . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
+        . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
+    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+        . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
+        . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
+    echo '</div>';
 
-// Left side: folder/flat display toggle (btn-group style).
-echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
-echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
-    . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
-    . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
-echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
-    . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
-    . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
-echo '</div>';
+    // Right side: tiles/details toggle (btn-group style) + printer-friendly button.
+    echo '<div class="d-flex align-items-center" style="gap: 0.5rem;">';
+    echo '<div class="btn-group exaport-view-toggle" role="group" aria-label="View">';
+    echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="tiles">'
+        . block_exaport_fontawesome_icon('table-cells-large', 'solid', 1)
+        . ' ' . block_exaport_get_string("tiles") . '</a>';
+    echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="details">'
+        . block_exaport_fontawesome_icon('list', 'solid', 1)
+        . ' ' . block_exaport_get_string("details") . '</a>';
+    echo '</div>';
+    if ($type == 'mine') {
+        echo '<a target="_blank" href="' . $CFG->wwwroot . '/blocks/exaport/view_items_print.php?courseid=' . $courseid . '" class="btn btn-sm btn-outline-secondary">'
+            . block_exaport_fontawesome_icon('print', 'solid', 1)
+            . ' ' . get_string("printerfriendly", "group") . '</a>';
+    }
+    echo '</div>';
+    echo '</div>';
 
-// Right side: tiles/details toggle (btn-group style) + printer-friendly button.
-echo '<div class="d-flex align-items-center" style="gap: 0.5rem;">';
-echo '<div class="btn-group exaport-view-toggle" role="group" aria-label="View">';
-echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="tiles">'
-    . block_exaport_fontawesome_icon('table-cells-large', 'solid', 1)
-    . ' ' . block_exaport_get_string("tiles") . '</a>';
-echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="details">'
-    . block_exaport_fontawesome_icon('list', 'solid', 1)
-    . ' ' . block_exaport_get_string("details") . '</a>';
-echo '</div>';
-if ($type == 'mine') {
-    echo '<a target="_blank" href="' . $CFG->wwwroot . '/blocks/exaport/view_items_print.php?courseid=' . $courseid . '" class="btn btn-sm btn-outline-secondary">'
-        . block_exaport_fontawesome_icon('print', 'solid', 1)
-        . ' ' . get_string("printerfriendly", "group") . '</a>';
-}
-echo '</div>';
-
-echo '</div>';
-
-} // end of non-extern_category controls
-
-if ($type != 'extern_category') {
-$PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
-$PAGE->requires->js_amd_inline('
-    document.addEventListener("DOMContentLoaded", function () {
-        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) {
-            return;
-        }
-        document.querySelectorAll("[data-bs-toggle=\'tooltip\']").forEach(function (el) {
-            bootstrap.Tooltip.getOrCreateInstance(el);
+    $PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
+    $PAGE->requires->js_amd_inline('
+        document.addEventListener("DOMContentLoaded", function () {
+            if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) {
+                return;
+            }
+            document.querySelectorAll("[data-bs-toggle=\'tooltip\']").forEach(function (el) {
+                bootstrap.Tooltip.getOrCreateInstance(el);
+            });
         });
-    });
-');
+    ');
 }
 
-if ($layout == 'folder' && $type != 'extern_category') {
+if ($layout == 'folder' && !$isexterncategory) {
     echo '<div class="excomdos_cat">';
     echo block_exaport_get_string('current_category') . ': ';
 
@@ -889,15 +857,8 @@ $useManualTable = ($layout == 'flat');
                     count(exaport_get_category_shared_groups($category->id)) > 0 ||
                     (isset($category->shareall) && $category->shareall == 1));
             if ($issharedexternal || $issharedinternal) {
-                $sharedtooltipparts = [];
-                if ($issharedinternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
-                }
-                if ($issharedexternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedexternalcategory');
-                }
                 $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                    ['title' => implode(', ', $sharedtooltipparts)]);
+                    ['title' => block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal)]);
                 //                $table->data[$itemind]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
             if (@$category->structure_share) {
@@ -925,12 +886,9 @@ $useManualTable = ($layout == 'flat');
 
     $itemscnt = count($items);
     foreach ($items as $item) {
-        if ($type == 'extern_category' && $externaccess_category) {
-            $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
-        } else {
-            $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' .
-                $item->id;
-        }
+        $url = !empty($item->extern_item_url)
+            ? $item->extern_item_url
+            : $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
 
         $itemind++;
 
@@ -976,57 +934,52 @@ $useManualTable = ($layout == 'flat');
 
         $icons = '';
 
-        if ($type == 'extern_category') {
-            // External category access: no interactive icons, items are read-only.
-            $icons = '';
-        } else {
+        if (!$isexternalreadonlyitems) {
+            // Link to export to my portfolio.
+            if ($currentcategory->id == -1) {
+                $rowdata['icons'] = '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid .
+                    '&id=' . $item->id . '&sesskey=' . sesskey() . '&action=copytoself' . '">' .
+                    '<img src="pix/import.png" title="' . get_string('make_it_yours', "block_exaport") . '"></a>';
+                if ($useManualTable) {
+                    $flatItemRows[] = ['data' => $rowdata, 'item' => $item];
+                } else {
+                    $table->data[$itemind] = $rowdata;
+                }
+                continue;
+            };
 
-        // Link to export to my portfolio.
-        if ($currentcategory->id == -1) {
-            $rowdata['icons'] = '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid .
-                '&id=' . $item->id . '&sesskey=' . sesskey() . '&action=copytoself' . '">' .
-                '<img src="pix/import.png" title="' . get_string('make_it_yours', "block_exaport") . '"></a>';
-            if ($useManualTable) {
-                $flatItemRows[] = ['data' => $rowdata, 'item' => $item];
-            } else {
-                $table->data[$itemind] = $rowdata;
+            if (isset($item->comments) && $item->comments > 0) {
+                $icons .= '<span class="excomdos_listcomments">
+                                <a href="' . $url . '" >
+                            ' . $item->comments . '<img src="pix/comments.png" alt="file">
+                                </a>
+                            </span>';
             }
-            continue;
-        };
 
-        if (isset($item->comments) && $item->comments > 0) {
-            $icons .= '<span class="excomdos_listcomments">
-                            <a href="' . $url . '" >
-                        ' . $item->comments . '<img src="pix/comments.png" alt="file">
-                            </a>
-                        </span>';
-        }
+            $icons .= block_exaport_get_item_comp_icon($item);
 
-        $icons .= block_exaport_get_item_comp_icon($item);
+            // Copy files to course.
+            if ($item->type == 'file' && block_exaport_feature_enabled('copy_to_course')) {
+                $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/copy_item_to_course.php?courseid=' . $courseid . '&itemid=' . $item->id .
+                    '&backtype=">' . get_string("copyitemtocourse", "block_exaport") . '</a>';
+            }
 
-        // Copy files to course.
-        if ($item->type == 'file' && block_exaport_feature_enabled('copy_to_course')) {
-            $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/copy_item_to_course.php?courseid=' . $courseid . '&itemid=' . $item->id .
-                '&backtype=">' . get_string("copyitemtocourse", "block_exaport") . '</a>';
-        }
-
-        if ($type == 'mine') {
-            $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=edit">'
-                . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
-                //                    .'<img src="pix/edit.png" alt="'.get_string("edit").'" />'
-                . '</a>';
-            if ($allowedit = block_exaport_item_is_editable($item->id)) {
-                $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id .
-                    '&action=delete&categoryid=' . $categoryid . '">'
-                    . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon'])
-                    //                        .'<img src="pix/del.png" alt="'.get_string("delete").'"/>'
+            if ($type == 'mine') {
+                $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=edit">'
+                    . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
+                    //                    .'<img src="pix/edit.png" alt="'.get_string("edit").'" />'
                     . '</a>';
-            } else {
-                $icons .= '<img src="pix/deleteview.png" alt="' . get_string("delete") . '">';
+                if ($allowedit = block_exaport_item_is_editable($item->id)) {
+                    $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id .
+                        '&action=delete&categoryid=' . $categoryid . '">'
+                        . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon'])
+                        //                        .'<img src="pix/del.png" alt="'.get_string("delete").'"/>'
+                        . '</a>';
+                } else {
+                    $icons .= '<img src="pix/deleteview.png" alt="' . get_string("delete") . '">';
+                }
             }
         }
-
-        } // end of else (non-extern_category icons)
 
         $icons = '<span class="excomdos_listicons">' . $icons . '</span>';
 
@@ -1083,9 +1036,6 @@ if ($layout == 'folder') {
 }
 
 foreach ($items as $item) {
-    if ($type == 'extern_category' && $externaccess_category) {
-        $item->extern_item_url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
-    }
     echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, ($layout == 'folder'));
 }
 
@@ -1397,15 +1347,8 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
                     count(exaport_get_category_shared_groups($category->id)) > 0 ||
                     (isset($category->shareall) && $category->shareall == 1));
             if ($issharedexternal || $issharedinternal) {
-                $sharedtooltipparts = [];
-                if ($issharedinternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
-                }
-                if ($issharedexternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedexternalcategory');
-                }
                 $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                    ['title' => implode(', ', $sharedtooltipparts)]);
+                    ['title' => block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal)]);
                 //                            echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
             if (@$category->structure_share) {
@@ -1607,4 +1550,3 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
     return 'something wrong!! (code: 1716990501476)';
 
 }
-

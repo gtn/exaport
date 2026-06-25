@@ -189,6 +189,22 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
 
 require_once("$CFG->libdir/formslib.php");
 
+/**
+ * Create a new unique category hash for external sharing URLs.
+ *
+ * @return string
+ * @throws Exception
+ */
+function block_exaport_generate_unique_category_hash(): string {
+    global $DB;
+
+    do {
+        $hash = bin2hex(random_bytes(4));
+    } while ($DB->record_exists('block_exaportcate', ['hash' => $hash]));
+
+    return $hash;
+}
+
 class simplehtml_form extends block_exaport_moodleform {
     // Add elements to form.
     public function definition() {
@@ -280,23 +296,14 @@ class simplehtml_form extends block_exaport_moodleform {
                     (!empty($category->externaccess) ? ' checked="checked"' : '') . ' />');
                 $mform->addElement('html', '</td><td>' . get_string('externalaccess', 'block_exaport') . '</td></tr>');
 
-                // Always prepare the external URL so it can be shown immediately.
-                // For existing categories with a hash, use the real URL.
-                // For new categories (or those without a hash), pre-generate one.
                 if (!empty($category->hash)) {
-                    $externhash = $category->hash;
-                } else {
-                    do {
-                        $externhash = bin2hex(random_bytes(4));
-                    } while ($DB->record_exists("block_exaportcate", array("hash" => $externhash)));
+                    // Existing categories keep their hash so already shared links stay stable.
+                    $externurl = block_exaport_get_external_category_url($category, $category->userid);
+                    $mform->addElement('html', '<tr id="externaccess-settings"><td></td><td>');
+                    $mform->addElement('html',
+                        '<div style="padding: 4px;"><a href="' . $externurl . '" target="_blank">' . $externurl . '</a></div>');
+                    $mform->addElement('html', '</td></tr>');
                 }
-                $externurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?access=hash/' .
-                    $category->userid . '-' . $externhash;
-
-                $mform->addElement('html', '<tr id="externaccess-settings"><td></td><td>');
-                $mform->addElement('html',
-                    '<div style="padding: 4px;"><a href="' . $externurl . '" target="_blank">' . $externurl . '</a></div>');
-                $mform->addElement('html', '</td></tr>');
 
                 // "Share comments in external portfolio" checkbox (mirrors view externcomment).
                 if (block_exaport_external_comments_enabled()) {
@@ -306,10 +313,6 @@ class simplehtml_form extends block_exaport_moodleform {
                         (!empty($category->externcomment) ? ' checked="checked"' : '') . ' />');
                     $mform->addElement('html', '</td><td>' . get_string('externcomment', 'block_exaport') . '</td></tr>');
                 }
-
-                // Store the pre-generated hash so it is submitted with the form.
-                $mform->addElement('hidden', 'hashvalue', $externhash);
-                $mform->setType('hashvalue', PARAM_ALPHANUM);
 
                 $mform->addElement('html', '<tr><td style="height: 10px"></td></tr>');
             }
@@ -434,18 +437,7 @@ if ($mform->is_cancelled()) {
         $newentry->hash = $existingcategory->hash;
     }
     if ($newentry->externaccess && empty($newentry->hash)) {
-        // Use the pre-generated hash from the form (shown to the user as the external URL).
-        $formhash = optional_param('hashvalue', '', PARAM_ALPHANUM);
-        if (!empty($formhash) && strlen($formhash) === 8
-                && !$DB->record_exists("block_exaportcate", array("hash" => $formhash))) {
-            $newentry->hash = $formhash;
-        } else {
-            // Fallback: generate a new hash.
-            do {
-                $hash = bin2hex(random_bytes(4));
-            } while ($DB->record_exists("block_exaportcate", array("hash" => $hash)));
-            $newentry->hash = $hash;
-        }
+        $newentry->hash = block_exaport_generate_unique_category_hash();
     }
 
     if ($newentry->id) {

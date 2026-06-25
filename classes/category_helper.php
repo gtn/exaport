@@ -142,4 +142,62 @@ class category_helper {
 
         return $items;
     }
+
+    /**
+     * Load all categories (with item counts) for one owner.
+     *
+     * @param int $userid
+     * @return array
+     */
+    public static function load_owner_categories(int $userid): array {
+        global $DB;
+
+        $categorycolumns = \block_exaport\globals::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+        return $DB->get_records_sql("
+            SELECT
+                {$categorycolumns}
+                , COUNT(DISTINCT i.id) AS item_cnt
+            FROM {block_exaportcate} c
+            LEFT JOIN {block_exaportitemcate} ic ON ic.cateid = c.id
+            LEFT JOIN {block_exaportitem} i ON (
+                i.id = ic.itemid
+            ) AND " . block_exaport_get_item_where() . "
+            WHERE c.userid = ?
+            GROUP BY
+                {$categorycolumns}
+            ORDER BY c.name ASC
+        ", [$userid]);
+    }
+
+    /**
+     * Load items for one owner and one category.
+     *
+     * @param int $userid
+     * @param int $categoryid
+     * @param string $sqlsort
+     * @return array
+     */
+    public static function load_owner_category_items(int $userid, int $categoryid, string $sqlsort): array {
+        global $DB;
+
+        return $DB->get_records_sql("
+            SELECT DISTINCT i.*, COUNT(com.id) As comments
+            FROM {block_exaportitem} i
+            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+            WHERE i.userid = ?
+                AND EXISTS (
+                    SELECT 1
+                    FROM {block_exaportitemcate} ic
+                    WHERE ic.itemid = i.id
+                      AND ic.cateid = ?
+                )
+                AND " . block_exaport_get_item_where() .
+            " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
+            i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
+            i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
+            i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
+            i.iseditable, i.example_url, i.parentid
+            $sqlsort
+        ", [$userid, $categoryid]);
+    }
 }

@@ -75,9 +75,10 @@ class item_card extends card {
         $courseid   = $this->courseid;
         $type       = $this->type;
         $categoryid = $this->categoryid;
+        $isexternalreadonly = ($type === 'extern_category');
 
-        // For external category access, use the pre-computed URL.
-        if ($type === 'extern_category' && !empty($item->extern_item_url)) {
+        // External category pages are read-only and must keep the category access token.
+        if ($isexternalreadonly && !empty($item->extern_item_url)) {
             $url = $item->extern_item_url;
         } else {
             $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid
@@ -128,8 +129,8 @@ class item_card extends card {
             'typeicon'      => '<i class="icon fa fa-' . s($iconTypeProps['iconName']) . ' fa-fw me-1"'
                                . ' data-bs-toggle="tooltip" data-bs-placement="top"'
                                . ' data-bs-title="' . s($typelabel) . '"></i>',
-            'canedit'       => $isownitem && $type !== 'extern_category',
-            'candelete'     => $isownitem && $type !== 'extern_category' && block_exaport_item_is_editable($item->id),
+            'canedit'       => $isownitem && !$isexternalreadonly,
+            'candelete'     => $isownitem && !$isexternalreadonly && block_exaport_item_is_editable($item->id),
             'introtext'     => $introtext,
             'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
             'commentlabel'  => $commentlabel,

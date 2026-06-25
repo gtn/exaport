@@ -1448,7 +1448,8 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
         }
     }
 
-    $url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
+    $url = !empty($item->extern_item_url) ? $item->extern_item_url
+        : $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
     $itemContent .= '
         <div class="excomdos_tile excomdos_tile_item exaport-flat-item id-' . $item->id . '" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemcatids)) . '" data-item-date="' . (int)$item->timemodified . '">
             <div class="excomdos_tilehead">

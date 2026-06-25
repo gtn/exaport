@@ -66,20 +66,33 @@ class category_card extends card {
         $outerclasses = $isparenttile ? 'col mb-4 exaport-folder-category' : 'col col-card-folder mb-4 exaport-folder-category';
         $tilefixedclass = $isparenttile ? 'excomdos_tile_fixed ' : '';
         $isshared = false;
+        $issharedinternal = false;
+        $issharedexternal = false;
 
         if (!$isparenttile) {
             if ($this->type == 'shared' || $this->type == 'sharedstudent') {
                 $isshared = true;
+                $issharedinternal = true;
             } else if ($this->type == 'mine') {
-                $isshared = !empty($this->category->externaccess) || (
-                    !empty($this->category->internshare) && (
-                        count(exaport_get_category_shared_users($this->category->id)) > 0 ||
-                        count(exaport_get_category_shared_groups($this->category->id)) > 0 ||
-                        (!empty($this->category->shareall) && (int)$this->category->shareall == 1)
-                    )
+                $issharedexternal = !empty($this->category->externaccess);
+                $issharedinternal = !empty($this->category->internshare) && (
+                    count(exaport_get_category_shared_users($this->category->id)) > 0 ||
+                    count(exaport_get_category_shared_groups($this->category->id)) > 0 ||
+                    (!empty($this->category->shareall) && (int)$this->category->shareall == 1)
                 );
+                $isshared = $issharedexternal || $issharedinternal;
             }
         }
+
+        // Build tooltip text based on share type.
+        $sharedtooltipparts = [];
+        if ($issharedinternal) {
+            $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
+        }
+        if ($issharedexternal) {
+            $sharedtooltipparts[] = block_exaport_get_string('sharedwith_shareexternal');
+        }
+        $sharedtooltip = implode(', ', $sharedtooltipparts);
 
         return $this->base_icons() + [
             'outerclasses'   => $outerclasses,
@@ -107,7 +120,7 @@ class category_card extends card {
                 [
                     'data-bs-toggle' => 'tooltip',
                     'data-bs-placement' => 'top',
-                    'data-bs-title' => block_exaport_get_string('sharedwithotherusers'),
+                    'data-bs-title' => $sharedtooltip,
                 ]
             ),
             'categorylabel'  => block_exaport_get_string('category'),

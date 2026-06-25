@@ -882,13 +882,21 @@ $useManualTable = ($layout == 'flat');
 
         if ($type == 'mine' && $category->id > 0) {
             $table->data[$itemind]['icons'] = '<span class="excomdos_listicons">';
-            if (!empty($category->externaccess) || (
-                (isset($category->internshare) && $category->internshare == 1) &&
+            $issharedexternal = !empty($category->externaccess);
+            $issharedinternal = (isset($category->internshare) && $category->internshare == 1) &&
                 (count(exaport_get_category_shared_users($category->id)) > 0 ||
                     count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                    (isset($category->shareall) && $category->shareall == 1))
-            )) {
-                $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
+                    (isset($category->shareall) && $category->shareall == 1));
+            if ($issharedexternal || $issharedinternal) {
+                $sharedtooltipparts = [];
+                if ($issharedinternal) {
+                    $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
+                }
+                if ($issharedexternal) {
+                    $sharedtooltipparts[] = block_exaport_get_string('sharedwith_shareexternal');
+                }
+                $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
+                    ['title' => implode(', ', $sharedtooltipparts)]);
                 //                $table->data[$itemind]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
             if (@$category->structure_share) {
@@ -1383,11 +1391,20 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
             //                        echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
         } else {
             // Type == mine.
-            if (!empty($category->externaccess) || (
-                @$category->internshare && (count(exaport_get_category_shared_users($category->id)) > 0 ||
+            $issharedexternal = !empty($category->externaccess);
+            $issharedinternal = @$category->internshare && (count(exaport_get_category_shared_users($category->id)) > 0 ||
                     count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                    (isset($category->shareall) && $category->shareall == 1)))) {
-                $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
+                    (isset($category->shareall) && $category->shareall == 1));
+            if ($issharedexternal || $issharedinternal) {
+                $sharedtooltipparts = [];
+                if ($issharedinternal) {
+                    $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
+                }
+                if ($issharedexternal) {
+                    $sharedtooltipparts[] = block_exaport_get_string('sharedwith_shareexternal');
+                }
+                $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
+                    ['title' => implode(', ', $sharedtooltipparts)]);
                 //                            echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
             if (@$category->structure_share) {

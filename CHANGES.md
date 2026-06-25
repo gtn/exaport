@@ -1,3 +1,12 @@
+### v5.1 (2026062400) ###
+* Rework: Categories and items now don't have a 1:m relationship but an m:n relationship. This allows users to assign multiple categories to a single item and vice versa. The database schema has been updated accordingly, and the UI has been adjusted to support multi-category selection.
+* New feature: Flat view of the categories, added to the previously existing folder view.
+* New filters: Real-time search and multi-select category filters in flat/folder layouts
+* Improvement: Persistent filter state and user preference storage
+* Improvement: Updated modal API for better Moodle 4.x compatibility
+* New feature: Notifications for shared categories, just like they already existed for shared views.
+* Moodle 5.2 compatibility: badges award API refactored
+
 ### v5.1 (2026052800) ###
 * New admin setting: Administrators can now individually show or hide each navigation area (Why ePortfolio, My CV, My Portfolio Artefacts, My Views, Shared Portfolios, Shared Categories, Import/Export, Preset Structure) via the plugin settings page. Hidden areas are blocked from user access.
 * New admin setting: The Moodle course navigation bar (Course, Participants, Grades, etc.) can be hidden on all Exaport pages for a cleaner interface.

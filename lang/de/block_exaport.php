@@ -379,6 +379,7 @@ $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
 $string['sharedwith_shareall'] = 'Mit allen Benutzer::innen geteilt';
 $string['sharedwith_shareexternal'] = 'Geteilte externe Views';
+$string['sharedexternalcategory'] = 'Extern geteilt';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 $string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
 

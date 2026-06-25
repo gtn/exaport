@@ -111,7 +111,6 @@ $string['internalaccessall'] = 'Access for <span class=\'block_eportfolio_bold\'
 $string['internalaccessusers'] = 'Access only for the following users';
 $string['internalaccessgroups'] = 'Access only for the following groups';
 $string['externaccess'] = 'external ePortfolio-Link';
-$string['externaccess_category'] = 'External category link';
 $string['emailaccess'] = 'Share by Email';
 $string['emailaccessdescription'] = 'Input an email address per line<br />Each email will receive a unique link with access to this view. Deleting the email will remove access to this view.';
 $string['emailaccessmessagesubject'] = 'New shared View for you';
@@ -381,6 +380,7 @@ $string['sharedwithotherusers'] = 'shared with other users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
+$string['sharedexternalcategory'] = 'Shared externally';
 $string['sharedwith_group'] = 'Shared with my group';
 $string['sharedwith_group_cnt'] = 'Shared with {$a} groups';
 

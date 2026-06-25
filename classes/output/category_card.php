@@ -90,7 +90,7 @@ class category_card extends card {
             $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
         }
         if ($issharedexternal) {
-            $sharedtooltipparts[] = block_exaport_get_string('sharedwith_shareexternal');
+            $sharedtooltipparts[] = block_exaport_get_string('sharedexternalcategory');
         }
         $sharedtooltip = implode(', ', $sharedtooltipparts);
 

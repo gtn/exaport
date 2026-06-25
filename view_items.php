@@ -535,7 +535,8 @@ if ($type == 'extern_category' && $externaccess_category) {
 
     $PAGE->requires->css('/blocks/exaport/css/shared_view.css');
     $PAGE->set_title(get_string('externaccess', 'block_exaport'));
-    $PAGE->set_heading(get_string('externaccess', 'block_exaport') . ' ' . fullname($owner));
+    // set_heading() does not auto-escape, so escape the user-controlled name to prevent XSS.
+    $PAGE->set_heading(get_string('externaccess', 'block_exaport') . ' ' . s(fullname($owner)));
 
     block_exaport_add_iconpack();
 
@@ -893,7 +894,7 @@ $useManualTable = ($layout == 'flat');
                     $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
                 }
                 if ($issharedexternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedwith_shareexternal');
+                    $sharedtooltipparts[] = block_exaport_get_string('sharedexternalcategory');
                 }
                 $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
                     ['title' => implode(', ', $sharedtooltipparts)]);
@@ -1401,7 +1402,7 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
                     $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
                 }
                 if ($issharedexternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedwith_shareexternal');
+                    $sharedtooltipparts[] = block_exaport_get_string('sharedexternalcategory');
                 }
                 $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
                     ['title' => implode(', ', $sharedtooltipparts)]);

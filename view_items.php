@@ -393,10 +393,10 @@ if ($type == 'sharedstudent') {
     }
 
     $categories = \block_exaport\category_helper::load_owner_categories($externaccess_category->userid);
-    $externalcategorybaseurl = block_exaport_get_external_category_url($externaccess_category, $externaccess_category->userid);
+    $external_category_base_url = block_exaport_get_external_category_url($externaccess_category, $externaccess_category->userid);
 
     foreach ($categories as $category) {
-        $category->url = $externalcategorybaseurl . '&categoryid=' . $category->id;
+        $category->url = $external_category_base_url . '&categoryid=' . $category->id;
         $category->icon = block_exaport_get_category_icon($category);
     }
 

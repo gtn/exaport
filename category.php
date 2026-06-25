@@ -298,7 +298,7 @@ class simplehtml_form extends block_exaport_moodleform {
                     (!empty($category->externaccess) ? ' checked="checked"' : '') . ' />');
                 $mform->addElement('html', '</td><td>' . get_string('externalaccess', 'block_exaport') . '</td></tr>');
 
-                $externlinkhtml = '<span class="text-muted">' . get_string('savechanges', 'admin') . '</span>';
+                $externlinkhtml = '<span class="text-muted">&mdash;</span>';
                 if (!empty($category->hash)) {
                     // Existing categories keep their hash so already shared links stay stable.
                     $externurl = block_exaport_get_external_category_url($category, $category->userid);

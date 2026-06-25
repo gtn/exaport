@@ -362,7 +362,7 @@ if ($editform->is_cancelled()) {
     if (!$view || !isset($view->hash)) {
         // Generate view hash.
         do {
-            $hash = substr(md5(microtime()), 3, 8);
+            $hash = substr(bin2hex(random_bytes(4)), 0, 8);
         } while ($DB->record_exists("block_exaportview", array("hash" => $hash)));
         $dbview->hash = $hash;
     }

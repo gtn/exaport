@@ -81,7 +81,7 @@ class view_distributor {
         $viewid = $DB->insert_record('block_exaportview', $view);
 
         // Generate hash for the view.
-        $hash = substr(md5(microtime()), 3, 8);
+        $hash = substr(bin2hex(random_bytes(4)), 0, 8);
         $DB->set_field('block_exaportview', 'hash', $hash, array('id' => $viewid));
 
         // Share to course teachers if requested (ONLY for newly created views).

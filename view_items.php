@@ -490,8 +490,8 @@ if ($type == 'sharedstudent') {
     }
 }
 
-$isexternalreadonlyitems = $isexterncategory && !empty($canonicalaccess);
-if ($isexternalreadonlyitems) {
+$isexternalreadonlymode = $isexterncategory && !empty($canonicalaccess);
+if ($isexternalreadonlymode) {
     foreach ($items as $item) {
         // Read-only external item links must keep the category access token (not portfolio/id/...).
         $item->extern_item_url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
@@ -934,7 +934,7 @@ $useManualTable = ($layout == 'flat');
 
         $icons = '';
 
-        if (!$isexternalreadonlyitems) {
+        if (!$isexternalreadonlymode) {
             // Link to export to my portfolio.
             if ($currentcategory->id == -1) {
                 $rowdata['icons'] = '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid .

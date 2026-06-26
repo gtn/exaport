@@ -195,6 +195,25 @@ function block_exaport_external_comments_enabled() {
     return empty($CFG->block_exaport_disable_external_comments);
 }
 
+/**
+ * Generate a unique 8-character hex hash for the given table's hash column.
+ *
+ * Uses a do-while loop to guarantee the generated token does not already exist
+ * in the database, preventing hash collisions on high-traffic sites.
+ *
+ * @param string $table  Unprefixed table name, e.g. 'block_exaportview'.
+ * @return string        8-character lowercase hex string.
+ */
+function block_exaport_generate_unique_hash(string $table): string {
+    global $DB;
+
+    do {
+        $hash = bin2hex(random_bytes(4));
+    } while ($DB->record_exists($table, ['hash' => $hash]));
+
+    return $hash;
+}
+
 function block_exaport_setup_default_categories() {
     global $DB, $USER, $CFG;
     if (block_exaport_course_has_desp() && !$DB->record_exists('block_exaportcate', array('userid' => $USER->id))

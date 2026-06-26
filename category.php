@@ -286,9 +286,7 @@ class simplehtml_form extends block_exaport_moodleform {
                 if (!empty($category->hash)) {
                     $externhash = $category->hash;
                 } else {
-                    do {
-                        $externhash = bin2hex(random_bytes(4));
-                    } while ($DB->record_exists("block_exaportcate", array("hash" => $externhash)));
+                    $externhash = block_exaport_generate_unique_hash('block_exaportcate');
                 }
                 $externurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?access=hash/' .
                     $category->userid . '-' . $externhash;
@@ -440,11 +438,7 @@ if ($mform->is_cancelled()) {
                 && !$DB->record_exists("block_exaportcate", array("hash" => $formhash))) {
             $newentry->hash = $formhash;
         } else {
-            // Fallback: generate a new hash.
-            do {
-                $hash = bin2hex(random_bytes(4));
-            } while ($DB->record_exists("block_exaportcate", array("hash" => $hash)));
-            $newentry->hash = $hash;
+            $newentry->hash = block_exaport_generate_unique_hash('block_exaportcate');
         }
     }
 

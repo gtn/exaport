@@ -55,7 +55,11 @@ if ($access && preg_match('!^hash/[0-9]+-[a-zA-Z0-9]{8}$!', $access)) {
     }
 
     $type = 'extern_category';
-    $categoryid = $externaccess_category->id;
+    // Keep any categoryid supplied in the URL so folder navigation works; only fall back to the
+    // shared root when none was given. The value is validated against the shared subtree below.
+    if (!$categoryid) {
+        $categoryid = $externaccess_category->id;
+    }
     $userid = $externaccess_category->userid;
 } else if ($wstoken) {
     $webservicelib = new webservice();

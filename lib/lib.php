@@ -204,12 +204,12 @@ function block_exaport_external_comments_enabled() {
  * @param string $table  Unprefixed table name, e.g. 'block_exaportview'.
  * @return string        8-character lowercase hex string.
  */
-function block_exaport_generate_unique_hash(string $table): string {
+function block_exaport_generate_unique_hash(string $table, string $field = 'hash'): string {
     global $DB;
 
     do {
         $hash = bin2hex(random_bytes(4));
-    } while ($DB->record_exists($table, ['hash' => $hash]));
+    } while ($DB->record_exists($table, [$field => $hash]));
 
     return $hash;
 }
@@ -699,12 +699,8 @@ function block_exaport_get_user_preferences($userid = null) {
     $userpreferences = block_exaport_get_user_preferences_record($userid);
 
     if (!$userpreferences || !$userpreferences->user_hash) {
-        do {
-            $hash = substr(md5(uniqid(rand(), true)), 3, 8);
-        } while ($DB->record_exists("block_exaportuser", array("user_hash" => $hash)));
-
+        $hash = block_exaport_generate_unique_hash('block_exaportuser', 'user_hash');
         block_exaport_set_user_preferences($userid, array('user_hash' => $hash, 'description' => ''));
-
         $userpreferences = block_exaport_get_user_preferences_record($userid);
     }
 

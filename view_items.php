@@ -392,7 +392,16 @@ if ($type == 'sharedstudent') {
         print_error('category_not_found', 'block_exaport');
     }
 
+    // External viewers may navigate only inside the shared root category and its descendants.
+    $allowedids = block_exaport_get_owned_category_tree_ids($externaccess_category->id, $externaccess_category->userid);
+
+    // Load the owner's categories, then immediately restrict to the shared subtree so that flat mode,
+    // the category filter dropdown and path names can never reveal categories outside what was shared.
     $categories = \block_exaport\category_helper::load_owner_categories($externaccess_category->userid);
+    $categories = array_filter($categories, function($cat) use ($allowedids) {
+        return in_array((int)$cat->id, $allowedids);
+    });
+
     $external_category_base_url = block_exaport_get_external_category_url($externaccess_category, $externaccess_category->userid);
 
     foreach ($categories as $category) {
@@ -400,44 +409,49 @@ if ($type == 'sharedstudent') {
         $category->icon = block_exaport_get_category_icon($category);
     }
 
+    // Built from the already-restricted set, so it only ever contains shared categories.
     $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
 
     if (!isset($categories[$categoryid])) {
+        // categoryid is either outside the shared subtree or unknown; both must fail closed.
         print_error('category_not_found', 'block_exaport');
     }
 
     $currentcategory = $categories[$categoryid];
 
-    // External viewers may navigate only inside the shared root category and its descendants.
-    $allowedids = block_exaport_get_owned_category_tree_ids($externaccess_category->id, $externaccess_category->userid);
-    if (!in_array((int)$currentcategory->id, $allowedids)) {
-        print_error('category_not_found', 'block_exaport');
-    }
-
-    $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
-    // Filter subcategories to only those within the shared tree.
-    $subcategories = array_filter($subcategories, function($cat) use ($allowedids) {
-        return in_array((int)$cat->id, $allowedids);
-    });
-
-    if ($currentcategory->id != $externaccess_category->id && isset($categories[$currentcategory->pid])
-        && in_array((int)$currentcategory->pid, $allowedids)) {
-        $parentcategory = $categories[$currentcategory->pid];
-    } else if ($currentcategory->id != $externaccess_category->id) {
-        // Go back to shared root.
-        $parentcategory = $categories[$externaccess_category->id];
-    } else {
+    if ($layout == 'flat') {
+        // Flat mode for external viewers: list every item in the shared subtree (and nothing outside it).
+        // The shared root is used as the display context; navigation chrome is hidden in flat mode.
+        $currentcategory = $categories[$externaccess_category->id];
         $parentcategory = null;
+        $subcategories = [];
+        $items = \block_exaport\category_helper::load_owner_flat_items(
+            $externaccess_category->userid,
+            $allowedids,
+            $sqlsort,
+            $categories
+        );
+    } else {
+        $layout = 'folder';
+
+        // Subcategories are already restricted to the shared subtree via $categories above.
+        $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
+
+        if ($currentcategory->id != $externaccess_category->id && isset($categories[$currentcategory->pid])) {
+            $parentcategory = $categories[$currentcategory->pid];
+        } else if ($currentcategory->id != $externaccess_category->id) {
+            // Go back to shared root.
+            $parentcategory = $categories[$externaccess_category->id];
+        } else {
+            $parentcategory = null;
+        }
+
+        $items = \block_exaport\category_helper::load_owner_category_items(
+            $externaccess_category->userid,
+            $currentcategory->id,
+            $sqlsort
+        );
     }
-
-    $items = \block_exaport\category_helper::load_owner_category_items(
-        $externaccess_category->userid,
-        $currentcategory->id,
-        $sqlsort
-    );
-
-    // Force folder layout for external access (no flat mode for external viewers).
-    $layout = 'folder';
 
 } else {
     // Read all categories.
@@ -684,11 +698,72 @@ if ($type == 'mine' && $layout == 'folder') {
         $categorychildrenmap,
         (int)$categoryid
     ]);
+} else if ($isexterncategory && $layout == 'flat') {
+    // External flat filter bar: search + category dropdown + sort + subcategory filtering.
+    // $categories is already restricted to the shared subtree, so every option here is a shared
+    // category only. No "other users" or create controls: the external view is single-owner/read-only.
+    $filtercategories = [];
+    foreach ($categories as $category) {
+        $filtercategories[(int)$category->id] = \block_exaport\category_helper::full_path_name($category->id, $categories);
+    }
+
+    echo '<div class="exaport-flat-filter mb-3">';
+    // Row 1: search + sort + category dropdown.
+    echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-flat');
+    echo '<div style="min-width: 200px; max-width: 350px;">';
+    echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string('category', 'block_exaport') . '</label>';
+    echo '<select id="exaport-flat-category-select" class="form-control custom-select">';
+    echo '<option value="">' . get_string('category', 'block_exaport') . '</option>';
+    foreach ($filtercategories as $catid => $catname) {
+        echo '<option value="' . $catid . '">' . s($catname) . '</option>';
+    }
+    echo '</select>';
+    echo '</div>';
+    echo '</div>';
+    // Row 2: "show items from subcategories" checkbox.
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
+    echo get_string('show_items_from_subcategories', 'block_exaport');
+    echo '</label>';
+    echo '</div>';
+    echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    echo '</div>';
+
+    // Build category children map for JS (parent_id => [child_id, ...]), shared categories only.
+    $categorychildrenmap = [];
+    foreach ($categories as $cat) {
+        $pid = (int)$cat->pid;
+        if (!isset($categorychildrenmap[$pid])) {
+            $categorychildrenmap[$pid] = [];
+        }
+        $categorychildrenmap[$pid][] = (int)$cat->id;
+    }
+
+    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
+        get_string('clearAllFilers', 'block_exaport'),
+        get_string('searchcategory', 'block_exaport'),
+        $categorychildrenmap,
+        0
+    ]);
 }
 
 if ($isexterncategory) {
-    // External category access: show category heading, no layout/filter controls.
+    // External category access: show category heading + folder/flat toggle only.
+    // Flat mode is scoped to the shared subtree (see data loading above), so it never leaks
+    // unshared categories. No tiles/details/print/other-users controls in the read-only external view.
     echo '<h2>' . format_string($currentcategory->name) . '</h2>';
+    echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
+    echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
+    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+        . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
+        . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
+    // Flat link resets categoryid: flat mode always lists the whole shared subtree from its root.
+    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'categoryid' => $externaccess_category->id]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+        . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
+        . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
+    echo '</div>';
+    echo '</div>';
 } else {
     echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 

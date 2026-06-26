@@ -203,4 +203,80 @@ class category_helper {
             $sqlsort
         ", [$userid, $categoryid]);
     }
+
+    /**
+     * Load items for one owner across a set of categories (flat mode), restricted to those categories only.
+     *
+     * Used by the external (hash) shared-category view: it must list every item inside the shared
+     * subtree but never anything outside it, so callers pass the allowed shared category IDs only.
+     * Each returned item gets ->flatcategories populated with its (allowed) category paths, matching
+     * the data shape that the flat-mode renderer/filter expects.
+     *
+     * @param int $userid The owner whose items to load.
+     * @param array $allowedcategoryids The shared category IDs the viewer is permitted to see.
+     * @param string $sqlsort SQL ORDER BY clause.
+     * @param array $categories All (allowed) categories keyed by id, for path name resolution.
+     * @return array The items array with ->flatcategories populated.
+     */
+    public static function load_owner_flat_items(int $userid, array $allowedcategoryids, string $sqlsort,
+                                                 array $categories): array {
+        global $DB;
+
+        if (empty($allowedcategoryids)) {
+            // No shared categories => no items; avoid an empty IN() clause.
+            return [];
+        }
+
+        // Only items that belong to at least one allowed (shared) category of this owner.
+        [$catinsql, $catinparams] = $DB->get_in_or_equal($allowedcategoryids, SQL_PARAMS_QM);
+        $sql = "SELECT DISTINCT i.*, COUNT(com.id) AS comments
+                FROM {block_exaportitem} i
+                LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
+                WHERE i.userid = ?
+                    AND EXISTS (
+                        SELECT 1
+                        FROM {block_exaportitemcate} ic
+                        WHERE ic.itemid = i.id
+                          AND ic.cateid $catinsql
+                    )
+                    AND " . block_exaport_get_item_where() .
+            " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
+            i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
+            i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
+            i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
+            i.iseditable, i.example_url, i.parentid
+            $sqlsort";
+        $params = array_merge([$userid], $catinparams);
+        $items = $DB->get_records_sql($sql, $params);
+
+        if (!$items) {
+            return [];
+        }
+
+        // Attach category paths, but only for the allowed categories so we never leak unshared ones.
+        $itemids = array_keys($items);
+        [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
+        [$cateinsql, $cateinparams] = $DB->get_in_or_equal($allowedcategoryids, SQL_PARAMS_QM);
+        $catsql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
+                FROM {block_exaportitemcate} ic
+                JOIN {block_exaportcate} c ON c.id = ic.cateid
+                WHERE ic.itemid $iteminsql
+                  AND c.id $cateinsql
+                  AND c.userid = ?
+                ORDER BY c.name ASC";
+        $catparams = array_merge($iteminparams, $cateinparams, [$userid]);
+        $itemcategories = $DB->get_records_sql($catsql, $catparams);
+
+        $categoriesbyitem = [];
+        foreach ($itemcategories as $itemcategory) {
+            $itemcategory->name = self::full_path_name($itemcategory->id, $categories);
+            $categoriesbyitem[$itemcategory->itemid][] = $itemcategory;
+        }
+
+        foreach ($items as $item) {
+            $item->flatcategories = $categoriesbyitem[$item->id] ?? [];
+        }
+
+        return $items;
+    }
 }

@@ -931,9 +931,7 @@ class externallib extends \external_api {
         ]);
 
         // Generate view hash, external share is on by default!
-        do {
-            $hash = bin2hex(random_bytes(4));
-        } while ($DB->record_exists("block_exaportview", array("hash" => $hash)));
+        $hash = block_exaport_generate_unique_hash('block_exaportview');
 
         // Add default PDF settings
         // only 'username' enabled

@@ -361,10 +361,7 @@ if ($editform->is_cancelled()) {
     $dbview->timemodified = time();
     if (!$view || !isset($view->hash)) {
         // Generate view hash.
-        do {
-            $hash = bin2hex(random_bytes(4));
-        } while ($DB->record_exists("block_exaportview", array("hash" => $hash)));
-        $dbview->hash = $hash;
+        $dbview->hash = block_exaport_generate_unique_hash('block_exaportview');
     }
 
     if ($type == 'share') {

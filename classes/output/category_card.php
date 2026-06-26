@@ -84,15 +84,7 @@ class category_card extends card {
             }
         }
 
-        // Build tooltip text based on share type.
-        $sharedtooltipparts = [];
-        if ($issharedinternal) {
-            $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
-        }
-        if ($issharedexternal) {
-            $sharedtooltipparts[] = block_exaport_get_string('sharedexternalcategory');
-        }
-        $sharedtooltip = implode(', ', $sharedtooltipparts);
+        $sharedtooltip = block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal);
 
         return $this->base_icons() + [
             'outerclasses'   => $outerclasses,

@@ -39,6 +39,24 @@ namespace {
         return $CFG->wwwroot . '/blocks/exaport/view_items.php?access=hash/' . $userid . '-' . $category->hash;
     }
 
+    /**
+     * Build the category sharing tooltip text from internal/external state.
+     *
+     * @param bool $issharedinternal
+     * @param bool $issharedexternal
+     * @return string
+     */
+    function block_exaport_get_category_share_tooltip(bool $issharedinternal, bool $issharedexternal): string {
+        $parts = [];
+        if ($issharedinternal) {
+            $parts[] = block_exaport_get_string('sharedwithotherusers');
+        }
+        if ($issharedexternal) {
+            $parts[] = block_exaport_get_string('sharedexternalcategory');
+        }
+        return implode(', ', $parts);
+    }
+
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
         global $DB;
 

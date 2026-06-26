@@ -860,15 +860,8 @@ $useManualTable = ($layout == 'flat');
                     count(exaport_get_category_shared_groups($category->id)) > 0 ||
                     (isset($category->shareall) && $category->shareall == 1));
             if ($issharedexternal || $issharedinternal) {
-                $sharedtooltipparts = [];
-                if ($issharedinternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
-                }
-                if ($issharedexternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedexternalcategory');
-                }
                 $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                    ['title' => implode(', ', $sharedtooltipparts)]);
+                    ['title' => block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal)]);
                 //                $table->data[$itemind]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
             if (@$category->structure_share) {
@@ -1368,15 +1361,8 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
                     count(exaport_get_category_shared_groups($category->id)) > 0 ||
                     (isset($category->shareall) && $category->shareall == 1));
             if ($issharedexternal || $issharedinternal) {
-                $sharedtooltipparts = [];
-                if ($issharedinternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedwithotherusers');
-                }
-                if ($issharedexternal) {
-                    $sharedtooltipparts[] = block_exaport_get_string('sharedexternalcategory');
-                }
                 $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                    ['title' => implode(', ', $sharedtooltipparts)]);
+                    ['title' => block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal)]);
                 //                            echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
             if (@$category->structure_share) {

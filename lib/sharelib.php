@@ -35,7 +35,7 @@ namespace {
         if ($userid == -1) {
             $userid = $USER->id;
         }
-        // We intentionally mirror the view URL format because that access parser pattern is already well-tested.
+        // Mirror the shared-view hash format to keep one predictable external access pattern.
         return $CFG->wwwroot . '/blocks/exaport/view_items.php?access=hash/' . $userid . '-' . $category->hash;
     }
 

@@ -719,19 +719,29 @@ if ($type == 'mine' && $layout == 'folder') {
 }
 
 if ($type === 'extern_category') {
-    // External category access: show category heading + folder/flat toggle only.
+    // External category access: show category heading + folder/flat toggle + tiles/details toggle.
     // Flat mode is scoped to the shared subtree (see data loading above), so it never leaks
-    // unshared categories. No tiles/details/print/other-users controls in the read-only external view.
+    // unshared categories. No print/other-users controls in the read-only external view.
     echo '<h2>' . format_string($currentcategory->name) . '</h2>';
     echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
     echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
-    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder']) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
         . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
         . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
     // Flat link resets categoryid: flat mode always lists the whole shared subtree from its root.
-    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'categoryid' => $externaccess_category->id]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'categoryid' => $externaccess_category->id, 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
         . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
         . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
+    echo '</div>';
+    echo '<div class="d-flex align-items-center" style="gap: 0.5rem;">';
+    echo '<div class="btn-group exaport-view-toggle" role="group" aria-label="View">';
+    echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="tiles">'
+        . block_exaport_fontawesome_icon('table-cells-large', 'solid', 1)
+        . ' ' . block_exaport_get_string("tiles") . '</a>';
+    echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="details">'
+        . block_exaport_fontawesome_icon('list', 'solid', 1)
+        . ' ' . block_exaport_get_string("details") . '</a>';
+    echo '</div>';
     echo '</div>';
     echo '</div>';
 } else {
@@ -765,18 +775,19 @@ if ($type === 'extern_category') {
     echo '</div>';
     echo '</div>';
 
-    $PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
-    $PAGE->requires->js_amd_inline('
-        document.addEventListener("DOMContentLoaded", function () {
-            if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) {
-                return;
-            }
-            document.querySelectorAll("[data-bs-toggle=\'tooltip\']").forEach(function (el) {
-                bootstrap.Tooltip.getOrCreateInstance(el);
-            });
-        });
-    ');
 }
+
+$PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
+$PAGE->requires->js_amd_inline('
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) {
+            return;
+        }
+        document.querySelectorAll("[data-bs-toggle=\'tooltip\']").forEach(function (el) {
+            bootstrap.Tooltip.getOrCreateInstance(el);
+        });
+    });
+');
 
 if ($layout == 'folder' && !($type === 'extern_category')) {
     echo '<div class="excomdos_cat">';

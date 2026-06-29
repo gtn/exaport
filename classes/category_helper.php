@@ -104,9 +104,10 @@ class category_helper {
         $itemids = array_keys($items);
         [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
 
-        // Belt-and-suspenders: restrict to the viewed user's own categories,
-        // even though items are already scoped by userid.
-        $is_viewing_other_user = ($allowedcategoryids === null && (int)$userid !== (int)$USER->id) || $owneronly;
+        // Belt-and-suspenders: restrict attached categories to $userid's own when we view someone
+        // else's items (other-user flat mode) or the external owner-only view, even though items are
+        // already scoped by userid.
+        $restricttoownercategories = ($allowedcategoryids === null && (int)$userid !== (int)$USER->id) || $owneronly;
 
         $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
                 FROM {block_exaportitemcate} ic
@@ -114,9 +115,7 @@ class category_helper {
                 WHERE ic.itemid $iteminsql";
         $params = $iteminparams;
 
-        // Belt-and-suspenders: restrict to the viewed user's own categories,
-        // even though items are already scoped by userid.
-        if ($is_viewing_other_user) {
+        if ($restricttoownercategories) {
             $sql .= " AND c.userid = ?";
             $params[] = $userid;
         }

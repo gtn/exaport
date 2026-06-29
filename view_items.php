@@ -96,7 +96,6 @@ if ($show_otherusers === -1) {
 if ($type != 'shared' && $type != 'sharedstudent' && $type != 'extern_category') {
     $type = 'mine';
 }
-$isexterncategory = ($type === 'extern_category');
 
 if ($type == 'mine' && empty($CFG->block_exaport_enable_myportfolio)) {
     print_error('areaisdisabled', 'block_exaport');
@@ -387,7 +386,7 @@ if ($type == 'sharedstudent') {
         }
     }
 
-} else if ($isexterncategory && $externaccess_category) {
+} else if (($type === 'extern_category') && $externaccess_category) {
     // External category mode is public/read-only: we only expose one owner's shared subtree.
     $canonicalaccess = 'hash/' . $externaccess_category->userid . '-' . $externaccess_category->hash;
 
@@ -512,7 +511,7 @@ if ($type == 'sharedstudent') {
     }
 }
 
-$isexternalreadonlymode = $isexterncategory && !empty($canonicalaccess);
+$isexternalreadonlymode = ($type === 'extern_category') && !empty($canonicalaccess);
 if ($isexternalreadonlymode) {
     foreach ($items as $item) {
         // Read-only external item links must keep the category access token (not portfolio/id/...).
@@ -521,7 +520,7 @@ if ($isexternalreadonlymode) {
 }
 
 // Build canonical URL with only navigation-defining params.
-if ($isexterncategory && $externaccess_category) {
+if (($type === 'extern_category') && $externaccess_category) {
     $pageparams = ['access' => $access];
     if ($categoryid != $externaccess_category->id) {
         $pageparams['categoryid'] = $categoryid;
@@ -550,7 +549,7 @@ if ($isexterncategory && $externaccess_category) {
 
 block_exaport_add_iconpack();
 
-if ($isexterncategory && $externaccess_category) {
+if (($type === 'extern_category') && $externaccess_category) {
     echo $OUTPUT->header();
     echo block_exaport_wrapperdivstart();
 } else {
@@ -703,7 +702,7 @@ if ($type == 'mine' && $layout == 'folder') {
         $categorychildrenmap,
         (int)$categoryid
     ]);
-} else if ($isexterncategory && $layout == 'flat') {
+} else if (($type === 'extern_category') && $layout == 'flat') {
     // External flat filter bar: search + category dropdown + sort + subcategory filtering.
     // $categories is already restricted to the shared subtree, so every option here is a shared
     // category only. No "other users" or create controls: the external view is single-owner/read-only.
@@ -753,7 +752,7 @@ if ($type == 'mine' && $layout == 'folder') {
     ]);
 }
 
-if ($isexterncategory) {
+if ($type === 'extern_category') {
     // External category access: show category heading + folder/flat toggle only.
     // Flat mode is scoped to the shared subtree (see data loading above), so it never leaks
     // unshared categories. No tiles/details/print/other-users controls in the read-only external view.
@@ -813,7 +812,7 @@ if ($isexterncategory) {
     ');
 }
 
-if ($layout == 'folder' && !$isexterncategory) {
+if ($layout == 'folder' && !($type === 'extern_category')) {
     echo '<div class="excomdos_cat">';
     echo block_exaport_get_string('current_category') . ': ';
 

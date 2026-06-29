@@ -195,13 +195,14 @@ class category_helper {
      * @return array
      */
     public static function load_shared_category_items(int $categoryid, string $sqlsort): array {
+        // i.userid > 0 keeps the original shared-view behaviour: any real owner's items, excluding userid 0.
         return self::load_category_items('i.userid > 0', [], $categoryid, $sqlsort);
     }
 
     /**
      * Load items for one category, restricted by an owner condition.
      *
-     * @param string $userwhere SQL condition selecting the relevant owner(s).
+     * @param string $userwhere SQL condition selecting the relevant owner(s); internal literal, never user input.
      * @param array $userparams Parameters used by the owner condition.
      * @param int $categoryid
      * @param string $sqlsort

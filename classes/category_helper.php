@@ -184,13 +184,36 @@ class category_helper {
      * @return array
      */
     public static function load_owner_category_items(int $userid, int $categoryid, string $sqlsort): array {
+        return self::load_category_items('i.userid = ?', [$userid], $categoryid, $sqlsort);
+    }
+
+    /**
+     * Load items in one category, accessible from shared views (any owner).
+     *
+     * @param int $categoryid
+     * @param string $sqlsort
+     * @return array
+     */
+    public static function load_shared_category_items(int $categoryid, string $sqlsort): array {
+        return self::load_category_items('i.userid > 0', [], $categoryid, $sqlsort);
+    }
+
+    /**
+     * Load items for one category, restricted by an owner condition.
+     *
+     * @param string $userwhere SQL condition selecting the relevant owner(s).
+     * @param array $userparams Parameters used by the owner condition.
+     * @param int $categoryid
+     * @param string $sqlsort
+     * @return array
+     */
+    private static function load_category_items(string $userwhere, array $userparams, int $categoryid, string $sqlsort): array {
         global $DB;
-        // TODO code duplication?
         return $DB->get_records_sql("
             SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i
             LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
-            WHERE i.userid = ?
+            WHERE $userwhere
                 AND EXISTS (
                     SELECT 1
                     FROM {block_exaportitemcate} ic
@@ -204,6 +227,6 @@ class category_helper {
             i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
             i.iseditable, i.example_url, i.parentid
             $sqlsort
-        ", [$userid, $categoryid]);
+        ", array_merge($userparams, [$categoryid]));
     }
 }

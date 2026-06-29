@@ -278,6 +278,15 @@ namespace {
         return $category;
     }
 
+    /**
+     * Recursive function to get all category IDs in the tree rooted at $categoryid that are owned by $userid.
+     * @param int $categoryid
+     * @param int $userid
+     * @param array $visited
+     * @return array
+     * @throws dml_exception
+     * @throws coding_exception
+     */
     function block_exaport_get_owned_category_tree_ids($categoryid, $userid, &$visited = []) {
         global $DB;
 

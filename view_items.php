@@ -223,6 +223,7 @@ if ($type == 'sharedstudent') {
             $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort);
         } else {
             // Common items.
+            // TODO code duplication?
             $items = $DB->get_records_sql("
                 SELECT DISTINCT i.*, COUNT(com.id) As comments
                 FROM {block_exaportitem} i
@@ -364,6 +365,7 @@ if ($type == 'sharedstudent') {
                 $usercondition = ' i.userid > 0 ';
             }
 
+            // TODO code duplication?
             $items = $DB->get_records_sql("
                 SELECT DISTINCT i.*, COUNT(com.id) As comments
                 FROM {block_exaportitem} i

@@ -185,7 +185,7 @@ class category_helper {
      */
     public static function load_owner_category_items(int $userid, int $categoryid, string $sqlsort): array {
         global $DB;
-
+        // TODO code duplication?
         return $DB->get_records_sql("
             SELECT DISTINCT i.*, COUNT(com.id) As comments
             FROM {block_exaportitem} i

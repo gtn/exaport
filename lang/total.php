@@ -1382,6 +1382,10 @@ return [
         'Geteilte externe Views',
         'Shared external',
     ],
+    'sharedexternalcategory' => [
+        'Extern geteilt',
+        'Shared externally',
+    ],
     'sharedwith_group' => [
         'Mit meiner Gruppe geteilt',
         'Shared with my group',

@@ -380,6 +380,7 @@ $string['sharedwithotherusers'] = 'shared with other users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
+$string['sharedexternalcategory'] = 'Shared externally';
 $string['sharedwith_group'] = 'Shared with my group';
 $string['sharedwith_group_cnt'] = 'Shared with {$a} groups';
 

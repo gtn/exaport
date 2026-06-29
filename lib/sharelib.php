@@ -30,6 +30,33 @@ namespace {
         return $CFG->wwwroot . '/blocks/exaport/shared_view.php?access=hash/' . $userid . '-' . $view->hash;
     }
 
+    function block_exaport_get_external_category_url(stdClass $category, $userid = -1) {
+        global $CFG, $USER;
+        if ($userid == -1) {
+            $userid = $USER->id;
+        }
+        // Mirror the shared-view hash format to keep one predictable external access pattern.
+        return $CFG->wwwroot . '/blocks/exaport/view_items.php?access=hash/' . $userid . '-' . $category->hash;
+    }
+
+    /**
+     * Build the category sharing tooltip text from internal/external state.
+     *
+     * @param bool $issharedinternal
+     * @param bool $issharedexternal
+     * @return string
+     */
+    function block_exaport_get_category_share_tooltip(bool $issharedinternal, bool $issharedexternal): string {
+        $parts = [];
+        if ($issharedinternal) {
+            $parts[] = block_exaport_get_string('sharedwithotherusers');
+        }
+        if ($issharedexternal) {
+            $parts[] = block_exaport_get_string('sharedexternalcategory');
+        }
+        return implode(', ', $parts);
+    }
+
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
         global $DB;
 
@@ -214,6 +241,81 @@ namespace {
         return $view;
     }
 
+    function block_exaport_get_category_from_access($access) {
+        global $DB;
+
+        if (!block_exaport_externaccess_enabled()) {
+            // Keep one central guard so all category external entry points fail closed when the feature is disabled.
+            return;
+        }
+
+        $accesspath = explode('/', $access);
+        if (count($accesspath) != 2 || $accesspath[0] !== 'hash') {
+            return;
+        }
+
+        $hashparts = explode('-', $accesspath[1]);
+        if (count($hashparts) != 2) {
+            return;
+        }
+
+        $userid = clean_param($hashparts[0], PARAM_INT);
+        $hash = clean_param($hashparts[1], PARAM_ALPHANUM);
+        if (empty($userid) || empty($hash) || strlen($hash) !== 8) {
+            // Category hashes are fixed-length (CHAR(8)); reject any unexpected token length early.
+            return;
+        }
+
+        // externaccess=1 is mandatory so a leaked old hash cannot be used after the owner disables sharing.
+        $conditions = ['userid' => $userid, 'hash' => $hash, 'externaccess' => 1];
+        $category = $DB->get_record('block_exaportcate', $conditions);
+        if (!$category) {
+            return;
+        }
+
+        $category->access = new stdClass();
+        $category->access->request = 'extern';
+        return $category;
+    }
+
+    /**
+     * Recursive function to get all category IDs in the tree rooted at $categoryid that are owned by $userid.
+     * @param int $categoryid
+     * @param int $userid
+     * @param array $visited
+     * @return array
+     * @throws dml_exception
+     * @throws coding_exception
+     */
+    function block_exaport_get_owned_category_tree_ids($categoryid, $userid, &$visited = []) {
+        global $DB;
+
+        $categoryid = clean_param($categoryid, PARAM_INT);
+        $userid = clean_param($userid, PARAM_INT);
+        if (empty($categoryid) || empty($userid)) {
+            return [];
+        }
+
+        if (isset($visited[$categoryid])) {
+            // Defensive loop-breaker: category trees should be acyclic, but we never trust data integrity blindly for access checks.
+            return [];
+        }
+
+        $rootcategory = $DB->get_record('block_exaportcate', ['id' => $categoryid, 'userid' => $userid], 'id');
+        if (!$rootcategory) {
+            return [];
+        }
+
+        $visited[$categoryid] = true;
+        $ids = [$categoryid];
+        $children = $DB->get_records('block_exaportcate', ['pid' => $categoryid, 'userid' => $userid], '', 'id');
+        foreach ($children as $child) {
+            $ids = array_merge($ids, block_exaport_get_owned_category_tree_ids($child->id, $userid, $visited));
+        }
+
+        return array_values(array_unique($ids));
+    }
+
     function block_exaport_get_item_epop($id, $user) {
         global $DB;
         $sql = "SELECT i.* FROM {block_exaportitem} i WHERE id=? AND userid=?";
@@ -362,6 +464,38 @@ namespace {
                 $item->allowComments = true;
                 $item->showComments = true;
             }
+        } else if (preg_match('!^category/(.+)$!', $access, $matches)) {
+            // External shared category mode.
+            if (!$category = block_exaport_get_category_from_access($matches[1])) {
+                return;
+            }
+
+            // Only allow files from items that belong to this shared category tree AND the owner.
+            $categoryids = block_exaport_get_owned_category_tree_ids($category->id, $category->userid);
+            if (empty($categoryids)) {
+                return;
+            }
+
+            [$insql, $params] = $DB->get_in_or_equal($categoryids, SQL_PARAMS_QM);
+            $params = array_merge([$itemid, $category->userid], $params);
+            $sql = "SELECT i.*
+                      FROM {block_exaportitem} i
+                      JOIN {block_exaportitemcate} ic ON ic.itemid = i.id
+                     WHERE i.id = ?
+                       AND i.userid = ?
+                       AND ic.cateid $insql";
+            $item = $DB->get_record_sql($sql, $params);
+            if (!$item) {
+                return;
+            }
+
+            $item->access = new stdClass();
+            $item->access->request = 'extern';
+            $item->access->page = 'category';
+            // External viewers are anonymous guests, so interactive operations are intentionally disabled.
+            $item->allowComments = false;
+            // Show comments read-only if the category owner enabled externcomment and the global setting allows it.
+            $item->showComments = block_exaport_external_comments_enabled() && !empty($category->externcomment);
         } else {
             return;
         }
@@ -1103,4 +1237,3 @@ namespace block_exaport {
         return $tree;
     }
 }
-

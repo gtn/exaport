@@ -17,6 +17,8 @@
 
 namespace block_exaport;
 
+use block_exaport\globals as g;
+
 defined('MOODLE_INTERNAL') || die();
 
 class category_helper {
@@ -73,10 +75,13 @@ class category_helper {
      *       other user's own categories when viewing someone else's items.
      *     - empty array: return no items.
      *     - non-empty array: only include these category IDs and remove items with no matching categories.
+     * @param bool $owneronly When true (used by the external hash shared-category view), restrict items and their
+     *     attached categories to $userid so only that owner's content inside the shared subtree is exposed; when
+     *     false, the non-empty category filter also includes other users' items shared into those categories.
      * @return array The items array with ->flatcategories populated.
      */
     public static function load_flat_items(int $userid, array $categories, string $sqlsort,
-                                           ?array $allowedcategoryids = null): array {
+                                           ?array $allowedcategoryids = null, bool $owneronly = false): array {
         global $DB, $USER;
 
         if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
@@ -84,7 +89,8 @@ class category_helper {
             return [];
         }
         if ($allowedcategoryids !== null) {
-            $items = block_exaport_get_items_by_category_and_user(0, $allowedcategoryids, $sqlsort, true);
+            // owneronly => withShared=false so the query restricts items to $userid only.
+            $items = block_exaport_get_items_by_category_and_user($userid, $allowedcategoryids, $sqlsort, !$owneronly);
         } else {
             // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
             // but they get filtered a few lines later with the unset()
@@ -98,9 +104,10 @@ class category_helper {
         $itemids = array_keys($items);
         [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
 
-        // Belt-and-suspenders: restrict to the viewed user's own categories,
-        // even though items are already scoped by userid.
-        $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+        // Belt-and-suspenders: restrict attached categories to $userid's own when we view someone
+        // else's items (other-user flat mode) or the external owner-only view, even though items are
+        // already scoped by userid.
+        $restricttoownercategories = ($allowedcategoryids === null && (int)$userid !== (int)$USER->id) || $owneronly;
 
         $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
                 FROM {block_exaportitemcate} ic
@@ -108,9 +115,7 @@ class category_helper {
                 WHERE ic.itemid $iteminsql";
         $params = $iteminparams;
 
-        // Belt-and-suspenders: restrict to the viewed user's own categories,
-        // even though items are already scoped by userid.
-        if ($is_viewing_other_user) {
+        if ($restricttoownercategories) {
             $sql .= " AND c.userid = ?";
             $params[] = $userid;
         }
@@ -141,5 +146,88 @@ class category_helper {
         }
 
         return $items;
+    }
+
+
+    /**
+     * Load all categories (with item counts) for one owner.
+     *
+     * @param int $userid
+     * @return array
+     */
+    public static function load_owner_categories(int $userid): array {
+        global $DB;
+
+        $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
+        return $DB->get_records_sql("
+            SELECT
+                {$categorycolumns}
+                , COUNT(DISTINCT i.id) AS item_cnt
+            FROM {block_exaportcate} c
+            LEFT JOIN {block_exaportitemcate} ic ON ic.cateid = c.id
+            LEFT JOIN {block_exaportitem} i ON (
+                i.id = ic.itemid
+            ) AND " . block_exaport_get_item_where() . "
+            WHERE c.userid = ?
+            GROUP BY
+                {$categorycolumns}
+            ORDER BY c.name ASC
+        ", [$userid]);
+    }
+
+    /**
+     * Load items for one owner and one category.
+     *
+     * @param int $userid
+     * @param int $categoryid
+     * @param string $sqlsort
+     * @return array
+     */
+    public static function load_owner_category_items(int $userid, int $categoryid, string $sqlsort): array {
+        return self::load_category_items('i.userid = ?', [$userid], $categoryid, $sqlsort);
+    }
+
+    /**
+     * Load items in one category, accessible from shared views (any owner).
+     *
+     * @param int $categoryid
+     * @param string $sqlsort
+     * @return array
+     */
+    public static function load_shared_category_items(int $categoryid, string $sqlsort): array {
+        // i.userid > 0 keeps the original shared-view behaviour: any real owner's items, excluding userid 0.
+        return self::load_category_items('i.userid > 0', [], $categoryid, $sqlsort);
+    }
+
+    /**
+     * Load items for one category, restricted by an owner condition.
+     *
+     * @param string $userwhere SQL condition selecting the relevant owner(s); internal literal, never user input.
+     * @param array $userparams Parameters used by the owner condition.
+     * @param int $categoryid
+     * @param string $sqlsort
+     * @return array
+     */
+    private static function load_category_items(string $userwhere, array $userparams, int $categoryid, string $sqlsort): array {
+        global $DB;
+        return $DB->get_records_sql("
+            SELECT DISTINCT i.*, COUNT(com.id) As comments
+            FROM {block_exaportitem} i
+            LEFT JOIN {block_exaportitemcomm} com on com.itemid = i.id
+            WHERE $userwhere
+                AND EXISTS (
+                    SELECT 1
+                    FROM {block_exaportitemcate} ic
+                    WHERE ic.itemid = i.id
+                      AND ic.cateid = ?
+                )
+                AND " . block_exaport_get_item_where() .
+            " GROUP BY i.id, i.userid, i.type, i.name, i.url, i.intro,
+            i.attachment, i.timemodified, i.courseid, i.shareall, i.externaccess,
+            i.externcomment, i.sortorder, i.isoez, i.fileurl, i.beispiel_url,
+            i.exampid, i.langid, i.beispiel_angabe, i.source, i.sourceid,
+            i.iseditable, i.example_url, i.parentid
+            $sqlsort
+        ", array_merge($userparams, [$categoryid]));
     }
 }

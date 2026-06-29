@@ -66,11 +66,7 @@
 
 .excomdos_cont .excomdos_listtable tr td.excomdos_listlastcol {
     word-wrap: break-word;
-
-    .
-    max-width:
-
-    300px;
+    max-width: 300px;
     min-width: 200px;
     overflow: hidden;
     width: 2em;
@@ -319,4 +315,8 @@
     position: absolute;
     right: 0;
     top: 0;
+}
+
+#exaport .exaport-view-section {
+    margin-top: 20px;
 }

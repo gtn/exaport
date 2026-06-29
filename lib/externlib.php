@@ -258,7 +258,7 @@ function block_exaport_print_extcomments($itemid) {
         echo '<td class="topic starter"><div class="author">';
         // Use helper function to get author name respecting privacy
         $fullname = block_exaport_get_comment_author_name($comment->userid);
-        $by = new object();
+        $by = new stdClass();
         $by->name = $fullname;
         $by->date = userdate($comment->timemodified);
         print_string('bynameondate', 'forum', $by);

@@ -23,9 +23,25 @@ jQueryExaport(function ($) {
 
   // Sharing.
   function update_sharing() {
-    // var share_text = '';
     var $form = $('#categoryform');
 
+    // Parent "Share" checkbox controls visibility of the sub-checkboxes container.
+    if ($form.find(':input[name="shareenabled"]').is(':checked')) {
+      $('#share-settings').show();
+    } else {
+      $('#share-settings').hide();
+    }
+
+    // External Access sub-checkbox: show/hide the external link.
+    if ($form.find(':input[name="externaccess"]').is(':checked')) {
+      $('#externaccess-settings').show();
+      $('#externcomment-settings').show();
+    } else {
+      $('#externaccess-settings').hide();
+      $('#externcomment-settings').hide();
+    }
+
+    // Internal Access sub-checkbox: show/hide the internal sharing options.
     if ($form.find(':input[name="internshare"]').is(':checked')) {
       $('#internaccess-settings').show();
       $('#internaccess-groups').hide();

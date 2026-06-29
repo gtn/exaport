@@ -198,7 +198,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
         $id = optional_param('id', 0, PARAM_INT);
         $category = $DB->get_record_sql('
-            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge
+            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash, c.externcomment
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
             ', array($USER->id, $id));
@@ -206,7 +206,11 @@ class simplehtml_form extends block_exaport_moodleform {
             $category = new stdClass;
             $category->shareall = 0;
             $category->id = 0;
+            $category->userid = $USER->id;
             $category->iconmerge = 0;
+            $category->externaccess = 0;
+            $category->hash = null;
+            $category->externcomment = 0;
         };
 
         // Don't forget the underscore!
@@ -249,60 +253,124 @@ class simplehtml_form extends block_exaport_moodleform {
         //        };
 
         // Sharing.
-        if (has_capability('block/exaport:shareintern', context_system::instance())) {
-            $mform->addElement('checkbox', 'internshare', get_string('share', 'block_exaport'));
-            $mform->setType('internshare', PARAM_INT);
-            $mform->add_exaport_help_button('internshare', 'forms.category.internshare');
-            $mform->addElement('html', '<div id="internaccess-settings" class="fitem">' .
-                '<div class="fitemtitle"></div><div class="felement">');
+        $canexternaccess = block_exaport_externaccess_enabled()
+            && has_capability('block/exaport:shareextern', context_system::instance());
+        $caninternaccess = has_capability('block/exaport:shareintern', context_system::instance());
 
-            // Output a hidden field with the config value alwaysnotifywhenshare (mirrors views_mod.php).
-            $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+        if ($canexternaccess || $caninternaccess) {
+            // Parent "Share" checkbox – checking it reveals sub-checkboxes for External / Internal access.
+            $shareenabled = !empty($category->externaccess) || !empty($category->internshare);
             $mform->addElement('html',
-                '<input type="hidden" id="alwaysnotifywhenshare" value="' . htmlspecialchars($alwaysnotifywhenshare) . '" />');
+                '<div class="fitem"><div class="fitemtitle"><label for="id_shareenabled">' .
+                get_string('share', 'block_exaport') .
+                '</label></div><div class="felement">' .
+                '<input type="checkbox" id="id_shareenabled" name="shareenabled" value="1"' .
+                ($shareenabled ? ' checked="checked"' : '') . ' />' .
+                '</div></div>');
 
-            $mform->addElement('html', '<div style="padding: 4px 0;"><table width=100%>');
-            // Share to all.
-            if (block_exaport_shareall_enabled()) {
-                $mform->addElement('html', '<tr><td>');
-                $mform->addElement('html', '<input type="radio" name="shareall" value="1"' .
-                    ($category->shareall == 1 ? ' checked="checked"' : '') . '/>');
-                $mform->addElement('html', '</td><td>' . get_string('internalaccessall', 'block_exaport') . '</td></tr>');
-                $mform->setType('shareall', PARAM_INT);
+            // Container for the two sub-checkboxes (hidden by JS when parent unchecked).
+            $mform->addElement('html', '<div id="share-settings">');
+            $mform->addElement('html', '<div style="padding: 4px 0 4px 22px"><table class="table_share">');
+
+            // --- External Access sub-checkbox ---
+            if ($canexternaccess) {
+                $mform->addElement('html', '<tr><td style="padding-right: 10px; width: 10px">');
+                $mform->addElement('html',
+                    '<input type="checkbox" id="id_externaccess" name="externaccess" value="1"' .
+                    (!empty($category->externaccess) ? ' checked="checked"' : '') . ' />');
+                $mform->addElement('html', '</td><td>' . get_string('externalaccess', 'block_exaport') . '</td></tr>');
+
+                // Always prepare the external URL so it can be shown immediately.
+                // For existing categories with a hash, use the real URL.
+                // For new categories (or those without a hash), pre-generate one.
+                if (!empty($category->hash)) {
+                    $externhash = $category->hash;
+                } else {
+                    $externhash = block_exaport_generate_unique_hash('block_exaportcate');
+                }
+                $externurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?access=hash/' .
+                    $category->userid . '-' . $externhash;
+
+                $mform->addElement('html', '<tr id="externaccess-settings"><td></td><td>');
+                $mform->addElement('html',
+                    '<div style="padding: 4px;"><a href="' . $externurl . '" target="_blank">' . $externurl . '</a></div>');
+                $mform->addElement('html', '</td></tr>');
+
+                // "Share comments in external portfolio" checkbox (mirrors view externcomment).
+                if (block_exaport_external_comments_enabled()) {
+                    $mform->addElement('html', '<tr id="externcomment-settings"><td style="padding-right: 10px; width: 10px">');
+                    $mform->addElement('html',
+                        '<input type="checkbox" id="id_externcomment" name="externcomment" value="1"' .
+                        (!empty($category->externcomment) ? ' checked="checked"' : '') . ' />');
+                    $mform->addElement('html', '</td><td>' . get_string('externcomment', 'block_exaport') . '</td></tr>');
+                }
+
+                // Store the pre-generated hash so it is submitted with the form.
+                $mform->addElement('hidden', 'hashvalue', $externhash);
+                $mform->setType('hashvalue', PARAM_ALPHANUM);
+
+                $mform->addElement('html', '<tr><td style="height: 10px"></td></tr>');
+            }
+
+            // --- Internal Access sub-checkbox ---
+            if ($caninternaccess) {
+                $mform->addElement('html', '<tr><td style="padding-right: 10px; width: 10px">');
+                $mform->addElement('html',
+                    '<input type="checkbox" id="id_internshare" name="internshare" value="1"' .
+                    (!empty($category->internshare) ? ' checked="checked"' : '') . ' />');
+                $mform->addElement('html', '</td><td>' . get_string('internalaccess', 'block_exaport') . '</td></tr>');
+
+                $mform->addElement('html', '<tr id="internaccess-settings"><td></td><td>');
+
+                // Output a hidden field with the config value alwaysnotifywhenshare (mirrors views_mod.php).
+                $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+                $mform->addElement('html',
+                    '<input type="hidden" id="alwaysnotifywhenshare" value="' . htmlspecialchars($alwaysnotifywhenshare) . '" />');
+
+                $mform->addElement('html', '<div style="padding: 4px 0;"><table>');
+                // Share to all.
+                if (block_exaport_shareall_enabled()) {
+                    $mform->addElement('html', '<tr><td style="padding-right: 10px; width: 10px">');
+                    $mform->addElement('html', '<input type="radio" name="shareall" value="1"' .
+                        ($category->shareall == 1 ? ' checked="checked"' : '') . '/>');
+                    $mform->addElement('html', '</td><td>' . get_string('internalaccessall', 'block_exaport') . '</td></tr>');
+                    $mform->setType('shareall', PARAM_INT);
+                }
+
+                // Share to users.
+                $mform->addElement('html', '<tr><td style="padding-right: 10px">');
+                $mform->addElement('html', '<input type="radio" name="shareall" value="0"' .
+                    (!$category->shareall ? ' checked="checked"' : '') . '/>');
+                $mform->addElement('html', '</td><td>' . get_string('internalaccessusers', 'block_exaport') . '</td></tr>');
+                if ($category->id > 0) {
+                    $sharedusers = $DB->get_records_menu('block_exaportcatshar',
+                        array("catid" => $category->id),
+                        null,
+                        'userid, userid AS tmp');
+                    $mform->addElement('html', '<script> var sharedusersarr = [];');
+                    foreach ($sharedusers as $i => $user) {
+                        $mform->addElement('html', 'sharedusersarr[' . $i . '] = ' . $user . ';');
+                    }
+                    $mform->addElement('html', '</script>');
+                }
+                $mform->addElement('html', '<tr id="internaccess-users"><td></td>' .
+                    '<td><div id="sharing-userlist">userlist</div></td></tr>');
+
+                // Share to groups.
+                $mform->addElement('html', '<tr><td style="padding-right: 10px">');
+                $mform->addElement('html', '<input type="radio" name="shareall" value="2"' .
+                    ($category->shareall == 2 ? ' checked="checked"' : '') . '/>');
+                $mform->addElement('html', '</td><td>' . get_string('internalaccessgroups', 'block_exaport') . '</td></tr>');
+                $mform->addElement('html', '<tr id="internaccess-groups"><td></td>' .
+                    '<td><div id="sharing-grouplist">grouplist</div></td></tr>');
+                $mform->addElement('html', '</table></div>');
+
                 $mform->addElement('html', '</td></tr>');
             }
 
-            // Share to users.
-            $mform->addElement('html', '<tr><td>');
-            $mform->addElement('html', '<input type="radio" name="shareall" value="0"' .
-                (!$category->shareall ? ' checked="checked"' : '') . '/>');
-            $mform->addElement('html', '</td><td>' . get_string('internalaccessusers', 'block_exaport') . '</td></tr>');
-            $mform->addElement('html', '</td></tr>');
-            if ($category->id > 0) {
-                $sharedusers = $DB->get_records_menu('block_exaportcatshar',
-                    array("catid" => $category->id),
-                    null,
-                    'userid, userid AS tmp');
-                $mform->addElement('html', '<script> var sharedusersarr = [];');
-                foreach ($sharedusers as $i => $user) {
-                    $mform->addElement('html', 'sharedusersarr[' . $i . '] = ' . $user . ';');
-                }
-                $mform->addElement('html', '</script>');
-            }
-            $mform->addElement('html', '<tr id="internaccess-users"><td></td>' .
-                '<td><div id="sharing-userlist">userlist</div></td></tr>');
-
-            // Share to groups.
-            $mform->addElement('html', '<tr><td>');
-            $mform->addElement('html', '<input type="radio" name="shareall" value="2"' .
-                ($category->shareall == 2 ? ' checked="checked"' : '') . '/>');
-            $mform->addElement('html', '</td><td>' . get_string('internalaccessgroups', 'block_exaport') . '</td></tr>');
-            $mform->addElement('html', '</td></tr>');
-            $mform->addElement('html', '<tr id="internaccess-groups"><td></td>' .
-                '<td><div id="sharing-grouplist">grouplist</div></td></tr>');
             $mform->addElement('html', '</table></div>');
-            $mform->addElement('html', '</div></div>');
-        };
+            $mform->addElement('html', '</div>'); // close #share-settings
+        }
 
         $this->add_action_buttons();
     }
@@ -325,11 +393,53 @@ if ($mform->is_cancelled()) {
 } else if ($newentry = $mform->get_data()) {
     require_sesskey();
     $newentry->userid = $USER->id;
+
+    $existingcategory = null;
+    if (!empty($newentry->id)) {
+        // Re-load ownership-scoped state for security-sensitive fields so forged form values cannot target foreign records.
+        $existingcategory = $DB->get_record('block_exaportcate', ['id' => $newentry->id, 'userid' => $USER->id], 'id, hash');
+        if (!$existingcategory) {
+            throw new \block_exaport\moodle_exception('category_not_found');
+        }
+    }
+
     $newentry->shareall = optional_param('shareall', 0, PARAM_INT);
     if (optional_param('internshare', 0, PARAM_INT) > 0) {
         $newentry->internshare = optional_param('internshare', 0, PARAM_INT);
     } else {
         $newentry->internshare = 0;
+    }
+
+    $canmanageexternaccess = block_exaport_externaccess_enabled()
+        && has_capability('block/exaport:shareextern', context_system::instance());
+    $externaccess = optional_param('externaccess', 0, PARAM_INT);
+    if (!$canmanageexternaccess || empty($externaccess)) {
+        // Fail closed: if capability/setting is missing we force disable, regardless of incoming POST data.
+        $newentry->externaccess = 0;
+    } else {
+        $newentry->externaccess = 1;
+    }
+
+    // Save externcomment setting (share comments in external portfolio).
+    if ($canmanageexternaccess && block_exaport_external_comments_enabled()) {
+        $newentry->externcomment = optional_param('externcomment', 0, PARAM_INT) ? 1 : 0;
+    } else {
+        $newentry->externcomment = 0;
+    }
+
+    if (!empty($existingcategory) && !empty($existingcategory->hash)) {
+        // Preserve existing hash for stable URLs; rotating links unexpectedly would invalidate already shared URLs.
+        $newentry->hash = $existingcategory->hash;
+    }
+    if ($newentry->externaccess && empty($newentry->hash)) {
+        // Use the pre-generated hash from the form (shown to the user as the external URL).
+        $formhash = optional_param('hashvalue', '', PARAM_ALPHANUM);
+        if (!empty($formhash) && strlen($formhash) === 8
+                && !$DB->record_exists("block_exaportcate", array("hash" => $formhash))) {
+            $newentry->hash = $formhash;
+        } else {
+            $newentry->hash = block_exaport_generate_unique_hash('block_exaportcate');
+        }
     }
 
     if ($newentry->id) {
@@ -477,7 +587,7 @@ if ($mform->is_cancelled()) {
     $category = null;
     if ($id = optional_param('id', 0, PARAM_INT)) {
         $category = $DB->get_record_sql('
-            SELECT c.id, c.name, c.pid, c.internshare, c.shareall, c.iconmerge
+            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
         ', array($USER->id, $id));

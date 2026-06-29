@@ -892,7 +892,7 @@ if ($parentcategory) {
     //        $table->data[$itemind]['type'] = '<img src="pix/folderup_32.png" alt="'.block_exaport_get_string('category').'">';
     $table->data[$itemind]['type'] = block_exaport_fontawesome_icon('folder-open', 'regular', 2, [], [], [], 'up', [], [], [], ['exaport-items-category-middle']);
 
-    $table->data[$itemind]['name'] = '<a href="' . $parentcategory->url . '">' . format_string($parentcategory->name) . '</a>';
+    $table->data[$itemind]['name'] = '<a href="' . s($parentcategory->url) . '">' . format_string($parentcategory->name) . '</a>';
     $table->data[$itemind][] = null;
     $table->data[$itemind][] = null;
 }
@@ -904,7 +904,7 @@ foreach ($subcategories as $category) {
     //        $table->data[$itemind]['type'] = '<img src="'.(@$category->icon ?: 'pix/folder_32_user.png').'" style="max-width:32px">';
     $table->data[$itemind]['type'] = block_exaport_fontawesome_icon('folder-open', 'regular', 2, [], [], [], '', [], [], [], ['exaport-items-category-middle']);
 
-    $table->data[$itemind]['name'] = '<a href="' . $category->url . '">' . format_string($category->name) . '</a>';
+    $table->data[$itemind]['name'] = '<a href="' . s($category->url) . '">' . format_string($category->name) . '</a>';
 
     $table->data[$itemind][] = null;
 
@@ -1448,12 +1448,12 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
         }
     }
     $categoryContent .= '<div class="excomdos_tileimage">';
-    $categoryContent .= '<a href="' . $categoryThumbUrl . '">';
+    $categoryContent .= '<a href="' . s($categoryThumbUrl) . '">';
     $categoryContent .= $categoryIcon;
     $categoryContent .= '</a>
         </div>
         <div class="exomdos_tiletitle">
-            <a href="' . $categoryThumbUrl . '">' . format_string($categoryName) . '</a>
+            <a href="' . s($categoryThumbUrl) . '">' . format_string($categoryName) . '</a>
         </div>
     </div>';
 

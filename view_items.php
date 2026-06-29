@@ -892,7 +892,7 @@ if ($parentcategory) {
     //        $table->data[$itemind]['type'] = '<img src="pix/folderup_32.png" alt="'.block_exaport_get_string('category').'">';
     $table->data[$itemind]['type'] = block_exaport_fontawesome_icon('folder-open', 'regular', 2, [], [], [], 'up', [], [], [], ['exaport-items-category-middle']);
 
-    $table->data[$itemind]['name'] = '<a href="' . $parentcategory->url . '">' . $parentcategory->name . '</a>';
+    $table->data[$itemind]['name'] = '<a href="' . s($parentcategory->url) . '">' . format_string($parentcategory->name) . '</a>';
     $table->data[$itemind][] = null;
     $table->data[$itemind][] = null;
 }
@@ -904,7 +904,7 @@ foreach ($subcategories as $category) {
     //        $table->data[$itemind]['type'] = '<img src="'.(@$category->icon ?: 'pix/folder_32_user.png').'" style="max-width:32px">';
     $table->data[$itemind]['type'] = block_exaport_fontawesome_icon('folder-open', 'regular', 2, [], [], [], '', [], [], [], ['exaport-items-category-middle']);
 
-    $table->data[$itemind]['name'] = '<a href="' . $category->url . '">' . $category->name . '</a>';
+    $table->data[$itemind]['name'] = '<a href="' . s($category->url) . '">' . format_string($category->name) . '</a>';
 
     $table->data[$itemind][] = null;
 
@@ -961,7 +961,7 @@ foreach ($items as $item) {
 
     $rowdata['type'] = $imgtype;
 
-    $rowdata['name'] = "<a href=\"" . s($url) . "\">" . $item->name . "</a>";
+    $rowdata['name'] = "<a href=\"" . s($url) . "\">" . format_string($item->name) . "</a>";
     if ($item->intro) {
         $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
             'block_exaport', 'item_content', 'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
@@ -1448,12 +1448,12 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
         }
     }
     $categoryContent .= '<div class="excomdos_tileimage">';
-    $categoryContent .= '<a href="' . $categoryThumbUrl . '">';
+    $categoryContent .= '<a href="' . s($categoryThumbUrl) . '">';
     $categoryContent .= $categoryIcon;
     $categoryContent .= '</a>
         </div>
         <div class="exomdos_tiletitle">
-            <a href="' . $categoryThumbUrl . '">' . $categoryName . '</a>
+            <a href="' . s($categoryThumbUrl) . '">' . format_string($categoryName) . '</a>
         </div>
     </div>';
 
@@ -1546,11 +1546,11 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
                 </span>
         </div>
         <div class="excomdos_tileimage">
-            <a href="' . $url . '"><img alt="' . $item->name . '" title="' . $item->name . '"
+            <a href="' . $url . '"><img alt="' . s($item->name) . '" title="' . s($item->name) . '"
                                     src="' . $CFG->wwwroot . '/blocks/exaport/item_thumb.php?item_id=' . $item->id . '"/></a>
         </div>
         <div class="exomdos_tiletitle">
-            <a href="' . $url . '">' . $item->name . '</a>
+            <a href="' . $url . '">' . format_string($item->name) . '</a>
             ' . block_exaport_render_item_category_badges($item) . '
         </div>
     </div>';

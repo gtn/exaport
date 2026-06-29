@@ -75,10 +75,13 @@ class category_helper {
      *       other user's own categories when viewing someone else's items.
      *     - empty array: return no items.
      *     - non-empty array: only include these category IDs and remove items with no matching categories.
+     * @param bool $owneronly When true (used by the external hash shared-category view), restrict items and their
+     *     attached categories to $userid so only that owner's content inside the shared subtree is exposed; when
+     *     false, the non-empty category filter also includes other users' items shared into those categories.
      * @return array The items array with ->flatcategories populated.
      */
     public static function load_flat_items(int $userid, array $categories, string $sqlsort,
-                                           ?array $allowedcategoryids = null): array {
+                                           ?array $allowedcategoryids = null, bool $owneronly = false): array {
         global $DB, $USER;
 
         if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
@@ -86,7 +89,8 @@ class category_helper {
             return [];
         }
         if ($allowedcategoryids !== null) {
-            $items = block_exaport_get_items_by_category_and_user(0, $allowedcategoryids, $sqlsort, true);
+            // owneronly => withShared=false so the query restricts items to $userid only.
+            $items = block_exaport_get_items_by_category_and_user($userid, $allowedcategoryids, $sqlsort, !$owneronly);
         } else {
             // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
             // but they get filtered a few lines later with the unset()
@@ -100,9 +104,10 @@ class category_helper {
         $itemids = array_keys($items);
         [$iteminsql, $iteminparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_QM);
 
-        // Belt-and-suspenders: restrict to the viewed user's own categories,
-        // even though items are already scoped by userid.
-        $is_viewing_other_user = $allowedcategoryids === null && (int)$userid !== (int)$USER->id;
+        // Belt-and-suspenders: restrict attached categories to $userid's own when we view someone
+        // else's items (other-user flat mode) or the external owner-only view, even though items are
+        // already scoped by userid.
+        $restricttoownercategories = ($allowedcategoryids === null && (int)$userid !== (int)$USER->id) || $owneronly;
 
         $sql = "SELECT ic.id AS icid, ic.itemid, c.id, c.name, c.pid
                 FROM {block_exaportitemcate} ic
@@ -110,9 +115,7 @@ class category_helper {
                 WHERE ic.itemid $iteminsql";
         $params = $iteminparams;
 
-        // Belt-and-suspenders: restrict to the viewed user's own categories,
-        // even though items are already scoped by userid.
-        if ($is_viewing_other_user) {
+        if ($restricttoownercategories) {
             $sql .= " AND c.userid = ?";
             $params[] = $userid;
         }

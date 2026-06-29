@@ -429,11 +429,12 @@ if ($type == 'sharedstudent') {
         $currentcategory = $categories[$externaccess_category->id];
         $parentcategory = null;
         $subcategories = [];
-        $items = \block_exaport\category_helper::load_owner_flat_items(
+        $items = \block_exaport\category_helper::load_flat_items(
             $externaccess_category->userid,
-            $allowedids,
+            $categories,
             $sqlsort,
-            $categories
+            $allowedids,
+            true
         );
     } else {
         $layout = 'folder';

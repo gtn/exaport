@@ -1,3 +1,8 @@
+### v5.1 (2026070700) ###
+* New feature: Categories can now be shared externally via a public hash-URL, just like views. Supports both folder and flat layout for external visitors.
+* Bugfixes and minor security improvements (XSS escaping, deprecated PHP usage)
+
+
 ### v5.1 (2026062400) ###
 * Rework: Categories and items now don't have a 1:m relationship but an m:n relationship. This allows users to assign multiple categories to a single item and vice versa. The database schema has been updated accordingly, and the UI has been adjusted to support multi-category selection.
 * New feature: Flat view of the categories, added to the previously existing folder view.

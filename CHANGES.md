@@ -1,3 +1,6 @@
+### v5.1 (2026070800) ###
+* Backwards compatibility: the three dots menue in exaport works with bootstrap 4 as well as boostrap 5.
+
 ### v5.1 (2026070700) ###
 * New feature: Categories can now be shared externally via a public hash-URL, just like views. Supports both folder and flat layout for external visitors.
 * Bugfixes and minor security improvements (XSS escaping, deprecated PHP usage)

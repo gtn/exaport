@@ -84,6 +84,6 @@ $data = \block_exaport\externallib\externallib::login();
 $data['tokens'] = $exatokens;
 
 // Clean output.
-$data = external_api::clean_returnvalue(\block_exaport\externallib\externallib::login_returns(), $data);
+$data = \core_external\external_api::clean_returnvalue(\block_exaport\externallib\externallib::login_returns(), $data);
 
 echo json_encode($data, JSON_PRETTY_PRINT);

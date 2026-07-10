@@ -1,5 +1,6 @@
-### v5.1 (2026071001) ###
+### v5.1 (2026071003) ###
 * Backwards compatibility: the three dots menue in exaport works with bootstrap 4 as well as boostrap 5.
+* Remove drag and drop functionality in flat mode. Refine layout, cursor, clickability in view_items.php
 
 ### v5.1 (2026070700) ###
 * New feature: Categories can now be shared externally via a public hash-URL, just like views. Supports both folder and flat layout for external visitors.

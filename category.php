@@ -430,12 +430,18 @@ if ($mform->is_cancelled()) {
             $newentry->externaccess = 1;
         }
 
-        // Save externcomment setting (share comments in external portfolio).
-        if ($canmanageexternaccess && block_exaport_external_comments_enabled()) {
-            $newentry->externcomment = optional_param('externcomment', 0, PARAM_INT) ? 1 : 0;
+        if($newentry->externaccess == 1){
+            // Save externcomment setting (share comments in external portfolio).
+            if ($canmanageexternaccess && block_exaport_external_comments_enabled()) {
+                $newentry->externcomment = optional_param('externcomment', 0, PARAM_INT) ? 1 : 0;
+            } else {
+                $newentry->externcomment = 0;
+            }
         } else {
+            // if externacess is 0, also set the externcomment to 0
             $newentry->externcomment = 0;
         }
+
     }
 
     if (!empty($existingcategory) && !empty($existingcategory->hash)) {

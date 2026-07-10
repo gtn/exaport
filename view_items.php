@@ -1079,7 +1079,7 @@ if ($useManualTable) {
 echo '</div>';
 
 echo '<div class="exaport-view-section exaport-view-tiles' . ($folderlayout == 'tiles' ? ' is-active' : '') . '" data-exaport-view="tiles"' . ($folderlayout == 'tiles' ? '' : ' style="display:none;"') . '>';
-echo '<div class="excomdos_tiletable ' . ($useBootstrapLayout ? 'row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5' : '') . '">';
+echo '<div class="excomdos_tiletable layout-' . $layout . ' ' . ($useBootstrapLayout ? 'row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5' : '') . '">';
 echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
 
 if ($layout == 'folder') {

@@ -13,11 +13,9 @@
         typemine            - Boolean: current user owns this category (show edit/delete)
         editurl             - URL for the edit action
         deleteurl           - URL for the delete action
-        ellipsisicon        - Pre-rendered HTML for the "⋮" dropdown toggle icon
-        viewicon            - Pre-rendered HTML for the "view" menu item icon
+        ellipsisicon        - Pre-rendered HTML for the "\u22ee" dropdown toggle icon
         editicon            - Pre-rendered HTML for the "edit" menu item icon
         deleteicon          - Pre-rendered HTML for the "delete" menu item icon
-        viewlabel           - Localised "View" label
         editlabel           - Localised "Edit" label
         deletelabel         - Localised "Delete" label
         folderupicon        - Pre-rendered HTML for the folder-open-up icon (parent tile only)
@@ -34,9 +32,6 @@
                     {{{ellipsisicon}}}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item" href="{{tileurl}}">{{{viewicon}}} {{viewlabel}}</a>
-                    </li>
                     {{#typemine}}
                     <li>
                         <a class="dropdown-item" href="{{editurl}}">{{{editicon}}} {{editlabel}}</a>

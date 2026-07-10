@@ -27,7 +27,7 @@ use templatable;
  * Abstract base class for card output objects (Bootstrap layout).
  *
  * Holds the shared constructor and properties common to all card variants,
- * plus the base_icons() helper that returns the 7 shared icon/label fields.
+ * plus the base_icons() helper that returns the shared icon/label fields.
  */
 abstract class card implements renderable, templatable {
 
@@ -49,15 +49,15 @@ abstract class card implements renderable, templatable {
     }
 
     /**
-     * Return the 7 icon/label fields shared by all card variants.
+     * Return the icon/label fields shared by all card variants.
+     * Note: viewicon/viewlabel are intentionally omitted for category cards
+     * because the tile itself is already a link; item_card still uses them.
      *
      * @return array
      */
     protected function base_icons(): array {
         return [
             'ellipsisicon' => block_exaport_fontawesome_icon('ellipsis-vertical', 'solid', 1),
-            'viewicon'     => block_exaport_fontawesome_icon('eye', 'regular', 1),
-            'viewlabel'    => block_exaport_get_string('view'),
             'editicon'     => block_exaport_fontawesome_icon('pen-to-square', 'regular', 1),
             'editlabel'    => block_exaport_get_string('edit'),
             'deleteicon'   => block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']),

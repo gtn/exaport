@@ -298,7 +298,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
                 // "Share comments in external portfolio" checkbox (mirrors view externcomment).
                 if (block_exaport_external_comments_enabled()) {
-                    $mform->addElement('html', '<tr id="externcomment-settings"><td style="padding-right: 10px; width: 10px">');
+                    $mform->addElement('html', '<tr id="externcomment-settings"><td style="padding-left: 22px; padding-right: 10px; width: 10px">');
                     $mform->addElement('html',
                         '<input type="checkbox" id="id_externcomment" name="externcomment" value="1"' .
                         (!empty($category->externcomment) ? ' checked="checked"' : '') . ' />');

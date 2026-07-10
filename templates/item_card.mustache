@@ -12,8 +12,6 @@
         typeicon        - Pre-rendered HTML for the type icon (with tooltip)
         itemname        - Display name of the item (auto-escaped by mustache)
         ellipsisicon    - Pre-rendered HTML for the "⋮" dropdown toggle icon
-        viewlabel       - Localised "View" label
-        viewicon        - Pre-rendered HTML for the view icon
         canedit         - Boolean: show "Edit" menu entry
         editurl         - URL for the edit action
         editicon        - Pre-rendered HTML for the edit icon
@@ -44,9 +42,6 @@
                     {{{ellipsisicon}}}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item" href="{{url}}">{{{viewicon}}} {{viewlabel}}</a>
-                    </li>
                     {{#canedit}}
                     <li>
                         <a class="dropdown-item" href="{{editurl}}">{{{editicon}}} {{editlabel}}</a>

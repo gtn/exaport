@@ -50,8 +50,7 @@ abstract class card implements renderable, templatable {
 
     /**
      * Return the icon/label fields shared by all card variants.
-     * Note: viewicon/viewlabel are intentionally omitted for category cards
-     * because the tile itself is already a link; item_card still uses them.
+     * "View" is intentionally absent: the card title link already serves that purpose.
      *
      * @return array
      */

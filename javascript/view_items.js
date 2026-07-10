@@ -25,7 +25,7 @@ function long_preview_hide(i) {
 }
 
 jQueryExaport(function ($) {
-  $(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile:not(.excomdos_tile_fixed)").draggable({
+  $(".excomdos_cont-type-mine .excomdos_tiletable.layout-folder .excomdos_tile:not(.excomdos_tile_fixed)").draggable({
     scroll: true, // Scroll when dragging.
     helper: "clone",
     start: function (event, ui) { // When dragging.
@@ -44,7 +44,7 @@ jQueryExaport(function ($) {
     }
   });
 
-  $(".excomdos_cont-type-mine .excomdos_tiletable .excomdos_tile_category").droppable({
+  $(".excomdos_cont-type-mine .excomdos_tiletable.layout-folder .excomdos_tile_category").droppable({
     activeClass: "ui-state-active",
     hoverClass: "ui-state-hover",
     tolerance: "pointer", // Fix for Moodle 5.x: use cursor position for drop detection instead of overlap

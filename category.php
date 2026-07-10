@@ -298,7 +298,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
                 // "Share comments in external portfolio" checkbox (mirrors view externcomment).
                 if (block_exaport_external_comments_enabled()) {
-                    $mform->addElement('html', '<tr id="externcomment-settings"><td style="padding-right: 10px; width: 10px">');
+                    $mform->addElement('html', '<tr id="externcomment-settings"><td style="padding-left: 22px; padding-right: 10px; width: 10px">');
                     $mform->addElement('html',
                         '<input type="checkbox" id="id_externcomment" name="externcomment" value="1"' .
                         (!empty($category->externcomment) ? ' checked="checked"' : '') . ' />');
@@ -403,28 +403,45 @@ if ($mform->is_cancelled()) {
         }
     }
 
-    $newentry->shareall = optional_param('shareall', 0, PARAM_INT);
-    if (optional_param('internshare', 0, PARAM_INT) > 0) {
-        $newentry->internshare = optional_param('internshare', 0, PARAM_INT);
-    } else {
-        $newentry->internshare = 0;
-    }
+    $shareenabled = optional_param('shareenabled', 0, PARAM_INT);
 
+    // shareenabled is the master switch: when off, force all sub-settings to 0 regardless of POST values.
+    // The frontend only hides/shows sub-checkboxes; enforcement is authoritative here on the server.
     $canmanageexternaccess = block_exaport_externaccess_enabled()
         && has_capability('block/exaport:shareextern', context_system::instance());
-    $externaccess = optional_param('externaccess', 0, PARAM_INT);
-    if (!$canmanageexternaccess || empty($externaccess)) {
-        // Fail closed: if capability/setting is missing we force disable, regardless of incoming POST data.
-        $newentry->externaccess = 0;
-    } else {
-        $newentry->externaccess = 1;
-    }
-
-    // Save externcomment setting (share comments in external portfolio).
-    if ($canmanageexternaccess && block_exaport_external_comments_enabled()) {
-        $newentry->externcomment = optional_param('externcomment', 0, PARAM_INT) ? 1 : 0;
-    } else {
+    if (!$shareenabled) {
+        $newentry->internshare   = 0;
+        $newentry->shareall      = 0;
+        $newentry->externaccess  = 0;
         $newentry->externcomment = 0;
+    } else {
+        $newentry->shareall = optional_param('shareall', 0, PARAM_INT);
+        if (optional_param('internshare', 0, PARAM_INT) > 0) {
+            $newentry->internshare = optional_param('internshare', 0, PARAM_INT);
+        } else {
+            $newentry->internshare = 0;
+        }
+
+        $externaccess = optional_param('externaccess', 0, PARAM_INT);
+        if (!$canmanageexternaccess || empty($externaccess)) {
+            // Fail closed: if capability/setting is missing we force disable, regardless of incoming POST data.
+            $newentry->externaccess = 0;
+        } else {
+            $newentry->externaccess = 1;
+        }
+
+        if($newentry->externaccess == 1){
+            // Save externcomment setting (share comments in external portfolio).
+            if ($canmanageexternaccess && block_exaport_external_comments_enabled()) {
+                $newentry->externcomment = optional_param('externcomment', 0, PARAM_INT) ? 1 : 0;
+            } else {
+                $newentry->externcomment = 0;
+            }
+        } else {
+            // if externacess is 0, also set the externcomment to 0
+            $newentry->externcomment = 0;
+        }
+
     }
 
     if (!empty($existingcategory) && !empty($existingcategory->hash)) {

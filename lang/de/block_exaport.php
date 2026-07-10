@@ -375,6 +375,7 @@ $string['layout_mode_folder'] = 'Ordner';
 $string['layout_mode_flat'] = 'Flach';
 $string['searchcategory'] = 'Kategorie suchen...';
 $string['sharedwith'] = 'Geteilt mit';
+$string['sharedwithotherusers'] = 'Intern mit anderen Benutzer:innen geteilt';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
 $string['sharedwith_shareall'] = 'Mit allen Benutzer::innen geteilt';

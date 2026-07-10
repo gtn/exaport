@@ -29,6 +29,10 @@ jQueryExaport(function ($) {
     if ($form.find(':input[name="shareenabled"]').is(':checked')) {
       $('#share-settings').show();
     } else {
+      // Uncheck all sub-sharing options so they are not submitted as active.
+      $form.find(':input[name="externaccess"]').prop('checked', false);
+      $form.find(':input[name="internshare"]').prop('checked', false);
+      $form.find(':input[name="shareall"]').prop('checked', false);
       $('#share-settings').hide();
     }
 

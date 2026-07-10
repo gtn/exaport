@@ -33,9 +33,9 @@
      data-item-date="{{timemodified}}"
      data-category-ids="{{catids}}">
     <div class="card card-eportfolio h-100 excomdos_tile excomdos_tile_item id-{{itemid}} ui-draggable ui-draggable-handle">
-        <div class="card-top d-flex justify-content-between">
+        <div class="card-top d-flex justify-content-between" style="position: relative; z-index: 2;">
             <h5 class="card-title">
-                <a href="{{url}}">{{{typeicon}}}{{itemname}}</a>
+                <a href="{{url}}" class="stretched-link">{{{typeicon}}}{{itemname}}</a>
             </h5>
             <span class="eportfolio-card-more">
                 <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">

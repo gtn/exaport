@@ -1370,6 +1370,10 @@ return [
         'Mit {$a} Benutzern geteilt',
         'Shared with {$a} users',
     ],
+    'sharedwithotherusers' => [
+        'mit anderen Benutzern geteilt',
+        'shared with other users',
+    ],
     'sharedwith_onlyme' => [
         'Nur mit mir geteilt',
         'Shared only with me',
@@ -2213,6 +2217,10 @@ return [
     'i_updated' => [
         '{$a->sendername} hat Änderungen an dem E-Portfolio {$a->title} vorgenommen, welches mit Ihnen geteilt ist.',
         '{$a->sendername} made changes to the e-portfolio view {$a->title} shared with you.',
+    ],
+    'i_updated_category' => [
+        '{$a->sendername} hat ein neues Artefakt zur geteilten Kategorie "{$a->title}" hinzugefügt',
+        '{$a->sendername} added a new artefact to the shared category "{$a->title}"',
     ],
     'addstdcat' => [
         'Standardkategorien importieren',

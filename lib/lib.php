@@ -2464,8 +2464,38 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryfilter, 
     global $DB;
     $params = [];
     if ($categoryfilter === null) {
-        // All items regardless of category (used by flat mode).
-        $where = ' 1=1 ';
+        if ($withShared) {
+            // Resolve categories that are genuinely shared to this user (internal sharing).
+            $sharedcatids = [];
+            $sharedcategories = \block_exaport\get_categories_shared_to_user($userid);
+            if ($sharedcategories) {
+                foreach ($sharedcategories as $sharedowner) {
+                    if (!empty($sharedowner->categories) && is_array($sharedowner->categories)) {
+                        $sharedcatids = array_merge($sharedcatids, array_keys($sharedowner->categories));
+                    }
+                }
+            }
+            $sharedcatids = array_values(array_unique(array_map('intval', $sharedcatids)));
+
+            if (!empty($sharedcatids)) {
+                [$insql, $inparams] = $DB->get_in_or_equal($sharedcatids, SQL_PARAMS_QM);
+                // Own items (categorised or not) OR any item that lives in a category shared to me.
+                $where = " ( i.userid = ? OR EXISTS (
+                                SELECT 1 FROM {block_exaportitemcate} ic
+                                 WHERE ic.itemid = i.id AND ic.cateid $insql
+                            ) ) ";
+                $params[] = $userid;
+                $params = array_merge($params, $inparams);
+            } else {
+                // Nothing shared to me: fall back to own items only (including uncategorized).
+                $where = ' i.userid = ? ';
+                $params[] = $userid;
+            }
+        } else {
+            // Own items only, regardless of category (preserves uncategorized items).
+            $where = ' i.userid = ? ';
+            $params[] = $userid;
+        }
     } else if (is_array($categoryfilter)) {
         if (empty($categoryfilter)) {
             $where = ' 1=0 ';
@@ -2496,18 +2526,22 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryfilter, 
             SELECT 1 FROM {block_exaportitemcate} ic WHERE ic.itemid = i.id
         ) ';
     }
-    if ($withShared) {
-        if (is_array($categoryfilter) || $categoryfilter > 0) {
-            // TODO: just shows ALL items?? ... it shows all items from THAT category. If it was shared once or currently is shared, it can contain entries from other users.
-            // add items from other users if the category is shared
+    // For the null case the user-id restriction is already fully handled above.
+    // For array/int/uncategorized cases, apply the withShared logic.
+    if ($categoryfilter !== null) {
+        if ($withShared) {
+            if (is_array($categoryfilter) || $categoryfilter > 0) {
+                // TODO: just shows ALL items?? ... it shows all items from THAT category. If it was shared once or currently is shared, it can contain entries from other users.
+                // add items from other users if the category is shared
+            } else {
+                // only own
+                $where .= ' AND i.userid = ? ';
+                $params[] = $userid;
+            }
         } else {
-            // only own
             $where .= ' AND i.userid = ? ';
             $params[] = $userid;
         }
-    } else {
-        $where .= ' AND i.userid = ? ';
-        $params[] = $userid;
     }
     $where .= " AND " . block_exaport_get_item_where() . " ";
     $items = $DB->get_records_sql("

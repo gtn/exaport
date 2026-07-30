@@ -78,10 +78,15 @@ class category_helper {
      * @param bool $owneronly When true (used by the external hash shared-category view), restrict items and their
      *     attached categories to $userid so only that owner's content inside the shared subtree is exposed; when
      *     false, the non-empty category filter also includes other users' items shared into those categories.
+     * @param bool $withshared When $allowedcategoryids is null, pass true to additively include other users'
+     *     items from categories that are genuinely shared to $userid. The user's own items (including
+     *     uncategorized ones) are always included regardless of this flag. Ignored when $allowedcategoryids
+     *     is non-null (those call sites use $allowedcategoryids as the genuine restriction).
      * @return array The items array with ->flatcategories populated.
      */
     public static function load_flat_items(int $userid, array $categories, string $sqlsort,
-                                           ?array $allowedcategoryids = null, bool $owneronly = false): array {
+                                           ?array $allowedcategoryids = null, bool $owneronly = false,
+                                           bool $withshared = false): array {
         global $DB, $USER;
 
         if ($allowedcategoryids !== null && empty($allowedcategoryids)) {
@@ -92,9 +97,10 @@ class category_helper {
             // owneronly => withShared=false so the query restricts items to $userid only.
             $items = block_exaport_get_items_by_category_and_user($userid, $allowedcategoryids, $sqlsort, !$owneronly);
         } else {
-            // this gets ALL the items of that user... e.g. unshared ones as well. As a teacher, this loads all the students items
-            // but they get filtered a few lines later with the unset()
-            $items = block_exaport_get_items_by_category_and_user($userid, null, $sqlsort);
+            // Pass $withshared so other users' items in categories shared to $userid are included when
+            // the "show items from other users" checkbox is ticked, while the user's own uncategorized
+            // items are always retained (categoryfilter stays null).
+            $items = block_exaport_get_items_by_category_and_user($userid, null, $sqlsort, $withshared);
         }
 
         if (!$items) {

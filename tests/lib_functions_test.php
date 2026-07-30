@@ -307,6 +307,192 @@ final class lib_functions_test extends \advanced_testcase {
         $this->assertArrayNotHasKey($item3, $items);
     }
 
+    // -------------------------------------------------------------------------
+    // Regression tests for the "show items from other users" flat-mode bug.
+    // -------------------------------------------------------------------------
+
+    /**
+     * Baseline (checkbox unchecked): withShared=false, categoryfilter=null returns the current
+     * user's items including an uncategorized item; other users' items are excluded.
+     */
+    public function test_get_items_null_filter_withshared_false_includes_uncategorized(): void {
+        global $DB;
+
+        $otheruser = $this->getDataGenerator()->create_user();
+        $cat = $this->create_category('Some category');
+
+        $myitem_cat = $this->create_item($cat, 'My categorized item');
+        $myitem_uncat = $this->create_item(0, 'My uncategorized item');
+
+        // Other user's item in the same category.
+        $otherid = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $otheruser->id,
+            'type' => 'note',
+            'categoryid' => 0,
+            'name' => 'Other item',
+            'url' => '',
+            'intro' => 'Other content',
+            'attachment' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'courseid' => $this->course->id,
+            'shareall' => 0,
+            'externaccess' => 0,
+            'externcomment' => 0,
+            'sortorder' => 0,
+            'isoez' => 0,
+            'langid' => 0,
+            'source' => 0,
+            'sourceid' => 0,
+            'iseditable' => 1,
+            'parentid' => 0,
+        ]);
+        $DB->insert_record('block_exaportitemcate', (object)['itemid' => $otherid, 'cateid' => $cat]);
+
+        $items = block_exaport_get_items_by_category_and_user($this->user->id, null, '', false);
+
+        $this->assertArrayHasKey($myitem_cat, $items, 'Own categorized item must be present (withShared=false)');
+        $this->assertArrayHasKey($myitem_uncat, $items, 'Own uncategorized item must be present (withShared=false)');
+        $this->assertArrayNotHasKey($otherid, $items, "Other user's item must be absent when withShared=false");
+    }
+
+    /**
+     * Regression: withShared=true, categoryfilter=null must NOT drop the current user's
+     * uncategorized items (this was the reported bug).
+     */
+    public function test_get_items_null_filter_withshared_true_keeps_own_uncategorized(): void {
+        $this->create_category('Some category'); // Ensure at least one category exists.
+        $myitem_uncat = $this->create_item(0, 'My uncategorized item');
+
+        // Pass withShared=true with null filter — own uncategorized item must survive.
+        $items = block_exaport_get_items_by_category_and_user($this->user->id, null, '', true);
+
+        $this->assertArrayHasKey($myitem_uncat, $items,
+            'Own uncategorized item must still be present when withShared=true and categoryfilter=null');
+    }
+
+    /**
+     * withShared=true, categoryfilter=null: another user's item in a category shared to the
+     * current user IS present; another user's item in a non-shared category is NOT present.
+     */
+    public function test_get_items_null_filter_withshared_true_includes_shared_category_items(): void {
+        global $DB;
+
+        $otheruser = $this->getDataGenerator()->create_user();
+
+        // Create a category owned by other user and mark it as internally shared.
+        $sharedcatid = (int)$DB->insert_record('block_exaportcate', (object)[
+            'userid' => $otheruser->id,
+            'pid' => 0,
+            'name' => 'Shared category',
+            'timemodified' => time(),
+            'courseid' => $this->course->id,
+            'description' => '',
+            'subjid' => 0,
+            'topicid' => 0,
+            'source' => 0,
+            'sourceid' => 0,
+            'isoez' => 0,
+            'sortorder' => 0,
+            'internshare' => 1, // Required for get_categories_shared_to_user().
+            'shareall' => 0,
+            'structure_shareall' => 0,
+            'structure_share' => 0,
+            'iconmerge' => 0,
+            'creatorid' => $otheruser->id,
+        ]);
+        // Share the category specifically with the current test user.
+        $DB->insert_record('block_exaportcatshar', (object)[
+            'catid' => $sharedcatid,
+            'userid' => $this->user->id,
+            'notify' => 0,
+        ]);
+
+        // Create a non-shared category owned by the other user.
+        $nonsharedcatid = (int)$DB->insert_record('block_exaportcate', (object)[
+            'userid' => $otheruser->id,
+            'pid' => 0,
+            'name' => 'Non-shared category',
+            'timemodified' => time(),
+            'courseid' => $this->course->id,
+            'description' => '',
+            'subjid' => 0,
+            'topicid' => 0,
+            'source' => 0,
+            'sourceid' => 0,
+            'isoez' => 0,
+            'sortorder' => 0,
+            'internshare' => 0,
+            'shareall' => 0,
+            'structure_shareall' => 0,
+            'structure_share' => 0,
+            'iconmerge' => 0,
+            'creatorid' => $otheruser->id,
+        ]);
+
+        // Other user's item in the shared category.
+        $shared_item = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $otheruser->id,
+            'type' => 'note',
+            'categoryid' => 0,
+            'name' => 'Shared item',
+            'url' => '',
+            'intro' => 'In shared cat',
+            'attachment' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'courseid' => $this->course->id,
+            'shareall' => 0,
+            'externaccess' => 0,
+            'externcomment' => 0,
+            'sortorder' => 0,
+            'isoez' => 0,
+            'langid' => 0,
+            'source' => 0,
+            'sourceid' => 0,
+            'iseditable' => 1,
+            'parentid' => 0,
+        ]);
+        $DB->insert_record('block_exaportitemcate', (object)['itemid' => $shared_item, 'cateid' => $sharedcatid]);
+
+        // Other user's item in the non-shared category.
+        $nonshared_item = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $otheruser->id,
+            'type' => 'note',
+            'categoryid' => 0,
+            'name' => 'Non-shared item',
+            'url' => '',
+            'intro' => 'In non-shared cat',
+            'attachment' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'courseid' => $this->course->id,
+            'shareall' => 0,
+            'externaccess' => 0,
+            'externcomment' => 0,
+            'sortorder' => 0,
+            'isoez' => 0,
+            'langid' => 0,
+            'source' => 0,
+            'sourceid' => 0,
+            'iseditable' => 1,
+            'parentid' => 0,
+        ]);
+        $DB->insert_record('block_exaportitemcate', (object)['itemid' => $nonshared_item, 'cateid' => $nonsharedcatid]);
+
+        // Current user's own uncategorized item — must always be included.
+        $myitem_uncat = $this->create_item(0, 'My uncategorized item');
+
+        $items = block_exaport_get_items_by_category_and_user($this->user->id, null, '', true);
+
+        $this->assertArrayHasKey($myitem_uncat, $items,
+            "Current user's uncategorized item must be present (withShared=true)");
+        $this->assertArrayHasKey($shared_item, $items,
+            "Other user's item in a shared category must be present (withShared=true)");
+        $this->assertArrayNotHasKey($nonshared_item, $items,
+            "Other user's item in a non-shared category must be absent (withShared=true)");
+    }
+
     /**
      * Test: withShared + category array includes matching items from other users.
      */

@@ -2467,6 +2467,35 @@ function block_exaport_get_items_by_category_and_user($userid, $categoryfilter, 
         // All items regardless of category (used by flat mode).
         $where = ' 1=1 ';
     } else if (is_array($categoryfilter)) {
+        // We reach this branch ONLY when a caller passes an explicit array of category IDs.
+        // On `experimental` that happens in exactly 3 flat-mode situations (via load_flat_items):
+        //
+        //   1. type='mine', flat, "show other users" TICKED
+        //      -> $categoryfilter = the CURRENT user's own category IDs.
+        //         Combined with $withShared=true (see below), this returns the user's items in
+        //         those categories PLUS other users' items placed into those (my) categories,
+        //         i.e. categories I own and shared out to them.
+        //
+        //   2. type='shared', flat
+        //      -> $categoryfilter = the categories that OTHER users shared TO me.
+        //         Restricts to items living in exactly those shared categories.
+        //
+        //   3. type='extern_category', flat (external hash access, $owneronly=true)
+        //      -> $categoryfilter = the allowed shared subtree; restricts to that subtree only.
+        //
+        // IMPORTANT: this branch is a pure "item must live in one of these categories" filter.
+        // Items that are UNCATEGORIZED (no row in {block_exaportitemcate}) are intentionally
+        // EXCLUDED here, because the EXISTS(...) below can never match them. That is CORRECT for
+        // cases 2 and 3 (an uncategorized item does not belong to any shared/external category and
+        // must not appear). It is NOT a bug in this branch.
+        //
+        // The one place where "drop uncategorized" is undesirable is case 1 (the 'mine' view),
+        // where the user also expects their own root/uncategorized items. That requirement is
+        // handled OUTSIDE this branch (in the caller / view_items.php) by additionally loading
+        // the user's own uncategorized items — do NOT "fix" it here by adding an OR for
+        // uncategorized items, or you would leak owner uncategorized items into the shared (2)
+        // and external (3) views.
+
         if (empty($categoryfilter)) {
             $where = ' 1=0 ';
         } else {

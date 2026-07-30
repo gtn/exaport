@@ -468,6 +468,7 @@ if ($type == 'sharedstudent') {
         $usercategoryids = array_filter(array_keys($categories), fn($id) => $id > 0);
         if ($show_otherusers) {
             $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, $usercategoryids ?: null);
+            $items += block_exaport_get_items_by_category_and_user($USER->id, 0, $sqlsort); // add my uncategorized (root) items
         } else {
             $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, null);
         }

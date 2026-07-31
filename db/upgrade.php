@@ -1447,7 +1447,8 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026071005) {
-        // Add block_exaportviewcate table for view-category many-to-many assignments.
+        // Add block_exaportviewcate table for view-category many-to-many assignments
+        // (mirrors block_exaportitemcate).
         $table = new xmldb_table('block_exaportviewcate');
 
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
@@ -1459,8 +1460,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $table->add_key('cateid', XMLDB_KEY_FOREIGN, ['cateid'], 'block_exaportcate', ['id']);
 
         $table->add_index('viewid_cateid', XMLDB_INDEX_UNIQUE, ['viewid', 'cateid']);
-        $table->add_index('viewid_idx', XMLDB_INDEX_NOTUNIQUE, ['viewid']);
-        $table->add_index('cateid_idx', XMLDB_INDEX_NOTUNIQUE, ['cateid']);
 
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);

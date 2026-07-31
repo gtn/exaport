@@ -482,8 +482,6 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="viewid_cateid" UNIQUE="true" FIELDS="viewid, cateid"/>
-        <INDEX NAME="viewid_idx" UNIQUE="false" FIELDS="viewid"/>
-        <INDEX NAME="cateid" UNIQUE="false" FIELDS="cateid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_exaport_course_templ" COMMENT="per-course category distribution templates">

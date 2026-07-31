@@ -1346,7 +1346,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026052903) {
-        // TODO: change version before merge
         // Add item-category relation table for multi-category assignments.
         $table = new xmldb_table('block_exaportitemcate');
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
@@ -1447,6 +1446,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026071005) {
+        // TODO: change version when merging
         // Add block_exaportviewcate table for view-category many-to-many assignments
         // (mirrors block_exaportitemcate).
         $table = new xmldb_table('block_exaportviewcate');

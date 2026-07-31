@@ -74,28 +74,6 @@
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
-#exaport .card-stack-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    border: .0625rem solid rgba(0,0,0,.175);
-    border-radius: .5rem;
-    pointer-events: none;
-}
-#exaport .card-stack-layer-1 {
-    top: -.2rem;
-    left: .2rem;
-    z-index: 2;
-}
-#exaport .card-stack-layer-2 {
-    top: -.4rem;
-    left: .4rem;
-    z-index: 1;
-    box-shadow: 2px 2px 4px rgba(0,0,0,.15);
-}
 #exaport .col-card-folder .card-eportfolio {
     position: relative;
     border-radius: 0 0.75rem 0.75rem 0rem;
@@ -189,36 +167,39 @@
     -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
     mask-image: linear-gradient(to right, black 70%, transparent 100%);
 }
-/* View (collection) card — stacked-paper effect via pseudo-elements */
-#exaport .exaport-flat-item .card-eportfolio.card-view {
+/* View (collection) card — stacked-paper effect via explicit sibling divs */
+#exaport .card-view-stack {
     position: relative;
-    overflow: visible !important;
+    height: 100%;
 }
-#exaport .exaport-flat-item .card-eportfolio.card-view::before,
-#exaport .exaport-flat-item .card-eportfolio.card-view::after {
-    content: "";
+#exaport .card-view-stack .card-eportfolio {
+    position: relative;
+    z-index: 3;
+}
+#exaport .card-stack-layer {
     position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: #fff;
     border: .0625rem solid rgba(0, 0, 0, .175);
     border-radius: .5rem;
     pointer-events: none;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
 }
-#exaport .exaport-flat-item .card-eportfolio.card-view::before {
-    z-index: -1;
-    transform: translate(4px, -4px);
-    background: #f8f9fa;
+#exaport .card-stack-layer-1 {
+    transform: translate(.3rem, .3rem);
+    z-index: 2;
+    background: #f5f6f7;
 }
-#exaport .exaport-flat-item .card-eportfolio.card-view::after {
-    z-index: -2;
-    transform: translate(8px, -8px);
-    background: #f0f2f4;
+#exaport .card-stack-layer-2 {
+    transform: translate(.6rem, .6rem);
+    z-index: 1;
+    background: #eeeff0;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, .1);
 }
-/* Ensure outer column allows the stacked overflow to be visible */
-#exaport .exaport-flat-item:has(.card-view) {
+/* Give view columns a little extra bottom clearance so shifted layers are not clipped */
+#exaport .exaport-flat-view {
     overflow: visible;
+    padding-bottom: .7rem;
 }

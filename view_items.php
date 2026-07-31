@@ -472,13 +472,21 @@ if ($type == 'sharedstudent') {
         } else {
             $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, null);
         }
+        // Load views for mine/flat mode.
+        $views = \block_exaport\view_helper::load_flat_views($USER->id, $categories, $sqlsort);
     } else {
         // Folder mode keeps legacy category navigation behavior.
         $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, $show_otherusers ? true : false);
+        // Load views for mine/folder mode (filtered to current category).
+        $views = \block_exaport\view_helper::load_owner_category_views($USER->id, $currentcategory->id, $categories, $sqlsort);
     }
 }
 
 $isexternalreadonlymode = ($type === 'extern_category') && !empty($canonicalaccess);
+// $views is only populated for type == 'mine' (both layouts); all other flows leave it empty.
+if (!isset($views)) {
+    $views = [];
+}
 if ($isexternalreadonlymode) {
     foreach ($items as $item) {
         // Read-only external item links must keep the category access token (not portfolio/id/...).
@@ -646,6 +654,17 @@ if ($type == 'mine' && $layout == 'folder') {
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
+    // Row 4 (mine only): items/views filter toggle.
+    if ($type == 'mine') {
+        echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+        echo '<label class="sr-only" for="exaport-flat-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
+        echo '<select id="exaport-flat-entrytype-select" class="form-control custom-select" style="min-width:160px; max-width:250px;">';
+        echo '<option value="">' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
+        echo '<option value="item">' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
+        echo '<option value="view">' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
+        echo '</select>';
+        echo '</div>';
+    }
     echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
     echo '</div>';
 
@@ -1066,16 +1085,78 @@ if ($useManualTable) {
                 $itemCatIds[] = (int)$cat->id;
             }
         }
-        echo '<tr class="exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
+        echo '<tr class="exaport-flat-item" data-entry-type="item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
         echo '<td style="width:10%">' . ($row['type'] ?? '') . '</td>';
         echo '<td style="width:60%">' . ($row['name'] ?? '') . '</td>';
         echo '<td style="width:20%">' . ($row['date'] ?? '') . '</td>';
         echo '<td style="width:10%">' . ($row['icons'] ?? '') . '</td>';
         echo '</tr>';
     }
+    // Render view rows alongside item rows (mine type only).
+    if ($type == 'mine') {
+        foreach ($views as $view) {
+            $viewCatIds = [];
+            if (!empty($view->flatcategories) && is_array($view->flatcategories)) {
+                foreach ($view->flatcategories as $cat) {
+                    $viewCatIds[] = (int)$cat->id;
+                }
+            }
+            $viewurl = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
+                . '&access=id/' . $view->userid . '-' . $view->id;
+            $editurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+                . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
+            $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+                . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
+            $isshared = !empty($view->share_all) || !empty($view->share_users) || !empty($view->share_groups) || !empty($view->share_external);
+            $sharedicon = $isshared ? block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
+                ['title' => block_exaport_get_view_share_tooltip($view)]) : '';
+            echo '<tr class="exaport-flat-item" data-entry-type="view" data-item-name="' . s(strtolower($view->name)) . '" data-category-ids="' . s(implode(',', $viewCatIds)) . '" data-item-date="' . (int)$view->timemodified . '">';
+            echo '<td style="width:10%">' . block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']) . '</td>';
+            echo '<td style="width:60%"><a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
+            if ($view->description) {
+                echo '<table width="98%"><tr><td>' . format_text($view->description, FORMAT_HTML) . '</td></tr></table>';
+            }
+            echo '</td>';
+            echo '<td style="width:20%">' . userdate($view->timemodified) . '</td>';
+            echo '<td style="width:10%"><span class="excomdos_listicons">' . $sharedicon
+                . ' <a href="' . s($editurl) . '">' . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . '</a>'
+                . ' <a href="' . s($deleteurl) . '">' . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']) . '</a>'
+                . '</span></td>';
+            echo '</tr>';
+        }
+    }
     echo '</tbody></table>';
 } else {
     echo html_writer::table($table);
+    // In folder mode (mine only), render view rows separately after the main table.
+    if ($type == 'mine' && $views) {
+        echo '<table class="generaltable" width="100%"><tbody>';
+        foreach ($views as $view) {
+            $viewurl = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
+                . '&access=id/' . $view->userid . '-' . $view->id;
+            $editurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+                . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
+            $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+                . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
+            $isshared = !empty($view->share_all) || !empty($view->share_users) || !empty($view->share_groups) || !empty($view->share_external);
+            $sharedicon = $isshared ? block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
+                ['title' => block_exaport_get_view_share_tooltip($view)]) : '';
+            echo '<tr>';
+            echo '<td style="width:10%">' . block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']) . '</td>';
+            echo '<td style="width:60%"><a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
+            if ($view->description) {
+                echo '<table width="98%"><tr><td>' . format_text($view->description, FORMAT_HTML) . '</td></tr></table>';
+            }
+            echo '</td>';
+            echo '<td style="width:20%">' . userdate($view->timemodified) . '</td>';
+            echo '<td style="width:10%"><span class="excomdos_listicons">' . $sharedicon
+                . ' <a href="' . s($editurl) . '">' . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . '</a>'
+                . ' <a href="' . s($deleteurl) . '">' . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']) . '</a>'
+                . '</span></td>';
+            echo '</tr>';
+        }
+        echo '</tbody></table>';
+    }
 }
 echo '</div>';
 
@@ -1097,6 +1178,13 @@ if ($layout == 'folder') {
 
 foreach ($items as $item) {
     echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, ($layout == 'folder'));
+}
+
+// Render view cards alongside item cards (mine type only).
+if ($type == 'mine') {
+    foreach ($views as $view) {
+        echo block_exaport_view_list_item($view, $courseid, $type, $categoryid, ($layout == 'folder'));
+    }
 }
 
 echo '</div>';
@@ -1189,7 +1277,7 @@ function block_exaport_get_item_comp_footer_badge($item) {
 }
 
 /**
- * Prints the unified "Create" dropdown button (artefact + category).
+ * Prints the unified "Create" dropdown button (artefact + category + view).
  */
 function block_exaport_print_create_button($courseid, $categoryid, $type) {
     global $CFG;
@@ -1199,6 +1287,10 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
     }
     $createartefacturl = $CFG->wwwroot . '/blocks/exaport/item.php?action=add&courseid=' . $courseid . '&categoryid=' . $categoryid . $cattype . '&type=mixed';
     $createcategoryurl = $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid;
+    $createviewurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?action=add&courseid=' . $courseid;
+    if ($categoryid) {
+        $createviewurl .= '&categoryid=' . $categoryid;
+    }
 
     echo '<div style="position: relative; display: inline-block;">';
     echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';
@@ -1212,6 +1304,9 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
         echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
             . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '
             . get_string("category", "block_exaport") . '</a>';
+        echo '<a class="dropdown-item" href="' . $createviewurl . '">'
+            . block_exaport_fontawesome_icon('layer-group', 'solid', 1) . ' '
+            . get_string("add_view", "block_exaport") . '</a>';
     }
     echo '</div>';
     echo '</div>';
@@ -1610,3 +1705,30 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
     return 'something wrong!! (code: 1716990501476)';
 
 }
+
+/**
+ * Render a view (collection) card. Dispatches to the right template based on the active layout.
+ *
+ * @param \stdClass $view       The view record decorated by view_helper.
+ * @param int       $courseid   The course id.
+ * @param string    $type       Access type ('mine').
+ * @param int       $categoryid The current category id.
+ * @param bool      $foldermode Whether in folder (no category badges) or flat mode (with badges).
+ * @return string               Rendered HTML.
+ */
+function block_exaport_view_list_item(\stdClass $view, int $courseid, string $type, int $categoryid = 0,
+                                      bool $foldermode = false): string {
+    global $CFG, $PAGE;
+    $template = block_exaport_used_layout();
+    if ($template === 'moodle_bootstrap') {
+        return $PAGE->get_renderer('block_exaport')->render(
+            new \block_exaport\output\view_card($view, $courseid, $type, $categoryid, !$foldermode)
+        );
+    }
+    // Fallback for non-bootstrap layouts: simple link.
+    $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
+           . '&access=id/' . $view->userid . '-' . $view->id;
+    return '<div class="excomdos_tile excomdos_tile_item"><a href="' . s($url) . '">'
+           . format_string($view->name) . '</a></div>';
+}
+

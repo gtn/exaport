@@ -23,6 +23,7 @@ define([], function() {
     var categoryChildrenMap = {}; // Map of {parentId: [childId, ...]} for expanding filters to subcategories.
     var clearAllLabel = 'Clear all filters'; // Translatable via init() parameter.
     var searchCategoryLabel = 'Search Category...'; // Translatable via init() parameter.
+    var entryTypeSelect;    // Entry-type filter dropdown (All / Only items / Only views).
 
     /**
      * Render category chips and a "remove all" button into the chips container.
@@ -106,6 +107,7 @@ define([], function() {
     function filterItems() {
         var searchText = (searchInput ? searchInput.value : '').toLowerCase();
         var selectedCatIds = Object.keys(selectedCategories).map(Number);
+        var selectedEntryType = entryTypeSelect ? entryTypeSelect.value : '';
 
         // If "show subcategories" is checked, expand each selected category to include descendants.
         var includeSubcats = subcategoriesCheckbox && subcategoriesCheckbox.checked;
@@ -126,13 +128,15 @@ define([], function() {
             var name = item.getAttribute('data-item-name') || '';
             var catIdsStr = item.getAttribute('data-category-ids') || '';
             var catIds = catIdsStr ? catIdsStr.split(',').map(Number) : [];
+            var entryType = item.getAttribute('data-entry-type') || 'item';
 
             var matchesSearch = !searchText || name.indexOf(searchText) !== -1;
             var matchesCategory = matchCatIds.length === 0 || matchCatIds.some(function(catId) {
                 return catIds.indexOf(catId) !== -1;
             });
+            var matchesEntryType = !selectedEntryType || entryType === selectedEntryType;
 
-            item.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
+            item.style.display = (matchesSearch && matchesCategory && matchesEntryType) ? '' : 'none';
         });
 
         sortItems();
@@ -430,6 +434,7 @@ define([], function() {
             sortSelect = document.getElementById('exaport-flat-sort-select');
             chipsContainer = document.getElementById('exaport-flat-filter-chips');
             subcategoriesCheckbox = document.getElementById('exaport-flat-subcategories-checkbox');
+            entryTypeSelect = document.getElementById('exaport-flat-entrytype-select');
 
             // Try to restore filter state from sessionStorage (after a reload).
             var restoredFromSession = restoreFilterStateFromSession();
@@ -458,6 +463,12 @@ define([], function() {
                 });
             }
 
+            // Bind entry-type filter dropdown.
+            if (entryTypeSelect) {
+                entryTypeSelect.addEventListener('change', function() {
+                    filterItems();
+                });
+            }
             // If state was restored from session, render chips and apply filters.
             if (restoredFromSession) {
                 renderChips();

@@ -57,6 +57,33 @@ namespace {
         return implode(', ', $parts);
     }
 
+    /**
+     * Build a detailed share tooltip for a view record.
+     *
+     * Mirrors block_exaport_get_category_share_tooltip() but uses the richer
+     * share info attached by view_helper::load_flat_views() / load_owner_category_views().
+     *
+     * @param stdClass $view View record decorated with share_* properties.
+     * @return string         Tooltip text, or empty string when not shared.
+     */
+    function block_exaport_get_view_share_tooltip(stdClass $view): string {
+        $parts = [];
+
+        if (!empty($view->share_all)) {
+            $parts[] = get_string('internalaccessall', 'block_exaport');
+        } else if (!empty($view->share_groups) && !empty($view->share_groups_only)) {
+            $parts[] = get_string('internalaccessgroups', 'block_exaport') . ': ' . implode(', ', $view->share_groups);
+        } else if (!empty($view->share_users)) {
+            $parts[] = get_string('internalaccessusers', 'block_exaport') . ': ' . implode(', ', $view->share_users);
+        }
+
+        if (!empty($view->share_external)) {
+            $parts[] = get_string('externalaccess', 'block_exaport') . ': ' . $view->share_external;
+        }
+
+        return implode('; ', $parts);
+    }
+
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
         global $DB;
 

@@ -1,16 +1,16 @@
 {{!
-    Item card for the bootstrap layout (moodle_bootstrap).
-    Used by block_exaport_artefact_list_item() in view_items.php
-    for both folder-navigation mode and flat/grid mode.
+    View (collection) card for the bootstrap layout (moodle_bootstrap).
+    Rendered as a stacked-paper card via .card-view modifier class.
+    Used by block_exaport_view_list_item() in view_items.php.
 
     Context variables:
-        url             - URL to the artefact detail page
-        itemnamelower   - Lowercase item name for data-item-name attribute
+        url             - URL to the shared view page
+        viewnamelower   - Lowercase view name for data-item-name attribute
         timemodified    - Unix timestamp for data-item-date attribute
         catids          - Comma-separated category IDs for data-category-ids attribute
-        itemid          - Integer item id
-        typeicon        - Pre-rendered HTML for the type icon (with tooltip)
-        itemname        - Display name of the item (auto-escaped by mustache)
+        viewid          - Integer view id
+        collectionicon  - Pre-rendered HTML for the collection/layer icon (with tooltip)
+        viewname        - Display name of the view (auto-escaped by mustache)
         ellipsisicon    - Pre-rendered HTML for the "⋮" dropdown toggle icon
         canedit         - Boolean: show "Edit" menu entry
         editurl         - URL for the edit action
@@ -20,23 +20,20 @@
         deleteurl       - URL for the delete action
         deleteicon      - Pre-rendered HTML for the delete icon
         deletelabel     - Localised "Delete" label
-        introtext       - Short plain-text intro excerpt (empty string when absent)
         dateformatted   - Human-readable date string for the card footer
-        compbadge       - Pre-rendered HTML for the competence badge (may be empty)
-        hascomments     - Boolean: item has at least one comment
-        commentcount    - Integer comment count
-        commentlabel    - Localised comment count tooltip string
+        isshared        - Boolean: view is shared with someone
+        sharedicon      - Pre-rendered HTML for the share icon (with tooltip)
         categorybadges  - Pre-rendered HTML for category badge pills (flat mode only, may be empty)
 }}
 <div class="col mb-4 exaport-flat-item"
-     data-entry-type="item"
-     data-item-name="{{itemnamelower}}"
+     data-entry-type="view"
+     data-item-name="{{viewnamelower}}"
      data-item-date="{{timemodified}}"
      data-category-ids="{{catids}}">
-    <div class="card card-eportfolio h-100 excomdos_tile excomdos_tile_item id-{{itemid}}">
+    <div class="card card-eportfolio card-view h-100 excomdos_tile excomdos_tile_item id-{{viewid}}">
         <div class="card-top d-flex justify-content-between">
             <h5 class="card-title">
-                <a href="{{url}}">{{{typeicon}}}{{itemname}}</a>
+                <a href="{{url}}">{{{collectionicon}}}{{viewname}}</a>
             </h5>
             <span class="eportfolio-card-more">
                 <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -58,9 +55,7 @@
         </div>
         <div class="card-body position-relative">
             <a href="{{url}}" class="stretched-link" aria-hidden="true" tabindex="-1"></a>
-            <div class="card-body-text">
-                {{#introtext}}<p class="card-text">{{introtext}}</p>{{/introtext}}
-            </div>
+            <div class="card-body-text"></div>
             {{#categorybadges}}
             <div class="card-body-chips">
                 {{{categorybadges}}}
@@ -70,17 +65,11 @@
         <div class="card-footer d-flex justify-content-between align-items-center">
             <span class="eportoflio-date">{{dateformatted}}</span>
             <div>
-                {{{compbadge}}}
-                {{#hascomments}}
-                <span class="eportoflio-comment me-2">
-                    <i class="icon icon-comment fa fa-comment-dots"
-                       aria-hidden="true"
-                       data-bs-toggle="tooltip"
-                       data-bs-placement="top"
-                       data-bs-title="{{commentlabel}}"></i>
-                    <span class="eportfolio-comment-count">{{commentcount}}</span>
+                {{#isshared}}
+                <span class="eportoflio-shared me-2">
+                    {{{sharedicon}}}
                 </span>
-                {{/hascomments}}
+                {{/isshared}}
             </div>
         </div>
     </div>

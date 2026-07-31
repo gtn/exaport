@@ -1446,5 +1446,28 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026062904, 'exaport');
     }
 
+    if ($oldversion < 2026071005) {
+        // Add block_exaportviewcate table for view-category many-to-many assignments.
+        $table = new xmldb_table('block_exaportviewcate');
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('viewid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('cateid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('viewid', XMLDB_KEY_FOREIGN, ['viewid'], 'block_exaportview', ['id']);
+        $table->add_key('cateid', XMLDB_KEY_FOREIGN, ['cateid'], 'block_exaportcate', ['id']);
+
+        $table->add_index('viewid_cateid', XMLDB_INDEX_UNIQUE, ['viewid', 'cateid']);
+        $table->add_index('viewid_idx', XMLDB_INDEX_NOTUNIQUE, ['viewid']);
+        $table->add_index('cateid_idx', XMLDB_INDEX_NOTUNIQUE, ['cateid']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_block_savepoint(true, 2026071005, 'exaport');
+    }
+
     return $result;
 }

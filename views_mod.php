@@ -93,7 +93,7 @@ if ($view && $action == 'grouplist') {
     exit;
 }
 
-$returnurltolist = $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $courseid;
+$returnurltolist = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid;
 $returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id . '&action=edit';
 
 // Delete item.
@@ -123,7 +123,7 @@ if ($action == 'delete') {
         block_exaport_print_header('views');
         echo '<br />';
         echo $OUTPUT->confirm(get_string("deletecheck", null, $view->name), new moodle_url('views_mod.php', $optionsyes),
-            new moodle_url('views_list.php', $optionsno));
+            new moodle_url('view_items.php', $optionsno));
         echo block_exaport_wrapperdivend();
         echo $OUTPUT->footer();
         die;

@@ -28,20 +28,41 @@ defined('MOODLE_INTERNAL') || die();
 class view_helper {
 
     /**
+     * Build a safe ORDER BY clause for the views query (table alias v).
+     *
+     * @param string $sortkey  Sort column key (e.g. 'name', 'date').
+     * @param string $sortdir  Sort direction, 'asc' or 'desc'.
+     * @return string SQL ORDER BY fragment including the leading " ORDER BY ".
+     */
+    private static function view_sort_sql(string $sortkey, string $sortdir): string {
+        $dir = (strtolower($sortdir) === 'desc') ? 'DESC' : 'ASC';
+
+        if ($sortkey === 'name') {
+            $column = 'v.name';
+        } else {
+            // 'date' and any unknown key → timemodified.
+            $column = 'v.timemodified';
+        }
+
+        return ' ORDER BY ' . $column . ' ' . $dir;
+    }
+
+    /**
      * Load all views for a user in flat mode and attach flatcategories.
      *
      * Mirrors category_helper::load_flat_items().
      *
-     * @param int    $userid   The user whose views to load.
+     * @param int    $userid     The user whose views to load.
      * @param array  $categories All categories keyed by id (for path name resolution).
-     * @param string $sqlsort  SQL ORDER BY clause fragment for the query.
+     * @param string $sortkey    Sort column key (e.g. 'name', 'date').
+     * @param string $sortdir    Sort direction, 'asc' or 'desc'.
      * @return array View records keyed by id, each with ->flatcategories and ->entrytype.
      */
-    public static function load_flat_views(int $userid, array $categories, string $sqlsort): array {
+    public static function load_flat_views(int $userid, array $categories, string $sortkey, string $sortdir): array {
         global $DB;
 
         $views = $DB->get_records_sql(
-            "SELECT v.* FROM {block_exaportview} v WHERE v.userid = ? " . $sqlsort,
+            "SELECT v.* FROM {block_exaportview} v WHERE v.userid = ? " . self::view_sort_sql($sortkey, $sortdir),
             [$userid]
         );
 
@@ -64,11 +85,14 @@ class view_helper {
      * @param int    $userid     The user whose views to load.
      * @param int    $categoryid The active category id (0 = root = uncategorised views only).
      * @param array  $categories All categories keyed by id (for path name resolution).
-     * @param string $sqlsort    SQL ORDER BY clause fragment.
+     * @param string $sortkey    Sort column key (e.g. 'name', 'date').
+     * @param string $sortdir    Sort direction, 'asc' or 'desc'.
      * @return array View records with ->flatcategories and ->entrytype.
      */
-    public static function load_owner_category_views(int $userid, int $categoryid, array $categories, string $sqlsort): array {
+    public static function load_owner_category_views(int $userid, int $categoryid, array $categories, string $sortkey, string $sortdir): array {
         global $DB;
+
+        $ordersql = self::view_sort_sql($sortkey, $sortdir);
 
         if ($categoryid > 0) {
             // Views explicitly assigned to this category.
@@ -76,7 +100,7 @@ class view_helper {
                 "SELECT v.*
                    FROM {block_exaportview} v
                    JOIN {block_exaportviewcate} vc ON vc.viewid = v.id AND vc.cateid = ?
-                  WHERE v.userid = ? " . $sqlsort,
+                  WHERE v.userid = ? " . $ordersql,
                 [$categoryid, $userid]
             );
         } else {
@@ -87,7 +111,7 @@ class view_helper {
                   WHERE v.userid = ?
                     AND NOT EXISTS (
                         SELECT 1 FROM {block_exaportviewcate} vc WHERE vc.viewid = v.id
-                    ) " . $sqlsort,
+                    ) " . $ordersql,
                 [$userid]
             );
         }

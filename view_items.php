@@ -473,12 +473,12 @@ if ($type == 'sharedstudent') {
             $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, null);
         }
         // Load views for mine/flat mode.
-        $views = \block_exaport\view_helper::load_flat_views($USER->id, $categories, $sqlsort);
+        $views = \block_exaport\view_helper::load_flat_views($USER->id, $categories, $parsedsort[0], $parsedsort[1]);
     } else {
         // Folder mode keeps legacy category navigation behavior.
         $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, $show_otherusers ? true : false);
         // Load views for mine/folder mode (filtered to current category).
-        $views = \block_exaport\view_helper::load_owner_category_views($USER->id, $currentcategory->id, $categories, $sqlsort);
+        $views = \block_exaport\view_helper::load_owner_category_views($USER->id, $currentcategory->id, $categories, $parsedsort[0], $parsedsort[1]);
     }
 }
 

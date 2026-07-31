@@ -87,7 +87,7 @@ class block_exaport extends block_list {
         if (!empty($CFG->block_exaport_enable_views)) {
             $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/myviews.svg' . '" width="16" height="16" class="icon" alt="" />';
             $this->content->items[] = '<a title="' . block_exaport_get_string('views') . '" ' .
-                ' href="' . $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id . '">' .
+                ' href="' . $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id . '">' .
                 $icon . block_exaport_get_string('views') . '</a>';
         }
 

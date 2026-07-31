@@ -179,11 +179,53 @@ define(['core/ajax'], function(Ajax) {
         }
     }
 
+    /**
+     * Apply the entry-type filter to folder-mode tiles and details rows.
+     * Hides/shows .exaport-flat-item (tiles) and .exaport-folder-item (details) elements.
+     *
+     * @param {string} entryType '' = all, 'item' = items only, 'view' = views only.
+     */
+    function applyFolderEntryTypeFilter(entryType) {
+        document.querySelectorAll('.exaport-flat-item, .exaport-folder-item').forEach(function(el) {
+            if (!entryType) {
+                el.style.display = '';
+            } else {
+                el.style.display = (el.getAttribute('data-entry-type') === entryType) ? '' : 'none';
+            }
+        });
+    }
+
+    /**
+     * Bind the entry-type filter dropdown (#exaport-entrytype-select) for:
+     * - folder mode: client-side show/hide of tiles and details rows
+     * - both modes: persist selected value to Moodle user preferences
+     */
+    function bindEntryTypeFilter(layout) {
+        var entryTypeSelect = document.getElementById('exaport-entrytype-select');
+        if (!entryTypeSelect) {
+            return;
+        }
+
+        entryTypeSelect.addEventListener('change', function() {
+            savePreference('entrytype', entryTypeSelect.value);
+            if (layout === 'folder') {
+                applyFolderEntryTypeFilter(entryTypeSelect.value);
+            }
+            // In flat mode the filtering is handled by flat_filter.js (filterItems call).
+        });
+
+        // Apply the initial value on page load (for folder mode).
+        if (layout === 'folder' && entryTypeSelect.value) {
+            applyFolderEntryTypeFilter(entryTypeSelect.value);
+        }
+    }
+
     return {
         init: function(folderlayout, layout) {
             setActiveView(folderlayout === 'details' ? 'details' : 'tiles');
             bindViewToggle();
             bindFlatPreferencePersistence(layout);
+            bindEntryTypeFilter(layout);
 
             var otherUsersCheckbox = document.getElementById('exaport-show-otherusers-checkbox');
             if (otherUsersCheckbox) {

@@ -10,7 +10,25 @@
  * @copyright  2024 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
+define(['core/ajax'], function(Ajax) {
+
+    /**
+     * Persist a user preference via AJAX.
+     *
+     * @param {string} name  Preference name (without the "block_exaport_" prefix).
+     * @param {string|number} value
+     */
+    function savePreference(name, value) {
+        Ajax.call([{
+            methodname: 'core_user_set_user_preferences',
+            args: {
+                preferences: [{
+                    name: 'block_exaport_' + name,
+                    value: String(value)
+                }]
+            }
+        }])[0];
+    }
 
     // Module-level state: we keep references to DOM elements and selection state here
     // so all functions can access them without re-querying the DOM.
@@ -434,7 +452,7 @@ define([], function() {
             sortSelect = document.getElementById('exaport-flat-sort-select');
             chipsContainer = document.getElementById('exaport-flat-filter-chips');
             subcategoriesCheckbox = document.getElementById('exaport-flat-subcategories-checkbox');
-            entryTypeSelect = document.getElementById('exaport-flat-entrytype-select');
+            entryTypeSelect = document.getElementById('exaport-entrytype-select');
 
             // Try to restore filter state from sessionStorage (after a reload).
             var restoredFromSession = restoreFilterStateFromSession();
@@ -466,6 +484,7 @@ define([], function() {
             // Bind entry-type filter dropdown.
             if (entryTypeSelect) {
                 entryTypeSelect.addEventListener('change', function() {
+                    savePreference('entrytype', entryTypeSelect.value);
                     filterItems();
                 });
             }
@@ -490,6 +509,9 @@ define([], function() {
                     renderChips();
                     filterItems();
                 }
+            } else if (entryTypeSelect && entryTypeSelect.value) {
+                // Apply persisted entry-type filter on initial page load (no session restore needed).
+                filterItems();
             }
         }
     };

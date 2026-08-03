@@ -612,6 +612,15 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-folder');
     echo '</div>';
+    // Row 4: items/views filter toggle.
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
+    echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:160px; max-width:250px;">';
+    echo '<option value=""' . ($entrytype === '' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
+    echo '<option value="item"' . ($entrytype === 'item' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
+    echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
+    echo '</select>';
+    echo '</div>';
     $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
@@ -803,13 +812,6 @@ if ($type === 'extern_category') {
         echo '<a target="_blank" href="' . $CFG->wwwroot . '/blocks/exaport/view_items_print.php?courseid=' . $courseid . '" class="btn btn-sm btn-outline-secondary">'
             . block_exaport_fontawesome_icon('print', 'solid', 1)
             . ' ' . get_string("printerfriendly", "group") . '</a>';
-        // Entry-type filter (All / Items / Views) – mine only, folder mode.
-        echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
-        echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:140px; max-width:220px;">';
-        echo '<option value=""' . ($entrytype === '' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
-        echo '<option value="item"' . ($entrytype === 'item' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
-        echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
-        echo '</select>';
     }
     echo '</div>';
     echo '</div>';

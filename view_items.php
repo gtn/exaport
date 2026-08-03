@@ -31,9 +31,6 @@ $layout = optional_param('layout', '', PARAM_TEXT);
 $folderlayout = optional_param('folderlayout', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_TEXT);
 $entrytype = optional_param('entrytype', '', PARAM_ALPHA);
-// Detect whether 'entrytype' was explicitly provided in the request (even as empty string).
-// This lets us distinguish "user selected All (entrytype=)" from "param absent → use stored pref".
-$entrytype_in_url = array_key_exists('entrytype', $_GET) || array_key_exists('entrytype', $_POST);
 
 // External category access via hash (mirrors shared_view.php access pattern).
 $access = optional_param('access', '', PARAM_TEXT);
@@ -96,9 +93,8 @@ $showothersusersfromurl = $show_otherusers;
 if ($show_otherusers === -1) {
     $show_otherusers = (int)get_user_preferences('block_exaport_show_otherusers', 1);
 }
-$entrytypefromurl = $entrytype_in_url ? $entrytype : null;
-if (!$entrytype_in_url) {
-    // No explicit URL param: restore from stored user preference.
+$entrytypefromurl = $entrytype;
+if ($entrytype === '') {
     $entrytype = get_user_preferences('block_exaport_entrytype', '');
 }
 // Validate: only 'item' and 'view' are accepted; empty string means "all".
@@ -141,7 +137,7 @@ if ($showsubcategoriesfromurl !== -1) {
 if ($showothersusersfromurl !== -1) {
     set_user_preference('block_exaport_show_otherusers', (int)$show_otherusers);
 }
-if ($entrytypefromurl !== null) {
+if ($entrytypefromurl !== '') {
     set_user_preference('block_exaport_entrytype', $entrytype);
 }
 
@@ -492,18 +488,9 @@ if ($type == 'sharedstudent') {
         $views = \block_exaport\view_helper::load_flat_views($USER->id, $categories, $parsedsort[0], $parsedsort[1]);
     } else {
         // Folder mode keeps legacy category navigation behavior.
-        // Skip loading items when filtering to views-only; skip views when filtering to items-only.
-        if ($entrytype !== 'view') {
-            $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, $show_otherusers ? true : false);
-        } else {
-            $items = [];
-        }
+        $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, $show_otherusers ? true : false);
         // Load views for mine/folder mode (filtered to current category).
-        if ($entrytype !== 'item') {
-            $views = \block_exaport\view_helper::load_owner_category_views($USER->id, $currentcategory->id, $categories, $parsedsort[0], $parsedsort[1]);
-        } else {
-            $views = [];
-        }
+        $views = \block_exaport\view_helper::load_owner_category_views($USER->id, $currentcategory->id, $categories, $parsedsort[0], $parsedsort[1]);
     }
 }
 
@@ -817,9 +804,8 @@ if ($type === 'extern_category') {
             . block_exaport_fontawesome_icon('print', 'solid', 1)
             . ' ' . get_string("printerfriendly", "group") . '</a>';
         // Entry-type filter (All / Items / Views) – mine only, folder mode.
-        echo '<label class="sr-only" for="exaport-folder-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
-        echo '<select id="exaport-folder-entrytype-select" class="form-control custom-select" style="min-width:140px; max-width:220px;"'
-            . ' onchange="var u=new URL(window.location.href);u.searchParams.set(\'entrytype\',this.value);window.location.href=u.toString();">';
+        echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
+        echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:140px; max-width:220px;">';
         echo '<option value=""' . ($entrytype === '' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
         echo '<option value="item"' . ($entrytype === 'item' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
         echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';

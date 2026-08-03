@@ -66,25 +66,20 @@ class category_card extends card {
         $outerclasses = $isparenttile ? 'col mb-4 exaport-folder-category' : 'col col-card-folder mb-4 exaport-folder-category';
         $tilefixedclass = $isparenttile ? 'excomdos_tile_fixed ' : '';
         $isshared = false;
-        $issharedinternal = false;
-        $issharedexternal = false;
+        $share = new \block_exaport\share_info();
 
         if (!$isparenttile) {
             if ($this->type == 'shared' || $this->type == 'sharedstudent') {
+                // The category is displayed because it is shared with the current user;
+                // mark it as shared but defer full detail to the owner's view.
                 $isshared = true;
-                $issharedinternal = true;
             } else if ($this->type == 'mine') {
-                $issharedexternal = !empty($this->category->externaccess);
-                $issharedinternal = !empty($this->category->internshare) && (
-                    count(exaport_get_category_shared_users($this->category->id)) > 0 ||
-                    count(exaport_get_category_shared_groups($this->category->id)) > 0 ||
-                    (!empty($this->category->shareall) && (int)$this->category->shareall == 1)
-                );
-                $isshared = $issharedexternal || $issharedinternal;
+                $share = \block_exaport\category_helper::build_share_info($this->category);
+                $isshared = $share->is_shared();
             }
         }
 
-        $sharedtooltip = block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal);
+        $sharedtooltip = block_exaport_get_share_tooltip($share);
 
         return $this->base_icons() + [
             'outerclasses'   => $outerclasses,
@@ -110,9 +105,10 @@ class category_card extends card {
                 ['icon', 'icon-shared'],
                 [],
                 [
-                    'data-bs-toggle' => 'tooltip',
+                    'data-bs-toggle'    => 'tooltip',
                     'data-bs-placement' => 'top',
-                    'data-bs-title' => $sharedtooltip,
+                    'data-bs-html'      => 'true',
+                    'data-bs-title'     => $sharedtooltip,
                 ]
             ),
             'categorylabel'  => block_exaport_get_string('category'),

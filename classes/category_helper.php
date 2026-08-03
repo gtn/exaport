@@ -42,6 +42,58 @@ class category_helper {
     }
 
     /**
+     * Build a \block_exaport\share_info object for a category.
+     *
+     * Resolves user fullnames and group/cohort names from the category's sharing
+     * records. This uses the same tables as the existing sharing UI.
+     *
+     * @param \stdClass $category Category record (must have ->id, ->internshare, ->shareall, ->externaccess).
+     * @return \block_exaport\share_info
+     */
+    public static function build_share_info(\stdClass $category): \block_exaport\share_info {
+        global $DB;
+
+        $share = new \block_exaport\share_info();
+        $share->external = !empty($category->externaccess);
+
+        if (!empty($category->internshare)) {
+            $shareall = (!empty($category->shareall) && (int)$category->shareall == 1);
+            if ($shareall) {
+                $share->all = true;
+            } else {
+                $sharedgroups = exaport_get_category_shared_groups($category->id);
+                if (!empty($sharedgroups)) {
+                    $groupids = array_keys($sharedgroups);
+                    [$insql, $inparams] = $DB->get_in_or_equal($groupids);
+                    $cohorts = $DB->get_records_sql(
+                        "SELECT c.name FROM {cohort} c WHERE c.id $insql ORDER BY c.name",
+                        $inparams
+                    );
+                    foreach ($cohorts as $c) {
+                        $share->groups[] = $c->name;
+                    }
+                } else {
+                    $sharedusers = exaport_get_category_shared_users($category->id);
+                    if (!empty($sharedusers)) {
+                        $userids = array_keys($sharedusers);
+                        [$insql, $inparams] = $DB->get_in_or_equal($userids);
+                        $users = $DB->get_records_sql(
+                            "SELECT " . $DB->sql_fullname() . " AS name FROM {user} u"
+                            . " WHERE u.id $insql AND u.deleted = 0 ORDER BY name",
+                            $inparams
+                        );
+                        foreach ($users as $u) {
+                            $share->users[] = $u->name;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $share;
+    }
+
+    /**
      * Build the full hierarchical path name for a category, e.g. "haustiere / hunde".
      *
      * @param int $categoryid The category id.

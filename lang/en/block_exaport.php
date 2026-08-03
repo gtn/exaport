@@ -388,6 +388,10 @@ $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedexternalcategory'] = 'Shared externally';
 $string['sharedwith_group'] = 'Shared with my group';
 $string['sharedwith_group_cnt'] = 'Shared with {$a} groups';
+$string['share_tooltip_users'] = 'Shared internally with the following users: {$a}';
+$string['share_tooltip_groups'] = 'Shared internally with the following groups: {$a}';
+$string['share_tooltip_all'] = 'Shared internally with all users.';
+$string['share_tooltip_external'] = 'Shared externally via URL.';
 
 // === Copy to course.
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';

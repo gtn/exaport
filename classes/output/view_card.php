@@ -88,25 +88,24 @@ class view_card extends card {
         $isownview = ((int)$view->userid === (int)$USER->id);
 
         // Share state.
-        $isshared = !empty($view->share_all)
-                 || !empty($view->share_users)
-                 || !empty($view->share_groups)
-                 || !empty($view->share_external);
-        $sharedtooltip = $isshared ? block_exaport_get_view_share_tooltip($view) : '';
+        $share = $view->shareinfo ?? new \block_exaport\share_info();
+        $isshared = $share->is_shared();
+        $sharedtooltip = $isshared ? block_exaport_get_share_tooltip($share) : '';
 
         $collectionicon = block_exaport_fontawesome_icon('layer-group', 'solid', 1, ['icon', 'fa-fw', 'me-1'], [],
             ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top',
              'data-bs-title'  => get_string('view', 'block_exaport')]);
 
         $sharedicon = block_exaport_fontawesome_icon(
-            'handshake',
-            'regular',
+            'share-nodes',
+            'solid',
             1,
             ['icon', 'icon-shared'],
             [],
             [
                 'data-bs-toggle'    => 'tooltip',
                 'data-bs-placement' => 'top',
+                'data-bs-html'      => 'true',
                 'data-bs-title'     => $sharedtooltip,
             ]
         );

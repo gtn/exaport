@@ -847,7 +847,7 @@ if ($layout == 'folder' && !($type === 'extern_category')) {
         if (@$currentcategory->internshare && (count(exaport_get_category_shared_users($currentcategory->id)) > 0 ||
                 count(exaport_get_category_shared_groups($currentcategory->id)) > 0 || $currentcategory->shareall == 1)
         ) {
-            $currentcategoryPathItemButtons .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
+            $currentcategoryPathItemButtons .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1);
             //        $currentcategoryPathItemButtons .= ' <img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
         }
         $currentcategoryPathItemButtons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $currentcategory->id .
@@ -951,14 +951,10 @@ foreach ($subcategories as $category) {
 
     if ($type == 'mine' && $category->id > 0) {
         $table->data[$itemind]['icons'] = '<span class="excomdos_listicons">';
-        $issharedexternal = !empty($category->externaccess);
-        $issharedinternal = (isset($category->internshare) && $category->internshare == 1) &&
-            (count(exaport_get_category_shared_users($category->id)) > 0 ||
-                count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                (isset($category->shareall) && $category->shareall == 1));
-        if ($issharedexternal || $issharedinternal) {
-            $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                ['title' => block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal)]);
+        $share = \block_exaport\category_helper::build_share_info($category);
+        if ($share->is_shared()) {
+            $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
+                ['title' => block_exaport_get_share_tooltip($share)]);
             //                $table->data[$itemind]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
         };
         if (@$category->structure_share) {
@@ -1129,9 +1125,9 @@ if ($useManualTable) {
                 . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
             $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
                 . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
-            $isshared = !empty($view->share_all) || !empty($view->share_users) || !empty($view->share_groups) || !empty($view->share_external);
-            $sharedicon = $isshared ? block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                ['title' => block_exaport_get_view_share_tooltip($view)]) : '';
+            $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
+            $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
+                ['title' => block_exaport_get_share_tooltip($view->shareinfo)]) : '';
             echo '<tr class="exaport-flat-item" data-entry-type="view" data-item-name="' . s(strtolower($view->name)) . '" data-category-ids="' . s(implode(',', $viewCatIds)) . '" data-item-date="' . (int)$view->timemodified . '">';
             echo '<td style="width:10%">' . block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']) . '</td>';
             echo '<td style="width:60%"><a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
@@ -1171,9 +1167,9 @@ if ($useManualTable) {
                     . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
                 $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
                     . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
-                $isshared = !empty($view->share_all) || !empty($view->share_users) || !empty($view->share_groups) || !empty($view->share_external);
-                $sharedicon = $isshared ? block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                    ['title' => block_exaport_get_view_share_tooltip($view)]) : '';
+                $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
+                $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
+                    ['title' => block_exaport_get_share_tooltip($view->shareinfo)]) : '';
                 echo '<tr class="exaport-folder-item" data-entry-type="view">';
                 echo '<td style="width:10%">' . block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']) . '</td>';
                 echo '<td style="width:60%"><a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
@@ -1527,17 +1523,14 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
         if ($category->id == -1) {
             $tempvar = 1; // For code checker.
         } else if ($type == 'shared' || $type == 'sharedstudent') {
-            $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
+            $categoryContent .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1);
             //                        echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
         } else {
             // Type == mine.
-            $issharedexternal = !empty($category->externaccess);
-            $issharedinternal = @$category->internshare && (count(exaport_get_category_shared_users($category->id)) > 0 ||
-                    count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                    (isset($category->shareall) && $category->shareall == 1));
-            if ($issharedexternal || $issharedinternal) {
-                $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                    ['title' => block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal)]);
+            $share = \block_exaport\category_helper::build_share_info($category);
+            if ($share->is_shared()) {
+                $categoryContent .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
+                    ['title' => block_exaport_get_share_tooltip($share)]);
                 //                            echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
             if (@$category->structure_share) {

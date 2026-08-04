@@ -1131,7 +1131,7 @@ if ($useManualTable) {
                 . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
             $isshared = !empty($view->share_all) || !empty($view->share_users) || !empty($view->share_groups) || !empty($view->share_external);
             $sharedicon = $isshared ? block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top', 'data-bs-title' => s(block_exaport_get_view_share_tooltip($view))]) : '';
+                ['title' => block_exaport_get_view_share_tooltip($view)]) : '';
             echo '<tr class="exaport-flat-item" data-entry-type="view" data-item-name="' . s(strtolower($view->name)) . '" data-category-ids="' . s(implode(',', $viewCatIds)) . '" data-item-date="' . (int)$view->timemodified . '">';
             echo '<td style="width:10%">' . block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']) . '</td>';
             echo '<td style="width:60%"><a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
@@ -1173,7 +1173,7 @@ if ($useManualTable) {
                     . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
                 $isshared = !empty($view->share_all) || !empty($view->share_users) || !empty($view->share_groups) || !empty($view->share_external);
                 $sharedicon = $isshared ? block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                    ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top', 'data-bs-title' => s(block_exaport_get_view_share_tooltip($view))]) : '';
+                    ['title' => block_exaport_get_view_share_tooltip($view)]) : '';
                 echo '<tr class="exaport-folder-item" data-entry-type="view">';
                 echo '<td style="width:10%">' . block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']) . '</td>';
                 echo '<td style="width:60%"><a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';

@@ -356,10 +356,24 @@ if ($type == 'sharedstudent') {
             $parentcategory = null;
             $subcategories = [];
             $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
+            $views = \block_exaport\view_helper::load_flat_views(
+                $selecteduser->id,
+                $categories,
+                $parsedsort[0],
+                $parsedsort[1],
+                array_keys($allowedcategories)
+            );
         } else {
             $items = \block_exaport\category_helper::load_shared_category_items(
                 $currentcategory->id,
                 $sqlsort
+            );
+            $views = \block_exaport\view_helper::load_owner_category_views(
+                $selecteduser->id,
+                $currentcategory->id,
+                $categories,
+                $parsedsort[0],
+                $parsedsort[1]
             );
         }
     }
@@ -622,6 +636,16 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</select>';
     echo '</div>';
     $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
+} else if ($type == 'shared' && $layout == 'folder') {
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
+    echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:160px; max-width:250px;">';
+    echo '<option value="all"' . ($entrytype === 'all' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
+    echo '<option value="item"' . ($entrytype === 'item' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
+    echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
+    echo '</select>';
+    echo '</div>';
+    $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser) {
@@ -675,8 +699,8 @@ if ($type == 'mine' && $layout == 'folder') {
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
-    // Row 4 (mine only): items/views filter toggle.
-    if ($type == 'mine') {
+    // Row 4: items/views filter toggle.
+    if (in_array($type, ['mine', 'shared'], true)) {
         echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
         echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
         echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:160px; max-width:250px;">';
@@ -1110,8 +1134,8 @@ if ($useManualTable) {
         echo '<td style="width:10%">' . ($row['icons'] ?? '') . '</td>';
         echo '</tr>';
     }
-    // Render view rows alongside item rows (mine type only).
-    if ($type == 'mine') {
+    // Render view rows alongside item rows for mine/shared types.
+    if (in_array($type, ['mine', 'shared'])) {
         foreach ($views as $view) {
             $viewCatIds = [];
             if (!empty($view->flatcategories) && is_array($view->flatcategories)) {
@@ -1121,10 +1145,6 @@ if ($useManualTable) {
             }
             $viewurl = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
                 . '&access=id/' . $view->userid . '-' . $view->id;
-            $editurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
-                . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
-            $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
-                . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
             $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
             $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
                 ['title' => block_exaport_get_share_tooltip($view->shareinfo)]) : '';
@@ -1136,10 +1156,16 @@ if ($useManualTable) {
             }
             echo '</td>';
             echo '<td style="width:20%">' . userdate($view->timemodified) . '</td>';
-            echo '<td style="width:10%"><span class="excomdos_listicons">' . $sharedicon
-                . ' <a href="' . s($editurl) . '">' . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . '</a>'
-                . ' <a href="' . s($deleteurl) . '">' . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']) . '</a>'
-                . '</span></td>';
+            echo '<td style="width:10%"><span class="excomdos_listicons">' . $sharedicon;
+            if ($type == 'mine') {
+                $editurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+                    . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
+                $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+                    . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
+                echo ' <a href="' . s($editurl) . '">' . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . '</a>'
+                    . ' <a href="' . s($deleteurl) . '">' . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']) . '</a>';
+            }
+            echo '</span></td>';
             echo '</tr>';
         }
     }
@@ -1148,7 +1174,7 @@ if ($useManualTable) {
     echo html_writer::table($table);
     // In folder mode, render item rows and view rows separately after the category table,
     // with data-entry-type attributes so the JS entry-type filter can show/hide them.
-    if ($folderItemRows || ($type == 'mine' && $views)) {
+    if ($folderItemRows || (in_array($type, ['mine', 'shared'], true) && $views)) {
         echo '<table class="generaltable" width="100%"><tbody>';
         foreach ($folderItemRows as $folderRow) {
             $row = $folderRow['data'];
@@ -1159,14 +1185,10 @@ if ($useManualTable) {
             echo '<td style="width:10%">' . ($row['icons'] ?? '') . '</td>';
             echo '</tr>';
         }
-        if ($type == 'mine') {
+        if (in_array($type, ['mine', 'shared'], true)) {
             foreach ($views as $view) {
                 $viewurl = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
                     . '&access=id/' . $view->userid . '-' . $view->id;
-                $editurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
-                    . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
-                $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
-                    . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
                 $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
                 $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
                     ['title' => block_exaport_get_share_tooltip($view->shareinfo)]) : '';
@@ -1178,10 +1200,16 @@ if ($useManualTable) {
                 }
                 echo '</td>';
                 echo '<td style="width:20%">' . userdate($view->timemodified) . '</td>';
-                echo '<td style="width:10%"><span class="excomdos_listicons">' . $sharedicon
-                    . ' <a href="' . s($editurl) . '">' . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . '</a>'
-                    . ' <a href="' . s($deleteurl) . '">' . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']) . '</a>'
-                    . '</span></td>';
+                echo '<td style="width:10%"><span class="excomdos_listicons">' . $sharedicon;
+                if ($type == 'mine') {
+                    $editurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+                        . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
+                    $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+                        . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
+                    echo ' <a href="' . s($editurl) . '">' . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . '</a>'
+                        . ' <a href="' . s($deleteurl) . '">' . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon']) . '</a>';
+                }
+                echo '</span></td>';
                 echo '</tr>';
             }
         }
@@ -1210,8 +1238,8 @@ foreach ($items as $item) {
     echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, ($layout == 'folder'));
 }
 
-// Render view cards alongside item cards (mine type only).
-if ($type == 'mine') {
+// Render view cards alongside item cards for mine/shared types.
+if (in_array($type, ['mine', 'shared'], true)) {
     foreach ($views as $view) {
         echo block_exaport_view_list_item($view, $courseid, $type, $categoryid, ($layout == 'folder'));
     }

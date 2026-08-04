@@ -244,7 +244,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                     array("userid" => $USER->id, "pid" => 0), "name asc");
                 $viewcategories = array(0 => block_exaport_get_root_category()->name);
                 if ($outercategories) {
-                    $viewcategories = $viewcategories + rek_category_select_setup($outercategories, " ", $viewcategories);
+                    $viewcategories = $viewcategories + $this->build_category_options($outercategories, " ", $viewcategories);
                 }
                 $categorysselect->loadArray($viewcategories);
 
@@ -351,6 +351,20 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
         }
 
         return $form;
+    }
+
+    private function build_category_options(array $outercategories, string $entryname, array $categories): array {
+        global $DB, $USER;
+        foreach ($outercategories as $curcategory) {
+            $categories[$curcategory->id] = $entryname . format_string($curcategory->name);
+            $name = $entryname . format_string($curcategory->name);
+            $conditions = array("userid" => $USER->id, "pid" => $curcategory->id);
+            $innercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
+            if ($innercategories) {
+                $categories = $this->build_category_options($innercategories, $name . ' → ', $categories);
+            }
+        }
+        return $categories;
     }
 }
 

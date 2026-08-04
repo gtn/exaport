@@ -208,10 +208,12 @@ define(['core/ajax'], function(Ajax) {
 
         entryTypeSelect.addEventListener('change', function() {
             savePreference('entrytype', entryTypeSelect.value);
-            if (layout === 'folder') {
-                applyFolderEntryTypeFilter(entryTypeSelect.value);
+            var url = new URL(window.location.href);
+            url.searchParams.set('entrytype', entryTypeSelect.value);
+            if (layout === 'folder' || layout === 'flat') {
+                window.location.href = url.toString();
+                return;
             }
-            // In flat mode the filtering is handled by flat_filter.js (filterItems call).
         });
 
         // Apply the initial value on page load (for folder mode).

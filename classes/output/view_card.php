@@ -107,7 +107,7 @@ class view_card extends card {
             [
                 'data-bs-toggle'    => 'tooltip',
                 'data-bs-placement' => 'top',
-                'data-bs-title'     => $sharedtooltip,
+                'data-bs-title'     => s($sharedtooltip),
             ]
         );
 

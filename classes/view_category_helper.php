@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+namespace block_exaport;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'block_exaport';
-$plugin->release = '5.1';
-$plugin->version = 2026080401;
-$plugin->requires = 2023042400; // moodle 4.2
-$plugin->maturity = MATURITY_STABLE;
+class view_category_helper {
+    public static function sync_view_categories($viewid, array $categoryids) {
+        global $DB;
+
+        $DB->delete_records('block_exaportviewcate', ['viewid' => $viewid]);
+        foreach ($categoryids as $categoryid) {
+            $DB->insert_record('block_exaportviewcate', (object)[
+                'viewid' => (int)$viewid,
+                'cateid' => (int)$categoryid,
+            ]);
+        }
+    }
+}

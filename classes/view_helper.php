@@ -169,14 +169,10 @@ class view_helper {
     }
 
     /**
-     * Attach share info to each view so the tooltip helper can use it.
+     * Attach share info to each view as a \block_exaport\share_info object.
      *
      * Decorates each view with:
-     *   ->share_users  array of user fullnames (internal user sharing)
-     *   ->share_groups array of group names (internal group sharing)
-     *   ->share_all    bool (shareall == 1 and shareall is enabled)
-     *   ->share_groups_only bool (shareall == 2 = groups only)
-     *   ->share_external string|null (external URL if externaccess enabled)
+     *   ->shareinfo  \block_exaport\share_info object with resolved sharing detail.
      *
      * @param array $views Associative array of view objects keyed by id (modified in place).
      */
@@ -184,16 +180,11 @@ class view_helper {
         global $DB;
 
         foreach ($views as $view) {
-            $view->share_users = [];
-            $view->share_groups = [];
-            $view->share_all = false;
-            $view->share_groups_only = false;
-            $view->share_external = null;
+            $share = new \block_exaport\share_info();
 
             if ($view->shareall == 1 && block_exaport_shareall_enabled()) {
-                $view->share_all = true;
+                $share->all = true;
             } else if ($view->shareall == 2 && block_exaport_shareall_enabled()) {
-                $view->share_groups_only = true;
                 $groups = $DB->get_records_sql(
                     "SELECT g.name
                        FROM {groups} g
@@ -202,7 +193,7 @@ class view_helper {
                     [$view->id]
                 );
                 foreach ($groups as $g) {
-                    $view->share_groups[] = $g->name;
+                    $share->groups[] = $g->name;
                 }
             } else {
                 $users = $DB->get_records_sql(
@@ -214,13 +205,13 @@ class view_helper {
                     [$view->id]
                 );
                 foreach ($users as $u) {
-                    $view->share_users[] = $u->name;
+                    $share->users[] = $u->name;
                 }
             }
 
-            if (block_exaport_externaccess_enabled() && $view->externaccess) {
-                $view->share_external = block_exaport_get_external_view_url($view);
-            }
+            $share->external = (bool)(block_exaport_externaccess_enabled() && $view->externaccess);
+
+            $view->shareinfo = $share;
         }
     }
 }

@@ -40,48 +40,31 @@ namespace {
     }
 
     /**
-     * Build the category sharing tooltip text from internal/external state.
+     * Build the sharing tooltip HTML from resolved share detail.
      *
-     * @param bool $issharedinternal
-     * @param bool $issharedexternal
-     * @return string
+     * Each line is only added when relevant. Lines are separated by two <br> tags
+     * so the icon must use data-bs-html="true". All user/group names are escaped
+     * with s() since the tooltip is rendered as HTML.
+     *
+     * @param \block_exaport\share_info $share Resolved sharing detail.
+     * @return string HTML for use in data-bs-title (requires data-bs-html="true").
      */
-    function block_exaport_get_category_share_tooltip(bool $issharedinternal, bool $issharedexternal): string {
-        $parts = [];
-        if ($issharedinternal) {
-            $parts[] = block_exaport_get_string('sharedwithotherusers');
+    function block_exaport_get_share_tooltip(\block_exaport\share_info $share): string {
+        $lines = [];
+        if ($share->all) {
+            $lines[] = block_exaport_get_string('share_tooltip_all');
+        } else if ($share->users) {
+            $names = implode(', ', array_map('s', $share->users));
+            $lines[] = block_exaport_get_string('share_tooltip_users', $names);
         }
-        if ($issharedexternal) {
-            $parts[] = block_exaport_get_string('sharedexternalcategory');
+        if ($share->groups) {
+            $names = implode(', ', array_map('s', $share->groups));
+            $lines[] = block_exaport_get_string('share_tooltip_groups', $names);
         }
-        return implode(', ', $parts);
-    }
-
-    /**
-     * Build a detailed share tooltip for a view record.
-     *
-     * Mirrors block_exaport_get_category_share_tooltip() but uses the richer
-     * share info attached by view_helper::load_flat_views() / load_owner_category_views().
-     *
-     * @param stdClass $view View record decorated with share_* properties.
-     * @return string         Tooltip text, or empty string when not shared.
-     */
-    function block_exaport_get_view_share_tooltip(stdClass $view): string {
-        $parts = [];
-
-        if (!empty($view->share_all)) {
-            $parts[] = get_string('internalaccessall', 'block_exaport');
-        } else if (!empty($view->share_groups) && !empty($view->share_groups_only)) {
-            $parts[] = get_string('internalaccessgroups', 'block_exaport') . ': ' . implode(', ', $view->share_groups);
-        } else if (!empty($view->share_users)) {
-            $parts[] = get_string('internalaccessusers', 'block_exaport') . ': ' . implode(', ', $view->share_users);
+        if ($share->external) {
+            $lines[] = block_exaport_get_string('share_tooltip_external');
         }
-
-        if (!empty($view->share_external)) {
-            $parts[] = get_string('externalaccess', 'block_exaport') . ': ' . $view->share_external;
-        }
-
-        return implode('; ', $parts);
+        return implode('<br><br>', $lines);
     }
 
     function block_exaport_get_user_from_access($access, $epopaccess = false) {

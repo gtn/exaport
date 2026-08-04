@@ -383,6 +383,10 @@ $string['sharedwith_shareexternal'] = 'Geteilte externe Views';
 $string['sharedexternalcategory'] = 'Extern geteilt';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 $string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
+$string['share_tooltip_users'] = 'Intern mit den folgenden Benutzer:innen geteilt: {$a}';
+$string['share_tooltip_groups'] = 'Intern mit den folgenden Gruppen geteilt: {$a}';
+$string['share_tooltip_all'] = 'Intern mit allen Benutzer:innen geteilt.';
+$string['share_tooltip_external'] = 'Extern via URL geteilt.';
 
 // === Copy to course.
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';

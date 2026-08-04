@@ -125,7 +125,7 @@ define(['core/ajax'], function(Ajax) {
     function filterItems() {
         var searchText = (searchInput ? searchInput.value : '').toLowerCase();
         var selectedCatIds = Object.keys(selectedCategories).map(Number);
-        var selectedEntryType = entryTypeSelect ? entryTypeSelect.value : '';
+        var selectedEntryType = entryTypeSelect ? entryTypeSelect.value : 'all';
 
         // If "show subcategories" is checked, expand each selected category to include descendants.
         var includeSubcats = subcategoriesCheckbox && subcategoriesCheckbox.checked;
@@ -152,7 +152,7 @@ define(['core/ajax'], function(Ajax) {
             var matchesCategory = matchCatIds.length === 0 || matchCatIds.some(function(catId) {
                 return catIds.indexOf(catId) !== -1;
             });
-            var matchesEntryType = !selectedEntryType || entryType === selectedEntryType;
+            var matchesEntryType = !selectedEntryType || selectedEntryType === 'all' || entryType === selectedEntryType;
 
             item.style.display = (matchesSearch && matchesCategory && matchesEntryType) ? '' : 'none';
         });
@@ -509,7 +509,7 @@ define(['core/ajax'], function(Ajax) {
                     renderChips();
                     filterItems();
                 }
-            } else if (entryTypeSelect && entryTypeSelect.value) {
+            } else if (entryTypeSelect && entryTypeSelect.value && entryTypeSelect.value !== 'all') {
                 // Apply persisted entry-type filter on initial page load (no session restore needed).
                 filterItems();
             }

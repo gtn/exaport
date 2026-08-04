@@ -1322,9 +1322,6 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
     $createartefacturl = $CFG->wwwroot . '/blocks/exaport/item.php?action=add&courseid=' . $courseid . '&categoryid=' . $categoryid . $cattype . '&type=mixed';
     $createcategoryurl = $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid;
     $createviewurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?action=add&courseid=' . $courseid;
-    if ($categoryid) {
-        $createviewurl .= '&categoryid=' . $categoryid;
-    }
 
     echo '<div style="position: relative; display: inline-block;">';
     echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';

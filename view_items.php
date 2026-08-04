@@ -30,7 +30,7 @@ $type = optional_param('type', '', PARAM_TEXT);
 $layout = optional_param('layout', '', PARAM_TEXT);
 $folderlayout = optional_param('folderlayout', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_TEXT);
-$entrytype = optional_param('entrytype', '', PARAM_ALPHA);
+$entrytype = optional_param('entrytype', 'nourl', PARAM_ALPHA);
 
 // External category access via hash (mirrors shared_view.php access pattern).
 $access = optional_param('access', '', PARAM_TEXT);
@@ -94,7 +94,7 @@ if ($show_otherusers === -1) {
     $show_otherusers = (int)get_user_preferences('block_exaport_show_otherusers', 1);
 }
 $entrytypefromurl = $entrytype;
-if ($entrytype === '') {
+if ($entrytype === 'nourl') {
     $entrytype = get_user_preferences('block_exaport_entrytype', '');
 }
 // Validate: only 'item' and 'view' are accepted; empty string means "all".
@@ -137,7 +137,7 @@ if ($showsubcategoriesfromurl !== -1) {
 if ($showothersusersfromurl !== -1) {
     set_user_preference('block_exaport_show_otherusers', (int)$show_otherusers);
 }
-if ($entrytypefromurl !== '') {
+if ($entrytypefromurl !== 'nourl') {
     set_user_preference('block_exaport_entrytype', $entrytype);
 }
 
@@ -1758,4 +1758,3 @@ function block_exaport_view_list_item(\stdClass $view, int $courseid, string $ty
     return '<div class="excomdos_tile excomdos_tile_item"><a href="' . s($url) . '">'
            . format_string($view->name) . '</a></div>';
 }
-

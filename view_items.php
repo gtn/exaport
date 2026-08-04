@@ -30,7 +30,7 @@ $type = optional_param('type', '', PARAM_TEXT);
 $layout = optional_param('layout', '', PARAM_TEXT);
 $folderlayout = optional_param('folderlayout', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_TEXT);
-$entrytype = optional_param('entrytype', 'nourl', PARAM_ALPHA);
+$entrytypefromurl = optional_param('entrytype', '', PARAM_ALPHA); // '' = not in URL
 
 // External category access via hash (mirrors shared_view.php access pattern).
 $access = optional_param('access', '', PARAM_TEXT);
@@ -93,13 +93,13 @@ $showothersusersfromurl = $show_otherusers;
 if ($show_otherusers === -1) {
     $show_otherusers = (int)get_user_preferences('block_exaport_show_otherusers', 1);
 }
-$entrytypefromurl = $entrytype;
-if ($entrytype === 'nourl') {
-    $entrytype = get_user_preferences('block_exaport_entrytype', '');
+if ($entrytypefromurl === '') {
+    $entrytype = get_user_preferences('block_exaport_entrytype', 'all');
+} else {
+    $entrytype = $entrytypefromurl;
 }
-// Validate: only 'item' and 'view' are accepted; empty string means "all".
-if (!in_array($entrytype, ['', 'item', 'view'])) {
-    $entrytype = '';
+if (!in_array($entrytype, ['all', 'item', 'view'])) {
+    $entrytype = 'all';
 }
 
 if ($type != 'shared' && $type != 'sharedstudent' && $type != 'extern_category') {
@@ -137,7 +137,7 @@ if ($showsubcategoriesfromurl !== -1) {
 if ($showothersusersfromurl !== -1) {
     set_user_preference('block_exaport_show_otherusers', (int)$show_otherusers);
 }
-if ($entrytypefromurl !== 'nourl') {
+if ($entrytypefromurl !== '') {
     set_user_preference('block_exaport_entrytype', $entrytype);
 }
 
@@ -616,7 +616,7 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
     echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:160px; max-width:250px;">';
-    echo '<option value=""' . ($entrytype === '' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
+    echo '<option value="all"' . ($entrytype === 'all' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
     echo '<option value="item"' . ($entrytype === 'item' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
     echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
     echo '</select>';
@@ -680,7 +680,7 @@ if ($type == 'mine' && $layout == 'folder') {
         echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
         echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
         echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:160px; max-width:250px;">';
-        echo '<option value=""' . ($entrytype === '' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
+        echo '<option value="all"' . ($entrytype === 'all' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
         echo '<option value="item"' . ($entrytype === 'item' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
         echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
         echo '</select>';

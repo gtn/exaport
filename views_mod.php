@@ -173,6 +173,22 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                 $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
                 $mform->add_exaport_help_button('name', 'forms.view.name');
 
+
+                // Category selection (mirrors item form).
+                $mform->addElement('autocomplete', 'categoryids', get_string("category", "block_exaport"), array(), ['multiple' => true]);
+                $mform->setDefault('categoryids', []);
+                $catid = isset($this->_customdata['catid']) ? (int)$this->_customdata['catid'] : 0;
+                $categorysselect = &$mform->getElement('categoryids');
+                $categorysselect->removeOptions();
+                $outercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?",
+                    array("userid" => $USER->id, "pid" => 0), "name asc");
+                $viewcategories = array(0 => block_exaport_get_root_category()->name);
+                if ($outercategories) {
+                    $viewcategories = $viewcategories + $this->build_category_options($outercategories, " ", $viewcategories);
+                }
+                $categorysselect->loadArray($viewcategories);
+
+
                 $mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'),
                     array('rows' => '20', 'cols' => '5'),
                     array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
@@ -233,20 +249,6 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                     $mform->setType('langid', PARAM_INT);
                     $mform->add_exaport_help_button('langid', 'forms.view.langid');
                 }
-
-                // Category selection (mirrors item form).
-                $mform->addElement('autocomplete', 'categoryids', get_string("category", "block_exaport"), array(), ['multiple' => true]);
-                $mform->setDefault('categoryids', []);
-                $catid = isset($this->_customdata['catid']) ? (int)$this->_customdata['catid'] : 0;
-                $categorysselect = &$mform->getElement('categoryids');
-                $categorysselect->removeOptions();
-                $outercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?",
-                    array("userid" => $USER->id, "pid" => 0), "name asc");
-                $viewcategories = array(0 => block_exaport_get_root_category()->name);
-                if ($outercategories) {
-                    $viewcategories = $viewcategories + $this->build_category_options($outercategories, " ", $viewcategories);
-                }
-                $categorysselect->loadArray($viewcategories);
 
                 break;
             case "layout":

@@ -62,12 +62,14 @@ class category_helper {
                 $share->all = true;
             } else {
                 // Groups and users are independent: a category may be shared with both.
+                // Note: block_exaportcatgroupshar.groupid stores cohort ids ({cohort}.id),
+                // not course-group ids ({groups}.id), despite the misleading column name.
                 $sharedgroups = exaport_get_category_shared_groups($category->id);
                 if (!empty($sharedgroups)) {
                     $groupids = array_keys($sharedgroups);
                     [$insql, $inparams] = $DB->get_in_or_equal($groupids);
                     $groups = $DB->get_records_sql(
-                        "SELECT g.name FROM {groups} g WHERE g.id $insql ORDER BY g.name",
+                        "SELECT c.name FROM {cohort} c WHERE c.id $insql ORDER BY c.name",
                         $inparams
                     );
                     foreach ($groups as $g) {

@@ -1364,7 +1364,7 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
             . get_string("category", "block_exaport") . '</a>';
         echo '<a class="dropdown-item" href="' . $createviewurl . '">'
             . block_exaport_fontawesome_icon('layer-group', 'solid', 1) . ' '
-            . get_string("add_view", "block_exaport") . '</a>';
+            . get_string("add_view_entry", "block_exaport") . '</a>';
     }
     echo '</div>';
     echo '</div>';

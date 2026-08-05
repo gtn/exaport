@@ -22,7 +22,8 @@ global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
 
 /**
- * Tests for category_helper::build_share_info() and block_exaport_get_share_tooltip*().
+ * Tests for category_helper::build_share_info(), view_helper sharing, and
+ * block_exaport_get_share_tooltip*().
  *
  * @package    block_exaport
  * @copyright  2024 gtn gmbh
@@ -36,6 +37,11 @@ final class category_helper_test extends \advanced_testcase {
     protected function setUp(): void {
         $this->resetAfterTest(true);
         $this->owner = $this->getDataGenerator()->create_user();
+        // Fail loudly if lang strings are missing (stale PHPUnit string cache).
+        $this->assertTrue(
+            get_string_manager()->string_exists('share_tooltip_users', 'block_exaport'),
+            'Language strings missing — run admin/tool/phpunit/cli/init.php'
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -78,16 +84,38 @@ final class category_helper_test extends \advanced_testcase {
     }
 
     /**
-     * Share a category with a Moodle group.
+     * Insert a view owned by the given user and return its id.
+     *
+     * @param \stdClass $user
+     * @param int $shareall 0 = not shared with all, 1 = shared with all.
+     * @param int $externaccess 1 = externally shared, 0 = not.
+     * @return int
+     */
+    private function create_view(\stdClass $user, int $shareall = 0, int $externaccess = 0): int {
+        global $DB;
+        return (int)$DB->insert_record('block_exaportview', (object)[
+            'userid'        => $user->id,
+            'name'          => 'Test view',
+            'intro'         => '',
+            'timemodified'  => time(),
+            'externaccess'  => $externaccess,
+            'externcomment' => 0,
+            'shareall'      => $shareall,
+            'layout'        => 0,
+        ]);
+    }
+
+    /**
+     * Share a category with a cohort (block_exaportcatgroupshar.groupid = cohort id).
      *
      * @param int $catid
-     * @param int $groupid
+     * @param int $cohortid
      */
-    private function share_with_group(int $catid, int $groupid): void {
+    private function share_category_with_cohort(int $catid, int $cohortid): void {
         global $DB;
         $DB->insert_record('block_exaportcatgroupshar', (object)[
             'catid'   => $catid,
-            'groupid' => $groupid,
+            'groupid' => $cohortid,
         ]);
     }
 
@@ -106,8 +134,36 @@ final class category_helper_test extends \advanced_testcase {
         ]);
     }
 
+    /**
+     * Share a view with a cohort (block_exaportviewgroupshar.groupid = cohort id).
+     *
+     * @param int $viewid
+     * @param int $cohortid
+     */
+    private function share_view_with_cohort(int $viewid, int $cohortid): void {
+        global $DB;
+        $DB->insert_record('block_exaportviewgroupshar', (object)[
+            'viewid'  => $viewid,
+            'groupid' => $cohortid,
+        ]);
+    }
+
+    /**
+     * Share a view with a specific user.
+     *
+     * @param int $viewid
+     * @param int $userid
+     */
+    private function share_view_with_user(int $viewid, int $userid): void {
+        global $DB;
+        $DB->insert_record('block_exaportviewshar', (object)[
+            'viewid' => $viewid,
+            'userid' => $userid,
+        ]);
+    }
+
     // -------------------------------------------------------------------------
-    // Tests: build_share_info
+    // Tests: category_helper::build_share_info
     // -------------------------------------------------------------------------
 
     /**
@@ -157,13 +213,12 @@ final class category_helper_test extends \advanced_testcase {
     }
 
     /**
-     * Category shared with only groups → groups populated with names from {groups}, users empty.
+     * Category shared with only cohorts → groups populated with cohort names, users empty.
      */
     public function test_shared_with_groups_only(): void {
-        $course = $this->getDataGenerator()->create_course();
-        $group  = $this->getDataGenerator()->create_group(['courseid' => $course->id, 'name' => 'Gruppe A']);
+        $cohort = $this->getDataGenerator()->create_cohort(['name' => 'Gruppe A']);
         $catid  = $this->create_category($this->owner, 1, 0);
-        $this->share_with_group($catid, $group->id);
+        $this->share_category_with_cohort($catid, $cohort->id);
 
         $cat = (object)['id' => $catid, 'internshare' => 1, 'shareall' => 0, 'externaccess' => 0];
         $share = category_helper::build_share_info($cat);
@@ -175,15 +230,14 @@ final class category_helper_test extends \advanced_testcase {
     }
 
     /**
-     * Category shared with both users and groups → both arrays populated (regression for Problem 2).
+     * Category shared with both users and cohorts → both arrays populated.
      */
     public function test_shared_with_both_users_and_groups(): void {
-        $course = $this->getDataGenerator()->create_course();
         $user1  = $this->getDataGenerator()->create_user(['firstname' => 'Bob', 'lastname' => 'Tester']);
-        $group  = $this->getDataGenerator()->create_group(['courseid' => $course->id, 'name' => 'Gruppe B']);
+        $cohort = $this->getDataGenerator()->create_cohort(['name' => 'Gruppe B']);
         $catid  = $this->create_category($this->owner, 1, 0);
         $this->share_with_user($catid, $user1->id);
-        $this->share_with_group($catid, $group->id);
+        $this->share_category_with_cohort($catid, $cohort->id);
 
         $cat = (object)['id' => $catid, 'internshare' => 1, 'shareall' => 0, 'externaccess' => 0];
         $share = category_helper::build_share_info($cat);
@@ -193,23 +247,111 @@ final class category_helper_test extends \advanced_testcase {
     }
 
     /**
-     * Group names come from {groups}, not {cohort} (regression for Problem 1).
+     * Group names are resolved from {cohort}, not {groups} (regression test).
      *
-     * Creates a group and a cohort with identical ids (by inserting in a way
-     * that gives the group a known id), then verifies the resolved name is
-     * the group name, not the cohort name.
+     * Creates a cohort and a course group with a different name. Asserts the
+     * result contains the cohort name and NOT the course-group name, even if
+     * ids happen to collide.
      */
-    public function test_group_names_resolved_from_groups_table(): void {
+    public function test_group_names_resolved_from_cohort_table(): void {
         $course = $this->getDataGenerator()->create_course();
-        $group  = $this->getDataGenerator()->create_group(['courseid' => $course->id, 'name' => 'CorrectGroupName']);
-        $catid  = $this->create_category($this->owner, 1, 0);
-        $this->share_with_group($catid, $group->id);
+        $cohort = $this->getDataGenerator()->create_cohort(['name' => 'CohortName']);
+        // Create a course group whose name differs from the cohort name.
+        $this->getDataGenerator()->create_group(['courseid' => $course->id, 'name' => 'CourseGroupName']);
+
+        $catid = $this->create_category($this->owner, 1, 0);
+        $this->share_category_with_cohort($catid, $cohort->id);
 
         $cat = (object)['id' => $catid, 'internshare' => 1, 'shareall' => 0, 'externaccess' => 0];
         $share = category_helper::build_share_info($cat);
 
-        $this->assertContains('CorrectGroupName', $share->groups,
-            'Group name must be resolved from {groups} table.');
+        $this->assertContains('CohortName', $share->groups,
+            'Group names must be resolved from {cohort} table.');
+        $this->assertNotContains('CourseGroupName', $share->groups,
+            'Course group names must NOT appear in share->groups.');
+    }
+
+    // -------------------------------------------------------------------------
+    // Tests: view_helper sharing (exercised via load_flat_views)
+    // -------------------------------------------------------------------------
+
+    /**
+     * View shared with cohorts only → $share->groups populated with cohort names.
+     */
+    public function test_view_shared_with_cohorts_only(): void {
+        $cohort = $this->getDataGenerator()->create_cohort(['name' => 'ViewCohort']);
+        $viewid = $this->create_view($this->owner);
+        $this->share_view_with_cohort($viewid, $cohort->id);
+
+        $views = view_helper::load_flat_views($this->owner->id, [], 'name', 'asc');
+        $this->assertArrayHasKey($viewid, $views);
+        $share = $views[$viewid]->shareinfo;
+
+        $this->assertNotEmpty($share->groups);
+        $this->assertContains('ViewCohort', $share->groups);
+        $this->assertEmpty($share->users);
+        $this->assertFalse($share->all);
+    }
+
+    /**
+     * View shared with individual users only → $share->users populated.
+     */
+    public function test_view_shared_with_users_only(): void {
+        $user1  = $this->getDataGenerator()->create_user(['firstname' => 'Carol', 'lastname' => 'Test']);
+        $viewid = $this->create_view($this->owner);
+        $this->share_view_with_user($viewid, $user1->id);
+
+        $views = view_helper::load_flat_views($this->owner->id, [], 'name', 'asc');
+        $this->assertArrayHasKey($viewid, $views);
+        $share = $views[$viewid]->shareinfo;
+
+        $this->assertNotEmpty($share->users);
+        $this->assertEmpty($share->groups);
+        $this->assertFalse($share->all);
+    }
+
+    /**
+     * View shared with both users and cohorts → both arrays populated (regression for 2b).
+     */
+    public function test_view_shared_with_both_users_and_cohorts(): void {
+        $user1  = $this->getDataGenerator()->create_user(['firstname' => 'Dave', 'lastname' => 'Test']);
+        $cohort = $this->getDataGenerator()->create_cohort(['name' => 'BothCohort']);
+        $viewid = $this->create_view($this->owner);
+        $this->share_view_with_user($viewid, $user1->id);
+        $this->share_view_with_cohort($viewid, $cohort->id);
+
+        $views = view_helper::load_flat_views($this->owner->id, [], 'name', 'asc');
+        $this->assertArrayHasKey($viewid, $views);
+        $share = $views[$viewid]->shareinfo;
+
+        $this->assertNotEmpty($share->users, 'users should be populated');
+        $this->assertNotEmpty($share->groups, 'groups should be populated');
+    }
+
+    /**
+     * View with shareall == 1 → $share->all === true.
+     */
+    public function test_view_shareall_flag(): void {
+        $viewid = $this->create_view($this->owner, 1);
+
+        $views = view_helper::load_flat_views($this->owner->id, [], 'name', 'asc');
+        $this->assertArrayHasKey($viewid, $views);
+        $share = $views[$viewid]->shareinfo;
+
+        $this->assertTrue($share->all);
+    }
+
+    /**
+     * View with externaccess set → $share->external === true.
+     */
+    public function test_view_externaccess_flag(): void {
+        $viewid = $this->create_view($this->owner, 0, 1);
+
+        $views = view_helper::load_flat_views($this->owner->id, [], 'name', 'asc');
+        $this->assertArrayHasKey($viewid, $views);
+        $share = $views[$viewid]->shareinfo;
+
+        $this->assertTrue($share->external);
     }
 
     // -------------------------------------------------------------------------

@@ -417,13 +417,13 @@ final class view_sharing_test extends \advanced_testcase {
      * load_flat_views() drops views with no intersecting allowed category.
      */
     public function test_load_flat_views_drops_disallowed(): void {
-        $sharedcat  = $this->create_category($this->owner, 0, 1);
-        $privateccat = $this->create_category($this->owner, 0, 0);
+        $sharedcat   = $this->create_category($this->owner, 0, 1);
+        $privatecat  = $this->create_category($this->owner, 0, 0);
 
         $sharedview  = $this->create_view($this->owner);
         $privateview = $this->create_view($this->owner);
         $this->assign_view_to_category($sharedview, $sharedcat);
-        $this->assign_view_to_category($privateview, $privateccat);
+        $this->assign_view_to_category($privateview, $privatecat);
 
         $categories = \block_exaport\category_helper::load_owner_categories($this->owner->id);
         $views = view_helper::load_flat_views($this->owner->id, $categories, 'name', 'asc', [$sharedcat]);

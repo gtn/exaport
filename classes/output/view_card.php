@@ -69,7 +69,8 @@ class view_card extends card {
         $courseid = $this->courseid;
 
         // The shared view URL used in views_list.php.
-        $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
+        $url = !empty($view->extern_view_url) ? $view->extern_view_url
+               : $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
                . '&access=id/' . $view->userid . '-' . $view->id;
 
         $editurl   = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
@@ -86,7 +87,8 @@ class view_card extends card {
         }
 
         $isownview = ((int)$view->userid === (int)$USER->id);
-        $readonly = ($this->type === 'shared');
+        // Read-only for every access type except 'mine' (owner's own portfolio).
+        $readonly = ($this->type !== 'mine');
 
         // Share state.
         $share = $view->shareinfo ?? new \block_exaport\share_info();

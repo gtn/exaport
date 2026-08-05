@@ -168,7 +168,13 @@ namespace {
         }
 
         $accesspath = explode('/', $access);
-        if (count($accesspath) != 2) {
+        // Standard modes (hash, id, email) use exactly 2 path segments.
+        // Category mode uses 3 segments: "category/hash/{userid}-{categoryhash}".
+        $accesstype = $accesspath[0];
+        if ($accesstype !== 'category' && count($accesspath) != 2) {
+            return;
+        }
+        if ($accesstype === 'category' && count($accesspath) != 3) {
             return;
         }
 
@@ -231,6 +237,17 @@ namespace {
             if (is_array($usergroups) && count($usergroups) > 0) {
                 $tempjoin .= " LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id = vgshar.viewid";
             }
+
+            // Category-based grant: build the set of view ids reachable via shared categories.
+            $categoryviewids = \block_exaport\view_helper::get_category_shared_view_ids($myuserid);
+            $categoryclause = '';
+            $categoryparams = [];
+            if (!empty($categoryviewids)) {
+                [$catinsql, $categoryparams] = $DB->get_in_or_equal($categoryviewids, SQL_PARAMS_QM);
+                $categoryclause = " OR v.id $catinsql";
+            }
+
+            $params = array_merge([$myuserid, $userid, $viewid, $myuserid], $categoryparams);
             $view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v" .
                 " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid = ?" .
                 $tempjoin .
@@ -239,7 +256,8 @@ namespace {
                 "  OR (v.shareall = 1)" . // Shared all.
                 "  OR (v.shareall = 0 AND vshar.userid IS NOT NULL) " .
                 ($usergroups ? " OR vgshar.groupid IN (" . join(',', array_keys($usergroups)) . ") " : "") .
-                ")", array($myuserid, $userid, $viewid, $myuserid)); // Shared for me.
+                $categoryclause .
+                ")", $params); // Shared for me.
             if (!$view) {
                 // View not found.
                 return;
@@ -247,6 +265,41 @@ namespace {
 
             $view->access = new stdClass();
             $view->access->request = 'intern';
+        } else if ($accesspath[0] == 'category') {
+            // External category-hash access for views: "category/hash/{userid}-{categoryhash}".
+            // The category access token is the remainder of the path: "hash/{userid}-{categoryhash}".
+            $categoryaccess = $accesspath[1] . '/' . $accesspath[2];
+            if (!$category = block_exaport_get_category_from_access($categoryaccess)) {
+                return;
+            }
+
+            $categoryids = block_exaport_get_owned_category_tree_ids($category->id, $category->userid);
+            if (empty($categoryids)) {
+                return;
+            }
+
+            $viewidparam = optional_param('viewid', 0, PARAM_INT);
+            if (empty($viewidparam)) {
+                return;
+            }
+
+            [$insql, $inparams] = $DB->get_in_or_equal($categoryids, SQL_PARAMS_QM);
+            $params = array_merge([$viewidparam, $category->userid], $inparams);
+            $view = $DB->get_record_sql(
+                "SELECT DISTINCT v.*
+                   FROM {block_exaportview} v
+                   JOIN {block_exaportviewcate} vc ON vc.viewid = v.id
+                  WHERE v.id = ?
+                    AND v.userid = ?
+                    AND vc.cateid $insql",
+                $params
+            );
+            if (!$view) {
+                return;
+            }
+
+            $view->access = new stdClass();
+            $view->access->request = 'extern';
         } else if ($accesspath[0] == 'email') {
 
             if (!block_exaport_shareemails_enabled()) {

@@ -197,24 +197,25 @@ class view_helper {
         foreach ($views as $view) {
             $share = new \block_exaport\share_info();
 
-            // Views use shareall as a three-state enum: 0 = users only, 1 = all, 2 = groups only.
-            // This differs from categories, where groups and users are stored separately and can
-            // both be set at the same time. The view data model does not support simultaneous
-            // user+group sharing, so the if/else here is intentional and correct.
+            // shareall == 1 means "shared with all users" (short-circuit: skip detail).
+            // Groups (cohorts) and users are stored separately and can both be set at the
+            // same time; populate them independently, mirroring category_helper.
+            // Note: block_exaportviewgroupshar.groupid stores cohort ids ({cohort}.id),
+            // not course-group ids ({groups}.id), despite the misleading column name.
             if ($view->shareall == 1 && block_exaport_shareall_enabled()) {
                 $share->all = true;
-            } else if ($view->shareall == 2 && block_exaport_shareall_enabled()) {
+            } else {
                 $groups = $DB->get_records_sql(
-                    "SELECT g.name
-                       FROM {groups} g
-                       JOIN {block_exaportviewgroupshar} vshar ON g.id = vshar.groupid AND vshar.viewid = ?
-                      ORDER BY g.name",
+                    "SELECT c.name
+                       FROM {cohort} c
+                       JOIN {block_exaportviewgroupshar} vshar ON c.id = vshar.groupid AND vshar.viewid = ?
+                      ORDER BY c.name",
                     [$view->id]
                 );
                 foreach ($groups as $g) {
                     $share->groups[] = $g->name;
                 }
-            } else {
+
                 $users = $DB->get_records_sql(
                     "SELECT " . $DB->sql_fullname() . " AS name
                        FROM {user} u

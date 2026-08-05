@@ -374,6 +374,7 @@ $string['show_items_from_other_users_help'] = 'Falls du eine oder mehrere deiner
 $string['layout_mode_folder'] = 'Ordner';
 $string['layout_mode_flat'] = 'Flach';
 $string['searchcategory'] = 'Kategorie suchen...';
+$string['add_view_entry'] = 'Ansicht';
 $string['sharedwith'] = 'Geteilt mit';
 $string['sharedwithotherusers'] = 'Intern mit anderen Benutzer:innen geteilt';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';

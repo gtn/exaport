@@ -144,7 +144,6 @@ final class category_helper_test extends \advanced_testcase {
      * Category shared with only users → users populated, groups empty.
      */
     public function test_shared_with_users_only(): void {
-        $course = $this->getDataGenerator()->create_course();
         $user1 = $this->getDataGenerator()->create_user(['firstname' => 'Alice', 'lastname' => 'Test']);
         $catid  = $this->create_category($this->owner, 1, 0);
         $this->share_with_user($catid, $user1->id);

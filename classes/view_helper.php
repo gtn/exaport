@@ -28,6 +28,60 @@ defined('MOODLE_INTERNAL') || die();
 class view_helper {
 
     /**
+     * Return the view ids that are reachable by $userid via category-based sharing.
+     *
+     * A view is reachable if it is assigned (via block_exaportviewcate) to any category
+     * that is shared to the requesting user — either directly, via subcategory inheritance,
+     * or via a cohort-shared category.  Subcategory inheritance is fully recursive (using
+     * block_exaport_get_owned_category_tree_ids() which already handles cycles).
+     *
+     * Fail-closed: returns an empty array when the shared set is empty so no extra access
+     * is granted.
+     *
+     * @param int $userid The user requesting access (not the category/view owner).
+     * @return int[] View ids (may be empty).
+     */
+    public static function get_category_shared_view_ids(int $userid): array {
+        global $DB;
+
+        // 1. Collect all category ids shared directly to this user (per-user + cohort shares).
+        $sharedcategoryids = [];
+
+        // Per-user shared categories (also includes shareall-enabled categories).
+        $sharedtree = \block_exaport\get_categories_shared_to_user($userid);
+        foreach ($sharedtree as $ownerdata) {
+            foreach ($ownerdata->categories as $cat) {
+                // Expand to the full subtree owned by the same user to get full recursion.
+                $treeids = block_exaport_get_owned_category_tree_ids($cat->id, $cat->userid);
+                foreach ($treeids as $id) {
+                    $sharedcategoryids[$id] = $id;
+                }
+            }
+        }
+
+        if (empty($sharedcategoryids)) {
+            return [];
+        }
+
+        $catids = array_values($sharedcategoryids);
+        [$insql, $inparams] = $DB->get_in_or_equal($catids, SQL_PARAMS_QM);
+
+        // Join view to ensure only views owned by the category owner are returned
+        // (a view belonging to user B in user A's shared category must not become visible via A's share).
+        $rows = $DB->get_records_sql(
+            "SELECT DISTINCT vc.viewid
+               FROM {block_exaportviewcate} vc
+               JOIN {block_exaportview} v ON v.id = vc.viewid
+               JOIN {block_exaportcate} c ON c.id = vc.cateid
+              WHERE vc.cateid $insql
+                AND v.userid = c.userid",
+            $inparams
+        );
+
+        return array_map('intval', array_keys($rows ?: []));
+    }
+
+    /**
      * Build a safe ORDER BY clause for the views query (table alias v).
      *
      * @param string $sortkey  Sort column key (e.g. 'name', 'date').

@@ -427,6 +427,13 @@ if ($type == 'sharedstudent') {
             $allowedids,
             true
         );
+        $views = \block_exaport\view_helper::load_flat_views(
+            $externaccess_category->userid,
+            $categories,
+            $parsedsort[0],
+            $parsedsort[1],
+            $allowedids
+        );
     } else {
         $layout = 'folder';
 
@@ -446,6 +453,13 @@ if ($type == 'sharedstudent') {
             $externaccess_category->userid,
             $currentcategory->id,
             $sqlsort
+        );
+        $views = \block_exaport\view_helper::load_owner_category_views(
+            $externaccess_category->userid,
+            $currentcategory->id,
+            $categories,
+            $parsedsort[0],
+            $parsedsort[1]
         );
     }
 
@@ -517,6 +531,10 @@ if ($isexternalreadonlymode) {
     foreach ($items as $item) {
         // Read-only external item links must keep the category access token (not portfolio/id/...).
         $item->extern_item_url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
+    }
+    foreach ($views as $view) {
+        // Read-only external view links: use the category hash access token so the ACL gate can resolve it.
+        $view->extern_view_url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?access=category/' . $canonicalaccess . '&viewid=' . $view->id;
     }
 }
 
@@ -763,9 +781,16 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</label>';
     echo '</div>';
     echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    // Row 3: items/views filter toggle.
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
+    echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:160px; max-width:250px;">';
+    echo '<option value="all"' . ($entrytype === 'all' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
+    echo '<option value="item"' . ($entrytype === 'item' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
+    echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
+    echo '</select>';
     echo '</div>';
-
-    // Build category children map for JS (parent_id => [child_id, ...]), shared categories only.
+    echo '</div>';
     $categorychildrenmap = [];
     foreach ($categories as $cat) {
         $pid = (int)$cat->pid;
@@ -809,6 +834,18 @@ if ($type === 'extern_category') {
     echo '</div>';
     echo '</div>';
     echo '</div>';
+    // Entry-type filter for external folder mode (items vs views).
+    if ($layout == 'folder') {
+        echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+        echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
+        echo '<select id="exaport-entrytype-select" class="form-control custom-select" style="min-width:160px; max-width:250px;">';
+        echo '<option value="all"' . ($entrytype === 'all' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_all', 'block_exaport') . '</option>';
+        echo '<option value="item"' . ($entrytype === 'item' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_items', 'block_exaport') . '</option>';
+        echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
+        echo '</select>';
+        echo '</div>';
+        $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
+    }
 } else {
     echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 
@@ -1134,8 +1171,8 @@ if ($useManualTable) {
         echo '<td style="width:10%">' . ($row['icons'] ?? '') . '</td>';
         echo '</tr>';
     }
-    // Render view rows alongside item rows for mine/shared types.
-    if (in_array($type, ['mine', 'shared'])) {
+    // Render view rows alongside item rows for mine/shared/extern_category types.
+    if (in_array($type, ['mine', 'shared', 'extern_category'])) {
         foreach ($views as $view) {
             $viewCatIds = [];
             if (!empty($view->flatcategories) && is_array($view->flatcategories)) {
@@ -1143,7 +1180,8 @@ if ($useManualTable) {
                     $viewCatIds[] = (int)$cat->id;
                 }
             }
-            $viewurl = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
+            $viewurl = !empty($view->extern_view_url) ? $view->extern_view_url
+                : $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
                 . '&access=id/' . $view->userid . '-' . $view->id;
             $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
             $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
@@ -1174,7 +1212,7 @@ if ($useManualTable) {
     echo html_writer::table($table);
     // In folder mode, render item rows and view rows separately after the category table,
     // with data-entry-type attributes so the JS entry-type filter can show/hide them.
-    if ($folderItemRows || (in_array($type, ['mine', 'shared'], true) && $views)) {
+    if ($folderItemRows || (in_array($type, ['mine', 'shared', 'extern_category'], true) && $views)) {
         echo '<table class="generaltable" width="100%"><tbody>';
         foreach ($folderItemRows as $folderRow) {
             $row = $folderRow['data'];
@@ -1185,9 +1223,10 @@ if ($useManualTable) {
             echo '<td style="width:10%">' . ($row['icons'] ?? '') . '</td>';
             echo '</tr>';
         }
-        if (in_array($type, ['mine', 'shared'], true)) {
+        if (in_array($type, ['mine', 'shared', 'extern_category'], true)) {
             foreach ($views as $view) {
-                $viewurl = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
+                $viewurl = !empty($view->extern_view_url) ? $view->extern_view_url
+                    : $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
                     . '&access=id/' . $view->userid . '-' . $view->id;
                 $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
                 $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
@@ -1238,8 +1277,8 @@ foreach ($items as $item) {
     echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, ($layout == 'folder'));
 }
 
-// Render view cards alongside item cards for mine/shared types.
-if (in_array($type, ['mine', 'shared'], true)) {
+// Render view cards alongside item cards for mine/shared/extern_category types.
+if (in_array($type, ['mine', 'shared', 'extern_category'], true)) {
     foreach ($views as $view) {
         echo block_exaport_view_list_item($view, $courseid, $type, $categoryid, ($layout == 'folder'));
     }

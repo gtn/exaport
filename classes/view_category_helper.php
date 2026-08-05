@@ -20,15 +20,53 @@ namespace block_exaport;
 defined('MOODLE_INTERNAL') || die();
 
 class view_category_helper {
+    /**
+     * Synchronise the category assignments for a view.
+     *
+     * Only category ids that are owned by the same user as the view are
+     * accepted; any other ids are silently dropped. The operation is wrapped
+     * in a Moodle DB transaction so a partial failure cannot leave the view
+     * with its categories wiped.
+     *
+     * @param int   $viewid      ID of the view to update.
+     * @param int[] $categoryids Desired set of category ids (may contain
+     *                           duplicates; deduplication is applied internally).
+     * @return void  Returns early without making any changes if $viewid does not exist.
+     */
     public static function sync_view_categories($viewid, array $categoryids) {
         global $DB;
 
-        $DB->delete_records('block_exaportviewcate', ['viewid' => $viewid]);
+        $view = $DB->get_record('block_exaportview', ['id' => (int)$viewid]);
+        if (!$view) {
+            return;
+        }
+
+        // Deduplicate and cast to int.
+        $categoryids = array_values(array_unique(array_map('intval', $categoryids)));
+
+        // Filter to categories owned by the view's owner.
+        if (!empty($categoryids)) {
+            list($insql, $inparams) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED);
+            $inparams['ownerid'] = (int)$view->userid;
+            $ownedids = $DB->get_fieldset_select(
+                'block_exaportcate',
+                'id',
+                "userid = :ownerid AND id $insql",
+                $inparams
+            );
+            $categoryids = array_map('intval', $ownedids);
+        }
+
+        $transaction = $DB->start_delegated_transaction();
+
+        $DB->delete_records('block_exaportviewcate', ['viewid' => (int)$viewid]);
         foreach ($categoryids as $categoryid) {
             $DB->insert_record('block_exaportviewcate', (object)[
                 'viewid' => (int)$viewid,
                 'cateid' => (int)$categoryid,
             ]);
         }
+
+        $transaction->allow_commit();
     }
 }

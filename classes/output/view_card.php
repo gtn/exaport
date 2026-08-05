@@ -86,6 +86,7 @@ class view_card extends card {
         }
 
         $isownview = ((int)$view->userid === (int)$USER->id);
+        $readonly = ($this->type === 'shared');
 
         // Share state.
         $share = $view->shareinfo ?? new \block_exaport\share_info();
@@ -120,8 +121,9 @@ class view_card extends card {
             'isownview'      => $isownview,
             'editurl'        => $editurl,
             'deleteurl'      => $deleteurl,
-            'canedit'        => $isownview,
-            'candelete'      => $isownview,
+            'readonly'       => $readonly,
+            'canedit'        => $isownview && !$readonly,
+            'candelete'      => $isownview && !$readonly,
             'dateformatted'  => date('d.m.Y H:i', $view->timemodified),
             'collectionicon' => $collectionicon,
             'isshared'       => $isshared,

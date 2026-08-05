@@ -56,9 +56,11 @@ class view_helper {
      * @param array  $categories All categories keyed by id (for path name resolution).
      * @param string $sortkey    Sort column key (e.g. 'name', 'date').
      * @param string $sortdir    Sort direction, 'asc' or 'desc'.
+     * @param array|null $allowedcategoryids Optional list of allowed category ids for filtering.
      * @return array View records keyed by id, each with ->flatcategories and ->entrytype.
      */
-    public static function load_flat_views(int $userid, array $categories, string $sortkey, string $sortdir): array {
+    public static function load_flat_views(int $userid, array $categories, string $sortkey, string $sortdir,
+                                           ?array $allowedcategoryids = null): array {
         global $DB;
 
         $views = $DB->get_records_sql(
@@ -71,6 +73,19 @@ class view_helper {
         }
 
         self::attach_categories($views, $categories);
+        if ($allowedcategoryids !== null) {
+            $allowedcategoryids = array_map('intval', $allowedcategoryids);
+            foreach ($views as $id => $view) {
+                $matchingcategories = array_filter($view->flatcategories, function($category) use ($allowedcategoryids) {
+                    return in_array((int)$category->id, $allowedcategoryids);
+                });
+                if (!$matchingcategories) {
+                    unset($views[$id]);
+                    continue;
+                }
+                $view->flatcategories = array_values($matchingcategories);
+            }
+        }
         self::attach_share_info($views);
 
         return $views;

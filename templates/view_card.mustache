@@ -38,6 +38,7 @@
             <h5 class="card-title">
                 <a href="{{url}}">{{{collectionicon}}}{{viewname}}</a>
             </h5>
+            {{^readonly}}
             <span class="eportfolio-card-more">
                 <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     {{{ellipsisicon}}}
@@ -55,6 +56,7 @@
                     {{/candelete}}
                 </ul>
             </span>
+            {{/readonly}}
         </div>
         <div class="card-body position-relative">
             <a href="{{url}}" class="stretched-link" aria-hidden="true" tabindex="-1"></a>

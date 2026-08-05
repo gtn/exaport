@@ -61,30 +61,31 @@ class category_helper {
             if ($shareall) {
                 $share->all = true;
             } else {
+                // Groups and users are independent: a category may be shared with both.
                 $sharedgroups = exaport_get_category_shared_groups($category->id);
                 if (!empty($sharedgroups)) {
                     $groupids = array_keys($sharedgroups);
                     [$insql, $inparams] = $DB->get_in_or_equal($groupids);
-                    $cohorts = $DB->get_records_sql(
-                        "SELECT c.name FROM {cohort} c WHERE c.id $insql ORDER BY c.name",
+                    $groups = $DB->get_records_sql(
+                        "SELECT g.name FROM {groups} g WHERE g.id $insql ORDER BY g.name",
                         $inparams
                     );
-                    foreach ($cohorts as $c) {
-                        $share->groups[] = $c->name;
+                    foreach ($groups as $g) {
+                        $share->groups[] = $g->name;
                     }
-                } else {
-                    $sharedusers = exaport_get_category_shared_users($category->id);
-                    if (!empty($sharedusers)) {
-                        $userids = array_keys($sharedusers);
-                        [$insql, $inparams] = $DB->get_in_or_equal($userids);
-                        $users = $DB->get_records_sql(
-                            "SELECT " . $DB->sql_fullname() . " AS name FROM {user} u"
-                            . " WHERE u.id $insql AND u.deleted = 0 ORDER BY name",
-                            $inparams
-                        );
-                        foreach ($users as $u) {
-                            $share->users[] = $u->name;
-                        }
+                }
+
+                $sharedusers = exaport_get_category_shared_users($category->id);
+                if (!empty($sharedusers)) {
+                    $userids = array_keys($sharedusers);
+                    [$insql, $inparams] = $DB->get_in_or_equal($userids);
+                    $users = $DB->get_records_sql(
+                        "SELECT " . $DB->sql_fullname() . " AS name FROM {user} u"
+                        . " WHERE u.id $insql AND u.deleted = 0 ORDER BY name",
+                        $inparams
+                    );
+                    foreach ($users as $u) {
+                        $share->users[] = $u->name;
                     }
                 }
             }

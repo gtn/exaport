@@ -197,6 +197,10 @@ class view_helper {
         foreach ($views as $view) {
             $share = new \block_exaport\share_info();
 
+            // Views use shareall as a three-state enum: 0 = users only, 1 = all, 2 = groups only.
+            // This differs from categories, where groups and users are stored separately and can
+            // both be set at the same time. The view data model does not support simultaneous
+            // user+group sharing, so the if/else here is intentional and correct.
             if ($view->shareall == 1 && block_exaport_shareall_enabled()) {
                 $share->all = true;
             } else if ($view->shareall == 2 && block_exaport_shareall_enabled()) {

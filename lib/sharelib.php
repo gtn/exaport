@@ -67,6 +67,36 @@ namespace {
         return implode('<br><br>', $lines);
     }
 
+    /**
+     * Build the sharing tooltip as plain text from resolved share detail.
+     *
+     * Suitable for use in plain HTML title="" attributes. Names are not escaped
+     * with s() here — the attribute value must be escaped by the call site
+     * (e.g. via s() or html_writer, or by block_exaport_fontawesome_icon's
+     * customAttributes which writes the value verbatim into an attribute string).
+     * Lines are joined with " | " so the result contains no HTML markup.
+     *
+     * @param \block_exaport\share_info $share Resolved sharing detail.
+     * @return string Plain text for use in title="" attributes.
+     */
+    function block_exaport_get_share_tooltip_text(\block_exaport\share_info $share): string {
+        $lines = [];
+        if ($share->all) {
+            $lines[] = block_exaport_get_string('share_tooltip_all');
+        } else if ($share->users) {
+            $names = implode(', ', $share->users);
+            $lines[] = block_exaport_get_string('share_tooltip_users', $names);
+        }
+        if ($share->groups) {
+            $names = implode(', ', $share->groups);
+            $lines[] = block_exaport_get_string('share_tooltip_groups', $names);
+        }
+        if ($share->external) {
+            $lines[] = block_exaport_get_string('share_tooltip_external');
+        }
+        return implode(' | ', $lines);
+    }
+
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
         global $DB;
 

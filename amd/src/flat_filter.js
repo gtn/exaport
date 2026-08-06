@@ -10,25 +10,7 @@
  * @copyright  2024 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax'], function(Ajax) {
-
-    /**
-     * Persist a user preference via AJAX.
-     *
-     * @param {string} name  Preference name (without the "block_exaport_" prefix).
-     * @param {string|number} value
-     */
-    function savePreference(name, value) {
-        Ajax.call([{
-            methodname: 'core_user_set_user_preferences',
-            args: {
-                preferences: [{
-                    name: 'block_exaport_' + name,
-                    value: String(value)
-                }]
-            }
-        }])[0];
-    }
+define(['block_exaport/prefs'], function(Prefs) {
 
     // Module-level state: we keep references to DOM elements and selection state here
     // so all functions can access them without re-querying the DOM.
@@ -157,6 +139,12 @@ define(['core/ajax'], function(Ajax) {
             item.style.display = (matchesSearch && matchesCategory && matchesEntryType) ? '' : 'none';
         });
 
+        document.querySelectorAll('.exaport-folder-category[data-item-name]').forEach(function(tile) {
+            var name = tile.getAttribute('data-item-name') || '';
+            var pinned = tile.getAttribute('data-pinned') === 'true';
+            tile.style.display = (pinned || !searchText || name.indexOf(searchText) !== -1) ? '' : 'none';
+        });
+
         sortItems();
     }
 
@@ -170,8 +158,8 @@ define(['core/ajax'], function(Ajax) {
         }
         var sortVal = sortSelect.value; // e.g. "date-desc", "name-asc"
         var parts = sortVal.split('-');
-        var field = parts[0]; // "date" or "name"
-        var dir = parts[1]; // "asc" or "desc"
+        var field = parts[0];
+        var dir = parts[1] || 'desc';
 
         // Sort within each view section independently to avoid moving items across sections.
         document.querySelectorAll('.exaport-view-section[data-exaport-view]').forEach(function(section) {
@@ -186,6 +174,9 @@ define(['core/ajax'], function(Ajax) {
                 if (field === 'date') {
                     valA = parseInt(a.getAttribute('data-item-date') || '0', 10);
                     valB = parseInt(b.getAttribute('data-item-date') || '0', 10);
+                } else if (field === 'type') {
+                    valA = a.getAttribute('data-item-type') || '';
+                    valB = b.getAttribute('data-item-type') || '';
                 } else {
                     valA = a.getAttribute('data-item-name') || '';
                     valB = b.getAttribute('data-item-name') || '';
@@ -201,6 +192,63 @@ define(['core/ajax'], function(Ajax) {
 
             items.forEach(function(item) {
                 parent.appendChild(item);
+            });
+        });
+    }
+
+    /**
+     * Update table sort heading arrows and aria-sort attributes from current select value.
+     */
+    function updateSortHeadings() {
+        var field = '';
+        var dir = '';
+        if (sortSelect && sortSelect.value) {
+            var parts = sortSelect.value.split('-');
+            field = parts[0];
+            dir = parts[1] || 'desc';
+        }
+
+        document.querySelectorAll('.exaport-sort-heading').forEach(function(heading) {
+            var headingField = heading.getAttribute('data-sort-field');
+            var arrow = heading.querySelector('.exaport-sort-arrow');
+            var active = headingField && headingField === field;
+            heading.setAttribute('aria-sort', active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none');
+            if (arrow) {
+                arrow.textContent = active ? (dir === 'asc' ? '↑' : '↓') : '';
+            }
+        });
+    }
+
+    /**
+     * Bind click handlers for details-table sort headings.
+     */
+    function bindSortHeadings() {
+        document.querySelectorAll('.exaport-sort-heading').forEach(function(heading) {
+            heading.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!sortSelect) {
+                    return;
+                }
+                var field = heading.getAttribute('data-sort-field');
+                if (!field) {
+                    return;
+                }
+
+                var current = sortSelect.value.split('-');
+                var currentField = current[0];
+                var currentDir = current[1] || 'desc';
+                var nextDir;
+                if (field === currentField) {
+                    nextDir = currentDir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    nextDir = field === 'date' ? 'desc' : 'asc';
+                }
+
+                sortSelect.value = field + '-' + nextDir;
+                if (!sortSelect.value) {
+                    return;
+                }
+                sortSelect.dispatchEvent(new Event('change', {bubbles: true}));
             });
         });
     }
@@ -387,16 +435,8 @@ define(['core/ajax'], function(Ajax) {
      * manual navigations.
      */
     function restoreFilterStateFromSession() {
-        var saved = sessionStorage.getItem('exaport_flat_filters');
-        if (!saved) {
-            return false;
-        }
-        sessionStorage.removeItem('exaport_flat_filters');
-
-        var state;
-        try {
-            state = JSON.parse(saved);
-        } catch (e) {
+        var state = Prefs.restoreFilterStateFromSession();
+        if (!state) {
             return false;
         }
 
@@ -447,11 +487,11 @@ define(['core/ajax'], function(Ajax) {
             clearAllLabel = clearAllString || clearAllLabel;
             searchCategoryLabel = searchCategoryString || searchCategoryLabel;
             categoryChildrenMap = childrenMap || {};
-            searchInput = document.getElementById('exaport-flat-search');
-            categorySelect = document.getElementById('exaport-flat-category-select');
-            sortSelect = document.getElementById('exaport-flat-sort-select');
-            chipsContainer = document.getElementById('exaport-flat-filter-chips');
-            subcategoriesCheckbox = document.getElementById('exaport-flat-subcategories-checkbox');
+            searchInput = document.getElementById('exaport-search');
+            categorySelect = document.getElementById('exaport-category-select');
+            sortSelect = document.getElementById('exaport-sort-select');
+            chipsContainer = document.getElementById('exaport-filter-chips');
+            subcategoriesCheckbox = document.getElementById('exaport-subcategories-checkbox');
             entryTypeSelect = document.getElementById('exaport-entrytype-select');
 
             // Try to restore filter state from sessionStorage (after a reload).
@@ -467,6 +507,7 @@ define(['core/ajax'], function(Ajax) {
             // Bind subcategories checkbox.
             if (subcategoriesCheckbox) {
                 subcategoriesCheckbox.addEventListener('change', function() {
+                    Prefs.savePreference('show_subcategories', subcategoriesCheckbox.checked ? 1 : 0);
                     filterItems();
                 });
             }
@@ -478,16 +519,23 @@ define(['core/ajax'], function(Ajax) {
             if (sortSelect) {
                 sortSelect.addEventListener('change', function() {
                     sortItems();
+                    updateSortHeadings();
+                    Prefs.savePreference('sort', sortSelect.value);
+                    var url = new URL(window.location.href);
+                    url.searchParams.set('sort', sortSelect.value);
+                    history.replaceState(null, '', url);
                 });
             }
 
             // Bind entry-type filter dropdown.
             if (entryTypeSelect) {
                 entryTypeSelect.addEventListener('change', function() {
-                    savePreference('entrytype', entryTypeSelect.value);
+                    Prefs.savePreference('entrytype', entryTypeSelect.value);
                     filterItems();
                 });
             }
+            bindSortHeadings();
+
             // If state was restored from session, render chips and apply filters.
             if (restoredFromSession) {
                 renderChips();
@@ -513,6 +561,7 @@ define(['core/ajax'], function(Ajax) {
                 // Apply persisted entry-type filter on initial page load (no session restore needed).
                 filterItems();
             }
+            updateSortHeadings();
         }
     };
 });

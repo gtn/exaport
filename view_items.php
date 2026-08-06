@@ -145,14 +145,6 @@ if ($entrytypefromurl !== '') {
 $parsedsort = block_exaport_parse_item_sort($sort, false);
 $sort = $parsedsort[0] . '.' . $parsedsort[1];
 
-$sortkey = $parsedsort[0];
-
-if ($parsedsort[1] == "desc") {
-    $newsort = $sortkey . ".asc";
-} else {
-    $newsort = $sortkey . ".desc";
-}
-$sorticon = $parsedsort[1] . '.png';
 $sqlsort = block_exaport_item_sort_to_sql($parsedsort, false);
 
 if ($sortfromurl !== '') {
@@ -589,7 +581,7 @@ if (($type === 'extern_category') && $externaccess_category) {
 
 // Normalise sort value for use in select dropdowns (e.g. "date.desc" → "date-desc").
 $flatsort = str_replace('.', '-', $sort);
-if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc'])) {
+if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc', 'type-asc', 'type-desc'])) {
     $flatsort = 'date-desc';
 }
 
@@ -642,7 +634,7 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     // Search + sort controls for folder mode.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-folder');
+    echo block_exaport_render_search_and_sort_controls($flatsort);
     echo '</div>';
     // Row 4: items/views filter toggle.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
@@ -653,7 +645,12 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
     echo '</select>';
     echo '</div>';
-    $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
+    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
+        get_string('clearAllFilers', 'block_exaport'),
+        get_string('searchcategory', 'block_exaport'),
+        [],
+        0
+    ]);
 } else if ($type == 'shared' && $layout == 'folder') {
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
@@ -663,7 +660,12 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
     echo '</select>';
     echo '</div>';
-    $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
+    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
+        get_string('clearAllFilers', 'block_exaport'),
+        get_string('searchcategory', 'block_exaport'),
+        [],
+        0
+    ]);
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser) {
@@ -688,11 +690,11 @@ if ($type == 'mine' && $layout == 'folder') {
     // Row 1: search + category dropdown + sort dropdown + create button.
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     // Search input + sort dropdown (shared helper, no duplication).
-    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-flat');
+    echo block_exaport_render_search_and_sort_controls($flatsort);
     // Category filter dropdown (simple select; chip multiselect handled by JS).
     echo '<div style="min-width: 200px; max-width: 350px;">';
-    echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string('category', 'block_exaport') . '</label>';
-    echo '<select id="exaport-flat-category-select" class="form-control custom-select">';
+    echo '<label class="sr-only" for="exaport-category-select">' . get_string('category', 'block_exaport') . '</label>';
+    echo '<select id="exaport-category-select" class="form-control custom-select">';
     echo '<option value="">' . get_string('category', 'block_exaport') . '</option>';
     foreach ($filtercategories as $catid => $catname) {
         echo '<option value="' . $catid . '">' . s($catname) . '</option>';
@@ -713,7 +715,7 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     // Row 3: "show items from subcategories" checkbox.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
@@ -728,7 +730,7 @@ if ($type == 'mine' && $layout == 'folder') {
         echo '</select>';
         echo '</div>';
     }
-    echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    echo '<div id="exaport-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
     echo '</div>';
 
     // Build category children map for JS (parent_id => [child_id, ...]).
@@ -763,10 +765,10 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="exaport-flat-filter mb-3">';
     // Row 1: search + sort + category dropdown.
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-flat');
+    echo block_exaport_render_search_and_sort_controls($flatsort);
     echo '<div style="min-width: 200px; max-width: 350px;">';
-    echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string('category', 'block_exaport') . '</label>';
-    echo '<select id="exaport-flat-category-select" class="form-control custom-select">';
+    echo '<label class="sr-only" for="exaport-category-select">' . get_string('category', 'block_exaport') . '</label>';
+    echo '<select id="exaport-category-select" class="form-control custom-select">';
     echo '<option value="">' . get_string('category', 'block_exaport') . '</option>';
     foreach ($filtercategories as $catid => $catname) {
         echo '<option value="' . $catid . '">' . s($catname) . '</option>';
@@ -776,11 +778,11 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     // Row 2: "show items from subcategories" checkbox.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
-    echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    echo '<div id="exaport-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
     // Row 3: items/views filter toggle.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<label class="sr-only" for="exaport-entrytype-select">' . get_string('filter_entry_type', 'block_exaport') . '</label>';
@@ -844,7 +846,12 @@ if ($type === 'extern_category') {
         echo '<option value="view"' . ($entrytype === 'view' ? ' selected="selected"' : '') . '>' . get_string('filter_entry_type_views', 'block_exaport') . '</option>';
         echo '</select>';
         echo '</div>';
-        $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
+        $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
+            get_string('clearAllFilers', 'block_exaport'),
+            get_string('searchcategory', 'block_exaport'),
+            [],
+            0
+        ]);
     }
 } else {
     echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
@@ -954,35 +961,20 @@ $table->width = "100%";
 $table->head = array();
 $table->size = array();
 
-if ($layout == 'flat') {
-    $table->head['type'] = get_string("type", "block_exaport");
-} else {
-    $table->head['type'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'type' ? $newsort : 'type'), 'folderlayout' => 'details']) . '">' . get_string("type", "block_exaport") . '</a>';
-}
+$table->head['type'] = '<a href="#" class="exaport-sort-heading" data-sort-field="type">'
+    . get_string("type", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
 $table->size['type'] = "10";
 
-if ($layout == 'flat') {
-    $table->head['name'] = get_string("name", "block_exaport");
-} else {
-    $table->head['name'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'name' ? $newsort : 'name'), 'folderlayout' => 'details']) . '">' . get_string("name", "block_exaport") . '</a>';
-}
+$table->head['name'] = '<a href="#" class="exaport-sort-heading" data-sort-field="name">'
+    . get_string("name", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
 $table->size['name'] = "60";
 
-if ($layout == 'flat') {
-    $table->head['date'] = get_string("date", "block_exaport");
-} else {
-    $table->head['date'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'date' ? $newsort : 'date.desc'), 'folderlayout' => 'details']) . '">' . get_string("date", "block_exaport") . '</a>';
-}
+$table->head['date'] = '<a href="#" class="exaport-sort-heading" data-sort-field="date">'
+    . get_string("date", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
 $table->size['date'] = "20";
 
 $table->head['icons'] = '';
 $table->size['icons'] = "10";
-
-// Add arrow to heading if available.
-if (isset($table->head[$sortkey])) {
-    $table->head[$sortkey] = "<img src=\"pix/$sorticon\" alt='" . get_string("updownarrow", "block_exaport") . "' /> " .
-        $table->head[$sortkey];
-}
 
 $table->data = array();
 $itemind = -1;
@@ -1164,7 +1156,7 @@ if ($useManualTable) {
                 $itemCatIds[] = (int)$cat->id;
             }
         }
-        echo '<tr class="exaport-flat-item" data-entry-type="item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
+        echo '<tr class="exaport-flat-item" data-entry-type="item" data-item-name="' . s(strtolower($item->name)) . '" data-item-type="' . s($item->type) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
         echo '<td style="width:10%">' . ($row['type'] ?? '') . '</td>';
         echo '<td style="width:60%">' . ($row['name'] ?? '') . '</td>';
         echo '<td style="width:20%">' . ($row['date'] ?? '') . '</td>';
@@ -1186,7 +1178,7 @@ if ($useManualTable) {
             $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
             $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
                 ['title' => block_exaport_get_share_tooltip_text($view->shareinfo)]) : '';
-            echo '<tr class="exaport-flat-item" data-entry-type="view" data-item-name="' . s(strtolower($view->name)) . '" data-category-ids="' . s(implode(',', $viewCatIds)) . '" data-item-date="' . (int)$view->timemodified . '">';
+            echo '<tr class="exaport-flat-item" data-entry-type="view" data-item-name="' . s(strtolower($view->name)) . '" data-item-type="view" data-category-ids="' . s(implode(',', $viewCatIds)) . '" data-item-date="' . (int)$view->timemodified . '">';
             echo '<td style="width:10%">' . block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']) . '</td>';
             echo '<td style="width:60%"><a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
             if ($view->description) {
@@ -1215,8 +1207,9 @@ if ($useManualTable) {
     if ($folderItemRows || (in_array($type, ['mine', 'shared', 'extern_category'], true) && $views)) {
         echo '<table class="generaltable" width="100%"><tbody>';
         foreach ($folderItemRows as $folderRow) {
+            $item = $folderRow['item'];
             $row = $folderRow['data'];
-            echo '<tr class="exaport-folder-item" data-entry-type="item">';
+            echo '<tr class="exaport-flat-item" data-entry-type="item" data-item-name="' . s(strtolower($item->name)) . '" data-item-type="' . s($item->type) . '" data-item-date="' . (int)$item->timemodified . '">';
             echo '<td style="width:10%">' . ($row['type'] ?? '') . '</td>';
             echo '<td style="width:60%">' . ($row['name'] ?? '') . '</td>';
             echo '<td style="width:20%">' . ($row['date'] ?? '') . '</td>';
@@ -1231,7 +1224,7 @@ if ($useManualTable) {
                 $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
                 $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
                     ['title' => block_exaport_get_share_tooltip_text($view->shareinfo)]) : '';
-                echo '<tr class="exaport-folder-item" data-entry-type="view">';
+                echo '<tr class="exaport-flat-item" data-entry-type="view" data-item-name="' . s(strtolower($view->name)) . '" data-item-type="view" data-item-date="' . (int)$view->timemodified . '">';
                 echo '<td style="width:10%">' . block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']) . '</td>';
                 echo '<td style="width:60%"><a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
                 if ($view->description) {
@@ -1413,19 +1406,16 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
  * Renders the shared search input and sort dropdown HTML fragment.
  *
  * Called from both the flat-layout filter bar and the folder-layout controls so
- * there is no duplicated rendering logic.  The $idprefix distinguishes the two
- * contexts: 'exaport-flat' for flat mode (handled by flat_filter AMD module) and
- * 'exaport-folder' for folder mode (handled by folder_filter AMD module).
+ * there is no duplicated rendering logic.
  *
  * @param string $selectedsort  Currently active sort value in "key-dir" format, e.g. "date-desc".
- * @param string $idprefix      Element ID prefix, e.g. 'exaport-flat' or 'exaport-folder'.
  * @return string               HTML fragment (two <div> elements: search input + sort select).
  */
-function block_exaport_render_search_and_sort_controls($selectedsort, $idprefix) {
+function block_exaport_render_search_and_sort_controls($selectedsort) {
     $html = '';
 
     // Search input.
-    $searchid = $idprefix . '-search';
+    $searchid = 'exaport-search';
     $html .= '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
     $html .= '<label class="sr-only" for="' . s($searchid) . '">' . get_string('search') . '</label>';
     $html .= '<input type="text" id="' . s($searchid) . '" class="form-control"'
@@ -1433,10 +1423,12 @@ function block_exaport_render_search_and_sort_controls($selectedsort, $idprefix)
     $html .= '</div>';
 
     // Sort dropdown.
-    $sortid = $idprefix . '-sort-select';
+    $sortid = 'exaport-sort-select';
     $opts = [
         'date-desc' => get_string('date', 'block_exaport') . ' ↓',
         'date-asc'  => get_string('date', 'block_exaport') . ' ↑',
+        'type-asc'  => get_string('type', 'block_exaport') . ' A-Z',
+        'type-desc' => get_string('type', 'block_exaport') . ' Z-A',
         'name-asc'  => get_string('name', 'block_exaport') . ' A-Z',
         'name-desc' => get_string('name', 'block_exaport') . ' Z-A',
     ];
@@ -1663,7 +1655,7 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
     $url = !empty($item->extern_item_url) ? $item->extern_item_url
         : $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
     $itemContent .= '
-        <div class="excomdos_tile excomdos_tile_item exaport-flat-item id-' . $item->id . '" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemcatids)) . '" data-item-date="' . (int)$item->timemodified . '">
+        <div class="excomdos_tile excomdos_tile_item exaport-flat-item id-' . $item->id . '" data-entry-type="item" data-item-name="' . s(strtolower($item->name)) . '" data-item-type="' . s($item->type) . '" data-category-ids="' . s(implode(',', $itemcatids)) . '" data-item-date="' . (int)$item->timemodified . '">
             <div class="excomdos_tilehead">
                     <span class="excomdos_tileinfo">';
     $iconTypeProps = block_exaport_item_icon_type_options($item->type);
@@ -1822,6 +1814,14 @@ function block_exaport_view_list_item(\stdClass $view, int $courseid, string $ty
     // Fallback for non-bootstrap layouts: simple link.
     $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
            . '&access=id/' . $view->userid . '-' . $view->id;
-    return '<div class="excomdos_tile excomdos_tile_item"><a href="' . s($url) . '">'
+    $viewcatids = [];
+    if (!empty($view->flatcategories) && is_array($view->flatcategories)) {
+        foreach ($view->flatcategories as $cat) {
+            $viewcatids[] = (int)$cat->id;
+        }
+    }
+    return '<div class="excomdos_tile excomdos_tile_item exaport-flat-item" data-entry-type="view" data-item-name="'
+           . s(strtolower($view->name)) . '" data-item-type="view" data-category-ids="' . s(implode(',', $viewcatids)) . '" data-item-date="'
+           . (int)$view->timemodified . '"><a href="' . s($url) . '">'
            . format_string($view->name) . '</a></div>';
 }

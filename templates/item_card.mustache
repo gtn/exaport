@@ -6,6 +6,7 @@
     Context variables:
         url             - URL to the artefact detail page
         itemnamelower   - Lowercase item name for data-item-name attribute
+        itemtype        - Item type key for data-item-type attribute
         timemodified    - Unix timestamp for data-item-date attribute
         catids          - Comma-separated category IDs for data-category-ids attribute
         itemid          - Integer item id
@@ -31,6 +32,7 @@
 <div class="col mb-4 exaport-flat-item"
      data-entry-type="item"
      data-item-name="{{itemnamelower}}"
+     data-item-type="{{itemtype}}"
      data-item-date="{{timemodified}}"
      data-category-ids="{{catids}}">
     <div class="card card-eportfolio h-100 excomdos_tile excomdos_tile_item id-{{itemid}}">

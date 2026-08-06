@@ -639,7 +639,19 @@ if ($type == 'mine' && $layout == 'folder') {
     // Row 4: items/views filter toggle.
     echo block_exaport_render_entrytype_control($entrytype);
     block_exaport_require_filter_js();
-} else if ($type == 'shared' && $layout == 'folder') {
+} else if (($type == 'shared' || $type == 'sharedstudent') && $layout == 'folder') {
+    // Shared folder mode: same client-side search/sort/entry-type controls as flat mode.
+    // No category-navigation select (tiles + breadcrumb handle that), and no other-users or
+    // subcategories checkbox (both only affect the 'mine'/flat server-side queries).
+    echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo block_exaport_render_search_and_sort_controls($flatsort);
+    if ($type == 'shared') {
+        // Create button (pushed right). For 'shared' it renders the artefact entry only.
+        echo '<div class="ms-auto">';
+        block_exaport_print_create_button($courseid, $categoryid, $type);
+        echo '</div>';
+    }
+    echo '</div>';
     echo block_exaport_render_entrytype_control($entrytype);
     block_exaport_require_filter_js();
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
@@ -683,12 +695,17 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     echo '</div>';
     // Row 2: "show items from other users" checkbox.
-    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-show-otherusers-checkbox"' . ($show_otherusers ? ' checked="checked"' : '') . '> ';
-    echo get_string('show_items_from_other_users', 'block_exaport');
-    echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
-    echo '</label>';
-    echo '</div>';
+    // Only rendered for 'mine': the shared/sharedstudent loaders do not consult this flag,
+    // and toggling it while viewing another user's portfolio would silently reconfigure the
+    // current user's own portfolio without any visible effect.
+    if ($type == 'mine') {
+        echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+        echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-show-otherusers-checkbox"' . ($show_otherusers ? ' checked="checked"' : '') . '> ';
+        echo get_string('show_items_from_other_users', 'block_exaport');
+        echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
+        echo '</label>';
+        echo '</div>';
+    }
     // Row 3: "show items from subcategories" checkbox.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
@@ -703,9 +720,16 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
 
     // Build category children map for JS (parent_id => [child_id, ...]).
+    // For 'shared', apply the same category_allowed() guard as $filtercategories above so
+    // the two structures remain consistent and subcategory expansion never references a
+    // category the current user was not permitted to see.
+    $isshared = ($type == 'shared');
     $categorychildrenmap = [];
     foreach ($categories as $cat) {
         if ((int)$cat->id === 0) {
+            continue;
+        }
+        if ($isshared && !category_allowed($selecteduser, $categories, $cat)) {
             continue;
         }
         $pid = (int)$cat->pid;

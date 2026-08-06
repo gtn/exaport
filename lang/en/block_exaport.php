@@ -380,8 +380,8 @@ $string['filter_entry_type_all'] = 'All (items &amp; views)';
 $string['filter_entry_type_items'] = 'Items only';
 $string['filter_entry_type_views'] = 'Views only';
 $string['sharedwith'] = 'Shared with';
-$string['sharedwith_user_cnt'] = 'Shared with {$a} users';
 $string['sharedwithotherusers'] = 'Shared internally with other users';
+$string['sharedwith_user_cnt'] = 'Shared with {$a} users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';
@@ -605,6 +605,7 @@ $string['resume_collaps'] = 'Collaps all';
 
 // === Structure sharing.
 $string['shared_categories'] = 'Shared Categories';
+$string['shared_categories_of'] = 'Shared categories of {$a}';
 $string['nothingstructureshared'] = 'Nobody is sharing a structure with you';
 $string['browsecategory'] = 'Browse this category';
 $string['copycategory'] = 'Copy to my Portfolio';
@@ -614,7 +615,6 @@ $string['create_as_note'] = 'Create as Artefact';
 $string['category_not_found'] = 'Category not found';
 $string['root_category'] = 'Root Category';
 $string['current_category'] = 'Current Category';
-$string['shared_categories_of'] = 'Shared categories of {$a}';
 $string['change_layout'] = 'Change Layout';
 $string['details'] = 'Details';
 $string['tiles'] = 'Tiles';

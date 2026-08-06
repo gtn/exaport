@@ -1445,8 +1445,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026062904, 'exaport');
     }
 
-    if ($oldversion < 2026071005) {
-        // TODO: change version when merging
+    if ($oldversion < 2026080600) {
         // Add block_exaportviewcate table for view-category many-to-many assignments
         // (mirrors block_exaportitemcate).
         $table = new xmldb_table('block_exaportviewcate');
@@ -1465,7 +1464,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-        upgrade_block_savepoint(true, 2026071005, 'exaport');
+        upgrade_block_savepoint(true, 2026080600, 'exaport');
     }
 
     return $result;

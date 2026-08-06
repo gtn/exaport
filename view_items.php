@@ -596,7 +596,7 @@ if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc', 'typ
 
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
-    echo '<div class="exaport-flat-filter mb-3">';
+    echo '<div class="exaport-folder-filter mb-3">';
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<div>';
     echo get_string("categories", "block_exaport") . ": ";

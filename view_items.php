@@ -635,17 +635,17 @@ if ($type == 'mine' && $layout == 'folder') {
     block_exaport_print_create_button($courseid, $categoryid, $type);
     echo '</div>';
     echo '</div>';
+    // Search + sort + entry-type controls for folder mode, on one row.
+    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo block_exaport_render_search_and_sort_controls($flatsort);
+    echo block_exaport_render_entrytype_control($entrytype);
+    echo '</div>';
     // Show other users checkbox for folder mode.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-show-otherusers-checkbox"' . ($show_otherusers ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_other_users', 'block_exaport');
     echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
     echo '</label>';
-    echo '</div>';
-    // Search + sort + entry-type controls for folder mode, on one row.
-    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo block_exaport_render_search_and_sort_controls($flatsort);
-    echo block_exaport_render_entrytype_control($entrytype);
     echo '</div>';
     echo '</div>';
     block_exaport_require_filter_js();

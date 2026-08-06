@@ -20,6 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
+require_once($CFG->dirroot . '/blocks/exaport/tests/fixtures/exaport_test_helpers_trait.php');
 
 /**
  * Tests for category_helper::build_share_info(), view_helper sharing, and
@@ -30,6 +31,8 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class category_helper_test extends \advanced_testcase {
+
+    use \block_exaport\tests\exaport_test_helpers_trait;
 
     /** @var \stdClass Owner user. */
     private \stdClass $owner;
@@ -47,63 +50,6 @@ final class category_helper_test extends \advanced_testcase {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
-
-    /**
-     * Insert a category owned by the given user and return its id.
-     *
-     * @param \stdClass $user
-     * @param int $internshare 1 = internally shared, 0 = not.
-     * @param int $shareall 1 = share-all, 0 = not.
-     * @param int $externaccess 1 = externally shared, 0 = not.
-     * @return int
-     */
-    private function create_category(\stdClass $user, int $internshare = 0,
-                                     int $shareall = 0, int $externaccess = 0): int {
-        global $DB;
-        return (int)$DB->insert_record('block_exaportcate', (object)[
-            'userid'           => $user->id,
-            'pid'              => 0,
-            'name'             => 'Cat',
-            'timemodified'     => time(),
-            'courseid'         => 0,
-            'description'      => '',
-            'subjid'           => 0,
-            'topicid'          => 0,
-            'source'           => 0,
-            'sourceid'         => 0,
-            'isoez'            => 0,
-            'sortorder'        => 0,
-            'internshare'      => $internshare,
-            'shareall'         => $shareall,
-            'structure_shareall' => 0,
-            'structure_share'  => 0,
-            'iconmerge'        => 0,
-            'creatorid'        => $user->id,
-            'externaccess'     => $externaccess,
-        ]);
-    }
-
-    /**
-     * Insert a view owned by the given user and return its id.
-     *
-     * @param \stdClass $user
-     * @param int $shareall 0 = not shared with all, 1 = shared with all.
-     * @param int $externaccess 1 = externally shared, 0 = not.
-     * @return int
-     */
-    private function create_view(\stdClass $user, int $shareall = 0, int $externaccess = 0): int {
-        global $DB;
-        return (int)$DB->insert_record('block_exaportview', (object)[
-            'userid'        => $user->id,
-            'name'          => 'Test view',
-            'intro'         => '',
-            'timemodified'  => time(),
-            'externaccess'  => $externaccess,
-            'externcomment' => 0,
-            'shareall'      => $shareall,
-            'layout'        => 0,
-        ]);
-    }
 
     /**
      * Share a category with a cohort (block_exaportcatgroupshar.groupid = cohort id).
@@ -170,7 +116,7 @@ final class category_helper_test extends \advanced_testcase {
      * shareall flag produces share->all === true.
      */
     public function test_shareall_flag(): void {
-        $catid = $this->create_category($this->owner, 1, 1);
+        $catid = $this->create_category($this->owner, internshare: 1, shareall: 1);
         $cat = (object)['id' => $catid, 'internshare' => 1, 'shareall' => 1, 'externaccess' => 0];
 
         $share = category_helper::build_share_info($cat);
@@ -185,7 +131,7 @@ final class category_helper_test extends \advanced_testcase {
      * externaccess flag produces share->external === true.
      */
     public function test_externaccess_flag(): void {
-        $catid = $this->create_category($this->owner, 0, 0, 1);
+        $catid = $this->create_category($this->owner, externaccess: 1);
         $cat = (object)['id' => $catid, 'internshare' => 0, 'shareall' => 0, 'externaccess' => 1];
 
         $share = category_helper::build_share_info($cat);
@@ -201,7 +147,7 @@ final class category_helper_test extends \advanced_testcase {
      */
     public function test_shared_with_users_only(): void {
         $user1 = $this->getDataGenerator()->create_user(['firstname' => 'Alice', 'lastname' => 'Test']);
-        $catid  = $this->create_category($this->owner, 1, 0);
+        $catid  = $this->create_category($this->owner, internshare: 1);
         $this->share_with_user($catid, $user1->id);
 
         $cat = (object)['id' => $catid, 'internshare' => 1, 'shareall' => 0, 'externaccess' => 0];
@@ -217,7 +163,7 @@ final class category_helper_test extends \advanced_testcase {
      */
     public function test_shared_with_groups_only(): void {
         $cohort = $this->getDataGenerator()->create_cohort(['name' => 'Gruppe A']);
-        $catid  = $this->create_category($this->owner, 1, 0);
+        $catid  = $this->create_category($this->owner, internshare: 1);
         $this->share_category_with_cohort($catid, $cohort->id);
 
         $cat = (object)['id' => $catid, 'internshare' => 1, 'shareall' => 0, 'externaccess' => 0];
@@ -235,7 +181,7 @@ final class category_helper_test extends \advanced_testcase {
     public function test_shared_with_both_users_and_groups(): void {
         $user1  = $this->getDataGenerator()->create_user(['firstname' => 'Bob', 'lastname' => 'Tester']);
         $cohort = $this->getDataGenerator()->create_cohort(['name' => 'Gruppe B']);
-        $catid  = $this->create_category($this->owner, 1, 0);
+        $catid  = $this->create_category($this->owner, internshare: 1);
         $this->share_with_user($catid, $user1->id);
         $this->share_category_with_cohort($catid, $cohort->id);
 
@@ -259,7 +205,7 @@ final class category_helper_test extends \advanced_testcase {
         // Create a course group whose name differs from the cohort name.
         $this->getDataGenerator()->create_group(['courseid' => $course->id, 'name' => 'CourseGroupName']);
 
-        $catid = $this->create_category($this->owner, 1, 0);
+        $catid = $this->create_category($this->owner, internshare: 1);
         $this->share_category_with_cohort($catid, $cohort->id);
 
         $cat = (object)['id' => $catid, 'internshare' => 1, 'shareall' => 0, 'externaccess' => 0];

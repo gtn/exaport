@@ -45,7 +45,7 @@ final class lib_functions_test extends \advanced_testcase {
 
         $this->assertArrayHasKey('block_exaport_entrytype', $preferences);
         $this->assertSame(PARAM_ALPHA, $preferences['block_exaport_entrytype']['type']);
-        $this->assertSame('', $preferences['block_exaport_entrytype']['default']);
+        $this->assertSame('all', $preferences['block_exaport_entrytype']['default']);
     }
 
     protected function setUp(): void {

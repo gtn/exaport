@@ -44,6 +44,7 @@ define(['block_exaport/prefs'], function(Prefs) {
             // badge-primary for BS4 (Moodle 3.x), bg-primary for BS5 (Moodle 4.x).
             chip.className = 'badge bg-secondary text-dark m-1';
             chip.style.cssText = 'font-size: 100%';
+            chip.setAttribute('data-cat-id', id);
             var closeBtn = document.createElement('span');
             closeBtn.innerHTML = '&times;';
             closeBtn.style.cssText = 'margin-right: 0.3em; font-size: 1.1em; line-height: 1; cursor: pointer;';

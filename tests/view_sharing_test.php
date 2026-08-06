@@ -20,6 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
+require_once($CFG->dirroot . '/blocks/exaport/tests/fixtures/exaport_test_helpers_trait.php');
 
 /**
  * Tests for category-based view sharing:
@@ -32,6 +33,8 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class view_sharing_test extends \advanced_testcase {
+
+    use \block_exaport\tests\exaport_test_helpers_trait;
 
     /** @var \stdClass Owner user (view/category creator). */
     private \stdClass $owner;
@@ -56,68 +59,6 @@ final class view_sharing_test extends \advanced_testcase {
     // =========================================================================
     // Helpers
     // =========================================================================
-
-    /**
-     * Create a category owned by $user with optional sharing flags.
-     *
-     * @param \stdClass $user
-     * @param int $pid          Parent category id (0 = root).
-     * @param int $internshare  1 = internally shared, 0 = not.
-     * @param int $shareall     shareall flag on the category record.
-     * @param int $externaccess 1 = externally shareable, 0 = not.
-     * @param string $hash      Optional 8-char hash for external access.
-     * @return int Category id.
-     */
-    private function create_category(\stdClass $user, int $pid = 0, int $internshare = 0,
-                                     int $shareall = 0, int $externaccess = 0,
-                                     string $hash = ''): int {
-        global $DB;
-        return (int)$DB->insert_record('block_exaportcate', (object)[
-            'userid'             => $user->id,
-            'pid'                => $pid,
-            'name'               => 'Cat',
-            'timemodified'       => time(),
-            'courseid'           => 0,
-            'description'        => '',
-            'subjid'             => 0,
-            'topicid'            => 0,
-            'source'             => 0,
-            'sourceid'           => 0,
-            'isoez'              => 0,
-            'sortorder'          => 0,
-            'internshare'        => $internshare,
-            'shareall'           => $shareall,
-            'structure_shareall' => 0,
-            'structure_share'    => 0,
-            'iconmerge'          => 0,
-            'creatorid'          => $user->id,
-            'externaccess'       => $externaccess,
-            'hash'               => $hash ?: substr(md5(uniqid()), 0, 8),
-        ]);
-    }
-
-    /**
-     * Create a view owned by $user.
-     *
-     * @param \stdClass $user
-     * @param int $shareall     0 = not, 1 = shared with all.
-     * @param int $externaccess 1 = externally accessible, 0 = not.
-     * @return int View id.
-     */
-    private function create_view(\stdClass $user, int $shareall = 0, int $externaccess = 0): int {
-        global $DB;
-        return (int)$DB->insert_record('block_exaportview', (object)[
-            'userid'        => $user->id,
-            'name'          => 'Test view',
-            'intro'         => '',
-            'timemodified'  => time(),
-            'externaccess'  => $externaccess,
-            'externcomment' => 0,
-            'shareall'      => $shareall,
-            'layout'        => 0,
-            'hash'          => substr(md5(uniqid()), 0, 8),
-        ]);
-    }
 
     /**
      * Assign a view to a category via block_exaportviewcate.
@@ -173,7 +114,7 @@ final class view_sharing_test extends \advanced_testcase {
         global $USER;
         $USER = $this->recipient;
 
-        $catid  = $this->create_category($this->owner, 0, 1); // internshare=1
+        $catid  = $this->create_category($this->owner, internshare: 1); // internshare=1
         $viewid = $this->create_view($this->owner);
         $this->assign_view_to_category($viewid, $catid);
         $this->share_category_with_user($catid, $this->recipient->id);
@@ -189,9 +130,9 @@ final class view_sharing_test extends \advanced_testcase {
         global $USER;
         $USER = $this->recipient;
 
-        $rootcatid  = $this->create_category($this->owner, 0, 1);
-        $childcatid = $this->create_category($this->owner, $rootcatid, 1);
-        $grandcatid = $this->create_category($this->owner, $childcatid, 0);
+        $rootcatid  = $this->create_category($this->owner, internshare: 1);
+        $childcatid = $this->create_category($this->owner, pid: $rootcatid, internshare: 1);
+        $grandcatid = $this->create_category($this->owner, pid: $childcatid);
 
         $viewid = $this->create_view($this->owner);
         $this->assign_view_to_category($viewid, $grandcatid);
@@ -211,7 +152,7 @@ final class view_sharing_test extends \advanced_testcase {
         $cohort = $this->getDataGenerator()->create_cohort();
         cohort_add_member($cohort->id, $this->recipient->id);
 
-        $catid  = $this->create_category($this->owner, 0, 1);
+        $catid  = $this->create_category($this->owner, internshare: 1);
         $viewid = $this->create_view($this->owner);
         $this->assign_view_to_category($viewid, $catid);
         $this->share_category_with_cohort($catid, $cohort->id);
@@ -227,7 +168,7 @@ final class view_sharing_test extends \advanced_testcase {
         global $USER;
         $USER = $this->recipient;
 
-        $catid  = $this->create_category($this->owner, 0, 1); // internshare but not shared to anyone
+        $catid  = $this->create_category($this->owner, internshare: 1); // internshare but not shared to anyone
         $viewid = $this->create_view($this->owner);
         $this->assign_view_to_category($viewid, $catid);
         // No share record inserted.
@@ -256,7 +197,7 @@ final class view_sharing_test extends \advanced_testcase {
         $USER = $this->recipient;
 
         // User B (owner) creates and shares a category.
-        $catid = $this->create_category($this->owner, 0, 1);
+        $catid = $this->create_category($this->owner, internshare: 1);
         $this->share_category_with_user($catid, $this->recipient->id);
 
         // User C (other) creates a view and assigns it to B's category.
@@ -280,7 +221,7 @@ final class view_sharing_test extends \advanced_testcase {
         global $USER;
         $USER = $this->recipient;
 
-        $catid  = $this->create_category($this->owner, 0, 1);
+        $catid  = $this->create_category($this->owner, internshare: 1);
         $viewid = $this->create_view($this->owner, 0); // shareall=0, not shared individually
         $this->assign_view_to_category($viewid, $catid);
         $this->share_category_with_user($catid, $this->recipient->id);
@@ -313,8 +254,8 @@ final class view_sharing_test extends \advanced_testcase {
         global $USER;
         $USER = $this->recipient;
 
-        $rootcatid  = $this->create_category($this->owner, 0, 1);
-        $childcatid = $this->create_category($this->owner, $rootcatid, 0);
+        $rootcatid  = $this->create_category($this->owner, internshare: 1);
+        $childcatid = $this->create_category($this->owner, pid: $rootcatid);
 
         $viewid = $this->create_view($this->owner, 0);
         $this->assign_view_to_category($viewid, $childcatid);
@@ -335,7 +276,7 @@ final class view_sharing_test extends \advanced_testcase {
      */
     public function test_get_view_from_access_external_category_hash(): void {
         $hash   = 'ab12cd34';
-        $catid  = $this->create_category($this->owner, 0, 0, 0, 1, $hash);
+        $catid  = $this->create_category($this->owner, externaccess: 1, hash: $hash);
         $viewid = $this->create_view($this->owner, 0, 0); // externaccess=0 should not veto
         $this->assign_view_to_category($viewid, $catid);
 
@@ -357,9 +298,9 @@ final class view_sharing_test extends \advanced_testcase {
     public function test_get_view_from_access_external_sibling_category_blocked(): void {
         $hash   = 'ef56gh78';
         // Shared category.
-        $catid  = $this->create_category($this->owner, 0, 0, 0, 1, $hash);
+        $catid  = $this->create_category($this->owner, externaccess: 1, hash: $hash);
         // Sibling (private) category.
-        $siblingcatid = $this->create_category($this->owner, 0, 0, 0, 0);
+        $siblingcatid = $this->create_category($this->owner);
 
         $viewid = $this->create_view($this->owner, 0, 0);
         $this->assign_view_to_category($viewid, $siblingcatid); // NOT in the shared subtree
@@ -378,7 +319,7 @@ final class view_sharing_test extends \advanced_testcase {
         set_config('block_exaport_externaccess', 0);
 
         $hash   = 'ij90kl12';
-        $catid  = $this->create_category($this->owner, 0, 0, 0, 1, $hash);
+        $catid  = $this->create_category($this->owner, externaccess: 1, hash: $hash);
         $viewid = $this->create_view($this->owner, 0, 0);
         $this->assign_view_to_category($viewid, $catid);
 
@@ -396,7 +337,7 @@ final class view_sharing_test extends \advanced_testcase {
      */
     public function test_get_view_from_access_external_wrong_owner_blocked(): void {
         $hash   = 'mn34op56';
-        $catid  = $this->create_category($this->owner, 0, 0, 0, 1, $hash);
+        $catid  = $this->create_category($this->owner, externaccess: 1, hash: $hash);
 
         $other  = $this->getDataGenerator()->create_user();
         $viewid = $this->create_view($other, 0, 0); // Wrong owner
@@ -417,8 +358,8 @@ final class view_sharing_test extends \advanced_testcase {
      * load_flat_views() drops views with no intersecting allowed category.
      */
     public function test_load_flat_views_drops_disallowed(): void {
-        $sharedcat   = $this->create_category($this->owner, 0, 1);
-        $privatecat  = $this->create_category($this->owner, 0, 0);
+        $sharedcat   = $this->create_category($this->owner, internshare: 1);
+        $privatecat  = $this->create_category($this->owner);
 
         $sharedview  = $this->create_view($this->owner);
         $privateview = $this->create_view($this->owner);
@@ -438,8 +379,8 @@ final class view_sharing_test extends \advanced_testcase {
      * flatcategories contain only the shared one.
      */
     public function test_load_flat_views_category_badges_restricted(): void {
-        $sharedcat  = $this->create_category($this->owner, 0, 1);
-        $privatecat = $this->create_category($this->owner, 0, 0);
+        $sharedcat  = $this->create_category($this->owner, internshare: 1);
+        $privatecat = $this->create_category($this->owner);
 
         $viewid = $this->create_view($this->owner);
         $this->assign_view_to_category($viewid, $sharedcat);

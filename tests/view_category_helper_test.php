@@ -18,6 +18,9 @@ namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once($CFG->dirroot . '/blocks/exaport/tests/fixtures/exaport_test_helpers_trait.php');
+
 /**
  * Tests for view_category_helper::sync_view_categories().
  *
@@ -26,6 +29,8 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class view_category_helper_test extends \advanced_testcase {
+
+    use \block_exaport\tests\exaport_test_helpers_trait;
 
     /** @var \stdClass The primary test user (view owner). */
     private \stdClass $owner;
@@ -42,50 +47,6 @@ final class view_category_helper_test extends \advanced_testcase {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
-
-    /**
-     * Insert a view owned by the given user and return its id.
-     */
-    private function create_view(\stdClass $user): int {
-        global $DB;
-        return (int)$DB->insert_record('block_exaportview', (object)[
-            'userid'       => $user->id,
-            'name'         => 'Test view',
-            'intro'        => '',
-            'timemodified' => time(),
-            'externaccess' => 0,
-            'externcomment'=> 0,
-            'shareall'     => 0,
-            'layout'       => 0,
-        ]);
-    }
-
-    /**
-     * Insert a category owned by the given user and return its id.
-     */
-    private function create_category(\stdClass $user, string $name = 'Cat'): int {
-        global $DB;
-        return (int)$DB->insert_record('block_exaportcate', (object)[
-            'userid'           => $user->id,
-            'pid'              => 0,
-            'name'             => $name,
-            'timemodified'     => time(),
-            'courseid'         => 0,
-            'description'      => '',
-            'subjid'           => 0,
-            'topicid'          => 0,
-            'source'           => 0,
-            'sourceid'         => 0,
-            'isoez'            => 0,
-            'sortorder'        => 0,
-            'internshare'      => 0,
-            'shareall'         => 0,
-            'structure_shareall' => 0,
-            'structure_share'  => 0,
-            'iconmerge'        => 0,
-            'creatorid'        => $user->id,
-        ]);
-    }
 
     /**
      * Return the cateid values currently stored for the given view.

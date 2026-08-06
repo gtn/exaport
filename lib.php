@@ -328,7 +328,7 @@ function block_exaport_user_preferences(): array {
     $preferences['block_exaport_entrytype'] = [
         'type' => PARAM_ALPHA,
         'null' => NULL_NOT_ALLOWED,
-        'default' => '',
+        'default' => 'all',
         'permissioncallback' => [core_user::class, 'is_current_user'],
     ];
     return $preferences;

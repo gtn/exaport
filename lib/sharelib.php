@@ -40,61 +40,44 @@ namespace {
     }
 
     /**
-     * Build the sharing tooltip HTML from resolved share detail.
+     * Build the sharing tooltip from resolved share detail.
      *
-     * Each line is only added when relevant. Lines are separated by two <br> tags
-     * so the icon must use data-bs-html="true". All user/group names are escaped
-     * with s() since the tooltip is rendered as HTML.
+     * When $html is true (default): lines are joined with '<br><br>' and user/group names
+     * are escaped with s() — suitable for data-bs-title with data-bs-html="true".
+     * When $html is false: lines are joined with ' | ' and names are NOT escaped —
+     * suitable for plain title="" attributes (the caller is responsible for attribute escaping).
      *
      * @param \block_exaport\share_info $share Resolved sharing detail.
-     * @return string HTML for use in data-bs-title (requires data-bs-html="true").
+     * @param bool                      $html  True for HTML output, false for plain text.
+     * @return string Tooltip string.
      */
-    function block_exaport_get_share_tooltip(\block_exaport\share_info $share): string {
+    function block_exaport_get_share_tooltip(\block_exaport\share_info $share, bool $html = true): string {
         $lines = [];
         if ($share->all) {
             $lines[] = block_exaport_get_string('share_tooltip_all');
         } else if ($share->users) {
-            $names = implode(', ', array_map('s', $share->users));
+            $names = $html ? implode(', ', array_map('s', $share->users)) : implode(', ', $share->users);
             $lines[] = block_exaport_get_string('share_tooltip_users', $names);
         }
         if ($share->groups) {
-            $names = implode(', ', array_map('s', $share->groups));
+            $names = $html ? implode(', ', array_map('s', $share->groups)) : implode(', ', $share->groups);
             $lines[] = block_exaport_get_string('share_tooltip_groups', $names);
         }
         if ($share->external) {
             $lines[] = block_exaport_get_string('share_tooltip_external');
         }
-        return implode('<br><br>', $lines);
+        return implode($html ? '<br><br>' : ' | ', $lines);
     }
 
     /**
      * Build the sharing tooltip as plain text from resolved share detail.
      *
-     * Suitable for use in plain HTML title="" attributes. Names are not escaped
-     * with s() here — the attribute value must be escaped by the call site
-     * (e.g. via s() or html_writer, or by block_exaport_fontawesome_icon's
-     * customAttributes which writes the value verbatim into an attribute string).
-     * Lines are joined with " | " so the result contains no HTML markup.
-     *
+     * @deprecated Use block_exaport_get_share_tooltip($share, false) instead.
      * @param \block_exaport\share_info $share Resolved sharing detail.
      * @return string Plain text for use in title="" attributes.
      */
     function block_exaport_get_share_tooltip_text(\block_exaport\share_info $share): string {
-        $lines = [];
-        if ($share->all) {
-            $lines[] = block_exaport_get_string('share_tooltip_all');
-        } else if ($share->users) {
-            $names = implode(', ', $share->users);
-            $lines[] = block_exaport_get_string('share_tooltip_users', $names);
-        }
-        if ($share->groups) {
-            $names = implode(', ', $share->groups);
-            $lines[] = block_exaport_get_string('share_tooltip_groups', $names);
-        }
-        if ($share->external) {
-            $lines[] = block_exaport_get_string('share_tooltip_external');
-        }
-        return implode(' | ', $lines);
+        return block_exaport_get_share_tooltip($share, false);
     }
 
     function block_exaport_get_user_from_access($access, $epopaccess = false) {

@@ -48,9 +48,14 @@ final class view_sharing_test extends \advanced_testcase {
         $this->owner     = $this->getDataGenerator()->create_user();
         $this->recipient = $this->getDataGenerator()->create_user();
 
-        // Enable external access and views feature so the ACL gate does not short-circuit.
-        set_config('block_exaport_externaccess', 1);
-        set_config('block_exaport_views', 1);
+        // Make sure external access is enabled so the ACL gate does not short-circuit.
+        // NOTE: the setting is an INVERTED "disable" flag — block_exaport_externaccess_enabled()
+        // returns empty($CFG->block_exaport_disable_externaccess), so 0 means enabled.
+        // There is no 'block_exaport_externaccess' setting.
+        set_config('block_exaport_disable_externaccess', 0);
+
+        // The 'views' feature needs no config: block_exaport_feature_enabled('views')
+        // is hardcoded to return true.
 
         // Ensure block_exaport lib functions are loaded.
         require_once($CFG->dirroot . '/blocks/exaport/lib.php');
@@ -314,9 +319,14 @@ final class view_sharing_test extends \advanced_testcase {
 
     /**
      * External access fails when block_exaport_externaccess_enabled() is false.
+     *
+     * The setting is an INVERTED "disable" flag: block_exaport_externaccess_enabled()
+     * returns empty($CFG->block_exaport_disable_externaccess), so 1 means DISABLED.
+     * block_exaport_get_category_from_access() checks this centrally, so the
+     * category never resolves and the category/ branch bails out.
      */
     public function test_get_view_from_access_external_disabled(): void {
-        set_config('block_exaport_externaccess', 0);
+        set_config('block_exaport_disable_externaccess', 1);
 
         $hash   = 'ij90kl12';
         $catid  = $this->create_category($this->owner, externaccess: 1, hash: $hash);
@@ -329,7 +339,7 @@ final class view_sharing_test extends \advanced_testcase {
         $this->assertEmpty($view, 'External access must fail when externaccess is disabled');
         unset($_GET['viewid']);
 
-        set_config('block_exaport_externaccess', 1);
+        set_config('block_exaport_disable_externaccess', 0);
     }
 
     /**

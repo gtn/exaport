@@ -332,7 +332,7 @@ final class category_helper_test extends \advanced_testcase {
     }
 
     // -------------------------------------------------------------------------
-    // Tests: block_exaport_get_share_tooltip_text (plain-text variant)
+    // Tests: block_exaport_get_share_tooltip($share, false) — plain-text variant
     // -------------------------------------------------------------------------
 
     /**
@@ -343,7 +343,7 @@ final class category_helper_test extends \advanced_testcase {
         $share->all = true;
         $share->external = true;
 
-        $tooltip = block_exaport_get_share_tooltip_text($share);
+        $tooltip = block_exaport_get_share_tooltip($share, false);
 
         $this->assertStringNotContainsString('<br>', $tooltip);
         $this->assertStringNotContainsString('<', $tooltip);
@@ -356,7 +356,7 @@ final class category_helper_test extends \advanced_testcase {
         $share = new share_info();
         $share->users = ['Alice & Bob'];
 
-        $tooltip = block_exaport_get_share_tooltip_text($share);
+        $tooltip = block_exaport_get_share_tooltip($share, false);
 
         $this->assertStringContainsString('Alice & Bob', $tooltip);
         $this->assertStringNotContainsString('&amp;', $tooltip);

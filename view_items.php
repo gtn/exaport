@@ -597,48 +597,33 @@ if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc', 'typ
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="exaport-folder-filter mb-3">';
+    // Row 1: search + sort + entry-type filter + category dropdown + create button
+    // (same order as the flat-mode filter bar).
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<div>';
-    echo get_string("categories", "block_exaport") . ": ";
-    echo '<select onchange="document.location.href=\'' . $PAGE->url->out(false) . '&categoryid=\'+encodeURIComponent(this.value);">';
+    echo block_exaport_render_search_and_sort_controls($flatsort);
+    echo block_exaport_render_entrytype_control($entrytype);
+    echo '<div style="min-width: 200px; max-width: 350px;">';
+    echo '<select id="exaport-category-select-folder" onchange="document.location.href=\'' . $PAGE->url->out(false) . '&categoryid=\'+encodeURIComponent(this.value);">';
     echo '<option value="">';
     echo $rootcategory->name;
     if ($rootcategory->item_cnt) {
         echo ' (' . $rootcategory->item_cnt . ' ' . block_exaport_get_string($rootcategory->item_cnt == 1 ? 'item' : 'items') . ')';
     }
     echo '</option>';
-    function block_exaport_print_category_select($categoriesbyparent, $currentcategoryid, $pid = 0, $level = 0) {
-        if (!isset($categoriesbyparent[$pid])) {
-            return;
-        }
-
-        foreach ($categoriesbyparent[$pid] as $category) {
-            echo '<option value="' . $category->id . '"' . ($currentcategoryid == $category->id ? ' selected="selected"' : '') . '>';
-            if ($level) {
-                echo str_repeat('&nbsp;', 4 * $level) . ' &rarr;&nbsp; ';
-            }
-            echo $category->name;
-            if ($category->item_cnt) {
-                echo ' (' . $category->item_cnt . ' ' . block_exaport_get_string($category->item_cnt == 1 ? 'item' : 'items') . ')';
-            }
-            echo '</option>';
-            block_exaport_print_category_select($categoriesbyparent, $currentcategoryid,
-                $category->id, $level + 1);
-        }
-    }
-
     block_exaport_print_category_select($categoriesbyparent, $currentcategory->id);
     echo '</select>';
     echo '</div>';
+    // Enhance the plain select into the same searchable dropdown widget used in flat mode
+    // (block_exaport/category_select), but as single-select navigation: picking an option
+    // reloads the page onto that category instead of adding a filter chip.
+    $PAGE->requires->js_call_amd('block_exaport/folder_category_select', 'init', [
+        get_string('searchcategory', 'block_exaport'),
+        $PAGE->url->out(false),
+    ]);
     // Create button (pushed to right).
     echo '<div class="ms-auto">';
     block_exaport_print_create_button($courseid, $categoryid, $type);
     echo '</div>';
-    echo '</div>';
-    // Search + sort + entry-type controls for folder mode, on one row.
-    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo block_exaport_render_search_and_sort_controls($flatsort);
-    echo block_exaport_render_entrytype_control($entrytype);
     echo '</div>';
     // Show other users checkbox for folder mode.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
@@ -1403,6 +1388,36 @@ function block_exaport_render_entrytype_control($entrytype) {
     }
     $html .= '</select></div>';
     return $html;
+}
+
+/**
+ * Recursively prints <option> elements for the folder-mode category select, indented by depth.
+ * The select is progressively enhanced client-side (see block_exaport/folder_category_select),
+ * so this only needs to provide the plain option data.
+ *
+ * @param array $categoriesbyparent Map of parent category id to array of child category objects.
+ * @param int   $currentcategoryid  Currently selected category id.
+ * @param int   $pid                Parent category id to start from.
+ * @param int   $level              Current recursion depth (used for indentation).
+ */
+function block_exaport_print_category_select($categoriesbyparent, $currentcategoryid, $pid = 0, $level = 0) {
+    if (!isset($categoriesbyparent[$pid])) {
+        return;
+    }
+
+    foreach ($categoriesbyparent[$pid] as $category) {
+        echo '<option value="' . $category->id . '"' . ($currentcategoryid == $category->id ? ' selected="selected"' : '') . '>';
+        if ($level) {
+            echo str_repeat('&nbsp;', 4 * $level) . ' &rarr;&nbsp; ';
+        }
+        echo $category->name;
+        if ($category->item_cnt) {
+            echo ' (' . $category->item_cnt . ' ' . block_exaport_get_string($category->item_cnt == 1 ? 'item' : 'items') . ')';
+        }
+        echo '</option>';
+        block_exaport_print_category_select($categoriesbyparent, $currentcategoryid,
+            $category->id, $level + 1);
+    }
 }
 
 /**

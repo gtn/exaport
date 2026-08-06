@@ -596,6 +596,7 @@ if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc', 'typ
 
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
 if ($type == 'mine' && $layout == 'folder') {
+    echo '<div class="exaport-flat-filter mb-3">';
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo '<div>';
     echo get_string("categories", "block_exaport") . ": ";
@@ -641,19 +642,21 @@ if ($type == 'mine' && $layout == 'folder') {
     echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
     echo '</label>';
     echo '</div>';
-    // Search + sort controls for folder mode.
+    // Search + sort + entry-type controls for folder mode, on one row.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo block_exaport_render_search_and_sort_controls($flatsort);
-    echo '</div>';
-    // Row 4: items/views filter toggle.
     echo block_exaport_render_entrytype_control($entrytype);
+    echo '</div>';
+    echo '</div>';
     block_exaport_require_filter_js();
 } else if (($type == 'shared' || $type == 'sharedstudent') && $layout == 'folder') {
     // Shared folder mode: same client-side search/sort/entry-type controls as flat mode.
     // No category-navigation select (tiles + breadcrumb handle that), and no other-users or
     // subcategories checkbox (both only affect the 'mine'/flat server-side queries).
+    echo '<div class="exaport-flat-filter mb-3">';
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo block_exaport_render_search_and_sort_controls($flatsort);
+    echo block_exaport_render_entrytype_control($entrytype);
     if ($type == 'shared') {
         // Create button (pushed right). For 'shared' it renders the artefact entry only.
         echo '<div class="ms-auto">';
@@ -661,7 +664,7 @@ if ($type == 'mine' && $layout == 'folder') {
         echo '</div>';
     }
     echo '</div>';
-    echo block_exaport_render_entrytype_control($entrytype);
+    echo '</div>';
     block_exaport_require_filter_js();
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
@@ -684,10 +687,13 @@ if ($type == 'mine' && $layout == 'folder') {
     }
 
     echo '<div class="exaport-flat-filter mb-3">';
-    // Row 1: search + category dropdown + sort dropdown + create button.
+    // Row 1: search + sort dropdown + entry-type filter + category dropdown + create button.
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     // Search input + sort dropdown (shared helper, no duplication).
     echo block_exaport_render_search_and_sort_controls($flatsort);
+    if (in_array($type, ['mine', 'shared'], true)) {
+        echo block_exaport_render_entrytype_control($entrytype);
+    }
     // Category filter dropdown (simple select; chip multiselect handled by JS).
     echo '<div style="min-width: 200px; max-width: 350px;">';
     echo '<label class="sr-only" for="exaport-category-select">' . get_string('category', 'block_exaport') . '</label>';
@@ -721,10 +727,6 @@ if ($type == 'mine' && $layout == 'folder') {
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
-    // Row 4: items/views filter toggle.
-    if (in_array($type, ['mine', 'shared'], true)) {
-        echo block_exaport_render_entrytype_control($entrytype);
-    }
     echo '<div id="exaport-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
     echo '</div>';
 
@@ -760,9 +762,10 @@ if ($type == 'mine' && $layout == 'folder') {
     }
 
     echo '<div class="exaport-flat-filter mb-3">';
-    // Row 1: search + sort + category dropdown.
+    // Row 1: search + sort + entry-type filter + category dropdown.
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo block_exaport_render_search_and_sort_controls($flatsort);
+    echo block_exaport_render_entrytype_control($entrytype);
     echo '<div style="min-width: 200px; max-width: 350px;">';
     echo '<label class="sr-only" for="exaport-category-select">' . get_string('category', 'block_exaport') . '</label>';
     echo '<select id="exaport-category-select" class="form-control custom-select">';
@@ -780,8 +783,6 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</label>';
     echo '</div>';
     echo '<div id="exaport-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
-    // Row 3: items/views filter toggle.
-    echo block_exaport_render_entrytype_control($entrytype);
     echo '</div>';
     $categorychildrenmap = [];
     foreach ($categories as $cat) {
@@ -823,7 +824,9 @@ if ($type === 'extern_category') {
     echo '</div>';
     // Entry-type filter for external folder mode (items vs views).
     if ($layout == 'folder') {
+        echo '<div class="exaport-flat-filter mb-3 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
         echo block_exaport_render_entrytype_control($entrytype);
+        echo '</div>';
         block_exaport_require_filter_js();
     }
 } else {
@@ -1389,11 +1392,10 @@ function block_exaport_render_search_and_sort_controls($selectedsort) {
  * @return string HTML fragment.
  */
 function block_exaport_render_entrytype_control($entrytype) {
-    $html = '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    $html = '<div style="min-width:160px; max-width:250px;">';
     $html .= '<label class="sr-only" for="exaport-entrytype-select">'
         . get_string('filter_entry_type', 'block_exaport') . '</label>';
-    $html .= '<select id="exaport-entrytype-select" class="form-control custom-select"'
-        . ' style="min-width:160px; max-width:250px;">';
+    $html .= '<select id="exaport-entrytype-select" class="form-control custom-select">';
     foreach (['all' => 'filter_entry_type_all', 'item' => 'filter_entry_type_items',
               'view' => 'filter_entry_type_views'] as $val => $key) {
         $html .= '<option value="' . $val . '"' . ($entrytype === $val ? ' selected="selected"' : '')

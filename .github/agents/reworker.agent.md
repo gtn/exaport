@@ -4,11 +4,11 @@
 # To make this agent available, merge this file into the default repository branch.
 # For format details, see: https://gh.io/customagents/config
 
-name: Moodle Plugin Development Assistant
+name: reworker - Moodle Plugin Development Assistant
 description: Assists with development and modernization of this Moodle plugin, following Moodle coding standards, security best practices, and repository-specific workflows.
 ---
 
-# My Agent
+# reworker
 
 # Moodle Plugin Development Assistant
 

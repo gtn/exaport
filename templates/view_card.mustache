@@ -6,6 +6,7 @@
     Context variables:
         url             - URL to the shared view page
         viewnamelower   - Lowercase view name for data-item-name attribute
+        (fixed) type    - data-item-type is always "view"
         timemodified    - Unix timestamp for data-item-date attribute
         catids          - Comma-separated category IDs for data-category-ids attribute
         viewid          - Integer view id
@@ -28,6 +29,7 @@
 <div class="col mb-4 exaport-flat-item exaport-flat-view"
      data-entry-type="view"
      data-item-name="{{viewnamelower}}"
+     data-item-type="view"
      data-item-date="{{timemodified}}"
      data-category-ids="{{catids}}">
     <div class="card-view-stack">

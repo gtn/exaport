@@ -112,6 +112,7 @@ class item_card extends card {
 
         return $this->base_icons() + [
             'itemnamelower' => strtolower($item->name),
+            'itemtype'      => $item->type,
             'catids'        => implode(',', $itemcatids),
             'timemodified'  => (int)$item->timemodified,
             'itemid'        => (int)$item->id,

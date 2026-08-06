@@ -1362,9 +1362,33 @@ return [
         'Kategorie suchen...',
         'Search Category...',
     ],
+    'add_view_entry' => [
+        'Ansicht',
+        'View',
+    ],
+    'filter_entry_type' => [
+        null,
+        'Show',
+    ],
+    'filter_entry_type_all' => [
+        null,
+        'All (items &amp; views)',
+    ],
+    'filter_entry_type_items' => [
+        null,
+        'Items only',
+    ],
+    'filter_entry_type_views' => [
+        null,
+        'Views only',
+    ],
     'sharedwith' => [
         'Geteilt mit',
         'Shared with',
+    ],
+    'sharedwithotherusers' => [
+        'Intern mit anderen Benutzer:innen geteilt',
+        'Shared internally with other users',
     ],
     'sharedwith_user_cnt' => [
         'Mit {$a} Benutzern geteilt',
@@ -1393,6 +1417,22 @@ return [
     'sharedwith_group_cnt' => [
         'Mit {$a} Gruppe geteilt',
         'Shared with {$a} groups',
+    ],
+    'share_tooltip_users' => [
+        'Intern mit den folgenden Benutzer:innen geteilt: {$a}',
+        'Shared internally with the following users: {$a}',
+    ],
+    'share_tooltip_groups' => [
+        'Intern mit den folgenden Gruppen geteilt: {$a}',
+        'Shared internally with the following groups: {$a}',
+    ],
+    'share_tooltip_all' => [
+        'Intern mit allen Benutzer:innen geteilt.',
+        'Shared internally with all users.',
+    ],
+    'share_tooltip_external' => [
+        'Extern via URL geteilt.',
+        'Shared externally via URL.',
     ],
 
     // === Copy to course.
@@ -2213,6 +2253,10 @@ return [
     'i_updated' => [
         '{$a->sendername} hat Änderungen an dem E-Portfolio {$a->title} vorgenommen, welches mit Ihnen geteilt ist.',
         '{$a->sendername} made changes to the e-portfolio view {$a->title} shared with you.',
+    ],
+    'i_updated_category' => [
+        null,
+        '{$a->sendername} added a new artefact to the shared category "{$a->title}"',
     ],
     'addstdcat' => [
         'Standardkategorien importieren',

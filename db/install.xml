@@ -469,6 +469,21 @@
         <INDEX NAME="viewid" UNIQUE="false" FIELDS="viewid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="block_exaportviewcate" COMMENT="Multi-category assignments for views">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="viewid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="cateid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="viewid" TYPE="foreign" FIELDS="viewid" REFTABLE="block_exaportview" REFFIELDS="id"/>
+        <KEY NAME="cateid" TYPE="foreign" FIELDS="cateid" REFTABLE="block_exaportcate" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="viewid_cateid" UNIQUE="true" FIELDS="viewid, cateid"/>
+      </INDEXES>
+    </TABLE>
     <TABLE NAME="block_exaport_course_templ" COMMENT="per-course category distribution templates">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

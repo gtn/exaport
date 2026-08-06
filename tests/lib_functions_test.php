@@ -36,6 +36,18 @@ final class lib_functions_test extends \advanced_testcase {
     private \stdClass $user;
     private \stdClass $course;
 
+    public function test_user_preferences_declares_view_items_preferences(): void {
+        $preferences = block_exaport_user_preferences();
+
+        $this->assertArrayHasKey('block_exaport_show_otherusers', $preferences);
+        $this->assertSame(PARAM_INT, $preferences['block_exaport_show_otherusers']['type']);
+        $this->assertSame(1, $preferences['block_exaport_show_otherusers']['default']);
+
+        $this->assertArrayHasKey('block_exaport_entrytype', $preferences);
+        $this->assertSame(PARAM_ALPHA, $preferences['block_exaport_entrytype']['type']);
+        $this->assertSame('all', $preferences['block_exaport_entrytype']['default']);
+    }
+
     protected function setUp(): void {
         global $USER;
         $this->resetAfterTest(true);

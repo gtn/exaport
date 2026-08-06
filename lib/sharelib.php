@@ -40,21 +40,33 @@ namespace {
     }
 
     /**
-     * Build the category sharing tooltip text from internal/external state.
+     * Build the sharing tooltip from resolved share detail.
      *
-     * @param bool $issharedinternal
-     * @param bool $issharedexternal
-     * @return string
+     * When $html is true (default): lines are joined with '<br><br>' and user/group names
+     * are escaped with s() — suitable for data-bs-title with data-bs-html="true".
+     * When $html is false: lines are joined with ' | ' and names are NOT escaped —
+     * suitable for plain title="" attributes (the caller is responsible for attribute escaping).
+     *
+     * @param \block_exaport\share_info $share Resolved sharing detail.
+     * @param bool                      $html  True for HTML output, false for plain text.
+     * @return string Tooltip string.
      */
-    function block_exaport_get_category_share_tooltip(bool $issharedinternal, bool $issharedexternal): string {
-        $parts = [];
-        if ($issharedinternal) {
-            $parts[] = block_exaport_get_string('sharedwithotherusers');
+    function block_exaport_get_share_tooltip(\block_exaport\share_info $share, bool $html = true): string {
+        $lines = [];
+        if ($share->all) {
+            $lines[] = block_exaport_get_string('share_tooltip_all');
+        } else if ($share->users) {
+            $names = $html ? implode(', ', array_map('s', $share->users)) : implode(', ', $share->users);
+            $lines[] = block_exaport_get_string('share_tooltip_users', $names);
         }
-        if ($issharedexternal) {
-            $parts[] = block_exaport_get_string('sharedexternalcategory');
+        if ($share->groups) {
+            $names = $html ? implode(', ', array_map('s', $share->groups)) : implode(', ', $share->groups);
+            $lines[] = block_exaport_get_string('share_tooltip_groups', $names);
         }
-        return implode(', ', $parts);
+        if ($share->external) {
+            $lines[] = block_exaport_get_string('share_tooltip_external');
+        }
+        return implode($html ? '<br><br>' : ' | ', $lines);
     }
 
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
@@ -128,7 +140,13 @@ namespace {
         }
 
         $accesspath = explode('/', $access);
-        if (count($accesspath) != 2) {
+        // Standard modes (hash, id, email) use exactly 2 path segments.
+        // Category mode uses 3 segments: "category/hash/{userid}-{categoryhash}".
+        $accesstype = $accesspath[0];
+        if ($accesstype !== 'category' && count($accesspath) != 2) {
+            return;
+        }
+        if ($accesstype === 'category' && count($accesspath) != 3) {
             return;
         }
 
@@ -191,6 +209,23 @@ namespace {
             if (is_array($usergroups) && count($usergroups) > 0) {
                 $tempjoin .= " LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id = vgshar.viewid";
             }
+
+            // Category-based grant: build the set of view ids reachable via shared categories.
+            // NOTE: This runs on every internal view access (not only category-granted ones) because it sits
+            // on the hot path for all id/-based view lookups. Cost scales with the number of categories shared
+            // to the user: one subtree query (block_exaport_get_owned_category_tree_ids) per shared category,
+            // followed by a final IN (...) clause. This is deliberately eager for simplicity; if it becomes a
+            // bottleneck it could be made lazy (only evaluated when the primary WHERE fails) or cached in a
+            // static variable for the duration of the request.
+            $categoryviewids = \block_exaport\view_helper::get_category_shared_view_ids($myuserid);
+            $categoryclause = '';
+            $categoryparams = [];
+            if (!empty($categoryviewids)) {
+                [$catinsql, $categoryparams] = $DB->get_in_or_equal($categoryviewids, SQL_PARAMS_QM);
+                $categoryclause = " OR v.id $catinsql";
+            }
+
+            $params = array_merge([$myuserid, $userid, $viewid, $myuserid], $categoryparams);
             $view = $DB->get_record_sql("SELECT DISTINCT v.* FROM {block_exaportview} v" .
                 " LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid = ?" .
                 $tempjoin .
@@ -199,7 +234,8 @@ namespace {
                 "  OR (v.shareall = 1)" . // Shared all.
                 "  OR (v.shareall = 0 AND vshar.userid IS NOT NULL) " .
                 ($usergroups ? " OR vgshar.groupid IN (" . join(',', array_keys($usergroups)) . ") " : "") .
-                ")", array($myuserid, $userid, $viewid, $myuserid)); // Shared for me.
+                $categoryclause .
+                ")", $params); // Shared for me.
             if (!$view) {
                 // View not found.
                 return;
@@ -207,6 +243,41 @@ namespace {
 
             $view->access = new stdClass();
             $view->access->request = 'intern';
+        } else if ($accesspath[0] == 'category') {
+            // External category-hash access for views: "category/hash/{userid}-{categoryhash}".
+            // The category access token is the remainder of the path: "hash/{userid}-{categoryhash}".
+            $categoryaccess = $accesspath[1] . '/' . $accesspath[2];
+            if (!$category = block_exaport_get_category_from_access($categoryaccess)) {
+                return;
+            }
+
+            $categoryids = block_exaport_get_owned_category_tree_ids($category->id, $category->userid);
+            if (empty($categoryids)) {
+                return;
+            }
+
+            $viewidparam = optional_param('viewid', 0, PARAM_INT);
+            if (empty($viewidparam)) {
+                return;
+            }
+
+            [$insql, $inparams] = $DB->get_in_or_equal($categoryids, SQL_PARAMS_QM);
+            $params = array_merge([$viewidparam, $category->userid], $inparams);
+            $view = $DB->get_record_sql(
+                "SELECT DISTINCT v.*
+                   FROM {block_exaportview} v
+                   JOIN {block_exaportviewcate} vc ON vc.viewid = v.id
+                  WHERE v.id = ?
+                    AND v.userid = ?
+                    AND vc.cateid $insql",
+                $params
+            );
+            if (!$view) {
+                return;
+            }
+
+            $view->access = new stdClass();
+            $view->access->request = 'extern';
         } else if ($accesspath[0] == 'email') {
 
             if (!block_exaport_shareemails_enabled()) {

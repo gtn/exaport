@@ -30,6 +30,7 @@ $type = optional_param('type', '', PARAM_TEXT);
 $layout = optional_param('layout', '', PARAM_TEXT);
 $folderlayout = optional_param('folderlayout', '', PARAM_TEXT);
 $action = optional_param('action', '', PARAM_TEXT);
+$entrytypefromurl = optional_param('entrytype', '', PARAM_ALPHA); // '' = not in URL
 
 // External category access via hash (mirrors shared_view.php access pattern).
 $access = optional_param('access', '', PARAM_TEXT);
@@ -92,6 +93,14 @@ $showothersusersfromurl = $show_otherusers;
 if ($show_otherusers === -1) {
     $show_otherusers = (int)get_user_preferences('block_exaport_show_otherusers', 1);
 }
+if ($entrytypefromurl === '') {
+    $entrytype = get_user_preferences('block_exaport_entrytype', 'all');
+} else {
+    $entrytype = $entrytypefromurl;
+}
+if (!in_array($entrytype, ['all', 'item', 'view'])) {
+    $entrytype = 'all';
+}
 
 if ($type != 'shared' && $type != 'sharedstudent' && $type != 'extern_category') {
     $type = 'mine';
@@ -128,19 +137,14 @@ if ($showsubcategoriesfromurl !== -1) {
 if ($showothersusersfromurl !== -1) {
     set_user_preference('block_exaport_show_otherusers', (int)$show_otherusers);
 }
+if ($entrytypefromurl !== '') {
+    set_user_preference('block_exaport_entrytype', $entrytype);
+}
 
 // Check sorting.
 $parsedsort = block_exaport_parse_item_sort($sort, false);
 $sort = $parsedsort[0] . '.' . $parsedsort[1];
 
-$sortkey = $parsedsort[0];
-
-if ($parsedsort[1] == "desc") {
-    $newsort = $sortkey . ".asc";
-} else {
-    $newsort = $sortkey . ".desc";
-}
-$sorticon = $parsedsort[1] . '.png';
 $sqlsort = block_exaport_item_sort_to_sql($parsedsort, false);
 
 if ($sortfromurl !== '') {
@@ -221,12 +225,21 @@ if ($type == 'sharedstudent') {
             $parentcategory = null;
             $subcategories = [];
             $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort);
+            // No allowedcategoryids restriction: a teacher viewing a student sees their whole portfolio.
+            $views = \block_exaport\view_helper::load_flat_views($selecteduser->id, $categories, $parsedsort[0], $parsedsort[1]);
         } else {
             // Common items.
             $items = \block_exaport\category_helper::load_owner_category_items(
                 $selecteduser->id,
                 $currentcategory->id,
                 $sqlsort
+            );
+            $views = \block_exaport\view_helper::load_owner_category_views(
+                $selecteduser->id,
+                $currentcategory->id,
+                $categories,
+                $parsedsort[0],
+                $parsedsort[1]
             );
         }
     }
@@ -344,10 +357,24 @@ if ($type == 'sharedstudent') {
             $parentcategory = null;
             $subcategories = [];
             $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
+            $views = \block_exaport\view_helper::load_flat_views(
+                $selecteduser->id,
+                $categories,
+                $parsedsort[0],
+                $parsedsort[1],
+                array_keys($allowedcategories)
+            );
         } else {
             $items = \block_exaport\category_helper::load_shared_category_items(
                 $currentcategory->id,
                 $sqlsort
+            );
+            $views = \block_exaport\view_helper::load_owner_category_views(
+                $selecteduser->id,
+                $currentcategory->id,
+                $categories,
+                $parsedsort[0],
+                $parsedsort[1]
             );
         }
     }
@@ -401,6 +428,13 @@ if ($type == 'sharedstudent') {
             $allowedids,
             true
         );
+        $views = \block_exaport\view_helper::load_flat_views(
+            $externaccess_category->userid,
+            $categories,
+            $parsedsort[0],
+            $parsedsort[1],
+            $allowedids
+        );
     } else {
         $layout = 'folder';
 
@@ -420,6 +454,13 @@ if ($type == 'sharedstudent') {
             $externaccess_category->userid,
             $currentcategory->id,
             $sqlsort
+        );
+        $views = \block_exaport\view_helper::load_owner_category_views(
+            $externaccess_category->userid,
+            $currentcategory->id,
+            $categories,
+            $parsedsort[0],
+            $parsedsort[1]
         );
     }
 
@@ -472,17 +513,29 @@ if ($type == 'sharedstudent') {
         } else {
             $items = \block_exaport\category_helper::load_flat_items($USER->id, $categories, $sqlsort, null);
         }
+        // Load views for mine/flat mode.
+        $views = \block_exaport\view_helper::load_flat_views($USER->id, $categories, $parsedsort[0], $parsedsort[1]);
     } else {
         // Folder mode keeps legacy category navigation behavior.
         $items = block_exaport_get_items_by_category_and_user($USER->id, $currentcategory->id, $sqlsort, $show_otherusers ? true : false);
+        // Load views for mine/folder mode (filtered to current category).
+        $views = \block_exaport\view_helper::load_owner_category_views($USER->id, $currentcategory->id, $categories, $parsedsort[0], $parsedsort[1]);
     }
 }
 
 $isexternalreadonlymode = ($type === 'extern_category') && !empty($canonicalaccess);
+// $views is populated for types: 'mine', 'shared', 'sharedstudent', and 'extern_category'.
+if (!isset($views)) {
+    $views = [];
+}
 if ($isexternalreadonlymode) {
     foreach ($items as $item) {
         // Read-only external item links must keep the category access token (not portfolio/id/...).
         $item->extern_item_url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
+    }
+    foreach ($views as $view) {
+        // Read-only external view links: use the category hash access token so the ACL gate can resolve it.
+        $view->extern_view_url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?access=category/' . $canonicalaccess . '&viewid=' . $view->id;
     }
 }
 
@@ -537,7 +590,7 @@ if (($type === 'extern_category') && $externaccess_category) {
 
 // Normalise sort value for use in select dropdowns (e.g. "date.desc" → "date-desc").
 $flatsort = str_replace('.', '-', $sort);
-if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc'])) {
+if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc', 'type-asc', 'type-desc'])) {
     $flatsort = 'date-desc';
 }
 
@@ -590,9 +643,26 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     // Search + sort controls for folder mode.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-folder');
+    echo block_exaport_render_search_and_sort_controls($flatsort);
     echo '</div>';
-    $PAGE->requires->js_call_amd('block_exaport/folder_filter', 'init', []);
+    // Row 4: items/views filter toggle.
+    echo block_exaport_render_entrytype_control($entrytype);
+    block_exaport_require_filter_js();
+} else if (($type == 'shared' || $type == 'sharedstudent') && $layout == 'folder') {
+    // Shared folder mode: same client-side search/sort/entry-type controls as flat mode.
+    // No category-navigation select (tiles + breadcrumb handle that), and no other-users or
+    // subcategories checkbox (both only affect the 'mine'/flat server-side queries).
+    echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo block_exaport_render_search_and_sort_controls($flatsort);
+    if ($type == 'shared') {
+        // Create button (pushed right). For 'shared' it renders the artefact entry only.
+        echo '<div class="ms-auto">';
+        block_exaport_print_create_button($courseid, $categoryid, $type);
+        echo '</div>';
+    }
+    echo '</div>';
+    echo block_exaport_render_entrytype_control($entrytype);
+    block_exaport_require_filter_js();
 } else if (($type == 'mine' || $type == 'shared' || $type == 'sharedstudent') && $layout == 'flat') {
     // Self-made filter bar: search input + category dropdown + sort dropdown in one row, chips below.
     if (($type == 'shared' || $type == 'sharedstudent') && $selecteduser) {
@@ -617,11 +687,11 @@ if ($type == 'mine' && $layout == 'folder') {
     // Row 1: search + category dropdown + sort dropdown + create button.
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     // Search input + sort dropdown (shared helper, no duplication).
-    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-flat');
+    echo block_exaport_render_search_and_sort_controls($flatsort);
     // Category filter dropdown (simple select; chip multiselect handled by JS).
     echo '<div style="min-width: 200px; max-width: 350px;">';
-    echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string('category', 'block_exaport') . '</label>';
-    echo '<select id="exaport-flat-category-select" class="form-control custom-select">';
+    echo '<label class="sr-only" for="exaport-category-select">' . get_string('category', 'block_exaport') . '</label>';
+    echo '<select id="exaport-category-select" class="form-control custom-select">';
     echo '<option value="">' . get_string('category', 'block_exaport') . '</option>';
     foreach ($filtercategories as $catid => $catname) {
         echo '<option value="' . $catid . '">' . s($catname) . '</option>';
@@ -634,25 +704,41 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     echo '</div>';
     // Row 2: "show items from other users" checkbox.
-    echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-show-otherusers-checkbox"' . ($show_otherusers ? ' checked="checked"' : '') . '> ';
-    echo get_string('show_items_from_other_users', 'block_exaport');
-    echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
-    echo '</label>';
-    echo '</div>';
+    // Only rendered for 'mine': the shared/sharedstudent loaders do not consult this flag,
+    // and toggling it while viewing another user's portfolio would silently reconfigure the
+    // current user's own portfolio without any visible effect.
+    if ($type == 'mine') {
+        echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+        echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-show-otherusers-checkbox"' . ($show_otherusers ? ' checked="checked"' : '') . '> ';
+        echo get_string('show_items_from_other_users', 'block_exaport');
+        echo ' <span title="' . s(get_string('show_items_from_other_users_help', 'block_exaport')) . '" style="cursor:help;">&#9432;</span>';
+        echo '</label>';
+        echo '</div>';
+    }
     // Row 3: "show items from subcategories" checkbox.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
-    echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    // Row 4: items/views filter toggle.
+    if (in_array($type, ['mine', 'shared'], true)) {
+        echo block_exaport_render_entrytype_control($entrytype);
+    }
+    echo '<div id="exaport-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
     echo '</div>';
 
     // Build category children map for JS (parent_id => [child_id, ...]).
+    // For 'shared', apply the same category_allowed() guard as $filtercategories above so
+    // the two structures remain consistent and subcategory expansion never references a
+    // category the current user was not permitted to see.
+    $isshared = ($type == 'shared');
     $categorychildrenmap = [];
     foreach ($categories as $cat) {
         if ((int)$cat->id === 0) {
+            continue;
+        }
+        if ($isshared && !category_allowed($selecteduser, $categories, $cat)) {
             continue;
         }
         $pid = (int)$cat->pid;
@@ -663,12 +749,7 @@ if ($type == 'mine' && $layout == 'folder') {
     }
 
     // Load AMD module for filtering.
-    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
-        get_string('clearAllFilers', 'block_exaport'),
-        get_string('searchcategory', 'block_exaport'),
-        $categorychildrenmap,
-        (int)$categoryid
-    ]);
+    block_exaport_require_filter_js($categorychildrenmap, $categoryid);
 } else if (($type === 'extern_category') && $layout == 'flat') {
     // External flat filter bar: search + category dropdown + sort + subcategory filtering.
     // $categories is already restricted to the shared subtree, so every option here is a shared
@@ -681,10 +762,10 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="exaport-flat-filter mb-3">';
     // Row 1: search + sort + category dropdown.
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo block_exaport_render_search_and_sort_controls($flatsort, 'exaport-flat');
+    echo block_exaport_render_search_and_sort_controls($flatsort);
     echo '<div style="min-width: 200px; max-width: 350px;">';
-    echo '<label class="sr-only" for="exaport-flat-category-select">' . get_string('category', 'block_exaport') . '</label>';
-    echo '<select id="exaport-flat-category-select" class="form-control custom-select">';
+    echo '<label class="sr-only" for="exaport-category-select">' . get_string('category', 'block_exaport') . '</label>';
+    echo '<select id="exaport-category-select" class="form-control custom-select">';
     echo '<option value="">' . get_string('category', 'block_exaport') . '</option>';
     foreach ($filtercategories as $catid => $catname) {
         echo '<option value="' . $catid . '">' . s($catname) . '</option>';
@@ -694,14 +775,14 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     // Row 2: "show items from subcategories" checkbox.
     echo '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-flat-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
+    echo '<label style="font-weight:normal; margin:0;"><input type="checkbox" id="exaport-subcategories-checkbox"' . ($show_subcategories ? ' checked="checked"' : '') . '> ';
     echo get_string('show_items_from_subcategories', 'block_exaport');
     echo '</label>';
     echo '</div>';
-    echo '<div id="exaport-flat-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    echo '<div id="exaport-filter-chips" class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.4rem;"></div>';
+    // Row 3: items/views filter toggle.
+    echo block_exaport_render_entrytype_control($entrytype);
     echo '</div>';
-
-    // Build category children map for JS (parent_id => [child_id, ...]), shared categories only.
     $categorychildrenmap = [];
     foreach ($categories as $cat) {
         $pid = (int)$cat->pid;
@@ -711,12 +792,7 @@ if ($type == 'mine' && $layout == 'folder') {
         $categorychildrenmap[$pid][] = (int)$cat->id;
     }
 
-    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
-        get_string('clearAllFilers', 'block_exaport'),
-        get_string('searchcategory', 'block_exaport'),
-        $categorychildrenmap,
-        0
-    ]);
+    block_exaport_require_filter_js($categorychildrenmap);
 }
 
 if ($type === 'extern_category') {
@@ -745,6 +821,11 @@ if ($type === 'extern_category') {
     echo '</div>';
     echo '</div>';
     echo '</div>';
+    // Entry-type filter for external folder mode (items vs views).
+    if ($layout == 'folder') {
+        echo block_exaport_render_entrytype_control($entrytype);
+        block_exaport_require_filter_js();
+    }
 } else {
     echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 
@@ -807,7 +888,7 @@ if ($layout == 'folder' && !($type === 'extern_category')) {
         if (@$currentcategory->internshare && (count(exaport_get_category_shared_users($currentcategory->id)) > 0 ||
                 count(exaport_get_category_shared_groups($currentcategory->id)) > 0 || $currentcategory->shareall == 1)
         ) {
-            $currentcategoryPathItemButtons .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
+            $currentcategoryPathItemButtons .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1);
             //        $currentcategoryPathItemButtons .= ' <img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
         }
         $currentcategoryPathItemButtons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $courseid . '&id=' . $currentcategory->id .
@@ -853,35 +934,20 @@ $table->width = "100%";
 $table->head = array();
 $table->size = array();
 
-if ($layout == 'flat') {
-    $table->head['type'] = get_string("type", "block_exaport");
-} else {
-    $table->head['type'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'type' ? $newsort : 'type'), 'folderlayout' => 'details']) . '">' . get_string("type", "block_exaport") . '</a>';
-}
+$table->head['type'] = '<a href="#" class="exaport-sort-heading" data-sort-field="type">'
+    . get_string("type", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
 $table->size['type'] = "10";
 
-if ($layout == 'flat') {
-    $table->head['name'] = get_string("name", "block_exaport");
-} else {
-    $table->head['name'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'name' ? $newsort : 'name'), 'folderlayout' => 'details']) . '">' . get_string("name", "block_exaport") . '</a>';
-}
+$table->head['name'] = '<a href="#" class="exaport-sort-heading" data-sort-field="name">'
+    . get_string("name", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
 $table->size['name'] = "60";
 
-if ($layout == 'flat') {
-    $table->head['date'] = get_string("date", "block_exaport");
-} else {
-    $table->head['date'] = '<a href="' . $PAGE->url->out(true, ['sort' => ($sortkey == 'date' ? $newsort : 'date.desc'), 'folderlayout' => 'details']) . '">' . get_string("date", "block_exaport") . '</a>';
-}
+$table->head['date'] = '<a href="#" class="exaport-sort-heading" data-sort-field="date">'
+    . get_string("date", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
 $table->size['date'] = "20";
 
 $table->head['icons'] = '';
 $table->size['icons'] = "10";
-
-// Add arrow to heading if available.
-if (isset($table->head[$sortkey])) {
-    $table->head[$sortkey] = "<img src=\"pix/$sorticon\" alt='" . get_string("updownarrow", "block_exaport") . "' /> " .
-        $table->head[$sortkey];
-}
 
 $table->data = array();
 $itemind = -1;
@@ -911,14 +977,11 @@ foreach ($subcategories as $category) {
 
     if ($type == 'mine' && $category->id > 0) {
         $table->data[$itemind]['icons'] = '<span class="excomdos_listicons">';
-        $issharedexternal = !empty($category->externaccess);
-        $issharedinternal = (isset($category->internshare) && $category->internshare == 1) &&
-            (count(exaport_get_category_shared_users($category->id)) > 0 ||
-                count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                (isset($category->shareall) && $category->shareall == 1));
-        if ($issharedexternal || $issharedinternal) {
-            $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                ['title' => block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal)]);
+        $share = \block_exaport\category_helper::build_share_info($category);
+        if ($share->is_shared()) {
+            // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
+            $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
+                ['title' => s(block_exaport_get_share_tooltip($share, false))]);
             //                $table->data[$itemind]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
         };
         if (@$category->structure_share) {
@@ -941,8 +1004,9 @@ foreach ($subcategories as $category) {
     }
 }
 
-// For flat mode, we'll collect item row data separately to render with data attributes.
+// For flat mode and folder mode, we'll collect item row data separately to render with data attributes.
 $flatItemRows = [];
+$folderItemRows = [];
 
 $itemscnt = count($items);
 foreach ($items as $item) {
@@ -1048,7 +1112,7 @@ foreach ($items as $item) {
     if ($useManualTable) {
         $flatItemRows[] = ['data' => $rowdata, 'item' => $item];
     } else {
-        $table->data[$itemind] = $rowdata;
+        $folderItemRows[] = ['data' => $rowdata, 'item' => $item];
     }
 }
 
@@ -1066,15 +1130,59 @@ if ($useManualTable) {
                 $itemCatIds[] = (int)$cat->id;
             }
         }
-        echo '<tr class="exaport-flat-item" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
+        echo '<tr class="exaport-flat-item" data-entry-type="item" data-item-name="' . s(strtolower($item->name)) . '" data-item-type="' . s($item->type) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
         echo '<td style="width:10%">' . ($row['type'] ?? '') . '</td>';
         echo '<td style="width:60%">' . ($row['name'] ?? '') . '</td>';
         echo '<td style="width:20%">' . ($row['date'] ?? '') . '</td>';
         echo '<td style="width:10%">' . ($row['icons'] ?? '') . '</td>';
         echo '</tr>';
     }
+    // Render view rows alongside item rows for mine/shared/sharedstudent/extern_category types.
+    // Delegate to the shared helper to avoid duplicating the URL/icon/edit-link logic.
+    if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'])) {
+        foreach ($views as $view) {
+            $viewCatIds = [];
+            if (!empty($view->flatcategories) && is_array($view->flatcategories)) {
+                foreach ($view->flatcategories as $cat) {
+                    $viewCatIds[] = (int)$cat->id;
+                }
+            }
+            $viewrow = block_exaport_render_view_table_row($view, $courseid, $type, $viewCatIds);
+            // html_writer::attributes() escapes all values, matching how html_writer::table() works for folder mode.
+            // $cell->text is pre-escaped HTML built by the helper (s(), format_string(), etc.) — safe to echo directly.
+            echo '<tr' . html_writer::attributes($viewrow->attributes) . '>';
+            $widths = ['10%', '60%', '20%', '10%'];
+            foreach ($viewrow->cells as $i => $cell) {
+                echo '<td style="width:' . ($widths[$i] ?? 'auto') . '">' . $cell->text . '</td>';
+            }
+            echo '</tr>';
+        }
+    }
     echo '</tbody></table>';
 } else {
+    // Folder mode: append item and view rows directly into $table->data using html_table_row
+    // so everything is one table and column widths align with the header row.
+    foreach ($folderItemRows as $folderRow) {
+        $item = $folderRow['item'];
+        $row = $folderRow['data'];
+        $tablerow = new html_table_row([
+            $row['type'] ?? '',
+            $row['name'] ?? '',
+            $row['date'] ?? '',
+            $row['icons'] ?? '',
+        ]);
+        $tablerow->attributes['class'] = 'exaport-flat-item';
+        $tablerow->attributes['data-entry-type'] = 'item';
+        $tablerow->attributes['data-item-name'] = strtolower($item->name);
+        $tablerow->attributes['data-item-type'] = $item->type;
+        $tablerow->attributes['data-item-date'] = (int)$item->timemodified;
+        $table->data[] = $tablerow;
+    }
+    if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'], true)) {
+        foreach ($views as $view) {
+            $table->data[] = block_exaport_render_view_table_row($view, $courseid, $type);
+        }
+    }
     echo html_writer::table($table);
 }
 echo '</div>';
@@ -1097,6 +1205,13 @@ if ($layout == 'folder') {
 
 foreach ($items as $item) {
     echo block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, $currentcategory, ($layout == 'folder'));
+}
+
+// Render view cards alongside item cards for mine/shared/sharedstudent/extern_category types.
+if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'], true)) {
+    foreach ($views as $view) {
+        echo block_exaport_view_list_item($view, $courseid, $type, $categoryid, ($layout == 'folder'));
+    }
 }
 
 echo '</div>';
@@ -1189,7 +1304,7 @@ function block_exaport_get_item_comp_footer_badge($item) {
 }
 
 /**
- * Prints the unified "Create" dropdown button (artefact + category).
+ * Prints the unified "Create" dropdown button (artefact + category + view).
  */
 function block_exaport_print_create_button($courseid, $categoryid, $type) {
     global $CFG;
@@ -1199,6 +1314,10 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
     }
     $createartefacturl = $CFG->wwwroot . '/blocks/exaport/item.php?action=add&courseid=' . $courseid . '&categoryid=' . $categoryid . $cattype . '&type=mixed';
     $createcategoryurl = $CFG->wwwroot . '/blocks/exaport/category.php?action=add&courseid=' . $courseid . '&pid=' . $categoryid;
+    $createviewurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?action=add&courseid=' . $courseid;
+    if ($categoryid) {
+        $createviewurl .= '&categoryid=' . $categoryid;
+    }
 
     echo '<div style="position: relative; display: inline-block;">';
     echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';
@@ -1212,6 +1331,9 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
         echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
             . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '
             . get_string("category", "block_exaport") . '</a>';
+        echo '<a class="dropdown-item" href="' . $createviewurl . '">'
+            . block_exaport_fontawesome_icon('layer-group', 'solid', 1) . ' '
+            . get_string("add_view_entry", "block_exaport") . '</a>';
     }
     echo '</div>';
     echo '</div>';
@@ -1221,19 +1343,16 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
  * Renders the shared search input and sort dropdown HTML fragment.
  *
  * Called from both the flat-layout filter bar and the folder-layout controls so
- * there is no duplicated rendering logic.  The $idprefix distinguishes the two
- * contexts: 'exaport-flat' for flat mode (handled by flat_filter AMD module) and
- * 'exaport-folder' for folder mode (handled by folder_filter AMD module).
+ * there is no duplicated rendering logic.
  *
  * @param string $selectedsort  Currently active sort value in "key-dir" format, e.g. "date-desc".
- * @param string $idprefix      Element ID prefix, e.g. 'exaport-flat' or 'exaport-folder'.
  * @return string               HTML fragment (two <div> elements: search input + sort select).
  */
-function block_exaport_render_search_and_sort_controls($selectedsort, $idprefix) {
+function block_exaport_render_search_and_sort_controls($selectedsort) {
     $html = '';
 
     // Search input.
-    $searchid = $idprefix . '-search';
+    $searchid = 'exaport-search';
     $html .= '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
     $html .= '<label class="sr-only" for="' . s($searchid) . '">' . get_string('search') . '</label>';
     $html .= '<input type="text" id="' . s($searchid) . '" class="form-control"'
@@ -1241,10 +1360,12 @@ function block_exaport_render_search_and_sort_controls($selectedsort, $idprefix)
     $html .= '</div>';
 
     // Sort dropdown.
-    $sortid = $idprefix . '-sort-select';
+    $sortid = 'exaport-sort-select';
     $opts = [
         'date-desc' => get_string('date', 'block_exaport') . ' ↓',
         'date-asc'  => get_string('date', 'block_exaport') . ' ↑',
+        'type-asc'  => get_string('type', 'block_exaport') . ' A-Z',
+        'type-desc' => get_string('type', 'block_exaport') . ' Z-A',
         'name-asc'  => get_string('name', 'block_exaport') . ' A-Z',
         'name-desc' => get_string('name', 'block_exaport') . ' Z-A',
     ];
@@ -1259,6 +1380,102 @@ function block_exaport_render_search_and_sort_controls($selectedsort, $idprefix)
     $html .= '</div>';
 
     return $html;
+}
+
+/**
+ * Renders the items/views entry-type filter dropdown.
+ *
+ * @param string $entrytype Currently active value: 'all', 'item' or 'view'.
+ * @return string HTML fragment.
+ */
+function block_exaport_render_entrytype_control($entrytype) {
+    $html = '<div class="mt-2 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    $html .= '<label class="sr-only" for="exaport-entrytype-select">'
+        . get_string('filter_entry_type', 'block_exaport') . '</label>';
+    $html .= '<select id="exaport-entrytype-select" class="form-control custom-select"'
+        . ' style="min-width:160px; max-width:250px;">';
+    foreach (['all' => 'filter_entry_type_all', 'item' => 'filter_entry_type_items',
+              'view' => 'filter_entry_type_views'] as $val => $key) {
+        $html .= '<option value="' . $val . '"' . ($entrytype === $val ? ' selected="selected"' : '')
+            . '>' . get_string($key, 'block_exaport') . '</option>';
+    }
+    $html .= '</select></div>';
+    return $html;
+}
+
+/**
+ * Requires the flat_filter AMD module and passes it the category children map and
+ * pre-selected category id. Extracted to avoid repeating the same js_call_amd block
+ * at every call site.
+ *
+ * @param array $childrenmap         Map of parent category id to array of child category ids.
+ * @param int   $preselectedcategoryid Optional pre-selected category id.
+ */
+function block_exaport_require_filter_js($childrenmap = [], $preselectedcategoryid = 0) {
+    global $PAGE;
+    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
+        get_string('clearAllFilers', 'block_exaport'),
+        get_string('searchcategory', 'block_exaport'),
+        $childrenmap,
+        (int)$preselectedcategoryid,
+    ]);
+}
+
+/**
+ * Renders a single view (collection) row for the details table.
+ *
+ * Returns an html_table_row with data-* attributes for JS filter/sort.
+ * Used from both flat mode (with category ids) and folder mode (without).
+ *
+ * @param stdClass $view         View record decorated by view_helper.
+ * @param int      $courseid     Course id.
+ * @param string   $type         Access type ('mine', 'shared', 'extern_category', …).
+ * @param array    $viewcatids   List of category ids for the category filter (flat mode).
+ * @return html_table_row
+ */
+function block_exaport_render_view_table_row(\stdClass $view, int $courseid, string $type,
+                                              array $viewcatids = []): \html_table_row {
+    global $CFG;
+    $viewurl = !empty($view->extern_view_url) ? $view->extern_view_url
+        : $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
+        . '&access=id/' . $view->userid . '-' . $view->id;
+    $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
+    // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
+    $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
+        ['title' => s(block_exaport_get_share_tooltip($view->shareinfo, false))]) : '';
+
+    $namecell = '<a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
+    if ($view->description) {
+        $namecell .= '<table width="98%"><tr><td>' . format_text($view->description, FORMAT_HTML) . '</td></tr></table>';
+    }
+    $iconscell = '<span class="excomdos_listicons">' . $sharedicon;
+    if ($type === 'mine') {
+        $editurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+            . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=edit';
+        $deleteurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid
+            . '&id=' . $view->id . '&sesskey=' . sesskey() . '&action=delete&confirm=1';
+        $iconscell .= ' <a href="' . s($editurl) . '">' . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1) . '</a>'
+            . ' <a href="' . s($deleteurl) . '">'
+            . block_exaport_fontawesome_icon('trash-can', 'regular', 1, [], [], [], '', [], [], [], ['exaport-remove-icon'])
+            . '</a>';
+    }
+    $iconscell .= '</span>';
+
+    $typecell = block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']);
+    $datecell = userdate($view->timemodified);
+
+    $row = new html_table_row([$typecell, $namecell, $datecell, $iconscell]);
+    $row->attributes['class'] = 'exaport-flat-item';
+    $row->attributes['data-entry-type'] = 'view';
+    // html_writer::table() escapes all attribute values via html_writer::attributes(),
+    // so we do NOT call s() here — that would double-encode the values.
+    $row->attributes['data-item-name'] = strtolower($view->name);
+    $row->attributes['data-item-type'] = 'view';
+    $row->attributes['data-item-date'] = (int)$view->timemodified;
+    if ($viewcatids) {
+        $row->attributes['data-category-ids'] = implode(',', $viewcatids);
+    }
+    return $row;
 }
 
 function block_exaport_get_item_project_icon($item) {
@@ -1398,17 +1615,15 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
         if ($category->id == -1) {
             $tempvar = 1; // For code checker.
         } else if ($type == 'shared' || $type == 'sharedstudent') {
-            $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1);
+            $categoryContent .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1);
             //                        echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
         } else {
             // Type == mine.
-            $issharedexternal = !empty($category->externaccess);
-            $issharedinternal = @$category->internshare && (count(exaport_get_category_shared_users($category->id)) > 0 ||
-                    count(exaport_get_category_shared_groups($category->id)) > 0 ||
-                    (isset($category->shareall) && $category->shareall == 1));
-            if ($issharedexternal || $issharedinternal) {
-                $categoryContent .= block_exaport_fontawesome_icon('handshake', 'regular', 1, [], [],
-                    ['title' => block_exaport_get_category_share_tooltip($issharedinternal, $issharedexternal)]);
+            $share = \block_exaport\category_helper::build_share_info($category);
+            if ($share->is_shared()) {
+                // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
+                $categoryContent .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
+                    ['title' => s(block_exaport_get_share_tooltip($share, false))]);
                 //                            echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
             };
             if (@$category->structure_share) {
@@ -1474,7 +1689,7 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
     $url = !empty($item->extern_item_url) ? $item->extern_item_url
         : $CFG->wwwroot . '/blocks/exaport/shared_item.php?courseid=' . $courseid . '&access=portfolio/id/' . $item->userid . '&itemid=' . $item->id;
     $itemContent .= '
-        <div class="excomdos_tile excomdos_tile_item exaport-flat-item id-' . $item->id . '" data-item-name="' . s(strtolower($item->name)) . '" data-category-ids="' . s(implode(',', $itemcatids)) . '" data-item-date="' . (int)$item->timemodified . '">
+        <div class="excomdos_tile excomdos_tile_item exaport-flat-item id-' . $item->id . '" data-entry-type="item" data-item-name="' . s(strtolower($item->name)) . '" data-item-type="' . s($item->type) . '" data-category-ids="' . s(implode(',', $itemcatids)) . '" data-item-date="' . (int)$item->timemodified . '">
             <div class="excomdos_tilehead">
                     <span class="excomdos_tileinfo">';
     $iconTypeProps = block_exaport_item_icon_type_options($item->type);
@@ -1609,4 +1824,38 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
     }
     return 'something wrong!! (code: 1716990501476)';
 
+}
+
+/**
+ * Render a view (collection) card. Dispatches to the right template based on the active layout.
+ *
+ * @param \stdClass $view       The view record decorated by view_helper.
+ * @param int       $courseid   The course id.
+ * @param string    $type       Access type ('mine').
+ * @param int       $categoryid The current category id.
+ * @param bool      $foldermode Whether in folder (no category badges) or flat mode (with badges).
+ * @return string               Rendered HTML.
+ */
+function block_exaport_view_list_item(\stdClass $view, int $courseid, string $type, int $categoryid = 0,
+                                      bool $foldermode = false): string {
+    global $CFG, $PAGE;
+    $template = block_exaport_used_layout();
+    if ($template === 'moodle_bootstrap') {
+        return $PAGE->get_renderer('block_exaport')->render(
+            new \block_exaport\output\view_card($view, $courseid, $type, $categoryid, !$foldermode)
+        );
+    }
+    // Fallback for non-bootstrap layouts: simple link.
+    $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
+           . '&access=id/' . $view->userid . '-' . $view->id;
+    $viewcatids = [];
+    if (!empty($view->flatcategories) && is_array($view->flatcategories)) {
+        foreach ($view->flatcategories as $cat) {
+            $viewcatids[] = (int)$cat->id;
+        }
+    }
+    return '<div class="excomdos_tile excomdos_tile_item exaport-flat-item" data-entry-type="view" data-item-name="'
+           . s(strtolower($view->name)) . '" data-item-type="view" data-category-ids="' . s(implode(',', $viewcatids)) . '" data-item-date="'
+           . (int)$view->timemodified . '"><a href="' . s($url) . '">'
+           . format_string($view->name) . '</a></div>';
 }

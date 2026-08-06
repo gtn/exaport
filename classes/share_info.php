@@ -15,10 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+namespace block_exaport;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'block_exaport';
-$plugin->release = '5.1';
-$plugin->version = 2026080401;
-$plugin->requires = 2023042400; // moodle 4.2
-$plugin->maturity = MATURITY_STABLE;
+/**
+ * Resolved sharing detail for a shareable entity (view or category).
+ */
+class share_info {
+    /** @var string[] Fullnames of internally shared users. */
+    public array $users = [];
+    /** @var string[] Group/cohort names it is internally shared with. */
+    public array $groups = [];
+    /** @var bool Shared with everyone (internal shareall). */
+    public bool $all = false;
+    /** @var bool Shared externally via a public URL. */
+    public bool $external = false;
+
+    /**
+     * Whether the entity is shared in any way.
+     *
+     * @return bool
+     */
+    public function is_shared(): bool {
+        return (bool)($this->users || $this->groups || $this->all || $this->external);
+    }
+}

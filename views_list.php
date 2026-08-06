@@ -15,6 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+// Views are now shown inside view_items.php alongside portfolio items.
+// Uncomment the lines below to redirect to view_items.php once the migration is ready.
+// require_once(__DIR__ . '/inc.php');
+// $courseid = optional_param('courseid', 0, PARAM_INT);
+// redirect(new moodle_url('/blocks/exaport/view_items.php', ['courseid' => $courseid]));
+
 require_once(__DIR__ . '/inc.php');
 
 use function block_exaport\common\print_error;

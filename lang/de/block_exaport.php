@@ -374,6 +374,7 @@ $string['show_items_from_other_users_help'] = 'Falls du eine oder mehrere deiner
 $string['layout_mode_folder'] = 'Ordner';
 $string['layout_mode_flat'] = 'Flach';
 $string['searchcategory'] = 'Kategorie suchen...';
+$string['add_view_entry'] = 'Ansicht';
 $string['sharedwith'] = 'Geteilt mit';
 $string['sharedwithotherusers'] = 'Intern mit anderen Benutzer:innen geteilt';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
@@ -383,6 +384,10 @@ $string['sharedwith_shareexternal'] = 'Geteilte externe Views';
 $string['sharedexternalcategory'] = 'Extern geteilt';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 $string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
+$string['share_tooltip_users'] = 'Intern mit den folgenden Benutzer:innen geteilt: {$a}';
+$string['share_tooltip_groups'] = 'Intern mit den folgenden Gruppen geteilt: {$a}';
+$string['share_tooltip_all'] = 'Intern mit allen Benutzer:innen geteilt.';
+$string['share_tooltip_external'] = 'Extern via URL geteilt.';
 
 // === Copy to course.
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';
@@ -595,6 +600,7 @@ $string['resume_collaps'] = 'Alles schließen';
 
 // === Structure sharing.
 $string['shared_categories'] = 'Geteilte Kategorien';
+$string['shared_categories_of'] = 'Geteilte Kategorien von {$a}';
 $string['nothingstructureshared'] = 'Keine geteilten Strukturen';
 $string['browsecategory'] = 'Inhalt anzeigen';
 $string['copycategory'] = 'In mein Portfolio kopieren';
@@ -604,7 +610,6 @@ $string['create_as_note'] = 'Als Artefakt hinzufügen';
 $string['category_not_found'] = 'Kategorie nicht gefunden';
 $string['root_category'] = 'Hauptkategorie';
 $string['current_category'] = 'Aktuelle Kategorie';
-$string['shared_categories_of'] = 'Geteilte Kategorien von {$a}';
 $string['change_layout'] = 'Darstellung wechseln';
 $string['details'] = 'Details';
 $string['tiles'] = 'Kacheln';

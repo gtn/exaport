@@ -25,6 +25,7 @@ $action = optional_param("action", "", PARAM_ALPHA);
 $confirm = optional_param("confirm", "", PARAM_BOOL);
 $id = optional_param('id', 0, PARAM_INT);
 $type = optional_param('type', 'content', PARAM_ALPHA);
+$categoryid = optional_param('categoryid', 0, PARAM_INT);
 if ($action == "add") {
     $type = "title";
 }
@@ -152,6 +153,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
         $mform->setType('viewid', PARAM_INT);
         $mform->setType('name', PARAM_TEXT);
         $mform->setType('autofill_artefacts', PARAM_TEXT);
+        $mform->setType('categoryids', PARAM_SEQUENCE);
         $mform->addElement('hidden', 'items');
         $mform->addElement('hidden', 'draft_itemid');
         $mform->addElement('hidden', 'action');
@@ -170,6 +172,22 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                 $mform->setType('name', PARAM_TEXT);
                 $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
                 $mform->add_exaport_help_button('name', 'forms.view.name');
+
+
+                // Category selection (mirrors item form).
+                $mform->addElement('autocomplete', 'categoryids', get_string("category", "block_exaport"), array(), ['multiple' => true]);
+                $mform->setDefault('categoryids', []);
+                $catid = isset($this->_customdata['catid']) ? (int)$this->_customdata['catid'] : 0;
+                $categorysselect = &$mform->getElement('categoryids');
+                $categorysselect->removeOptions();
+                $outercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?",
+                    array("userid" => $USER->id, "pid" => 0), "name asc");
+                $viewcategories = array(0 => block_exaport_get_root_category()->name);
+                if ($outercategories) {
+                    $viewcategories = $viewcategories + $this->build_category_options($outercategories, " ", $viewcategories);
+                }
+                $categorysselect->loadArray($viewcategories);
+
 
                 $mform->addElement('editor', 'description_editor', get_string('viewdescription', 'block_exaport'),
                     array('rows' => '20', 'cols' => '5'),
@@ -231,6 +249,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                     $mform->setType('langid', PARAM_INT);
                     $mform->add_exaport_help_button('langid', 'forms.view.langid');
                 }
+
                 break;
             case "layout":
                 $radioarray = array();
@@ -335,6 +354,20 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
 
         return $form;
     }
+
+    private function build_category_options(array $outercategories, string $entryname, array $categories): array {
+        global $DB, $USER;
+        foreach ($outercategories as $curcategory) {
+            $categories[$curcategory->id] = $entryname . format_string($curcategory->name);
+            $name = $entryname . format_string($curcategory->name);
+            $conditions = array("userid" => $USER->id, "pid" => $curcategory->id);
+            $innercategories = $DB->get_records_select("block_exaportcate", "userid = ? AND pid = ?", $conditions, "name asc");
+            if ($innercategories) {
+                $categories = $this->build_category_options($innercategories, $name . ' → ', $categories);
+            }
+        }
+        return $categories;
+    }
 }
 
 $textfieldoptions = array('trusttext' => true,
@@ -343,7 +376,7 @@ $textfieldoptions = array('trusttext' => true,
     'context' => context_user::instance($USER->id)->id);
 
 $editform = new block_exaport_view_edit_form($_SERVER['REQUEST_URI'],
-    array('view' => $view, 'course' => $COURSE->id, 'action' => $action, 'type' => $type));
+    array('view' => $view, 'course' => $COURSE->id, 'action' => $action, 'type' => $type, 'catid' => $categoryid));
 
 $message = '';
 
@@ -401,6 +434,9 @@ if ($editform->is_cancelled()) {
                 if (isset($dbview->sharetoteacher) and $dbview->sharetoteacher == 1) {
                     block_exaport_share_view_to_teachers($dbview->id);
                 }
+                // Sync category assignments.
+                $viewcategoryids = block_exaport_normalize_view_categoryids($formview->categoryids ?? []);
+                \block_exaport\view_category_helper::sync_view_categories($dbview->id, $viewcategoryids);
                 block_exaport_add_to_log(SITEID, 'bookmark', 'add',
                     'views_mod.php?courseid=' . $courseid . '&id=' . $dbview->id . '&action=add', $dbview->name);
             } else {
@@ -431,6 +467,11 @@ if ($editform->is_cancelled()) {
                 block_exaport_share_view_to_teachers($dbview->id);
             }
             if ($DB->update_record('block_exaportview', $dbview)) {
+                // Sync category assignments if this is the title/metadata step.
+                if ($type == 'title') {
+                    $viewcategoryids = block_exaport_normalize_view_categoryids($formview->categoryids ?? []);
+                    \block_exaport\view_category_helper::sync_view_categories($dbview->id, $viewcategoryids);
+                }
                 block_exaport_add_to_log(SITEID, 'bookmark', 'update',
                     'item.php?courseid=' . $courseid . '&id=' . $dbview->id . '&action=edit', $dbview->name);
             } else {
@@ -707,6 +748,13 @@ $postview = ($view ? $view : new stdClass());
 $postview->action = $action;
 $postview->courseid = $courseid;
 $postview->draft_itemid = null;
+
+// Prefill category selection for the title/add step.
+if ($action == 'add') {
+    $postview->categoryids = $categoryid > 0 ? [$categoryid] : [];
+} else if ($action == 'edit' && $view && $view->id > 0) {
+    $postview->categoryids = array_map('intval', $DB->get_fieldset_select('block_exaportviewcate', 'cateid', 'viewid = ?', [$view->id]));
+}
 
 file_prepare_draft_area($postview->draft_itemid, context_user::instance($USER->id)->id, 'block_exaport', 'view_content', $view->id,
     array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
@@ -1450,4 +1498,15 @@ function block_exaport_emailaccess_sendemails(&$view, $oldemails, $newemails, $h
     }
 
     return true;
+}
+
+function block_exaport_normalize_view_categoryids($categoryids) {
+    if (!is_array($categoryids)) {
+        $categoryids = [];
+    }
+    $categoryids = array_map('intval', $categoryids);
+    $categoryids = array_values(array_unique(array_filter($categoryids, function($categoryid) {
+        return $categoryid > 0;
+    })));
+    return $categoryids;
 }

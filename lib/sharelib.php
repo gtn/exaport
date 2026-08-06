@@ -69,17 +69,6 @@ namespace {
         return implode($html ? '<br><br>' : ' | ', $lines);
     }
 
-    /**
-     * Build the sharing tooltip as plain text from resolved share detail.
-     *
-     * @deprecated Use block_exaport_get_share_tooltip($share, false) instead.
-     * @param \block_exaport\share_info $share Resolved sharing detail.
-     * @return string Plain text for use in title="" attributes.
-     */
-    function block_exaport_get_share_tooltip_text(\block_exaport\share_info $share): string {
-        return block_exaport_get_share_tooltip($share, false);
-    }
-
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
         global $DB;
 
@@ -222,6 +211,12 @@ namespace {
             }
 
             // Category-based grant: build the set of view ids reachable via shared categories.
+            // NOTE: This runs on every internal view access (not only category-granted ones) because it sits
+            // on the hot path for all id/-based view lookups. Cost scales with the number of categories shared
+            // to the user: one subtree query (block_exaport_get_owned_category_tree_ids) per shared category,
+            // followed by a final IN (...) clause. This is deliberately eager for simplicity; if it becomes a
+            // bottleneck it could be made lazy (only evaluated when the primary WHERE fails) or cached in a
+            // static variable for the duration of the request.
             $categoryviewids = \block_exaport\view_helper::get_category_shared_view_ids($myuserid);
             $categoryclause = '';
             $categoryparams = [];

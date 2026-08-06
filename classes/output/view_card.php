@@ -126,7 +126,7 @@ class view_card extends card {
             'readonly'       => $readonly,
             'canedit'        => $isownview && !$readonly,
             'candelete'      => $isownview && !$readonly,
-            'dateformatted'  => date('d.m.Y H:i', $view->timemodified),
+            'dateformatted'  => userdate($view->timemodified),
             'collectionicon' => $collectionicon,
             'isshared'       => $isshared,
             'sharedicon'     => $sharedicon,

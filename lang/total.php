@@ -259,8 +259,8 @@ return [
         'The field name is required. Please fill them in.',
     ],
     'myportfolio' => [
-        'Meine Seiten',
-        'My Pages',
+        'Mein Portfolio',
+        'My Portfolio',
     ],
     'myportfoliotitle' => [
         'ePortfolio-Modul: Füge hier Links und Dateien hinzu.',

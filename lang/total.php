@@ -3049,19 +3049,19 @@ return [
     ],
     'settings_enable_views_head' => [
         'Bereich "Meine Portfolios" anzeigen',
-        'Show "My Portfolios" area',
+        'Show "My Views" area',
     ],
     'settings_enable_views_body' => [
         'Den Navigationsbereich "Meine Portfolios" ein-/ausblenden.',
-        'Show or hide the "My Portfolios" navigation area.',
+        'Show or hide the "My Views" navigation area.',
     ],
     'settings_enable_shared_views_head' => [
         'Bereich "Geteilte Portfolios" anzeigen',
-        'Show "Shared Portfolios" area',
+        'Show "Shared Views" area',
     ],
     'settings_enable_shared_views_body' => [
         'Den Navigationsbereich "Geteilte Portfolios" ein-/ausblenden.',
-        'Show or hide the "Shared Portfolios" navigation area.',
+        'Show or hide the "Shared Views" navigation area.',
     ],
     'settings_enable_shared_categories_head' => [
         'Bereich "Geteilte Kategorien" anzeigen',

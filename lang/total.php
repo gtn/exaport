@@ -259,8 +259,8 @@ return [
         'The field name is required. Please fill them in.',
     ],
     'myportfolio' => [
-        'Meine Portfolio Artefakte',
-        'My Portfolio Artefacts',
+        'Meine Seiten',
+        'My Pages',
     ],
     'myportfoliotitle' => [
         'ePortfolio-Modul: Füge hier Links und Dateien hinzu.',
@@ -311,8 +311,8 @@ return [
         'Note',
     ],
     'shared_views' => [
-        'Geteilte Views',
-        'Shared Views',
+        'Geteilte Sammelmappen',
+        'Shared Collections',
     ],
     'showall' => [
         'auch andere Kurse anzeigen',
@@ -859,8 +859,8 @@ return [
         'File does not exist at this assignment!',
     ],
     'publishedportfolios' => [
-        'Ver&ouml;ffentliche Portfolios',
-        'Published portfolios',
+        'Ver&ouml;ffentlichte Sammelmappen',
+        'Published collections',
     ],
     'viewcategories' => [
         'Kategorien verwalten',
@@ -967,52 +967,52 @@ return [
 
     // === Views.
     'view' => [
-        'View',
-        'View',
+        'Sammelmappe',
+        'Collection',
     ],
     'views' => [
-        'Meine Views',
-        'My Views',
+        'Meine Sammelmappen',
+        'My Collections',
     ],
     'explainingviews' => [
-        'View verwalten',
-        'Manage your views.',
+        'Sammelmappen verwalten',
+        'Manage your collections.',
     ],
     'noviews' => [
-        'Bitte Views anlegen',
-        'Please create a new View',
+        'Bitte eine Sammelmappe anlegen',
+        'Please create a new Collection',
     ],
     'viewnotfound' => [
         'Das Objekt ist für den Benutzer nicht einsehbar / Keine Zugriffsberechtigung.',
         'View not found',
     ],
     'newview' => [
-        'Neue View erstellen',
-        'Add View',
+        'Neue Sammelmappe erstellen',
+        'Add Collection',
     ],
     'viewinformation' => [
-        'View Informationen',
-        'View Information',
+        'Informationen zur Sammelmappe',
+        'Collection Information',
     ],
     'viewdescription' => [
         'Beschreibung',
         'description',
     ],
     'viewdesign' => [
-        'View Darstellung',
-        'View Design',
+        'Sammelmappen-Darstellung',
+        'Collection Design',
     ],
     'viewitems' => [
-        'Deine Eintr&auml;ge',
-        'Your Items',
+        'Deine Seiten',
+        'Your Pages',
     ],
     'viewitem' => [
-        'Eintrag',
-        'Item',
+        'Seite',
+        'Page',
     ],
     'view_specialitems' => [
-        'Spezielle Eintr&auml;ge',
-        'Special Items',
+        'Spezielle Seiten',
+        'Special Pages',
     ],
     'view_specialitem_headline' => [
         'Kopfzeile',
@@ -1191,16 +1191,16 @@ return [
         'The simple block for adding only header line',
     ],
     'item' => [
-        'Artefakt',
-        'Item',
+        'Seite',
+        'Page',
     ],
     'items' => [
-        'Artefakte',
-        'My artefacts',
+        'Seiten',
+        'My pages',
     ],
     'items_help' => [
-        'Der Block mit deinen Artefakten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Artefakte anzeigen</a>',
-        'The block with your artefacts<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your artefacts</a>',
+        'Der Block mit deinen Seiten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Seiten anzeigen</a>',
+        'The block with your pages<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your pages</a>',
     ],
     'media' => [
         'Medieneintrag',
@@ -1215,8 +1215,8 @@ return [
         'Fields to show',
     ],
     'listofartefacts' => [
-        'W&aumlhle ein Element aus',
-        'List of Artefacts',
+        'W&aumlhle eine Seite aus',
+        'List of Pages',
     ],
     'listofbadges' => [
         'Liste von Badges',
@@ -1327,8 +1327,8 @@ return [
         'Filter by tag',
     ],
     'tagarea_block_exaportitem' => [
-        'Meine Portfolio Artefakte',
-        'My Portfolio Artefacts',
+        'Meine Seiten',
+        'My Pages',
     ],
     'searchByTitle' => [
         'Suchen',
@@ -1751,8 +1751,8 @@ return [
         'Enable "Copy to my portfolio"',
     ],
     'block_exaport_copytomyportfolio_body' => [
-        'Benutzer können Artefakte aus einer geteilten Kategorie in ihr eigenes Portfolio kopieren.',
-        'User will be able copy artefacts from shared category into own portfolio',
+        'Benutzer können Seiten aus einer geteilten Kategorie in ihre eigene Sammelmappe kopieren.',
+        'User will be able to copy pages from a shared category into their own collection',
     ],
     'block_exaport_app_alloweditdelete_head' => [
         'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
@@ -3040,28 +3040,28 @@ return [
         'Show or hide the "My CV" navigation area.',
     ],
     'settings_enable_myportfolio_head' => [
-        'Bereich "Meine Portfolio Artefakte" anzeigen',
-        'Show "My Portfolio Artefacts" area',
+        'Bereich "Meine Seiten" anzeigen',
+        'Show "My Pages" area',
     ],
     'settings_enable_myportfolio_body' => [
-        'Den Navigationsbereich "Meine Portfolio Artefakte" ein-/ausblenden.',
-        'Show or hide the "My Portfolio Artefacts" navigation area.',
+        'Den Navigationsbereich "Meine Seiten" ein-/ausblenden.',
+        'Show or hide the "My Pages" navigation area.',
     ],
     'settings_enable_views_head' => [
-        'Bereich "Meine Portfolios" anzeigen',
-        'Show "My Views" area',
+        'Bereich "Meine Sammelmappen" anzeigen',
+        'Show "My Collections" area',
     ],
     'settings_enable_views_body' => [
-        'Den Navigationsbereich "Meine Portfolios" ein-/ausblenden.',
-        'Show or hide the "My Views" navigation area.',
+        'Den Navigationsbereich "Meine Sammelmappen" ein-/ausblenden.',
+        'Show or hide the "My Collections" navigation area.',
     ],
     'settings_enable_shared_views_head' => [
-        'Bereich "Geteilte Portfolios" anzeigen',
-        'Show "Shared Views" area',
+        'Bereich "Geteilte Sammelmappen" anzeigen',
+        'Show "Shared Collections" area',
     ],
     'settings_enable_shared_views_body' => [
-        'Den Navigationsbereich "Geteilte Portfolios" ein-/ausblenden.',
-        'Show or hide the "Shared Views" navigation area.',
+        'Den Navigationsbereich "Geteilte Sammelmappen" ein-/ausblenden.',
+        'Show or hide the "Shared Collections" navigation area.',
     ],
     'settings_enable_shared_categories_head' => [
         'Bereich "Geteilte Kategorien" anzeigen',
@@ -3218,12 +3218,12 @@ return [
         'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children).',
     ],
     'settings_starter_view_templates' => [
-        'Vorlage für Portfolio-Grundstruktur',
-        'Starter View Templates',
+        'Starter-Sammelmappen-Vorlagen',
+        'Starter Collection Templates',
     ],
     'settings_starter_view_templates_description' => [
-        'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben.',
-        'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers).',
+        'JSON-Array von Starter-Sammelmappen-Vorlagen. Jede Vorlage muss "name" und "views" (Array von Sammelmappe-Objekten mit name, description und share_to_teachers) haben.',
+        'JSON array of starter collection templates. Each template must have "name" and "views" (array of collection objects with name, description, and share_to_teachers).',
     ],
     'category_distribution' => [
         'Struktur vorgeben',
@@ -3419,8 +3419,8 @@ return [
         'View Distribution',
     ],
     'view_distribution_description' => [
-        'Verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.',
-        'Manage and distribute view templates to students. Views are portfolios that students can use to showcase their work.',
+        'Verteilen Sie Sammelmappen-Vorlagen an Lernende. Sammelmappen helfen Lernenden, ihre Arbeit zu präsentieren.',
+        'Manage and distribute collection templates to students. Collections help students showcase their work.',
     ],
     'starter_view_template_select' => [
         'Starter-Ansichtsvorlage auswählen',

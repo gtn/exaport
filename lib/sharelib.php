@@ -1265,7 +1265,7 @@ namespace block_exaport {
                     FROM {block_exaportcate} c
                       JOIN {user} u ON u.id = c.userid
                       LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?
-                      LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid
+                      LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid
                     WHERE (
                         (' . (block_exaport_shareall_enabled() ? ' c.shareall = 1 OR ' : '') . ' cshar.userid IS NOT NULL) ' .
             // Only show shared all, if enabled

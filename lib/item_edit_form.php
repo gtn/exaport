@@ -231,7 +231,10 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $item = $itemid > 0 ? $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $USER->id)) : null;
             $itemshareall = $item ? (int)$item->shareall : 0;
 
-            $shareenabled = $itemshareall > 0 || ($itemid > 0 && $DB->record_exists('block_exaportitemshar', ['itemid' => $itemid]));
+            $shareenabled = $itemshareall > 0 || ($itemid > 0 && (
+                $DB->record_exists('block_exaportitemshar', ['itemid' => $itemid])
+                || $DB->record_exists('block_exaportitemgroupshar', ['itemid' => $itemid])
+            ));
 
             $mform->addElement('html',
                 '<div class="fitem"><div class="fitemtitle"><label for="id_shareenabled">' .
@@ -243,6 +246,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
             $mform->addElement('html', '<div id="item-share-settings">');
             $mform->addElement('html', '<div style="padding: 4px 0 4px 22px"><table class="table_share">');
+            $mform->addElement('html', '<tr id="item-internaccess-settings"><td></td><td>');
 
             // Output a hidden field with the config value alwaysnotifywhenshare (mirrors category.php/views_mod.php).
             $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
@@ -287,6 +291,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 '<td><div id="sharing-grouplist">grouplist</div></td></tr>');
             $mform->addElement('html', '</table></div>');
 
+            $mform->addElement('html', '</td></tr>'); // close #item-internaccess-settings row
             $mform->addElement('html', '</table></div>');
             $mform->addElement('html', '</div>'); // close #item-share-settings
         }

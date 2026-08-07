@@ -110,8 +110,11 @@ class provider implements
             'parentid' => 'privacy:metadata:block_exaportitem:parentid',
         ], 'privacy:metadata:block_exaportitem');
 
-        // looks is not used:
         // block_exaportitemshar
+        // block_exaportitemgroupshar
+        // Records who an item is shared with (specific users / cohort groups). Not treated as
+        // separate exportable personal data, consistent with block_exaportcatshar/block_exaportviewshar
+        // above; the rows are deleted together with the owning artifact / user, see delete_atifact_data().
 
         // block_exaportitemcomm
         $collection->add_database_table('block_exaportitemcomm', [
@@ -784,6 +787,7 @@ class provider implements
     public function delete_atifact_data($artifact_id) {
         global $DB;
         $DB->delete_records('block_exaportitemshar', ['itemid' => $artifact_id]);
+        $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportitemcomm', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportviewblock', ['itemid' => $artifact_id]);
         return true;

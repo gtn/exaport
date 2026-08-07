@@ -173,10 +173,7 @@
         <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
         <KEY NAME="original" TYPE="foreign" FIELDS="original" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
-      <INDEXES>
-        <INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
-        <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
-      </INDEXES>
+        <!-- Removed redundant indexes for itemid and userid (foreign keys are auto-indexed) -->
     </TABLE>
     <TABLE NAME="block_exaportitemgroupshar" COMMENT="information to which groups (cohorts) an item is shared">
       <FIELDS>
@@ -189,7 +186,7 @@
         <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
+        <!-- Removed redundant index for itemid (foreign key is auto-indexed) -->
         <INDEX NAME="groupid" UNIQUE="false" FIELDS="groupid"/>
       </INDEXES>
     </TABLE>

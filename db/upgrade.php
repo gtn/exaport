@@ -1498,7 +1498,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $grouptable->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
         $grouptable->add_key('itemid', XMLDB_KEY_FOREIGN, ['itemid'], 'block_exaportitem', ['id']);
 
-        $grouptable->add_index('itemid', XMLDB_INDEX_NOTUNIQUE, ['itemid']);
+        // Removed redundant index for itemid (foreign key is auto-indexed)
         $grouptable->add_index('groupid', XMLDB_INDEX_NOTUNIQUE, ['groupid']);
 
         if (!$dbman->table_exists($grouptable)) {

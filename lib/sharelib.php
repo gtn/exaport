@@ -1033,7 +1033,7 @@ namespace {
             " JOIN {block_exaportcate} c ON u.id = c.userid " .
             " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?" .
 
-            " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid " .
+            " LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid " . // LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid was a BUG. The count was wrong, but probably never used
             " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid " .
             " WHERE (" .
             "(" . (block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '') . " cshar.userid IS NOT NULL) " .

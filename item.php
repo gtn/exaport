@@ -83,23 +83,21 @@ if ($action == 'userlist') {
 }
 // Get grouplist for sharing item.
 if ($action == 'grouplist') {
-    $id = required_param('id', PARAM_INT);
-
-    $item = $DB->get_record('block_exaportitem', array(
-        'id' => $id,
-        'userid' => $USER->id,
-    ));
-    if (!$item) {
-        throw new \block_exaport\moodle_exception('bookmarknotfound');
+    if ($id > 0 && !$DB->get_record('block_exaportitem', ['id' => $id, 'userid' => $USER->id])) {
+        $id = 0; // Not your item, don't expose sharing info.
     }
 
     $groupgroups = block_exaport_get_shareable_groups_for_json();
+    $sharedgroups = [];
+    if ($id > 0) {
+        $sharedgroups = $DB->get_records_menu('block_exaportitemgroupshar',
+            ['itemid' => $id],
+            null,
+            'groupid, groupid AS groupid');
+    }
     foreach ($groupgroups as $groupgroup) {
         foreach ($groupgroup->groups as $group) {
-            $group->shared_to = $DB->record_exists('block_exaportitemgroupshar', [
-                'itemid' => $item->id,
-                'groupid' => $group->id,
-            ]);
+            $group->shared_to = isset($sharedgroups[$group->id]);
         }
     }
     echo json_encode($groupgroups);
@@ -510,6 +508,28 @@ if ($exacompactive) {
 
 $editform->set_data($post);
 echo $OUTPUT->box($extracontent);
+if (has_capability('block/exaport:shareintern', context_system::instance())) {
+    // Translations.
+    $translations = array(
+        'name', 'role', 'nousersfound',
+        'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
+        'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
+        'notify', 'checkall', 'viewmustbesafed',
+    );
+
+    $translations = array_flip($translations);
+    foreach ($translations as $key => &$value) {
+        $value = block_exaport_get_string($key);
+    }
+    unset($value);
+    ?>
+    <script type="text/javascript">
+        //<![CDATA[
+        ExabisEportfolio.setTranslations(<?php echo json_encode($translations); ?>);
+        //]]>
+    </script>
+    <?php
+}
 $editform->display();
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);

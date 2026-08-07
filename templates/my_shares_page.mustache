@@ -1,0 +1,58 @@
+{{!
+    This file is part of Exabis Eportfolio (extension for Moodle)
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_exaport/my_shares_page
+
+    Overview table of the current user's own items/categories/views that are
+    shared (with users, groups, or externally/shareall).
+
+    Context variables:
+        hasrows      - Boolean: at least one share row
+        rows         - List of rows: typelabel, title, url, sharedwithtext, commentcount
+        nothingtext  - Localised text shown when there is nothing shared
+        headertitle  - Localised column header "Title"
+        headertype   - Localised column header "Type"
+        headershared - Localised column header "Shared with"
+        headercomments - Localised column header "Comments"
+}}
+<div class="block_exaport_my_shares">
+    {{^hasrows}}
+        <p>{{nothingtext}}</p>
+    {{/hasrows}}
+    {{#hasrows}}
+        <table class="generaltable table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>{{headertitle}}</th>
+                    <th>{{headertype}}</th>
+                    <th>{{headershared}}</th>
+                    <th>{{headercomments}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#rows}}
+                    <tr>
+                        <td><a href="{{url}}">{{title}}</a></td>
+                        <td>{{typelabel}}</td>
+                        <td>{{sharedwithtext}}</td>
+                        <td>{{commentcount}}</td>
+                    </tr>
+                {{/rows}}
+            </tbody>
+        </table>
+    {{/hasrows}}
+</div>

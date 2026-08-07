@@ -442,6 +442,16 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
             $CFG->wwwroot . '/blocks/exaport/shared_categories.php?courseid=' . $COURSE->id,
             block_exaport_get_string("shared_categories"), '', true);
     }
+    if (!empty($CFG->block_exaport_enable_my_shares)) {
+        $tabs['my_shares'] = new tabobject('my_shares',
+            $CFG->wwwroot . '/blocks/exaport/my_shares.php?courseid=' . $COURSE->id,
+            get_string("my_shares", "block_exaport"), '', true);
+    }
+    if (!empty($CFG->block_exaport_enable_shared_with_me)) {
+        $tabs['shared_with_me'] = new tabobject('shared_with_me',
+            $CFG->wwwroot . '/blocks/exaport/shared_with_me.php?courseid=' . $COURSE->id,
+            get_string("shared_with_me", "block_exaport"), '', true);
+    }
     $tabtitle = get_string("importexport", "block_exaport");
     /*$scriptname = basename($_SERVER['SCRIPT_NAME']);
     if ($scriptname == 'export_scorm.php') {

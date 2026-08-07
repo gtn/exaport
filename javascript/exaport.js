@@ -95,11 +95,10 @@
     translations: null,
 
     translate: function (key) {
-      if (this.translations[key] == undefined) {
+      if (!this.translations || this.translations[key] === undefined) {
         return '[[js[' + key + ']js]]';
-      } else {
-        return this.translations[key];
       }
+      return this.translations[key];
     },
 
     setTranslations: function (translations) {
@@ -283,7 +282,11 @@
 
       $('#sharing-grouplist').html('loading grouplist...');
 
-      $.getJSON(document.location.href, {action: 'grouplist'}, function (courses) {
+      var params = {action: 'grouplist'};
+      if (type == 'cat_mod') {
+        params.id = $('input[name="id"]').val() || 0;
+      }
+      $.getJSON(document.location.href, params, function (courses) {
         var html = '';
 
         if (!$.empty(courses)) {

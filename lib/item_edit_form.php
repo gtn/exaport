@@ -225,6 +225,77 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 'accepted_types' => array('image', 'web_image')));
         $mform->add_exaport_help_button('iconfile', 'forms.item.iconfile');
 
+        // Sharing (direct item share: users and groups/cohorts).
+        if (has_capability('block/exaport:shareintern', context_system::instance())) {
+            $itemid = (int)($this->_customdata['current']->id ?? 0);
+            $item = $itemid > 0 ? $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $USER->id)) : null;
+            $itemshareall = $item ? (int)$item->shareall : 0;
+
+            $shareenabled = $itemshareall > 0 || ($itemid > 0 && (
+                $DB->record_exists('block_exaportitemshar', ['itemid' => $itemid])
+                || $DB->record_exists('block_exaportitemgroupshar', ['itemid' => $itemid])
+            ));
+
+            $mform->addElement('html',
+                '<div class="fitem"><div class="fitemtitle"><label for="id_shareenabled">' .
+                get_string('share', 'block_exaport') .
+                '</label></div><div class="felement">' .
+                '<input type="checkbox" id="id_shareenabled" name="shareenabled" value="1"' .
+                ($shareenabled ? ' checked="checked"' : '') . ' />' .
+                '</div></div>');
+
+            $mform->addElement('html', '<div id="item-share-settings">');
+            $mform->addElement('html', '<div style="padding: 4px 0 4px 22px"><table class="table_share">');
+            $mform->addElement('html', '<tr id="item-internaccess-settings"><td></td><td>');
+
+            // Output a hidden field with the config value alwaysnotifywhenshare (mirrors category.php/views_mod.php).
+            $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+            $mform->addElement('html',
+                '<input type="hidden" id="alwaysnotifywhenshare" value="' . htmlspecialchars($alwaysnotifywhenshare) . '" />');
+
+            $mform->addElement('html', '<div style="padding: 4px 0;"><table>');
+            // Share to all.
+            if (block_exaport_shareall_enabled()) {
+                $mform->addElement('html', '<tr><td style="padding-right: 10px; width: 10px">');
+                $mform->addElement('html', '<input type="radio" name="shareall" value="1"' .
+                    ($itemshareall == 1 ? ' checked="checked"' : '') . '/>');
+                $mform->addElement('html', '</td><td>' . get_string('internalaccessall', 'block_exaport') . '</td></tr>');
+                $mform->setType('shareall', PARAM_INT);
+            }
+
+            // Share to users.
+            $mform->addElement('html', '<tr><td style="padding-right: 10px">');
+            $mform->addElement('html', '<input type="radio" name="shareall" value="0"' .
+                (!$itemshareall ? ' checked="checked"' : '') . '/>');
+            $mform->addElement('html', '</td><td>' . get_string('internalaccessusers', 'block_exaport') . '</td></tr>');
+            if ($itemid > 0) {
+                $shareditemusers = $DB->get_records_menu('block_exaportitemshar',
+                    array('itemid' => $itemid),
+                    null,
+                    'userid, userid AS tmp');
+                $mform->addElement('html', '<script> var sharedusersarr = [];');
+                foreach ($shareditemusers as $i => $shareduser) {
+                    $mform->addElement('html', 'sharedusersarr[' . $i . '] = ' . $shareduser . ';');
+                }
+                $mform->addElement('html', '</script>');
+            }
+            $mform->addElement('html', '<tr id="item-internaccess-users"><td></td>' .
+                '<td><div id="sharing-userlist">userlist</div></td></tr>');
+
+            // Share to groups.
+            $mform->addElement('html', '<tr><td style="padding-right: 10px">');
+            $mform->addElement('html', '<input type="radio" name="shareall" value="2"' .
+                ($itemshareall == 2 ? ' checked="checked"' : '') . '/>');
+            $mform->addElement('html', '</td><td>' . get_string('internalaccessgroups', 'block_exaport') . '</td></tr>');
+            $mform->addElement('html', '<tr id="item-internaccess-groups"><td></td>' .
+                '<td><div id="sharing-grouplist">grouplist</div></td></tr>');
+            $mform->addElement('html', '</table></div>');
+
+            $mform->addElement('html', '</td></tr>'); // close #item-internaccess-settings row
+            $mform->addElement('html', '</table></div>');
+            $mform->addElement('html', '</div>'); // close #item-share-settings
+        }
+
         // Tags.
         if (!empty($CFG->usetags) && $CFG->usetags) {
             $tags = \core_tag_tag::get_tags_by_area_in_contexts('block_exaport', 'block_exaportitem', [context_user::instance($USER->id)]);

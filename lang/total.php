@@ -860,7 +860,7 @@ return [
     ],
     'publishedportfolios' => [
         'Ver&ouml;ffentlichte Sammelmappen',
-        'Published collections',
+        'Published Collections',
     ],
     'viewcategories' => [
         'Kategorien verwalten',
@@ -983,8 +983,8 @@ return [
         'Please create a new Collection',
     ],
     'viewnotfound' => [
-        'Das Objekt ist für den Benutzer nicht einsehbar / Keine Zugriffsberechtigung.',
-        'View not found',
+        'Die Sammelmappe ist für den Benutzer nicht einsehbar / Keine Zugriffsberechtigung.',
+        'Collection not found',
     ],
     'newview' => [
         'Neue Sammelmappe erstellen',
@@ -1196,7 +1196,7 @@ return [
     ],
     'items' => [
         'Seiten',
-        'My pages',
+        'My Pages',
     ],
     'items_help' => [
         'Der Block mit deinen Seiten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Seiten anzeigen</a>',
@@ -3222,8 +3222,8 @@ return [
         'Starter Collection Templates',
     ],
     'settings_starter_view_templates_description' => [
-        'JSON-Array von Starter-Sammelmappen-Vorlagen. Jede Vorlage muss "name" und "views" (Array von Sammelmappe-Objekten mit name, description und share_to_teachers) haben.',
-        'JSON array of starter collection templates. Each template must have "name" and "views" (array of collection objects with name, description, and share_to_teachers).',
+        'JSON-Array von Starter-Sammelmappen-Vorlagen. Jede Vorlage muss "name" und den technischen Schlüssel "views" (Array von Sammelmappe-Objekten mit name, description und share_to_teachers) haben.',
+        'JSON array of starter collection templates. Each template must have "name" and the technical key "views" (array of collection objects with name, description, and share_to_teachers).',
     ],
     'category_distribution' => [
         'Struktur vorgeben',

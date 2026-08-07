@@ -119,7 +119,7 @@ class my_shares_page implements renderable, templatable {
         if (!empty($row->cnt_shared_users)) {
             return (int)$row->cnt_shared_users > 1
                 ? get_string('sharedwith_user_cnt', 'block_exaport', (int)$row->cnt_shared_users)
-                : get_string('sharedwith_onlyme', 'block_exaport');
+                : get_string('sharedwith_user', 'block_exaport');
         }
         if (!empty($row->externaccess)) {
             return get_string('externalaccess', 'block_exaport');

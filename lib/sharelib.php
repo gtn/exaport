@@ -1037,7 +1037,7 @@ namespace {
             " JOIN {block_exaportcate} c ON u.id = c.userid " .
             " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?" .
 
-            " LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid " .
+            " LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid " .
             " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid " .
             " WHERE (" .
             "(" . (block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '') . " cshar.userid IS NOT NULL) " .
@@ -1165,6 +1165,12 @@ namespace {
             if ($directshareditemids) {
                 [$insql, $inparams] = $DB->get_in_or_equal($directshareditemids);
                 $directitems = $DB->get_records_sql("SELECT i.* FROM {block_exaportitem} i WHERE i.id $insql", $inparams);
+
+                $ownerids = array_unique(array_map(function($item) {
+                    return $item->userid;
+                }, $directitems));
+                $owners = $ownerids ? $DB->get_records_list('user', 'id', $ownerids) : [];
+
                 foreach ($directitems as $directitem) {
                     $owner = $directitem->userid;
                     $existingkey = null;
@@ -1178,7 +1184,7 @@ namespace {
                         $existingkey = $owner . '_direct';
                         $sharedartefactsbyuser[$existingkey] = [
                             'userid' => $owner,
-                            'fullname' => fullname($DB->get_record('user', array('id' => $owner))),
+                            'fullname' => isset($owners[$owner]) ? fullname($owners[$owner]) : '',
                             'items' => [],
                         ];
                     }
@@ -1427,7 +1433,7 @@ namespace block_exaport {
                     FROM {block_exaportcate} c
                       JOIN {user} u ON u.id = c.userid
                       LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?
-                      LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid
+                      LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid
                     WHERE (
                         (' . (block_exaport_shareall_enabled() ? ' c.shareall = 1 OR ' : '') . ' cshar.userid IS NOT NULL) ' .
             // Only show shared all, if enabled

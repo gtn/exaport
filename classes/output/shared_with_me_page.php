@@ -55,14 +55,22 @@ class shared_with_me_page implements renderable, templatable {
     public function export_for_template(renderer_base $output): array {
         global $DB;
 
+        $ownerids = array_unique(array_map(function($row) {
+            return $row->owner_userid;
+        }, $this->rows));
+        $owners = $ownerids ? $DB->get_records_list('user', 'id', $ownerids) : [];
+
+        $courseids = array_unique(array_filter(array_map(function($row) {
+            return $row->courseid;
+        }, $this->rows)));
+        $courses = $courseids ? $DB->get_records_list('course', 'id', $courseids, '', 'id, shortname, fullname') : [];
+
         $exportedrows = [];
         foreach ($this->rows as $row) {
-            $owner = $DB->get_record('user', ['id' => $row->owner_userid]);
-            $coursename = '';
-            if (!empty($row->courseid)) {
-                $course = $DB->get_record('course', ['id' => $row->courseid], 'id, shortname, fullname');
-                $coursename = $course ? format_string($course->fullname) : '';
-            }
+            $owner = $owners[$row->owner_userid] ?? null;
+            $coursename = !empty($row->courseid) && isset($courses[$row->courseid])
+                ? format_string($courses[$row->courseid]->fullname)
+                : '';
 
             $exportedrows[] = [
                 'typelabel'     => get_string($row->entity_type, 'block_exaport'),

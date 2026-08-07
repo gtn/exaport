@@ -378,6 +378,7 @@ $string['add_view_entry'] = 'Ansicht';
 $string['sharedwith'] = 'Geteilt mit';
 $string['sharedwithotherusers'] = 'Intern mit anderen Benutzer:innen geteilt';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
+$string['sharedwith_user'] = 'Mit 1 Benutzer geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
 $string['sharedwith_shareall'] = 'Mit allen Benutzer::innen geteilt';
 $string['sharedwith_shareexternal'] = 'Geteilte externe Views';

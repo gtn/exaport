@@ -382,6 +382,7 @@ $string['filter_entry_type_views'] = 'Views only';
 $string['sharedwith'] = 'Shared with';
 $string['sharedwithotherusers'] = 'Shared internally with other users';
 $string['sharedwith_user_cnt'] = 'Shared with {$a} users';
+$string['sharedwith_user'] = 'Shared with 1 user';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
 $string['sharedwith_shareexternal'] = 'Shared external';

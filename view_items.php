@@ -20,6 +20,24 @@ require_once(__DIR__ . '/inc.php');
 use block_exaport\globals as g;
 use function block_exaport\common\print_error;
 
+/**
+ * Returns true if $category is accessible to $selecteduser within the shared subtree.
+ * A category is allowed if it, or any ancestor, is directly in $selecteduser->categories.
+ */
+function category_allowed($selecteduser, $categories, $category) {
+    while ($category) {
+        if (isset($selecteduser->categories[$category->id])) {
+            return true;
+        } else if ($category->pid && isset($categories[$category->pid])) {
+            $category = $categories[$category->pid];
+        } else {
+            break;
+        }
+    }
+
+    return false;
+}
+
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $sort = optional_param('sort', '', PARAM_RAW);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
@@ -296,20 +314,6 @@ if ($type == 'sharedstudent') {
                 {$categorycolumns}
             ORDER BY c.name ASC
         ", array($selecteduser->id));
-
-        function category_allowed($selecteduser, $categories, $category) {
-            while ($category) {
-                if (isset($selecteduser->categories[$category->id])) {
-                    return true;
-                } else if ($category->pid && isset($categories[$category->pid])) {
-                    $category = $categories[$category->pid];
-                } else {
-                    break;
-                }
-            }
-
-            return false;
-        }
 
         foreach ($categories as $category) {
             $category->url = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . '&type=shared&userid=' . $userid .
@@ -635,15 +639,45 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     block_exaport_require_filter_js();
 } else if (($type == 'shared' || $type == 'sharedstudent') && $layout == 'folder') {
-    // Shared folder mode: same client-side search/sort/entry-type controls as flat mode.
-    // No category-navigation select (tiles + breadcrumb handle that), and no other-users or
-    // subcategories checkbox (both only affect the 'mine'/flat server-side queries).
     echo '<div class="exaport-flat-filter mb-3">';
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo block_exaport_render_search_and_sort_controls($flatsort);
     echo block_exaport_render_entrytype_control($entrytype);
+
     if ($type == 'shared') {
-        // Create button (pushed right). For 'shared' it renders the artefact entry only.
+        // Build a categoriesbyparent map containing only categories actually
+        // accessible to the current user (mirrors the flat-mode $filtercategories guard).
+        $allowedcategoriesbyparent = [];
+        foreach ($categories as $cat) {
+            if ((int)$cat->id === 0) {
+                continue;
+            }
+            if (!category_allowed($selecteduser, $categories, $cat)) {
+                continue;
+            }
+            $pid = (int)$cat->pid;
+            // Re-root: if the real parent is outside the shared subtree, treat this
+            // category as a top-level entry (pid=0) so it surfaces in the select tree.
+            if (!isset($categories[$pid]) || !category_allowed($selecteduser, $categories, $categories[$pid])) {
+                $pid = 0;
+            }
+            $allowedcategoriesbyparent[$pid][] = $cat;
+        }
+
+        echo '<div style="min-width: 200px; max-width: 350px;">';
+        echo '<select id="exaport-category-select-folder" onchange="document.location.href=\''
+            . $PAGE->url->out(false) . '&categoryid=\'+encodeURIComponent(this.value);">';
+        block_exaport_print_category_select($allowedcategoriesbyparent, $currentcategory->id);
+        echo '</select>';
+        echo '</div>';
+
+        $PAGE->requires->js_call_amd('block_exaport/folder_category_select', 'init', [
+            get_string('searchcategory', 'block_exaport'),
+            $PAGE->url->out(false),
+        ]);
+    }
+
+    if ($type == 'shared') {
         echo '<div class="ms-auto">';
         block_exaport_print_create_button($courseid, $categoryid, $type);
         echo '</div>';
@@ -893,12 +927,7 @@ if ($layout == 'folder' && !($type === 'extern_category')) {
         // Show path only for "my" category. Shared category will not show it, because we need to hide inner Path of the user's structure
         echo '<span class="excomdos_cat_path">' . block_exaport_category_path($currentcategory, $courseid, $currentcategoryPathItemButtons) . '</span>';
     } else if ($type == 'shared' && $selecteduser && $categoryid) {
-        echo block_exaport_fontawesome_icon('circle-user', 'solid', 1)
-            //        .'<strong><img src="pix/user1.png" width="16" />&nbsp;'
-            . $selecteduser->name . '&nbsp;/&nbsp;'
-            . block_exaport_fontawesome_icon('folder', 'regular', 1, [], ['color' => '#7a7a7a'])
-            //        .'<img src="pix/cat_path_item.png" width="16" />'
-            . '&nbsp;' . $currentcategory->name . '</strong>';
+        echo '<span class="excomdos_cat_path">' . block_exaport_shared_category_path($currentcategory, $categories, $selecteduser) . '</span>';
         // When category selected, allow copy.
         /*
         $url = $PAGE->url->out(true, ['action'=>'copy']);
@@ -1595,6 +1624,52 @@ function block_exaport_category_path($category, $courseid = 1, $currentcategoryP
 
     $resultPath = implode('<span class="cat_path_delimeter">/</span>', $path);
     return $resultPath;
+}
+
+/**
+ * Builds a breadcrumb path for shared-category folder mode.
+ * Walks up via pid through $categories, stopping before any ancestor that fails
+ * category_allowed() so private parent folders above the shared boundary are never shown.
+ * Renders: [user icon] username / [folder icon] ancestor / ... / [folder icon] current (active).
+ *
+ * @param stdClass $currentcategory
+ * @param array    $categories    All of the owner's categories (id => stdClass), with ->url set.
+ * @param stdClass $selecteduser  Sharing user, with ->categories (directly shared ids) and ->name.
+ * @return string HTML breadcrumb matching the classes used by block_exaport_category_path().
+ */
+function block_exaport_shared_category_path($currentcategory, $categories, $selecteduser) {
+    // Walk up from current category, collecting allowed ancestors.
+    $chain = [];
+    $current = $currentcategory;
+    while ($current) {
+        $chain[] = $current;
+        $pid = (int)$current->pid;
+        if (isset($categories[$pid]) && category_allowed($selecteduser, $categories, $categories[$pid])) {
+            $current = $categories[$pid];
+        } else {
+            break;
+        }
+    }
+    $chain = array_reverse($chain);
+
+    // Start with the sharing user's name (non-link) as top-level "root".
+    $path = [];
+    $path[] = '<span class="cat_path_item">'
+        . block_exaport_fontawesome_icon('circle-user', 'solid', 1)
+        . '&nbsp;' . s($selecteduser->name)
+        . '</span>';
+
+    foreach ($chain as $cat) {
+        $isactive = ((int)$cat->id === (int)$currentcategory->id);
+        $path[] = '<span class="cat_path_item ' . ($isactive ? 'active' : '') . '">'
+            . '<a href="' . s($cat->url) . '">'
+            . block_exaport_fontawesome_icon('folder', 'regular', 1, [], ['color' => '#7a7a7a'])
+            . '&nbsp;' . format_string($cat->name)
+            . '</a>'
+            . '</span>';
+    }
+
+    return implode('<span class="cat_path_delimeter">/</span>', $path);
 }
 
 function block_exaport_category_template_tile($category, $courseid, $type, $currentcategory, $parentcategory = null) {

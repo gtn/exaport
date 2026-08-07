@@ -93,7 +93,7 @@ if ($action == 'grouplist') {
         $sharedgroups = $DB->get_records_menu('block_exaportitemgroupshar',
             ['itemid' => $id],
             null,
-            'groupid, groupid AS groupid');
+            'groupid, groupid');
     }
     foreach ($groupgroups as $groupgroup) {
         foreach ($groupgroup->groups as $group) {

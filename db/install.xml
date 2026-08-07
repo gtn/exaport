@@ -162,6 +162,9 @@
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="original" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="notify" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="send notification when item is updated"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="date-limited sharing: start of access, 0/null means no limit"/>
+        <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="date-limited sharing: end of access, 0/null means no limit"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -173,6 +176,21 @@
       <INDEXES>
         <INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_exaportitemgroupshar" COMMENT="information to which groups (cohorts) an item is shared">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="block_exaportitem" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
+        <INDEX NAME="groupid" UNIQUE="false" FIELDS="groupid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_exaportitemcomm" COMMENT="comments for the items">

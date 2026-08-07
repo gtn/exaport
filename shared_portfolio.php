@@ -48,7 +48,7 @@ if ($user->access->request == 'extern') {
     $extratable = "LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid=?";
     $extrawhere = " ((i.shareall=1 AND ishar.userid IS NULL)";
     $extrawhere .= "  OR (i.shareall=0 AND ishar.userid IS NOT NULL))";
-    $conditions[] = $USER->Id;
+    $conditions[] = $USER->id;
 }
 
 $conditions[] = $user->id;

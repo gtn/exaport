@@ -54,6 +54,58 @@ if ($CFG->branch < 31) {
 $allowedit = block_exaport_item_is_editable($id);
 $allowresubmission = block_exaport_item_is_resubmitable($id);
 
+// Get userlist for sharing item.
+if ($action == 'userlist') {
+    if ($id > 0 && !$DB->get_record('block_exaportitem', ['id' => $id, 'userid' => $USER->id])) {
+        $id = 0; // Not your item, don't expose sharing info.
+    }
+
+    $courses = exaport_get_shareable_courses_with_users('');
+
+    if ($id > 0) {
+        // Mark users that are already shared to this item (with their notify state).
+        $sharedusers = $DB->get_records('block_exaportitemshar', array('itemid' => $id), null, 'userid, notify');
+        foreach ($courses as $course) {
+            foreach ($course->users as $user) {
+                if (isset($sharedusers[$user->id])) {
+                    $user->shared_to = true;
+                    $user->notify_user = (bool)$sharedusers[$user->id]->notify;
+                } else {
+                    $user->shared_to = false;
+                    $user->notify_user = false;
+                }
+            }
+        }
+    }
+
+    echo json_encode($courses);
+    exit;
+}
+// Get grouplist for sharing item.
+if ($action == 'grouplist') {
+    $id = required_param('id', PARAM_INT);
+
+    $item = $DB->get_record('block_exaportitem', array(
+        'id' => $id,
+        'userid' => $USER->id,
+    ));
+    if (!$item) {
+        throw new \block_exaport\moodle_exception('bookmarknotfound');
+    }
+
+    $groupgroups = block_exaport_get_shareable_groups_for_json();
+    foreach ($groupgroups as $groupgroup) {
+        foreach ($groupgroup->groups as $group) {
+            $group->shared_to = $DB->record_exists('block_exaportitemgroupshar', [
+                'itemid' => $item->id,
+                'groupid' => $group->id,
+            ]);
+        }
+    }
+    echo json_encode($groupgroups);
+    exit;
+}
+
 if ($action == 'copytoself') {
     require_sesskey();
     if (!$ownerid = block_exaport_can_user_access_shared_item($USER->id, $id)) {
@@ -513,6 +565,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 
     if ($DB->update_record('block_exaportitem', $post)) {
         item_category_helper::sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
+        block_exaport_save_item_shares($post->id);
         block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit',
             $post->name);
     } else {
@@ -586,6 +639,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
     if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
         $newcategoryids = block_exaport_normalize_item_categoryids($post->categoryids ?? []);
         item_category_helper::sync_item_categories($post->id, $newcategoryids);
+        block_exaport_save_item_shares($post->id);
         //
         // // Trigger event for item creation
         // $event = \block_exaport\event\item_created::create(array(
@@ -680,6 +734,70 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
 }
 
 /**
+ * Save direct item sharing (users + groups) from submitted form data into
+ * block_exaportitemshar / block_exaportitemgroupshar, mirroring category.php's
+ * handling of block_exaportcatshar / block_exaportcatgroupshar.
+ *
+ * @param int $itemid
+ */
+function block_exaport_save_item_shares($itemid) {
+    global $DB;
+
+    if (!has_capability('block/exaport:shareintern', context_system::instance())) {
+        return;
+    }
+
+    $shareenabled = optional_param('shareenabled', 0, PARAM_INT);
+    $shareall = $shareenabled ? optional_param('shareall', 0, PARAM_INT) : 0;
+
+    $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
+    if ($item && (int)$item->shareall !== $shareall) {
+        $item->shareall = $shareall;
+        $DB->update_record('block_exaportitem', $item);
+    }
+
+    // Delete all shared users, then add new ones.
+    $DB->delete_records('block_exaportitemshar', array('itemid' => $itemid));
+    if ($shareenabled && !$shareall) {
+        $shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+        $notifyusers = optional_param_array('notifyusers', array(), PARAM_INT);
+        $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+        foreach ($shareusers as $shareuser) {
+            $shareuser = clean_param($shareuser, PARAM_INT);
+            $shareitem = new stdClass();
+            $shareitem->itemid = $itemid;
+            $shareitem->userid = $shareuser;
+            $shareitem->original = 0;
+            $shareitem->courseid = $item ? $item->courseid : 0;
+            if ($alwaysnotifywhenshare) {
+                $shareitem->notify = 1;
+            } else {
+                $shareitem->notify = in_array($shareuser, $notifyusers) ? 1 : 0;
+            }
+            $DB->insert_record('block_exaportitemshar', $shareitem);
+        }
+    }
+
+    // Delete all shared groups, then add new ones.
+    $DB->delete_records('block_exaportitemgroupshar', array('itemid' => $itemid));
+    if ($shareenabled && $shareall == 2) {
+        $sharegroups = \block_exaport\param::optional_array('sharegroups', PARAM_INT);
+        $usergroups = block_exaport_get_user_cohorts();
+
+        foreach ($sharegroups as $groupid) {
+            if (!isset($usergroups[$groupid])) {
+                // Not allowed.
+                continue;
+            }
+            $DB->insert_record('block_exaportitemgroupshar', [
+                'itemid' => $itemid,
+                'groupid' => $groupid,
+            ]);
+        }
+    }
+}
+
+/**
  * Delete item from database
  */
 function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
@@ -691,6 +809,8 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
     $conditions = array("id" => $post->id);
     $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);
+    $DB->delete_records('block_exaportitemshar', ['itemid' => $post->id]);
+    $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $post->id]);
     $status = $DB->delete_records('block_exaportitem', $conditions);
 
     $interaction = block_exaport_check_competence_interaction();

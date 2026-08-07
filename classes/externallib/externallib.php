@@ -1777,6 +1777,7 @@ class externallib extends external_api {
         if ($catitems) {
             foreach ($catitems as $entry) {
                 $DB->delete_records('block_exaportitemshar', array('itemid' => $entry->id));
+                $DB->delete_records('block_exaportitemgroupshar', array('itemid' => $entry->id));
             }
         }
 

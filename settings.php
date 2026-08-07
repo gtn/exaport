@@ -184,6 +184,12 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_enable_shared_categories',
         get_string('settings_enable_shared_categories_head', 'block_exaport'),
         get_string('settings_enable_shared_categories_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_my_shares',
+        get_string('settings_enable_my_shares_head', 'block_exaport'),
+        get_string('settings_enable_my_shares_body', 'block_exaport'), 1));
+    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_shared_with_me',
+        get_string('settings_enable_shared_with_me_head', 'block_exaport'),
+        get_string('settings_enable_shared_with_me_body', 'block_exaport'), 1));
     $settings->add(new admin_setting_configcheckbox('block_exaport_enable_importexport',
         get_string('settings_enable_importexport_head', 'block_exaport'),
         get_string('settings_enable_importexport_body', 'block_exaport'), 1));

@@ -1014,10 +1014,6 @@ namespace {
     function block_exaport_get_items_shared_to_user($userid, $onlyitems = false, $itemid = null) {
         global $DB;
 
-        // Items shared directly (block_exaportitemshar) or via a group/cohort share
-        // (block_exaportitemgroupshar), independent of category sharing.
-        $directshareditemids = block_exaport_get_directly_shared_item_ids($userid, $itemid);
-
         // Categories for user groups.
         $usercats = block_exaport_get_group_share_categories($userid);
         // All categories and users who shared.
@@ -1037,7 +1033,7 @@ namespace {
             " JOIN {block_exaportcate} c ON u.id = c.userid " .
             " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?" .
 
-            " LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid " .
+            " LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid " . // LEFT JOIN {block_exaportviewgroupshar} cgshar ON c.id = cgshar.groupid was a BUG. The count was wrong, but probably never used
             " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid " .
             " WHERE (" .
             "(" . (block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '') . " cshar.userid IS NOT NULL) " .
@@ -1138,12 +1134,6 @@ namespace {
 
             }
 
-            // Add directly (and group) shared items on top of the category-based ones.
-            if ($directshareditemids) {
-                $directitems = block_exaport_get_item_share_details($directshareditemids);
-                $shareditems = $shareditems + $directitems;
-            }
-
             return $shareditems;
         } else {
             $sharedartefactsbyuser = array();
@@ -1161,115 +1151,8 @@ namespace {
                 }
             }
 
-            // Add directly (and group) shared items, grouped by their owner.
-            if ($directshareditemids) {
-                [$insql, $inparams] = $DB->get_in_or_equal($directshareditemids);
-                $directitems = $DB->get_records_sql("SELECT i.* FROM {block_exaportitem} i WHERE i.id $insql", $inparams);
-
-                $ownerids = array_unique(array_map(function($item) {
-                    return $item->userid;
-                }, $directitems));
-                $owners = $ownerids ? $DB->get_records_list('user', 'id', $ownerids) : [];
-
-                foreach ($directitems as $directitem) {
-                    $owner = $directitem->userid;
-                    $existingkey = null;
-                    foreach ($sharedartefactsbyuser as $key => $entry) {
-                        if ($entry['userid'] == $owner) {
-                            $existingkey = $key;
-                            break;
-                        }
-                    }
-                    if ($existingkey === null) {
-                        $existingkey = $owner . '_direct';
-                        $sharedartefactsbyuser[$existingkey] = [
-                            'userid' => $owner,
-                            'fullname' => isset($owners[$owner]) ? fullname($owners[$owner]) : '',
-                            'items' => [],
-                        ];
-                    }
-                    $sharedartefactsbyuser[$existingkey]['items'][$directitem->id] = $directitem;
-                }
-            }
-
             return $sharedartefactsbyuser;
         }
-    }
-
-    /**
-     * Returns the ids of items directly shared to a user (block_exaportitemshar),
-     * or via one of the user's group/cohort shares (block_exaportitemgroupshar).
-     * Honors optional time-limited sharing (timestart/timeend) on individual shares.
-     *
-     * @param int $userid
-     * @param int|array|null $itemid optional item id (or array of ids) to restrict the check to
-     * @return array list of item ids
-     */
-    function block_exaport_get_directly_shared_item_ids($userid, $itemid = null) {
-        global $DB;
-
-        $itemwhere = '';
-        if ($itemid) {
-            $items = is_array($itemid) ? $itemid : [$itemid];
-            $itemwhere = ' AND i.id IN (' . implode(',', array_map('intval', $items)) . ') ';
-        }
-
-        $now = time();
-        $itemids = $DB->get_fieldset_sql(
-            "SELECT DISTINCT i.id
-               FROM {block_exaportitem} i
-               JOIN {block_exaportitemshar} ishar ON ishar.itemid = i.id AND ishar.userid = ?
-                AND (ishar.timestart IS NULL OR ishar.timestart = 0 OR ishar.timestart <= ?)
-                AND (ishar.timeend IS NULL OR ishar.timeend = 0 OR ishar.timeend >= ?)
-              WHERE 1=1 $itemwhere",
-            [$userid, $now, $now]
-        );
-
-        $usergroupids = array_keys(block_exaport_get_user_cohorts($userid));
-        if ($usergroupids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($usergroupids);
-            $groupitemids = $DB->get_fieldset_sql(
-                "SELECT DISTINCT i.id
-                   FROM {block_exaportitem} i
-                   JOIN {block_exaportitemgroupshar} igshar ON igshar.itemid = i.id AND igshar.groupid $insql
-                  WHERE 1=1 $itemwhere",
-                $inparams
-            );
-            $itemids = array_unique(array_merge($itemids, $groupitemids));
-        }
-
-        return $itemids;
-    }
-
-    /**
-     * Loads item details (in the same shape as the category-shared items query) for a
-     * given set of item ids, for use by block_exaport_get_items_shared_to_user().
-     *
-     * @param array $itemids
-     * @return array item records keyed by id
-     */
-    function block_exaport_get_item_share_details($itemids) {
-        global $DB;
-
-        if (!$itemids) {
-            return [];
-        }
-
-        [$insql, $inparams] = $DB->get_in_or_equal($itemids);
-
-        return $DB->get_records_sql(
-            "SELECT DISTINCT i.id, i.name, i.type, i.intro AS intro, i.url AS link, " .
-            " ic.name AS cname, ic.id AS catid, ic2.name AS cname_parent, i.userid, COUNT(com.id) AS comments " .
-            " FROM {block_exaportitem} i " .
-            " LEFT JOIN {block_exaportitemcate} icat ON icat.itemid = i.id " .
-            " LEFT JOIN {block_exaportcate} ic ON icat.cateid = ic.id " .
-            " LEFT JOIN {block_exaportcate} ic2 ON ic.pid = ic2.id " .
-            " LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id " .
-            " WHERE i.id $insql " .
-            " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.name, ic.id, ic2.name, i.userid " .
-            " ORDER BY i.name",
-            $inparams
-        );
     }
 
     /**
@@ -1289,10 +1172,6 @@ namespace {
             if (array_key_exists($itemdata->userid, $students)) {
                 return $itemdata->userid;
             }
-        }
-        // Check direct item share (block_exaportitemshar), incl. optional time-limited sharing.
-        if ($ownerid = block_exaport_get_direct_item_share_owner($userid, $itemid)) {
-            return $ownerid;
         }
         // Check access by self sharing
         $itemsforuser = block_exaport_get_items_shared_to_user($userid, true, $itemid);
@@ -1321,53 +1200,6 @@ namespace {
                 return $item->userid;
             }
         }
-        return false;
-    }
-
-    /**
-     * Checks if an item is directly shared to a user, either individually
-     * (block_exaportitemshar) or via one of the user's group/cohort shares
-     * (block_exaportitemgroupshar). Honors optional time-limited sharing
-     * (timestart/timeend) on the individual share record.
-     *
-     * @param int $userid the user who wants to access the item
-     * @param int $itemid the item being accessed
-     * @return int|false the item owner's userid if access is granted, false otherwise
-     */
-    function block_exaport_get_direct_item_share_owner($userid, $itemid) {
-        global $DB;
-
-        $now = time();
-        $item = $DB->get_record_sql(
-            "SELECT i.userid
-               FROM {block_exaportitem} i
-               JOIN {block_exaportitemshar} ishar ON ishar.itemid = i.id
-              WHERE i.id = ?
-                AND ishar.userid = ?
-                AND (ishar.timestart IS NULL OR ishar.timestart = 0 OR ishar.timestart <= ?)
-                AND (ishar.timeend IS NULL OR ishar.timeend = 0 OR ishar.timeend >= ?)",
-            [$itemid, $userid, $now, $now]
-        );
-        if ($item) {
-            return $item->userid;
-        }
-
-        $usergroupids = array_keys(block_exaport_get_user_cohorts($userid));
-        if ($usergroupids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($usergroupids);
-            $item = $DB->get_record_sql(
-                "SELECT i.userid
-                   FROM {block_exaportitem} i
-                   JOIN {block_exaportitemgroupshar} igshar ON igshar.itemid = i.id
-                  WHERE i.id = ?
-                    AND igshar.groupid $insql",
-                array_merge([$itemid], $inparams)
-            );
-            if ($item) {
-                return $item->userid;
-            }
-        }
-
         return false;
     }
 

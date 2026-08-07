@@ -635,15 +635,41 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
     block_exaport_require_filter_js();
 } else if (($type == 'shared' || $type == 'sharedstudent') && $layout == 'folder') {
-    // Shared folder mode: same client-side search/sort/entry-type controls as flat mode.
-    // No category-navigation select (tiles + breadcrumb handle that), and no other-users or
-    // subcategories checkbox (both only affect the 'mine'/flat server-side queries).
     echo '<div class="exaport-flat-filter mb-3">';
     echo '<div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
     echo block_exaport_render_search_and_sort_controls($flatsort);
     echo block_exaport_render_entrytype_control($entrytype);
+
     if ($type == 'shared') {
-        // Create button (pushed right). For 'shared' it renders the artefact entry only.
+        // Build a categoriesbyparent map containing only categories actually
+        // accessible to the current user (mirrors the flat-mode $filtercategories guard).
+        $allowedcategoriesbyparent = [];
+        foreach ($categories as $cat) {
+            if ((int)$cat->id === 0) {
+                continue;
+            }
+            if (!category_allowed($selecteduser, $categories, $cat)) {
+                continue;
+            }
+            $pid = (int)$cat->pid;
+            $allowedcategoriesbyparent[$pid][] = $cat;
+        }
+
+        echo '<div style="min-width: 200px; max-width: 350px;">';
+        echo '<select id="exaport-category-select-folder" onchange="document.location.href=\''
+            . $PAGE->url->out(false) . '&categoryid=\'+encodeURIComponent(this.value);">';
+        echo '<option value="">' . $rootcategory->name . '</option>';
+        block_exaport_print_category_select($allowedcategoriesbyparent, $currentcategory->id);
+        echo '</select>';
+        echo '</div>';
+
+        $PAGE->requires->js_call_amd('block_exaport/folder_category_select', 'init', [
+            get_string('searchcategory', 'block_exaport'),
+            $PAGE->url->out(false),
+        ]);
+    }
+
+    if ($type == 'shared') {
         echo '<div class="ms-auto">';
         block_exaport_print_create_button($courseid, $categoryid, $type);
         echo '</div>';

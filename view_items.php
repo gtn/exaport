@@ -594,7 +594,8 @@ if (($type === 'extern_category') && $externaccess_category) {
 
 // Normalise sort value for use in select dropdowns (e.g. "date.desc" → "date-desc").
 $flatsort = str_replace('.', '-', $sort);
-if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc', 'type-asc', 'type-desc'])) {
+// if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc', 'type-asc', 'type-desc'])) {
+if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc'])) {
     $flatsort = 'date-desc';
 }
 
@@ -1381,8 +1382,8 @@ function block_exaport_render_search_and_sort_controls($selectedsort) {
     $opts = [
         'date-desc' => get_string('date', 'block_exaport') . ' ↓',
         'date-asc'  => get_string('date', 'block_exaport') . ' ↑',
-        'type-asc'  => get_string('type', 'block_exaport') . ' A-Z',
-        'type-desc' => get_string('type', 'block_exaport') . ' Z-A',
+        // 'type-asc'  => get_string('type', 'block_exaport') . ' A-Z',
+        // 'type-desc' => get_string('type', 'block_exaport') . ' Z-A',
         'name-asc'  => get_string('name', 'block_exaport') . ' A-Z',
         'name-desc' => get_string('name', 'block_exaport') . ' Z-A',
     ];

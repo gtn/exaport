@@ -3503,8 +3503,17 @@ return [
         'Show "My shares" area',
         '',
     ],
+    'settings_enable_my_shares_body' => [
+        'Den Navigationsbereich "Meine geteilten Inhalte" ein-/ausblenden.',
+        'Show or hide the "My shares" navigation area.',
+    ],
     'settings_enable_shared_with_me_head' => [
         'Bereich "Mit mir geteilte Inhalte" anzeigen',
         'Show "Shared with me" area',
     ],
+    'settings_enable_shared_with_me_body' => [
+        'Den Navigationsbereich "Mit mir geteilte Inhalte" ein-/ausblenden.',
+        'Show or hide the "Shared with me" navigation area.',
+    ],
+
 ];

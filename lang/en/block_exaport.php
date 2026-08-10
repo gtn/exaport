@@ -1001,4 +1001,6 @@ $string['views_skipped'] = 'Collections skipped (already exist): {$a}';
 $string['my_shares'] = 'My shares';
 $string['shared_with_me'] = 'Shared with me';
 $string['settings_enable_my_shares_head'] = 'Show "My shares" area';
+$string['settings_enable_my_shares_body'] = 'Show or hide the "My shares" navigation area.';
 $string['settings_enable_shared_with_me_head'] = 'Show "Shared with me" area';
+$string['settings_enable_shared_with_me_body'] = 'Show or hide the "Shared with me" navigation area.';

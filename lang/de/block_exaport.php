@@ -996,3 +996,5 @@ $string['views_created'] = 'Sammelmappen erstellt: {$a}';
 $string['views_skipped'] = 'Sammelmappen übersprungen (existieren bereits): {$a}';
 $string['my_shares'] = 'Meine geteilten Inhalte';
 $string['shared_with_me'] = 'Mit mir geteilte Inhalte';
+$string['settings_enable_my_shares_head'] = 'Bereich "Meine geteilten Inhalte" anzeigen';
+$string['settings_enable_shared_with_me_head'] = 'Bereich "Mit mir geteilte Inhalte" anzeigen';

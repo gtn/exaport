@@ -3490,12 +3490,21 @@ return [
         'Sammelmappen übersprungen (existieren bereits): {$a}',
         'Collections skipped (already exist): {$a}',
     ],
-        'my_shares' => [
-            'Meine geteilten Inhalte',
-            'My shares',
-        ],
-        'shared_with_me' => [
-            'Mit mir geteilte Inhalte',
-            'Shared with me',
-        ],
+    'my_shares' => [
+        'Meine geteilten Inhalte',
+        'My shares',
+    ],
+    'shared_with_me' => [
+        'Mit mir geteilte Inhalte',
+        'Shared with me',
+    ],
+    'settings_enable_my_shares_head' => [
+        'Bereich "Meine geteilten Inhalte" anzeigen',
+        'Show "My shares" area',
+        '',
+    ],
+    'settings_enable_shared_with_me_head' => [
+        'Bereich "Mit mir geteilte Inhalte" anzeigen',
+        'Show "Shared with me" area',
+    ],
 ];

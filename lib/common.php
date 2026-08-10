@@ -480,11 +480,11 @@ namespace block_exaport\common {
         $totalfile = $langdir . '/total.php';
         $langfile = $langdir . '/' . $lang . '/' . _plugin_name() . '.php';
 
-        if (true) { // quickfix
-            $time = filemtime($totalfile);
-        // if (file_exists($totalfile) && file_exists($langfile) && ($time = filemtime($totalfile)) != filemtime($langfile) &&
-        //     is_writable($langfile)
-        // ) {
+        // if (true) { // quickfix
+        //     $time = filemtime($totalfile);
+        if (file_exists($totalfile) && file_exists($langfile) && ($time = filemtime($totalfile)) != filemtime($langfile) &&
+            is_writable($langfile)
+        ) {
             // Regenerate must be enabled by developer with uncommenting below code.
             // It is needed for security reasons
 

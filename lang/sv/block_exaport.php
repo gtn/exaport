@@ -200,7 +200,7 @@ $string['deleteposterror'] = 'Ett fel uppkom vid borttagande av post';
 $string['addposterror'] = 'Ett fel uppkom när posten skulle läggas till i databasen';
 $string['invalidassignmentid'] = 'Felaktig uppgifts-ID';
 $string['invalidfileatthisassignment'] = 'Filen existerar inte till denna uppgift!';
-$string['publishedportfolios'] = 'Publicerade portfolior';
+$string['publishedportfolios'] = 'Publicerade samlingar';
 $string['viewcategories'] = 'handha kategorier';
 $string['updownarrow'] = 'Pil för uppladdning';
 
@@ -232,7 +232,7 @@ $string['view'] = 'Visa';
 $string['views'] = 'Visningar';
 $string['explainingviews'] = 'Handha dina visningar';
 $string['noviews'] = 'var vänlig och skapa en ny visning';
-$string['viewnotfound'] = 'Visning ej funnen';
+$string['viewnotfound'] = 'Samling inte funnen';
 $string['newview'] = 'Lägg till visning';
 $string['viewinformation'] = 'Information om visning';
 $string['viewtitle'] = 'Titel';
@@ -356,4 +356,4 @@ $string['views_created'] = 'Views created: {$a}';
 $string['views_skipped'] = 'Views skipped (already exist): {$a}';
 
 $string['settings_starter_view_templates'] = 'Starter View Templates';
-$string['settings_starter_view_templates_description'] = 'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers).';
+$string['settings_starter_view_templates_description'] = 'JSON array of starter collection templates. Each template must have "name" and the technical key "views" (array of collection objects with name, description, and share_to_teachers).';

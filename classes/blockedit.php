@@ -156,7 +156,7 @@ class blockedit {
         $content .= '<table style="width: 100%;">';
         // Add new artefact button
         $content .= '<tr><td>';
-        $content .= '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=1&action=add&type=mixed" target="_blank" class="exaport_add_artefact"><img src="pix/mixed_new_32.png" width="24"/>&nbsp;' . get_string("add_mixed", "block_exaport") . '</a><br>';
+        $content .= '<a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=1&action=add&type=mixed" target="_blank" class="exaport_add_artefact"><img src="pix/mixed_new_32.png" width="24"/>&nbsp;' . get_string("viewitem", "block_exaport") . '</a><br>';
         $content .= 'To category: &nbsp;';
         $categories = block_exaport_get_all_categories_for_user_simpletree_selectbox($USER->id, 'categoryForNewItem', 'categoryForNewItem');
         $content .= $categories;

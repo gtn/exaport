@@ -69,12 +69,12 @@ return [
         'Import from Moodle',
     ],
     'exaport:shareintern' => [
-        'Internes Teilen von Views',
-        'Internal sharing of views',
+        'Internes Teilen von Sammelmappen',
+        'Internal sharing of collections',
     ],
     'exaport:shareextern' => [
-        'Externes Teilen von Views',
-        'External sharing of views',
+        'Externes Teilen von Sammelmappen',
+        'External sharing of collections',
     ],
     'exaport:allowposts' => [
         'Kommentare erlauben',
@@ -85,8 +85,8 @@ return [
         'Allow competences',
     ],
     'exaport:viewartifactsfromstudents' => [
-        'Portfolio Artefakte der eigenen SuS sehen',
-        'Can see portfolio artefacts of own students',
+        'Portfolio Seiten der eigenen SuS sehen',
+        'Can see portfolio pages of own students',
     ],
     'new' => [
         'Neu',
@@ -259,8 +259,8 @@ return [
         'The field name is required. Please fill them in.',
     ],
     'myportfolio' => [
-        'Meine Portfolio Artefakte',
-        'My Portfolio Artefacts',
+        'Mein Portfolio',
+        'My Portfolio',
     ],
     'myportfoliotitle' => [
         'ePortfolio-Modul: Füge hier Links und Dateien hinzu.',
@@ -311,8 +311,8 @@ return [
         'Note',
     ],
     'shared_views' => [
-        'Geteilte Views',
-        'Shared Views',
+        'Geteilte Sammelmappen',
+        'Shared Collections',
     ],
     'showall' => [
         'auch andere Kurse anzeigen',
@@ -383,20 +383,20 @@ return [
         'Share by Email',
     ],
     'emailaccessdescription' => [
-        'Gib eine Email Adresse pro Zeile ein<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese View. Das Löschen der Adresse löscht den Zugriff auf diese View.',
-        'Input an email address per line<br />Each email will receive a unique link with access to this view. Deleting the email will remove access to this view.',
+        'Gib eine Email Adresse pro Zeile ein<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Das Löschen der Adresse löscht den Zugriff auf diese Sammelmappe.',
+        'Input an email address per line<br />Each email will receive a unique link with access to this collection. Deleting the email will remove access to this collection.',
     ],
     'emailaccessmessagesubject' => [
-        'Ein ePortfolio wurde mit dir geteilt',
-        'New shared View for you',
+        'Eine Sammelmappe wurde mit dir geteilt',
+        'New shared collection for you',
     ],
     'emailaccessmessage' => [
-        'Hallo! {$a->sendername} hat das ePortfolio "{$a->viewname}" mit dir geteilt. Es kann hier abgerufen werden: {$a->url}',
-        'Hello! {$a->sendername} has shared the view "{$a->viewname}" for you. You can view it here: {$a->url}',
+        'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}" mit dir geteilt. Sie kann hier abgerufen werden: {$a->url}',
+        'Hello! {$a->sendername} has shared the collection "{$a->viewname}" for you. You can view it here: {$a->url}',
     ],
     'emailaccessmessageHTML' => [
-        'Hallo!<br />{$a->sendername} hat das ePortfolio "{$a->viewname}" mit dir geteilt.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
-        'Hello!<br />{$a->sendername} has shared the view "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.',
+        'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}" mit dir geteilt.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
+        'Hello!<br />{$a->sendername} has shared the collection "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
 
     // 'emailaccessmessagesubject_updatedview' => [
@@ -404,16 +404,16 @@ return [
     //     'I updated an eportfolio view I shared with you',
     // ],
     'emailaccessmessagesubject_updatedview' => [
-        '{$a->sendername} hat Änderungen an einem E-Portfolio vorgenommen, das mit Ihnen geteilt ist.',
-        '{$a->sendername} made changes to an e-portfolio view shared with you.',
+        '{$a->sendername} hat Änderungen an einer Sammelmappe vorgenommen, die mit Ihnen geteilt ist.',
+        '{$a->sendername} made changes to a collection shared with you.',
     ],
     'emailaccessmessage_updatedview' => [
-        'Hallo! {$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert. Es kann hier abgerufen werden: {$a->url}',
-        'Hello! {$a->sendername} has updated the view "{$a->viewname}" they shared with you. You can view it here: {$a->url}',
+        'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}", welche er mit dir geteilt hat, aktualisiert. Sie kann hier abgerufen werden: {$a->url}',
+        'Hello! {$a->sendername} has updated the collection "{$a->viewname}" they shared with you. You can view it here: {$a->url}',
     ],
     'emailaccessmessageHTML_updatedview' => [
-        'Hallo!<br />{$a->sendername} hat das ePortfolio "{$a->viewname}", welches er mit dir geteilt hat, aktualisiert.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
-        'Hello!<br />{$a->sendername} has updated the view "{$a->viewname}" they shared with you.<br />You can view it <a href="{$a->url}">here</a>.',
+        'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}", welche er mit dir geteilt hat, aktualisiert.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden',
+        'Hello!<br />{$a->sendername} has updated the collection "{$a->viewname}" they shared with you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
 
     'showallusers' => [
@@ -747,12 +747,12 @@ return [
         'Link',
     ],
     'mixed' => [
-        'Artefakte',
-        'Artefact',
+        'Seiten',
+        'Pages',
     ],
     'add_mixed' => [
-        'Neue Artefakte',
-        'Add new artefact',
+        'Neue Seiten',
+        'Add new page',
     ],
     'categorynotempty' => [
         'Es muss eine Kategorie ausgew&auml;hlt sein.',
@@ -859,8 +859,8 @@ return [
         'File does not exist at this assignment!',
     ],
     'publishedportfolios' => [
-        'Ver&ouml;ffentliche Portfolios',
-        'Published portfolios',
+        'Ver&ouml;ffentlichte Sammelmappen',
+        'Published Collections',
     ],
     'viewcategories' => [
         'Kategorien verwalten',
@@ -913,8 +913,8 @@ return [
         'Create EPX-File',
     ],
     'exportviewselect' => [
-        'Um alle Einträge einer bestimmten View zu exportieren, bitte diese hier w&auml;hlen',
-        'To export all items of a specific view, please select it here',
+        'Um alle Einträge einer bestimmten Sammelmappe zu exportieren, bitte diese hier w&auml;hlen',
+        'To export all items of a specific collection, please select it here',
     ],
     'export_directory' => [
         'Exportiere Ordnerstruktur',
@@ -967,52 +967,52 @@ return [
 
     // === Views.
     'view' => [
-        'View',
-        'View',
+        'Sammelmappe',
+        'Collection',
     ],
     'views' => [
-        'Meine Views',
-        'My Views',
+        'Meine Sammelmappen',
+        'My Collections',
     ],
     'explainingviews' => [
-        'View verwalten',
-        'Manage your views.',
+        'Sammelmappen verwalten',
+        'Manage your collections.',
     ],
     'noviews' => [
-        'Bitte Views anlegen',
-        'Please create a new View',
+        'Bitte eine Sammelmappe anlegen',
+        'Please create a new Collection',
     ],
     'viewnotfound' => [
-        'Das Objekt ist für den Benutzer nicht einsehbar / Keine Zugriffsberechtigung.',
-        'View not found',
+        'Die Sammelmappe ist für den Benutzer nicht einsehbar / Keine Zugriffsberechtigung.',
+        'Collection not found',
     ],
     'newview' => [
-        'Neue View erstellen',
-        'Add View',
+        'Neue Sammelmappe erstellen',
+        'Add Collection',
     ],
     'viewinformation' => [
-        'View Informationen',
-        'View Information',
+        'Informationen zur Sammelmappe',
+        'Collection Information',
     ],
     'viewdescription' => [
         'Beschreibung',
         'description',
     ],
     'viewdesign' => [
-        'View Darstellung',
-        'View Design',
+        'Sammelmappen-Darstellung',
+        'Collection Design',
     ],
     'viewitems' => [
-        'Deine Eintr&auml;ge',
-        'Your Items',
+        'Deine Seiten',
+        'Your Pages',
     ],
     'viewitem' => [
-        'Eintrag',
-        'Item',
+        'Seite',
+        'Page',
     ],
     'view_specialitems' => [
-        'Spezielle Eintr&auml;ge',
-        'Special Items',
+        'Spezielle Seiten',
+        'Special Pages',
     ],
     'view_specialitem_headline' => [
         'Kopfzeile',
@@ -1071,8 +1071,8 @@ return [
         'other courses',
     ],
     'autofillview' => [
-        'Alle bestehenden Artefakte in diese View einfügen',
-        'Automatically add all available artefacts to this view',
+        'Alle bestehenden Seiten in diese Sammelmappe einfügen',
+        'Automatically add all available pages to this collection',
     ],
     'sharetoteacher' => [
         'Sofort mit allen Kurs-Trainer/:innen teilen',
@@ -1080,11 +1080,11 @@ return [
     ],
     'createpage' => [
         'Zieh das Elemente in das Feld unterhalb, um deinen Inhalt zu erstellen.',
-        'Drag and drop content blocks from the tabs below to create your page.',
+        'Drag and drop content blocks from the tabs below to create your collection.',
     ],
     'chooselayout' => [
-        'W&aumlhle ein Layout für deinen View.',
-        'Select how you would like the columns in your page to be laid out.',
+        'W&aumlhle ein Layout für deine Sammelmappe.',
+        'Select how you would like the columns in your collection to be laid out.',
     ],
     'viewtitle' => [
         'Titel und Beschreibung',
@@ -1191,16 +1191,16 @@ return [
         'The simple block for adding only header line',
     ],
     'item' => [
-        'Artefakt',
-        'Item',
+        'Seite',
+        'Page',
     ],
     'items' => [
-        'Artefakte',
-        'My artefacts',
+        'Seiten',
+        'My Pages',
     ],
     'items_help' => [
-        'Der Block mit deinen Artefakten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Artefakte anzeigen</a>',
-        'The block with your artefacts<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your artefacts</a>',
+        'Der Block mit deinen Seiten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Seiten anzeigen</a>',
+        'The block with your pages<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your pages</a>',
     ],
     'media' => [
         'Medieneintrag',
@@ -1215,8 +1215,8 @@ return [
         'Fields to show',
     ],
     'listofartefacts' => [
-        'W&aumlhle ein Element aus',
-        'List of Artefacts',
+        'W&aumlhle eine Seite aus',
+        'List of Pages',
     ],
     'listofbadges' => [
         'Liste von Badges',
@@ -1231,16 +1231,16 @@ return [
         'Save',
     ],
     'saveViewShareSettingsButton' => [
-        'Portfolio teilen',
-        'Share',
+        'Sammelmappe teilen',
+        'Share collection',
     ],
     'saveViewButton' => [
-        'Portfolio speichern',
-        'Save view',
+        'Sammelmappe speichern',
+        'Save collection',
     ],
     'saveAndNotifyButton' => [
-        'Portfolio speichern und Benachrichtigungen senden',
-        'Save view and send notifications',
+        'Sammelmappe speichern und Benachrichtigungen senden',
+        'Save collection and send notifications',
     ],
     'cancelButton' => [
         'Abbrechen',
@@ -1303,8 +1303,8 @@ return [
         'share',
     ],
     'viewmustbesafed' => [
-        'Vorausgewählt auf Grund globaler Einstellungen. Das Portfolio muss gespeichert werden, bevor diese Benachrichtigen-Einstellung wirksam wird',
-        'Preselected due to global settings. The view must be saved before this notify-setting will take effect',
+        'Vorausgewählt auf Grund globaler Einstellungen. Die Sammelmappe muss gespeichert werden, bevor diese Benachrichtigen-Einstellung wirksam wird',
+        'Preselected due to global settings. The collection must be saved before this notify-setting will take effect',
     ],
     'mediacontent' => [
         'URL oder eingebetteter Code*',
@@ -1327,8 +1327,8 @@ return [
         'Filter by tag',
     ],
     'tagarea_block_exaportitem' => [
-        'Meine Portfolio Artefakte',
-        'My Portfolio Artefacts',
+        'Meine Seiten',
+        'My Pages',
     ],
     'searchByTitle' => [
         'Suchen',
@@ -1363,24 +1363,24 @@ return [
         'Search Category...',
     ],
     'add_view_entry' => [
-        'Ansicht',
-        'View',
+        'Sammelmappe',
+        'Collection',
     ],
     'filter_entry_type' => [
         null,
         'Show',
     ],
     'filter_entry_type_all' => [
-        null,
-        'All (items &amp; views)',
+        'Alle (Seiten &amp; Sammelmappen)',
+        'All (pages &amp; collections)',
     ],
     'filter_entry_type_items' => [
-        null,
-        'Items only',
+        'Nur Seiten',
+        'Pages only',
     ],
     'filter_entry_type_views' => [
-        null,
-        'Views only',
+        'Nur Sammelmappen',
+        'Collections only',
     ],
     'sharedwith' => [
         'Geteilt mit',
@@ -1403,7 +1403,7 @@ return [
         'Shared with all users',
     ],
     'sharedwith_shareexternal' => [
-        'Geteilte externe Views',
+        'Geteilte externe Sammelmappen',
         'Shared external',
     ],
     'sharedexternalcategory' => [
@@ -1465,8 +1465,8 @@ return [
         'Choose headline',
     ],
     'configureblock_item' => [
-        'Auswahl der Artefakte',
-        'Choose artefact',
+        'Auswahl der Seiten',
+        'Choose pages',
     ],
     'configureblock_media' => [
         'Medieneintrag',
@@ -1639,12 +1639,12 @@ return [
         'Contract all',
     ],
     'studentcomps' => [
-        'Hier kannst du einsch&auml;tzen, ob folgende Kompetenzen durch Dein Artefakt erreicht wurden.',
-        'Here you can self-assess whether you have acquired the competency with your artefact.',
+        'Hier kannst du einsch&auml;tzen, ob folgende Kompetenzen durch deine Seite erreicht wurden.',
+        'Here you can self-assess whether you have acquired the competency with your page.',
     ],
     'teachercomps' => [
-        'Hier kannst du beurteilen, ob die Lernenden folgende Kompetenzen durch Artefakte erreicht haben.',
-        'Here you can assess whether your students have acquired the competency with this artefact.',
+        'Hier kannst du beurteilen, ob die Lernenden folgende Kompetenzen durch Seiten erreicht haben.',
+        'Here you can assess whether your students have acquired the competency with this page.',
     ],
     'competences' => [
         'Kompetenzen',
@@ -1691,24 +1691,24 @@ return [
         'Click <a href="{$a}">here</a>, to remove all global shares',
     ],
     'settings_disable_externaccess_head' => [
-        'Teilen Option "Externer Zugriff" auf Portfolios deaktivieren.',
-        'Disable Sharing-Option "External Access" for views',
+        'Teilen Option "Externer Zugriff" auf Sammelmappen deaktivieren.',
+        'Disable Sharing-Option "External Access" for collections',
     ],
     'settings_disable_externaccess_body' => [
         '',
         '',
     ],
     'settings_disable_shareemails_head' => [
-        'Teilen Option "Per E-Mail teilen" von Portfolios deaktivieren.',
-        'Disable Sharing-Option "Share by Email" for views',
+        'Teilen Option "Per E-Mail teilen" von Sammelmappen deaktivieren.',
+        'Disable Sharing-Option "Share by Email" for collections',
     ],
     'settings_disable_shareemails_body' => [
         '',
         '',
     ],
     'settings_disable_external_comments_head' => [
-        'Teilen von Kommentaren in externen Views deaktivieren',
-        'Disable sharing of comments in external view',
+        'Teilen von Kommentaren in externen Sammelmappen deaktivieren',
+        'Disable sharing of comments in external collections',
     ],
     'settings_disable_external_comments_body' => [
         '',
@@ -1739,8 +1739,8 @@ return [
         'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
     ],
     'block_exaport_multiplefilesinitem' => [
-        'Mehrere Dateien in Datei-Artefakt hochladen',
-        'Multiple files in "File" artefact',
+        'Mehrere Dateien in Datei-Seite hochladen',
+        'Multiple files in "File" page',
     ],
     'block_exaport_multiplefilesinitem_body' => [
         'Limit: 10 Dateien',
@@ -1751,8 +1751,8 @@ return [
         'Enable "Copy to my portfolio"',
     ],
     'block_exaport_copytomyportfolio_body' => [
-        'Benutzer können Artefakte aus einer geteilten Kategorie in ihr eigenes Portfolio kopieren.',
-        'User will be able copy artefacts from shared category into own portfolio',
+        'Benutzer können Seiten aus einer geteilten Kategorie in ihre eigene Sammelmappe kopieren.',
+        'User will be able to copy pages from a shared category into their own collection',
     ],
     'block_exaport_app_alloweditdelete_head' => [
         'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
@@ -1771,12 +1771,12 @@ return [
         'Delete all shareall?',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head' => [
-        'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
-        'Teacher can see ALL artefacts of own students',
+        'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen',
+        'Teacher can see ALL pages of own students',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head_alternative' => [
-        'Trainer:innen können ALLE Artefakte der eigenen Teilnehmer:innen einsehen',
-        'Teacher can see ALL artefacts of own students',
+        'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen',
+        'Teacher can see ALL pages of own students',
     ],
     'block_exaport_teachercanseeartifactsofstudents_body' => [
         'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.',
@@ -2156,16 +2156,16 @@ return [
         'Copy to my Portfolio',
     ],
     'sharedArtefacts' => [
-        'Gruppe-Portfolios, die mit dir geteilt wurden',
-        'Group portfolios shared with you',
+        'Seiten, welche mit dir über Kategorien geteilt wurden',
+        'Pages shared with you via categories',
     ],
     'shareditems_category' => [
         'Gruppen-Portfolios, die mit dir geteilt wurden',
         'Group portfolios shared with you',
     ],
     'create_as_note' => [
-        'Als Artefakt hinzufügen',
-        'Create as Artefact',
+        'Als Seite hinzufügen',
+        'Create as Page',
     ],
     'category_not_found' => [
         'Kategorie nicht gefunden',
@@ -2237,8 +2237,8 @@ return [
     ],
 
     'messageprovider:viewupdated' => [
-        'Nachricht, wenn ein Benutzer seine geteilte View aktualisiert',
-        'Updated view notifications',
+        'Nachricht, wenn ein Benutzer seine geteilte Sammelmappe aktualisiert',
+        'Updated collection notifications',
     ],
 
     // === Not Used Anymore.
@@ -2247,16 +2247,16 @@ return [
     //     'I shared an eportfolio view with you',
     // ],
     'i_shared' => [
-        '{$a->sendername} hat die ePortfolio Ansicht {$a->title} mit Ihnen geteilt',
-        '{$a->sendername} shared the e-portfolio view {$a->title} with you',
+        '{$a->sendername} hat die Sammelmappe {$a->title} mit Ihnen geteilt',
+        '{$a->sendername} shared the collection {$a->title} with you',
     ],
     'i_updated' => [
-        '{$a->sendername} hat Änderungen an dem E-Portfolio {$a->title} vorgenommen, welches mit Ihnen geteilt ist.',
-        '{$a->sendername} made changes to the e-portfolio view {$a->title} shared with you.',
+        '{$a->sendername} hat Änderungen an der Sammelmappe {$a->title} vorgenommen, welche mit Ihnen geteilt ist.',
+        '{$a->sendername} made changes to the collection {$a->title} shared with you.',
     ],
     'i_updated_category' => [
-        null,
-        '{$a->sendername} added a new artefact to the shared category "{$a->title}"',
+        '{$a->sendername} hat Änderungen an der geteilten Kategorie "{$a->title}" vorgenommen',
+        '{$a->sendername} made changes to the shared category "{$a->title}"',
     ],
     'addstdcat' => [
         'Standardkategorien importieren',
@@ -2276,10 +2276,10 @@ return [
     ],
     'pdf_settings_description' => [
         'Wenn du spezielle oder ungewöhnliche Schriftzeichen verwendest, kann es zu Problemen mit dem generierten PDF kommen. Du kannst daher versuchen, unterschiedliche Schriftarteinstellungen zu verwenden.<br>
-			Deine PDF-Einstellungen werden für diese Ansicht gespeichert.<br>Wenn deine Ansicht mit anderen Benutzern geteilt wird, sehen sie das PDF mit deinen Einstellungen.<br>
+			Deine PDF-Einstellungen werden für diese Sammelmappe gespeichert.<br>Wenn deine Sammelmappe mit anderen Benutzern geteilt wird, sehen sie das PDF mit deinen Einstellungen.<br>
 			Nicht-standardisierte Schriftarten können einige Optionen wie Fett, Kursiv usw. verlieren.',
         'If you use some special or uncommon language characters the generated pdf can have problems. So, you can try to use different font settings<br>
-            Your PDF settings will be saved for this view.<br>So, if your view is shared with other users - they will see the pdf with your settings.<br>
+            Your PDF settings will be saved for this collection.<br>So, if your collection is shared with other users - they will see the pdf with your settings.<br>
             Non-standard fonts can have some lost options like bold, italic, e.t.c.',
     ],
     'pdf_settings_fontfamily' => [
@@ -2291,8 +2291,8 @@ return [
         'Basic font size',
     ],
     'pdf_settings_showmetadata' => [
-        'Metadaten zur Ansicht hinzufügen',
-        'Add view meta data',
+        'Metadaten zur Sammelmappe hinzufügen',
+        'Add collection meta data',
     ],
     'pdf_settings_showusername' => [
         'Benutzername',
@@ -2351,24 +2351,24 @@ return [
         'Layout settings',
     ],
     'block_exaport_allowcustomlayout_head' => [
-        'Benutzerdefinierte Optionen für das Layout der Views für View-Eigentümer',
-        'Custom options for the view layout for view owners',
+        'Benutzerdefinierte Optionen für das Layout der Sammelmappen für Sammelmappen-Eigentümer',
+        'Custom options for the collection layout for collection owners',
     ],
     'block_exaport_allowcustomlayout_body' => [
-        'Ermöglicht die Verwendung benutzerdefinierter Layout-Einstellungen für Views (ähnlich den unten aufgeführten Optionen) für reguläre Besitzer der Views.',
-        'Allows to use custom view layout settings (similar to options below) for regular owners of the views',
+        'Ermöglicht die Verwendung benutzerdefinierter Layout-Einstellungen für Sammelmappen (ähnlich den unten aufgeführten Optionen) für reguläre Besitzer der Sammelmappen.',
+        'Allows to use custom collection layout settings (similar to options below) for regular owners of the collection',
     ],
     'settings_layout_settings_description' => [
-        'Hier kannst du einige Layout-Optionen der View ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die View nach deinen Wünschen zu gestalten.<br>Diese Einstellungen werden als Standardeinstellungen <strong>für alle Views</strong> verwendet.',
-        'Here you can change some view layout options or use own custom CSS rules to have the view as you want<br>These settings will be used as default settings <strong>for all views</strong>',
+        'Hier kannst du einige Layout-Optionen der Sammelmappe ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach deinen Wünschen zu gestalten.<br>Diese Einstellungen werden als Standardeinstellungen <strong>für alle Sammelmappen</strong> verwendet.',
+        'Here you can change some collection layout options or use own custom CSS rules to have the collection as you want<br>These settings will be used as default settings <strong>for all collections</strong>',
     ],
     'layout_settings' => [
         'Layout-Einstellungen',
         'Layout settings',
     ],
     'layout_settings_description' => [
-        'Hier kannst du einige Layout-Optionen der View ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die View nach deinen Wünschen zu gestalten.',
-        'Here you can change some view layout options or use own custom CSS rules to have the view as you want',
+        'Hier kannst du einige Layout-Optionen der Sammelmappe ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach deinen Wünschen zu gestalten.',
+        'Here you can change some collection layout options or use own custom CSS rules to have the collection as you want',
     ],
     'layout_settings_font_size' => [
         'Schriftgröße',
@@ -2387,12 +2387,12 @@ return [
         'Only bottom border',
     ],
     'layout_settings_view_headers' => [
-        'Überschriften der View-Blöcke',
-        'Headers of view blocks',
+        'Überschriften der Sammelmappen-Blöcke',
+        'Headers of collection blocks',
     ],
     'layout_settings_view_content' => [
-        'Inhalt der View-Blöcke',
-        'Content of view blocks',
+        'Inhalt der Sammelmappen-Blöcke',
+        'Content of collection blocks',
     ],
     'layout_settings_custom_css' => [
         'benutzerdefinierte CSS-Regeln',
@@ -2530,12 +2530,12 @@ return [
         'Project Information',
     ],
     'view_saved' => [
-        'View gespeichert',
-        'View saved',
+        'Sammelmappe gespeichert',
+        'Collection saved',
     ],
     'view_sharing_updated' => [
         'Ver&ouml;ffentlichung gespeichert',
-        'View sharing updated',
+        'Collection sharing updated',
     ],
     'list' => [
         'Liste',
@@ -2710,16 +2710,16 @@ return [
     ],
 
     'privacy:metadata:block_exaportitem' => [
-        'Artefakt des Benutzers',
-        'user\'s artefact',
+        'Seite des Benutzers',
+        'user\'s page',
     ],
     'privacy:metadata:block_exaportitem:userid' => [
-        'Artefakt des Besitzers',
-        'artefact\'s owner',
+        'Seite des Besitzers',
+        'page\'s owner',
     ],
     'privacy:metadata:block_exaportitem:type' => [
-        'Typ des Artefakts',
-        'type of artefact',
+        'Typ der Seite',
+        'type of page',
     ],
     'privacy:metadata:block_exaportitem:categoryid' => [
         'Kategorie Id',
@@ -2783,7 +2783,7 @@ return [
     ],
     'privacy:metadata:block_exaportitem:example_url' => [
         'Material Url',
-        'artefact\'s owner',
+        'Example url',
     ],
     'privacy:metadata:block_exaportitem:parentid' => [
         'Übergeordnete ID',
@@ -2791,12 +2791,12 @@ return [
     ],
 
     'privacy:metadata:block_exaportitemcomm' => [
-        'Kommentare zu Artefakten',
-        'comments for artefacts',
+        'Kommentare zu Seiten',
+        'comments for pages',
     ],
     'privacy:metadata:block_exaportitemcomm:itemid' => [
-        'Id zu Artefakten',
-        'id of artefact',
+        'Id zu Seiten',
+        'id of page',
     ],
     'privacy:metadata:block_exaportitemcomm:userid' => [
         'Autor des Kommentars',
@@ -2812,12 +2812,12 @@ return [
     ],
 
     'privacy:metadata:block_exaportview' => [
-        'Kommentar zu Artefakten',
-        'comments for artefacts',
+        'Kommentar zu Seiten',
+        'comments for page',
     ],
     'privacy:metadata:block_exaportview:userid' => [
-        'Besitzer der View',
-        'owner of view',
+        'Besitzer der Sammelmappe',
+        'owner of collection',
     ],
     'privacy:metadata:block_exaportview:name' => [
         'Name',
@@ -2848,16 +2848,16 @@ return [
         'language id',
     ],
     'privacy:metadata:block_exaportview:layout' => [
-        'Layout der View',
-        'layout of the view',
+        'Layout der Sammelmappe',
+        'layout of the collection',
     ],
     'privacy:metadata:block_exaportview:sharedemails' => [
         'Liste freigegebener E-Mails',
         'shared emails list',
     ],
     'privacy:metadata:block_exaportview:autofill_artefacts' => [
-        'Automatisches Ausfüllen bei Artefakten aktiviert',
-        'enabled autofill by artefacts',
+        'Automatisches Ausfüllen bei Seiten aktiviert',
+        'enabled autofill for page',
     ],
 
     'privacy:metadata:block_exaportresume' => [
@@ -2905,8 +2905,8 @@ return [
         'careers skills',
     ],
     'privacy:metadata:core_files' => [
-        'Exabis ePortfolio speichert Dateien, die vom Benutzer hochgeladen wurden, um Teil von Artefakten, Lebenslaufeinträgen und Kommentaren zu werden.',
-        'Exabis ePortfolio stores files which have been uploaded by the user to form part of artefacts, resume entries and comments.',
+        'Exabis ePortfolio speichert Dateien, die vom Benutzer hochgeladen wurden, um Teil von Seiten, Lebenslaufeinträgen und Kommentaren zu werden.',
+        'Exabis ePortfolio stores files which have been uploaded by the user to form part of pages, resume entries and comments.',
     ],
     'whyEportfolio' => [
         'Warum ein ePortfolio?',
@@ -2922,7 +2922,7 @@ return [
             <h4>Was ist ein ePortfolio?</h4>
             <br>
             <p>Ein ePortfolio ist mehr als nur ein digitaler Lebenslauf. Es ist eine persönliche Sammlung Ihrer Arbeiten, die Ihre Fähigkeiten und Erfahrungen lebendig darstellt. Anders als ein klassischer CV bietet es echte Nachweise: Arbeitsproben, Reflexionen und den Kontext, in dem Sie Ihre Kompetenzen erworben haben.</p>
-            <p>Mit Exabis ePortfolio können Sie mehrere Ansichten erstellen, passgenau für bestimmte Bewerbungen, Jobchancen oder Präsentationen. So zeigen Sie immer das, was für die jeweilige Situation am wichtigsten ist.</p>
+            <p>Mit Exabis ePortfolio können Sie mehrere Sammelmappen erstellen, passgenau für bestimmte Bewerbungen, Jobchancen oder Präsentationen. So zeigen Sie immer das, was für die jeweilige Situation am wichtigsten ist.</p>
             <br>
             <h4>Wie erstellst du dein ePortfolio?</h4>
             <br>
@@ -2942,7 +2942,7 @@ return [
                 <h4>What is an ePortfolio?</h4>
                 <br>
                 <p> An ePortfolio is more than just a digital resume. It is a personal collection of your work that vividly demonstrates your abilities and experiences. Unlike a traditional CV, it provides real evidence: work samples, reflections, and the context in which you developed your skills.</p>
-                <p>With Exabis ePortfolio, you can create multiple views tailored to specific applications, job opportunities, or presentations. This way, you always highlight what is most relevant for the situation.</p>
+                <p>With Exabis ePortfolio, you can create multiple collections tailored to specific applications, job opportunities, or presentations. This way, you always highlight what is most relevant for the situation.</p>
                 <br>
                 <h4>How do you create your ePortfolio?</h4>
                 <br>
@@ -2999,16 +2999,16 @@ return [
         'Preview',
     ],
     'view_preview_help' => [
-        'Vorschau der View',
-        'Preview of your view',
+        'Vorschau der Sammelmappe',
+        'Preview of your collection',
     ],
     'block_exaport_used_layout' => [
         'Verwendetes Layout',
         'Used layout',
     ],
     'block_exaport_used_layout_body' => [
-        'Ändern Sie das Layout, falls es Darstellungsprobleme gibt. Momentan wird es nur für die Artefaktliste verwendet.',
-        'Change the layout if you have some appearance problems. Right now it is used only for artefact list.',
+        'Ändern Sie das Layout, falls es Darstellungsprobleme gibt. Momentan wird es nur für die Seitenliste verwendet.',
+        'Change the layout if you have some appearance problems. Right now it is used only for pages list.',
     ],
     'block_exaport_used_layout_moodle_bootstrap' => [
         'Karten-Layout',
@@ -3040,28 +3040,28 @@ return [
         'Show or hide the "My CV" navigation area.',
     ],
     'settings_enable_myportfolio_head' => [
-        'Bereich "Meine Portfolio Artefakte" anzeigen',
-        'Show "My Portfolio Artefacts" area',
+        'Bereich "Meine Seiten" anzeigen',
+        'Show "My Pages" area',
     ],
     'settings_enable_myportfolio_body' => [
-        'Den Navigationsbereich "Meine Portfolio Artefakte" ein-/ausblenden.',
-        'Show or hide the "My Portfolio Artefacts" navigation area.',
+        'Den Navigationsbereich "Meine Seiten" ein-/ausblenden.',
+        'Show or hide the "My Pages" navigation area.',
     ],
     'settings_enable_views_head' => [
-        'Bereich "Meine Portfolios" anzeigen',
-        'Show "My Views" area',
+        'Bereich "Meine Sammelmappen" anzeigen',
+        'Show "My Collections" area',
     ],
     'settings_enable_views_body' => [
-        'Den Navigationsbereich "Meine Portfolios" ein-/ausblenden.',
-        'Show or hide the "My Views" navigation area.',
+        'Den Navigationsbereich "Meine Sammelmappen" ein-/ausblenden.',
+        'Show or hide the "My Collections" navigation area.',
     ],
     'settings_enable_shared_views_head' => [
-        'Bereich "Geteilte Portfolios" anzeigen',
-        'Show "Shared Views" area',
+        'Bereich "Geteilte Sammelmappen" anzeigen',
+        'Show "Shared Collections" area',
     ],
     'settings_enable_shared_views_body' => [
-        'Den Navigationsbereich "Geteilte Portfolios" ein-/ausblenden.',
-        'Show or hide the "Shared Views" navigation area.',
+        'Den Navigationsbereich "Geteilte Sammelmappen" ein-/ausblenden.',
+        'Show or hide the "Shared Collections" navigation area.',
     ],
     'settings_enable_shared_categories_head' => [
         'Bereich "Geteilte Kategorien" anzeigen',
@@ -3176,16 +3176,16 @@ return [
         'Remove the passphrase',
     ],
     'wp_exported_view' => [
-        'Exportierte Ansicht',
-        'Exported view',
+        'Exportierte Sammelmapp',
+        'Exported collection',
     ],
     'wp_exported_view_hidden_in_wp' => [
         'Exportiert, aber in Wordpress ausgeblendet',
         'Exported but hidden in your WordPress',
     ],
     'wp_exported_view_newer_than_wp' => [
-        'WordPress-Ansicht ist älter als die Moodle-Ansicht',
-        'WordPress view version is older than Moodle version',
+        'WordPress-Sammelmappe ist älter als die Moodle-Sammelmappe',
+        'WordPress collection version is older than Moodle version',
     ],
     'alwaysnotifywhenshare' => [
         'Immer benachrichtigen, wenn geteilt wird',
@@ -3206,8 +3206,8 @@ return [
         'Preset structure',
     ],
     'settings_category_distribution_description' => [
-        'Konfiguriere Starter-Vorlagen für kursverwaltete Kategorie- und Ansichtenverteilung',
-        'Configure starter templates for course-managed category and view distribution',
+        'Konfiguriere Starter-Vorlagen für kursverwaltete Kategorie- und Sammelmappenverteilung',
+        'Configure starter templates for course-managed category and collection distribution',
     ],
     'settings_starter_templates' => [
         'Starter-Vorlagen',
@@ -3218,12 +3218,12 @@ return [
         'JSON array of starter templates for category distribution. Each template must have "name" and "tree" (with nested children).',
     ],
     'settings_starter_view_templates' => [
-        'Vorlage für Portfolio-Grundstruktur',
-        'Starter View Templates',
+        'Starter-Sammelmappen-Vorlagen',
+        'Starter Collection Templates',
     ],
     'settings_starter_view_templates_description' => [
-        'JSON-Array von Starter-Ansichtsvorlagen. Jede Vorlage muss "name" und "views" (Array von Ansichtsobjekten mit name, description und share_to_teachers) haben.',
-        'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers).',
+        'JSON-Array von Starter-Sammelmappen-Vorlagen. Jede Vorlage muss "name" und den technischen Schlüssel "views" (Array von Sammelmappe-Objekten mit name, description und share_to_teachers) haben.',
+        'JSON array of starter collection templates. Each template must have "name" and the technical key "views" (array of collection objects with name, description, and share_to_teachers).',
     ],
     'category_distribution' => [
         'Struktur vorgeben',
@@ -3234,8 +3234,8 @@ return [
         'Preset structure',
     ],
     'category_distribution_description' => [
-        'Kategorien- und Ansichtsstrukturen an Lernende verteilen',
-        'Manage and distribute category and view structures to students',
+        'Kategorien- und Sammelmappenstrukturen an Lernende verteilen',
+        'Manage and distribute category and collection structures to students',
     ],
     'starter_template_select' => [
         'Starter-Vorlage auswählen',
@@ -3398,8 +3398,8 @@ return [
         'Confirm Distribution',
     ],
     'confirm_distribute_views_body' => [
-        'Sind Sie sicher, dass Sie die Ansichtsvorlagen an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Ansichten für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Ansichten erstellt.',
-        'Are you sure you want to distribute the view templates to all enrolled students? This will create views for students who do not already have them. This action cannot be undone. Once distributed, the views are created.',
+        'Sind Sie sicher, dass Sie die Sammelmappenvorlagen an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Sammelmappen für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Sammelmappen erstellt.',
+        'Are you sure you want to distribute the collection templates to all enrolled students? This will create collections for students who do not already have them. This action cannot be undone. Once distributed, the collections are created.',
     ],
     'distribute' => [
         'Verteilen',
@@ -3415,79 +3415,87 @@ return [
     ],
     // View distribution strings.
     'view_distribution' => [
-        'Ansichten-Verteilung',
-        'View Distribution',
+        'Sammelmappen-Verteilung',
+        'Collection Distribution',
     ],
     'view_distribution_description' => [
-        'Verteilen Sie Ansichtsvorlagen an Lernende. Ansichten sind Portfolios, die Lernende nutzen können, um ihre Arbeit zu präsentieren.',
-        'Manage and distribute view templates to students. Views are portfolios that students can use to showcase their work.',
+        'Verteilen Sie Sammelmappen-Vorlagen an Lernende. Sammelmappen helfen Lernenden, ihre Arbeit zu präsentieren.',
+        'Manage and distribute collection templates to students. Collections help students showcase their work.',
     ],
     'starter_view_template_select' => [
-        'Starter-Ansichtsvorlage auswählen',
-        'Select Starter View Template',
+        'Starter-Sammelmappenvorlage auswählen',
+        'Select Starter Collection Template',
     ],
     'current_view_template' => [
-        'Aktuelle Ansichtsvorlage',
-        'Current View Template',
+        'Aktuelle Sammelmappenvorlage',
+        'Current Collection Template',
     ],
     'view_template_empty' => [
-        'Keine Ansichten in der Vorlage. Fügen Sie eine Ansicht hinzu, um zu beginnen.',
-        'No views in template. Add a view to get started.',
+        'Keine Sammelmappen in der Vorlage. Fügen Sie eine Sammelmappe hinzu, um zu beginnen.',
+        'No collection in template. Add a collection to get started.',
     ],
     'add_view' => [
-        'Ansicht hinzufügen',
-        'Add View',
+        'Sammelmappe hinzufügen',
+        'Add Collection',
     ],
     'rename_view' => [
-        'Ansicht umbenennen',
-        'Rename View',
+        'Sammelmappe umbenennen',
+        'Rename Collection',
     ],
     'remove_view' => [
-        'Ansicht entfernen',
-        'Remove View',
+        'Sammelmappe entfernen',
+        'Remove Collection',
     ],
     'remove_view_confirm' => [
-        'Sind Sie sicher, dass Sie diese Ansicht aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Ansichten von Lernenden.',
-        'Are you sure you want to remove this view from the template? This will not delete existing student views.',
+        'Sind Sie sicher, dass Sie diese Sammelmappe aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Sammelmappen von Lernenden.',
+        'Are you sure you want to remove this collection from the template? This will not delete existing student collections.',
     ],
     'view_name_required' => [
-        'Ansichtsname ist erforderlich',
-        'View name is required',
+        'Sammelmappenname ist erforderlich',
+        'Collection name is required',
     ],
     'view_added' => [
-        'Ansicht zur Vorlage hinzugefügt',
-        'View added to template',
+        'Sammelmappe zur Vorlage hinzugefügt',
+        'Collection added to template',
     ],
     'view_renamed' => [
-        'Ansicht erfolgreich umbenannt',
-        'View renamed successfully',
+        'Sammelmappe erfolgreich umbenannt',
+        'Collection renamed successfully',
     ],
     'view_removed' => [
-        'Ansicht aus Vorlage entfernt',
-        'View removed from template',
+        'Sammelmappe aus Vorlage entfernt',
+        'Collection removed from template',
     ],
     'distribute_views' => [
-        'Ansichten verteilen',
-        'Distribute Views',
+        'Sammelmappen verteilen',
+        'Distribute Collections',
     ],
     'distribute_views_now' => [
-        'Ansichten jetzt verteilen',
-        'Distribute Views Now',
+        'Sammelmappen jetzt verteilen',
+        'Distribute Collections Now',
     ],
     'auto_distribute_views_on_enrolment' => [
-        'Ansichten automatisch bei neuen Einschreibungen verteilen',
-        'Automatically distribute views to new enrolments',
+        'Sammelmappen automatisch bei neuen Einschreibungen verteilen',
+        'Automatically distribute collections to new enrolments',
     ],
     'no_views_to_distribute' => [
-        'Keine Ansichtsvorlage zum Verteilen definiert',
-        'No view template defined to distribute',
+        'Keine Sammelmappenvorlage zum Verteilen definiert',
+        'No collection template defined to distribute',
     ],
     'views_created' => [
-        'Ansichten erstellt: {$a}',
-        'Views created: {$a}',
+        'Sammelmappen erstellt: {$a}',
+        'Collections created: {$a}',
     ],
     'views_skipped' => [
-        'Ansichten übersprungen (existieren bereits): {$a}',
-        'Views skipped (already exist): {$a}',
+        'Sammelmappen übersprungen (existieren bereits): {$a}',
+        'Collections skipped (already exist): {$a}',
     ],
+        'my_shares' => [
+            'Meine geteilten Inhalte',
+            'My shares',
+        ],
+        'shared_with_me' => [
+            'Mit mir geteilte Inhalte',
+            'Shared with me',
+        ],
 ];

@@ -994,3 +994,5 @@ $string['auto_distribute_views_on_enrolment'] = 'Sammelmappen automatisch bei ne
 $string['no_views_to_distribute'] = 'Keine Sammelmappenvorlage zum Verteilen definiert';
 $string['views_created'] = 'Sammelmappen erstellt: {$a}';
 $string['views_skipped'] = 'Sammelmappen übersprungen (existieren bereits): {$a}';
+$string['my_shares'] = 'Meine geteilten Inhalte';
+$string['shared_with_me'] = 'Mit mir geteilte Inhalte';

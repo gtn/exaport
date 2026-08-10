@@ -1343,7 +1343,7 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
     echo '<div class="dropdown-menu dropdown-menu-right dropdown-menu-end">';
     echo '<a class="dropdown-item" href="' . $createartefacturl . '">'
         . block_exaport_fontawesome_icon('clone', 'solid', 1) . ' '
-        . get_string("add_mixed", "block_exaport") . '</a>';
+        . get_string("viewitem", "block_exaport") . '</a>';
     if ($type == 'mine') {
         echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
             . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '

@@ -3490,4 +3490,12 @@ return [
         'Sammelmappen übersprungen (existieren bereits): {$a}',
         'Collections skipped (already exist): {$a}',
     ],
+        'my_shares' => [
+            'Meine geteilten Inhalte',
+            'My shares',
+        ],
+        'shared_with_me' => [
+            'Mit mir geteilte Inhalte',
+            'Shared with me',
+        ],
 ];

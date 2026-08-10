@@ -998,3 +998,5 @@ $string['auto_distribute_views_on_enrolment'] = 'Automatically distribute collec
 $string['no_views_to_distribute'] = 'No collection template defined to distribute';
 $string['views_created'] = 'Collections created: {$a}';
 $string['views_skipped'] = 'Collections skipped (already exist): {$a}';
+$string['my_shares'] = 'My shares';
+$string['shared_with_me'] = 'Shared with me';

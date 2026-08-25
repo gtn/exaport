@@ -22,6 +22,7 @@ use block_exaport\share_overview;
 use block_exaport\output\shared_with_me_page;
 
 $courseid = required_param('courseid', PARAM_INT);
+$sort     = optional_param('sort', 'name-asc', PARAM_TEXT);
 
 require_login($courseid);
 
@@ -36,10 +37,13 @@ $PAGE->set_url('/blocks/exaport/shared_with_me.php', ['courseid' => $courseid]);
 
 block_exaport_print_header("shared_with_me");
 
+block_exaport_require_filter_js();
+
 echo "<div class='block_eportfolio_center'>\n";
 
 $rows = share_overview::get_shared_with_me($USER->id);
-$page = new shared_with_me_page($rows, $courseid);
+$searchcontrols = block_exaport_render_search_and_sort_controls($sort);
+$page = new shared_with_me_page($rows, $courseid, $searchcontrols);
 echo $PAGE->get_renderer('block_exaport')->render($page);
 
 echo "</div>";

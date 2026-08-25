@@ -387,6 +387,7 @@ $string['sharedwith_shareexternal'] = 'Geteilte externe Sammelmappen';
 $string['sharedexternalcategory'] = 'Extern geteilt';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 $string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
+$string['sharedwith_cnt'] = '{$a}x geteilt';
 $string['share_tooltip_users'] = 'Intern mit den folgenden Benutzer:innen geteilt: {$a}';
 $string['share_tooltip_groups'] = 'Intern mit den folgenden Gruppen geteilt: {$a}';
 $string['share_tooltip_all'] = 'Intern mit allen Benutzer:innen geteilt.';

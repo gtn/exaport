@@ -25,7 +25,7 @@ use templatable;
 
 /**
  * Output class for the "My shares" overview page (my_shares.php).
- * Renders block_exaport/my_shares.
+ * Renders block_exaport/my_shares_page.
  */
 class my_shares_page implements renderable, templatable {
 
@@ -35,15 +35,20 @@ class my_shares_page implements renderable, templatable {
     /** @var int $courseid */
     protected $courseid;
 
+    /** @var string $searchcontrols */
+    protected $searchcontrols;
+
     /**
      * Constructor.
      *
-     * @param array $rows     Rows returned by \block_exaport\share_overview::get_my_shares().
-     * @param int   $courseid The current course id.
+     * @param array  $rows           Rows returned by \block_exaport\share_overview::get_my_shares().
+     * @param int    $courseid       The current course id.
+     * @param string $searchcontrols Pre-rendered HTML for the search/sort controls bar (optional).
      */
-    public function __construct(array $rows, int $courseid) {
-        $this->rows     = $rows;
-        $this->courseid = $courseid;
+    public function __construct(array $rows, int $courseid, string $searchcontrols = '') {
+        $this->rows           = $rows;
+        $this->courseid       = $courseid;
+        $this->searchcontrols = $searchcontrols;
     }
 
     /**
@@ -53,16 +58,28 @@ class my_shares_page implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
-        global $CFG;
-
         $exportedrows = [];
         foreach ($this->rows as $row) {
+            $share   = \block_exaport\share_overview::build_share_info($row->entity_type, (int)$row->id, $row);
+            $tooltip = block_exaport_get_share_tooltip($share);
             $exportedrows[] = [
+                'typeicon'       => $this->build_type_icon($row),
                 'typelabel'      => get_string($row->entity_type, 'block_exaport'),
                 'title'          => format_string($row->title),
-                'url'            => $this->build_url($row),
+                'titlenamelower' => core_text::strtolower(strip_tags(format_string($row->title))),
+                'editurl'        => $this->build_edit_url($row),
+                'shareurl'       => $this->build_share_url($row),
                 'sharedwithtext' => $this->build_shared_with_text($row),
+                'sharetooltip'   => $tooltip,
+                'hastooltip'     => $share->is_shared(),
                 'commentcount'   => (int)($row->comment_cnt ?? 0),
+                'ellipsisicon'   => block_exaport_fontawesome_icon('ellipsis-vertical', 'solid', 1),
+                'editicon'       => block_exaport_fontawesome_icon('pen-to-square', 'regular', 1),
+                'shareicon'      => block_exaport_fontawesome_icon('share-nodes', 'solid', 1),
+                'deleteicon'     => block_exaport_fontawesome_icon('trash-can', 'regular', 1),
+                'editlabel'      => get_string('edit'),
+                'sharelabel'     => get_string('share', 'block_exaport'),
+                'deletelabel'    => get_string('delete'),
             ];
         }
 
@@ -74,16 +91,58 @@ class my_shares_page implements renderable, templatable {
             'headertype'     => get_string('type', 'block_exaport'),
             'headershared'   => get_string('sharedwith', 'block_exaport'),
             'headercomments' => get_string('comments', 'block_exaport'),
+            'headeractions'  => '',
+            'searchcontrols' => $this->searchcontrols,
         ];
     }
 
     /**
-     * Build a link to the entity's own edit/detail page.
+     * Build the type icon HTML for a row.
+     *
+     * Delegates to \block_exaport\share_overview::build_type_icon() to avoid
+     * duplicating the icon-selection logic between my_shares_page and shared_with_me_page.
+     *
+     * @param \stdClass $row
+     * @return string HTML
+     */
+    protected function build_type_icon(\stdClass $row): string {
+        return \block_exaport\share_overview::build_type_icon($row->entity_type, $row->type ?? '');
+    }
+
+    /**
+     * Build the edit URL for a row.
      *
      * @param \stdClass $row
      * @return string
      */
-    protected function build_url(\stdClass $row): string {
+    protected function build_edit_url(\stdClass $row): string {
+        global $CFG;
+
+        switch ($row->entity_type) {
+            case 'item':
+                return $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $this->courseid .
+                    '&id=' . $row->id . '&action=edit';
+            case 'category':
+                return $CFG->wwwroot . '/blocks/exaport/category.php?courseid=' . $this->courseid .
+                    '&id=' . $row->id . '&action=edit';
+            case 'view':
+                return $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $this->courseid .
+                    '&id=' . $row->id . '&action=edit';
+            default:
+                return '#';
+        }
+    }
+
+    /**
+     * Build the share/settings URL for a row.
+     *
+     * For views this links directly to the share tab; for items and categories it links
+     * to the edit page which contains the sharing form.
+     *
+     * @param \stdClass $row
+     * @return string
+     */
+    protected function build_share_url(\stdClass $row): string {
         global $CFG;
 
         switch ($row->entity_type) {
@@ -111,18 +170,12 @@ class my_shares_page implements renderable, templatable {
         if (!empty($row->shareall)) {
             return get_string('sharedwith_shareall', 'block_exaport');
         }
-        if (!empty($row->cnt_shared_groups)) {
-            return (int)$row->cnt_shared_groups > 1
-                ? get_string('sharedwith_group_cnt', 'block_exaport', (int)$row->cnt_shared_groups)
-                : get_string('sharedwith_group', 'block_exaport');
-        }
-        if (!empty($row->cnt_shared_users)) {
-            return (int)$row->cnt_shared_users > 1
-                ? get_string('sharedwith_user_cnt', 'block_exaport', (int)$row->cnt_shared_users)
-                : get_string('sharedwith_user', 'block_exaport');
+        $total = (int)($row->cnt_shared_users ?? 0) + (int)($row->cnt_shared_groups ?? 0);
+        if ($total > 0) {
+            return get_string('sharedwith_cnt', 'block_exaport', $total);
         }
         if (!empty($row->externaccess)) {
-            return get_string('externalaccess', 'block_exaport');
+            return get_string('sharedwith_shareexternal', 'block_exaport');
         }
 
         return '';

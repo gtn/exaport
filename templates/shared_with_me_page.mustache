@@ -21,16 +21,26 @@
     the current user, either directly or via a group/cohort share.
 
     Context variables:
-        hasrows       - Boolean: at least one share row
-        rows          - List of rows: typelabel, title, url, ownername, coursename, sharemodetext
-        nothingtext   - Localised text shown when nothing is shared with the user
-        headertitle   - Localised column header "Title"
-        headertype    - Localised column header "Type"
-        headeruser    - Localised column header "Shared by"
-        headercourse  - Localised column header "Course"
-        headersharedwith - Localised column header "Shared with"
+        hasrows           - Boolean: at least one share row
+        rows              - List of rows:
+                              typeicon (pre-rendered HTML), typelabel, title, titlenamelower,
+                              url, ownername, coursename, sharemodetext,
+                              commentcount, hascomments
+        nothingtext       - Localised text shown when nothing is shared with the user
+        headertitle       - Localised column header "Title"
+        headertype        - Localised column header "Type"
+        headeruser        - Localised column header "Shared by"
+        headercourse      - Localised column header "Course"
+        headersharedwith  - Localised column header "Shared with"
+        headercomments    - Localised column header "Comments"
+        searchcontrols    - Pre-rendered HTML for search input + sort dropdown
 }}
 <div class="block_exaport_shared_with_me">
+    {{#searchcontrols}}
+    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        {{{searchcontrols}}}
+    </div>
+    {{/searchcontrols}}
     {{^hasrows}}
         <p>{{nothingtext}}</p>
     {{/hasrows}}
@@ -43,16 +53,20 @@
                     <th>{{headeruser}}</th>
                     <th>{{headercourse}}</th>
                     <th>{{headersharedwith}}</th>
+                    <th>{{headercomments}}</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="exaport-view-section" data-exaport-view="1">
                 {{#rows}}
-                    <tr>
-                        <td><a href="{{url}}">{{title}}</a></td>
+                    <tr class="exaport-flat-item"
+                        data-item-name="{{titlenamelower}}"
+                        data-item-date="0">
+                        <td><a href="{{url}}">{{{typeicon}}}{{title}}</a></td>
                         <td>{{typelabel}}</td>
                         <td>{{ownername}}</td>
                         <td>{{coursename}}</td>
                         <td>{{sharemodetext}}</td>
+                        <td>{{#hascomments}}{{commentcount}}{{/hascomments}}</td>
                     </tr>
                 {{/rows}}
             </tbody>

@@ -126,7 +126,7 @@ class ExaportVievPdf {
     private $page_top_margin = 15;
     private $page_bottom_margin = 15;
     private $page_left_margin = 5;
-    private $page_bottom_margin = 5;
+    private $page_right_margin = 5;
 
     private $main_font_size = 10;
     private $main_font_name = 'helvetica';
@@ -148,8 +148,7 @@ class ExaportVievPdf {
 
     private $page_added = false;
 
-    public function __construct($view = null)
-    {
+    public function __construct($view = null) {
 
         // create new PDF document
         $this->pdf = new exaportTCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false, false, $view);
@@ -224,7 +223,7 @@ class ExaportVievPdf {
 
         while ($h <= 1000 && $current_page <= $page_limit) {
             // $this->pdf->MultiCell(50, 0, $this->pdf->GetY(), 0, 'L', false, 1, 20, $h, true);
-            $block_h = $this->writeHTMLCellReturnHeight(80, 20, $h, $h.'<br>'.str_repeat('<br>', rand(2, 7)));
+            $block_h = $this->writeHTMLCellReturnHeight(80, 20, $h, $h . '<br>' . str_repeat('<br>', rand(2, 7)));
             // $h += 20;
             $h = $this->increaseBlockY($h, $block_h);
             if ($h > $page_height) {
@@ -294,7 +293,7 @@ class ExaportVievPdf {
             $y = $y_original;
             $x_start_column = ($column_width + $columns_margin) * ($column_i - 1) + $columns_margin;
             foreach ($column_blocks as $bclock_i => $block) {
-            // $yBlockStart = $this->pdf->GetY();
+                // $yBlockStart = $this->pdf->GetY();
                 $ln = 1;
                 if ($bclock_i == (count($column_blocks) - 1)) { // for last block
                     $ln = 0;
@@ -328,7 +327,7 @@ class ExaportVievPdf {
     }
 
 
-     function getViewBlockContent($column_i, $block, $access, $column_width, $x, $y, $ln) {
+    function getViewBlockContent($column_i, $block, $access, $column_width, $x, $y, $ln) {
         global $USER, $CFG, $DB, $OUTPUT;
         $content = '';
         $view = $DB->get_record("block_exaportview", array("id" => $block->viewid));
@@ -348,7 +347,7 @@ class ExaportVievPdf {
 
                 // link to web-preview
                 $linked = false;
-                $block_href = $CFG->wwwroot.'/blocks/exaport/shared_item.php?access=view/'.$access.'&itemid='.$item->id.'&att='.$item->attachment;
+                $block_href = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=view/' . $access . '&itemid=' . $item->id . '&att=' . $item->attachment;
 
                 if ($item->name) {
                     $head_hight = $this->addHeadLine(strip_tags($item->name), $x, $y_block_current, $column_width, 0, null, true, 'L', $block_href);
@@ -357,11 +356,11 @@ class ExaportVievPdf {
                     $linked = true;
                 }
 
-                switch($item->type) {
+                switch ($item->type) {
                     case 'file':
                         $file_links = [];
-                        $select = "contextid='".context_user::instance($item->userid)->id."' ".
-                            " AND component='block_exaport' AND filearea='item_file' AND itemid='".$item->id."' AND filesize>0 ";
+                        $select = "contextid='" . context_user::instance($item->userid)->id . "' " .
+                            " AND component='block_exaport' AND filearea='item_file' AND itemid='" . $item->id . "' AND filesize>0 ";
                         if ($files = $DB->get_records_select('files', $select, null, 'id, filename, mimetype, filesize')) {
                             if (is_array($files)) {
                                 $imgs = [];
@@ -373,8 +372,8 @@ class ExaportVievPdf {
                                 $file_index = 1;
                                 foreach ($files as $file) {
                                     if (strpos($file->mimetype, "image") !== false) {
-                                        $imgsrc = moodle_url::make_pluginfile_url(context_user::instance($item->userid)->id, 'block_exaport', 'item_file/view/'.$access.'/itemid', $item->id, '/', $file->filename, false, false)->out();
-                                        $imgsrc .= '/forPdf/'.$view->hash.'/'.$view->id.'/'.$USER->id; // images are got from PHP pdf generator, so they are not logged in as FE-user
+                                        $imgsrc = moodle_url::make_pluginfile_url(context_user::instance($item->userid)->id, 'block_exaport', 'item_file/view/' . $access . '/itemid', $item->id, '/', $file->filename, false, false)->out();
+                                        $imgsrc .= '/forPdf/' . $view->hash . '/' . $view->id . '/' . $USER->id; // images are got from PHP pdf generator, so they are not logged in as FE-user
                                         // file thumbnail
                                         // get list of images with sizes:
                                         $img_x = $x + $column_width - ($max_width * $file_index);
@@ -382,11 +381,11 @@ class ExaportVievPdf {
                                     } else {
                                         // get data for Fileinfo block.
                                         // Link to the file.
-                                        $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/".$access."&itemid=".$item->id."&inst=".$file->pathnamehash);
+                                        $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/" . $access . "&itemid=" . $item->id . "&inst=" . $file->pathnamehash);
                                         // Human filesizes.
                                         $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
                                         $power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
-                                        $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',').' '.$units[$power];
+                                        $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
                                         $file_links[$file->filename] = [
                                             'url' => $ffurl,
                                             'size' => $filesize,
@@ -418,7 +417,7 @@ class ExaportVievPdf {
                                 if (count($file_links) > 0) {
                                     $linkscontent = '<p>';
                                     foreach ($file_links as $f_name => $f_data) {
-                                        $linkscontent .= '<a style="text-decoration: none;" href="'.$f_data['url'].'">'.$f_name.'</a> ('.$f_data['size'].')';
+                                        $linkscontent .= '<a style="text-decoration: none;" href="' . $f_data['url'] . '">' . $f_name . '</a> (' . $f_data['size'] . ')';
                                     }
                                     $linkscontent .= '</p>';
                                     $cell_hight = $this->writeHTMLCellReturnHeight($column_width, $x, $y_block_current, $linkscontent);
@@ -434,7 +433,7 @@ class ExaportVievPdf {
                     case 'link':
                         $thumbnail_part_width = round($column_width / 4);
 
-                        $thumb_url = $CFG->wwwroot.'/blocks/exaport/item_thumb.php?item_id='.$item->id.'&access='.$access.'&ispdf=1&vhash='.$view->hash.'&vid='.$view->id.'&uid='.$USER->id;
+                        $thumb_url = $CFG->wwwroot . '/blocks/exaport/item_thumb.php?item_id=' . $item->id . '&access=' . $access . '&ispdf=1&vhash=' . $view->hash . '&vid=' . $view->id . '&uid=' . $USER->id;
 
                         // item thumbnail
                         if (list($img_w, $im_h) = $this->addImageBySrc($thumb_url, $x + $column_width - $thumbnail_part_width, $y_block_current, $this->maxThumbnailWidth, $this->max_thumbnail_height, $item->url)) {
@@ -444,7 +443,7 @@ class ExaportVievPdf {
                             $textContentWidth = $column_width;
                         }
 
-                        $url_text = '<a style="text-decoration: none;" href="'.$item->url.'">'.$item->url.'</a>';
+                        $url_text = '<a style="text-decoration: none;" href="' . $item->url . '">' . $item->url . '</a>';
                         $cell_hight = $this->writeHTMLCellReturnHeight($textContentWidth, $x, $y_block_current, $url_text);
                         $item->url = false; // DISABLE for next adding
                         if ($im_h > $cell_hight) {
@@ -479,7 +478,7 @@ class ExaportVievPdf {
                         $iframe_element = $dom->getElementsByTagName('iframe')->item(0);
                         $src = $iframe_element->getAttribute("src");
                         if ($src) {
-                            $src_text = '<a style="text-decoration: none;" href="'.$src.'">'.$src.'</a>';
+                            $src_text = '<a style="text-decoration: none;" href="' . $src . '">' . $src . '</a>';
                             $cell_hight = $this->writeHTMLCellReturnHeight($column_width, $x, $y_block_current, $src_text);
                         }
                     } else {
@@ -535,7 +534,7 @@ class ExaportVievPdf {
                     $name .= $block->firstname;
                 }
                 if (isset($block->lastname)) {
-                    $name .= ' '.$block->lastname;
+                    $name .= ' ' . $block->lastname;
                 }
                 $name = trim($name);
                 $person_info['name'] = $name;
@@ -610,10 +609,10 @@ class ExaportVievPdf {
                 $height_block_current += $head_height;
                 $picture_part_width = $column_width / 4;
                 if (!$badge->courseid) { // For badges with courseid = NULL.
-                    $badge->imageUrl = (string) moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+                    $badge->imageUrl = (string)moodle_url::make_pluginfile_url(1, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
                 } else {
                     $context = context_course::instance($badge->courseid);
-                    $badge->imageUrl = (string) moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
+                    $badge->imageUrl = (string)moodle_url::make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/', 'f1', false);
                 }
                 $curr_page = $this->pdf->getPage();
                 list($img_w, $imgH) = $this->addImageBySrc($badge->imageUrl, $x + $column_width - $picture_part_width, $y_block_current, $picture_part_width, 30, '');
@@ -652,7 +651,7 @@ class ExaportVievPdf {
                             $item_data = $resume->educations[$block->itemid];
                             $attachments = $item_data->attachments;
                             $description = '';
-                            $description .= $item_data->institution.': ';
+                            $description .= $item_data->institution . ': ';
                             $description .= $item_data->qualname;
                             if ($item_data->startdate != '' || $item_data->enddate != '') {
                                 $description .= ' (';
@@ -660,12 +659,12 @@ class ExaportVievPdf {
                                     $description .= $item_data->startdate;
                                 }
                                 if ($item_data->enddate != '') {
-                                    $description .= ' - '.$item_data->enddate;
+                                    $description .= ' - ' . $item_data->enddate;
                                 }
                                 $description .= ')';
                             }
                             if ($item_data->qualdescription != '') {
-                                $description .= '<br>'.$item_data->qualdescription;
+                                $description .= '<br>' . $item_data->qualdescription;
                             }
                             $body_content .= $description;
                         }
@@ -675,7 +674,7 @@ class ExaportVievPdf {
                             $item_data = $resume->employments[$block->itemid];
                             $attachments = $item_data->attachments;
                             $description = '';
-                            $description .= $item_data->jobtitle.': ';
+                            $description .= $item_data->jobtitle . ': ';
                             $description .= $item_data->employer;
                             if ($item_data->startdate != '' || $item_data->enddate != '') {
                                 $description .= ' (';
@@ -683,12 +682,12 @@ class ExaportVievPdf {
                                     $description .= $item_data->startdate;
                                 }
                                 if ($item_data->enddate != '') {
-                                    $description .= ' - '.$item_data->enddate;
+                                    $description .= ' - ' . $item_data->enddate;
                                 }
                                 $description .= ')';
                             }
                             if ($item_data->positiondescription != '') {
-                                $description .= '<br>'.$item_data->positiondescription;
+                                $description .= '<br>' . $item_data->positiondescription;
                             }
                             $body_content .= $description;
                         }
@@ -698,12 +697,12 @@ class ExaportVievPdf {
                             $item_data = $resume->certifications[$block->itemid];
                             $attachments = $item_data->attachments;
                             $description = '';
-                            $description .= $item_data->title.' ';
+                            $description .= $item_data->title . ' ';
                             if ($item_data->date != '') {
-                                $description .= '('.$item_data->date.')';
+                                $description .= '(' . $item_data->date . ')';
                             }
                             if ($item_data->description != '') {
-                                $description .= '<br>'.$item_data->description;
+                                $description .= '<br>' . $item_data->description;
                             }
                             $body_content = $description;
                         }
@@ -715,10 +714,10 @@ class ExaportVievPdf {
                             $description = '';
                             $description .= $item_data->title;
                             if ($item_data->contribution != '') {
-                                $description .= ' ('.$item_data->contribution.')';
+                                $description .= ' (' . $item_data->contribution . ')';
                             }
                             if ($item_data->date != '') {
-                                $description .= '('.$item_data->date.')';
+                                $description .= '(' . $item_data->date . ')';
                             }
                             if ($item_data->contributiondetails != '' || $item_data->url != '') {
                                 $description .= '<br>';
@@ -726,7 +725,7 @@ class ExaportVievPdf {
                                     $description .= $item_data->contributiondetails;
                                 }
                                 if ($item_data->url != '') {
-                                    $description .= '<br /><a href="'.$item_data->url.'" target="_blank">'.$item_data->url.'</a>';
+                                    $description .= '<br /><a href="' . $item_data->url . '" target="_blank">' . $item_data->url . '</a>';
                                 }
                             }
                             $body_content = $description;
@@ -737,19 +736,19 @@ class ExaportVievPdf {
                             $item_data = $resume->profmembershipments[$block->itemid];
                             $attachments = $item_data->attachments;
                             $description = '';
-                            $description .= $item_data->title.' ';
+                            $description .= $item_data->title . ' ';
                             if ($item_data->startdate != '' || $item_data->enddate != '') {
                                 $description .= ' (';
                                 if ($item_data->startdate != '') {
                                     $description .= $item_data->startdate;
                                 }
                                 if ($item_data->enddate != '') {
-                                    $description .= ' - '.$item_data->enddate;
+                                    $description .= ' - ' . $item_data->enddate;
                                 }
                                 $description .= ')';
                             }
                             if ($item_data->description != '') {
-                                $description .= '<br>'.$item_data->description;
+                                $description .= '<br>' . $item_data->description;
                             }
                             $body_content = $description;
                         }
@@ -760,10 +759,10 @@ class ExaportVievPdf {
                     case 'skillspersonal':
                     case 'skillsacademic':
                     case 'skillscareers':
-                        $attachments = @$resume->{$block->resume_itemtype.'_attachments'};
+                        $attachments = @$resume->{$block->resume_itemtype . '_attachments'};
                         $description = '';
                         if ($resume && $resume->{$block->resume_itemtype}) {
-                            $description .= '<br>'.$resume->{$block->resume_itemtype}.' ';
+                            $description .= '<br>' . $resume->{$block->resume_itemtype} . ' ';
                         }
                         $body_content = $description;
                         break;
@@ -781,7 +780,7 @@ class ExaportVievPdf {
                 if ($attachments && is_array($attachments) && count($attachments) > 0 && $block->resume_withfiles) {
                     $body_content .= '<ul>';
                     foreach ($attachments as $attachm) {
-                        $body_content .= '<li><p><a href="'.$attachm['fileurl'].'" target="_blank">'.$attachm['filename'].'</a></p></li>';
+                        $body_content .= '<li><p><a href="' . $attachm['fileurl'] . '" target="_blank">' . $attachm['filename'] . '</a></p></li>';
                     }
                     $body_content .= '</ul>';
                 }
@@ -848,7 +847,7 @@ class ExaportVievPdf {
     function increaseBlockY($current_y, $add_y = 0) {
         // return true;
         $dev_text = '';
-        $dev_text .= $this->pdf->getPage().'p = ';
+        $dev_text .= $this->pdf->getPage() . 'p = ';
 
         $page_height = $this->pdf->getPageDimensions($this->first_page_for_main_report_data)['hk'] - $this->pdf->getPageDimensions($this->first_page_for_main_report_data)['bm'] - $this->pdf->getPageDimensions($this->first_page_for_main_report_data)['tm']; // from first page?
         $current_page = $this->pdf->getPage();
@@ -867,7 +866,7 @@ class ExaportVievPdf {
             $new_y = round($new_y);
 
             // if ($new_y < $this->y_top_position) {
-                $new_y = $new_y + $this->y_top_position;// + ($this->pdf->getStringHeight(100, '.') * 2);
+            $new_y = $new_y + $this->y_top_position;// + ($this->pdf->getStringHeight(100, '.') * 2);
             // $this->addDeveloperInfo('--'.round($new_y).'--', 100, $new_y);
             // }
 
@@ -883,7 +882,7 @@ class ExaportVievPdf {
             $current_y = $new_y;//$this->y_top_position;
             $this->current_y = $new_y;//$this->y_top_position; // main y position is also must be changed!
 
-            $dev_text .= ' new: '.$current_page.'p = '.$this->current_y;
+            $dev_text .= ' new: ' . $current_page . 'p = ' . $this->current_y;
         }
 
         // $this->addDeveloperInfo('added: '.$add_y, $this->pdf->GetX() - 5, $current_y);
@@ -902,7 +901,7 @@ class ExaportVievPdf {
 
     }
 
-    function addImageBySrc($src, $x, $y, $max_width = 0, $max_height = 0, $url = '', $hide = false){
+    function addImageBySrc($src, $x, $y, $max_width = 0, $max_height = 0, $url = '', $hide = false) {
         static $downloaded_images = null;
         if ($downloaded_images === null) {
             $downloaded_images = [];
@@ -966,7 +965,7 @@ class ExaportVievPdf {
     }
 
     // danger function. can return not correct result, because html is very different
-    public function getCountLinesFromHtml($html){
+    public function getCountLinesFromHtml($html) {
         $html = trim($html);
         if (!$html) {
             return 0;
@@ -1018,8 +1017,8 @@ class ExaportVievPdf {
             /*$this->pdf->Image($CFG->wwwroot.'/blocks/exaport/pix/link_external32.png',
                     $x + $w - 5, $y + $header_top_margin + ($text_height / 12), 0, $text_height / 2, '', $link_to_web_block_view
             );*/
-            $link_icon = '<img src="'.$CFG->wwwroot.'/blocks/exaport/pix/link_external32.png" />';
-            $link = '<a href="'.$link_to_web_block_view.'" style="text-decoration: none;" target="_blank">'.$link_icon.'</a>';
+            $link_icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/link_external32.png" />';
+            $link = '<a href="' . $link_to_web_block_view . '" style="text-decoration: none;" target="_blank">' . $link_icon . '</a>';
             $this->pdf->writeHTMLCell($text_height / 1.5, 0, $x + $w - 5, $y + $header_top_margin + ($text_height / 12), $link);
         }
 
@@ -1027,15 +1026,15 @@ class ExaportVievPdf {
         return $text_height;
     }
 
-    public function addLinkToBlock($link, $x, $y){
+    public function addLinkToBlock($link, $x, $y) {
         $link_height = $this->pdf->getStringHeight(100, 'link');
-        $link = '<a href="'.$link.'" target="_blank" style="text-decoration: none;">link</a>';
+        $link = '<a href="' . $link . '" target="_blank" style="text-decoration: none;">link</a>';
         $this->pdf->writeHTMLCell(0, 0, $x, $y, $link);
         // $link_height = 15;
         return $link_height;
     }
 
-    public function addSubHeadLine($headline_text, $x, $y, $w = 0, $h = 0){
+    public function addSubHeadLine($headline_text, $x, $y, $w = 0, $h = 0) {
         $this->pdf->SetFont($this->main_font_name, 'B', $this->main_font_size);
         $text_height = $this->pdf->getStringHeight($w, strip_tags($headline_text));
         $this->pdf->MultiCell($w, $h, $headline_text, 0, 'L', true, 1, $x, $y, false, 0, false, true, 0, 'T', false);
@@ -1043,12 +1042,12 @@ class ExaportVievPdf {
         return $text_height;
     }
 
-    public function setDefaultFont(){
+    public function setDefaultFont() {
         $this->pdf->SetFont($this->main_font_name, '', $this->main_font_size);
         $this->pdf->SetTextColor(30, 30, 30);
     }
 
-    public function convertHtmlToPdfHtml($html){
+    public function convertHtmlToPdfHtml($html) {
         // if (strpos($html, 'FOTOLADENFABRIK') !== false) {
         // echo '<textarea>';
         // echo $html;
@@ -1089,14 +1088,14 @@ class ExaportVievPdf {
         // remove empty tags
         // $xpath = new DOMXPath($dom);
         // foreach( $xpath->query('//*[not(node())]') as $node) {
-            // $node->parentNode->removeChild($node);
+        // $node->parentNode->removeChild($node);
         // }
 
         $text = $dom->saveHTML();
 
         // remove html wrappers
-        $trim_off_front = strpos($text,'<body>') + 6;
-        $trim_off_end = (strrpos($text,'</body>')) - strlen($text);
+        $trim_off_front = strpos($text, '<body>') + 6;
+        $trim_off_end = (strrpos($text, '</body>')) - strlen($text);
         $text = substr($text, $trim_off_front, $trim_off_end);
         $text = preg_replace("/(\r?\n){1,}/", "", $text); // delete linebreaks
         $text = trim($text);
@@ -1105,7 +1104,7 @@ class ExaportVievPdf {
         do {
             preg_match('/^<(\w+)(.*?\>)(.*)(\<\/\w+\>)$/i', $text, $matches);
             if ($matches) {
-                if ('</'.$matches[1].'>' == $matches[4] && !in_array($matches[1], ['b', 'strong', 'i'])) {
+                if ('</' . $matches[1] . '>' == $matches[4] && !in_array($matches[1], ['b', 'strong', 'i'])) {
                     $text = $matches[3];
                 } else {
                     $wrapped = false;
@@ -1126,14 +1125,14 @@ class ExaportVievPdf {
 
         // for debug
         //if (strpos($text, 'FOTOLADENFABRIK') !== false) {
-             // echo '<textarea>';
-             // echo $text;
-             // echo '</textarea>';
+        // echo '<textarea>';
+        // echo $text;
+        // echo '</textarea>';
         // }
         return $text;
     }
 
-    public function closeNonClosedHtmlTags($html){
+    public function closeNonClosedHtmlTags($html) {
         preg_match_all('#<([a-z]+)(?: .*)?(?<![/|/ ])>#iU', $html, $result);
         $openedtags = $result[1];
         preg_match_all('#</([a-z]+)>#iU', $html, $result);
@@ -1151,7 +1150,7 @@ class ExaportVievPdf {
                 continue;
             }
             if (!in_array($openedtags[$i], $closedtags)) {
-                $html .= '</'.$openedtags[$i].'>';
+                $html .= '</' . $openedtags[$i] . '>';
             } else {
                 unset($closedtags[array_search($openedtags[$i], $closedtags)]);
             }
@@ -1159,7 +1158,7 @@ class ExaportVievPdf {
         return $html;
     }
 
-    public function writeHTMLCellReturnHeight($column_width, $x, $y, $text, $align = 'J'){
+    public function writeHTMLCellReturnHeight($column_width, $x, $y, $text, $align = 'J') {
         $html_height = 0;
         $current_page_id = $this->pdf->getPage();
         $y_before_html = $this->pdf->GetY();
@@ -1199,11 +1198,11 @@ class ExaportVievPdf {
         return $html_height;
     }
 
-    public function addDefaultPage(){
+    public function addDefaultPage() {
         $this->pdf->AddPage($this->orientation, $this->format, true);
     }
 
-    public function addFirstPageHeader(){
+    public function addFirstPageHeader() {
 
         $this->pdf->SetFont($this->main_font_name, 'B', $this->main_font_size);
 
@@ -1227,23 +1226,23 @@ class ExaportVievPdf {
 
     }
 
-    public function fillViewMetaData($view){
+    public function fillViewMetaData($view) {
         $this->pdf->fillMetaData($view);
     }
 
-    public function getViewMetaData(){
+    public function getViewMetaData() {
         return $this->pdf->getViewMetaData();
     }
 
-    public function getWorkingPage(){
+    public function getWorkingPage() {
         return $this->pdf->getWorkingPage();
     }
 
-    public function setWorkingPage($page){
+    public function setWorkingPage($page) {
         $this->pdf->setWorkingPage($page);
     }
 
-    public function addDeveloperInfo($text, $x = null, $y = null){
+    public function addDeveloperInfo($text, $x = null, $y = null) {
         // get current position
         $current_y = $this->pdf->GetY();
         $current_x = $this->pdf->GetX();
@@ -1262,8 +1261,7 @@ class ExaportVievPdf {
         $this->pdf->SetX($current_x);
         $this->pdf->SetY($current_y, false);
     }
-
-?>
+}
 
 
 

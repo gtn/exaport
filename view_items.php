@@ -1349,9 +1349,11 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
         echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
             . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '
             . get_string("category", "block_exaport") . '</a>';
-        echo '<a class="dropdown-item" href="' . $createviewurl . '">'
-            . block_exaport_fontawesome_icon('layer-group', 'solid', 1) . ' '
-            . get_string("add_view_entry", "block_exaport") . '</a>';
+        if ($CFG->block_exaport_enable_views) {
+            echo '<a class="dropdown-item" href="' . $createviewurl . '">'
+                . block_exaport_fontawesome_icon('layer-group', 'solid', 1) . ' '
+                . get_string("add_view_entry", "block_exaport") . '</a>';
+        }
     }
     echo '</div>';
     echo '</div>';
@@ -1363,7 +1365,7 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
  * Called from both the flat-layout filter bar and the folder-layout controls so
  * there is no duplicated rendering logic.
  *
- * @param string $selectedsort  Currently active sort value in "key-dir" format, e.g. "date-desc".
+ * @param string $selectedsort Currently active sort value in "key-dir" format, e.g. "date-desc".
  * @return string               HTML fragment (two <div> elements: search input + sort select).
  */
 function block_exaport_render_search_and_sort_controls($selectedsort) {
@@ -1381,10 +1383,10 @@ function block_exaport_render_search_and_sort_controls($selectedsort) {
     $sortid = 'exaport-sort-select';
     $opts = [
         'date-desc' => get_string('date', 'block_exaport') . ' ↓',
-        'date-asc'  => get_string('date', 'block_exaport') . ' ↑',
+        'date-asc' => get_string('date', 'block_exaport') . ' ↑',
         // 'type-asc'  => get_string('type', 'block_exaport') . ' A-Z',
         // 'type-desc' => get_string('type', 'block_exaport') . ' Z-A',
-        'name-asc'  => get_string('name', 'block_exaport') . ' A-Z',
+        'name-asc' => get_string('name', 'block_exaport') . ' A-Z',
         'name-desc' => get_string('name', 'block_exaport') . ' Z-A',
     ];
     $html .= '<div style="min-width: 180px; max-width: 250px;">';
@@ -1412,7 +1414,7 @@ function block_exaport_render_entrytype_control($entrytype) {
         . get_string('filter_entry_type', 'block_exaport') . '</label>';
     $html .= '<select id="exaport-entrytype-select" class="form-control custom-select">';
     foreach (['all' => 'filter_entry_type_all', 'item' => 'filter_entry_type_items',
-              'view' => 'filter_entry_type_views'] as $val => $key) {
+                 'view' => 'filter_entry_type_views'] as $val => $key) {
         $html .= '<option value="' . $val . '"' . ($entrytype === $val ? ' selected="selected"' : '')
             . '>' . get_string($key, 'block_exaport') . '</option>';
     }
@@ -1426,9 +1428,9 @@ function block_exaport_render_entrytype_control($entrytype) {
  * so this only needs to provide the plain option data.
  *
  * @param array $categoriesbyparent Map of parent category id to array of child category objects.
- * @param int   $currentcategoryid  Currently selected category id.
- * @param int   $pid                Parent category id to start from.
- * @param int   $level              Current recursion depth (used for indentation).
+ * @param int $currentcategoryid Currently selected category id.
+ * @param int $pid Parent category id to start from.
+ * @param int $level Current recursion depth (used for indentation).
  */
 function block_exaport_print_category_select($categoriesbyparent, $currentcategoryid, $pid = 0, $level = 0) {
     if (!isset($categoriesbyparent[$pid])) {
@@ -1455,8 +1457,8 @@ function block_exaport_print_category_select($categoriesbyparent, $currentcatego
  * pre-selected category id. Extracted to avoid repeating the same js_call_amd block
  * at every call site.
  *
- * @param array $childrenmap         Map of parent category id to array of child category ids.
- * @param int   $preselectedcategoryid Optional pre-selected category id.
+ * @param array $childrenmap Map of parent category id to array of child category ids.
+ * @param int $preselectedcategoryid Optional pre-selected category id.
  */
 function block_exaport_require_filter_js($childrenmap = [], $preselectedcategoryid = 0) {
     global $PAGE;
@@ -1474,14 +1476,14 @@ function block_exaport_require_filter_js($childrenmap = [], $preselectedcategory
  * Returns an html_table_row with data-* attributes for JS filter/sort.
  * Used from both flat mode (with category ids) and folder mode (without).
  *
- * @param stdClass $view         View record decorated by view_helper.
- * @param int      $courseid     Course id.
- * @param string   $type         Access type ('mine', 'shared', 'extern_category', …).
- * @param array    $viewcatids   List of category ids for the category filter (flat mode).
+ * @param stdClass $view View record decorated by view_helper.
+ * @param int $courseid Course id.
+ * @param string $type Access type ('mine', 'shared', 'extern_category', …).
+ * @param array $viewcatids List of category ids for the category filter (flat mode).
  * @return html_table_row
  */
 function block_exaport_render_view_table_row(\stdClass $view, int $courseid, string $type,
-                                              array $viewcatids = []): \html_table_row {
+    array $viewcatids = []): \html_table_row {
     global $CFG;
     $viewurl = !empty($view->extern_view_url) ? $view->extern_view_url
         : $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
@@ -1634,8 +1636,8 @@ function block_exaport_category_path($category, $courseid = 1, $currentcategoryP
  * Renders: [user icon] username / [folder icon] ancestor / ... / [folder icon] current (active).
  *
  * @param stdClass $currentcategory
- * @param array    $categories    All of the owner's categories (id => stdClass), with ->url set.
- * @param stdClass $selecteduser  Sharing user, with ->categories (directly shared ids) and ->name.
+ * @param array $categories All of the owner's categories (id => stdClass), with ->url set.
+ * @param stdClass $selecteduser Sharing user, with ->categories (directly shared ids) and ->name.
  * @return string HTML breadcrumb matching the classes used by block_exaport_category_path().
  */
 function block_exaport_shared_category_path($currentcategory, $categories, $selecteduser) {
@@ -1922,15 +1924,15 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
 /**
  * Render a view (collection) card. Dispatches to the right template based on the active layout.
  *
- * @param \stdClass $view       The view record decorated by view_helper.
- * @param int       $courseid   The course id.
- * @param string    $type       Access type ('mine').
- * @param int       $categoryid The current category id.
- * @param bool      $foldermode Whether in folder (no category badges) or flat mode (with badges).
+ * @param \stdClass $view The view record decorated by view_helper.
+ * @param int $courseid The course id.
+ * @param string $type Access type ('mine').
+ * @param int $categoryid The current category id.
+ * @param bool $foldermode Whether in folder (no category badges) or flat mode (with badges).
  * @return string               Rendered HTML.
  */
 function block_exaport_view_list_item(\stdClass $view, int $courseid, string $type, int $categoryid = 0,
-                                      bool $foldermode = false): string {
+    bool $foldermode = false): string {
     global $CFG, $PAGE;
     $template = block_exaport_used_layout();
     if ($template === 'moodle_bootstrap') {
@@ -1940,7 +1942,7 @@ function block_exaport_view_list_item(\stdClass $view, int $courseid, string $ty
     }
     // Fallback for non-bootstrap layouts: simple link.
     $url = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
-           . '&access=id/' . $view->userid . '-' . $view->id;
+        . '&access=id/' . $view->userid . '-' . $view->id;
     $viewcatids = [];
     if (!empty($view->flatcategories) && is_array($view->flatcategories)) {
         foreach ($view->flatcategories as $cat) {
@@ -1948,7 +1950,7 @@ function block_exaport_view_list_item(\stdClass $view, int $courseid, string $ty
         }
     }
     return '<div class="excomdos_tile excomdos_tile_item exaport-flat-item" data-entry-type="view" data-item-name="'
-           . s(strtolower($view->name)) . '" data-item-type="view" data-category-ids="' . s(implode(',', $viewcatids)) . '" data-item-date="'
-           . (int)$view->timemodified . '"><a href="' . s($url) . '">'
-           . format_string($view->name) . '</a></div>';
+        . s(strtolower($view->name)) . '" data-item-type="view" data-category-ids="' . s(implode(',', $viewcatids)) . '" data-item-date="'
+        . (int)$view->timemodified . '"><a href="' . s($url) . '">'
+        . format_string($view->name) . '</a></div>';
 }

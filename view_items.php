@@ -1453,24 +1453,6 @@ function block_exaport_print_category_select($categoriesbyparent, $currentcatego
 }
 
 /**
- * Requires the flat_filter AMD module and passes it the category children map and
- * pre-selected category id. Extracted to avoid repeating the same js_call_amd block
- * at every call site.
- *
- * @param array $childrenmap Map of parent category id to array of child category ids.
- * @param int $preselectedcategoryid Optional pre-selected category id.
- */
-function block_exaport_require_filter_js($childrenmap = [], $preselectedcategoryid = 0) {
-    global $PAGE;
-    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
-        get_string('clearAllFilers', 'block_exaport'),
-        get_string('searchcategory', 'block_exaport'),
-        $childrenmap,
-        (int)$preselectedcategoryid,
-    ]);
-}
-
-/**
  * Renders a single view (collection) row for the details table.
  *
  * Returns an html_table_row with data-* attributes for JS filter/sort.

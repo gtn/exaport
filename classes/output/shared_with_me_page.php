@@ -19,6 +19,7 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core_text;
 use renderable;
 use renderer_base;
 use templatable;

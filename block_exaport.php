@@ -105,6 +105,20 @@ class block_exaport extends block_list {
                 $icon . block_exaport_get_string('shared_categories') . '</a>';
         }
 
+        if (!empty($CFG->block_exaport_enable_my_shares)) {
+            $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/shared_views.svg' . '" width="16" height="16" class="icon" alt="" />';
+            $this->content->items[] = '<a title="' . block_exaport_get_string('my_shares') . '" ' .
+                ' href="' . $CFG->wwwroot . '/blocks/exaport/my_shares.php?courseid=' . $COURSE->id . '">' .
+                $icon . block_exaport_get_string('my_shares') . '</a>';
+        }
+
+        if (!empty($CFG->block_exaport_enable_shared_with_me)) {
+            $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/shared_views.svg' . '" width="16" height="16" class="icon" alt="" />';
+            $this->content->items[] = '<a title="' . block_exaport_get_string('shared_with_me') . '" ' .
+                ' href="' . $CFG->wwwroot . '/blocks/exaport/shared_with_me.php?courseid=' . $COURSE->id . '">' .
+                $icon . block_exaport_get_string('shared_with_me') . '</a>';
+        }
+
         if (!empty($CFG->block_exaport_enable_importexport)) {
             $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/importexport.svg' . '" width="16" height="16" class="icon" alt="" />';
             $this->content->items[] = '<a title="' . block_exaport_get_string('importexport') . '" ' .

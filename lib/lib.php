@@ -1244,7 +1244,7 @@ function block_exaport_share_view_to_teachers($viewid) {
     global $DB, $COURSE, $USER;
     if ($viewid > 0) {
         $allteachers = block_exaport_get_course_teachers();
-        $allsharedusers = block_exaport_get_shared_users($viewid);
+        $allsharedusers = array_keys(exaport_get_view_shared_users($viewid));
         $diff = array_diff($allteachers, $allsharedusers);
         $view = $DB->get_record_sql('SELECT * FROM {block_exaportview} WHERE id = ?', array('id' => $viewid));
         if (!$view->shareall) {
@@ -1771,29 +1771,6 @@ function block_exaport_get_students_for_teacher($userid = null, $courseid = 0) {
     }
     return $students;
 }
-
-/**
- * Function gets all shared users
- *
- * @param $viewid
- * @return array
- */
-function block_exaport_get_shared_users($viewid) {
-    global $DB, $USER;
-    $sharedusers = array();
-    if ($viewid > 0) {
-        $query = "SELECT userid FROM {block_exaportviewshar} s WHERE s.viewid=" . $viewid;
-        $users = $DB->get_records_sql($query);
-        foreach ($users as $user) {
-            $sharedusers[] = $user->userid;
-        };
-    };
-    sort($sharedusers);
-
-    return $sharedusers;
-}
-
-;
 
 function block_exaport_file_userquotecheck($addingfiles = 0, $id = 0) {
     global $DB, $USER, $CFG;

@@ -24,7 +24,7 @@
         hasrows           - Boolean: at least one share row
         rows              - List of rows:
                               typeicon (pre-rendered HTML), typelabel, title, titlenamelower,
-                              url, ownername, coursename, sharemodetext,
+                              url, ownername, coursename, sharemodetext, sharetooltip, hastooltip,
                               commentcount, hascomments
         nothingtext       - Localised text shown when nothing is shared with the user
         headertitle       - Localised column header "Title"
@@ -65,7 +65,18 @@
                         <td>{{typelabel}}</td>
                         <td>{{ownername}}</td>
                         <td>{{coursename}}</td>
-                        <td>{{sharemodetext}}</td>
+                        <td>
+                            {{#hastooltip}}
+                            <span data-bs-toggle="tooltip"
+                                  data-bs-html="true"
+                                  data-bs-title="{{sharetooltip}}"
+                                  data-toggle="tooltip"
+                                  title="{{sharetooltip}}">
+                                {{sharemodetext}}
+                            </span>
+                            {{/hastooltip}}
+                            {{^hastooltip}}{{sharemodetext}}{{/hastooltip}}
+                        </td>
                         <td>{{#hascomments}}{{commentcount}}{{/hascomments}}</td>
                     </tr>
                 {{/rows}}

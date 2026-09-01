@@ -62,6 +62,10 @@ $usercats = block_exaport_get_group_share_categories($USER->id);
 
 $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
 $categories = block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort);
+$shareinfos = \block_exaport\share_info::resolve_many('category', $categories);
+foreach ($categories as $category) {
+    $category->shareinfo = $shareinfos[(int)$category->id];
+}
 
 if ($CFG->block_exaport_copy_category_to_my && $action == 'copy') {
     $categoryid = optional_param('categoryid', 0, PARAM_INT);
@@ -333,78 +337,15 @@ echo block_exaport_wrapperdivend();
 echo block_exaport_print_footer();
 
 function block_exaport_get_shared_with_text($structure, $target = '') {
-    global $DB;
-    static $js_code = null;
-    $shared = "";
-    if ($js_code === null) {
-        if ($target == 'categories') {
-            $js_code = '
-                <script>
-                function toggleUsersList(elId) {
-                    var x = document.getElementById(elId);
-                    if (x.style.display === "none") {
-                        x.style.display = "block";
-                    } else {
-                        x.style.display = "none";
-                    };
-                    return false;
-                }
-                </script>
-            ';
-            $shared .= $js_code;
-        }
+    $summary = block_exaport_get_share_summary($structure->shareinfo);
+    if (!$structure->shareinfo->is_shared()) {
+        return $summary;
     }
-
-    if ($structure->cnt_shared_groups == 1) {
-        $shared .= block_exaport_get_string('sharedwith_group');
-    } else if ($structure->cnt_shared_groups > 1) {
-        $shared .= block_exaport_get_string('sharedwith_group_cnt', $structure->cnt_shared_groups);
-        if ($target == 'categories') {
-            $shared .= '&nbsp;(<a onClick="return toggleUsersList(\'groupList' . $structure->id . '\')" href="">';
-            $shared .= block_exaport_get_string('list');
-            $shared .= '</a>)';
-            // add list of shared users
-            $sharedgroups = $DB->get_records_sql(
-                'SELECT c.*
-                FROM {block_exaportcatgroupshar} cgmm
-                LEFT JOIN {cohort} c ON c.id = cgmm.groupid
-                WHERE cgmm.catid = ?
-                ORDER BY c.name',
-                [$structure->id]
-            );
-            $shared .= '<ul class="exaport-shared-list" style="display: none;" id="groupList' . $structure->id . '">';
-            foreach ($sharedgroups as $group) {
-                $shared .= '<li>' . $group->name . '</li>';
-            }
-            $shared .= '</ul>';
-        }
-    } else if ($structure->shareall) {
-        $shared .= block_exaport_get_string('sharedwith_shareall');
-    } else if ($structure->cnt_shared_users > 1) {
-        $shared .= block_exaport_get_string('sharedwith_user_cnt', $structure->cnt_shared_users);
-        if ($target == 'categories') {
-            $shared .= '&nbsp;(<a onClick="return toggleUsersList(\'usersList' . $structure->id . '\')" href="">';
-            $shared .= block_exaport_get_string('list');
-            $shared .= '</a>)';
-            // add list of shared users
-            $sharedusers = $DB->get_records_sql(
-                'SELECT u.*
-                FROM {block_exaportcatshar} csmm
-                LEFT JOIN {user} u ON u.id = csmm.userid
-                WHERE csmm.catid = ?
-                ORDER BY u.firstname, u.lastname',
-                [$structure->id]
-            );
-            $shared .= '<ul class="exaport-shared-list" style="display: none;" id="usersList' . $structure->id . '">';
-            foreach ($sharedusers as $user) {
-                $shared .= '<li>' . fullname($user) . '</li>';
-            }
-            $shared .= '</ul>';
-        }
-    } else if ($structure->cnt_shared_users) {
-        $shared .= block_exaport_get_string('sharedwith_onlyme');
-    }
-    return $shared;
+    return html_writer::tag('span', $summary, [
+        'data-bs-toggle' => 'tooltip',
+        'data-bs-html' => 'true',
+        'data-bs-title' => block_exaport_get_share_tooltip($structure->shareinfo),
+    ]);
 }
 
 // Shared structure as a tree.

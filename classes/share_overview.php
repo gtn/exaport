@@ -53,13 +53,10 @@ class share_overview {
     /**
      * Build a \block_exaport\share_info for any shareable entity type (item, category, view).
      *
-     * For categories the method delegates to category_helper::build_share_info() to avoid
-     * duplication. For items and views it queries the respective share tables using the same
-     * patterns as exaport_get_view_shared_users() / exaport_get_category_shared_users() in
-     * lib/sharelib.php.
+     * Compatibility wrapper around the canonical share_info resolver.
      *
-     * The $row must contain at minimum: shareall, externaccess.
-     * For categories it must also contain id, internshare (passed through to category_helper).
+     * The $row must contain at minimum shareall and externaccess. For categories it must
+     * also contain internshare.
      *
      * @param string    $entity_type 'item', 'category', or 'view'.
      * @param int       $id          Entity primary key.
@@ -67,62 +64,8 @@ class share_overview {
      * @return \block_exaport\share_info
      */
     public static function build_share_info(string $entity_type, int $id, \stdClass $row): \block_exaport\share_info {
-        global $DB;
-
-        if ($entity_type === 'category') {
-            // Delegate to the existing helper which already handles cohort resolution.
-            return \block_exaport\category_helper::build_share_info($row);
-        }
-
-        $share = new \block_exaport\share_info();
-        $share->external = !empty($row->externaccess);
-
-        if (!empty($row->shareall)) {
-            $share->all = true;
-            return $share;
-        }
-
-        // Table names depend on entity type.
-        if ($entity_type === 'item') {
-            $usertable  = 'block_exaportitemshar';
-            $grouptable = 'block_exaportitemgroupshar';
-            $idcol      = 'itemid';
-        } else {
-            // view
-            $usertable  = 'block_exaportviewshar';
-            $grouptable = 'block_exaportviewgroupshar';
-            $idcol      = 'viewid';
-        }
-
-        // Resolve shared user full-names (same pattern as exaport_get_view_shared_users()).
-        $userids = $DB->get_fieldset_select($usertable, 'userid', "$idcol = ?", [$id]);
-        if ($userids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($userids);
-            $users = $DB->get_records_sql(
-                "SELECT " . $DB->sql_fullname() . " AS name FROM {user} u"
-                . " WHERE u.id $insql AND u.deleted = 0 ORDER BY name",
-                $inparams
-            );
-            foreach ($users as $u) {
-                $share->users[] = $u->name;
-            }
-        }
-
-        // Resolve shared cohort names (same pattern as category_helper::build_share_info()).
-        // Note: groupid stores cohort ids ({cohort}.id), mirroring the category share tables.
-        $groupids = $DB->get_fieldset_select($grouptable, 'groupid', "$idcol = ?", [$id]);
-        if ($groupids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($groupids);
-            $groups = $DB->get_records_sql(
-                "SELECT c.name FROM {cohort} c WHERE c.id $insql ORDER BY c.name",
-                $inparams
-            );
-            foreach ($groups as $g) {
-                $share->groups[] = $g->name;
-            }
-        }
-
-        return $share;
+        $row->id = $id;
+        return \block_exaport\share_info::resolve($entity_type, $row);
     }
 
     /**
@@ -209,6 +152,7 @@ class share_overview {
             $rows[] = $view;
         }
 
+        self::attach_share_info($rows);
         return $rows;
     }
 
@@ -218,127 +162,105 @@ class share_overview {
      *
      * @param int $userid
      * @return array list of stdClass rows: entity_type, id, title, type (items only),
-     *               owner_userid, courseid, share_mode, comment_cnt
+     *               owner_userid, courseid, shareinfo, comment_cnt
      */
     public static function get_shared_with_me(int $userid): array {
         global $DB;
 
         $rows = [];
         $usergroupids = array_keys(block_exaport_get_user_cohorts($userid));
+        if ($usergroupids) {
+            [$groupinsql, $groupparams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_QM);
+        } else {
+            $groupinsql = '';
+            $groupparams = [];
+        }
+        $shareallsql = block_exaport_shareall_enabled() ? '%s.shareall = 1 OR ' : '';
 
-        // Items shared directly — include type for the type icon and comment count.
+        $itemgroupsql = $groupinsql
+            ? "EXISTS (SELECT 1 FROM {block_exaportitemgroupshar} gs
+                        WHERE gs.itemid = i.id AND gs.groupid {$groupinsql})"
+            : '1 = 0';
+        $now = time();
         $items = $DB->get_records_sql(
             "SELECT i.id, i.name AS title, i.type, i.userid AS owner_userid, i.courseid,
-                    'user' AS share_mode,
-                    COUNT(DISTINCT com.id) AS comment_cnt
-               FROM {block_exaportitemshar} ishar
-               JOIN {block_exaportitem} i ON i.id = ishar.itemid
+                    i.shareall, i.externaccess, COUNT(DISTINCT com.id) AS comment_cnt
+               FROM {block_exaportitem} i
                JOIN {user} u ON u.id = i.userid
-               LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
-              WHERE ishar.userid = ? AND u.deleted = 0
-                AND (ishar.timestart IS NULL OR ishar.timestart = 0 OR ishar.timestart <= ?)
-                AND (ishar.timeend IS NULL OR ishar.timeend = 0 OR ishar.timeend >= ?)
-           GROUP BY i.id, i.name, i.type, i.userid, i.courseid",
-            [$userid, time(), time()]
+          LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
+              WHERE u.deleted = 0 AND i.userid != ? AND (" . sprintf($shareallsql, 'i') . "
+                    EXISTS (SELECT 1 FROM {block_exaportitemshar} us
+                             WHERE us.itemid = i.id AND us.userid = ?
+                               AND (us.timestart IS NULL OR us.timestart = 0 OR us.timestart <= ?)
+                               AND (us.timeend IS NULL OR us.timeend = 0 OR us.timeend >= ?))
+                    OR {$itemgroupsql})
+           GROUP BY i.id, i.name, i.type, i.userid, i.courseid, i.shareall, i.externaccess",
+            array_merge([$userid, $userid, $now, $now], $groupparams)
         );
         foreach ($items as $item) {
             $item->entity_type = 'item';
-            $rows[$item->entity_type . '_' . $item->id] = $item;
+            $rows[] = $item;
         }
 
-        if ($usergroupids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($usergroupids);
-            $groupitems = $DB->get_records_sql(
-                "SELECT i.id, i.name AS title, i.type, i.userid AS owner_userid, i.courseid,
-                        'group' AS share_mode,
-                        COUNT(DISTINCT com.id) AS comment_cnt
-                   FROM {block_exaportitemgroupshar} igshar
-                   JOIN {block_exaportitem} i ON i.id = igshar.itemid
-                   JOIN {user} u ON u.id = i.userid
-                   LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
-                  WHERE igshar.groupid $insql AND u.deleted = 0
-               GROUP BY i.id, i.name, i.type, i.userid, i.courseid",
-                $inparams
-            );
-            foreach ($groupitems as $item) {
-                $item->entity_type = 'item';
-                $key = $item->entity_type . '_' . $item->id;
-                if (!isset($rows[$key])) {
-                    $rows[$key] = $item;
-                }
-            }
-        }
-
-        // Categories shared directly.
+        $categorygroupsql = $groupinsql
+            ? "EXISTS (SELECT 1 FROM {block_exaportcatgroupshar} gs
+                        WHERE gs.catid = c.id AND gs.groupid {$groupinsql})"
+            : '1 = 0';
         $categories = $DB->get_records_sql(
             "SELECT c.id, c.name AS title, '' AS type, c.userid AS owner_userid, c.courseid,
-                    'user' AS share_mode, 0 AS comment_cnt
-               FROM {block_exaportcatshar} cshar
-               JOIN {block_exaportcate} c ON c.id = cshar.catid
+                    c.shareall, c.externaccess, c.internshare, 0 AS comment_cnt
+               FROM {block_exaportcate} c
                JOIN {user} u ON u.id = c.userid
-              WHERE cshar.userid = ? AND u.deleted = 0 AND c.internshare = 1",
-            [$userid]
+              WHERE u.deleted = 0 AND c.userid != ? AND c.internshare = 1
+                AND (" . sprintf($shareallsql, 'c') . "
+                    EXISTS (SELECT 1 FROM {block_exaportcatshar} us
+                             WHERE us.catid = c.id AND us.userid = ?)
+                    OR {$categorygroupsql})",
+            array_merge([$userid, $userid], $groupparams)
         );
         foreach ($categories as $category) {
             $category->entity_type = 'category';
-            $rows[$category->entity_type . '_' . $category->id] = $category;
+            $rows[] = $category;
         }
 
-        if ($usergroupids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($usergroupids);
-            $groupcategories = $DB->get_records_sql(
-                "SELECT c.id, c.name AS title, '' AS type, c.userid AS owner_userid, c.courseid,
-                        'group' AS share_mode, 0 AS comment_cnt
-                   FROM {block_exaportcatgroupshar} cgshar
-                   JOIN {block_exaportcate} c ON c.id = cgshar.catid
-                   JOIN {user} u ON u.id = c.userid
-                  WHERE cgshar.groupid $insql AND u.deleted = 0 AND c.internshare = 1",
-                $inparams
-            );
-            foreach ($groupcategories as $category) {
-                $category->entity_type = 'category';
-                $key = $category->entity_type . '_' . $category->id;
-                if (!isset($rows[$key])) {
-                    $rows[$key] = $category;
-                }
-            }
-        }
-
-        // Views shared directly.
+        $viewgroupsql = $groupinsql
+            ? "EXISTS (SELECT 1 FROM {block_exaportviewgroupshar} gs
+                        WHERE gs.viewid = v.id AND gs.groupid {$groupinsql})"
+            : '1 = 0';
         $views = $DB->get_records_sql(
             "SELECT v.id, v.name AS title, '' AS type, v.userid AS owner_userid,
-                    0 AS courseid, 'user' AS share_mode, 0 AS comment_cnt
-               FROM {block_exaportviewshar} vshar
-               JOIN {block_exaportview} v ON v.id = vshar.viewid
+                    0 AS courseid, v.shareall, v.externaccess, 0 AS comment_cnt
+               FROM {block_exaportview} v
                JOIN {user} u ON u.id = v.userid
-              WHERE vshar.userid = ? AND u.deleted = 0",
-            [$userid]
+              WHERE u.deleted = 0 AND v.userid != ? AND (" . sprintf($shareallsql, 'v') . "
+                    EXISTS (SELECT 1 FROM {block_exaportviewshar} us
+                             WHERE us.viewid = v.id AND us.userid = ?)
+                    OR {$viewgroupsql})",
+            array_merge([$userid, $userid], $groupparams)
         );
         foreach ($views as $view) {
             $view->entity_type = 'view';
-            $rows[$view->entity_type . '_' . $view->id] = $view;
+            $rows[] = $view;
         }
 
-        if ($usergroupids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($usergroupids);
-            $groupviews = $DB->get_records_sql(
-                "SELECT v.id, v.name AS title, '' AS type, v.userid AS owner_userid,
-                        0 AS courseid, 'group' AS share_mode, 0 AS comment_cnt
-                   FROM {block_exaportviewgroupshar} vgshar
-                   JOIN {block_exaportview} v ON v.id = vgshar.viewid
-                   JOIN {user} u ON u.id = v.userid
-                  WHERE vgshar.groupid $insql AND u.deleted = 0",
-                $inparams
-            );
-            foreach ($groupviews as $view) {
-                $view->entity_type = 'view';
-                $key = $view->entity_type . '_' . $view->id;
-                if (!isset($rows[$key])) {
-                    $rows[$key] = $view;
-                }
+        self::attach_share_info($rows);
+        return $rows;
+    }
+
+    /**
+     * Attach canonical, batch-resolved share information to overview rows.
+     *
+     * @param array $rows Rows to decorate
+     */
+    private static function attach_share_info(array &$rows): void {
+        foreach (['item', 'category', 'view'] as $entitytype) {
+            $entities = array_filter($rows, function($row) use ($entitytype) {
+                return $row->entity_type === $entitytype;
+            });
+            $resolved = \block_exaport\share_info::resolve_many($entitytype, $entities);
+            foreach ($entities as $entity) {
+                $entity->shareinfo = $resolved[(int)$entity->id];
             }
         }
-
-        return array_values($rows);
     }
 }

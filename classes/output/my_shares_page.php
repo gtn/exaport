@@ -19,6 +19,7 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core_text;
 use renderable;
 use renderer_base;
 use templatable;
@@ -60,7 +61,8 @@ class my_shares_page implements renderable, templatable {
     public function export_for_template(renderer_base $output): array {
         $exportedrows = [];
         foreach ($this->rows as $row) {
-            $share   = \block_exaport\share_overview::build_share_info($row->entity_type, (int)$row->id, $row);
+            $share = $row->shareinfo ??
+                \block_exaport\share_overview::build_share_info($row->entity_type, (int)$row->id, $row);
             $tooltip = block_exaport_get_share_tooltip($share);
             $exportedrows[] = [
                 'typeicon'       => $this->build_type_icon($row),
@@ -69,7 +71,7 @@ class my_shares_page implements renderable, templatable {
                 'titlenamelower' => core_text::strtolower(strip_tags(format_string($row->title))),
                 'editurl'        => $this->build_edit_url($row),
                 'shareurl'       => $this->build_share_url($row),
-                'sharedwithtext' => $this->build_shared_with_text($row),
+                'sharedwithtext' => block_exaport_get_share_summary($share),
                 'sharetooltip'   => $tooltip,
                 'hastooltip'     => $share->is_shared(),
                 'commentcount'   => (int)($row->comment_cnt ?? 0),
@@ -160,24 +162,4 @@ class my_shares_page implements renderable, templatable {
         }
     }
 
-    /**
-     * Build the human-readable "shared with" summary text for a row.
-     *
-     * @param \stdClass $row
-     * @return string
-     */
-    protected function build_shared_with_text(\stdClass $row): string {
-        if (!empty($row->shareall)) {
-            return get_string('sharedwith_shareall', 'block_exaport');
-        }
-        $total = (int)($row->cnt_shared_users ?? 0) + (int)($row->cnt_shared_groups ?? 0);
-        if ($total > 0) {
-            return get_string('sharedwith_cnt', 'block_exaport', $total);
-        }
-        if (!empty($row->externaccess)) {
-            return get_string('sharedwith_shareexternal', 'block_exaport');
-        }
-
-        return '';
-    }
 }

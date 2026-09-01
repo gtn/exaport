@@ -220,7 +220,7 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                     $allteachers = block_exaport_get_course_teachers();
                     // If view is editing.
                     if ($this->_customdata['view']->id > 0) {
-                        $allsharedusers = block_exaport_get_shared_users($this->_customdata['view']->id);
+                        $allsharedusers = array_keys(exaport_get_view_shared_users($this->_customdata['view']->id));
                         $diff = array_diff($allteachers, $allsharedusers);
                         // If there is teacher which does not share.
                         if ((count($allteachers) > 0) && (count($diff) > 0)) {

@@ -87,6 +87,10 @@ $views = $DB->get_records_sql("
     GROUP BY
         {$viewcolumns}, u.firstname, u.lastname, u.picture
     $sqlsort", [$USER->id, $USER->id]);
+$shareinfos = \block_exaport\share_info::resolve_many('view', $views);
+foreach ($views as $view) {
+    $view->shareinfo = $shareinfos[(int)$view->id];
+}
 
 function exaport_search_views($views, $column, $value) {
     $viewsfound = array();
@@ -265,16 +269,13 @@ echo block_exaport_wrapperdivend();
 echo block_exaport_print_footer();
 
 function block_exaport_get_shared_with_text($view) {
-    $shared = "";
-    if ($view->shareall == 1) {
-        $shared = block_exaport_get_string('sharedwith_shareall');
-    } else if ($view->cnt_shared_groups) {
-        $shared = block_exaport_get_string('sharedwith_group');
-    } else if ($view->cnt_shared_users > 1) {
-        $shared = block_exaport_get_string('sharedwith_user_cnt', $view->cnt_shared_users);
-    } else if ($view->cnt_shared_users) {
-        $shared = block_exaport_get_string('sharedwith_onlyme');
+    $summary = block_exaport_get_share_summary($view->shareinfo);
+    if (!$view->shareinfo->is_shared()) {
+        return $summary;
     }
-
-    return $shared;
+    return html_writer::tag('span', $summary, [
+        'data-bs-toggle' => 'tooltip',
+        'data-bs-html' => 'true',
+        'data-bs-title' => block_exaport_get_share_tooltip($view->shareinfo),
+    ]);
 }

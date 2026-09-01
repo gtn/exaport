@@ -131,7 +131,7 @@ if (!$views) {
         } else if ($view->shareall == 2 && block_exaport_shareall_enabled()) {
             // Read groups.
             $query = "SELECT name" .
-                " FROM {groups} g," .
+                " FROM {cohort} g," .
                 " {block_exaportviewgroupshar} vshar WHERE g.id=vshar.groupid AND vshar.viewid=?" .
                 " ORDER BY name";
             $groups = $DB->get_records_sql($query, array($view->id));

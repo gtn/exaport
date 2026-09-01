@@ -69,6 +69,34 @@ namespace {
         return implode($html ? '<br><br>' : ' | ', $lines);
     }
 
+    /**
+     * Build the short sharing summary used by sharing overview pages.
+     *
+     * @param \block_exaport\share_info $share Resolved sharing detail
+     * @return string
+     */
+    function block_exaport_get_share_summary(\block_exaport\share_info $share): string {
+        if ($share->all) {
+            return block_exaport_get_string('sharedwith_shareall');
+        }
+        if (count($share->groups) > 1) {
+            return block_exaport_get_string('sharedwith_group_cnt', count($share->groups));
+        }
+        if ($share->groups) {
+            return block_exaport_get_string('sharedwith_group');
+        }
+        if (count($share->users) > 1) {
+            return block_exaport_get_string('sharedwith_user_cnt', count($share->users));
+        }
+        if ($share->users) {
+            return block_exaport_get_string('sharedwith_onlyme');
+        }
+        if ($share->external) {
+            return block_exaport_get_string('sharedwith_shareexternal');
+        }
+        return '';
+    }
+
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
         global $DB;
 

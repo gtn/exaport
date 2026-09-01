@@ -140,6 +140,22 @@ final class share_overview_test extends \advanced_testcase {
     }
 
     /**
+     * Item-level share-all audience is also authorized by the shared-item access check.
+     */
+    public function test_item_shareall_grants_shared_item_access(): void {
+        global $USER;
+
+        $recipient = $this->getDataGenerator()->create_user();
+        $USER = $recipient;
+        $itemid = $this->create_item($this->owner, 1);
+
+        $this->assertSame(
+            (int)$this->owner->id,
+            (int)block_exaport_can_user_access_shared_item($recipient->id, $itemid)
+        );
+    }
+
+    /**
      * Item externaccess flag → share->external === true.
      */
     public function test_item_externaccess(): void {
@@ -288,8 +304,9 @@ final class share_overview_test extends \advanced_testcase {
      */
     public function test_view_mixed_user_and_cohort_audience_is_not_collapsed(): void {
         $user = $this->getDataGenerator()->create_user(['firstname' => 'Direct', 'lastname' => 'Recipient']);
+        $cohortuser = $this->getDataGenerator()->create_user();
         $cohort = $this->getDataGenerator()->create_cohort(['name' => 'Cohort recipient']);
-        cohort_add_member($cohort->id, $user->id);
+        cohort_add_member($cohort->id, $cohortuser->id);
         $viewid = $this->create_view($this->owner, 2);
         $this->share_view_with_user($viewid, $user->id);
         $this->share_view_with_cohort($viewid, $cohort->id);

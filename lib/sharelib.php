@@ -260,7 +260,7 @@ namespace {
                 " WHERE v.userid = ? AND v.id = ? AND" .
                 " ((v.userid = ?)" . // Myself.
                 "  OR (v.shareall = 1)" . // Shared all.
-                "  OR (v.shareall = 0 AND vshar.userid IS NOT NULL) " .
+                "  OR (vshar.userid IS NOT NULL) " .
                 ($usergroups ? " OR vgshar.groupid IN (" . join(',', array_keys($usergroups)) . ") " : "") .
                 $categoryclause .
                 ")", $params); // Shared for me.
@@ -1317,6 +1317,10 @@ namespace {
             if (array_key_exists($itemdata->userid, $students)) {
                 return $itemdata->userid;
             }
+        }
+        $itemdata = $DB->get_record('block_exaportitem', ['id' => $itemid], 'id, userid, shareall');
+        if ($itemdata && (int)$itemdata->shareall === 1 && block_exaport_shareall_enabled()) {
+            return $itemdata->userid;
         }
         // Check direct item share (block_exaportitemshar), incl. optional time-limited sharing.
         if ($ownerid = block_exaport_get_direct_item_share_owner($userid, $itemid)) {

@@ -90,6 +90,8 @@ class share_overview {
                     COUNT(DISTINCT com.id) AS comment_cnt
                FROM {block_exaportitem} i
                LEFT JOIN {block_exaportitemshar} ishar ON ishar.itemid = i.id
+                    AND (ishar.timestart IS NULL OR ishar.timestart = 0 OR ishar.timestart <= ?)
+                    AND (ishar.timeend IS NULL OR ishar.timeend = 0 OR ishar.timeend >= ?)
                LEFT JOIN {block_exaportitemgroupshar} igshar ON igshar.itemid = i.id
                LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
               WHERE i.userid = ?
@@ -99,7 +101,7 @@ class share_overview {
                  OR i.shareall > 0
                  OR i.externaccess = 1
            ORDER BY i.name",
-            [$userid]
+            [time(), time(), $userid]
         );
         foreach ($items as $item) {
             $item->entity_type = 'item';

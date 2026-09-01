@@ -86,34 +86,37 @@ class share_info {
             return $resolved;
         }
 
-        [$insql, $params] = $DB->get_in_or_equal(array_unique($detailids), SQL_PARAMS_QM);
-        $timecondition = $entitytype === 'item'
-            ? ' AND (s.timestart IS NULL OR s.timestart = 0 OR s.timestart <= ?)
-                AND (s.timeend IS NULL OR s.timeend = 0 OR s.timeend >= ?)'
-            : '';
-        $userparams = $entitytype === 'item' ? array_merge($params, [time(), time()]) : $params;
-        $users = $DB->get_records_sql(
-            "SELECT s.id, s.{$idcolumn} AS entityid, " . $DB->sql_fullname() . " AS name
-               FROM {{$usertable}} s
-               JOIN {user} u ON u.id = s.userid
-              WHERE s.{$idcolumn} {$insql} AND u.deleted = 0 {$timecondition}
-           ORDER BY name",
-            $userparams
-        );
-        foreach ($users as $user) {
-            $resolved[(int)$user->entityid]->users[] = $user->name;
-        }
+        $now = time();
+        foreach (array_chunk(array_unique($detailids), 1000) as $idchunk) {
+            [$insql, $params] = $DB->get_in_or_equal($idchunk, SQL_PARAMS_QM);
+            $timecondition = $entitytype === 'item'
+                ? ' AND (s.timestart IS NULL OR s.timestart = 0 OR s.timestart <= ?)
+                    AND (s.timeend IS NULL OR s.timeend = 0 OR s.timeend >= ?)'
+                : '';
+            $userparams = $entitytype === 'item' ? array_merge($params, [$now, $now]) : $params;
+            $users = $DB->get_records_sql(
+                "SELECT s.id, s.{$idcolumn} AS entityid, " . $DB->sql_fullname() . " AS name
+                   FROM {{$usertable}} s
+                   JOIN {user} u ON u.id = s.userid
+                  WHERE s.{$idcolumn} {$insql} AND u.deleted = 0 {$timecondition}
+               ORDER BY name",
+                $userparams
+            );
+            foreach ($users as $user) {
+                $resolved[(int)$user->entityid]->users[] = $user->name;
+            }
 
-        $groups = $DB->get_records_sql(
-            "SELECT s.id, s.{$idcolumn} AS entityid, c.name
-               FROM {{$grouptable}} s
-               JOIN {cohort} c ON c.id = s.groupid
-              WHERE s.{$idcolumn} {$insql}
-           ORDER BY c.name",
-            $params
-        );
-        foreach ($groups as $group) {
-            $resolved[(int)$group->entityid]->groups[] = $group->name;
+            $groups = $DB->get_records_sql(
+                "SELECT s.id, s.{$idcolumn} AS entityid, c.name
+                   FROM {{$grouptable}} s
+                   JOIN {cohort} c ON c.id = s.groupid
+                  WHERE s.{$idcolumn} {$insql}
+               ORDER BY c.name",
+                $params
+            );
+            foreach ($groups as $group) {
+                $resolved[(int)$group->entityid]->groups[] = $group->name;
+            }
         }
 
         return $resolved;

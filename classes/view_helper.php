@@ -246,46 +246,9 @@ class view_helper {
      * @param array $views Associative array of view objects keyed by id (modified in place).
      */
     private static function attach_share_info(array &$views): void {
-        global $DB;
-
+        $resolved = \block_exaport\share_info::resolve_many('view', $views);
         foreach ($views as $view) {
-            $share = new \block_exaport\share_info();
-
-            // shareall == 1 means "shared with all users" (short-circuit: skip detail).
-            // Groups (cohorts) and users are stored separately and can both be set at the
-            // same time; populate them independently, mirroring category_helper.
-            // Note: block_exaportviewgroupshar.groupid stores cohort ids ({cohort}.id),
-            // not course-group ids ({groups}.id), despite the misleading column name.
-            if ($view->shareall == 1 && block_exaport_shareall_enabled()) {
-                $share->all = true;
-            } else {
-                $groups = $DB->get_records_sql(
-                    "SELECT c.name
-                       FROM {cohort} c
-                       JOIN {block_exaportviewgroupshar} vshar ON c.id = vshar.groupid AND vshar.viewid = ?
-                      ORDER BY c.name",
-                    [$view->id]
-                );
-                foreach ($groups as $g) {
-                    $share->groups[] = $g->name;
-                }
-
-                $users = $DB->get_records_sql(
-                    "SELECT " . $DB->sql_fullname() . " AS name
-                       FROM {user} u
-                       JOIN {block_exaportviewshar} vshar ON u.id = vshar.userid AND vshar.viewid = ?
-                      WHERE u.deleted = 0
-                      ORDER BY name",
-                    [$view->id]
-                );
-                foreach ($users as $u) {
-                    $share->users[] = $u->name;
-                }
-            }
-
-            $share->external = (bool)(block_exaport_externaccess_enabled() && $view->externaccess);
-
-            $view->shareinfo = $share;
+            $view->shareinfo = $resolved[(int)$view->id];
         }
     }
 }

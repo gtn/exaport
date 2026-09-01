@@ -21,15 +21,26 @@
     shared (with users, groups, or externally/shareall).
 
     Context variables:
-        hasrows      - Boolean: at least one share row
-        rows         - List of rows: typelabel, title, url, sharedwithtext, commentcount
-        nothingtext  - Localised text shown when there is nothing shared
-        headertitle  - Localised column header "Title"
-        headertype   - Localised column header "Type"
-        headershared - Localised column header "Shared with"
-        headercomments - Localised column header "Comments"
+        hasrows         - Boolean: at least one share row
+        rows            - List of rows:
+                            typeicon (pre-rendered HTML), typelabel, title, titlenamelower,
+                            editurl, shareurl, sharedwithtext, sharetooltip, hastooltip,
+                            commentcount, ellipsisicon, editicon, shareicon, deleteicon,
+                            editlabel, sharelabel, deletelabel
+        nothingtext     - Localised text shown when there is nothing shared
+        headertitle     - Localised column header "Title"
+        headertype      - Localised column header "Type"
+        headershared    - Localised column header "Shared with"
+        headercomments  - Localised column header "Comments"
+        headeractions   - Empty string (no label for the actions column)
+        searchcontrols  - Pre-rendered HTML for search input + sort dropdown
 }}
 <div class="block_exaport_my_shares">
+    {{#searchcontrols}}
+    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        {{{searchcontrols}}}
+    </div>
+    {{/searchcontrols}}
     {{^hasrows}}
         <p>{{nothingtext}}</p>
     {{/hasrows}}
@@ -41,15 +52,52 @@
                     <th>{{headertype}}</th>
                     <th>{{headershared}}</th>
                     <th>{{headercomments}}</th>
+                    <th class="text-right" style="width:3rem;">{{headeractions}}</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="exaport-view-section" data-exaport-view="1">
                 {{#rows}}
-                    <tr>
-                        <td><a href="{{url}}">{{title}}</a></td>
+                    <tr class="exaport-flat-item"
+                        data-item-name="{{titlenamelower}}"
+                        data-item-date="0">
+                        <td><a href="{{editurl}}">{{{typeicon}}}{{title}}</a></td>
                         <td>{{typelabel}}</td>
-                        <td>{{sharedwithtext}}</td>
+                        <td>
+                            {{#hastooltip}}
+                            <span data-bs-toggle="tooltip"
+                                  data-bs-html="true"
+                                  data-bs-title="{{sharetooltip}}"
+                                  data-toggle="tooltip"
+                                  title="{{sharetooltip}}">
+                                {{sharedwithtext}}
+                            </span>
+                            {{/hastooltip}}
+                            {{^hastooltip}}{{sharedwithtext}}{{/hastooltip}}
+                        </td>
                         <td>{{commentcount}}</td>
+                        <td class="text-right">
+                            <div class="dropdown">
+                                <a class="dropdown-toggle btn btn-sm btn-light"
+                                   href="#"
+                                   role="button"
+                                   data-toggle="dropdown"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    {{{ellipsisicon}}}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{{editurl}}">{{{editicon}}} {{editlabel}}</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{shareurl}}">{{{shareicon}}} {{sharelabel}}</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">{{{deleteicon}}} {{deletelabel}}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
                     </tr>
                 {{/rows}}
             </tbody>

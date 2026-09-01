@@ -1359,48 +1359,6 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
     echo '</div>';
 }
 
-/**
- * Renders the shared search input and sort dropdown HTML fragment.
- *
- * Called from both the flat-layout filter bar and the folder-layout controls so
- * there is no duplicated rendering logic.
- *
- * @param string $selectedsort Currently active sort value in "key-dir" format, e.g. "date-desc".
- * @return string               HTML fragment (two <div> elements: search input + sort select).
- */
-function block_exaport_render_search_and_sort_controls($selectedsort) {
-    $html = '';
-
-    // Search input.
-    $searchid = 'exaport-search';
-    $html .= '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
-    $html .= '<label class="sr-only" for="' . s($searchid) . '">' . get_string('search') . '</label>';
-    $html .= '<input type="text" id="' . s($searchid) . '" class="form-control"'
-        . ' placeholder="' . s(get_string('search')) . '...">';
-    $html .= '</div>';
-
-    // Sort dropdown.
-    $sortid = 'exaport-sort-select';
-    $opts = [
-        'date-desc' => get_string('date', 'block_exaport') . ' ↓',
-        'date-asc' => get_string('date', 'block_exaport') . ' ↑',
-        // 'type-asc'  => get_string('type', 'block_exaport') . ' A-Z',
-        // 'type-desc' => get_string('type', 'block_exaport') . ' Z-A',
-        'name-asc' => get_string('name', 'block_exaport') . ' A-Z',
-        'name-desc' => get_string('name', 'block_exaport') . ' Z-A',
-    ];
-    $html .= '<div style="min-width: 180px; max-width: 250px;">';
-    $html .= '<label class="sr-only" for="' . s($sortid) . '">' . get_string('sort') . '</label>';
-    $html .= '<select id="' . s($sortid) . '" class="form-control custom-select">';
-    foreach ($opts as $val => $label) {
-        $selected = ($selectedsort === $val) ? ' selected="selected"' : '';
-        $html .= '<option value="' . s($val) . '"' . $selected . '>' . s($label) . '</option>';
-    }
-    $html .= '</select>';
-    $html .= '</div>';
-
-    return $html;
-}
 
 /**
  * Renders the items/views entry-type filter dropdown.
@@ -1450,24 +1408,6 @@ function block_exaport_print_category_select($categoriesbyparent, $currentcatego
         block_exaport_print_category_select($categoriesbyparent, $currentcategoryid,
             $category->id, $level + 1);
     }
-}
-
-/**
- * Requires the flat_filter AMD module and passes it the category children map and
- * pre-selected category id. Extracted to avoid repeating the same js_call_amd block
- * at every call site.
- *
- * @param array $childrenmap Map of parent category id to array of child category ids.
- * @param int $preselectedcategoryid Optional pre-selected category id.
- */
-function block_exaport_require_filter_js($childrenmap = [], $preselectedcategoryid = 0) {
-    global $PAGE;
-    $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
-        get_string('clearAllFilers', 'block_exaport'),
-        get_string('searchcategory', 'block_exaport'),
-        $childrenmap,
-        (int)$preselectedcategoryid,
-    ]);
 }
 
 /**

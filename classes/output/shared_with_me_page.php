@@ -19,13 +19,14 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core_text;
 use renderable;
 use renderer_base;
 use templatable;
 
 /**
  * Output class for the "Shared with me" overview page (shared_with_me.php).
- * Renders block_exaport/shared_with_me.
+ * Renders block_exaport/shared_with_me_page.
  */
 class shared_with_me_page implements renderable, templatable {
 
@@ -35,15 +36,20 @@ class shared_with_me_page implements renderable, templatable {
     /** @var int $courseid */
     protected $courseid;
 
+    /** @var string $searchcontrols */
+    protected $searchcontrols;
+
     /**
      * Constructor.
      *
-     * @param array $rows     Rows returned by \block_exaport\share_overview::get_shared_with_me().
-     * @param int   $courseid The current course id.
+     * @param array  $rows           Rows returned by \block_exaport\share_overview::get_shared_with_me().
+     * @param int    $courseid       The current course id.
+     * @param string $searchcontrols Pre-rendered HTML for the search/sort controls bar (optional).
      */
-    public function __construct(array $rows, int $courseid) {
-        $this->rows     = $rows;
-        $this->courseid = $courseid;
+    public function __construct(array $rows, int $courseid, string $searchcontrols = '') {
+        $this->rows           = $rows;
+        $this->courseid       = $courseid;
+        $this->searchcontrols = $searchcontrols;
     }
 
     /**
@@ -68,19 +74,25 @@ class shared_with_me_page implements renderable, templatable {
         $exportedrows = [];
         foreach ($this->rows as $row) {
             $owner = $owners[$row->owner_userid] ?? null;
+            $share = $row->shareinfo ??
+                \block_exaport\share_overview::build_share_info($row->entity_type, (int)$row->id, $row);
             $coursename = !empty($row->courseid) && isset($courses[$row->courseid])
                 ? format_string($courses[$row->courseid]->fullname)
                 : '';
 
             $exportedrows[] = [
-                'typelabel'     => get_string($row->entity_type, 'block_exaport'),
-                'title'         => format_string($row->title),
-                'url'           => $this->build_url($row),
-                'ownername'     => $owner ? fullname($owner) : '',
-                'coursename'    => $coursename,
-                'sharemodetext' => $row->share_mode === 'group'
-                    ? get_string('sharedwith_group', 'block_exaport')
-                    : get_string('sharedwith_onlyme', 'block_exaport'),
+                'typeicon'        => $this->build_type_icon($row),
+                'typelabel'       => get_string($row->entity_type, 'block_exaport'),
+                'title'           => format_string($row->title),
+                'titlenamelower'  => core_text::strtolower(strip_tags(format_string($row->title))),
+                'url'             => $this->build_url($row),
+                'ownername'       => $owner ? fullname($owner) : '',
+                'coursename'      => $coursename,
+                'sharemodetext'   => block_exaport_get_share_summary($share),
+                'sharetooltip'    => block_exaport_get_share_tooltip($share),
+                'hastooltip'      => $share->is_shared(),
+                'commentcount'    => (int)($row->comment_cnt ?? 0),
+                'hascomments'     => (int)($row->comment_cnt ?? 0) > 0,
             ];
         }
 
@@ -93,7 +105,22 @@ class shared_with_me_page implements renderable, templatable {
             'headeruser'       => get_string('user'),
             'headercourse'     => get_string('course', 'block_exaport'),
             'headersharedwith' => get_string('sharedwith', 'block_exaport'),
+            'headercomments'   => get_string('comments', 'block_exaport'),
+            'searchcontrols'   => $this->searchcontrols,
         ];
+    }
+
+    /**
+     * Build the type icon HTML for a row.
+     *
+     * Delegates to \block_exaport\share_overview::build_type_icon() to avoid
+     * duplicating the icon-selection logic between my_shares_page and shared_with_me_page.
+     *
+     * @param \stdClass $row
+     * @return string HTML
+     */
+    protected function build_type_icon(\stdClass $row): string {
+        return \block_exaport\share_overview::build_type_icon($row->entity_type, $row->type ?? '');
     }
 
     /**

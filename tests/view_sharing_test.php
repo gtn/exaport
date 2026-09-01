@@ -253,6 +253,41 @@ final class view_sharing_test extends \advanced_testcase {
     }
 
     /**
+     * A direct user share remains valid when the view also uses cohort sharing mode.
+     */
+    public function test_get_view_from_access_direct_grant_with_cohort_mode(): void {
+        global $DB, $USER;
+        $USER = $this->recipient;
+
+        $viewid = $this->create_view($this->owner, 2);
+        $DB->insert_record('block_exaportviewshar', (object)[
+            'viewid' => $viewid,
+            'userid' => $this->recipient->id,
+            'notify' => 0,
+        ]);
+
+        $access = 'id/' . $this->owner->id . '-' . $viewid;
+        $view = block_exaport_get_view_from_access($access);
+
+        $this->assertNotEmpty($view);
+        $this->assertEquals($viewid, (int)$view->id);
+    }
+
+    /**
+     * Disabling share-all also revokes internal access through an existing URL.
+     */
+    public function test_get_view_from_access_shareall_disabled(): void {
+        global $USER;
+        $USER = $this->recipient;
+        set_config('block_exaport_disable_shareall', 1);
+
+        $viewid = $this->create_view($this->owner, 1);
+        $access = 'id/' . $this->owner->id . '-' . $viewid;
+
+        $this->assertEmpty(block_exaport_get_view_from_access($access));
+    }
+
+    /**
      * A view in a descendant of a shared category is accessible (recursive inheritance).
      */
     public function test_get_view_from_access_descendant_category(): void {

@@ -74,6 +74,8 @@ class shared_with_me_page implements renderable, templatable {
         $exportedrows = [];
         foreach ($this->rows as $row) {
             $owner = $owners[$row->owner_userid] ?? null;
+            $share = $row->shareinfo ??
+                \block_exaport\share_overview::build_share_info($row->entity_type, (int)$row->id, $row);
             $coursename = !empty($row->courseid) && isset($courses[$row->courseid])
                 ? format_string($courses[$row->courseid]->fullname)
                 : '';
@@ -86,7 +88,9 @@ class shared_with_me_page implements renderable, templatable {
                 'url'             => $this->build_url($row),
                 'ownername'       => $owner ? fullname($owner) : '',
                 'coursename'      => $coursename,
-                'sharemodetext'   => $this->build_share_mode_text($row),
+                'sharemodetext'   => block_exaport_get_share_summary($share),
+                'sharetooltip'    => block_exaport_get_share_tooltip($share),
+                'hastooltip'      => $share->is_shared(),
                 'commentcount'    => (int)($row->comment_cnt ?? 0),
                 'hascomments'     => (int)($row->comment_cnt ?? 0) > 0,
             ];
@@ -117,22 +121,6 @@ class shared_with_me_page implements renderable, templatable {
      */
     protected function build_type_icon(\stdClass $row): string {
         return \block_exaport\share_overview::build_type_icon($row->entity_type, $row->type ?? '');
-    }
-
-    /**
-     * Build the human-readable "shared with" / share mode text shown in the last column.
-     *
-     * For a row that was shared directly (share_mode = 'user') this describes the owner's
-     * share scope; for a group share it notes the group/cohort origin.
-     *
-     * @param \stdClass $row
-     * @return string
-     */
-    protected function build_share_mode_text(\stdClass $row): string {
-        if ($row->share_mode === 'group') {
-            return get_string('sharedwith_group', 'block_exaport');
-        }
-        return get_string('sharedwith_onlyme', 'block_exaport');
     }
 
     /**

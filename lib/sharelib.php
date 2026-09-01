@@ -69,6 +69,34 @@ namespace {
         return implode($html ? '<br><br>' : ' | ', $lines);
     }
 
+    /**
+     * Build the short sharing summary used by sharing overview pages.
+     *
+     * @param \block_exaport\share_info $share Resolved sharing detail
+     * @return string
+     */
+    function block_exaport_get_share_summary(\block_exaport\share_info $share): string {
+        if ($share->all) {
+            return block_exaport_get_string('sharedwith_shareall');
+        }
+        if (count($share->groups) > 1) {
+            return block_exaport_get_string('sharedwith_group_cnt', count($share->groups));
+        }
+        if ($share->groups) {
+            return block_exaport_get_string('sharedwith_group');
+        }
+        if (count($share->users) > 1) {
+            return block_exaport_get_string('sharedwith_user_cnt', count($share->users));
+        }
+        if ($share->users) {
+            return block_exaport_get_string('sharedwith_onlyme');
+        }
+        if ($share->external) {
+            return block_exaport_get_string('sharedwith_shareexternal');
+        }
+        return '';
+    }
+
     function block_exaport_get_user_from_access($access, $epopaccess = false) {
         global $DB;
 
@@ -231,8 +259,8 @@ namespace {
                 $tempjoin .
                 " WHERE v.userid = ? AND v.id = ? AND" .
                 " ((v.userid = ?)" . // Myself.
-                "  OR (v.shareall = 1)" . // Shared all.
-                "  OR (v.shareall = 0 AND vshar.userid IS NOT NULL) " .
+                (block_exaport_shareall_enabled() ? " OR (v.shareall = 1)" : "") . // Shared all.
+                "  OR (vshar.userid IS NOT NULL) " .
                 ($usergroups ? " OR vgshar.groupid IN (" . join(',', array_keys($usergroups)) . ") " : "") .
                 $categoryclause .
                 ")", $params); // Shared for me.
@@ -1289,6 +1317,10 @@ namespace {
             if (array_key_exists($itemdata->userid, $students)) {
                 return $itemdata->userid;
             }
+        }
+        $itemdata = $DB->get_record('block_exaportitem', ['id' => $itemid], 'id, userid, shareall');
+        if ($itemdata && (int)$itemdata->shareall === 1 && block_exaport_shareall_enabled()) {
+            return $itemdata->userid;
         }
         // Check direct item share (block_exaportitemshar), incl. optional time-limited sharing.
         if ($ownerid = block_exaport_get_direct_item_share_owner($userid, $itemid)) {

@@ -259,7 +259,7 @@ namespace {
                 $tempjoin .
                 " WHERE v.userid = ? AND v.id = ? AND" .
                 " ((v.userid = ?)" . // Myself.
-                "  OR (v.shareall = 1)" . // Shared all.
+                (block_exaport_shareall_enabled() ? " OR (v.shareall = 1)" : "") . // Shared all.
                 "  OR (vshar.userid IS NOT NULL) " .
                 ($usergroups ? " OR vgshar.groupid IN (" . join(',', array_keys($usergroups)) . ") " : "") .
                 $categoryclause .

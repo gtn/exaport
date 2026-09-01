@@ -81,6 +81,8 @@ class share_overview {
         global $DB;
 
         $rows = [];
+        $shareallenabled = block_exaport_shareall_enabled();
+        $externalenabled = block_exaport_externaccess_enabled();
 
         // Items — include the item type so we can show a per-type icon.
         $items = $DB->get_records_sql(
@@ -98,8 +100,8 @@ class share_overview {
            GROUP BY i.id, i.name, i.type, i.courseid, i.shareall, i.externaccess
              HAVING COUNT(DISTINCT ishar.userid) > 0
                  OR COUNT(DISTINCT igshar.groupid) > 0
-                 OR i.shareall > 0
-                 OR i.externaccess = 1
+                 " . ($shareallenabled ? 'OR i.shareall = 1' : '') . "
+                 " . ($externalenabled ? 'OR i.externaccess = 1' : '') . "
            ORDER BY i.name",
             [time(), time(), $userid]
         );
@@ -117,12 +119,14 @@ class share_overview {
                FROM {block_exaportcate} c
                LEFT JOIN {block_exaportcatshar} cshar ON cshar.catid = c.id
                LEFT JOIN {block_exaportcatgroupshar} cgshar ON cgshar.catid = c.id
-              WHERE c.userid = ? AND c.internshare = 1
+              WHERE c.userid = ?
            GROUP BY c.id, c.name, c.courseid, c.shareall, c.externaccess, c.internshare
-             HAVING COUNT(DISTINCT cshar.userid) > 0
-                 OR COUNT(DISTINCT cgshar.groupid) > 0
-                 OR c.shareall > 0
-                 OR c.externaccess = 1
+             HAVING (c.internshare = 1 AND (
+                        COUNT(DISTINCT cshar.userid) > 0
+                        OR COUNT(DISTINCT cgshar.groupid) > 0
+                        " . ($shareallenabled ? 'OR c.shareall = 1' : '') . "
+                   ))
+                   " . ($externalenabled ? 'OR c.externaccess = 1' : '') . "
            ORDER BY c.name",
             [$userid]
         );
@@ -144,8 +148,8 @@ class share_overview {
            GROUP BY v.id, v.name, v.shareall, v.externaccess
              HAVING COUNT(DISTINCT vshar.userid) > 0
                  OR COUNT(DISTINCT vgshar.groupid) > 0
-                 OR v.shareall > 0
-                 OR v.externaccess = 1
+                 " . ($shareallenabled ? 'OR v.shareall = 1' : '') . "
+                 " . ($externalenabled ? 'OR v.externaccess = 1' : '') . "
            ORDER BY v.name",
             [$userid]
         );

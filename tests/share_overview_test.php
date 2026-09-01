@@ -364,6 +364,25 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertSame(['Category cohort'], $row->shareinfo->groups);
     }
 
+    /**
+     * An external-only category remains visible in the owner's sharing overview.
+     */
+    public function test_my_shares_includes_external_only_category(): void {
+        $categoryid = $this->create_category($this->owner, externaccess: 1);
+
+        $rows = share_overview::get_my_shares($this->owner->id);
+        $row = current(array_filter($rows, function($row) use ($categoryid) {
+            return $row->entity_type === 'category' && (int)$row->id === $categoryid;
+        }));
+
+        $this->assertNotFalse($row);
+        $this->assertTrue($row->shareinfo->external);
+        $this->assertSame(
+            get_string('sharedwith_shareexternal', 'block_exaport'),
+            block_exaport_get_share_summary($row->shareinfo)
+        );
+    }
+
     // -------------------------------------------------------------------------
     // Tests: tooltip integration
     // -------------------------------------------------------------------------

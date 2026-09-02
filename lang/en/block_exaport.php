@@ -247,6 +247,8 @@ $string['comment_delete_confirmation'] = 'Do you really want to delete this comm
 // Shared portfolios.
 $string['nocoursetogether'] = 'No Course';
 $string['nothingshared'] = 'Nobody is sharing a portfolio with you';
+$string['nothingsharedwithme'] = 'Nothing is shared with you';
+$string['nothingsharedbyme'] = 'You haven\'t shared anything';
 
 // === Errors.
 $string['nouserforid'] = 'User not found (id unknown)';
@@ -388,7 +390,6 @@ $string['sharedwith_shareexternal'] = 'Shared external';
 $string['sharedexternalcategory'] = 'Shared externally';
 $string['sharedwith_group'] = 'Shared with my group';
 $string['sharedwith_group_cnt'] = 'Shared with {$a} groups';
-$string['sharedwith_cnt'] = '{$a}x shared';
 $string['share_tooltip_users'] = 'Shared internally with the following users: {$a}';
 $string['share_tooltip_groups'] = 'Shared internally with the following groups: {$a}';
 $string['share_tooltip_all'] = 'Shared internally with all users.';

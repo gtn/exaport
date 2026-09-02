@@ -99,7 +99,7 @@ class shared_with_me_page implements renderable, templatable {
         return [
             'hasrows'          => (bool)$exportedrows,
             'rows'             => $exportedrows,
-            'nothingtext'      => get_string('nothingshared', 'block_exaport'),
+            'nothingtext'      => get_string('nothingsharedwithme', 'block_exaport'),
             'headertitle'      => get_string('title', 'block_exaport'),
             'headertype'       => get_string('type', 'block_exaport'),
             'headeruser'       => get_string('user'),

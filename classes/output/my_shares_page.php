@@ -88,7 +88,7 @@ class my_shares_page implements renderable, templatable {
         return [
             'hasrows'        => (bool)$exportedrows,
             'rows'           => $exportedrows,
-            'nothingtext'    => get_string('nothingshared', 'block_exaport'),
+            'nothingtext'    => get_string('nothingsharedbyme', 'block_exaport'),
             'headertitle'    => get_string('title', 'block_exaport'),
             'headertype'     => get_string('type', 'block_exaport'),
             'headershared'   => get_string('sharedwith', 'block_exaport'),

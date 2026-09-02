@@ -247,6 +247,8 @@ $string['comment_delete_confirmation'] = 'Willst du wirklich diesen Kommentar l√
 // Shared portfolios.
 $string['nocoursetogether'] = 'Kein Kurs';
 $string['nothingshared'] = 'Kein freigegebenen ePortfolios gefunden';
+$string['nothingsharedwithme'] = 'Es wurde nichts mit dir geteilt';
+$string['nothingsharedbyme'] = 'Du hast nichts geteilt';
 
 // === Errors.
 $string['nouserforid'] = 'Kein Benutzer zu dieser Id!';
@@ -387,7 +389,6 @@ $string['sharedwith_shareexternal'] = 'Geteilte externe Sammelmappen';
 $string['sharedexternalcategory'] = 'Extern geteilt';
 $string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
 $string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
-$string['sharedwith_cnt'] = '{$a}x geteilt';
 $string['share_tooltip_users'] = 'Intern mit den folgenden Benutzer:innen geteilt: {$a}';
 $string['share_tooltip_groups'] = 'Intern mit den folgenden Gruppen geteilt: {$a}';
 $string['share_tooltip_all'] = 'Intern mit allen Benutzer:innen geteilt.';

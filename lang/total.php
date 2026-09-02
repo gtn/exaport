@@ -884,6 +884,14 @@ return [
         'Kein freigegebenen ePortfolios gefunden',
         'Nobody is sharing a portfolio with you',
     ],
+    'nothingsharedwithme' => [
+        'Es wurde nichts mit dir geteilt',
+        'Nothing is shared with you',
+    ],
+    'nothingsharedbyme' => [
+        'Du hast nichts geteilt',
+        'You haven\'t shared anything',
+    ],
 
     // === Errors.
     'nouserforid' => [

@@ -114,7 +114,8 @@
 
       $('#sharing-userlist').html('loading userlist...');
 
-      var params = {action: 'userlist'};
+      // The sesskey is always sent, because all sharing endpoints (view/category/item) require it.
+      var params = {action: 'userlist', sesskey: M.cfg.sesskey};
       if (type == 'cat_mod') {
         params.id = $('input[name="id"]').val() || 0;
       }
@@ -282,7 +283,8 @@
 
       $('#sharing-grouplist').html('loading grouplist...');
 
-      var params = {action: 'grouplist'};
+      // The sesskey is always sent, because all sharing endpoints (view/category/item) require it.
+      var params = {action: 'grouplist', sesskey: M.cfg.sesskey};
       if (type == 'cat_mod') {
         params.id = $('input[name="id"]').val() || 0;
       }

@@ -843,11 +843,115 @@ namespace {
         return $fields;
     }
 
-    function exaport_get_shareable_courses_with_users_for_view($viewid) {
+    /**
+     * Configuration registry for the "share this entity with users/groups" UI.
+     *
+     * Collections (views), categories and items are shared in exactly the same way, only the
+     * database tables and id column names differ. Keeping that knowledge in one place allows
+     * category.php, views_mod.php and item.php to use one single implementation of the
+     * userlist/grouplist AJAX endpoints instead of three slightly diverging copies.
+     *
+     * @param string $entitytype One of 'view', 'category', 'item'.
+     * @return object Configuration with the table/column names used for this entity type.
+     */
+    function block_exaport_get_sharing_entity_config(string $entitytype) {
+        $configs = [
+            'view' => (object)[
+                'entitytable' => 'block_exaportview',
+                'idfield' => 'viewid',
+                'usersharetable' => 'block_exaportviewshar',
+                'groupsharetable' => 'block_exaportviewgroupshar',
+                'coursestype' => 'sharing',
+                'notfoundstring' => 'viewnotfound',
+                // Collections may be shared to users the owner is no longer enrolled with,
+                // so those users are listed in an extra pseudo course to keep them removable.
+                // Categories and items historically never did this and their share forms only
+                // process users coming from the owner's own courses, so enabling it there would
+                // change (not just deduplicate) their behaviour - therefore it stays view-only.
+                'extrausers' => true,
+            ],
+            'category' => (object)[
+                'entitytable' => 'block_exaportcate',
+                'idfield' => 'catid',
+                'usersharetable' => 'block_exaportcatshar',
+                'groupsharetable' => 'block_exaportcatgroupshar',
+                'coursestype' => '',
+                'notfoundstring' => 'category_not_found',
+                'extrausers' => false,
+            ],
+            'item' => (object)[
+                'entitytable' => 'block_exaportitem',
+                'idfield' => 'itemid',
+                'usersharetable' => 'block_exaportitemshar',
+                'groupsharetable' => 'block_exaportitemgroupshar',
+                'coursestype' => '',
+                'notfoundstring' => 'bookmarknotfound',
+                'extrausers' => false,
+            ],
+        ];
+
+        if (!isset($configs[$entitytype])) {
+            throw new coding_exception('Unknown exaport sharing entity type: ' . $entitytype);
+        }
+
+        return $configs[$entitytype];
+    }
+
+    /**
+     * Ownership check for the sharing AJAX endpoints.
+     *
+     * Returns the entity id if the current user owns the entity, 0 otherwise. Callers then build
+     * the list without any share state, which is the safest possible answer: a user who does not
+     * own an entity must never learn to whom it is shared. Returning 0 instead of throwing also
+     * keeps the "new, not yet saved entity" case (id = 0) working, which the sharing dialogs rely
+     * on to render an empty selection list.
+     *
+     * @param object $config Entity configuration, see block_exaport_get_sharing_entity_config().
+     * @param int $entityid
+     * @return int The entity id, or 0 if the current user is not the owner.
+     */
+    function block_exaport_sharing_owned_entity_id($config, int $entityid): int {
+        global $DB, $USER;
+
+        if ($entityid <= 0) {
+            return 0;
+        }
+        if (!$DB->record_exists($config->entitytable, ['id' => $entityid, 'userid' => $USER->id])) {
+            // Not the user's entity: don't expose any sharing info.
+            return 0;
+        }
+
+        return $entityid;
+    }
+
+    /**
+     * AJAX endpoint: list all courses/users the current user may share an entity with.
+     *
+     * Shared by category.php, views_mod.php and item.php so that the sharing dialog logic exists
+     * only once. Outputs the JSON structure expected by javascript/exaport.js and exits.
+     *
+     * require_sesskey() is enforced for all entity types. category.php used to be missing this
+     * check; enforcing it here is a deliberate security hardening.
+     *
+     * @param string $entitytype One of 'view', 'category', 'item'.
+     * @param int $entityid Id of the entity being edited, 0 for a not yet saved one.
+     */
+    function block_exaport_ajax_sharing_userlist(string $entitytype, int $entityid) {
         global $DB;
 
-        $sharedusers = exaport_get_view_shared_users($viewid);
-        $courses = exaport_get_shareable_courses_with_users('sharing');
+        require_sesskey();
+
+        $config = block_exaport_get_sharing_entity_config($entitytype);
+        $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
+
+        $courses = exaport_get_shareable_courses_with_users($config->coursestype);
+
+        $sharedusers = [];
+        if ($entityid > 0) {
+            // The first field is used as the array key, which is important here.
+            $sharedusers = $DB->get_records($config->usersharetable, [$config->idfield => $entityid],
+                null, 'userid, notify');
+        }
 
         foreach ($courses as $course) {
             foreach ($course->users as $user) {
@@ -862,35 +966,75 @@ namespace {
             }
         }
 
-        if ($sharedusers) {
-            $extrausers = array();
+        // Users the entity is shared to but who are not in any of the owner's courses.
+        if ($config->extrausers && $sharedusers) {
+            $extrausers = [];
+            // Since user_picture::fields() uses a deprecated moodle function, this is the workaround.
+            $fields = implode(',', exaport_get_picture_fields());
 
-            foreach ($sharedusers as $userid) {
-                // since user_picture::fields() uses a deprecated moodle function, this is the workaround:
-                $fields = exaport_get_picture_fields();
-                $fields = implode(',', $fields);
-                $user = $DB->get_record('user', array('id' => $userid), $fields);
+            foreach (array_keys($sharedusers) as $userid) {
+                $user = $DB->get_record('user', ['id' => $userid], $fields);
                 if (!$user) {
                     // Doesn't exist anymore.
                     continue;
                 }
 
-                $extrausers[] = (object)array(
+                $extrausers[] = (object)[
                     'id' => $user->id,
                     'name' => fullname($user),
                     'rolename' => '',
                     'shared_to' => true,
-                );
+                ];
             }
 
-            array_unshift($courses, (object)array(
+            array_unshift($courses, (object)[
                 'id' => -1,
                 'fullname' => get_string('other_users_course', 'block_exaport'),
                 'users' => $extrausers,
-            ));
+            ]);
         }
 
-        return $courses;
+        echo json_encode($courses);
+        exit;
+    }
+
+    /**
+     * AJAX endpoint: list all cohort groups the current user may share an entity with.
+     *
+     * Shared by category.php, views_mod.php and item.php, see
+     * block_exaport_ajax_sharing_userlist() for the reasoning. Outputs the JSON structure
+     * expected by javascript/exaport.js and exits.
+     *
+     * If the current user does not own the entity, the groups are returned without any share
+     * state (shared_to = false) instead of throwing an exception: this is the same behaviour as
+     * the userlist endpoint and it never leaks sharing information of somebody else's entity.
+     *
+     * @param string $entitytype One of 'view', 'category', 'item'.
+     * @param int $entityid Id of the entity being edited, 0 for a not yet saved one.
+     */
+    function block_exaport_ajax_sharing_grouplist(string $entitytype, int $entityid) {
+        global $DB;
+
+        require_sesskey();
+
+        $config = block_exaport_get_sharing_entity_config($entitytype);
+        $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
+
+        $sharedgroups = [];
+        if ($entityid > 0) {
+            $sharedgroups = $DB->get_records_menu($config->groupsharetable, [$config->idfield => $entityid],
+                null, 'groupid, groupid AS tmp');
+        }
+
+        $groupgroups = block_exaport_get_shareable_groups_for_json();
+        foreach ($groupgroups as $groupgroup) {
+            foreach ($groupgroup->groups as $group) {
+                $group->shared_to = isset($sharedgroups[$group->id]);
+            }
+        }
+
+        echo json_encode($groupgroups);
+        exit;
     }
 
     function exaport_get_shareable_courses_with_users($type) {

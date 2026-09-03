@@ -55,67 +55,14 @@ $allowedit = block_exaport_item_is_editable($id);
 $allowresubmission = block_exaport_item_is_resubmitable($id);
 
 // Get userlist for sharing item.
+// Shared implementation, see lib/sharelib.php: it sends the JSON and exits.
+// It always enforces require_sesskey(), which hardens this previously "graceful" check.
 if ($action == 'userlist') {
-    // Graceful sesskey hardening for this read-only, ownership-scoped AJAX endpoint.
-    $sesskey = optional_param('sesskey', null, PARAM_RAW);
-    if ($sesskey !== null && !confirm_sesskey($sesskey)) {
-        header('HTTP/1.1 403 Forbidden');
-        exit;
-    }
-
-    if ($id > 0 && !$DB->get_record('block_exaportitem', ['id' => $id, 'userid' => $USER->id])) {
-        $id = 0; // Not your item, don't expose sharing info.
-    }
-
-    $courses = exaport_get_shareable_courses_with_users('');
-
-    if ($id > 0) {
-        // Mark users that are already shared to this item (with their notify state).
-        $sharedusers = $DB->get_records('block_exaportitemshar', array('itemid' => $id), null, 'userid, notify');
-        foreach ($courses as $course) {
-            foreach ($course->users as $user) {
-                if (isset($sharedusers[$user->id])) {
-                    $user->shared_to = true;
-                    $user->notify_user = (bool)$sharedusers[$user->id]->notify;
-                } else {
-                    $user->shared_to = false;
-                    $user->notify_user = false;
-                }
-            }
-        }
-    }
-
-    echo json_encode($courses);
-    exit;
+    block_exaport_ajax_sharing_userlist('item', $id);
 }
 // Get grouplist for sharing item.
 if ($action == 'grouplist') {
-    // Graceful sesskey hardening for this read-only, ownership-scoped AJAX endpoint.
-    $sesskey = optional_param('sesskey', null, PARAM_RAW);
-    if ($sesskey !== null && !confirm_sesskey($sesskey)) {
-        header('HTTP/1.1 403 Forbidden');
-        exit;
-    }
-
-    if ($id > 0 && !$DB->get_record('block_exaportitem', ['id' => $id, 'userid' => $USER->id])) {
-        $id = 0; // Not your item, don't expose sharing info.
-    }
-
-    $groupgroups = block_exaport_get_shareable_groups_for_json();
-    $sharedgroups = [];
-    if ($id > 0) {
-        $sharedgroups = $DB->get_records_menu('block_exaportitemgroupshar',
-            ['itemid' => $id],
-            null,
-            'groupid, groupid AS tmp');
-    }
-    foreach ($groupgroups as $groupgroup) {
-        foreach ($groupgroup->groups as $group) {
-            $group->shared_to = isset($sharedgroups[$group->id]);
-        }
-    }
-    echo json_encode($groupgroups);
-    exit;
+    block_exaport_ajax_sharing_grouplist('item', $id);
 }
 
 if ($action == 'copytoself') {

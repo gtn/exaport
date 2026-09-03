@@ -73,25 +73,13 @@ if ($id) {
 }
 
 if ($view && $action == 'userlist') {
-    require_sesskey();
-    // this gets called in exaport.js by  $.getJSON(document.location.href, {action: 'userlist'} and returns the necessary data
-    echo json_encode(exaport_get_shareable_courses_with_users_for_view($view->id));
-    exit;
+    // This gets called in exaport.js by $.getJSON(document.location.href, {action: 'userlist'}).
+    // The shared implementation (also used by category.php and item.php) sends the JSON and exits.
+    block_exaport_ajax_sharing_userlist('view', (int)$view->id);
 }
 
 if ($view && $action == 'grouplist') {
-    require_sesskey();
-
-    $sharedgroups = exaport_get_view_shared_groups($view->id);
-
-    $groupgroups = block_exaport_get_shareable_groups_for_json();
-    foreach ($groupgroups as $groupgroup) {
-        foreach ($groupgroup->groups as $group) {
-            $group->shared_to = isset($sharedgroups[$group->id]);
-        }
-    }
-    echo json_encode($groupgroups);
-    exit;
+    block_exaport_ajax_sharing_grouplist('view', (int)$view->id);
 }
 
 $returnurltolist = $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $courseid;

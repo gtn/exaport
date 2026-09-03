@@ -28,57 +28,13 @@ $PAGE->set_url($url, ['courseid' => $courseid,
     'id' => optional_param('id', '', PARAM_INT)]);
 
 // Get userlist for sharing category.
+// Shared implementation, see lib/sharelib.php: it sends the JSON and exits.
 if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {
-    $id = optional_param('id', 0, PARAM_INT);
-
-    if ($id > 0 && !$DB->get_record('block_exaportcate', ['id' => $id, 'userid' => $USER->id])) {
-        $id = 0; // not your category, don't expose sharing info
-    }
-
-    $courses = exaport_get_shareable_courses_with_users('');
-
-    if ($id > 0) {
-        // Mark users that are already shared to this category (with their notify state).
-        $sharedusers = $DB->get_records('block_exaportcatshar', array('catid' => $id), null, 'userid, notify');
-        foreach ($courses as $course) {
-            foreach ($course->users as $user) {
-                if (isset($sharedusers[$user->id])) {
-                    $user->shared_to = true;
-                    $user->notify_user = (bool)$sharedusers[$user->id]->notify;
-                } else {
-                    $user->shared_to = false;
-                    $user->notify_user = false;
-                }
-            }
-        }
-    }
-
-    echo json_encode($courses);
-    exit;
+    block_exaport_ajax_sharing_userlist('category', optional_param('id', 0, PARAM_INT));
 }
 // Get grouplist for sharing category.
 if (optional_param('action', '', PARAM_ALPHA) == 'grouplist') {
-    $id = required_param('id', PARAM_INT);
-
-    $category = $DB->get_record("block_exaportcate", array(
-        'id' => $id,
-        'userid' => $USER->id,
-    ));
-    if (!$category) {
-        throw new \block_exaport\moodle_exception('category_not_found');
-    }
-
-    $groupgroups = block_exaport_get_shareable_groups_for_json();
-    foreach ($groupgroups as $groupgroup) {
-        foreach ($groupgroup->groups as $group) {
-            $group->shared_to = $DB->record_exists('block_exaportcatgroupshar', [
-                'catid' => $category->id,
-                'groupid' => $group->id,
-            ]);
-        }
-    }
-    echo json_encode($groupgroups);
-    exit;
+    block_exaport_ajax_sharing_grouplist('category', optional_param('id', 0, PARAM_INT));
 }
 
 if (optional_param('action', '', PARAM_ALPHA) == 'addstdcat') {

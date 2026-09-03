@@ -32,6 +32,13 @@ $PAGE->set_url($url, ['courseid' => $courseid,
 if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {
     block_exaport_ajax_sharing_userlist('category', optional_param('id', 0, PARAM_INT));
 }
+// Get the shareable users of exactly one course, fetched lazily by the userlist dialog when a
+// course group is expanded (or eagerly for already-shared courses) instead of upfront for every
+// enrolled course - see block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php.
+if (optional_param('action', '', PARAM_ALPHA) == 'userlistcourse') {
+    block_exaport_ajax_sharing_userlist_course('category', optional_param('id', 0, PARAM_INT),
+        required_param('usercourseid', PARAM_INT));
+}
 // Get grouplist for sharing category.
 if (optional_param('action', '', PARAM_ALPHA) == 'grouplist') {
     block_exaport_ajax_sharing_grouplist('category', optional_param('id', 0, PARAM_INT));
@@ -310,8 +317,19 @@ class simplehtml_form extends block_exaport_moodleform {
                     }
                     $mform->addElement('html', '</script>');
                 }
-                $mform->addElement('html', '<tr id="internaccess-users"><td></td>' .
-                    '<td><div id="sharing-userlist">userlist</div></td></tr>');
+                $mform->addElement('html', '<tr id="internaccess-users"><td></td><td>');
+                if (block_exaport_shareall_enabled()) {
+                    // Show user search form (same feature as in views_mod.php's share tab): it lets
+                    // the owner share with any moodle user, not only with users of her own courses.
+                    $mform->addElement('html', get_string('share_to_other_users', 'block_exaport') . ':');
+                    $mform->addElement('html', '<div style="padding-bottom: 20px;">');
+                    $mform->addElement('html', '<input name="share_to_other_users_q" type="text" /> ');
+                    $mform->addElement('html', '<input name="share_to_other_users_submit" type="submit" value="' .
+                        get_string('search') . '" />');
+                    $mform->addElement('html', '</div>');
+                }
+                $mform->addElement('html', '<div id="sharing-userlist">userlist</div>');
+                $mform->addElement('html', '</td></tr>');
 
                 // Share to groups.
                 $mform->addElement('html', '<tr><td style="padding-right: 10px">');
@@ -552,6 +570,13 @@ if ($mform->is_cancelled()) {
             $newentry->id,
             array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
     };
+
+    if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
+        // Search button pressed -> redirect to the shared search form, exactly like views_mod.php does.
+        redirect(new moodle_url('/blocks/exaport/share_user_search.php',
+            array('entitytype' => 'category', 'courseid' => $courseid, 'id' => $newentry->id,
+                'q' => optional_param('share_to_other_users_q', '', PARAM_RAW))));
+    }
 
     redirect('view_items.php?courseid=' . $courseid . '&categoryid=' .
         ($newentry->back == 'same' ? $newentry->id : $newentry->pid));

@@ -47,3 +47,26 @@ div.item-detail-image img {
 .exaport-toast-close {
     opacity: 1 !important;
 }
+
+/* Collapsible course groups of the sharing userlist/grouplist widgets.
+   These rules live here (and only here) because block_exaport_init_js_css() auto-loads
+   page-specific stylesheets by script name only (views_mod.php -> css/views_mod.css), so
+   category.php and item.php would never receive them. css/styles.css is loaded on every
+   exaport page, so the widgets collapse/expand identically wherever they are rendered. */
+#exaport .course-group-title {
+    cursor: pointer;
+    padding-left: 30px;
+    background: url('../pix/group_closed.png') no-repeat 15px 5px;
+}
+
+#exaport .course-group-open .course-group-title {
+    background-image: url('../pix/group_open.png');
+}
+
+#exaport .course-group-content {
+    display: none;
+}
+
+#exaport .course-group-open .course-group-content {
+    display: block;
+}

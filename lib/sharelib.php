@@ -855,6 +855,12 @@ namespace {
      * missing/foreign entity itself - the AJAX endpoints below deliberately don't use it,
      * see block_exaport_sharing_owned_entity_id().
      *
+     * 'internaccessfield' is the column that enables internal sharing for this entity type
+     * (null if the entity type has no such flag), 'editpage'/'editparams' point back to the
+     * page where the entity's sharing settings are edited and 'headeritem'/'headersubitem'
+     * select the navigation entry of that page. They are used by
+     * block_exaport_sharing_user_search_page().
+     *
      * @param string $entitytype One of 'view', 'category', 'item'.
      * @return object Configuration with the table/column names used for this entity type.
      */
@@ -867,6 +873,11 @@ namespace {
                 'groupsharetable' => 'block_exaportviewgroupshar',
                 'coursestype' => 'sharing',
                 'notfoundstring' => 'viewnotfound',
+                'internaccessfield' => 'internaccess',
+                'editpage' => '/blocks/exaport/views_mod.php',
+                'editparams' => ['type' => 'share', 'action' => 'edit'],
+                'headeritem' => 'views',
+                'headersubitem' => 'share',
                 // Collections may be shared to users the owner is no longer enrolled with,
                 // so those users are listed in an extra pseudo course to keep them removable.
                 // Categories and items historically never did this and their share forms only
@@ -881,6 +892,11 @@ namespace {
                 'groupsharetable' => 'block_exaportcatgroupshar',
                 'coursestype' => '',
                 'notfoundstring' => 'category_not_found',
+                'internaccessfield' => 'internshare',
+                'editpage' => '/blocks/exaport/category.php',
+                'editparams' => ['action' => 'edit'],
+                'headeritem' => 'myportfolio',
+                'headersubitem' => null,
                 'extrausers' => false,
             ],
             'item' => (object)[
@@ -890,6 +906,13 @@ namespace {
                 'groupsharetable' => 'block_exaportitemgroupshar',
                 'coursestype' => '',
                 'notfoundstring' => 'bookmarknotfound',
+                // Items have no separate "internal access" flag, sharing is derived from the
+                // existing share rows plus shareall - therefore there is nothing to flip here.
+                'internaccessfield' => null,
+                'editpage' => '/blocks/exaport/item.php',
+                'editparams' => ['action' => 'edit'],
+                'headeritem' => 'myportfolio',
+                'headersubitem' => null,
                 'extrausers' => false,
             ],
         ];
@@ -929,10 +952,19 @@ namespace {
     }
 
     /**
-     * AJAX endpoint: list all courses/users the current user may share an entity with.
+     * AJAX endpoint: list all courses the current user may share an entity with.
      *
      * Shared by category.php, views_mod.php and item.php so that the sharing dialog logic exists
      * only once. Outputs the JSON structure expected by javascript/exaport.js and exits.
+     *
+     * This deliberately does NOT resolve any course's users (that used to happen eagerly for
+     * every enrolled course via exaport_get_shareable_courses_with_users(), which calls
+     * get_roles_used_in_context()/get_role_users() once per role per course - an N x M set of
+     * calls that made opening this dialog slow on installations with many courses). Instead the
+     * frontend fetches a single course's users lazily via
+     * block_exaport_ajax_sharing_userlist_course(), either on first expand or eagerly for
+     * courses flagged has_shared_users below, so the "already shared courses auto-expand"
+     * behaviour keeps working without eagerly loading everything.
      *
      * require_sesskey() is enforced for all entity types. category.php used to be missing this
      * check; enforcing it here is a deliberate security hardening.
@@ -948,8 +980,6 @@ namespace {
         $config = block_exaport_get_sharing_entity_config($entitytype);
         $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
 
-        $courses = exaport_get_shareable_courses_with_users($config->coursestype);
-
         $sharedusers = [];
         if ($entityid > 0) {
             // The first field is used as the array key, which is important here.
@@ -957,48 +987,119 @@ namespace {
                 null, 'userid, notify');
         }
 
-        foreach ($courses as $course) {
-            foreach ($course->users as $user) {
-                if (isset($sharedusers[$user->id])) {
-                    $user->shared_to = true;
-                    $user->notify_user = (bool)$sharedusers[$user->id]->notify;
-                    unset($sharedusers[$user->id]);
-                } else {
-                    $user->shared_to = false;
-                    $user->notify_user = false;
-                }
+        $courses = exaport_get_shareable_courses_list();
+
+        // Work out which of the already-shared users are enrolled in which of the listed
+        // courses. This only ever queries the (usually tiny) set of already-shared user ids, so
+        // it stays cheap regardless of how many courses/users exist, unlike resolving every
+        // course's users up front.
+        $sharedusercourseids = $sharedusers
+            ? exaport_get_courseids_for_shared_users(array_keys($sharedusers), array_keys($courses))
+            : [];
+        foreach ($sharedusercourseids as $userid => $userscourseids) {
+            foreach ($userscourseids as $courseid) {
+                $courses[$courseid]->has_shared_users = true;
             }
         }
 
-        // Users the entity is shared to but who are not in any of the owner's courses.
+        // Users the entity is shared to but who are not enrolled in any of the owner's courses.
         if ($config->extrausers && $sharedusers) {
+            $extrauserids = array_diff(array_keys($sharedusers), array_keys($sharedusercourseids));
             $extrausers = [];
-            // Since user_picture::fields() uses a deprecated moodle function, this is the workaround.
-            $fields = implode(',', exaport_get_picture_fields());
+            if ($extrauserids) {
+                // Since user_picture::fields() uses a deprecated moodle function, this is the workaround.
+                $fields = implode(',', exaport_get_picture_fields());
 
-            foreach (array_keys($sharedusers) as $userid) {
-                $user = $DB->get_record('user', ['id' => $userid], $fields);
-                if (!$user) {
-                    // Doesn't exist anymore.
-                    continue;
+                foreach ($extrauserids as $userid) {
+                    $user = $DB->get_record('user', ['id' => $userid], $fields);
+                    if (!$user) {
+                        // Doesn't exist anymore.
+                        continue;
+                    }
+
+                    $extrausers[] = (object)[
+                        'id' => $user->id,
+                        'name' => fullname($user),
+                        'rolename' => '',
+                        'shared_to' => true,
+                    ];
                 }
-
-                $extrausers[] = (object)[
-                    'id' => $user->id,
-                    'name' => fullname($user),
-                    'rolename' => '',
-                    'shared_to' => true,
-                ];
             }
 
-            array_unshift($courses, (object)[
-                'id' => -1,
-                'fullname' => get_string('other_users_course', 'block_exaport'),
-                'users' => $extrausers,
-            ]);
+            if ($extrausers) {
+                // Users are embedded directly (unlike the other, real courses) since there is no
+                // course to lazily fetch them from - the frontend renders this pseudo-course
+                // straight away and marks it open, same as before.
+                $courses = ['-1' => (object)[
+                    'id' => -1,
+                    'fullname' => get_string('other_users_course', 'block_exaport'),
+                    'users' => $extrausers,
+                ]] + $courses;
+            }
         }
 
-        echo json_encode($courses);
+        echo json_encode(array_values($courses));
+        exit;
+    }
+
+    /**
+     * AJAX endpoint: list the shareable users of exactly one course.
+     *
+     * Split out of block_exaport_ajax_sharing_userlist() so the "share to users" dialog can
+     * lazily fetch a single course's users only when needed (on first expand of that course, or
+     * eagerly for courses flagged has_shared_users by block_exaport_ajax_sharing_userlist()),
+     * instead of resolving every enrolled course's users up front. See that function's docblock
+     * for why this split exists.
+     *
+     * Enforces the exact same ownership/sesskey checks as block_exaport_ajax_sharing_userlist(),
+     * via the same helpers, plus an explicit enrol_get_my_courses() membership check for
+     * $courseid so this endpoint can't be used to peek at users of a course the caller has
+     * nothing to do with.
+     *
+     * The entry points dispatch to this for action=userlistcourse. The action value must not
+     * contain an underscore, because the entry points read it with PARAM_ALPHA, which strips
+     * everything that is not a plain letter.
+     *
+     * @param string $entitytype One of 'view', 'category', 'item'.
+     * @param int $entityid Id of the entity being edited, 0 for a not yet saved one.
+     * @param int $courseid Id of the course to list shareable users for.
+     */
+    function block_exaport_ajax_sharing_userlist_course(string $entitytype, int $entityid, int $courseid) {
+        global $DB;
+
+        require_sesskey();
+
+        $config = block_exaport_get_sharing_entity_config($entitytype);
+        $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
+
+        // Only ever resolve users of courses the current user is actually enrolled in - the same
+        // restriction the eager, all-courses code path used to get "for free" by only ever
+        // looping over enrol_get_my_courses().
+        $mycourses = enrol_get_my_courses();
+        if (!isset($mycourses[$courseid])) {
+            echo json_encode([]);
+            exit;
+        }
+
+        $users = exaport_get_course_shareable_users($courseid);
+
+        $sharedusers = [];
+        if ($entityid > 0) {
+            $sharedusers = $DB->get_records($config->usersharetable, [$config->idfield => $entityid],
+                null, 'userid, notify');
+        }
+
+        foreach ($users as $user) {
+            if (isset($sharedusers[$user->id])) {
+                $user->shared_to = true;
+                $user->notify_user = (bool)$sharedusers[$user->id]->notify;
+            } else {
+                $user->shared_to = false;
+                $user->notify_user = false;
+            }
+        }
+
+        echo json_encode(array_values($users));
         exit;
     }
 
@@ -1041,50 +1142,271 @@ namespace {
         exit;
     }
 
+    /**
+     * Toggle direct user shares of an entity, used by the "search any user" sharing page.
+     *
+     * Extracted so that the search page exists only once for collections, categories and items
+     * instead of triplicating the same add/delete logic. The caller is responsible for the
+     * ownership check (see block_exaport_sharing_owned_entity_id()) and for require_sesskey().
+     *
+     * @param object $config Entity configuration, see block_exaport_get_sharing_entity_config().
+     * @param int $entityid Id of the (owned) entity.
+     * @param array $shareusers userid => truthy value if the entity should be shared to that user.
+     */
+    function block_exaport_sharing_toggle_shared_users($config, int $entityid, array $shareusers) {
+        global $DB;
+
+        $sharedusers = $DB->get_records_menu($config->usersharetable, [$config->idfield => $entityid],
+            null, 'userid, userid AS tmp');
+
+        foreach ($shareusers as $userid => $share) {
+            $userid = (int)$userid;
+            if ($share && !isset($sharedusers[$userid])) {
+                // Add, but only for users that really exist.
+                if (!$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])) {
+                    continue;
+                }
+                $DB->insert_record($config->usersharetable, (object)[
+                    $config->idfield => $entityid,
+                    'userid' => $userid,
+                ]);
+            } else if (!$share && isset($sharedusers[$userid])) {
+                // Delete.
+                $DB->delete_records($config->usersharetable, [$config->idfield => $entityid, 'userid' => $userid]);
+            }
+        }
+
+        // Sharing to single users only makes sense if internal access is on and "share to all" is off,
+        // so the flags are updated exactly like the collection only version of this page always did.
+        $update = ['id' => $entityid, 'shareall' => 0];
+        if ($config->internaccessfield) {
+            $update[$config->internaccessfield] = 1;
+        }
+        $DB->update_record($config->entitytable, (object)$update);
+    }
+
+    /**
+     * Page: search any moodle user and toggle direct sharing of one entity with them.
+     *
+     * This is the generalized version of the former views_mod_share_user_search.php. Collections,
+     * categories and items all share with single users in exactly the same way, so the search,
+     * the result list and the toggling live here once and the per entity type differences flow
+     * through block_exaport_get_sharing_entity_config().
+     *
+     * Only the owner of the entity may see or change anything, the search results and the share
+     * state are never rendered for anybody else.
+     *
+     * @param string $entitytype One of 'view', 'category', 'item'.
+     */
+    function block_exaport_sharing_user_search_page(string $entitytype) {
+        global $DB, $OUTPUT, $PAGE, $CFG;
+
+        $config = block_exaport_get_sharing_entity_config($entitytype);
+
+        $courseid = required_param('courseid', PARAM_INT);
+        $id = required_param('id', PARAM_INT);
+        $q = trim(optional_param('q', '', PARAM_TEXT));
+
+        block_exaport_require_login($courseid);
+
+        $context = context_system::instance();
+        $PAGE->set_url('/blocks/exaport/share_user_search.php',
+            ['courseid' => $courseid, 'entitytype' => $entitytype, 'id' => $id]);
+
+        if (!$course = $DB->get_record('course', ['id' => $courseid])) {
+            throw new \block_exaport\moodle_exception('invalidcourseid');
+        }
+
+        // Ownership check, identical to the one used by the sharing AJAX endpoints.
+        if (!block_exaport_sharing_owned_entity_id($config, $id)) {
+            throw new \block_exaport\moodle_exception($config->notfoundstring);
+        }
+
+        $shareusers = optional_param_array('shareusers', null, PARAM_INT);
+        if ($shareusers) {
+            require_sesskey();
+            block_exaport_sharing_toggle_shared_users($config, $id, $shareusers);
+        }
+
+        $backurl = new moodle_url($config->editpage,
+            ['courseid' => $courseid, 'id' => $id, 'sesskey' => sesskey()] + $config->editparams);
+        $searchurl = new moodle_url('/blocks/exaport/share_user_search.php',
+            ['courseid' => $courseid, 'entitytype' => $entitytype, 'id' => $id, 'q' => $q, 'sesskey' => sesskey()]);
+        $backlink = '<a href="' . $backurl->out() . '">' . get_string('back') . '</a>';
+
+        block_exaport_print_header($config->headeritem, $config->headersubitem);
+
+        echo $backlink . '<br /><br />';
+
+        echo '<form method="get" action="' . $CFG->wwwroot . '/blocks/exaport/share_user_search.php">';
+        echo '<input type="hidden" name="courseid" value="' . s($courseid) . '" />';
+        echo '<input type="hidden" name="entitytype" value="' . s($entitytype) . '" />';
+        echo '<input type="hidden" name="id" value="' . s($id) . '" />';
+        echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+        echo '<input name="q" type="text" value="' . s($q) . '" />';
+        echo '<input value="' . get_string('search') . '" type="submit" />';
+        echo '</form>';
+
+        if ($q) {
+            $users = get_users_listing('firstname', 'ASC', 0, 10, $q, '', '', '', array(), $context);
+
+            if ($users) {
+                $sharedusers = $DB->get_records_menu($config->usersharetable, [$config->idfield => $id],
+                    null, 'userid, userid AS tmp');
+
+                echo '<form method="post" action="' . $searchurl->out() . '" style="padding-top: 10px;">';
+                echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+                echo '<table width="70%">';
+                echo '<tr><th align="center">' . get_string('strshare', 'block_exaport') . '</th>';
+                echo '<th align="left">' . get_string('name') . '</th></tr>';
+
+                foreach ($users as $user) {
+                    $sharedto = isset($sharedusers[$user->id]);
+
+                    echo '<tr><td align="center" width="50">';
+                    echo '<input class="shareusers" type="hidden" name="shareusers[' . $user->id . ']" value="" />';
+                    echo '<input class="shareusers" type="checkbox" name="shareusers[' . $user->id . ']" value="' . $user->id . '"' .
+                        ($sharedto ? ' checked="checked"' : '') . ' />';
+                    echo '</td><td align="center">' . s(fullname($user)) . '</td></tr>';
+                }
+                echo '</table>';
+                echo $backlink . '&nbsp;&nbsp;&nbsp;';
+                echo '<input value="' . get_string('savechanges') . '" type="submit" />';
+                echo '</form>';
+            } else {
+                echo get_string('nousersfound');
+            }
+        }
+
+        echo block_exaport_wrapperdivend();
+        echo $OUTPUT->footer($course);
+    }
+
+    /**
+     * Resolves the shareable users (with roles) of exactly one course.
+     *
+     * Extracted out of exaport_get_shareable_courses_with_users() so this - the expensive part,
+     * one get_role_users() call per role used in the course - can be invoked for a single course
+     * only, by block_exaport_ajax_sharing_userlist_course(), instead of always for every enrolled
+     * course as exaport_get_shareable_courses_with_users() still does for its own callers.
+     *
+     * @param int $courseid
+     * @return object[] Keyed by user id: {id, name, rolename}.
+     */
+    function exaport_get_course_shareable_users(int $courseid): array {
+        global $USER;
+
+        $users = array();
+
+        $context = context_course::instance($courseid);
+        $roles = get_roles_used_in_context($context);
+
+        foreach ($roles as $role) {
+            // since user_picture::fields('u') uses a deprecated moodle function, this is the workaround:
+            $fields = exaport_get_picture_fields();
+            foreach ($fields as $key => $field) {
+                $fields[$key] = 'u.' . $field;
+            }
+            $fields = implode(',', $fields);
+            $roleusers = get_role_users($role->id, $context, false, $fields, null, true, '', '', '',
+                ' deleted=0 AND suspended=0');
+
+            if (!$roleusers) {
+                continue;
+            }
+
+            foreach ($roleusers as $user) {
+                if ($user->id == $USER->id) {
+                    continue;
+                }
+
+                $users[$user->id] = (object)array(
+                    'id' => $user->id,
+                    'name' => fullname($user),
+                    'rolename' => $role->name ? $role->name : $role->shortname,
+                );
+            }
+        }
+
+        return $users;
+    }
+
+    /**
+     * Cheap list of courses a "share to users" dialog may pick from, without resolving any
+     * course's users - see block_exaport_ajax_sharing_userlist() for why this split exists.
+     *
+     * @return object[] Keyed by course id: {id, fullname, has_shared_users}. has_shared_users
+     *                   always starts out false here, it is filled in by the caller.
+     */
+    function exaport_get_shareable_courses_list(): array {
+        global $COURSE;
+
+        $courses = array();
+        foreach (enrol_get_my_courses(null, 'fullname ASC') as $dbcourse) {
+            $courses[$dbcourse->id] = (object)array(
+                'id' => $dbcourse->id,
+                'fullname' => $dbcourse->fullname,
+                'has_shared_users' => false,
+            );
+        }
+
+        // Move active course to first position, same as exaport_get_shareable_courses_with_users().
+        if (isset($courses[$COURSE->id])) {
+            $course = $courses[$COURSE->id];
+            unset($courses[$COURSE->id]);
+            $courses = array($course->id => $course) + $courses;
+        }
+
+        return $courses;
+    }
+
+    /**
+     * Cheap lookup of which of the given courses each of the given users is enrolled in.
+     *
+     * Used to work out which courses already have shares (so they can be auto-expanded/eagerly
+     * fetched) and which shared users are not enrolled in any of the owner's courses ("extra
+     * users"), without ever calling get_roles_used_in_context()/get_role_users(): the query below
+     * only ever touches the (normally tiny) set of already-shared user ids, so it stays cheap
+     * however many courses the owner is enrolled in.
+     *
+     * @param int[] $userids
+     * @param int[] $courseids
+     * @return array userid => int[] of courseids (a subset of $courseids) the user is enrolled in.
+     */
+    function exaport_get_courseids_for_shared_users(array $userids, array $courseids): array {
+        global $DB;
+
+        $result = array();
+        if (!$userids || !$courseids) {
+            return $result;
+        }
+
+        list($useridsql, $uparams) = $DB->get_in_or_equal(array_map('intval', $userids), SQL_PARAMS_NAMED, 'shu');
+        list($courseidsql, $cparams) = $DB->get_in_or_equal(array_map('intval', $courseids), SQL_PARAMS_NAMED, 'shc');
+        $sql = "SELECT DISTINCT ue.userid, e.courseid
+                  FROM {user_enrolments} ue
+                  JOIN {enrol} e ON e.id = ue.enrolid
+                 WHERE ue.userid $useridsql AND e.courseid $courseidsql";
+        $rows = $DB->get_recordset_sql($sql, $uparams + $cparams);
+        foreach ($rows as $row) {
+            $result[$row->userid][] = $row->courseid;
+        }
+        $rows->close();
+
+        return $result;
+    }
+
     function exaport_get_shareable_courses_with_users($type) {
-        global $USER, $COURSE;
+        global $COURSE;
         $courses = array();
 
         // Loop through all my courses.
         foreach (enrol_get_my_courses(null, 'fullname ASC') as $dbcourse) {
-
-            $course = (object)array(
+            $courses[$dbcourse->id] = (object)array(
                 'id' => $dbcourse->id,
                 'fullname' => $dbcourse->fullname,
-                'users' => array(),
+                'users' => exaport_get_course_shareable_users($dbcourse->id),
             );
-
-            $context = context_course::instance($dbcourse->id);
-            $roles = get_roles_used_in_context($context);
-
-            foreach ($roles as $role) {
-                // since user_picture::fields('u') uses a deprecated moodle function, this is the workaround:
-                $fields = exaport_get_picture_fields();
-                foreach ($fields as $key => $field) {
-                    $fields[$key] = 'u.' . $field;
-                }
-                $fields = implode(',', $fields);
-                $users = get_role_users($role->id, $context, false, $fields, null, true, '', '', '',
-                    ' deleted=0 AND suspended=0');
-
-                if (!$users) {
-                    continue;
-                }
-
-                foreach ($users as $user) {
-                    if ($user->id == $USER->id) {
-                        continue;
-                    }
-
-                    $course->users[$user->id] = (object)array(
-                        'id' => $user->id,
-                        'name' => fullname($user),
-                        'rolename' => $role->name ? $role->name : $role->shortname,
-                    );
-                }
-            }
-
-            $courses[$course->id] = $course;
         }
         // Move active course to first position.
         if (isset($courses[$COURSE->id]) && ($type != 'shared_views')) {

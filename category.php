@@ -35,7 +35,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {
 // Get the shareable users of exactly one course, fetched lazily by the userlist dialog when a
 // course group is expanded (or eagerly for already-shared courses) instead of upfront for every
 // enrolled course - see block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php.
-if (optional_param('action', '', PARAM_ALPHA) == 'userlist_course') {
+if (optional_param('action', '', PARAM_ALPHA) == 'userlistcourse') {
     block_exaport_ajax_sharing_userlist_course('category', optional_param('id', 0, PARAM_INT),
         required_param('usercourseid', PARAM_INT));
 }

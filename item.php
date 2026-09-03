@@ -62,7 +62,7 @@ if ($action == 'userlist') {
 }
 // Lazily fetch the shareable users of exactly one course, see
 // block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php for why this exists.
-if ($action == 'userlist_course') {
+if ($action == 'userlistcourse') {
     block_exaport_ajax_sharing_userlist_course('item', $id, required_param('usercourseid', PARAM_INT));
 }
 // Get grouplist for sharing item.

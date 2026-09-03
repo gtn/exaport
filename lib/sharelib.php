@@ -1056,6 +1056,10 @@ namespace {
      * $courseid so this endpoint can't be used to peek at users of a course the caller has
      * nothing to do with.
      *
+     * The entry points dispatch to this for action=userlistcourse. The action value must not
+     * contain an underscore, because the entry points read it with PARAM_ALPHA, which strips
+     * everything that is not a plain letter.
+     *
      * @param string $entitytype One of 'view', 'category', 'item'.
      * @param int $entityid Id of the entity being edited, 0 for a not yet saved one.
      * @param int $courseid Id of the course to list shareable users for.

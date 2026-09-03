@@ -264,7 +264,7 @@
         var $content = $fieldset.find('.course-group-content');
         $content.html('loading users...');
 
-        var courseparams = {action: 'userlist_course', sesskey: M.cfg.sesskey, usercourseid: courseid};
+        var courseparams = {action: 'userlistcourse', sesskey: M.cfg.sesskey, usercourseid: courseid};
         if (type == 'cat_mod') {
           courseparams.id = $('input[name="id"]').val() || 0;
         }

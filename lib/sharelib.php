@@ -1189,6 +1189,94 @@ namespace {
     }
 
     /**
+     * Save the full set of direct user shares of an entity from a "share" form submission.
+     *
+     * Used by views_mod.php, category.php and item.php instead of each of them deleting all
+     * existing rows and blindly re-inserting one row per submitted value. Direct user shares are
+     * entity-wide (one entity/user relation, see block_exaport_get_sharing_entity_config()), not
+     * course-specific, even though the share form groups the same eligible users by course for
+     * display purposes and can therefore submit several checkbox occurrences of the same user id
+     * (once per course they are enrolled in) - see block_exaport_ajax_sharing_userlist_course().
+     * This function treats the submission as exactly what it means: one deduplicated
+     * userid => selected map, never as separate per-course shares, and:
+     *  - deduplicates the submitted user/notify ids (a duplicate or contradictory checkbox
+     *    occurrence must never be able to produce more than one row per user, nor an
+     *    unpredictable notify value for that user);
+     *  - only ever inserts rows for ids that are real, non-deleted users - submitted ids are
+     *    never trusted blindly;
+     *  - reconciles against the existing rows (adds missing, removes unselected, including users
+     *    whose course group was never expanded/loaded by the frontend and therefore could not
+     *    even be re-submitted) instead of deleting everything and re-inserting, which keeps this
+     *    entity/user row identity stable and avoids duplicate-row races on submissions that
+     *    (incorrectly) still contain the same user id more than once.
+     *
+     * @param object $config Entity configuration, see block_exaport_get_sharing_entity_config().
+     * @param int $entityid Id of the (owned) entity.
+     * @param array $shareuserids List of userids the entity should be shared to (course grouping
+     *                            already stripped, duplicates allowed).
+     * @param array $notifyuserids List of userids that should be notified, subset of $shareuserids.
+     * @param array $extrafields Extra column values (e.g. item.php's 'original'/'courseid') to
+     *                           set on newly inserted rows only.
+     * @param bool $forcenotify If true, every shared user is notified regardless of
+     *                          $notifyuserids (block_exaport's "always notify when share"
+     *                          admin setting).
+     */
+    function block_exaport_sharing_save_direct_user_shares($config, int $entityid, array $shareuserids,
+            array $notifyuserids, array $extrafields = [], bool $forcenotify = false) {
+        global $DB;
+
+        // Normalize to a deduplicated set of ids - never trust duplicate checkbox occurrences of
+        // the same user (which can legitimately arrive once per course they are listed in) as
+        // meaning anything other than "this user is selected once".
+        $shareuserids = array_unique(array_map('intval', $shareuserids));
+        $shareuserids = array_filter($shareuserids, fn($id) => $id > 0);
+
+        $notifyuserids = array_unique(array_map('intval', $notifyuserids));
+        $notifyuserids = array_flip($notifyuserids);
+
+        $existing = $DB->get_records($config->usersharetable, [$config->idfield => $entityid],
+            null, 'userid, id, notify');
+
+        // Remove shares for users that are no longer selected, including ones in a course group
+        // the frontend never loaded (and so could never have re-submitted).
+        $toremove = array_diff(array_keys($existing), $shareuserids);
+        if ($toremove) {
+            [$insql, $inparams] = $DB->get_in_or_equal(array_values($toremove));
+            $DB->delete_records_select($config->usersharetable,
+                $config->idfield . ' = ? AND userid ' . $insql,
+                array_merge([$entityid], $inparams));
+        }
+
+        // Only ever add shares for ids that are real, non-deleted users - submitted ids are
+        // never trusted blindly.
+        $toadd = array_diff($shareuserids, array_keys($existing));
+        $validuserids = [];
+        if ($toadd) {
+            [$insql, $inparams] = $DB->get_in_or_equal(array_values($toadd));
+            $validuserids = array_keys($DB->get_records_select('user', 'id ' . $insql . ' AND deleted = 0',
+                $inparams, '', 'id'));
+        }
+
+        foreach ($validuserids as $userid) {
+            $record = (object)(['userid' => $userid, $config->idfield => $entityid,
+                    'notify' => ($forcenotify || isset($notifyuserids[$userid])) ? 1 : 0]
+                + $extrafields);
+            $DB->insert_record($config->usersharetable, $record);
+        }
+
+        // Update the notify flag of already-shared users whose notify state changed.
+        foreach ($shareuserids as $userid) {
+            if (!isset($existing[$userid])) {
+                continue;
+            }
+            $notify = ($forcenotify || isset($notifyuserids[$userid])) ? 1 : 0;
+            if ((int)$existing[$userid]->notify !== $notify) {
+                $DB->update_record($config->usersharetable, (object)['id' => $existing[$userid]->id, 'notify' => $notify]);
+            }
+        }
+    }
+
+    /**
      * Page: search any moodle user and toggle direct sharing of one entity with them.
      *
      * This is the generalized version of the former views_mod_share_user_search.php. Collections,

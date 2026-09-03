@@ -362,6 +362,7 @@ $string['aboutme_description'] = 'Predefined by CV information, but can be edita
 $string['notify'] = 'notify';
 $string['sharejs'] = 'share';
 $string['viewmustbesafed'] = 'Preselected due to global settings. The collection must be saved before this notify-setting will take effect';
+$string['sharedinallcourses'] = 'Selected in all courses';
 $string['mediacontent'] = 'URL or embed code *';
 $string['height'] = 'Height';
 $string['width'] = 'Width';

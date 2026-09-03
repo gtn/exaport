@@ -480,7 +480,7 @@ if (has_capability('block/exaport:shareintern', context_system::instance())) {
         'name', 'role', 'nousersfound',
         'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
         'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
-        'notify', 'checkall', 'viewmustbesafed',
+        'notify', 'checkall', 'viewmustbesafed', 'sharedinallcourses',
     );
 
     $translations = array_flip($translations);
@@ -747,27 +747,20 @@ function block_exaport_save_item_shares($itemid) {
         $DB->update_record('block_exaportitem', $item);
     }
 
-    // Delete all shared users, then add new ones.
-    $DB->delete_records('block_exaportitemshar', array('itemid' => $itemid));
+    // Direct user shares are entity-wide (one row per item/user), never course-specific - see
+    // block_exaport_sharing_save_direct_user_shares(). It also validates submitted ids, dedupes
+    // them and reconciles against the existing rows instead of blindly deleting everything and
+    // re-inserting.
+    $itemconfig = block_exaport_get_sharing_entity_config('item');
+    $shareuserids = [];
+    $notifyuserids = [];
     if ($shareenabled && !$shareall) {
-        $shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
-        $notifyusers = optional_param_array('notifyusers', array(), PARAM_INT);
-        $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
-        foreach ($shareusers as $shareuser) {
-            $shareuser = clean_param($shareuser, PARAM_INT);
-            $shareitem = new stdClass();
-            $shareitem->itemid = $itemid;
-            $shareitem->userid = $shareuser;
-            $shareitem->original = 0;
-            $shareitem->courseid = $item ? $item->courseid : 0;
-            if ($alwaysnotifywhenshare) {
-                $shareitem->notify = 1;
-            } else {
-                $shareitem->notify = in_array($shareuser, $notifyusers) ? 1 : 0;
-            }
-            $DB->insert_record('block_exaportitemshar', $shareitem);
-        }
+        $shareuserids = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+        $notifyuserids = optional_param_array('notifyusers', array(), PARAM_INT);
     }
+    $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+    block_exaport_sharing_save_direct_user_shares($itemconfig, $itemid, $shareuserids, $notifyuserids,
+        ['original' => 0, 'courseid' => $item ? $item->courseid : 0], (bool)$alwaysnotifywhenshare);
 
     // Delete all shared groups, then add new ones.
     $DB->delete_records('block_exaportitemgroupshar', array('itemid' => $itemid));

@@ -577,60 +577,55 @@ if ($editform->is_cancelled()) {
 
             break;
         case 'share':
-            // Delete all shared users.
-            $DB->delete_records("block_exaportviewshar", array('viewid' => $dbview->id));
-            // Add new shared users.
+            // Direct user shares are entity-wide (one row per view/user), never course-specific -
+            // see block_exaport_sharing_save_direct_user_shares(). It also validates submitted
+            // ids, dedupes them and reconciles against the existing rows instead of blindly
+            // deleting everything and re-inserting.
+            $viewconfig = block_exaport_get_sharing_entity_config('view');
+            $shareuserids = [];
+            $notifyuserids = [];
             if ($dbview->internaccess && !$dbview->shareall) {
-                $shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
-                $notifyusers = optional_param_array('notifyusers', array(), PARAM_INT);
+                $shareuserids = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+                $notifyuserids = optional_param_array('notifyusers', array(), PARAM_INT);
+            }
+            block_exaport_sharing_save_direct_user_shares($viewconfig, $dbview->id, $shareuserids, $notifyuserids);
 
-                foreach ($shareusers as $shareuser) {
-                    $shareuser = clean_param($shareuser, PARAM_INT);
-                    $shareitem = new stdClass();
-                    $shareitem->viewid = $dbview->id;
-                    $shareitem->userid = $shareuser;
-                    $shareitem->notify = in_array($shareuser, $notifyusers) ? 1 : 0;
-                    $DB->insert_record("block_exaportviewshar", $shareitem);
-                }
-                // Message users, if they have shared.
-                if (count($notifyusers) > 0) {
-                    foreach ($notifyusers as $notifyuser) {
-                        // Only notify if he also is shared.
-                        // if (isset($shareusers[$notifyuser])) { returns false if array contains 3 and $notifyuser is string "3" !!!
-                        if (in_array((int)$notifyuser, $shareusers, true)) {
-                            // Notify.
-                            /*
-                            $notificationdata = new \core\message\message();
-                            $notificationdata->component = 'block_exaport';
-                            $notificationdata->name = 'sharing';
-                            $notificationdata->userfrom = $USER;
-                            $notificationdata->userto = $DB->get_record('user', array('id' => $notifyuser));
-                            // TODO: subject + message text.
-                            $notificationdata->subject = get_string('i_shared', 'block_exaport');
-                            // TODO: courseid=1??? Doesn't seem to matter...
-                            $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=1&' .
-                                'access=id/' . $USER->id . '-' . $dbview->id;
-                            $notificationdata->fullmessageformat = FORMAT_PLAIN;
-                            $notificationdata->fullmessagehtml = '';
-                            $notificationdata->smallmessage = '';
-                            $notificationdata->notification = 1;
+            // Message users, if they have shared. Read the notify flag back from the just-saved
+            // rows instead of the raw submission, so only users this save actually (still)
+            // shares with can ever be notified.
+            $notifiedusers = $DB->get_records('block_exaportviewshar',
+                ['viewid' => $dbview->id, 'notify' => 1], null, 'userid');
+            foreach ($notifiedusers as $notifieduser) {
+                // Notify.
+                /*
+                $notificationdata = new \core\message\message();
+                $notificationdata->component = 'block_exaport';
+                $notificationdata->name = 'sharing';
+                $notificationdata->userfrom = $USER;
+                $notificationdata->userto = $DB->get_record('user', array('id' => $notifyuser));
+                // TODO: subject + message text.
+                $notificationdata->subject = get_string('i_shared', 'block_exaport');
+                // TODO: courseid=1??? Doesn't seem to matter...
+                $notificationdata->fullmessage = $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=1&' .
+                    'access=id/' . $USER->id . '-' . $dbview->id;
+                $notificationdata->fullmessageformat = FORMAT_PLAIN;
+                $notificationdata->fullmessagehtml = '';
+                $notificationdata->smallmessage = '';
+                $notificationdata->notification = 1;
 
-                            $mailresult = message_send($notificationdata);
-                            */
-                            $a = (object)[
-                                'sendername' => fullname($USER),
-                                'title' => $dbview->name,
-                            ];
-                            exaport_notify_single_user(
-                                $dbview->id,
-                                $notifyuser,
-                                'sharing',
-                                get_string('i_shared', 'block_exaport', $a),
-                                $courseid
-                            );
-                        }
-                    }
-                }
+                $mailresult = message_send($notificationdata);
+                */
+                $a = (object)[
+                    'sendername' => fullname($USER),
+                    'title' => $dbview->name,
+                ];
+                exaport_notify_single_user(
+                    $dbview->id,
+                    $notifieduser->userid,
+                    'sharing',
+                    get_string('i_shared', 'block_exaport', $a),
+                    $courseid
+                );
             }
 
             // Delete all shared groups.
@@ -873,7 +868,7 @@ $translations = array(
     'file', 'note', 'link',
     'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
     'notify', 'emailaccess',
-    'checkall', 'viewmustbesafed',
+    'checkall', 'viewmustbesafed', 'sharedinallcourses',
     'configureblock_item', 'configureblock_personal_information', 'configureblock_cv_information',
     'configureblock_text', 'configureblock_headline', 'configureblock_media', 'configureblock_badge',
 );

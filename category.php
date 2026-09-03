@@ -443,26 +443,20 @@ if ($mform->is_cancelled()) {
         $newentry->id = $DB->insert_record("block_exaportcate", $newentry);
     }
 
-    // Delete all shared users.
-    $DB->delete_records("block_exaportcatshar", array('catid' => $newentry->id));
-    // Add new shared users.
+    // Direct user shares are entity-wide (one row per category/user), never course-specific -
+    // see block_exaport_sharing_save_direct_user_shares(). It also validates submitted ids,
+    // dedupes them and reconciles against the existing rows instead of blindly deleting
+    // everything and re-inserting.
+    $catconfig = block_exaport_get_sharing_entity_config('category');
+    $shareuserids = [];
+    $notifyuserids = [];
     if ($newentry->internshare && !$newentry->shareall) {
-        $shareusers = \block_exaport\param::optional_array('shareusers', PARAM_INT);
-        $notifyusers = optional_param_array('notifyusers', array(), PARAM_INT);
-        $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
-        foreach ($shareusers as $shareuser) {
-            $shareuser = clean_param($shareuser, PARAM_INT);
-            $shareitem = new stdClass();
-            $shareitem->catid = $newentry->id;
-            $shareitem->userid = $shareuser;
-            if ($alwaysnotifywhenshare) {
-                $shareitem->notify = 1;
-            } else {
-                $shareitem->notify = in_array($shareuser, $notifyusers) ? 1 : 0;
-            }
-            $DB->insert_record("block_exaportcatshar", $shareitem);
-        };
-    };
+        $shareuserids = \block_exaport\param::optional_array('shareusers', PARAM_INT);
+        $notifyuserids = optional_param_array('notifyusers', array(), PARAM_INT);
+    }
+    $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
+    block_exaport_sharing_save_direct_user_shares($catconfig, $newentry->id, $shareuserids, $notifyuserids,
+        [], (bool)$alwaysnotifywhenshare);
 
     // Delete all shared groups.
     $DB->delete_records("block_exaportcatgroupshar", array('catid' => $newentry->id));
@@ -626,7 +620,7 @@ if ($mform->is_cancelled()) {
         'name', 'role', 'nousersfound',
         'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
         'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
-        'notify', 'checkall', 'viewmustbesafed',
+        'notify', 'checkall', 'viewmustbesafed', 'sharedinallcourses',
     );
 
     $translations = array_flip($translations);

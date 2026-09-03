@@ -60,6 +60,11 @@ $allowresubmission = block_exaport_item_is_resubmitable($id);
 if ($action == 'userlist') {
     block_exaport_ajax_sharing_userlist('item', $id);
 }
+// Lazily fetch the shareable users of exactly one course, see
+// block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php for why this exists.
+if ($action == 'userlist_course') {
+    block_exaport_ajax_sharing_userlist_course('item', $id, required_param('usercourseid', PARAM_INT));
+}
 // Get grouplist for sharing item.
 if ($action == 'grouplist') {
     block_exaport_ajax_sharing_grouplist('item', $id);

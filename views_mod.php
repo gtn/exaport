@@ -78,6 +78,12 @@ if ($view && $action == 'userlist') {
     block_exaport_ajax_sharing_userlist('view', (int)$view->id);
 }
 
+if ($view && $action == 'userlist_course') {
+    // Lazily fetch the shareable users of exactly one course, see
+    // block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php for why this exists.
+    block_exaport_ajax_sharing_userlist_course('view', (int)$view->id, required_param('usercourseid', PARAM_INT));
+}
+
 if ($view && $action == 'grouplist') {
     block_exaport_ajax_sharing_grouplist('view', (int)$view->id);
 }

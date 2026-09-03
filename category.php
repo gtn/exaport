@@ -32,6 +32,13 @@ $PAGE->set_url($url, ['courseid' => $courseid,
 if (optional_param('action', '', PARAM_ALPHA) == 'userlist') {
     block_exaport_ajax_sharing_userlist('category', optional_param('id', 0, PARAM_INT));
 }
+// Get the shareable users of exactly one course, fetched lazily by the userlist dialog when a
+// course group is expanded (or eagerly for already-shared courses) instead of upfront for every
+// enrolled course - see block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php.
+if (optional_param('action', '', PARAM_ALPHA) == 'userlist_course') {
+    block_exaport_ajax_sharing_userlist_course('category', optional_param('id', 0, PARAM_INT),
+        required_param('usercourseid', PARAM_INT));
+}
 // Get grouplist for sharing category.
 if (optional_param('action', '', PARAM_ALPHA) == 'grouplist') {
     block_exaport_ajax_sharing_grouplist('category', optional_param('id', 0, PARAM_INT));

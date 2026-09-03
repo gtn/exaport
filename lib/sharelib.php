@@ -976,6 +976,7 @@ namespace {
         global $DB;
 
         require_sesskey();
+        require_capability('block/exaport:shareintern', context_system::instance());
 
         $config = block_exaport_get_sharing_entity_config($entitytype);
         $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
@@ -1068,6 +1069,7 @@ namespace {
         global $DB;
 
         require_sesskey();
+        require_capability('block/exaport:shareintern', context_system::instance());
 
         $config = block_exaport_get_sharing_entity_config($entitytype);
         $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
@@ -1121,6 +1123,7 @@ namespace {
         global $DB;
 
         require_sesskey();
+        require_capability('block/exaport:shareintern', context_system::instance());
 
         $config = block_exaport_get_sharing_entity_config($entitytype);
         $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
@@ -1210,6 +1213,7 @@ namespace {
         block_exaport_require_login($courseid);
 
         $context = context_system::instance();
+        require_capability('block/exaport:shareintern', context_system::instance());
         $PAGE->set_url('/blocks/exaport/share_user_search.php',
             ['courseid' => $courseid, 'entitytype' => $entitytype, 'id' => $id]);
 

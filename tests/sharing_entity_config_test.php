@@ -115,6 +115,21 @@ final class sharing_entity_config_test extends \advanced_testcase {
     }
 
     /**
+     * The shared user-search page is restricted to users with the internal share capability.
+     */
+    public function test_search_page_requires_shareintern_capability(): void {
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $this->setUser($user);
+
+        $_GET['courseid'] = $course->id;
+        $_GET['id'] = 0;
+
+        $this->expectException(\required_capability_exception::class);
+        block_exaport_sharing_user_search_page('category');
+    }
+
+    /**
      * Toggling direct shares adds/removes rows and enables internal sharing for the entity.
      */
     public function test_toggle_shared_users(): void {

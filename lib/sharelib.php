@@ -1189,7 +1189,7 @@ namespace {
                     echo '<input class="shareusers" type="hidden" name="shareusers[' . $user->id . ']" value="" />';
                     echo '<input class="shareusers" type="checkbox" name="shareusers[' . $user->id . ']" value="' . $user->id . '"' .
                         ($sharedto ? ' checked="checked"' : '') . ' />';
-                    echo '</td><td align="center">' . fullname($user) . '</td></tr>';
+                    echo '</td><td align="center">' . s(fullname($user)) . '</td></tr>';
                 }
                 echo '</table>';
                 echo $backlink . '&nbsp;&nbsp;&nbsp;';

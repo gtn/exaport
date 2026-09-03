@@ -45,6 +45,10 @@ if ($user->access->request == 'extern') {
     $extratable = "";
     $extrawhere = "i.externaccess=1";
 } else {
+    // TODO: item-group-sharing gap - this query only considers direct user shares
+    // (block_exaportitemshar) and shareall. Items shared only via a cohort/group
+    // (block_exaportitemgroupshar) are not included here, so this page can
+    // under-expose items to viewers who only have access through group membership.
     $extratable = "LEFT JOIN {block_exaportitemshar} ishar ON i.id=ishar.itemid AND ishar.userid=?";
     $extrawhere = " ((i.shareall=1 AND ishar.userid IS NULL)";
     $extrawhere .= "  OR (i.shareall=0 AND ishar.userid IS NOT NULL))";

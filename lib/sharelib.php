@@ -851,6 +851,10 @@ namespace {
      * category.php, views_mod.php and item.php to use one single implementation of the
      * userlist/grouplist AJAX endpoints instead of three slightly diverging copies.
      *
+     * 'notfoundstring' is the language string a caller should use when it wants to report a
+     * missing/foreign entity itself - the AJAX endpoints below deliberately don't use it,
+     * see block_exaport_sharing_owned_entity_id().
+     *
      * @param string $entitytype One of 'view', 'category', 'item'.
      * @return object Configuration with the table/column names used for this entity type.
      */

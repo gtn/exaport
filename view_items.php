@@ -1107,6 +1107,12 @@ foreach ($items as $item) {
         }
 
         if ($type == 'mine') {
+            $share = \block_exaport\item_helper::build_share_info($item);
+            if ($share->is_shared()) {
+                // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
+                $icons .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
+                    ['title' => s(block_exaport_get_share_tooltip($share, false))]);
+            }
             $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=edit">'
                 . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
                 //                    .'<img src="pix/edit.png" alt="'.get_string("edit").'" />'

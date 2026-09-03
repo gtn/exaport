@@ -109,6 +109,15 @@ class item_card extends card {
         }
 
         $commentlabel = $commentcount . ' ' . block_exaport_get_string($commentcount === 1 ? 'comment' : 'comments');
+        $isshared = false;
+        $share = new \block_exaport\share_info();
+
+        if ($type == 'mine') {
+            $share = \block_exaport\item_helper::build_share_info($item);
+            $isshared = $share->is_shared();
+        }
+
+        $sharedtooltip = block_exaport_get_share_tooltip($share);
 
         return $this->base_icons() + [
             'itemnamelower' => strtolower($item->name),
@@ -116,6 +125,7 @@ class item_card extends card {
             'catids'        => implode(',', $itemcatids),
             'timemodified'  => (int)$item->timemodified,
             'itemid'        => (int)$item->id,
+            'isshared'      => $isshared,
             'url'           => $url,
             'itemname'      => $item->name,
             'isownitem'     => $isownitem,
@@ -134,6 +144,19 @@ class item_card extends card {
             'introtext'     => $introtext,
             'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
             'commentlabel'  => $commentlabel,
+            'sharedicon'    => block_exaport_fontawesome_icon(
+                'share-nodes',
+                'solid',
+                1,
+                ['icon', 'icon-shared'],
+                [],
+                [
+                    'data-bs-toggle'    => 'tooltip',
+                    'data-bs-placement' => 'top',
+                    'data-bs-html'      => 'true',
+                    'data-bs-title'     => $sharedtooltip,
+                ]
+            ),
         ] + ($this->showcategories ? [
             'categorybadges' => block_exaport_render_item_category_badges($this->item),
         ] : []);

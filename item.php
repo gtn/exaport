@@ -107,7 +107,7 @@ if ($action == 'grouplist') {
         $sharedgroups = $DB->get_records_menu('block_exaportitemgroupshar',
             ['itemid' => $id],
             null,
-            'groupid, groupid');
+            'groupid, groupid AS tmp');
     }
     foreach ($groupgroups as $groupgroup) {
         foreach ($groupgroup->groups as $group) {

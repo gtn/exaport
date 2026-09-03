@@ -15,10 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
-// Backwards compatible entry point: this page was collection ("view") only, the same feature is
-// now available for categories (and items) through share_user_search.php. Existing links and
-// bookmarks keep working, the shared implementation lives in lib/sharelib.php.
+// Search any moodle user and share a collection, category or item directly with them.
+// The whole logic lives in lib/sharelib.php so that it is not triplicated per entity type,
+// see block_exaport_sharing_user_search_page().
+//
+// TODO: item.php does not offer this search box yet - items have no "internal access" flag and
+// their share form flow differs, so wiring up the item UI was deferred. This script itself
+// already supports entitytype=item.
 
 require_once(__DIR__ . '/inc.php');
 
-block_exaport_sharing_user_search_page('view');
+$entitytype = optional_param('entitytype', 'view', PARAM_ALPHA);
+if (!in_array($entitytype, ['view', 'category', 'item'])) {
+    throw new \block_exaport\moodle_exception('error');
+}
+
+block_exaport_sharing_user_search_page($entitytype);

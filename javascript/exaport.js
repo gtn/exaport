@@ -112,90 +112,34 @@
       }
       this.userlist_loaded = true;
 
-      $('#sharing-userlist').html('loading userlist...');
+      var $userlist = $('#sharing-userlist');
+      $userlist.html('loading userlist...');
 
-      var params = {action: 'userlist'};
-      if (type == 'cat_mod') {
-        params.id = $('input[name="id"]').val() || 0;
-      }
-      $.getJSON(document.location.href, params, function (courses) {
-        var html = '';
-        var alwaysNotify = document.getElementById('alwaysnotifywhenshare')?.value ?? "false";
-        var alwaysNotifyBool = alwaysNotify === "true" || alwaysNotify === "1";
-        if (!$.empty(courses)) {
-          $.each(courses, function (tmp, course) {
-            html += '<fieldset class="course-group"><legend class="course-group-title">';
-            html += ($E.courseid == course.id ? '<b>' : '');
-            html += course.fullname;
-            html += ($E.courseid == course.id ? '</b>' : '');
-            html += '</legend>';
+      var alwaysNotify = document.getElementById('alwaysnotifywhenshare')?.value ?? "false";
+      var alwaysNotifyBool = alwaysNotify === "true" || alwaysNotify === "1";
 
-            html += '<div class="course-group-content">';
-            if (!$.empty(course.users)) {
-              html += "<table width=\"70%\">";
-              html += "<tr><th align=\"center\">&nbsp;</th>";
-              if (type == 'views_mod' || type == 'cat_mod') {
-                html += "<th align=\"center\">&nbsp;</th>";
-              }
-              html += "<th align=\"left\">" + $E.translate('name') + "</th><th align=\"right\">" + $E.translate('role') + "</th></tr>";
+      // courseid => true once that course's users have been fetched (or were embedded directly,
+      // like the "other users" pseudo-course), so re-collapsing/re-expanding a course never
+      // re-fetches it.
+      var loadedCourses = {};
 
-              html += '<tr><td align=\"center\" width="5%">';
-              html += '<input class="shareusers-check-all" courseid="' + course.id + '" type="checkbox" />';
-              html += "<br />" + $E.translate('checkall');
-              html += "</td></tr>";
-
-              $.each(course.users, function (tmp, user) {
-                html += '<tr><td align=\"center\" width="5%">';
-                html += '<input class="shareusers" type="checkbox" courseid="' + course.id + '" name="shareusers[' + user.id + ']" ';
-                html += ' value="' + user.id + '"' + (user.shared_to ? ' checked="checked"' : '') + ' />';
-                if (type == 'views_mod' || type == 'cat_mod') {
-                  html += "<br />" + $E.translate('sharejs');
-                  html += '</td><td align=\"center\" width="5%" style="padding-right: 20px;">';
-
-                  html += '<input class="notifyusers" type="checkbox"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
-                  html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
-
-                  // workaround for disabled checkboxes not submittting: https://stackoverflow.com/questions/4727974/how-to-post-submit-an-input-checkbox-that-is-disabled
-                  if (alwaysNotifyBool) {
-                    // if the user.notify_user differs from the checked state of the checkbox, the checkbox should be red and a hover info should write "asdf"
-                    if ((user.notify_user && !user.shared_to) || (!user.notify_user && user.shared_to)) {
-                      html += ' <span title="' + $E.translate('viewmustbesafed') + '" style="color: red; font-weight: bold;">(!)</span> ';
-                    }
-
-                    html += '<input class="notifyusers" type="hidden"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
-                    html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
-                  }
-
-                  html += "<br />" + $E.translate('notify');
-                }
-                html += "</td><td align=\"center\" width='45%'>" + user.name + "</td><td align=\"center\" width='45%'>" + user.rolename + "</td></tr>";
-              });
-
-              html += "</table>";
-            } else {
-              html += $E.translate('nousersfound');
-            }
-            html += '</div>';
-            html += "</fieldset>";
+      // Wires up all the checkbox behaviours (check-all, notify enable/disable, alwaysNotifyBool
+      // handling, sharedusersarr pre-check) for one already-rendered course's user table. Scoped
+      // to $content instead of the whole #sharing-userlist, and called once per rendered course
+      // (both for courses rendered eagerly and courses rendered lazily on click), because with
+      // lazy-loading not every course's table exists yet when the userlist first renders.
+      function wireCourseCheckboxes($content) {
+        // Set default checkboxes for category (undefined in view sharing).
+        if (typeof sharedusersarr != 'undefined' && sharedusersarr.length > 0) {
+          $.each(sharedusersarr, function (tmp, userid) {
+            $content.find('input:checkbox[value=' + userid + ']').attr("checked", true);
           });
-        } else {
-          html += '<b>' + $E.translate('nousersfound') + '</b>';
         }
 
-        $('#sharing-userlist').html(html);
-
-        // Set default checkboxes for category.
-        if (typeof sharedusersarr != 'undefined') { // In view sharing this array is undefined.
-          if (sharedusersarr.length > 0) {
-            $.each(sharedusersarr, function (tmp, userid) {
-              $('form [id$="internaccess-users"] input:checkbox[value=' + userid + ']').attr("checked", true);
-            });
-          }
-        }
-        // CHECK ALL buttons.
-        $('#sharing-userlist .shareusers-check-all').click(function () {
+        // CHECK ALL button.
+        $content.find('.shareusers-check-all').on('click', function () {
           // Check/uncheck all users in this course.
-          $('#sharing-userlist .shareusers:checkbox[courseid=' + $(this).attr('courseid') + ']')
+          $content.find('.shareusers:checkbox[courseid=' + $(this).attr('courseid') + ']')
             .prop('checked', $(this).is(':checked'))
             // Execute click handler.
             .each(function () {
@@ -204,15 +148,7 @@
             });
         });
 
-        /*
-         $('#sharing-userlist .shareusers:checkbox, #sharing-userlist .notifyusers:checkbox').click(function(){
-         // check/uncheck this user in other courses
-         $('#sharing-userlist :checkbox[name="'+this.name+'"]').attr('checked', this.checked);
-         });
-         */
-
-        // Stop slow loading.
-        $('#sharing-userlist .shareusers:checkbox').click(function () {
+        $content.find('.shareusers:checkbox').on('click', function () {
           // Enable/disable notifyuser, according to shared users checkbox.
           var $notifyboxeshidden = $(this).closest('tr').find('.notifyusers[type="hidden"]');
           var $notifyboxescheckbox = $(this).closest('tr').find('.notifyusers[type="checkbox"]');
@@ -229,47 +165,174 @@
           }
 
           // Check/uncheck all users.
-          // TODO: what does this do??
-          var $courseCheckboxes = $('#sharing-userlist .shareusers:checkbox[courseid=' + $(this).attr('courseid') + ']');
-          $('#sharing-userlist .shareusers-check-all[courseid=' + $(this).attr('courseid') + ']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
+          var $courseCheckboxes = $content.find('.shareusers:checkbox[courseid=' + $(this).attr('courseid') + ']');
+          $content.find('.shareusers-check-all[courseid=' + $(this).attr('courseid') + ']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
         });
-        $('.course-group-content').each(function () {
-          var flag = 0;
-          $(this).find('table > tbody > tr > td > input.shareusers').each(function () {
-            if (flag == 1) {
-              return false;
-            }
-            if ($(this).prop('checked') == false) {
-              flag = 1;
-            }
 
-            // TODO FIX THIS FOR GROUPS
-            var $notifyboxes = $(this).closest('tr').find('.notifyusers');
+        var flag = 0;
+        $content.find('table > tbody > tr > td > input.shareusers').each(function () {
+          if (flag == 1) {
+            return false;
+          }
+          if ($(this).prop('checked') == false) {
+            flag = 1;
+          }
+
+          var $notifyboxes = $(this).closest('tr').find('.notifyusers');
+          if (alwaysNotifyBool) {
+            $notifyboxes.prop('checked', this.checked);
+          } else {
+            $notifyboxes.attr('disabled', !this.checked);
+            if (!this.checked) {
+              $notifyboxes.prop('checked', false);
+            }
+          }
+        });
+        if (flag == 0) {
+          $content.find('table > tbody > tr > td > input.shareusers-check-all').prop('checked', true);
+        }
+
+        // Disable notifyusers if alwaysNotify is true.
+        if (alwaysNotifyBool) {
+          $content.find('.notifyusers[type="checkbox"]').prop('disabled', true);
+        }
+      }
+
+      // Renders one course's user table into its .course-group-content and (re-)wires its
+      // checkbox behaviours. Factored out so it is shared between the "eagerly render an
+      // already-shared course" and "lazily render on first click" code paths below.
+      function renderCourseUsers($content, courseid, users) {
+        var html = '';
+        if (!$.empty(users)) {
+          html += "<table width=\"70%\">";
+          html += "<tr><th align=\"center\">&nbsp;</th>";
+          if (type == 'views_mod' || type == 'cat_mod') {
+            html += "<th align=\"center\">&nbsp;</th>";
+          }
+          html += "<th align=\"left\">" + $E.translate('name') + "</th><th align=\"right\">" + $E.translate('role') + "</th></tr>";
+
+          html += '<tr><td align=\"center\" width="5%">';
+          html += '<input class="shareusers-check-all" courseid="' + courseid + '" type="checkbox" />';
+          html += "<br />" + $E.translate('checkall');
+          html += "</td></tr>";
+
+          $.each(users, function (tmp, user) {
+            html += '<tr><td align=\"center\" width="5%">';
+            html += '<input class="shareusers" type="checkbox" courseid="' + courseid + '" name="shareusers[' + user.id + ']" ';
+            html += ' value="' + user.id + '"' + (user.shared_to ? ' checked="checked"' : '') + ' />';
+            if (type == 'views_mod' || type == 'cat_mod') {
+              html += "<br />" + $E.translate('sharejs');
+              html += '</td><td align=\"center\" width="5%" style="padding-right: 20px;">';
+
+              html += '<input class="notifyusers" type="checkbox"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
+              html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
+
+              // workaround for disabled checkboxes not submittting: https://stackoverflow.com/questions/4727974/how-to-post-submit-an-input-checkbox-that-is-disabled
               if (alwaysNotifyBool) {
-                  $notifyboxes.prop('checked', this.checked);
-              } else {
-                  $notifyboxes.attr('disabled', !this.checked);
-                  if (!this.checked) {
-                      $notifyboxes.prop('checked', false);
-                  }
+                // if the user.notify_user differs from the checked state of the checkbox, the checkbox should be red and a hover info should write "asdf"
+                if ((user.notify_user && !user.shared_to) || (!user.notify_user && user.shared_to)) {
+                  html += ' <span title="' + $E.translate('viewmustbesafed') + '" style="color: red; font-weight: bold;">(!)</span> ';
+                }
+
+                html += '<input class="notifyusers" type="hidden"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
+                html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
               }
+
+              html += "<br />" + $E.translate('notify');
+            }
+            html += "</td><td align=\"center\" width='45%'>" + user.name + "</td><td align=\"center\" width='45%'>" + user.rolename + "</td></tr>";
           });
-          if (flag == 0) {
-            $(this).find('table > tbody > tr > td > input.shareusers-check-all').prop('checked', true);
+
+          html += "</table>";
+        } else {
+          html += $E.translate('nousersfound');
+        }
+        $content.html(html);
+        wireCourseCheckboxes($content);
+      }
+
+      // Lazily fetches and renders exactly one course's users, unless it was already
+      // loaded/is being loaded - see block_exaport_ajax_sharing_userlist_course() in
+      // lib/sharelib.php for why this is a separate request instead of being part of the
+      // initial courses list.
+      function loadCourseUsers(courseid, $fieldset) {
+        if (loadedCourses[courseid]) {
+          return;
+        }
+        loadedCourses[courseid] = true;
+
+        var $content = $fieldset.find('.course-group-content');
+        $content.html('loading users...');
+
+        var courseparams = {action: 'userlistcourse', sesskey: M.cfg.sesskey, usercourseid: courseid};
+        if (type == 'cat_mod') {
+          courseparams.id = $('input[name="id"]').val() || 0;
+        }
+        $.getJSON(document.location.href, courseparams, function (users) {
+          renderCourseUsers($content, courseid, users);
+        });
+      }
+
+      // The sesskey is always sent, because all sharing endpoints (view/category/item) require it.
+      var params = {action: 'userlist', sesskey: M.cfg.sesskey};
+      if (type == 'cat_mod') {
+        params.id = $('input[name="id"]').val() || 0;
+      }
+      $.getJSON(document.location.href, params, function (courses) {
+        var html = '';
+        if (!$.empty(courses)) {
+          $.each(courses, function (tmp, course) {
+            html += '<fieldset class="course-group" courseid="' + course.id + '"><legend class="course-group-title">';
+            html += ($E.courseid == course.id ? '<b>' : '');
+            html += course.fullname;
+            html += ($E.courseid == course.id ? '</b>' : '');
+            html += '</legend>';
+
+            // Real courses only carry id/fullname/has_shared_users here - their users are
+            // fetched lazily below. The "other users" pseudo-course (id -1) is the only one with
+            // users embedded directly, since there is no course to lazily fetch them from.
+            html += '<div class="course-group-content">';
+            if ($.empty(course.users)) {
+              html += 'click to load users...';
+            }
+            html += '</div>';
+            html += "</fieldset>";
+          });
+        } else {
+          html += '<b>' + $E.translate('nousersfound') + '</b>';
+        }
+
+        $userlist.html(html);
+
+        $.each(courses, function (tmp, course) {
+          var $fieldset = $userlist.find('.course-group[courseid="' + course.id + '"]');
+          if (!$.empty(course.users)) {
+            // Embedded directly (the "other users" pseudo-course), no fetch needed.
+            loadedCourses[course.id] = true;
+            renderCourseUsers($fieldset.find('.course-group-content'), course.id, course.users);
+            $fieldset.addClass('course-group-open');
+          } else if (course.has_shared_users) {
+            // Preserve the "auto-expand already-shared courses" behaviour without eagerly
+            // loading every course: only fetch+open the courses flagged by the server as
+            // already having shares.
+            $fieldset.addClass('course-group-open');
+            loadCourseUsers(course.id, $fieldset);
           }
         });
 
-        // Open/close course group.
-        $('.course-group-title').on('click', function () {
-          $(this).closest('.course-group').toggleClass('course-group-open');
+        // Open/close course group + lazily load its users on first expand.
+        // Scoped to #sharing-userlist (this widget) only: an unscoped $('.course-group-title')
+        // selector here would also match the (hidden but still-in-DOM) grouplist's course
+        // titles once load_grouplist() has run, binding this handler twice on those elements and
+        // making the collapse/expand toggle silently cancel itself out - see load_grouplist().
+        $userlist.find('.course-group-title').on('click', function () {
+          var $fieldset = $(this).closest('.course-group');
+          $fieldset.toggleClass('course-group-open');
+          var courseid = $fieldset.attr('courseid');
+          if (courseid != -1) {
+            loadCourseUsers(courseid, $fieldset);
+          }
         });
-        // Open all shared courses.
-        $('.course-group').has('input:checked').addClass('course-group-open');
-
-        // Disable notifyusers if alwaysNotify is true
-        if (alwaysNotifyBool) {
-            $('.notifyusers[type="checkbox"]').prop('disabled', true);
-        }
       });
     },
 
@@ -282,7 +345,8 @@
 
       $('#sharing-grouplist').html('loading grouplist...');
 
-      var params = {action: 'grouplist'};
+      // The sesskey is always sent, because all sharing endpoints (view/category/item) require it.
+      var params = {action: 'grouplist', sesskey: M.cfg.sesskey};
       if (type == 'cat_mod') {
         params.id = $('input[name="id"]').val() || 0;
       }
@@ -349,7 +413,7 @@
           var $courseCheckboxes = $('#sharing-grouplist .sharegroups:checkbox[courseid=' + $(this).attr('courseid') + ']');
           $('#sharing-grouplist .sharegroups-check-all[courseid=' + $(this).attr('courseid') + ']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
         });
-        $('.course-group-content').each(function () {
+        $('#sharing-grouplist .course-group-content').each(function () {
           var flag = 0;
           $(this).find('table > tbody > tr > td > input.sharegroups').each(function () {
             if (flag == 1) {
@@ -365,11 +429,15 @@
         });
 
         // Open/close course group.
-        $('.course-group-title').on('click', function () {
+        // Scoped to #sharing-grouplist (this widget) only: an unscoped $('.course-group-title')
+        // selector here would also match the (hidden but still-in-DOM) userlist's course titles
+        // once load_userlist() has run, binding this handler twice on those elements and making
+        // the collapse/expand toggle silently cancel itself out - see load_userlist().
+        $('#sharing-grouplist .course-group-title').on('click', function () {
           $(this).closest('.course-group').toggleClass('course-group-open');
         });
         // Open all shared courses.
-        $('.course-group').has('input:checked').addClass('course-group-open');
+        $('#sharing-grouplist .course-group').has('input:checked').addClass('course-group-open');
       });
     },
 

@@ -362,6 +362,7 @@ $string['aboutme_description'] = 'Vordefiniert durch Lebenslaufinformationen, ka
 $string['notify'] = 'Benachrichtigen';
 $string['sharejs'] = 'teilen';
 $string['viewmustbesafed'] = 'Vorausgewählt auf Grund globaler Einstellungen. Die Sammelmappe muss gespeichert werden, bevor diese Benachrichtigen-Einstellung wirksam wird';
+$string['sharedinallcourses'] = 'In allen Kursen ausgewählt';
 $string['mediacontent'] = 'URL oder eingebetteter Code*';
 $string['height'] = 'H&ouml;he';
 $string['width'] = 'Breite';

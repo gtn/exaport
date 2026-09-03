@@ -123,51 +123,138 @@
       // re-fetches it.
       var loadedCourses = {};
 
-      // Wires up all the checkbox behaviours (check-all, notify enable/disable, alwaysNotifyBool
-      // handling, sharedusersarr pre-check) for one already-rendered course's user table. Scoped
-      // to $content instead of the whole #sharing-userlist, and called once per rendered course
-      // (both for courses rendered eagerly and courses rendered lazily on click), because with
-      // lazy-loading not every course's table exists yet when the userlist first renders.
+      // Direct user shares are entity-wide (one entity/user relation, not one per course - see
+      // block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php), so the same Moodle
+      // user id can legitimately appear in several course groups here. These maps hold the
+      // client-side selection by user id, independent of which/how many rows currently render
+      // that user, so that:
+      //  - checking/unchecking one occurrence can be propagated to every other rendered
+      //    occurrence of the same user, and
+      //  - a course loaded later (lazily, on first expand) inherits an already made but not yet
+      //    saved selection instead of only reflecting whatever the last save left in the DB.
+      // Values are only ever seeded from the server the first time a given user id is
+      // encountered (see renderCourseUsers()) so an unsaved client-side change is never
+      // overwritten by a later lazy-loaded course's server state.
+      var selectedUsers = {};
+      var selectedNotifications = {};
+
+      // Recomputes one course's "check all" checkbox from its currently rendered rows. Needs to
+      // run for every course affected by applyUserSelection(), not only the course the
+      // originating click happened in, because syncing a user across courses can change rows in
+      // courses whose own check-all checkbox was not touched directly.
+      function updateCourseCheckAllState(courseid) {
+        var $courseCheckboxes = $userlist.find('.shareusers:checkbox[courseid="' + courseid + '"]');
+        $userlist.find('.shareusers-check-all[courseid="' + courseid + '"]')
+          .prop('checked', $courseCheckboxes.length > 0 && $courseCheckboxes.not(':checked').length === 0);
+      }
+
+      // Shows/hides the "selected in all courses" note on every currently rendered occurrence of
+      // this user, depending on whether the user is actually rendered more than once and checked.
+      function updateDuplicateNote(userid) {
+        var $occurrences = $userlist.find('.shareusers:checkbox[value="' + userid + '"]');
+        var isDuplicate = $occurrences.length > 1;
+        $occurrences.each(function () {
+          var $note = $(this).closest('td').find('.shareusers-duplicate-note');
+          if (isDuplicate && $(this).prop('checked')) {
+            // .text() escapes its argument, so the translated string can never inject markup.
+            $note.text($E.translate('sharedinallcourses')).show();
+          } else {
+            $note.hide().text('');
+          }
+        });
+      }
+
+      // Applies a (un)checked state for one user id to every rendered occurrence of that user,
+      // in every course group - not only the course the change originated in - since the
+      // underlying share is entity-wide. Only ever sets DOM state via .prop()/.attr(), never by
+      // re-triggering click/change events, so this cannot recurse back into the handlers below.
+      function applyUserSelection(userid, checked) {
+        selectedUsers[userid] = checked;
+
+        var affectedCourseIds = {};
+
+        $userlist.find('.shareusers:checkbox[value="' + userid + '"]').each(function () {
+          $(this).prop('checked', checked);
+
+          var courseid = $(this).attr('courseid');
+          if (courseid !== undefined) {
+            affectedCourseIds[courseid] = true;
+          }
+
+          var $row = $(this).closest('tr');
+          var $notifyCheckbox = $row.find('.notifyusers[type="checkbox"]');
+          var $notifyHidden = $row.find('.notifyusers[type="hidden"]');
+
+          // Based on alwaysNotifyBool the CHECKBOXES should always be disabled, but the hidden
+          // field should be enabled/disabled - see the workaround note in renderCourseUsers().
+          if (alwaysNotifyBool) {
+            $notifyHidden.attr('disabled', !checked);
+            $notifyCheckbox.prop('checked', checked);
+          } else {
+            $notifyCheckbox.attr('disabled', !checked);
+            if (!checked) {
+              $notifyCheckbox.prop('checked', false);
+            } else if (Object.prototype.hasOwnProperty.call(selectedNotifications, userid)) {
+              $notifyCheckbox.prop('checked', selectedNotifications[userid]);
+            }
+          }
+        });
+
+        $.each(affectedCourseIds, function (courseid) {
+          updateCourseCheckAllState(courseid);
+        });
+
+        updateDuplicateNote(userid);
+      }
+
+      // Same idea as applyUserSelection(), but for the per-user notify checkbox of views/
+      // categories: propagates to every rendered occurrence and remembers the choice for courses
+      // loaded later.
+      function applyNotifySelection(userid, checked) {
+        selectedNotifications[userid] = checked;
+        $userlist.find('.notifyusers[type="checkbox"][value="' + userid + '"]').prop('checked', checked);
+        $userlist.find('.notifyusers[type="hidden"][value="' + userid + '"]').prop('checked', checked);
+      }
+
+      // Wires up all the checkbox behaviours (check-all, entity-wide user/notify sync,
+      // alwaysNotifyBool handling, sharedusersarr pre-check) for one already-rendered course's
+      // user table. Scoped to $content instead of the whole #sharing-userlist, and called once
+      // per rendered course (both for courses rendered eagerly and courses rendered lazily on
+      // click), because with lazy-loading not every course's table exists yet when the userlist
+      // first renders.
       function wireCourseCheckboxes($content) {
         // Set default checkboxes for category (undefined in view sharing).
         if (typeof sharedusersarr != 'undefined' && sharedusersarr.length > 0) {
           $.each(sharedusersarr, function (tmp, userid) {
             $content.find('input:checkbox[value=' + userid + ']').attr("checked", true);
+            selectedUsers[String(userid)] = true;
           });
         }
 
         // CHECK ALL button.
         $content.find('.shareusers-check-all').on('click', function () {
-          // Check/uncheck all users in this course.
-          $content.find('.shareusers:checkbox[courseid=' + $(this).attr('courseid') + ']')
-            .prop('checked', $(this).is(':checked'))
-            // Execute click handler.
-            .each(function () {
-              // Wrapped in each, because triggerHandler only works on first element.
-              $(this).triggerHandler('click');
-            });
+          var checked = $(this).is(':checked');
+          var courseid = $(this).attr('courseid');
+          // Check/uncheck all users in this course, propagating each one to its other
+          // occurrences too (applyUserSelection() only ever uses .prop(), so this cannot
+          // recurse).
+          $content.find('.shareusers:checkbox[courseid=' + courseid + ']').each(function () {
+            applyUserSelection(String($(this).val()), checked);
+          });
         });
 
+        // Check/uncheck this user everywhere it is currently rendered - direct user shares are
+        // entity-wide, not course-specific, see block_exaport_ajax_sharing_userlist_course() in
+        // lib/sharelib.php.
         $content.find('.shareusers:checkbox').on('click', function () {
-          // Enable/disable notifyuser, according to shared users checkbox.
-          var $notifyboxeshidden = $(this).closest('tr').find('.notifyusers[type="hidden"]');
-          var $notifyboxescheckbox = $(this).closest('tr').find('.notifyusers[type="checkbox"]');
-          // based on alwaysNotifyBool the CHECKBOXES should always be disabled, but the hidden field should be enabled/disabled
-
-          if (alwaysNotifyBool) {
-            $notifyboxeshidden.attr('disabled', !this.checked); // the hidden field should be enabled/disabled. The checkbox stays disabled and is always disabled.
-            $notifyboxescheckbox.prop('checked', this.checked);
-          } else {
-            $notifyboxescheckbox.attr('disabled', !this.checked);
-              if (!this.checked) {
-                $notifyboxescheckbox.prop('checked', false);
-              }
-          }
-
-          // Check/uncheck all users.
-          var $courseCheckboxes = $content.find('.shareusers:checkbox[courseid=' + $(this).attr('courseid') + ']');
-          $content.find('.shareusers-check-all[courseid=' + $(this).attr('courseid') + ']').prop('checked', $courseCheckboxes.not(':checked').length == 0);
+          applyUserSelection(String($(this).val()), $(this).prop('checked'));
         });
+
+        if (type == 'views_mod' || type == 'cat_mod') {
+          $content.find('.notifyusers[type="checkbox"]').on('click', function () {
+            applyNotifySelection(String($(this).val()), $(this).prop('checked'));
+          });
+        }
 
         var flag = 0;
         $content.find('table > tbody > tr > td > input.shareusers').each(function () {
@@ -176,16 +263,6 @@
           }
           if ($(this).prop('checked') == false) {
             flag = 1;
-          }
-
-          var $notifyboxes = $(this).closest('tr').find('.notifyusers');
-          if (alwaysNotifyBool) {
-            $notifyboxes.prop('checked', this.checked);
-          } else {
-            $notifyboxes.attr('disabled', !this.checked);
-            if (!this.checked) {
-              $notifyboxes.prop('checked', false);
-            }
           }
         });
         if (flag == 0) {
@@ -217,25 +294,49 @@
           html += "</td></tr>";
 
           $.each(users, function (tmp, user) {
+            var uid = String(user.id);
+
+            // Seed the selection maps from the server response only the first time this user id
+            // is encountered, so a later lazy-loaded course carrying the same user (entity-wide
+            // sharing means the server reports the same shared_to for every course a user is
+            // enrolled in) never overwrites an unsaved client-side change made in a course
+            // rendered earlier.
+            var checked;
+            if (Object.prototype.hasOwnProperty.call(selectedUsers, uid)) {
+              checked = selectedUsers[uid];
+            } else {
+              checked = !!user.shared_to;
+              selectedUsers[uid] = checked;
+            }
+
+            var notifyChecked;
+            if (Object.prototype.hasOwnProperty.call(selectedNotifications, uid)) {
+              notifyChecked = selectedNotifications[uid];
+            } else {
+              notifyChecked = !!user.notify_user;
+              selectedNotifications[uid] = notifyChecked;
+            }
+
             html += '<tr><td align=\"center\" width="5%">';
             html += '<input class="shareusers" type="checkbox" courseid="' + courseid + '" name="shareusers[' + user.id + ']" ';
-            html += ' value="' + user.id + '"' + (user.shared_to ? ' checked="checked"' : '') + ' />';
+            html += ' value="' + user.id + '"' + (checked ? ' checked="checked"' : '') + ' />';
+            html += ' <span class="shareusers-duplicate-note" style="display:none;"></span>';
             if (type == 'views_mod' || type == 'cat_mod') {
               html += "<br />" + $E.translate('sharejs');
               html += '</td><td align=\"center\" width="5%" style="padding-right: 20px;">';
 
-              html += '<input class="notifyusers" type="checkbox"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
-              html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
+              html += '<input class="notifyusers" type="checkbox"' + (checked ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
+              html += ' value="' + user.id + '"' + (notifyChecked ? ' checked="checked"' : '') + ' />';
 
               // workaround for disabled checkboxes not submittting: https://stackoverflow.com/questions/4727974/how-to-post-submit-an-input-checkbox-that-is-disabled
               if (alwaysNotifyBool) {
-                // if the user.notify_user differs from the checked state of the checkbox, the checkbox should be red and a hover info should write "asdf"
-                if ((user.notify_user && !user.shared_to) || (!user.notify_user && user.shared_to)) {
+                // if the notify state differs from the (pending) shared state, the checkbox should be red and a hover info should write "asdf"
+                if (notifyChecked !== checked) {
                   html += ' <span title="' + $E.translate('viewmustbesafed') + '" style="color: red; font-weight: bold;">(!)</span> ';
                 }
 
-                html += '<input class="notifyusers" type="hidden"' + (user.shared_to ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
-                html += ' value="' + user.id + '"' + (user.notify_user ? ' checked="checked"' : '') + ' />';
+                html += '<input class="notifyusers" type="hidden"' + (checked ? '' : ' disabled="disabled"') + ' name="notifyusers[' + user.id + ']"  ';
+                html += ' value="' + user.id + '"' + (notifyChecked ? ' checked="checked"' : '') + ' />';
               }
 
               html += "<br />" + $E.translate('notify');
@@ -249,6 +350,13 @@
         }
         $content.html(html);
         wireCourseCheckboxes($content);
+
+        // Now that the rows exist in the DOM, show/hide the "selected in all courses" note for
+        // every user just (re-)rendered - this also refreshes the note on occurrences rendered
+        // earlier, since updateDuplicateNote() re-scans all currently rendered occurrences.
+        $.each(users, function (tmp, user) {
+          updateDuplicateNote(String(user.id));
+        });
       }
 
       // Lazily fetches and renders exactly one course's users, unless it was already

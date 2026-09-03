@@ -180,4 +180,187 @@ final class sharing_entity_config_test extends \advanced_testcase {
         $this->assertEquals(1, $view->internaccess);
         $this->assertEquals(0, $view->shareall);
     }
+
+    // =========================================================================
+    // block_exaport_sharing_save_direct_user_shares() - "share" form save path,
+    // used by views_mod.php/category.php/item.php instead of a delete-all-then-insert-all
+    // loop. Direct user shares are entity-wide (one row per entity/user), even though the
+    // share form groups the same eligible user under several courses - see
+    // block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php.
+    // =========================================================================
+
+    /**
+     * Duplicate submitted user ids (e.g. the same user checked under two course groups) must
+     * never create more than one share row.
+     */
+    public function test_save_direct_user_shares_dedupes_duplicate_submitted_ids(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $viewid = $this->create_view($owner);
+        $config = block_exaport_get_sharing_entity_config('view');
+
+        // The same user id submitted three times, as if it had been checked under three
+        // different course groups in the share form.
+        block_exaport_sharing_save_direct_user_shares($config, $viewid,
+            [$recipient->id, $recipient->id, $recipient->id], []);
+
+        $this->assertCount(1, $DB->get_records('block_exaportviewshar', ['viewid' => $viewid]));
+        $this->assertTrue($DB->record_exists('block_exaportviewshar',
+            ['viewid' => $viewid, 'userid' => $recipient->id]));
+    }
+
+    /**
+     * Non-existent and deleted user ids are never inserted, regardless of course grouping.
+     */
+    public function test_save_direct_user_shares_rejects_invalid_and_deleted_users(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $validuser = $this->getDataGenerator()->create_user();
+        $deleteduser = $this->getDataGenerator()->create_user();
+        $DB->set_field('user', 'deleted', 1, ['id' => $deleteduser->id]);
+        $nonexistentid = $deleteduser->id + 1000000;
+        $viewid = $this->create_view($owner);
+        $config = block_exaport_get_sharing_entity_config('view');
+
+        block_exaport_sharing_save_direct_user_shares($config, $viewid,
+            [$validuser->id, $deleteduser->id, $nonexistentid], []);
+
+        $this->assertCount(1, $DB->get_records('block_exaportviewshar', ['viewid' => $viewid]));
+        $this->assertTrue($DB->record_exists('block_exaportviewshar',
+            ['viewid' => $viewid, 'userid' => $validuser->id]));
+        $this->assertFalse($DB->record_exists('block_exaportviewshar',
+            ['viewid' => $viewid, 'userid' => $deleteduser->id]));
+    }
+
+    /**
+     * Reconciliation removes shares for users no longer selected - including ones whose course
+     * group was never expanded/loaded by the frontend and therefore could not be re-submitted.
+     */
+    public function test_save_direct_user_shares_removes_unselected_users(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $keptuser = $this->getDataGenerator()->create_user();
+        $removeduser = $this->getDataGenerator()->create_user();
+        $viewid = $this->create_view($owner);
+        $config = block_exaport_get_sharing_entity_config('view');
+
+        block_exaport_sharing_save_direct_user_shares($config, $viewid,
+            [$keptuser->id, $removeduser->id], []);
+        $this->assertCount(2, $DB->get_records('block_exaportviewshar', ['viewid' => $viewid]));
+
+        // Only $keptuser is submitted this time (as if $removeduser's course group was never
+        // loaded and so never re-submitted the checkbox).
+        block_exaport_sharing_save_direct_user_shares($config, $viewid, [$keptuser->id], []);
+
+        $this->assertCount(1, $DB->get_records('block_exaportviewshar', ['viewid' => $viewid]));
+        $this->assertTrue($DB->record_exists('block_exaportviewshar',
+            ['viewid' => $viewid, 'userid' => $keptuser->id]));
+        $this->assertFalse($DB->record_exists('block_exaportviewshar',
+            ['viewid' => $viewid, 'userid' => $removeduser->id]));
+    }
+
+    /**
+     * An empty selection removes every existing direct share (e.g. when internal access/share
+     * to single users is turned off).
+     */
+    public function test_save_direct_user_shares_empty_selection_removes_all(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $viewid = $this->create_view($owner);
+        $config = block_exaport_get_sharing_entity_config('view');
+
+        block_exaport_sharing_save_direct_user_shares($config, $viewid, [$recipient->id], []);
+        $this->assertCount(1, $DB->get_records('block_exaportviewshar', ['viewid' => $viewid]));
+
+        block_exaport_sharing_save_direct_user_shares($config, $viewid, [], []);
+        $this->assertCount(0, $DB->get_records('block_exaportviewshar', ['viewid' => $viewid]));
+    }
+
+    /**
+     * Notify values are set on insert and updated for already-shared users, with duplicate
+     * submitted notify ids normalized the same way as duplicate share ids.
+     */
+    public function test_save_direct_user_shares_notify_values(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $usera = $this->getDataGenerator()->create_user();
+        $userb = $this->getDataGenerator()->create_user();
+        $viewid = $this->create_view($owner);
+        $config = block_exaport_get_sharing_entity_config('view');
+
+        // $usera is shared and notified (submitted twice, as if listed under two courses),
+        // $userb is shared without notification.
+        block_exaport_sharing_save_direct_user_shares($config, $viewid,
+            [$usera->id, $userb->id], [$usera->id, $usera->id]);
+
+        $sharea = $DB->get_record('block_exaportviewshar', ['viewid' => $viewid, 'userid' => $usera->id]);
+        $shareb = $DB->get_record('block_exaportviewshar', ['viewid' => $viewid, 'userid' => $userb->id]);
+        $this->assertEquals(1, $sharea->notify);
+        $this->assertEquals(0, $shareb->notify);
+
+        // A later save without $usera in notifyuserids turns notification off again for the
+        // already-shared row instead of leaving it stale.
+        block_exaport_sharing_save_direct_user_shares($config, $viewid,
+            [$usera->id, $userb->id], [$userb->id]);
+
+        $sharea = $DB->get_record('block_exaportviewshar', ['viewid' => $viewid, 'userid' => $usera->id]);
+        $shareb = $DB->get_record('block_exaportviewshar', ['viewid' => $viewid, 'userid' => $userb->id]);
+        $this->assertEquals(0, $sharea->notify);
+        $this->assertEquals(1, $shareb->notify);
+    }
+
+    /**
+     * The $forcenotify parameter (block_exaport's "always notify when share" admin setting)
+     * overrides the submitted notify selection for every shared user.
+     */
+    public function test_save_direct_user_shares_forcenotify(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $categoryid = $this->create_category($owner, 'Cat', 0, 1);
+        $config = block_exaport_get_sharing_entity_config('category');
+
+        block_exaport_sharing_save_direct_user_shares($config, $categoryid,
+            [$recipient->id], [], [], true);
+
+        $share = $DB->get_record('block_exaportcatshar', ['catid' => $categoryid, 'userid' => $recipient->id]);
+        $this->assertEquals(1, $share->notify);
+    }
+
+    /**
+     * Extra fields (e.g. item.php's 'original'/'courseid') are only applied to newly inserted
+     * rows, matching block_exaportitemshar's schema which requires them.
+     */
+    public function test_save_direct_user_shares_extrafields_on_item(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $DB->insert_record('block_exaportitem', (object)[
+            'userid' => $owner->id,
+            'name' => 'Test item',
+            'type' => 'note',
+            'intro' => '',
+            'timemodified' => time(),
+            'courseid' => $course->id,
+        ]);
+        $config = block_exaport_get_sharing_entity_config('item');
+
+        block_exaport_sharing_save_direct_user_shares($config, $itemid, [$recipient->id], [],
+            ['original' => 0, 'courseid' => $course->id]);
+
+        $share = $DB->get_record('block_exaportitemshar', ['itemid' => $itemid, 'userid' => $recipient->id]);
+        $this->assertNotEmpty($share);
+        $this->assertEquals(0, $share->original);
+        $this->assertEquals($course->id, $share->courseid);
+    }
 }

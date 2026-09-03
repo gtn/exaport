@@ -15,10 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+namespace block_exaport;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'block_exaport';
-$plugin->release = '5.1';
-$plugin->version = 2026082503; // TODO: VERSION INCREASE WHEN MERGING -> upgrade.php
-$plugin->requires = 2023042400; // moodle 4.2
-$plugin->maturity = MATURITY_STABLE;
+class item_helper {
+
+    /**
+     * Build a \block_exaport\share_info object for an item.
+     *
+     * Resolves user fullnames and group/cohort names from the item's sharing
+     * records. This uses the same tables as the existing sharing UI.
+     *
+     * @param \stdClass $item Item record (must have ->id, ->shareall, ->externaccess).
+     * @return \block_exaport\share_info
+     */
+    public static function build_share_info(\stdClass $item): \block_exaport\share_info {
+        return \block_exaport\share_info::resolve('item', $item);
+    }
+}

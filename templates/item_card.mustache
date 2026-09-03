@@ -27,6 +27,8 @@
         hascomments     - Boolean: item has at least one comment
         commentcount    - Integer comment count
         commentlabel    - Localised comment count tooltip string
+        isshared        - Boolean: item is shared (show share icon in footer)
+        sharedicon      - Pre-rendered HTML for share icon
         categorybadges  - Pre-rendered HTML for category badge pills (flat mode only, may be empty)
 }}
 <div class="col mb-4 exaport-flat-item"
@@ -72,6 +74,7 @@
         <div class="card-footer d-flex justify-content-between align-items-center">
             <span class="eportoflio-date">{{dateformatted}}</span>
             <div>
+                {{#isshared}}<span class="eportoflio-share">{{{sharedicon}}}</span>{{/isshared}}
                 {{{compbadge}}}
                 {{#hascomments}}
                 <span class="eportoflio-comment me-2">

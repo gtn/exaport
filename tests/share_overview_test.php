@@ -202,6 +202,43 @@ final class share_overview_test extends \advanced_testcase {
     }
 
     /**
+     * Item group-share lookups must return non-null values for shared cohort ids.
+     */
+    public function test_item_group_share_menu_uses_non_null_values(): void {
+        global $DB;
+
+        $cohort = $this->getDataGenerator()->create_cohort(['name' => 'ItemMenuCohort']);
+        $itemid = $this->create_item($this->owner);
+        $this->share_item_with_cohort($itemid, $cohort->id);
+
+        $sharedgroups = $DB->get_records_menu('block_exaportitemgroupshar',
+            ['itemid' => $itemid],
+            null,
+            'groupid, groupid AS tmp');
+
+        $this->assertArrayHasKey($cohort->id, $sharedgroups);
+        $this->assertSame((string)$cohort->id, (string)$sharedgroups[$cohort->id]);
+        $this->assertTrue(isset($sharedgroups[$cohort->id]));
+    }
+
+    /**
+     * Item delegation: build_share_info for an item returns the same result
+     * as calling share_overview::build_share_info() directly.
+     */
+    public function test_item_delegates_to_item_helper(): void {
+        $itemid = $this->create_item($this->owner, 1);
+        $row = (object)['id' => $itemid, 'shareall' => 1, 'externaccess' => 0];
+
+        $viaOverview = share_overview::build_share_info('item', $itemid, $row);
+        $viaHelper = item_helper::build_share_info($row);
+
+        $this->assertSame($viaHelper->all, $viaOverview->all);
+        $this->assertSame($viaHelper->users, $viaOverview->users);
+        $this->assertSame($viaHelper->groups, $viaOverview->groups);
+        $this->assertSame($viaHelper->external, $viaOverview->external);
+    }
+
+    /**
      * Item shared with both user and cohort → both arrays populated.
      */
     public function test_item_shared_with_user_and_cohort(): void {

@@ -1314,10 +1314,6 @@ return [
         'Vorausgewählt auf Grund globaler Einstellungen. Die Sammelmappe muss gespeichert werden, bevor diese Benachrichtigen-Einstellung wirksam wird',
         'Preselected due to global settings. The collection must be saved before this notify-setting will take effect',
     ],
-    'sharedinallcourses' => [
-        'In allen Kursen ausgewählt',
-        'Selected in all courses',
-    ],
     'mediacontent' => [
         'URL oder eingebetteter Code*',
         'URL or embed code *',

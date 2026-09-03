@@ -868,7 +868,7 @@ $translations = array(
     'file', 'note', 'link',
     'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
     'notify', 'emailaccess',
-    'checkall', 'viewmustbesafed', 'sharedinallcourses',
+    'checkall', 'viewmustbesafed',
     'configureblock_item', 'configureblock_personal_information', 'configureblock_cv_information',
     'configureblock_text', 'configureblock_headline', 'configureblock_media', 'configureblock_badge',
 );

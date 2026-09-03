@@ -317,6 +317,46 @@ final class sharing_entity_config_test extends \advanced_testcase {
     }
 
     /**
+     * Regression test for the "notify checkbox appears checked after reload, then persists as
+     * notify=1 on the next unmodified save" bug: sharing a user (without notifying) and
+     * resubmitting the exact same form data afterwards (as a plain "reload, then save without
+     * changing anything" round trip would) must keep notify=0 forever, even when the user is
+     * submitted under several duplicate course occurrences, and even across several repeated
+     * saves.
+     */
+    public function test_save_direct_user_shares_repeated_save_without_notify_stays_zero(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $viewid = $this->create_view($owner);
+        $config = block_exaport_get_sharing_entity_config('view');
+
+        // Share $recipient, submitted three times as if rendered under three course groups,
+        // without ever selecting notify.
+        block_exaport_sharing_save_direct_user_shares($config, $viewid,
+            [$recipient->id, $recipient->id, $recipient->id], []);
+
+        $share = $DB->get_record('block_exaportviewshar', ['viewid' => $viewid, 'userid' => $recipient->id]);
+        $this->assertEquals(0, $share->notify);
+
+        // Reload + save again without changing anything: the share checkbox is still submitted
+        // (checked), notify is still absent from the submission (unchecked) - notify must stay 0.
+        block_exaport_sharing_save_direct_user_shares($config, $viewid,
+            [$recipient->id, $recipient->id, $recipient->id], []);
+
+        $share = $DB->get_record('block_exaportviewshar', ['viewid' => $viewid, 'userid' => $recipient->id]);
+        $this->assertEquals(0, $share->notify);
+
+        // A third identical save keeps behaving the same way.
+        block_exaport_sharing_save_direct_user_shares($config, $viewid,
+            [$recipient->id, $recipient->id, $recipient->id], []);
+
+        $share = $DB->get_record('block_exaportviewshar', ['viewid' => $viewid, 'userid' => $recipient->id]);
+        $this->assertEquals(0, $share->notify);
+    }
+
+    /**
      * The $forcenotify parameter (block_exaport's "always notify when share" admin setting)
      * overrides the submitted notify selection for every shared user.
      */

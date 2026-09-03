@@ -148,22 +148,6 @@
           .prop('checked', $courseCheckboxes.length > 0 && $courseCheckboxes.not(':checked').length === 0);
       }
 
-      // Shows/hides the "selected in all courses" note on every currently rendered occurrence of
-      // this user, depending on whether the user is actually rendered more than once and checked.
-      function updateDuplicateNote(userid) {
-        var $occurrences = $userlist.find('.shareusers:checkbox[value="' + userid + '"]');
-        var isDuplicate = $occurrences.length > 1;
-        $occurrences.each(function () {
-          var $note = $(this).closest('td').find('.shareusers-duplicate-note');
-          if (isDuplicate && $(this).prop('checked')) {
-            // .text() escapes its argument, so the translated string can never inject markup.
-            $note.text($E.translate('sharedinallcourses')).show();
-          } else {
-            $note.hide().text('');
-          }
-        });
-      }
-
       // Applies a (un)checked state for one user id to every rendered occurrence of that user,
       // in every course group - not only the course the change originated in - since the
       // underlying share is entity-wide. Only ever sets DOM state via .prop()/.attr(), never by
@@ -203,9 +187,8 @@
         $.each(affectedCourseIds, function (courseid) {
           updateCourseCheckAllState(courseid);
         });
-
-        updateDuplicateNote(userid);
       }
+
 
       // Same idea as applyUserSelection(), but for the per-user notify checkbox of views/
       // categories: propagates to every rendered occurrence and remembers the choice for courses
@@ -223,10 +206,16 @@
       // click), because with lazy-loading not every course's table exists yet when the userlist
       // first renders.
       function wireCourseCheckboxes($content) {
-        // Set default checkboxes for category (undefined in view sharing).
+        // Set default checkboxes for category (undefined in view sharing). Scoped to
+        // ".shareusers" specifically (not just "input:checkbox[value=...]"), because the
+        // notifyusers checkbox for the same user id also carries a matching value="..."
+        // attribute - matching it here used to force-check notify regardless of the actual
+        // notify DB value (see block_exaport_ajax_sharing_userlist_course()'s notify_user,
+        // which renderCourseUsers() already applies correctly), causing a shared user with
+        // notify=0 to render (and then re-save) as notify=1.
         if (typeof sharedusersarr != 'undefined' && sharedusersarr.length > 0) {
           $.each(sharedusersarr, function (tmp, userid) {
-            $content.find('input:checkbox[value=' + userid + ']').attr("checked", true);
+            $content.find('input.shareusers:checkbox[value=' + userid + ']').prop("checked", true);
             selectedUsers[String(userid)] = true;
           });
         }
@@ -320,7 +309,6 @@
             html += '<tr><td align=\"center\" width="5%">';
             html += '<input class="shareusers" type="checkbox" courseid="' + courseid + '" name="shareusers[' + user.id + ']" ';
             html += ' value="' + user.id + '"' + (checked ? ' checked="checked"' : '') + ' />';
-            html += ' <span class="shareusers-duplicate-note" style="display:none;"></span>';
             if (type == 'views_mod' || type == 'cat_mod') {
               html += "<br />" + $E.translate('sharejs');
               html += '</td><td align=\"center\" width="5%" style="padding-right: 20px;">';
@@ -350,13 +338,6 @@
         }
         $content.html(html);
         wireCourseCheckboxes($content);
-
-        // Now that the rows exist in the DOM, show/hide the "selected in all courses" note for
-        // every user just (re-)rendered - this also refreshes the note on occurrences rendered
-        // earlier, since updateDuplicateNote() re-scans all currently rendered occurrences.
-        $.each(users, function (tmp, user) {
-          updateDuplicateNote(String(user.id));
-        });
       }
 
       // Lazily fetches and renders exactly one course's users, unless it was already

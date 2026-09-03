@@ -620,7 +620,7 @@ if ($mform->is_cancelled()) {
         'name', 'role', 'nousersfound',
         'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
         'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
-        'notify', 'checkall', 'viewmustbesafed', 'sharedinallcourses',
+        'notify', 'checkall', 'viewmustbesafed',
     );
 
     $translations = array_flip($translations);

@@ -181,6 +181,109 @@ final class sharing_entity_config_test extends \advanced_testcase {
         $this->assertEquals(0, $view->shareall);
     }
 
+    /**
+     * Only entity types whose share form has a notify checkbox offer one on the search page.
+     */
+    public function test_config_marks_notify_support(): void {
+        $this->assertTrue(block_exaport_get_sharing_entity_config('view')->supportsnotify);
+        $this->assertTrue(block_exaport_get_sharing_entity_config('category')->supportsnotify);
+        $this->assertFalse(block_exaport_get_sharing_entity_config('item')->supportsnotify);
+    }
+
+    /**
+     * The user search page shares with notify = 0 unless notify was really checked, and a
+     * notify = 0 row stays 0 when it is saved again without an explicit notify change.
+     */
+    public function test_toggle_shared_users_notify_round_trip(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $categoryid = $this->create_category($owner, 'Cat', 0, 1);
+        $config = block_exaport_get_sharing_entity_config('category');
+
+        // Sharing without checking notify (the hidden field submits an explicit 0).
+        block_exaport_sharing_toggle_shared_users($config, $categoryid,
+            [$recipient->id => $recipient->id], [$recipient->id => 0]);
+        $share = $DB->get_record('block_exaportcatshar', ['catid' => $categoryid, 'userid' => $recipient->id]);
+        $this->assertEquals(0, $share->notify);
+
+        // Saving again without an explicit notify change must not turn notify on.
+        block_exaport_sharing_toggle_shared_users($config, $categoryid,
+            [$recipient->id => $recipient->id], [$recipient->id => 0]);
+        $this->assertEquals(0, $DB->get_field('block_exaportcatshar', 'notify',
+            ['catid' => $categoryid, 'userid' => $recipient->id]));
+
+        // Checking notify submits the user id and turns it on.
+        block_exaport_sharing_toggle_shared_users($config, $categoryid,
+            [$recipient->id => $recipient->id], [$recipient->id => $recipient->id]);
+        $this->assertEquals(1, $DB->get_field('block_exaportcatshar', 'notify',
+            ['catid' => $categoryid, 'userid' => $recipient->id]));
+
+        // ... and unchecking it turns it off again, without touching the share itself.
+        block_exaport_sharing_toggle_shared_users($config, $categoryid,
+            [$recipient->id => $recipient->id], [$recipient->id => 0]);
+        $this->assertEquals(0, $DB->get_field('block_exaportcatshar', 'notify',
+            ['catid' => $categoryid, 'userid' => $recipient->id]));
+        $this->assertCount(1, $DB->get_records('block_exaportcatshar', ['catid' => $categoryid]));
+    }
+
+    /**
+     * A missing notify value (its checkbox was disabled and therefore not submitted at all)
+     * keeps the stored value, and unselecting a user removes the row including its notify state.
+     */
+    public function test_toggle_shared_users_notify_absent_keeps_value(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $viewid = $this->create_view($owner);
+        $config = block_exaport_get_sharing_entity_config('view');
+
+        block_exaport_sharing_toggle_shared_users($config, $viewid,
+            [$recipient->id => $recipient->id], [$recipient->id => $recipient->id]);
+        $this->assertEquals(1, $DB->get_field('block_exaportviewshar', 'notify',
+            ['viewid' => $viewid, 'userid' => $recipient->id]));
+
+        // No notify value submitted at all: the stored 1 survives.
+        block_exaport_sharing_toggle_shared_users($config, $viewid, [$recipient->id => $recipient->id]);
+        $this->assertEquals(1, $DB->get_field('block_exaportviewshar', 'notify',
+            ['viewid' => $viewid, 'userid' => $recipient->id]));
+
+        // Unselecting the user removes the row, notify value included.
+        block_exaport_sharing_toggle_shared_users($config, $viewid, [$recipient->id => 0],
+            [$recipient->id => $recipient->id]);
+        $this->assertFalse($DB->record_exists('block_exaportviewshar',
+            ['viewid' => $viewid, 'userid' => $recipient->id]));
+    }
+
+    /**
+     * With "always notify when share" the notify checkboxes are disabled and only mirror the
+     * share state, so the value is forced on save - exactly like the normal share form does.
+     */
+    public function test_toggle_shared_users_always_notify(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $categoryid = $this->create_category($owner, 'Cat', 0, 1);
+        $config = block_exaport_get_sharing_entity_config('category');
+
+        // New share: notify is forced on although nothing was submitted for it.
+        block_exaport_sharing_toggle_shared_users($config, $categoryid,
+            [$recipient->id => $recipient->id], [], true);
+        $this->assertEquals(1, $DB->get_field('block_exaportcatshar', 'notify',
+            ['catid' => $categoryid, 'userid' => $recipient->id]));
+
+        // Existing share with notify = 0: also forced on, a submitted 0 cannot override it.
+        $DB->set_field('block_exaportcatshar', 'notify', 0,
+            ['catid' => $categoryid, 'userid' => $recipient->id]);
+        block_exaport_sharing_toggle_shared_users($config, $categoryid,
+            [$recipient->id => $recipient->id], [$recipient->id => 0], true);
+        $this->assertEquals(1, $DB->get_field('block_exaportcatshar', 'notify',
+            ['catid' => $categoryid, 'userid' => $recipient->id]));
+    }
+
     // =========================================================================
     // block_exaport_sharing_save_direct_user_shares() - "share" form save path,
     // used by views_mod.php/category.php/item.php instead of a delete-all-then-insert-all

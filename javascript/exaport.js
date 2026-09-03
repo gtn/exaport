@@ -105,6 +105,61 @@
       this.translations = translations;
     },
 
+    // Reads the "always notify when share" admin setting, rendered as a hidden field by every
+    // page that offers share/notify checkboxes (views_mod.php, category.php, item edit form and
+    // the user search page, see block_exaport_sharing_user_search_page() in lib/sharelib.php).
+    always_notify_when_share: function () {
+      var alwaysNotify = document.getElementById('alwaysnotifywhenshare')?.value ?? "false";
+      return alwaysNotify === "true" || alwaysNotify === "1";
+    },
+
+    // Enables/disables and synchronises the notify controls belonging to one share checkbox.
+    // Shared by the course grouped sharing dialog (load_userlist()) and the "search any user"
+    // sharing page (init_share_user_search()) so the notify behaviour - including the
+    // alwaysNotifyBool handling and the "disabled checkboxes are not submitted" hidden field
+    // workaround - exists exactly once.
+    //
+    // Only ever sets DOM state via .prop()/.attr(), never by re-triggering click/change events,
+    // so this cannot recurse back into the handlers that call it.
+    update_notify_state: function ($shareCheckbox, alwaysNotifyBool, notifyChecked) {
+      var checked = $shareCheckbox.prop('checked');
+      var $row = $shareCheckbox.closest('tr');
+      var $notifyCheckbox = $row.find('.notifyusers[type="checkbox"]');
+      var $notifyHidden = $row.find('.notifyusers[type="hidden"]');
+
+      // Based on alwaysNotifyBool the CHECKBOXES should always be disabled, but the hidden
+      // field should be enabled/disabled - see the workaround note in renderCourseUsers().
+      if (alwaysNotifyBool) {
+        $notifyHidden.attr('disabled', !checked);
+        $notifyCheckbox.prop('checked', checked);
+      } else {
+        $notifyCheckbox.attr('disabled', !checked);
+        if (!checked) {
+          $notifyCheckbox.prop('checked', false);
+        } else if (notifyChecked !== undefined) {
+          $notifyCheckbox.prop('checked', notifyChecked);
+        }
+      }
+    },
+
+    // "Search any moodle user and share with them" page, see
+    // block_exaport_sharing_user_search_page() in lib/sharelib.php. Its rows are rendered by PHP
+    // (there is no course grouping and no lazy loading here, so every user appears exactly
+    // once), only the notify enable/disable synchronisation is needed - and that is the very
+    // same one the normal sharing UI uses, see update_notify_state().
+    init_share_user_search: function () {
+      var $form = $('#share-user-search-results');
+      if (!$form.length) {
+        return;
+      }
+
+      var alwaysNotifyBool = this.always_notify_when_share();
+
+      $form.find('.shareusers:checkbox').on('click', function () {
+        $E.update_notify_state($(this), alwaysNotifyBool);
+      });
+    },
+
     userlist_loaded: false,
     load_userlist: function (type) {
       if (this.userlist_loaded) {
@@ -115,8 +170,7 @@
       var $userlist = $('#sharing-userlist');
       $userlist.html('loading userlist...');
 
-      var alwaysNotify = document.getElementById('alwaysnotifywhenshare')?.value ?? "false";
-      var alwaysNotifyBool = alwaysNotify === "true" || alwaysNotify === "1";
+      var alwaysNotifyBool = this.always_notify_when_share();
 
       // courseid => true once that course's users have been fetched (or were embedded directly,
       // like the "other users" pseudo-course), so re-collapsing/re-expanding a course never
@@ -165,23 +219,9 @@
             affectedCourseIds[courseid] = true;
           }
 
-          var $row = $(this).closest('tr');
-          var $notifyCheckbox = $row.find('.notifyusers[type="checkbox"]');
-          var $notifyHidden = $row.find('.notifyusers[type="hidden"]');
-
-          // Based on alwaysNotifyBool the CHECKBOXES should always be disabled, but the hidden
-          // field should be enabled/disabled - see the workaround note in renderCourseUsers().
-          if (alwaysNotifyBool) {
-            $notifyHidden.attr('disabled', !checked);
-            $notifyCheckbox.prop('checked', checked);
-          } else {
-            $notifyCheckbox.attr('disabled', !checked);
-            if (!checked) {
-              $notifyCheckbox.prop('checked', false);
-            } else if (Object.prototype.hasOwnProperty.call(selectedNotifications, userid)) {
-              $notifyCheckbox.prop('checked', selectedNotifications[userid]);
-            }
-          }
+          $E.update_notify_state($(this), alwaysNotifyBool,
+            Object.prototype.hasOwnProperty.call(selectedNotifications, userid)
+              ? selectedNotifications[userid] : undefined);
         });
 
         $.each(affectedCourseIds, function (courseid) {
@@ -598,6 +638,10 @@
     if ($('body').attr('class').match(/course-([^\s]+)/)) {
       $E.courseid = RegExp.$1;
     }
+
+    // Only does anything on the user search sharing page, which is the only page carrying that
+    // form - no separate per page script is needed for those few lines.
+    $E.init_share_user_search();
   });
 
 })();

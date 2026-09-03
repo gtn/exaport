@@ -858,7 +858,8 @@ namespace {
      * 'internaccessfield' is the column that enables internal sharing for this entity type
      * (null if the entity type has no such flag), 'editpage'/'editparams' point back to the
      * page where the entity's sharing settings are edited and 'headeritem'/'headersubitem'
-     * select the navigation entry of that page. They are used by
+     * select the navigation entry of that page. 'supportsnotify' says whether the entity type's
+     * share form offers a "notify user" checkbox. They are used by
      * block_exaport_sharing_user_search_page().
      *
      * @param string $entitytype One of 'view', 'category', 'item'.
@@ -878,6 +879,7 @@ namespace {
                 'editparams' => ['type' => 'share', 'action' => 'edit'],
                 'headeritem' => 'views',
                 'headersubitem' => 'share',
+                'supportsnotify' => true,
                 // Collections may be shared to users the owner is no longer enrolled with,
                 // so those users are listed in an extra pseudo course to keep them removable.
                 // Categories and items historically never did this and their share forms only
@@ -897,6 +899,7 @@ namespace {
                 'editparams' => ['action' => 'edit'],
                 'headeritem' => 'myportfolio',
                 'headersubitem' => null,
+                'supportsnotify' => true,
                 'extrausers' => false,
             ],
             'item' => (object)[
@@ -913,6 +916,10 @@ namespace {
                 'editparams' => ['action' => 'edit'],
                 'headeritem' => 'myportfolio',
                 'headersubitem' => null,
+                // The share forms of items never offered a notify checkbox (see
+                // javascript/exaport.js, which only renders it for views/categories), so the
+                // user search page doesn't render a meaningless one either.
+                'supportsnotify' => false,
                 'extrausers' => false,
             ],
         ];
@@ -1152,18 +1159,38 @@ namespace {
      * instead of triplicating the same add/delete logic. The caller is responsible for the
      * ownership check (see block_exaport_sharing_owned_entity_id()) and for require_sesskey().
      *
+     * The notify flag follows the same contract as the normal share form: a submitted value (0 or
+     * the user id, the search page renders a hidden field next to every notify checkbox so an
+     * unchecked box still submits 0) is applied as given, an absent one - the control was
+     * disabled and therefore not submitted at all - leaves the stored value untouched.
+     *
      * @param object $config Entity configuration, see block_exaport_get_sharing_entity_config().
      * @param int $entityid Id of the (owned) entity.
      * @param array $shareusers userid => truthy value if the entity should be shared to that user.
+     * @param array $notifyusers userid => truthy value if that user should be notified. Missing
+     *                           entries keep the currently stored notify value.
+     * @param bool $forcenotify If true, every shared user is notified regardless of $notifyusers
+     *                          (block_exaport's "always notify when share" admin setting).
      */
-    function block_exaport_sharing_toggle_shared_users($config, int $entityid, array $shareusers) {
+    function block_exaport_sharing_toggle_shared_users($config, int $entityid, array $shareusers,
+            array $notifyusers = [], bool $forcenotify = false) {
         global $DB;
 
-        $sharedusers = $DB->get_records_menu($config->usersharetable, [$config->idfield => $entityid],
-            null, 'userid, userid AS tmp');
+        $sharedusers = $DB->get_records($config->usersharetable, [$config->idfield => $entityid],
+            null, 'userid, id, notify');
 
         foreach ($shareusers as $userid => $share) {
             $userid = (int)$userid;
+
+            // Work out the requested notify value: forced by the admin setting, explicitly
+            // submitted, or unknown (null) - which means "keep whatever is stored".
+            $notify = null;
+            if ($forcenotify) {
+                $notify = 1;
+            } else if (array_key_exists($userid, $notifyusers)) {
+                $notify = $notifyusers[$userid] ? 1 : 0;
+            }
+
             if ($share && !isset($sharedusers[$userid])) {
                 // Add, but only for users that really exist.
                 if (!$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])) {
@@ -1172,7 +1199,11 @@ namespace {
                 $DB->insert_record($config->usersharetable, (object)[
                     $config->idfield => $entityid,
                     'userid' => $userid,
+                    'notify' => (int)$notify,
                 ]);
+            } else if ($share && $notify !== null && (int)$sharedusers[$userid]->notify !== $notify) {
+                $DB->update_record($config->usersharetable,
+                    (object)['id' => $sharedusers[$userid]->id, 'notify' => $notify]);
             } else if (!$share && isset($sharedusers[$userid])) {
                 // Delete.
                 $DB->delete_records($config->usersharetable, [$config->idfield => $entityid, 'userid' => $userid]);
@@ -1314,10 +1345,20 @@ namespace {
             throw new \block_exaport\moodle_exception($config->notfoundstring);
         }
 
+        // Notify is only offered for entity types whose share form has it, see
+        // block_exaport_get_sharing_entity_config(). The admin setting is handled exactly like
+        // the normal share form does: the checkboxes are disabled and only mirror the share
+        // state, the value itself is forced on save.
+        $shownotify = !empty($config->supportsnotify);
+        $alwaysnotify = $shownotify && (bool)get_config('block_exaport', 'alwaysnotifywhenshare');
+
         $shareusers = optional_param_array('shareusers', null, PARAM_INT);
         if ($shareusers) {
             require_sesskey();
-            block_exaport_sharing_toggle_shared_users($config, $id, $shareusers);
+            // A missing notify value means "control was disabled, keep the stored value", see
+            // block_exaport_sharing_toggle_shared_users().
+            $notifyusers = $shownotify ? optional_param_array('notifyusers', [], PARAM_INT) : [];
+            block_exaport_sharing_toggle_shared_users($config, $id, $shareusers, $notifyusers, $alwaysnotify);
         }
 
         $backurl = new moodle_url($config->editpage,
@@ -1343,23 +1384,56 @@ namespace {
             $users = get_users_listing('firstname', 'ASC', 0, 10, $q, '', '', '', array(), $context);
 
             if ($users) {
-                $sharedusers = $DB->get_records_menu($config->usersharetable, [$config->idfield => $id],
-                    null, 'userid, userid AS tmp');
+                // The exact stored notify value is needed here, a share row with notify = 0 must
+                // never render as "notify" (it would then be re-saved as notify = 1).
+                $sharedusers = $DB->get_records($config->usersharetable, [$config->idfield => $id],
+                    null, 'userid, notify');
 
-                echo '<form method="post" action="' . $searchurl->out() . '" style="padding-top: 10px;">';
+                // The id is used by javascript/exaport.js to wire up the notify checkboxes.
+                echo '<form id="share-user-search-results" method="post" action="' . $searchurl->out() .
+                    '" style="padding-top: 10px;">';
                 echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+                if ($shownotify) {
+                    // Read by javascript/exaport.js, same hidden field as on the share forms.
+                    echo '<input type="hidden" id="alwaysnotifywhenshare" value="' . s($alwaysnotify ? 1 : 0) . '" />';
+                }
                 echo '<table width="70%">';
                 echo '<tr><th align="center">' . get_string('strshare', 'block_exaport') . '</th>';
+                if ($shownotify) {
+                    echo '<th align="center">' . get_string('notify', 'block_exaport') . '</th>';
+                }
                 echo '<th align="left">' . get_string('name') . '</th></tr>';
 
                 foreach ($users as $user) {
                     $sharedto = isset($sharedusers[$user->id]);
+                    $notify = $sharedto && $sharedusers[$user->id]->notify;
 
                     echo '<tr><td align="center" width="50">';
                     echo '<input class="shareusers" type="hidden" name="shareusers[' . $user->id . ']" value="" />';
                     echo '<input class="shareusers" type="checkbox" name="shareusers[' . $user->id . ']" value="' . $user->id . '"' .
                         ($sharedto ? ' checked="checked"' : '') . ' />';
-                    echo '</td><td align="center">' . s(fullname($user)) . '</td></tr>';
+                    echo '</td>';
+                    if ($shownotify) {
+                        echo '<td align="center" width="50">';
+                        if ($alwaysnotify) {
+                            // Disabled checkboxes are never submitted, so the value is forced on
+                            // save instead of being submitted - no hidden field is needed (and no
+                            // conflicting duplicate value can be sent).
+                            echo '<input class="notifyusers" type="checkbox" disabled="disabled" value="' . $user->id . '"' .
+                                ($sharedto ? ' checked="checked"' : '') . ' />';
+                        } else {
+                            // The hidden field makes an unchecked (but enabled) checkbox submit an
+                            // explicit 0, so notify = 0 stays 0. The checkbox is only enabled while
+                            // the user is selected; if it is disabled nothing but the hidden field
+                            // is submitted, which is exactly the "keep the stored value" case.
+                            echo '<input type="hidden" name="notifyusers[' . $user->id . ']" value="0" />';
+                            echo '<input class="notifyusers" type="checkbox" name="notifyusers[' . $user->id . ']" value="' .
+                                $user->id . '"' . ($notify ? ' checked="checked"' : '') .
+                                ($sharedto ? '' : ' disabled="disabled"') . ' />';
+                        }
+                        echo '</td>';
+                    }
+                    echo '<td align="center">' . s(fullname($user)) . '</td></tr>';
                 }
                 echo '</table>';
                 echo $backlink . '&nbsp;&nbsp;&nbsp;';

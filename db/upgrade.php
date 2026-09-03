@@ -1467,8 +1467,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026080600, 'exaport');
     }
 
-    if ($oldversion < 2026080700) {
-        // TODO: VERSION INCREASE WHEN MERGING
+    if ($oldversion < 2026090300) {
         // Extend block_exaportitemshar with notify + date-limited sharing (mirrors
         // block_exaportcatshar/block_exaportviewshar), and add a group-share variant
         // (mirrors block_exaportcatgroupshar/block_exaportviewgroupshar) so direct
@@ -1506,7 +1505,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
             $dbman->create_table($grouptable);
         }
 
-        upgrade_block_savepoint(true, 2026080700, 'exaport');
+        upgrade_block_savepoint(true, 2026090300, 'exaport');
     }
 
     return $result;

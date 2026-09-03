@@ -56,6 +56,13 @@ $allowresubmission = block_exaport_item_is_resubmitable($id);
 
 // Get userlist for sharing item.
 if ($action == 'userlist') {
+    // Graceful sesskey hardening for this read-only, ownership-scoped AJAX endpoint.
+    $sesskey = optional_param('sesskey', null, PARAM_RAW);
+    if ($sesskey !== null && !confirm_sesskey($sesskey)) {
+        header('HTTP/1.1 403 Forbidden');
+        exit;
+    }
+
     if ($id > 0 && !$DB->get_record('block_exaportitem', ['id' => $id, 'userid' => $USER->id])) {
         $id = 0; // Not your item, don't expose sharing info.
     }
@@ -83,6 +90,13 @@ if ($action == 'userlist') {
 }
 // Get grouplist for sharing item.
 if ($action == 'grouplist') {
+    // Graceful sesskey hardening for this read-only, ownership-scoped AJAX endpoint.
+    $sesskey = optional_param('sesskey', null, PARAM_RAW);
+    if ($sesskey !== null && !confirm_sesskey($sesskey)) {
+        header('HTTP/1.1 403 Forbidden');
+        exit;
+    }
+
     if ($id > 0 && !$DB->get_record('block_exaportitem', ['id' => $id, 'userid' => $USER->id])) {
         $id = 0; // Not your item, don't expose sharing info.
     }
@@ -761,17 +775,22 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
  * @param int $itemid
  */
 function block_exaport_save_item_shares($itemid) {
-    global $DB;
+    global $DB, $USER;
 
     if (!has_capability('block/exaport:shareintern', context_system::instance())) {
+        return;
+    }
+
+    // Defense in depth: only the owner may (re)write shares for their own item.
+    $item = $DB->get_record('block_exaportitem', ['id' => $itemid, 'userid' => $USER->id]);
+    if (!$item) {
         return;
     }
 
     $shareenabled = optional_param('shareenabled', 0, PARAM_INT);
     $shareall = $shareenabled ? optional_param('shareall', 0, PARAM_INT) : 0;
 
-    $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
-    if ($item && (int)$item->shareall !== $shareall) {
+    if ((int)$item->shareall !== $shareall) {
         $item->shareall = $shareall;
         $DB->update_record('block_exaportitem', $item);
     }

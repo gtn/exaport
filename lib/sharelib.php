@@ -855,6 +855,12 @@ namespace {
      * missing/foreign entity itself - the AJAX endpoints below deliberately don't use it,
      * see block_exaport_sharing_owned_entity_id().
      *
+     * 'internaccessfield' is the column that enables internal sharing for this entity type
+     * (null if the entity type has no such flag), 'editpage'/'editparams' point back to the
+     * page where the entity's sharing settings are edited and 'headeritem'/'headersubitem'
+     * select the navigation entry of that page. They are used by
+     * block_exaport_sharing_user_search_page().
+     *
      * @param string $entitytype One of 'view', 'category', 'item'.
      * @return object Configuration with the table/column names used for this entity type.
      */
@@ -867,6 +873,11 @@ namespace {
                 'groupsharetable' => 'block_exaportviewgroupshar',
                 'coursestype' => 'sharing',
                 'notfoundstring' => 'viewnotfound',
+                'internaccessfield' => 'internaccess',
+                'editpage' => '/blocks/exaport/views_mod.php',
+                'editparams' => ['type' => 'share', 'action' => 'edit'],
+                'headeritem' => 'views',
+                'headersubitem' => 'share',
                 // Collections may be shared to users the owner is no longer enrolled with,
                 // so those users are listed in an extra pseudo course to keep them removable.
                 // Categories and items historically never did this and their share forms only
@@ -881,6 +892,11 @@ namespace {
                 'groupsharetable' => 'block_exaportcatgroupshar',
                 'coursestype' => '',
                 'notfoundstring' => 'category_not_found',
+                'internaccessfield' => 'internshare',
+                'editpage' => '/blocks/exaport/category.php',
+                'editparams' => ['action' => 'edit'],
+                'headeritem' => 'myportfolio',
+                'headersubitem' => null,
                 'extrausers' => false,
             ],
             'item' => (object)[
@@ -890,6 +906,13 @@ namespace {
                 'groupsharetable' => 'block_exaportitemgroupshar',
                 'coursestype' => '',
                 'notfoundstring' => 'bookmarknotfound',
+                // Items have no separate "internal access" flag, sharing is derived from the
+                // existing share rows plus shareall - therefore there is nothing to flip here.
+                'internaccessfield' => null,
+                'editpage' => '/blocks/exaport/item.php',
+                'editparams' => ['action' => 'edit'],
+                'headeritem' => 'myportfolio',
+                'headersubitem' => null,
                 'extrausers' => false,
             ],
         ];
@@ -1039,6 +1062,146 @@ namespace {
 
         echo json_encode($groupgroups);
         exit;
+    }
+
+    /**
+     * Toggle direct user shares of an entity, used by the "search any user" sharing page.
+     *
+     * Extracted so that the search page exists only once for collections, categories and items
+     * instead of triplicating the same add/delete logic. The caller is responsible for the
+     * ownership check (see block_exaport_sharing_owned_entity_id()) and for require_sesskey().
+     *
+     * @param object $config Entity configuration, see block_exaport_get_sharing_entity_config().
+     * @param int $entityid Id of the (owned) entity.
+     * @param array $shareusers userid => truthy value if the entity should be shared to that user.
+     */
+    function block_exaport_sharing_toggle_shared_users($config, int $entityid, array $shareusers) {
+        global $DB;
+
+        $sharedusers = $DB->get_records_menu($config->usersharetable, [$config->idfield => $entityid],
+            null, 'userid, userid AS tmp');
+
+        foreach ($shareusers as $userid => $share) {
+            $userid = (int)$userid;
+            if ($share && !isset($sharedusers[$userid])) {
+                // Add, but only for users that really exist.
+                if (!$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])) {
+                    continue;
+                }
+                $DB->insert_record($config->usersharetable, (object)[
+                    $config->idfield => $entityid,
+                    'userid' => $userid,
+                ]);
+            } else if (!$share && isset($sharedusers[$userid])) {
+                // Delete.
+                $DB->delete_records($config->usersharetable, [$config->idfield => $entityid, 'userid' => $userid]);
+            }
+        }
+
+        // Sharing to single users only makes sense if internal access is on and "share to all" is off,
+        // so the flags are updated exactly like the collection only version of this page always did.
+        $update = ['id' => $entityid, 'shareall' => 0];
+        if ($config->internaccessfield) {
+            $update[$config->internaccessfield] = 1;
+        }
+        $DB->update_record($config->entitytable, (object)$update);
+    }
+
+    /**
+     * Page: search any moodle user and toggle direct sharing of one entity with them.
+     *
+     * This is the generalized version of the former views_mod_share_user_search.php. Collections,
+     * categories and items all share with single users in exactly the same way, so the search,
+     * the result list and the toggling live here once and the per entity type differences flow
+     * through block_exaport_get_sharing_entity_config().
+     *
+     * Only the owner of the entity may see or change anything, the search results and the share
+     * state are never rendered for anybody else.
+     *
+     * @param string $entitytype One of 'view', 'category', 'item'.
+     */
+    function block_exaport_sharing_user_search_page(string $entitytype) {
+        global $DB, $OUTPUT, $PAGE, $CFG;
+
+        $config = block_exaport_get_sharing_entity_config($entitytype);
+
+        $courseid = required_param('courseid', PARAM_INT);
+        $id = required_param('id', PARAM_INT);
+        $q = trim(optional_param('q', '', PARAM_TEXT));
+
+        block_exaport_require_login($courseid);
+
+        $context = context_system::instance();
+        $PAGE->set_url('/blocks/exaport/share_user_search.php',
+            ['courseid' => $courseid, 'entitytype' => $entitytype, 'id' => $id]);
+
+        if (!$course = $DB->get_record('course', ['id' => $courseid])) {
+            throw new \block_exaport\moodle_exception('invalidcourseid');
+        }
+
+        // Ownership check, identical to the one used by the sharing AJAX endpoints.
+        if (!block_exaport_sharing_owned_entity_id($config, $id)) {
+            throw new \block_exaport\moodle_exception($config->notfoundstring);
+        }
+
+        $shareusers = optional_param_array('shareusers', null, PARAM_INT);
+        if ($shareusers) {
+            require_sesskey();
+            block_exaport_sharing_toggle_shared_users($config, $id, $shareusers);
+        }
+
+        $backurl = new moodle_url($config->editpage,
+            ['courseid' => $courseid, 'id' => $id, 'sesskey' => sesskey()] + $config->editparams);
+        $searchurl = new moodle_url('/blocks/exaport/share_user_search.php',
+            ['courseid' => $courseid, 'entitytype' => $entitytype, 'id' => $id, 'q' => $q, 'sesskey' => sesskey()]);
+        $backlink = '<a href="' . $backurl->out() . '">' . get_string('back') . '</a>';
+
+        block_exaport_print_header($config->headeritem, $config->headersubitem);
+
+        echo $backlink . '<br /><br />';
+
+        echo '<form method="get" action="' . $CFG->wwwroot . '/blocks/exaport/share_user_search.php">';
+        echo '<input type="hidden" name="courseid" value="' . s($courseid) . '" />';
+        echo '<input type="hidden" name="entitytype" value="' . s($entitytype) . '" />';
+        echo '<input type="hidden" name="id" value="' . s($id) . '" />';
+        echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+        echo '<input name="q" type="text" value="' . s($q) . '" />';
+        echo '<input value="' . get_string('search') . '" type="submit" />';
+        echo '</form>';
+
+        if ($q) {
+            $users = get_users_listing('firstname', 'ASC', 0, 10, $q, '', '', '', array(), $context);
+
+            if ($users) {
+                $sharedusers = $DB->get_records_menu($config->usersharetable, [$config->idfield => $id],
+                    null, 'userid, userid AS tmp');
+
+                echo '<form method="post" action="' . $searchurl->out() . '" style="padding-top: 10px;">';
+                echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+                echo '<table width="70%">';
+                echo '<tr><th align="center">' . get_string('strshare', 'block_exaport') . '</th>';
+                echo '<th align="left">' . get_string('name') . '</th></tr>';
+
+                foreach ($users as $user) {
+                    $sharedto = isset($sharedusers[$user->id]);
+
+                    echo '<tr><td align="center" width="50">';
+                    echo '<input class="shareusers" type="hidden" name="shareusers[' . $user->id . ']" value="" />';
+                    echo '<input class="shareusers" type="checkbox" name="shareusers[' . $user->id . ']" value="' . $user->id . '"' .
+                        ($sharedto ? ' checked="checked"' : '') . ' />';
+                    echo '</td><td align="center">' . fullname($user) . '</td></tr>';
+                }
+                echo '</table>';
+                echo $backlink . '&nbsp;&nbsp;&nbsp;';
+                echo '<input value="' . get_string('savechanges') . '" type="submit" />';
+                echo '</form>';
+            } else {
+                echo get_string('nousersfound');
+            }
+        }
+
+        echo block_exaport_wrapperdivend();
+        echo $OUTPUT->footer($course);
     }
 
     function exaport_get_shareable_courses_with_users($type) {

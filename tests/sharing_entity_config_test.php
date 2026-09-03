@@ -94,4 +94,75 @@ final class sharing_entity_config_test extends \advanced_testcase {
         $this->assertSame(0, block_exaport_sharing_owned_entity_id($config, 0));
         $this->assertSame(0, block_exaport_sharing_owned_entity_id($config, $categoryid + 1000));
     }
+
+    /**
+     * The registry knows where the sharing settings of each entity type are edited and which
+     * column enables internal sharing, used by block_exaport_sharing_user_search_page().
+     */
+    public function test_config_contains_search_page_settings(): void {
+        $view = block_exaport_get_sharing_entity_config('view');
+        $this->assertSame('internaccess', $view->internaccessfield);
+        $this->assertSame('/blocks/exaport/views_mod.php', $view->editpage);
+        $this->assertSame(['type' => 'share', 'action' => 'edit'], $view->editparams);
+
+        $category = block_exaport_get_sharing_entity_config('category');
+        $this->assertSame('internshare', $category->internaccessfield);
+        $this->assertSame('/blocks/exaport/category.php', $category->editpage);
+        $this->assertSame(['action' => 'edit'], $category->editparams);
+
+        // Items have no internal access flag at all.
+        $this->assertNull(block_exaport_get_sharing_entity_config('item')->internaccessfield);
+    }
+
+    /**
+     * Toggling direct shares adds/removes rows and enables internal sharing for the entity.
+     */
+    public function test_toggle_shared_users(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $otheruser = $this->getDataGenerator()->create_user();
+        $thirduser = $this->getDataGenerator()->create_user();
+        $categoryid = $this->create_category($owner, 'Cat', 0, 0, 1);
+        $config = block_exaport_get_sharing_entity_config('category');
+
+        // Share to one user.
+        block_exaport_sharing_toggle_shared_users($config, $categoryid, [$otheruser->id => $otheruser->id]);
+        $this->assertTrue($DB->record_exists('block_exaportcatshar',
+            ['catid' => $categoryid, 'userid' => $otheruser->id]));
+
+        // Sharing to single users enables internal sharing and disables "share to all".
+        $category = $DB->get_record('block_exaportcate', ['id' => $categoryid]);
+        $this->assertEquals(1, $category->internshare);
+        $this->assertEquals(0, $category->shareall);
+
+        // Unchecking removes the share again, unknown users are never inserted.
+        block_exaport_sharing_toggle_shared_users($config, $categoryid,
+            [$otheruser->id => 0, $thirduser->id => $thirduser->id, ($thirduser->id + 1000) => 1]);
+        $this->assertFalse($DB->record_exists('block_exaportcatshar',
+            ['catid' => $categoryid, 'userid' => $otheruser->id]));
+        $this->assertTrue($DB->record_exists('block_exaportcatshar',
+            ['catid' => $categoryid, 'userid' => $thirduser->id]));
+        $this->assertCount(1, $DB->get_records('block_exaportcatshar', ['catid' => $categoryid]));
+    }
+
+    /**
+     * The same helper works for collections, which use different table/column names.
+     */
+    public function test_toggle_shared_users_for_views(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $otheruser = $this->getDataGenerator()->create_user();
+        $viewid = $this->create_view($owner, 1);
+        $config = block_exaport_get_sharing_entity_config('view');
+
+        block_exaport_sharing_toggle_shared_users($config, $viewid, [$otheruser->id => $otheruser->id]);
+
+        $this->assertTrue($DB->record_exists('block_exaportviewshar',
+            ['viewid' => $viewid, 'userid' => $otheruser->id]));
+        $view = $DB->get_record('block_exaportview', ['id' => $viewid]);
+        $this->assertEquals(1, $view->internaccess);
+        $this->assertEquals(0, $view->shareall);
+    }
 }

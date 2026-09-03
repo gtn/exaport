@@ -435,24 +435,6 @@
     background-color: #f9f9f9;
 }
 
-#exaport .course-group-title {
-    cursor: pointer;
-    padding-left: 30px;
-    background: url('../pix/group_closed.png') no-repeat 15px 5px;
-}
-
-#exaport .course-group-open .course-group-title {
-    background-image: url('../pix/group_open.png');
-}
-
-#exaport .course-group-content {
-    display: none;
-}
-
-#exaport .course-group-open .course-group-content {
-    display: block;
-}
-
 #exaport .edu_qualdescription,
 #exaport .employ_positiondescription,
 #exaport .certif_description,

@@ -131,9 +131,13 @@
     cursor: default;
 }
 /* Uniform card height for both item and category column wrappers */
-#exaport .exaport-flat-item,
-#exaport .exaport-folder-category {
+#exaport .exaport-view-tiles .exaport-flat-item,
+#exaport .exaport-view-tiles .exaport-folder-category {
     height: 13rem;
+}
+
+#exaport .exaport-view-details tr.exaport-flat-item {
+    height: auto;
 }
 /* Artefact cards (items) fill their column fully */
 #exaport .exaport-flat-item .card-eportfolio {

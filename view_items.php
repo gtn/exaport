@@ -1049,8 +1049,7 @@ foreach ($items as $item) {
             // No intro.
         } else if ($shortintro == $intro) {
             // Very short one.
-            $rowdata['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">" .
-                format_text($intro, FORMAT_HTML) . "</td></tr></table>";
+            $rowdata['name'] .= '<div class="exaport-details-preview">' . format_text($intro, FORMAT_HTML) . '</div>';
         } else {
             // Display show/hide buttons.
             $rowdata['name'] .= '<div><div id="short-preview-' . $itemind . '"><div>' . $shortintro . '...</div>
@@ -1406,7 +1405,7 @@ function block_exaport_render_view_table_row(\stdClass $view, int $courseid, str
 
     $namecell = '<a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
     if ($view->description) {
-        $namecell .= '<table width="98%"><tr><td>' . format_text($view->description, FORMAT_HTML) . '</td></tr></table>';
+        $namecell .= '<div class="exaport-details-preview">' . format_text($view->description, FORMAT_HTML) . '</div>';
     }
     $iconscell = '<span class="excomdos_listicons">' . $sharedicon;
     if ($type === 'mine') {

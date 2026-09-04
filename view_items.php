@@ -946,11 +946,11 @@ $table = new html_table();
 $useManualTable = ($layout == 'flat');
 $table->head = array();
 
-$table->head['type'] = '<a href="#" class="exaport-sort-heading" data-sort-field="type">'
-    . get_string("type", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
-
 $table->head['name'] = '<a href="#" class="exaport-sort-heading" data-sort-field="name">'
     . get_string("name", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
+
+$table->head['type'] = '<a href="#" class="exaport-sort-heading" data-sort-field="type">'
+    . get_string("type", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
 
 $table->head['date'] = '<a href="#" class="exaport-sort-heading" data-sort-field="date">'
     . get_string("date", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
@@ -964,10 +964,9 @@ if ($parentcategory) {
     // If isn't parent category, show link to go to parent category.
     $itemind++;
     $table->data[$itemind] = array();
+    $table->data[$itemind]['name'] = '<a href="' . s($parentcategory->url) . '">' . format_string($parentcategory->name) . '</a>';
     //        $table->data[$itemind]['type'] = '<img src="pix/folderup_32.png" alt="'.block_exaport_get_string('category').'">';
     $table->data[$itemind]['type'] = block_exaport_fontawesome_icon('folder-open', 'regular', 2, [], [], [], 'up', [], [], [], ['exaport-items-category-middle']);
-
-    $table->data[$itemind]['name'] = '<a href="' . s($parentcategory->url) . '">' . format_string($parentcategory->name) . '</a>';
     $table->data[$itemind][] = null;
     $table->data[$itemind][] = null;
 }
@@ -976,10 +975,10 @@ foreach ($subcategories as $category) {
     // Checking for shared items. If userid is null - show users, if userid > 0 - need to show items from user.
     $itemind++;
     $table->data[$itemind] = array();
+    $table->data[$itemind]['name'] = '<a href="' . s($category->url) . '">' . format_string($category->name) . '</a>';
     //        $table->data[$itemind]['type'] = '<img src="'.(@$category->icon ?: 'pix/folder_32_user.png').'" style="max-width:32px">';
     $table->data[$itemind]['type'] = block_exaport_fontawesome_icon('folder-open', 'regular', 2, [], [], [], '', [], [], [], ['exaport-items-category-middle']);
 
-    $table->data[$itemind]['name'] = '<a href="' . s($category->url) . '">' . format_string($category->name) . '</a>';
 
     $table->data[$itemind][] = null;
 
@@ -1132,8 +1131,8 @@ foreach ($items as $item) {
 
 foreach ($flatItemRows as $flatRow) {
     $row = new html_table_row([
-        $flatRow['data']['type'] ?? '',
         $flatRow['data']['name'] ?? '',
+        $flatRow['data']['type'] ?? '',
         $flatRow['data']['date'] ?? '',
         $flatRow['data']['icons'] ?? '',
     ]);
@@ -1159,8 +1158,8 @@ if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'], true
 
 foreach ($folderItemRows as $folderRow) {
     $row = new html_table_row([
-        $folderRow['data']['type'] ?? '',
         $folderRow['data']['name'] ?? '',
+        $folderRow['data']['type'] ?? '',
         $folderRow['data']['date'] ?? '',
         $folderRow['data']['icons'] ?? '',
     ]);
@@ -1427,7 +1426,7 @@ function block_exaport_render_view_table_row(\stdClass $view, int $courseid, str
     $typecell = block_exaport_fontawesome_icon('layer-group', 'solid', 2, [], [], [], '', [], [], [], ['exaport-items-type-icon']);
     $datecell = userdate($view->timemodified);
 
-    $row = new html_table_row([$typecell, $namecell, $datecell, $iconscell]);
+    $row = new html_table_row([$namecell, $typecell, $datecell, $iconscell]);
     $row->attributes['class'] = 'exaport-flat-item';
     $row->attributes['data-entry-type'] = 'view';
     // html_writer::table() escapes all attribute values via html_writer::attributes(),

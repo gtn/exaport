@@ -360,4 +360,31 @@ final class lib_functions_test extends \advanced_testcase {
         $this->assertArrayHasKey($myitem, $items);
         $this->assertArrayHasKey($otheritem, $items);
     }
+
+    /**
+     * block_exaport_entry_icon_type_options() returns the canonical Exaport icons that are
+     * used for the rows of the details/table view in view_items.php.
+     */
+    public function test_entry_icon_type_options(): void {
+        $this->assertSame(
+            ['iconName' => 'folder-open', 'iconStyle' => 'regular'],
+            block_exaport_entry_icon_type_options('category')
+        );
+        $this->assertSame(
+            ['iconName' => 'layer-group', 'iconStyle' => 'solid'],
+            block_exaport_entry_icon_type_options('view')
+        );
+        $this->assertSame(
+            ['iconName' => 'note-sticky', 'iconStyle' => 'regular'],
+            block_exaport_entry_icon_type_options('item', 'note')
+        );
+        $this->assertSame(
+            ['iconName' => 'file-lines', 'iconStyle' => 'regular'],
+            block_exaport_entry_icon_type_options('item', 'file')
+        );
+        $this->assertSame(
+            ['iconName' => 'link', 'iconStyle' => 'solid'],
+            block_exaport_entry_icon_type_options('item', 'link')
+        );
+    }
 }

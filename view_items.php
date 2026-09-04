@@ -1311,17 +1311,21 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
     echo '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">';
     echo block_exaport_fontawesome_icon('plus', 'solid', 1) . ' ' . get_string('create');
     echo '</button>';
+    // Use the same icon symbols as the corresponding entries in the details/table view.
+    $itemiconprops = block_exaport_entry_icon_type_options('item');
+    $categoryiconprops = block_exaport_entry_icon_type_options('category');
+    $viewiconprops = block_exaport_entry_icon_type_options('view');
     echo '<div class="dropdown-menu dropdown-menu-right dropdown-menu-end">';
     echo '<a class="dropdown-item" href="' . $createartefacturl . '">'
-        . block_exaport_fontawesome_icon('clone', 'solid', 1) . ' '
+        . block_exaport_fontawesome_icon($itemiconprops['iconName'], $itemiconprops['iconStyle'], 1) . ' '
         . get_string("viewitem", "block_exaport") . '</a>';
     if ($type == 'mine') {
         echo '<a class="dropdown-item" href="' . $createcategoryurl . '">'
-            . block_exaport_fontawesome_icon('folder', 'solid', 1) . ' '
+            . block_exaport_fontawesome_icon($categoryiconprops['iconName'], $categoryiconprops['iconStyle'], 1) . ' '
             . get_string("category", "block_exaport") . '</a>';
         if ($CFG->block_exaport_enable_views) {
             echo '<a class="dropdown-item" href="' . $createviewurl . '">'
-                . block_exaport_fontawesome_icon('layer-group', 'solid', 1) . ' '
+                . block_exaport_fontawesome_icon($viewiconprops['iconName'], $viewiconprops['iconStyle'], 1) . ' '
                 . get_string("add_view_entry", "block_exaport") . '</a>';
         }
     }

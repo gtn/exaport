@@ -45,7 +45,7 @@
         <p>{{nothingtext}}</p>
     {{/hasrows}}
     {{#hasrows}}
-        <table class="generaltable table table-striped table-hover" style="width: 100%;">
+        <table class="generaltable table table-striped table-hover exaport-share-overview-table" style="width: 100%;">
             <thead>
                 <tr>
                     <th>{{headertitle}}</th>
@@ -61,8 +61,8 @@
                     <tr class="exaport-flat-item"
                         data-item-name="{{titlenamelower}}"
                         data-item-date="0">
-                        <td><a href="{{url}}">{{{typeicon}}}{{title}}</a></td>
-                        <td>{{typelabel}}</td>
+                        <td><a href="{{url}}">{{title}}</a></td>
+                        <td>{{{typeicon}}}&nbsp;{{typelabel}}</td>
                         <td>{{ownername}}</td>
                         <td>{{coursename}}</td>
                         <td>

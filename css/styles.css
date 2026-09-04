@@ -45,7 +45,8 @@ div.item-detail-image img {
     text-align: left;
 }
 
-.block_exaport_my_shares .exaport-share-overview-table .text-right {
+.block_exaport_my_shares .exaport-share-overview-table th.text-right,
+.block_exaport_my_shares .exaport-share-overview-table td.text-right {
     text-align: right;
 }
 

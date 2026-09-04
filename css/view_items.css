@@ -46,10 +46,6 @@
     font-size: 0.9rem;
 }
 
-.excomdos_cont .excomdos_listtable tr:nth-child(2n+2) {
-    background-color: #f9f9f9;
-}
-
 .excomdos_cont .excomdos_listicon {
     width: 42px;
     text-align: center;

@@ -942,30 +942,20 @@ if ($layout == 'folder' && !($type === 'extern_category')) {
 }
 
 echo '<div class="exaport-view-section exaport-view-details' . ($folderlayout == 'details' ? ' is-active' : '') . '" data-exaport-view="details"' . ($folderlayout == 'details' ? '' : ' style="display:none;"') . '>';
-// For flat mode, render the table manually so we can add data attributes for JS filtering.
-// For folder mode, use html_table as before.
-$useManualTable = ($layout == 'flat');
-
 $table = new html_table();
-$table->width = "100%";
-
+$useManualTable = ($layout == 'flat');
 $table->head = array();
-$table->size = array();
 
 $table->head['type'] = '<a href="#" class="exaport-sort-heading" data-sort-field="type">'
     . get_string("type", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
-$table->size['type'] = "10";
 
 $table->head['name'] = '<a href="#" class="exaport-sort-heading" data-sort-field="name">'
     . get_string("name", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
-$table->size['name'] = "60";
 
 $table->head['date'] = '<a href="#" class="exaport-sort-heading" data-sort-field="date">'
     . get_string("date", "block_exaport") . ' <span class="exaport-sort-arrow"></span></a>';
-$table->size['date'] = "20";
 
 $table->head['icons'] = '';
-$table->size['icons'] = "10";
 
 $table->data = array();
 $itemind = -1;
@@ -1059,8 +1049,7 @@ foreach ($items as $item) {
             // No intro.
         } else if ($shortintro == $intro) {
             // Very short one.
-            $rowdata['name'] .= "<table width=\"50%\"><tr><td width=\"50px\">" .
-                format_text($intro, FORMAT_HTML) . "</td></tr></table>";
+            $rowdata['name'] .= '<div class="exaport-details-preview">' . format_text($intro, FORMAT_HTML) . '</div>';
         } else {
             // Display show/hide buttons.
             $rowdata['name'] .= '<div><div id="short-preview-' . $itemind . '"><div>' . $shortintro . '...</div>
@@ -1140,76 +1129,50 @@ foreach ($items as $item) {
     }
 }
 
-if ($useManualTable) {
-    // Render table header and category rows using html_table, then manually render item rows with data attributes.
-    $table->attributes['class'] = trim(($table->attributes['class'] ?? '') . ' generaltable table table-striped table-hover');
-    echo html_writer::table($table);
-    // Now render item rows as a separate table with data attributes on each row.
-    echo '<table class="generaltable table table-striped table-hover" width="100%"><tbody>';
-    foreach ($flatItemRows as $flatRow) {
-        $item = $flatRow['item'];
-        $row = $flatRow['data'];
-        $itemCatIds = [];
-        if (!empty($item->flatcategories) && is_array($item->flatcategories)) {
-            foreach ($item->flatcategories as $cat) {
-                $itemCatIds[] = (int)$cat->id;
-            }
-        }
-        echo '<tr class="exaport-flat-item" data-entry-type="item" data-item-name="' . s(strtolower($item->name)) . '" data-item-type="' . s($item->type) . '" data-category-ids="' . s(implode(',', $itemCatIds)) . '" data-item-date="' . (int)$item->timemodified . '">';
-        echo '<td style="width:10%">' . ($row['type'] ?? '') . '</td>';
-        echo '<td style="width:60%">' . ($row['name'] ?? '') . '</td>';
-        echo '<td style="width:20%">' . ($row['date'] ?? '') . '</td>';
-        echo '<td style="width:10%">' . ($row['icons'] ?? '') . '</td>';
-        echo '</tr>';
-    }
-    // Render view rows alongside item rows for mine/shared/sharedstudent/extern_category types.
-    // Delegate to the shared helper to avoid duplicating the URL/icon/edit-link logic.
-    if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'])) {
-        foreach ($views as $view) {
-            $viewCatIds = [];
-            if (!empty($view->flatcategories) && is_array($view->flatcategories)) {
-                foreach ($view->flatcategories as $cat) {
-                    $viewCatIds[] = (int)$cat->id;
-                }
-            }
-            $viewrow = block_exaport_render_view_table_row($view, $courseid, $type, $viewCatIds);
-            // html_writer::attributes() escapes all values, matching how html_writer::table() works for folder mode.
-            // $cell->text is pre-escaped HTML built by the helper (s(), format_string(), etc.) — safe to echo directly.
-            echo '<tr' . html_writer::attributes($viewrow->attributes) . '>';
-            $widths = ['10%', '60%', '20%', '10%'];
-            foreach ($viewrow->cells as $i => $cell) {
-                echo '<td style="width:' . ($widths[$i] ?? 'auto') . '">' . $cell->text . '</td>';
-            }
-            echo '</tr>';
-        }
-    }
-    echo '</tbody></table>';
-} else {
-    // Folder mode: append item and view rows directly into $table->data using html_table_row
-    // so everything is one table and column widths align with the header row.
-    foreach ($folderItemRows as $folderRow) {
-        $item = $folderRow['item'];
-        $row = $folderRow['data'];
-        $tablerow = new html_table_row([
-            $row['type'] ?? '',
-            $row['name'] ?? '',
-            $row['date'] ?? '',
-            $row['icons'] ?? '',
-        ]);
-        $tablerow->attributes['class'] = 'exaport-flat-item';
-        $tablerow->attributes['data-entry-type'] = 'item';
-        $tablerow->attributes['data-item-name'] = strtolower($item->name);
-        $tablerow->attributes['data-item-type'] = $item->type;
-        $tablerow->attributes['data-item-date'] = (int)$item->timemodified;
-        $table->data[] = $tablerow;
-    }
-    if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'], true)) {
-        foreach ($views as $view) {
-            $table->data[] = block_exaport_render_view_table_row($view, $courseid, $type);
-        }
-    }
-    echo html_writer::table($table);
+
+foreach ($flatItemRows as $flatRow) {
+    $row = new html_table_row([
+        $flatRow['data']['type'] ?? '',
+        $flatRow['data']['name'] ?? '',
+        $flatRow['data']['date'] ?? '',
+        $flatRow['data']['icons'] ?? '',
+    ]);
+    $row->attributes['class'] = 'exaport-flat-item';
+    $row->attributes['data-entry-type'] = 'item';
+    $row->attributes['data-item-name'] = strtolower($flatRow['item']->name);
+    $row->attributes['data-item-type'] = $flatRow['item']->type;
+    $row->attributes['data-item-date'] = (int)$flatRow['item']->timemodified;
+    $row->attributes['data-category-ids'] = implode(',', array_map(function($cat) {
+        return (int)$cat->id;
+    }, $flatRow['item']->flatcategories ?? []));
+    $table->data[] = $row;
 }
+if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'], true)) {
+    foreach ($views as $view) {
+        $viewcatids = [];
+        foreach ($view->flatcategories ?? [] as $cat) {
+            $viewcatids[] = (int)$cat->id;
+        }
+        $table->data[] = block_exaport_render_view_table_row($view, $courseid, $type, $viewcatids);
+    }
+}
+
+foreach ($folderItemRows as $folderRow) {
+    $row = new html_table_row([
+        $folderRow['data']['type'] ?? '',
+        $folderRow['data']['name'] ?? '',
+        $folderRow['data']['date'] ?? '',
+        $folderRow['data']['icons'] ?? '',
+    ]);
+    $row->attributes['class'] = 'exaport-flat-item';
+    $row->attributes['data-entry-type'] = 'item';
+    $row->attributes['data-item-name'] = strtolower($folderRow['item']->name);
+    $row->attributes['data-item-type'] = $folderRow['item']->type;
+    $row->attributes['data-item-date'] = (int)$folderRow['item']->timemodified;
+    $table->data[] = $row;
+}
+$table->attributes['class'] = 'generaltable table table-striped table-hover';
+echo html_writer::table($table);
 echo '</div>';
 
 echo '<div class="exaport-view-section exaport-view-tiles' . ($folderlayout == 'tiles' ? ' is-active' : '') . '" data-exaport-view="tiles"' . ($folderlayout == 'tiles' ? '' : ' style="display:none;"') . '>';
@@ -1442,7 +1405,7 @@ function block_exaport_render_view_table_row(\stdClass $view, int $courseid, str
 
     $namecell = '<a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
     if ($view->description) {
-        $namecell .= '<table width="98%"><tr><td>' . format_text($view->description, FORMAT_HTML) . '</td></tr></table>';
+        $namecell .= '<div class="exaport-details-preview">' . format_text($view->description, FORMAT_HTML) . '</div>';
     }
     $iconscell = '<span class="excomdos_listicons">' . $sharedicon;
     if ($type === 'mine') {

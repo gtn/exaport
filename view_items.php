@@ -1142,9 +1142,10 @@ foreach ($items as $item) {
 
 if ($useManualTable) {
     // Render table header and category rows using html_table, then manually render item rows with data attributes.
+    $table->attributes['class'] = trim(($table->attributes['class'] ?? '') . ' generaltable table table-striped table-hover');
     echo html_writer::table($table);
     // Now render item rows as a separate table with data attributes on each row.
-    echo '<table class="generaltable" width="100%"><tbody>';
+    echo '<table class="generaltable table table-striped table-hover" width="100%"><tbody>';
     foreach ($flatItemRows as $flatRow) {
         $item = $flatRow['item'];
         $row = $flatRow['data'];

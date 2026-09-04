@@ -101,7 +101,9 @@ final class sharing_entity_config_test extends \advanced_testcase {
      */
     public function test_config_contains_search_page_settings(): void {
         $view = block_exaport_get_sharing_entity_config('view');
-        $this->assertSame('internaccess', $view->internaccessfield);
+        // Views have no persisted "internal access" column, internal sharing is derived from
+        // the share rows plus shareall instead (like items).
+        $this->assertNull($view->internaccessfield);
         $this->assertSame('/blocks/exaport/views_mod.php', $view->editpage);
         $this->assertSame(['type' => 'share', 'action' => 'edit'], $view->editparams);
 
@@ -118,8 +120,26 @@ final class sharing_entity_config_test extends \advanced_testcase {
      * The shared user-search page is restricted to users with the internal share capability.
      */
     public function test_search_page_requires_shareintern_capability(): void {
+        global $DB;
+
         $user = $this->getDataGenerator()->create_user();
         $course = $this->getDataGenerator()->create_course();
+
+        // Enrol the user so block_exaport_require_login() lets them into the course instead of
+        // redirecting to an enrolment page (which PHPUnit reports as an "unsupported redirect").
+        $studentrole = $DB->get_record('role', ['shortname' => 'student'], '*', MUST_EXIST);
+        $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id);
+
+        // block/exaport:use is allowed for every authenticated user by default (see
+        // db/access.php), so the user already passes block_exaport_require_login(). Explicitly
+        // prohibit block/exaport:shareintern for this user only, via a dedicated role, so the
+        // test genuinely exercises that capability check instead of failing earlier.
+        $roleid = create_role('No exaport shareintern', 'blockexaportnoshareintern', '');
+        $systemcontext = \context_system::instance();
+        assign_capability('block/exaport:shareintern', CAP_PROHIBIT, $roleid, $systemcontext->id);
+        role_assign($roleid, $user->id, $systemcontext->id);
+        accesslib_clear_all_caches_for_unit_testing();
+
         $this->setUser($user);
 
         $_GET['courseid'] = $course->id;
@@ -174,10 +194,11 @@ final class sharing_entity_config_test extends \advanced_testcase {
 
         block_exaport_sharing_toggle_shared_users($config, $viewid, [$otheruser->id => $otheruser->id]);
 
+        // Views have no persisted "internal access" column, so internal sharing shows up as the
+        // direct share row plus "share to all" being switched off, not as an internaccess flag.
         $this->assertTrue($DB->record_exists('block_exaportviewshar',
             ['viewid' => $viewid, 'userid' => $otheruser->id]));
         $view = $DB->get_record('block_exaportview', ['id' => $viewid]);
-        $this->assertEquals(1, $view->internaccess);
         $this->assertEquals(0, $view->shareall);
     }
 

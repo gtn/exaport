@@ -28,8 +28,9 @@ class share_overview {
     /**
      * Build a type icon HTML string for the given entity type.
      *
-     * Reuses block_exaport_fontawesome_icon() and block_exaport_item_icon_type_options()
-     * with the same icon choices already used in view_items.php and the *_card.php classes.
+     * Reuses block_exaport_fontawesome_icon() and block_exaport_entry_icon_type_options()
+     * so that the symbols are identical to the ones used for the rows of the details/table
+     * view in view_items.php.
      * Extracted here to be shared by my_shares_page and shared_with_me_page without duplication.
      *
      * @param string $entity_type 'item', 'category', or 'view'.
@@ -37,17 +38,11 @@ class share_overview {
      * @return string HTML
      */
     public static function build_type_icon(string $entity_type, string $itemtype = ''): string {
-        switch ($entity_type) {
-            case 'item':
-                $iconprops = block_exaport_item_icon_type_options($itemtype);
-                return block_exaport_fontawesome_icon($iconprops['iconName'], $iconprops['iconStyle'], 1);
-            case 'category':
-                return block_exaport_fontawesome_icon('folder-open', 'regular', 1);
-            case 'view':
-                return block_exaport_fontawesome_icon('table-cells', 'solid', 1);
-            default:
-                return '';
+        if (!in_array($entity_type, ['item', 'category', 'view'], true)) {
+            return '';
         }
+        $iconprops = block_exaport_entry_icon_type_options($entity_type, $itemtype);
+        return block_exaport_fontawesome_icon($iconprops['iconName'], $iconprops['iconStyle'], 1);
     }
 
     /**

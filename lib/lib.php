@@ -2841,6 +2841,28 @@ function block_exaport_item_icon_type_options($itemtype) {
     return ['iconName' => $iconTypes, 'iconStyle' => $st];
 }
 
+/**
+ * Canonical Exaport icon mapping for an entry (entity) type.
+ *
+ * These are the same symbols that are used for the rows of the details/table view
+ * in view_items.php: an open outlined folder for categories, a layered stack for
+ * views/collections and the item type icon (note, file, link) for items.
+ *
+ * @param string $entrytype 'category', 'view' or 'item'.
+ * @param string $itemtype  Item type ('note', 'file', 'link', ...), only used for items.
+ * @return array ['iconName' => string, 'iconStyle' => string]
+ */
+function block_exaport_entry_icon_type_options($entrytype, $itemtype = '') {
+    switch ($entrytype) {
+        case 'category':
+            return ['iconName' => 'folder-open', 'iconStyle' => 'regular'];
+        case 'view':
+            return ['iconName' => 'layer-group', 'iconStyle' => 'solid'];
+        default:
+            return block_exaport_item_icon_type_options($itemtype);
+    }
+}
+
 
 /**
  * Add icon pack JS/CSS code. BE careful with edit forms. There are possible already existing icons from Moodle

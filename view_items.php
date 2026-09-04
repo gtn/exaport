@@ -1129,34 +1129,34 @@ foreach ($items as $item) {
     }
 }
 
-{
-    foreach ($flatItemRows as $flatRow) {
-        $row = new html_table_row([
-            $flatRow['data']['type'] ?? '',
-            $flatRow['data']['name'] ?? '',
-            $flatRow['data']['date'] ?? '',
-            $flatRow['data']['icons'] ?? '',
-        ]);
-        $row->attributes['class'] = 'exaport-flat-item';
-        $row->attributes['data-entry-type'] = 'item';
-        $row->attributes['data-item-name'] = strtolower($flatRow['item']->name);
-        $row->attributes['data-item-type'] = $flatRow['item']->type;
-        $row->attributes['data-item-date'] = (int)$flatRow['item']->timemodified;
-        $row->attributes['data-category-ids'] = implode(',', array_map(function($cat) {
-            return (int)$cat->id;
-        }, $flatRow['item']->flatcategories ?? []));
-        $table->data[] = $row;
-    }
-    if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'], true)) {
-        foreach ($views as $view) {
-            $viewcatids = [];
-            foreach ($view->flatcategories ?? [] as $cat) {
-                $viewcatids[] = (int)$cat->id;
-            }
-            $table->data[] = block_exaport_render_view_table_row($view, $courseid, $type, $viewcatids);
+
+foreach ($flatItemRows as $flatRow) {
+    $row = new html_table_row([
+        $flatRow['data']['type'] ?? '',
+        $flatRow['data']['name'] ?? '',
+        $flatRow['data']['date'] ?? '',
+        $flatRow['data']['icons'] ?? '',
+    ]);
+    $row->attributes['class'] = 'exaport-flat-item';
+    $row->attributes['data-entry-type'] = 'item';
+    $row->attributes['data-item-name'] = strtolower($flatRow['item']->name);
+    $row->attributes['data-item-type'] = $flatRow['item']->type;
+    $row->attributes['data-item-date'] = (int)$flatRow['item']->timemodified;
+    $row->attributes['data-category-ids'] = implode(',', array_map(function($cat) {
+        return (int)$cat->id;
+    }, $flatRow['item']->flatcategories ?? []));
+    $table->data[] = $row;
+}
+if (in_array($type, ['mine', 'shared', 'sharedstudent', 'extern_category'], true)) {
+    foreach ($views as $view) {
+        $viewcatids = [];
+        foreach ($view->flatcategories ?? [] as $cat) {
+            $viewcatids[] = (int)$cat->id;
         }
+        $table->data[] = block_exaport_render_view_table_row($view, $courseid, $type, $viewcatids);
     }
 }
+
 foreach ($folderItemRows as $folderRow) {
     $row = new html_table_row([
         $folderRow['data']['type'] ?? '',

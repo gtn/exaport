@@ -874,7 +874,10 @@ namespace {
                 'groupsharetable' => 'block_exaportviewgroupshar',
                 'coursestype' => 'sharing',
                 'notfoundstring' => 'viewnotfound',
-                'internaccessfield' => 'internaccess',
+                // Views have no persisted "internal access" column - internal sharing is
+                // derived from the block_exaportviewshar/block_exaportviewgroupshar rows plus
+                // shareall, exactly like items - therefore there is nothing to flip here.
+                'internaccessfield' => null,
                 'editpage' => '/blocks/exaport/views_mod.php',
                 'editparams' => ['type' => 'share', 'action' => 'edit'],
                 'headeritem' => 'views',

@@ -181,8 +181,6 @@ class simplehtml_form extends block_exaport_moodleform {
         $mform = $this->_form;
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
-        $mform->addElement('hidden', 'pid');
-        $mform->setType('pid', PARAM_INT);
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'back');
@@ -192,6 +190,11 @@ class simplehtml_form extends block_exaport_moodleform {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', block_exaport_get_string('titlenotemtpy'), 'required', null, 'client');
         $mform->add_exaport_help_button('name', 'forms.category.name');
+
+        $mform->addElement('autocomplete', 'pid', block_exaport_get_string('parentcategory'), [], ['multiple' => false]);
+        $mform->setType('pid', PARAM_INT);
+        $mform->getElement('pid')->loadArray(\block_exaport\category_helper::build_parent_options(
+            $USER->id, block_exaport_get_string('rootcategory')));
 
         $mform->addElement('filemanager',
             'iconfile',
@@ -352,7 +355,15 @@ class simplehtml_form extends block_exaport_moodleform {
 
     // Custom validation should be added here.
     public function validation($data, $files) {
-        return array();
+        global $USER;
+
+        $errors = [];
+        $parentid = isset($data['pid']) ? (int)$data['pid'] : 0;
+        $categoryid = isset($data['id']) ? (int)$data['id'] : 0;
+        if (!\block_exaport\category_helper::is_valid_parent($parentid, $USER->id, $categoryid)) {
+            $errors['pid'] = block_exaport_get_string('invalidparentcategory');
+        }
+        return $errors;
     }
 }
 
@@ -368,6 +379,12 @@ if ($mform->is_cancelled()) {
 } else if ($newentry = $mform->get_data()) {
     require_sesskey();
     $newentry->userid = $USER->id;
+    $newentry->pid = (int)$newentry->pid;
+
+    // Keep the submitted selector authoritative even if client-side validation is bypassed.
+    if (!\block_exaport\category_helper::is_valid_parent($newentry->pid, $USER->id, (int)$newentry->id)) {
+        throw new \block_exaport\moodle_exception('invalidparentcategory');
+    }
 
     $existingcategory = null;
     if (!empty($newentry->id)) {
@@ -594,8 +611,9 @@ if ($mform->is_cancelled()) {
         $category->id = null;
     }
     $category->back = optional_param('back', '', PARAM_TEXT);
-    if (empty($category->pid)) {
-        $category->pid = optional_param('pid', 0, PARAM_INT);
+    if (!isset($category->id) || !$category->id) {
+        $candidatepid = optional_param('pid', 0, PARAM_INT);
+        $category->pid = \block_exaport\category_helper::initial_parent_id($candidatepid, $USER->id);
     }
 
     // Filemanager for editing icon picture.

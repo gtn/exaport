@@ -156,6 +156,18 @@ return [
         'Kategorie gel&ouml;scht.',
         'Category deleted.',
     ],
+    'parentcategory' => [
+        'Übergeordnete Kategorie',
+        'Parent category',
+    ],
+    'rootcategory' => [
+        'Wurzel',
+        'Root',
+    ],
+    'invalidparentcategory' => [
+        'Bitte wähle eine gültige übergeordnete Kategorie.',
+        'Please select a valid parent category.',
+    ],
     'date' => [
         'Datum',
         'Date',

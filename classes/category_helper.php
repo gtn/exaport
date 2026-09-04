@@ -24,6 +24,78 @@ defined('MOODLE_INTERNAL') || die();
 class category_helper {
 
     /**
+     * Build the single-select options used for category parents.
+     *
+     * @param int $userid Category owner.
+     * @param string $rootlabel Label for the root option.
+     * @return array
+     */
+    public static function build_parent_options(int $userid, string $rootlabel): array {
+        $categories = self::load_owner_categories($userid);
+        $byid = [];
+        foreach ($categories as $category) {
+            $byid[(int)$category->id] = $category;
+        }
+
+        $options = [0 => $rootlabel];
+        foreach ($byid as $categoryid => $category) {
+            $path = str_replace(' / ', ' &rarr; ', self::full_path_name($categoryid, $byid));
+            // Orphaned legacy records remain selectable, while still being distinguishable.
+            $options[$categoryid] = format_string($path !== '' ? $path : $category->name);
+        }
+        uasort($options, static function($left, $right) {
+            return strnatcasecmp((string)$left, (string)$right);
+        });
+        // Root must always be the first option, regardless of its translated label.
+        return [0 => $rootlabel] + $options;
+    }
+
+    /**
+     * Check that a parent belongs to the user and cannot create an edit cycle.
+     *
+     * @param int $parentid Proposed parent, where 0 means root.
+     * @param int $userid Owner of the category being created/edited.
+     * @param int $categoryid Existing category id, or 0 for a new category.
+     * @return bool
+     */
+    public static function is_valid_parent(int $parentid, int $userid, int $categoryid = 0): bool {
+        global $DB;
+
+        if ($parentid === 0) {
+            return true;
+        }
+        if (!$DB->record_exists('block_exaportcate', ['id' => $parentid, 'userid' => $userid])) {
+            return false;
+        }
+        if ($categoryid === 0) {
+            return true;
+        }
+
+        $visited = [];
+        $currentid = $parentid;
+        while ($currentid) {
+            if ($currentid === $categoryid || isset($visited[$currentid])) {
+                return false;
+            }
+            $visited[$currentid] = true;
+            $currentid = (int)$DB->get_field('block_exaportcate', 'pid',
+                ['id' => $currentid, 'userid' => $userid]);
+        }
+        return true;
+    }
+
+    /**
+     * Resolve the URL parent used only as the add-form initial value.
+     *
+     * @param int $candidatepid URL-provided parent.
+     * @param int $userid Category owner.
+     * @return int Valid parent id, or 0 for root.
+     */
+    public static function initial_parent_id(int $candidatepid, int $userid): int {
+        return self::is_valid_parent($candidatepid, $userid) ? $candidatepid : 0;
+    }
+
+    /**
      * Build a category tree keyed by parent id.
      *
      * @param array $categories

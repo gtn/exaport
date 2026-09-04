@@ -109,6 +109,48 @@ final class category_helper_test extends \advanced_testcase {
     }
 
     // -------------------------------------------------------------------------
+    // Tests: category parent selector and validation
+    // -------------------------------------------------------------------------
+
+    public function test_parent_options_include_root_and_full_paths(): void {
+        $work = $this->create_category($this->owner, 'Work');
+        $projects = $this->create_category($this->owner, 'Projects', $work);
+        $moodle = $this->create_category($this->owner, 'Moodle', $projects);
+
+        $options = category_helper::build_parent_options($this->owner->id, 'Root');
+
+        $this->assertSame('Root', $options[0]);
+        $this->assertSame('Work', $options[$work]);
+        $this->assertSame('Work &rarr; Projects', $options[$projects]);
+        $this->assertSame('Work &rarr; Projects &rarr; Moodle', $options[$moodle]);
+    }
+
+    public function test_root_and_valid_parent_are_accepted(): void {
+        $parent = $this->create_category($this->owner, 'Parent');
+
+        $this->assertTrue(category_helper::is_valid_parent(0, $this->owner->id));
+        $this->assertTrue(category_helper::is_valid_parent($parent, $this->owner->id));
+        $this->assertSame($parent, category_helper::initial_parent_id($parent, $this->owner->id));
+        $this->assertSame(0, category_helper::initial_parent_id(0, $this->owner->id));
+        $this->assertSame(0, category_helper::initial_parent_id(999999, $this->owner->id));
+    }
+
+    public function test_foreign_parent_is_rejected(): void {
+        $otheruser = $this->getDataGenerator()->create_user();
+        $foreignparent = $this->create_category($otheruser, 'Foreign');
+
+        $this->assertFalse(category_helper::is_valid_parent($foreignparent, $this->owner->id));
+    }
+
+    public function test_edit_parent_cannot_be_self_or_descendant(): void {
+        $category = $this->create_category($this->owner, 'Category');
+        $descendant = $this->create_category($this->owner, 'Descendant', $category);
+
+        $this->assertFalse(category_helper::is_valid_parent($category, $this->owner->id, $category));
+        $this->assertFalse(category_helper::is_valid_parent($descendant, $this->owner->id, $category));
+    }
+
+    // -------------------------------------------------------------------------
     // Tests: category_helper::build_share_info
     // -------------------------------------------------------------------------
 

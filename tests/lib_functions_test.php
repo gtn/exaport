@@ -360,6 +360,7 @@ final class lib_functions_test extends \advanced_testcase {
         $this->assertArrayHasKey($myitem, $items);
         $this->assertArrayHasKey($otheritem, $items);
     }
+
     /**
      * block_exaport_entry_icon_type_options() returns the canonical Exaport icons that are
      * used for the rows of the details/table view in view_items.php.

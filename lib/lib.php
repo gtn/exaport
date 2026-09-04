@@ -2858,6 +2858,7 @@ function block_exaport_entry_icon_type_options($entrytype, $itemtype = '') {
             return ['iconName' => 'folder-open', 'iconStyle' => 'regular'];
         case 'view':
             return ['iconName' => 'layer-group', 'iconStyle' => 'solid'];
+        case 'item':
         default:
             return block_exaport_item_icon_type_options($itemtype);
     }

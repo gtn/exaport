@@ -38,6 +38,18 @@ div.item-detail-image img {
     opacity: 0.75;
 }
 
+.block_exaport_shared_with_me .exaport-share-overview-table th,
+.block_exaport_shared_with_me .exaport-share-overview-table td,
+.block_exaport_my_shares .exaport-share-overview-table th,
+.block_exaport_my_shares .exaport-share-overview-table td {
+    text-align: left;
+}
+
+.block_exaport_my_shares .exaport-share-overview-table th.text-right,
+.block_exaport_my_shares .exaport-share-overview-table td.text-right {
+    text-align: right;
+}
+
 #exaport .view-group-content .table-responsive {
     width: 100%;
     display: block;

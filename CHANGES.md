@@ -1,3 +1,8 @@
+### v5.1 (2026090800) ###
+* Unified sharing overhaul for items, views, and categories, including consistent access checks, audience resolution, sharing indicators, notifications, and overview pages.
+* Items can now be shared directly.
+* Added category and item sharing improvements, category-parent selection safeguards, and refined details layouts, icons, tables, and responsive styling.
+
 ### v5.1 (2026080600) ###
 * Added views alongside portfolio items.
 * Added category assignment and category-based sharing for views.

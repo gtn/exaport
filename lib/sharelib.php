@@ -91,12 +91,12 @@ namespace {
      */
     function block_exaport_get_share_summary_segments(\block_exaport\share_info $share): array {
         $keys = $share->get_summary_segments();
+        if (!$keys) {
+            $keys = ['none'];
+        }
         $labels = [];
         foreach ($keys as $key) {
             $labels[] = block_exaport_get_string('share_summary_' . $key);
-        }
-        if (!$labels) {
-            $labels[] = block_exaport_get_string('share_summary_none');
         }
         return ['keys' => $keys, 'labels' => $labels, 'text' => implode(' · ', $labels)];
     }

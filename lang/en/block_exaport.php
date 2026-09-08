@@ -389,14 +389,21 @@ $string['sharedwithotherusers'] = 'Shared internally with other users';
 $string['sharedwith_user_cnt'] = 'Shared with {$a} users';
 $string['sharedwith_onlyme'] = 'Shared only with me';
 $string['sharedwith_shareall'] = 'Shared with all users';
-$string['sharedwith_shareexternal'] = 'Shared external';
+$string['sharedwith_shareexternal'] = 'External link';
 $string['sharedexternalcategory'] = 'Shared externally';
-$string['sharedwith_group'] = 'Shared with my group';
+$string['sharedwith_group'] = 'Shared with selected groups';
 $string['sharedwith_group_cnt'] = 'Shared with {$a} groups';
 $string['share_tooltip_users'] = 'Shared internally with the following users: {$a}';
 $string['share_tooltip_groups'] = 'Shared internally with the following groups: {$a}';
 $string['share_tooltip_all'] = 'Shared internally with all users.';
 $string['share_tooltip_external'] = 'Shared externally via URL.';
+$string['share_tooltip_emails'] = 'Shared through individual email links.';
+$string['share_summary_none'] = 'Not shared';
+$string['share_summary_all'] = 'Internal: all users';
+$string['share_summary_groups'] = 'Internal: selected groups';
+$string['share_summary_users'] = 'Internal: selected users';
+$string['share_summary_external'] = 'External link';
+$string['share_summary_emails'] = 'Email recipients';
 
 // === Copy to course.
 $string['filecopiedtocourse'] = 'File copied to course $a->coursename under the name of $a->filename';

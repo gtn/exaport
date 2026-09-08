@@ -867,6 +867,8 @@ $translations = array(
     'delete', 'viewand',
     'file', 'note', 'link',
     'internalaccess', 'externalaccess', 'internalaccessall', 'internalaccessusers', 'view_sharing_noaccess', 'sharejs',
+    'share_summary_all', 'share_summary_groups', 'share_summary_users', 'share_summary_external',
+    'share_summary_emails', 'share_summary_none',
     'notify', 'emailaccess',
     'checkall', 'viewmustbesafed',
     'configureblock_item', 'configureblock_personal_information', 'configureblock_cv_information',

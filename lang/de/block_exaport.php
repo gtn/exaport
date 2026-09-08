@@ -388,14 +388,21 @@ $string['sharedwithotherusers'] = 'Intern mit anderen Benutzer:innen geteilt';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Benutzern geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
 $string['sharedwith_shareall'] = 'Mit allen Benutzer::innen geteilt';
-$string['sharedwith_shareexternal'] = 'Geteilte externe Sammelmappen';
+$string['sharedwith_shareexternal'] = 'Externer Link';
 $string['sharedexternalcategory'] = 'Extern geteilt';
-$string['sharedwith_group'] = 'Mit meiner Gruppe geteilt';
+$string['sharedwith_group'] = 'Mit ausgewählten Gruppen geteilt';
 $string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
 $string['share_tooltip_users'] = 'Intern mit den folgenden Benutzer:innen geteilt: {$a}';
 $string['share_tooltip_groups'] = 'Intern mit den folgenden Gruppen geteilt: {$a}';
 $string['share_tooltip_all'] = 'Intern mit allen Benutzer:innen geteilt.';
 $string['share_tooltip_external'] = 'Extern via URL geteilt.';
+$string['share_tooltip_emails'] = 'Über individuelle E-Mail-Links geteilt.';
+$string['share_summary_none'] = 'Nicht geteilt';
+$string['share_summary_all'] = 'Intern: alle Benutzer:innen';
+$string['share_summary_groups'] = 'Intern: ausgewählte Gruppen';
+$string['share_summary_users'] = 'Intern: ausgewählte Benutzer:innen';
+$string['share_summary_external'] = 'Externer Link';
+$string['share_summary_emails'] = 'E-Mail-Empfänger:innen';
 
 // === Copy to course.
 $string['filecopiedtocourse'] = 'Datei wurde in den Kurs $a->coursename unter dem Namen $a->filename kopiert';

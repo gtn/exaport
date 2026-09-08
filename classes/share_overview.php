@@ -132,7 +132,7 @@ class share_overview {
 
         // Views.
         $views = $DB->get_records_sql(
-            "SELECT v.id, v.name AS title, 0 AS courseid, v.shareall, v.externaccess,
+            "SELECT v.id, v.name AS title, 0 AS courseid, v.shareall, v.externaccess, v.sharedemails,
                     COUNT(DISTINCT vshar.userid) AS cnt_shared_users,
                     COUNT(DISTINCT vgshar.groupid) AS cnt_shared_groups,
                     0 AS comment_cnt
@@ -140,11 +140,12 @@ class share_overview {
                LEFT JOIN {block_exaportviewshar} vshar ON vshar.viewid = v.id
                LEFT JOIN {block_exaportviewgroupshar} vgshar ON vgshar.viewid = v.id
               WHERE v.userid = ?
-           GROUP BY v.id, v.name, v.shareall, v.externaccess
+           GROUP BY v.id, v.name, v.shareall, v.externaccess, v.sharedemails
              HAVING COUNT(DISTINCT vshar.userid) > 0
                  OR COUNT(DISTINCT vgshar.groupid) > 0
                  " . ($shareallenabled ? 'OR v.shareall = 1' : '') . "
                  " . ($externalenabled ? 'OR v.externaccess = 1' : '') . "
+                 " . (block_exaport_shareemails_enabled() ? 'OR v.sharedemails = 1' : '') . "
            ORDER BY v.name",
             [$userid]
         );

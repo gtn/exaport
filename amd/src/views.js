@@ -1245,11 +1245,11 @@ define(['jquery',
 
   // Sharing.
   function update_sharing() {
-    var share_text = '';
+    var share_segments = [];
     var $form = $('#exaport-view-mod');
 
     if ($form.find(':input[name=externaccess]').is(':checked')) {
-      share_text += $E.translate('externalaccess') + ' ';
+      share_segments.push($E.translate('share_summary_external'));
       $('#externaccess-settings').show();
     } else {
       $('#externaccess-settings').hide();
@@ -1258,22 +1258,17 @@ define(['jquery',
     if ($form.find(':input[name=internaccess]').is(':checked')) {
       $('#internaccess-settings').show();
       $('#internaccess-groups').hide();
-      if (share_text) {
-        share_text += ' ' + $E.translate('viewand') + ' ';
-      }
-      share_text += $E.translate('internalaccess') + ': ';
-
       if ($form.find(':input[name=shareall]:checked').val() == 1) {
-        share_text += $E.translate('internalaccessall');
+        share_segments.unshift($E.translate('share_summary_all'));
         $('#internaccess-users').hide();
         $('#internaccess-groups').hide();
       } else if ($form.find(':input[name=shareall]:checked').val() == 2) {
-        share_text += $E.translate('internalaccessgroups');
+        share_segments.unshift($E.translate('share_summary_groups'));
         $('#internaccess-users').hide();
         $('#internaccess-groups').show();
         ExabisEportfolio.load_grouplist('views_mod');
       } else {
-        share_text += $E.translate('internalaccessusers');
+        share_segments.unshift($E.translate('share_summary_users'));
         $('#internaccess-groups').hide();
         $('#internaccess-users').show();
         ExabisEportfolio.load_userlist('views_mod');
@@ -1283,21 +1278,17 @@ define(['jquery',
     }
 
     if ($form.find(':input[name=sharedemails]').is(':checked')) {
-      if (share_text) {
-        share_text += ' ' + $E.translate('viewand') + ' ';
-      }
-      ;
-      share_text += $E.translate('emailaccess') + ' ';
+      share_segments.push($E.translate('share_summary_emails'));
       $('#emailaccess-settings').show();
     } else {
       $('#emailaccess-settings').hide();
     }
     ;
 
-    if (!share_text) {
-      share_text = $E.translate('view_sharing_noaccess');
+    if (!share_segments.length) {
+      share_segments.push($E.translate('share_summary_none'));
     }
-    $('#view-share-text').html(share_text);
+    $('#view-share-text').text(share_segments.join(' · '));
   }
 
   // MAIN code of MODULE.
@@ -1313,4 +1304,3 @@ define(['jquery',
   };
 
 });
-

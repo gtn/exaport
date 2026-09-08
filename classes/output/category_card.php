@@ -111,6 +111,7 @@ class category_card extends card {
                     'data-bs-title'     => $sharedtooltip,
                 ]
             ),
+            'sharedsummary'  => $share->is_shared() ? block_exaport_get_share_summary($share) : '',
             'categorylabel'  => block_exaport_get_string('category'),
         ];
     }

@@ -1454,6 +1454,34 @@ return [
         'Extern via URL geteilt.',
         'Shared externally via URL.',
     ],
+    'share_tooltip_emails' => [
+        'Über individuelle E-Mail-Links geteilt.',
+        'Shared through individual email links.',
+    ],
+    'share_summary_none' => [
+        'Nicht geteilt',
+        'Not shared',
+    ],
+    'share_summary_all' => [
+        'Intern: alle Benutzer:innen',
+        'Internal: all users',
+    ],
+    'share_summary_groups' => [
+        'Intern: ausgewählte Gruppen',
+        'Internal: selected groups',
+    ],
+    'share_summary_users' => [
+        'Intern: ausgewählte Benutzer:innen',
+        'Internal: selected users',
+    ],
+    'share_summary_external' => [
+        'Externer Link',
+        'External link',
+    ],
+    'share_summary_emails' => [
+        'E-Mail-Empfänger:innen',
+        'Email recipients',
+    ],
 
     // === Copy to course.
     'filecopiedtocourse' => [

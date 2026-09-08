@@ -403,4 +403,30 @@ final class category_helper_test extends \advanced_testcase {
         $this->assertStringContainsString('Alice & Bob', $tooltip);
         $this->assertStringNotContainsString('&amp;', $tooltip);
     }
+
+    /**
+     * Summary segments retain every active sharing channel.
+     */
+    public function test_share_summary_is_composable(): void {
+        $share = new share_info();
+        $this->assertSame(['none'], block_exaport_get_share_summary_segments($share)['keys']);
+
+        $share->users = ['Alice'];
+        $share->groups = ['Group A'];
+        $share->external = true;
+        $summary = block_exaport_get_share_summary_segments($share);
+
+        $this->assertSame(['groups', 'users', 'external'], $summary['keys']);
+        $this->assertSame(
+            'Internal: selected groups · Internal: selected users · External link',
+            $summary['text']
+        );
+
+        $share->all = true;
+        $share->emails = true;
+        $summary = block_exaport_get_share_summary_segments($share);
+        $this->assertSame(['all', 'groups', 'users', 'external', 'emails'], $summary['keys']);
+        $this->assertStringContainsString('Internal: all users', $summary['text']);
+        $this->assertStringContainsString('Email recipients', $summary['text']);
+    }
 }

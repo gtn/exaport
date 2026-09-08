@@ -131,6 +131,7 @@ class view_card extends card {
             'isshared'       => $isshared,
             'sharedicon'     => $sharedicon,
             'sharedtooltip'  => $sharedtooltip,
+            'sharedsummary'  => block_exaport_get_share_summary($share),
         ];
 
         if ($this->showcategories) {

@@ -126,6 +126,7 @@ class item_card extends card {
             'timemodified'  => (int)$item->timemodified,
             'itemid'        => (int)$item->id,
             'isshared'      => $isshared,
+            'sharedsummary' => $share->is_shared() ? block_exaport_get_share_summary($share) : '',
             'url'           => $url,
             'itemname'      => $item->name,
             'isownitem'     => $isownitem,

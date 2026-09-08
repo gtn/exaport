@@ -121,8 +121,6 @@ class item_card extends card {
             $isshared = $share->is_shared();
         }
 
-        $sharedtooltip = block_exaport_get_share_tooltip($share);
-
         return $this->base_icons() + [
             'itemnamelower' => strtolower($item->name),
             'itemtype'      => $item->type,
@@ -150,19 +148,7 @@ class item_card extends card {
             'introtext'     => $introtext,
             'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
             'commentlabel'  => $commentlabel,
-            'sharedicon'    => block_exaport_fontawesome_icon(
-                'share-nodes',
-                'solid',
-                1,
-                ['icon', 'icon-shared'],
-                [],
-                [
-                    'data-bs-toggle'    => 'tooltip',
-                    'data-bs-placement' => 'top',
-                    'data-bs-html'      => 'true',
-                    'data-bs-title'     => $sharedtooltip,
-                ]
-            ),
+            'sharedicon'    => block_exaport_render_share_icon($share),
         ] + ($this->showcategories ? [
             'categorybadges' => block_exaport_render_item_category_badges($this->item),
         ] : []);

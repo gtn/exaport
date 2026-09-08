@@ -82,7 +82,8 @@ class category_card extends card {
             }
         }
 
-        $sharedtooltip = block_exaport_get_share_tooltip($share);
+        $sharedicon = $share->is_shared() ? block_exaport_render_share_icon($share)
+            : ($isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1) : '');
 
         return $this->base_icons() + [
             'outerclasses'   => $outerclasses,
@@ -101,19 +102,7 @@ class category_card extends card {
             'folderupicon'   => block_exaport_fontawesome_icon('folder-open', 'regular', 1, ['icon', 'fa-fw', 'me-1'], [],
                                     ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top',
                                      'data-bs-title'  => block_exaport_get_string('category_up')], 'up'),
-            'sharedicon'     => block_exaport_fontawesome_icon(
-                'share-nodes',
-                'solid',
-                1,
-                ['icon', 'icon-shared'],
-                [],
-                [
-                    'data-bs-toggle'    => 'tooltip',
-                    'data-bs-placement' => 'top',
-                    'data-bs-html'      => 'true',
-                    'data-bs-title'     => $sharedtooltip,
-                ]
-            ),
+            'sharedicon'     => $sharedicon,
             'sharedsummary'  => $this->showsharingstatus && $share->is_shared()
                 ? block_exaport_get_share_summary($share) : '',
             'categorylabel'  => block_exaport_get_string('category'),

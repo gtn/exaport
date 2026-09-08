@@ -985,12 +985,7 @@ foreach ($subcategories as $category) {
     if ($type == 'mine' && $category->id > 0) {
         $table->data[$itemind]['icons'] = '<span class="excomdos_listicons">';
         $share = \block_exaport\category_helper::build_share_info($category);
-        if ($share->is_shared()) {
-            // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
-            $table->data[$itemind]['icons'] .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
-                ['title' => s(block_exaport_get_share_tooltip($share, false))]);
-            //                $table->data[$itemind]['icons'] .= '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
-        };
+        $table->data[$itemind]['icons'] .= block_exaport_render_share_icon($share);
         if (@$category->structure_share) {
             $table->data[$itemind]['icons'] .= ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
         }
@@ -1096,11 +1091,7 @@ foreach ($items as $item) {
 
         if ($type == 'mine') {
             $share = \block_exaport\item_helper::build_share_info($item);
-            if ($share->is_shared()) {
-                // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
-                $icons .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
-                    ['title' => s(block_exaport_get_share_tooltip($share, false))]);
-            }
+            $icons .= block_exaport_render_share_icon($share);
             $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid . '&id=' . $item->id . '&action=edit">'
                 . block_exaport_fontawesome_icon('pen-to-square', 'regular', 1)
                 //                    .'<img src="pix/edit.png" alt="'.get_string("edit").'" />'
@@ -1401,10 +1392,9 @@ function block_exaport_render_view_table_row(\stdClass $view, int $courseid, str
     $viewurl = !empty($view->extern_view_url) ? $view->extern_view_url
         : $CFG->wwwroot . '/blocks/exaport/shared_view.php?courseid=' . $courseid
         . '&access=id/' . $view->userid . '-' . $view->id;
-    $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
-    // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
-    $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
-        ['title' => s(block_exaport_get_share_tooltip($view->shareinfo, false))]) : '';
+    $share = $view->shareinfo ?? new \block_exaport\share_info();
+    $isshared = $share->is_shared();
+    $sharedicon = block_exaport_render_share_icon($share);
 
     $namecell = '<a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
     if ($view->description) {
@@ -1628,12 +1618,7 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
         } else {
             // Type == mine.
             $share = \block_exaport\category_helper::build_share_info($category);
-            if ($share->is_shared()) {
-                // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
-                $categoryContent .= block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
-                    ['title' => s(block_exaport_get_share_tooltip($share, false))]);
-                //                            echo '<img src="pix/noteitshared.gif" alt="file" title="shared to other users">';
-            };
+            $categoryContent .= block_exaport_render_share_icon($share);
             if (@$category->structure_share) {
                 $categoryContent .= ' <img src="pix/sharedfolder.png" title="shared to other users as a structure">';
             };
@@ -1728,6 +1713,10 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
         $itemContent .= block_exaport_get_item_comp_icon($item);
 
         if (in_array($type, ['mine', 'shared'])) {
+            if ($type == 'mine') {
+                $share = \block_exaport\item_helper::build_share_info($item);
+                $itemContent .= block_exaport_render_share_icon($share);
+            }
             $cattype = '';
             if ($type == 'shared') {
                 $cattype = '&cattype=shared';

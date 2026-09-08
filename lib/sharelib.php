@@ -73,6 +73,27 @@ namespace {
     }
 
     /**
+     * Render the canonical sharing icon and its Bootstrap tooltip.
+     *
+     * @param \block_exaport\share_info $share Resolved sharing detail.
+     * @return string Sharing icon, or an empty string when unshared.
+     */
+    function block_exaport_render_share_icon(\block_exaport\share_info $share): string {
+        if (!$share->is_shared()) {
+            return '';
+        }
+
+        return block_exaport_fontawesome_icon('share-nodes', 'solid', 1, ['icon', 'icon-shared'], [], [
+            'data-bs-toggle' => 'tooltip',
+            'data-bs-placement' => 'top',
+            'data-bs-html' => 'true',
+            // The icon helper writes attributes verbatim. Encode the already HTML-safe tooltip
+            // once more so entities remain text when Bootstrap renders the HTML tooltip.
+            'data-bs-title' => s(block_exaport_get_share_tooltip($share)),
+        ]);
+    }
+
+    /**
      * Build the short sharing summary used by sharing overview pages.
      *
      * @param \block_exaport\share_info $share Resolved sharing detail

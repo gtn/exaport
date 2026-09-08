@@ -405,6 +405,49 @@ final class category_helper_test extends \advanced_testcase {
     }
 
     /**
+     * The shared icon uses the Bootstrap tooltip contract and the canonical tooltip content.
+     */
+    public function test_share_icon_uses_bootstrap_tooltip(): void {
+        $share = new share_info();
+        $share->all = true;
+        $share->external = true;
+
+        $icon = block_exaport_render_share_icon($share);
+
+        $this->assertStringContainsString('fa-share-nodes', $icon);
+        $this->assertStringContainsString('icon-shared', $icon);
+        $this->assertStringContainsString('data-bs-toggle = "tooltip"', $icon);
+        $this->assertStringContainsString('data-bs-placement = "top"', $icon);
+        $this->assertStringContainsString('data-bs-html = "true"', $icon);
+        $this->assertStringContainsString(
+            'data-bs-title = "' . s(block_exaport_get_share_tooltip($share)) . '"',
+            $icon
+        );
+        $this->assertStringNotContainsString(' title = "', $icon);
+    }
+
+    /**
+     * An empty share_info is safe to pass to the renderer and produces no icon.
+     */
+    public function test_unshared_share_icon_is_empty(): void {
+        $this->assertSame('', block_exaport_render_share_icon(new share_info()));
+    }
+
+    /**
+     * User-controlled names remain text when the HTML tooltip is placed in an attribute.
+     */
+    public function test_share_icon_escapes_user_controlled_tooltip_names(): void {
+        $share = new share_info();
+        $share->users = ['Alice <Test> & Co'];
+
+        $icon = block_exaport_render_share_icon($share);
+
+        $this->assertStringContainsString('&amp;lt;Test&amp;gt;', $icon);
+        $this->assertStringContainsString('&amp;amp;', $icon);
+        $this->assertStringNotContainsString('data-bs-title = "Alice <Test>', $icon);
+    }
+
+    /**
      * Summary segments retain every active sharing channel.
      */
     public function test_share_summary_is_composable(): void {

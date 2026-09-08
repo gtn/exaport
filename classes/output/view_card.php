@@ -104,19 +104,7 @@ class view_card extends card {
             ['data-bs-toggle' => 'tooltip', 'data-bs-placement' => 'top',
              'data-bs-title'  => get_string('view', 'block_exaport')]);
 
-        $sharedicon = block_exaport_fontawesome_icon(
-            'share-nodes',
-            'solid',
-            1,
-            ['icon', 'icon-shared'],
-            [],
-            [
-                'data-bs-toggle'    => 'tooltip',
-                'data-bs-placement' => 'top',
-                'data-bs-html'      => 'true',
-                'data-bs-title'     => $sharedtooltip,
-            ]
-        );
+        $sharedicon = block_exaport_render_share_icon($share);
 
         $data = $this->base_icons() + [
             'viewnamelower'  => strtolower($view->name),

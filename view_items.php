@@ -1404,8 +1404,7 @@ function block_exaport_render_view_table_row(\stdClass $view, int $courseid, str
     $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
     // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
     $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
-        ['title' => s(block_exaport_get_share_tooltip($view->shareinfo, false))]) . ' '
-        . s(block_exaport_get_share_summary($view->shareinfo)) : '';
+        ['title' => s(block_exaport_get_share_tooltip($view->shareinfo, false))]) : '';
 
     $namecell = '<a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
     if ($view->description) {

@@ -36,6 +36,9 @@ class view_card extends card {
     /** @var bool $showcategories */
     protected bool $showcategories;
 
+    /** @var bool */
+    protected bool $showsharingstatus;
+
     /** @var int $categoryid */
     protected $categoryid;
 
@@ -47,13 +50,15 @@ class view_card extends card {
      * @param string    $type           Access type, e.g. 'mine'.
      * @param int       $categoryid     The current category id (used for edit/delete URL context).
      * @param bool      $showcategories Whether to show category badge chips.
+     * @param bool      $showsharingstatus Whether to show the visible sharing summary.
      */
     public function __construct(\stdClass $view, int $courseid, string $type, int $categoryid = 0,
-                                bool $showcategories = false) {
+                                bool $showcategories = false, bool $showsharingstatus = true) {
         parent::__construct($courseid, $type);
         $this->view           = $view;
         $this->categoryid     = $categoryid;
         $this->showcategories = $showcategories;
+        $this->showsharingstatus = $showsharingstatus;
     }
 
     /**
@@ -131,7 +136,7 @@ class view_card extends card {
             'isshared'       => $isshared,
             'sharedicon'     => $sharedicon,
             'sharedtooltip'  => $sharedtooltip,
-            'sharedsummary'  => block_exaport_get_share_summary($share),
+            'sharedsummary'  => $this->showsharingstatus ? block_exaport_get_share_summary($share) : '',
         ];
 
         if ($this->showcategories) {

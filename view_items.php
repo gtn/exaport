@@ -1404,8 +1404,7 @@ function block_exaport_render_view_table_row(\stdClass $view, int $courseid, str
     $isshared = !empty($view->shareinfo) && $view->shareinfo->is_shared();
     // block_exaport_fontawesome_icon() writes attribute values verbatim; escaping is the caller's responsibility.
     $sharedicon = $isshared ? block_exaport_fontawesome_icon('share-nodes', 'solid', 1, [], [],
-        ['title' => s(block_exaport_get_share_tooltip($view->shareinfo, false))]) . ' '
-        . s(block_exaport_get_share_summary($view->shareinfo)) : '';
+        ['title' => s(block_exaport_get_share_tooltip($view->shareinfo, false))]) : '';
 
     $namecell = '<a href="' . s($viewurl) . '">' . format_string($view->name) . '</a>';
     if ($view->description) {
@@ -1792,7 +1791,9 @@ function block_exaport_category_list_item($category, $courseid, $type, $currentc
     switch ($template) {
         case 'moodle_bootstrap':
             return $PAGE->get_renderer('block_exaport')->render(
-                new \block_exaport\output\category_card($category, $courseid, $type, $currentcategory, $parentcategory)
+                new \block_exaport\output\category_card(
+                    $category, $courseid, $type, $currentcategory, $parentcategory, false
+                )
             );
             break;
         case 'exaport_bootstrap': // may we do not need this at all?
@@ -1816,11 +1817,15 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
         case 'moodle_bootstrap':
             if ($foldermode) {
                 return $PAGE->get_renderer('block_exaport')->render(
-                    new \block_exaport\output\item_card($item, $courseid, $type, $categoryid, $currentcategory)
+                    new \block_exaport\output\item_card(
+                        $item, $courseid, $type, $categoryid, $currentcategory, false, false
+                    )
                 );
             } else {
                 return $PAGE->get_renderer('block_exaport')->render(
-                    new \block_exaport\output\item_card($item, $courseid, $type, $categoryid, $currentcategory, true)
+                    new \block_exaport\output\item_card(
+                        $item, $courseid, $type, $categoryid, $currentcategory, true, false
+                    )
                 );
             }
             break;

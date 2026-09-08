@@ -33,6 +33,8 @@ class category_card extends card {
 
     /** @var \stdClass|null $parentcategory */
     protected $parentcategory;
+    /** @var bool */
+    protected bool $showsharingstatus;
 
     /**
      * Constructor.
@@ -44,10 +46,11 @@ class category_card extends card {
      * @param \stdClass|null $parentcategory  When non-null, this tile links up to the parent category.
      */
     public function __construct(\stdClass $category, int $courseid, string $type, \stdClass $currentcategory,
-                                ?\stdClass $parentcategory = null) {
+                                ?\stdClass $parentcategory = null, bool $showsharingstatus = true) {
         parent::__construct($courseid, $type);
         $this->category       = $category;
         $this->parentcategory = $parentcategory;
+        $this->showsharingstatus = $showsharingstatus;
     }
 
     /**
@@ -111,7 +114,8 @@ class category_card extends card {
                     'data-bs-title'     => $sharedtooltip,
                 ]
             ),
-            'sharedsummary'  => $share->is_shared() ? block_exaport_get_share_summary($share) : '',
+            'sharedsummary'  => $this->showsharingstatus && $share->is_shared()
+                ? block_exaport_get_share_summary($share) : '',
             'categorylabel'  => block_exaport_get_string('category'),
         ];
     }

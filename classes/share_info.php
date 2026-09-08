@@ -31,6 +31,8 @@ class share_info {
     public bool $all = false;
     /** @var bool Shared externally via a public URL. */
     public bool $external = false;
+    /** @var bool Shared through individual email links. */
+    public bool $emails = false;
 
     /**
      * Whether the entity is shared in any way.
@@ -38,7 +40,32 @@ class share_info {
      * @return bool
      */
     public function is_shared(): bool {
-        return (bool)($this->users || $this->groups || $this->all || $this->external);
+        return (bool)($this->users || $this->groups || $this->all || $this->external || $this->emails);
+    }
+
+    /**
+     * Return every configured sharing channel in display order.
+     *
+     * @return string[]
+     */
+    public function get_summary_segments(): array {
+        $segments = [];
+        if ($this->all) {
+            $segments[] = 'all';
+        }
+        if ($this->groups) {
+            $segments[] = 'groups';
+        }
+        if ($this->users) {
+            $segments[] = 'users';
+        }
+        if ($this->external) {
+            $segments[] = 'external';
+        }
+        if ($this->emails) {
+            $segments[] = 'emails';
+        }
+        return $segments;
     }
 
     /**
@@ -67,6 +94,8 @@ class share_info {
             $share->all = $internal && (int)($entity->shareall ?? 0) === 1
                 && block_exaport_shareall_enabled();
             $share->external = !empty($entity->externaccess) && block_exaport_externaccess_enabled();
+            $share->emails = $entitytype === 'view' && !empty($entity->sharedemails)
+                && block_exaport_shareemails_enabled();
             $resolved[(int)$entity->id] = $share;
         }
         if (!$resolved) {

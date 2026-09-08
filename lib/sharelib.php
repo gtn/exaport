@@ -66,6 +66,9 @@ namespace {
         if ($share->external) {
             $lines[] = block_exaport_get_string('share_tooltip_external');
         }
+        if ($share->emails) {
+            $lines[] = block_exaport_get_string('share_tooltip_emails');
+        }
         return implode($html ? '<br><br>' : ' | ', $lines);
     }
 
@@ -76,25 +79,26 @@ namespace {
      * @return string
      */
     function block_exaport_get_share_summary(\block_exaport\share_info $share): string {
-        if ($share->all) {
-            return block_exaport_get_string('sharedwith_shareall');
+        $segments = block_exaport_get_share_summary_segments($share);
+        return implode(' · ', $segments['labels']);
+    }
+
+    /**
+     * Return the canonical sharing summary in a form usable by PHP and Mustache.
+     *
+     * @param \block_exaport\share_info $share Resolved sharing detail.
+     * @return array{keys: string[], labels: string[], text: string}
+     */
+    function block_exaport_get_share_summary_segments(\block_exaport\share_info $share): array {
+        $keys = $share->get_summary_segments();
+        $labels = [];
+        foreach ($keys as $key) {
+            $labels[] = block_exaport_get_string('share_summary_' . $key);
         }
-        if (count($share->groups) > 1) {
-            return block_exaport_get_string('sharedwith_group_cnt', count($share->groups));
+        if (!$labels) {
+            $labels[] = block_exaport_get_string('share_summary_none');
         }
-        if ($share->groups) {
-            return block_exaport_get_string('sharedwith_group');
-        }
-        if (count($share->users) > 1) {
-            return block_exaport_get_string('sharedwith_user_cnt', count($share->users));
-        }
-        if ($share->users) {
-            return block_exaport_get_string('sharedwith_onlyme');
-        }
-        if ($share->external) {
-            return block_exaport_get_string('sharedwith_shareexternal');
-        }
-        return '';
+        return ['keys' => $keys, 'labels' => $labels, 'text' => implode(' · ', $labels)];
     }
 
     function block_exaport_get_user_from_access($access, $epopaccess = false) {

@@ -328,7 +328,7 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertCount(3, $overviewrow->shareinfo->users);
         $this->assertSame($overviewrow->shareinfo->users, $viewitemsrows[$viewid]->shareinfo->users);
         $this->assertSame(
-            get_string('sharedwith_user_cnt', 'block_exaport', 3),
+            get_string('share_summary_users', 'block_exaport'),
             block_exaport_get_share_summary($overviewrow->shareinfo)
         );
         foreach (['Alice Audience', 'Bob Audience', 'Carol Audience'] as $name) {
@@ -415,7 +415,7 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertNotFalse($row);
         $this->assertTrue($row->shareinfo->external);
         $this->assertSame(
-            get_string('sharedwith_shareexternal', 'block_exaport'),
+            get_string('share_summary_external', 'block_exaport'),
             block_exaport_get_share_summary($row->shareinfo)
         );
     }

@@ -74,7 +74,7 @@
         <div class="card-footer d-flex justify-content-between align-items-center">
             <span class="eportoflio-date">{{dateformatted}}</span>
             <div>
-                {{#isshared}}<span class="eportoflio-share">{{{sharedicon}}}</span>{{/isshared}}
+                {{#isshared}}<span class="eportoflio-share">{{{sharedicon}}} <span>{{sharedsummary}}</span></span>{{/isshared}}
                 {{{compbadge}}}
                 {{#hascomments}}
                 <span class="eportoflio-comment me-2">

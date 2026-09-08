@@ -1791,7 +1791,9 @@ function block_exaport_category_list_item($category, $courseid, $type, $currentc
     switch ($template) {
         case 'moodle_bootstrap':
             return $PAGE->get_renderer('block_exaport')->render(
-                new \block_exaport\output\category_card($category, $courseid, $type, $currentcategory, $parentcategory)
+                new \block_exaport\output\category_card(
+                    $category, $courseid, $type, $currentcategory, $parentcategory, false
+                )
             );
             break;
         case 'exaport_bootstrap': // may we do not need this at all?
@@ -1815,11 +1817,15 @@ function block_exaport_artefact_list_item($item, $courseid, $type, $categoryid, 
         case 'moodle_bootstrap':
             if ($foldermode) {
                 return $PAGE->get_renderer('block_exaport')->render(
-                    new \block_exaport\output\item_card($item, $courseid, $type, $categoryid, $currentcategory)
+                    new \block_exaport\output\item_card(
+                        $item, $courseid, $type, $categoryid, $currentcategory, false, false
+                    )
                 );
             } else {
                 return $PAGE->get_renderer('block_exaport')->render(
-                    new \block_exaport\output\item_card($item, $courseid, $type, $categoryid, $currentcategory, true)
+                    new \block_exaport\output\item_card(
+                        $item, $courseid, $type, $categoryid, $currentcategory, true, false
+                    )
                 );
             }
             break;
@@ -1850,7 +1856,7 @@ function block_exaport_view_list_item(\stdClass $view, int $courseid, string $ty
     $template = block_exaport_used_layout();
     if ($template === 'moodle_bootstrap') {
         return $PAGE->get_renderer('block_exaport')->render(
-            new \block_exaport\output\view_card($view, $courseid, $type, $categoryid, !$foldermode)
+            new \block_exaport\output\view_card($view, $courseid, $type, $categoryid, !$foldermode, false)
         );
     }
     // Fallback for non-bootstrap layouts: simple link.

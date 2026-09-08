@@ -42,6 +42,8 @@ class item_card extends card {
 
     /** @var bool $showcategories */
     protected bool $showcategories;
+    /** @var bool */
+    protected bool $showsharingstatus;
 
     /**
      * Constructor.
@@ -54,12 +56,14 @@ class item_card extends card {
      * @param bool      $showcategories  Whether to show category badge chips.
      */
     public function __construct(\stdClass $item, int $courseid, string $type, int $categoryid,
-                                \stdClass $currentcategory, bool $showcategories = false) {
+                                \stdClass $currentcategory, bool $showcategories = false,
+                                bool $showsharingstatus = true) {
         parent::__construct($courseid, $type);
         $this->item            = $item;
         $this->categoryid      = $categoryid;
         $this->currentcategory = $currentcategory;
         $this->showcategories  = $showcategories;
+        $this->showsharingstatus = $showsharingstatus;
     }
 
     /**
@@ -126,6 +130,8 @@ class item_card extends card {
             'timemodified'  => (int)$item->timemodified,
             'itemid'        => (int)$item->id,
             'isshared'      => $isshared,
+            'sharedsummary' => $this->showsharingstatus && $share->is_shared()
+                ? block_exaport_get_share_summary($share) : '',
             'url'           => $url,
             'itemname'      => $item->name,
             'isownitem'     => $isownitem,

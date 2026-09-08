@@ -1423,16 +1423,16 @@ return [
         'Shared with all users',
     ],
     'sharedwith_shareexternal' => [
-        'Geteilte externe Sammelmappen',
-        'Shared external',
+        'Externer Link',
+        'External link',
     ],
     'sharedexternalcategory' => [
         'Extern geteilt',
         'Shared externally',
     ],
     'sharedwith_group' => [
-        'Mit meiner Gruppe geteilt',
-        'Shared with my group',
+        'Mit ausgewählten Gruppen geteilt',
+        'Shared with selected groups',
     ],
     'sharedwith_group_cnt' => [
         'Mit {$a} Gruppe geteilt',

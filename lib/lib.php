@@ -1498,6 +1498,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
         if ($item->intro) {
             $item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                 'block_exaport', 'item_content', 'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
+            // TODO: check if the previous solution was needed for the apps
             // Do NOT use ['noclean' => true] here: it disables Moodle's HTML Purifier entirely for
             // the whole string, so any stored <script>/onerror=/... would be rendered as-is. The
             // intro is user-authored rich text (only ever meant to allow safe formatting tags), so

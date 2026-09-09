@@ -500,8 +500,8 @@ define(['jquery',
       tempString += '</div></div>';
       $item.html(tempString);
       if (!item_data.competences) {
-        // User html may be malformed, so savely inject it here.
-        $item.find('.exaport-item-intro').html(item_data.intro);
+        // Insert the already-sanitized rich HTML separately from the generated wrapper.
+        $item.find('.exaport-item-intro').html(item_data.intro || '');
       }
     } else if (data.type == 'personal_information') {
       var tempString = '<div id="id_holder" style="display:none;"></div>';

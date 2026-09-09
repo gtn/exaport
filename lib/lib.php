@@ -37,6 +37,31 @@ require_once(__DIR__ . '/common.php');
 
 require_once(__DIR__ . '/lib.exaport.php');
 require_once(__DIR__ . '/sharelib.php');
+
+/**
+ * Safely escapes a piece of untrusted text (e.g. a competence/descriptor title) for use as the
+ * argument of the inline `onmouseover="Tip('...')"` handler used by javascript/wz_tooltip.js.
+ *
+ * That value passes through TWO separate HTML-entity-decoding steps before it is ever displayed:
+ *  1. The browser decodes entities once when it parses the "onmouseover" HTML attribute itself,
+ *     before the JS engine ever sees the Tip('...') call.
+ *  2. wz_tooltip.js's Tip() function assigns the string it receives directly into `.innerHTML`,
+ *     which is a second HTML-parsing/decoding step.
+ *
+ * A single htmlspecialchars() pass is therefore not enough: it gets fully undone by step 1, so a
+ * title containing e.g. "<img onerror=...>" or a literal quote would reach Tip() completely
+ * unescaped again and either break out of the single-quoted JS string (a quote) or be rendered as
+ * real markup by the innerHTML assignment (angle brackets). Encoding twice means one layer of
+ * entities survives step 1 (staying inert to the JS/HTML parser) and is only ever "used up" by the
+ * final, harmless step 2, which renders the original characters back as plain visible text.
+ *
+ * @param string $text
+ * @return string
+ */
+function block_exaport_escape_for_inline_tooltip($text) {
+    return s(s((string)$text));
+}
+
 /*** FILE FUNCTIONS **********************************************************************/
 
 /**
@@ -740,7 +765,7 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences =
     $topics = $competences["topics"];
 
     $content = "<table class='compstable flexible boxaligncenter generaltable'>
-                <tr><td><h4 class='m-0'>" . $item->name . "</h4></td></tr>";
+                <tr><td><h4 class='m-0'>" . s($item->name) . "</h4></td></tr>";
 
     if ($role == "teacher") {
         $disteacher = " ";
@@ -759,7 +784,7 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences =
             $trclass = "even";
             $bgcolor = ' style="background-color:#ffffff" ';
         }
-        $content .= '<tr ' . $bgcolor . '><td>' . $descriptor->title . '</td></tr>';
+        $content .= '<tr ' . $bgcolor . '><td>' . s($descriptor->title) . '</td></tr>';
         /* <td>
         <input'.$dis_teacher.'type="checkbox" name="data[' . $descriptor->id . ']" checked="###checked' . $descriptor->id . '###" />
         </td>
@@ -774,7 +799,7 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences =
             $trclass = "even";
             $bgcolor = ' style="background-color:#ffffff" ';
         }
-        $content .= '<tr ' . $bgcolor . '><td>' . $topic->title . '</td></tr>';
+        $content .= '<tr ' . $bgcolor . '><td>' . s($topic->title) . '</td></tr>';
         /* <td>
         <input'.$dis_teacher.'type="checkbox" name="data[' . $descriptor->id . ']" checked="###checked' . $descriptor->id . '###" />
         </td>
@@ -890,7 +915,7 @@ function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) 
                 $content .= '<input type="checkbox" name="desc' . ($forresume ? '[]' : '') . '" ' . $checked . ' value="' . $item->id . '" ' .
                     (!$allowedit ? 'disabled="disabled"' : '') . '>';
             }
-            $content .= $item->title .
+            $content .= s($item->title) .
                 ($item->achieved ? ' ' . g::$OUTPUT->pix_icon("i/badge",
                         block_exaport_get_string('selected_competencies')) : '') .
                 $printtree($item->get_subs(), $level + 1) .
@@ -1473,11 +1498,11 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
         if ($item->intro) {
             $item->intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                 'block_exaport', 'item_content', 'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
-            if (strpos($item->intro, '<iframe') !== false) {
-                $item->intro = format_text($item->intro, FORMAT_HTML, ['noclean' => true]);
-            } else {
-                $item->intro = format_text($item->intro, FORMAT_HTML);
-            }
+            // Do NOT use ['noclean' => true] here: it disables Moodle's HTML Purifier entirely for
+            // the whole string, so any stored <script>/onerror=/... would be rendered as-is. The
+            // intro is user-authored rich text (only ever meant to allow safe formatting tags), so
+            // it must always go through the normal cleaning pass, regardless of what it contains.
+            $item->intro = format_text($item->intro, FORMAT_HTML);
         }
 
         // Get competences of the item.
@@ -1495,13 +1520,18 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
                         $strictness = IGNORE_MISSING);
 
                     if ($competencesdb != null) {
-                        $competences .= $competencesdb->title . '<br>';
+                        // Titles are user/import supplied text, not trusted HTML. This value is later
+                        // JSON-encoded and rendered client-side (amd/src/views.js) into an inline
+                        // onmouseover="Tip('...')" attribute via jQuery's .html(), whose value
+                        // wz_tooltip.js then assigns directly to .innerHTML — see
+                        // block_exaport_escape_for_inline_tooltip() for why each title must be
+                        // escaped twice. Escape only the title itself, not the '<br>' separator,
+                        // which must stay real markup so it still renders as a line break.
+                        $competences .= block_exaport_escape_for_inline_tooltip($competencesdb->title) . '<br>';
                     }
                 }
                 $competences = str_replace("\r", "", $competences);
                 $competences = str_replace("\n", "", $competences);
-                $competences = str_replace("\"", "&quot;", $competences);
-                $competences = str_replace("'", "&prime;", $competences);
 
                 $item->competences = $competences;
             }

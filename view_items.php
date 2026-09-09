@@ -1215,17 +1215,19 @@ function block_exaport_get_item_comp_icon($item) {
     }
 
     // If item is assoziated with competences display them.
+    // Titles are user/import supplied text, not trusted HTML. They end up inside the inline
+    // onmouseover="Tip('...')" attribute below, whose value wz_tooltip.js later assigns directly to
+    // .innerHTML, so each title must be escaped for both of those layers (see
+    // block_exaport_escape_for_inline_tooltip() docblock for why a single escape pass is not enough).
     $competences = "";
     foreach ($comps["descriptors"] as $comp) {
-        $competences .= $comp->title . '<br>';
+        $competences .= block_exaport_escape_for_inline_tooltip($comp->title) . '<br>';
     }
     foreach ($comps["topics"] as $comp) {
-        $competences .= $comp->title . '<br>';
+        $competences .= block_exaport_escape_for_inline_tooltip($comp->title) . '<br>';
     }
     $competences = str_replace("\r", "", $competences);
     $competences = str_replace("\n", "", $competences);
-    $competences = str_replace("\"", "&quot;", $competences);
-    $competences = str_replace("'", "&prime;", $competences);
     $competences = trim($competences);
 
     if (!$competences) {

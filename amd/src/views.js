@@ -27,6 +27,21 @@ define(['jquery',
     return blockType ? $E.translate('configureblock_' + blockType) : '';
   }
 
+  // Server-side sanitization (PARAM_TEXT) already strips markup from plain-text item fields
+  // such as name/category/comments, but this HTML-escapes them again here as defense-in-depth
+  // before they are concatenated into an HTML string and inserted via $item.html().
+  function escapeHtml(text) {
+    if (text === undefined || text === null) {
+      return text;
+    }
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   var exaportViewEditCreate = function () {
 
     var viewEdit = {
@@ -474,11 +489,11 @@ define(['jquery',
       var tempString = '';
       tempString += '<div id="id_holder" style="display:none;"></div> ';
       tempString += '<div class="item_info" style="overflow: hidden;">';
-      tempString += '<div class="header">' + $E.translate('viewitem') + ': ' + item_data.name + '</div>';
+      tempString += '<div class="header">' + $E.translate('viewitem') + ': ' + escapeHtml(item_data.name) + '</div>';
       tempString += itemPictures;
       tempString += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(item_data.type) + '<br />';
-      tempString += $E.translate('category') + ': ' + item_data.category + '<br />' + ilink;
-      tempString += $E.translate('comments') + ': ' + item_data.comments + '<div class="exaport-item-intro"></div>';
+      tempString += $E.translate('category') + ': ' + escapeHtml(item_data.category) + '<br />' + ilink;
+      tempString += $E.translate('comments') + ': ' + escapeHtml(item_data.comments) + '<div class="exaport-item-intro"></div>';
       if (item_data.competences) {
         tempString += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
       }

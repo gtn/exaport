@@ -407,14 +407,18 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         if (is_array($competencies)) {
                             $competenciesoutput = "";
                             foreach ($competencies as $competence) {
-                                $competenciesoutput .= $competence->title . '<br/>';
+                                // Titles are user/import supplied text, not trusted HTML. They end up
+                                // inside the inline onmouseover="Tip('...')" attribute below, whose
+                                // value wz_tooltip.js assigns directly to .innerHTML, so each title
+                                // must be escaped twice — see
+                                // block_exaport_escape_for_inline_tooltip() for the full explanation.
+                                // The '<br/>' separator itself must stay real markup (unescaped) so
+                                // it still renders as a line break.
+                                $competenciesoutput .= block_exaport_escape_for_inline_tooltip($competence->title) . '<br/>';
                             }
 
-                            // TODO: still needed?
                             $competenciesoutput = str_replace("\r", "", $competenciesoutput);
                             $competenciesoutput = str_replace("\n", "", $competenciesoutput);
-                            $competenciesoutput = str_replace("\"", "&quot;", $competenciesoutput);
-                            $competenciesoutput = str_replace("'", "&prime;", $competenciesoutput);
 
                             $item->competences = $competenciesoutput;
                         }
@@ -499,7 +503,11 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $blockForPdf .= $fileparams;
                     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
                         'block_exaport', 'item_content', 'view/' . $access . '/itemid/' . $item->id);
-                    $intro = format_text($intro, FORMAT_HTML, ['noclean' => true]);
+                    // Do NOT use ['noclean' => true] here: it disables Moodle's HTML Purifier
+                    // entirely for the whole string, so any stored <script>/onerror=/<iframe>/...
+                    // would be rendered as-is on this (potentially public/shared) view. Always run
+                    // the normal cleaning pass.
+                    $intro = format_text($intro, FORMAT_HTML);
                     $general_content .= '<div class="view-item-text">';
                     $blockForPdf .= '<div class="view-item-text">';
                     if ($item->url && $item->url != "false") {

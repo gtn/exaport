@@ -21,14 +21,13 @@ require_once(__DIR__ . '/inc.php');
  * Sends a static thumbnail fallback file and exits.
  *
  * @param string $relativepath
- * @param string $mimetype
  * @return void
  */
-function block_exaport_send_thumb_static_fallback(string $relativepath, string $mimetype): void {
+function block_exaport_send_thumb_static_fallback(string $relativepath): void {
     global $CFG;
 
-    header('Content-Type: ' . $mimetype);
-    readfile($CFG->dirroot . '/blocks/exaport/' . ltrim($relativepath, '/'));
+    $filepath = $CFG->dirroot . '/blocks/exaport/' . ltrim($relativepath, '/');
+    send_file($filepath, basename($filepath), DAYSECS, $CFG->filteruploadedfiles, false, true);
     exit;
 }
 
@@ -69,15 +68,15 @@ if ($access == '') {
     $viewownerid = $view->userid;
     $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
     if (empty($item)) {
-        throw new moodle_exception('item not found');
+        throw new moodle_exception('filenotfound', 'block_exaport');
     }
     $sharable = block_exaport_can_user_access_shared_item($viewownerid, $itemid);
     if ($viewownerid != $item->userid && !$sharable) {
-        throw new moodle_exception('item not found');
+        throw new moodle_exception('filenotfound', 'block_exaport');
     }
 }
 if (empty($item)) {
-    throw new moodle_exception('item not found');
+    throw new moodle_exception('filenotfound', 'block_exaport');
 }
 
 // Custom Icon file.
@@ -118,11 +117,11 @@ switch ($item->type) {
         break;
 
     case "link":
-        block_exaport_send_thumb_static_fallback('pix/link_tile.svg', 'image/svg+xml');
+        block_exaport_send_thumb_static_fallback('pix/link_tile.svg');
         break;
 
     case "note":
-        block_exaport_send_thumb_static_fallback('pix/note_tile.svg', 'image/svg+xml');
+        block_exaport_send_thumb_static_fallback('pix/note_tile.svg');
         break;
     default:
         die('wrong type');

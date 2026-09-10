@@ -99,6 +99,13 @@ class item_card extends card {
         $cattype      = ($type == 'shared') ? '&cattype=shared' : '';
         $isownitem    = ($item->userid == $USER->id);
         $commentcount = (int)($item->comments ?? 0);
+        $thumbnailaccess = '';
+
+        if (!empty($item->thumbnail_access)) {
+            $thumbnailaccess = $item->thumbnail_access;
+        } else if ($type !== 'extern_category') {
+            $thumbnailaccess = 'portfolio/id/' . $item->userid;
+        }
 
         $iconTypeProps = block_exaport_item_icon_type_options($item->type);
         $typelabel     = get_string($item->type, 'block_exaport');
@@ -149,7 +156,11 @@ class item_card extends card {
             'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
             'commentlabel'  => $commentlabel,
             'sharedicon'    => block_exaport_render_share_icon($share),
-        ] + ($this->showcategories ? [
+        ] + ($thumbnailaccess ? \block_exaport_get_item_thumbnail_context($item, $thumbnailaccess) : [
+            'hasthumbnail' => false,
+            'thumbnailurl' => '',
+            'thumbnailalt' => '',
+        ]) + ($this->showcategories ? [
             'categorybadges' => block_exaport_render_item_category_badges($this->item),
         ] : []);
     }

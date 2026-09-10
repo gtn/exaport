@@ -97,7 +97,7 @@ switch ($item->type) {
                 send_stored_file($file, 1);
                 exit;
             }
-            if ($thumbnailfile = block_exaport_get_item_thumbnail_file($item)) {
+            if (!$file && ($thumbnailfile = block_exaport_get_item_thumbnail_file($item))) {
                 send_stored_file($thumbnailfile, 1);
                 exit;
             }

@@ -124,5 +124,5 @@ switch ($item->type) {
         block_exaport_send_thumb_static_fallback('pix/note_tile.svg');
         break;
     default:
-        die('wrong type');
+        throw new moodle_exception('filenotfound', 'block_exaport');
 }

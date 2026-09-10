@@ -22,7 +22,7 @@ namespace block_exaport\common {
     defined('MOODLE_INTERNAL') || die();
 
     class url extends \moodle_url {
-        public static function create($url, array $params = null, $anchor = null) {
+        public static function create($url, ?array $params = null, $anchor = null) {
             return new static($url, $params, $anchor);
         }
 
@@ -31,7 +31,7 @@ namespace block_exaport\common {
          * @param array $overrideparams new attributes for object
          * @return self
          */
-        public function copy(array $overrideparams = null) {
+        public function copy(?array $overrideparams = null) {
             $object = new static($this);
             if ($overrideparams) {
                 $object->params($overrideparams);
@@ -40,7 +40,7 @@ namespace block_exaport\common {
             return $object;
         }
 
-        protected function merge_overrideparams(array $overrideparams = null) {
+        protected function merge_overrideparams(?array $overrideparams = null) {
             $params = parent::merge_overrideparams($overrideparams);
 
             $overrideparams = (array)$overrideparams;
@@ -53,7 +53,7 @@ namespace block_exaport\common {
             return $params;
         }
 
-        public function params(array $params = null) {
+        public function params(?array $params = null) {
             parent::params($params);
 
             $params = (array)$params;

@@ -1187,8 +1187,6 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
         $newuserpreferences = $preferences;
     } else if (is_array($preferences)) {
         $newuserpreferences = (object)$preferences;
-    } else {
-        echo 'error #fjklfdsjkl';
     }
 
     if ($olduserpreferences = block_exaport_get_user_preferences_record($userid)) {

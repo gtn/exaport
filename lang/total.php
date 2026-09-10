@@ -1371,8 +1371,8 @@ return [
         'In case you shared one or more of your categories, other users are able to add items into your categories. With this checkbox you can decide if you want to see them, or not.',
     ],
     'layout_mode_folder' => [
-        'Ordner',
-        'Folder',
+        'Hierarchisch',
+        'Hierarchical',
     ],
     'layout_mode_flat' => [
         'Flach',

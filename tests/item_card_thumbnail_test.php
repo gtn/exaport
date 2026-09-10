@@ -173,6 +173,22 @@ final class item_card_thumbnail_test extends \advanced_testcase {
         );
     }
 
+    public function test_external_category_custom_icon_uses_item_iconfile_path(): void {
+        $item = $this->create_item();
+        $item->thumbnail_access = 'category/hash/' . $this->owner->id . '-abcdef12';
+        $item->extern_item_url = 'https://example.invalid/shared-item';
+        $this->add_item_file($item, 'item_file', 'photo.png', $this->get_png_content(), 'image/png');
+        $this->add_item_file($item, 'item_iconfile', 'custom.png', $this->get_png_content(), 'image/png');
+
+        $data = $this->export_item_card($item, 'extern_category');
+
+        $this->assertTrue($data['hasthumbnail']);
+        $this->assertStringContainsString(
+            '/item_iconfile/category/hash/' . $this->owner->id . '-abcdef12/itemid/' . $item->id . '/custom.png',
+            $data['thumbnailurl']
+        );
+    }
+
     public function test_missing_file_item_exports_no_thumbnail(): void {
         $item = $this->create_item();
 

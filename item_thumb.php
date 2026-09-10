@@ -68,15 +68,15 @@ if ($access == '') {
     $viewownerid = $view->userid;
     $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
     if (empty($item)) {
-        throw new moodle_exception('filenotfound', 'block_exaport');
+        throw new moodle_exception('filenotfound', 'error');
     }
     $sharable = block_exaport_can_user_access_shared_item($viewownerid, $itemid);
     if ($viewownerid != $item->userid && !$sharable) {
-        throw new moodle_exception('filenotfound', 'block_exaport');
+        throw new moodle_exception('filenotfound', 'error');
     }
 }
 if (empty($item)) {
-    throw new moodle_exception('filenotfound', 'block_exaport');
+    throw new moodle_exception('filenotfound', 'error');
 }
 
 // Custom Icon file.
@@ -124,5 +124,5 @@ switch ($item->type) {
         block_exaport_send_thumb_static_fallback('pix/note_tile.svg');
         break;
     default:
-        throw new moodle_exception('filenotfound', 'block_exaport');
+        throw new moodle_exception('filenotfound', 'error');
 }

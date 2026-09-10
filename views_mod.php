@@ -563,6 +563,7 @@ if ($editform->is_cancelled()) {
                     $view->id, array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
                 $ret->blocks = json_encode(block_exaport_get_view_blocks($view));
 
+                header('Content-Type: application/json');
                 echo json_encode($ret);
                 exit;
             }

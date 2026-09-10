@@ -76,7 +76,8 @@
                          src="{{thumbnailurl}}"
                          alt="{{thumbnailalt}}"
                          loading="lazy"
-                         onerror="this.closest('.eportfolio-card-thumbnail').classList.add('is-fallback'); this.remove();">
+                         onload="this.closest('.eportfolio-card-thumbnail').classList.add('is-loaded');"
+                         onerror="this.remove();">
                 </div>
                 {{/hasthumbnail}}
                 <div class="card-body-main">

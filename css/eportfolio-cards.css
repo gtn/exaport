@@ -194,16 +194,16 @@
     object-fit: cover;
 }
 #exaport .card-eportfolio .eportfolio-card-thumbnail-fallback {
-    display: none;
-    width: 100%;
-    height: 100%;
+    display: flex;
+    position: absolute;
+    inset: 0;
     align-items: center;
     justify-content: center;
     color: rgba(0, 0, 0, .65);
     background: linear-gradient(135deg, #f8f9fa 0%, #eceff1 100%);
 }
-#exaport .card-eportfolio .eportfolio-card-thumbnail.is-fallback .eportfolio-card-thumbnail-fallback {
-    display: flex;
+#exaport .card-eportfolio .eportfolio-card-thumbnail.is-loaded .eportfolio-card-thumbnail-fallback {
+    display: none;
 }
 /* Chips zone: fixed single-row height, overflowing chips clipped with a right-edge fade */
 #exaport .card-eportfolio .card-body-chips {

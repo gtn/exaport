@@ -536,6 +536,7 @@ if ($isexternalreadonlymode) {
     foreach ($items as $item) {
         // Read-only external item links must keep the category access token (not portfolio/id/...).
         $item->extern_item_url = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=category/' . $canonicalaccess . '&itemid=' . $item->id;
+        $item->thumbnail_access = 'category/' . $canonicalaccess;
     }
     foreach ($views as $view) {
         // Read-only external view links: use the category hash access token so the ACL gate can resolve it.

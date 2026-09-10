@@ -22,6 +22,9 @@
         deleteicon      - Pre-rendered HTML for the delete icon
         deletelabel     - Localised "Delete" label
         introtext       - Short plain-text intro excerpt (empty string when absent)
+        hasthumbnail    - Boolean: item has a thumbnail preview
+        thumbnailurl    - Access-controlled thumbnail URL
+        thumbnailalt    - Alt text for the thumbnail image
         dateformatted   - Human-readable date string for the card footer
         compbadge       - Pre-rendered HTML for the competence badge (may be empty)
         hascomments     - Boolean: item has at least one comment
@@ -62,14 +65,32 @@
         </div>
         <div class="card-body position-relative">
             <a href="{{url}}" class="stretched-link" aria-hidden="true" tabindex="-1"></a>
-            <div class="card-body-text">
-                {{#introtext}}<p class="card-text">{{introtext}}</p>{{/introtext}}
+            <div class="card-body-content">
+                {{#hasthumbnail}}
+                <div class="eportfolio-card-thumbnail">
+                    <span class="eportfolio-card-thumbnail-fallback">
+                        <span aria-hidden="true">{{{typeicon}}}</span>
+                        <span class="visually-hidden">{{thumbnailalt}}</span>
+                    </span>
+                    <img class="eportfolio-card-thumbnail-image"
+                         src="{{thumbnailurl}}"
+                         alt="{{thumbnailalt}}"
+                         loading="lazy"
+                         onload="this.closest('.eportfolio-card-thumbnail').classList.add('is-loaded');"
+                         onerror="this.remove();">
+                </div>
+                {{/hasthumbnail}}
+                <div class="card-body-main">
+                    <div class="card-body-text">
+                        {{#introtext}}<p class="card-text">{{introtext}}</p>{{/introtext}}
+                    </div>
+                    {{#categorybadges}}
+                    <div class="card-body-chips">
+                        {{{categorybadges}}}
+                    </div>
+                    {{/categorybadges}}
+                </div>
             </div>
-            {{#categorybadges}}
-            <div class="card-body-chips">
-                {{{categorybadges}}}
-            </div>
-            {{/categorybadges}}
         </div>
         <div class="card-footer d-flex justify-content-between align-items-center">
             <span class="eportoflio-date">{{dateformatted}}</span>

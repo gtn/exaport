@@ -17,6 +17,20 @@
 
 require_once(__DIR__ . '/inc.php');
 
+/**
+ * Sends a static thumbnail fallback file and exits.
+ *
+ * @param string $relativepath
+ * @return void
+ */
+function block_exaport_send_thumb_static_fallback(string $relativepath): void {
+    global $CFG;
+
+    $filepath = $CFG->dirroot . '/blocks/exaport/' . ltrim($relativepath, '/');
+    send_file($filepath, basename($filepath), DAYSECS, $CFG->filteruploadedfiles, false, true);
+    exit;
+}
+
 $itemid = optional_param('item_id', -1, PARAM_INT);
 $access = optional_param('access', '', PARAM_TEXT);
 // sometimes for artifacts with multiple images
@@ -51,62 +65,47 @@ if ($access == '') {
     if (!$view = block_exaport_get_view_from_access($access, $is_for_pdf, $pdfuserid)) {
         die("view not found");
     }
-    $viewid = $view->id;
     $viewownerid = $view->userid;
     $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
+    if (empty($item)) {
+        throw new moodle_exception('filenotfound', 'error');
+    }
     $sharable = block_exaport_can_user_access_shared_item($viewownerid, $itemid);
     if ($viewownerid != $item->userid && !$sharable) {
-        throw new moodle_exception('item not found');
+        throw new moodle_exception('filenotfound', 'error');
     }
 }
 if (empty($item)) {
-    throw new moodle_exception('item not found');
+    throw new moodle_exception('filenotfound', 'error');
 }
 
 // Custom Icon file.
-if ($iconfile = block_exaport_get_files($item, 'item_iconfile', true)) {
-    if (is_array($iconfile)) { // from new moodle version?
-        $iconfile = reset($iconfile);
-    }
+if (($iconfile = block_exaport_get_single_file($item, 'item_iconfile')) && $iconfile->is_valid_image()) {
     send_stored_file($iconfile);
     exit;
 }
 
 switch ($item->type) {
     case "file":
-        // Thumbnail of file.
-        $file = block_exaport_get_item_files($item);
-        // Serve file.
-        if ($file && ($imageindex || $imageindex === 0)) {
-            $filevalues = array_values($file);
-            $single_file = $filevalues[$imageindex];
-            if ($single_file && $single_file->is_valid_image()) {
-                send_stored_file($single_file, 1);
+        $files = array_values(block_exaport_get_item_files_array($item));
+        $file = false;
+
+        if ($files && ($imageindex || $imageindex === 0)) {
+            $file = $files[$imageindex] ?? false;
+            if ($file && $file->is_valid_image()) {
+                send_stored_file($file, 1);
                 exit;
             }
-            $file = $single_file;
-        } else if ($file) {
-            if (is_array($file)) {
-                if (count($file) > 1) {
-                    $mixedimage = block_exaport_mix_images($file);
-                    // $file->is_valid_image()
-                    // send_stored_file($file, 1);  // !!!!!!!!!!!!!!! may be make composite of images?
-                    echo 'mixed image';
-                    exit;
-                } else {
-                    $single_file = reset($file);
-                    if ($single_file->is_valid_image()) {
-                        send_stored_file($single_file, 1);
-                        exit;
-                    }
-                    $file = $single_file;
-                }
-            } else {
-                if ($file->is_valid_image()) {
-                    send_stored_file($file, 1);
-                    exit;
-                }
+            if (!$file) {
+                $file = reset($files);
             }
+        } else {
+            $file = block_exaport_get_item_thumbnail_file($item);
+            if ($file) {
+                send_stored_file($file, 1);
+                exit;
+            }
+            $file = reset($files);
         }
 
         $output = block_exaport_get_renderer();
@@ -118,71 +117,12 @@ switch ($item->type) {
         break;
 
     case "link":
-        $url = $item->url;
-        if ($purl = parse_url($url)) {
-            if (!isset($purl["scheme"]) || strpos($purl["scheme"], 'http') === false) {
-                $url = 'http://' . $url;
-            }
-        }
-
-        $str = @file_get_contents($url);
-
-        if ($str && preg_match('/<img\s.*src=[\'"]([^\'"]+)[\'"]/im', $str, $matches)) {
-
-            $firstimg = $matches[1];
-            if (strpos($firstimg, 'http') === false) {
-                if ($firstimg[0] == '/') {
-                    /* google.com + /imgage.png
-                       google.com/sub + /imgage.png. */
-                    $firstimg = preg_replace('!([^:/])/.*$!m', '$1', $url) . $firstimg;
-                } else {
-                    /* google.com + imgage.png. */
-                    $firstimg = $url . "/" . $firstimg;
-                }
-            }
-
-            // img must not be a local file, only url
-            if ($purl = parse_url($firstimg)) {
-                if (!isset($purl["scheme"]) || strpos($purl["scheme"], 'http') === false) {
-                    $firstimg = 'http://' . $firstimg;
-                }
-            }
-
-            $imgstr = @file_get_contents($firstimg);
-
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
-            $type = $finfo->buffer($imgstr);
-
-            // we need to return only PICTURES
-            if (strpos($type, 'image/') === false) {
-                header('Content-Type: image/svg+xml');
-                readfile('pix/link_tile.svg');
-                exit;
-                break;
-            }
-
-            if (strlen($imgstr) < 50) {
-                header('Content-Type: image/svg+xml');
-                readfile('pix/link_tile.svg');
-                exit;
-                break;
-            }
-            header("Content-type: " . $type);
-
-            echo $imgstr;
-
-            exit;
-        }
-        header('Content-Type: image/svg+xml');
-        readfile('pix/link_tile.svg');
-        exit;
+        block_exaport_send_thumb_static_fallback('pix/link_tile.svg');
         break;
 
     case "note":
-        header('Content-Type: image/svg+xml');
-        readfile('pix/note_tile.svg');
-        exit;
+        block_exaport_send_thumb_static_fallback('pix/note_tile.svg');
         break;
     default:
-        die('wrong type');
+        throw new moodle_exception('filenotfound', 'error');
 }

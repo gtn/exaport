@@ -150,6 +150,19 @@
     flex: 1 1 0;
     min-height: 0;
 }
+#exaport .card-eportfolio .card-body-content {
+    display: flex;
+    gap: .75rem;
+    flex: 1 1 0;
+    min-height: 0;
+}
+#exaport .card-eportfolio .card-body-main {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
 /* Text zone: grows to fill remaining space, text clamped to 2 lines */
 #exaport .card-eportfolio .card-body-text {
     flex: 1 1 0;
@@ -163,6 +176,35 @@
     overflow: hidden;
     margin-bottom: 0;
 }
+#exaport .card-eportfolio .eportfolio-card-thumbnail {
+    position: relative;
+    flex: 0 0 5rem;
+    width: 5rem;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid var(--bs-border-color, rgba(0, 0, 0, .125));
+    border-radius: .5rem;
+    background: #f5f6f7;
+    align-self: flex-start;
+}
+#exaport .card-eportfolio .eportfolio-card-thumbnail-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+#exaport .card-eportfolio .eportfolio-card-thumbnail-fallback {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0, 0, 0, .65);
+    background: linear-gradient(135deg, #f8f9fa 0%, #eceff1 100%);
+}
+#exaport .card-eportfolio .eportfolio-card-thumbnail.is-loaded .eportfolio-card-thumbnail-fallback {
+    display: none;
+}
 /* Chips zone: fixed single-row height, overflowing chips clipped with a right-edge fade */
 #exaport .card-eportfolio .card-body-chips {
     flex: 0 0 1.8rem;
@@ -170,6 +212,12 @@
     white-space: nowrap;
     -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
     mask-image: linear-gradient(to right, black 70%, transparent 100%);
+}
+@media (max-width: 575.98px) {
+    #exaport .card-eportfolio .eportfolio-card-thumbnail {
+        flex-basis: 4rem;
+        width: 4rem;
+    }
 }
 /* View (collection) card — stacked-paper effect via explicit sibling divs */
 #exaport .card-view-stack {

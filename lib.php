@@ -60,6 +60,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 
     switch ($filearea) {
         case 'item_file':
+        case 'item_iconfile':
             $filename = array_pop($args);
             $id = array_pop($args);
             if (array_pop($args) != 'itemid') {

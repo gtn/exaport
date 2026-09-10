@@ -98,6 +98,93 @@ function block_exaport_get_item_files_array($item) {
     return block_exaport_get_files($item, 'item_file'); // Multiple files
 }
 
+/**
+ * Returns the preferred thumbnail source file for an item.
+ *
+ * Custom uploaded item icons keep precedence. For file items without a custom
+ * icon, the first valid stored image file is used.
+ *
+ * @param \stdClass $item
+ * @return \stored_file|false
+ */
+function block_exaport_get_item_thumbnail_file($item) {
+    $iconfile = block_exaport_get_single_file($item, 'item_iconfile');
+    if ($iconfile && $iconfile->is_valid_image()) {
+        return $iconfile;
+    }
+
+    if (($item->type ?? '') !== 'file') {
+        return false;
+    }
+
+    foreach (block_exaport_get_item_files_array($item) as $file) {
+        if ($file && $file->is_valid_image()) {
+            return $file;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Builds an access-controlled pluginfile URL for an item file or custom icon.
+ *
+ * @param \stored_file $file
+ * @param string $access
+ * @return string
+ */
+function block_exaport_get_item_thumbnail_url(\stored_file $file, string $access): string {
+    $access = trim($access, '/');
+    $filearea = $file->get_filearea() . '/' . $access . '/itemid';
+
+    return moodle_url::make_pluginfile_url(
+        $file->get_contextid(),
+        $file->get_component(),
+        $filearea,
+        $file->get_itemid(),
+        $file->get_filepath(),
+        $file->get_filename(),
+        false,
+        false
+    )->out(false);
+}
+
+/**
+ * Returns thumbnail template context for an item card.
+ *
+ * @param \stdClass $item
+ * @param string $access
+ * @return array
+ */
+function block_exaport_get_item_thumbnail_context($item, string $access = ''): array {
+    if (empty($item->userid)) {
+        return [
+            'hasthumbnail' => false,
+            'thumbnailurl' => '',
+            'thumbnailalt' => '',
+        ];
+    }
+
+    if ($access === '') {
+        $access = 'portfolio/id/' . $item->userid;
+    }
+
+    $file = block_exaport_get_item_thumbnail_file($item);
+    if (!$file) {
+        return [
+            'hasthumbnail' => false,
+            'thumbnailurl' => '',
+            'thumbnailalt' => '',
+        ];
+    }
+
+    return [
+        'hasthumbnail' => true,
+        'thumbnailurl' => block_exaport_get_item_thumbnail_url($file, $access),
+        'thumbnailalt' => format_string($item->name ?? ''),
+    ];
+}
+
 function block_exaport_get_single_file($item, $type) {
     $file = block_exaport_get_files($item, $type);
 

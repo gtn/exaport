@@ -725,7 +725,7 @@ function block_exaport_get_plural_item_type($type) {
  * @param $sort the sorting in a format like "category.desc"
  * @return Array(sortcolumn, asc|desc)
  */
-function block_exaport_parse_sort($sort, array $allowedsorts, array $defaultsort = null) {
+function block_exaport_parse_sort($sort, array $allowedsorts, ?array $defaultsort = null) {
     if (!is_array($sort)) {
         // Accept both dot and hyphen as separator (e.g. "date.desc" or "date-desc").
         $sort = preg_split('/[.\-]/', $sort, 2);
@@ -950,7 +950,14 @@ function block_exaport_check_item_competences($item) {
 }
 
 function block_exaport_get_active_comps_for_item($item) {
-    return \block_exacomp\api::get_active_comps_for_exaport_item($item->id, $item->userid, @$item->courseid);
+    $competences = \block_exacomp\api::get_active_comps_for_exaport_item($item->id, $item->userid, @$item->courseid);
+    if (!is_array($competences)) {
+        return ['descriptors' => [], 'topics' => []];
+    }
+
+    $competences['descriptors'] = $competences['descriptors'] ?? [];
+    $competences['topics'] = $competences['topics'] ?? [];
+    return $competences;
 }
 
 function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) {

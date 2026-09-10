@@ -1060,13 +1060,29 @@ define(['jquery',
       url: document.location.href,
       type: 'POST',
       data: data,
+      dataType: 'text',
       success: function (res) {
         var scrollTop = $(window).scrollTop();
-        var data = JSON.parse(res);
-        $('form :input[name=blocks]').val(data.blocks);
+        var response;
+        try {
+          response = JSON.parse(res);
+        } catch (error) {
+          console.error('Exabis ePortfolio: invalid response while saving the view.', error, res);
+          return;
+        }
+        if (!response || response.ok !== true || typeof response.blocks !== 'string') {
+          console.error('Exabis ePortfolio: unexpected response while saving the view.', response);
+          return;
+        }
+        $('form :input[name=blocks]').val(response.blocks);
         exaportViewEdit.resetViewContent();
-        hidePreloadinator($('#view-preview'), '');
         $(window).scrollTop(scrollTop);
+      },
+      error: function (xhr, status, error) {
+        console.error('Exabis ePortfolio: failed to save the view.', status, error, xhr.responseText);
+      },
+      complete: function () {
+        hidePreloadinator($('#view-preview'), '');
       }
     });
   }

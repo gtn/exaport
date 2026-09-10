@@ -103,7 +103,7 @@ class item_card extends card {
 
         if (!empty($item->thumbnail_access)) {
             $thumbnailaccess = $item->thumbnail_access;
-        } else if ($type !== 'extern_category') {
+        } else {
             $thumbnailaccess = 'portfolio/id/' . $item->userid;
         }
 
@@ -156,11 +156,7 @@ class item_card extends card {
             'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
             'commentlabel'  => $commentlabel,
             'sharedicon'    => block_exaport_render_share_icon($share),
-        ] + ($thumbnailaccess ? \block_exaport_get_item_thumbnail_context($item, $thumbnailaccess) : [
-            'hasthumbnail' => false,
-            'thumbnailurl' => '',
-            'thumbnailalt' => '',
-        ]) + ($this->showcategories ? [
+        ] + \block_exaport_get_item_thumbnail_context($item, $thumbnailaccess) + ($this->showcategories ? [
             'categorybadges' => block_exaport_render_item_category_badges($this->item),
         ] : []);
     }

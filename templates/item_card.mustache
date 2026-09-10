@@ -67,11 +67,14 @@
             <a href="{{url}}" class="stretched-link" aria-hidden="true" tabindex="-1"></a>
             <div class="card-body-content">
                 {{#hasthumbnail}}
-                <div class="eportfolio-card-thumbnail" role="img" aria-label="{{thumbnailalt}}">
-                    <span class="eportfolio-card-thumbnail-fallback"><span aria-hidden="true">{{{typeicon}}}</span></span>
+                <div class="eportfolio-card-thumbnail">
+                    <span class="eportfolio-card-thumbnail-fallback">
+                        <span aria-hidden="true">{{{typeicon}}}</span>
+                        <span class="visually-hidden">{{thumbnailalt}}</span>
+                    </span>
                     <img class="eportfolio-card-thumbnail-image"
                          src="{{thumbnailurl}}"
-                         alt=""
+                         alt="{{thumbnailalt}}"
                          loading="lazy"
                          onerror="this.closest('.eportfolio-card-thumbnail').classList.add('is-fallback'); this.remove();">
                 </div>

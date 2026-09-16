@@ -340,6 +340,7 @@ $string['item'] = 'Page';
 $string['itemblockemptycontent'] = 'This content block does not contain any text yet.';
 $string['itemblockaddheading'] = 'Add {$a} block';
 $string['itemblockaddtype'] = 'Add {$a}';
+$string['itemblockactions'] = 'Actions for {$a}';
 $string['itemblockcontent'] = 'Block content';
 $string['itemblockdeleteaction'] = 'Delete block: {$a}';
 $string['itemblockdeleteconfirm'] = 'Do you really want to delete this {$a->type} block?';

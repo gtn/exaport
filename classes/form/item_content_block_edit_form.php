@@ -50,9 +50,6 @@ class item_content_block_edit_form extends \block_exaport_moodleform {
         $mform->addElement('hidden', 'type');
         $mform->setType('type', PARAM_ALPHA);
 
-        $mform->addElement('hidden', 'access');
-        $mform->setType('access', PARAM_TEXT);
-
         $mform->addElement('hidden', 'backtype');
         $mform->setType('backtype', PARAM_ALPHA);
 

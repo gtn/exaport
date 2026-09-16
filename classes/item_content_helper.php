@@ -190,6 +190,7 @@ class item_content_helper {
 
         if (!empty($options['canmanage'])) {
             $backtype = (string)($options['backtype'] ?? '');
+            $data['actionslabel'] = get_string('itemblockactions', 'block_exaport', $blocklabel);
             $data['candelete'] = true;
             $data['deletelabel'] = get_string('itemblockdeleteaction', 'block_exaport', $blocklabel);
             $data['deleteurl'] = item_content_mutation_helper::get_block_action_url(

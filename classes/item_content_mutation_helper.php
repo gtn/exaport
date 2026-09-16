@@ -15,7 +15,7 @@ namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
-use context_system;
+use context_course;
 use context_user;
 use core_text;
 
@@ -73,20 +73,29 @@ class item_content_mutation_helper {
             'courseid' => (int)$item->courseid,
             'itemid' => (int)$item->id,
             'action' => $action,
-            'access' => $access,
         ];
 
-        if ($type !== '') {
-            $params['type'] = $type;
-        }
-        if ($blockid > 0) {
-            $params['blockid'] = $blockid;
-        }
-        if ($backtype !== '') {
-            $params['backtype'] = $backtype;
+            if ($type !== '') {
+                $params['type'] = $type;
+            }
+            if ($blockid > 0) {
+                $params['blockid'] = $blockid;
+            }
+            if ($backtype !== '') {
+                $params['backtype'] = $backtype;
         }
 
         return new \moodle_url('/blocks/exaport/item_content_block.php', $params);
+    }
+
+    /**
+     * Canonical owner access path for block mutation redirects.
+     *
+     * @param \stdClass $item
+     * @return string
+     */
+    public static function get_manage_access(\stdClass $item): string {
+        return 'portfolio/id/' . (int)$item->userid;
     }
 
     /**
@@ -123,7 +132,7 @@ class item_content_mutation_helper {
         global $DB, $USER;
 
         require_login($courseid);
-        require_capability('block/exaport:use', context_system::instance());
+        require_capability('block/exaport:use', context_course::instance($courseid));
 
         $item = $DB->get_record('block_exaportitem', ['id' => $itemid, 'userid' => $USER->id, 'courseid' => $courseid]);
         if (!$item) {
@@ -175,20 +184,18 @@ class item_content_mutation_helper {
      *
      * @param \stdClass $item
      * @param int $courseid
-     * @param string $access
      * @param string $type
      * @param \stdClass|null $block
      * @param string $backtype
      * @return \stdClass
      */
-    public static function prepare_form_data(\stdClass $item, int $courseid, string $access, string $type,
+    public static function prepare_form_data(\stdClass $item, int $courseid, string $type,
                                              ?\stdClass $block = null, string $backtype = ''): \stdClass {
         $type = self::require_supported_block_type($type);
 
         $data = $block ? clone $block : new \stdClass();
         $data->itemid = (int)$item->id;
         $data->courseid = $courseid;
-        $data->access = $access;
         $data->backtype = $backtype;
         $data->type = $type;
         $data->blockid = $block ? (int)$block->id : 0;

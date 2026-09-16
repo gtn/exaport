@@ -109,6 +109,12 @@ div.item-detail-image img {
     justify-content: flex-end;
 }
 
+#exaport .exaport-item-block__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+
 #exaport .exaport-item-block__content > :last-child {
     margin-bottom: 0;
 }

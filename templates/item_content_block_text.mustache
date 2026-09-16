@@ -1,16 +1,20 @@
 {{#hasheading}}
 <div class="exaport-item-block__header">
     <h5 class="exaport-item-block__title">{{heading}}</h5>
+    <div class="exaport-item-block__actions" role="group" aria-label="{{actionslabel}}">
     {{#canedit}}<a class="btn btn-link btn-sm p-0" href="{{editurl}}" aria-label="{{editlabel}}" title="{{editlabel}}">{{#str}}edit, core{{/str}}</a>{{/canedit}}
     {{#candelete}}
     <a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}" aria-label="{{deletelabel}}" title="{{deletelabel}}">{{#str}}delete, core{{/str}}</a>
     {{/candelete}}
+    </div>
 </div>
 {{/hasheading}}
 {{^hasheading}}
 <div class="exaport-item-block__header exaport-item-block__header--actions-only">
+    <div class="exaport-item-block__actions" role="group" aria-label="{{actionslabel}}">
     {{#canedit}}<a class="btn btn-link btn-sm p-0" href="{{editurl}}" aria-label="{{editlabel}}" title="{{editlabel}}">{{#str}}edit, core{{/str}}</a>{{/canedit}}
     {{#candelete}}<a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}" aria-label="{{deletelabel}}" title="{{deletelabel}}">{{#str}}delete, core{{/str}}</a>{{/candelete}}
+    </div>
 </div>
 {{/hasheading}}
 {{#hascontent}}<div class="exaport-item-block__content">{{{contenthtml}}}</div>{{/hascontent}}

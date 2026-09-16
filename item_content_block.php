@@ -16,13 +16,13 @@ require_once(__DIR__ . '/inc.php');
 $courseid = required_param('courseid', PARAM_INT);
 $itemid = required_param('itemid', PARAM_INT);
 $action = required_param('action', PARAM_ACTION);
-$access = required_param('access', PARAM_TEXT);
 $type = optional_param('type', '', PARAM_ALPHA);
 $blockid = optional_param('blockid', 0, PARAM_INT);
 $backtype = optional_param('backtype', '', PARAM_ALPHA);
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 
 [$item, $block] = \block_exaport\item_content_mutation_helper::require_manage_context($courseid, $itemid, $blockid);
+$access = \block_exaport\item_content_mutation_helper::get_manage_access($item);
 $returnurl = \block_exaport\item_content_mutation_helper::get_return_url($item, $access, $backtype);
 
 if ($action === 'delete') {
@@ -44,7 +44,6 @@ if ($action === 'delete') {
             'itemid' => $itemid,
             'blockid' => $block->id,
             'action' => 'delete',
-            'access' => $access,
             'backtype' => $backtype,
             'confirm' => 1,
             'sesskey' => sesskey(),
@@ -70,7 +69,6 @@ $PAGE->set_url('/blocks/exaport/item_content_block.php', [
     'blockid' => $blockid,
     'action' => $action,
     'type' => $type,
-    'access' => $access,
     'backtype' => $backtype,
 ]);
 
@@ -99,7 +97,7 @@ if ($form->is_cancelled()) {
     redirect($returnurl);
 }
 
-$data = \block_exaport\item_content_mutation_helper::prepare_form_data($item, $courseid, $access, $type, $block, $backtype);
+$data = \block_exaport\item_content_mutation_helper::prepare_form_data($item, $courseid, $type, $block, $backtype);
 block_exaport_print_header('myportfolio');
 $form->set_data($data);
 $form->display();

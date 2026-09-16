@@ -2028,7 +2028,7 @@ class externallib extends external_api {
         // $result_item->isimage = false;
         // $result_item->filename = "";
         // $result_item->mimetype = "";
-        $result_item->description = \block_exaport\item_block::get_export_html($item, 'portfolio/id/' . g::$USER->id);
+        $result_item->description = \block_exaport\item_block::get_export_html($item, 'portfolio/id/' . $item->userid);
         $result_item->files = [];
 
         foreach (\block_exaport\item_block::get_export_files($item) as $file) {

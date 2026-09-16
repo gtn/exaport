@@ -23,6 +23,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class item_block {
+    /** @var bool|null */
+    private static $tableexists = null;
+
     /** @var string */
     public const TYPE_TEXT = 'text';
     /** @var string */
@@ -55,6 +58,15 @@ class item_block {
             return false;
         }
         return $DB->record_exists('block_exaportitemblock', ['itemid' => $itemid]);
+    }
+
+    /**
+     * Reset static caches.
+     *
+     * @return void
+     */
+    public static function reset_cache(): void {
+        self::$tableexists = null;
     }
 
     /**
@@ -873,10 +885,9 @@ class item_block {
      */
     private static function table_exists(): bool {
         global $DB;
-        static $exists = null;
-        if ($exists === null) {
-            $exists = $DB->get_manager()->table_exists(new \xmldb_table('block_exaportitemblock'));
+        if (self::$tableexists === null) {
+            self::$tableexists = $DB->get_manager()->table_exists(new \xmldb_table('block_exaportitemblock'));
         }
-        return $exists;
+        return self::$tableexists;
     }
 }

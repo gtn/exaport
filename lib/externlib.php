@@ -109,7 +109,7 @@ function block_exaport_print_extern_item($item, $access) {
         }
 
         if ($block->type === \block_exaport\item_block::TYPE_FILE) {
-            foreach ($block->files as $file) {
+            foreach ($block->files as $fileindex => $file) {
                 $fileurl = !empty($block->fileurl) && count($block->files) === 1
                     ? $block->fileurl
                     : moodle_url::make_pluginfile_url(
@@ -131,10 +131,11 @@ function block_exaport_print_extern_item($item, $access) {
                         $OUTPUT->action_link($fileurl, format_string($file->get_filename()), new popup_action('click', $fileurl)) .
                         '</p>';
                     if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
+                        $videoid = 'video-file-' . $block->id . '-' . $blockindex . '-' . $fileindex;
                         $boxcontent .= '
-                        <div id="video_block">
-                            <div id="video_content">
-                                <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
+                        <div class="video_block">
+                            <div class="video_content">
+                                <video id="' . s($videoid) . '" class="video-js vjs-default-skin vjs-big-play-centered"
                                             controls preload="auto" width="640" height="480"
                                             data-setup=\'{}\'>
                                     <source src="' . s($fileurl) . '" type="video/mp4" />

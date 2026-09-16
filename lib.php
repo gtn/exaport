@@ -105,6 +105,11 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 print_error('Item not found');
             }
 
+            $block = \block_exaport\item_block::get_block((int)$blockid, (int)$item->id);
+            if (!$block) {
+                print_error('filenotfound', 'block_exaport');
+            }
+
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $block->id, '/', $filename);
 

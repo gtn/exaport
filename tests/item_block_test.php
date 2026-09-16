@@ -26,6 +26,7 @@ final class item_block_test extends \advanced_testcase {
 
     protected function setUp(): void {
         $this->resetAfterTest(true);
+        item_block::reset_cache();
         $this->user = $this->getDataGenerator()->create_user();
         $this->course = $this->getDataGenerator()->create_course();
         $this->setUser($this->user);
@@ -109,6 +110,17 @@ final class item_block_test extends \advanced_testcase {
         $this->assertStringContainsString('Hello world', $blocks[0]->contenthtml);
         $this->assertSame(item_block::TYPE_FILE, $blocks[1]->type);
         $this->assertSame('document.txt', $blocks[1]->filename);
+    }
+
+    public function test_table_exists_cache_can_be_reset_between_calls(): void {
+        $item = $this->create_item();
+        $this->assertFalse(item_block::item_uses_blocks($item->id));
+
+        item_block::reset_cache();
+
+        $block = $this->create_block($item, item_block::TYPE_TEXT, 1, 'Intro', '<p>Hello world</p>');
+        $this->assertNotEmpty($block->id);
+        $this->assertTrue(item_block::item_uses_blocks($item->id));
     }
 
     public function test_save_order_reorders_blocks(): void {

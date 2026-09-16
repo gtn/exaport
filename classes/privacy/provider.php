@@ -347,6 +347,7 @@ class provider implements
                             $writer->export_data(
                                 [$subcontext_name . $add_tosubcontext_name . '/Structured blocks', 'Block ' . $itemblock->sortorder],
                                 (object)[
+                                    'itemid' => $itemblock->itemid,
                                     'type' => $itemblock->type,
                                     'sortorder' => $itemblock->sortorder,
                                     'title' => $itemblock->title,

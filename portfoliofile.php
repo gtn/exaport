@@ -126,7 +126,13 @@ if ($itemid) {
             not_found();
         }
         $files = \block_exaport\item_block::get_block_files($block, $item->userid);
-        $file = reset($files);
+        if ($inst && isset($files[$inst])) {
+            $file = $files[$inst];
+        } else if (count($files) === 1) {
+            $file = reset($files);
+        } else {
+            not_found();
+        }
     } else {
         $files = block_exaport_get_item_files_array($item);
 

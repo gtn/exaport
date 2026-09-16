@@ -29,6 +29,8 @@ define(['jquery', 'jqueryui', 'core/modal_save_cancel'], function($, JQueryUI, M
             config.strings.file + '</a>' +
             '<a class="list-group-item list-group-item-action" href="' + config.addurls.link + '">' +
             config.strings.link + '</a>' +
+            '<button type="button" class="btn btn-secondary mt-3 exaport-item-block-chooser-cancel">' +
+            config.strings.cancel + '</button>' +
             '</div>';
 
         ModalSaveCancel.create({
@@ -36,6 +38,10 @@ define(['jquery', 'jqueryui', 'core/modal_save_cancel'], function($, JQueryUI, M
             body: body
         }).then(function(modal) {
             modal.getFooter().hide();
+            modal.getRoot().on('click', '.exaport-item-block-chooser-cancel', function(e) {
+                e.preventDefault();
+                modal.hide();
+            });
             modal.show();
             return modal;
         });

@@ -208,6 +208,7 @@ $string['commentshouldnotbeempty'] = 'You have to enter a comment.';
 $string['content'] = 'Content';
 $string['title'] = 'Title';
 $string['text'] = 'Text';
+$string['titlenotempty'] = 'You have to enter a title.';
 $string['titlenotemtpy'] = 'You have to enter a title.';
 $string['intro'] = 'Content';
 $string['shortdescription'] = 'Short description';

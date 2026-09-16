@@ -179,6 +179,7 @@ $PAGE->requires->js_call_amd('block_exaport/item_blocks', 'init', [[
         'text' => get_string('text', 'block_exaport'),
         'file' => get_string('file', 'block_exaport'),
         'link' => get_string('link', 'block_exaport'),
+        'cancel' => get_string('cancel'),
         'savefirst' => get_string('itemblock_savefirst', 'block_exaport'),
     ],
 ]]);

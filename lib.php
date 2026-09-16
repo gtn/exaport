@@ -90,7 +90,14 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         case 'itemblock_content':
             $filename = array_pop($args);
             $blockid = array_pop($args);
-            if (array_pop($args) != 'blockid') {
+            if ($filearea === 'itemblock_file') {
+                if (array_pop($args) != 'blockid') {
+                    print_error('wrong params');
+                }
+            } else if (end($args) === 'blockid') {
+                array_pop($args);
+            }
+            if (!$blockid) {
                 print_error('wrong params');
             }
 

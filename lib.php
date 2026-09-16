@@ -117,23 +117,17 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             }
             break;
         case 'itemblock_file':
-            $filename = array_pop($args);
-            $blockid = (int)array_pop($args);
-            if (array_pop($args) != 'blockid') {
-                print_error('wrong params');
-            }
-            $itemid = (int)array_pop($args);
-            if (array_pop($args) != 'itemid') {
+            $fileargs = \block_exaport\item_content_helper::parse_block_file_args($args);
+            if (!$fileargs) {
                 print_error('wrong params');
             }
 
-            $access = join('/', $args);
-            $item = block_exaport_get_item($itemid, $access);
+            $item = block_exaport_get_item($fileargs['itemid'], $fileargs['access']);
             if (!$item) {
                 print_error('Item not found');
             }
 
-            if (!\block_exaport\item_content_helper::get_item_block_record((int)$item->id, $blockid)) {
+            if (!\block_exaport\item_content_helper::get_item_block_record((int)$item->id, $fileargs['blockid'])) {
                 print_error('Item block not found');
             }
 
@@ -142,9 +136,9 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 context_user::instance($item->userid)->id,
                 'block_exaport',
                 'itemblock_file',
-                $blockid,
-                '/',
-                $filename
+                $fileargs['blockid'],
+                $fileargs['filepath'],
+                $fileargs['filename']
             );
 
             if ($file) {

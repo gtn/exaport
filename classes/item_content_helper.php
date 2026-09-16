@@ -299,6 +299,40 @@ class item_content_helper {
     }
 
     /**
+     * Parse pluginfile arguments for an item block attachment.
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function parse_block_file_args(array $args): array {
+        $itemidposition = array_search('itemid', $args, true);
+        $blockidposition = array_search('blockid', $args, true);
+
+        if ($itemidposition === false || $blockidposition === false || $blockidposition <= $itemidposition + 1) {
+            return [];
+        }
+
+        $accessparts = array_slice($args, 0, $itemidposition);
+        $itemid = clean_param($args[$itemidposition + 1] ?? 0, PARAM_INT);
+        $blockid = clean_param($args[$blockidposition + 1] ?? 0, PARAM_INT);
+        $fileparts = array_slice($args, $blockidposition + 2);
+
+        if (empty($accessparts) || empty($itemid) || empty($blockid) || empty($fileparts)) {
+            return [];
+        }
+
+        $filename = array_pop($fileparts);
+
+        return [
+            'access' => implode('/', $accessparts),
+            'itemid' => (int)$itemid,
+            'blockid' => (int)$blockid,
+            'filepath' => '/' . ($fileparts ? implode('/', $fileparts) . '/' : ''),
+            'filename' => $filename,
+        ];
+    }
+
+    /**
      * Return the pluginfile area token used for block content files.
      *
      * @param string $access

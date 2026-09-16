@@ -12,11 +12,13 @@
         {{#isvideo}}
         <video class="w-100 rounded border" controls preload="metadata">
             <source src="{{url}}">
+            <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{name}}</a>
         </video>
         {{/isvideo}}
         {{#isaudio}}
         <audio class="w-100" controls preload="metadata">
             <source src="{{url}}">
+            <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{name}}</a>
         </audio>
         {{/isaudio}}
         <div class="exaport-item-block__file-meta">

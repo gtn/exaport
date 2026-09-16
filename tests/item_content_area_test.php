@@ -95,14 +95,15 @@ final class item_content_area_test extends \advanced_testcase {
      * @param string $mimetype
      * @return void
      */
-    private function add_block_file(int $blockid, string $filename, string $content, string $mimetype): void {
+    private function add_block_file(int $blockid, string $filename, string $content, string $mimetype,
+                                    string $filepath = '/'): void {
         $fs = get_file_storage();
         $fs->create_file_from_string([
             'contextid' => \context_user::instance($this->owner->id)->id,
             'component' => 'block_exaport',
             'filearea' => \block_exaport\item_content_helper::FILEAREA,
             'itemid' => $blockid,
-            'filepath' => '/',
+            'filepath' => $filepath,
             'filename' => $filename,
             'mimetype' => $mimetype,
         ], $content);
@@ -193,14 +194,30 @@ final class item_content_area_test extends \advanced_testcase {
 
     public function test_file_blocks_export_pluginfile_urls_without_filesystem_paths(): void {
         $block = $this->create_block(['type' => 'file', 'title' => 'Download']);
-        $this->add_block_file($block->id, 'document.pdf', 'pdf-content', 'application/pdf');
+        $this->add_block_file($block->id, 'document.pdf', 'pdf-content', 'application/pdf', '/nested/');
 
         $data = $this->export_area();
 
         $this->assertTrue($data['blocks'][0]['hasfiles']);
         $this->assertStringContainsString('/pluginfile.php/', $data['blocks'][0]['files'][0]['url']);
         $this->assertStringContainsString('/itemblock_file/portfolio/id/' . $this->owner->id .
-            '/itemid/' . $this->item->id . '/blockid/' . $block->id . '/document.pdf', $data['blocks'][0]['files'][0]['url']);
+            '/itemid/' . $this->item->id . '/blockid/' . $block->id . '/nested/document.pdf',
+            $data['blocks'][0]['files'][0]['url']);
         $this->assertStringNotContainsString('/filedir/', $data['blocks'][0]['files'][0]['url']);
+    }
+
+    public function test_block_file_argument_parser_supports_nested_filepaths(): void {
+        $parsed = \block_exaport\item_content_helper::parse_block_file_args([
+            'portfolio', 'id', (string)$this->owner->id,
+            'itemid', (string)$this->item->id,
+            'blockid', '44',
+            'nested', 'folder', 'document.pdf',
+        ]);
+
+        $this->assertSame('portfolio/id/' . $this->owner->id, $parsed['access']);
+        $this->assertSame($this->item->id, $parsed['itemid']);
+        $this->assertSame(44, $parsed['blockid']);
+        $this->assertSame('/nested/folder/', $parsed['filepath']);
+        $this->assertSame('document.pdf', $parsed['filename']);
     }
 }

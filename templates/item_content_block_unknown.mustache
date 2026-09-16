@@ -1,10 +1,10 @@
 {{#hasheading}}
 <div class="exaport-item-block__header">
     <h5 class="exaport-item-block__title">{{heading}}</h5>
-    {{#candelete}}<a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}">{{#str}}delete{{/str}}</a>{{/candelete}}
+    {{#candelete}}<a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}">{{#str}}delete, core{{/str}}</a>{{/candelete}}
 </div>
 {{/hasheading}}
 {{^hasheading}}
-{{#candelete}}<div class="exaport-item-block__header exaport-item-block__header--actions-only"><a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}">{{#str}}delete{{/str}}</a></div>{{/candelete}}
+{{#candelete}}<div class="exaport-item-block__header exaport-item-block__header--actions-only"><a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}">{{#str}}delete, core{{/str}}</a></div>{{/candelete}}
 {{/hasheading}}
 <p class="text-muted mb-0">{{unsupportedtext}}</p>

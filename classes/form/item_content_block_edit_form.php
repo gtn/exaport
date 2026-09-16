@@ -97,7 +97,12 @@ class item_content_block_edit_form extends \block_exaport_moodleform {
      */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
-        $type = \block_exaport\item_content_mutation_helper::require_supported_block_type($data['type'] ?? '');
+        if (!\block_exaport\item_content_mutation_helper::is_supported_block_type((string)($data['type'] ?? ''))) {
+            $errors['type'] = get_string('itemblockunsupportedtype', 'block_exaport');
+            return $errors;
+        }
+
+        $type = \block_exaport\item_content_mutation_helper::require_supported_block_type($data['type']);
 
         if ($type === 'link') {
             $normalized = \block_exaport\item_content_mutation_helper::normalize_url((string)($data['url'] ?? ''));

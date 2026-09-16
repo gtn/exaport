@@ -358,11 +358,13 @@ class item_content_mutation_helper {
      * @return array
      */
     public static function get_editor_options(\stdClass $item): array {
+        global $CFG;
+
         return [
             'trusttext' => true,
             'subdirs' => true,
             'maxfiles' => 99,
-            'maxbytes' => get_config('block_exaport', 'max_uploadfile_size') ?: 0,
+            'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
             'context' => context_user::instance($item->userid),
         ];
     }

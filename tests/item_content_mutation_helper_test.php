@@ -211,4 +211,44 @@ final class item_content_mutation_helper_test extends \advanced_testcase {
         $this->expectException(\moodle_exception::class);
         item_content_mutation_helper::require_supported_block_type('accordion');
     }
+
+    public function test_resolve_block_file_request_rejects_mismatched_item_and_block(): void {
+        global $DB;
+
+        $block = $this->create_block(['type' => 'file']);
+        $otheritemid = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $this->owner->id,
+            'type' => 'note',
+            'categoryid' => 0,
+            'name' => 'Other item',
+            'url' => '',
+            'intro' => '',
+            'attachment' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'courseid' => $this->course->id,
+            'shareall' => 0,
+            'externaccess' => 0,
+            'externcomment' => 0,
+            'sortorder' => 0,
+            'isoez' => 0,
+            'langid' => 0,
+            'source' => 0,
+            'sourceid' => 0,
+            'iseditable' => 1,
+            'parentid' => 0,
+        ]);
+
+        $resolved = item_content_helper::resolve_block_file_request(item_content_helper::FILEAREA, [
+            'access',
+            item_content_helper::encode_access_path('portfolio/id/' . $this->owner->id),
+            'itemid',
+            (string)$otheritemid,
+            'blockid',
+            (string)$block->id,
+            'attachment.pdf',
+        ]);
+
+        $this->assertSame([], $resolved);
+    }
 }

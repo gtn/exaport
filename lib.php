@@ -127,13 +127,15 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 print_error('Item not found');
             }
 
-            if (!\block_exaport\item_content_helper::get_item_block_record((int)$item->id, $fileargs['blockid'])) {
+            $blockrecord = \block_exaport\item_content_helper::get_item_block_record((int)$item->id, $fileargs['blockid']);
+            if (!$blockrecord) {
                 print_error('Item block not found');
             }
 
+            $contextid = context_user::instance($item->userid)->id;
             $fs = get_file_storage();
             $file = $fs->get_file(
-                context_user::instance($item->userid)->id,
+                $contextid,
                 'block_exaport',
                 'itemblock_file',
                 $fileargs['blockid'],
@@ -141,7 +143,11 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 $fileargs['filename']
             );
 
-            if ($file) {
+            if ($file
+                && (int)$file->get_contextid() === (int)$contextid
+                && $file->get_component() === 'block_exaport'
+                && $file->get_filearea() === 'itemblock_file'
+                && (int)$file->get_itemid() === (int)$blockrecord->id) {
                 send_stored_file($file);
             } else {
                 return false;

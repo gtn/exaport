@@ -22,7 +22,12 @@
         </audio>
         {{/isaudio}}
         <div class="exaport-item-block__file-meta">
+            {{^isimage}}{{^isvideo}}{{^isaudio}}
             <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{name}}</a>
+            {{/isaudio}}{{/isvideo}}{{/isimage}}
+            {{#isimage}}{{name}}{{/isimage}}
+            {{#isvideo}}{{name}}{{/isvideo}}
+            {{#isaudio}}{{name}}{{/isaudio}}
             <span class="text-muted">({{size}})</span>
         </div>
     </div>

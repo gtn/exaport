@@ -452,6 +452,61 @@ class block_exaport_item_block_edit_form extends block_exaport_moodleform {
     }
 }
 
+/**
+ * Build the structured item block form and resolved block state.
+ *
+ * @param stdClass $item
+ * @param string $blockaction
+ * @param int $blockid
+ * @param string $blocktype
+ * @param string|null $actionurl
+ * @return array
+ */
+function block_exaport_build_item_block_edit_form(stdClass $item, string $blockaction, int $blockid, string $blocktype,
+                                                  ?string $actionurl = null): array {
+    if ($blockaction === 'edit') {
+        $block = \block_exaport\item_block::get_block($blockid, $item->id);
+        if (!$block) {
+            throw new moodle_exception('invalidblockid', 'block_exaport');
+        }
+        $blocktype = $block->type;
+        $formdata = \block_exaport\item_block::prepare_block_for_edit($block, $item);
+    } else {
+        \block_exaport\item_block::validate_type($blocktype);
+        $block = (object)[
+            'id' => 0,
+            'itemid' => $item->id,
+            'type' => $blocktype,
+            'title' => '',
+            'content' => '',
+            'contentformat' => FORMAT_HTML,
+            'url' => '',
+        ];
+        if ($blocktype === \block_exaport\item_block::TYPE_FILE) {
+            $block->file = file_get_submitted_draft_itemid('file');
+        }
+        $formdata = clone $block;
+    }
+
+    $formdata->itemid = $item->id;
+    $formdata->blockid = (int)$block->id;
+    $formdata->blockaction = $blockaction;
+    $formdata->blocktype = $blocktype;
+
+    $blockform = new block_exaport_item_block_edit_form($actionurl ?? $_SERVER['REQUEST_URI'], [
+        'blocktype' => $blocktype,
+        'editoroptions' => \block_exaport\item_block::get_editor_options($item),
+        'fileoptions' => \block_exaport\item_block::get_filemanager_options(),
+    ]);
+    $blockform->set_data($formdata);
+
+    return [
+        'form' => $blockform,
+        'block' => $block,
+        'blocktype' => $blocktype,
+    ];
+}
+
 function rek_category_select_setup($outercategories, $entryname, $categories) {
     global $DB, $USER;
     foreach ($outercategories as $curcategory) {

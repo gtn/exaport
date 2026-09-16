@@ -406,3 +406,48 @@ function block_exaport_output_fragment_blockedit($args) {
 
     return $formdata->html;
 }
+
+/**
+ * Fragment callback for loading structured item block forms in a modal.
+ *
+ * Moodle captures the queued editor/filemanager JS and returns it with the HTML.
+ *
+ * @param array $args
+ * @return string
+ */
+function block_exaport_output_fragment_itemblock_form($args) {
+    global $CFG, $DB, $USER;
+
+    require_login();
+    require_capability('block/exaport:use', context_system::instance());
+    require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
+
+    $itemid = clean_param($args['itemid'] ?? 0, PARAM_INT);
+    $blockid = clean_param($args['blockid'] ?? 0, PARAM_INT);
+    $blockaction = clean_param($args['blockaction'] ?? '', PARAM_ALPHA);
+    $blocktype = clean_param($args['blocktype'] ?? '', PARAM_ALPHA);
+    $courseid = clean_param($args['courseid'] ?? 0, PARAM_INT);
+    $categoryid = clean_param($args['categoryid'] ?? 0, PARAM_INT);
+    $cattype = clean_param($args['cattype'] ?? '', PARAM_ALPHA);
+
+    $item = $DB->get_record('block_exaportitem', ['id' => $itemid, 'userid' => $USER->id], '*', MUST_EXIST);
+    if (!block_exaport_item_is_editable($item->id)) {
+        throw new moodle_exception('nopermissions', 'error', '', get_string('edit'));
+    }
+
+    $actionurl = new moodle_url('/blocks/exaport/item.php', [
+        'courseid' => $courseid,
+        'id' => $itemid,
+        'action' => 'edit',
+        'categoryid' => $categoryid,
+    ]);
+    if ($cattype) {
+        $actionurl->param('cattype', $cattype);
+    }
+
+    $blockformstate = block_exaport_build_item_block_edit_form($item, $blockaction, $blockid, $blocktype, $actionurl->out(false));
+
+    ob_start();
+    $blockformstate['form']->display();
+    return ob_get_clean();
+}

@@ -110,6 +110,10 @@ final class item_block_test extends \advanced_testcase {
         $this->assertStringContainsString('Hello world', $blocks[0]->contenthtml);
         $this->assertSame(item_block::TYPE_FILE, $blocks[1]->type);
         $this->assertSame('document.txt', $blocks[1]->filename);
+        $this->assertStringContainsString(
+            '/itemblock_file/portfolio/id/' . $this->user->id . '/blockid/' . $fileblock->id . '/document.txt',
+            $blocks[1]->fileurl
+        );
     }
 
     public function test_table_exists_cache_can_be_reset_between_calls(): void {
@@ -135,6 +139,21 @@ final class item_block_test extends \advanced_testcase {
         $this->assertSame(1, (int)$reloaded[0]->sortorder);
         $this->assertSame($first->id, $reloaded[1]->id);
         $this->assertSame(2, (int)$reloaded[1]->sortorder);
+    }
+
+    public function test_delete_block_removes_files_and_resequences_remaining_blocks(): void {
+        $item = $this->create_item();
+        $first = $this->create_block($item, item_block::TYPE_FILE, 1, 'File one');
+        $second = $this->create_block($item, item_block::TYPE_TEXT, 2, 'Text two', '<p>Two</p>');
+        $this->add_block_file($first, 'document.txt');
+
+        item_block::delete_block($item, $first);
+        $remaining = array_values(item_block::get_blocks($item->id));
+
+        $this->assertCount(1, $remaining);
+        $this->assertSame($second->id, $remaining[0]->id);
+        $this->assertSame(1, (int)$remaining[0]->sortorder);
+        $this->assertSame([], item_block::get_block_files($first, (int)$item->userid));
     }
 
     public function test_save_order_rejects_invalid_block_sets(): void {

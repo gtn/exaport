@@ -125,7 +125,7 @@ class item_content_mutation_helper {
         require_login($courseid);
         require_capability('block/exaport:use', context_system::instance());
 
-        $item = $DB->get_record('block_exaportitem', ['id' => $itemid, 'userid' => $USER->id]);
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid, 'userid' => $USER->id, 'courseid' => $courseid]);
         if (!$item) {
             throw new \moodle_exception('bookmarknotfound', 'block_exaport');
         }
@@ -301,8 +301,10 @@ class item_content_mutation_helper {
             }
         }
 
-        $DB->delete_records('block_exaportitemblock', ['id' => $block->id, 'itemid' => $item->id]);
-        self::touch_item($item);
+        if ($DB->record_exists('block_exaportitemblock', ['id' => $block->id, 'itemid' => $item->id])) {
+            $DB->delete_records('block_exaportitemblock', ['id' => $block->id, 'itemid' => $item->id]);
+            self::touch_item($item);
+        }
     }
 
     /**

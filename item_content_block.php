@@ -15,7 +15,7 @@ require_once(__DIR__ . '/inc.php');
 
 $courseid = required_param('courseid', PARAM_INT);
 $itemid = required_param('itemid', PARAM_INT);
-$action = required_param('action', PARAM_ALPHA);
+$action = required_param('action', PARAM_ACTION);
 $access = required_param('access', PARAM_TEXT);
 $type = optional_param('type', '', PARAM_ALPHA);
 $blockid = optional_param('blockid', 0, PARAM_INT);

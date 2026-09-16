@@ -182,9 +182,16 @@ class item_content_helper {
             'emptycontenttext' => get_string('itemblockemptycontent', 'block_exaport'),
         ];
 
+        $blocklabel = $title !== ''
+            ? format_string($title)
+            : (!empty($type) && item_content_mutation_helper::is_supported_block_type($type)
+                ? item_content_mutation_helper::get_block_type_label($type)
+                : get_string('itemblocklabeldefault', 'block_exaport'));
+
         if (!empty($options['canmanage'])) {
             $backtype = (string)($options['backtype'] ?? '');
             $data['candelete'] = true;
+            $data['deletelabel'] = get_string('itemblockdeleteaction', 'block_exaport', $blocklabel);
             $data['deleteurl'] = item_content_mutation_helper::get_block_action_url(
                 $item,
                 $access,
@@ -233,6 +240,7 @@ class item_content_helper {
         if (!empty($options['canmanage']) && item_content_mutation_helper::is_supported_block_type($type)) {
             $backtype = (string)($options['backtype'] ?? '');
             $data['canedit'] = true;
+            $data['editlabel'] = get_string('itemblockeditaction', 'block_exaport', $blocklabel);
             $data['editurl'] = item_content_mutation_helper::get_block_action_url(
                 $item,
                 $access,

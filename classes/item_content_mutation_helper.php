@@ -274,6 +274,7 @@ class item_content_mutation_helper {
         ];
         $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
         $block->sortorder = $block->id * 10;
+        $DB->set_field('block_exaportitemblock', 'sortorder', $block->sortorder, ['id' => $block->id]);
 
         return self::save_block($item, $block, $data);
     }
@@ -387,7 +388,7 @@ class item_content_mutation_helper {
         global $CFG;
 
         return [
-            'trusttext' => true,
+            'trusttext' => false,
             'subdirs' => true,
             'maxfiles' => 99,
             'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
@@ -479,10 +480,12 @@ class item_content_mutation_helper {
     }
 
     /**
-     * Calculate the next sortorder for a new block.
+     * Validate an attachment draft against the configured upload and quota limits.
      *
-     * @param int $itemid
-     * @return int
+     * @param int $draftid
+     * @param \stdClass $item
+     * @param \stdClass $block
+     * @return void
      */
     private static function validate_attachment_draft(int $draftid, \stdClass $item, \stdClass $block): void {
         global $DB, $CFG;

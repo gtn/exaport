@@ -7,6 +7,12 @@
 </div>
 {{/hasheading}}
 {{^hasheading}}
-{{#candelete}}<div class="exaport-item-block__header exaport-item-block__header--actions-only"><div class="exaport-item-block__actions" role="group" aria-label="{{actionslabel}}"><a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}" aria-label="{{deletelabel}}" title="{{deletelabel}}">{{#str}}delete, core{{/str}}</a></div></div>{{/candelete}}
+{{#candelete}}
+<div class="exaport-item-block__header exaport-item-block__header--actions-only">
+    <div class="exaport-item-block__actions" role="group" aria-label="{{actionslabel}}">
+        <a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}" aria-label="{{deletelabel}}" title="{{deletelabel}}">{{#str}}delete, core{{/str}}</a>
+    </div>
+</div>
+{{/candelete}}
 {{/hasheading}}
 <p class="text-muted mb-0">{{unsupportedtext}}</p>

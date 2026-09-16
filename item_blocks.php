@@ -39,6 +39,7 @@ if ($existing && !$allowedit && ($deleteblock || in_array($blockaction, ['add', 
 
 if ($ajax && $existing) {
     require_sesskey();
+    $effectiveblocktype = $blocktype;
     try {
         if (!$allowedit) {
             throw new moodle_exception('nopermissions', 'error', '', get_string('edit'));
@@ -56,20 +57,21 @@ if ($ajax && $existing) {
                     throw new moodle_exception('invalidblockid', 'block_exaport');
                 }
                 $blocktype = $block->type;
+                $effectiveblocktype = $blocktype;
                 \block_exaport\item_block::update_block($existing, $block, $submitteddata);
                 $savedblockid = $block->id;
             } else if ($blockaction === 'add') {
                 \block_exaport\item_block::validate_type($blocktype);
+                $effectiveblocktype = $blocktype;
                 $savedblockid = \block_exaport\item_block::create_block($existing, $blocktype, $submitteddata);
             } else {
                 throw new moodle_exception('invalidblockid', 'block_exaport');
             }
 
-            $displayblock = block_exaport_get_editor_display_block($existing, $savedblockid);
             block_exaport_send_json([
                 'success' => true,
                 'blockid' => $savedblockid,
-                'rowhtml' => block_exaport_render_item_block_editor_row($displayblock, $existing, $courseid, $categoryid, $cattype),
+                'listhtml' => block_exaport_render_item_block_editor_rows($existing, $courseid, $categoryid, $cattype),
                 'hasblocks' => true,
             ]);
         }
@@ -83,6 +85,7 @@ if ($ajax && $existing) {
             \block_exaport\item_block::delete_block($existing, $block);
             block_exaport_send_json([
                 'success' => true,
+                'listhtml' => block_exaport_render_item_block_editor_rows($existing, $courseid, $categoryid, $cattype),
                 'hasblocks' => !empty(\block_exaport\item_block::get_blocks((int)$existing->id)),
             ]);
         }
@@ -100,7 +103,7 @@ if ($ajax && $existing) {
         block_exaport_send_json([
             'success' => false,
             'message' => $message,
-            'fielderrors' => block_exaport_get_item_block_field_errors($errorcode, $blocktype),
+            'fielderrors' => block_exaport_get_item_block_field_errors($errorcode, $effectiveblocktype),
         ]);
     }
 }
@@ -624,18 +627,18 @@ function block_exaport_get_item_block_field_errors(string $errorcode, string $bl
     }
 }
 
-function block_exaport_get_editor_display_block(stdClass $item, int $blockid): stdClass {
-    foreach (\block_exaport\item_block::get_display_blocks($item, 'portfolio/id/' . $item->userid) as $displayblock) {
-        if ((int)$displayblock->id === $blockid) {
-            return $displayblock;
-        }
+function block_exaport_send_json(array $payload): void {
+    while (ob_get_level()) {
+        ob_end_clean();
     }
-
-    throw new moodle_exception('invalidblockid', 'block_exaport');
+    header('Content-Type: application/json');
+    die(json_encode($payload));
 }
 
-function block_exaport_send_json(array $payload): void {
-    header('Content-Type: application/json');
-    echo json_encode($payload);
-    exit;
+function block_exaport_render_item_block_editor_rows(stdClass $item, int $courseid, int $categoryid, string $cattype): string {
+    $output = '';
+    foreach (\block_exaport\item_block::get_display_blocks($item, 'portfolio/id/' . $item->userid) as $displayblock) {
+        $output .= block_exaport_render_item_block_editor_row($displayblock, $item, $courseid, $categoryid, $cattype);
+    }
+    return $output;
 }

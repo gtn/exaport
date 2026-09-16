@@ -44,6 +44,17 @@ define([
     };
 
     var showMessage = function(message) {
+        if (Notification.addNotification) {
+            Notification.addNotification({
+                message: message,
+                type: 'error'
+            });
+            return;
+        }
+        if (Notification.alert) {
+            Notification.alert('', message);
+            return;
+        }
         window.alert(message);
     };
 
@@ -101,14 +112,8 @@ define([
         updateOrderField();
     };
 
-    var upsertRow = function(blockid, rowhtml) {
-        var list = getBlockList();
-        var existing = list.find('[data-blockid="' + blockid + '"]');
-        if (existing.length) {
-            existing.replaceWith(rowhtml);
-        } else {
-            list.append(rowhtml);
-        }
+    var replaceListHtml = function(listhtml) {
+        getBlockList().html(listhtml || '');
         updateListEmptyState();
     };
 
@@ -141,7 +146,7 @@ define([
         });
     };
 
-    var ensureFormModal = function() {
+    var createFormModal = function() {
         return ModalSaveCancel.create({
             title: '',
             body: ''
@@ -173,7 +178,7 @@ define([
                         }
                         return;
                     }
-                    upsertRow(response.blockid, response.rowhtml);
+                    replaceListHtml(response.listhtml);
                     modal.hide();
                 }).fail(function(exception) {
                     showMessage(getRequestErrorMessage(exception, config.strings.cancel));
@@ -194,7 +199,7 @@ define([
             return;
         }
 
-        ensureFormModal().then(function(modal) {
+        createFormModal().then(function(modal) {
             modal.setTitle(getModalTitle(blockaction, blocktype));
             modal.setBody(Fragment.loadFragment('block_exaport', 'itemblock_form', config.fragmentcontextid, {
                 itemid: config.itemid,
@@ -264,8 +269,7 @@ define([
                 showMessage(response && response.message ? response.message : config.strings.deleteconfirm);
                 return;
             }
-            getBlockList().find('[data-blockid="' + blockid + '"]').remove();
-            updateListEmptyState();
+            replaceListHtml(response.listhtml);
         }).fail(function(exception) {
             showMessage(getRequestErrorMessage(exception, config.strings.deleteconfirm));
         });

@@ -1,0 +1,30 @@
+{{#hasheading}}<h5 class="exaport-item-block__title">{{heading}}</h5>{{/hasheading}}
+{{#hascontent}}<div class="exaport-item-block__content">{{{contenthtml}}}</div>{{/hascontent}}
+{{#hasfiles}}
+<div class="exaport-item-block__files">
+    {{#files}}
+    <div class="exaport-item-block__file">
+        {{#isimage}}
+        <a class="exaport-item-block__image-link" href="{{url}}" target="_blank" rel="noopener noreferrer">
+            <img class="img-fluid rounded border" src="{{url}}" alt="{{name}}" loading="lazy">
+        </a>
+        {{/isimage}}
+        {{#isvideo}}
+        <video class="w-100 rounded border" controls preload="metadata">
+            <source src="{{url}}">
+        </video>
+        {{/isvideo}}
+        {{#isaudio}}
+        <audio class="w-100" controls preload="metadata">
+            <source src="{{url}}">
+        </audio>
+        {{/isaudio}}
+        <div class="exaport-item-block__file-meta">
+            <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{name}}</a>
+            <span class="text-muted">({{size}})</span>
+        </div>
+    </div>
+    {{/files}}
+</div>
+{{/hasfiles}}
+{{^hasfiles}}<p class="text-muted mb-0">{{emptyfiletext}}</p>{{/hasfiles}}

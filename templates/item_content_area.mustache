@@ -1,0 +1,29 @@
+{{!
+    Structured item content area.
+}}
+<section class="exaport-item-content-area">
+    <div class="exaport-item-content-area__header">
+        <h4 class="mb-0">{{heading}}</h4>
+    </div>
+
+    {{#hasblocks}}
+    <div class="exaport-item-content-area__body">
+        {{#blocks}}
+        <article class="exaport-item-block exaport-item-block--{{type}}">
+            {{#istext}}{{> block_exaport/item_content_block_text}}{{/istext}}
+            {{#islink}}{{> block_exaport/item_content_block_link}}{{/islink}}
+            {{#isfile}}{{> block_exaport/item_content_block_file}}{{/isfile}}
+            {{#ismedia}}{{> block_exaport/item_content_block_file}}{{/ismedia}}
+            {{#isunknown}}{{> block_exaport/item_content_block_unknown}}{{/isunknown}}
+        </article>
+        {{/blocks}}
+    </div>
+    {{/hasblocks}}
+
+    {{^hasblocks}}
+    <div class="exaport-item-content-area__empty alert alert-light mb-0" role="status">
+        <strong>{{emptytitle}}</strong>
+        <div>{{emptytext}}</div>
+    </div>
+    {{/hasblocks}}
+</section>

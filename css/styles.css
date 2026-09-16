@@ -60,6 +60,55 @@ div.item-detail-image img {
     opacity: 1 !important;
 }
 
+#exaport .exaport-item-detail-box {
+    padding: 1rem;
+}
+
+#exaport .exaport-item-content-area {
+    border: 1px solid var(--bs-border-color, rgba(0, 0, 0, .125));
+    border-radius: .5rem;
+    background: var(--bs-body-bg, #fff);
+    margin-bottom: 1rem;
+}
+
+#exaport .exaport-item-content-area__header {
+    padding: 1rem 1rem 0 1rem;
+}
+
+#exaport .exaport-item-content-area__body {
+    padding: 1rem;
+}
+
+#exaport .exaport-item-block + .exaport-item-block {
+    border-top: 1px solid var(--bs-border-color, rgba(0, 0, 0, .125));
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+#exaport .exaport-item-block__title {
+    margin-bottom: .75rem;
+}
+
+#exaport .exaport-item-block__content > :last-child {
+    margin-bottom: 0;
+}
+
+#exaport .exaport-item-block__files {
+    display: grid;
+    gap: 1rem;
+}
+
+#exaport .exaport-item-block__file {
+    display: grid;
+    gap: .75rem;
+}
+
+#exaport .exaport-item-block__image-link,
+#exaport .exaport-item-block video,
+#exaport .exaport-item-block audio {
+    max-width: 100%;
+}
+
 /* Collapsible course groups of the sharing userlist/grouplist widgets.
    These rules live here (and only here) because block_exaport_init_js_css() auto-loads
    page-specific stylesheets by script name only (views_mod.php -> css/views_mod.css), so

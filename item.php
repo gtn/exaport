@@ -793,6 +793,7 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
     $conditions = array("id" => $post->id);
     $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);
+    $DB->delete_records('block_exaportitemblock', ['itemid' => $post->id]);
     $DB->delete_records('block_exaportitemshar', ['itemid' => $post->id]);
     $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $post->id]);
     $status = $DB->delete_records('block_exaportitem', $conditions);

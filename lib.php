@@ -116,6 +116,43 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 return false;
             }
             break;
+        case 'itemblock_file':
+            $filename = array_pop($args);
+            $blockid = (int)array_pop($args);
+            if (array_pop($args) != 'blockid') {
+                print_error('wrong params');
+            }
+            $itemid = (int)array_pop($args);
+            if (array_pop($args) != 'itemid') {
+                print_error('wrong params');
+            }
+
+            $access = join('/', $args);
+            $item = block_exaport_get_item($itemid, $access);
+            if (!$item) {
+                print_error('Item not found');
+            }
+
+            if (!\block_exaport\item_content_helper::get_item_block_record((int)$item->id, $blockid)) {
+                print_error('Item block not found');
+            }
+
+            $fs = get_file_storage();
+            $file = $fs->get_file(
+                context_user::instance($item->userid)->id,
+                'block_exaport',
+                'itemblock_file',
+                $blockid,
+                '/',
+                $filename
+            );
+
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
         case 'view_content':
             $filename = array_pop($args);
 

@@ -1,0 +1,8 @@
+{{#hasheading}}<h5 class="exaport-item-block__title">{{heading}}</h5>{{/hasheading}}
+{{#hasurl}}
+<p class="mb-2">
+    <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{linktext}}</a>
+</p>
+{{/hasurl}}
+{{^hasurl}}<p class="text-muted mb-2">{{emptylinktext}}</p>{{/hasurl}}
+{{#hascontent}}<div class="exaport-item-block__content">{{{contenthtml}}}</div>{{/hascontent}}

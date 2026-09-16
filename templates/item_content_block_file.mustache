@@ -6,12 +6,26 @@
     <div class="exaport-item-block__file">
         {{#isimage}}
         <a class="exaport-item-block__image-link" href="{{url}}">
-            <img class="img-fluid rounded border" src="{{url}}" alt="" loading="lazy">
+            <img class="img-fluid rounded border" src="{{url}}" alt="{{name}}" loading="lazy">
         </a>
         {{/isimage}}
+        {{#isvideo}}
+        <video class="w-100 rounded border" controls preload="metadata">
+            <source src="{{url}}" type="{{mimetype}}">
+            <a href="{{url}}">{{name}}</a>
+        </video>
+        {{/isvideo}}
+        {{#isaudio}}
+        <audio class="w-100" controls preload="metadata">
+            <source src="{{url}}" type="{{mimetype}}">
+            <a href="{{url}}">{{name}}</a>
+        </audio>
+        {{/isaudio}}
         <div class="exaport-item-block__file-meta">
-            {{^isimage}}<a href="{{url}}">{{name}}</a>{{/isimage}}
+            {{^isimage}}{{^isvideo}}{{^isaudio}}<a href="{{url}}">{{name}}</a>{{/isaudio}}{{/isvideo}}{{/isimage}}
             {{#isimage}}{{name}}{{/isimage}}
+            {{#isvideo}}{{name}}{{/isvideo}}
+            {{#isaudio}}{{name}}{{/isaudio}}
             <span class="text-muted">({{size}})</span>
         </div>
     </div>

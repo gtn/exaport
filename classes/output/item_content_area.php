@@ -33,6 +33,8 @@ class item_content_area implements renderable, templatable {
     protected $access;
     /** @var array|null */
     protected $blocks;
+    /** @var array */
+    protected $options;
 
     /**
      * Constructor.
@@ -41,10 +43,11 @@ class item_content_area implements renderable, templatable {
      * @param string $access
      * @param array|null $blocks
      */
-    public function __construct(\stdClass $item, string $access, ?array $blocks = null) {
+    public function __construct(\stdClass $item, string $access, ?array $blocks = null, array $options = []) {
         $this->item = $item;
         $this->access = $access;
         $this->blocks = $blocks;
+        $this->options = $options;
     }
 
     /**
@@ -54,7 +57,8 @@ class item_content_area implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
-        $blocks = $this->blocks ?? \block_exaport\item_content_helper::export_item_blocks($this->item, $this->access);
+        $blocks = $this->blocks ?? \block_exaport\item_content_helper::export_item_blocks($this->item, $this->access, $this->options);
+        $canmanage = !empty($this->options['canmanage']);
 
         return [
             'hasblocks' => !empty($blocks),
@@ -62,6 +66,15 @@ class item_content_area implements renderable, templatable {
             'heading' => get_string('itemcontentarea', 'block_exaport'),
             'emptytitle' => get_string('itemcontentemptytitle', 'block_exaport'),
             'emptytext' => get_string('itemcontentempty', 'block_exaport'),
+            'canmanage' => $canmanage,
+            'hasaddactions' => $canmanage,
+            'addactions' => $canmanage
+                ? \block_exaport\item_content_mutation_helper::get_add_action_links(
+                    $this->item,
+                    $this->access,
+                    (string)($this->options['backtype'] ?? '')
+                )
+                : [],
         ];
     }
 }

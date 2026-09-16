@@ -75,6 +75,13 @@ div.item-detail-image img {
     padding: 1rem 1rem 0 1rem;
 }
 
+#exaport .exaport-item-content-area__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .75rem;
+}
+
 #exaport .exaport-item-content-area__body {
     padding: 1rem;
 }
@@ -86,7 +93,20 @@ div.item-detail-image img {
 }
 
 #exaport .exaport-item-block__title {
+    margin-bottom: 0;
+}
+
+#exaport .exaport-item-block__header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    justify-content: space-between;
     margin-bottom: .75rem;
+}
+
+#exaport .exaport-item-block__header--actions-only {
+    justify-content: flex-end;
 }
 
 #exaport .exaport-item-block__content > :last-child {

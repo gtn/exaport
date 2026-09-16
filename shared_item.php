@@ -172,7 +172,7 @@ if (count($data) > 0) {
     block_exaport_set_competences($values, $item, $USER->id);
 }
 echo "<div>\n";
-block_exaport_print_extern_item($item, $access);
+block_exaport_print_extern_item($item, $access, $backtype);
 
 if (block_exaport_check_competence_interaction()) {
     $competences = block_exaport_get_active_comps_for_item($item);

@@ -4,6 +4,13 @@
 <section class="exaport-item-content-area">
     <div class="exaport-item-content-area__header">
         <h4 class="mb-0">{{heading}}</h4>
+        {{#hasaddactions}}
+        <div class="exaport-item-content-area__actions">
+            {{#addactions}}
+            <a class="btn btn-outline-secondary btn-sm" href="{{url}}">{{label}}</a>
+            {{/addactions}}
+        </div>
+        {{/hasaddactions}}
     </div>
 
     {{#hasblocks}}

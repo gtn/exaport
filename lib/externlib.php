@@ -88,8 +88,8 @@ function block_exaport_extern_item_category_badges(int $itemid, int $userid): st
     return html_writer::div(implode(' ', $badges), 'eportfolio-categories');
 }
 
-function block_exaport_print_extern_item($item, $access) {
-    global $CFG, $OUTPUT, $DB;
+function block_exaport_print_extern_item($item, $access, $backtype = '') {
+    global $CFG, $OUTPUT, $DB, $USER;
     echo $OUTPUT->heading(format_string($item->name));
     $tags = \core_tag_tag::get_item_tags('block_exaport', 'block_exaportitem', $item->id);
     echo $OUTPUT->tag_list($tags, null, 'exaport-artifact-tags', 0, null, false);
@@ -100,9 +100,17 @@ function block_exaport_print_extern_item($item, $access) {
         echo $categorybadges;
     }
 
-    $itemblocks = \block_exaport\item_content_helper::export_item_blocks($item, $access);
+    $canmanageblocks = $item->userid == $USER->id
+        && $item->access->page === 'portfolio'
+        && $item->access->request === 'intern'
+        && block_exaport_item_is_editable($item->id);
+    $blockrenderoptions = [
+        'canmanage' => $canmanageblocks,
+        'backtype' => $backtype,
+    ];
+    $itemblocks = \block_exaport\item_content_helper::export_item_blocks($item, $access, $blockrenderoptions);
     $boxcontent = block_exaport_get_renderer()->render(
-        new \block_exaport\output\item_content_area($item, $access, $itemblocks)
+        new \block_exaport\output\item_content_area($item, $access, $itemblocks, $blockrenderoptions)
     );
     $filescontent = '';
     if ($files = block_exaport_get_item_files($item)) {

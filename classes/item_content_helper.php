@@ -28,6 +28,8 @@ use context_user;
 class item_content_helper {
     /** @var string filearea for item block attachments */
     public const FILEAREA = 'itemblock_file';
+    /** @var string filearea for item block editor content */
+    public const CONTENT_FILEAREA = 'itemblock_content';
 
     /**
      * Load all content blocks for an item in display order.
@@ -52,10 +54,10 @@ class item_content_helper {
      * @param string $access
      * @return array
      */
-    public static function export_item_blocks(\stdClass $item, string $access): array {
+    public static function export_item_blocks(\stdClass $item, string $access, array $options = []): array {
         $blocks = [];
         foreach (self::get_item_block_records($item) as $block) {
-            $blocks[] = self::export_item_block($item, $access, $block);
+            $blocks[] = self::export_item_block($item, $access, $block, $options);
         }
 
         return $blocks;
@@ -89,7 +91,9 @@ class item_content_helper {
 
         $fs = get_file_storage();
         foreach (self::get_item_block_records($item) as $block) {
-            $fs->delete_area_files($context->id, 'block_exaport', self::FILEAREA, $block->id);
+            foreach (self::get_block_fileareas() as $filearea) {
+                $fs->delete_area_files($context->id, 'block_exaport', $filearea, $block->id);
+            }
         }
     }
 
@@ -132,20 +136,22 @@ class item_content_helper {
             $newblock->timemodified = time();
             $newblockid = (int)$DB->insert_record('block_exaportitemblock', $newblock);
 
-            foreach (self::get_block_files($sourceitem, (int)$block->id) as $file) {
-                if (!$file || $file->is_directory()) {
-                    continue;
-                }
+            foreach (self::get_block_fileareas() as $filearea) {
+                foreach (self::get_block_area_files($sourceitem, (int)$block->id, $filearea) as $file) {
+                    if (!$file || $file->is_directory()) {
+                        continue;
+                    }
 
-                $fs->create_file_from_storedfile([
-                    'contextid' => $targetcontext->id,
-                    'component' => 'block_exaport',
-                    'filearea' => self::FILEAREA,
-                    'itemid' => $newblockid,
-                    'filepath' => $file->get_filepath(),
-                    'filename' => $file->get_filename(),
-                    'userid' => $targetuserid,
-                ], $file);
+                    $fs->create_file_from_storedfile([
+                        'contextid' => $targetcontext->id,
+                        'component' => 'block_exaport',
+                        'filearea' => $filearea,
+                        'itemid' => $newblockid,
+                        'filepath' => $file->get_filepath(),
+                        'filename' => $file->get_filename(),
+                        'userid' => $targetuserid,
+                    ], $file);
+                }
             }
         }
     }
@@ -158,7 +164,7 @@ class item_content_helper {
      * @param \stdClass $block
      * @return array
      */
-    protected static function export_item_block(\stdClass $item, string $access, \stdClass $block): array {
+    protected static function export_item_block(\stdClass $item, string $access, \stdClass $block, array $options = []): array {
         $type = core_text::strtolower(trim((string)($block->type ?? '')));
         $title = trim((string)($block->title ?? ''));
         $contenthtml = self::format_block_content($item, $access, $block);
@@ -175,6 +181,20 @@ class item_content_helper {
             'contenthtml' => $contenthtml,
             'emptycontenttext' => get_string('itemblockemptycontent', 'block_exaport'),
         ];
+
+        if (!empty($options['canmanage'])) {
+            $backtype = (string)($options['backtype'] ?? '');
+            $data['candelete'] = true;
+            $data['deleteurl'] = item_content_mutation_helper::get_block_action_url(
+                $item,
+                $access,
+                'delete',
+                $type,
+                (int)$block->id,
+                $backtype
+            )->out(false);
+            $data['deleteconfirm'] = item_content_mutation_helper::get_delete_confirmation_text($block);
+        }
 
         switch ($type) {
             case 'text':
@@ -210,6 +230,19 @@ class item_content_helper {
                 break;
         }
 
+        if (!empty($options['canmanage']) && item_content_mutation_helper::is_supported_block_type($type)) {
+            $backtype = (string)($options['backtype'] ?? '');
+            $data['canedit'] = true;
+            $data['editurl'] = item_content_mutation_helper::get_block_action_url(
+                $item,
+                $access,
+                'edit',
+                $type,
+                (int)$block->id,
+                $backtype
+            )->out(false);
+        }
+
         return $data;
     }
 
@@ -232,7 +265,7 @@ class item_content_helper {
             'pluginfile.php',
             context_user::instance($item->userid)->id,
             'block_exaport',
-            self::FILEAREA,
+            self::CONTENT_FILEAREA,
             self::get_pluginfile_itemid($access, (int)$item->id, (int)$block->id)
         );
 
@@ -277,6 +310,18 @@ class item_content_helper {
      * @return array
      */
     public static function get_block_files(\stdClass $item, int $blockid): array {
+        return self::get_block_area_files($item, $blockid, self::FILEAREA);
+    }
+
+    /**
+     * Return the stored files for a block and filearea.
+     *
+     * @param \stdClass $item
+     * @param int $blockid
+     * @param string $filearea
+     * @return array
+     */
+    public static function get_block_area_files(\stdClass $item, int $blockid, string $filearea): array {
         if (!context_user::instance($item->userid, IGNORE_MISSING)) {
             return [];
         }
@@ -285,11 +330,23 @@ class item_content_helper {
         return $fs->get_area_files(
             context_user::instance($item->userid)->id,
             'block_exaport',
-            self::FILEAREA,
+            $filearea,
             $blockid,
             'filename ASC',
             false
         );
+    }
+
+    /**
+     * Supported block fileareas.
+     *
+     * @return array
+     */
+    public static function get_block_fileareas(): array {
+        return [
+            self::CONTENT_FILEAREA,
+            self::FILEAREA,
+        ];
     }
 
     /**
@@ -349,6 +406,56 @@ class item_content_helper {
             'blockid' => (int)$blockid,
             'filepath' => '/' . ($fileparts ? implode('/', $fileparts) . '/' : ''),
             'filename' => $filename,
+        ];
+    }
+
+    /**
+     * Resolve and validate a block pluginfile request.
+     *
+     * @param string $filearea
+     * @param array $args
+     * @param bool $pdfaccess
+     * @param int $pdfforuserid
+     * @return array
+     */
+    public static function resolve_block_file_request(string $filearea, array $args, bool $pdfaccess = false,
+                                                      int $pdfforuserid = 0): array {
+        if (!in_array($filearea, self::get_block_fileareas(), true)) {
+            return [];
+        }
+
+        $fileargs = self::parse_block_file_args($args);
+        if (!$fileargs) {
+            return [];
+        }
+
+        $item = block_exaport_get_item($fileargs['itemid'], $fileargs['access'], false, $pdfaccess, $pdfforuserid);
+        if (!$item) {
+            return [];
+        }
+
+        $blockrecord = self::get_item_block_record((int)$item->id, $fileargs['blockid']);
+        if (!$blockrecord) {
+            return [];
+        }
+
+        $supportedtypes = ['text', 'link', 'file', 'media'];
+        $blocktype = core_text::strtolower(trim((string)($blockrecord->type ?? '')));
+        if (!in_array($blocktype, $supportedtypes, true)) {
+            return [];
+        }
+
+        if ($filearea === self::FILEAREA && !in_array($blocktype, ['file', 'media'], true)) {
+            return [];
+        }
+
+        return [
+            'item' => $item,
+            'block' => $blockrecord,
+            'contextid' => context_user::instance($item->userid)->id,
+            'filepath' => $fileargs['filepath'],
+            'filename' => $fileargs['filename'],
+            'blockid' => $fileargs['blockid'],
         ];
     }
 

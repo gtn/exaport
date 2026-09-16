@@ -116,38 +116,33 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 return false;
             }
             break;
-        case 'itemblock_file':
-            $fileargs = \block_exaport\item_content_helper::parse_block_file_args($args);
-            if (!$fileargs) {
+        case \block_exaport\item_content_helper::FILEAREA:
+        case \block_exaport\item_content_helper::CONTENT_FILEAREA:
+            $filerequest = \block_exaport\item_content_helper::resolve_block_file_request(
+                $filearea,
+                $args,
+                $is_for_pdf,
+                (int)$pdfforuserid
+            );
+            if (!$filerequest) {
                 print_error('itemblockinvalidrequest', 'block_exaport');
             }
 
-            $item = block_exaport_get_item($fileargs['itemid'], $fileargs['access']);
-            if (!$item) {
-                print_error('bookmarknotfound', 'block_exaport');
-            }
-
-            $blockrecord = \block_exaport\item_content_helper::get_item_block_record((int)$item->id, $fileargs['blockid']);
-            if (!$blockrecord) {
-                print_error('itemblocknotfound', 'block_exaport');
-            }
-
-            $contextid = context_user::instance($item->userid)->id;
             $fs = get_file_storage();
             $file = $fs->get_file(
-                $contextid,
+                $filerequest['contextid'],
                 'block_exaport',
-                'itemblock_file',
-                $fileargs['blockid'],
-                $fileargs['filepath'],
-                $fileargs['filename']
+                $filearea,
+                $filerequest['blockid'],
+                $filerequest['filepath'],
+                $filerequest['filename']
             );
 
             if ($file
-                && (int)$file->get_contextid() === (int)$contextid
+                && (int)$file->get_contextid() === (int)$filerequest['contextid']
                 && $file->get_component() === 'block_exaport'
-                && $file->get_filearea() === 'itemblock_file'
-                && (int)$file->get_itemid() === (int)$blockrecord->id) {
+                && $file->get_filearea() === $filearea
+                && (int)$file->get_itemid() === (int)$filerequest['block']->id) {
                 send_stored_file($file);
             } else {
                 return false;

@@ -48,6 +48,20 @@ define([
         window.alert(message);
     };
 
+    var getRequestErrorMessage = function(exception, fallbackMessage) {
+        if (exception && exception.responseJSON && exception.responseJSON.message) {
+            return exception.responseJSON.message;
+        }
+        if (exception && exception.responseText) {
+            try {
+                return JSON.parse(exception.responseText).message || fallbackMessage;
+            } catch (error) {
+                return fallbackMessage;
+            }
+        }
+        return (exception && exception.message) || fallbackMessage;
+    };
+
     var clearFieldErrors = function(form) {
         form.find('.exaport-field-error').remove();
         form.find('[aria-invalid="true"]').removeAttr('aria-invalid');
@@ -72,7 +86,7 @@ define([
                 return;
             }
             container.find('.exaport-field-error').remove();
-            container.append('<div class="text-danger exaport-field-error" role="alert">' + message + '</div>');
+            $('<div class="text-danger exaport-field-error" role="alert"></div>').text(message).appendTo(container);
             container.find(':input').first().attr('aria-invalid', 'true');
         });
     };
@@ -121,7 +135,7 @@ define([
             if (previousOrder && previousOrder.length) {
                 applyOrder(previousOrder);
             }
-            showMessage(exception.message || exception.statusText || config.strings.cancel);
+            showMessage(getRequestErrorMessage(exception, config.strings.cancel));
         });
     };
 
@@ -163,7 +177,7 @@ define([
                     upsertRow(response.blockid, response.rowhtml);
                     modal.hide();
                 }).fail(function(exception) {
-                    showMessage(exception.message || exception.statusText || config.strings.cancel);
+                    showMessage(getRequestErrorMessage(exception, config.strings.cancel));
                 });
             });
             return modal;
@@ -254,7 +268,7 @@ define([
             getBlockList().find('[data-blockid="' + blockid + '"]').remove();
             updateListEmptyState();
         }).fail(function(exception) {
-            showMessage(exception.message || exception.statusText || config.strings.deleteconfirm);
+            showMessage(getRequestErrorMessage(exception, config.strings.deleteconfirm));
         });
     };
 

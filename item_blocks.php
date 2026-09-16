@@ -94,11 +94,13 @@ if ($ajax && $existing) {
         }
 
         throw new moodle_exception('invalidblockid', 'block_exaport');
-    } catch (moodle_exception $exception) {
+    } catch (Throwable $exception) {
+        $message = $exception instanceof moodle_exception ? $exception->getMessage() : get_string('error');
+        $errorcode = $exception instanceof moodle_exception ? $exception->errorcode : '';
         block_exaport_send_json([
             'success' => false,
-            'message' => $exception->getMessage(),
-            'fielderrors' => block_exaport_get_item_block_field_errors($exception->errorcode, $blocktype),
+            'message' => $message,
+            'fielderrors' => block_exaport_get_item_block_field_errors($errorcode, $blocktype),
         ]);
     }
 }

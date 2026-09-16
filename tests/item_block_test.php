@@ -125,6 +125,27 @@ final class item_block_test extends \advanced_testcase {
         $this->assertSame(2, (int)$reloaded[1]->sortorder);
     }
 
+    public function test_save_order_rejects_invalid_block_sets(): void {
+        $item = $this->create_item();
+        $first = $this->create_block($item, item_block::TYPE_TEXT, 1, 'First', '<p>One</p>');
+        $second = $this->create_block($item, item_block::TYPE_LINK, 2, 'Second', '<p>Two</p>', 'https://example.com');
+
+        $invalidorders = [
+            [$first->id],
+            [$first->id, $second->id, 999999],
+            [$first->id, $first->id],
+        ];
+
+        foreach ($invalidorders as $invalidorder) {
+            try {
+                item_block::save_order($item->id, $invalidorder);
+                $this->fail('Expected invalidblockorder exception was not thrown.');
+            } catch (\moodle_exception $exception) {
+                $this->assertSame('invalidblockorder', $exception->errorcode);
+            }
+        }
+    }
+
     public function test_legacy_display_blocks_remain_available_without_structured_blocks(): void {
         global $DB;
         $item = $this->create_item('file');

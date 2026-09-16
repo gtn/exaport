@@ -677,7 +677,7 @@ class item_block {
         }
 
         if ($type === self::TYPE_FILE) {
-            if ($isnew && empty($data->file)) {
+            if (empty($data->file) || !self::draft_area_has_files((int)$data->file)) {
                 throw new \moodle_exception('invalidblockcontent', 'block_exaport');
             }
         }
@@ -746,6 +746,24 @@ class item_block {
         }
 
         return $displayblocks;
+    }
+
+    /**
+     * Check whether a draft area contains uploaded files.
+     *
+     * @param int $draftitemid
+     * @return bool
+     */
+    private static function draft_area_has_files(int $draftitemid): bool {
+        global $USER;
+
+        if ($draftitemid <= 0 || empty($USER->id)) {
+            return false;
+        }
+
+        $fs = get_file_storage();
+        $files = $fs->get_area_files(\context_user::instance($USER->id)->id, 'user', 'draft', $draftitemid, 'id', false);
+        return !empty($files);
     }
 
     /**

@@ -166,7 +166,14 @@ $exacompactive = block_exaport_check_competence_interaction() && $descriptorsele
 $PAGE->requires->js('/blocks/exaport/javascript/item.js', true);
 $PAGE->requires->js_call_amd('block_exaport/item_blocks', 'init', [[
     'hasitem' => (bool)$existing,
-    'chooserurl' => $edititemurl ? $edititemurl->out(false) : '',
+    'addurls' => $edititemurl ? [
+        'text' => (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
+            'blocktype' => 'text']))->out(false),
+        'file' => (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
+            'blocktype' => 'file']))->out(false),
+        'link' => (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
+            'blocktype' => 'link']))->out(false),
+    ] : [],
     'strings' => [
         'choosertitle' => get_string('itemblock_addcontent', 'block_exaport'),
         'text' => get_string('text', 'block_exaport'),
@@ -263,7 +270,8 @@ if (!$existing) {
             echo block_exaport_render_item_block_editor_row($displayblock, $existing, $courseid, $categoryid, $cattype);
         }
         echo html_writer::end_tag('ul');
-        echo html_writer::tag('p', get_string('itemblock_dragdrophelp', 'block_exaport'), ['class' => 'text-muted mt-2 mb-0']);
+        echo html_writer::tag('p', get_string('itemblock_dragdrophelp', 'block_exaport'),
+            ['class' => 'text-muted mt-2 mb-0', 'id' => 'exaport-item-block-help']);
     } else {
         echo html_writer::tag('p', get_string('itemblock_empty', 'block_exaport'), ['class' => 'mt-3 text-muted']);
     }
@@ -318,7 +326,8 @@ function block_exaport_render_item_block_editor_row($block, $item, $courseid, $c
     $content .= html_writer::start_div('me-3');
     $content .= html_writer::tag('div',
         block_exaport_fontawesome_icon('grip-vertical', 'solid', 1) . ' ' . format_string($block->title ?: get_string($block->type, 'block_exaport')),
-        ['class' => 'fw-bold exaport-item-block-handle']);
+        ['class' => 'fw-bold exaport-item-block-handle', 'aria-label' => get_string('itemblock_reorderlabel', 'block_exaport'),
+            'title' => get_string('itemblock_reorderlabel', 'block_exaport')]);
 
     if ($block->type === \block_exaport\item_block::TYPE_FILE) {
         foreach ($block->files as $file) {
@@ -346,6 +355,7 @@ function block_exaport_render_item_block_editor_row($block, $item, $courseid, $c
     return html_writer::tag('li', $content, [
         'class' => 'list-group-item',
         'data-blockid' => $block->id,
+        'aria-describedby' => 'exaport-item-block-help',
     ]);
 }
 
@@ -468,8 +478,9 @@ function block_exaport_do_edit_structured($existing, $post, $courseid) {
                 }
             }
 
-            block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $existing->id . '&action=edit',
-                $post->name);
         }
     }
+
+    block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $existing->id . '&action=edit',
+        $post->name);
 }

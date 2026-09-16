@@ -23,11 +23,11 @@ define(['jquery', 'jqueryui', 'core/modal_save_cancel'], function($, JQueryUI, M
         }
 
         var body = '<div class="list-group">' +
-            '<a class="list-group-item list-group-item-action" href="' + config.chooserurl + '&blockaction=add&blocktype=text">' +
+            '<a class="list-group-item list-group-item-action" href="' + config.addurls.text + '">' +
             config.strings.text + '</a>' +
-            '<a class="list-group-item list-group-item-action" href="' + config.chooserurl + '&blockaction=add&blocktype=file">' +
+            '<a class="list-group-item list-group-item-action" href="' + config.addurls.file + '">' +
             config.strings.file + '</a>' +
-            '<a class="list-group-item list-group-item-action" href="' + config.chooserurl + '&blockaction=add&blocktype=link">' +
+            '<a class="list-group-item list-group-item-action" href="' + config.addurls.link + '">' +
             config.strings.link + '</a>' +
             '</div>';
 

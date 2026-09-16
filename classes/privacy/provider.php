@@ -360,12 +360,6 @@ class provider implements
                             $writer->export_area_files(
                                 [$subcontext_name . $add_tosubcontext_name . '/Structured blocks', 'Block ' . $itemblock->sortorder],
                                 'block_exaport',
-                                'itemblock_content',
-                                $itemblock->id
-                            );
-                            $writer->export_area_files(
-                                [$subcontext_name . $add_tosubcontext_name . '/Structured blocks', 'Block ' . $itemblock->sortorder],
-                                'block_exaport',
                                 'itemblock_file',
                                 $itemblock->id
                             );

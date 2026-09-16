@@ -185,7 +185,8 @@ class item_content_helper {
                 $data['islink'] = true;
                 $data['hasurl'] = $url !== '';
                 $data['url'] = $url;
-                $data['linktext'] = $url !== '' ? preg_replace('~^https?://~i', '', $url) : '';
+                $data['linktext'] = $title !== '' ? format_string($title) :
+                    ($url !== '' ? preg_replace('~^https?://~i', '', $url) : '');
                 $data['emptylinktext'] = get_string('itemblockemptylink', 'block_exaport');
                 break;
 
@@ -231,8 +232,8 @@ class item_content_helper {
             'pluginfile.php',
             context_user::instance($item->userid)->id,
             'block_exaport',
-            self::get_pluginfile_filearea($access, (int)$item->id),
-            (int)$block->id
+            self::FILEAREA,
+            self::get_pluginfile_itemid($access, (int)$item->id, (int)$block->id)
         );
 
         return format_text($rewritten, (int)($block->contentformat ?? FORMAT_HTML));
@@ -303,8 +304,8 @@ class item_content_helper {
         return moodle_url::make_pluginfile_url(
             $file->get_contextid(),
             $file->get_component(),
-            self::get_pluginfile_filearea($access, $itemid),
-            $file->get_itemid(),
+            self::FILEAREA,
+            self::get_pluginfile_itemid($access, $itemid, (int)$file->get_itemid()),
             $file->get_filepath(),
             $file->get_filename(),
             false,
@@ -387,13 +388,14 @@ class item_content_helper {
     }
 
     /**
-     * Return the pluginfile area token used for block content files.
+     * Return the pluginfile itemid token used for block content files.
      *
      * @param string $access
      * @param int $itemid
+     * @param int $blockid
      * @return string
      */
-    public static function get_pluginfile_filearea(string $access, int $itemid): string {
-        return self::FILEAREA . '/access/' . self::encode_access_path($access) . '/itemid/' . $itemid . '/blockid';
+    public static function get_pluginfile_itemid(string $access, int $itemid, int $blockid): string {
+        return 'access/' . self::encode_access_path($access) . '/itemid/' . $itemid . '/blockid/' . $blockid;
     }
 }

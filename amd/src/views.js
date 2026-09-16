@@ -1173,17 +1173,20 @@ define(['jquery',
       });
     }
 
-    var handledFragmentPromise = fragmentPromise.catch(function (error) {
+    var fragmentHtml = '';
+    try {
+      fragmentHtml = await fragmentPromise;
+    } catch (error) {
       cleanupPendingBlockEdit(blockEditCtx);
       blockEditCtx = null;
       blockEditModal.setBody('');
       blockEditModal.hide();
       Notification.alert('', window.block_exaport.translate('updateposterror'));
       console.error('Exabis ePortfolio: failed to load block editor.', error);
-      throw error;
-    });
+      return;
+    }
     blockEditModal.setTitle(getModalTitle(blockType));
-    blockEditModal.setBody(handledFragmentPromise);
+    blockEditModal.setBody(fragmentHtml);
     blockEditModal.show();
   }
 

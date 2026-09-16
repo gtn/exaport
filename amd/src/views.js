@@ -1217,9 +1217,8 @@ define(['jquery',
 
     $(".portfolioDesignBlocks").sortable({
       receive: function (e, ui) {
-        // Get ajax only for item from the top block.
-        var uiattr = $(ui.item[0]).closest('ul').prop("className");
-        if (uiattr.search("portfolioDesignBlocks") == -1) {
+        var fromDesignBlocks = ui.sender && ui.sender.hasClass('portfolioDesignBlocks');
+        if (!fromDesignBlocks) {
           var blockType = ui.item.attr('block-type');
           // Sortable receive hands us the live inserted block, which is the one that needs cleanup.
           showPreloadinator(ui.item, '.blocktype', false);

@@ -30,26 +30,28 @@ if ($action === 'delete') {
         throw new moodle_exception('itemblocknotfound', 'block_exaport');
     }
 
-    if ($confirm && confirm_sesskey()) {
+    if ($confirm && data_submitted() && confirm_sesskey()) {
         require_sesskey();
         \block_exaport\item_content_mutation_helper::delete_block($item, $block);
         redirect($returnurl);
     }
 
     block_exaport_print_header('myportfolio');
-    echo $OUTPUT->confirm(
-        \block_exaport\item_content_mutation_helper::get_delete_confirmation_text($block),
-        new moodle_url('/blocks/exaport/item_content_block.php', [
-            'courseid' => $courseid,
-            'itemid' => $itemid,
-            'blockid' => $block->id,
-            'action' => 'delete',
-            'backtype' => $backtype,
-            'confirm' => 1,
-            'sesskey' => sesskey(),
-        ]),
-        $returnurl
-    );
+    echo $OUTPUT->box_start();
+    echo html_writer::tag('p', \block_exaport\item_content_mutation_helper::get_delete_confirmation_text($block));
+    echo html_writer::start_div('d-flex flex-wrap gap-2');
+    echo $OUTPUT->single_button(new moodle_url('/blocks/exaport/item_content_block.php', [
+        'courseid' => $courseid,
+        'itemid' => $itemid,
+        'blockid' => $block->id,
+        'action' => 'delete',
+        'backtype' => $backtype,
+        'confirm' => 1,
+        'sesskey' => sesskey(),
+    ]), get_string('delete', 'core'), 'post');
+    echo $OUTPUT->single_button($returnurl, get_string('cancel', 'core'), 'get');
+    echo html_writer::end_div();
+    echo $OUTPUT->box_end();
     echo block_exaport_wrapperdivend();
     echo $OUTPUT->footer();
     die;

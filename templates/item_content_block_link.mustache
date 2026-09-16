@@ -17,7 +17,7 @@
 {{/hasheading}}
 {{#hasurl}}
 <p class="mb-2">
-    <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{linktext}}</a>
+    <a href="{{url}}"{{#openinnewtab}} target="_blank" rel="noopener noreferrer"{{/openinnewtab}}>{{linktext}}</a>
 </p>
 {{/hasurl}}
 {{^hasurl}}<p class="text-muted mb-2">{{emptylinktext}}</p>{{/hasurl}}

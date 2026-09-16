@@ -211,6 +211,7 @@ class item_content_helper {
 
             case 'link':
                 $data['islink'] = true;
+                $data['openinnewtab'] = true;
                 $data['hasurl'] = $url !== '';
                 $data['url'] = $url;
                 $data['linktext'] = $title !== '' ? format_string($title) :

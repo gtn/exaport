@@ -261,10 +261,11 @@ class item_content_mutation_helper {
 
         $type = self::require_supported_block_type($type);
         $now = time();
+        $transaction = $DB->start_delegated_transaction();
         $block = (object)[
             'itemid' => (int)$item->id,
             'type' => $type,
-            'sortorder' => 0,
+            'sortorder' => self::get_next_sortorder((int)$item->id),
             'title' => '',
             'content' => '',
             'contentformat' => FORMAT_HTML,
@@ -273,8 +274,7 @@ class item_content_mutation_helper {
             'timemodified' => $now,
         ];
         $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
-        $block->sortorder = $block->id * 10;
-        $DB->set_field('block_exaportitemblock', 'sortorder', $block->sortorder, ['id' => $block->id]);
+        $transaction->allow_commit();
 
         return self::save_block($item, $block, $data);
     }
@@ -477,6 +477,27 @@ class item_content_mutation_helper {
         self::touch_item($item, (int)$record->timemodified);
 
         return $DB->get_record('block_exaportitemblock', ['id' => $block->id], '*', MUST_EXIST);
+    }
+
+    /**
+     * Calculate the next sortorder for a new block.
+     *
+     * @param int $itemid
+     * @return int
+     */
+    private static function get_next_sortorder(int $itemid): int {
+        global $DB;
+
+        $maxsortorder = $DB->get_field_sql(
+            'SELECT MAX(sortorder) FROM {block_exaportitemblock} WHERE itemid = ?',
+            [$itemid]
+        );
+
+        if ($maxsortorder === false || $maxsortorder === null) {
+            return 10;
+        }
+
+        return ((int)$maxsortorder) + 10;
     }
 
     /**

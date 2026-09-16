@@ -116,7 +116,7 @@ final class item_content_mutation_helper_test extends \advanced_testcase {
         $block = item_content_mutation_helper::create_block($this->item, 'text', $data);
         $updateditem = $DB->get_record('block_exaportitem', ['id' => $this->item->id], '*', MUST_EXIST);
 
-        $this->assertGreaterThan(30, (int)$block->sortorder);
+        $this->assertSame(40, (int)$block->sortorder);
         $this->assertSame('New block', $block->title);
         $this->assertStringContainsString('Body', $block->content);
         $this->assertGreaterThanOrEqual($oldmodified, (int)$updateditem->timemodified);

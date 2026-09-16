@@ -193,14 +193,21 @@ class item_content_helper {
             $data['actionslabel'] = get_string('itemblockactions', 'block_exaport', $blocklabel);
             $data['candelete'] = true;
             $data['deletelabel'] = get_string('itemblockdeleteaction', 'block_exaport', $blocklabel);
-            $data['deleteurl'] = item_content_mutation_helper::get_block_action_url(
+            $deleteurl = item_content_mutation_helper::get_block_action_url(
                 $item,
                 $access,
                 'delete',
                 $type,
                 (int)$block->id,
                 $backtype
-            )->out(false);
+            );
+            $data['deleteurl'] = $deleteurl->out(false);
+            $data['deleteposturl'] = $deleteurl->out_omit_querystring();
+            $data['deletecourseid'] = (int)$item->courseid;
+            $data['deleteitemid'] = (int)$item->id;
+            $data['deleteblockid'] = (int)$block->id;
+            $data['deletebacktype'] = $backtype;
+            $data['deletesesskey'] = sesskey();
             $data['deleteconfirm'] = item_content_mutation_helper::get_delete_confirmation_text($block);
         }
 

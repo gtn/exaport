@@ -4,7 +4,15 @@
     <div class="exaport-item-block__actions" role="group" aria-label="{{actionslabel}}">
     {{#canedit}}<a class="btn btn-link btn-sm p-0" href="{{editurl}}" aria-label="{{editlabel}}" title="{{editlabel}}">{{#str}}edit, core{{/str}}</a>{{/canedit}}
     {{#candelete}}
-    <a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}" aria-label="{{deletelabel}}" title="{{deletelabel}}">{{#str}}delete, core{{/str}}</a>
+    <form class="d-inline" method="post" action="{{deleteposturl}}">
+        <input type="hidden" name="courseid" value="{{deletecourseid}}">
+        <input type="hidden" name="itemid" value="{{deleteitemid}}">
+        <input type="hidden" name="blockid" value="{{deleteblockid}}">
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="backtype" value="{{deletebacktype}}">
+        <input type="hidden" name="sesskey" value="{{deletesesskey}}">
+        <button class="btn btn-link btn-sm text-danger p-0" type="submit" aria-label="{{deletelabel}}" title="{{deletelabel}}">{{#str}}delete, core{{/str}}</button>
+    </form>
     {{/candelete}}
     </div>
 </div>
@@ -13,7 +21,17 @@
 <div class="exaport-item-block__header exaport-item-block__header--actions-only">
     <div class="exaport-item-block__actions" role="group" aria-label="{{actionslabel}}">
     {{#canedit}}<a class="btn btn-link btn-sm p-0" href="{{editurl}}" aria-label="{{editlabel}}" title="{{editlabel}}">{{#str}}edit, core{{/str}}</a>{{/canedit}}
-    {{#candelete}}<a class="btn btn-link btn-sm text-danger p-0" href="{{deleteurl}}" aria-label="{{deletelabel}}" title="{{deletelabel}}">{{#str}}delete, core{{/str}}</a>{{/candelete}}
+    {{#candelete}}
+    <form class="d-inline" method="post" action="{{deleteposturl}}">
+        <input type="hidden" name="courseid" value="{{deletecourseid}}">
+        <input type="hidden" name="itemid" value="{{deleteitemid}}">
+        <input type="hidden" name="blockid" value="{{deleteblockid}}">
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="backtype" value="{{deletebacktype}}">
+        <input type="hidden" name="sesskey" value="{{deletesesskey}}">
+        <button class="btn btn-link btn-sm text-danger p-0" type="submit" aria-label="{{deletelabel}}" title="{{deletelabel}}">{{#str}}delete, core{{/str}}</button>
+    </form>
+    {{/candelete}}
     </div>
 </div>
 {{/hasheading}}

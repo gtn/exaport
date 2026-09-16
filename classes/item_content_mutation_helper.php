@@ -274,6 +274,7 @@ class item_content_mutation_helper {
             'timemodified' => $now,
         ];
         $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
+        self::stabilize_sortorder($block);
         $transaction->allow_commit();
 
         return self::save_block($item, $block, $data);
@@ -498,6 +499,25 @@ class item_content_mutation_helper {
         }
 
         return ((int)$maxsortorder) + 10;
+    }
+
+    /**
+     * Retry sortorder allocation if a concurrent insert picked the same slot.
+     *
+     * @param \stdClass $block
+     * @return void
+     */
+    private static function stabilize_sortorder(\stdClass $block): void {
+        global $DB;
+
+        while ($DB->record_exists_select(
+            'block_exaportitemblock',
+            'itemid = ? AND sortorder = ? AND id <> ?',
+            [$block->itemid, $block->sortorder, $block->id]
+        )) {
+            $block->sortorder += 10;
+            $DB->set_field('block_exaportitemblock', 'sortorder', $block->sortorder, ['id' => $block->id]);
+        }
     }
 
     /**

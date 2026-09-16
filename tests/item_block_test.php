@@ -156,6 +156,15 @@ final class item_block_test extends \advanced_testcase {
         $this->assertSame([], item_block::get_block_files($first, (int)$item->userid));
     }
 
+    public function test_delete_last_block_leaves_item_without_blocks(): void {
+        $item = $this->create_item();
+        $block = $this->create_block($item, item_block::TYPE_TEXT, 1, 'Only block', '<p>One</p>');
+
+        item_block::delete_block($item, $block);
+
+        $this->assertSame([], item_block::get_blocks($item->id));
+    }
+
     public function test_save_order_rejects_invalid_block_sets(): void {
         $item = $this->create_item();
         $first = $this->create_block($item, item_block::TYPE_TEXT, 1, 'First', '<p>One</p>');

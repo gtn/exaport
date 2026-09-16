@@ -94,7 +94,7 @@ if ($ajax && $existing) {
         }
 
         throw new moodle_exception('invalidblockid', 'block_exaport');
-    } catch (Throwable $exception) {
+    } catch (\Throwable $exception) {
         $message = $exception instanceof moodle_exception ? $exception->getMessage() : get_string('error');
         $errorcode = $exception instanceof moodle_exception ? $exception->errorcode : '';
         block_exaport_send_json([
@@ -577,6 +577,15 @@ function block_exaport_do_edit_structured($existing, $post, $courseid) {
         $post->name);
 }
 
+/**
+ * Collect submitted block data for AJAX save requests.
+ *
+ * Text/link blocks return title, url, and a content_editor array with text, format, and draft itemid.
+ * File blocks return title, url, and the file draft itemid.
+ *
+ * @param string $blocktype
+ * @return stdClass
+ */
 function block_exaport_get_submitted_item_block_data(string $blocktype): stdClass {
     $data = (object)[
         'title' => optional_param('title', '', PARAM_TEXT),

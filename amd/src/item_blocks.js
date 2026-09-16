@@ -15,7 +15,6 @@ define([
 ], function($, JQueryUI, Fragment, ModalSaveCancel, ModalEvents, Notification) {
     var config = {};
     var chooserModal = null;
-    var formModal = null;
 
     var getBlockList = function() {
         return $('.exaport-item-block-list');
@@ -52,14 +51,17 @@ define([
         if (exception && exception.responseJSON && exception.responseJSON.message) {
             return exception.responseJSON.message;
         }
-        if (exception && exception.responseText) {
+        if (exception && exception.message) {
+            return exception.message;
+        }
+        if (exception && exception.responseText && exception.responseText.charAt(0) === '{') {
             try {
                 return JSON.parse(exception.responseText).message || fallbackMessage;
             } catch (error) {
                 return fallbackMessage;
             }
         }
-        return (exception && exception.message) || fallbackMessage;
+        return fallbackMessage;
     };
 
     var clearFieldErrors = function(form) {
@@ -140,19 +142,16 @@ define([
     };
 
     var ensureFormModal = function() {
-        if (formModal) {
-            return $.Deferred().resolve(formModal).promise();
-        }
-
         return ModalSaveCancel.create({
             title: '',
             body: ''
         }).then(function(modal) {
-            formModal = modal;
             modal.getFooter().hide();
             modal.getRoot().on(ModalEvents.hidden, function() {
                 clearFieldErrors(modal.getBody());
-                modal.setBody('');
+                if (typeof modal.destroy === 'function') {
+                    modal.destroy();
+                }
             });
             modal.getRoot().on('click', 'input[name=cancel], button[name=cancel]', function(e) {
                 e.preventDefault();

@@ -91,15 +91,7 @@ if ($view && $action == 'grouplist') {
 $returnurltolist = $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $courseid;
 $returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id . '&action=edit';
 
-/**
- * Emit the AJAX save response for the collection editor.
- *
- * @param bool $ok
- * @param string $blocks
- * @param int $statuscode
- * @return void
- */
-function block_exaport_send_view_ajax_response(bool $ok, string $blocks = '', int $statuscode = 200): void {
+$sendajaxresponse = static function(bool $ok, string $blocks = '', int $statuscode = 200): void {
     http_response_code($statuscode);
     header('Content-Type: application/json');
     echo json_encode((object) [
@@ -107,7 +99,7 @@ function block_exaport_send_view_ajax_response(bool $ok, string $blocks = '', in
         'blocks' => $blocks,
     ]);
     exit;
-}
+};
 
 // Delete item.
 if ($action == 'delete') {
@@ -564,7 +556,7 @@ if ($editform->is_cancelled()) {
                 }
             } catch (moodle_exception $e) {
                 if ($isajax) {
-                    block_exaport_send_view_ajax_response(false, '', 500);
+                    $sendajaxresponse(false, '', 500);
                 }
                 $message = block_exaport_get_string('Something wrong with blocks saving (code: 1694089814164)');
                 break;
@@ -583,9 +575,9 @@ if ($editform->is_cancelled()) {
                     $view->id, array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
                 $blocksjson = json_encode(block_exaport_get_view_blocks($view));
                 if ($blocksjson === false) {
-                    block_exaport_send_view_ajax_response(false, '', 500);
+                    $sendajaxresponse(false, '', 500);
                 }
-                block_exaport_send_view_ajax_response(true, $blocksjson);
+                $sendajaxresponse(true, $blocksjson);
             }
 
             $message = block_exaport_get_string('view_saved');

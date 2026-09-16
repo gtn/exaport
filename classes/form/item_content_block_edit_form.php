@@ -102,8 +102,9 @@ class item_content_block_edit_form extends \block_exaport_moodleform {
         $type = \block_exaport\item_content_mutation_helper::require_supported_block_type($data['type']);
 
         if ($type === 'link') {
-            $normalized = \block_exaport\item_content_mutation_helper::normalize_url((string)($data['url'] ?? ''));
-            if ($normalized === '' || clean_param($normalized, PARAM_URL) !== $normalized) {
+            try {
+                \block_exaport\item_content_mutation_helper::validate_link_url((string)($data['url'] ?? ''));
+            } catch (\moodle_exception $e) {
                 $errors['url'] = get_string('invalidurl');
             }
         }

@@ -264,7 +264,7 @@ class item_content_mutation_helper {
         $block = (object)[
             'itemid' => (int)$item->id,
             'type' => $type,
-            'sortorder' => self::get_next_sortorder((int)$item->id),
+            'sortorder' => 0,
             'title' => '',
             'content' => '',
             'contentformat' => FORMAT_HTML,
@@ -273,6 +273,7 @@ class item_content_mutation_helper {
             'timemodified' => $now,
         ];
         $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
+        $block->sortorder = $block->id * 10;
 
         return self::save_block($item, $block, $data);
     }
@@ -330,6 +331,22 @@ class item_content_mutation_helper {
         }
 
         return trim(clean_param($url, PARAM_URL));
+    }
+
+    /**
+     * Validate and normalize a block link URL.
+     *
+     * @param string $url
+     * @return string
+     */
+    public static function validate_link_url(string $url): string {
+        $normalized = self::normalize_url($url);
+        $parts = $normalized !== '' ? parse_url($normalized) : false;
+        if ($normalized === '' || $parts === false || empty($parts['scheme']) || empty($parts['host'])) {
+            throw new \moodle_exception('invalidurl');
+        }
+
+        return $normalized;
     }
 
     /**
@@ -421,7 +438,7 @@ class item_content_mutation_helper {
         $record->timemodified = time();
 
         if ($type === 'link') {
-            $record->url = self::normalize_url((string)($data->url ?? ''));
+            $record->url = self::validate_link_url((string)($data->url ?? ''));
         }
 
         $editorrecord = clone $record;
@@ -444,18 +461,15 @@ class item_content_mutation_helper {
 
         if (in_array($type, ['file', 'media'], true)) {
             $draftid = (int)($data->attachments ?? 0);
-            $uploadfilesizes = block_exaport_get_filessize_by_draftid($draftid);
-            if (block_exaport_file_userquotecheck($uploadfilesizes, $item->id)
-                && block_exaport_get_maxfilesize_by_draftid_check($draftid)) {
-                file_save_draft_area_files(
-                    $draftid,
-                    context_user::instance($item->userid)->id,
-                    'block_exaport',
-                    item_content_helper::FILEAREA,
-                    $block->id,
-                    self::get_attachment_options($type)
-                );
-            }
+            self::validate_attachment_draft($draftid, $item, $block);
+            file_save_draft_area_files(
+                $draftid,
+                context_user::instance($item->userid)->id,
+                'block_exaport',
+                item_content_helper::FILEAREA,
+                $block->id,
+                self::get_attachment_options($type)
+            );
         }
 
         $DB->update_record('block_exaportitemblock', $record);
@@ -470,19 +484,43 @@ class item_content_mutation_helper {
      * @param int $itemid
      * @return int
      */
-    private static function get_next_sortorder(int $itemid): int {
-        global $DB;
+    private static function validate_attachment_draft(int $draftid, \stdClass $item, \stdClass $block): void {
+        global $DB, $CFG;
 
-        $maxsortorder = $DB->get_field_sql(
-            'SELECT MAX(sortorder) FROM {block_exaportitemblock} WHERE itemid = ?',
-            [$itemid]
+        $contextid = context_user::instance($item->userid)->id;
+        $draftstats = $DB->get_record_sql(
+            "SELECT COALESCE(SUM(filesize), 0) AS allfilesize, COALESCE(MAX(filesize), 0) AS maxfilesize
+               FROM {files}
+              WHERE contextid = ?
+                AND component = 'user'
+                AND filearea = 'draft'
+                AND itemid = ?",
+            [$contextid, $draftid]
+        );
+        $existingfilesize = $DB->get_field_sql(
+            "SELECT COALESCE(SUM(filesize), 0)
+               FROM {files}
+              WHERE contextid = ?
+                AND component = 'block_exaport'
+                AND filearea = ?
+                AND itemid = ?",
+            [$contextid, item_content_helper::FILEAREA, $block->id]
+        );
+        $totalfilesize = $DB->get_field_sql(
+            "SELECT COALESCE(SUM(filesize), 0)
+               FROM {files}
+              WHERE contextid = ?
+                AND component = 'block_exaport'",
+            [$contextid]
         );
 
-        if ($maxsortorder === false || $maxsortorder === null) {
-            return 10;
+        if ($CFG->block_exaport_max_uploadfile_size > 0 && (int)$draftstats->maxfilesize > $CFG->block_exaport_max_uploadfile_size) {
+            throw new \moodle_exception('maxbytes', 'moodle');
         }
-
-        return ((int)$maxsortorder) + 10;
+        if ($CFG->block_exaport_userquota > 0
+            && ((int)$totalfilesize - (int)$existingfilesize + (int)$draftstats->allfilesize) > $CFG->block_exaport_userquota) {
+            throw new \moodle_exception('userquotalimit', 'block_exaport');
+        }
     }
 
     /**

@@ -116,7 +116,7 @@ final class item_content_mutation_helper_test extends \advanced_testcase {
         $block = item_content_mutation_helper::create_block($this->item, 'text', $data);
         $updateditem = $DB->get_record('block_exaportitem', ['id' => $this->item->id], '*', MUST_EXIST);
 
-        $this->assertSame(40, (int)$block->sortorder);
+        $this->assertGreaterThan(30, (int)$block->sortorder);
         $this->assertSame('New block', $block->title);
         $this->assertStringContainsString('Body', $block->content);
         $this->assertGreaterThanOrEqual($oldmodified, (int)$updateditem->timemodified);
@@ -210,6 +210,21 @@ final class item_content_mutation_helper_test extends \advanced_testcase {
     public function test_unsupported_block_types_are_rejected(): void {
         $this->expectException(\moodle_exception::class);
         item_content_mutation_helper::require_supported_block_type('accordion');
+    }
+
+    public function test_invalid_link_urls_are_rejected_during_update(): void {
+        $block = $this->create_block([
+            'type' => 'link',
+            'sortorder' => 77,
+        ]);
+        $data = (object)[
+            'title' => 'Invalid',
+            'url' => 'http://',
+            'content_editor' => $this->create_editor_data('<p>Description</p>'),
+        ];
+
+        $this->expectException(\moodle_exception::class);
+        item_content_mutation_helper::update_block($this->item, $block, $data);
     }
 
     public function test_resolve_block_file_request_rejects_mismatched_item_and_block(): void {

@@ -266,4 +266,22 @@ final class item_content_mutation_helper_test extends \advanced_testcase {
 
         $this->assertSame([], $resolved);
     }
+
+    public function test_resolve_block_file_request_accepts_editor_content_filearea(): void {
+        $block = $this->create_block(['type' => 'text']);
+        $this->add_block_file($block->id, item_content_helper::CONTENT_FILEAREA, 'embedded.txt', 'content');
+
+        $resolved = item_content_helper::resolve_block_file_request(item_content_helper::CONTENT_FILEAREA, [
+            'access',
+            item_content_helper::encode_access_path('portfolio/id/' . $this->owner->id),
+            'itemid',
+            (string)$this->item->id,
+            'blockid',
+            (string)$block->id,
+            'embedded.txt',
+        ]);
+
+        $this->assertSame($block->id, $resolved['block']->id);
+        $this->assertSame('embedded.txt', $resolved['filename']);
+    }
 }

@@ -216,7 +216,7 @@ class item_content_mutation_helper {
                 $block->id
             );
         } else {
-            $draftid = file_get_submitted_draft_itemid('content_editor');
+            $draftid = self::get_form_draft_itemid('content_editor');
             file_prepare_draft_area(
                 $draftid,
                 $context->id,
@@ -233,7 +233,7 @@ class item_content_mutation_helper {
         }
 
         if (in_array($type, ['file', 'media'], true)) {
-            $draftitemid = file_get_submitted_draft_itemid('attachments');
+            $draftitemid = self::get_form_draft_itemid('attachments');
             file_prepare_draft_area(
                 $draftitemid,
                 $context->id,
@@ -261,21 +261,30 @@ class item_content_mutation_helper {
 
         $type = self::require_supported_block_type($type);
         $now = time();
-        $transaction = $DB->start_delegated_transaction();
-        $block = (object)[
-            'itemid' => (int)$item->id,
-            'type' => $type,
-            'sortorder' => self::get_next_sortorder((int)$item->id),
-            'title' => '',
-            'content' => '',
-            'contentformat' => FORMAT_HTML,
-            'url' => '',
-            'timecreated' => $now,
-            'timemodified' => $now,
-        ];
-        $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
-        self::stabilize_sortorder($block);
-        $transaction->allow_commit();
+        $lockfactory = \core\lock\lock_config::get_lock_factory('block_exaport_itemblocks');
+        $lock = $lockfactory->get_lock('item:' . (int)$item->id, 10);
+        if (!$lock) {
+            throw new \moodle_exception('error');
+        }
+
+        try {
+            $transaction = $DB->start_delegated_transaction();
+            $block = (object)[
+                'itemid' => (int)$item->id,
+                'type' => $type,
+                'sortorder' => self::get_next_sortorder((int)$item->id),
+                'title' => '',
+                'content' => '',
+                'contentformat' => FORMAT_HTML,
+                'url' => '',
+                'timecreated' => $now,
+                'timemodified' => $now,
+            ];
+            $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
+            $transaction->allow_commit();
+        } finally {
+            $lock->release();
+        }
 
         return self::save_block($item, $block, $data);
     }
@@ -505,25 +514,6 @@ class item_content_mutation_helper {
     }
 
     /**
-     * Retry sortorder allocation if a concurrent insert picked the same slot.
-     *
-     * @param \stdClass $block
-     * @return void
-     */
-    private static function stabilize_sortorder(\stdClass $block): void {
-        global $DB;
-
-        while ($DB->record_exists_select(
-            'block_exaportitemblock',
-            'itemid = ? AND sortorder = ? AND id <> ?',
-            [$block->itemid, $block->sortorder, $block->id]
-        )) {
-            $block->sortorder += 10;
-            $DB->set_field('block_exaportitemblock', 'sortorder', $block->sortorder, ['id' => $block->id]);
-        }
-    }
-
-    /**
      * Validate an attachment draft against the configured upload and quota limits.
      *
      * @param int $draftid
@@ -568,6 +558,20 @@ class item_content_mutation_helper {
             && ((int)$totalfilesize - (int)$existingfilesize + (int)$draftstats->allfilesize) > $CFG->block_exaport_userquota) {
             throw new \moodle_exception('userquotalimit', 'block_exaport');
         }
+    }
+
+    /**
+     * Get a fresh draft itemid on initial loads while preserving submitted drafts after validation failures.
+     *
+     * @param string $elementname
+     * @return int
+     */
+    private static function get_form_draft_itemid(string $elementname): int {
+        if (data_submitted()) {
+            return file_get_submitted_draft_itemid($elementname);
+        }
+
+        return file_get_unused_draft_itemid();
     }
 
     /**

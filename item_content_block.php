@@ -30,10 +30,20 @@ if ($action === 'delete') {
         throw new moodle_exception('itemblocknotfound', 'block_exaport');
     }
 
-    if ($confirm && data_submitted() && confirm_sesskey()) {
+    if (data_submitted()) {
         require_sesskey();
-        \block_exaport\item_content_mutation_helper::delete_block($item, $block);
-        redirect($returnurl);
+        if ($confirm) {
+            \block_exaport\item_content_mutation_helper::delete_block($item, $block);
+            redirect($returnurl);
+        }
+
+        redirect(new moodle_url('/blocks/exaport/item_content_block.php', [
+            'courseid' => $courseid,
+            'itemid' => $itemid,
+            'blockid' => $block->id,
+            'action' => 'delete',
+            'backtype' => $backtype,
+        ]));
     }
 
     block_exaport_print_header('myportfolio');

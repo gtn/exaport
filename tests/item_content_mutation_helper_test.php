@@ -195,9 +195,14 @@ final class item_content_mutation_helper_test extends \advanced_testcase {
 
         $copiedblock = $DB->get_record('block_exaportitemblock', ['itemid' => $targetitemid], '*', MUST_EXIST);
         $targetitem = $DB->get_record('block_exaportitem', ['id' => $targetitemid], '*', MUST_EXIST);
+        $targetcontextid = \context_user::instance($this->recipient->id)->id;
+        $attachmentfiles = item_content_helper::get_block_area_files($targetitem, $copiedblock->id, item_content_helper::FILEAREA);
+        $contentfiles = item_content_helper::get_block_area_files($targetitem, $copiedblock->id, item_content_helper::CONTENT_FILEAREA);
 
-        $this->assertCount(1, item_content_helper::get_block_area_files($targetitem, $copiedblock->id, item_content_helper::FILEAREA));
-        $this->assertCount(1, item_content_helper::get_block_area_files($targetitem, $copiedblock->id, item_content_helper::CONTENT_FILEAREA));
+        $this->assertCount(1, $attachmentfiles);
+        $this->assertCount(1, $contentfiles);
+        $this->assertSame($targetcontextid, (int)reset($attachmentfiles)->get_contextid());
+        $this->assertSame($targetcontextid, (int)reset($contentfiles)->get_contextid());
     }
 
     public function test_require_manage_context_rejects_foreign_item_access(): void {

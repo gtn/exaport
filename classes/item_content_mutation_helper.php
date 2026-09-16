@@ -281,12 +281,13 @@ class item_content_mutation_helper {
                 'timemodified' => $now,
             ];
             $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
+            $savedblock = self::save_block($item, $block, $data);
             $transaction->allow_commit();
         } finally {
             $lock->release();
         }
 
-        return self::save_block($item, $block, $data);
+        return $savedblock;
     }
 
     /**

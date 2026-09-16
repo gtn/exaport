@@ -13,6 +13,8 @@
 
 require_once(__DIR__ . '/inc.php');
 
+global $OUTPUT;
+
 $courseid = required_param('courseid', PARAM_INT);
 $itemid = required_param('itemid', PARAM_INT);
 $action = required_param('action', PARAM_ACTION);

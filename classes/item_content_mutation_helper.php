@@ -328,7 +328,7 @@ class item_content_mutation_helper {
         if ($url === '') {
             return '';
         }
-        if (!preg_match('~^[a-z][a-z0-9+.-]*://~i', $url)) {
+        if (!preg_match('~^[a-z][a-z0-9+.-]*:~i', $url)) {
             $url = 'http://' . $url;
         }
 
@@ -344,7 +344,10 @@ class item_content_mutation_helper {
     public static function validate_link_url(string $url): string {
         $normalized = self::normalize_url($url);
         $parts = $normalized !== '' ? parse_url($normalized) : false;
-        if ($normalized === '' || $parts === false || empty($parts['scheme']) || empty($parts['host'])) {
+        $scheme = $parts['scheme'] ?? '';
+        $requireshost = in_array($scheme, ['http', 'https', 'ftp', 'ftps'], true);
+        $hasendpoint = !empty($parts['host']) || !empty($parts['path']);
+        if ($normalized === '' || $parts === false || empty($scheme) || ($requireshost && empty($parts['host'])) || !$hasendpoint) {
             throw new \moodle_exception('invalidurl');
         }
 

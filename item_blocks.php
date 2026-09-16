@@ -103,7 +103,7 @@ if ($ajax && $existing) {
         block_exaport_send_json([
             'success' => false,
             'message' => $message,
-            'fielderrors' => block_exaport_get_item_block_field_errors($errorcode, $effectiveblocktype),
+            'fielderrors' => block_exaport_get_item_block_validation_errors($errorcode, $effectiveblocktype),
         ]);
     }
 }
@@ -231,6 +231,7 @@ $PAGE->requires->js_call_amd('block_exaport/item_blocks', 'init', [[
         'delete' => get_string('delete'),
         'cancel' => get_string('cancel'),
         'savefirst' => get_string('itemblock_savefirst', 'block_exaport'),
+        'ajaxerror' => get_string('itemblock_ajaxerror', 'block_exaport'),
         'deleteconfirm' => get_string('itemblock_deleteconfirm', 'block_exaport'),
         'empty' => get_string('itemblock_empty', 'block_exaport'),
     ],
@@ -319,7 +320,7 @@ if (!$existing) {
 } else {
     $blocks = \block_exaport\item_block::get_display_blocks($existing, 'portfolio/id/' . $existing->userid);
     echo html_writer::start_tag('ul', ['class' => 'list-group mt-3 exaport-item-block-list' . ($blocks ? '' : ' d-none'),
-        'data-itemid' => $existing->id]);
+        'data-itemid' => $existing->id, 'aria-hidden' => $blocks ? 'false' : 'true']);
     if ($blocks) {
         foreach ($blocks as $displayblock) {
             echo block_exaport_render_item_block_editor_row($displayblock, $existing, $courseid, $categoryid, $cattype);
@@ -328,9 +329,11 @@ if (!$existing) {
     echo html_writer::end_tag('ul');
     echo html_writer::tag('p', get_string('itemblock_empty', 'block_exaport'), [
         'class' => 'mt-3 text-muted exaport-item-block-empty' . ($blocks ? ' d-none' : ''),
+        'aria-hidden' => $blocks ? 'true' : 'false',
     ]);
     echo html_writer::tag('p', get_string('itemblock_dragdrophelp', 'block_exaport'),
-        ['class' => 'text-muted mt-2 mb-0', 'id' => 'exaport-item-block-help']);
+        ['class' => 'text-muted mt-2 mb-0 exaport-item-block-help' . ($blocks ? '' : ' d-none'),
+            'id' => 'exaport-item-block-help', 'aria-hidden' => $blocks ? 'false' : 'true']);
     echo '<noscript>';
     echo html_writer::tag('div', html_writer::link(
         (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
@@ -609,22 +612,6 @@ function block_exaport_get_submitted_item_block_data(string $blocktype): stdClas
     }
 
     return $data;
-}
-
-function block_exaport_get_item_block_field_errors(string $errorcode, string $blocktype): array {
-    switch ($errorcode) {
-        case 'invalidblockurl':
-            return ['url' => get_string('invalidblockurl', 'block_exaport')];
-        case 'uploadfailed':
-            return ['file' => get_string('uploadfailed', 'block_exaport')];
-        case 'invalidblockcontent':
-            if ($blocktype === \block_exaport\item_block::TYPE_FILE) {
-                return ['file' => get_string('invalidblockcontent', 'block_exaport')];
-            }
-            return ['content_editor' => get_string('invalidblockcontent', 'block_exaport')];
-        default:
-            return [];
-    }
 }
 
 function block_exaport_send_json(array $payload): void {

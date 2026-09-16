@@ -507,6 +507,29 @@ function block_exaport_build_item_block_edit_form(stdClass $item, string $blocka
     ];
 }
 
+/**
+ * Map structured item block validation exceptions to form field errors.
+ *
+ * @param string $errorcode
+ * @param string $blocktype
+ * @return array
+ */
+function block_exaport_get_item_block_validation_errors(string $errorcode, string $blocktype): array {
+    switch ($errorcode) {
+        case 'invalidblockurl':
+            return ['url' => get_string('invalidblockurl', 'block_exaport')];
+        case 'uploadfailed':
+            return ['file' => get_string('uploadfailed', 'block_exaport')];
+        case 'invalidblockcontent':
+            if ($blocktype === \block_exaport\item_block::TYPE_FILE) {
+                return ['file' => get_string('invalidblockcontent', 'block_exaport')];
+            }
+            return ['content_editor' => get_string('invalidblockcontent', 'block_exaport')];
+        default:
+            return [];
+    }
+}
+
 function rek_category_select_setup($outercategories, $entryname, $categories) {
     global $DB, $USER;
     foreach ($outercategories as $curcategory) {

@@ -216,6 +216,7 @@ $string['project_description'] = 'The why behind this project';
 $string['project_process'] = 'Making it happen';
 $string['project_result'] = 'Results and learnings';
 $string['itemblock_addcontent'] = 'Add content';
+$string['itemblock_ajaxerror'] = 'The content block action could not be completed.';
 $string['itemblock_contentblocks'] = 'Content blocks';
 $string['itemblock_deleteconfirm'] = 'Do you really want to delete this content block?';
 $string['itemblock_dragdrophelp'] = 'Drag and drop the blocks into the required order, then save the page.';

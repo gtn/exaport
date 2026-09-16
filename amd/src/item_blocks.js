@@ -106,9 +106,13 @@ define([
 
     var updateListEmptyState = function() {
         var list = getBlockList();
+        var help = $('.exaport-item-block-help');
+        var emptyState = $('.exaport-item-block-empty');
         var hasBlocks = list.find('[data-blockid]').length > 0;
         list.toggleClass('d-none', !hasBlocks);
-        $('.exaport-item-block-empty').toggleClass('d-none', hasBlocks);
+        list.attr('aria-hidden', hasBlocks ? 'false' : 'true');
+        help.toggleClass('d-none', !hasBlocks).attr('aria-hidden', hasBlocks ? 'false' : 'true');
+        emptyState.toggleClass('d-none', hasBlocks).attr('aria-hidden', hasBlocks ? 'true' : 'false');
         updateOrderField();
     };
 
@@ -142,7 +146,7 @@ define([
             if (previousOrder && previousOrder.length) {
                 applyOrder(previousOrder);
             }
-            showMessage(getRequestErrorMessage(exception, config.strings.cancel));
+            showMessage(getRequestErrorMessage(exception, config.strings.ajaxerror));
         });
     };
 
@@ -174,14 +178,14 @@ define([
                     if (!response || !response.success) {
                         showFieldErrors(form, response ? response.fielderrors : {});
                         if (!response || !response.fielderrors || !Object.keys(response.fielderrors).length) {
-                            showMessage(response && response.message ? response.message : config.strings.cancel);
+                            showMessage(response && response.message ? response.message : config.strings.ajaxerror);
                         }
                         return;
                     }
                     replaceListHtml(response.listhtml);
                     modal.hide();
                 }).fail(function(exception) {
-                    showMessage(getRequestErrorMessage(exception, config.strings.cancel));
+                    showMessage(getRequestErrorMessage(exception, config.strings.ajaxerror));
                 });
             });
             return modal;
@@ -200,8 +204,7 @@ define([
         }
 
         createFormModal().then(function(modal) {
-            modal.setTitle(getModalTitle(blockaction, blocktype));
-            modal.setBody(Fragment.loadFragment('block_exaport', 'itemblock_form', config.fragmentcontextid, {
+            var fragmentPromise = Fragment.loadFragment('block_exaport', 'itemblock_form', config.fragmentcontextid, {
                 itemid: config.itemid,
                 courseid: config.courseid,
                 categoryid: config.categoryid,
@@ -209,9 +212,18 @@ define([
                 blockaction: blockaction,
                 blocktype: blocktype,
                 blockid: blockid || 0
-            }));
-            modal.show();
-        }).fail(Notification.exception);
+            });
+            fragmentPromise.then(function(fragmentHtml) {
+                modal.setTitle(getModalTitle(blockaction, blocktype));
+                modal.setBody(fragmentHtml);
+                modal.show();
+            }, function(exception) {
+                if (typeof modal.destroy === 'function') {
+                    modal.destroy();
+                }
+                showMessage(getRequestErrorMessage(exception, config.strings.ajaxerror));
+            });
+        }, Notification.exception);
     };
 
     var ensureChooserModal = function() {
@@ -251,7 +263,7 @@ define([
         }
         ensureChooserModal().then(function(modal) {
             modal.show();
-        }).fail(Notification.exception);
+        }, Notification.exception);
     };
 
     var deleteBlock = function(blockid) {

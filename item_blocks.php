@@ -31,6 +31,10 @@ $blocktype = optional_param('blocktype', '', PARAM_ALPHA);
 $blockid = optional_param('blockid', 0, PARAM_INT);
 $deleteblock = optional_param('deleteblock', 0, PARAM_INT);
 
+if ($existing && !$allowedit && ($deleteblock || in_array($blockaction, ['add', 'edit'], true))) {
+    print_error('nopermissions', 'error', '', get_string('edit'));
+}
+
 if ($deleteblock && $existing && $allowedit) {
     require_sesskey();
     if ($block = \block_exaport\item_block::get_block($deleteblock, $existing->id)) {
@@ -328,7 +332,7 @@ function block_exaport_render_item_block_editor_row($block, $item, $courseid, $c
     $content .= html_writer::tag('div',
         block_exaport_fontawesome_icon('grip-vertical', 'solid', 1) . ' ' . format_string($block->title ?: get_string($block->type, 'block_exaport')),
         ['class' => 'fw-bold exaport-item-block-handle', 'aria-label' => get_string('itemblock_reorderlabel', 'block_exaport'),
-            'title' => get_string('itemblock_reorderlabel', 'block_exaport')]);
+            'title' => get_string('itemblock_reorderlabel', 'block_exaport'), 'tabindex' => 0]);
 
     if ($block->type === \block_exaport\item_block::TYPE_FILE) {
         foreach ($block->files as $file) {

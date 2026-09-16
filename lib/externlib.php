@@ -89,7 +89,7 @@ function block_exaport_extern_item_category_badges(int $itemid, int $userid): st
 }
 
 function block_exaport_print_extern_item($item, $access) {
-    global $CFG, $OUTPUT, $DB;
+    global $CFG, $OUTPUT, $PAGE, $DB;
     echo $OUTPUT->heading(format_string($item->name));
     $tags = \core_tag_tag::get_item_tags('block_exaport', 'block_exaportitem', $item->id);
     echo $OUTPUT->tag_list($tags, null, 'exaport-artifact-tags', 0, null, false);
@@ -101,6 +101,7 @@ function block_exaport_print_extern_item($item, $access) {
     }
 
     $boxcontent = '';
+    $requiresvideojs = false;
     $blocks = \block_exaport\item_block::get_display_blocks($item, $access);
     foreach ($blocks as $blockindex => $block) {
         $boxcontent .= '<div class="item-project-section exaport-item-block exaport-item-block-' . s($block->type) . '">';
@@ -131,6 +132,7 @@ function block_exaport_print_extern_item($item, $access) {
                         $OUTPUT->action_link($fileurl, format_string($file->get_filename()), new popup_action('click', $fileurl)) .
                         '</p>';
                     if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
+                        $requiresvideojs = true;
                         $videoid = 'video-file-' . $block->id . '-' . $blockindex . '-' . $fileindex;
                         $boxcontent .= '
                         <div class="video_block">
@@ -141,8 +143,7 @@ function block_exaport_print_extern_item($item, $access) {
                                     <source src="' . s($fileurl) . '" type="video/mp4" />
                                 </video>
                             </div>
-                        </div>
-                        <script src="' . $CFG->wwwroot . '/blocks/exaport/javascript/vedeo-js/exaport_video.js"></script>';
+                        </div>';
                     }
                 }
             }
@@ -162,6 +163,10 @@ function block_exaport_print_extern_item($item, $access) {
 
     if (!$boxcontent && !$blocks && $item->type != 'note') {
         $boxcontent = block_exaport_get_string('filenotfound');
+    }
+
+    if ($requiresvideojs) {
+        $PAGE->requires->js(new moodle_url('/blocks/exaport/javascript/vedeo-js/exaport_video.js'));
     }
 
     echo $OUTPUT->box($boxcontent);

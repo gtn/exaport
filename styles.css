@@ -77,6 +77,12 @@
     cursor: move;
 }
 
+.exaport-item-block-handle:focus,
+.exaport-item-block-move:focus {
+    outline: 2px solid #0f6cbf;
+    outline-offset: 2px;
+}
+
 .exaport-item-block-list .block-placeholder {
     list-style: none;
     min-height: 3rem;

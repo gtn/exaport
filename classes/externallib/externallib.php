@@ -2031,13 +2031,14 @@ class externallib extends external_api {
         $result_item->description = \block_exaport\item_block::get_export_html($item, 'portfolio/id/' . $item->userid);
         $result_item->files = [];
 
-        foreach (\block_exaport\item_block::get_export_files($item) as $file) {
+        foreach (\block_exaport\item_block::get_export_files($item) as $filekey => $file) {
             $result_file = (object)[];
             if ($file->get_filearea() === 'itemblock_file') {
                 $result_file->url = (new \moodle_url('/blocks/exaport/portfoliofile.php', [
                     'access' => 'portfolio/id/' . $item->userid,
                     'itemid' => $item->id,
                     'blockid' => $file->get_itemid(),
+                    'inst' => $filekey,
                     'wstoken' => static::wstoken(),
                 ]))->out(false);
             } else {

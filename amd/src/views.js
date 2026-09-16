@@ -7,8 +7,9 @@ define(['jquery',
   'core/modal',
   'core/modal_events',
   'core/fragment',
+  'core/notification',
   'core/templates'
-], function ($, jqui, jquitp, Modal, modalEvents, Fragment, Templates) {
+], function ($, jqui, jquitp, Modal, modalEvents, Fragment, Notification, Templates) {
 
   var helpDialogue;
   var contextId;
@@ -203,6 +204,18 @@ define(['jquery',
       return false;
     });
     return ok;
+  }
+
+  function cleanupPendingBlockEdit(ctx) {
+    if (!ctx) {
+      return;
+    }
+
+    hidePreloadinator(ctx.item, ctx.isNew ? '.blocktype' : '');
+    if (ctx.isNew && !ctx.saved) {
+      $(ctx.item).remove();
+      updateBlockData();
+    }
   }
 
   var formSubmitHandlers = {
@@ -1056,6 +1069,16 @@ define(['jquery',
       data.push({name: 'clicked_button', value: submitter.name});
     }
     showPreloadinator($('#view-preview'), '', true);
+    var saveFailureNotified = false;
+    var notifySaveFailure = function () {
+      if (saveFailureNotified) {
+        return;
+      }
+
+      saveFailureNotified = true;
+      Notification.alert('', window.block_exaport.translate('updateposterror'));
+    };
+
     $.ajax({
       url: document.location.href,
       type: 'POST',
@@ -1067,11 +1090,14 @@ define(['jquery',
         try {
           response = JSON.parse(res);
         } catch (error) {
+          // Keep the response contract strict so upstream PHP warnings still surface as server bugs.
           console.error('Exabis ePortfolio: invalid response while saving the view.', error, res);
+          notifySaveFailure();
           return;
         }
         if (!response || response.ok !== true || typeof response.blocks !== 'string') {
           console.error('Exabis ePortfolio: unexpected response while saving the view.', response);
+          notifySaveFailure();
           return;
         }
         $('form :input[name=blocks]').val(response.blocks);
@@ -1080,6 +1106,7 @@ define(['jquery',
       },
       error: function (xhr, status, error) {
         console.error('Exabis ePortfolio: failed to save the view.', status, error, xhr.responseText);
+        notifySaveFailure();
       },
       complete: function () {
         hidePreloadinator($('#view-preview'), '');
@@ -1123,10 +1150,7 @@ define(['jquery',
       });
       blockEditModal.getRoot().on(modalEvents.hidden, function () {
         blockEditModal.setBody('');
-        if (blockEditCtx && blockEditCtx.isNew && !blockEditCtx.saved) {
-          $(blockEditCtx.item).remove();
-          updateBlockData();
-        }
+        cleanupPendingBlockEdit(blockEditCtx);
         blockEditCtx = null;
       });
       blockEditModal.getRoot().on('submit', '#blockform', function (e) {
@@ -1135,7 +1159,7 @@ define(['jquery',
           return;
         }
         var ctx = blockEditCtx;
-        var submitter = e.originalEvent.submitter;
+        var submitter = e.originalEvent && e.originalEvent.submitter ? e.originalEvent.submitter : null;
         var handler = formSubmitHandlers[ctx.blockType];
         if (handler) {
           handler(ctx.itemId, ctx.item);
@@ -1149,9 +1173,31 @@ define(['jquery',
       });
     }
 
-    blockEditModal.setTitle(getModalTitle(blockType));
-    blockEditModal.setBody(fragmentPromise);
-    blockEditModal.show();
+    var currentBlockEditCtx = blockEditCtx;
+    var currentBlockEditModal = blockEditModal;
+    var fragmentHtml = '';
+    try {
+      fragmentHtml = await fragmentPromise;
+    } catch (error) {
+      if (blockEditCtx !== currentBlockEditCtx || blockEditModal !== currentBlockEditModal) {
+        return;
+      }
+      cleanupPendingBlockEdit(currentBlockEditCtx);
+      blockEditCtx = null;
+      if (currentBlockEditModal) {
+        currentBlockEditModal.setBody('');
+        currentBlockEditModal.hide();
+      }
+      Notification.alert('', window.block_exaport.translate('updateposterror'));
+      console.error('Exabis ePortfolio: failed to load block editor.', error);
+      return;
+    }
+    if (blockEditCtx !== currentBlockEditCtx || blockEditModal !== currentBlockEditModal) {
+      return;
+    }
+    currentBlockEditModal.setTitle(getModalTitle(blockType));
+    currentBlockEditModal.setBody(fragmentHtml);
+    currentBlockEditModal.show();
   }
 
   function editItemClick() {
@@ -1169,20 +1215,15 @@ define(['jquery',
     exaportViewEdit = exaportViewEditCreate();
     exaportViewEdit.resetViewContent();
 
-    var droppedItem = null;
     $(".portfolioDesignBlocks").sortable({
-      beforeStop: function (event, ui) {
-        // ui.item here is the actual element placed in the sortable.
-        // In receive, ui.item may reference the original draggable instead.
-        droppedItem = ui.item;
-      },
       receive: function (e, ui) {
-        // Get ajax only for item from the top block.
-        var uiattr = $(ui.item[0]).closest('ul').prop("className");
-        if (uiattr.search("portfolioDesignBlocks") == -1) {
+        var fromDesignBlocks = ui.sender && ui.sender.hasClass('portfolioDesignBlocks');
+        if (!fromDesignBlocks) {
           var blockType = ui.item.attr('block-type');
+          // Sortable receive hands us the live inserted block, which is the one that needs cleanup.
+          showPreloadinator(ui.item, '.blocktype', false);
 
-          loadBlockEditFragment(blockType, 0, droppedItem);
+          loadBlockEditFragment(blockType, 0, ui.item);
 
           $('body').on('change keydown paste input', '#filterByTitle', exaportViewEdit.filterItemsByTitle);
           updateBlockData();
@@ -1215,12 +1256,7 @@ define(['jquery',
     });
     $(".portfolioElement").draggable({
       connectToSortable: '.portfolioDesignBlocks',
-      placeholder: ".block-placeholder",
-      forcePlaceholderSize: true,
       helper: "clone",
-      stop: function (e, ui) {
-        showPreloadinator($(ui.helper), '', false);
-      }
     });
     $('body').on('click', '[data-toggle="gtn-help-modal"]', function (e) {
       e.preventDefault();

@@ -91,6 +91,16 @@ if ($view && $action == 'grouplist') {
 $returnurltolist = $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $courseid;
 $returnurl = $CFG->wwwroot . '/blocks/exaport/views_mod.php?courseid=' . $courseid . '&id=' . $id . '&action=edit';
 
+$sendajaxresponse = static function(bool $ok, string $blocks = '', int $statuscode = 200): void {
+    http_response_code($statuscode);
+    header('Content-Type: application/json');
+    echo json_encode((object) [
+        'ok' => $ok,
+        'blocks' => $blocks,
+    ]);
+    exit;
+};
+
 // Delete item.
 if ($action == 'delete') {
     require_sesskey();
@@ -491,6 +501,7 @@ if ($editform->is_cancelled()) {
         case 'content':
             // Delete all blocks only if all ok with possible blocks preparing
             $torewriteblocks = false;
+            $isajax = (bool) optional_param('ajax', 0, PARAM_INT);
 
             try {
                 // Add blocks.
@@ -544,6 +555,9 @@ if ($editform->is_cancelled()) {
 
                 }
             } catch (moodle_exception $e) {
+                if ($isajax) {
+                    $sendajaxresponse(false, '', 500);
+                }
                 $message = block_exaport_get_string('Something wrong with blocks saving (code: 1694089814164)');
                 break;
             }
@@ -556,16 +570,14 @@ if ($editform->is_cancelled()) {
                 }
             }
 
-            if (optional_param('ajax', 0, PARAM_INT)) {
-                $ret = new stdClass;
-                $ret->ok = true;
+            if ($isajax) {
                 file_prepare_draft_area($view->draft_itemid, context_user::instance($USER->id)->id, 'block_exaport', 'view_content',
                     $view->id, array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
-                $ret->blocks = json_encode(block_exaport_get_view_blocks($view));
-
-                header('Content-Type: application/json');
-                echo json_encode($ret);
-                exit;
+                $blocksjson = json_encode(block_exaport_get_view_blocks($view));
+                if ($blocksjson === false) {
+                    $sendajaxresponse(false, '', 500);
+                }
+                $sendajaxresponse(true, $blocksjson);
             }
 
             $message = block_exaport_get_string('view_saved');
@@ -872,6 +884,7 @@ $translations = array(
     'share_summary_emails', 'share_summary_none',
     'notify', 'emailaccess',
     'checkall', 'viewmustbesafed',
+    'updateposterror',
     'configureblock_item', 'configureblock_personal_information', 'configureblock_cv_information',
     'configureblock_text', 'configureblock_headline', 'configureblock_media', 'configureblock_badge',
 );

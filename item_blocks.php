@@ -14,6 +14,7 @@
 defined('BLOCK_EXAPORT_INTERNAL_ITEM_BLOCKS') || die();
 
 require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
+use block_exaport\item_category_helper;
 
 $textfieldoptions = \block_exaport\item_block::get_editor_options((object)['userid' => $USER->id]);
 $structuredreturnurl = $returnurl;

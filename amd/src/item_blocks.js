@@ -55,12 +55,31 @@ define(['jquery', 'jqueryui', 'core/modal_save_cancel'], function($, JQueryUI, M
         updateOrderField();
     };
 
+    var moveBlock = function(button) {
+        var item = button.closest('[data-blockid]');
+        if (!item.length) {
+            return;
+        }
+
+        if (button.data('direction') === 'up') {
+            item.prev('[data-blockid]').before(item);
+        } else {
+            item.next('[data-blockid]').after(item);
+        }
+
+        updateOrderField();
+    };
+
     return {
         init: function(initconfig) {
             config = initconfig || {};
             $('body').on('click', '.exaport-add-content', function(e) {
                 e.preventDefault();
                 showChooser();
+            });
+            $('body').on('click', '.exaport-item-block-move', function(e) {
+                e.preventDefault();
+                moveBlock($(this));
             });
             initSortable();
         }

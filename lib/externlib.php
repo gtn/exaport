@@ -159,7 +159,7 @@ function block_exaport_print_extern_item($item, $access) {
         $boxcontent .= '</div>';
     }
 
-    if (!$boxcontent && $item->type != 'note') {
+    if (!$boxcontent && !$blocks && $item->type != 'note') {
         $boxcontent = block_exaport_get_string('filenotfound');
     }
 

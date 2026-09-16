@@ -191,7 +191,7 @@ class item_block {
         global $DB, $USER;
 
         self::validate_type($type);
-        self::normalise_block_data($type, $data, true);
+        self::normalise_block_data($type, $data, true, 0, (int)$item->userid);
 
         $time = time();
         $record = (object)[
@@ -268,7 +268,7 @@ class item_block {
         global $DB, $USER;
 
         self::validate_type($block->type);
-        self::normalise_block_data($block->type, $data, false);
+        self::normalise_block_data($block->type, $data, false, (int)$block->id, (int)$item->userid);
 
         $record = (object)[
             'id' => $block->id,
@@ -381,23 +381,46 @@ class item_block {
      * @return string
      */
     public static function get_summary_text(\stdClass $item): string {
-        $blocks = self::get_display_blocks($item, 'portfolio/id/' . $item->userid);
-        foreach ($blocks as $block) {
-            if ($block->type === self::TYPE_TEXT || $block->type === self::TYPE_LINK) {
-                $text = trim(strip_tags((string)($block->contenthtml ?? '')));
-                if ($text !== '') {
-                    return shorten_text($text, 140, true);
+        if (self::item_uses_blocks((int)$item->id)) {
+            foreach (self::get_blocks((int)$item->id) as $block) {
+                if ($block->type === self::TYPE_TEXT || $block->type === self::TYPE_LINK) {
+                    $text = trim(strip_tags((string)($block->content ?? '')));
+                    if ($text !== '') {
+                        return shorten_text($text, 140, true);
+                    }
+                }
+                if ($block->type === self::TYPE_LINK && !empty($block->url)) {
+                    return shorten_text((string)$block->url, 140, true);
+                }
+                if ($block->type === self::TYPE_FILE) {
+                    $filename = self::get_block_file_name((int)$block->id, (int)$item->userid);
+                    if ($filename !== '') {
+                        return shorten_text($filename, 140, true);
+                    }
                 }
             }
-            if ($block->type === self::TYPE_LINK && !empty($block->url)) {
-                return shorten_text((string)$block->url, 140, true);
-            }
-            if ($block->type === self::TYPE_FILE && !empty($block->filename)) {
-                return shorten_text((string)$block->filename, 140, true);
+
+            return '';
+        }
+
+        $legacyfields = [
+            $item->intro ?? '',
+            $item->project_description ?? '',
+            $item->project_process ?? '',
+            $item->project_result ?? '',
+        ];
+        foreach ($legacyfields as $legacyfield) {
+            $text = trim(strip_tags((string)$legacyfield));
+            if ($text !== '') {
+                return shorten_text($text, 140, true);
             }
         }
 
-        return '';
+        if (!empty($item->url)) {
+            return shorten_text((string)$item->url, 140, true);
+        }
+
+        return self::get_legacy_primary_file_name($item);
     }
 
     /**
@@ -666,9 +689,11 @@ class item_block {
      * @param string $type
      * @param \stdClass $data
      * @param bool $isnew
+     * @param int $blockid
+     * @param int $userid
      * @return void
      */
-    private static function normalise_block_data(string $type, \stdClass $data, bool $isnew): void {
+    private static function normalise_block_data(string $type, \stdClass $data, bool $isnew, int $blockid = 0, int $userid = 0): void {
         if ($type === self::TYPE_TEXT) {
             $text = trim(strip_tags((string)($data->content_editor['text'] ?? '')));
             if ($text === '') {
@@ -677,7 +702,12 @@ class item_block {
         }
 
         if ($type === self::TYPE_FILE) {
-            if (empty($data->file) || !self::draft_area_has_files((int)$data->file)) {
+            $draftitemid = (int)($data->file ?? 0);
+            if (!$isnew && $blockid && $userid && self::block_has_stored_files($blockid, $userid)
+                && (!$draftitemid || !self::draft_area_has_files($draftitemid))) {
+                return;
+            }
+            if (!$draftitemid || !self::draft_area_has_files($draftitemid)) {
                 throw new \moodle_exception('invalidblockcontent', 'block_exaport');
             }
         }
@@ -811,6 +841,29 @@ class item_block {
         $files = self::get_block_files($block, $userid);
         $file = reset($files);
         return $file ? $file->get_filename() : '';
+    }
+
+    /**
+     * Whether a file block already has stored files.
+     *
+     * @param int $blockid
+     * @param int $userid
+     * @return bool
+     */
+    private static function block_has_stored_files(int $blockid, int $userid): bool {
+        return self::get_block_file_name($blockid, $userid) !== '';
+    }
+
+    /**
+     * Read the primary legacy file name for an item.
+     *
+     * @param \stdClass $item
+     * @return string
+     */
+    private static function get_legacy_primary_file_name(\stdClass $item): string {
+        $files = block_exaport_get_item_files_array($item);
+        $file = reset($files);
+        return $file ? shorten_text($file->get_filename(), 140, true) : '';
     }
 
     /**

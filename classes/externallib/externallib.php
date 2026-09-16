@@ -2035,13 +2035,13 @@ class externallib extends external_api {
             $result_file = (object)[];
             if ($file->get_filearea() === 'itemblock_file') {
                 $result_file->url = (new \moodle_url('/blocks/exaport/portfoliofile.php', [
-                    'access' => 'portfolio/id/' . g::$USER->id,
+                    'access' => 'portfolio/id/' . $item->userid,
                     'itemid' => $item->id,
                     'blockid' => $file->get_itemid(),
                     'wstoken' => static::wstoken(),
                 ]))->out(false);
             } else {
-                $result_file->url = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . g::$USER->id .
+                $result_file->url = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $item->userid .
                     "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
             }
             // $result_file->isimage = $file->is_valid_image();

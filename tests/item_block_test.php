@@ -131,6 +131,7 @@ final class item_block_test extends \advanced_testcase {
         $second = $this->create_block($item, item_block::TYPE_LINK, 2, 'Second', '<p>Two</p>', 'https://example.com');
 
         $invalidorders = [
+            [],
             [$first->id],
             [$first->id, $second->id, 999999],
             [$first->id, $first->id],

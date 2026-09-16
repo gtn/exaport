@@ -331,7 +331,16 @@ function block_exaport_render_item_block_editor_row($block, $item, $courseid, $c
 
     if ($block->type === \block_exaport\item_block::TYPE_FILE) {
         foreach ($block->files as $file) {
-            $content .= html_writer::tag('div', html_writer::link($block->fileurl, format_string($file->get_filename()),
+            $fileurl = moodle_url::make_pluginfile_url(
+                $file->get_contextid(),
+                $file->get_component(),
+                'itemblock_file/portfolio/id/' . $item->userid . '/blockid',
+                $block->id,
+                $file->get_filepath(),
+                $file->get_filename(),
+                false
+            );
+            $content .= html_writer::tag('div', html_writer::link($fileurl, format_string($file->get_filename()),
                 ['target' => '_blank', 'rel' => 'noopener noreferrer']), ['class' => 'text-muted']);
         }
     } else {
@@ -344,6 +353,16 @@ function block_exaport_render_item_block_editor_row($block, $item, $courseid, $c
     }
     $content .= html_writer::end_div();
     $content .= html_writer::start_div('btn-group');
+    $content .= html_writer::tag('button', get_string('itemblock_moveup', 'block_exaport'), [
+        'type' => 'button',
+        'class' => 'btn btn-sm btn-outline-secondary exaport-item-block-move',
+        'data-direction' => 'up',
+    ]);
+    $content .= html_writer::tag('button', get_string('itemblock_movedown', 'block_exaport'), [
+        'type' => 'button',
+        'class' => 'btn btn-sm btn-outline-secondary exaport-item-block-move',
+        'data-direction' => 'down',
+    ]);
     $content .= html_writer::link($editurl, get_string('edit'), ['class' => 'btn btn-sm btn-outline-primary']);
     $content .= html_writer::link($deleteurl, get_string('delete'), [
         'class' => 'btn btn-sm btn-outline-danger',

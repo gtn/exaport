@@ -1517,6 +1517,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('title', XMLDB_TYPE_CHAR, '255', null, null, null, null);
         $table->add_field('content', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        // Default 1 maps to Moodle's FORMAT_HTML constant.
         $table->add_field('contentformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
         $table->add_field('url', XMLDB_TYPE_CHAR, '255', null, null, null, null);
         $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');

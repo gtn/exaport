@@ -138,6 +138,50 @@ final class item_content_area_test extends \advanced_testcase {
         $this->assertSame('Third', $data['blocks'][2]['heading']);
     }
 
+    public function test_blocks_are_scoped_to_the_current_item(): void {
+        global $DB;
+
+        $this->create_block(['type' => 'text', 'sortorder' => 10, 'title' => 'Current item block']);
+        $otheritemid = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $this->owner->id,
+            'type' => 'note',
+            'categoryid' => 0,
+            'name' => 'Other item',
+            'url' => '',
+            'intro' => '',
+            'attachment' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'courseid' => $this->course->id,
+            'shareall' => 0,
+            'externaccess' => 0,
+            'externcomment' => 0,
+            'sortorder' => 0,
+            'isoez' => 0,
+            'langid' => 0,
+            'source' => 0,
+            'sourceid' => 0,
+            'iseditable' => 1,
+            'parentid' => 0,
+        ]);
+        $DB->insert_record('block_exaportitemblock', (object)[
+            'itemid' => $otheritemid,
+            'type' => 'text',
+            'sortorder' => 0,
+            'title' => 'Other item block',
+            'content' => 'Should stay hidden',
+            'contentformat' => FORMAT_HTML,
+            'url' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+
+        $data = $this->export_area();
+
+        $this->assertCount(1, $data['blocks']);
+        $this->assertSame('Current item block', $data['blocks'][0]['heading']);
+    }
+
     public function test_unknown_block_types_export_fallback_state(): void {
         $this->create_block(['type' => 'accordion', 'title' => 'Future block']);
 

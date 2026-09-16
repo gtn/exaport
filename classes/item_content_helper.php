@@ -94,6 +94,50 @@ class item_content_helper {
     }
 
     /**
+     * Copy all structured blocks and their files to another item.
+     *
+     * @param \stdClass $sourceitem
+     * @param int $targetitemid
+     * @param int $targetuserid
+     * @return void
+     */
+    public static function copy_item_blocks(\stdClass $sourceitem, int $targetitemid, int $targetuserid): void {
+        global $DB;
+
+        $sourcecontext = context_user::instance($sourceitem->userid, IGNORE_MISSING);
+        $targetcontext = context_user::instance($targetuserid, IGNORE_MISSING);
+        if (!$sourcecontext || !$targetcontext) {
+            return;
+        }
+
+        $fs = get_file_storage();
+        foreach (self::get_item_block_records($sourceitem) as $block) {
+            $newblock = clone $block;
+            unset($newblock->id);
+            $newblock->itemid = $targetitemid;
+            $newblock->timecreated = time();
+            $newblock->timemodified = time();
+            $newblockid = (int)$DB->insert_record('block_exaportitemblock', $newblock);
+
+            foreach (self::get_block_files($sourceitem, (int)$block->id) as $file) {
+                if (!$file || $file->is_directory()) {
+                    continue;
+                }
+
+                $fs->create_file_from_storedfile([
+                    'contextid' => $targetcontext->id,
+                    'component' => 'block_exaport',
+                    'filearea' => self::FILEAREA,
+                    'itemid' => $newblockid,
+                    'filepath' => $file->get_filepath(),
+                    'filename' => $file->get_filename(),
+                    'userid' => $targetuserid,
+                ], $file);
+            }
+        }
+    }
+
+    /**
      * Export one block for Mustache rendering.
      *
      * @param \stdClass $item

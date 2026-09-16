@@ -91,6 +91,7 @@ if ($action == 'copytoself') {
     $copy->shareall = 0;
 
     $newitemid = $DB->insert_record('block_exaportitem', $copy);
+    \block_exaport\item_content_helper::copy_item_blocks($sourceitem, (int)$newitemid, (int)$USER->id);
 
     // Copy category assignments from the source item to the new item.
     $sourcecatids = $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$id]);

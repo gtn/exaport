@@ -1178,8 +1178,9 @@ define(['jquery',
       blockEditCtx = null;
       blockEditModal.setBody('');
       blockEditModal.hide();
+      Notification.alert('', window.block_exaport.translate('updateposterror'));
       console.error('Exabis ePortfolio: failed to load block editor.', error);
-      return '';
+      throw error;
     });
     blockEditModal.setTitle(getModalTitle(blockType));
     blockEditModal.setBody(handledFragmentPromise);

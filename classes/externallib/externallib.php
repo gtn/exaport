@@ -503,6 +503,7 @@ class externallib extends external_api {
         ], '*', MUST_EXIST);
 
         block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
+        \block_exaport\item_content_helper::delete_item_blocks($item);
 
         $DB->delete_records("block_exaportitem", array('id' => $id));
 

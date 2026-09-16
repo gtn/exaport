@@ -264,7 +264,6 @@ function block_exaport_file_remove($item) {
     $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id);
     // Item content (intro) inside the html editor.
     $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content', $item->id);
-    \block_exaport\item_content_helper::delete_item_block_files($item);
 }
 
 /*** GENERAL FUNCTIONS **********************************************************************/

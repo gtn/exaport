@@ -791,10 +791,10 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
     // Try to delete the item file.
     block_exaport_file_remove($post);
+    \block_exaport\item_content_helper::delete_item_blocks($post);
 
     $conditions = array("id" => $post->id);
     $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);
-    $DB->delete_records('block_exaportitemblock', ['itemid' => $post->id]);
     $DB->delete_records('block_exaportitemshar', ['itemid' => $post->id]);
     $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $post->id]);
     $status = $DB->delete_records('block_exaportitem', $conditions);

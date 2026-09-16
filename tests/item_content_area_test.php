@@ -197,18 +197,20 @@ final class item_content_area_test extends \advanced_testcase {
         $this->add_block_file($block->id, 'document.pdf', 'pdf-content', 'application/pdf', '/nested/');
 
         $data = $this->export_area();
+        $encodedaccess = \block_exaport\item_content_helper::encode_access_path('portfolio/id/' . $this->owner->id);
 
         $this->assertTrue($data['blocks'][0]['hasfiles']);
         $this->assertStringContainsString('/pluginfile.php/', $data['blocks'][0]['files'][0]['url']);
-        $this->assertStringContainsString('/itemblock_file/portfolio/id/' . $this->owner->id .
+        $this->assertStringContainsString('/itemblock_file/access/' . $encodedaccess .
             '/itemid/' . $this->item->id . '/blockid/' . $block->id . '/nested/document.pdf',
             $data['blocks'][0]['files'][0]['url']);
         $this->assertStringNotContainsString('/filedir/', $data['blocks'][0]['files'][0]['url']);
     }
 
     public function test_block_file_argument_parser_supports_nested_filepaths(): void {
+        $encodedaccess = \block_exaport\item_content_helper::encode_access_path('portfolio/id/' . $this->owner->id);
         $parsed = \block_exaport\item_content_helper::parse_block_file_args([
-            'portfolio', 'id', (string)$this->owner->id,
+            'access', $encodedaccess,
             'itemid', (string)$this->item->id,
             'blockid', '44',
             'nested', 'folder', 'document.pdf',
@@ -222,22 +224,24 @@ final class item_content_area_test extends \advanced_testcase {
     }
 
     public function test_block_file_argument_parser_rejects_missing_markers(): void {
+        $encodedaccess = \block_exaport\item_content_helper::encode_access_path('portfolio/id/' . $this->owner->id);
         $this->assertSame([], \block_exaport\item_content_helper::parse_block_file_args([
-            'portfolio', 'id', (string)$this->owner->id,
+            'access', $encodedaccess,
             'blockid', '44',
             'document.pdf',
         ]));
 
         $this->assertSame([], \block_exaport\item_content_helper::parse_block_file_args([
-            'portfolio', 'id', (string)$this->owner->id,
+            'access', $encodedaccess,
             'itemid', (string)$this->item->id,
             'document.pdf',
         ]));
     }
 
     public function test_block_file_argument_parser_rejects_empty_filename(): void {
+        $encodedaccess = \block_exaport\item_content_helper::encode_access_path('portfolio/id/' . $this->owner->id);
         $this->assertSame([], \block_exaport\item_content_helper::parse_block_file_args([
-            'portfolio', 'id', (string)$this->owner->id,
+            'access', $encodedaccess,
             'itemid', (string)$this->item->id,
             'blockid', '44',
             '',

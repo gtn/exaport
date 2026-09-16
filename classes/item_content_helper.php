@@ -94,6 +94,19 @@ class item_content_helper {
     }
 
     /**
+     * Delete all structured blocks and their stored files for an item.
+     *
+     * @param \stdClass $item
+     * @return void
+     */
+    public static function delete_item_blocks(\stdClass $item): void {
+        global $DB;
+
+        self::delete_item_block_files($item);
+        $DB->delete_records('block_exaportitemblock', ['itemid' => $item->id]);
+    }
+
+    /**
      * Copy all structured blocks and their files to another item.
      *
      * @param \stdClass $sourceitem
@@ -306,19 +319,21 @@ class item_content_helper {
      * @return array
      */
     public static function parse_block_file_args(array $args): array {
+        $accessposition = array_search('access', $args, true);
         $itemidposition = array_search('itemid', $args, true);
         $blockidposition = array_search('blockid', $args, true);
 
-        if ($itemidposition === false || $blockidposition === false || $blockidposition <= $itemidposition + 1) {
+        if ($accessposition === false || $itemidposition === false || $blockidposition === false
+            || $accessposition + 1 !== $itemidposition - 1 || $blockidposition <= $itemidposition + 1) {
             return [];
         }
 
-        $accessparts = array_slice($args, 0, $itemidposition);
+        $access = self::decode_access_path($args[$accessposition + 1] ?? '');
         $itemid = clean_param($args[$itemidposition + 1] ?? 0, PARAM_INT);
         $blockid = clean_param($args[$blockidposition + 1] ?? 0, PARAM_INT);
         $fileparts = array_slice($args, $blockidposition + 2);
 
-        if (empty($accessparts) || empty($itemid) || empty($blockid) || empty($fileparts)) {
+        if ($access === '' || empty($itemid) || empty($blockid) || empty($fileparts)) {
             return [];
         }
 
@@ -328,12 +343,47 @@ class item_content_helper {
         }
 
         return [
-            'access' => implode('/', $accessparts),
+            'access' => $access,
             'itemid' => (int)$itemid,
             'blockid' => (int)$blockid,
             'filepath' => '/' . ($fileparts ? implode('/', $fileparts) . '/' : ''),
             'filename' => $filename,
         ];
+    }
+
+    /**
+     * Encode an access path into a single safe URL segment.
+     *
+     * @param string $access
+     * @return string
+     */
+    public static function encode_access_path(string $access): string {
+        $encoded = base64_encode(trim($access, '/'));
+        return rtrim(strtr($encoded, '+/', '-_'), '=');
+    }
+
+    /**
+     * Decode an access path from a safe URL segment.
+     *
+     * @param string $access
+     * @return string
+     */
+    public static function decode_access_path(string $access): string {
+        if ($access === '') {
+            return '';
+        }
+
+        $padding = strlen($access) % 4;
+        if ($padding !== 0) {
+            $access .= str_repeat('=', 4 - $padding);
+        }
+
+        $decoded = base64_decode(strtr($access, '-_', '+/'), true);
+        if ($decoded === false) {
+            return '';
+        }
+
+        return trim($decoded, '/');
     }
 
     /**
@@ -344,6 +394,6 @@ class item_content_helper {
      * @return string
      */
     public static function get_pluginfile_filearea(string $access, int $itemid): string {
-        return self::FILEAREA . '/' . trim($access, '/') . '/itemid/' . $itemid . '/blockid';
+        return self::FILEAREA . '/access/' . self::encode_access_path($access) . '/itemid/' . $itemid . '/blockid';
     }
 }

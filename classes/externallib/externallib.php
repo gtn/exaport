@@ -2028,12 +2028,23 @@ class externallib extends external_api {
         // $result_item->isimage = false;
         // $result_item->filename = "";
         // $result_item->mimetype = "";
-        $result_item->description = format_text($item->intro, FORMAT_HTML);
+        $result_item->description = \block_exaport\item_block::get_export_html($item, 'portfolio/id/' . $item->userid);
         $result_item->files = [];
 
-        foreach (block_exaport_get_item_files_array($item) as $file) {
+        foreach (\block_exaport\item_block::get_export_files($item) as $filekey => $file) {
             $result_file = (object)[];
-            $result_file->url = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . g::$USER->id . "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
+            if ($file->get_filearea() === 'itemblock_file') {
+                $result_file->url = (new \moodle_url('/blocks/exaport/portfoliofile.php', [
+                    'access' => 'portfolio/id/' . $item->userid,
+                    'itemid' => $item->id,
+                    'blockid' => $file->get_itemid(),
+                    'inst' => $filekey,
+                    'wstoken' => static::wstoken(),
+                ]))->out(false);
+            } else {
+                $result_file->url = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $item->userid .
+                    "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
+            }
             // $result_file->isimage = $file->is_valid_image();
             $result_file->filename = $file->get_filename();
             $result_file->mimetype = $file->get_mimetype();

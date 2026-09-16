@@ -121,6 +121,11 @@ switch ($item->type) {
         break;
 
     case "note":
+    case "mixed":
+        if ($file = \block_exaport\item_block::get_thumbnail_file($item)) {
+            send_stored_file($file, 1);
+            exit;
+        }
         block_exaport_send_thumb_static_fallback('pix/note_tile.svg');
         break;
     default:

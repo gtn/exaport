@@ -1030,7 +1030,10 @@ foreach ($items as $item) {
     $rowdata['type'] = $imgtype;
 
     $rowdata['name'] = "<a href=\"" . s($url) . "\">" . format_string($item->name) . "</a>";
-    if ($item->intro) {
+    $summarytext = \block_exaport\item_block::get_summary_text($item);
+    if ($summarytext !== '') {
+        $rowdata['name'] .= '<div class="exaport-details-preview">' . s($summarytext) . '</div>';
+    } else if ($item->intro) {
         $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
             'block_exaport', 'item_content', 'portfolio/id/' . $item->userid . '/itemid/' . $item->id);
 

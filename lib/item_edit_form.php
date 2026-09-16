@@ -90,6 +90,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         global $CFG, $USER, $DB;
 
         $type = $this->_customdata['type'];
+        $structuredmode = !empty($this->_customdata['structuredmode']);
 
         $mform = &$this->_form;
 
@@ -110,6 +111,12 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->setType('compids', PARAM_TEXT);
         $mform->setDefault('compids', '');
 
+        if ($structuredmode) {
+            $mform->addElement('hidden', 'blockorder');
+            $mform->setType('blockorder', PARAM_RAW_TRIMMED);
+            $mform->setDefault('blockorder', '');
+        }
+
         $mform->addElement('text', 'name', get_string("title", "block_exaport"), 'maxlength="255" size="60"');
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
@@ -123,24 +130,14 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->add_exaport_help_button('categoryids', 'forms.item.categoryid');
 
 
-        // 'link' input for all types:
-        $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
-        $mform->setType('url', PARAM_TEXT);
-        /*if ($type == 'link') {
-            $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="http://"');
-            $mform->setType('url', PARAM_TEXT);
-            $mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client');
-        } else {
+        if (!$structuredmode) {
+            // 'link' input for all types:
             $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
             $mform->setType('url', PARAM_TEXT);
-        }*/
-        $mform->add_exaport_help_button('url', 'forms.item.url');
+            $mform->add_exaport_help_button('url', 'forms.item.url');
+        }
 
-        // 'File' input is for ALL types
-        if ($type == 'link' && 11 == 22) {
-            // For code checker.
-            $tempvar = 1;
-        } else if (11 == 11 /* for ALL */ /*$type == 'file'*/) {
+        if (!$structuredmode && !($type == 'link' && 11 == 22)) {
             $filelimits = 1;
             if ($CFG->block_exaport_multiple_files_in_item) {
                 $filelimits = 10;
@@ -190,33 +187,30 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->add_exaport_help_button('langid', 'forms.item.langid');
         }
 
-        $textareafields = [ // field name => string marker
-            'intro' => 'shortdescription',
-            'project_description' => 'project_description',
-            'project_process' => 'project_process',
-            'project_result' => 'project_result',
-        ];
-        $usetextareas = @$this->_customdata['useTextareas'] ?: [];
-        foreach ($textareafields as $textareafield => $stringmarker) {
-            if (isset($usetextareas[$textareafield]) && $usetextareas[$textareafield]) {
-                // It has iframe, show textfield, no editor.
-                $mform->addElement('textarea', $textareafield, get_string($stringmarker, 'block_exaport'), 'rows="20" cols="50" style="width: 95%"');
-                $mform->setType($textareafield, PARAM_RAW);
-                // Required for all item types
-                //                if ($type == 'note' && $textareafield == 'intro') {
-                // Intro field is now optional - validation rule removed
-                //                }
-                $mform->add_exaport_help_button($textareafield, 'forms.item.' . $textareafield);
-            } else {
-                if (!isset($this->_customdata['textfieldoptions'])) {
-                    $this->_customdata['textfieldoptions'] = array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99,
-                        'context' => context_user::instance($USER->id));
+        if (!$structuredmode) {
+            $textareafields = [
+                'intro' => 'shortdescription',
+                'project_description' => 'project_description',
+                'project_process' => 'project_process',
+                'project_result' => 'project_result',
+            ];
+            $usetextareas = @$this->_customdata['useTextareas'] ?: [];
+            foreach ($textareafields as $textareafield => $stringmarker) {
+                if (isset($usetextareas[$textareafield]) && $usetextareas[$textareafield]) {
+                    $mform->addElement('textarea', $textareafield, get_string($stringmarker, 'block_exaport'),
+                        'rows="20" cols="50" style="width: 95%"');
+                    $mform->setType($textareafield, PARAM_RAW);
+                    $mform->add_exaport_help_button($textareafield, 'forms.item.' . $textareafield);
+                } else {
+                    if (!isset($this->_customdata['textfieldoptions'])) {
+                        $this->_customdata['textfieldoptions'] = array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99,
+                            'context' => context_user::instance($USER->id));
+                    }
+                    $mform->addElement('editor', $textareafield . '_editor', get_string($stringmarker, 'block_exaport'), null,
+                        $this->_customdata['textfieldoptions']);
+                    $mform->setType($textareafield . '_editor', PARAM_RAW);
+                    $mform->add_exaport_help_button($textareafield . '_editor', 'forms.item.' . $textareafield . '_editor');
                 }
-                $mform->addElement('editor', $textareafield . '_editor', get_string($stringmarker, 'block_exaport'), null,
-                    $this->_customdata['textfieldoptions']);
-                $mform->setType($textareafield . '_editor', PARAM_RAW);
-                // Intro field is now optional - validation rule removed
-                $mform->add_exaport_help_button($textareafield . '_editor', 'forms.item.' . $textareafield . '_editor');
             }
         }
 
@@ -341,10 +335,12 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
             $mform->disabledIf('name', 'allowedit', 'neq', 1);
             $mform->disabledIf('categoryids', 'allowedit', 'neq', 1);
-            $mform->disabledIf('url', 'allowedit', 'neq', 1);
-            $mform->disabledIf('file', 'allowedit', 'neq', 1);
-            $mform->disabledIf('intro', 'allowedit', 'neq', 1);
-            $mform->disabledIf('intro_editor', 'allowedit', 'neq', 1);
+            if (!$structuredmode) {
+                $mform->disabledIf('url', 'allowedit', 'neq', 1);
+                $mform->disabledIf('file', 'allowedit', 'neq', 1);
+                $mform->disabledIf('intro', 'allowedit', 'neq', 1);
+                $mform->disabledIf('intro_editor', 'allowedit', 'neq', 1);
+            }
             $mform->disabledIf('iconfile', 'allowedit', 'neq', 1);
 
             if (!empty($this->_customdata['allowresubmission'])) {
@@ -353,6 +349,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             } else {
                 $mform->addElement('html', get_string("isgraded", "block_exacomp"));
             }
+
         }
     }
 
@@ -391,6 +388,68 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $categorysselect->loadArray($categories);
     }
 
+}
+
+class block_exaport_item_block_edit_form extends block_exaport_moodleform {
+    public function definition() {
+        $blocktype = $this->_customdata['blocktype'];
+        $mform = &$this->_form;
+
+        $mform->addElement('hidden', 'itemid');
+        $mform->setType('itemid', PARAM_INT);
+
+        $mform->addElement('hidden', 'blockid');
+        $mform->setType('blockid', PARAM_INT);
+        $mform->setDefault('blockid', 0);
+
+        $mform->addElement('hidden', 'blockaction');
+        $mform->setType('blockaction', PARAM_ALPHA);
+        $mform->setDefault('blockaction', 'add');
+
+        $mform->addElement('hidden', 'blocktype');
+        $mform->setType('blocktype', PARAM_ALPHA);
+        $mform->setDefault('blocktype', $blocktype);
+
+        $mform->addElement('text', 'title', get_string('title', 'block_exaport'), 'maxlength="255" size="60"');
+        $mform->setType('title', PARAM_TEXT);
+
+        if ($blocktype === \block_exaport\item_block::TYPE_TEXT) {
+            $mform->addElement('editor', 'content_editor', get_string('content', 'block_exaport'), null,
+                $this->_customdata['editoroptions']);
+            $mform->setType('content_editor', PARAM_RAW);
+        } else if ($blocktype === \block_exaport\item_block::TYPE_FILE) {
+            $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null,
+                $this->_customdata['fileoptions']);
+        } else if ($blocktype === \block_exaport\item_block::TYPE_LINK) {
+            $mform->addElement('text', 'url', get_string('url', 'block_exaport'), 'maxlength="1333" size="60"');
+            $mform->setType('url', PARAM_TEXT);
+            $mform->addRule('url', get_string('urlnotempty', 'block_exaport'), 'required', null, 'client');
+            $mform->addElement('editor', 'content_editor', get_string('description', 'moodle'), null,
+                $this->_customdata['editoroptions']);
+            $mform->setType('content_editor', PARAM_RAW);
+        }
+
+        $this->add_action_buttons(true, get_string('save'));
+    }
+
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        if ($data['blocktype'] === \block_exaport\item_block::TYPE_TEXT
+            && trim(strip_tags($data['content_editor']['text'] ?? '')) === '') {
+            $errors['content_editor'] = get_string('invalidblockcontent', 'block_exaport');
+        }
+
+        if ($data['blocktype'] === \block_exaport\item_block::TYPE_LINK) {
+            $url = clean_param((string)($data['url'] ?? ''), PARAM_URL);
+            $scheme = $url ? parse_url($url, PHP_URL_SCHEME) : null;
+            if (!$url || !in_array($scheme, ['http', 'https'], true)) {
+                $errors['url'] = get_string('invalidblockurl', 'block_exaport');
+            }
+        }
+
+        return $errors;
+    }
 }
 
 function rek_category_select_setup($outercategories, $entryname, $categories) {

@@ -110,8 +110,8 @@ class item_card extends card {
         $iconTypeProps = block_exaport_item_icon_type_options($item->type);
         $typelabel     = get_string($item->type, 'block_exaport');
 
-        $introtext = '';
-        if (!empty($item->intro)) {
+        $introtext = \block_exaport\item_block::get_summary_text($item);
+        if ($introtext === '' && !empty($item->intro)) {
             $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php',
                 context_user::instance($item->userid)->id,
                 'block_exaport', 'item_content',

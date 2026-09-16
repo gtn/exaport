@@ -100,10 +100,6 @@ if ($action == 'copytoself') {
 
     if ($copy->type == 'file') {
         $fs = get_file_storage();
-        $fileinfo = array(
-            'component' => 'block_exaport',
-            'filearea' => 'item_file',
-            'itemid' => $id);
         $ownerusercontext = context_user::instance($ownerid);
         $usercontext = context_user::instance($USER->id);
         $oldfiles = $fs->get_area_files($ownerusercontext->id, 'block_exaport', 'item_file', $id);
@@ -115,7 +111,27 @@ if ($action == 'copytoself') {
             );
             $filecopy = $fs->create_file_from_storedfile($newfileparams, $f->get_id());
         };
-    };
+    }
+
+    $fs = get_file_storage();
+    $ownerusercontext = context_user::instance($ownerid);
+    $usercontext = context_user::instance($USER->id);
+    foreach ($fs->get_area_files($ownerusercontext->id, 'block_exaport', 'item_iconfile', $id, 'id', false) as $f) {
+        $fs->create_file_from_storedfile([
+            'contextid' => $usercontext->id,
+            'itemid' => $newitemid,
+            'component' => 'block_exaport',
+            'filearea' => 'item_iconfile',
+            'userid' => $USER->id,
+            'filepath' => $f->get_filepath(),
+            'filename' => $f->get_filename(),
+        ], $f->get_id());
+    }
+
+    if (\block_exaport\item_block::item_uses_blocks((int)$sourceitem->id)) {
+        $targetitem = $DB->get_record('block_exaportitem', ['id' => $newitemid], '*', MUST_EXIST);
+        \block_exaport\item_block::copy_blocks($sourceitem, $targetitem);
+    }
 
     $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&categoryid=-1&userid=" . $ownerid;
     redirect($returnurl);
@@ -212,6 +228,13 @@ if ($action == 'movetocategory' && $allowedit) {
 
     echo 'ok';
     exit;
+}
+
+$structureditem = ($type === 'mixed') || ($existing && \block_exaport\item_block::item_uses_blocks((int)$existing->id));
+if ($structureditem) {
+    define('BLOCK_EXAPORT_INTERNAL_ITEM_BLOCKS', true);
+    require(__DIR__ . '/item_blocks.php');
+    return;
 }
 
 require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
@@ -790,6 +813,7 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
     // Try to delete the item file.
     block_exaport_file_remove($post);
+    \block_exaport\item_block::delete_item_blocks($post);
 
     $conditions = array("id" => $post->id);
     $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);

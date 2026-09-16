@@ -509,6 +509,7 @@ if ($editform->is_cancelled()) {
         case 'content':
             // Delete all blocks only if all ok with possible blocks preparing
             $torewriteblocks = false;
+            $isajax = (bool) optional_param('ajax', 0, PARAM_INT);
 
             try {
                 // Add blocks.
@@ -562,7 +563,7 @@ if ($editform->is_cancelled()) {
 
                 }
             } catch (moodle_exception $e) {
-                if (optional_param('ajax', 0, PARAM_INT)) {
+                if ($isajax) {
                     block_exaport_send_view_ajax_response(false, '', 500);
                 }
                 $message = block_exaport_get_string('Something wrong with blocks saving (code: 1694089814164)');
@@ -577,7 +578,7 @@ if ($editform->is_cancelled()) {
                 }
             }
 
-            if (optional_param('ajax', 0, PARAM_INT)) {
+            if ($isajax) {
                 file_prepare_draft_area($view->draft_itemid, context_user::instance($USER->id)->id, 'block_exaport', 'view_content',
                     $view->id, array('subdirs' => true, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size), null);
                 $blocksjson = json_encode(block_exaport_get_view_blocks($view));

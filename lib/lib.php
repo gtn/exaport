@@ -113,13 +113,15 @@ function block_exaport_get_item_thumbnail_file($item) {
         return $iconfile;
     }
 
-    if (($item->type ?? '') !== 'file') {
-        return false;
+    if (\block_exaport\item_block::item_uses_blocks((int)$item->id)) {
+        return \block_exaport\item_block::get_thumbnail_file($item);
     }
 
-    foreach (block_exaport_get_item_files_array($item) as $file) {
-        if ($file && $file->is_valid_image()) {
-            return $file;
+    if (($item->type ?? '') === 'file') {
+        foreach (block_exaport_get_item_files_array($item) as $file) {
+            if ($file && $file->is_valid_image()) {
+                return $file;
+            }
         }
     }
 
@@ -135,7 +137,11 @@ function block_exaport_get_item_thumbnail_file($item) {
  */
 function block_exaport_get_item_thumbnail_url(\stored_file $file, string $access): string {
     $access = trim($access, '/');
-    $filearea = $file->get_filearea() . '/' . $access . '/itemid';
+    $idlabel = 'itemid';
+    if ($file->get_filearea() === 'itemblock_file') {
+        $idlabel = 'blockid';
+    }
+    $filearea = $file->get_filearea() . '/' . $access . '/' . $idlabel;
 
     return moodle_url::make_pluginfile_url(
         $file->get_contextid(),
@@ -264,6 +270,10 @@ function block_exaport_file_remove($item) {
     $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id);
     // Item content (intro) inside the html editor.
     $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content', $item->id);
+    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content_project_description', $item->id);
+    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content_project_process', $item->id);
+    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content_project_result', $item->id);
+    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_iconfile', $item->id);
 }
 
 /*** GENERAL FUNCTIONS **********************************************************************/
@@ -2943,6 +2953,10 @@ function block_exaport_fontawesome_icon($icon, $iconStyle = 'regular', $iconSize
 function block_exaport_item_icon_type_options($itemtype) {
     // Icon with the type of the item
     switch ($itemtype) {
+        case 'mixed':
+            $iconTypes = 'rectangle-list';
+            $st = 'regular';
+            break;
         case 'link':
             $iconTypes = 'link';
             $st = 'solid';

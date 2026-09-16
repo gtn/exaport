@@ -110,6 +110,18 @@ class provider implements
             'parentid' => 'privacy:metadata:block_exaportitem:parentid',
         ], 'privacy:metadata:block_exaportitem');
 
+        $collection->add_database_table('block_exaportitemblock', [
+            'itemid' => 'privacy:metadata:block_exaportitemblock:itemid',
+            'type' => 'privacy:metadata:block_exaportitemblock:type',
+            'sortorder' => 'privacy:metadata:block_exaportitemblock:sortorder',
+            'title' => 'privacy:metadata:block_exaportitemblock:title',
+            'content' => 'privacy:metadata:block_exaportitemblock:content',
+            'contentformat' => 'privacy:metadata:block_exaportitemblock:contentformat',
+            'url' => 'privacy:metadata:block_exaportitemblock:url',
+            'timecreated' => 'privacy:metadata:block_exaportitemblock:timecreated',
+            'timemodified' => 'privacy:metadata:block_exaportitemblock:timemodified',
+        ], 'privacy:metadata:block_exaportitemblock');
+
         // block_exaportitemshar
         // block_exaportitemgroupshar
         // Records who an item is shared with (specific users / cohort groups). Not treated as
@@ -304,6 +316,7 @@ class provider implements
 
 
     public static function attach_category_artifact_files($categories_tree, $context, $subcontext_name) {
+        global $DB;
         $writer = writer::with_context($context);
 
         foreach ($categories_tree as $cat_id => $category) {
@@ -320,6 +333,44 @@ class provider implements
                         $item->intro = $writer->rewrite_pluginfile_urls([$subcontext_name . $add_tosubcontext_name], 'block_exaport', 'item_content', $item_id, $item->intro);
                     }
                     $writer->export_area_files([$subcontext_name . $add_tosubcontext_name], 'block_exaport', 'item_content', $item_id);
+                    if ($itemblocks = $DB->get_records('block_exaportitemblock', ['itemid' => $item_id], 'sortorder ASC, id ASC')) {
+                        foreach ($itemblocks as $itemblock) {
+                            if (!empty($itemblock->content)) {
+                                $itemblock->content = $writer->rewrite_pluginfile_urls(
+                                    [$subcontext_name . $add_tosubcontext_name . '/Structured blocks'],
+                                    'block_exaport',
+                                    'itemblock_content',
+                                    $itemblock->id,
+                                    $itemblock->content
+                                );
+                            }
+                            $writer->export_data(
+                                [$subcontext_name . $add_tosubcontext_name . '/Structured blocks', 'Block ' . $itemblock->sortorder],
+                                (object)[
+                                    'type' => $itemblock->type,
+                                    'sortorder' => $itemblock->sortorder,
+                                    'title' => $itemblock->title,
+                                    'content' => $itemblock->content,
+                                    'contentformat' => $itemblock->contentformat,
+                                    'url' => $itemblock->url,
+                                    'timecreated' => transform::datetime($itemblock->timecreated),
+                                    'timemodified' => transform::datetime($itemblock->timemodified),
+                                ]
+                            );
+                            $writer->export_area_files(
+                                [$subcontext_name . $add_tosubcontext_name . '/Structured blocks', 'Block ' . $itemblock->sortorder],
+                                'block_exaport',
+                                'itemblock_content',
+                                $itemblock->id
+                            );
+                            $writer->export_area_files(
+                                [$subcontext_name . $add_tosubcontext_name . '/Structured blocks', 'Block ' . $itemblock->sortorder],
+                                'block_exaport',
+                                'itemblock_file',
+                                $itemblock->id
+                            );
+                        }
+                    }
                     // item icon
                     $writer->export_area_files([$subcontext_name . $add_tosubcontext_name . '/Icons'], 'block_exaport', 'item_iconfile', $item_id);
                     // comment for item
@@ -786,9 +837,13 @@ class provider implements
 
     public function delete_atifact_data($artifact_id) {
         global $DB;
+        if ($artifact = $DB->get_record('block_exaportitem', ['id' => $artifact_id])) {
+            \block_exaport\item_block::delete_item_blocks($artifact);
+        }
         $DB->delete_records('block_exaportitemshar', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportitemcomm', ['itemid' => $artifact_id]);
+        $DB->delete_records('block_exaportitemblock', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportviewblock', ['itemid' => $artifact_id]);
         return true;
     }

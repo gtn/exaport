@@ -86,6 +86,34 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 return false;
             }
             break;
+        case 'itemblock_file':
+        case 'itemblock_content':
+            $filename = array_pop($args);
+            $blockid = array_pop($args);
+            if (array_pop($args) != 'blockid') {
+                print_error('wrong params');
+            }
+
+            $access = join('/', $args);
+            $block = \block_exaport\item_block::get_block((int)$blockid);
+            if (!$block) {
+                print_error('filenotfound', 'block_exaport');
+            }
+
+            $item = block_exaport_get_item($block->itemid, $access, false, $is_for_pdf, $pdfforuserid);
+            if (!$item) {
+                print_error('Item not found');
+            }
+
+            $fs = get_file_storage();
+            $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $block->id, '/', $filename);
+
+            if ($file) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
         case 'item_content':
         case 'item_content_project_description':
         case 'item_content_project_process':

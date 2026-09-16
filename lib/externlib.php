@@ -101,125 +101,66 @@ function block_exaport_print_extern_item($item, $access) {
     }
 
     $boxcontent = '';
-    $filescontent = '';
-    if ($files = block_exaport_get_item_files($item)) {
-        foreach ($files as $fileindex => $file) {
-            if (!$file) {
-                continue; // Is here possible that $file is null?
-            }
-            $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=" . $access . "&itemid=" . $item->id . '&inst=' . $fileindex);
-            if ($file->is_valid_image()) { // Image attachments don't get printed as links.
-                $filescontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . s($item->name) . "\" /></div>";
-            } else {
-                $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-                $filescontent .= "<p class=\"filelink\">" . $icon . ' ' .
-                    $OUTPUT->action_link($ffurl, format_string($file->get_filename()), new popup_action ('click', $ffurl)) . "</p>";
-                if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
-                    // Videoblock.
-                    $filescontent .= '
-                    <div id="video_block">
-                        <div id="video_content">
-                            <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
-                                        controls preload="auto" width="640" height="480"
-                                        data-setup=\'{}\'>
-                                <source src="' . $ffurl . '" type="video/mp4" />
-                                <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading
-                                        to a web browser that
-                                        <a href="http://videojs.com/html5-video-support/" target="_blank">
-                                            supports HTML5 video</a></p>
-                            </video>
+    $blocks = \block_exaport\item_block::get_display_blocks($item, $access);
+    foreach ($blocks as $blockindex => $block) {
+        $boxcontent .= '<div class="item-project-section exaport-item-block exaport-item-block-' . s($block->type) . '">';
+        if (!empty($block->title)) {
+            $boxcontent .= '<h4>' . format_string($block->title) . '</h4>';
+        }
+
+        if ($block->type === \block_exaport\item_block::TYPE_FILE) {
+            foreach ($block->files as $file) {
+                $fileurl = !empty($block->fileurl) && count($block->files) === 1
+                    ? $block->fileurl
+                    : moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        'itemblock_file/' . trim($access, '/') . '/blockid',
+                        $block->id,
+                        $file->get_filepath(),
+                        $file->get_filename(),
+                        false
+                    )->out(false);
+
+                if ($file->is_valid_image()) {
+                    $boxcontent .= '<div class="item-detail-image"><img src="' . s($fileurl) . '" alt="' .
+                        s($file->get_filename()) . '" /></div>';
+                } else {
+                    $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
+                    $boxcontent .= '<p class="filelink">' . $icon . ' ' .
+                        $OUTPUT->action_link($fileurl, format_string($file->get_filename()), new popup_action('click', $fileurl)) .
+                        '</p>';
+                    if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
+                        $boxcontent .= '
+                        <div id="video_block">
+                            <div id="video_content">
+                                <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
+                                            controls preload="auto" width="640" height="480"
+                                            data-setup=\'{}\'>
+                                    <source src="' . s($fileurl) . '" type="video/mp4" />
+                                </video>
+                            </div>
                         </div>
-                        <div id="video_error" style="display: none;" class="incompatible_video">';
-                    $a = new stdClass ();
-                    $a->link = $OUTPUT->action_link($ffurl, format_string($file->get_filename()), new popup_action ('click', $ffurl));
-                    $filescontent .= get_string('incompatible_video', 'block_exaport', $a);
-                    $filescontent .= '</div>
-                                    </div>';
-                    $filescontent .= "
-                    <script src=\"" . $CFG->wwwroot . "/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
-                };
+                        <script src="' . $CFG->wwwroot . '/blocks/exaport/javascript/vedeo-js/exaport_video.js"></script>';
+                    }
+                }
+            }
+        } else {
+            if ($block->type === \block_exaport\item_block::TYPE_LINK && !empty($block->url)) {
+                $label = $block->title ?: preg_replace('!^https?://!i', '', $block->url);
+                $boxcontent .= '<p><a target="_blank" rel="noopener noreferrer" href="' . s($block->url) . '">' .
+                    s($label) . '</a></p>';
+            }
+            if (!empty($block->contenthtml)) {
+                $boxcontent .= $block->contenthtml;
             }
         }
-    }
 
-    if (!$filescontent && !$item->url) {
-        if ($item->type != 'note') { // notes can be without files
-            $boxcontent = block_exaport_get_string('filenotfound');
-        }
-    }
-
-    // Display files/attachments with heading if they exist
-    if ($filescontent) {
-        $boxcontent .= '<div class="item-project-section">';
-        $boxcontent .= '<h4>' . get_string('file', 'block_exaport') . '</h4>';
-        $boxcontent .= $filescontent;
         $boxcontent .= '</div>';
     }
 
-    $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
-        'block_exaport', 'item_content', $access . '/itemid/' . $item->id);
-    $intro = format_text($intro);
-    $template_text_to_html = text_to_html('');
-    $intro = trim($intro);
-    if ($intro && $intro == $template_text_to_html && strpos($item->intro, '<iframe') !== false) {
-        // TODO: test - if the intro is empty - it will have wrapper template (Moodle api)
-        // in this case it is possible that it is cleaned media link. Get it again
-        $intro = $item->intro;
-    }
-
-    // Display URL with heading if it exists
-    if ($item->url && $item->url != "false") {
-        $boxcontent .= '<div class="item-project-section">';
-        $boxcontent .= '<h4>' . get_string('url', 'block_exaport') . '</h4>';
-        $boxcontent .= '<p><a target="_blank" href="' . s($item->url) . '">' . str_replace('http://', '', $item->url) . '</a></p>';
-        $boxcontent .= '</div>';
-    }
-
-    // Display short description (intro field) with heading
-    if ($intro) {
-        $boxcontent .= '<div class="item-project-section">';
-        $boxcontent .= '<h4>' . get_string('shortdescription', 'block_exaport') . '</h4>';
-        $boxcontent .= $intro;
-        $boxcontent .= '</div>';
-    }
-
-    // Display project information fields if they exist
-    if (@$item->project_description || @$item->project_process || @$item->project_result) {
-        // The why behind this project
-        if (@$item->project_description) {
-            $boxcontent .= '<div class="item-project-section">';
-            $boxcontent .= '<h4>' . get_string('project_description', 'block_exaport') . '</h4>';
-            $content = file_rewrite_pluginfile_urls($item->project_description, 'pluginfile. php',
-                context_user::instance($item->userid)->id,
-                'block_exaport', 'item_content_project_description',
-                $access . '/itemid/' . $item->id);
-            $boxcontent .= format_text($content);
-            $boxcontent .= '</div>';
-        }
-
-        // Making it happen
-        if (@$item->project_process) {
-            $boxcontent .= '<div class="item-project-section">';
-            $boxcontent .= '<h4>' . get_string('project_process', 'block_exaport') . '</h4>';
-            $content = file_rewrite_pluginfile_urls($item->project_process, 'pluginfile.php',
-                context_user::instance($item->userid)->id,
-                'block_exaport', 'item_content_project_process',
-                $access . '/itemid/' . $item->id);
-            $boxcontent .= format_text($content);
-            $boxcontent .= '</div>';
-        }
-
-        // Results and learnings
-        if (@$item->project_result) {
-            $boxcontent .= '<div class="item-project-section">';
-            $boxcontent .= '<h4>' . get_string('project_result', 'block_exaport') . '</h4>';
-            $content = file_rewrite_pluginfile_urls($item->project_result, 'pluginfile.php',
-                context_user::instance($item->userid)->id,
-                'block_exaport', 'item_content_project_result',
-                $access . '/itemid/' . $item->id);
-            $boxcontent .= format_text($content);
-            $boxcontent .= '</div>';
-        }
+    if (!$boxcontent && $item->type != 'note') {
+        $boxcontent = block_exaport_get_string('filenotfound');
     }
 
     echo $OUTPUT->box($boxcontent);

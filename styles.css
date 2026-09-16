@@ -73,3 +73,18 @@
     outline-offset: -3px;
     background-color: rgba(0, 102, 204, 0.08);
 }
+.exaport-item-block-handle {
+    cursor: move;
+}
+
+.exaport-item-block-list .block-placeholder {
+    list-style: none;
+    min-height: 3rem;
+    background: rgba(0, 0, 0, 0.04);
+    border: 2px dashed rgba(0, 0, 0, 0.15);
+}
+
+.exaport-item-block .item-detail-image img {
+    max-width: 100%;
+    height: auto;
+}

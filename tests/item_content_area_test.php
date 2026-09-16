@@ -220,4 +220,27 @@ final class item_content_area_test extends \advanced_testcase {
         $this->assertSame('/nested/folder/', $parsed['filepath']);
         $this->assertSame('document.pdf', $parsed['filename']);
     }
+
+    public function test_block_file_argument_parser_rejects_missing_markers(): void {
+        $this->assertSame([], \block_exaport\item_content_helper::parse_block_file_args([
+            'portfolio', 'id', (string)$this->owner->id,
+            'blockid', '44',
+            'document.pdf',
+        ]));
+
+        $this->assertSame([], \block_exaport\item_content_helper::parse_block_file_args([
+            'portfolio', 'id', (string)$this->owner->id,
+            'itemid', (string)$this->item->id,
+            'document.pdf',
+        ]));
+    }
+
+    public function test_block_file_argument_parser_rejects_empty_filename(): void {
+        $this->assertSame([], \block_exaport\item_content_helper::parse_block_file_args([
+            'portfolio', 'id', (string)$this->owner->id,
+            'itemid', (string)$this->item->id,
+            'blockid', '44',
+            '',
+        ]));
+    }
 }

@@ -119,17 +119,17 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         case 'itemblock_file':
             $fileargs = \block_exaport\item_content_helper::parse_block_file_args($args);
             if (!$fileargs) {
-                print_error('wrong params');
+                print_error('itemblockinvalidrequest', 'block_exaport');
             }
 
             $item = block_exaport_get_item($fileargs['itemid'], $fileargs['access']);
             if (!$item) {
-                print_error('Item not found');
+                print_error('bookmarknotfound', 'block_exaport');
             }
 
             $blockrecord = \block_exaport\item_content_helper::get_item_block_record((int)$item->id, $fileargs['blockid']);
             if (!$blockrecord) {
-                print_error('Item block not found');
+                print_error('itemblocknotfound', 'block_exaport');
             }
 
             $contextid = context_user::instance($item->userid)->id;

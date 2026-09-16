@@ -245,6 +245,7 @@ class item_content_helper {
                 'name' => $file->get_filename(),
                 'url' => self::get_block_file_url($file, $access, (int)$item->id),
                 'size' => display_size($file->get_filesize()),
+                'mimetype' => $mimetype,
                 'isimage' => $file->is_valid_image(),
                 'isvideo' => str_starts_with($mimetype, 'video/'),
                 'isaudio' => str_starts_with($mimetype, 'audio/'),
@@ -322,6 +323,9 @@ class item_content_helper {
         }
 
         $filename = array_pop($fileparts);
+        if ($filename === '') {
+            return [];
+        }
 
         return [
             'access' => implode('/', $accessparts),

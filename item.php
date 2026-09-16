@@ -91,6 +91,7 @@ if ($action == 'copytoself') {
     $copy->shareall = 0;
 
     $newitemid = $DB->insert_record('block_exaportitem', $copy);
+    \block_exaport\item_content_helper::copy_item_blocks($sourceitem, (int)$newitemid, (int)$USER->id);
 
     // Copy category assignments from the source item to the new item.
     $sourcecatids = $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$id]);
@@ -790,6 +791,7 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
     // Try to delete the item file.
     block_exaport_file_remove($post);
+    \block_exaport\item_content_helper::delete_item_blocks($post);
 
     $conditions = array("id" => $post->id);
     $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);

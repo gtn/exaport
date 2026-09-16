@@ -100,7 +100,10 @@ function block_exaport_print_extern_item($item, $access) {
         echo $categorybadges;
     }
 
-    $boxcontent = '';
+    $itemblocks = \block_exaport\item_content_helper::export_item_blocks($item, $access);
+    $boxcontent = block_exaport_get_renderer()->render(
+        new \block_exaport\output\item_content_area($item, $access, $itemblocks)
+    );
     $filescontent = '';
     if ($files = block_exaport_get_item_files($item)) {
         foreach ($files as $fileindex => $file) {
@@ -142,9 +145,9 @@ function block_exaport_print_extern_item($item, $access) {
         }
     }
 
-    if (!$filescontent && !$item->url) {
+    if (!$filescontent && !$item->url && empty($itemblocks)) {
         if ($item->type != 'note') { // notes can be without files
-            $boxcontent = block_exaport_get_string('filenotfound');
+            $boxcontent .= '<p>' . block_exaport_get_string('filenotfound') . '</p>';
         }
     }
 
@@ -222,7 +225,7 @@ function block_exaport_print_extern_item($item, $access) {
         }
     }
 
-    echo $OUTPUT->box($boxcontent);
+    echo $OUTPUT->box($boxcontent, 'exaport-item-detail-box');
 }
 
 function block_exaport_print_extcomments($itemid) {

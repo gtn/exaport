@@ -116,6 +116,43 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 return false;
             }
             break;
+        case 'itemblock_file':
+            $fileargs = \block_exaport\item_content_helper::parse_block_file_args($args);
+            if (!$fileargs) {
+                print_error('itemblockinvalidrequest', 'block_exaport');
+            }
+
+            $item = block_exaport_get_item($fileargs['itemid'], $fileargs['access']);
+            if (!$item) {
+                print_error('bookmarknotfound', 'block_exaport');
+            }
+
+            $blockrecord = \block_exaport\item_content_helper::get_item_block_record((int)$item->id, $fileargs['blockid']);
+            if (!$blockrecord) {
+                print_error('itemblocknotfound', 'block_exaport');
+            }
+
+            $contextid = context_user::instance($item->userid)->id;
+            $fs = get_file_storage();
+            $file = $fs->get_file(
+                $contextid,
+                'block_exaport',
+                'itemblock_file',
+                $fileargs['blockid'],
+                $fileargs['filepath'],
+                $fileargs['filename']
+            );
+
+            if ($file
+                && (int)$file->get_contextid() === (int)$contextid
+                && $file->get_component() === 'block_exaport'
+                && $file->get_filearea() === 'itemblock_file'
+                && (int)$file->get_itemid() === (int)$blockrecord->id) {
+                send_stored_file($file);
+            } else {
+                return false;
+            }
+            break;
         case 'view_content':
             $filename = array_pop($args);
 

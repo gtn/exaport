@@ -366,3 +366,63 @@ function block_exaport_output_fragment_blockedit($args) {
 
     return $formdata->html;
 }
+
+/**
+ * Fragment callback for the unsaved text block form on an item edit page.
+ *
+ * @param array $args
+ * @return string
+ */
+function block_exaport_output_fragment_item_content_text($args) {
+    global $CFG, $DB, $PAGE, $USER;
+
+    require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_blocks.php');
+    require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_text_form.php');
+
+    $courseid = clean_param($args['courseid'] ?? 0, PARAM_INT);
+    $itemid = clean_param($args['itemid'] ?? 0, PARAM_INT);
+    require_login($courseid);
+    require_capability('block/exaport:use', context_system::instance());
+    $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
+
+    if ($itemid > 0) {
+        $item = $DB->get_record('block_exaportitem', [
+            'id' => $itemid,
+            'userid' => $USER->id,
+        ]);
+        if (!$item || (int)$item->courseid !== $courseid || !block_exaport_item_is_editable($itemid)) {
+            throw new moodle_exception('nopermissions', 'error');
+        }
+    }
+
+    $editoroptions = [
+        'trusttext' => true,
+        'subdirs' => false,
+        'maxfiles' => 0,
+        'maxbytes' => 0,
+        'context' => context_user::instance($USER->id),
+    ];
+    $form = new block_exaport_item_content_text_form(null, [
+        'editoroptions' => $editoroptions,
+        'modal' => true,
+    ]);
+    $data = (object)[
+        'courseid' => $courseid,
+        'itemid' => $itemid,
+        'title' => '',
+        'content' => '',
+        'contentformat' => FORMAT_HTML,
+    ];
+    $data = file_prepare_standard_editor(
+        $data,
+        'content',
+        $editoroptions,
+        context_user::instance($USER->id),
+        'block_exaport',
+        'item_content_text',
+        0
+    );
+    $form->set_data($data);
+
+    return $form->render();
+}

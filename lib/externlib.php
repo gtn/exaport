@@ -17,6 +17,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/item_content_blocks.php');
+
 require_once(__DIR__ . '/lib.php'); // needed for block_exaport_get_comment_author_name
 function block_exaport_get_user_from_hash($hash) {
     trigger_error('deprecated');

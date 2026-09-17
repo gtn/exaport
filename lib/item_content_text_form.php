@@ -34,6 +34,9 @@ class block_exaport_item_content_text_form extends block_exaport_moodleform {
         $mform->addElement('hidden', 'itemid');
         $mform->setType('itemid', PARAM_INT);
 
+        $mform->addElement('hidden', 'pendingcontentblocks');
+        $mform->setType('pendingcontentblocks', PARAM_RAW);
+
         $mform->addElement('text', 'title', get_string('title', 'block_exaport'), [
             'maxlength' => 255,
         ]);
@@ -43,6 +46,8 @@ class block_exaport_item_content_text_form extends block_exaport_moodleform {
         $mform->addElement('editor', 'content_editor', get_string('blockcontent', 'block_exaport'), null, $editoroptions);
         $mform->setType('content_editor', PARAM_RAW);
 
-        $this->add_action_buttons(true, get_string('save'));
+        if (empty($this->_customdata['modal'])) {
+            $this->add_action_buttons(true, get_string('save'));
+        }
     }
 }

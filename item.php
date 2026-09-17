@@ -16,6 +16,7 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/item_content_blocks.php');
 
 use function block_exaport\common\print_error;
 use block_exaport\item_category_helper;
@@ -231,9 +232,29 @@ if ($cattype == 'shared' && $categoryid === 0 && $existing) {
     $existingcateid = $DB->get_field_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$existing->id]);
     $categoryidforform = $existingcateid ? (int)$existingcateid : 0;
 }
+
+if ($existing) {
+    $itemcontentblocks = $DB->get_records(
+        'block_exaportitemblock',
+        ['itemid' => $existing->id],
+        'sortorder ASC, id ASC'
+    );
+} else {
+    $itemcontentblocks = [];
+}
+$itemcontenthtml = $PAGE->get_renderer('block_exaport')->render(
+    new \block_exaport\output\item_content_blocks(
+        $itemcontentblocks,
+        null,
+        (int)($existing->userid ?? $USER->id),
+        (bool)$allowedit
+    )
+);
+
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type,
     array('current' => $existing, 'useTextareas' => $usetextareas, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
-        'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission, 'cattype' => $cattype, 'catid' => $categoryidforform));
+        'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission,
+        'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontenthtml' => $itemcontenthtml));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -242,9 +263,15 @@ if ($editform->is_cancelled()) {
 } else if (($fromform = $editform->get_data()) && $allowedit) {
     require_sesskey();
 
+    $pendingcontentblocks = block_exaport_validate_pending_text_blocks(
+        (string)($fromform->pendingcontentblocks ?? ''),
+        $existing ? (int)$existing->id : 0
+    );
+    unset($fromform->pendingcontentblocks);
     $categoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
     $fromform->categoryids = $categoryids;
 
+    $transaction = $DB->start_delegated_transaction();
     switch ($action) {
         case 'add':
             $fromform->type = $type;
@@ -266,6 +293,8 @@ if ($editform->is_cancelled()) {
             print_error("unknownaction", "block_exaport");
     }
 
+    block_exaport_persist_pending_text_blocks($pendingcontentblocks, (int)$fromform->id);
+    $transaction->allow_commit();
     redirect($returnurl);
 }
 
@@ -277,6 +306,7 @@ $post->introformat = FORMAT_HTML;
 $post->project_descriptionformat = FORMAT_HTML;
 $post->project_processformat = FORMAT_HTML;
 $post->project_resultformat = FORMAT_HTML;
+$post->pendingcontentblocks = optional_param('pendingcontentblocks', '', PARAM_RAW);
 $post->allowedit = $allowedit;
 
 switch ($action) {
@@ -474,27 +504,11 @@ if ($exacompactive) {
 
 $editform->set_data($post);
 echo $OUTPUT->box($extracontent);
-if ($existing) {
-    $itemcontentblocks = $DB->get_records(
-        'block_exaportitemblock',
-        ['itemid' => $existing->id],
-        'sortorder ASC, id ASC'
-    );
-    $itemcontentaddurl = $allowedit ? new moodle_url('/blocks/exaport/item_content_text.php', [
-        'courseid' => $courseid,
-        'itemid' => $existing->id,
-    ]) : null;
-} else {
-    $itemcontentblocks = [];
-    $itemcontentaddurl = null;
-}
-echo $PAGE->get_renderer('block_exaport')->render(
-    new \block_exaport\output\item_content_blocks(
-        $itemcontentblocks,
-        $itemcontentaddurl,
-        (int)($existing->userid ?? $USER->id)
-    )
-);
+$PAGE->requires->js_call_amd('block_exaport/item_content_draft', 'init', [
+    'contextid' => context_system::instance()->id,
+    'courseid' => $courseid,
+    'itemid' => $existing ? (int)$existing->id : 0,
+]);
 if (has_capability('block/exaport:shareintern', context_system::instance())) {
     // Translations.
     $translations = array(

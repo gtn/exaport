@@ -84,6 +84,12 @@ class item_content_blocks implements renderable, templatable {
             'heading' => get_string('viewcontent', 'block_exaport'),
             'blocks' => $rows,
             'hasblocks' => !empty($rows),
+            'texticon' => $output->pix_icon(
+                'i/info',
+                get_string('view_specialitem_text', 'block_exaport'),
+                'moodle',
+                ['class' => 'exaport-item-content-block-icon']
+            ),
             'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
             'addlabel' => get_string('add', 'block_exaport') . ' ' .
                 get_string('view_specialitem_text', 'block_exaport'),

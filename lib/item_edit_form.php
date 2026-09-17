@@ -110,6 +110,10 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->setType('compids', PARAM_TEXT);
         $mform->setDefault('compids', '');
 
+        $mform->addElement('hidden', 'pendingcontentblocks');
+        $mform->setType('pendingcontentblocks', PARAM_RAW);
+        $mform->setDefault('pendingcontentblocks', '');
+
         $mform->addElement('text', 'name', get_string("title", "block_exaport"), 'maxlength="255" size="60"');
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
@@ -324,6 +328,10 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             ];
             $mform->addElement('autocomplete', 'tags', get_string('tags'), $tagstrings, $options);
             $mform->add_exaport_help_button('tags', 'forms.item.tags');
+        }
+
+        if (!empty($this->_customdata['itemcontenthtml'])) {
+            $mform->addElement('html', $this->_customdata['itemcontenthtml']);
         }
 
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {

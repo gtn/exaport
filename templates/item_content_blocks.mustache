@@ -3,8 +3,8 @@
 }}
 <section class="exaport-item-content-section mt-4" aria-labelledby="exaport-item-content-heading">
     <h2 id="exaport-item-content-heading" class="h4 mb-3">{{heading}}</h2>
-    {{#hasblocks}}
-    <div class="exaport-item-content-rows border-top">
+    <div class="exaport-item-content-rows border-top {{^hasblocks}}d-none{{/hasblocks}}"
+         data-exaport-content-rows="1">
         {{#blocks}}
         <div class="exaport-item-content-row d-flex align-items-start py-3 border-bottom">
             <div class="exaport-item-content-icon flex-shrink-0 me-3">
@@ -21,24 +21,15 @@
         </div>
         {{/blocks}}
     </div>
-    {{/hasblocks}}
+    <span class="d-none" data-exaport-text-icon="1">{{{texticon}}}</span>
     {{#showaddbutton}}
     <div class="exaport-item-content-divider">
-        {{#addurl}}
-        <a class="exaport-item-content-add-button"
-           href="{{addurl}}"
-           role="button"
-           aria-label="{{addlabel}}">
+        <button type="button"
+                class="exaport-item-content-add-button"
+                data-exaport-content-add="text"
+                aria-label="{{addlabel}}">
             {{{addicon}}}
-        </a>
-        {{/addurl}}
-        {{^addurl}}
-        <span class="exaport-item-content-add-button"
-              aria-disabled="true"
-              aria-label="{{addlabel}}">
-            {{{addicon}}}
-        </span>
-        {{/addurl}}
+        </button>
     </div>
     {{/showaddbutton}}
 </section>

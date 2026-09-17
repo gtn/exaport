@@ -88,8 +88,28 @@ function block_exaport_extern_item_category_badges(int $itemid, int $userid): st
     return html_writer::div(implode(' ', $badges), 'eportfolio-categories');
 }
 
+/**
+ * Load the supported structured content blocks for one authorized item.
+ *
+ * @param int $itemid
+ * @return array
+ */
+function block_exaport_get_item_content_text_blocks(int $itemid): array {
+    global $DB;
+
+    $blocks = $DB->get_records(
+        'block_exaportitemblock',
+        ['itemid' => $itemid],
+        'sortorder ASC, id ASC'
+    );
+
+    return array_filter($blocks, function($block): bool {
+        return ($block->type ?? '') === 'text';
+    });
+}
+
 function block_exaport_print_extern_item($item, $access) {
-    global $CFG, $OUTPUT, $DB;
+    global $CFG, $OUTPUT, $DB, $PAGE;
     echo $OUTPUT->heading(format_string($item->name));
     $tags = \core_tag_tag::get_item_tags('block_exaport', 'block_exaportitem', $item->id);
     echo $OUTPUT->tag_list($tags, null, 'exaport-artifact-tags', 0, null, false);
@@ -220,6 +240,18 @@ function block_exaport_print_extern_item($item, $access) {
             $boxcontent .= format_text($content);
             $boxcontent .= '</div>';
         }
+    }
+
+    $structuredblocks = block_exaport_get_item_content_text_blocks((int)$item->id);
+    if ($structuredblocks) {
+        $boxcontent .= $PAGE->get_renderer('block_exaport')->render(
+            new \block_exaport\output\item_content_blocks(
+                $structuredblocks,
+                null,
+                (int)$item->userid,
+                false
+            )
+        );
     }
 
     echo $OUTPUT->box($boxcontent);

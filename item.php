@@ -489,7 +489,11 @@ if ($existing) {
     $itemcontentaddurl = null;
 }
 echo $PAGE->get_renderer('block_exaport')->render(
-    new \block_exaport\output\item_content_blocks($itemcontentblocks, $itemcontentaddurl)
+    new \block_exaport\output\item_content_blocks(
+        $itemcontentblocks,
+        $itemcontentaddurl,
+        (int)($existing->userid ?? $USER->id)
+    )
 );
 if (has_capability('block/exaport:shareintern', context_system::instance())) {
     // Translations.

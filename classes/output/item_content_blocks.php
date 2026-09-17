@@ -35,13 +35,23 @@ class item_content_blocks implements renderable, templatable {
     /** @var \moodle_url|null */
     private $addurl;
 
+    /** @var int */
+    private $ownerid;
+
+    /** @var bool */
+    private $showaddbutton;
+
     /**
      * @param array $blocks Ordered item content block records.
      * @param \moodle_url|null $addurl URL for adding a text block.
+     * @param int $ownerid User ID that owns the item content.
+     * @param bool $showaddbutton Whether the visual add control should be shown.
      */
-    public function __construct(array $blocks, $addurl = null) {
+    public function __construct(array $blocks, $addurl, int $ownerid, bool $showaddbutton = true) {
         $this->blocks = $blocks;
         $this->addurl = $addurl;
+        $this->ownerid = $ownerid;
+        $this->showaddbutton = $showaddbutton;
     }
 
     /**
@@ -78,6 +88,7 @@ class item_content_blocks implements renderable, templatable {
             'addlabel' => get_string('add', 'block_exaport') . ' ' .
                 get_string('view_specialitem_text', 'block_exaport'),
             'addurl' => $this->addurl instanceof \moodle_url ? $this->addurl->out(false) : '',
+            'showaddbutton' => $this->showaddbutton,
         ];
     }
 
@@ -156,16 +167,24 @@ class item_content_blocks implements renderable, templatable {
      * @return string
      */
     private function format_content(\stdClass $block): string {
-        global $USER;
-
         $content = trim((string)($block->content ?? ''));
         if ($content === '') {
             return '';
         }
 
         $contentformat = isset($block->contentformat) ? (int)$block->contentformat : FORMAT_HTML;
+        $ownercontext = context_user::instance($this->ownerid);
+        $content = file_rewrite_pluginfile_urls(
+            $content,
+            'pluginfile.php',
+            $ownercontext->id,
+            'block_exaport',
+            'item_content_text',
+            $block->id
+        );
+
         return format_text($content, $contentformat, [
-            'context' => context_user::instance($USER->id),
+            'context' => $ownercontext,
         ]);
     }
 }

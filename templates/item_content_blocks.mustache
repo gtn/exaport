@@ -15,6 +15,7 @@
                     <span class="exaport-item-content-type text-muted small">{{typelabel}}</span>
                     {{#title}}<span class="exaport-item-content-title fw-semibold">{{title}}</span>{{/title}}
                 </div>
+                {{#content}}<div class="exaport-item-content-preview mt-1">{{{content}}}</div>{{/content}}
                 {{#preview}}<div class="exaport-item-content-preview mt-1">{{preview}}</div>{{/preview}}
             </div>
         </div>
@@ -22,12 +23,20 @@
     </div>
     {{/hasblocks}}
     <div class="exaport-item-content-divider">
-        <button type="button"
-                class="exaport-item-content-add-button"
-                aria-label="{{addlabel}} {{heading}}"
-                aria-disabled="true"
-                tabindex="-1">
+        {{#addurl}}
+        <a class="exaport-item-content-add-button"
+           href="{{addurl}}"
+           role="button"
+           aria-label="{{addlabel}}">
             {{{addicon}}}
-        </button>
+        </a>
+        {{/addurl}}
+        {{^addurl}}
+        <span class="exaport-item-content-add-button"
+              aria-disabled="true"
+              aria-label="{{addlabel}}">
+            {{{addicon}}}
+        </span>
+        {{/addurl}}
     </div>
 </section>

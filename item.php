@@ -480,11 +480,16 @@ if ($existing) {
         ['itemid' => $existing->id],
         'sortorder ASC, id ASC'
     );
+    $itemcontentaddurl = $allowedit ? new moodle_url('/blocks/exaport/item_content_text.php', [
+        'courseid' => $courseid,
+        'itemid' => $existing->id,
+    ]) : null;
 } else {
     $itemcontentblocks = [];
+    $itemcontentaddurl = null;
 }
 echo $PAGE->get_renderer('block_exaport')->render(
-    new \block_exaport\output\item_content_blocks($itemcontentblocks)
+    new \block_exaport\output\item_content_blocks($itemcontentblocks, $itemcontentaddurl)
 );
 if (has_capability('block/exaport:shareintern', context_system::instance())) {
     // Translations.

@@ -19,6 +19,7 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+use context_user;
 use renderable;
 use renderer_base;
 use templatable;
@@ -31,11 +32,16 @@ class item_content_blocks implements renderable, templatable {
     /** @var array */
     private $blocks;
 
+    /** @var \moodle_url|null */
+    private $addurl;
+
     /**
      * @param array $blocks Ordered item content block records.
+     * @param \moodle_url|null $addurl URL for adding a text block.
      */
-    public function __construct(array $blocks) {
+    public function __construct(array $blocks, $addurl = null) {
         $this->blocks = $blocks;
+        $this->addurl = $addurl;
     }
 
     /**
@@ -59,6 +65,7 @@ class item_content_blocks implements renderable, templatable {
                 ),
                 'typelabel' => $typelabel,
                 'title' => trim((string)($block->title ?? '')),
+                'content' => $type === 'text' ? $this->format_content($block) : '',
                 'preview' => $this->build_preview($block, $type),
             ];
         }
@@ -68,7 +75,9 @@ class item_content_blocks implements renderable, templatable {
             'blocks' => $rows,
             'hasblocks' => !empty($rows),
             'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
-            'addlabel' => get_string('add', 'block_exaport'),
+            'addlabel' => get_string('add', 'block_exaport') . ' ' .
+                get_string('view_specialitem_text', 'block_exaport'),
+            'addurl' => $this->addurl instanceof \moodle_url ? $this->addurl->out(false) : '',
         ];
     }
 
@@ -118,6 +127,10 @@ class item_content_blocks implements renderable, templatable {
         $content = trim((string)($block->content ?? ''));
         $url = trim((string)($block->url ?? ''));
 
+        if ($type === 'text') {
+            return $content === '' && $title === '' ? get_string('noentry', 'block_exaport') : '';
+        }
+
         if ($type === 'link') {
             $values = [$url !== '' ? $url : $content];
         } else {
@@ -134,5 +147,25 @@ class item_content_blocks implements renderable, templatable {
         }
 
         return $preview === '' ? '' : shorten_text($preview, 160, true);
+    }
+
+    /**
+     * Format a text block using its stored Moodle format.
+     *
+     * @param \stdClass $block
+     * @return string
+     */
+    private function format_content(\stdClass $block): string {
+        global $USER;
+
+        $content = trim((string)($block->content ?? ''));
+        if ($content === '') {
+            return '';
+        }
+
+        $contentformat = isset($block->contentformat) ? (int)$block->contentformat : FORMAT_HTML;
+        return format_text($content, $contentformat, [
+            'context' => context_user::instance($USER->id),
+        ]);
     }
 }

@@ -91,6 +91,15 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertStringNotContainsString('<script', $data['blocks'][0]['content']);
         $this->assertStringContainsString('Owner title', $data['blocks'][0]['title']);
         $this->assertNotSame($owner->id, $viewer->id);
+
+        global $OUTPUT;
+        $html = $OUTPUT->render_from_template('block_exaport/item_content_blocks', $data);
+        $this->assertStringNotContainsString('exaport-item-content-add-button', $html);
+
+        $emptydata = (new \block_exaport\output\item_content_blocks([], null, $owner->id, false))
+            ->export_for_template($renderer);
+        $this->assertFalse($emptydata['hasblocks']);
+        $this->assertSame([], $emptydata['blocks']);
     }
 
     /**

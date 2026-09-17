@@ -35,9 +35,8 @@ define(['jquery', 'core/modal', 'core/modal_events', 'core/fragment'], function(
     };
 
     var plainText = function(content) {
-        var container = document.createElement('div');
-        container.innerHTML = content || '';
-        return (container.textContent || container.innerText || '').replace(/\s+/g, ' ').trim();
+        var documentfragment = new DOMParser().parseFromString(content || '', 'text/html');
+        return (documentfragment.body.textContent || '').replace(/\s+/g, ' ').trim();
     };
 
     var renderDrafts = function(form) {

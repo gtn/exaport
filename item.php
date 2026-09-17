@@ -272,29 +272,33 @@ if ($editform->is_cancelled()) {
     $fromform->categoryids = $categoryids;
 
     $transaction = $DB->start_delegated_transaction();
-    switch ($action) {
-        case 'add':
-            $fromform->type = $type;
-            $fromform->compids = $compids;
+    try {
+        switch ($action) {
+            case 'add':
+                $fromform->type = $type;
+                $fromform->compids = $compids;
 
-            block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
-            break;
+                block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
+                break;
 
-        case 'edit':
-            $fromform->type = $type;
-            if (!$existing) {
-                print_error("bookmarknotfound", "block_exaport");
-            }
+            case 'edit':
+                $fromform->type = $type;
+                if (!$existing) {
+                    print_error("bookmarknotfound", "block_exaport");
+                }
 
-            block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
-            break;
+                block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
+                break;
 
-        default:
-            print_error("unknownaction", "block_exaport");
+            default:
+                print_error("unknownaction", "block_exaport");
+        }
+
+        block_exaport_persist_pending_text_blocks($pendingcontentblocks, (int)$fromform->id);
+        $transaction->allow_commit();
+    } catch (\Throwable $exception) {
+        $transaction->rollback($exception);
     }
-
-    block_exaport_persist_pending_text_blocks($pendingcontentblocks, (int)$fromform->id);
-    $transaction->allow_commit();
     redirect($returnurl);
 }
 

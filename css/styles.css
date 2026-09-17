@@ -113,7 +113,7 @@ div.item-detail-image img {
     border-radius: 0.375rem;
     background-color: #e8f4fc;
     color: #3d83b5;
-    cursor: default;
+    cursor: pointer;
     transform: translate(-50%, -50%);
 }
 

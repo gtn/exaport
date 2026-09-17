@@ -92,14 +92,14 @@ if ($form->is_cancelled()) {
         print_error('nopermissions', 'error');
     }
 
-    $lastblock = $DB->get_record(
+    $maxsortorder = $DB->get_field(
         'block_exaportitemblock',
-        ['itemid' => $itemid],
-        'sortorder DESC, id DESC',
-        'id, sortorder',
-        IGNORE_MULTIPLE
+        'MAX(sortorder)',
+        ['itemid' => $itemid]
     );
-    $sortorder = $lastblock ? (int)$lastblock->sortorder + 1 : 0;
+    $sortorder = ($maxsortorder === false || $maxsortorder === null)
+        ? 0
+        : ((int)$maxsortorder + 1);
     $time = time();
 
     $block = (object)[

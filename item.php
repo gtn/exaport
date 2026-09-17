@@ -508,6 +508,10 @@ $PAGE->requires->js_call_amd('block_exaport/item_content_draft', 'init', [
     'contextid' => context_system::instance()->id,
     'courseid' => $courseid,
     'itemid' => $existing ? (int)$existing->id : 0,
+    'title' => get_string('view_specialitem_text', 'block_exaport'),
+    'textlabel' => get_string('view_specialitem_text', 'block_exaport'),
+    'savelabel' => get_string('save'),
+    'cancellabel' => get_string('cancel'),
 ]);
 if (has_capability('block/exaport:shareintern', context_system::instance())) {
     // Translations.

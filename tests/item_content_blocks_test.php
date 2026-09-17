@@ -102,6 +102,56 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertSame([], $emptydata['blocks']);
     }
 
+    public function test_pending_text_blocks_are_validated_and_persisted_after_parent_item(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $this->setUser($owner);
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->insert_block($itemid, 'text', 4, 'Existing');
+
+        $drafts = json_encode([
+            [
+                'tempid' => 'pending-1',
+                'type' => 'text',
+                'title' => 'Draft title',
+                'content' => '<p>Draft content</p>',
+                'contentformat' => FORMAT_HTML,
+                'itemid' => 999999,
+                'sortorder' => -100,
+            ],
+        ]);
+        $validated = block_exaport_validate_pending_text_blocks($drafts, $itemid);
+
+        $this->assertSame([[
+            'type' => 'text',
+            'title' => 'Draft title',
+            'content' => '<p>Draft content</p>',
+            'contentformat' => FORMAT_HTML,
+        ]], $validated);
+
+        block_exaport_persist_pending_text_blocks($validated, $itemid);
+        $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $itemid], 'sortorder ASC, id ASC');
+        $this->assertCount(2, $blocks);
+        $saved = end($blocks);
+        $this->assertSame('Draft title', $saved->title);
+        $this->assertSame(5, (int)$saved->sortorder);
+    }
+
+    public function test_pending_text_blocks_reject_unsupported_type(): void {
+        $this->resetAfterTest(true);
+
+        $this->expectException(\invalid_parameter_exception::class);
+        block_exaport_validate_pending_text_blocks(json_encode([[
+            'type' => 'link',
+            'title' => 'Not supported',
+            'content' => 'https://example.com',
+            'contentformat' => FORMAT_HTML,
+        ]]));
+    }
+
     /**
      * @param int $itemid
      * @param string $type

@@ -16,7 +16,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return array
  */
 function block_exaport_validate_pending_text_blocks(string $json, int $itemid = 0): array {
-    global $DB;
+    global $DB, $USER;
 
     if (trim($json) === '') {
         return [];
@@ -34,7 +34,7 @@ function block_exaport_validate_pending_text_blocks(string $json, int $itemid = 
     if ($itemid > 0) {
         $item = $DB->get_record('block_exaportitem', [
             'id' => $itemid,
-            'userid' => $GLOBALS['USER']->id,
+            'userid' => $USER->id,
         ]);
         if (!$item || !block_exaport_item_is_editable($itemid)) {
             throw new required_capability_exception(
@@ -53,17 +53,27 @@ function block_exaport_validate_pending_text_blocks(string $json, int $itemid = 
             throw new invalid_parameter_exception('Invalid pending item content block type.');
         }
 
-        $title = clean_param((string)($draft['title'] ?? ''), PARAM_TEXT);
+        $titlevalue = $draft['title'] ?? '';
+        $contentvalue = $draft['content'] ?? '';
+        if (!is_scalar($titlevalue) || !is_scalar($contentvalue)) {
+            throw new invalid_parameter_exception('Invalid pending item content block data.');
+        }
+
+        $title = clean_param((string)$titlevalue, PARAM_TEXT);
         if (core_text::strlen($title) > 255) {
             throw new invalid_parameter_exception('Pending item content block title is too long.');
         }
 
-        $content = clean_param((string)($draft['content'] ?? ''), PARAM_RAW);
+        $content = clean_param((string)$contentvalue, PARAM_RAW);
         if (core_text::strlen($content) > 1048576) {
             throw new invalid_parameter_exception('Pending item content block content is too long.');
         }
 
-        $format = clean_param($draft['contentformat'] ?? FORMAT_HTML, PARAM_INT);
+        $formatvalue = $draft['contentformat'] ?? FORMAT_HTML;
+        if (!is_scalar($formatvalue)) {
+            throw new invalid_parameter_exception('Invalid pending item content block format.');
+        }
+        $format = clean_param($formatvalue, PARAM_INT);
         if (!in_array($format, $formats, true)) {
             throw new invalid_parameter_exception('Invalid pending item content block format.');
         }

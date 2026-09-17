@@ -474,6 +474,18 @@ if ($exacompactive) {
 
 $editform->set_data($post);
 echo $OUTPUT->box($extracontent);
+if ($existing) {
+    $itemcontentblocks = $DB->get_records(
+        'block_exaportitemblock',
+        ['itemid' => $existing->id],
+        'sortorder ASC, id ASC'
+    );
+} else {
+    $itemcontentblocks = [];
+}
+echo $PAGE->get_renderer('block_exaport')->render(
+    new \block_exaport\output\item_content_blocks($itemcontentblocks)
+);
 if (has_capability('block/exaport:shareintern', context_system::instance())) {
     // Translations.
     $translations = array(

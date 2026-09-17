@@ -1,0 +1,22 @@
+{{!
+    Read-only ordered content blocks shown on the item edit page.
+}}
+<section class="exaport-item-content-section mt-4" aria-labelledby="exaport-item-content-heading">
+    <h2 id="exaport-item-content-heading" class="h4 mb-3">{{heading}}</h2>
+    <div class="exaport-item-content-rows border-top">
+        {{#blocks}}
+        <div class="exaport-item-content-row d-flex align-items-start py-3 border-bottom">
+            <div class="exaport-item-content-icon flex-shrink-0 me-3">
+                {{{icon}}}
+            </div>
+            <div class="flex-grow-1 text-break">
+                <div class="d-flex flex-wrap align-items-baseline gap-2">
+                    <span class="exaport-item-content-type text-muted small">{{typelabel}}</span>
+                    {{#title}}<span class="exaport-item-content-title fw-semibold">{{title}}</span>{{/title}}
+                </div>
+                {{#preview}}<div class="exaport-item-content-preview mt-1">{{preview}}</div>{{/preview}}
+            </div>
+        </div>
+        {{/blocks}}
+    </div>
+</section>

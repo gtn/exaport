@@ -19,6 +19,7 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+use block_exaport\item_content_mutation_helper;
 use renderable;
 use renderer_base;
 use templatable;
@@ -69,7 +70,7 @@ class item_content_area implements renderable, templatable {
             'canmanage' => $canmanage,
             'hasaddactions' => $canmanage,
             'addactions' => $canmanage
-                ? \block_exaport\item_content_mutation_helper::get_add_action_links(
+                ? item_content_mutation_helper::get_add_action_links(
                     $this->item,
                     $this->access,
                     (string)($this->options['backtype'] ?? '')

@@ -82,3 +82,41 @@ div.item-detail-image img {
 #exaport .course-group-open .course-group-content {
     display: block;
 }
+
+.exaport-item-content-section {
+    border: 1px solid #d9e2ea;
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem 1.5rem;
+}
+
+.exaport-item-content-section h2 {
+    margin-top: 0;
+}
+
+.exaport-item-content-divider {
+    position: relative;
+    border-bottom: 1px dashed #b8c7d3;
+    margin: 1.5rem 0 0;
+}
+
+.exaport-item-content-add-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid #b8d9f0;
+    border-radius: 0.375rem;
+    background-color: #e8f4fc;
+    color: #3d83b5;
+    cursor: default;
+    transform: translate(-50%, -50%);
+}
+
+.exaport-item-content-add-button .icon {
+    margin: 0;
+}

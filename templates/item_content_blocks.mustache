@@ -3,6 +3,7 @@
 }}
 <section class="exaport-item-content-section mt-4" aria-labelledby="exaport-item-content-heading">
     <h2 id="exaport-item-content-heading" class="h4 mb-3">{{heading}}</h2>
+    {{#hasblocks}}
     <div class="exaport-item-content-rows border-top">
         {{#blocks}}
         <div class="exaport-item-content-row d-flex align-items-start py-3 border-bottom">
@@ -18,5 +19,15 @@
             </div>
         </div>
         {{/blocks}}
+    </div>
+    {{/hasblocks}}
+    <div class="exaport-item-content-divider">
+        <button type="button"
+                class="exaport-item-content-add-button"
+                aria-label="{{addlabel}} {{heading}}"
+                aria-disabled="true"
+                tabindex="-1">
+            {{{addicon}}}
+        </button>
     </div>
 </section>

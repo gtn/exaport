@@ -961,32 +961,19 @@ function block_exaport_get_active_comps_for_item($item) {
     return \block_exacomp\api::get_active_comps_for_exaport_item($item->id, $item->userid, @$item->courseid);
 }
 
-function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) {
+function block_exaport_build_resume_comp_tree($type, $resume) {
     global $CFG, $USER;
 
-    if ($type == 'skillscomp' || $type == 'goalscomp') {
-        $forresume = true;
-        $resume = $itemorresume;
-        $item = null;
-        $activedescriptors = $resume->descriptors;
-    } else if ($type == 'item') {
-        $forresume = false;
-        $resume = null;
-        $item = $itemorresume;
-        $activedescriptors = isset($item->compids_array) ? $item->compids_array : [];
-    } else {
+    if ($type != 'skillscomp' && $type != 'goalscomp') {
         throw new \block_exaport\moodle_exception("wrong \$type: $type");
     }
 
-    if ($forresume) {
-        $content = '<form id="treeform" method="post" ' .
-            ' action="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $resume->courseid .
-            '&id=' . $resume->id . '&sesskey=' . sesskey() . '#' . $type . '">';
-    } else {
-        $content = '<form id="treeform">';
-    }
+    $activedescriptors = $resume->descriptors;
+    $content = '<form id="treeform" method="post" ' .
+        ' action="' . $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $resume->courseid .
+        '&id=' . $resume->id . '&sesskey=' . sesskey() . '#' . $type . '">';
 
-    $printtree = function($items, $level = 0) use (&$printtree, $forresume, $activedescriptors, $allowedit) {
+    $printtree = function($items, $level = 0) use (&$printtree, $activedescriptors) {
         if (!$items) {
             return '';
         }
@@ -1007,8 +994,7 @@ function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) 
 
             $content .= '<li>';
             if ($item instanceof \block_exacomp\descriptor) {
-                $content .= '<input type="checkbox" name="desc' . ($forresume ? '[]' : '') . '" ' . $checked . ' value="' . $item->id . '" ' .
-                    (!$allowedit ? 'disabled="disabled"' : '') . '>';
+                $content .= '<input type="checkbox" name="desc[]" ' . $checked . ' value="' . $item->id . '">';
             }
             $content .= s($item->title) .
                 ($item->achieved ? ' ' . g::$OUTPUT->pix_icon("i/badge",
@@ -1023,46 +1009,14 @@ function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) 
     };
 
     $comptree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
-
-    // No filtering.
-    /*
-    if ($compTree && $forresume) {
-        $filter_tree = function($item) use (&$filter_tree, $forresume, $active_descriptors) {
-            $item->set_subs(array_filter($item->get_subs(), $filter_tree));
-
-            if ($item instanceof \block_exacomp\descriptor) {
-                // achieved, or children achieved
-                return ($item->get_subs() || $item->achieved);
-            } else {
-                return !!$item->get_subs();
-            }
-        };
-        $compTree = array_filter($compTree, $filter_tree);
-    }
-    */
-
-    /*
-    if (!$compTree) {
-        $content .= '<div><h4 style="text-align:center; padding: 40px;">'.
-                block_exaport\trans(['de:Eine Kurse hat leider keine Kompetenzen für den Kurs aktiviert', "en:"]).'</h4></div>';
-    } else {
-        $content .= $print_tree($compTree);
-    }
-    */
     $content .= $printtree($comptree);
-
-    if ($forresume) {
-        $content .= '<input type="hidden" value="edit" name="action">';
-        $content .= '<input type="hidden" value="' . $type . '" name="type">';
-        $content .= '<input type="hidden" value="' . sesskey() . '" name="sesskey">';
-        $content .= '<input type="submit" id="id_submitbutton" type="submit" value="' . get_string('savechanges') .
-            '" name="submitbutton">';
-        $content .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" ' .
-            ' value="' . get_string('cancel') . '" name="cancel">';
-    } else {
-        $content .= '<input type="button" id="id_submitbutton2" value="' . get_string('savechanges') .
-            '" name="savecompetencesbutton" onClick="jQueryExaport.colorbox.close();">';
-    }
+    $content .= '<input type="hidden" value="edit" name="action">';
+    $content .= '<input type="hidden" value="' . $type . '" name="type">';
+    $content .= '<input type="hidden" value="' . sesskey() . '" name="sesskey">';
+    $content .= '<input type="submit" id="id_submitbutton" type="submit" value="' . get_string('savechanges') .
+        '" name="submitbutton">';
+    $content .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" ' .
+        ' value="' . get_string('cancel') . '" name="cancel">';
     $content .= '</form>';
 
     return $content;

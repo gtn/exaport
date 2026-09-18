@@ -59,6 +59,53 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
     }
 
     switch ($filearea) {
+        case 'item_content_file':
+            $filename = array_pop($args);
+            $blockid = array_pop($args);
+            if (array_pop($args) !== 'blockid') {
+                print_error('wrong params');
+            }
+            $itemid = array_pop($args);
+            if (array_pop($args) !== 'itemid') {
+                print_error('wrong params');
+            }
+            $access = join('/', $args);
+
+            $block = $DB->get_record('block_exaportitemblock', [
+                'id' => $blockid,
+                'itemid' => $itemid,
+                'type' => 'file',
+            ]);
+            if (!$block) {
+                return false;
+            }
+
+            if ($access !== '') {
+                $item = block_exaport_get_item($itemid, $access);
+            } else {
+                $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
+                $sharedownerid = $item ? block_exaport_can_user_access_shared_item($USER->id, $itemid) : false;
+                if (!$item || ((int)$item->userid !== (int)$USER->id && !$sharedownerid)) {
+                    $item = false;
+                }
+            }
+            if (!$item) {
+                return false;
+            }
+
+            $file = get_file_storage()->get_file(
+                context_user::instance($item->userid)->id,
+                'block_exaport',
+                'item_content_file',
+                $blockid,
+                '/',
+                $filename
+            );
+            if (!$file || $file->is_directory()) {
+                return false;
+            }
+            send_stored_file($file, 86400, 0, $forcedownload);
+            break;
         case 'item_file':
         case 'item_iconfile':
             $filename = array_pop($args);

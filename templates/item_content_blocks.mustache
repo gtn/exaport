@@ -1,8 +1,12 @@
 {{!
     Read-only ordered content blocks shown for an Exaport item.
 }}
-<section class="exaport-item-content-section mt-4" aria-labelledby="exaport-item-content-heading">
+<section class="exaport-item-content-section mt-4"
+    {{#showheading}}aria-labelledby="exaport-item-content-heading"{{/showheading}}
+    {{^showheading}}aria-label="{{heading}}"{{/showheading}}>
+    {{#showheading}}
     <h2 id="exaport-item-content-heading" class="h4 mb-3">{{heading}}</h2>
+    {{/showheading}}
     {{#hasblocks}}
     <div class="exaport-item-content-rows border-top">
         {{#blocks}}
@@ -16,7 +20,22 @@
                     {{#title}}<span class="exaport-item-content-title fw-semibold">{{title}}</span>{{/title}}
                 </div>
                 {{#content}}<div class="exaport-item-content-preview mt-1">{{{content}}}</div>{{/content}}
-                {{#preview}}<div class="exaport-item-content-preview mt-1">{{preview}}</div>{{/preview}}
+                {{#linkurl}}
+                <div class="exaport-item-content-preview mt-1">
+                    <a href="{{linkurl}}" target="_blank" rel="noopener noreferrer">{{linkurl}}</a>
+                </div>
+                {{/linkurl}}
+                {{^linkurl}}{{#preview}}<div class="exaport-item-content-preview mt-1">{{preview}}</div>{{/preview}}{{/linkurl}}
+                {{#hasfiles}}
+                <div class="exaport-item-content-files d-flex flex-wrap gap-3 mt-2">
+                    {{#files}}
+                    <a href="{{url}}" class="exaport-item-content-file" target="_blank" rel="noopener noreferrer">
+                        {{#isimage}}<img src="{{url}}" alt="{{name}}" class="exaport-item-content-thumbnail">{{/isimage}}
+                        {{^isimage}}{{{icon}}}<span>{{name}}</span>{{/isimage}}
+                    </a>
+                    {{/files}}
+                </div>
+                {{/hasfiles}}
             </div>
         </div>
         {{/blocks}}
@@ -24,21 +43,31 @@
     {{/hasblocks}}
     {{#showaddbutton}}
     <div class="exaport-item-content-divider">
-        {{#addurl}}
-        <a class="exaport-item-content-add-button"
-           href="{{addurl}}"
-           role="button"
+        {{#hasaddactions}}
+        <div class="dropdown">
+        <button class="exaport-item-content-add-button dropdown-toggle"
+           type="button"
+           data-toggle="dropdown"
+           data-bs-toggle="dropdown"
+           aria-haspopup="true"
+           aria-expanded="false"
            aria-label="{{addlabel}}">
             {{{addicon}}}
-        </a>
-        {{/addurl}}
-        {{^addurl}}
+        </button>
+        <div class="dropdown-menu">
+            {{#addactions}}
+            <a class="dropdown-item d-flex align-items-center gap-2" href="{{url}}">{{{icon}}}<span>{{label}}</span></a>
+            {{/addactions}}
+        </div>
+        </div>
+        {{/hasaddactions}}
+        {{^hasaddactions}}
         <span class="exaport-item-content-add-button"
               aria-disabled="true"
               aria-label="{{addlabel}}">
             {{{addicon}}}
         </span>
-        {{/addurl}}
+        {{/hasaddactions}}
     </div>
     {{/showaddbutton}}
 </section>

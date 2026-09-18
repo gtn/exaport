@@ -49,6 +49,53 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertSame(1, $DB->count_records('block_exaportitemblock', ['itemid' => $otheritemid]));
     }
 
+    public function test_supported_loader_and_renderer_include_links_and_files(): void {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $linkid = $this->insert_block($itemid, 'link', 0, 'Moodle', '', 'https://moodle.org/');
+        $fileid = $this->insert_block($itemid, 'file', 1, 'Images', '');
+        $this->insert_block($itemid, 'unsupported', 2, 'Unsupported');
+
+        $context = \context_user::instance($owner->id);
+        get_file_storage()->create_file_from_string([
+            'contextid' => $context->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $fileid,
+            'filepath' => '/',
+            'filename' => 'picture.png',
+        ], 'not-a-real-png');
+
+        $blocks = block_exaport_get_item_content_blocks($itemid);
+        $this->assertSame([$linkid, $fileid], array_keys($blocks));
+
+        $renderer = $this->getMockBuilder(\renderer_base::class)
+            ->disableOriginalConstructor()
+            ->getMockForAbstractClass();
+        $renderer->method('pix_icon')->willReturn('icon');
+        $addurls = [
+            'text' => new \moodle_url('/blocks/exaport/item_content_text.php'),
+            'link' => new \moodle_url('/blocks/exaport/item_content_link.php'),
+            'file' => new \moodle_url('/blocks/exaport/item_content_file.php'),
+        ];
+        $data = (new \block_exaport\output\item_content_blocks($blocks, $addurls, $owner->id))
+            ->export_for_template($renderer);
+
+        $this->assertSame('https://moodle.org/', $data['blocks'][0]['linkurl']);
+        $this->assertTrue($data['blocks'][1]['hasfiles']);
+        $this->assertSame('picture.png', $data['blocks'][1]['files'][0]['name']);
+        $this->assertStringContainsString(
+            $CFG->wwwroot . '/pluginfile.php/' . $context->id . '/block_exaport/item_content_file/' .
+                'itemid/' . $itemid . '/blockid/' . $fileid . '/picture.png',
+            $data['blocks'][1]['files'][0]['url']
+        );
+        $this->assertCount(3, $data['addactions']);
+    }
+
     public function test_text_is_formatted_with_owner_context_and_shared_output_has_no_add_control(): void {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
@@ -100,6 +147,13 @@ final class item_content_blocks_test extends \advanced_testcase {
             ->export_for_template($renderer);
         $this->assertFalse($emptydata['hasblocks']);
         $this->assertSame([], $emptydata['blocks']);
+
+        $embeddeddata = (new \block_exaport\output\item_content_blocks([], null, $owner->id, true, false))
+            ->export_for_template($renderer);
+        $this->assertFalse($embeddeddata['showheading']);
+        $embeddedhtml = $OUTPUT->render_from_template('block_exaport/item_content_blocks', $embeddeddata);
+        $this->assertStringNotContainsString('exaport-item-content-heading', $embeddedhtml);
+        $this->assertStringContainsString('aria-label="Content"', $embeddedhtml);
     }
 
     /**
@@ -108,6 +162,7 @@ final class item_content_blocks_test extends \advanced_testcase {
      * @param int $sortorder
      * @param string $title
      * @param string $content
+     * @param string $url
      * @return int
      */
     private function insert_block(
@@ -115,7 +170,8 @@ final class item_content_blocks_test extends \advanced_testcase {
         string $type,
         int $sortorder,
         string $title,
-        string $content = 'Content'
+        string $content = 'Content',
+        string $url = ''
     ): int {
         global $DB;
 
@@ -126,7 +182,7 @@ final class item_content_blocks_test extends \advanced_testcase {
             'title' => $title,
             'content' => $content,
             'contentformat' => FORMAT_HTML,
-            'url' => '',
+            'url' => $url,
             'timecreated' => time(),
             'timemodified' => time(),
         ]);

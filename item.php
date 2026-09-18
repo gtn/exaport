@@ -238,10 +238,17 @@ if ($existing) {
         ['itemid' => $existing->id],
         'sortorder ASC, id ASC'
     );
-    $itemcontentaddurl = $allowedit ? new moodle_url('/blocks/exaport/item_content_text.php', [
-        'courseid' => $courseid,
-        'itemid' => $existing->id,
-    ]) : null;
+    if ($allowedit) {
+        $itemcontentaddurl = [];
+        foreach (['text', 'link', 'file'] as $blocktype) {
+            $itemcontentaddurl[$blocktype] = new moodle_url('/blocks/exaport/item_content_' . $blocktype . '.php', [
+                'courseid' => $courseid,
+                'itemid' => $existing->id,
+            ]);
+        }
+    } else {
+        $itemcontentaddurl = null;
+    }
 } else {
     $itemcontentblocks = [];
     $itemcontentaddurl = null;
@@ -813,6 +820,7 @@ function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
     $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);
     $DB->delete_records('block_exaportitemshar', ['itemid' => $post->id]);
     $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $post->id]);
+    $DB->delete_records('block_exaportitemblock', ['itemid' => $post->id]);
     $status = $DB->delete_records('block_exaportitem', $conditions);
 
     $interaction = block_exaport_check_competence_interaction();

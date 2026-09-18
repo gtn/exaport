@@ -14,6 +14,7 @@
 
 require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/lib/item_content_text_form.php');
+require_once(__DIR__ . '/lib/item_content_helpers.php');
 
 $courseid = required_param('courseid', PARAM_INT);
 $itemid = required_param('itemid', PARAM_INT);
@@ -23,29 +24,14 @@ require_login($courseid);
 require_capability('block/exaport:use', $context);
 
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
-$item = $DB->get_record('block_exaportitem', [
-    'id' => $itemid,
-    'userid' => $USER->id,
-]);
-
-if (!$item || (int)$item->courseid !== $courseid) {
-    print_error('bookmarknotfound', 'block_exaport');
-}
-
-if (!block_exaport_item_is_editable($item->id)) {
-    print_error('nopermissions', 'error');
-}
+$item = block_exaport_get_editable_content_item($itemid, $courseid);
 
 $PAGE->set_url(new moodle_url('/blocks/exaport/item_content_text.php', [
     'courseid' => $courseid,
     'itemid' => $itemid,
 ]));
 
-$returnurl = new moodle_url('/blocks/exaport/item.php', [
-    'courseid' => $courseid,
-    'id' => $itemid,
-    'action' => 'edit',
-]);
+$returnurl = block_exaport_content_return_url($courseid, $itemid);
 $editoroptions = [
     'trusttext' => true,
     'subdirs' => false,
@@ -81,38 +67,10 @@ if ($form->is_cancelled()) {
     require_sesskey();
 
     // Re-check ownership and editability at save time.
-    $item = $DB->get_record('block_exaportitem', [
-        'id' => $itemid,
-        'userid' => $USER->id,
-    ]);
-    if (!$item || (int)$item->courseid !== $courseid) {
-        print_error('bookmarknotfound', 'block_exaport');
-    }
-    if (!block_exaport_item_is_editable($item->id)) {
-        print_error('nopermissions', 'error');
-    }
+    block_exaport_get_editable_content_item($itemid, $courseid);
 
-    $maxsortorder = $DB->get_field(
-        'block_exaportitemblock',
-        'MAX(sortorder)',
-        ['itemid' => $itemid]
-    );
-    $sortorder = ($maxsortorder === false || $maxsortorder === null)
-        ? 0
-        : ((int)$maxsortorder + 1);
-    $time = time();
-
-    $block = (object)[
-        'itemid' => $itemid,
-        'type' => 'text',
-        'sortorder' => $sortorder,
-        'title' => $fromform->title,
-        'content' => '',
-        'contentformat' => FORMAT_HTML,
-        'url' => '',
-        'timecreated' => $time,
-        'timemodified' => $time,
-    ];
+    $transaction = $DB->start_delegated_transaction();
+    $block = block_exaport_new_content_block($itemid, 'text', $fromform->title);
     $block->id = $DB->insert_record('block_exaportitemblock', $block);
 
     $fromform = file_postupdate_standard_editor(
@@ -128,10 +86,11 @@ if ($form->is_cancelled()) {
         'id' => $block->id,
         'content' => $fromform->content,
         'contentformat' => $fromform->contentformat,
-        'timemodified' => $time,
+        'timemodified' => time(),
     ]);
 
-    redirect($returnurl);
+    $transaction->allow_commit();
+    redirect($returnurl, get_string('contentblockadded', 'block_exaport'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
 block_exaport_print_header('bookmarks' . block_exaport_get_plural_item_type('all'), 'edit');

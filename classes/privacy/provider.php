@@ -110,6 +110,18 @@ class provider implements
             'parentid' => 'privacy:metadata:block_exaportitem:parentid',
         ], 'privacy:metadata:block_exaportitem');
 
+        $collection->add_database_table('block_exaportitemblock', [
+            'itemid' => 'privacy:metadata:block_exaportitemblock:itemid',
+            'type' => 'privacy:metadata:block_exaportitemblock:type',
+            'sortorder' => 'privacy:metadata:block_exaportitemblock:sortorder',
+            'title' => 'privacy:metadata:block_exaportitemblock:title',
+            'content' => 'privacy:metadata:block_exaportitemblock:content',
+            'contentformat' => 'privacy:metadata:block_exaportitemblock:contentformat',
+            'url' => 'privacy:metadata:block_exaportitemblock:url',
+            'timecreated' => 'privacy:metadata:block_exaportitemblock:timecreated',
+            'timemodified' => 'privacy:metadata:block_exaportitemblock:timemodified',
+        ], 'privacy:metadata:block_exaportitemblock');
+
         // block_exaportitemshar
         // block_exaportitemgroupshar
         // Records who an item is shared with (specific users / cohort groups). Not treated as
@@ -304,6 +316,8 @@ class provider implements
 
 
     public static function attach_category_artifact_files($categories_tree, $context, $subcontext_name) {
+        global $DB;
+
         $writer = writer::with_context($context);
 
         foreach ($categories_tree as $cat_id => $category) {
@@ -324,6 +338,28 @@ class provider implements
                     $writer->export_area_files([$subcontext_name . $add_tosubcontext_name . '/Icons'], 'block_exaport', 'item_iconfile', $item_id);
                     // comment for item
                     $writer->export_area_files([$subcontext_name . $add_tosubcontext_name . '/Comments'], 'block_exaport', 'item_comment_file', $item_id);
+                    $contentblocks = $DB->get_records('block_exaportitemblock', ['itemid' => $item_id]);
+                    foreach ($contentblocks as $contentblock) {
+                        $blockcontext = $subcontext_name . $add_tosubcontext_name . '/Content blocks';
+                        $blockdata = (object)[
+                            'type' => $contentblock->type,
+                            'sortorder' => $contentblock->sortorder,
+                            'title' => $contentblock->title,
+                            'content' => $contentblock->content,
+                            'contentformat' => $contentblock->contentformat,
+                            'url' => $contentblock->url,
+                            'timecreated' => transform::datetime($contentblock->timecreated),
+                            'timemodified' => transform::datetime($contentblock->timemodified),
+                        ];
+                        $blockpath = [$blockcontext, (string)$contentblock->id];
+                        $writer->export_data($blockpath, $blockdata)
+                            ->export_area_files(
+                                $blockpath,
+                                'block_exaport',
+                                'item_content_file',
+                                $contentblock->id
+                            );
+                    }
                 }
             }
             // subcategory
@@ -786,10 +822,21 @@ class provider implements
 
     public function delete_atifact_data($artifact_id) {
         global $DB;
+        $artifact = $DB->get_record('block_exaportitem', ['id' => $artifact_id]);
+        if ($artifact) {
+            $fs = get_file_storage();
+            $contextid = context_user::instance($artifact->userid)->id;
+            $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $artifact_id], '', 'id');
+            foreach ($blocks as $block) {
+                $fs->delete_area_files($contextid, 'block_exaport', 'item_content_text', $block->id);
+                $fs->delete_area_files($contextid, 'block_exaport', 'item_content_file', $block->id);
+            }
+        }
         $DB->delete_records('block_exaportitemshar', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportitemcomm', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportviewblock', ['itemid' => $artifact_id]);
+        $DB->delete_records('block_exaportitemblock', ['itemid' => $artifact_id]);
         return true;
     }
 

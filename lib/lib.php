@@ -260,10 +260,18 @@ function block_exaport_add_to_log($courseid, $module, $action, $url = '', $info 
 
 function block_exaport_file_remove($item) {
     $fs = get_file_storage();
+    $contextid = context_user::instance($item->userid)->id;
     // Associated file (if it's a file item).
-    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id);
+    $fs->delete_area_files($contextid, 'block_exaport', 'item_file', $item->id);
     // Item content (intro) inside the html editor.
-    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content', $item->id);
+    $fs->delete_area_files($contextid, 'block_exaport', 'item_content', $item->id);
+    // Structured item blocks use the block ID as their File API item ID.
+    global $DB;
+    $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $item->id], '', 'id');
+    foreach ($blocks as $block) {
+        $fs->delete_area_files($contextid, 'block_exaport', 'item_content_text', $block->id);
+        $fs->delete_area_files($contextid, 'block_exaport', 'item_content_file', $block->id);
+    }
 }
 
 /*** GENERAL FUNCTIONS **********************************************************************/

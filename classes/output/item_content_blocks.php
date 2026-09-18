@@ -20,6 +20,7 @@ namespace block_exaport\output;
 defined('MOODLE_INTERNAL') || die();
 
 use context_user;
+use moodle_url;
 use renderable;
 use renderer_base;
 use templatable;
@@ -32,7 +33,7 @@ class item_content_blocks implements renderable, templatable {
     /** @var array */
     private $blocks;
 
-    /** @var \moodle_url|null */
+    /** @var moodle_url[]|moodle_url|null */
     private $addurl;
 
     /** @var int */
@@ -44,25 +45,31 @@ class item_content_blocks implements renderable, templatable {
     /** @var bool */
     private $showheading;
 
+    /** @var string|null */
+    private $access;
+
     /**
      * @param array $blocks Ordered item content block records.
-     * @param \moodle_url|null $addurl URL for adding a text block.
+     * @param moodle_url[]|moodle_url|null $addurl URLs for adding supported blocks.
      * @param int $ownerid User ID that owns the item content.
      * @param bool $showaddbutton Whether the visual add control should be shown.
      * @param bool $showheading Whether the section should render its own heading.
+     * @param string|null $access Optional Exaport access path used in pluginfile URLs.
      */
     public function __construct(
         array $blocks,
         $addurl,
         int $ownerid,
         bool $showaddbutton = true,
-        bool $showheading = true
+        bool $showheading = true,
+        ?string $access = null
     ) {
         $this->blocks = $blocks;
         $this->addurl = $addurl;
         $this->ownerid = $ownerid;
         $this->showaddbutton = $showaddbutton;
         $this->showheading = $showheading;
+        $this->access = $access;
     }
 
     /**
@@ -77,7 +84,7 @@ class item_content_blocks implements renderable, templatable {
             $typeinfo = $this->get_type_info($type);
             $typelabel = $typeinfo['label'];
 
-            $rows[] = [
+            $row = [
                 'icon' => $output->pix_icon(
                     $typeinfo['icon'],
                     $typelabel,
@@ -89,19 +96,112 @@ class item_content_blocks implements renderable, templatable {
                 'content' => $type === 'text' ? $this->format_content($block) : '',
                 'preview' => $this->build_preview($block, $type),
             ];
+            if ($type === 'link' && !empty($block->url)) {
+                $row['linkurl'] = clean_param($block->url, PARAM_URL);
+            } else if ($type === 'file') {
+                $row['files'] = $this->get_block_files($block, $output);
+                $row['hasfiles'] = !empty($row['files']);
+            }
+            $rows[] = $row;
         }
+
+        $addactions = $this->get_add_actions($output);
 
         return [
             'heading' => get_string('viewcontent', 'block_exaport'),
             'blocks' => $rows,
             'hasblocks' => !empty($rows),
             'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
-            'addlabel' => get_string('add', 'block_exaport') . ' ' .
-                get_string('view_specialitem_text', 'block_exaport'),
-            'addurl' => $this->addurl instanceof \moodle_url ? $this->addurl->out(false) : '',
+            'addlabel' => get_string('addcontentblock', 'block_exaport'),
+            'addactions' => $addactions,
+            'hasaddactions' => !empty($addactions),
             'showaddbutton' => $this->showaddbutton,
             'showheading' => $this->showheading,
         ];
+    }
+
+    /**
+     * Build the add menu entries.
+     *
+     * @param renderer_base $output Renderer used for icons.
+     * @return array
+     */
+    private function get_add_actions(renderer_base $output): array {
+        if ($this->addurl instanceof moodle_url) {
+            $urls = ['text' => $this->addurl];
+        } else if (is_array($this->addurl)) {
+            $urls = $this->addurl;
+        } else {
+            return [];
+        }
+
+        $actions = [];
+        foreach (['text', 'link', 'file'] as $type) {
+            if (empty($urls[$type]) || !($urls[$type] instanceof moodle_url)) {
+                continue;
+            }
+            $typeinfo = $this->get_type_info($type);
+            $actions[] = [
+                'url' => $urls[$type]->out(false),
+                'icon' => $output->pix_icon($typeinfo['icon'], '', 'moodle'),
+                'label' => $typeinfo['label'],
+            ];
+        }
+        return $actions;
+    }
+
+    /**
+     * Export files attached to a file block.
+     *
+     * @param \stdClass $block Content block record.
+     * @param renderer_base $output Renderer used for file icons.
+     * @return array
+     */
+    private function get_block_files(\stdClass $block, renderer_base $output): array {
+        $context = context_user::instance($this->ownerid);
+        $storedfiles = get_file_storage()->get_area_files(
+            $context->id,
+            'block_exaport',
+            'item_content_file',
+            $block->id,
+            'filename ASC',
+            false
+        );
+        $files = [];
+        foreach ($storedfiles as $file) {
+            $url = $this->get_file_url($block, $file);
+            $isimage = strpos((string)$file->get_mimetype(), 'image/') === 0;
+            $files[] = [
+                'name' => $file->get_filename(),
+                'url' => $url,
+                'isimage' => $isimage,
+                'icon' => $isimage ? '' : $output->pix_icon(file_file_icon($file), $file->get_filename(), 'moodle'),
+            ];
+        }
+        return $files;
+    }
+
+    /**
+     * Build an access-aware pluginfile URL for a block file.
+     *
+     * @param \stdClass $block Content block record.
+     * @param \stored_file $file Stored file.
+     * @return string
+     */
+    private function get_file_url(\stdClass $block, \stored_file $file): string {
+        global $CFG;
+
+        $parts = [];
+        if ($this->access !== null && $this->access !== '') {
+            $parts[] = trim($this->access, '/');
+        }
+        $parts[] = 'itemid/' . (int)$block->itemid;
+        $parts[] = 'blockid/' . (int)$block->id;
+        $parts[] = $file->get_filename();
+        $path = '/' . context_user::instance($this->ownerid)->id . '/block_exaport/item_content_file/' .
+            implode('/', $parts);
+
+        return file_encode_url($CFG->wwwroot . '/pluginfile.php', $path, true);
     }
 
     /**

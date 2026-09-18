@@ -26,7 +26,6 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
 $confirm = optional_param("confirm", "", PARAM_BOOL);
 $backtype = optional_param('backtype', 'all', PARAM_ALPHA);
-$compids = optional_param('compids', '', PARAM_TEXT);
 $backtype = block_exaport_check_item_type($backtype, true);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
 $cattype = optional_param('cattype', '', PARAM_ALPHA);
@@ -143,6 +142,7 @@ if ($existing) {
 
 // Get competences from item if editing.
 $exacompactive = block_exaport_check_competence_interaction();
+$exacompsupported = file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php');
 if ($existing && $exacompactive) {
     // For the tree.
     $compstmp = block_exaport_get_active_comps_for_item($existing);
@@ -151,8 +151,6 @@ if ($existing && $exacompactive) {
     } else {
         $existing->compids_array = [];
     }
-    // For form.
-    $existing->compids = join(',', $existing->compids_array);
 }
 $cattype_params = '';
 if ($cattype) {
@@ -258,7 +256,9 @@ $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' 
     array('current' => $existing, 'useTextareas' => $usetextareas, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
         'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission,
         'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontentblocks' => $itemcontentblocks,
-        'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id)));
+        'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id),
+        'exacompactive' => $existing && $exacompactive && $descriptorselection,
+        'exacompsupported' => $exacompsupported));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -273,7 +273,6 @@ if ($editform->is_cancelled()) {
     switch ($action) {
         case 'add':
             $fromform->type = $type;
-            $fromform->compids = $compids;
 
             block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
             break;
@@ -328,7 +327,6 @@ switch ($action) {
         $post->action = $action;
         $post->courseid = $courseid;
         $post->type = $existing->type;
-        $post->compids = isset($existing->compids) ? $existing->compids : '';
         $post->langid = $existing->langid;
         if (!empty($CFG->usetags)) {
             if ($CFG->branch < 31) {
@@ -403,99 +401,20 @@ switch ($action) {
 $exacompactive = block_exaport_check_competence_interaction() && $descriptorselection;
 
 if ($exacompactive) {
-    $PAGE->requires->jquery();
-
-    $PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
-    $PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
-
-    $PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
-    // $PAGE->
-    $PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
-    $PAGE->requires->css('/blocks/exaport/css/colorbox.css');
+    if ($existing && $exacompsupported) {
+        $PAGE->requires->js_call_amd('block_exaport/item_competences', 'init', [[
+            'saveUrl' => (new moodle_url('/blocks/exaport/item_competences.php'))->out(false),
+            'itemId' => (int)$existing->id,
+            'courseId' => (int)$courseid,
+            'sesskey' => sesskey(),
+            'title' => get_string('opencomps', 'block_exaport'),
+            'saveLabel' => get_string('savechanges'),
+            'saveFailed' => get_string('competencessavefailed', 'block_exaport'),
+        ]]);
+    }
 }
 
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
-
-if ($exacompactive) {
-    echo '<fieldset id="general" style="border: 1px solid #ddd; margin: 10px;">';
-    echo '<legend class="ftoggler"><b>' . get_string("competences", "block_exaport") . '</b></legend>';
-    if (file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php')) {
-        echo "<p style='margin-left: 5px;'><a class='competences' href='#'>" . get_string("selectcomps", "block_exaport") . "</a>";
-    } else {
-        echo "<p style='margin-left: 5px;'" . get_string("competences_old_version", "block_exaport");
-    }
-    echo "<div style='margin-left: 5px;' id='comptitles'></div></p>";
-    echo '</fieldset>';
-    ?>
-    <div style="display: none">
-        <div id='inline_comp_tree' style='padding: 10px; background: #fff;'>
-            <h4>
-                <?php echo get_string("opencomps", "block_exaport") ?>
-            </h4>
-
-            <a href="javascript:ddtreemenu.flatten('comptree', 'expand')"><?php echo get_string("expandcomps", "block_exaport") ?>
-            </a> | <a href="javascript:ddtreemenu.flatten('comptree', 'contact')"><?php echo get_string("contactcomps",
-                    "block_exaport") ?>
-            </a>
-
-            <?php echo block_exaport_build_comp_tree('item', $existing, $allowedit); ?>
-        </div>
-    </div>
-
-    <script type="text/javascript">
-        //<![CDATA[
-        jQueryExaport(function ($) {
-
-            $('#treeform :checkbox').click(function (e) {
-                // Prevent item open/close.
-                e.stopPropagation();
-            });
-
-            var $compids = $('input[name=compids]');
-            var $descriptors = $('#treeform :checkbox');
-
-            $(".competences").colorbox({
-                width: "75%", height: "75%", inline: true, href: "#inline_comp_tree", onClosed: function () {
-                    // Save ids to input field.
-                    var compids = '';
-                    $descriptors.filter(':checked').each(function () {
-                        compids += this.value + ',';
-                    });
-                    $compids.val(compids);
-
-                    build_competence_output();
-                }
-            });
-            ddtreemenu.createTree("comptree", true);
-
-            function build_competence_output() {
-                var $tree = $('#comptree').clone();
-                // Remove original id, conflicts with real tree.
-                $tree.attr('id', 'comptree-selected');
-
-                // Delete all not checked.
-                $tree.find('li').each(function () {
-                    if (!$(this).find(':checked').length) {
-                        $(this).remove();
-                    }
-                });
-
-                // Delete checkboxes.
-                $tree.find(':checkbox').remove();
-
-                $("#comptitles").empty().append($tree);
-                ddtreemenu.createTree("comptree-selected", false);
-
-                // Open all.
-                ddtreemenu.flatten('comptree-selected', 'expand');
-            }
-
-            build_competence_output();
-        });
-        //]]>
-    </script>
-    <?php
-}
 
 $editform->set_data($post);
 echo $OUTPUT->box($extracontent);
@@ -582,29 +501,6 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     } else {
         print_error('updateposterror', 'block_exaport', $returnurl);
     }
-    $interaction = block_exaport_check_competence_interaction();
-    if ($interaction) {
-        $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $post->id, "eportfolioitem" => 1));
-        $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-            array("activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
-        $comps = $post->compids;
-        if ($comps) {
-            $comps = explode(",", $comps);
-            $course = $DB->get_record('course', array("id" => $courseid));
-
-            foreach ($comps as $comp) {
-                if ($comp != 0) {
-                    $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                        array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1,
-                            "activitytitle" => $post->name, "coursetitle" => $course->shortname));
-                }
-                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-                    array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id,
-                        "userid" => $USER->id, "role" => 0));
-            }
-        }
-    }
-
     // Tags.
     if ($CFG->branch < 31) {
         // Moodle before v3.1.
@@ -709,22 +605,6 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
             }
         }
 
-        $comps = $post->compids;
-        if ($comps) {
-            $comps = explode(",", $comps);
-            $course = $DB->get_record('course', array("id" => $courseid));
-
-            foreach ($comps as $comp) {
-                if ($comp != 0) {
-                    $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                        array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1,
-                            "activitytitle" => $post->name, "coursetitle" => $course->shortname));
-                }
-                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-                    array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id,
-                        "userid" => $USER->id, "role" => 0));
-            }
-        }
         // TODO: is this deprecated? START
         block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add',
             $post->name);

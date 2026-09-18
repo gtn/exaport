@@ -342,6 +342,19 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
         }
 
+        // The competence picker itself is rendered outside the form because its legacy tree
+        // contains a form element. Keep the visible controls here so this section follows Content.
+        if (!empty($this->_customdata['exacompactive'])) {
+            $mform->addElement('header', 'itemcompetences', get_string('competencessection', 'block_exaport'));
+            if (!empty($this->_customdata['exacompsupported'])) {
+                $mform->addElement('html',
+                    '<p><a class="competences" href="#">' . get_string('selectcomps', 'block_exaport') . '</a></p>' .
+                    '<div id="comptitles"></div><div id="competences-save-status" class="text-muted" aria-live="polite"></div>');
+            } else {
+                $mform->addElement('html', '<p>' . get_string('competences_old_version', 'block_exaport') . '</p>');
+            }
+        }
+
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {
             $this->add_action_buttons($cancel = true, $submitlabel = get_string('saveitem', 'block_exaport'));
         } else {

@@ -69,17 +69,18 @@ define(['jquery', 'core/modal_save_cancel', 'core/modal_events', 'core/notificat
         let persistedIds = selectedIds($(pickerHtml));
 
         $section.on('click', '[data-action="open-competence-picker"]', function() {
-            const $picker = $(pickerHtml);
-            $picker.find('[data-region="competence-checkbox"]').each(function() {
-                this.checked = persistedIds.indexOf(this.value) !== -1;
-            });
-
             ModalSaveCancel.create({
                 title: config.title,
-                body: $picker,
+                // Moodle's modal API expects HTML here. Passing a jQuery object produces an empty
+                // body in Moodle versions whose setBody implementation only handles strings.
+                body: pickerHtml,
                 large: true,
                 removeOnClose: true,
             }).then(function(modal) {
+                const $picker = modal.getRoot().find('[data-region="competence-picker"]');
+                $picker.find('[data-region="competence-checkbox"]').each(function() {
+                    this.checked = persistedIds.indexOf(this.value) !== -1;
+                });
                 modal.setSaveButtonText(config.saveLabel);
 
                 modal.getRoot().on('click', '[data-action="expand-competences"]', function() {

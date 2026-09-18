@@ -5,89 +5,120 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-define([], function() {
+/**
+ * Moodle modal used to edit an item's competence selection.
+ *
+ * @module block_exaport/item_competences
+ */
+define(['jquery', 'core/modal_save_cancel', 'core/modal_events', 'core/notification'], function(
+    $, ModalSaveCancel, ModalEvents, Notification
+) {
 
     /**
-     * Initialize the item competence popup.
+     * Read selected competence ids from a picker.
      *
-     * @param {Object} config Endpoint and item configuration.
+     * @param {jQuery} $root Picker root.
+     * @return {Array}
+     */
+    const selectedIds = function($root) {
+        return $root.find('[data-region="competence-checkbox"]:checked').map(function() {
+            return this.value;
+        }).get();
+    };
+
+    /**
+     * Update the read-only tree shown in the item form.
+     *
+     * @param {jQuery} $section Competence section.
+     * @param {jQuery} $picker Picker containing the persisted selection.
+     */
+    const renderSummary = function($section, $picker) {
+        const $tree = $picker.find('.exaport-competence-tree').first().clone();
+
+        $tree.find('.exaport-competence-node').each(function() {
+            const $node = $(this);
+            const $checkbox = $node.children('.custom-control').find('[data-region="competence-checkbox"]');
+            if ($checkbox.length && !$checkbox.is(':checked')) {
+                $node.remove();
+            }
+        });
+        $tree.find('details').each(function() {
+            const $details = $(this);
+            if (!$details.find('[data-region="competence-checkbox"]:checked').length) {
+                $details.closest('.exaport-competence-node').remove();
+            }
+        });
+        $tree.find('.custom-control').each(function() {
+            const label = $(this).find('label').text();
+            $(this).replaceWith($('<span class="text-success"></span>').text('✓ ' + label));
+        });
+        $tree.find('details').prop('open', true);
+        $tree.addClass('exaport-competence-summary mb-3');
+        $section.find('[data-region="competence-summary"]').empty().append($tree);
+    };
+
+    /**
+     * Initialize the competence section and picker modal.
+     *
+     * @param {Object} config Endpoint, item and translated string configuration.
      */
     const init = function(config) {
-        const $ = window.jQueryExaport;
-        const $form = $('#treeform');
-        const $descriptors = $form.find(':checkbox');
-        const $submit = $form.find('[name="savecompetencesbutton"]');
-        let persistedIds = selectedIds();
+        const $section = $('[data-region="item-competences"]');
+        const $source = $section.find('[data-region="competence-picker-source"]');
+        const pickerHtml = $source.html();
+        let persistedIds = selectedIds($(pickerHtml));
 
-        function selectedIds() {
-            return $descriptors.filter(':checked').map(function() {
-                return this.value;
-            }).get();
-        }
-
-        function restorePersistedSelection() {
-            $descriptors.each(function() {
+        $section.on('click', '[data-action="open-competence-picker"]', function() {
+            const $picker = $(pickerHtml);
+            $picker.find('[data-region="competence-checkbox"]').each(function() {
                 this.checked = persistedIds.indexOf(this.value) !== -1;
             });
-        }
 
-        function renderSelection() {
-            const $tree = $('#comptree').clone().attr('id', 'comptree-selected');
-            $tree.find('li').each(function() {
-                if (!$(this).find(':checked').length) {
-                    $(this).remove();
-                }
-            });
-            $tree.find(':checkbox').remove();
-            $('#comptitles').empty().append($tree);
-            window.ddtreemenu.createTree('comptree-selected', false);
-            window.ddtreemenu.flatten('comptree-selected', 'expand');
-        }
+            ModalSaveCancel.create({
+                title: config.title,
+                body: $picker,
+                large: true,
+                removeOnClose: true,
+            }).then(function(modal) {
+                modal.setSaveButtonText(config.saveLabel);
 
-        $descriptors.on('click', function(event) {
-            event.stopPropagation();
+                modal.getRoot().on('click', '[data-action="expand-competences"]', function() {
+                    $picker.find('details').prop('open', true);
+                });
+                modal.getRoot().on('click', '[data-action="collapse-competences"]', function() {
+                    $picker.find('details').prop('open', false);
+                });
+                modal.getRoot().on(ModalEvents.save, function(event) {
+                    event.preventDefault();
+                    const $savebutton = modal.getRoot().find('[data-action="save"]');
+                    $savebutton.prop('disabled', true);
+                    $picker.find('[data-region="competence-save-error"]').text('');
+
+                    $.ajax({
+                        url: config.saveUrl,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            courseid: config.courseId,
+                            itemid: config.itemId,
+                            competenceids: selectedIds($picker),
+                            sesskey: config.sesskey,
+                        },
+                    }).done(function() {
+                        persistedIds = selectedIds($picker);
+                        renderSummary($section, $picker);
+                        modal.hide();
+                    }).fail(function() {
+                        $picker.find('[data-region="competence-save-error"]').text(config.saveFailed);
+                    }).always(function() {
+                        $savebutton.prop('disabled', false);
+                    });
+                });
+
+                modal.show();
+                return modal;
+            }).catch(Notification.exception);
         });
-
-        $form.on('submit', function(event) {
-            event.preventDefault();
-            $submit.prop('disabled', true);
-            $('#competences-popup-status').text('');
-
-            $.ajax({
-                url: config.saveUrl,
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    courseid: config.courseId,
-                    itemid: config.itemId,
-                    competenceids: selectedIds(),
-                    sesskey: config.sesskey,
-                },
-            }).done(function() {
-                persistedIds = selectedIds();
-                renderSelection();
-                $.colorbox.close();
-            }).fail(function() {
-                $('#competences-popup-status').text(config.saveFailed);
-            }).always(function() {
-                $submit.prop('disabled', false);
-            });
-        });
-
-        $('.competences').colorbox({
-            width: '75%',
-            height: '75%',
-            inline: true,
-            href: '#inline_comp_tree',
-            onOpen: function() {
-                restorePersistedSelection();
-                $('#competences-popup-status').text('');
-            },
-            onClosed: restorePersistedSelection,
-        });
-
-        window.ddtreemenu.createTree('comptree', true);
-        renderSelection();
     };
 
     return {init: init};

@@ -401,49 +401,20 @@ switch ($action) {
 $exacompactive = block_exaport_check_competence_interaction() && $descriptorselection;
 
 if ($exacompactive) {
-    $PAGE->requires->jquery();
-
-    $PAGE->requires->js('/blocks/exaport/javascript/simpletreemenu.js', true);
-    $PAGE->requires->css('/blocks/exaport/javascript/simpletree.css');
-
-    $PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
-    // $PAGE->
-    $PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
-    $PAGE->requires->css('/blocks/exaport/css/colorbox.css');
-
     if ($existing && $exacompsupported) {
         $PAGE->requires->js_call_amd('block_exaport/item_competences', 'init', [[
             'saveUrl' => (new moodle_url('/blocks/exaport/item_competences.php'))->out(false),
             'itemId' => (int)$existing->id,
             'courseId' => (int)$courseid,
             'sesskey' => sesskey(),
+            'title' => get_string('opencomps', 'block_exaport'),
+            'saveLabel' => get_string('savechanges'),
             'saveFailed' => get_string('competencessavefailed', 'block_exaport'),
         ]]);
     }
 }
 
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
-
-if ($exacompactive && $existing) {
-    if ($exacompsupported) {
-        ?>
-    <div style="display: none">
-        <div id='inline_comp_tree' style='padding: 10px; background: #fff;'>
-            <h4>
-                <?php echo get_string("opencomps", "block_exaport") ?>
-            </h4>
-
-            <a href="javascript:ddtreemenu.flatten('comptree', 'expand')"><?php echo get_string("expandcomps", "block_exaport") ?>
-            </a> | <a href="javascript:ddtreemenu.flatten('comptree', 'contact')"><?php echo get_string("contactcomps",
-                    "block_exaport") ?>
-            </a>
-
-            <?php echo block_exaport_build_comp_tree('item', $existing, $allowedit); ?>
-        </div>
-    </div>
-    <?php
-    }
-}
 
 $editform->set_data($post);
 echo $OUTPUT->box($extracontent);

@@ -16,7 +16,6 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
-require_once(__DIR__ . '/lib/item_competence_helpers.php');
 
 use function block_exaport\common\print_error;
 use block_exaport\item_category_helper;
@@ -142,7 +141,8 @@ if ($existing) {
 }
 
 // Get competences from item if editing.
-$exacompactive = block_exaport_check_competence_interaction() && $descriptorselection;
+$exacompactive = block_exaport_check_competence_interaction();
+$exacompsupported = file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php');
 if ($existing && $exacompactive) {
     // For the tree.
     $compstmp = block_exaport_get_active_comps_for_item($existing);
@@ -257,7 +257,8 @@ $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' 
         'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission,
         'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontentblocks' => $itemcontentblocks,
         'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id),
-        'exacompactive' => $existing && $exacompactive));
+        'exacompactive' => $existing && $exacompactive && $descriptorselection,
+        'exacompsupported' => $exacompsupported));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -397,16 +398,20 @@ switch ($action) {
         print_error("unknownaction", "block_exaport");
 }
 
-if ($exacompactive && $existing) {
-    $PAGE->requires->js_call_amd('block_exaport/item_competences', 'init', [[
-        'saveUrl' => (new moodle_url('/blocks/exaport/item_competences.php'))->out(false),
-        'itemId' => (int)$existing->id,
-        'courseId' => (int)$courseid,
-        'sesskey' => sesskey(),
-        'title' => get_string('opencomps', 'block_exaport'),
-        'saveLabel' => get_string('savechanges'),
-        'saveFailed' => get_string('competencessavefailed', 'block_exaport'),
-    ]]);
+$exacompactive = block_exaport_check_competence_interaction() && $descriptorselection;
+
+if ($exacompactive) {
+    if ($existing && $exacompsupported) {
+        $PAGE->requires->js_call_amd('block_exaport/item_competences', 'init', [[
+            'saveUrl' => (new moodle_url('/blocks/exaport/item_competences.php'))->out(false),
+            'itemId' => (int)$existing->id,
+            'courseId' => (int)$courseid,
+            'sesskey' => sesskey(),
+            'title' => get_string('opencomps', 'block_exaport'),
+            'saveLabel' => get_string('savechanges'),
+            'saveFailed' => get_string('competencessavefailed', 'block_exaport'),
+        ]]);
+    }
 }
 
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
@@ -490,9 +495,6 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 
     if ($DB->update_record('block_exaportitem', $post)) {
         item_category_helper::sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
-        if (block_exaport_check_competence_interaction()) {
-            block_exaport_update_item_competence_metadata($post);
-        }
         block_exaport_save_item_shares($post->id);
         block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=edit',
             $post->name);

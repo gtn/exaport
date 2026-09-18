@@ -341,11 +341,15 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         // The picker saves independently in a Moodle modal, so competence changes are not part of this form submission.
         if (!empty($this->_customdata['exacompactive'])) {
             $mform->addElement('header', 'itemcompetences', get_string('competencessection', 'block_exaport'));
-            $competences = new \block_exaport\output\item_competences(
-                $this->_customdata['current'],
-                !empty($this->_customdata['allowedit'])
-            );
-            $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($competences));
+            if (!empty($this->_customdata['exacompsupported'])) {
+                $competences = new \block_exaport\output\item_competences(
+                    $this->_customdata['current'],
+                    !empty($this->_customdata['allowedit'])
+                );
+                $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($competences));
+            } else {
+                $mform->addElement('html', '<p>' . get_string('competences_old_version', 'block_exaport') . '</p>');
+            }
         }
 
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {

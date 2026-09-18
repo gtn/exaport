@@ -842,7 +842,7 @@ function block_exaport_resume_competences_form($resume, $id, $typeblock) {
         "comptype" => $type), null, 'compid'));
     $content .= '<div class="block_eportfolio_center">' . get_string('edit', "block_exaport") . ': ' .
         get_string('resume_' . $typeblock, "block_exaport") . '</div>';
-    $content .= block_exaport_build_resume_comp_tree($typeblock, $resume);
+    $content .= block_exaport_build_comp_tree($typeblock, $resume);
     echo $content;
     return false;
 }

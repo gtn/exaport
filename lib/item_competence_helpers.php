@@ -58,19 +58,3 @@ function block_exaport_sync_item_competences(stdClass $item, array $competenceid
 
     $transaction->allow_commit();
 }
-
-/**
- * Keep denormalized Exacomp activity data in sync when item metadata changes.
- *
- * Competence selections are saved by the picker, but the item title is still saved by the main form.
- *
- * @param stdClass $item Updated portfolio item.
- */
-function block_exaport_update_item_competence_metadata(stdClass $item): void {
-    global $DB;
-
-    $DB->set_field(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, 'activitytitle', $item->name, [
-        'activityid' => $item->id,
-        'eportfolioitem' => 1,
-    ]);
-}

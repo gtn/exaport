@@ -4,10 +4,10 @@
     <span class="text-success">&#10003; {{title}}</span>
     {{/summary}}
     {{^summary}}
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="exaport-competence-{{id}}"
+    <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" id="exaport-competence-{{id}}"
                value="{{id}}" data-region="competence-checkbox" {{#checked}}checked{{/checked}}>
-        <label class="form-check-label" for="exaport-competence-{{id}}">{{title}}</label>
+        <label class="custom-control-label" for="exaport-competence-{{id}}">{{title}}</label>
     </div>
     {{/summary}}
     {{/isdescriptor}}

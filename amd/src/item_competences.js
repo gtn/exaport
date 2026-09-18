@@ -37,7 +37,7 @@ define(['jquery', 'core/modal_save_cancel', 'core/modal_events', 'core/notificat
 
         $tree.find('.exaport-competence-node').each(function() {
             const $node = $(this);
-            const $checkbox = $node.children('.form-check').find('[data-region="competence-checkbox"]');
+            const $checkbox = $node.children('.custom-control').find('[data-region="competence-checkbox"]');
             if ($checkbox.length && !$checkbox.is(':checked')) {
                 $node.remove();
             }
@@ -48,7 +48,7 @@ define(['jquery', 'core/modal_save_cancel', 'core/modal_events', 'core/notificat
                 $details.closest('.exaport-competence-node').remove();
             }
         });
-        $tree.find('.form-check').each(function() {
+        $tree.find('.custom-control').each(function() {
             const label = $(this).find('label').text();
             $(this).replaceWith($('<span class="text-success"></span>').text('✓ ' + label));
         });

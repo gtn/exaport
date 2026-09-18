@@ -106,10 +106,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->setType('action', PARAM_ACTION);
         $mform->setDefault('action', '');
 
-        $mform->addElement('hidden', 'compids');
-        $mform->setType('compids', PARAM_TEXT);
-        $mform->setDefault('compids', '');
-
         $mform->addElement('text', 'name', get_string("title", "block_exaport"), 'maxlength="255" size="60"');
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string("titlenotemtpy", "block_exaport"), 'required', null, 'client');
@@ -342,14 +338,13 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
         }
 
-        // The competence picker itself is rendered outside the form because its legacy tree
-        // contains a form element. Keep the visible controls here so this section follows Content.
+        // The picker is a separate form in a popup, so competence changes are not part of this form submission.
         if (!empty($this->_customdata['exacompactive'])) {
             $mform->addElement('header', 'itemcompetences', get_string('competencessection', 'block_exaport'));
             if (!empty($this->_customdata['exacompsupported'])) {
                 $mform->addElement('html',
                     '<p><a class="competences" href="#">' . get_string('selectcomps', 'block_exaport') . '</a></p>' .
-                    '<div id="comptitles"></div><div id="competences-save-status" class="text-muted" aria-live="polite"></div>');
+                    '<div id="comptitles"></div>');
             } else {
                 $mform->addElement('html', '<p>' . get_string('competences_old_version', 'block_exaport') . '</p>');
             }

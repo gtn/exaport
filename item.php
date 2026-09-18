@@ -26,7 +26,6 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 $action = optional_param("action", "", PARAM_ALPHA);
 $confirm = optional_param("confirm", "", PARAM_BOOL);
 $backtype = optional_param('backtype', 'all', PARAM_ALPHA);
-$compids = optional_param('compids', '', PARAM_TEXT);
 $backtype = block_exaport_check_item_type($backtype, true);
 $categoryid = optional_param('categoryid', 0, PARAM_INT);
 $cattype = optional_param('cattype', '', PARAM_ALPHA);
@@ -141,25 +140,9 @@ if ($existing) {
     }
 }
 
-// Competence selections on an existing item are persisted independently of the main item form.
-if ($action === 'savecompetences') {
-    require_sesskey();
-
-    if (!$existing || !$allowedit || !block_exaport_check_competence_interaction()) {
-        throw new moodle_exception('nopermissions', 'error');
-    }
-
-    $competenceids = block_exaport_normalize_competenceids($compids);
-    block_exaport_sync_item_competences($existing, $competenceids);
-
-    $response = ['success' => true, 'compids' => array_values($competenceids)];
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($response);
-    exit;
-}
-
 // Get competences from item if editing.
 $exacompactive = block_exaport_check_competence_interaction();
+$exacompsupported = file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php');
 if ($existing && $exacompactive) {
     // For the tree.
     $compstmp = block_exaport_get_active_comps_for_item($existing);
@@ -168,8 +151,6 @@ if ($existing && $exacompactive) {
     } else {
         $existing->compids_array = [];
     }
-    // For form.
-    $existing->compids = join(',', $existing->compids_array);
 }
 $cattype_params = '';
 if ($cattype) {
@@ -276,8 +257,8 @@ $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' 
         'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission,
         'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontentblocks' => $itemcontentblocks,
         'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id),
-        'exacompactive' => $exacompactive && $descriptorselection,
-        'exacompsupported' => file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php')));
+        'exacompactive' => $existing && $exacompactive && $descriptorselection,
+        'exacompsupported' => $exacompsupported));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -292,7 +273,6 @@ if ($editform->is_cancelled()) {
     switch ($action) {
         case 'add':
             $fromform->type = $type;
-            $fromform->compids = $compids;
 
             block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
             break;
@@ -347,7 +327,6 @@ switch ($action) {
         $post->action = $action;
         $post->courseid = $courseid;
         $post->type = $existing->type;
-        $post->compids = isset($existing->compids) ? $existing->compids : '';
         $post->langid = $existing->langid;
         if (!empty($CFG->usetags)) {
             if ($CFG->branch < 31) {
@@ -431,12 +410,22 @@ if ($exacompactive) {
     // $PAGE->
     $PAGE->requires->js('/blocks/exaport/javascript/jquery.colorbox.js', true);
     $PAGE->requires->css('/blocks/exaport/css/colorbox.css');
+
+    if ($existing && $exacompsupported) {
+        $PAGE->requires->js_call_amd('block_exaport/item_competences', 'init', [[
+            'saveUrl' => (new moodle_url('/blocks/exaport/item_competences.php'))->out(false),
+            'itemId' => (int)$existing->id,
+            'courseId' => (int)$courseid,
+            'sesskey' => sesskey(),
+            'saveFailed' => get_string('competencessavefailed', 'block_exaport'),
+        ]]);
+    }
 }
 
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
 
-if ($exacompactive) {
-    if (file_exists($CFG->dirroot . '/blocks/exacomp/lib/lib.php')) {
+if ($exacompactive && $existing) {
+    if ($exacompsupported) {
         ?>
     <div style="display: none">
         <div id='inline_comp_tree' style='padding: 10px; background: #fff;'>
@@ -452,105 +441,6 @@ if ($exacompactive) {
             <?php echo block_exaport_build_comp_tree('item', $existing, $allowedit); ?>
         </div>
     </div>
-
-    <script type="text/javascript">
-        //<![CDATA[
-        jQueryExaport(function ($) {
-
-            $('#treeform :checkbox').click(function (e) {
-                // Prevent item open/close.
-                e.stopPropagation();
-            });
-
-            var $compids = $('input[name=compids]');
-            var $descriptors = $('#treeform :checkbox');
-            var saveUrl = <?php echo json_encode((new moodle_url('/blocks/exaport/item.php'))->out(false)); ?>;
-            var itemId = <?php echo (int)($existing->id ?? 0); ?>;
-            var saveRequest = null;
-
-            function selectedCompetenceIds() {
-                return $descriptors.filter(':checked').map(function () {
-                    return this.value;
-                }).get();
-            }
-
-            function saveCompetences() {
-                var ids = selectedCompetenceIds();
-                $compids.val(ids.join(','));
-                build_competence_output();
-
-                // A new item has no stable id yet; its initial selection is saved with the item.
-                if (!itemId) {
-                    return;
-                }
-
-                if (saveRequest) {
-                    return;
-                }
-                $('#competences-save-status').text(<?php echo json_encode(get_string('savingcompetences', 'block_exaport')); ?>);
-                var requestedIds = $compids.val();
-                var requestSucceeded = false;
-                saveRequest = $.ajax({
-                    url: saveUrl,
-                    method: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'savecompetences',
-                        id: itemId,
-                        courseid: <?php echo (int)$courseid; ?>,
-                        compids: requestedIds,
-                        sesskey: M.cfg.sesskey
-                    }
-                }).done(function () {
-                    requestSucceeded = true;
-                }).fail(function () {
-                    $('#competences-save-status').text(<?php echo json_encode(get_string('competencessavefailed', 'block_exaport')); ?>);
-                }).always(function () {
-                    saveRequest = null;
-                    if ($compids.val() !== requestedIds) {
-                        saveCompetences();
-                    } else if (requestSucceeded) {
-                        $('#competences-save-status').text(<?php echo json_encode(get_string('competencessaved', 'block_exaport')); ?>);
-                    }
-                });
-            }
-
-            $descriptors.on('change', saveCompetences);
-
-            $(".competences").colorbox({
-                width: "75%", height: "75%", inline: true, href: "#inline_comp_tree", onClosed: function () {
-                    $compids.val(selectedCompetenceIds().join(','));
-                    build_competence_output();
-                }
-            });
-            ddtreemenu.createTree("comptree", true);
-
-            function build_competence_output() {
-                var $tree = $('#comptree').clone();
-                // Remove original id, conflicts with real tree.
-                $tree.attr('id', 'comptree-selected');
-
-                // Delete all not checked.
-                $tree.find('li').each(function () {
-                    if (!$(this).find(':checked').length) {
-                        $(this).remove();
-                    }
-                });
-
-                // Delete checkboxes.
-                $tree.find(':checkbox').remove();
-
-                $("#comptitles").empty().append($tree);
-                ddtreemenu.createTree("comptree-selected", false);
-
-                // Open all.
-                ddtreemenu.flatten('comptree-selected', 'expand');
-            }
-
-            build_competence_output();
-        });
-        //]]>
-    </script>
     <?php
     }
 }
@@ -640,29 +530,6 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     } else {
         print_error('updateposterror', 'block_exaport', $returnurl);
     }
-    $interaction = block_exaport_check_competence_interaction();
-    if ($interaction) {
-        $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $post->id, "eportfolioitem" => 1));
-        $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-            array("activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
-        $comps = $post->compids;
-        if ($comps) {
-            $comps = explode(",", $comps);
-            $course = $DB->get_record('course', array("id" => $courseid));
-
-            foreach ($comps as $comp) {
-                if ($comp != 0) {
-                    $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                        array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1,
-                            "activitytitle" => $post->name, "coursetitle" => $course->shortname));
-                }
-                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-                    array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id,
-                        "userid" => $USER->id, "role" => 0));
-            }
-        }
-    }
-
     // Tags.
     if ($CFG->branch < 31) {
         // Moodle before v3.1.
@@ -767,22 +634,6 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
             }
         }
 
-        $comps = $post->compids;
-        if ($comps) {
-            $comps = explode(",", $comps);
-            $course = $DB->get_record('course', array("id" => $courseid));
-
-            foreach ($comps as $comp) {
-                if ($comp != 0) {
-                    $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-                        array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1,
-                            "activitytitle" => $post->name, "coursetitle" => $course->shortname));
-                }
-                $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-                    array("compid" => $comp, "activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id,
-                        "userid" => $USER->id, "role" => 0));
-            }
-        }
         // TODO: is this deprecated? START
         block_exaport_add_to_log(SITEID, 'bookmark', 'add', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=add',
             $post->name);
@@ -906,61 +757,6 @@ function block_exaport_normalize_item_categoryids($categoryids) {
         return $categoryid > 0;
     })));
     return $categoryids;
-}
-
-/**
- * Convert a submitted comma-separated competence list to unique positive ids.
- *
- * @param string|array $competenceids
- * @return int[]
- */
-function block_exaport_normalize_competenceids($competenceids) {
-    if (!is_array($competenceids)) {
-        $competenceids = $competenceids === '' ? [] : explode(',', $competenceids);
-    }
-
-    $competenceids = array_map('intval', $competenceids);
-    return array_values(array_unique(array_filter($competenceids, function($competenceid) {
-        return $competenceid > 0;
-    })));
-}
-
-/**
- * Replace the learner's competence selection for an eportfolio item.
- *
- * @param stdClass $item
- * @param int[] $competenceids
- */
-function block_exaport_sync_item_competences($item, array $competenceids) {
-    global $DB, $USER;
-
-    $course = $DB->get_record('course', ['id' => $item->courseid], 'id,shortname', MUST_EXIST);
-    $transaction = $DB->start_delegated_transaction();
-
-    $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
-        ['activityid' => $item->id, 'eportfolioitem' => 1]);
-    $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-        ['activityid' => $item->id, 'eportfolioitem' => 1, 'reviewerid' => $USER->id]);
-
-    foreach ($competenceids as $competenceid) {
-        $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, [
-            'compid' => $competenceid,
-            'activityid' => $item->id,
-            'eportfolioitem' => 1,
-            'activitytitle' => $item->name,
-            'coursetitle' => $course->shortname,
-        ]);
-        $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM, [
-            'compid' => $competenceid,
-            'activityid' => $item->id,
-            'eportfolioitem' => 1,
-            'reviewerid' => $USER->id,
-            'userid' => $USER->id,
-            'role' => 0,
-        ]);
-    }
-
-    $transaction->allow_commit();
 }
 
 function block_exaport_convert_item_type(&$post) {

@@ -1060,8 +1060,9 @@ function block_exaport_build_comp_tree($type, $itemorresume, $allowedit = true) 
         $content .= '<input type="submit" id="id_cancel" class="btn-cancel" onclick="skipClientValidation = true; return true;" ' .
             ' value="' . get_string('cancel') . '" name="cancel">';
     } else {
-        $content .= '<input type="button" id="id_submitbutton2" value="' . get_string('savechanges') .
-            '" name="savecompetencesbutton" onClick="jQueryExaport.colorbox.close();">';
+        $content .= '<div id="competences-popup-status" class="text-muted" aria-live="polite"></div>';
+        $content .= '<input type="submit" id="id_submitbutton2" class="btn btn-primary" value="' . get_string('savechanges') .
+            '" name="savecompetencesbutton">';
     }
     $content .= '</form>';
 

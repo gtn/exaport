@@ -16,7 +16,7 @@ $itemid = required_param('itemid', PARAM_INT);
 require_login($courseid);
 require_capability('block/exaport:use', context_system::instance());
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
-block_exaport_get_editable_content_item($itemid, $courseid);
+block_exaport_get_editable_item($itemid, $courseid);
 
 $PAGE->set_url('/blocks/exaport/item_content_link.php', ['courseid' => $courseid, 'itemid' => $itemid]);
 $returnurl = block_exaport_content_return_url($courseid, $itemid);
@@ -27,7 +27,7 @@ if ($form->is_cancelled()) {
     redirect($returnurl);
 } else if ($fromform = $form->get_data()) {
     require_sesskey();
-    block_exaport_get_editable_content_item($itemid, $courseid);
+    block_exaport_get_editable_item($itemid, $courseid);
 
     $block = block_exaport_new_content_block($itemid, 'link', $fromform->title, $fromform->url);
     $DB->insert_record('block_exaportitemblock', $block);

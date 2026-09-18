@@ -312,6 +312,7 @@ $string['createpage'] = 'Zieh das Elemente in das Feld unterhalb, um deinen Inha
 $string['chooselayout'] = 'W&aumlhle ein Layout für deine Sammelmappe.';
 $string['viewtitle'] = 'Titel und Beschreibung';
 $string['viewcontent'] = 'Inhalt';
+$string['mainsettings'] = 'Haupteinstellungen';
 $string['viewlayout'] = 'Layout';
 $string['viewshare'] = 'Teilen';
 $string['viewlayoutgroup1'] = '1 Spalte';

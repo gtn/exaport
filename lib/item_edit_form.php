@@ -93,7 +93,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
         $mform = &$this->_form;
 
-        $mform->addElement('header', 'general', get_string($type, "block_exaport"));
+        $mform->addElement('header', 'mainsettings', get_string('mainsettings', 'block_exaport'));
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
@@ -220,18 +220,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             }
         }
 
-        if (array_key_exists('itemcontentblocks', $this->_customdata)) {
-            $contentblocks = $this->_customdata['itemcontentblocks'];
-            $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
-            $contentownerid = (int)($this->_customdata['itemcontentownerid'] ?? $USER->id);
-            $contentsection = new \block_exaport\output\item_content_blocks(
-                $contentblocks,
-                $contentaddurl,
-                $contentownerid
-            );
-            $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
-        }
-
         $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,
             array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
                 'accepted_types' => array('image', 'web_image')));
@@ -336,6 +324,22 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             ];
             $mform->addElement('autocomplete', 'tags', get_string('tags'), $tagstrings, $options);
             $mform->add_exaport_help_button('tags', 'forms.item.tags');
+        }
+
+        if (array_key_exists('itemcontentblocks', $this->_customdata)) {
+            $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
+
+            $contentblocks = $this->_customdata['itemcontentblocks'];
+            $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
+            $contentownerid = (int)($this->_customdata['itemcontentownerid'] ?? $USER->id);
+            $contentsection = new \block_exaport\output\item_content_blocks(
+                $contentblocks,
+                $contentaddurl,
+                $contentownerid,
+                true,
+                false
+            );
+            $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
         }
 
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {

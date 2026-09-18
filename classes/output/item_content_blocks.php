@@ -41,17 +41,28 @@ class item_content_blocks implements renderable, templatable {
     /** @var bool */
     private $showaddbutton;
 
+    /** @var bool */
+    private $showheading;
+
     /**
      * @param array $blocks Ordered item content block records.
      * @param \moodle_url|null $addurl URL for adding a text block.
      * @param int $ownerid User ID that owns the item content.
      * @param bool $showaddbutton Whether the visual add control should be shown.
+     * @param bool $showheading Whether the section should render its own heading.
      */
-    public function __construct(array $blocks, $addurl, int $ownerid, bool $showaddbutton = true) {
+    public function __construct(
+        array $blocks,
+        $addurl,
+        int $ownerid,
+        bool $showaddbutton = true,
+        bool $showheading = true
+    ) {
         $this->blocks = $blocks;
         $this->addurl = $addurl;
         $this->ownerid = $ownerid;
         $this->showaddbutton = $showaddbutton;
+        $this->showheading = $showheading;
     }
 
     /**
@@ -89,6 +100,7 @@ class item_content_blocks implements renderable, templatable {
                 get_string('view_specialitem_text', 'block_exaport'),
             'addurl' => $this->addurl instanceof \moodle_url ? $this->addurl->out(false) : '',
             'showaddbutton' => $this->showaddbutton,
+            'showheading' => $this->showheading,
         ];
     }
 

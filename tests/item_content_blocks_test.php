@@ -100,6 +100,13 @@ final class item_content_blocks_test extends \advanced_testcase {
             ->export_for_template($renderer);
         $this->assertFalse($emptydata['hasblocks']);
         $this->assertSame([], $emptydata['blocks']);
+
+        $embeddeddata = (new \block_exaport\output\item_content_blocks([], null, $owner->id, true, false))
+            ->export_for_template($renderer);
+        $this->assertFalse($embeddeddata['showheading']);
+        $embeddedhtml = $OUTPUT->render_from_template('block_exaport/item_content_blocks', $embeddeddata);
+        $this->assertStringNotContainsString('exaport-item-content-heading', $embeddedhtml);
+        $this->assertStringContainsString('aria-label="Content"', $embeddedhtml);
     }
 
     /**

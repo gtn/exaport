@@ -1,8 +1,12 @@
 {{!
     Read-only ordered content blocks shown for an Exaport item.
 }}
-<section class="exaport-item-content-section mt-4" aria-labelledby="exaport-item-content-heading">
+<section class="exaport-item-content-section mt-4"
+    {{#showheading}}aria-labelledby="exaport-item-content-heading"{{/showheading}}
+    {{^showheading}}aria-label="{{heading}}"{{/showheading}}>
+    {{#showheading}}
     <h2 id="exaport-item-content-heading" class="h4 mb-3">{{heading}}</h2>
+    {{/showheading}}
     {{#hasblocks}}
     <div class="exaport-item-content-rows border-top">
         {{#blocks}}

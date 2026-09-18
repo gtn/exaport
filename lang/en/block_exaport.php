@@ -312,6 +312,7 @@ $string['createpage'] = 'Drag and drop content blocks from the tabs below to cre
 $string['chooselayout'] = 'Select how you would like the columns in your collection to be laid out.';
 $string['viewtitle'] = 'Title and description';
 $string['viewcontent'] = 'Content';
+$string['mainsettings'] = 'Main settings';
 $string['viewlayout'] = 'Layout';
 $string['viewshare'] = 'Share';
 $string['viewlayoutgroup1'] = '1 column';

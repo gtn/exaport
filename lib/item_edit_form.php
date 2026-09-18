@@ -87,7 +87,7 @@ class block_exaport_comment_edit_form extends block_exaport_moodleform {
 class block_exaport_item_edit_form extends block_exaport_moodleform {
 
     public function definition() {
-        global $CFG, $USER, $DB;
+        global $CFG, $USER, $DB, $PAGE;
 
         $type = $this->_customdata['type'];
 
@@ -218,6 +218,18 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 // Intro field is now optional - validation rule removed
                 $mform->add_exaport_help_button($textareafield . '_editor', 'forms.item.' . $textareafield . '_editor');
             }
+        }
+
+        if (array_key_exists('itemcontentblocks', $this->_customdata)) {
+            $contentblocks = $this->_customdata['itemcontentblocks'];
+            $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
+            $contentownerid = (int)($this->_customdata['itemcontentownerid'] ?? $USER->id);
+            $contentsection = new \block_exaport\output\item_content_blocks(
+                $contentblocks,
+                $contentaddurl,
+                $contentownerid
+            );
+            $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
         }
 
         $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,

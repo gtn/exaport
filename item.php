@@ -231,9 +231,27 @@ if ($cattype == 'shared' && $categoryid === 0 && $existing) {
     $existingcateid = $DB->get_field_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$existing->id]);
     $categoryidforform = $existingcateid ? (int)$existingcateid : 0;
 }
+
+if ($existing) {
+    $itemcontentblocks = $DB->get_records(
+        'block_exaportitemblock',
+        ['itemid' => $existing->id],
+        'sortorder ASC, id ASC'
+    );
+    $itemcontentaddurl = $allowedit ? new moodle_url('/blocks/exaport/item_content_text.php', [
+        'courseid' => $courseid,
+        'itemid' => $existing->id,
+    ]) : null;
+} else {
+    $itemcontentblocks = [];
+    $itemcontentaddurl = null;
+}
+
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type,
     array('current' => $existing, 'useTextareas' => $usetextareas, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
-        'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission, 'cattype' => $cattype, 'catid' => $categoryidforform));
+        'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission,
+        'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontentblocks' => $itemcontentblocks,
+        'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id)));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -474,27 +492,6 @@ if ($exacompactive) {
 
 $editform->set_data($post);
 echo $OUTPUT->box($extracontent);
-if ($existing) {
-    $itemcontentblocks = $DB->get_records(
-        'block_exaportitemblock',
-        ['itemid' => $existing->id],
-        'sortorder ASC, id ASC'
-    );
-    $itemcontentaddurl = $allowedit ? new moodle_url('/blocks/exaport/item_content_text.php', [
-        'courseid' => $courseid,
-        'itemid' => $existing->id,
-    ]) : null;
-} else {
-    $itemcontentblocks = [];
-    $itemcontentaddurl = null;
-}
-echo $PAGE->get_renderer('block_exaport')->render(
-    new \block_exaport\output\item_content_blocks(
-        $itemcontentblocks,
-        $itemcontentaddurl,
-        (int)($existing->userid ?? $USER->id)
-    )
-);
 if (has_capability('block/exaport:shareintern', context_system::instance())) {
     // Translations.
     $translations = array(

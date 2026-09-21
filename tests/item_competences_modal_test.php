@@ -63,11 +63,6 @@ final class item_competences_modal_test extends \advanced_testcase {
             null,
             $this->create_tree()
         );
-
-        $renderer = $this->getMockBuilder(\core_renderer::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['pix_icon'])
-            ->getMock();
         $data = $renderable->export_picker_for_template();
 
         $this->assertSame([11, 13], $this->collect_checked_ids($data['nodes']));

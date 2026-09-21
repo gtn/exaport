@@ -139,6 +139,7 @@ class item_competences extends dynamic_form {
      */
     public function process_dynamic_submission(): array {
         global $PAGE;
+        global $USER;
 
         $data = $this->get_data();
         if ($data === null) {
@@ -148,7 +149,7 @@ class item_competences extends dynamic_form {
         require_sesskey();
 
         $item = block_exaport_require_competence_item_access((int)$data->itemid, (int)$data->courseid);
-        $tree = $this->get_competence_tree((int)$item->userid, true);
+        $tree = $this->get_competence_tree((int)$USER->id, true);
         $competenceids = block_exaport_parse_competenceids($data->competenceids ?? '');
         $competenceids = block_exaport_validate_competenceids(
             $competenceids,

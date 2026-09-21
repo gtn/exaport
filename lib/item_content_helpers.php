@@ -8,6 +8,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Dynamic forms are loaded directly by Moodle's external API, without going
+// through the plugin's inc.php bootstrap used by the standalone pages.
+require_once(__DIR__ . '/lib.php');
+
 /**
  * Load an item that the current user may modify through the content editor.
  *

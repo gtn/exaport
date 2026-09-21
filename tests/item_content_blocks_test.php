@@ -24,6 +24,7 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
 final class item_content_blocks_test extends \advanced_testcase {
 
     public function test_item_content_modal_uses_moodle_dynamic_form(): void {
+        $this->assertTrue(function_exists('block_exaport_item_is_editable'));
         $this->assertTrue(is_subclass_of(
             \block_exaport\form\item_content::class,
             \core_form\dynamic_form::class

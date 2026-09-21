@@ -97,7 +97,7 @@ const open = (trigger, config) => {
             return;
         }
         pickerHandlersBound = true;
-        const modalRoot = modalForm.modal.getRoot()[0];
+        const modalRoot = modalForm.modal.getModal()[0];
         syncSelection(modalRoot);
 
         modalRoot.addEventListener('change', event => {

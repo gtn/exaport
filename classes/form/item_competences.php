@@ -123,12 +123,12 @@ class item_competences extends dynamic_form {
      */
     public function set_data_for_dynamic_submission(): void {
         $item = $this->get_item();
-        $item->compids_array = block_exaport_get_item_competenceids($item);
+        $selectedids = $this->get_selectedids();
 
         $this->set_data((object)[
             'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
             'itemid' => (int)$item->id,
-            'competenceids' => implode(',', $item->compids_array),
+            'competenceids' => implode(',', $selectedids),
         ]);
     }
 

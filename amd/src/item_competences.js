@@ -1,149 +1,126 @@
-import ModalForm from 'core_form/modalform';
-import * as Templates from 'core/templates';
-import Notification from 'core/notification';
-
-const ITEM_SECTION_SELECTOR = '[data-region="item-competences"]';
-const COMPETENCE_SUMMARY_SELECTOR = '[data-region="competence-summary"]';
-const COMPETENCE_CHECKBOX_SELECTOR = '[data-region="competence-checkbox"]';
-const COMPETENCE_HIDDEN_FIELD_SELECTOR = 'input[name="competenceids"]';
+// This file is part of Exabis Eportfolio (extension for Moodle)
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 
 /**
- * Normalize a collection of checkbox values.
+ * Moodle modal used to edit an item's competence selection.
  *
- * @param {string[]} values Raw checkbox values.
- * @returns {number[]}
+ * @module block_exaport/item_competences
  */
-const normalizeIds = values => [...new Set(values
-    .map(value => Number.parseInt(value, 10))
-    .filter(value => Number.isInteger(value) && value > 0))]
-    .sort((left, right) => left - right);
+define(['jquery', 'core/modal_save_cancel', 'core/modal_events', 'core/notification'], function(
+    $, ModalSaveCancel, ModalEvents, Notification
+) {
 
-/**
- * Collect the checked competence ids inside a picker root.
- *
- * @param {ParentNode} root Picker or form root.
- * @returns {number[]}
- */
-export const collectSelectedCompetencyIds = root => normalizeIds(
-    Array.from(root.querySelectorAll(`${COMPETENCE_CHECKBOX_SELECTOR}:checked`), checkbox => checkbox.value)
-);
+    /**
+     * Read selected competence ids from a picker.
+     *
+     * @param {jQuery} $root Picker root.
+     * @return {Array}
+     */
+    const selectedIds = function($root) {
+        return $root.find('[data-region="competence-checkbox"]:checked').map(function() {
+            return this.value;
+        }).get();
+    };
 
-/**
- * Synchronize the custom tree selection into the registered form field.
- *
- * @param {ParentNode} root Picker or form root.
- * @returns {string}
- */
-export const syncSelection = root => {
-    const hiddenField = root.querySelector(COMPETENCE_HIDDEN_FIELD_SELECTOR);
-    if (!hiddenField) {
-        return '';
-    }
+    /**
+     * Update the read-only tree shown in the item form.
+     *
+     * @param {jQuery} $section Competence section.
+     * @param {jQuery} $picker Picker containing the persisted selection.
+     */
+    const renderSummary = function($section, $picker) {
+        const $tree = $picker.find('.exaport-competence-tree').first().clone();
 
-    hiddenField.value = collectSelectedCompetencyIds(root).join(',');
-    return hiddenField.value;
-};
-
-/**
- * Expand or collapse every tree branch in the picker.
- *
- * @param {ParentNode} root Picker root.
- * @param {boolean} expanded Whether branches should be expanded.
- */
-export const setTreeExpanded = (root, expanded) => {
-    root.querySelectorAll('details').forEach(details => {
-        details.open = expanded;
-    });
-};
-
-/**
- * Replace the authoritative server-rendered summary for one item.
- *
- * @param {number} itemId Item id.
- * @param {string} content Rendered summary HTML.
- * @returns {Promise<void>}
- */
-export const replaceSummary = (itemId, content) => {
-    const summary = document.querySelector(`${COMPETENCE_SUMMARY_SELECTOR}[data-itemid="${itemId}"]`);
-    if (!summary) {
-        return Promise.resolve();
-    }
-
-    return Templates.replaceNode(summary, content, '');
-};
-
-/**
- * Open the standard dynamic-form modal.
- *
- * @param {HTMLElement} trigger Action which opened the modal.
- * @param {object} config Page configuration.
- */
-const open = (trigger, config) => {
-    const modalForm = new ModalForm({
-        formClass: 'block_exaport\\form\\item_competences',
-        args: {
-            courseid: config.courseId,
-            itemid: config.itemId,
-        },
-        modalConfig: {title: config.title},
-        saveButtonText: config.saveLabel,
-        returnFocus: trigger,
-    });
-    let pickerHandlersBound = false;
-    let summaryHandled = false;
-
-    modalForm.addEventListener(modalForm.events.LOADED, () => {
-        if (pickerHandlersBound) {
-            return;
-        }
-        pickerHandlersBound = true;
-        const modalRoot = modalForm.modal.getModal()[0];
-        syncSelection(modalRoot);
-
-        modalRoot.addEventListener('change', event => {
-            if (event.target.closest(COMPETENCE_CHECKBOX_SELECTOR)) {
-                syncSelection(modalRoot);
+        $tree.find('.exaport-competence-node').each(function() {
+            const $node = $(this);
+            const $checkbox = $node.children('.form-check').find('[data-region="competence-checkbox"]');
+            if ($checkbox.length && !$checkbox.is(':checked')) {
+                $node.remove();
             }
         });
-
-        modalRoot.addEventListener('click', event => {
-            if (event.target.closest('[data-action="expand-competences"]')) {
-                event.preventDefault();
-                setTreeExpanded(modalRoot, true);
-            } else if (event.target.closest('[data-action="collapse-competences"]')) {
-                event.preventDefault();
-                setTreeExpanded(modalRoot, false);
+        $tree.find('details').each(function() {
+            const $details = $(this);
+            if (!$details.find('[data-region="competence-checkbox"]:checked').length) {
+                $details.closest('.exaport-competence-node').remove();
             }
         });
-    });
-    modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, event => {
-        if (summaryHandled) {
-            return;
-        }
-        summaryHandled = true;
-        replaceSummary(event.detail.itemid, event.detail.content).catch(Notification.exception);
-    });
-    modalForm.show().catch(Notification.exception);
-};
+        $tree.find('.form-check').each(function() {
+            const label = $(this).find('label').text();
+            $(this).replaceWith($('<span class="text-success"></span>').text('✓ ' + label));
+        });
+        $tree.find('details').prop('open', true);
+        $tree.addClass('exaport-competence-summary mb-3');
+        $section.find('[data-region="competence-summary"]').empty().append($tree);
+    };
 
-/**
- * Register item-competence modal actions.
- *
- * @param {object} config Page configuration.
- */
-export const init = config => {
-    const section = document.querySelector(`${ITEM_SECTION_SELECTOR}[data-itemid="${config.itemId}"]`);
-    if (!section) {
-        return;
-    }
+    /**
+     * Initialize the competence section and picker modal.
+     *
+     * @param {Object} config Endpoint, item and translated string configuration.
+     */
+    const init = function(config) {
+        const $section = $('[data-region="item-competences"]');
+        const $source = $section.find('[data-region="competence-picker-source"]');
+        const pickerHtml = $source.html();
+        let persistedIds = selectedIds($(pickerHtml));
 
-    section.addEventListener('click', event => {
-        const trigger = event.target.closest('[data-action="open-competence-picker"]');
-        if (!trigger) {
-            return;
-        }
+        $section.on('click', '[data-action="open-competence-picker"]', function() {
+            ModalSaveCancel.create({
+                title: config.title,
+                // Moodle's modal API expects HTML here. Passing a jQuery object produces an empty
+                // body in Moodle versions whose setBody implementation only handles strings.
+                body: pickerHtml,
+                large: true,
+                removeOnClose: true,
+            }).then(function(modal) {
+                const $picker = modal.getRoot().find('[data-region="competence-picker"]');
+                $picker.find('[data-region="competence-checkbox"]').each(function() {
+                    this.checked = persistedIds.indexOf(this.value) !== -1;
+                });
+                modal.setSaveButtonText(config.saveLabel);
 
-        event.preventDefault();
-        open(trigger, config);
-    });
-};
+                modal.getRoot().on('click', '[data-action="expand-competences"]', function() {
+                    $picker.find('details').prop('open', true);
+                });
+                modal.getRoot().on('click', '[data-action="collapse-competences"]', function() {
+                    $picker.find('details').prop('open', false);
+                });
+                modal.getRoot().on(ModalEvents.save, function(event) {
+                    event.preventDefault();
+                    const $savebutton = modal.getRoot().find('[data-action="save"]');
+                    $savebutton.prop('disabled', true);
+                    $picker.find('[data-region="competence-save-error"]').text('');
+
+                    $.ajax({
+                        url: config.saveUrl,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            courseid: config.courseId,
+                            itemid: config.itemId,
+                            competenceids: selectedIds($picker),
+                            sesskey: config.sesskey,
+                        },
+                    }).done(function() {
+                        persistedIds = selectedIds($picker);
+                        renderSummary($section, $picker);
+                        modal.hide();
+                    }).fail(function() {
+                        $picker.find('[data-region="competence-save-error"]').text(config.saveFailed);
+                    }).always(function() {
+                        $savebutton.prop('disabled', false);
+                    });
+                });
+
+                modal.show();
+                return modal;
+            }).catch(Notification.exception);
+        });
+    };
+
+    return {init: init};
+});

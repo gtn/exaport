@@ -7,7 +7,6 @@
 // (at your option) any later version.
 
 require_once(__DIR__ . '/inc.php');
-require_once(__DIR__ . '/lib/item_content_form.php');
 require_once(__DIR__ . '/lib/item_content_helpers.php');
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -20,24 +19,8 @@ block_exaport_get_editable_content_item($itemid, $courseid);
 
 $PAGE->set_url('/blocks/exaport/item_content_file.php', ['courseid' => $courseid, 'itemid' => $itemid]);
 $returnurl = block_exaport_content_return_url($courseid, $itemid);
-$fileoptions = [
-    'subdirs' => false,
-    'maxfiles' => !empty($CFG->block_exaport_multiple_files_in_item) ? 10 : 1,
-    'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
-    'accepted_types' => '*',
-];
-$form = new block_exaport_item_content_file_form(null, ['fileoptions' => $fileoptions]);
-$data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'title' => '', 'files' => ''];
-$data = file_prepare_standard_filemanager(
-    $data,
-    'files',
-    $fileoptions,
-    context_user::instance($USER->id),
-    'block_exaport',
-    'item_content_file',
-    0
-);
-$form->set_data($data);
+$fileoptions = block_exaport_item_content_file_options();
+$form = block_exaport_create_item_content_form('file', $courseid, $itemid);
 
 if ($form->is_cancelled()) {
     redirect($returnurl);

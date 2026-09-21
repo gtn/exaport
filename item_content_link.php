@@ -7,7 +7,6 @@
 // (at your option) any later version.
 
 require_once(__DIR__ . '/inc.php');
-require_once(__DIR__ . '/lib/item_content_form.php');
 require_once(__DIR__ . '/lib/item_content_helpers.php');
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -20,8 +19,7 @@ block_exaport_get_editable_content_item($itemid, $courseid);
 
 $PAGE->set_url('/blocks/exaport/item_content_link.php', ['courseid' => $courseid, 'itemid' => $itemid]);
 $returnurl = block_exaport_content_return_url($courseid, $itemid);
-$form = new block_exaport_item_content_link_form();
-$form->set_data(['courseid' => $courseid, 'itemid' => $itemid]);
+$form = block_exaport_create_item_content_form('link', $courseid, $itemid);
 
 if ($form->is_cancelled()) {
     redirect($returnurl);
@@ -29,8 +27,10 @@ if ($form->is_cancelled()) {
     require_sesskey();
     block_exaport_get_editable_content_item($itemid, $courseid);
 
+    $transaction = $DB->start_delegated_transaction();
     $block = block_exaport_new_content_block($itemid, 'link', $fromform->title, $fromform->url);
     $DB->insert_record('block_exaportitemblock', $block);
+    $transaction->allow_commit();
     redirect($returnurl, get_string('contentblockadded', 'block_exaport'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 

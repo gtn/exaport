@@ -13,7 +13,6 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
-require_once(__DIR__ . '/lib/item_content_text_form.php');
 require_once(__DIR__ . '/lib/item_content_helpers.php');
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -24,7 +23,7 @@ require_login($courseid);
 require_capability('block/exaport:use', $context);
 
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
-$item = block_exaport_get_editable_content_item($itemid, $courseid);
+block_exaport_get_editable_content_item($itemid, $courseid);
 
 $PAGE->set_url(new moodle_url('/blocks/exaport/item_content_text.php', [
     'courseid' => $courseid,
@@ -32,34 +31,9 @@ $PAGE->set_url(new moodle_url('/blocks/exaport/item_content_text.php', [
 ]));
 
 $returnurl = block_exaport_content_return_url($courseid, $itemid);
-$editoroptions = [
-    'trusttext' => true,
-    'subdirs' => false,
-    'maxfiles' => 0,
-    'maxbytes' => 0,
-    'context' => context_user::instance($USER->id),
-];
+$editoroptions = block_exaport_item_content_editor_options();
 
-$form = new block_exaport_item_content_text_form(null, [
-    'editoroptions' => $editoroptions,
-]);
-$data = (object)[
-    'courseid' => $courseid,
-    'itemid' => $itemid,
-    'title' => '',
-    'content' => '',
-    'contentformat' => FORMAT_HTML,
-];
-$data = file_prepare_standard_editor(
-    $data,
-    'content',
-    $editoroptions,
-    context_user::instance($USER->id),
-    'block_exaport',
-    'item_content_text',
-    0
-);
-$form->set_data($data);
+$form = block_exaport_create_item_content_form('text', $courseid, $itemid);
 
 if ($form->is_cancelled()) {
     redirect($returnurl);

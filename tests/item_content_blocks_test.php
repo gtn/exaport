@@ -12,6 +12,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/externlib.php');
+require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
 
 /**
  * Tests structured item content loading and read-only output.
@@ -21,6 +22,14 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/externlib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class item_content_blocks_test extends \advanced_testcase {
+
+    public function test_item_content_modal_uses_moodle_dynamic_form(): void {
+        $this->assertTrue(function_exists('block_exaport_item_is_editable'));
+        $this->assertTrue(is_subclass_of(
+            \block_exaport\form\item_content::class,
+            \core_form\dynamic_form::class
+        ));
+    }
 
     public function test_blocks_are_scoped_ordered_and_unsupported_types_are_ignored(): void {
         global $DB;
@@ -106,6 +115,7 @@ final class item_content_blocks_test extends \advanced_testcase {
             $data['blocks'][1]['files'][0]['url']
         );
         $this->assertCount(3, $data['addactions']);
+        $this->assertSame(['text', 'link', 'file'], array_column($data['addactions'], 'type'));
         $this->assertStringContainsString('>T</span>', $data['addactions'][0]['icon']);
         $this->assertSame('icon', $data['addactions'][1]['icon']);
         $this->assertSame('icon', $data['addactions'][2]['icon']);
@@ -118,6 +128,8 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertStringContainsString('<div class="divider-content px-3">', $html);
         $this->assertStringContainsString('btn add-content exaport-item-content-add-button', $html);
         $this->assertStringNotContainsString('dropdown-toggle', $html);
+        $this->assertStringContainsString('data-content-type="text"', $html);
+        $this->assertStringContainsString('data-content-url=', $html);
     }
 
     public function test_text_is_formatted_with_owner_context_and_shared_output_has_no_add_control(): void {

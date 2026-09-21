@@ -42,34 +42,37 @@
     </div>
     {{/hasblocks}}
     {{#showaddbutton}}
-    <div class="exaport-item-content-divider">
-        {{#hasaddactions}}
-        <div class="dropdown">
-        <button class="btn add-content exaport-item-content-add-button d-flex justify-content-center align-items-center p-1 icon-no-margin"
-           type="button"
-           data-toggle="dropdown"
-           data-bs-toggle="dropdown"
-           data-action="open-addingcontent"
-           aria-haspopup="true"
-           aria-expanded="false"
-           aria-label="{{addlabel}}"
-           title="{{addlabel}}">
-            {{{addicon}}}
-        </button>
-        <div class="dropdown-menu">
-            {{#addactions}}
-            <a class="dropdown-item" href="{{url}}">{{{icon}}} <span>{{label}}</span></a>
-            {{/addactions}}
+    <div class="divider bulk-hidden d-flex justify-content-center align-items-center always-visible my-3 exaport-item-content-divider">
+        <hr>
+        <div class="divider-content px-3">
+            {{#hasaddactions}}
+            <div class="dropdown">
+                <button class="btn add-content exaport-item-content-add-button d-flex justify-content-center align-items-center p-1 icon-no-margin"
+                   type="button"
+                   data-toggle="dropdown"
+                   data-bs-toggle="dropdown"
+                   data-action="open-addingcontent"
+                   aria-haspopup="true"
+                   aria-expanded="false"
+                   aria-label="{{addlabel}}"
+                   title="{{addlabel}}">
+                    {{{addicon}}}
+                </button>
+                <div class="dropdown-menu">
+                    {{#addactions}}
+                    <a class="dropdown-item" href="{{url}}">{{{icon}}} <span>{{label}}</span></a>
+                    {{/addactions}}
+                </div>
+            </div>
+            {{/hasaddactions}}
+            {{^hasaddactions}}
+            <span class="btn add-content exaport-item-content-add-button d-flex justify-content-center align-items-center p-1 icon-no-margin disabled"
+                  aria-disabled="true"
+                  aria-label="{{addlabel}}">
+                {{{addicon}}}
+            </span>
+            {{/hasaddactions}}
         </div>
-        </div>
-        {{/hasaddactions}}
-        {{^hasaddactions}}
-        <span class="exaport-item-content-add-button"
-              aria-disabled="true"
-              aria-label="{{addlabel}}">
-            {{{addicon}}}
-        </span>
-        {{/hasaddactions}}
     </div>
     {{/showaddbutton}}
 </section>

@@ -111,6 +111,11 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertSame('icon', $data['addactions'][2]['icon']);
 
         $html = $OUTPUT->render_from_template('block_exaport/item_content_blocks', $data);
+        $this->assertStringContainsString(
+            'divider bulk-hidden d-flex justify-content-center align-items-center always-visible my-3',
+            $html
+        );
+        $this->assertStringContainsString('<div class="divider-content px-3">', $html);
         $this->assertStringContainsString('btn add-content exaport-item-content-add-button', $html);
         $this->assertStringContainsString('data-action="open-addingcontent"', $html);
         $this->assertStringNotContainsString('dropdown-toggle', $html);

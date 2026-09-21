@@ -25,41 +25,74 @@ class item_competences implements renderable, templatable {
     /** @var bool */
     private $editable;
 
+    /** @var int[] */
+    private $selectedids;
+
+    /** @var array|null */
+    private $tree;
+
     /**
      * @param \stdClass $item Portfolio item.
      * @param bool $editable Whether the current user may change the selection.
+     * @param int[]|null $selectedids Optional selected ids override.
+     * @param array|null $tree Optional competence tree override.
      */
-    public function __construct(\stdClass $item, bool $editable) {
+    public function __construct(
+        \stdClass $item,
+        bool $editable,
+        ?array $selectedids = null,
+        ?array $tree = null
+    ) {
         $this->item = $item;
         $this->editable = $editable;
+        $this->selectedids = block_exaport_normalize_competenceids($selectedids ?? ($this->item->compids_array ?? []));
+        $this->tree = $tree;
     }
 
     /**
-     * Export the competence tree for the section and modal templates.
+     * Export the competence section for the item edit form.
      *
      * @param renderer_base $output
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
-        global $USER;
-
-        $selectedids = array_map('intval', $this->item->compids_array ?? []);
-        $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
-        $nodes = $this->export_nodes($tree, $selectedids);
-        $selectednodes = $this->filter_selected_nodes($nodes);
-
         return [
             'intro' => get_string('selectcomps', 'block_exaport'),
             'addlabel' => get_string('addcompetences', 'block_exaport'),
             'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
+            'itemid' => (int)$this->item->id,
+            'summary' => $this->export_summary_for_template(),
+            'editable' => $this->editable,
+        ];
+    }
+
+    /**
+     * Export the authoritative summary node tree.
+     *
+     * @return array
+     */
+    public function export_summary_for_template(): array {
+        $nodes = $this->export_nodes($this->get_tree(), $this->selectedids);
+        $selectednodes = $this->filter_selected_nodes($nodes);
+
+        return [
+            'itemid' => (int)$this->item->id,
             'selectednodes' => $selectednodes,
             'hasselected' => !empty($selectednodes),
-            'picker' => [
-                'nodes' => $nodes,
-                'expandlabel' => get_string('expandcomps', 'block_exaport'),
-                'collapselabel' => get_string('collapsecomps', 'block_exaport'),
-            ],
-            'editable' => $this->editable,
+        ];
+    }
+
+    /**
+     * Export the editable picker tree for the dynamic form.
+     *
+     * @return array
+     */
+    public function export_picker_for_template(): array {
+        return [
+            'itemid' => (int)$this->item->id,
+            'nodes' => $this->export_nodes($this->get_tree(), $this->selectedids, true),
+            'expandlabel' => get_string('expandcomps', 'block_exaport'),
+            'collapselabel' => get_string('collapsecomps', 'block_exaport'),
         ];
     }
 
@@ -68,19 +101,22 @@ class item_competences implements renderable, templatable {
      *
      * @param array $items Exacomp tree nodes.
      * @param int[] $selectedids Selected descriptor ids.
+     * @param bool $picker Whether to include picker checkbox metadata.
      * @return array
      */
-    private function export_nodes(array $items, array $selectedids): array {
+    private function export_nodes(array $items, array $selectedids, bool $picker = false): array {
         $nodes = [];
         foreach ($items as $item) {
             $isdescriptor = $item instanceof \block_exacomp\descriptor;
-            $children = $this->export_nodes($item->get_subs() ?: [], $selectedids);
+            $children = $this->export_nodes($item->get_subs() ?: [], $selectedids, $picker);
+            $id = $isdescriptor ? (int)$item->id : 0;
             $nodes[] = [
-                'id' => $isdescriptor ? (int)$item->id : 0,
+                'id' => $id,
                 'title' => $item->title,
                 'isdescriptor' => $isdescriptor,
                 'isgroup' => !$isdescriptor,
-                'checked' => $isdescriptor && in_array((int)$item->id, $selectedids, true),
+                'checked' => $isdescriptor && in_array($id, $selectedids, true),
+                'inputid' => $picker && $isdescriptor ? 'exaport-competence-' . $this->item->id . '-' . $id : '',
                 'children' => $children,
                 'haschildren' => !empty($children),
             ];
@@ -106,5 +142,20 @@ class item_competences implements renderable, templatable {
             }
         }
         return $selected;
+    }
+
+    /**
+     * Load the current competence tree once.
+     *
+     * @return array
+     */
+    private function get_tree(): array {
+        global $USER;
+
+        if ($this->tree === null) {
+            $this->tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+        }
+
+        return $this->tree;
     }
 }

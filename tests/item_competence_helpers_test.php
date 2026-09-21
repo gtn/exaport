@@ -181,6 +181,22 @@ final class item_competence_helpers_test extends \advanced_testcase {
         $this->assertSame($itemid, (int)$item->id);
     }
 
+    public function test_require_competence_item_access_rejects_invalid_course(): void {
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->grant_competence_access($owner, $course);
+        $this->setUser($owner);
+
+        $this->assert_entry_point_error(
+            'invalidcourseid',
+            'block_exaport_require_competence_item_access',
+            $itemid,
+            $course->id + 9999
+        );
+    }
+
     private function insert_item(int $userid, int $courseid): int {
         global $DB;
 

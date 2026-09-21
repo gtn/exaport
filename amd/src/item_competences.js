@@ -89,8 +89,13 @@ const open = (trigger, config) => {
         saveButtonText: config.saveLabel,
         returnFocus: trigger,
     });
+    let pickerHandlersBound = false;
 
     modalForm.addEventListener(modalForm.events.LOADED, () => {
+        if (pickerHandlersBound) {
+            return;
+        }
+        pickerHandlersBound = true;
         const modalRoot = modalForm.modal.getRoot()[0];
         syncSelection(modalRoot);
 

@@ -2001,6 +2001,34 @@ function block_exaport_item_is_editable($itemid) {
 }
 
 /**
+ * Load an item owned by the current user and verify that it can be edited in a course workflow.
+ *
+ * Keeping this check in the domain library ensures that every item-editing feature applies the
+ * same ownership, course and Exacomp editability rules. An item outside the requested user's
+ * course is deliberately reported as missing rather than exposing its existence.
+ *
+ * @param int $itemid Item ID.
+ * @param int $courseid Course ID.
+ * @return stdClass The editable item record.
+ */
+function block_exaport_get_editable_item(int $itemid, int $courseid): stdClass {
+    global $DB, $USER;
+
+    $item = $DB->get_record('block_exaportitem', [
+        'id' => $itemid,
+        'userid' => $USER->id,
+    ]);
+    if (!$item || (int)$item->courseid !== $courseid) {
+        print_error('bookmarknotfound', 'block_exaport');
+    }
+    if (!block_exaport_item_is_editable($item->id)) {
+        print_error('nopermissions', 'error');
+    }
+
+    return $item;
+}
+
+/**
  * checks if exacomp is installed and the item can be resubmitted there
  *
  * @param $itemid

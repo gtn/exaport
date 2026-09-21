@@ -13,6 +13,10 @@ require_once(__DIR__ . '/lib.php');
 /**
  * Require access to the item competence workflow and return the editable item.
  *
+ * This function is called from Moodle's authenticated dynamic-form AJAX request.
+ * Do not call require_login($courseid) here because it attempts to change the
+ * current page course after Moodle has initialized the page theme.
+ *
  * @param int $itemid Item ID.
  * @param int $courseid Course ID.
  * @return stdClass
@@ -21,13 +25,13 @@ function block_exaport_require_competence_item_access(int $itemid, int $courseid
     global $DB;
 
     if (!$DB->record_exists('course', ['id' => $courseid])) {
-        print_error('invalidcourseid', 'block_exaport');
+        throw new moodle_exception('invalidcourseid', 'block_exaport');
     }
-    require_login($courseid);
-    require_capability('block/exaport:use', context_system::instance());
+
+    require_capability('block/exaport:use', \context_system::instance());
 
     if (!block_exaport_check_competence_interaction()) {
-        print_error('nopermissions', 'error');
+        throw new moodle_exception('nopermissions', 'error');
     }
 
     return block_exaport_get_editable_competence_item($itemid, $courseid);

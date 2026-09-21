@@ -36,6 +36,7 @@ class item_competences extends dynamic_form {
      */
     protected function definition(): void {
         global $PAGE;
+        global $USER;
 
         $mform = $this->_form;
         $item = $this->get_item();
@@ -44,7 +45,7 @@ class item_competences extends dynamic_form {
             $item,
             true,
             $selectedids,
-            $this->get_competence_tree($this->get_tree_userid())
+            $this->get_competence_tree((int)$USER->id)
         );
         $renderer = $PAGE->get_renderer('block_exaport');
 
@@ -68,6 +69,8 @@ class item_competences extends dynamic_form {
      * @return array
      */
     public function validation($data, $files): array {
+        global $USER;
+
         $errors = parent::validation($data, $files);
 
         try {
@@ -78,7 +81,7 @@ class item_competences extends dynamic_form {
         }
 
         if (array_diff($competenceids, block_exaport_competence_tree_descriptorids(
-            $this->get_competence_tree($this->get_tree_userid())
+            $this->get_competence_tree((int)$USER->id)
         ))) {
             $errors['competenceids'] = get_string('invaliddata', 'error');
         }
@@ -136,6 +139,7 @@ class item_competences extends dynamic_form {
      */
     public function process_dynamic_submission(): array {
         global $PAGE;
+        global $USER;
 
         $data = $this->get_data();
         if ($data === null) {
@@ -145,7 +149,7 @@ class item_competences extends dynamic_form {
         require_sesskey();
 
         $item = block_exaport_require_competence_item_access((int)$data->itemid, (int)$data->courseid);
-        $tree = $this->get_competence_tree((int)$item->userid, true);
+        $tree = $this->get_competence_tree((int)$USER->id, true);
         $competenceids = block_exaport_parse_competenceids($data->competenceids ?? '');
         $competenceids = block_exaport_validate_competenceids(
             $competenceids,
@@ -216,12 +220,4 @@ class item_competences extends dynamic_form {
         return $this->competencetree;
     }
 
-    /**
-     * Editable item access is already owner-scoped, so tree loading should use the same user id everywhere.
-     *
-     * @return int
-     */
-    private function get_tree_userid(): int {
-        return (int)$this->get_item()->userid;
-    }
 }

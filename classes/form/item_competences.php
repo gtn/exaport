@@ -49,9 +49,9 @@ class item_competences extends dynamic_form {
         );
         $renderer = $PAGE->get_renderer('block_exaport');
 
-        $mform->addElement('hidden', 'courseid', $this->optional_param('courseid', 0, PARAM_INT));
+        $mform->addElement('hidden', 'courseid', $this->get_form_param('courseid'));
         $mform->setType('courseid', PARAM_INT);
-        $mform->addElement('hidden', 'itemid', $this->optional_param('itemid', 0, PARAM_INT));
+        $mform->addElement('hidden', 'itemid', $this->get_form_param('itemid'));
         $mform->setType('itemid', PARAM_INT);
         $mform->addElement('hidden', 'competenceids', implode(',', $selectedids));
         $mform->setType('competenceids', PARAM_RAW_TRIMMED);
@@ -108,8 +108,9 @@ class item_competences extends dynamic_form {
      */
     protected function get_page_url_for_dynamic_submission(): moodle_url {
         return new moodle_url('/blocks/exaport/item.php', [
-            'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
-            'id' => $this->optional_param('itemid', 0, PARAM_INT),
+            'courseid' => $this->get_form_param('courseid'),
+            'id' => $this->get_form_param('itemid'),
+            'itemid' => $this->get_form_param('itemid'),
             'action' => 'edit',
         ]);
     }
@@ -121,7 +122,7 @@ class item_competences extends dynamic_form {
         $item = block_exaport_populate_item_competenceids($this->load_item());
 
         $this->set_data((object)[
-            'courseid' => (int)$this->optional_param('courseid', 0, PARAM_INT),
+            'courseid' => $this->get_form_param('courseid'),
             'itemid' => (int)$item->id,
             'competenceids' => implode(',', $item->compids_array),
         ]);
@@ -153,8 +154,8 @@ class item_competences extends dynamic_form {
     private function load_item(): \stdClass {
         if ($this->item === null) {
             $this->item = block_exaport_require_competence_item_access(
-                $this->optional_param('itemid', 0, PARAM_INT),
-                $this->optional_param('courseid', 0, PARAM_INT)
+                $this->get_form_param('itemid'),
+                $this->get_form_param('courseid')
             );
             $this->item = block_exaport_populate_item_competenceids($this->item);
         }
@@ -218,6 +219,20 @@ class item_competences extends dynamic_form {
      * @return string
      */
     private function get_checkbox_id_prefix(): string {
-        return 'exaport-competence-' . $this->optional_param('itemid', 0, PARAM_INT) . '-';
+        return 'exaport-competence-' . $this->get_form_param('itemid') . '-';
+    }
+
+    /**
+     * Read a numeric form argument from AJAX payload data when present.
+     *
+     * @param string $name Parameter name.
+     * @return int
+     */
+    private function get_form_param(string $name): int {
+        if (is_array($this->_ajaxformdata) && array_key_exists($name, $this->_ajaxformdata)) {
+            return clean_param($this->_ajaxformdata[$name], PARAM_INT);
+        }
+
+        return $this->optional_param($name, 0, PARAM_INT);
     }
 }

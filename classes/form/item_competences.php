@@ -28,6 +28,9 @@ class item_competences extends dynamic_form {
     /** @var \stdClass|null */
     private $item = null;
 
+    /** @var array|null */
+    private $competencetree = null;
+
     /**
      * Define the dynamic form.
      */
@@ -191,7 +194,7 @@ class item_competences extends dynamic_form {
         try {
             return block_exaport_parse_competenceids($submittedids);
         } catch (invalid_parameter_exception $exception) {
-            return [];
+            return block_exaport_get_item_competenceids($this->get_item());
         }
     }
 
@@ -203,6 +206,10 @@ class item_competences extends dynamic_form {
     private function get_competence_tree(): array {
         global $USER;
 
-        return \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+        if ($this->competencetree === null) {
+            $this->competencetree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+        }
+
+        return $this->competencetree;
     }
 }

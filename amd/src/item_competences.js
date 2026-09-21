@@ -143,8 +143,13 @@ const open = (trigger, config) => {
  * @param {object} config Page configuration.
  */
 export const init = config => {
-    document.addEventListener('click', event => {
-        const trigger = event.target.closest(`${ITEM_SECTION_SELECTOR} [data-action="open-competence-picker"]`);
+    const section = document.querySelector(`${ITEM_SECTION_SELECTOR}[data-itemid="${config.itemId}"]`);
+    if (!section) {
+        return;
+    }
+
+    section.addEventListener('click', event => {
+        const trigger = event.target.closest('[data-action="open-competence-picker"]');
         if (!trigger) {
             return;
         }

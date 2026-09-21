@@ -1,0 +1,36 @@
+<?php
+// This file is part of Exabis Eportfolio (extension for Moodle)
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+namespace block_exaport;
+
+defined('MOODLE_INTERNAL') || die();
+
+/** Structural tests for the competence dynamic form and its client lifecycle. */
+final class item_competences_form_test extends \advanced_testcase {
+
+    public function test_form_uses_moodle_dynamic_form_contract(): void {
+        $this->assertTrue(is_subclass_of(
+            \block_exaport\form\item_competences::class,
+            \core_form\dynamic_form::class
+        ));
+        foreach (['definition', 'get_context_for_dynamic_submission', 'check_access_for_dynamic_submission',
+            'get_page_url_for_dynamic_submission', 'set_data_for_dynamic_submission',
+            'process_dynamic_submission', 'validation'] as $method) {
+            $this->assertTrue(method_exists(\block_exaport\form\item_competences::class, $method), $method);
+        }
+    }
+
+    public function test_client_uses_modal_form_without_legacy_ajax_lifecycle(): void {
+        $source = file_get_contents(__DIR__ . '/../amd/src/item_competences.js');
+        $this->assertStringContainsString("from 'core_form/modalform'", $source);
+        $this->assertStringContainsString('FORM_SUBMITTED', $source);
+        $this->assertStringNotContainsString('jquery', strtolower($source));
+        $this->assertStringNotContainsString('$.ajax', $source);
+        $this->assertStringNotContainsString('ModalSaveCancel', $source);
+    }
+}

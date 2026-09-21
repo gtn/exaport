@@ -497,7 +497,6 @@ $string['competences'] = 'competences';
 $string['competencessection'] = 'Competences';
 $string['addcompetences'] = 'Add competences';
 $string['collapsecomps'] = 'Collapse all';
-$string['competencessavefailed'] = 'Competences could not be saved. Please try again.';
 $string['desp_einleitung'] = 'Here is your portfolio. You can show others what you have accomplished by yourself.';
 $string['settings_interaktion_exacomp_head'] = 'Interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'Interaction with block Exabis Competence Grid, in case it is installed';

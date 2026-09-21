@@ -56,6 +56,7 @@ class item_competences implements renderable, templatable {
             'hasselected' => !empty($selectednodes),
             'picker' => [
                 'nodes' => $nodes,
+                'itemid' => (int)$this->item->id,
                 'expandlabel' => get_string('expandcomps', 'block_exaport'),
                 'collapselabel' => get_string('collapsecomps', 'block_exaport'),
             ],

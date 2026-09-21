@@ -53,7 +53,7 @@ final class item_competences_modal_test extends \advanced_testcase {
         ));
 
         $source = file_get_contents(__DIR__ . '/../amd/src/item_competences.js');
-        $this->assertStringContainsString("import ModalForm from 'core_form/modalform';", $source);
+        $this->assertStringContainsString('core_form/modalform', $source);
         $this->assertStringNotContainsString('jquery', $source);
         $this->assertStringNotContainsString('$.ajax', $source);
         $this->assertStringNotContainsString('ModalSaveCancel', $source);

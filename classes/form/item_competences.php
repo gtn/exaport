@@ -72,13 +72,13 @@ class item_competences extends dynamic_form {
         $errors = parent::validation($data, $files);
 
         try {
-            $competencyids = block_exaport_parse_competenceids($data['competenceids'] ?? '');
+            $competenceids = block_exaport_parse_competenceids($data['competenceids'] ?? '');
         } catch (invalid_parameter_exception $exception) {
             $errors['competenceids'] = get_string('invaliddata', 'error');
             return $errors;
         }
 
-        if (array_diff($competencyids, $this->get_available_descriptorids())) {
+        if (array_diff($competenceids, $this->get_available_descriptorids())) {
             $errors['competenceids'] = get_string('invaliddata', 'error');
         }
 

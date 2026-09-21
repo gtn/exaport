@@ -73,3 +73,18 @@
     outline-offset: -3px;
     background-color: rgba(0, 102, 204, 0.08);
 }
+
+/* Modern item competence picker. */
+.exaport-competence-tree details > summary {
+    cursor: pointer;
+    padding: .2rem 0;
+}
+
+.exaport-competence-tree .form-check {
+    min-height: 1.5rem;
+}
+
+[data-region="competence-picker"] {
+    max-height: 65vh;
+    overflow-y: auto;
+}

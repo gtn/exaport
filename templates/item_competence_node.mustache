@@ -1,0 +1,26 @@
+<li class="exaport-competence-node mb-1">
+    {{#isdescriptor}}
+    {{#summary}}
+    <span class="text-success">&#10003; {{title}}</span>
+    {{/summary}}
+    {{^summary}}
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="exaport-competence-{{id}}"
+               value="{{id}}" data-region="competence-checkbox" {{#checked}}checked{{/checked}}>
+        <label class="form-check-label" for="exaport-competence-{{id}}">{{title}}</label>
+    </div>
+    {{/summary}}
+    {{/isdescriptor}}
+    {{#isgroup}}
+    <details open>
+        <summary>{{title}}</summary>
+        {{#haschildren}}
+        <ul class="list-unstyled ml-4 mt-1">
+            {{#children}}
+                {{> block_exaport/item_competence_node}}
+            {{/children}}
+        </ul>
+        {{/haschildren}}
+    </details>
+    {{/isgroup}}
+</li>

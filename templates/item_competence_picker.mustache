@@ -1,0 +1,13 @@
+<div data-region="competence-picker">
+    <div class="mb-3">
+        <button type="button" class="btn btn-link p-0" data-action="expand-competences">{{expandlabel}}</button>
+        <span class="text-muted mx-1" aria-hidden="true">|</span>
+        <button type="button" class="btn btn-link p-0" data-action="collapse-competences">{{collapselabel}}</button>
+    </div>
+    <ul class="list-unstyled exaport-competence-tree">
+        {{#nodes}}
+            {{> block_exaport/item_competence_node}}
+        {{/nodes}}
+    </ul>
+    <div class="text-danger mt-3" data-region="competence-save-error" aria-live="polite"></div>
+</div>

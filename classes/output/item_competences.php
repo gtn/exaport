@@ -45,7 +45,7 @@ class item_competences implements renderable, templatable {
     ) {
         $this->item = $item;
         $this->editable = $editable;
-        $this->selectedids = array_map('intval', $selectedids ?? ($this->item->compids_array ?? []));
+        $this->selectedids = block_exaport_normalize_competenceids($selectedids ?? ($this->item->compids_array ?? []));
         $this->tree = $tree;
     }
 

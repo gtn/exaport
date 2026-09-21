@@ -28,9 +28,6 @@ class item_competences implements renderable, templatable {
     /** @var int[] */
     private $selectedids;
 
-    /** @var string */
-    private $checkboxidprefix;
-
     /** @var array|null */
     private $tree;
 
@@ -38,20 +35,17 @@ class item_competences implements renderable, templatable {
      * @param \stdClass $item Portfolio item.
      * @param bool $editable Whether the current user may change the selection.
      * @param int[]|null $selectedids Optional selected ids override.
-     * @param string $checkboxidprefix Checkbox id prefix for custom picker markup.
      * @param array|null $tree Optional competence tree override.
      */
     public function __construct(
         \stdClass $item,
         bool $editable,
         ?array $selectedids = null,
-        string $checkboxidprefix = 'exaport-competence-',
         ?array $tree = null
     ) {
         $this->item = $item;
         $this->editable = $editable;
         $this->selectedids = array_map('intval', $selectedids ?? ($this->item->compids_array ?? []));
-        $this->checkboxidprefix = $checkboxidprefix;
         $this->tree = $tree;
     }
 
@@ -67,7 +61,7 @@ class item_competences implements renderable, templatable {
             'addlabel' => get_string('addcompetences', 'block_exaport'),
             'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
             'itemid' => (int)$this->item->id,
-            'summary' => $this->export_summary_for_template($output),
+            'summary' => $this->export_summary_for_template(),
             'editable' => $this->editable,
         ];
     }
@@ -75,10 +69,9 @@ class item_competences implements renderable, templatable {
     /**
      * Export the authoritative summary node tree.
      *
-     * @param renderer_base $output
      * @return array
      */
-    public function export_summary_for_template(renderer_base $output): array {
+    public function export_summary_for_template(): array {
         $nodes = $this->export_nodes($this->get_tree(), $this->selectedids);
         $selectednodes = $this->filter_selected_nodes($nodes);
 
@@ -92,10 +85,9 @@ class item_competences implements renderable, templatable {
     /**
      * Export the editable picker tree for the dynamic form.
      *
-     * @param renderer_base $output
      * @return array
      */
-    public function export_picker_for_template(renderer_base $output): array {
+    public function export_picker_for_template(): array {
         return [
             'itemid' => (int)$this->item->id,
             'nodes' => $this->export_nodes($this->get_tree(), $this->selectedids, true),
@@ -124,7 +116,7 @@ class item_competences implements renderable, templatable {
                 'isdescriptor' => $isdescriptor,
                 'isgroup' => !$isdescriptor,
                 'checked' => $isdescriptor && in_array($id, $selectedids, true),
-                'inputid' => $picker && $isdescriptor ? $this->checkboxidprefix . $id : '',
+                'inputid' => $picker && $isdescriptor ? 'exaport-competence-' . $this->item->id . '-' . $id : '',
                 'children' => $children,
                 'haschildren' => !empty($children),
             ];

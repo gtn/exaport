@@ -73,64 +73,43 @@ export const replaceSummary = (itemId, content) => {
 };
 
 /**
- * Register picker interactions on the modal root.
- *
- * @param {ModalForm} modalForm Modal form instance.
- */
-const registerPickerInteractions = modalForm => {
-    let handlersBound = false;
-    modalForm.addEventListener(modalForm.events.LOADED, () => {
-        if (handlersBound) {
-            return;
-        }
-        handlersBound = true;
-        const modalRoot = modalForm.modal.getRoot()[0];
-
-        modalRoot.addEventListener('change', event => {
-            if (!event.target.closest(COMPETENCE_CHECKBOX_SELECTOR)) {
-                return;
-            }
-            syncSelection(modalRoot);
-        });
-
-        modalRoot.addEventListener('click', event => {
-            const expandTrigger = event.target.closest('[data-action="expand-competences"]');
-            if (expandTrigger) {
-                event.preventDefault();
-                setTreeExpanded(modalRoot, true);
-                return;
-            }
-
-            const collapseTrigger = event.target.closest('[data-action="collapse-competences"]');
-            if (collapseTrigger) {
-                event.preventDefault();
-                setTreeExpanded(modalRoot, false);
-            }
-        });
-    });
-};
-
-/**
  * Open the standard dynamic-form modal.
  *
  * @param {HTMLElement} trigger Action which opened the modal.
  * @param {object} config Page configuration.
  */
 const open = (trigger, config) => {
-    const section = trigger.closest(ITEM_SECTION_SELECTOR);
-    const itemId = Number.parseInt(section?.dataset.itemid || config.itemId, 10);
     const modalForm = new ModalForm({
         formClass: 'block_exaport\\form\\item_competences',
         args: {
             courseid: config.courseId,
-            itemid: itemId,
+            itemid: config.itemId,
         },
         modalConfig: {title: config.title},
         saveButtonText: config.saveLabel,
         returnFocus: trigger,
     });
 
-    registerPickerInteractions(modalForm);
+    modalForm.addEventListener(modalForm.events.LOADED, () => {
+        const modalRoot = modalForm.modal.getRoot()[0];
+        syncSelection(modalRoot);
+
+        modalRoot.addEventListener('change', event => {
+            if (event.target.closest(COMPETENCE_CHECKBOX_SELECTOR)) {
+                syncSelection(modalRoot);
+            }
+        });
+
+        modalRoot.addEventListener('click', event => {
+            if (event.target.closest('[data-action="expand-competences"]')) {
+                event.preventDefault();
+                setTreeExpanded(modalRoot, true);
+            } else if (event.target.closest('[data-action="collapse-competences"]')) {
+                event.preventDefault();
+                setTreeExpanded(modalRoot, false);
+            }
+        });
+    });
     modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, event => {
         replaceSummary(event.detail.itemid, event.detail.content).catch(Notification.exception);
     });

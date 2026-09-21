@@ -28,9 +28,6 @@ class item_competences extends dynamic_form {
     /** @var \stdClass|null */
     private $item = null;
 
-    /** @var array|null */
-    private $tree = null;
-
     /**
      * Define the dynamic form.
      */
@@ -38,26 +35,25 @@ class item_competences extends dynamic_form {
         global $PAGE;
 
         $mform = $this->_form;
-        $item = $this->load_item();
-        $selectedids = $this->get_selectedids_for_display();
+        $item = $this->get_item();
+        $selectedids = $this->get_selectedids();
         $renderable = new \block_exaport\output\item_competences(
             $item,
             true,
             $selectedids,
-            $this->get_checkbox_id_prefix(),
-            $this->get_available_tree()
+            $this->get_competence_tree()
         );
         $renderer = $PAGE->get_renderer('block_exaport');
 
-        $mform->addElement('hidden', 'courseid', $this->get_form_param('courseid'));
+        $mform->addElement('hidden', 'courseid', $this->optional_param('courseid', 0, PARAM_INT));
         $mform->setType('courseid', PARAM_INT);
-        $mform->addElement('hidden', 'itemid', $this->get_form_param('itemid'));
+        $mform->addElement('hidden', 'itemid', $this->optional_param('itemid', 0, PARAM_INT));
         $mform->setType('itemid', PARAM_INT);
         $mform->addElement('hidden', 'competenceids', implode(',', $selectedids));
         $mform->setType('competenceids', PARAM_RAW_TRIMMED);
         $mform->addElement('html', $renderer->render_from_template(
             'block_exaport/item_competence_picker',
-            $renderable->export_picker_for_template($renderer)
+            $renderable->export_picker_for_template()
         ));
     }
 
@@ -78,7 +74,7 @@ class item_competences extends dynamic_form {
             return $errors;
         }
 
-        if (array_diff($competenceids, $this->get_available_descriptorids())) {
+        if (array_diff($competenceids, block_exaport_competence_tree_descriptorids($this->get_competence_tree()))) {
             $errors['competenceids'] = get_string('invaliddata', 'error');
         }
 
@@ -98,7 +94,7 @@ class item_competences extends dynamic_form {
      * Check access before Moodle renders or processes the form.
      */
     protected function check_access_for_dynamic_submission(): void {
-        $this->load_item();
+        $this->get_item();
     }
 
     /**
@@ -108,9 +104,8 @@ class item_competences extends dynamic_form {
      */
     protected function get_page_url_for_dynamic_submission(): moodle_url {
         return new moodle_url('/blocks/exaport/item.php', [
-            'courseid' => $this->get_form_param('courseid'),
-            'id' => $this->get_form_param('itemid'),
-            'itemid' => $this->get_form_param('itemid'),
+            'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
+            'id' => $this->optional_param('itemid', 0, PARAM_INT),
             'action' => 'edit',
         ]);
     }
@@ -119,10 +114,11 @@ class item_competences extends dynamic_form {
      * Set initial form data.
      */
     public function set_data_for_dynamic_submission(): void {
-        $item = block_exaport_populate_item_competenceids($this->load_item());
+        $item = $this->get_item();
+        $item->compids_array = block_exaport_get_item_competenceids($item);
 
         $this->set_data((object)[
-            'courseid' => $this->get_form_param('courseid'),
+            'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
             'itemid' => (int)$item->id,
             'competenceids' => implode(',', $item->compids_array),
         ]);
@@ -134,16 +130,35 @@ class item_competences extends dynamic_form {
      * @return array
      */
     public function process_dynamic_submission(): array {
+        global $PAGE;
+
         $data = $this->get_data();
         if ($data === null) {
             return [];
         }
 
-        return block_exaport_process_item_competence_submission(
-            (int)$data->courseid,
-            (int)$data->itemid,
-            $data->competenceids ?? ''
+        require_sesskey();
+
+        $item = block_exaport_require_competence_item_access((int)$data->itemid, (int)$data->courseid);
+        $competenceids = block_exaport_parse_competenceids($data->competenceids ?? '');
+        $competenceids = block_exaport_validate_competenceids(
+            $competenceids,
+            block_exaport_competence_tree_descriptorids($this->get_competence_tree())
         );
+
+        block_exaport_sync_item_competences($item, $competenceids);
+        $item->compids_array = block_exaport_get_item_competenceids($item);
+
+        $renderer = $PAGE->get_renderer('block_exaport');
+        $renderable = new \block_exaport\output\item_competences($item, true);
+
+        return [
+            'content' => $renderer->render_from_template(
+                'block_exaport/item_competence_summary',
+                $renderable->export_summary_for_template()
+            ),
+            'itemid' => (int)$item->id,
+        ];
     }
 
     /**
@@ -151,13 +166,12 @@ class item_competences extends dynamic_form {
      *
      * @return \stdClass
      */
-    private function load_item(): \stdClass {
+    private function get_item(): \stdClass {
         if ($this->item === null) {
             $this->item = block_exaport_require_competence_item_access(
-                $this->get_form_param('itemid'),
-                $this->get_form_param('courseid')
+                $this->optional_param('itemid', 0, PARAM_INT),
+                $this->optional_param('courseid', 0, PARAM_INT)
             );
-            $this->item = block_exaport_populate_item_competenceids($this->item);
         }
 
         return $this->item;
@@ -168,71 +182,27 @@ class item_competences extends dynamic_form {
      *
      * @return int[]
      */
-    private function get_selectedids_for_display(): array {
-        if (!$this->has_submitted_competenceids()) {
-            return array_map('intval', $this->load_item()->compids_array ?? []);
+    private function get_selectedids(): array {
+        $submittedids = $this->optional_param('competenceids', null, PARAM_RAW_TRIMMED);
+        if ($submittedids === null) {
+            return block_exaport_get_item_competenceids($this->get_item());
         }
 
         try {
-            return block_exaport_parse_competenceids($this->_ajaxformdata['competenceids']);
+            return block_exaport_parse_competenceids($submittedids);
         } catch (invalid_parameter_exception $exception) {
             return [];
         }
     }
 
     /**
-     * Whether the current request already submitted a custom selection.
-     *
-     * @return bool
-     */
-    private function has_submitted_competenceids(): bool {
-        return is_array($this->_ajaxformdata) && array_key_exists('competenceids', $this->_ajaxformdata);
-    }
-
-    /**
-     * Load and cache the available competence tree.
+     * Load the current user's available competence tree.
      *
      * @return array
      */
-    private function get_available_tree(): array {
+    private function get_competence_tree(): array {
         global $USER;
 
-        if ($this->tree === null) {
-            $this->tree = block_exaport_get_available_competence_tree($USER->id);
-        }
-
-        return $this->tree;
-    }
-
-    /**
-     * Return the available descriptor ids for the current user.
-     *
-     * @return int[]
-     */
-    private function get_available_descriptorids(): array {
-        return block_exaport_competence_tree_descriptorids($this->get_available_tree());
-    }
-
-    /**
-     * Build a per-item checkbox id prefix for the custom tree markup.
-     *
-     * @return string
-     */
-    private function get_checkbox_id_prefix(): string {
-        return 'exaport-competence-' . $this->get_form_param('itemid') . '-';
-    }
-
-    /**
-     * Read a numeric form argument from AJAX payload data when present.
-     *
-     * @param string $name Parameter name.
-     * @return int
-     */
-    private function get_form_param(string $name): int {
-        if (is_array($this->_ajaxformdata) && array_key_exists($name, $this->_ajaxformdata)) {
-            return clean_param($this->_ajaxformdata[$name], PARAM_INT);
-        }
-
-        return $this->optional_param($name, 0, PARAM_INT);
+        return \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
     }
 }

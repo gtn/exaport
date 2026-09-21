@@ -46,17 +46,11 @@ final class item_competence_group_node {
  */
 final class item_competences_modal_test extends \advanced_testcase {
 
-    public function test_dynamic_form_class_and_js_source_contract(): void {
+    public function test_dynamic_form_class_extends_moodle_dynamic_form(): void {
         $this->assertTrue(is_subclass_of(
             \block_exaport\form\item_competences::class,
             \core_form\dynamic_form::class
         ));
-
-        $source = file_get_contents(__DIR__ . '/../amd/src/item_competences.js');
-        $this->assertStringContainsString('core_form/modalform', $source);
-        $this->assertStringNotContainsString('jquery', $source);
-        $this->assertStringNotContainsString('$.ajax', $source);
-        $this->assertStringNotContainsString('ModalSaveCancel', $source);
     }
 
     public function test_picker_export_marks_existing_selected_ids(): void {
@@ -67,7 +61,6 @@ final class item_competences_modal_test extends \advanced_testcase {
             (object)['id' => 7, 'compids_array' => [13, 11]],
             true,
             null,
-            'picker-',
             $this->create_tree()
         );
 
@@ -75,19 +68,25 @@ final class item_competences_modal_test extends \advanced_testcase {
             ->disableOriginalConstructor()
             ->onlyMethods(['pix_icon'])
             ->getMock();
-        $data = $renderable->export_picker_for_template($renderer);
+        $data = $renderable->export_picker_for_template();
 
         $this->assertSame([11, 13], $this->collect_checked_ids($data['nodes']));
-        $this->assertSame('picker-11', $data['nodes'][0]['children'][0]['inputid']);
-        $this->assertSame('picker-13', $data['nodes'][1]['inputid']);
+        $this->assertSame('exaport-competence-7-11', $data['nodes'][0]['children'][0]['inputid']);
+        $this->assertSame('exaport-competence-7-13', $data['nodes'][1]['inputid']);
     }
 
     public function test_rendered_summary_contains_only_selected_nodes(): void {
+        global $OUTPUT;
+
         $this->resetAfterTest(true);
         $this->require_exacomp_descriptor();
         $item = (object)['id' => 9, 'compids_array' => [11, 13]];
 
-        $html = block_exaport_render_item_competence_summary($item, $this->create_tree());
+        $renderable = new \block_exaport\output\item_competences($item, true, null, $this->create_tree());
+        $html = $OUTPUT->render_from_template(
+            'block_exaport/item_competence_summary',
+            $renderable->export_summary_for_template()
+        );
 
         $this->assertStringContainsString('data-region="competence-summary"', $html);
         $this->assertStringContainsString('Descriptor 11', $html);

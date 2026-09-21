@@ -57,7 +57,7 @@ function block_exaport_parse_competenceids($competenceids): array {
     }
 
     if (is_string($competenceids)) {
-        $competenceids = preg_replace('/\s+/', '', $competenceids);
+        $competenceids = trim(preg_replace('/\s+/', '', $competenceids));
         if ($competenceids === '') {
             return [];
         }
@@ -105,89 +105,6 @@ function block_exaport_get_item_competenceids(stdClass $item): array {
         return array_map('intval', array_keys($compstmp['descriptors']));
     }
     return [];
-}
-
-/**
- * Populate compids_array on an item record.
- *
- * @param stdClass $item Item record.
- * @return stdClass
- */
-function block_exaport_populate_item_competenceids(stdClass $item): stdClass {
-    $item->compids_array = block_exaport_get_item_competenceids($item);
-    return $item;
-}
-
-/**
- * Load the current user's available competence tree.
- *
- * @param int $userid User ID.
- * @return array
- */
-function block_exaport_get_available_competence_tree(int $userid): array {
-    return \block_exacomp\api::get_comp_tree_for_exaport($userid);
-}
-
-/**
- * Load the current user's available competence descriptor ids.
- *
- * @param int $userid User ID.
- * @return int[]
- */
-function block_exaport_get_available_competenceids(int $userid): array {
-    return block_exaport_competence_tree_descriptorids(block_exaport_get_available_competence_tree($userid));
-}
-
-/**
- * Render the current item competence summary HTML.
- *
- * @param stdClass $item Item record with current competence state.
- * @param array|null $tree Optional competence tree override.
- * @return string
- */
-function block_exaport_render_item_competence_summary(stdClass $item, ?array $tree = null): string {
-    global $PAGE;
-
-    $renderer = $PAGE->get_renderer('block_exaport');
-    $renderable = new \block_exaport\output\item_competences($item, true, null, 'exaport-competence-', $tree);
-    return $renderer->render_from_template(
-        'block_exaport/item_competence_summary',
-        $renderable->export_summary_for_template($renderer)
-    );
-}
-
-/**
- * Process a complete competence selection replacement and return the refreshed summary response.
- *
- * @param int $courseid Course ID.
- * @param int $itemid Item ID.
- * @param array|string|null $submittedcompetenceids Submitted competence ids.
- * @return array{content:string,itemid:int,competenceids:array}
- */
-function block_exaport_process_item_competence_submission(
-    int $courseid,
-    int $itemid,
-    $submittedcompetenceids
-): array {
-    global $USER;
-
-    require_sesskey();
-
-    $item = block_exaport_require_competence_item_access($itemid, $courseid);
-    $competenceids = block_exaport_parse_competenceids($submittedcompetenceids);
-    $competenceids = block_exaport_validate_competenceids(
-        $competenceids,
-        block_exaport_get_available_competenceids($USER->id)
-    );
-    block_exaport_sync_item_competences($item, $competenceids);
-
-    $item = block_exaport_populate_item_competenceids($item);
-
-    return [
-        'content' => block_exaport_render_item_competence_summary($item),
-        'itemid' => (int)$item->id,
-        'competenceids' => $item->compids_array,
-    ];
 }
 
 /**

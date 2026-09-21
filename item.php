@@ -144,7 +144,7 @@ if ($existing) {
 // Get competences from item if editing.
 $exacompactive = block_exaport_check_competence_interaction() && $descriptorselection;
 if ($existing && $exacompactive) {
-    $existing = block_exaport_populate_item_competenceids($existing);
+    $existing->compids_array = block_exaport_get_item_competenceids($existing);
 }
 $cattype_params = '';
 if ($cattype) {

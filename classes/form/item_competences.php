@@ -143,10 +143,11 @@ class item_competences extends dynamic_form {
         require_sesskey();
 
         $item = block_exaport_require_competence_item_access((int)$data->itemid, (int)$data->courseid);
+        $tree = $this->get_competence_tree(true);
         $competenceids = block_exaport_parse_competenceids($data->competenceids ?? '');
         $competenceids = block_exaport_validate_competenceids(
             $competenceids,
-            block_exaport_competence_tree_descriptorids($this->get_competence_tree())
+            block_exaport_competence_tree_descriptorids($tree)
         );
 
         block_exaport_sync_item_competences($item, $competenceids);
@@ -201,12 +202,13 @@ class item_competences extends dynamic_form {
     /**
      * Load the current user's available competence tree.
      *
+     * @param bool $refresh Whether to force a fresh tree load.
      * @return array
      */
-    private function get_competence_tree(): array {
+    private function get_competence_tree(bool $refresh = false): array {
         global $USER;
 
-        if ($this->competencetree === null) {
+        if ($refresh || $this->competencetree === null) {
             $this->competencetree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
         }
 

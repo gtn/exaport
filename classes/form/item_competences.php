@@ -134,6 +134,9 @@ class item_competences extends dynamic_form {
      */
     public function process_dynamic_submission(): array {
         $data = $this->get_data();
+        if ($data === null) {
+            return [];
+        }
 
         return block_exaport_process_item_competence_submission(
             (int)$data->courseid,

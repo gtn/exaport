@@ -78,7 +78,12 @@ export const replaceSummary = (itemId, content) => {
  * @param {ModalForm} modalForm Modal form instance.
  */
 const registerPickerInteractions = modalForm => {
+    let handlersBound = false;
     modalForm.addEventListener(modalForm.events.LOADED, () => {
+        if (handlersBound) {
+            return;
+        }
+        handlersBound = true;
         const modalRoot = modalForm.modal.getRoot()[0];
 
         modalRoot.addEventListener('change', event => {

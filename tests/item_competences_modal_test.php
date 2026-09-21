@@ -6,14 +6,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-namespace block_exacomp {
-    if (!class_exists(\block_exacomp\descriptor::class)) {
-        class descriptor {
-        }
-    }
-}
-
-namespace block_exaport {
+namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -47,33 +40,6 @@ final class item_competence_group_node {
 }
 
 /**
- * Lightweight descriptor node used for competence tree rendering tests.
- */
-final class item_competence_descriptor_node extends \block_exacomp\descriptor {
-    /** @var int */
-    public $id;
-
-    /** @var string */
-    public $title;
-
-    /**
-     * @param int $id Descriptor id.
-     * @param string $title Node title.
-     */
-    public function __construct(int $id, string $title) {
-        $this->id = $id;
-        $this->title = $title;
-    }
-
-    /**
-     * @return array
-     */
-    public function get_subs(): array {
-        return [];
-    }
-}
-
-/**
  * Tests for the dynamic-form competence modal presentation.
  *
  * @package block_exaport
@@ -94,6 +60,9 @@ final class item_competences_modal_test extends \advanced_testcase {
     }
 
     public function test_picker_export_marks_existing_selected_ids(): void {
+        $this->resetAfterTest(true);
+        $this->require_exacomp_descriptor();
+
         $renderable = new \block_exaport\output\item_competences(
             (object)['id' => 7, 'compids_array' => [13, 11]],
             true,
@@ -115,6 +84,7 @@ final class item_competences_modal_test extends \advanced_testcase {
 
     public function test_rendered_summary_contains_only_selected_nodes(): void {
         $this->resetAfterTest(true);
+        $this->require_exacomp_descriptor();
         $item = (object)['id' => 9, 'compids_array' => [11, 13]];
 
         $html = block_exaport_render_item_competence_summary($item, $this->create_tree());
@@ -131,11 +101,42 @@ final class item_competences_modal_test extends \advanced_testcase {
     private function create_tree(): array {
         return [
             new item_competence_group_node('Group', [
-                new item_competence_descriptor_node(11, 'Descriptor 11'),
-                new item_competence_descriptor_node(12, 'Descriptor 12'),
+                $this->create_descriptor_node(11, 'Descriptor 11'),
+                $this->create_descriptor_node(12, 'Descriptor 12'),
             ]),
-            new item_competence_descriptor_node(13, 'Descriptor 13'),
+            $this->create_descriptor_node(13, 'Descriptor 13'),
         ];
+    }
+
+    /**
+     * @param int $id
+     * @param string $title
+     * @return \block_exacomp\descriptor
+     */
+    private function create_descriptor_node(int $id, string $title): \block_exacomp\descriptor {
+        return new class($id, $title) extends \block_exacomp\descriptor {
+            /** @var int */
+            public $id;
+
+            /** @var string */
+            public $title;
+
+            /**
+             * @param int $id
+             * @param string $title
+             */
+            public function __construct(int $id, string $title) {
+                $this->id = $id;
+                $this->title = $title;
+            }
+
+            /**
+             * @return array
+             */
+            public function get_subs(): array {
+                return [];
+            }
+        };
     }
 
     /**
@@ -155,5 +156,10 @@ final class item_competences_modal_test extends \advanced_testcase {
         sort($checked, SORT_NUMERIC);
         return $checked;
     }
-}
+
+    private function require_exacomp_descriptor(): void {
+        if (!class_exists(\block_exacomp\descriptor::class)) {
+            $this->markTestSkipped('Exacomp descriptor class is required for competence tree rendering tests.');
+        }
+    }
 }

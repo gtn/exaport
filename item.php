@@ -252,12 +252,20 @@ if ($existing) {
     $itemcontentaddurl = null;
 }
 
+// Sections which manage records related to an item need its database id and are therefore edit-only.
+// Keep these decisions together so that further independently persisted sections can be added explicitly.
+$itemeditsections = [
+    'mainsettings' => true,
+    'content' => (bool)$existing,
+    'competences' => (bool)$existing && $exacompactive,
+];
+
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type,
     array('current' => $existing, 'useTextareas' => $usetextareas, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
         'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission,
         'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontentblocks' => $itemcontentblocks,
         'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id),
-        'exacompactive' => $existing && $exacompactive));
+        'itemeditsections' => $itemeditsections));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -268,6 +276,7 @@ if ($editform->is_cancelled()) {
 
     $categoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
     $fromform->categoryids = $categoryids;
+    $keepediting = !empty($fromform->saveandkeepediting);
 
     switch ($action) {
         case 'add':
@@ -287,6 +296,23 @@ if ($editform->is_cancelled()) {
 
         default:
             print_error("unknownaction", "block_exaport");
+    }
+
+    if ($keepediting) {
+        $editparams = [
+            'courseid' => $courseid,
+            'id' => (int)$fromform->id,
+            'action' => 'edit',
+            'backtype' => $backtype,
+            'categoryid' => $categoryid,
+        ];
+        if ($cattype !== '') {
+            $editparams['cattype'] = $cattype;
+        }
+        if (!$descriptorselection) {
+            $editparams['descriptorselection'] = 0;
+        }
+        redirect(new moodle_url('/blocks/exaport/item.php', $editparams));
     }
 
     redirect($returnurl);

@@ -177,7 +177,8 @@ $string['externcomment'] = 'Kommentare mitver&ouml;ffentlichen';
 $string['itemgrading'] = 'Beurteilung';
 $string['gradeitem'] = 'Abgabe beurteilen';
 $string['submititem'] = 'Abgeben';
-$string['saveitem'] = 'Speichern';
+$string['saveitem'] = 'Speichern und schließen';
+$string['saveandkeepediting'] = 'Speichern und weiter bearbeiten';
 
 // === Notes.
 $string['deletenoteconfirm'] = 'Möchtest du diese Notiz wirklich l&ouml;schen?';

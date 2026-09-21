@@ -93,6 +93,14 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
         $mform = &$this->_form;
 
+        // Main settings create the item. Other sections may opt in once their related records can be persisted.
+        $sections = ['mainsettings' => true, 'content' => false, 'competences' => false];
+        foreach ($this->_customdata['itemeditsections'] ?? [] as $section => $visible) {
+            if ($section !== 'mainsettings' && array_key_exists($section, $sections)) {
+                $sections[$section] = (bool)$visible;
+            }
+        }
+
         $mform->addElement('header', 'mainsettings', get_string('mainsettings', 'block_exaport'));
 
         $mform->addElement('hidden', 'id');
@@ -322,7 +330,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->add_exaport_help_button('tags', 'forms.item.tags');
         }
 
-        if (array_key_exists('itemcontentblocks', $this->_customdata)) {
+        if ($sections['content']) {
             $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
 
             $contentblocks = $this->_customdata['itemcontentblocks'];
@@ -339,7 +347,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         }
 
         // The picker saves independently in a Moodle modal, so competence changes are not part of this form submission.
-        if (!empty($this->_customdata['exacompactive'])) {
+        if ($sections['competences']) {
             $mform->addElement('header', 'itemcompetences', get_string('competencessection', 'block_exaport'));
             $competences = new \block_exaport\output\item_competences(
                 $this->_customdata['current'],
@@ -349,7 +357,16 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         }
 
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {
-            $this->add_action_buttons($cancel = true, $submitlabel = get_string('saveitem', 'block_exaport'));
+            $buttonarray = [];
+            $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('saveitem', 'block_exaport'));
+            $buttonarray[] = $mform->createElement(
+                'submit',
+                'saveandkeepediting',
+                get_string('saveandkeepediting', 'block_exaport')
+            );
+            $buttonarray[] = $mform->createElement('cancel');
+            $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
+            $mform->closeHeaderBefore('buttonar');
         } else {
             $exampleid = $DB->get_field(BLOCK_EXACOMP_DB_ITEM_MM,
                 'exampleid',

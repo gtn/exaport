@@ -623,8 +623,12 @@ return [
         'Submit',
     ],
     'saveitem' => [
-        'Speichern',
-        'Save',
+        'Speichern und schließen',
+        'Save and close',
+    ],
+    'saveandkeepediting' => [
+        'Speichern und weiter bearbeiten',
+        'Save and keep editing',
     ],
 
     // === Notes.

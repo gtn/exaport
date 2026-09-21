@@ -95,30 +95,69 @@ div.item-detail-image img {
 
 #exaport .exaport-item-content-divider {
     position: relative;
-    border-bottom: 1px dashed #b8c7d3;
-    margin: 1.5rem 0 0;
 }
 
-#exaport .exaport-item-content-add-button {
+#exaport .exaport-item-content-divider hr {
+    width: 100%;
+    margin: 0.5rem 0.25rem;
+    border: 0;
+    border-top: 2px dashed var(--bs-border-color, #dee2e6);
+    opacity: 1;
+}
+
+#exaport .exaport-item-content-divider .divider-content {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    border: 1px solid #b8d9f0;
+    background: linear-gradient(
+        transparent 40%,
+        var(--bs-body-bg, #fff) 40%,
+        var(--bs-body-bg, #fff) 60%,
+        transparent 60%
+    );
+}
+
+#exaport .exaport-item-content-divider .btn.add-content {
+    position: relative;
+    z-index: 1;
     border-radius: 0.375rem;
-    background-color: #e8f4fc;
-    color: #3d83b5;
-    cursor: pointer;
-    transform: translate(-50%, -50%);
+    color: var(--bs-primary, #0f6cbf);
+    background-color: var(--bs-primary-bg-subtle, #e7f1ff);
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+#exaport .exaport-item-content-divider .btn.add-content:hover,
+#exaport .exaport-item-content-divider .btn.add-content:focus {
+    color: #fff;
+    background-color: var(--bs-primary, #0f6cbf);
+}
+
+#exaport .exaport-item-content-divider:focus-within hr,
+#exaport .exaport-item-content-divider:has(.btn.add-content:hover) hr {
+    border-color: var(--bs-primary, #0f6cbf);
+}
+
+#exaport .exaport-item-content-divider .btn.add-content .icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
 }
 
 #exaport .exaport-item-content-add-button .icon {
     margin: 0;
+}
+
+#exaport .exaport-item-content-type-icon {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    text-align: center;
+}
+
+#exaport .exaport-item-content-text-icon {
+    display: inline-block;
+    font-family: serif;
+    font-weight: bold;
+    line-height: 1rem;
 }
 
 #exaport .exaport-item-content-thumbnail {

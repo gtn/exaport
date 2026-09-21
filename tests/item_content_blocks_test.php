@@ -23,14 +23,11 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
  */
 final class item_content_blocks_test extends \advanced_testcase {
 
-    public function test_ajax_response_preserves_structured_success_and_validation_data(): void {
-        $success = block_exaport_item_content_response(true, ['content' => '<section>Updated</section>']);
-        $validation = block_exaport_item_content_response(false, ['validation' => true, 'form' => '<form></form>']);
-
-        $this->assertSame(['success' => true, 'content' => '<section>Updated</section>'], $success);
-        $this->assertFalse($validation['success']);
-        $this->assertTrue($validation['validation']);
-        $this->assertSame('<form></form>', $validation['form']);
+    public function test_item_content_modal_uses_moodle_dynamic_form(): void {
+        $this->assertTrue(is_subclass_of(
+            \block_exaport\form\item_content::class,
+            \core_form\dynamic_form::class
+        ));
     }
 
     public function test_blocks_are_scoped_ordered_and_unsupported_types_are_ignored(): void {

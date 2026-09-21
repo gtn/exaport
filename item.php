@@ -441,7 +441,7 @@ if ($itemeditsections['content'] && $allowedit) {
         'courseId' => (int)$courseid,
         'itemId' => (int)$existing->id,
         'title' => get_string('addcontentblock', 'block_exaport'),
-        'error' => get_string('error'),
+        'saveLabel' => get_string('save'),
     ]]);
 }
 

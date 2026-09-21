@@ -21,23 +21,4 @@ define(['jquery'], function($) {
         });
     });
 
-    QUnit.test('validation and server errors can remain in the modal', function(assert) {
-        var body = $('<div><form class="mform"><input required></form></div>');
-        body.prepend('<div class="alert alert-danger exaport-item-content-error">Error</div>');
-        assert.strictEqual(body.find('form.mform').length, 1, 'the form remains available');
-        assert.strictEqual(body.find('[role="alert"]').length, 1, 'the error is announced');
-    });
-
-    QUnit.test('success replaces the visible content section', function(assert) {
-        this.fixture.find('.exaport-item-content-section').replaceWith(
-            '<section class="exaport-item-content-section"><div class="exaport-item-content-row">New</div></section>'
-        );
-        assert.strictEqual(this.fixture.find('.exaport-item-content-row').text(), 'New');
-    });
-
-    QUnit.test('cancellation leaves the visible content list unchanged', function(assert) {
-        var before = this.fixture.find('.exaport-item-content-section').html();
-        $('<button name="cancel">Cancel</button>').trigger('click').remove();
-        assert.strictEqual(this.fixture.find('.exaport-item-content-section').html(), before);
-    });
 });

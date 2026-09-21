@@ -45,13 +45,15 @@
     <div class="exaport-item-content-divider">
         {{#hasaddactions}}
         <div class="dropdown">
-        <button class="btn btn-primary exaport-item-content-add-button d-flex justify-content-center align-items-center p-1 icon-no-margin"
+        <button class="btn add-content exaport-item-content-add-button d-flex justify-content-center align-items-center p-1 icon-no-margin"
            type="button"
            data-toggle="dropdown"
            data-bs-toggle="dropdown"
+           data-action="open-addingcontent"
            aria-haspopup="true"
            aria-expanded="false"
-           aria-label="{{addlabel}}">
+           aria-label="{{addlabel}}"
+           title="{{addlabel}}">
             {{{addicon}}}
         </button>
         <div class="dropdown-menu">

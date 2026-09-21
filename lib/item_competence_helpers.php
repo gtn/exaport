@@ -9,6 +9,30 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * Load an item that the current user may modify through the competence picker.
+ *
+ * @param int $itemid Item ID.
+ * @param int $courseid Course ID.
+ * @return stdClass
+ */
+function block_exaport_get_editable_competence_item(int $itemid, int $courseid): stdClass {
+    global $DB, $USER;
+
+    $item = $DB->get_record('block_exaportitem', [
+        'id' => $itemid,
+        'userid' => $USER->id,
+    ]);
+    if (!$item || (int)$item->courseid !== $courseid) {
+        print_error('bookmarknotfound', 'block_exaport');
+    }
+    if (!block_exaport_item_is_editable($item->id)) {
+        print_error('nopermissions', 'error');
+    }
+
+    return $item;
+}
+
+/**
  * Normalize submitted competence ids.
  *
  * @param array $competenceids Submitted competence ids.
@@ -19,6 +43,40 @@ function block_exaport_normalize_competenceids(array $competenceids): array {
     return array_values(array_unique(array_filter($competenceids, function($competenceid) {
         return $competenceid > 0;
     })));
+}
+
+/**
+ * Collect descriptor ids from an Exacomp competence tree.
+ *
+ * @param array $items Exacomp tree nodes.
+ * @return int[] Descriptor ids available in the tree.
+ */
+function block_exaport_competence_tree_descriptorids(array $items): array {
+    $descriptorids = [];
+    foreach ($items as $item) {
+        if ($item instanceof \block_exacomp\descriptor) {
+            $descriptorids[] = (int)$item->id;
+        }
+        $descriptorids = array_merge(
+            $descriptorids,
+            block_exaport_competence_tree_descriptorids($item->get_subs() ?: [])
+        );
+    }
+    return $descriptorids;
+}
+
+/**
+ * Reject submitted competence ids that are not available to the user.
+ *
+ * @param int[] $competenceids Submitted competence ids.
+ * @param int[] $availableids Descriptor ids available to the user.
+ * @return int[] Validated competence ids.
+ */
+function block_exaport_validate_competenceids(array $competenceids, array $availableids): array {
+    if (array_diff($competenceids, $availableids)) {
+        throw new invalid_parameter_exception('Invalid competence selection');
+    }
+    return $competenceids;
 }
 
 /**
@@ -57,4 +115,18 @@ function block_exaport_sync_item_competences(stdClass $item, array $competenceid
     }
 
     $transaction->allow_commit();
+}
+
+/**
+ * Keep Exacomp's denormalized activity title in sync after an item rename.
+ *
+ * @param stdClass $item Updated portfolio item.
+ */
+function block_exaport_update_item_competence_metadata(stdClass $item): void {
+    global $DB;
+
+    $DB->set_field(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, 'activitytitle', $item->name, [
+        'activityid' => $item->id,
+        'eportfolioitem' => 1,
+    ]);
 }

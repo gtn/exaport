@@ -24,7 +24,7 @@ require_login($courseid);
 require_capability('block/exaport:use', $context);
 
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
-$item = block_exaport_get_editable_item($itemid, $courseid);
+$item = block_exaport_get_editable_content_item($itemid, $courseid);
 
 $PAGE->set_url(new moodle_url('/blocks/exaport/item_content_text.php', [
     'courseid' => $courseid,
@@ -67,7 +67,7 @@ if ($form->is_cancelled()) {
     require_sesskey();
 
     // Re-check ownership and editability at save time.
-    block_exaport_get_editable_item($itemid, $courseid);
+    block_exaport_get_editable_content_item($itemid, $courseid);
 
     $transaction = $DB->start_delegated_transaction();
     $block = block_exaport_new_content_block($itemid, 'text', $fromform->title);

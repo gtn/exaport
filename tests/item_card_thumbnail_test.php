@@ -17,6 +17,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
+require_once($CFG->dirroot . '/blocks/exaport/locallib.php');
 
 /**
  * Tests thumbnail selection in modern item card output.

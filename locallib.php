@@ -18,6 +18,50 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/portfolio/caller.php');
+
+/**
+ * Renders the competencies footer badge for Bootstrap card mode.
+ *
+ * @param stdClass $item
+ * @return string
+ */
+function block_exaport_get_item_comp_footer_badge($item) {
+    if (!block_exaport_check_competence_interaction()) {
+        return '';
+    }
+
+    $comps = block_exaport_get_active_comps_for_item($item);
+    if (!$comps) {
+        return '';
+    }
+
+    $titles = [];
+    foreach (['descriptors', 'topics'] as $key) {
+        if (!empty($comps[$key]) && is_array($comps[$key])) {
+            foreach ($comps[$key] as $comp) {
+                if (!empty($comp->title)) {
+                    $titles[] = $comp->title;
+                }
+            }
+        }
+    }
+
+    if (!$titles) {
+        return '';
+    }
+
+    $items = '';
+    foreach ($titles as $title) {
+        $items .= html_writer::tag('li', format_string($title));
+    }
+    $tooltiphtml = html_writer::tag('ul', $items, ['class' => 'tooltiplist']);
+
+    return '<span class="eportoflio-comment me-2">'
+        . '<i class="icon icon-comment fa fa-lightbulb" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' . s($tooltiphtml) . '"></i>'
+        . '<span class="eportfolio-comment-count">' . count($titles) . '</span>'
+        . '</span>';
+}
+
 class exaport_portfolio_caller extends portfolio_module_caller_base {
 
     /** @var int callback arg - the id of artefact we export */

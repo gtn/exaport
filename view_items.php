@@ -16,6 +16,7 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/locallib.php');
 
 use block_exaport\globals as g;
 use function block_exaport\common\print_error;
@@ -1239,49 +1240,6 @@ function block_exaport_get_item_comp_icon($item) {
         . block_exaport_fontawesome_icon('list', 'solid', 1)
         //        .'<img src="pix/comp.png" alt="'.'competences'.'" />'
         . '</a>';
-}
-
-/**
- * Renders the competencies footer badge for Bootstrap card mode.
- *
- * @param stdClass $item
- * @return string
- */
-function block_exaport_get_item_comp_footer_badge($item) {
-    if (!block_exaport_check_competence_interaction()) {
-        return '';
-    }
-
-    $comps = block_exaport_get_active_comps_for_item($item);
-    if (!$comps) {
-        return '';
-    }
-
-    $titles = [];
-    foreach (['descriptors', 'topics'] as $key) {
-        if (!empty($comps[$key]) && is_array($comps[$key])) {
-            foreach ($comps[$key] as $comp) {
-                if (!empty($comp->title)) {
-                    $titles[] = $comp->title;
-                }
-            }
-        }
-    }
-
-    if (!$titles) {
-        return '';
-    }
-
-    $items = '';
-    foreach ($titles as $title) {
-        $items .= html_writer::tag('li', format_string($title));
-    }
-    $tooltiphtml = html_writer::tag('ul', $items, ['class' => 'tooltiplist']);
-
-    return '<span class="eportoflio-comment me-2">'
-        . '<i class="icon icon-comment fa fa-lightbulb" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' . s($tooltiphtml) . '"></i>'
-        . '<span class="eportfolio-comment-count">' . count($titles) . '</span>'
-        . '</span>';
 }
 
 /**

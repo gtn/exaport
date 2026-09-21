@@ -106,6 +106,9 @@ final class item_content_blocks_test extends \advanced_testcase {
             $data['blocks'][1]['files'][0]['url']
         );
         $this->assertCount(3, $data['addactions']);
+        $this->assertStringContainsString('>T</span>', $data['addactions'][0]['icon']);
+        $this->assertSame('icon', $data['addactions'][1]['icon']);
+        $this->assertSame('icon', $data['addactions'][2]['icon']);
     }
 
     public function test_text_is_formatted_with_owner_context_and_shared_output_has_no_add_control(): void {

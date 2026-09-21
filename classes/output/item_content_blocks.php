@@ -85,12 +85,7 @@ class item_content_blocks implements renderable, templatable {
             $typelabel = $typeinfo['label'];
 
             $row = [
-                'icon' => $output->pix_icon(
-                    $typeinfo['icon'],
-                    $typelabel,
-                    'moodle',
-                    ['class' => 'exaport-item-content-block-icon']
-                ),
+                'icon' => $this->get_type_icon($output, $typeinfo, $typelabel),
                 'typelabel' => $typelabel,
                 'title' => trim((string)($block->title ?? '')),
                 'content' => $type === 'text' ? $this->format_content($block) : '',
@@ -111,7 +106,7 @@ class item_content_blocks implements renderable, templatable {
             'heading' => get_string('viewcontent', 'block_exaport'),
             'blocks' => $rows,
             'hasblocks' => !empty($rows),
-            'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
+            'addicon' => \html_writer::tag('span', '+', ['aria-hidden' => 'true']),
             'addlabel' => get_string('addcontentblock', 'block_exaport'),
             'addactions' => $addactions,
             'hasaddactions' => !empty($addactions),
@@ -143,7 +138,7 @@ class item_content_blocks implements renderable, templatable {
             $typeinfo = $this->get_type_info($type);
             $actions[] = [
                 'url' => $urls[$type]->out(false),
-                'icon' => $output->pix_icon($typeinfo['icon'], '', 'moodle'),
+                'icon' => $this->get_type_icon($output, $typeinfo, ''),
                 'label' => $typeinfo['label'],
             ];
         }
@@ -212,22 +207,23 @@ class item_content_blocks implements renderable, templatable {
         switch ($type) {
             case 'text':
                 return [
-                    'icon' => 'i/info',
+                    'icon' => null,
+                    'icontext' => 'T',
                     'label' => get_string('view_specialitem_text', 'block_exaport'),
                 ];
             case 'link':
                 return [
-                    'icon' => 'i/url',
+                    'icon' => 'e/insert_edit_link',
                     'label' => get_string('link', 'block_exaport'),
                 ];
             case 'file':
                 return [
-                    'icon' => 'i/file',
+                    'icon' => 'e/insert_edit_image',
                     'label' => get_string('file', 'block_exaport'),
                 ];
             case 'media':
                 return [
-                    'icon' => 'i/file',
+                    'icon' => 'e/insert_edit_image',
                     'label' => get_string('view_specialitem_media', 'block_exaport'),
                 ];
             default:
@@ -236,6 +232,27 @@ class item_content_blocks implements renderable, templatable {
                     'label' => $type !== '' ? $type : get_string('viewcontent', 'block_exaport'),
                 ];
         }
+    }
+
+    /**
+     * Render a stable icon for a content block type.
+     *
+     * @param renderer_base $output
+     * @param array $typeinfo
+     * @param string $alt
+     * @return string
+     */
+    private function get_type_icon(renderer_base $output, array $typeinfo, string $alt): string {
+        if (isset($typeinfo['icontext'])) {
+            return \html_writer::tag('span', $typeinfo['icontext'], [
+                'class' => 'exaport-item-content-type-icon exaport-item-content-text-icon',
+                'aria-hidden' => 'true',
+            ]);
+        }
+
+        return $output->pix_icon($typeinfo['icon'], $alt, 'moodle', [
+            'class' => 'exaport-item-content-type-icon',
+        ]);
     }
 
     /**

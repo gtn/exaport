@@ -160,7 +160,7 @@ class item_competences extends dynamic_form {
         $item->compids_array = block_exaport_get_item_competenceids($item);
 
         $renderer = $PAGE->get_renderer('block_exaport');
-        $renderable = new \block_exaport\output\item_competences($item, true);
+        $renderable = new \block_exaport\output\item_competences($item, true, null, $tree);
 
         return [
             'content' => $renderer->render_from_template(

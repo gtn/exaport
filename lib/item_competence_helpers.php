@@ -16,20 +16,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return stdClass
  */
 function block_exaport_get_editable_competence_item(int $itemid, int $courseid): stdClass {
-    global $DB, $USER;
-
-    $item = $DB->get_record('block_exaportitem', [
-        'id' => $itemid,
-        'userid' => $USER->id,
-    ]);
-    if (!$item || (int)$item->courseid !== $courseid) {
-        print_error('bookmarknotfound', 'block_exaport');
-    }
-    if (!block_exaport_item_is_editable($item->id)) {
-        print_error('nopermissions', 'error');
-    }
-
-    return $item;
+    return block_exaport_get_editable_item($itemid, $courseid);
 }
 
 /**

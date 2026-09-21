@@ -20,6 +20,34 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/portfolio/caller.php');
 
 /**
+ * Render an item's category paths as Bootstrap badges.
+ *
+ * @param stdClass $item Item decorated with a flatcategories array.
+ * @return string
+ */
+function block_exaport_render_item_category_badges($item) {
+    if (empty($item->flatcategories) || !is_array($item->flatcategories)) {
+        return '';
+    }
+
+    $badges = [];
+    foreach ($item->flatcategories as $category) {
+        $fullpath = format_string($category->name);
+        $parts = explode(' / ', $fullpath);
+        $shortlabel = trim(end($parts));
+        $attrs = [
+            'class' => 'badge badge-secondary',
+            'data-bs-toggle' => 'tooltip',
+            'data-bs-placement' => 'top',
+            'data-bs-title' => $fullpath,
+        ];
+        $badges[] = html_writer::tag('span', $shortlabel, $attrs) . ' ';
+    }
+
+    return html_writer::div(implode('', $badges), 'eportfolio-categories');
+}
+
+/**
  * Renders the competencies footer badge for Bootstrap card mode.
  *
  * @param stdClass $item

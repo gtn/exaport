@@ -1441,29 +1441,6 @@ function block_exaport_get_item_project_icon($item) {
         . '</a>';
 }
 
-function block_exaport_render_item_category_badges($item) {
-    if (empty($item->flatcategories) || !is_array($item->flatcategories)) {
-        return '';
-    }
-    $badges = [];
-    foreach ($item->flatcategories as $category) {
-        $fullpath = format_string($category->name);
-        $parts = explode(' / ', $fullpath);
-        $shortlabel = trim(end($parts));
-        $attrs = [
-            'class' => 'badge badge-secondary',
-            'data-bs-toggle' => 'tooltip',
-            'data-bs-placement' => 'top',
-            'data-bs-title' => $fullpath,
-        ];
-        $badges[] = html_writer::tag('span', $shortlabel, $attrs) . ' ';
-    }
-    if (!$badges) {
-        return '';
-    }
-    return html_writer::div(implode('', $badges), 'eportfolio-categories');
-}
-
 function block_exaport_category_path($category, $courseid = 1, $currentcategoryPathItemButtons = '') {
     global $DB, $CFG;
     $pathItem = function($id, $title, $courseid, $selected = false, $currentcategoryPathItemButtons = '') use ($CFG) {

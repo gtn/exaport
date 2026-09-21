@@ -23,6 +23,21 @@ require_once($CFG->dirroot . '/blocks/exaport/locallib.php');
  */
 final class item_comp_footer_badge_test extends \advanced_testcase {
 
+    public function test_category_badges_helper_is_available_to_card_renderers(): void {
+        $item = (object)[
+            'flatcategories' => [
+                (object)['name' => 'Parent / Child'],
+            ],
+        ];
+
+        $html = block_exaport_render_item_category_badges($item);
+
+        $this->assertStringContainsString('eportfolio-categories', $html);
+        $this->assertStringContainsString('data-bs-title="Parent / Child"', $html);
+        $this->assertStringContainsString('>Child</span>', $html);
+        $this->assertSame('', block_exaport_render_item_category_badges((object)[]));
+    }
+
     public function test_badge_is_available_and_empty_when_competence_interaction_is_disabled(): void {
         global $CFG;
 

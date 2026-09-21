@@ -144,13 +144,7 @@ if ($existing) {
 // Get competences from item if editing.
 $exacompactive = block_exaport_check_competence_interaction() && $descriptorselection;
 if ($existing && $exacompactive) {
-    // For the tree.
-    $compstmp = block_exaport_get_active_comps_for_item($existing);
-    if ($compstmp && is_array($compstmp) && array_key_exists('descriptors', $compstmp)) {
-        $existing->compids_array = array_keys($compstmp['descriptors']);
-    } else {
-        $existing->compids_array = [];
-    }
+    $existing = block_exaport_populate_item_competenceids($existing);
 }
 $cattype_params = '';
 if ($cattype) {
@@ -425,13 +419,10 @@ switch ($action) {
 
 if ($exacompactive && $existing) {
     $PAGE->requires->js_call_amd('block_exaport/item_competences', 'init', [[
-        'saveUrl' => (new moodle_url('/blocks/exaport/item_competences.php'))->out(false),
         'itemId' => (int)$existing->id,
         'courseId' => (int)$courseid,
-        'sesskey' => sesskey(),
         'title' => get_string('opencomps', 'block_exaport'),
         'saveLabel' => get_string('savechanges'),
-        'saveFailed' => get_string('competencessavefailed', 'block_exaport'),
     ]]);
 }
 

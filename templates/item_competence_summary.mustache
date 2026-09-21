@@ -1,0 +1,9 @@
+<div data-region="competence-summary" data-itemid="{{itemid}}">
+    {{#hasselected}}
+    <ul class="list-unstyled mb-3 exaport-competence-tree exaport-competence-summary">
+        {{#selectednodes}}
+            {{> block_exaport/item_competence_node}}
+        {{/selectednodes}}
+    </ul>
+    {{/hasselected}}
+</div>

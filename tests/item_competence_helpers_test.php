@@ -17,6 +17,7 @@ require_once(__DIR__ . '/../lib/item_content_helpers.php');
  * Tests for item competence persistence helpers.
  *
  * @covers ::block_exaport_normalize_competenceids
+ * @covers ::block_exaport_parse_competenceids
  * @covers ::block_exaport_validate_competenceids
  */
 final class item_competence_helpers_test extends \advanced_testcase {
@@ -111,6 +112,15 @@ final class item_competence_helpers_test extends \advanced_testcase {
         $this->assertSame([4, 8], block_exaport_normalize_competenceids([4, '8', 4, 0, -2]));
     }
 
+    public function test_parse_competenceids_accepts_comma_separated_hidden_field_values(): void {
+        $this->assertSame([4, 8], block_exaport_parse_competenceids('8,4,8,0,-2'));
+    }
+
+    public function test_parse_competenceids_rejects_malformed_values(): void {
+        $this->expectException(\invalid_parameter_exception::class);
+        block_exaport_parse_competenceids('4,not-an-id');
+    }
+
     public function test_validate_competenceids_accepts_available_ids(): void {
         $this->assertSame([4, 8], block_exaport_validate_competenceids([4, 8], [2, 4, 8]));
     }
@@ -118,6 +128,57 @@ final class item_competence_helpers_test extends \advanced_testcase {
     public function test_validate_competenceids_rejects_unavailable_ids(): void {
         $this->expectException(\invalid_parameter_exception::class);
         block_exaport_validate_competenceids([4, 99], [2, 4, 8]);
+    }
+
+    public function test_require_competence_item_access_rejects_disabled_interaction(): void {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+        $CFG->block_exaport_enable_interaction_competences = false;
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->grant_competence_access($owner, $course);
+        $this->setUser($owner);
+
+        $this->assert_entry_point_error(
+            'nopermissions',
+            'block_exaport_require_competence_item_access',
+            $itemid,
+            $course->id
+        );
+    }
+
+    public function test_require_competence_item_access_rejects_missing_capability(): void {
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->getDataGenerator()->enrol_user($owner->id, $course->id);
+        $this->setUser($owner);
+
+        $this->assert_entry_point_error(
+            'nopermissions',
+            'block_exaport_require_competence_item_access',
+            $itemid,
+            $course->id
+        );
+    }
+
+    public function test_require_competence_item_access_returns_item_for_authorized_owner(): void {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+        $CFG->block_exaport_app_alloweditdelete = true;
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->grant_competence_access($owner, $course);
+        $this->setUser($owner);
+
+        $item = block_exaport_require_competence_item_access($itemid, $course->id);
+
+        $this->assertSame($itemid, (int)$item->id);
     }
 
     private function insert_item(int $userid, int $courseid): int {
@@ -159,5 +220,13 @@ final class item_competence_helpers_test extends \advanced_testcase {
         } catch (\moodle_exception $exception) {
             $this->assertSame($errorcode, $exception->errorcode);
         }
+    }
+
+    private function grant_competence_access(\stdClass $user, \stdClass $course): void {
+        $roleid = create_role('Exaport competence tester', 'exaportcompetencetester', '');
+        assign_capability('block/exaport:use', CAP_ALLOW, $roleid, \context_system::instance()->id, true);
+        role_assign($roleid, $user->id, \context_system::instance()->id);
+        $this->getDataGenerator()->enrol_user($user->id, $course->id);
+        accesslib_clear_all_caches_for_unit_testing();
     }
 }

@@ -1,25 +1,13 @@
-<div class="exaport-item-competences" data-region="item-competences">
+<div class="exaport-item-competences" data-region="item-competences" data-itemid="{{itemid}}">
     <p>{{intro}}</p>
 
-    <div data-region="competence-summary">
-        {{#hasselected}}
-        <ul class="list-unstyled mb-3 exaport-competence-tree exaport-competence-summary">
-            {{#selectednodes}}
-                {{> block_exaport/item_competence_node}}
-            {{/selectednodes}}
-        </ul>
-        {{/hasselected}}
-    </div>
+    {{#summary}}
+        {{> block_exaport/item_competence_summary}}
+    {{/summary}}
 
     {{#editable}}
-    <button type="button" class="btn btn-primary" data-action="open-competence-picker">
+    <button type="button" class="btn btn-primary" data-action="open-competence-picker" data-itemid="{{itemid}}">
         {{{addicon}}} {{addlabel}}
     </button>
     {{/editable}}
-
-    <template data-region="competence-picker-source">
-        {{#picker}}
-            {{> block_exaport/item_competence_picker}}
-        {{/picker}}
-    </template>
 </div>

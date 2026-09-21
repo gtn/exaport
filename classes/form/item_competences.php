@@ -15,65 +15,101 @@ require_once(__DIR__ . '/../../lib/item_competence_helpers.php');
 use context;
 use context_system;
 use core_form\dynamic_form;
+use invalid_parameter_exception;
 use moodle_url;
 
-/** Moodle dynamic form for replacing an item's competence selection. */
+/**
+ * Moodle dynamic form for editing an item's competences.
+ *
+ * @package block_exaport
+ */
 class item_competences extends dynamic_form {
 
-    /** Define the serialized value and the custom competence tree. */
+    /** @var \stdClass|null */
+    private $item = null;
+
+    /** @var array|null */
+    private $competencetree = null;
+
+    /**
+     * Define the dynamic form.
+     */
     protected function definition(): void {
-        global $OUTPUT, $USER;
+        global $PAGE;
+        global $USER;
 
-        $courseid = $this->optional_param('courseid', 0, PARAM_INT);
-        $itemid = $this->optional_param('itemid', 0, PARAM_INT);
         $mform = $this->_form;
-        $mform->addElement('hidden', 'courseid', $courseid);
-        $mform->setType('courseid', PARAM_INT);
-        $mform->addElement('hidden', 'itemid', $itemid);
-        $mform->setType('itemid', PARAM_INT);
-        // One registered field bridges the custom checkboxes into the dynamic-form submission.
-        $mform->addElement('hidden', 'competenceids', '');
-        $mform->setType('competenceids', PARAM_RAW_TRIMMED);
+        $item = $this->get_item();
+        $selectedids = $this->get_selectedids();
+        $renderable = new \block_exaport\output\item_competences(
+            $item,
+            true,
+            $selectedids,
+            $this->get_competence_tree((int)$USER->id)
+        );
+        $renderer = $PAGE->get_renderer('block_exaport');
 
-        $item = (object)['id' => $itemid, 'compids_array' => $this->get_selected_ids($itemid)];
-        $renderable = new \block_exaport\output\item_competences($item, true);
-        $data = $renderable->export_for_template($OUTPUT);
-        $mform->addElement('html', $OUTPUT->render_from_template(
-            'block_exaport/item_competence_picker', $data['picker']));
+        $mform->addElement('hidden', 'courseid', $this->optional_param('courseid', 0, PARAM_INT));
+        $mform->setType('courseid', PARAM_INT);
+        $mform->addElement('hidden', 'itemid', $this->optional_param('itemid', 0, PARAM_INT));
+        $mform->setType('itemid', PARAM_INT);
+        $mform->addElement('hidden', 'competenceids', implode(',', $selectedids));
+        $mform->setType('competenceids', PARAM_RAW_TRIMMED);
+        $mform->addElement('html', $renderer->render_from_template(
+            'block_exaport/item_competence_picker',
+            $renderable->export_picker_for_template()
+        ));
     }
 
-    /** Validate the submitted sequence against the current user's Exacomp tree. */
+    /**
+     * Validate the submitted selection.
+     *
+     * @param array $data Submitted data.
+     * @param array $files Uploaded files.
+     * @return array
+     */
     public function validation($data, $files): array {
         global $USER;
 
         $errors = parent::validation($data, $files);
+
         try {
-            $ids = block_exaport_normalize_competenceids($this->decode_ids($data['competenceids'] ?? ''));
-            $availableids = block_exaport_competence_tree_descriptorids(
-                \block_exacomp\api::get_comp_tree_for_exaport($USER->id));
-            block_exaport_validate_competenceids($ids, $availableids);
-        } catch (\invalid_parameter_exception $exception) {
+            $competenceids = block_exaport_parse_competenceids($data['competenceids'] ?? '');
+        } catch (invalid_parameter_exception $exception) {
+            $errors['competenceids'] = get_string('invaliddata', 'error');
+            return $errors;
+        }
+
+        if (array_diff($competenceids, block_exaport_competence_tree_descriptorids(
+            $this->get_competence_tree((int)$USER->id)
+        ))) {
             $errors['competenceids'] = get_string('invaliddata', 'error');
         }
+
         return $errors;
     }
 
+    /**
+     * Return the context validated by Moodle's dynamic-form external service.
+     *
+     * @return context
+     */
     protected function get_context_for_dynamic_submission(): context {
         return context_system::instance();
     }
 
-    /** Apply all feature and item authorization checks for render and submit requests. */
+    /**
+     * Check access before Moodle renders or processes the form.
+     */
     protected function check_access_for_dynamic_submission(): void {
-        $courseid = $this->optional_param('courseid', 0, PARAM_INT);
-        require_login($courseid);
-        require_capability('block/exaport:use', $this->get_context_for_dynamic_submission());
-        if (!block_exaport_check_competence_interaction()) {
-            throw new \moodle_exception('nopermissions', 'error');
-        }
-        block_exaport_get_editable_competence_item(
-            $this->optional_param('itemid', 0, PARAM_INT), $courseid);
+        $this->get_item();
     }
 
+    /**
+     * Return the canonical page URL used by the dynamic form.
+     *
+     * @return moodle_url
+     */
     protected function get_page_url_for_dynamic_submission(): moodle_url {
         return new moodle_url('/blocks/exaport/item.php', [
             'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
@@ -82,44 +118,106 @@ class item_competences extends dynamic_form {
         ]);
     }
 
-    /** Populate the serialized selection from persisted records. */
+    /**
+     * Set initial form data.
+     */
     public function set_data_for_dynamic_submission(): void {
-        $itemid = $this->optional_param('itemid', 0, PARAM_INT);
+        $item = $this->get_item();
+        $selectedids = $this->get_selectedids();
+
         $this->set_data((object)[
             'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
-            'itemid' => $itemid,
-            'competenceids' => implode(',', $this->get_selected_ids($itemid)),
+            'itemid' => (int)$item->id,
+            'competenceids' => implode(',', $selectedids),
         ]);
     }
 
-    /** Persist the complete selection and return the server-rendered refreshed section. */
+    /**
+     * Persist the submitted selection and return the refreshed summary HTML.
+     *
+     * @return array
+     */
     public function process_dynamic_submission(): array {
-        global $OUTPUT, $USER;
+        global $PAGE;
+        global $USER;
 
         $data = $this->get_data();
-        $item = block_exaport_get_editable_competence_item((int)$data->itemid, (int)$data->courseid);
-        $ids = block_exaport_normalize_competenceids($this->decode_ids($data->competenceids ?? ''));
-        $availableids = block_exaport_competence_tree_descriptorids(
-            \block_exacomp\api::get_comp_tree_for_exaport($USER->id));
-        $ids = block_exaport_validate_competenceids($ids, $availableids);
-        block_exaport_sync_item_competences($item, $ids);
-        $item->compids_array = $this->get_selected_ids((int)$item->id);
-
-        return ['content' => $OUTPUT->render(new \block_exaport\output\item_competences($item, true))];
-    }
-
-    /** @return int[] */
-    private function get_selected_ids(int $itemid): array {
-        global $DB;
-        if (!$itemid || !defined('BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY')) {
+        if ($data === null) {
             return [];
         }
-        return block_exaport_normalize_competenceids($DB->get_fieldset_select(
-            BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, 'compid', 'activityid = ? AND eportfolioitem = 1', [$itemid]));
+
+        require_sesskey();
+
+        $item = block_exaport_require_competence_item_access((int)$data->itemid, (int)$data->courseid);
+        $tree = $this->get_competence_tree((int)$USER->id, true);
+        $competenceids = block_exaport_parse_competenceids($data->competenceids ?? '');
+        $competenceids = block_exaport_validate_competenceids(
+            $competenceids,
+            block_exaport_competence_tree_descriptorids($tree)
+        );
+
+        block_exaport_sync_item_competences($item, $competenceids);
+        $item->compids_array = block_exaport_get_item_competenceids($item);
+
+        $renderer = $PAGE->get_renderer('block_exaport');
+        $renderable = new \block_exaport\output\item_competences($item, true, null, $tree);
+
+        return [
+            'content' => $renderer->render_from_template(
+                'block_exaport/item_competence_summary',
+                $renderable->export_summary_for_template()
+            ),
+            'itemid' => (int)$item->id,
+        ];
     }
 
-    /** Decode the registered comma-separated value, including an empty selection. */
-    private function decode_ids(string $value): array {
-        return $value === '' ? [] : explode(',', $value);
+    /**
+     * Load and cache the editable item after applying all workflow access checks.
+     *
+     * @return \stdClass
+     */
+    private function get_item(): \stdClass {
+        if ($this->item === null) {
+            $this->item = block_exaport_require_competence_item_access(
+                $this->optional_param('itemid', 0, PARAM_INT),
+                $this->optional_param('courseid', 0, PARAM_INT)
+            );
+        }
+
+        return $this->item;
     }
+
+    /**
+     * Return the competence ids that should be reflected in the rendered picker.
+     *
+     * @return int[]
+     */
+    private function get_selectedids(): array {
+        $submittedids = $this->optional_param('competenceids', null, PARAM_RAW_TRIMMED);
+        if ($submittedids === null) {
+            return block_exaport_get_item_competenceids($this->get_item());
+        }
+
+        try {
+            return block_exaport_parse_competenceids($submittedids);
+        } catch (invalid_parameter_exception $exception) {
+            return block_exaport_get_item_competenceids($this->get_item());
+        }
+    }
+
+    /**
+     * Load the current user's available competence tree.
+     *
+     * @param int $userid User id whose competence tree should be loaded.
+     * @param bool $refresh Whether to force a fresh tree load.
+     * @return array
+     */
+    private function get_competence_tree(int $userid, bool $refresh = false): array {
+        if ($refresh || $this->competencetree === null) {
+            $this->competencetree = \block_exacomp\api::get_comp_tree_for_exaport($userid);
+        }
+
+        return $this->competencetree;
+    }
+
 }

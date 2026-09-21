@@ -1,25 +1,64 @@
-define(['block_exaport/item_competences'], function(Competences) {
+define(['jquery', 'block_exaport/item_competences'], function($, Competences) {
     QUnit.module('block_exaport/item_competences', {
         beforeEach: function() {
-            document.getElementById('qunit-fixture').innerHTML =
-                '<form><input name="competenceids" type="hidden" value="4">' +
-                '<div data-region="competence-picker">' +
-                '<input type="checkbox" data-region="competence-checkbox" value="4">' +
-                '<input type="checkbox" data-region="competence-checkbox" value="8" checked>' +
-                '<input type="checkbox" data-region="competence-checkbox" value="12" checked>' +
-                '</div></form>';
+            this.fixture = $('#qunit-fixture');
+            this.fixture.html(
+                '<div data-region="item-competences" data-itemid="42">' +
+                    '<div data-region="competence-summary" data-itemid="42"><span>Old summary</span></div>' +
+                    '<form>' +
+                        '<input type="hidden" name="competenceids" value="" />' +
+                        '<details><summary>One</summary></details>' +
+                        '<details open><summary>Two</summary></details>' +
+                        '<input type="checkbox" data-region="competence-checkbox" value="9" checked />' +
+                        '<input type="checkbox" data-region="competence-checkbox" value="3" checked />' +
+                        '<input type="checkbox" data-region="competence-checkbox" value="9" checked />' +
+                        '<input type="checkbox" data-region="competence-checkbox" value="-1" checked />' +
+                    '</form>' +
+                '</div>'
+            );
         }
     });
 
-    QUnit.test('serializes the complete checked selection into the form field', function(assert) {
-        var picker = document.querySelector('[data-region="competence-picker"]');
-        Competences.synchronizeSelection(picker);
-        assert.strictEqual(document.querySelector('[name="competenceids"]').value, '8,12');
+    QUnit.test('selection serialization normalizes duplicate and invalid checkbox values', function(assert) {
+        assert.deepEqual(
+            Competences.collectSelectedCompetencyIds(this.fixture[0]),
+            [3, 9],
+            'selected ids are unique, positive and sorted'
+        );
+        assert.strictEqual(
+            Competences.syncSelection(this.fixture[0]),
+            '3,9',
+            'the hidden dynamic-form field is kept in sync'
+        );
+    });
 
-        picker.querySelectorAll('input').forEach(function(checkbox) {
-            checkbox.checked = false;
-        });
-        Competences.synchronizeSelection(picker);
-        assert.strictEqual(document.querySelector('[name="competenceids"]').value, '', 'an empty selection is preserved');
+    QUnit.test('empty selection serializes to an empty string', function(assert) {
+        this.fixture.find('[data-region="competence-checkbox"]').prop('checked', false);
+
+        assert.deepEqual(Competences.collectSelectedCompetencyIds(this.fixture[0]), [], 'no ids are selected');
+        assert.strictEqual(Competences.syncSelection(this.fixture[0]), '', 'empty selections clear the field');
+    });
+
+    QUnit.test('expand and collapse toggle all tree branches', function(assert) {
+        Competences.setTreeExpanded(this.fixture[0], false);
+        assert.strictEqual(this.fixture.find('details[open]').length, 0, 'all branches collapse');
+
+        Competences.setTreeExpanded(this.fixture[0], true);
+        assert.strictEqual(this.fixture.find('details[open]').length, 2, 'all branches expand');
+    });
+
+    QUnit.test('server-rendered summaries replace the current summary node', function(assert) {
+        var done = assert.async();
+
+        Competences.replaceSummary(42,
+            '<div data-region="competence-summary" data-itemid="42"><span>Updated summary</span></div>')
+            .then(function() {
+                assert.strictEqual(
+                    $.trim($('#qunit-fixture [data-region="competence-summary"]').text()),
+                    'Updated summary',
+                    'the rendered summary is installed'
+                );
+                done();
+            });
     });
 });

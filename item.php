@@ -144,13 +144,7 @@ if ($existing) {
 // Get competences from item if editing.
 $exacompactive = block_exaport_check_competence_interaction() && $descriptorselection;
 if ($existing && $exacompactive) {
-    // For the tree.
-    $compstmp = block_exaport_get_active_comps_for_item($existing);
-    if ($compstmp && is_array($compstmp) && array_key_exists('descriptors', $compstmp)) {
-        $existing->compids_array = array_keys($compstmp['descriptors']);
-    } else {
-        $existing->compids_array = [];
-    }
+    $existing->compids_array = block_exaport_get_item_competenceids($existing);
 }
 $cattype_params = '';
 if ($cattype) {

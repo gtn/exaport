@@ -357,7 +357,16 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         }
 
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {
-            $this->add_action_buttons($cancel = true, $submitlabel = get_string('saveitem', 'block_exaport'));
+            $buttonarray = [];
+            $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('saveitem', 'block_exaport'));
+            $buttonarray[] = $mform->createElement(
+                'submit',
+                'saveandkeepediting',
+                get_string('saveandkeepediting', 'block_exaport')
+            );
+            $buttonarray[] = $mform->createElement('cancel');
+            $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
+            $mform->closeHeaderBefore('buttonar');
         } else {
             $exampleid = $DB->get_field(BLOCK_EXACOMP_DB_ITEM_MM,
                 'exampleid',

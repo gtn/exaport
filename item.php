@@ -276,6 +276,7 @@ if ($editform->is_cancelled()) {
 
     $categoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
     $fromform->categoryids = $categoryids;
+    $keepediting = !empty($fromform->saveandkeepediting);
 
     switch ($action) {
         case 'add':
@@ -295,6 +296,23 @@ if ($editform->is_cancelled()) {
 
         default:
             print_error("unknownaction", "block_exaport");
+    }
+
+    if ($keepediting) {
+        $editparams = [
+            'courseid' => $courseid,
+            'id' => (int)$fromform->id,
+            'action' => 'edit',
+            'backtype' => $backtype,
+            'categoryid' => $categoryid,
+        ];
+        if ($cattype !== '') {
+            $editparams['cattype'] = $cattype;
+        }
+        if (!$descriptorselection) {
+            $editparams['descriptorselection'] = 0;
+        }
+        redirect(new moodle_url('/blocks/exaport/item.php', $editparams));
     }
 
     redirect($returnurl);

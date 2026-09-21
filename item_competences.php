@@ -7,7 +7,6 @@
 // (at your option) any later version.
 
 require_once(__DIR__ . '/inc.php');
-require_once(__DIR__ . '/lib/item_helpers.php');
 require_once(__DIR__ . '/lib/item_competence_helpers.php');
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -22,8 +21,11 @@ if (!block_exaport_check_competence_interaction()) {
     throw new moodle_exception('nopermissions', 'error');
 }
 
-$item = block_exaport_get_editable_item($itemid, $courseid);
+$item = block_exaport_get_editable_competence_item($itemid, $courseid);
 $competenceids = block_exaport_normalize_competenceids($competenceids);
+$tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+$availableids = block_exaport_competence_tree_descriptorids($tree);
+$competenceids = block_exaport_validate_competenceids($competenceids, $availableids);
 block_exaport_sync_item_competences($item, $competenceids);
 
 header('Content-Type: application/json; charset=utf-8');

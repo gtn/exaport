@@ -138,6 +138,7 @@ class item_content_blocks implements renderable, templatable {
             $typeinfo = $this->get_type_info($type);
             $actions[] = [
                 'url' => $urls[$type]->out(false),
+                'type' => $type,
                 'icon' => $this->get_type_icon($output, $typeinfo, ''),
                 'label' => $typeinfo['label'],
             ];

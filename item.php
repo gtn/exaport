@@ -435,6 +435,16 @@ if ($exacompactive && $existing) {
     ]]);
 }
 
+if ($itemeditsections['content'] && $allowedit) {
+    $PAGE->requires->js_call_amd('block_exaport/item_content_modal', 'init', [[
+        'contextId' => $context->id,
+        'courseId' => (int)$courseid,
+        'itemId' => (int)$existing->id,
+        'title' => get_string('addcontentblock', 'block_exaport'),
+        'error' => get_string('error'),
+    ]]);
+}
+
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
 
 $editform->set_data($post);

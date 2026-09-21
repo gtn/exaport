@@ -59,7 +59,8 @@
                 </button>
                 <div class="dropdown-menu">
                     {{#addactions}}
-                    <a class="dropdown-item" href="{{url}}">{{{icon}}} <span>{{label}}</span></a>
+                    <a class="dropdown-item exaport-item-content-add" href="{{url}}"
+                       data-content-type="{{type}}" data-content-url="{{url}}">{{{icon}}} <span>{{label}}</span></a>
                     {{/addactions}}
                 </div>
             </div>

@@ -413,3 +413,17 @@ function block_exaport_output_fragment_blockedit($args) {
 
     return $formdata->html;
 }
+
+/** Fragment callback for an item content add form. */
+function block_exaport_output_fragment_itemcontentform($args) {
+    global $CFG;
+    require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
+
+    $courseid = clean_param($args['courseid'] ?? 0, PARAM_INT);
+    $itemid = clean_param($args['itemid'] ?? 0, PARAM_INT);
+    $type = clean_param($args['contenttype'] ?? '', PARAM_ALPHA);
+    require_login($courseid);
+    require_capability('block/exaport:use', context_system::instance());
+    block_exaport_get_editable_content_item($itemid, $courseid);
+    return block_exaport_create_item_content_form($type, $courseid, $itemid)->render();
+}

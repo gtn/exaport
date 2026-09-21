@@ -80,3 +80,72 @@ function block_exaport_content_return_url(int $courseid, int $itemid): moodle_ur
         'action' => 'edit',
     ]);
 }
+
+/**
+ * Create and initialise an add-content form.
+ *
+ * Keeping this here makes the exact same Moodle form available to both the
+ * standalone pages and Fragment API requests.
+ *
+ * @param string $type text, link or file.
+ * @param int $courseid Course ID.
+ * @param int $itemid Item ID.
+ * @return moodleform
+ */
+function block_exaport_create_item_content_form(string $type, int $courseid, int $itemid) {
+    global $CFG, $USER;
+
+    $usercontext = context_user::instance($USER->id);
+    if ($type === 'text') {
+        require_once(__DIR__ . '/item_content_text_form.php');
+        $options = ['trusttext' => true, 'subdirs' => false, 'maxfiles' => 0,
+            'maxbytes' => 0, 'context' => $usercontext];
+        $form = new block_exaport_item_content_text_form(null, ['editoroptions' => $options]);
+        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'title' => '',
+            'content' => '', 'contentformat' => FORMAT_HTML];
+        $data = file_prepare_standard_editor($data, 'content', $options, $usercontext,
+            'block_exaport', 'item_content_text', 0);
+    } else if ($type === 'file') {
+        require_once(__DIR__ . '/item_content_form.php');
+        $options = ['subdirs' => false, 'maxfiles' => !empty($CFG->block_exaport_multiple_files_in_item) ? 10 : 1,
+            'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'accepted_types' => '*'];
+        $form = new block_exaport_item_content_file_form(null, ['fileoptions' => $options]);
+        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'title' => '', 'files' => ''];
+        $data = file_prepare_standard_filemanager($data, 'files', $options, $usercontext,
+            'block_exaport', 'item_content_file', 0);
+    } else if ($type === 'link') {
+        require_once(__DIR__ . '/item_content_form.php');
+        $form = new block_exaport_item_content_link_form();
+        $data = (object)['courseid' => $courseid, 'itemid' => $itemid];
+    } else {
+        throw new coding_exception('Unsupported Exaport item content block type');
+    }
+    $form->set_data($data);
+    return $form;
+}
+
+/** Render the editable content section after an asynchronous save. */
+function block_exaport_render_item_content_blocks(int $courseid, stdClass $item): string {
+    global $DB, $PAGE;
+
+    $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $item->id], 'sortorder ASC, id ASC');
+    $urls = [];
+    foreach (['text', 'link', 'file'] as $type) {
+        $urls[$type] = new moodle_url('/blocks/exaport/item_content_' . $type . '.php',
+            ['courseid' => $courseid, 'itemid' => $item->id]);
+    }
+    $renderable = new \block_exaport\output\item_content_blocks($blocks, $urls, (int)$item->userid, true, false);
+    return $PAGE->get_renderer('block_exaport')->render($renderable);
+}
+
+/** Build a consistent response used by all three content endpoints. */
+function block_exaport_item_content_response(bool $success, array $data = []): array {
+    return array_merge(['success' => $success], $data);
+}
+
+/** Send a consistent JSON response used by all three content endpoints. */
+function block_exaport_send_item_content_json(bool $success, array $data = []): void {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(block_exaport_item_content_response($success, $data));
+    exit;
+}

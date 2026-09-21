@@ -13,11 +13,11 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
-require_once(__DIR__ . '/lib/item_content_text_form.php');
 require_once(__DIR__ . '/lib/item_content_helpers.php');
 
 $courseid = required_param('courseid', PARAM_INT);
 $itemid = required_param('itemid', PARAM_INT);
+$ajax = optional_param('ajax', 0, PARAM_BOOL);
 
 $context = context_system::instance();
 require_login($courseid);
@@ -40,28 +40,12 @@ $editoroptions = [
     'context' => context_user::instance($USER->id),
 ];
 
-$form = new block_exaport_item_content_text_form(null, [
-    'editoroptions' => $editoroptions,
-]);
-$data = (object)[
-    'courseid' => $courseid,
-    'itemid' => $itemid,
-    'title' => '',
-    'content' => '',
-    'contentformat' => FORMAT_HTML,
-];
-$data = file_prepare_standard_editor(
-    $data,
-    'content',
-    $editoroptions,
-    context_user::instance($USER->id),
-    'block_exaport',
-    'item_content_text',
-    0
-);
-$form->set_data($data);
+$form = block_exaport_create_item_content_form('text', $courseid, $itemid);
 
 if ($form->is_cancelled()) {
+    if ($ajax) {
+        block_exaport_send_item_content_json(false, ['cancelled' => true]);
+    }
     redirect($returnurl);
 } else if ($fromform = $form->get_data()) {
     require_sesskey();
@@ -90,7 +74,20 @@ if ($form->is_cancelled()) {
     ]);
 
     $transaction->allow_commit();
+    if ($ajax) {
+        block_exaport_send_item_content_json(true, [
+            'content' => block_exaport_render_item_content_blocks($courseid, $item),
+        ]);
+    }
     redirect($returnurl, get_string('contentblockadded', 'block_exaport'), null, \core\output\notification::NOTIFY_SUCCESS);
+}
+
+if ($ajax && data_submitted()) {
+    block_exaport_send_item_content_json(false, [
+        'validation' => true,
+        'form' => $form->render(),
+        'javascript' => $PAGE->requires->get_end_code(),
+    ]);
 }
 
 block_exaport_print_header('bookmarks' . block_exaport_get_plural_item_type('all'), 'edit');

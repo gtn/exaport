@@ -8,6 +8,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/lib.php');
+
 /**
  * Require access to the item competence workflow and return the editable item.
  *

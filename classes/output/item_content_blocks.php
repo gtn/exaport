@@ -207,7 +207,6 @@ class item_content_blocks implements renderable, templatable {
         switch ($type) {
             case 'text':
                 return [
-                    'icon' => null,
                     'icontext' => 'T',
                     'label' => get_string('view_specialitem_text', 'block_exaport'),
                 ];

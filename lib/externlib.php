@@ -92,7 +92,7 @@ function block_exaport_extern_item_category_badges(int $itemid, int $userid): st
  * Load the supported structured content blocks for one authorized item.
  *
  * @param int $itemid
- * @return array
+ * @return array Sequential list ordered by sort order and record ID.
  */
 function block_exaport_get_item_content_blocks(int $itemid): array {
     global $DB;
@@ -103,21 +103,21 @@ function block_exaport_get_item_content_blocks(int $itemid): array {
         'sortorder ASC, id ASC'
     );
 
-    return array_filter($blocks, function($block): bool {
+    return array_values(array_filter($blocks, function($block): bool {
         return in_array(($block->type ?? ''), ['text', 'link', 'file'], true);
-    });
+    }));
 }
 
 /**
  * Backwards-compatible alias for callers introduced with text-only blocks.
  *
  * @param int $itemid Item ID.
- * @return array
+ * @return array Sequential list ordered by sort order and record ID.
  */
 function block_exaport_get_item_content_text_blocks(int $itemid): array {
-    return array_filter(block_exaport_get_item_content_blocks($itemid), function($block): bool {
+    return array_values(array_filter(block_exaport_get_item_content_blocks($itemid), function($block): bool {
         return ($block->type ?? '') === 'text';
-    });
+    }));
 }
 
 function block_exaport_print_extern_item($item, $access) {

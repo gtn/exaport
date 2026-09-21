@@ -39,7 +39,13 @@ final class item_content_blocks_test extends \advanced_testcase {
 
         $blocks = block_exaport_get_item_content_text_blocks($itemid);
 
-        $this->assertSame([$thirdid, $firstid, $secondid], array_keys($blocks));
+        $this->assertSame([0, 1, 2], array_keys($blocks));
+        $this->assertSame([$thirdid, $firstid, $secondid], array_map(
+            static function(\stdClass $block): int {
+                return (int)$block->id;
+            },
+            $blocks
+        ));
         $this->assertSame(['First', 'Second', 'Third'], array_map(
             static function(\stdClass $block): string {
                 return $block->title;
@@ -71,11 +77,17 @@ final class item_content_blocks_test extends \advanced_testcase {
         ], 'not-a-real-png');
 
         $blocks = block_exaport_get_item_content_blocks($itemid);
-        $this->assertSame([$linkid, $fileid], array_keys($blocks));
+        $this->assertSame([$linkid, $fileid], array_map(
+            static function(\stdClass $block): int {
+                return (int)$block->id;
+            },
+            $blocks
+        ));
 
-        $renderer = $this->getMockBuilder(\renderer_base::class)
+        $renderer = $this->getMockBuilder(\core_renderer::class)
             ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
+            ->onlyMethods(['pix_icon'])
+            ->getMock();
         $renderer->method('pix_icon')->willReturn('icon');
         $addurls = [
             'text' => new \moodle_url('/blocks/exaport/item_content_text.php'),
@@ -113,9 +125,10 @@ final class item_content_blocks_test extends \advanced_testcase {
         global $DB;
         $block = $DB->get_record('block_exaportitemblock', ['id' => $blockid], '*', MUST_EXIST);
 
-        $renderer = $this->getMockBuilder(\renderer_base::class)
+        $renderer = $this->getMockBuilder(\core_renderer::class)
             ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
+            ->onlyMethods(['pix_icon'])
+            ->getMock();
         $renderer->method('pix_icon')->willReturn('icon');
 
         $data = (new \block_exaport\output\item_content_blocks(

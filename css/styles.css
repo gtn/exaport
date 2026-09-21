@@ -103,22 +103,7 @@ div.item-detail-image img {
     position: absolute;
     top: 50%;
     left: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    padding: 0;
-    border: 0;
-    border-radius: 0.375rem;
-    background-color: #0f6cbf;
-    color: #fff;
-    cursor: pointer;
     transform: translate(-50%, -50%);
-}
-
-#exaport .exaport-item-content-add-button.dropdown-toggle::after {
-    display: none;
 }
 
 #exaport .exaport-item-content-add-button .icon {

@@ -56,7 +56,7 @@ final class item_content_blocks_test extends \advanced_testcase {
     }
 
     public function test_supported_loader_and_renderer_include_links_and_files(): void {
-        global $CFG;
+        global $CFG, $OUTPUT;
 
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
@@ -109,6 +109,10 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertStringContainsString('>T</span>', $data['addactions'][0]['icon']);
         $this->assertSame('icon', $data['addactions'][1]['icon']);
         $this->assertSame('icon', $data['addactions'][2]['icon']);
+
+        $html = $OUTPUT->render_from_template('block_exaport/item_content_blocks', $data);
+        $this->assertStringContainsString('btn btn-primary exaport-item-content-add-button', $html);
+        $this->assertStringNotContainsString('dropdown-toggle', $html);
     }
 
     public function test_text_is_formatted_with_owner_context_and_shared_output_has_no_add_control(): void {

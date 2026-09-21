@@ -106,7 +106,7 @@ class item_content_blocks implements renderable, templatable {
             'heading' => get_string('viewcontent', 'block_exaport'),
             'blocks' => $rows,
             'hasblocks' => !empty($rows),
-            'addicon' => \html_writer::tag('span', '+', ['aria-hidden' => 'true']),
+            'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
             'addlabel' => get_string('addcontentblock', 'block_exaport'),
             'addactions' => $addactions,
             'hasaddactions' => !empty($addactions),

@@ -90,6 +90,7 @@ const open = (trigger, config) => {
         returnFocus: trigger,
     });
     let pickerHandlersBound = false;
+    let summaryHandled = false;
 
     modalForm.addEventListener(modalForm.events.LOADED, () => {
         if (pickerHandlersBound) {
@@ -116,6 +117,10 @@ const open = (trigger, config) => {
         });
     });
     modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, event => {
+        if (summaryHandled) {
+            return;
+        }
+        summaryHandled = true;
         replaceSummary(event.detail.itemid, event.detail.content).catch(Notification.exception);
     });
     modalForm.show().catch(Notification.exception);

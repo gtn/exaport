@@ -5,7 +5,7 @@ import Notification from 'core/notification';
 const ITEM_SECTION_SELECTOR = '[data-region="item-competences"]';
 const COMPETENCE_SUMMARY_SELECTOR = '[data-region="competence-summary"]';
 const COMPETENCE_CHECKBOX_SELECTOR = '[data-region="competence-checkbox"]';
-const COMPETENCE_HIDDEN_FIELD_SELECTOR = 'input[name="competencyids"]';
+const COMPETENCE_HIDDEN_FIELD_SELECTOR = 'input[name="competenceids"]';
 
 /**
  * Normalize a collection of checkbox values.

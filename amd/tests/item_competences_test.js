@@ -6,7 +6,7 @@ define(['jquery', 'block_exaport/item_competences'], function($, Competences) {
                 '<div data-region="item-competences" data-itemid="42">' +
                     '<div data-region="competence-summary" data-itemid="42"><span>Old summary</span></div>' +
                     '<form>' +
-                        '<input type="hidden" name="competencyids" value="" />' +
+                        '<input type="hidden" name="competenceids" value="" />' +
                         '<details><summary>One</summary></details>' +
                         '<details open><summary>Two</summary></details>' +
                         '<input type="checkbox" data-region="competence-checkbox" value="9" checked />' +

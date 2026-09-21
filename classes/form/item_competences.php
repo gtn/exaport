@@ -53,8 +53,8 @@ class item_competences extends dynamic_form {
         $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'itemid', $this->optional_param('itemid', 0, PARAM_INT));
         $mform->setType('itemid', PARAM_INT);
-        $mform->addElement('hidden', 'competencyids', implode(',', $selectedids));
-        $mform->setType('competencyids', PARAM_RAW_TRIMMED);
+        $mform->addElement('hidden', 'competenceids', implode(',', $selectedids));
+        $mform->setType('competenceids', PARAM_RAW_TRIMMED);
         $mform->addElement('html', $renderer->render_from_template(
             'block_exaport/item_competence_picker',
             $renderable->export_picker_for_template($renderer)
@@ -72,14 +72,14 @@ class item_competences extends dynamic_form {
         $errors = parent::validation($data, $files);
 
         try {
-            $competencyids = block_exaport_parse_competenceids($data['competencyids'] ?? '');
+            $competencyids = block_exaport_parse_competenceids($data['competenceids'] ?? '');
         } catch (invalid_parameter_exception $exception) {
-            $errors['competencyids'] = get_string('invaliddata', 'error');
+            $errors['competenceids'] = get_string('invaliddata', 'error');
             return $errors;
         }
 
         if (array_diff($competencyids, $this->get_available_descriptorids())) {
-            $errors['competencyids'] = get_string('invaliddata', 'error');
+            $errors['competenceids'] = get_string('invaliddata', 'error');
         }
 
         return $errors;
@@ -123,7 +123,7 @@ class item_competences extends dynamic_form {
         $this->set_data((object)[
             'courseid' => (int)$this->optional_param('courseid', 0, PARAM_INT),
             'itemid' => (int)$item->id,
-            'competencyids' => implode(',', $item->compids_array),
+            'competenceids' => implode(',', $item->compids_array),
         ]);
     }
 
@@ -138,7 +138,7 @@ class item_competences extends dynamic_form {
         return block_exaport_process_item_competence_submission(
             (int)$data->courseid,
             (int)$data->itemid,
-            $data->competencyids ?? ''
+            $data->competenceids ?? ''
         );
     }
 
@@ -165,12 +165,12 @@ class item_competences extends dynamic_form {
      * @return int[]
      */
     private function get_selectedids_for_display(): array {
-        if (!$this->has_submitted_competencyids()) {
+        if (!$this->has_submitted_competenceids()) {
             return array_map('intval', $this->load_item()->compids_array ?? []);
         }
 
         try {
-            return block_exaport_parse_competenceids($this->_ajaxformdata['competencyids']);
+            return block_exaport_parse_competenceids($this->_ajaxformdata['competenceids']);
         } catch (invalid_parameter_exception $exception) {
             return [];
         }
@@ -181,8 +181,8 @@ class item_competences extends dynamic_form {
      *
      * @return bool
      */
-    private function has_submitted_competencyids(): bool {
-        return is_array($this->_ajaxformdata) && array_key_exists('competencyids', $this->_ajaxformdata);
+    private function has_submitted_competenceids(): bool {
+        return is_array($this->_ajaxformdata) && array_key_exists('competenceids', $this->_ajaxformdata);
     }
 
     /**

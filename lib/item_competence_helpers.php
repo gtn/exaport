@@ -8,6 +8,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Dynamic forms are instantiated by Moodle's external API and do not pass
+// through the plugin's inc.php bootstrap used by standalone pages.
+require_once(__DIR__ . '/lib.php');
+
 /**
  * Load an item that the current user may modify through the competence picker.
  *

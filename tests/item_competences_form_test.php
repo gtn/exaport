@@ -10,8 +10,15 @@ namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/../lib/item_competence_helpers.php');
+
 /** Structural tests for the competence dynamic form and its client lifecycle. */
 final class item_competences_form_test extends \advanced_testcase {
+
+    public function test_dynamic_form_helpers_load_plugin_domain_functions(): void {
+        $this->assertTrue(function_exists('block_exaport_check_competence_interaction'));
+        $this->assertTrue(function_exists('block_exaport_get_editable_item'));
+    }
 
     public function test_form_uses_moodle_dynamic_form_contract(): void {
         $this->assertTrue(is_subclass_of(

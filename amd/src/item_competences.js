@@ -1,149 +1,61 @@
+// This file is part of Exabis Eportfolio (extension for Moodle)
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+/**
+ * Moodle dynamic-form modal used to edit an item's competence selection.
+ *
+ * @module block_exaport/item_competences
+ */
+
 import ModalForm from 'core_form/modalform';
 import * as Templates from 'core/templates';
 import Notification from 'core/notification';
 
-const ITEM_SECTION_SELECTOR = '[data-region="item-competences"]';
-const COMPETENCE_SUMMARY_SELECTOR = '[data-region="competence-summary"]';
-const COMPETENCE_CHECKBOX_SELECTOR = '[data-region="competence-checkbox"]';
-const COMPETENCE_HIDDEN_FIELD_SELECTOR = 'input[name="competenceids"]';
-
-/**
- * Normalize a collection of checkbox values.
- *
- * @param {string[]} values Raw checkbox values.
- * @returns {number[]}
- */
-const normalizeIds = values => [...new Set(values
-    .map(value => Number.parseInt(value, 10))
-    .filter(value => Number.isInteger(value) && value > 0))]
-    .sort((left, right) => left - right);
-
-/**
- * Collect the checked competence ids inside a picker root.
- *
- * @param {ParentNode} root Picker or form root.
- * @returns {number[]}
- */
-export const collectSelectedCompetencyIds = root => normalizeIds(
-    Array.from(root.querySelectorAll(`${COMPETENCE_CHECKBOX_SELECTOR}:checked`), checkbox => checkbox.value)
-);
-
-/**
- * Synchronize the custom tree selection into the registered form field.
- *
- * @param {ParentNode} root Picker or form root.
- * @returns {string}
- */
-export const syncSelection = root => {
-    const hiddenField = root.querySelector(COMPETENCE_HIDDEN_FIELD_SELECTOR);
-    if (!hiddenField) {
-        return '';
-    }
-
-    hiddenField.value = collectSelectedCompetencyIds(root).join(',');
-    return hiddenField.value;
+/** Synchronize custom tree checkboxes with the registered dynamic-form value. */
+export const synchronizeSelection = picker => {
+    const field = picker.closest('form').querySelector('[name="competenceids"]');
+    field.value = Array.from(picker.querySelectorAll('[data-region="competence-checkbox"]:checked'))
+        .map(checkbox => checkbox.value).join(',');
 };
 
-/**
- * Expand or collapse every tree branch in the picker.
- *
- * @param {ParentNode} root Picker root.
- * @param {boolean} expanded Whether branches should be expanded.
- */
-export const setTreeExpanded = (root, expanded) => {
-    root.querySelectorAll('details').forEach(details => {
-        details.open = expanded;
-    });
-};
-
-/**
- * Replace the authoritative server-rendered summary for one item.
- *
- * @param {number} itemId Item id.
- * @param {string} content Rendered summary HTML.
- * @returns {Promise<void>}
- */
-export const replaceSummary = (itemId, content) => {
-    const summary = document.querySelector(`${COMPETENCE_SUMMARY_SELECTOR}[data-itemid="${itemId}"]`);
-    if (!summary) {
-        return Promise.resolve();
-    }
-
-    return Templates.replaceNode(summary, content, '');
-};
-
-/**
- * Open the standard dynamic-form modal.
- *
- * @param {HTMLElement} trigger Action which opened the modal.
- * @param {object} config Page configuration.
- */
-const open = (trigger, config) => {
-    const modalForm = new ModalForm({
-        formClass: 'block_exaport\\form\\item_competences',
-        args: {
-            courseid: config.courseId,
-            itemid: config.itemId,
-        },
-        modalConfig: {title: config.title, large: true},
-        saveButtonText: config.saveLabel,
-        returnFocus: trigger,
-    });
-    let pickerHandlersBound = false;
-    let summaryHandled = false;
-
-    modalForm.addEventListener(modalForm.events.LOADED, () => {
-        if (pickerHandlersBound) {
-            return;
-        }
-        pickerHandlersBound = true;
-        const modalRoot = modalForm.modal.getModal()[0];
-        syncSelection(modalRoot);
-
-        modalRoot.addEventListener('change', event => {
-            if (event.target.closest(COMPETENCE_CHECKBOX_SELECTOR)) {
-                syncSelection(modalRoot);
-            }
-        });
-
-        modalRoot.addEventListener('click', event => {
-            if (event.target.closest('[data-action="expand-competences"]')) {
-                event.preventDefault();
-                setTreeExpanded(modalRoot, true);
-            } else if (event.target.closest('[data-action="collapse-competences"]')) {
-                event.preventDefault();
-                setTreeExpanded(modalRoot, false);
-            }
-        });
-    });
-    modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, event => {
-        if (summaryHandled) {
-            return;
-        }
-        summaryHandled = true;
-        replaceSummary(event.detail.itemid, event.detail.content).catch(Notification.exception);
-    });
-    modalForm.show().catch(Notification.exception);
-};
-
-/**
- * Register item-competence modal actions.
- *
- * @param {object} config Page configuration.
- */
+/** Register competency tree interactions and the Moodle dynamic-form launcher. */
 export const init = config => {
-    const section = document.querySelector(`${ITEM_SECTION_SELECTOR}[data-itemid="${config.itemId}"]`);
-    if (!section) {
-        return;
-    }
+    document.addEventListener('click', event => {
+        const treeAction = event.target.closest('[data-action="expand-competences"], [data-action="collapse-competences"]');
+        if (treeAction) {
+            const picker = treeAction.closest('[data-region="competence-picker"]');
+            picker.querySelectorAll('details').forEach(details => {
+                details.open = treeAction.dataset.action === 'expand-competences';
+            });
+            return;
+        }
 
-    section.addEventListener('click', event => {
         const trigger = event.target.closest('[data-action="open-competence-picker"]');
         if (!trigger) {
             return;
         }
-
         event.preventDefault();
-        open(trigger, config);
+        const section = trigger.closest('[data-region="item-competences"]');
+        const modalForm = new ModalForm({
+            formClass: 'block_exaport\\form\\item_competences',
+            args: {courseid: config.courseId, itemid: config.itemId},
+            modalConfig: {title: config.title, large: true},
+            saveButtonText: config.saveLabel,
+            returnFocus: trigger,
+        });
+        modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, submitted => {
+            Templates.replaceNode(section, submitted.detail.content, '').catch(Notification.exception);
+        });
+        modalForm.show();
+    });
+
+    document.addEventListener('change', event => {
+        if (event.target.matches('[data-region="competence-checkbox"]')) {
+            synchronizeSelection(event.target.closest('[data-region="competence-picker"]'));
+        }
     });
 };

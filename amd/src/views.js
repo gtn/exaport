@@ -1258,63 +1258,12 @@ define(['jquery',
     $(element).find('.preloader').remove();
   } // End hidePreloadinator
 
-  // Sharing.
-  function update_sharing() {
-    var share_segments = [];
-    var $form = $('#exaport-view-mod');
-
-    if ($form.find(':input[name=externaccess]').is(':checked')) {
-      share_segments.push($E.translate('share_summary_external'));
-      $('#externaccess-settings').show();
-    } else {
-      $('#externaccess-settings').hide();
-    }
-
-    if ($form.find(':input[name=internaccess]').is(':checked')) {
-      $('#internaccess-settings').show();
-      $('#internaccess-groups').hide();
-      if ($form.find(':input[name=shareall]:checked').val() == 1) {
-        share_segments.unshift($E.translate('share_summary_all'));
-        $('#internaccess-users').hide();
-        $('#internaccess-groups').hide();
-      } else if ($form.find(':input[name=shareall]:checked').val() == 2) {
-        share_segments.unshift($E.translate('share_summary_groups'));
-        $('#internaccess-users').hide();
-        $('#internaccess-groups').show();
-        ExabisEportfolio.load_grouplist('views_mod');
-      } else {
-        share_segments.unshift($E.translate('share_summary_users'));
-        $('#internaccess-groups').hide();
-        $('#internaccess-users').show();
-        ExabisEportfolio.load_userlist('views_mod');
-      }
-    } else {
-      $('#internaccess-settings').hide();
-    }
-
-    if ($form.find(':input[name=sharedemails]').is(':checked')) {
-      share_segments.push($E.translate('share_summary_emails'));
-      $('#emailaccess-settings').show();
-    } else {
-      $('#emailaccess-settings').hide();
-    }
-    ;
-
-    if (!share_segments.length) {
-      share_segments.push($E.translate('share_summary_none'));
-    }
-    $('#view-share-text').text(share_segments.join(' · '));
-  }
 
   // MAIN code of MODULE.
   return {
     initialise: function (_contextId) {
       contextId = _contextId;
       initContentEdit();
-      // For sharing of views
-      // changing the checkboxes / radiobuttons update the sharing text, visible options, etc.
-      $('.view-sharing input[type=checkbox], .view-sharing input[type=radio]').click(update_sharing);
-      update_sharing();
     },
   };
 

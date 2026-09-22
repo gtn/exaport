@@ -675,46 +675,27 @@ function block_exaport_save_item_shares($itemid) {
         return;
     }
 
-    $shareenabled = optional_param('shareenabled', 0, PARAM_INT);
+    $shareenabled = (bool)optional_param('shareenabled', 0, PARAM_INT);
     $shareall = $shareenabled ? optional_param('shareall', 0, PARAM_INT) : 0;
+    $shareuserids = $shareenabled && $shareall === 0
+        ? \block_exaport\param::optional_array('shareusers', PARAM_INT) : [];
+    $notifyuserids = $shareenabled && $shareall === 0
+        ? optional_param_array('notifyusers', [], PARAM_INT) : [];
+    $sharegroupids = $shareenabled && $shareall === 2
+        ? \block_exaport\param::optional_array('sharegroups', PARAM_INT) : [];
 
-    if ((int)$item->shareall !== $shareall) {
-        $item->shareall = $shareall;
-        $DB->update_record('block_exaportitem', $item);
-    }
+    \block_exaport\sharing_service::save_internal_shares(
+        'item',
+        $itemid,
+        $shareenabled,
+        $shareall,
+        $shareuserids,
+        $notifyuserids,
+        $sharegroupids,
+        ['original' => 0, 'courseid' => $item->courseid],
+        (bool)get_config('block_exaport', 'alwaysnotifywhenshare')
+    );
 
-    // Direct user shares are entity-wide (one row per item/user), never course-specific - see
-    // block_exaport_sharing_save_direct_user_shares(). It also validates submitted ids, dedupes
-    // them and reconciles against the existing rows instead of blindly deleting everything and
-    // re-inserting.
-    $itemconfig = block_exaport_get_sharing_entity_config('item');
-    $shareuserids = [];
-    $notifyuserids = [];
-    if ($shareenabled && !$shareall) {
-        $shareuserids = \block_exaport\param::optional_array('shareusers', PARAM_INT);
-        $notifyuserids = optional_param_array('notifyusers', array(), PARAM_INT);
-    }
-    $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
-    block_exaport_sharing_save_direct_user_shares($itemconfig, $itemid, $shareuserids, $notifyuserids,
-        ['original' => 0, 'courseid' => $item ? $item->courseid : 0], (bool)$alwaysnotifywhenshare);
-
-    // Delete all shared groups, then add new ones.
-    $DB->delete_records('block_exaportitemgroupshar', array('itemid' => $itemid));
-    if ($shareenabled && $shareall == 2) {
-        $sharegroups = \block_exaport\param::optional_array('sharegroups', PARAM_INT);
-        $usergroups = block_exaport_get_user_cohorts();
-
-        foreach ($sharegroups as $groupid) {
-            if (!isset($usergroups[$groupid])) {
-                // Not allowed.
-                continue;
-            }
-            $DB->insert_record('block_exaportitemgroupshar', [
-                'itemid' => $itemid,
-                'groupid' => $groupid,
-            ]);
-        }
-    }
 }
 
 /**

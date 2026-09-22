@@ -194,11 +194,8 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->add_exaport_help_button('langid', 'forms.item.langid');
         }
 
-        $textareafields = [ // field name => string marker
+        $textareafields = [ // Field name => string marker.
             'intro' => 'shortdescription',
-            'project_description' => 'project_description',
-            'project_process' => 'project_process',
-            'project_result' => 'project_result',
         ];
         $usetextareas = @$this->_customdata['useTextareas'] ?: [];
         foreach ($textareafields as $textareafield => $stringmarker) {
@@ -229,8 +226,35 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 'accepted_types' => array('image', 'web_image')));
         $mform->add_exaport_help_button('iconfile', 'forms.item.iconfile');
 
+        $mform->addElement('header', 'itemmetadata', get_string('metadata', 'block_exaport'));
+
+        $textareafields = [
+            'project_description' => 'project_description',
+            'project_process' => 'project_process',
+            'project_result' => 'project_result',
+        ];
+        foreach ($textareafields as $textareafield => $stringmarker) {
+            if (isset($usetextareas[$textareafield]) && $usetextareas[$textareafield]) {
+                // It has iframe, show textfield, no editor.
+                $mform->addElement('textarea', $textareafield, get_string($stringmarker, 'block_exaport'),
+                    'rows="20" cols="50" style="width: 95%"');
+                $mform->setType($textareafield, PARAM_RAW);
+                $mform->add_exaport_help_button($textareafield, 'forms.item.' . $textareafield);
+            } else {
+                if (!isset($this->_customdata['textfieldoptions'])) {
+                    $this->_customdata['textfieldoptions'] = array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99,
+                        'context' => context_user::instance($USER->id));
+                }
+                $mform->addElement('editor', $textareafield . '_editor', get_string($stringmarker, 'block_exaport'), null,
+                    $this->_customdata['textfieldoptions']);
+                $mform->setType($textareafield . '_editor', PARAM_RAW);
+                $mform->add_exaport_help_button($textareafield . '_editor', 'forms.item.' . $textareafield . '_editor');
+            }
+        }
+
         // Sharing (direct item share: users and groups/cohorts).
         if (has_capability('block/exaport:shareintern', context_system::instance())) {
+            $mform->addElement('header', 'itemsharing', get_string('share', 'block_exaport'));
             $itemid = (int)($this->_customdata['current']->id ?? 0);
             $item = $itemid > 0 ? $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $USER->id)) : null;
             $itemshareall = $item ? (int)$item->shareall : 0;
@@ -302,6 +326,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
         // Tags.
         if (!empty($CFG->usetags) && $CFG->usetags) {
+            $mform->addElement('header', 'itemtags', get_string('tags'));
             $tags = \core_tag_tag::get_tags_by_area_in_contexts('block_exaport', 'block_exaportitem', [context_user::instance($USER->id)]);
             $tagstrings = [];
             foreach ($tags as $tag) {

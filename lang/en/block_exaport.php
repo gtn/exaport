@@ -314,6 +314,7 @@ $string['chooselayout'] = 'Select how you would like the columns in your collect
 $string['viewtitle'] = 'Title and description';
 $string['viewcontent'] = 'Content';
 $string['mainsettings'] = 'Main settings';
+$string['metadata'] = 'Metadata';
 $string['addcontentblock'] = 'Add content';
 $string['addlinkblock'] = 'Add link';
 $string['addfileblock'] = 'Add files/media';

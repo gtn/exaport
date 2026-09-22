@@ -46,20 +46,49 @@ class item_competences implements renderable, templatable {
         $selectedids = array_map('intval', $this->item->compids_array ?? []);
         $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
         $nodes = $this->export_nodes($tree, $selectedids);
-        $selectednodes = $this->filter_selected_nodes($nodes);
+        $summary = $this->export_summary_from_nodes($nodes);
 
         return [
             'intro' => get_string('selectcomps', 'block_exaport'),
             'addlabel' => get_string('addcompetences', 'block_exaport'),
             'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
-            'selectednodes' => $selectednodes,
-            'hasselected' => !empty($selectednodes),
+            'selectednodes' => $summary['selectednodes'],
+            'hasselected' => $summary['hasselected'],
             'picker' => [
                 'nodes' => $nodes,
+                'itemid' => (int)$this->item->id,
                 'expandlabel' => get_string('expandcomps', 'block_exaport'),
                 'collapselabel' => get_string('collapsecomps', 'block_exaport'),
             ],
             'editable' => $this->editable,
+        ];
+    }
+
+    /**
+     * Export only the selected competence summary.
+     *
+     * @param array|null $tree Competence tree when already available.
+     * @return array
+     */
+    public function export_summary_for_template(?array $tree = null): array {
+        global $USER;
+
+        if ($tree === null) {
+            $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+        }
+        $selectedids = array_map('intval', $this->item->compids_array ?? []);
+        $nodes = $this->export_nodes($tree, $selectedids);
+
+        return $this->export_summary_from_nodes($nodes);
+    }
+
+    /** Return summary template data from an already prepared node tree. */
+    private function export_summary_from_nodes(array $nodes): array {
+        $selectednodes = $this->filter_selected_nodes($nodes);
+
+        return [
+            'selectednodes' => $selectednodes,
+            'hasselected' => !empty($selectednodes),
         ];
     }
 

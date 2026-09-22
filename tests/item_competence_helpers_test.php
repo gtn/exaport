@@ -111,6 +111,16 @@ final class item_competence_helpers_test extends \advanced_testcase {
         $this->assertSame([4, 8], block_exaport_normalize_competenceids([4, '8', 4, 0, -2]));
     }
 
+    public function test_parse_competenceids_normalizes_hidden_field_value(): void {
+        $this->assertSame([8, 4], block_exaport_parse_competenceids('8,4,8,0,-2'));
+        $this->assertSame([], block_exaport_parse_competenceids(''));
+    }
+
+    public function test_parse_competenceids_rejects_malformed_value(): void {
+        $this->expectException(\invalid_parameter_exception::class);
+        block_exaport_parse_competenceids('4,not-an-id');
+    }
+
     public function test_validate_competenceids_accepts_available_ids(): void {
         $this->assertSame([4, 8], block_exaport_validate_competenceids([4, 8], [2, 4, 8]));
     }

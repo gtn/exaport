@@ -8,6 +8,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Dynamic forms are instantiated by Moodle's external API and do not pass
+// through the plugin's inc.php bootstrap used by standalone pages.
+require_once(__DIR__ . '/lib.php');
+
 /**
  * Load an item that the current user may modify through the competence picker.
  *
@@ -30,6 +34,22 @@ function block_exaport_normalize_competenceids(array $competenceids): array {
     return array_values(array_unique(array_filter($competenceids, function($competenceid) {
         return $competenceid > 0;
     })));
+}
+
+/**
+ * Parse the comma-separated dynamic-form value without silently accepting malformed input.
+ *
+ * @param string $value Submitted hidden-field value.
+ * @return int[] Unique positive ids.
+ */
+function block_exaport_parse_competenceids(string $value): array {
+    if ($value === '') {
+        return [];
+    }
+    if (!preg_match('/^-?\d+(,-?\d+)*$/', $value)) {
+        throw new invalid_parameter_exception('Malformed competence selection');
+    }
+    return block_exaport_normalize_competenceids(explode(',', $value));
 }
 
 /**

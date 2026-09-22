@@ -93,6 +93,19 @@ div.item-detail-image img {
     margin-top: 0;
 }
 
+#exaport .exaport-item-competences {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr);
+    column-gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 767.98px) {
+    #exaport .exaport-item-competences {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 #exaport .exaport-item-content-divider {
     position: relative;
 }

@@ -15,9 +15,23 @@ const selectors = {
     groups: '[data-region="groups-settings"]',
     email: '[name="sharedemails"]',
     emailSettings: '[data-region="email-settings"]',
+    status: '[data-region="sharing-status"]',
     statusOn: '[data-region="status-enabled"]',
     statusOff: '[data-region="status-disabled"]',
     summary: '[data-region="sharing-summary"]',
+};
+
+/**
+ * Keep the server-rendered form usable when JavaScript initialisation fails.
+ *
+ * @param {HTMLElement} root Sharing form root.
+ */
+const showFallback = root => {
+    const $root = $(root);
+    $root.addClass('is-unavailable').attr('data-initialization-failed', '1');
+    $root.find(selectors.master).removeAttr('aria-expanded');
+    $root.find(selectors.status).hide();
+    $root.find(selectors.settings).show().attr('aria-disabled', 'false');
 };
 
 const initialiseRoot = (root, loaderType) => {
@@ -99,13 +113,17 @@ const initialiseRoot = (root, loaderType) => {
         update();
     });
     update();
+  }).catch(error => {
+    showFallback(root);
+    Notification.exception(error);
   });
 };
 
 return {
   init: function(loaderType) {
     loaderType = loaderType || '';
-    document.querySelectorAll(selectors.root).forEach(root => initialiseRoot(root, loaderType));
+    return Promise.all(Array.from(document.querySelectorAll(selectors.root),
+        root => initialiseRoot(root, loaderType)));
   }
 };
 });

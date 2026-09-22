@@ -184,6 +184,41 @@ namespace {
         }
     }
 
+    /**
+     * Apply the collection sharing master switch to submitted sharing settings.
+     *
+     * A false value is authoritative: subordinate controls may still be present in a
+     * forged or stale request, but none of them may remain enabled.
+     *
+     * @param stdClass $sharing Submitted collection fields.
+     * @param bool $shareenabled Whether collection sharing is enabled.
+     * @return stdClass The normalized fields.
+     */
+    function block_exaport_normalize_view_sharing(stdClass $sharing, bool $shareenabled): stdClass {
+        if (!$shareenabled) {
+            $sharing->externaccess = 0;
+            $sharing->internaccess = 0;
+            $sharing->shareall = 0;
+            $sharing->externcomment = 0;
+            $sharing->sharedemails = 0;
+        }
+
+        return $sharing;
+    }
+
+    /**
+     * Remove every persisted recipient created by the collection sharing form.
+     *
+     * @param int $viewid Collection id.
+     */
+    function block_exaport_revoke_view_sharing(int $viewid): void {
+        global $DB;
+
+        $DB->delete_records('block_exaportviewshar', ['viewid' => $viewid]);
+        $DB->delete_records('block_exaportviewgroupshar', ['viewid' => $viewid]);
+        $DB->delete_records('block_exaportviewemailshar', ['viewid' => $viewid]);
+    }
+
     function block_exaport_get_view_from_access($access, $pdfaccess = false, $pdfforuserid = 0) {
         global $USER, $DB;
 

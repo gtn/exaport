@@ -392,10 +392,18 @@ if ($editform->is_cancelled()) {
     }
 
     if ($type == 'share') {
-        if (!block_exaport_externaccess_enabled() || empty($dbview->externaccess)) {
+        $shareenabled = (bool)optional_param('shareenabled', 0, PARAM_INT);
+
+        // shareenabled=0 is authoritative over external, internal and email sharing. In particular, never trust
+        // checked subordinate controls from a stale or forged request when the master switch is disabled.
+        $dbview = block_exaport_normalize_view_sharing($dbview, $shareenabled);
+        if (!$shareenabled && !empty($view->id)) {
+            block_exaport_revoke_view_sharing((int)$view->id);
+        }
+        if (!$shareenabled || !block_exaport_externaccess_enabled() || empty($dbview->externaccess)) {
             $dbview->externaccess = 0;
         }
-        if (empty($dbview->internaccess)) {
+        if (!$shareenabled || empty($dbview->internaccess)) {
             $dbview->internaccess = 0;
         }
         if (!block_exaport_shareall_enabled() || !$dbview->internaccess || empty($dbview->shareall)) {
@@ -404,7 +412,7 @@ if ($editform->is_cancelled()) {
         if (empty($dbview->externcomment)) {
             $dbview->externcomment = 0;
         }
-        if (!block_exaport_shareemails_enabled() || empty($dbview->sharedemails)) {
+        if (!$shareenabled || !block_exaport_shareemails_enabled() || empty($dbview->sharedemails)) {
             $dbview->sharedemails = 0;
         }
     }
@@ -690,6 +698,9 @@ if ($editform->is_cancelled()) {
                         block_exaport_emailaccess_sendemails($view, $oldemails, $newemails, $hashesforemails);
                     }
                 }
+            } else {
+                // Removing the rows revokes already-issued email URLs as well as disabling the view flag.
+                $DB->delete_records('block_exaportviewemailshar', ['viewid' => $view->id]);
             }
             $message = block_exaport_get_string('view_sharing_updated');
             break;
@@ -1318,6 +1329,17 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
         echo '<input type="hidden" id="alwaysnotifywhenshare" value="' . htmlspecialchars($alwaysnotifywhenshare) . '" />';
 
+        $shareenabled = !empty($postview->externaccess) || !empty($postview->internaccess)
+            || !empty($postview->sharedemails)
+            || $DB->record_exists('block_exaportviewshar', ['viewid' => $view->id])
+            || $DB->record_exists('block_exaportviewgroupshar', ['viewid' => $view->id])
+            || $DB->record_exists('block_exaportviewemailshar', ['viewid' => $view->id]);
+        echo '<tr><td style="padding-right: 10px; width: 10px">';
+        echo '<input type="checkbox" id="id_shareenabled" name="shareenabled" value="1"' .
+            ($shareenabled ? ' checked="checked"' : '') . ' />';
+        echo '</td><td>' . get_string('share', 'block_exaport') . '</td></tr>';
+        echo '</table><div id="view-share-settings"><table class="table_share">';
+
         if (block_exaport_externaccess_enabled() && has_capability('block/exaport:shareextern', context_system::instance())) {
 
             echo '<tr><td style="padding-right: 10px; width: 10px">';
@@ -1395,7 +1417,7 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
             }
         }
 
-        echo '</table></div>';
+        echo '</table></div></div>';
         echo '</div>';
         echo '</div>';
         break;

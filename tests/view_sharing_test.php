@@ -288,6 +288,123 @@ final class view_sharing_test extends \advanced_testcase {
     }
 
     /**
+     * The sharing master switch revokes all existing channels together.
+     */
+    public function test_view_sharing_master_switch_revokes_every_channel(): void {
+        global $DB, $USER;
+
+        $viewid = $this->create_view($this->owner, 1, 1);
+        $view = $DB->get_record('block_exaportview', ['id' => $viewid], '*', MUST_EXIST);
+        $view->internaccess = 1;
+        $view->sharedemails = 1;
+        $DB->update_record('block_exaportview', $view);
+        $DB->insert_record('block_exaportviewshar', (object)[
+            'viewid' => $viewid, 'userid' => $this->recipient->id, 'notify' => 0,
+        ]);
+        $cohort = $this->getDataGenerator()->create_cohort();
+        cohort_add_member($cohort->id, $this->recipient->id);
+        $DB->insert_record('block_exaportviewgroupshar', (object)[
+            'viewid' => $viewid, 'groupid' => $cohort->id,
+        ]);
+        $emailhash = 'emailhash123';
+        $DB->insert_record('block_exaportviewemailshar', (object)[
+            'viewid' => $viewid, 'email' => 'reader@example.com', 'hash' => $emailhash,
+        ]);
+
+        $view = block_exaport_normalize_view_sharing($view, false);
+        block_exaport_revoke_view_sharing($viewid);
+        $DB->update_record('block_exaportview', $view);
+
+        $saved = $DB->get_record('block_exaportview', ['id' => $viewid], '*', MUST_EXIST);
+        $this->assertSame(0, (int)$saved->externaccess);
+        $this->assertSame(0, (int)$saved->shareall);
+        $this->assertSame(0, (int)$saved->sharedemails);
+        $this->assertFalse($DB->record_exists('block_exaportviewshar', ['viewid' => $viewid]));
+        $this->assertFalse($DB->record_exists('block_exaportviewgroupshar', ['viewid' => $viewid]));
+        $this->assertFalse($DB->record_exists('block_exaportviewemailshar', ['viewid' => $viewid]));
+
+        $USER = $this->recipient;
+        $this->assertEmpty(block_exaport_get_view_from_access('id/' . $this->owner->id . '-' . $viewid));
+        $this->assertEmpty(block_exaport_get_view_from_access('hash/' . $this->owner->id . '-' . $saved->hash));
+        $this->assertEmpty(block_exaport_get_view_from_access('email/' . $saved->hash . '-' . $emailhash));
+    }
+
+    /**
+     * Forged subordinate values cannot override a disabled master switch.
+     */
+    public function test_disabled_master_switch_ignores_forged_subordinate_controls(): void {
+        $submitted = (object)[
+            'externaccess' => 1,
+            'internaccess' => 1,
+            'shareall' => 2,
+            'externcomment' => 1,
+            'sharedemails' => 1,
+        ];
+
+        $normalized = block_exaport_normalize_view_sharing($submitted, false);
+
+        $this->assertSame(0, $normalized->externaccess);
+        $this->assertSame(0, $normalized->internaccess);
+        $this->assertSame(0, $normalized->shareall);
+        $this->assertSame(0, $normalized->externcomment);
+        $this->assertSame(0, $normalized->sharedemails);
+    }
+
+    /**
+     * Enabling the master leaves each independently selected channel intact.
+     *
+     * @dataProvider enabled_channel_provider
+     */
+    public function test_enabled_master_preserves_independent_channels(array $fields): void {
+        $normalized = block_exaport_normalize_view_sharing((object)$fields, true);
+
+        foreach ($fields as $field => $value) {
+            $this->assertSame($value, $normalized->{$field});
+        }
+    }
+
+    public static function enabled_channel_provider(): array {
+        return [
+            'external only' => [['externaccess' => 1, 'internaccess' => 0, 'shareall' => 0, 'sharedemails' => 0]],
+            'internal only' => [['externaccess' => 0, 'internaccess' => 1, 'shareall' => 1, 'sharedemails' => 0]],
+            'email only' => [['externaccess' => 0, 'internaccess' => 0, 'shareall' => 0, 'sharedemails' => 1]],
+        ];
+    }
+
+    /**
+     * With sharing enabled, external, direct-user and email grants operate without enabling each other.
+     */
+    public function test_enabled_master_allows_channels_to_work_independently(): void {
+        global $DB, $USER;
+
+        $externalid = $this->create_view($this->owner, 0, 1);
+        $internalid = $this->create_view($this->owner);
+        $emailid = $this->create_view($this->owner);
+        $external = block_exaport_normalize_view_sharing(
+            $DB->get_record('block_exaportview', ['id' => $externalid], '*', MUST_EXIST), true);
+        $internal = block_exaport_normalize_view_sharing(
+            $DB->get_record('block_exaportview', ['id' => $internalid], '*', MUST_EXIST), true);
+        $email = block_exaport_normalize_view_sharing(
+            $DB->get_record('block_exaportview', ['id' => $emailid], '*', MUST_EXIST), true);
+        $email->sharedemails = 1;
+        $DB->update_record('block_exaportview', $email);
+        $DB->insert_record('block_exaportviewshar', (object)[
+            'viewid' => $internalid, 'userid' => $this->recipient->id, 'notify' => 0,
+        ]);
+        $emailhash = 'independent123';
+        $DB->insert_record('block_exaportviewemailshar', (object)[
+            'viewid' => $emailid, 'email' => 'independent@example.com', 'hash' => $emailhash,
+        ]);
+
+        $this->assertNotEmpty(block_exaport_get_view_from_access(
+            'hash/' . $this->owner->id . '-' . $external->hash));
+        $USER = $this->recipient;
+        $this->assertNotEmpty(block_exaport_get_view_from_access(
+            'id/' . $this->owner->id . '-' . $internal->id));
+        $this->assertNotEmpty(block_exaport_get_view_from_access('email/' . $email->hash . '-' . $emailhash));
+    }
+
+    /**
      * A view in a descendant of a shared category is accessible (recursive inheritance).
      */
     public function test_get_view_from_access_descendant_category(): void {

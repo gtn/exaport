@@ -1263,6 +1263,16 @@ define(['jquery',
     var share_segments = [];
     var $form = $('#exaport-view-mod');
 
+    // The server treats this as an authoritative master switch; hiding subordinate
+    // controls here is presentation only and is not relied on for enforcement.
+    if (!$form.find(':input[name=shareenabled]').is(':checked')) {
+      $('#view-share-settings').hide();
+      share_segments.push($E.translate('share_summary_none'));
+      $('#view-share-text').text(share_segments.join(' · '));
+      return;
+    }
+    $('#view-share-settings').show();
+
     if ($form.find(':input[name=externaccess]').is(':checked')) {
       share_segments.push($E.translate('share_summary_external'));
       $('#externaccess-settings').show();

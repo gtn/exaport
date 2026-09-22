@@ -35,7 +35,6 @@ const initialiseRoot = (root, loaderType) => {
     ]).then(strings => {
     const $root = $(root);
     const $master = $root.find(selectors.master);
-    let confirmedDisable = false;
     let usersLoaded = false;
     let groupsLoaded = false;
 
@@ -82,7 +81,7 @@ const initialiseRoot = (root, loaderType) => {
 
     $root.on('change', 'input[type="checkbox"], input[type="radio"]', event => {
         if ($(event.target).is(selectors.master) && !event.target.checked &&
-                root.dataset.configured === '1' && !confirmedDisable) {
+                root.dataset.configured === '1') {
             event.target.checked = true;
             update();
             Notification.confirm(
@@ -91,7 +90,6 @@ const initialiseRoot = (root, loaderType) => {
                 strings[8],
                 strings[9],
                 () => {
-                    confirmedDisable = true;
                     event.target.checked = false;
                     update();
                 }

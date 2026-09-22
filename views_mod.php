@@ -393,29 +393,11 @@ if ($editform->is_cancelled()) {
     }
 
     if ($type == 'share') {
-        $shareenabled = optional_param('shareenabled', 0, PARAM_INT);
-        if (!$shareenabled) {
-            $dbview->externaccess = 0;
-            $dbview->internaccess = 0;
-            $dbview->shareall = 0;
-            $dbview->externcomment = 0;
-            $dbview->sharedemails = 0;
-        }
-        if (!$shareenabled || !block_exaport_externaccess_enabled() || empty($dbview->externaccess)) {
-            $dbview->externaccess = 0;
-        }
-        if (empty($dbview->internaccess)) {
-            $dbview->internaccess = 0;
-        }
-        if (!block_exaport_shareall_enabled() || !$dbview->internaccess || empty($dbview->shareall)) {
-            $dbview->shareall = 0;
-        }
-        if (empty($dbview->externcomment)) {
-            $dbview->externcomment = 0;
-        }
-        if (!block_exaport_shareemails_enabled() || empty($dbview->sharedemails)) {
-            $dbview->sharedemails = 0;
-        }
+        // shareenabled is authoritative over every view sharing channel. In particular, a forged
+        // request cannot keep external, internal or email access active by submitting subordinate
+        // controls alongside shareenabled=0.
+        $shareenabled = (bool)optional_param('shareenabled', 0, PARAM_INT);
+        $dbview = \block_exaport\sharing_service::normalize_view_channels($dbview, $shareenabled);
     }
 
     switch ($action) {

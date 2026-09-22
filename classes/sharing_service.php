@@ -10,6 +10,35 @@ defined('MOODLE_INTERNAL') || die();
  */
 final class sharing_service {
     /**
+     * Apply the view sharing master switch and feature flags to submitted channel state.
+     *
+     * The master switch is authoritative: when it is off, subordinate values are ignored even
+     * if a forged request submits them as enabled. This method does not persist the view.
+     *
+     * @param \stdClass $state Submitted view sharing state.
+     * @param bool $shareenabled Master sharing state.
+     * @return \stdClass Normalized state safe for persistence.
+     */
+    public static function normalize_view_channels(\stdClass $state, bool $shareenabled): \stdClass {
+        if (!$shareenabled) {
+            $state->externaccess = 0;
+            $state->internaccess = 0;
+            $state->shareall = 0;
+            $state->externcomment = 0;
+            $state->sharedemails = 0;
+            return $state;
+        }
+
+        $state->externaccess = block_exaport_externaccess_enabled() && !empty($state->externaccess) ? 1 : 0;
+        $state->internaccess = !empty($state->internaccess) ? 1 : 0;
+        $state->shareall = block_exaport_shareall_enabled() && $state->internaccess && !empty($state->shareall)
+            ? (int)$state->shareall : 0;
+        $state->externcomment = !empty($state->externcomment) ? 1 : 0;
+        $state->sharedemails = block_exaport_shareemails_enabled() && !empty($state->sharedemails) ? 1 : 0;
+        return $state;
+    }
+
+    /**
      * Save the audience for an entity owned by the current user.
      *
      * Disabling sharing deliberately removes recipient assignments. This matches the historic

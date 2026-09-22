@@ -17,6 +17,7 @@
 
 require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/lib/externlib.php');
+require_once(__DIR__ . '/lib/item_competence_helpers.php');
 require_once(__DIR__ . '/blockmediafunc.php');
 
 use function block_exaport\common\print_error;
@@ -174,14 +175,7 @@ if (count($data) > 0) {
 echo "<div>\n";
 block_exaport_print_extern_item($item, $access);
 
-if (block_exaport_check_competence_interaction()) {
-    $competences = block_exaport_get_active_comps_for_item($item);
-    if ($competences) {
-        // Für alle rollen? Keine interaktion?
-        block_exaport_build_comp_table($item, null, $competences);
-        echo '<br>';
-    }
-}
+echo block_exaport_render_item_competence_summary($item);
 
 if ($item->allowComments) {
     $newcomment = new stdClass();

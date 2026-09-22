@@ -48,16 +48,12 @@ function block_exaport_render_item_category_badges($item) {
 }
 
 /**
- * Render an item's selected competencies using the shared competence summary.
+ * Renders the competencies footer badge for Bootstrap card mode.
  *
  * @param stdClass $item
  * @return string
  */
-function block_exaport_render_item_competences($item) {
-    global $OUTPUT;
-
-    static $trees = [];
-
+function block_exaport_get_item_comp_footer_badge($item) {
     if (!block_exaport_check_competence_interaction()) {
         return '';
     }
@@ -67,22 +63,31 @@ function block_exaport_render_item_competences($item) {
         return '';
     }
 
-    if (empty($comps['descriptors'])) {
+    $titles = [];
+    foreach (['descriptors', 'topics'] as $key) {
+        if (!empty($comps[$key]) && is_array($comps[$key])) {
+            foreach ($comps[$key] as $comp) {
+                if (!empty($comp->title)) {
+                    $titles[] = $comp->title;
+                }
+            }
+        }
+    }
+
+    if (!$titles) {
         return '';
     }
 
-    $renderitem = clone $item;
-    $renderitem->compids_array = array_keys($comps['descriptors']);
-    $userid = (int)$renderitem->userid;
-    if (!array_key_exists($userid, $trees)) {
-        $trees[$userid] = \block_exacomp\api::get_comp_tree_for_exaport($userid);
+    $items = '';
+    foreach ($titles as $title) {
+        $items .= html_writer::tag('li', format_string($title));
     }
-    $renderable = new \block_exaport\output\item_competences($renderitem, false);
+    $tooltiphtml = html_writer::tag('ul', $items, ['class' => 'tooltiplist']);
 
-    return $OUTPUT->render_from_template(
-        'block_exaport/item_competence_summary',
-        $renderable->export_summary_for_template($trees[$userid])
-    );
+    return '<span class="eportoflio-comment me-2">'
+        . '<i class="icon icon-comment fa fa-lightbulb" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' . s($tooltiphtml) . '"></i>'
+        . '<span class="eportfolio-comment-count">' . count($titles) . '</span>'
+        . '</span>';
 }
 
 class exaport_portfolio_caller extends portfolio_module_caller_base {

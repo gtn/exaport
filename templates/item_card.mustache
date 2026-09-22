@@ -26,7 +26,7 @@
         thumbnailurl    - Access-controlled thumbnail URL
         thumbnailalt    - Alt text for the thumbnail image
         dateformatted   - Human-readable date string for the card footer
-        competences     - Selected competence summary HTML (may be empty)
+        compbadge       - Pre-rendered HTML for the competence badge (may be empty)
         hascomments     - Boolean: item has at least one comment
         commentcount    - Integer comment count
         commentlabel    - Localised comment count tooltip string
@@ -89,7 +89,6 @@
                         {{{categorybadges}}}
                     </div>
                     {{/categorybadges}}
-                    {{{competences}}}
                 </div>
             </div>
         </div>
@@ -97,6 +96,7 @@
             <span class="eportoflio-date">{{dateformatted}}</span>
             <div>
                 {{#isshared}}<span class="eportoflio-share">{{{sharedicon}}} <span>{{sharedsummary}}</span></span>{{/isshared}}
+                {{{compbadge}}}
                 {{#hascomments}}
                 <span class="eportoflio-comment me-2">
                     <i class="icon icon-comment fa fa-comment-dots"

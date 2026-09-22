@@ -15,13 +15,13 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
 require_once($CFG->dirroot . '/blocks/exaport/locallib.php');
 
 /**
- * Tests the item competence summary helper.
+ * Tests the item competence footer badge helper.
  *
  * @package    block_exaport
  * @copyright  2026 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class item_competences_summary_test extends \advanced_testcase {
+final class item_comp_footer_badge_test extends \advanced_testcase {
 
     public function test_category_badges_helper_is_available_to_card_renderers(): void {
         $item = (object)[
@@ -38,13 +38,13 @@ final class item_competences_summary_test extends \advanced_testcase {
         $this->assertSame('', block_exaport_render_item_category_badges((object)[]));
     }
 
-    public function test_summary_is_available_and_empty_when_competence_interaction_is_disabled(): void {
+    public function test_badge_is_available_and_empty_when_competence_interaction_is_disabled(): void {
         global $CFG;
 
         $this->resetAfterTest(true);
         $CFG->block_exaport_enable_interaction_competences = 0;
 
-        $this->assertTrue(function_exists('block_exaport_render_item_competences'));
-        $this->assertSame('', block_exaport_render_item_competences((object)['id' => 1]));
+        $this->assertTrue(function_exists('block_exaport_get_item_comp_footer_badge'));
+        $this->assertSame('', block_exaport_get_item_comp_footer_badge((object)['id' => 1]));
     }
 }

@@ -1083,7 +1083,7 @@ foreach ($items as $item) {
                             </span>';
         }
 
-        $rowdata['name'] .= block_exaport_render_item_competences($item);
+        $icons .= block_exaport_get_item_comp_icon($item);
 
         // Copy files to course.
         if ($item->type == 'file' && block_exaport_feature_enabled('copy_to_course')) {
@@ -1169,6 +1169,8 @@ echo '</div>';
 
 echo '<div class="exaport-view-section exaport-view-tiles' . ($folderlayout == 'tiles' ? ' is-active' : '') . '" data-exaport-view="tiles"' . ($folderlayout == 'tiles' ? '' : ' style="display:none;"') . '>';
 echo '<div class="excomdos_tiletable layout-' . $layout . ' ' . ($useBootstrapLayout ? 'row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5' : '') . '">';
+echo '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>';
+
 if ($layout == 'folder') {
     // Show a link to parent category only for folder mode navigation.
     if ($parentcategory) {
@@ -1200,6 +1202,45 @@ echo "</div>";
 echo block_exaport_wrapperdivend();
 
 echo $OUTPUT->footer();
+
+function block_exaport_get_item_comp_icon($item) {
+    global $DB;
+
+    if (!block_exaport_check_competence_interaction()) {
+        return;
+    }
+
+    $comps = block_exaport_get_active_comps_for_item($item);
+
+    if (!$comps) {
+        return;
+    }
+
+    // If item is assoziated with competences display them.
+    // Titles are user/import supplied text, not trusted HTML. They end up inside the inline
+    // onmouseover="Tip('...')" attribute below, whose value wz_tooltip.js later assigns directly to
+    // .innerHTML, so each title must be escaped for both of those layers (see
+    // block_exaport_escape_for_inline_tooltip() docblock for why a single escape pass is not enough).
+    $competences = "";
+    foreach ($comps["descriptors"] as $comp) {
+        $competences .= block_exaport_escape_for_inline_tooltip($comp->title) . '<br>';
+    }
+    foreach ($comps["topics"] as $comp) {
+        $competences .= block_exaport_escape_for_inline_tooltip($comp->title) . '<br>';
+    }
+    $competences = str_replace("\r", "", $competences);
+    $competences = str_replace("\n", "", $competences);
+    $competences = trim($competences);
+
+    if (!$competences) {
+        return;
+    }
+
+    return '<a class="artefact-button" onmouseover="Tip(\'' . $competences . '\')" onmouseout="UnTip()">'
+        . block_exaport_fontawesome_icon('list', 'solid', 1)
+        //        .'<img src="pix/comp.png" alt="'.'competences'.'" />'
+        . '</a>';
+}
 
 /**
  * Prints the unified "Create" dropdown button (artefact + category + view).
@@ -1607,6 +1648,7 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
                 . '</span>';
         }
         $itemContent .= block_exaport_get_item_project_icon($item);
+        $itemContent .= block_exaport_get_item_comp_icon($item);
 
         if (in_array($type, ['mine', 'shared'])) {
             if ($type == 'mine') {
@@ -1661,7 +1703,6 @@ function block_exaport_artefact_template_tile($item, $courseid, $type, $category
         <div class="exomdos_tiletitle">
             <a href="' . $url . '">' . format_string($item->name) . '</a>
             ' . block_exaport_render_item_category_badges($item) . '
-            ' . block_exaport_render_item_competences($item) . '
         </div>
     </div>';
 

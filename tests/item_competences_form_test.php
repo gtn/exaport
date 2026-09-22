@@ -18,6 +18,7 @@ final class item_competences_form_test extends \advanced_testcase {
     public function test_dynamic_form_helpers_load_plugin_domain_functions(): void {
         $this->assertTrue(function_exists('block_exaport_check_competence_interaction'));
         $this->assertTrue(function_exists('block_exaport_get_editable_item'));
+        $this->assertTrue(function_exists('block_exaport_render_item_competence_summary'));
     }
 
     public function test_form_uses_moodle_dynamic_form_contract(): void {
@@ -48,6 +49,13 @@ final class item_competences_form_test extends \advanced_testcase {
             "/addElement\\(\\s*'static',\\s*'competencesummary',\\s*get_string\\('selectcomps'/s",
             $source
         );
+    }
+
+    public function test_shared_item_reuses_competence_summary_instead_of_legacy_table(): void {
+        $source = file_get_contents(__DIR__ . '/../shared_item.php');
+
+        $this->assertStringContainsString('block_exaport_render_item_competence_summary($item)', $source);
+        $this->assertStringNotContainsString('block_exaport_build_comp_table', $source);
     }
 
     public function test_summary_export_contains_only_selected_nodes(): void {

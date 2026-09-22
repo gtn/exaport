@@ -53,9 +53,12 @@ final class item_competences_form_test extends \advanced_testcase {
 
     public function test_shared_item_reuses_competence_summary_instead_of_legacy_table(): void {
         $source = file_get_contents(__DIR__ . '/../shared_item.php');
+        $template = file_get_contents(__DIR__ . '/../templates/item_competence_section.mustache');
 
         $this->assertStringContainsString('block_exaport_render_item_competence_summary($item)', $source);
         $this->assertStringNotContainsString('block_exaport_build_comp_table', $source);
+        $this->assertStringContainsString('exaport-item-content-section', $template);
+        $this->assertStringContainsString('{{> block_exaport/item_competence_summary}}', $template);
     }
 
     public function test_summary_export_contains_only_selected_nodes(): void {

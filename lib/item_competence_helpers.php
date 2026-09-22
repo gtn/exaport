@@ -163,8 +163,8 @@ function block_exaport_render_item_competence_summary(stdClass $item, ?array $co
     $tree = \block_exacomp\api::get_comp_tree_for_exaport((int)$item->userid);
     $renderable = new \block_exaport\output\item_competences($summaryitem, false);
 
-    return $OUTPUT->render_from_template(
-        'block_exaport/item_competence_summary',
-        $renderable->export_summary_for_template($tree)
-    );
+    $data = $renderable->export_summary_for_template($tree);
+    $data['heading'] = get_string('competencessection', 'block_exaport');
+
+    return $OUTPUT->render_from_template('block_exaport/item_competence_section', $data);
 }

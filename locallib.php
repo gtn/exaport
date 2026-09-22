@@ -48,12 +48,16 @@ function block_exaport_render_item_category_badges($item) {
 }
 
 /**
- * Renders the competencies footer badge for Bootstrap card mode.
+ * Render an item's selected competencies using the shared competence summary.
  *
  * @param stdClass $item
  * @return string
  */
-function block_exaport_get_item_comp_footer_badge($item) {
+function block_exaport_render_item_competences($item) {
+    global $OUTPUT;
+
+    static $trees = [];
+
     if (!block_exaport_check_competence_interaction()) {
         return '';
     }
@@ -63,31 +67,22 @@ function block_exaport_get_item_comp_footer_badge($item) {
         return '';
     }
 
-    $titles = [];
-    foreach (['descriptors', 'topics'] as $key) {
-        if (!empty($comps[$key]) && is_array($comps[$key])) {
-            foreach ($comps[$key] as $comp) {
-                if (!empty($comp->title)) {
-                    $titles[] = $comp->title;
-                }
-            }
-        }
-    }
-
-    if (!$titles) {
+    if (empty($comps['descriptors'])) {
         return '';
     }
 
-    $items = '';
-    foreach ($titles as $title) {
-        $items .= html_writer::tag('li', format_string($title));
+    $renderitem = clone $item;
+    $renderitem->compids_array = array_keys($comps['descriptors']);
+    $userid = (int)$renderitem->userid;
+    if (!array_key_exists($userid, $trees)) {
+        $trees[$userid] = \block_exacomp\api::get_comp_tree_for_exaport($userid);
     }
-    $tooltiphtml = html_writer::tag('ul', $items, ['class' => 'tooltiplist']);
+    $renderable = new \block_exaport\output\item_competences($renderitem, false);
 
-    return '<span class="eportoflio-comment me-2">'
-        . '<i class="icon icon-comment fa fa-lightbulb" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' . s($tooltiphtml) . '"></i>'
-        . '<span class="eportfolio-comment-count">' . count($titles) . '</span>'
-        . '</span>';
+    return $OUTPUT->render_from_template(
+        'block_exaport/item_competence_summary',
+        $renderable->export_summary_for_template($trees[$userid])
+    );
 }
 
 class exaport_portfolio_caller extends portfolio_module_caller_base {

@@ -41,10 +41,8 @@ class item_competences implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
-        global $USER;
-
         $selectedids = array_map('intval', $this->item->compids_array ?? []);
-        $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+        $tree = \block_exacomp\api::get_comp_tree_for_exaport($this->get_userid());
         $nodes = $this->export_nodes($tree, $selectedids);
         $summary = $this->export_summary_from_nodes($nodes);
 
@@ -70,15 +68,20 @@ class item_competences implements renderable, templatable {
      * @return array
      */
     public function export_summary_for_template(?array $tree = null): array {
-        global $USER;
-
         if ($tree === null) {
-            $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+            $tree = \block_exacomp\api::get_comp_tree_for_exaport($this->get_userid());
         }
         $selectedids = array_map('intval', $this->item->compids_array ?? []);
         $nodes = $this->export_nodes($tree, $selectedids);
 
         return $this->export_summary_from_nodes($nodes);
+    }
+
+    /** Return the owner whose competence tree contains the selected descriptors. */
+    private function get_userid(): int {
+        global $USER;
+
+        return (int)($this->item->userid ?? $USER->id);
     }
 
     /** Return summary template data from an already prepared node tree. */

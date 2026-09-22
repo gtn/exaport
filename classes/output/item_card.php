@@ -153,7 +153,7 @@ class item_card extends card {
             'canedit'       => $isownitem && $type !== 'extern_category',
             'candelete'     => $isownitem && $type !== 'extern_category' && block_exaport_item_is_editable($item->id),
             'introtext'     => $introtext,
-            'compbadge'     => block_exaport_get_item_comp_footer_badge($item),
+            'competences'   => block_exaport_render_item_competences($item),
             'commentlabel'  => $commentlabel,
             'sharedicon'    => block_exaport_render_share_icon($share),
         ] + \block_exaport_get_item_thumbnail_context($item, $thumbnailaccess) + ($this->showcategories ? [

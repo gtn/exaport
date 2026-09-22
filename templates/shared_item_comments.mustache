@@ -1,0 +1,31 @@
+<section class="exaport-shared-item-comments mt-4 mb-4">
+    <hr class="mb-4">
+    <h2 class="h3 mb-3">{{heading}}</h2>
+    {{#comments}}
+    <article class="card mb-2">
+        <div class="card-body d-flex">
+            {{#picture}}
+            <div class="mr-3 me-3 flex-shrink-0">{{{picture}}}</div>
+            {{/picture}}
+            <div class="flex-grow-1">
+                <div class="mb-3">{{{authorline}}}</div>
+                <div class="mb-2">{{{content}}}</div>
+                {{#file}}
+                <div class="mb-2">
+                    {{label}}:
+                    <a href="{{url}}" target="_blank" rel="noopener">{{name}}</a>
+                    ({{size}})
+                </div>
+                {{/file}}
+                {{#canmanage}}
+                <div class="text-right text-end">
+                    <a href="{{editurl}}">{{editlabel}}</a>
+                    <span aria-hidden="true">&nbsp;</span>
+                    <a href="{{deleteurl}}" class="text-danger" onclick="{{{deleteonclick}}}">{{deletelabel}}</a>
+                </div>
+                {{/canmanage}}
+            </div>
+        </div>
+    </article>
+    {{/comments}}
+</section>

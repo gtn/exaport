@@ -137,3 +137,34 @@ function block_exaport_update_item_competence_metadata(stdClass $item): void {
         'eportfolioitem' => 1,
     ]);
 }
+
+/**
+ * Render the read-only summary used for selected item competencies.
+ *
+ * @param stdClass $item Portfolio item, including its owner id.
+ * @param array|null $competences Active Exacomp competencies when already loaded.
+ * @return string
+ */
+function block_exaport_render_item_competence_summary(stdClass $item, ?array $competences = null): string {
+    global $OUTPUT;
+
+    if (!block_exaport_check_competence_interaction()) {
+        return '';
+    }
+    if ($competences === null) {
+        $competences = block_exaport_get_active_comps_for_item($item);
+    }
+    if (empty($competences['descriptors'])) {
+        return '';
+    }
+
+    $summaryitem = clone $item;
+    $summaryitem->compids_array = array_keys($competences['descriptors']);
+    $tree = \block_exacomp\api::get_comp_tree_for_exaport((int)$item->userid);
+    $renderable = new \block_exaport\output\item_competences($summaryitem, false);
+
+    $data = $renderable->export_summary_for_template($tree);
+    $data['heading'] = get_string('competencessection', 'block_exaport');
+
+    return $OUTPUT->render_from_template('block_exaport/item_competence_section', $data);
+}

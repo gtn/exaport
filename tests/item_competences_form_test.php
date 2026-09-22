@@ -18,6 +18,7 @@ final class item_competences_form_test extends \advanced_testcase {
     public function test_dynamic_form_helpers_load_plugin_domain_functions(): void {
         $this->assertTrue(function_exists('block_exaport_check_competence_interaction'));
         $this->assertTrue(function_exists('block_exaport_get_editable_item'));
+        $this->assertTrue(function_exists('block_exaport_render_item_competence_summary'));
     }
 
     public function test_form_uses_moodle_dynamic_form_contract(): void {
@@ -48,6 +49,28 @@ final class item_competences_form_test extends \advanced_testcase {
             "/addElement\\(\\s*'static',\\s*'competencesummary',\\s*get_string\\('selectcomps'/s",
             $source
         );
+    }
+
+    public function test_shared_item_reuses_competence_summary_instead_of_legacy_table(): void {
+        $source = file_get_contents(__DIR__ . '/../shared_item.php');
+        $template = file_get_contents(__DIR__ . '/../templates/item_competence_section.mustache');
+
+        $this->assertStringContainsString('block_exaport_render_item_competence_summary($item)', $source);
+        $this->assertStringNotContainsString('block_exaport_build_comp_table', $source);
+        $this->assertStringContainsString('exaport-item-content-section', $template);
+        $this->assertStringContainsString('{{> block_exaport/item_competence_summary}}', $template);
+    }
+
+    public function test_shared_item_comments_use_moodle_card_markup(): void {
+        $source = file_get_contents(__DIR__ . '/../shared_item.php');
+        $template = file_get_contents(__DIR__ . '/../templates/shared_item_comments.mustache');
+
+        $this->assertStringContainsString("render_from_template('block_exaport/shared_item_comments'", $source);
+        $this->assertStringNotContainsString('class="forumpost blogpost blog"', $source);
+        $this->assertStringContainsString('<article class="card mb-2">', $template);
+        $this->assertStringContainsString('{{{authorline}}}', $template);
+        $this->assertStringContainsString('{{#file}}', $template);
+        $this->assertStringContainsString('{{#canmanage}}', $template);
     }
 
     public function test_summary_export_contains_only_selected_nodes(): void {

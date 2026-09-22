@@ -493,6 +493,7 @@ $string['contactcomps'] = 'Alle schlie&szlig;en';
 $string['studentcomps'] = 'Hier kannst du einsch&auml;tzen, ob folgende Kompetenzen durch deine Seite erreicht wurden.';
 $string['teachercomps'] = 'Hier kannst du beurteilen, ob die Lernenden folgende Kompetenzen durch Seiten erreicht haben.';
 $string['competences'] = 'Kompetenzen';
+$string['competencessection'] = 'Kompetenzen';
 $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.';
 $string['settings_interaktion_exacomp_head'] = 'Verknüpfung von Exabis ePortfolio und Exabis Kompetenzraster aktivieren';
 $string['settings_interaktion_exacomp_body'] = 'Interaktion mit Block Exabis Competence Grid, falls dieser installiert ist, zulassen.';

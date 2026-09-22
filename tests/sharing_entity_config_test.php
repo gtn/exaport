@@ -527,4 +527,46 @@ final class sharing_entity_config_test extends \advanced_testcase {
         $this->assertEquals(0, $share->original);
         $this->assertEquals($course->id, $share->courseid);
     }
+
+    /**
+     * The shared service treats the master switch as authoritative and removes stale audiences.
+     */
+    public function test_sharing_service_disables_category_and_removes_recipients(): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $categoryid = $this->create_category($owner);
+        $this->setUser($owner);
+
+        sharing_service::save_internal_shares('category', $categoryid, true, 0, [$recipient->id]);
+        $category = $DB->get_record('block_exaportcate', ['id' => $categoryid]);
+        $this->assertEquals(1, $category->internshare);
+        $this->assertTrue($DB->record_exists('block_exaportcatshar', [
+            'catid' => $categoryid,
+            'userid' => $recipient->id,
+        ]));
+
+        // Forged subordinate values are ignored when the master switch is off.
+        sharing_service::save_internal_shares('category', $categoryid, false, 2,
+            [$recipient->id], [$recipient->id], [12345]);
+        $category = $DB->get_record('block_exaportcate', ['id' => $categoryid]);
+        $this->assertEquals(0, $category->internshare);
+        $this->assertEquals(0, $category->shareall);
+        $this->assertFalse($DB->record_exists('block_exaportcatshar', ['catid' => $categoryid]));
+        $this->assertFalse($DB->record_exists('block_exaportcatgroupshar', ['catid' => $categoryid]));
+    }
+
+    /**
+     * Sharing state may only be changed by the entity owner.
+     */
+    public function test_sharing_service_rejects_non_owner(): void {
+        $owner = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+        $categoryid = $this->create_category($owner);
+        $this->setUser($other);
+
+        $this->expectException(\moodle_exception::class);
+        sharing_service::save_internal_shares('category', $categoryid, true, 1);
+    }
 }

@@ -1,0 +1,110 @@
+{{!
+    @template block_exaport/sharing_form
+
+    Shared, accessible sharing controls for views, categories and items.
+}}
+<section id="{{componentid}}" class="exaport-sharing" data-region="exaport-sharing"
+         data-configured="{{#configured}}1{{/configured}}{{^configured}}0{{/configured}}">
+    <input type="hidden" id="alwaysnotifywhenshare" value="{{#alwaysnotify}}1{{/alwaysnotify}}{{^alwaysnotify}}0{{/alwaysnotify}}">
+
+    {{#showmaster}}
+        <div class="exaport-sharing__master custom-control custom-switch">
+            <input class="custom-control-input" type="checkbox" id="{{componentid}}-enabled"
+                   name="shareenabled" value="1" aria-controls="{{componentid}}-settings"
+                   {{#enabled}}checked{{/enabled}}>
+            <label class="custom-control-label" for="{{componentid}}-enabled">
+                <strong>{{#str}} sharing_enable, block_exaport {{/str}}</strong>
+            </label>
+            <div class="form-text text-muted">{{#str}} sharing_enable_help, block_exaport {{/str}}</div>
+        </div>
+    {{/showmaster}}
+
+    <div class="exaport-sharing__status mt-2" data-region="sharing-status" role="status" aria-live="polite">
+        <span class="badge badge-success bg-success" data-region="status-enabled">{{#str}} sharing_status_on, block_exaport {{/str}}</span>
+        <span class="badge badge-secondary bg-secondary" data-region="status-disabled">{{#str}} sharing_status_off, block_exaport {{/str}}</span>
+        <span class="ml-2 ms-2" data-region="sharing-summary"></span>
+    </div>
+
+    <div id="{{componentid}}-settings" class="exaport-sharing__settings mt-3" data-region="sharing-settings">
+        {{#showexternal}}
+            <fieldset class="exaport-sharing__channel">
+                <legend class="h6">{{#str}} sharing_external_heading, block_exaport {{/str}}</legend>
+                <div class="form-check">
+                    {{{externalinput}}}
+                    <label class="form-check-label" for="id_externaccess">{{#str}} externalaccess, block_exaport {{/str}}</label>
+                </div>
+                <div class="exaport-sharing__details" data-region="external-settings">
+                    {{#externalurl}}<a href="{{externalurl}}" target="_blank" rel="noopener noreferrer">{{externalurl}}</a>{{/externalurl}}
+                    {{#showexternalcomments}}
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="{{componentid}}-externcomment"
+                                   name="externcomment" value="1" {{#externalcommentschecked}}checked{{/externalcommentschecked}}>
+                            <label class="form-check-label" for="{{componentid}}-externcomment">{{#str}} externcomment, block_exaport {{/str}}</label>
+                        </div>
+                    {{/showexternalcomments}}
+                </div>
+            </fieldset>
+        {{/showexternal}}
+
+        {{#showinternal}}
+            <fieldset class="exaport-sharing__channel">
+                <legend class="h6">{{#str}} sharing_internal_heading, block_exaport {{/str}}</legend>
+                {{#internalinput}}
+                    <div class="form-check mb-2">
+                        {{{internalinput}}}
+                        <label class="form-check-label" for="id_internaccess">{{#str}} internalaccess, block_exaport {{/str}}</label>
+                    </div>
+                {{/internalinput}}
+                <div data-region="internal-settings">
+                    <fieldset>
+                        <legend class="sr-only visually-hidden">{{#str}} sharing_audience, block_exaport {{/str}}</legend>
+                        {{#showeveryone}}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="{{componentid}}-all" name="shareall" value="1" {{#modeall}}checked{{/modeall}}>
+                                <label class="form-check-label" for="{{componentid}}-all">{{#str}} sharing_everyone, block_exaport {{/str}}</label>
+                            </div>
+                        {{/showeveryone}}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="{{componentid}}-users" name="shareall" value="0" {{#modeusers}}checked{{/modeusers}}>
+                            <label class="form-check-label" for="{{componentid}}-users">{{#str}} internalaccessusers, block_exaport {{/str}}</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="{{componentid}}-groups" name="shareall" value="2" {{#modegroups}}checked{{/modegroups}}>
+                            <label class="form-check-label" for="{{componentid}}-groups">{{#str}} internalaccessgroups, block_exaport {{/str}}</label>
+                        </div>
+                    </fieldset>
+
+                    <div class="exaport-sharing__audience" data-region="users-settings">
+                        {{#showsearch}}
+                            <label for="{{componentid}}-search">{{#str}} share_to_other_users, block_exaport {{/str}}</label>
+                            <div class="input-group mb-3">
+                                <input class="form-control" id="{{componentid}}-search" name="share_to_other_users_q" type="search" value="{{searchvalue}}">
+                                <div class="input-group-append">
+                                    <button class="btn btn-secondary" name="share_to_other_users_submit" value="1" type="submit">{{#str}} search {{/str}}</button>
+                                </div>
+                            </div>
+                        {{/showsearch}}
+                        <div id="sharing-userlist" class="exaport-sharing__recipient-list" data-region="user-list">{{#str}} loading, core {{/str}}</div>
+                    </div>
+                    <div class="exaport-sharing__audience" data-region="groups-settings">
+                        <div id="sharing-grouplist" class="exaport-sharing__recipient-list" data-region="group-list">{{#str}} loading, core {{/str}}</div>
+                    </div>
+                </div>
+            </fieldset>
+        {{/showinternal}}
+
+        {{#showemail}}
+            <fieldset class="exaport-sharing__channel">
+                <legend class="h6">{{#str}} sharing_email_heading, block_exaport {{/str}}</legend>
+                <div class="form-check">
+                    {{{emailinput}}}
+                    <label class="form-check-label" for="id_sharedemails">{{#str}} emailaccess, block_exaport {{/str}}</label>
+                </div>
+                <div class="exaport-sharing__details" data-region="email-settings">
+                    <label for="{{componentid}}-emails">{{#str}} emailaccessdescription, block_exaport {{/str}}</label>
+                    <textarea class="form-control" id="{{componentid}}-emails" name="emailsforshare" rows="4">{{emailaddresses}}</textarea>
+                </div>
+            </fieldset>
+        {{/showemail}}
+    </div>
+</section>

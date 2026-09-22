@@ -172,3 +172,71 @@ div.item-detail-image img {
     align-items: center;
     gap: 0.375rem;
 }
+.exaport-sharing {
+    max-width: 72rem;
+}
+
+.exaport-sharing__master {
+    padding: 1rem 1rem 1rem 3rem;
+    border: 1px solid #d5ddea;
+    border-radius: .5rem;
+    background: #f8f9fa;
+}
+
+.exaport-sharing__status {
+    min-height: 1.75rem;
+}
+
+.exaport-sharing__settings {
+    display: grid;
+    gap: 1rem;
+    transition: opacity .15s ease-in-out;
+}
+
+.exaport-sharing.is-disabled .exaport-sharing__settings {
+    opacity: .55;
+}
+
+.exaport-sharing__channel {
+    min-width: 0;
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid #d5ddea;
+    border-radius: .5rem;
+}
+
+.exaport-sharing__channel > legend {
+    width: auto;
+    margin: 0 0 .75rem;
+    padding: 0 .25rem;
+}
+
+.exaport-sharing__details,
+.exaport-sharing__audience {
+    margin-top: .75rem;
+    padding-left: 1.5rem;
+}
+
+.exaport-sharing__recipient-list {
+    max-height: 24rem;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    background: #fff;
+}
+
+.exaport-sharing .course-group-title {
+    min-height: 2.75rem;
+    padding: .625rem .75rem;
+    cursor: pointer;
+}
+
+@media (min-width: 992px) {
+    .exaport-sharing__settings {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .exaport-sharing__channel:only-child {
+        grid-column: 1 / -1;
+    }
+}

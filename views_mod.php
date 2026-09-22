@@ -53,6 +53,7 @@ block_exaport_add_iconpack(true);
 // $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
 // $PAGE->requires->js_call_amd('block_exaport/views', 'initialise', [['alwaysnotifywhenshare' => $alwaysnotifywhenshare]]);
 $PAGE->requires->js_call_amd('block_exaport/views', 'initialise', [context_system::instance()->id]);
+$PAGE->requires->js_call_amd('block_exaport/sharing_form', 'init', ['views_mod']);
 // $config = ['paths' => ['block_exaport/popover' => $CFG->wwwroot.'/blocks/exaport/javascript/popover.min']];
 // $requirejs = 'require.config(' . json_encode($config) . ')';
 // $PAGE->requires->js_amd_inline($requirejs);
@@ -392,21 +393,11 @@ if ($editform->is_cancelled()) {
     }
 
     if ($type == 'share') {
-        if (!block_exaport_externaccess_enabled() || empty($dbview->externaccess)) {
-            $dbview->externaccess = 0;
-        }
-        if (empty($dbview->internaccess)) {
-            $dbview->internaccess = 0;
-        }
-        if (!block_exaport_shareall_enabled() || !$dbview->internaccess || empty($dbview->shareall)) {
-            $dbview->shareall = 0;
-        }
-        if (empty($dbview->externcomment)) {
-            $dbview->externcomment = 0;
-        }
-        if (!block_exaport_shareemails_enabled() || empty($dbview->sharedemails)) {
-            $dbview->sharedemails = 0;
-        }
+        // shareenabled is authoritative over every view sharing channel. In particular, a forged
+        // request cannot keep external, internal or email access active by submitting subordinate
+        // controls alongside shareenabled=0.
+        $shareenabled = (bool)optional_param('shareenabled', 0, PARAM_INT);
+        $dbview = \block_exaport\sharing_service::normalize_view_channels($dbview, $shareenabled);
     }
 
     switch ($action) {
@@ -577,18 +568,21 @@ if ($editform->is_cancelled()) {
 
             break;
         case 'share':
-            // Direct user shares are entity-wide (one row per view/user), never course-specific -
-            // see block_exaport_sharing_save_direct_user_shares(). It also validates submitted
-            // ids, dedupes them and reconciles against the existing rows instead of blindly
-            // deleting everything and re-inserting.
-            $viewconfig = block_exaport_get_sharing_entity_config('view');
-            $shareuserids = [];
-            $notifyuserids = [];
-            if ($dbview->internaccess && !$dbview->shareall) {
-                $shareuserids = \block_exaport\param::optional_array('shareusers', PARAM_INT);
-                $notifyuserids = optional_param_array('notifyusers', array(), PARAM_INT);
-            }
-            block_exaport_sharing_save_direct_user_shares($viewconfig, $dbview->id, $shareuserids, $notifyuserids);
+            $shareuserids = $dbview->internaccess && (int)$dbview->shareall === 0
+                ? \block_exaport\param::optional_array('shareusers', PARAM_INT) : [];
+            $notifyuserids = $dbview->internaccess && (int)$dbview->shareall === 0
+                ? optional_param_array('notifyusers', [], PARAM_INT) : [];
+            $sharegroupids = $dbview->internaccess && (int)$dbview->shareall === 2
+                ? \block_exaport\param::optional_array('sharegroups', PARAM_INT) : [];
+            \block_exaport\sharing_service::save_internal_shares(
+                'view',
+                (int)$dbview->id,
+                (bool)$dbview->internaccess,
+                (int)$dbview->shareall,
+                $shareuserids,
+                $notifyuserids,
+                $sharegroupids
+            );
 
             // Message users, if they have shared. Read the notify flag back from the just-saved
             // rows instead of the raw submission, so only users this save actually (still)
@@ -628,24 +622,6 @@ if ($editform->is_cancelled()) {
                 );
             }
 
-            // Delete all shared groups.
-            $DB->delete_records("block_exaportviewgroupshar", array('viewid' => $dbview->id));
-            // Add new groups sharing. shareall == 0 - users sharing; 1 - share for all; 2 - groups sharing.
-            if ($dbview->internaccess && $dbview->shareall == 2) {
-                $sharegroups = \block_exaport\param::optional_array('sharegroups', PARAM_INT);
-                $usergroups = block_exaport_get_user_cohorts();
-
-                foreach ($sharegroups as $groupid) {
-                    if (!isset($usergroups[$groupid])) {
-                        // Not allowed.
-                        continue;
-                    }
-                    $DB->insert_record("block_exaportviewgroupshar", [
-                        'viewid' => $dbview->id,
-                        'groupid' => $groupid,
-                    ]);
-                }
-            }
 
             if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
                 // Search button pressed -> redirect to search form.
@@ -1306,99 +1282,43 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         break;
 
     case 'share' :
+        $canexternal = block_exaport_externaccess_enabled()
+            && has_capability('block/exaport:shareextern', context_system::instance());
+        $caninternal = has_capability('block/exaport:shareintern', context_system::instance());
+        $showemail = block_exaport_shareemails_enabled();
+        $internenabled = !empty($postview->internaccess);
+        $shareenabled = ($canexternal && !empty($postview->externaccess)) || $internenabled ||
+            ($showemail && !empty($postview->sharedemails));
+        $externalurl = ($canexternal && $view && !empty($view->id)) ? block_exaport_get_external_view_url($view) : '';
+        $emailaddresses = ($view && !empty($view->id))
+            ? implode("\n", exaport_get_view_shared_emails($view->id)) : '';
+        $sharingform = new \block_exaport\output\sharing_form([
+            'componentid' => 'view-sharing',
+            'enabled' => $shareenabled,
+            'configured' => $shareenabled,
+            'showexternal' => $canexternal,
+            'externalinput' => $canexternal ? $form['elements_by_name']['externaccess']['html'] : '',
+            'externalurl' => $externalurl,
+            'showexternalcomments' => $canexternal && $view && !empty($view->id) &&
+                block_exaport_external_comments_enabled(),
+            'externalcommentschecked' => !empty($postview->externcomment),
+            'showinternal' => $caninternal,
+            'internalinput' => $caninternal ? $form['elements_by_name']['internaccess']['html'] : '',
+            'internalchecked' => $internenabled,
+            'showeveryone' => block_exaport_shareall_enabled(),
+            'mode' => (int)$postview->shareall,
+            'showsearch' => block_exaport_shareall_enabled(),
+            'showemail' => $showemail,
+            'emailinput' => $showemail ? $form['elements_by_name']['sharedemails']['html'] : '',
+            'emailchecked' => !empty($postview->sharedemails),
+            'emailaddresses' => $emailaddresses,
+            'alwaysnotify' => (bool)get_config('block_exaport', 'alwaysnotifywhenshare'),
+        ]);
         echo '<div class="view-sharing view-group">';
-        echo '<div class=""><div>'; // instead of view-group-header just no classe, as it does not do anything when clicked itself but show what is clicked INSIDE.
-        echo block_exaport_fontawesome_icon('share-from-square', 'solid', 1);
-        echo get_string('view_sharing', 'block_exaport');
-        echo ': <span id="view-share-text"></span></div></div>';
-        echo '<div class="">';
-        echo '<div style="padding: 18px 22px"><table class="table_share">';
-
-        // Output a hidden field with the config value alwaysnotifywhenshare
-        $alwaysnotifywhenshare = get_config('block_exaport', 'alwaysnotifywhenshare');
-        echo '<input type="hidden" id="alwaysnotifywhenshare" value="' . htmlspecialchars($alwaysnotifywhenshare) . '" />';
-
-        if (block_exaport_externaccess_enabled() && has_capability('block/exaport:shareextern', context_system::instance())) {
-
-            echo '<tr><td style="padding-right: 10px; width: 10px">';
-            echo $form['elements_by_name']['externaccess']['html'];
-            echo '</td><td>' . get_string("externalaccess", "block_exaport") . '</td></tr>';
-
-            if ($view) {
-                $url = block_exaport_get_external_view_url($view);
-                // Only when editing a view, the external link will work!
-                echo '<tr id="externaccess-settings"><td></td><td>';
-                echo '<div style="padding: 4px;"><a href="' . $url . '">' . $url . '</a></div>';
-                if (block_exaport_external_comments_enabled()) {
-                    echo '<div style="padding: 4px 0;"><table>';
-                    echo '<tr><td style="padding-right: 10px; width: 10px">';
-                    echo '<input type="checkbox" name="externcomment" value="1"' .
-                        ($postview->externcomment ? ' checked="checked"' : '') . ' />';
-                    echo '</td><td>' . get_string("externcomment", "block_exaport") . '</td></tr>';
-                    echo '</table></div>';
-                }
-                echo '</td></tr>';
-            }
-
-            echo '<tr><td style="height: 10px"></td></tr>';
-        }
-
-        if (has_capability('block/exaport:shareintern', context_system::instance())) {
-            echo '<tr><td style="padding-right: 10px">';
-            echo $form['elements_by_name']['internaccess']['html'];
-            echo '</td><td>' . get_string("internalaccess", "block_exaport") . '</td></tr>';
-            echo '<tr id="internaccess-settings"><td></td><td>';
-            echo '<div style="padding: 4px 0;"><table>';
-            if (block_exaport_shareall_enabled()) {
-                echo '<tr><td style="padding-right: 10px; width: 10px">';
-                echo '<input type="radio" name="shareall" value="1"' . ($postview->shareall == 1 ? ' checked="checked"' : '') . ' />';
-                echo '</td><td>' . get_string("internalaccessall", "block_exaport") . '</td></tr>';
-            }
-            // Internal access for users.
-            echo '<tr><td style="padding-right: 10px">';
-            echo '<input type="radio" name="shareall" value="0"' . (!$postview->shareall ? ' checked="checked"' : '') . '/>';
-            echo '</td><td>' . get_string("internalaccessusers", "block_exaport") . '</td></tr>';
-            echo '<tr id="internaccess-users"><td></td><td>';
-            if (block_exaport_shareall_enabled()) {
-                // Show user search form.
-                echo get_string("share_to_other_users", "block_exaport") . ':';
-                echo '<div style="padding-bottom: 20px;">';
-                echo '<input name="share_to_other_users_q" type="text" /> ';
-                echo '<input name="share_to_other_users_submit" type="submit" value="' . get_string('search') . '" />';
-                echo '</div>';
-            }
-            echo '<div id="sharing-userlist">userlist</div>';
-            echo '</td></tr>';
-            // Internal access for groups.
-            echo '<tr><td style="padding-right: 10px">';
-            echo '<input type="radio" name="shareall" value="2"' . ($postview->shareall == 2 ? ' checked="checked" ' : '') . '/>';
-            echo '</td><td>' . get_string("internalaccessgroups", "block_exaport") . '</td></tr>';
-            echo '<tr id="internaccess-groups"><td></td><td>';
-            echo '<div id="sharing-grouplist">grouplist</div>';
-            echo '</td></tr>';
-            echo '</table></div>';
-            echo '</td></tr>';
-        }
-
-        if (block_exaport_shareemails_enabled()) {
-            echo '<tr><td style="height: 10px"></td></tr>';
-            echo '<tr><td style="padding-right: 10px; width: 10px">';
-            echo $form['elements_by_name']['sharedemails']['html'];
-            echo '</td><td>' . get_string("emailaccess", "block_exaport") . '</td></tr>';
-
-            if ($view) {
-                $view->emailsforshare = implode(';', exaport_get_view_shared_emails($view->id));
-                echo '<tr id="emailaccess-settings"><td></td><td>';
-                echo get_string("emailaccessdescription", "block_exaport");
-                echo '<textarea name="emailsforshare">' . str_replace(';', "\r\n", $view->emailsforshare) . '</textarea><br>';
-                echo '</td></tr>';
-            }
-        }
-
-        echo '</table></div>';
-        echo '</div>';
+        echo $OUTPUT->render_from_template('block_exaport/sharing_form', $sharingform->export_for_template($OUTPUT));
         echo '</div>';
         break;
+
     default:
         break;
 }

@@ -46,14 +46,14 @@ class item_competences implements renderable, templatable {
         $selectedids = array_map('intval', $this->item->compids_array ?? []);
         $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
         $nodes = $this->export_nodes($tree, $selectedids);
-        $selectednodes = $this->filter_selected_nodes($nodes);
+        $summary = $this->export_summary_for_template($nodes);
 
         return [
             'intro' => get_string('selectcomps', 'block_exaport'),
             'addlabel' => get_string('addcompetences', 'block_exaport'),
             'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
-            'selectednodes' => $selectednodes,
-            'hasselected' => !empty($selectednodes),
+            'selectednodes' => $summary['selectednodes'],
+            'hasselected' => $summary['hasselected'],
             'picker' => [
                 'nodes' => $nodes,
                 'itemid' => (int)$this->item->id,
@@ -61,6 +61,28 @@ class item_competences implements renderable, templatable {
                 'collapselabel' => get_string('collapsecomps', 'block_exaport'),
             ],
             'editable' => $this->editable,
+        ];
+    }
+
+    /**
+     * Export only the selected competence summary.
+     *
+     * @param array|null $nodes Prepared tree nodes when already available.
+     * @return array
+     */
+    public function export_summary_for_template(?array $nodes = null): array {
+        global $USER;
+
+        if ($nodes === null) {
+            $selectedids = array_map('intval', $this->item->compids_array ?? []);
+            $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+            $nodes = $this->export_nodes($tree, $selectedids);
+        }
+        $selectednodes = $this->filter_selected_nodes($nodes);
+
+        return [
+            'selectednodes' => $selectednodes,
+            'hasselected' => !empty($selectednodes),
         ];
     }
 

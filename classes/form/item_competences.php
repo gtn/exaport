@@ -93,7 +93,7 @@ class item_competences extends dynamic_form {
         ]);
     }
 
-    /** Persist the complete selection and return the server-rendered refreshed section. */
+    /** Persist the complete selection and return the server-rendered refreshed summary. */
     public function process_dynamic_submission(): array {
         global $OUTPUT, $USER;
 
@@ -106,7 +106,11 @@ class item_competences extends dynamic_form {
         block_exaport_sync_item_competences($item, $ids);
         $item->compids_array = $this->get_selected_ids((int)$item->id);
 
-        return ['content' => $OUTPUT->render(new \block_exaport\output\item_competences($item, true))];
+        $renderable = new \block_exaport\output\item_competences($item, true);
+        return ['content' => $OUTPUT->render_from_template(
+            'block_exaport/item_competence_summary',
+            $renderable->export_summary_for_template()
+        )];
     }
 
     /** @return int[] */

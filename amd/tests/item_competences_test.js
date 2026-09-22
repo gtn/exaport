@@ -22,4 +22,18 @@ define(['block_exaport/item_competences'], function(Competences) {
         Competences.synchronizeSelection(picker);
         assert.strictEqual(document.querySelector('[name="competenceids"]').value, '', 'an empty selection is preserved');
     });
+
+    QUnit.test('replaces only the selected competence summary', function(assert) {
+        var done = assert.async();
+        var section = document.createElement('div');
+        section.innerHTML = '<p>Intro</p><div data-region="competence-summary">Old</div><button>Add</button>';
+        document.getElementById('qunit-fixture').appendChild(section);
+
+        Competences.replaceSummary(section, '<div data-region="competence-summary">New</div>').then(function() {
+            assert.strictEqual(section.querySelector('p').textContent, 'Intro', 'intro remains unchanged');
+            assert.strictEqual(section.querySelector('button').textContent, 'Add', 'button remains unchanged');
+            assert.strictEqual(section.querySelector('[data-region="competence-summary"]').textContent, 'New');
+            done();
+        });
+    });
 });

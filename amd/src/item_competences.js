@@ -22,6 +22,10 @@ export const synchronizeSelection = picker => {
         .map(checkbox => checkbox.value).join(',');
 };
 
+/** Replace the server-rendered selected-competences summary. */
+export const replaceSummary = (section, content) => Templates.replaceNode(
+    section.querySelector('[data-region="competence-summary"]'), content, '');
+
 /** Register competency tree interactions and the Moodle dynamic-form launcher. */
 export const init = config => {
     document.addEventListener('click', event => {
@@ -48,7 +52,7 @@ export const init = config => {
             returnFocus: trigger,
         });
         modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, submitted => {
-            Templates.replaceNode(section, submitted.detail.content, '').catch(Notification.exception);
+            replaceSummary(section, submitted.detail.content).catch(Notification.exception);
         });
         modalForm.show();
     });

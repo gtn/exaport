@@ -40,4 +40,38 @@ final class item_competences_form_test extends \advanced_testcase {
         $this->assertStringNotContainsString('$.ajax', $source);
         $this->assertStringNotContainsString('ModalSaveCancel', $source);
     }
+
+    public function test_summary_export_contains_only_selected_nodes(): void {
+        $renderable = new \block_exaport\output\item_competences((object)['id' => 7], true);
+        $summary = $renderable->export_summary_for_template([
+            [
+                'checked' => true,
+                'children' => [],
+                'haschildren' => false,
+                'title' => 'Selected',
+            ],
+            [
+                'checked' => false,
+                'children' => [],
+                'haschildren' => false,
+                'title' => 'Not selected',
+            ],
+        ]);
+
+        $this->assertSame(['selectednodes', 'hasselected'], array_keys($summary));
+        $this->assertTrue($summary['hasselected']);
+        $this->assertCount(1, $summary['selectednodes']);
+        $this->assertSame('Selected', $summary['selectednodes'][0]['title']);
+    }
+
+    public function test_submission_and_client_replace_only_summary_fragment(): void {
+        $formsource = file_get_contents(__DIR__ . '/../classes/form/item_competences.php');
+        $clientsource = file_get_contents(__DIR__ . '/../amd/src/item_competences.js');
+
+        $this->assertStringContainsString("'block_exaport/item_competence_summary'", $formsource);
+        $this->assertStringContainsString('export_summary_for_template()', $formsource);
+        $this->assertStringNotContainsString('$OUTPUT->render(new', $formsource);
+        $this->assertStringContainsString('replaceSummary(section, submitted.detail.content)', $clientsource);
+        $this->assertStringNotContainsString('Templates.replaceNode(section,', $clientsource);
+    }
 }

@@ -41,6 +41,15 @@ final class item_competences_form_test extends \advanced_testcase {
         $this->assertStringNotContainsString('ModalSaveCancel', $source);
     }
 
+    public function test_item_form_uses_standard_form_layout_for_competence_summary(): void {
+        $source = file_get_contents(__DIR__ . '/../lib/item_edit_form.php');
+
+        $this->assertMatchesRegularExpression(
+            "/addElement\\(\\s*'static',\\s*'competencesummary',\\s*get_string\\('selectcomps'/s",
+            $source
+        );
+    }
+
     public function test_summary_export_contains_only_selected_nodes(): void {
         if (!class_exists(\block_exacomp\descriptor::class)) {
             $this->markTestSkipped('Exacomp is required for competence tree rendering.');

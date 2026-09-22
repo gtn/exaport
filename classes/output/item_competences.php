@@ -49,7 +49,6 @@ class item_competences implements renderable, templatable {
         $summary = $this->export_summary_from_nodes($nodes);
 
         return [
-            'intro' => get_string('selectcomps', 'block_exaport'),
             'addlabel' => get_string('addcompetences', 'block_exaport'),
             'addicon' => $output->pix_icon('t/add', '', 'moodle', ['aria-hidden' => 'true']),
             'selectednodes' => $summary['selectednodes'],

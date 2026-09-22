@@ -353,7 +353,12 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $this->_customdata['current'],
                 !empty($this->_customdata['allowedit'])
             );
-            $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($competences));
+            $mform->addElement(
+                'static',
+                'competencesummary',
+                get_string('selectcomps', 'block_exaport'),
+                $PAGE->get_renderer('block_exaport')->render($competences)
+            );
         }
 
         if (!empty($this->_customdata['allowedit']) || empty($this->_customdata['current'])) {

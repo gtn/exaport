@@ -3568,4 +3568,130 @@ return [
         'Show or hide the "Shared with me" navigation area.',
     ],
 
+    // === Item content blocks ===
+    'mainsettings' => [
+        'Haupteinstellungen',
+        'Main settings',
+    ],
+    'metadata' => [
+        'Metadaten',
+        'Metadata',
+    ],
+    'addcontentblock' => [
+        'Inhalt hinzufügen',
+        'Add content',
+    ],
+    'addlinkblock' => [
+        'Link hinzufügen',
+        'Add link',
+    ],
+    'addfileblock' => [
+        'Dateien/Medien hinzufügen',
+        'Add files/media',
+    ],
+    'contentblockadded' => [
+        'Inhalt wurde hinzugefügt.',
+        'Content added.',
+    ],
+    'privacy:metadata:block_exaportitemblock' => [
+        'Geordnete Inhalte eines Portfolioeintrags.',
+        'Ordered content stored in a portfolio item.',
+    ],
+    'privacy:metadata:block_exaportitemblock:itemid' => [
+        'Der Portfolioeintrag, der den Inhaltsblock enthält.',
+        'The portfolio item containing the content block.',
+    ],
+    'privacy:metadata:block_exaportitemblock:type' => [
+        'Der Typ des Inhaltsblocks.',
+        'The type of content block.',
+    ],
+    'privacy:metadata:block_exaportitemblock:sortorder' => [
+        'Die Position des Inhaltsblocks.',
+        'The position of the content block.',
+    ],
+    'privacy:metadata:block_exaportitemblock:title' => [
+        'Der optionale Titel des Inhaltsblocks.',
+        'The optional content block title.',
+    ],
+    'privacy:metadata:block_exaportitemblock:content' => [
+        'Der Text des Inhaltsblocks.',
+        'The content block text.',
+    ],
+    'privacy:metadata:block_exaportitemblock:contentformat' => [
+        'Das Format des Inhaltsblocktexts.',
+        'The format of the content block text.',
+    ],
+    'privacy:metadata:block_exaportitemblock:url' => [
+        'Die URL eines Link-Inhaltsblocks.',
+        'The URL stored in a link content block.',
+    ],
+    'privacy:metadata:block_exaportitemblock:timecreated' => [
+        'Der Erstellungszeitpunkt des Inhaltsblocks.',
+        'When the content block was created.',
+    ],
+    'privacy:metadata:block_exaportitemblock:timemodified' => [
+        'Der letzte Änderungszeitpunkt des Inhaltsblocks.',
+        'When the content block was last changed.',
+    ],
+
+    // === Item competences ===
+    'competencessection' => [
+        'Kompetenzen',
+        'Competences',
+    ],
+    'addcompetences' => [
+        'Kompetenzen hinzufügen',
+        'Add competences',
+    ],
+    'collapsecomps' => [
+        'Alle einklappen',
+        'Collapse all',
+    ],
+
+    // === Sharing form ===
+    'sharing_enable' => [
+        'Teilen aktivieren',
+        'Enable sharing',
+    ],
+    'sharing_enable_help' => [
+        'Wenn das Teilen deaktiviert ist, kann niemand anderes auf diesen Inhalt zugreifen. Beim Speichern werden die aktuellen Personen- und Gruppenzuweisungen entfernt.',
+        'When sharing is disabled, nobody else can access this content. Saving will remove the current people and group assignments.',
+    ],
+    'sharing_status_on' => [
+        'Teilen aktiviert',
+        'Sharing on',
+    ],
+    'sharing_status_off' => [
+        'Teilen deaktiviert',
+        'Sharing off',
+    ],
+    'sharing_disable_title' => [
+        'Teilen deaktivieren?',
+        'Disable sharing?',
+    ],
+    'sharing_disable_confirm' => [
+        'Wenn Sie mit deaktivierter Freigabe speichern, wird der Zugriff widerrufen und die aktuellen Personen- und Gruppenzuweisungen werden entfernt.',
+        'Saving with sharing disabled will revoke access and remove the current people and group assignments.',
+    ],
+    'sharing_external_heading' => [
+        'Öffentlicher Link',
+        'Public link',
+    ],
+    'sharing_internal_heading' => [
+        'Personen und Gruppen',
+        'People and groups',
+    ],
+    'sharing_email_heading' => [
+        'E-Mail-Einladungen',
+        'Email invitations',
+    ],
+    'sharing_audience' => [
+        'Wer kann darauf zugreifen?',
+        'Who can access this?',
+    ],
+    'sharing_everyone' => [
+        'Alle mit einem Benutzerkonto',
+        'Everyone with an account',
+    ],
+
 ];

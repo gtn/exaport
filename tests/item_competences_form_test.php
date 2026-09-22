@@ -93,11 +93,8 @@ final class item_competences_form_test extends \advanced_testcase {
 
     private function create_descriptor(int $id, string $title): \block_exacomp\descriptor {
         return new class($id, $title) extends \block_exacomp\descriptor {
-            /** @var int */
-            public $id;
-
-            /** @var string */
-            public $title;
+            /** @var array */
+            private array $subs = [];
 
             /** Set test descriptor fields. */
             public function __construct(int $id, string $title) {
@@ -106,8 +103,8 @@ final class item_competences_form_test extends \advanced_testcase {
             }
 
             /** @return array */
-            public function get_subs(): array {
-                return [];
+            public function &get_subs(): array {
+                return $this->subs;
             }
         };
     }

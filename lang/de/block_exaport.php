@@ -111,17 +111,6 @@ $string['accessoptions'] = 'Wer hat Zugriff?';
 $string['shareallexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern';
 $string['sharenoneexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer';
 $string['internalaccessall'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span>';
-$string['sharing_enable'] = 'Teilen aktivieren';
-$string['sharing_enable_help'] = 'Wenn das Teilen deaktiviert ist, kann niemand anderes auf diesen Inhalt zugreifen. Beim Speichern werden die aktuellen Personen- und Gruppenzuweisungen entfernt.';
-$string['sharing_status_on'] = 'Teilen aktiviert';
-$string['sharing_status_off'] = 'Teilen deaktiviert';
-$string['sharing_disable_title'] = 'Teilen deaktivieren?';
-$string['sharing_disable_confirm'] = 'Wenn Sie mit deaktivierter Freigabe speichern, wird der Zugriff widerrufen und die aktuellen Personen- und Gruppenzuweisungen werden entfernt.';
-$string['sharing_external_heading'] = 'Öffentlicher Link';
-$string['sharing_internal_heading'] = 'Personen und Gruppen';
-$string['sharing_email_heading'] = 'E-Mail-Einladungen';
-$string['sharing_audience'] = 'Wer kann darauf zugreifen?';
-$string['sharing_everyone'] = 'Alle mit einem Benutzerkonto';
 $string['internalaccessusers'] = 'Zugriff nur für folgende Benutzer';
 $string['internalaccessgroups'] = 'Zugriff für folgende Gruppen';
 $string['externaccess'] = 'externer ePortfolio-Link';
@@ -324,21 +313,6 @@ $string['createpage'] = 'Zieh das Elemente in das Feld unterhalb, um deinen Inha
 $string['chooselayout'] = 'W&aumlhle ein Layout für deine Sammelmappe.';
 $string['viewtitle'] = 'Titel und Beschreibung';
 $string['viewcontent'] = 'Inhalt';
-$string['mainsettings'] = 'Haupteinstellungen';
-$string['addcontentblock'] = 'Inhalt hinzufügen';
-$string['addlinkblock'] = 'Link hinzufügen';
-$string['addfileblock'] = 'Dateien/Medien hinzufügen';
-$string['contentblockadded'] = 'Inhalt wurde hinzugefügt.';
-$string['privacy:metadata:block_exaportitemblock'] = 'Geordnete Inhalte eines Portfolioeintrags.';
-$string['privacy:metadata:block_exaportitemblock:itemid'] = 'Der Portfolioeintrag, der den Inhaltsblock enthält.';
-$string['privacy:metadata:block_exaportitemblock:type'] = 'Der Typ des Inhaltsblocks.';
-$string['privacy:metadata:block_exaportitemblock:sortorder'] = 'Die Position des Inhaltsblocks.';
-$string['privacy:metadata:block_exaportitemblock:title'] = 'Der optionale Titel des Inhaltsblocks.';
-$string['privacy:metadata:block_exaportitemblock:content'] = 'Der Text des Inhaltsblocks.';
-$string['privacy:metadata:block_exaportitemblock:contentformat'] = 'Das Format des Inhaltsblocktexts.';
-$string['privacy:metadata:block_exaportitemblock:url'] = 'Die URL eines Link-Inhaltsblocks.';
-$string['privacy:metadata:block_exaportitemblock:timecreated'] = 'Der Erstellungszeitpunkt des Inhaltsblocks.';
-$string['privacy:metadata:block_exaportitemblock:timemodified'] = 'Der letzte Änderungszeitpunkt des Inhaltsblocks.';
 $string['viewlayout'] = 'Layout';
 $string['viewshare'] = 'Teilen';
 $string['viewlayoutgroup1'] = '1 Spalte';
@@ -504,7 +478,6 @@ $string['contactcomps'] = 'Alle schlie&szlig;en';
 $string['studentcomps'] = 'Hier kannst du einsch&auml;tzen, ob folgende Kompetenzen durch deine Seite erreicht wurden.';
 $string['teachercomps'] = 'Hier kannst du beurteilen, ob die Lernenden folgende Kompetenzen durch Seiten erreicht haben.';
 $string['competences'] = 'Kompetenzen';
-$string['competencessection'] = 'Kompetenzen';
 $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.';
 $string['settings_interaktion_exacomp_head'] = 'Verknüpfung von Exabis ePortfolio und Exabis Kompetenzraster aktivieren';
 $string['settings_interaktion_exacomp_body'] = 'Interaktion mit Block Exabis Competence Grid, falls dieser installiert ist, zulassen.';
@@ -1040,3 +1013,39 @@ $string['settings_enable_my_shares_head'] = 'Bereich "Meine geteilten Inhalte" a
 $string['settings_enable_my_shares_body'] = 'Den Navigationsbereich "Meine geteilten Inhalte" ein-/ausblenden.';
 $string['settings_enable_shared_with_me_head'] = 'Bereich "Mit mir geteilte Inhalte" anzeigen';
 $string['settings_enable_shared_with_me_body'] = 'Den Navigationsbereich "Mit mir geteilte Inhalte" ein-/ausblenden.';
+
+// === Item content blocks ===
+$string['mainsettings'] = 'Haupteinstellungen';
+$string['metadata'] = 'Metadaten';
+$string['addcontentblock'] = 'Inhalt hinzufügen';
+$string['addlinkblock'] = 'Link hinzufügen';
+$string['addfileblock'] = 'Dateien/Medien hinzufügen';
+$string['contentblockadded'] = 'Inhalt wurde hinzugefügt.';
+$string['privacy:metadata:block_exaportitemblock'] = 'Geordnete Inhalte eines Portfolioeintrags.';
+$string['privacy:metadata:block_exaportitemblock:itemid'] = 'Der Portfolioeintrag, der den Inhaltsblock enthält.';
+$string['privacy:metadata:block_exaportitemblock:type'] = 'Der Typ des Inhaltsblocks.';
+$string['privacy:metadata:block_exaportitemblock:sortorder'] = 'Die Position des Inhaltsblocks.';
+$string['privacy:metadata:block_exaportitemblock:title'] = 'Der optionale Titel des Inhaltsblocks.';
+$string['privacy:metadata:block_exaportitemblock:content'] = 'Der Text des Inhaltsblocks.';
+$string['privacy:metadata:block_exaportitemblock:contentformat'] = 'Das Format des Inhaltsblocktexts.';
+$string['privacy:metadata:block_exaportitemblock:url'] = 'Die URL eines Link-Inhaltsblocks.';
+$string['privacy:metadata:block_exaportitemblock:timecreated'] = 'Der Erstellungszeitpunkt des Inhaltsblocks.';
+$string['privacy:metadata:block_exaportitemblock:timemodified'] = 'Der letzte Änderungszeitpunkt des Inhaltsblocks.';
+
+// === Item competences ===
+$string['competencessection'] = 'Kompetenzen';
+$string['addcompetences'] = 'Kompetenzen hinzufügen';
+$string['collapsecomps'] = 'Alle einklappen';
+
+// === Sharing form ===
+$string['sharing_enable'] = 'Teilen aktivieren';
+$string['sharing_enable_help'] = 'Wenn das Teilen deaktiviert ist, kann niemand anderes auf diesen Inhalt zugreifen. Beim Speichern werden die aktuellen Personen- und Gruppenzuweisungen entfernt.';
+$string['sharing_status_on'] = 'Teilen aktiviert';
+$string['sharing_status_off'] = 'Teilen deaktiviert';
+$string['sharing_disable_title'] = 'Teilen deaktivieren?';
+$string['sharing_disable_confirm'] = 'Wenn Sie mit deaktivierter Freigabe speichern, wird der Zugriff widerrufen und die aktuellen Personen- und Gruppenzuweisungen werden entfernt.';
+$string['sharing_external_heading'] = 'Öffentlicher Link';
+$string['sharing_internal_heading'] = 'Personen und Gruppen';
+$string['sharing_email_heading'] = 'E-Mail-Einladungen';
+$string['sharing_audience'] = 'Wer kann darauf zugreifen?';
+$string['sharing_everyone'] = 'Alle mit einem Benutzerkonto';

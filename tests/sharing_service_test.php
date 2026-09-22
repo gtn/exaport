@@ -375,6 +375,7 @@ final class sharing_service_test extends \advanced_testcase {
             $entity->config->idfield . ' = ?',
             [$entity->id]
         ));
+        $expectedgroupids = array_map('intval', $expectedgroupids);
         sort($actual);
         sort($expectedgroupids);
         $this->assertSame($expectedgroupids, $actual);

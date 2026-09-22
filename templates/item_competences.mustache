@@ -1,12 +1,16 @@
 <div class="exaport-item-competences" data-region="item-competences">
-    <p>{{intro}}</p>
+    <div class="exaport-item-competences-intro">
+        <p>{{intro}}</p>
+    </div>
 
-    {{> block_exaport/item_competence_summary}}
+    <div class="exaport-item-competences-selection">
+        {{> block_exaport/item_competence_summary}}
 
-    {{#editable}}
-    <button type="button" class="btn btn-primary" data-action="open-competence-picker">
-        {{{addicon}}} {{addlabel}}
-    </button>
-    {{/editable}}
+        {{#editable}}
+        <button type="button" class="btn btn-primary" data-action="open-competence-picker">
+            {{{addicon}}} {{addlabel}}
+        </button>
+        {{/editable}}
+    </div>
 
 </div>

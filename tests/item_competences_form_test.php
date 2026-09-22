@@ -61,6 +61,18 @@ final class item_competences_form_test extends \advanced_testcase {
         $this->assertStringContainsString('{{> block_exaport/item_competence_summary}}', $template);
     }
 
+    public function test_shared_item_comments_use_moodle_card_markup(): void {
+        $source = file_get_contents(__DIR__ . '/../shared_item.php');
+        $template = file_get_contents(__DIR__ . '/../templates/shared_item_comments.mustache');
+
+        $this->assertStringContainsString("render_from_template('block_exaport/shared_item_comments'", $source);
+        $this->assertStringNotContainsString('class="forumpost blogpost blog"', $source);
+        $this->assertStringContainsString('<article class="card mb-2">', $template);
+        $this->assertStringContainsString('{{{authorline}}}', $template);
+        $this->assertStringContainsString('{{#file}}', $template);
+        $this->assertStringContainsString('{{#canmanage}}', $template);
+    }
+
     public function test_summary_export_contains_only_selected_nodes(): void {
         if (!class_exists(\block_exacomp\descriptor::class)) {
             $this->markTestSkipped('Exacomp is required for competence tree rendering.');

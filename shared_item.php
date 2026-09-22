@@ -257,67 +257,57 @@ function block_exaport_show_comments($item, $access, $backtype = '', $editingcom
     $comments = $DB->get_records("block_exaportitemcomm", $conditions, 'timemodified DESC');
 
     if ($comments) {
+        $templatecomments = [];
         foreach ($comments as $comment) {
             // When editing a comment, only render that specific comment.
             if ($editingcommentid > 0 && $comment->id != $editingcommentid) {
                 continue;
             }
 
-            echo '<table cellspacing="0" class="forumpost blogpost blog" width="100%">';
-
-            echo '<tr class="header"><td class="picture left">';
-            // Check if this is a hidden grader (userid = -1, use strict comparison)
+            $picture = '';
             if ($comment->userid == -1) {
-                // Show anonymous user icon for hidden grader
-                // echo $OUTPUT->user_picture((object)['id' => 0, 'picture' => 0, 'firstname' => '', 'lastname' => '']);
-                // since this above does not work: just show nothing for hidden grader
+                $author = s(block_exaport_get_comment_author_name($comment->userid));
             } else {
                 $user = $DB->get_record('user', array('id' => $comment->userid));
-                echo $OUTPUT->user_picture($user);
+                $picture = $OUTPUT->user_picture($user, ['size' => 48]);
+                $authorurl = new moodle_url('/user/view.php', [
+                    'id' => $comment->userid,
+                    'course' => $COURSE->id,
+                ]);
+                $author = html_writer::link($authorurl, s(block_exaport_get_comment_author_name($comment->userid)));
             }
-            echo '</td>';
-
-            echo '<td class="topic starter"><div class="author">';
-            // Use helper function to get author name respecting privacy
-            $fullname = block_exaport_get_comment_author_name($comment->userid);
             $by = new stdClass();
-            if ($comment->userid == -1) {
-                // Don't link to user profile for hidden grader
-                $by->name = $fullname;
-            } else {
-                $by->name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' .
-                    $comment->userid . '&amp;course=' . $COURSE->id . '">' . $fullname . '</a>';
-            }
+            $by->name = $author;
             $by->date = userdate($comment->timemodified);
-            print_string('bynameondate', 'forum', $by);
-
-            if ($comment->userid == $USER->id && $editingcommentid == 0) {
-                echo ' - <a href="' . s($baseurl . '&comment_edit=' . $comment->id) .
-                    '">' . block_exaport_get_string('editcomment') . '</a>';
-                echo ' - <a href="' . s($baseurl . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey()) .
-                    '" onclick="' . s('return confirm(' . json_encode(block_exaport_get_string('comment_delete_confirmation')) . ')') .
-                    '">' . block_exaport_get_string('delete') . '</a>';
-            }
-            echo '</div></td></tr>';
-
-            echo '<tr><td class="left side">';
-
-            echo '</td><td class="content">' . "\n";
-
-            echo format_text($comment->entry);
-
+            $templatecomment = [
+                'picture' => $picture,
+                'authorline' => get_string('bynameondate', 'forum', $by),
+                'content' => format_text($comment->entry),
+                'canmanage' => $comment->userid == $USER->id && $editingcommentid == 0,
+                'editurl' => $baseurl . '&comment_edit=' . $comment->id,
+                'deleteurl' => $baseurl . '&commentid=' . $comment->id . '&comment_delete=1&sesskey=' . sesskey(),
+                'editlabel' => block_exaport_get_string('editcomment'),
+                'deletelabel' => block_exaport_get_string('delete'),
+                'deleteonclick' => s('return confirm(' .
+                    json_encode(block_exaport_get_string('comment_delete_confirmation')) . ')'),
+            ];
             if ($file = block_exaport_get_item_comment_file($comment->id)) {
                 $fileurl = $CFG->wwwroot .
                     "/blocks/exaport/portfoliofile.php?access={$access}&itemid={$item->id}&commentid={$comment->id}";
-                echo '</td></tr><tr><td class="left side">';
-
-                echo '</td><td class="content">' . "\n";
-                echo get_string('file', 'block_exaport') . ': <a href="' . s($fileurl) . '" target="_blank">' . $file->get_filename() .
-                    '</a> (' . display_size($file->get_filesize()) . ')';
+                $templatecomment['file'] = [
+                    'url' => $fileurl,
+                    'name' => $file->get_filename(),
+                    'size' => display_size($file->get_filesize()),
+                    'label' => get_string('file', 'block_exaport'),
+                ];
             }
-
-            echo '</td></tr></table>' . "\n\n";
+            $templatecomments[] = $templatecomment;
         }
+
+        echo $OUTPUT->render_from_template('block_exaport/shared_item_comments', [
+            'heading' => get_string('comments', 'block_exaport'),
+            'comments' => $templatecomments,
+        ]);
     }
 }
 

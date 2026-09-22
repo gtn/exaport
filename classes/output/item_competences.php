@@ -46,7 +46,7 @@ class item_competences implements renderable, templatable {
         $selectedids = array_map('intval', $this->item->compids_array ?? []);
         $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
         $nodes = $this->export_nodes($tree, $selectedids);
-        $summary = $this->export_summary_for_template($nodes);
+        $summary = $this->export_summary_from_nodes($nodes);
 
         return [
             'intro' => get_string('selectcomps', 'block_exaport'),
@@ -67,17 +67,23 @@ class item_competences implements renderable, templatable {
     /**
      * Export only the selected competence summary.
      *
-     * @param array|null $nodes Prepared tree nodes when already available.
+     * @param array|null $tree Competence tree when already available.
      * @return array
      */
-    public function export_summary_for_template(?array $nodes = null): array {
+    public function export_summary_for_template(?array $tree = null): array {
         global $USER;
 
-        if ($nodes === null) {
-            $selectedids = array_map('intval', $this->item->compids_array ?? []);
+        if ($tree === null) {
             $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
-            $nodes = $this->export_nodes($tree, $selectedids);
         }
+        $selectedids = array_map('intval', $this->item->compids_array ?? []);
+        $nodes = $this->export_nodes($tree, $selectedids);
+
+        return $this->export_summary_from_nodes($nodes);
+    }
+
+    /** Return summary template data from an already prepared node tree. */
+    private function export_summary_from_nodes(array $nodes): array {
         $selectednodes = $this->filter_selected_nodes($nodes);
 
         return [

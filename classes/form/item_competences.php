@@ -100,8 +100,8 @@ class item_competences extends dynamic_form {
         $data = $this->get_data();
         $item = block_exaport_get_editable_competence_item((int)$data->itemid, (int)$data->courseid);
         $ids = block_exaport_parse_competenceids($data->competenceids ?? '');
-        $availableids = block_exaport_competence_tree_descriptorids(
-            \block_exacomp\api::get_comp_tree_for_exaport($USER->id));
+        $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
+        $availableids = block_exaport_competence_tree_descriptorids($tree);
         $ids = block_exaport_validate_competenceids($ids, $availableids);
         block_exaport_sync_item_competences($item, $ids);
         $item->compids_array = $this->get_selected_ids((int)$item->id);
@@ -109,7 +109,7 @@ class item_competences extends dynamic_form {
         $renderable = new \block_exaport\output\item_competences($item, true);
         return ['content' => $OUTPUT->render_from_template(
             'block_exaport/item_competence_summary',
-            $renderable->export_summary_for_template()
+            $renderable->export_summary_for_template($tree)
         )];
     }
 

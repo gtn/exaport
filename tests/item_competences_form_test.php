@@ -42,26 +42,42 @@ final class item_competences_form_test extends \advanced_testcase {
     }
 
     public function test_summary_export_contains_only_selected_nodes(): void {
-        $renderable = new \block_exaport\output\item_competences((object)['id' => 7], true);
-        $summary = $renderable->export_summary_for_template([
-            [
-                'checked' => true,
-                'children' => [],
-                'haschildren' => false,
-                'title' => 'Selected',
-            ],
-            [
-                'checked' => false,
-                'children' => [],
-                'haschildren' => false,
-                'title' => 'Not selected',
-            ],
-        ]);
+        if (!class_exists(\block_exacomp\descriptor::class)) {
+            $this->markTestSkipped('Exacomp is required for competence tree rendering.');
+        }
+        $selected = $this->create_descriptor(4, 'Selected');
+        $notselected = $this->create_descriptor(8, 'Not selected');
+        $renderable = new \block_exaport\output\item_competences(
+            (object)['id' => 7, 'compids_array' => [4]],
+            true
+        );
+        $summary = $renderable->export_summary_for_template([$selected, $notselected]);
 
         $this->assertSame(['selectednodes', 'hasselected'], array_keys($summary));
         $this->assertTrue($summary['hasselected']);
         $this->assertCount(1, $summary['selectednodes']);
         $this->assertSame('Selected', $summary['selectednodes'][0]['title']);
+    }
+
+    private function create_descriptor(int $id, string $title): \block_exacomp\descriptor {
+        return new class($id, $title) extends \block_exacomp\descriptor {
+            /** @var int */
+            public $id;
+
+            /** @var string */
+            public $title;
+
+            /** Set test descriptor fields. */
+            public function __construct(int $id, string $title) {
+                $this->id = $id;
+                $this->title = $title;
+            }
+
+            /** @return array */
+            public function get_subs(): array {
+                return [];
+            }
+        };
     }
 
 }

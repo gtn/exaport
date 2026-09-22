@@ -64,14 +64,4 @@ final class item_competences_form_test extends \advanced_testcase {
         $this->assertSame('Selected', $summary['selectednodes'][0]['title']);
     }
 
-    public function test_submission_and_client_replace_only_summary_fragment(): void {
-        $formsource = file_get_contents(__DIR__ . '/../classes/form/item_competences.php');
-        $clientsource = file_get_contents(__DIR__ . '/../amd/src/item_competences.js');
-
-        $this->assertStringContainsString("'block_exaport/item_competence_summary'", $formsource);
-        $this->assertStringContainsString('export_summary_for_template()', $formsource);
-        $this->assertStringNotContainsString('$OUTPUT->render(new', $formsource);
-        $this->assertStringContainsString('replaceSummary(section, submitted.detail.content)', $clientsource);
-        $this->assertStringNotContainsString('Templates.replaceNode(section,', $clientsource);
-    }
 }

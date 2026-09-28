@@ -372,6 +372,38 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertStringNotContainsString(block_exaport_get_string('filenotfound'), $html);
     }
 
+    public function test_view_editor_block_data_contains_structured_content(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $this->setUser($owner);
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->insert_block($itemid, 'text', 0, 'Editor content', '<p>Visible in editor</p>');
+        $viewid = $DB->insert_record('block_exaportview', (object)[
+            'userid' => $owner->id,
+            'creatorid' => $owner->id,
+            'name' => 'Editor preview',
+            'timemodified' => time(),
+        ]);
+        $viewblockid = $DB->insert_record('block_exaportviewblock', (object)[
+            'viewid' => $viewid,
+            'positionx' => 1,
+            'positiony' => 1,
+            'type' => 'item',
+            'itemid' => $itemid,
+            'width' => 320,
+            'height' => 240,
+        ]);
+
+        $blocks = block_exaport_get_view_blocks((object)['id' => $viewid, 'userid' => $owner->id]);
+
+        $this->assertArrayHasKey($viewblockid, $blocks);
+        $this->assertStringContainsString('Visible in editor', $blocks[$viewblockid]->item->intro);
+        $this->assertStringContainsString('exaport-item-content-section', $blocks[$viewblockid]->item->intro);
+    }
+
     /**
      * @param int $itemid
      * @param string $type

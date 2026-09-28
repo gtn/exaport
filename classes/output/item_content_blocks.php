@@ -30,6 +30,24 @@ use templatable;
  */
 class item_content_blocks implements renderable, templatable {
 
+    /**
+     * Whether exported presentation data contains usable primary content.
+     *
+     * Empty file blocks and title-only rows intentionally do not count as a
+     * replacement for a missing legacy file.
+     *
+     * @param array $data Data returned by export_for_template().
+     * @return bool
+     */
+    public static function has_displayable_content(array $data): bool {
+        foreach ($data['blocks'] ?? [] as $block) {
+            if (($block['content'] ?? '') !== '' || !empty($block['linkurl']) || !empty($block['hasfiles'])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** @var array */
     private $blocks;
 
@@ -85,6 +103,7 @@ class item_content_blocks implements renderable, templatable {
             $typelabel = $typeinfo['label'];
 
             $row = [
+                'type' => $type,
                 'icon' => $this->get_type_icon($output, $typeinfo, $typelabel),
                 'typelabel' => $typelabel,
                 'title' => trim((string)($block->title ?? '')),
@@ -159,14 +178,62 @@ class item_content_blocks implements renderable, templatable {
         foreach ($storedfiles as $file) {
             $url = $this->get_file_url($block, $file);
             $isimage = strpos((string)$file->get_mimetype(), 'image/') === 0;
+            $isvideo = strpos((string)$file->get_mimetype(), 'video/') === 0;
+            $isaudio = strpos((string)$file->get_mimetype(), 'audio/') === 0;
             $files[] = [
                 'name' => $file->get_filename(),
                 'url' => $url,
                 'isimage' => $isimage,
+                'isvideo' => $isvideo,
+                'isaudio' => $isaudio,
+                'isdownload' => !$isimage && !$isvideo && !$isaudio,
+                'mimetype' => $file->get_mimetype(),
+                'size' => display_size($file->get_filesize()),
                 'icon' => $isimage ? '' : $output->pix_icon(file_file_icon($file), $file->get_filename(), 'moodle'),
             ];
         }
         return $files;
+    }
+
+    /**
+     * Render non-interactive structured content for the PDF collection path.
+     *
+     * This deliberately consumes the same normalized data as the Mustache view,
+     * while avoiding controls and browser-only behaviour.
+     *
+     * @param renderer_base $output
+     * @param array|null $data Previously exported template data, when available.
+     * @return string Safe HTML.
+     */
+    public function render_for_pdf(renderer_base $output, ?array $data = null): string {
+        $data = $data ?? $this->export_for_template($output);
+        $html = '';
+        foreach ($data['blocks'] as $block) {
+            $html .= \html_writer::start_div('exaport-item-content-pdf');
+            if ($block['title'] !== '') {
+                $html .= \html_writer::tag('strong', $block['title']);
+            }
+            if ($block['content'] !== '') {
+                $html .= \html_writer::div($block['content']);
+            }
+            if (!empty($block['linkurl'])) {
+                $html .= \html_writer::div(\html_writer::link($block['linkurl'], $block['linkurl']));
+            }
+            foreach ($block['files'] ?? [] as $file) {
+                if ($file['isimage']) {
+                    $html .= \html_writer::empty_tag('img', [
+                        'src' => $file['url'],
+                        'alt' => $file['name'],
+                        'class' => 'exaport-item-content-thumbnail',
+                    ]);
+                } else {
+                    $html .= \html_writer::div(\html_writer::link($file['url'], $file['name']) .
+                        ' (' . s($file['size']) . ')', 'exaport-item-content-file');
+                }
+            }
+            $html .= \html_writer::end_div();
+        }
+        return $html;
     }
 
     /**

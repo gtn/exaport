@@ -29,10 +29,28 @@
                 {{#hasfiles}}
                 <div class="exaport-item-content-files d-flex flex-wrap gap-3 mt-2">
                     {{#files}}
+                    {{#isvideo}}
+                    <div class="exaport-item-content-media">
+                        <video controls preload="metadata">
+                            <source src="{{url}}" type="{{mimetype}}">
+                            <a href="{{url}}">{{name}}</a>
+                        </video>
+                    </div>
+                    {{/isvideo}}
+                    {{#isaudio}}
+                    <div class="exaport-item-content-media">
+                        <audio controls preload="metadata">
+                            <source src="{{url}}" type="{{mimetype}}">
+                            <a href="{{url}}">{{name}}</a>
+                        </audio>
+                    </div>
+                    {{/isaudio}}
+                    {{^isvideo}}{{^isaudio}}
                     <a href="{{url}}" class="exaport-item-content-file" target="_blank" rel="noopener noreferrer">
                         {{#isimage}}<img src="{{url}}" alt="{{name}}" class="exaport-item-content-thumbnail">{{/isimage}}
-                        {{^isimage}}{{{icon}}}<span>{{name}}</span>{{/isimage}}
+                        {{#isdownload}}{{{icon}}}<span>{{name}} ({{size}})</span>{{/isdownload}}
                     </a>
+                    {{/isaudio}}{{/isvideo}}
                     {{/files}}
                 </div>
                 {{/hasfiles}}

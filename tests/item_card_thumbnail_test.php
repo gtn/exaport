@@ -17,6 +17,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
+require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
 require_once($CFG->dirroot . '/blocks/exaport/locallib.php');
 
 /**
@@ -89,6 +90,21 @@ final class item_card_thumbnail_test extends \advanced_testcase {
             'filename' => $filename,
             'mimetype' => $mimetype,
         ], $content);
+    }
+
+    private function add_structured_file(stdClass $item, int $sortorder, string $filename, string $content,
+                                         string $mimetype): int {
+        $block = block_exaport_create_file_content_block($item->id, 'Files', ['sortorder' => $sortorder]);
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($item->userid)->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $block->id,
+            'filepath' => '/',
+            'filename' => $filename,
+            'mimetype' => $mimetype,
+        ], $content);
+        return $block->id;
     }
 
     private function export_item_card(\stdClass $item, string $type = 'shared'): array {
@@ -197,4 +213,129 @@ final class item_card_thumbnail_test extends \advanced_testcase {
 
         $this->assertFalse($data['hasthumbnail']);
     }
+
+    public function test_structured_image_is_selected_independent_of_legacy_type(): void {
+        foreach (['note', 'link'] as $type) {
+            $item = $this->create_item($type, ucfirst($type));
+            $blockid = $this->add_structured_file(
+                $item, 0, 'structured image.png', $this->get_png_content(), 'image/png'
+            );
+
+            $source = block_exaport_get_item_thumbnail_source($item);
+            $this->assertNotFalse($source);
+            $this->assertSame('item_content_file', $source->filearea);
+            $this->assertSame($item->id, $source->itemid);
+            $this->assertSame($blockid, $source->blockid);
+            $this->assertSame('structured image.png', $source->file->get_filename());
+
+            $data = $this->export_item_card($item);
+            $this->assertTrue($data['hasthumbnail']);
+            $this->assertStringContainsString(
+                '/item_content_file/portfolio/id/' . $this->owner->id . '/itemid/' . $item->id .
+                    '/blockid/' . $blockid . '/structured%20image.png',
+                $data['thumbnailurl']
+            );
+        }
+    }
+
+    public function test_structured_block_and_file_order_select_first_valid_image(): void {
+        $item = $this->create_item('note');
+        block_exaport_create_file_content_block($item->id, 'Empty', ['sortorder' => 0]);
+        $firstblockid = $this->add_structured_file($item, 10, 'zero.txt', 'text', 'text/plain');
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($item->userid)->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $firstblockid,
+            'filepath' => '/',
+            'filename' => 'z-image.png',
+            'mimetype' => 'image/png',
+        ], $this->get_png_content());
+        $this->add_structured_file($item, 20, 'a-image.png', $this->get_png_content(), 'image/png');
+
+        $source = block_exaport_get_item_thumbnail_source($item);
+        $this->assertSame($firstblockid, $source->blockid);
+        $this->assertSame('z-image.png', $source->file->get_filename());
+        $this->assertSame(
+            ['zero.txt', 'z-image.png'],
+            array_map(static function(\stored_file $file): string {
+                return $file->get_filename();
+            },
+                array_slice(block_exaport_get_item_thumbnail_candidates($item), 0, 2))
+        );
+    }
+
+    public function test_structured_image_precedes_legacy_image_but_custom_icon_precedes_both(): void {
+        $item = $this->create_item();
+        $this->add_item_file($item, 'item_file', 'legacy.png', $this->get_png_content(), 'image/png');
+        $this->add_structured_file($item, 0, 'structured.png', $this->get_png_content(), 'image/png');
+
+        $this->assertSame('structured.png', block_exaport_get_item_thumbnail_file($item)->get_filename());
+
+        $this->add_item_file($item, 'item_iconfile', 'custom.png', $this->get_png_content(), 'image/png');
+        $this->assertSame('custom.png', block_exaport_get_item_thumbnail_file($item)->get_filename());
+    }
+
+    public function test_legacy_image_remains_fallback_and_url_shape_is_unchanged(): void {
+        $item = $this->create_item();
+        $this->add_item_file($item, 'item_file', 'legacy image.png', $this->get_png_content(), 'image/png');
+
+        $source = block_exaport_get_item_thumbnail_source($item);
+        $this->assertSame('item_file', $source->filearea);
+        $this->assertStringContainsString(
+            '/item_file/portfolio/id/' . $this->owner->id . '/itemid/' . $item->id . '/legacy%20image.png',
+            block_exaport_get_item_thumbnail_source_url($source, 'portfolio/id/' . $this->owner->id)
+        );
+    }
+
+    public function test_structured_external_access_url_keeps_parent_and_block_ids_distinct(): void {
+        $item = $this->create_item();
+        $blockid = $this->add_structured_file($item, 0, 'photo.png', $this->get_png_content(), 'image/png');
+        $source = block_exaport_get_item_thumbnail_source($item);
+
+        $url = block_exaport_get_item_thumbnail_source_url(
+            $source, 'category/hash/' . $this->owner->id . '-abcdef12'
+        );
+        $this->assertStringContainsString(
+            '/item_content_file/category/hash/' . $this->owner->id . '-abcdef12/itemid/' . $item->id .
+                '/blockid/' . $blockid . '/photo.png',
+            $url
+        );
+        $this->assertNotSame($item->id, $blockid);
+
+        $viewurl = block_exaport_get_item_thumbnail_source_url($source, 'view/hash/sharedtoken');
+        $this->assertStringContainsString(
+            '/item_content_file/view/hash/sharedtoken/itemid/' . $item->id . '/blockid/' . $blockid . '/photo.png',
+            $viewurl
+        );
+    }
+
+    public function test_structured_non_image_is_candidate_but_not_card_thumbnail(): void {
+        $item = $this->create_item('note');
+        $this->add_structured_file($item, 0, 'document.pdf', '%PDF', 'application/pdf');
+
+        $this->assertFalse(block_exaport_get_item_thumbnail_file($item));
+        $this->assertSame('document.pdf', block_exaport_get_item_thumbnail_candidates($item)[0]->get_filename());
+        $this->assertFalse($this->export_item_card($item)['hasthumbnail']);
+    }
+
+    public function test_imindex_candidates_prefer_structured_list_and_legacy_list_is_preserved(): void {
+        $item = $this->create_item();
+        $this->add_item_file($item, 'item_file', 'legacy.png', $this->get_png_content(), 'image/png');
+        $this->assertSame('legacy.png', block_exaport_get_item_thumbnail_candidates($item)[0]->get_filename());
+
+        $this->add_structured_file($item, 0, 'structured.txt', 'text', 'text/plain');
+        $this->assertSame(
+            ['structured.txt'],
+            array_map(static function(\stored_file $file): string {
+                return $file->get_filename();
+            },
+                block_exaport_get_item_thumbnail_candidates($item))
+        );
+        $this->assertSame(
+            'structured.txt',
+            block_exaport_get_item_thumbnail_candidate($item, 99)->get_filename()
+        );
+    }
+
 }

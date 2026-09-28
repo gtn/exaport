@@ -99,27 +99,108 @@ function block_exaport_get_item_files_array($item) {
 }
 
 /**
- * Returns the preferred thumbnail source file for an item.
+ * Returns structured files belonging to an item in deterministic display order.
  *
- * Custom uploaded item icons keep precedence. For file items without a custom
- * icon, the first valid stored image file is used.
+ * Blocks are ordered by sortorder and ID by the Phase 1 loader; files retain the
+ * filepath, filename, and ID ordering of the corresponding file helper.
  *
- * @param \stdClass $item
- * @return \stored_file|false
+ * @param \stdClass $item Item with id and userid.
+ * @return \stored_file[]
  */
-function block_exaport_get_item_thumbnail_file($item) {
-    $iconfile = block_exaport_get_single_file($item, 'item_iconfile');
-    if ($iconfile && $iconfile->is_valid_image()) {
-        return $iconfile;
+function block_exaport_get_item_structured_files($item): array {
+    require_once(__DIR__ . '/item_content_helpers.php');
+
+    if (empty($item->id) || empty($item->userid)) {
+        return [];
     }
 
-    if (($item->type ?? '') !== 'file') {
-        return false;
+    $files = [];
+    foreach (block_exaport_get_item_content_blocks((int)$item->id) as $block) {
+        if (($block->type ?? '') !== 'file') {
+            continue;
+        }
+        foreach (block_exaport_get_item_content_files((int)$item->userid, (int)$block->id) as $file) {
+            $files[] = $file;
+        }
+    }
+    return $files;
+}
+
+/**
+ * Returns all deterministic thumbnail endpoint candidates for one source.
+ *
+ * If structured files exist they are authoritative for indexed requests;
+ * otherwise the legacy list is returned. This preserves the meaning of legacy
+ * imindex values while giving structured-only items deterministic indexing.
+ *
+ * @param \stdClass $item Item record.
+ * @return \stored_file[]
+ */
+function block_exaport_get_item_thumbnail_candidates($item): array {
+    $structuredfiles = block_exaport_get_item_structured_files($item);
+    if ($structuredfiles) {
+        return $structuredfiles;
+    }
+    return array_values(block_exaport_get_item_files_array($item));
+}
+
+
+/**
+ * Selects an indexed endpoint candidate, falling back to the first candidate.
+ *
+ * @param \stdClass $item Item record.
+ * @param int $index Zero-based imindex value.
+ * @return \stored_file|false
+ */
+function block_exaport_get_item_thumbnail_candidate($item, int $index) {
+    $files = block_exaport_get_item_thumbnail_candidates($item);
+    return $files[$index] ?? reset($files);
+}
+
+/**
+ * Returns the preferred thumbnail source, including its parent-item identity.
+ *
+ * A structured stored_file has its content block ID as its File API itemid, not
+ * the parent Exaport item ID. Keeping the item on this descriptor prevents URL
+ * builders from confusing those two identifiers.
+ *
+ * @param \stdClass $item Item record.
+ * @return \stdClass|false Descriptor with file, filearea, itemid, blockid, and ownerid.
+ */
+function block_exaport_get_item_thumbnail_source($item) {
+    $iconfile = block_exaport_get_single_file($item, 'item_iconfile');
+    if ($iconfile && $iconfile->is_valid_image()) {
+        return (object)[
+            'file' => $iconfile,
+            'filearea' => 'item_iconfile',
+            'itemid' => (int)$item->id,
+            'blockid' => null,
+            'ownerid' => (int)$item->userid,
+        ];
+    }
+
+    $structuredfiles = block_exaport_get_item_structured_files($item);
+    foreach ($structuredfiles as $file) {
+        if ($file->is_valid_image()) {
+            return (object)[
+                'file' => $file,
+                'filearea' => 'item_content_file',
+                'itemid' => (int)$item->id,
+                'blockid' => (int)$file->get_itemid(),
+                'ownerid' => (int)$item->userid,
+            ];
+        }
     }
 
     foreach (block_exaport_get_item_files_array($item) as $file) {
         if ($file && $file->is_valid_image()) {
-            return $file;
+            return (object)[
+                'file' => $file,
+                'filearea' => 'item_file',
+                'itemid' => (int)$item->id,
+                'blockid' => null,
+                'ownerid' => (int)$item->userid,
+            ];
         }
     }
 
@@ -127,26 +208,79 @@ function block_exaport_get_item_thumbnail_file($item) {
 }
 
 /**
- * Builds an access-controlled pluginfile URL for an item file or custom icon.
+ * Returns the preferred thumbnail file for an item.
  *
- * @param \stored_file $file
- * @param string $access
+ * Compatibility wrapper for callers expecting stored_file|false. Selection is
+ * custom icon, structured image, then legacy image and is independent of type.
+ *
+ * @param \stdClass $item Item record.
+ * @return \stored_file|false
+ */
+function block_exaport_get_item_thumbnail_file($item) {
+    $source = block_exaport_get_item_thumbnail_source($item);
+    return $source ? $source->file : false;
+}
+
+/**
+ * Builds an access-controlled pluginfile URL for a selected thumbnail source.
+ *
+ * @param \stdClass $source Descriptor from block_exaport_get_item_thumbnail_source().
+ * @param string $access Authorized Exaport access path.
  * @return string
  */
-function block_exaport_get_item_thumbnail_url(\stored_file $file, string $access): string {
-    $access = trim($access, '/');
-    $filearea = $file->get_filearea() . '/' . $access . '/itemid';
+function block_exaport_get_item_thumbnail_source_url(\stdClass $source, string $access): string {
+    global $CFG;
 
-    return moodle_url::make_pluginfile_url(
-        $file->get_contextid(),
-        $file->get_component(),
-        $filearea,
-        $file->get_itemid(),
-        $file->get_filepath(),
-        $file->get_filename(),
-        false,
-        false
-    )->out(false);
+    $access = trim($access, '/');
+    $parts = [$source->file->get_contextid(), 'block_exaport', $source->filearea];
+    if ($access !== '') {
+        $parts[] = $access;
+    }
+    $parts[] = 'itemid';
+    $parts[] = (int)$source->itemid;
+    if ($source->filearea === 'item_content_file') {
+        $parts[] = 'blockid';
+        $parts[] = (int)$source->blockid;
+    }
+    $parts[] = $source->file->get_filename();
+
+    return file_encode_url($CFG->wwwroot . '/pluginfile.php', '/' . implode('/', $parts), true);
+}
+
+/**
+ * Backwards-compatible URL builder for legacy item files and custom icons.
+ *
+ * Structured files require the parent item because their stored itemid is the
+ * block ID. New code should use block_exaport_get_item_thumbnail_source_url().
+ *
+ * @param \stored_file $file Stored file.
+ * @param string $access Authorized Exaport access path.
+ * @param \stdClass|null $item Parent item, required for structured files.
+ * @return string
+ */
+function block_exaport_get_item_thumbnail_url(\stored_file $file, string $access, ?\stdClass $item = null): string {
+    if ($file->get_filearea() === 'item_content_file') {
+        if (!$item) {
+            throw new coding_exception('Parent item is required for a structured thumbnail URL');
+        }
+        $source = (object)[
+            'file' => $file,
+            'filearea' => 'item_content_file',
+            'itemid' => (int)$item->id,
+            'blockid' => (int)$file->get_itemid(),
+            'ownerid' => (int)$item->userid,
+        ];
+        return block_exaport_get_item_thumbnail_source_url($source, $access);
+    }
+
+    $source = (object)[
+        'file' => $file,
+        'filearea' => $file->get_filearea(),
+        'itemid' => (int)$file->get_itemid(),
+        'blockid' => null,
+        'ownerid' => $item ? (int)$item->userid : 0,
+    ];
+    return block_exaport_get_item_thumbnail_source_url($source, $access);
 }
 
 /**
@@ -158,29 +292,21 @@ function block_exaport_get_item_thumbnail_url(\stored_file $file, string $access
  */
 function block_exaport_get_item_thumbnail_context($item, string $access = ''): array {
     if (empty($item->userid)) {
-        return [
-            'hasthumbnail' => false,
-            'thumbnailurl' => '',
-            'thumbnailalt' => '',
-        ];
+        return ['hasthumbnail' => false, 'thumbnailurl' => '', 'thumbnailalt' => ''];
     }
 
     if ($access === '') {
         $access = 'portfolio/id/' . $item->userid;
     }
 
-    $file = block_exaport_get_item_thumbnail_file($item);
-    if (!$file) {
-        return [
-            'hasthumbnail' => false,
-            'thumbnailurl' => '',
-            'thumbnailalt' => '',
-        ];
+    $source = block_exaport_get_item_thumbnail_source($item);
+    if (!$source) {
+        return ['hasthumbnail' => false, 'thumbnailurl' => '', 'thumbnailalt' => ''];
     }
 
     return [
         'hasthumbnail' => true,
-        'thumbnailurl' => block_exaport_get_item_thumbnail_url($file, $access),
+        'thumbnailurl' => block_exaport_get_item_thumbnail_source_url($source, $access),
         'thumbnailalt' => format_string($item->name ?? ''),
     ];
 }

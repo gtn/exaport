@@ -79,48 +79,43 @@ if (empty($item)) {
     throw new moodle_exception('filenotfound', 'error');
 }
 
-// Custom Icon file.
+// Custom icons always override indexed and automatically selected item files.
 if (($iconfile = block_exaport_get_single_file($item, 'item_iconfile')) && $iconfile->is_valid_image()) {
     send_stored_file($iconfile);
     exit;
 }
 
+$file = false;
+if ($imageindex !== '') {
+    // Structured files form the indexed list when present; otherwise indexes
+    // retain their historical meaning in the deterministic legacy file list.
+    $file = block_exaport_get_item_thumbnail_candidate($item, $imageindex);
+} else {
+    $file = block_exaport_get_item_thumbnail_file($item);
+    if (!$file) {
+        $files = block_exaport_get_item_thumbnail_candidates($item);
+        $file = reset($files);
+    }
+}
+
+if ($file && $file->is_valid_image()) {
+    send_stored_file($file, 1);
+    exit;
+}
+
+if ($file) {
+    $output = block_exaport_get_renderer();
+    // Needed for image_url(). Never pass an absent file to file_file_icon().
+    $PAGE->set_context(context_system::instance());
+    $icon = $output->image_url(file_file_icon($file, 90));
+    redirect($icon);
+}
+
 switch ($item->type) {
-    case "file":
-        $files = array_values(block_exaport_get_item_files_array($item));
-        $file = false;
-
-        if ($files && ($imageindex || $imageindex === 0)) {
-            $file = $files[$imageindex] ?? false;
-            if ($file && $file->is_valid_image()) {
-                send_stored_file($file, 1);
-                exit;
-            }
-            if (!$file) {
-                $file = reset($files);
-            }
-        } else {
-            $file = block_exaport_get_item_thumbnail_file($item);
-            if ($file) {
-                send_stored_file($file, 1);
-                exit;
-            }
-            $file = reset($files);
-        }
-
-        $output = block_exaport_get_renderer();
-        // Needed for pix_url.
-        $PAGE->set_context(context_system::instance());
-        $icon = $output->image_url(file_file_icon($file, 90));
-        // TODO: If Pdf will have a problems - look a solution with readfile below
-        header('Location: ' . $icon);
-        break;
-
-    case "link":
+    case 'link':
         block_exaport_send_thumb_static_fallback('pix/link_tile.svg');
         break;
-
-    case "note":
+    case 'note':
         block_exaport_send_thumb_static_fallback('pix/note_tile.svg');
         break;
     default:

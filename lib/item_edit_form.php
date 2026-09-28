@@ -357,8 +357,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->closeHeaderBefore('buttonar');
         } else {
             $itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEM_MM,
-                array('itemid' => $this->_customdata['current']->id),
-                'competence_type, exacomp_record_id');
+                array('itemid' => $this->_customdata['current']->id));
             $exampleid = $itemexample ? block_exaport_get_item_mapping_exampleid($itemexample) : null;
 
             $mform->addElement('hidden', 'allowedit');

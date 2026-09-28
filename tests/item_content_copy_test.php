@@ -69,7 +69,7 @@ final class item_content_copy_test extends \advanced_testcase {
         $this->assertSame($expectedsourceorder, array_keys($map));
         $this->assertSame([2, 8, 8], array_map(fn($block) => (int)$block->sortorder, $destinationblocks));
         $this->assertSame('<b>Body</b>', $destinationblocks[0]->content);
-        $this->assertSame(FORMAT_HTML, (int)$destinationblocks[0]->contentformat);
+        $this->assertSame((int)FORMAT_HTML, (int)$destinationblocks[0]->contentformat);
         $this->assertSame('https://example.test/a', $destinationblocks[1]->url);
         $this->assertSame('unchanged:URL', $destinationblocks[2]->url);
         $this->assertSame(10, (int)$destinationblocks[1]->timecreated);
@@ -99,7 +99,7 @@ final class item_content_copy_test extends \advanced_testcase {
         $this->assertSame('text/plain', $subfile->get_mimetype());
         $this->assertSame('copy-source', $subfile->get_source());
         $this->assertSame('Copy Author', $subfile->get_author());
-        $this->assertSame($destinationuser->id, (int)$subfile->get_userid());
+        $this->assertSame((int)$destinationuser->id, (int)$subfile->get_userid());
         $this->assertCount(1, get_file_storage()->get_area_files(\context_user::instance($destinationuser->id)->id,
             'block_exaport', 'item_content_file', $map[$second->id], 'id ASC', false));
         $this->assertSame(2, $DB->count_records('block_exaportitemblock', ['itemid' => $source->id]));

@@ -1428,8 +1428,9 @@ function block_exaport_get_view_blocks($view) {
     }
     $badges = block_exaport_get_all_user_badges($userid);
 
-    $query = "SELECT b.*
+    $query = "SELECT b.*, i.userid AS itemownerid
               FROM {block_exaportviewblock} b
+         LEFT JOIN {block_exaportitem} i ON i.id = b.itemid
               WHERE b.viewid = ?
               ORDER BY b.positionx, b.positiony";
 
@@ -1462,7 +1463,7 @@ function block_exaport_get_view_blocks($view) {
                 $contentrenderable = new \block_exaport\output\item_content_blocks(
                     $contentblocks,
                     null,
-                    (int)$portfolioitems[$block->itemid]->userid,
+                    (int)$block->itemownerid,
                     false,
                     false
                 );

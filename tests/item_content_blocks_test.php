@@ -381,6 +381,16 @@ final class item_content_blocks_test extends \advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $itemid = $this->insert_item($owner->id, $course->id);
         $this->insert_block($itemid, 'text', 0, 'Editor content', '<p>Visible in editor</p>');
+        $fileblockid = $this->insert_block($itemid, 'file', 1, 'Editor file');
+        $ownercontext = \context_user::instance($owner->id);
+        get_file_storage()->create_file_from_string([
+            'contextid' => $ownercontext->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $fileblockid,
+            'filepath' => '/',
+            'filename' => 'editor.pdf',
+        ], 'pdf');
         $viewid = $DB->insert_record('block_exaportview', (object)[
             'userid' => $owner->id,
             'creatorid' => $owner->id,
@@ -402,6 +412,9 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertArrayHasKey($viewblockid, $blocks);
         $this->assertStringContainsString('Visible in editor', $blocks[$viewblockid]->item->intro);
         $this->assertStringContainsString('exaport-item-content-section', $blocks[$viewblockid]->item->intro);
+        $this->assertStringContainsString('/pluginfile.php/' . $ownercontext->id .
+            '/block_exaport/item_content_file/itemid/' . $itemid . '/blockid/' . $fileblockid . '/editor.pdf',
+            $blocks[$viewblockid]->item->intro);
     }
 
     /**

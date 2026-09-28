@@ -26,7 +26,6 @@ require_once(__DIR__ . '/../../lib/item_content_helpers.php');
 use context_user;
 use moodle_url;
 use renderable;
-use renderer_base;
 use templatable;
 
 /**
@@ -95,10 +94,10 @@ class item_content_blocks implements renderable, templatable {
     }
 
     /**
-     * @param renderer_base $output
+     * @param \renderer_base|\core\output\renderer_base $output Moodle renderer.
      * @return array
      */
-    public function export_for_template(renderer_base $output): array {
+    public function export_for_template($output): array {
         $rows = [];
 
         foreach ($this->blocks as $block) {
@@ -141,10 +140,10 @@ class item_content_blocks implements renderable, templatable {
     /**
      * Build the add menu entries.
      *
-     * @param renderer_base $output Renderer used for icons.
+     * @param \renderer_base|\core\output\renderer_base $output Renderer used for icons.
      * @return array
      */
-    private function get_add_actions(renderer_base $output): array {
+    private function get_add_actions($output): array {
         if ($this->addurl instanceof moodle_url) {
             $urls = ['text' => $this->addurl];
         } else if (is_array($this->addurl)) {
@@ -173,10 +172,10 @@ class item_content_blocks implements renderable, templatable {
      * Export files attached to a file block.
      *
      * @param \stdClass $block Content block record.
-     * @param renderer_base $output Renderer used for file icons.
+     * @param \renderer_base|\core\output\renderer_base $output Renderer used for file icons.
      * @return array
      */
-    private function get_block_files(\stdClass $block, renderer_base $output): array {
+    private function get_block_files(\stdClass $block, $output): array {
         $storedfiles = \block_exaport_get_item_content_files($this->ownerid, (int)$block->id);
         $files = [];
         foreach ($storedfiles as $file) {
@@ -205,11 +204,11 @@ class item_content_blocks implements renderable, templatable {
      * This deliberately consumes the same normalized data as the Mustache view,
      * while avoiding controls and browser-only behaviour.
      *
-     * @param renderer_base $output
+     * @param \renderer_base|\core\output\renderer_base $output Moodle renderer.
      * @param array|null $data Previously exported template data, when available.
      * @return string Safe HTML.
      */
-    public function render_for_pdf(renderer_base $output, ?array $data = null): string {
+    public function render_for_pdf($output, ?array $data = null): string {
         $data = $data ?? $this->export_for_template($output);
         $html = '';
         foreach ($data['blocks'] as $block) {
@@ -300,12 +299,12 @@ class item_content_blocks implements renderable, templatable {
     /**
      * Render a stable icon for a content block type.
      *
-     * @param renderer_base $output
+     * @param \renderer_base|\core\output\renderer_base $output Moodle renderer.
      * @param array $typeinfo
      * @param string $alt
      * @return string
      */
-    private function get_type_icon(renderer_base $output, array $typeinfo, string $alt): string {
+    private function get_type_icon($output, array $typeinfo, string $alt): string {
         if (isset($typeinfo['icontext'])) {
             return \html_writer::tag('span', $typeinfo['icontext'], [
                 'class' => 'exaport-item-content-type-icon exaport-item-content-text-icon',

@@ -1544,6 +1544,7 @@ function block_exaport_get_view_blocks($view) {
 
     // This function also supplies the JSON used by the interactive view editor.
     require_once(__DIR__ . '/item_content_helpers.php');
+    require_once(__DIR__ . '/../blockmediafunc.php');
 
     $portfolioitems = block_exaport_get_portfolio_items();
 

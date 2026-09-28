@@ -92,7 +92,7 @@ final class item_card_thumbnail_test extends \advanced_testcase {
         ], $content);
     }
 
-    private function add_structured_file(stdClass $item, int $sortorder, string $filename, string $content,
+    private function add_structured_file(\stdClass $item, int $sortorder, string $filename, string $content,
                                          string $mimetype): int {
         $block = block_exaport_create_file_content_block($item->id, 'Files', ['sortorder' => $sortorder]);
         get_file_storage()->create_file_from_string([

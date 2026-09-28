@@ -154,15 +154,7 @@ class item_content_blocks implements renderable, templatable {
      * @return array
      */
     private function get_block_files(\stdClass $block, renderer_base $output): array {
-        $context = context_user::instance($this->ownerid);
-        $storedfiles = get_file_storage()->get_area_files(
-            $context->id,
-            'block_exaport',
-            'item_content_file',
-            $block->id,
-            'filename ASC',
-            false
-        );
+        $storedfiles = block_exaport_get_item_content_files($this->ownerid, (int)$block->id);
         $files = [];
         foreach ($storedfiles as $file) {
             $url = $this->get_file_url($block, $file);

@@ -24,30 +24,130 @@ function block_exaport_get_editable_content_item(int $itemid, int $courseid): st
 }
 
 /**
+ * Load the supported structured content blocks belonging to an item.
+ *
+ * The returned array is always a zero-based list. Unknown block types are
+ * deliberately ignored so that a newer block type cannot break older import,
+ * copy, or display code.
+ *
+ * @param int $itemid Item ID.
+ * @return stdClass[] Blocks ordered by sortorder ASC, id ASC.
+ */
+function block_exaport_get_item_content_blocks(int $itemid): array {
+    global $DB;
+
+    $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $itemid], 'sortorder ASC, id ASC');
+    return array_values(array_filter($blocks, static function(stdClass $block): bool {
+        return in_array($block->type ?? '', ['text', 'link', 'file'], true);
+    }));
+}
+
+/**
+ * Backwards-compatible loader for text blocks only.
+ *
+ * @param int $itemid Item ID.
+ * @return stdClass[] Text blocks ordered by sortorder ASC, id ASC.
+ */
+function block_exaport_get_item_content_text_blocks(int $itemid): array {
+    return array_values(array_filter(block_exaport_get_item_content_blocks($itemid),
+        static function(stdClass $block): bool {
+            return ($block->type ?? '') === 'text';
+        }));
+}
+
+/**
+ * Load the files stored for a file content block.
+ *
+ * Directories are excluded. Ordering by filepath first makes this helper safe
+ * if subdirectories are enabled later; filename and file id provide stable
+ * tie-breakers for imports which contain duplicate names in different paths.
+ *
+ * @param int $userid Owner of the user-context files.
+ * @param int $blockid Content block ID (the file area's itemid).
+ * @return stored_file[] Files ordered by filepath ASC, filename ASC, id ASC.
+ */
+function block_exaport_get_item_content_files(int $userid, int $blockid): array {
+    $files = get_file_storage()->get_area_files(
+        context_user::instance($userid)->id,
+        'block_exaport',
+        'item_content_file',
+        $blockid,
+        'filepath ASC, filename ASC, id ASC',
+        false
+    );
+    return array_values($files);
+}
+
+/**
+ * Whether an item contains link or file blocks.
+ *
+ * Text-only structured content does not count because legacy item content can
+ * represent text, but has no equivalent representation for links or files.
+ *
+ * @param int $itemid Item ID.
+ * @return bool
+ */
+function block_exaport_item_has_structured_link_or_file_content(int $itemid): bool {
+    global $DB;
+
+    return $DB->record_exists_select(
+        'block_exaportitemblock',
+        'itemid = :itemid AND (type = :linktype OR type = :filetype)',
+        ['itemid' => $itemid, 'linktype' => 'link', 'filetype' => 'file']
+    );
+}
+
+/**
+ * Obtain the sort order to use when appending a block to an item.
+ *
+ * @param int $itemid Item ID.
+ * @return int Zero for the first block, otherwise the current maximum plus one.
+ */
+function block_exaport_get_next_item_content_sortorder(int $itemid): int {
+    global $DB;
+
+    $maximum = $DB->get_field('block_exaportitemblock', 'MAX(sortorder)', ['itemid' => $itemid]);
+    return $maximum === false || $maximum === null ? 0 : (int)$maximum + 1;
+}
+
+/**
  * Build the common record fields for a newly appended content block.
  *
- * The server calculates the order; callers never accept an order from the browser.
+ * Defaults are suitable for interactive append operations. Trusted callers such
+ * as migrations, imports, and copy operations may supply explicit storage
+ * fields; HTTP parameters must never be passed through as the fields array.
  *
  * @param int $itemid Item ID.
  * @param string $type Supported block type.
  * @param string $title Optional block title.
  * @param string $url Optional URL.
+ * @param array $fields Optional sortorder, content, contentformat, timecreated,
+ *     and timemodified overrides selected by trusted server-side code.
  * @return stdClass
  */
-function block_exaport_new_content_block(int $itemid, string $type, string $title = '', string $url = ''): stdClass {
-    global $DB;
-
+function block_exaport_new_content_block(
+    int $itemid,
+    string $type,
+    string $title = '',
+    string $url = '',
+    array $fields = []
+): stdClass {
     if (!in_array($type, ['text', 'link', 'file'], true)) {
         throw new coding_exception('Unsupported Exaport item content block type');
     }
 
-    $maxsortorder = $DB->get_field('block_exaportitemblock', 'MAX(sortorder)', ['itemid' => $itemid]);
+    $supportedfields = ['sortorder', 'content', 'contentformat', 'timecreated', 'timemodified'];
+    $unsupportedfields = array_diff(array_keys($fields), $supportedfields);
+    if ($unsupportedfields) {
+        throw new coding_exception('Unsupported Exaport item content block field: ' . reset($unsupportedfields));
+    }
+
     $time = time();
 
-    return (object)[
+    $record = [
         'itemid' => $itemid,
         'type' => $type,
-        'sortorder' => $maxsortorder === false || $maxsortorder === null ? 0 : (int)$maxsortorder + 1,
+        'sortorder' => block_exaport_get_next_item_content_sortorder($itemid),
         'title' => $title,
         'content' => '',
         'contentformat' => FORMAT_HTML,
@@ -55,6 +155,65 @@ function block_exaport_new_content_block(int $itemid, string $type, string $titl
         'timecreated' => $time,
         'timemodified' => $time,
     ];
+    return (object)array_replace($record, $fields);
+}
+
+/**
+ * Create and insert a structured content block without depending on form data.
+ *
+ * @param int $itemid Item ID.
+ * @param string $type Supported block type.
+ * @param string $title Optional block title.
+ * @param string $url Optional URL.
+ * @param array $fields Trusted storage-field overrides; see block_exaport_new_content_block().
+ * @return stdClass Inserted block, including its integer ID.
+ */
+function block_exaport_create_content_block(
+    int $itemid,
+    string $type,
+    string $title = '',
+    string $url = '',
+    array $fields = []
+): stdClass {
+    global $DB;
+
+    $block = block_exaport_new_content_block($itemid, $type, $title, $url, $fields);
+    $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
+    return $block;
+}
+
+/**
+ * Create a link block without requiring form or request data.
+ *
+ * @param int $itemid Item ID.
+ * @param string $title Optional title.
+ * @param string $url Link URL.
+ * @param array $fields Trusted storage-field overrides.
+ * @return stdClass Inserted block, including its ID.
+ */
+function block_exaport_create_link_content_block(
+    int $itemid,
+    string $title,
+    string $url,
+    array $fields = []
+): stdClass {
+    return block_exaport_create_content_block($itemid, 'link', $title, $url, $fields);
+}
+
+/**
+ * Create a file block record without requiring form, draft-area, or request data.
+ *
+ * Callers such as upgrades, imports, and copy operations can use the returned ID
+ * as the itemid of the item_content_file file area and populate it with the File
+ * API. Interactive forms can likewise move their draft files after this call.
+ *
+ * @param int $itemid Item ID.
+ * @param string $title Optional title.
+ * @param array $fields Trusted storage-field overrides.
+ * @return stdClass Inserted block, including its ID.
+ */
+function block_exaport_create_file_content_block(int $itemid, string $title, array $fields = []): stdClass {
+    return block_exaport_create_content_block($itemid, 'file', $title, '', $fields);
 }
 
 /**
@@ -129,9 +288,9 @@ function block_exaport_create_item_content_form(string $type, int $courseid, int
 
 /** Render the editable content section after an asynchronous save. */
 function block_exaport_render_item_content_blocks(int $courseid, stdClass $item): string {
-    global $DB, $PAGE;
+    global $PAGE;
 
-    $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $item->id], 'sortorder ASC, id ASC');
+    $blocks = block_exaport_get_item_content_blocks((int)$item->id);
     $urls = [];
     foreach (['text', 'link', 'file'] as $type) {
         $urls[$type] = new moodle_url('/blocks/exaport/item_content_' . $type . '.php',

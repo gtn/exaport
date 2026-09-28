@@ -29,8 +29,7 @@ if ($form->is_cancelled()) {
     block_exaport_get_editable_content_item($itemid, $courseid);
 
     $transaction = $DB->start_delegated_transaction();
-    $block = block_exaport_new_content_block($itemid, 'file', $fromform->title);
-    $block->id = $DB->insert_record('block_exaportitemblock', $block);
+    $block = block_exaport_create_file_content_block($itemid, $fromform->title);
     file_postupdate_standard_filemanager(
         $fromform,
         'files',

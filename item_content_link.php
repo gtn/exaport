@@ -28,8 +28,7 @@ if ($form->is_cancelled()) {
     block_exaport_get_editable_content_item($itemid, $courseid);
 
     $transaction = $DB->start_delegated_transaction();
-    $block = block_exaport_new_content_block($itemid, 'link', $fromform->title, $fromform->url);
-    $DB->insert_record('block_exaportitemblock', $block);
+    block_exaport_create_link_content_block($itemid, $fromform->title, $fromform->url);
     $transaction->allow_commit();
     redirect($returnurl, get_string('contentblockadded', 'block_exaport'), null, \core\output\notification::NOTIFY_SUCCESS);
 }

@@ -23,6 +23,56 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
  */
 final class item_content_blocks_test extends \advanced_testcase {
 
+    public function test_empty_item_helpers_return_empty_defaults(): void {
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+
+        $this->assertSame([], block_exaport_get_item_content_blocks($itemid));
+        $this->assertSame(0, block_exaport_get_next_item_content_sortorder($itemid));
+        $this->assertFalse(block_exaport_item_has_structured_link_or_file_content($itemid));
+    }
+
+    public function test_record_creation_helpers_append_without_form_data(): void {
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->insert_block($itemid, 'text', 4, 'Existing');
+
+        $text = block_exaport_create_content_block($itemid, 'text', 'Imported text', '', [
+            'sortorder' => 12,
+            'content' => 'Imported content',
+            'contentformat' => FORMAT_PLAIN,
+            'timecreated' => 123,
+            'timemodified' => 456,
+        ]);
+        $link = block_exaport_create_link_content_block($itemid, 'Example', 'https://example.com/');
+        $file = block_exaport_create_file_content_block($itemid, 'Documents');
+
+        $this->assertIsInt($text->id);
+        $this->assertSame('text', $text->type);
+        $this->assertSame(12, $text->sortorder);
+        $this->assertSame('Imported content', $text->content);
+        $this->assertSame(FORMAT_PLAIN, $text->contentformat);
+        $this->assertSame(123, $text->timecreated);
+        $this->assertSame(456, $text->timemodified);
+        $this->assertGreaterThan(0, $link->id);
+        $this->assertIsInt($link->id);
+        $this->assertSame('link', $link->type);
+        $this->assertSame('https://example.com/', $link->url);
+        $this->assertSame(13, $link->sortorder);
+        $this->assertIsInt($file->id);
+        $this->assertSame('file', $file->type);
+        $this->assertSame(14, $file->sortorder);
+        $this->assertTrue(block_exaport_item_has_structured_link_or_file_content($itemid));
+        $this->assertSame(15, block_exaport_get_next_item_content_sortorder($itemid));
+
+        $this->expectException(\coding_exception::class);
+        block_exaport_create_content_block($itemid, 'unsupported');
+    }
+
     public function test_item_content_modal_uses_moodle_dynamic_form(): void {
         $this->assertTrue(function_exists('block_exaport_item_is_editable'));
         $this->assertTrue(is_subclass_of(
@@ -84,6 +134,22 @@ final class item_content_blocks_test extends \advanced_testcase {
             'filepath' => '/',
             'filename' => 'picture.png',
         ], 'not-a-real-png');
+        get_file_storage()->create_file_from_string([
+            'contextid' => $context->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $fileid,
+            'filepath' => '/',
+            'filename' => 'alpha.txt',
+        ], 'text');
+
+        $files = block_exaport_get_item_content_files($owner->id, $fileid);
+        $this->assertSame(['alpha.txt', 'picture.png'], array_map(
+            static function(\stored_file $file): string {
+                return $file->get_filename();
+            },
+            $files
+        ));
 
         $blocks = block_exaport_get_item_content_blocks($itemid);
         $this->assertSame([$linkid, $fileid], array_map(
@@ -108,11 +174,11 @@ final class item_content_blocks_test extends \advanced_testcase {
 
         $this->assertSame('https://moodle.org/', $data['blocks'][0]['linkurl']);
         $this->assertTrue($data['blocks'][1]['hasfiles']);
-        $this->assertSame('picture.png', $data['blocks'][1]['files'][0]['name']);
+        $this->assertSame(['alpha.txt', 'picture.png'], array_column($data['blocks'][1]['files'], 'name'));
         $this->assertStringContainsString(
             $CFG->wwwroot . '/pluginfile.php/' . $context->id . '/block_exaport/item_content_file/' .
                 'itemid/' . $itemid . '/blockid/' . $fileid . '/picture.png',
-            $data['blocks'][1]['files'][0]['url']
+            $data['blocks'][1]['files'][1]['url']
         );
         $this->assertCount(3, $data['addactions']);
         $this->assertSame(['text', 'link', 'file'], array_column($data['addactions'], 'type'));

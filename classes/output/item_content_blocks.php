@@ -19,6 +19,10 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+// The renderable is autoloaded from item-edit and other paths which do not use
+// the standalone-page bootstrap that loads the procedural content helpers.
+require_once(__DIR__ . '/../../lib/item_content_helpers.php');
+
 use context_user;
 use moodle_url;
 use renderable;
@@ -173,7 +177,7 @@ class item_content_blocks implements renderable, templatable {
      * @return array
      */
     private function get_block_files(\stdClass $block, renderer_base $output): array {
-        $storedfiles = block_exaport_get_item_content_files($this->ownerid, (int)$block->id);
+        $storedfiles = \block_exaport_get_item_content_files($this->ownerid, (int)$block->id);
         $files = [];
         foreach ($storedfiles as $file) {
             $url = $this->get_file_url($block, $file);

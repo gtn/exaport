@@ -78,9 +78,12 @@ final class item_competence_helpers_test extends \advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $itemid = $this->insert_item($owner->id, $course->id);
         $this->setUser($owner);
+
         $DB->insert_record(BLOCK_EXACOMP_DB_ITEM_MM, (object)[
+            'competence_type' => BLOCK_EXACOMP_TYPE_EXAMPLE,
+            'exacomp_record_id' => 1,
             'itemid' => $itemid,
-            'exampleid' => 1,
+            'timecreated' => time(),
             'teachervalue' => 1,
         ]);
 

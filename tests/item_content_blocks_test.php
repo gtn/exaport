@@ -41,17 +41,36 @@ final class item_content_blocks_test extends \advanced_testcase {
         $itemid = $this->insert_item($owner->id, $course->id);
         $this->insert_block($itemid, 'text', 4, 'Existing');
 
+        $text = block_exaport_create_content_block($itemid, 'text', 'Imported text', '', [
+            'sortorder' => 12,
+            'content' => 'Imported content',
+            'contentformat' => FORMAT_PLAIN,
+            'timecreated' => 123,
+            'timemodified' => 456,
+        ]);
         $link = block_exaport_create_link_content_block($itemid, 'Example', 'https://example.com/');
         $file = block_exaport_create_file_content_block($itemid, 'Documents');
 
+        $this->assertIsInt($text->id);
+        $this->assertSame('text', $text->type);
+        $this->assertSame(12, $text->sortorder);
+        $this->assertSame('Imported content', $text->content);
+        $this->assertSame(FORMAT_PLAIN, $text->contentformat);
+        $this->assertSame(123, $text->timecreated);
+        $this->assertSame(456, $text->timemodified);
         $this->assertGreaterThan(0, $link->id);
+        $this->assertIsInt($link->id);
         $this->assertSame('link', $link->type);
         $this->assertSame('https://example.com/', $link->url);
-        $this->assertSame(5, $link->sortorder);
+        $this->assertSame(13, $link->sortorder);
+        $this->assertIsInt($file->id);
         $this->assertSame('file', $file->type);
-        $this->assertSame(6, $file->sortorder);
+        $this->assertSame(14, $file->sortorder);
         $this->assertTrue(block_exaport_item_has_structured_link_or_file_content($itemid));
-        $this->assertSame(7, block_exaport_get_next_item_content_sortorder($itemid));
+        $this->assertSame(15, block_exaport_get_next_item_content_sortorder($itemid));
+
+        $this->expectException(\coding_exception::class);
+        block_exaport_create_content_block($itemid, 'unsupported');
     }
 
     public function test_item_content_modal_uses_moodle_dynamic_form(): void {

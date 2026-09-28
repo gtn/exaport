@@ -113,22 +113,38 @@ function block_exaport_get_next_item_content_sortorder(int $itemid): int {
 /**
  * Build the common record fields for a newly appended content block.
  *
- * The server calculates the order; callers never accept an order from the browser.
+ * Defaults are suitable for interactive append operations. Trusted callers such
+ * as migrations, imports, and copy operations may supply explicit storage
+ * fields; HTTP parameters must never be passed through as the fields array.
  *
  * @param int $itemid Item ID.
  * @param string $type Supported block type.
  * @param string $title Optional block title.
  * @param string $url Optional URL.
+ * @param array $fields Optional sortorder, content, contentformat, timecreated,
+ *     and timemodified overrides selected by trusted server-side code.
  * @return stdClass
  */
-function block_exaport_new_content_block(int $itemid, string $type, string $title = '', string $url = ''): stdClass {
+function block_exaport_new_content_block(
+    int $itemid,
+    string $type,
+    string $title = '',
+    string $url = '',
+    array $fields = []
+): stdClass {
     if (!in_array($type, ['text', 'link', 'file'], true)) {
         throw new coding_exception('Unsupported Exaport item content block type');
     }
 
+    $supportedfields = ['sortorder', 'content', 'contentformat', 'timecreated', 'timemodified'];
+    $unsupportedfields = array_diff(array_keys($fields), $supportedfields);
+    if ($unsupportedfields) {
+        throw new coding_exception('Unsupported Exaport item content block field: ' . reset($unsupportedfields));
+    }
+
     $time = time();
 
-    return (object)[
+    $record = [
         'itemid' => $itemid,
         'type' => $type,
         'sortorder' => block_exaport_get_next_item_content_sortorder($itemid),
@@ -139,6 +155,31 @@ function block_exaport_new_content_block(int $itemid, string $type, string $titl
         'timecreated' => $time,
         'timemodified' => $time,
     ];
+    return (object)array_replace($record, $fields);
+}
+
+/**
+ * Create and insert a structured content block without depending on form data.
+ *
+ * @param int $itemid Item ID.
+ * @param string $type Supported block type.
+ * @param string $title Optional block title.
+ * @param string $url Optional URL.
+ * @param array $fields Trusted storage-field overrides; see block_exaport_new_content_block().
+ * @return stdClass Inserted block, including its integer ID.
+ */
+function block_exaport_create_content_block(
+    int $itemid,
+    string $type,
+    string $title = '',
+    string $url = '',
+    array $fields = []
+): stdClass {
+    global $DB;
+
+    $block = block_exaport_new_content_block($itemid, $type, $title, $url, $fields);
+    $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
+    return $block;
 }
 
 /**
@@ -147,14 +188,16 @@ function block_exaport_new_content_block(int $itemid, string $type, string $titl
  * @param int $itemid Item ID.
  * @param string $title Optional title.
  * @param string $url Link URL.
+ * @param array $fields Trusted storage-field overrides.
  * @return stdClass Inserted block, including its ID.
  */
-function block_exaport_create_link_content_block(int $itemid, string $title, string $url): stdClass {
-    global $DB;
-
-    $block = block_exaport_new_content_block($itemid, 'link', $title, $url);
-    $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
-    return $block;
+function block_exaport_create_link_content_block(
+    int $itemid,
+    string $title,
+    string $url,
+    array $fields = []
+): stdClass {
+    return block_exaport_create_content_block($itemid, 'link', $title, $url, $fields);
 }
 
 /**
@@ -166,14 +209,11 @@ function block_exaport_create_link_content_block(int $itemid, string $title, str
  *
  * @param int $itemid Item ID.
  * @param string $title Optional title.
+ * @param array $fields Trusted storage-field overrides.
  * @return stdClass Inserted block, including its ID.
  */
-function block_exaport_create_file_content_block(int $itemid, string $title): stdClass {
-    global $DB;
-
-    $block = block_exaport_new_content_block($itemid, 'file', $title);
-    $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
-    return $block;
+function block_exaport_create_file_content_block(int $itemid, string $title, array $fields = []): stdClass {
+    return block_exaport_create_content_block($itemid, 'file', $title, '', $fields);
 }
 
 /**

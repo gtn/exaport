@@ -2043,7 +2043,7 @@ function block_exaport_get_item_mapping_exampleid(stdClass $itemexample): ?int {
     }
 
     $exampleid = $itemexample->exacomp_record_id ?? $itemexample->exampleid ?? null;
-    if (empty($exampleid)) {
+    if ($exampleid === null || $exampleid === '') {
         return null;
     }
 

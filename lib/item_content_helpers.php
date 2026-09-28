@@ -79,6 +79,81 @@ function block_exaport_get_item_content_files(int $userid, int $blockid): array 
 }
 
 /**
+ * Copy all supported structured content between two existing items.
+ *
+ * Blocks are inserted in their existing sortorder/id order and retain their
+ * original sortorder and creation time. Their modification time is the time of
+ * the copy. File metadata is retained by cloning each stored_file; only its
+ * owner context, user, file area itemid, and (where applicable) file area are
+ * changed. The caller owns the transaction and must create the parent item.
+ *
+ * @param stdClass $sourceitem Source item containing trusted id and userid.
+ * @param stdClass $destinationitem Destination item containing trusted id and userid.
+ * @return array<int, int> Source block ID to destination block ID map.
+ */
+function block_exaport_copy_item_content(stdClass $sourceitem, stdClass $destinationitem): array {
+    global $DB;
+
+    if (empty($sourceitem->id) || empty($sourceitem->userid) ||
+            empty($destinationitem->id) || empty($destinationitem->userid)) {
+        throw new coding_exception('Item content copying requires item and owner IDs');
+    }
+
+    $sourcecontext = context_user::instance((int)$sourceitem->userid);
+    $destinationcontext = context_user::instance((int)$destinationitem->userid);
+    $fs = get_file_storage();
+    $blockmap = [];
+    $copytime = time();
+
+    foreach (block_exaport_get_item_content_blocks((int)$sourceitem->id) as $sourceblock) {
+        $destinationblock = (object)[
+            'itemid' => (int)$destinationitem->id,
+            'type' => $sourceblock->type,
+            'sortorder' => (int)$sourceblock->sortorder,
+            'title' => $sourceblock->title,
+            'content' => $sourceblock->content,
+            'contentformat' => (int)$sourceblock->contentformat,
+            'url' => $sourceblock->url,
+            'timecreated' => (int)$sourceblock->timecreated,
+            'timemodified' => $copytime,
+        ];
+        $destinationblock->id = (int)$DB->insert_record('block_exaportitemblock', $destinationblock);
+        $blockmap[(int)$sourceblock->id] = $destinationblock->id;
+
+        $fileareas = [];
+        if ($sourceblock->type === 'file') {
+            $fileareas['item_content_file'] = block_exaport_get_item_content_files(
+                (int)$sourceitem->userid,
+                (int)$sourceblock->id
+            );
+        } else if ($sourceblock->type === 'text') {
+            $fileareas['item_content_text'] = array_values($fs->get_area_files(
+                $sourcecontext->id,
+                'block_exaport',
+                'item_content_text',
+                (int)$sourceblock->id,
+                'filepath ASC, filename ASC, id ASC',
+                false
+            ));
+        }
+
+        foreach ($fileareas as $filearea => $files) {
+            foreach ($files as $file) {
+                $fs->create_file_from_storedfile([
+                    'contextid' => $destinationcontext->id,
+                    'component' => 'block_exaport',
+                    'filearea' => $filearea,
+                    'itemid' => $destinationblock->id,
+                    'userid' => (int)$destinationitem->userid,
+                ], $file);
+            }
+        }
+    }
+
+    return $blockmap;
+}
+
+/**
  * Load a file block only when it belongs to the requested item.
  *
  * This is the authoritative relationship check used before serving structured

@@ -28,7 +28,11 @@ function copy_category_to_myself($categoryid) {
         throw new moodle_exception('category not found');
     }
 
-    return _copy_category_to_myself_iterator($rootcat, 0);
+    // A requested tree is copied atomically: failures never report a partial tree.
+    $transaction = g::$DB->start_delegated_transaction();
+    $newroot = _copy_category_to_myself_iterator($rootcat, 0);
+    $transaction->allow_commit();
+    return $newroot;
 }
 
 function _copy_category_to_myself_iterator($currcat, $parentcatid) {
@@ -72,6 +76,8 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         $newitem->id = g::$DB->insert_record('block_exaportitem', $newitem);
         // Assign the new item to the new category.
         item_category_helper::sync_item_categories($newitem->id, [$newcat->id]);
+
+        \block_exaport_copy_item_content($item, $newitem);
 
         // Files.
         $fs = get_file_storage();

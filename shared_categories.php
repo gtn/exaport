@@ -68,6 +68,7 @@ foreach ($categories as $category) {
 }
 
 if ($CFG->block_exaport_copy_category_to_my && $action == 'copy') {
+    require_sesskey();
     $categoryid = optional_param('categoryid', 0, PARAM_INT);
 
     // Check if category can be accessed.
@@ -248,7 +249,8 @@ function exaport_print_structures($categories, $parsedsort) {
                             . get_string("browsecategory", "block_exaport") . '</a>';
                         $link2 = '';
                         if ($CFG->block_exaport_copy_category_to_my) {
-                            $link2 = '<a href="shared_categories.php?courseid=' . $courseid . '&action=copy&categoryid=' . $structure->id . '">
+                            $link2 = '<a href="shared_categories.php?courseid=' . $courseid . '&action=copy&categoryid=' .
+                                $structure->id . '&sesskey=' . sesskey() . '">
                                                 <img src="pix/folder_new_32.png" /><br />' . get_string("copycategory", "block_exaport") .
                                 '</a>';
                         }
@@ -302,7 +304,8 @@ function exaport_print_structures($categories, $parsedsort) {
                         . get_string("browsecategory", "block_exaport") . '</a>';
                     $link2 = '';
                     if ($CFG->block_exaport_copy_category_to_my) {
-                        $link2 = '<a href="shared_categories.php?courseid=' . $courseid . '&action=copy&categoryid=' . $structure->id . '">
+                        $link2 = '<a href="shared_categories.php?courseid=' . $courseid . '&action=copy&categoryid=' .
+                            $structure->id . '&sesskey=' . sesskey() . '">
                                         <img src="pix/folder_new_32.png" /><br />' . get_string("copycategory", "block_exaport") . '</a>';
                     }
                     $t_data = array(

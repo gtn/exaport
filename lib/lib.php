@@ -35,6 +35,10 @@ if (block_exaport_check_competence_interaction()) {
 
 require_once(__DIR__ . '/common.php');
 
+// Category-copy functions in lib.exaport.php use the structured-content
+// helpers, so load them before defining those workflows. This bootstrap is
+// also used by standalone pages which do not include the plugin's root lib.php.
+require_once(__DIR__ . '/item_content_helpers.php');
 require_once(__DIR__ . '/lib.exaport.php');
 require_once(__DIR__ . '/sharelib.php');
 

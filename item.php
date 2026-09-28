@@ -89,33 +89,33 @@ if ($action == 'copytoself') {
     $copy->externaccess = 0;
     $copy->externcomment = 0;
     $copy->shareall = 0;
+    $copy->categoryid = 0;
 
+    $transaction = $DB->start_delegated_transaction();
     $newitemid = $DB->insert_record('block_exaportitem', $copy);
+    $copy->id = $newitemid;
 
-    // Copy category assignments from the source item to the new item.
-    $sourcecatids = $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$id]);
-    if ($sourcecatids) {
-        item_category_helper::sync_item_categories($newitemid, $sourcecatids);
+    // Source categories can be private to their owner, so a direct cross-user
+    // copy is deliberately left in the recipient's uncategorized area.
+    block_exaport_copy_item_content($sourceitem, $copy);
+
+    // Keep copying the legacy file area during the structured-content transition.
+    $fs = get_file_storage();
+    $ownerusercontext = context_user::instance($ownerid);
+    $usercontext = context_user::instance($USER->id);
+    $oldfiles = $fs->get_area_files($ownerusercontext->id, 'block_exaport', 'item_file', $id);
+    foreach ($oldfiles as $f) {
+        if ($f->is_directory()) {
+            continue;
+        }
+        $newfileparams = array(
+            'contextid' => $usercontext->id,
+            'itemid' => $newitemid,
+            'userid' => $USER->id,
+        );
+        $fs->create_file_from_storedfile($newfileparams, $f);
     }
-
-    if ($copy->type == 'file') {
-        $fs = get_file_storage();
-        $fileinfo = array(
-            'component' => 'block_exaport',
-            'filearea' => 'item_file',
-            'itemid' => $id);
-        $ownerusercontext = context_user::instance($ownerid);
-        $usercontext = context_user::instance($USER->id);
-        $oldfiles = $fs->get_area_files($ownerusercontext->id, 'block_exaport', 'item_file', $id);
-        foreach ($oldfiles as $f) {
-            $newfileparams = array(
-                'contextid' => $usercontext->id,
-                'itemid' => $newitemid,
-                'userid' => $USER->id,
-            );
-            $filecopy = $fs->create_file_from_storedfile($newfileparams, $f->get_id());
-        };
-    };
+    $transaction->allow_commit();
 
     $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&categoryid=-1&userid=" . $ownerid;
     redirect($returnurl);

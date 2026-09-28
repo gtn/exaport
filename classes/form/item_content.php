@@ -136,13 +136,14 @@ class item_content extends dynamic_form {
         $data = $this->get_data();
         $item = block_exaport_get_editable_content_item((int)$data->itemid, (int)$data->courseid);
         $transaction = $DB->start_delegated_transaction();
-        $block = block_exaport_new_content_block(
-            (int)$data->itemid,
-            $data->contenttype,
-            $data->title,
-            $data->contenttype === 'link' ? $data->url : ''
-        );
-        $block->id = $DB->insert_record('block_exaportitemblock', $block);
+        if ($data->contenttype === 'link') {
+            $block = block_exaport_create_link_content_block((int)$data->itemid, $data->title, $data->url);
+        } else if ($data->contenttype === 'file') {
+            $block = block_exaport_create_file_content_block((int)$data->itemid, $data->title);
+        } else {
+            $block = block_exaport_new_content_block((int)$data->itemid, 'text', $data->title);
+            $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
+        }
         $context = context_user::instance($USER->id);
         if ($data->contenttype === 'text') {
             $data = file_postupdate_standard_editor($data, 'content', block_exaport_item_content_editor_options(),

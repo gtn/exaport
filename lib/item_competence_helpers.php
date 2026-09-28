@@ -16,11 +16,11 @@ require_once(__DIR__ . '/lib.php');
  * Load an item that the current user may modify through the competence picker.
  *
  * @param int $itemid Item ID.
- * @param int $courseid Course ID.
+ * @param int $courseid Navigation course ID; item authorization uses the trusted item record.
  * @return stdClass
  */
 function block_exaport_get_editable_competence_item(int $itemid, int $courseid): stdClass {
-    return block_exaport_get_editable_item($itemid, $courseid);
+    return block_exaport_get_editable_item($itemid);
 }
 
 /**

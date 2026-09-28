@@ -38,6 +38,10 @@ require_once(__DIR__ . '/common.php');
 require_once(__DIR__ . '/lib.exaport.php');
 require_once(__DIR__ . '/sharelib.php');
 
+// Exacomp's upgraded block_exacompitem_mm schema defaults competence_type=4 for example mappings,
+// so keep that value available when legacy/partial row shapes do not expose the runtime constant.
+defined('BLOCK_EXAPORT_EXACOMP_TYPE_EXAMPLE_FALLBACK') || define('BLOCK_EXAPORT_EXACOMP_TYPE_EXAMPLE_FALLBACK', 4);
+
 /**
  * Safely escapes a piece of untrusted text (e.g. a competence/descriptor title) for use as the
  * argument of the inline `onmouseover="Tip('...')"` handler used by javascript/wz_tooltip.js.
@@ -2029,6 +2033,27 @@ function block_exaport_get_editable_item(int $itemid, int $courseid): stdClass {
 }
 
 /**
+ * Return the mapped Exacomp example ID for an item mapping row when it refers to an example.
+ *
+ * @param stdClass $itemexample Mapping row from block_exacompitem_mm.
+ * @return int|null
+ */
+function block_exaport_get_item_mapping_exampleid(stdClass $itemexample): ?int {
+    $exampletype = defined('BLOCK_EXACOMP_TYPE_EXAMPLE') ? (int)BLOCK_EXACOMP_TYPE_EXAMPLE :
+        BLOCK_EXAPORT_EXACOMP_TYPE_EXAMPLE_FALLBACK;
+    if ((int)($itemexample->competence_type ?? $exampletype) !== $exampletype) {
+        return null;
+    }
+
+    $exampleid = $itemexample->exacomp_record_id ?? $itemexample->exampleid ?? null;
+    if ($exampleid === null || $exampleid === '') {
+        return null;
+    }
+
+    return (int)$exampleid;
+}
+
+/**
  * checks if exacomp is installed and the item can be resubmitted there
  *
  * @param $itemid
@@ -2047,8 +2072,9 @@ function block_exaport_item_is_resubmitable($itemid) {
 
     if ($itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEM_MM, array("itemid" => $itemid))) {
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
-        if ($eval = $DB->get_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL,
-            array('exampleid' => $itemexample->exampleid, 'studentid' => $USER->id, 'courseid' => $item->courseid))
+        $exampleid = block_exaport_get_item_mapping_exampleid($itemexample);
+        if ($exampleid && ($eval = $DB->get_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL,
+            array('exampleid' => $exampleid, 'studentid' => $USER->id, 'courseid' => $item->courseid)))
         ) {
             if (!$eval->resubmission) {
                 return false;

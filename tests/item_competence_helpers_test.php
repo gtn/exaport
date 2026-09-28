@@ -78,13 +78,69 @@ final class item_competence_helpers_test extends \advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $itemid = $this->insert_item($owner->id, $course->id);
         $this->setUser($owner);
-        $DB->insert_record(BLOCK_EXACOMP_DB_ITEM_MM, (object)[
-            'itemid' => $itemid,
-            'exampleid' => 1,
-            'teachervalue' => 1,
-        ]);
+        $this->insert_exacomp_item_mapping($itemid, ['teachervalue' => 1]);
 
         $this->assert_entry_point_error('nopermissions', $entrypoint, $itemid, $course->id);
+    }
+
+    public function test_item_is_resubmitable_respects_example_evaluation_for_example_mappings(): void {
+        global $CFG, $DB;
+
+        $this->resetAfterTest(true);
+        $CFG->block_exaport_app_alloweditdelete = false;
+        $CFG->block_exaport_enable_interaction_competences = true;
+        if (!block_exaport_check_competence_interaction()) {
+            $this->markTestSkipped('Exacomp is required to evaluate example resubmissions.');
+        }
+
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->setUser($owner);
+
+        $exampleid = 42;
+        $this->insert_exacomp_item_mapping($itemid, [
+            'competence_type' => (int)BLOCK_EXACOMP_TYPE_EXAMPLE,
+            'exacomp_record_id' => $exampleid,
+        ]);
+        $DB->insert_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL, (object)[
+            'exampleid' => $exampleid,
+            'courseid' => $course->id,
+            'studentid' => $owner->id,
+            'resubmission' => 0,
+        ]);
+
+        $this->assertFalse(block_exaport_item_is_resubmitable($itemid));
+    }
+
+    public function test_item_is_resubmitable_ignores_non_example_mapping_rows(): void {
+        global $CFG, $DB;
+
+        $this->resetAfterTest(true);
+        $CFG->block_exaport_app_alloweditdelete = false;
+        $CFG->block_exaport_enable_interaction_competences = true;
+        if (!block_exaport_check_competence_interaction()) {
+            $this->markTestSkipped('Exacomp is required to evaluate example resubmissions.');
+        }
+
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->setUser($owner);
+
+        $recordid = 24;
+        $this->insert_exacomp_item_mapping($itemid, [
+            'competence_type' => $this->get_non_example_competence_type(),
+            'exacomp_record_id' => $recordid,
+        ]);
+        $DB->insert_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL, (object)[
+            'exampleid' => $recordid,
+            'courseid' => $course->id,
+            'studentid' => $owner->id,
+            'resubmission' => 0,
+        ]);
+
+        $this->assertTrue(block_exaport_item_is_resubmitable($itemid));
     }
 
     /**
@@ -155,6 +211,27 @@ final class item_competence_helpers_test extends \advanced_testcase {
             'iseditable' => 1,
             'parentid' => 0,
         ]);
+    }
+
+    private function insert_exacomp_item_mapping(int $itemid, array $fields = []): void {
+        global $DB;
+
+        $DB->insert_record(BLOCK_EXACOMP_DB_ITEM_MM, (object)array_merge([
+            'exacomp_record_id' => 1,
+            'itemid' => $itemid,
+            'timecreated' => time(),
+            'teachervalue' => 0,
+        ], $fields));
+    }
+
+    private function get_non_example_competence_type(): int {
+        if (defined('BLOCK_EXACOMP_TYPE_TOPIC')) {
+            return (int)BLOCK_EXACOMP_TYPE_TOPIC;
+        }
+
+        $exampletype = defined('BLOCK_EXACOMP_TYPE_EXAMPLE') ? (int)BLOCK_EXACOMP_TYPE_EXAMPLE :
+            BLOCK_EXAPORT_EXACOMP_TYPE_EXAMPLE_FALLBACK;
+        return $exampletype + 1;
     }
 
     private function assert_entry_point_error(

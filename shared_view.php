@@ -19,6 +19,7 @@ use Dompdf\Dompdf;
 use function block_exaport\common\print_error;
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/item_content_helpers.php');
 require_once(__DIR__ . '/blockmediafunc.php');
 
 $access = optional_param('access', 0, PARAM_TEXT);

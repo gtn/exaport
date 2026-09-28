@@ -2035,6 +2035,8 @@ function block_exaport_get_editable_item(int $itemid, int $courseid): stdClass {
  * @return int|null
  */
 function block_exaport_get_item_mapping_exampleid(stdClass $itemexample): ?int {
+    // Exacomp's upgraded block_exacompitem_mm schema defaults competence_type=4 for example mappings,
+    // so keep that fallback for legacy/partial row shapes where the constant or field may be unavailable.
     $exampletype = defined('BLOCK_EXACOMP_TYPE_EXAMPLE') ? (int)BLOCK_EXACOMP_TYPE_EXAMPLE : 4;
     if ((int)($itemexample->competence_type ?? $exampletype) !== $exampletype) {
         return null;

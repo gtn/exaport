@@ -224,7 +224,7 @@ final class item_card_thumbnail_test extends \advanced_testcase {
             $source = block_exaport_get_item_thumbnail_source($item);
             $this->assertNotFalse($source);
             $this->assertSame('item_content_file', $source->filearea);
-            $this->assertSame($item->id, $source->itemid);
+            $this->assertSame((int)$item->id, $source->itemid);
             $this->assertSame($blockid, $source->blockid);
             $this->assertSame('structured image.png', $source->file->get_filename());
 
@@ -241,7 +241,7 @@ final class item_card_thumbnail_test extends \advanced_testcase {
     public function test_structured_block_and_file_order_select_first_valid_image(): void {
         $item = $this->create_item('note');
         block_exaport_create_file_content_block($item->id, 'Empty', ['sortorder' => 0]);
-        $firstblockid = $this->add_structured_file($item, 10, 'zero.txt', 'text', 'text/plain');
+        $firstblockid = $this->add_structured_file($item, 10, 'a-document.txt', 'text', 'text/plain');
         get_file_storage()->create_file_from_string([
             'contextid' => \context_user::instance($item->userid)->id,
             'component' => 'block_exaport',
@@ -257,7 +257,7 @@ final class item_card_thumbnail_test extends \advanced_testcase {
         $this->assertSame($firstblockid, $source->blockid);
         $this->assertSame('z-image.png', $source->file->get_filename());
         $this->assertSame(
-            ['zero.txt', 'z-image.png'],
+            ['a-document.txt', 'z-image.png'],
             array_map(static function(\stored_file $file): string {
                 return $file->get_filename();
             },

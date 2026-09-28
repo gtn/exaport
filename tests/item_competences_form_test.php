@@ -33,6 +33,15 @@ final class item_competences_form_test extends \advanced_testcase {
         }
     }
 
+    public function test_dynamic_submission_explicitly_requires_sesskey(): void {
+        $source = file_get_contents(__DIR__ . '/../classes/form/item_competences.php');
+
+        $this->assertMatchesRegularExpression(
+            '/function process_dynamic_submission\(\): array\s*\{.*?require_sesskey\(\);/s',
+            $source
+        );
+    }
+
     public function test_client_uses_modal_form_without_legacy_ajax_lifecycle(): void {
         $source = file_get_contents(__DIR__ . '/../amd/src/item_competences.js');
         $this->assertStringContainsString("from 'core_form/modalform'", $source);

@@ -50,7 +50,7 @@ final class item_competence_helpers_test extends \advanced_testcase {
     /**
      * @dataProvider editable_item_entry_points_provider
      */
-    public function test_editable_item_entry_point_rejects_wrong_course(string $entrypoint): void {
+    public function test_editable_item_entry_point_allows_different_navigation_course(string $entrypoint): void {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
         $course = $this->getDataGenerator()->create_course();
@@ -58,7 +58,11 @@ final class item_competence_helpers_test extends \advanced_testcase {
         $itemid = $this->insert_item($owner->id, $course->id);
         $this->setUser($owner);
 
-        $this->assert_entry_point_error('bookmarknotfound', $entrypoint, $itemid, $othercourse->id);
+        $item = $entrypoint($itemid, $othercourse->id);
+
+        $this->assertSame($itemid, (int)$item->id);
+        $this->assertSame((int)$owner->id, (int)$item->userid);
+        $this->assertSame((int)$course->id, (int)$item->courseid);
     }
 
     /**

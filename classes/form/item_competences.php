@@ -97,6 +97,7 @@ class item_competences extends dynamic_form {
     public function process_dynamic_submission(): array {
         global $OUTPUT, $USER;
 
+        require_sesskey();
         $data = $this->get_data();
         $item = block_exaport_get_editable_competence_item((int)$data->itemid, (int)$data->courseid);
         $ids = block_exaport_parse_competenceids($data->competenceids ?? '');

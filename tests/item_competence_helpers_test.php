@@ -229,7 +229,9 @@ final class item_competence_helpers_test extends \advanced_testcase {
             return (int)BLOCK_EXACOMP_TYPE_TOPIC;
         }
 
-        return (int)BLOCK_EXACOMP_TYPE_EXAMPLE + 1;
+        $exampletype = defined('BLOCK_EXACOMP_TYPE_EXAMPLE') ? (int)BLOCK_EXACOMP_TYPE_EXAMPLE :
+            BLOCK_EXAPORT_EXACOMP_TYPE_EXAMPLE_FALLBACK;
+        return $exampletype + 1;
     }
 
     private function assert_entry_point_error(

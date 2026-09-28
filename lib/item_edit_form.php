@@ -377,7 +377,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                     $url = new moodle_url("/blocks/exacomp/example_submission.php",
                         array("courseid" => $this->_customdata['course']->id, "newsubmission" => true, "exampleid" => $exampleid));
                     $mform->addElement('button', 'newsubmission', get_string("newsubmission", "block_exacomp"),
-                        array('onclick' => 'location.href = " ' . str_replace("&amp;", "&", $url) . '"'));
+                        array('onclick' => 'location.href = ' . json_encode($url->out(false))));
                 }
             } else {
                 $mform->addElement('html', get_string("isgraded", "block_exacomp"));

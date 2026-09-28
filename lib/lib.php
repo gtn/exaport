@@ -3232,7 +3232,7 @@ function block_exaport_get_my_views() {
 function block_exaport_create_item_from_assignment($assignment, $file = null, $categoryid = 0, $courseid = 0, $onlinetext = null) {
     global $USER, $DB;
 
-    $fs = get_file_storage();
+    $transaction = $DB->start_delegated_transaction();
 
     // Create the portfolio item using assignment name
     $item = new stdClass();
@@ -3242,27 +3242,20 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
     $item->intro = $onlinetext ? $onlinetext : ''; // Use online text if provided
     $item->courseid = $courseid;
     $item->timemodified = time();
-    $item->attachment = $file ? $file->get_itemid() : '';
+    $item->url = '';
+    $item->attachment = '';
 
     // Insert the item
     $item->id = $DB->insert_record('block_exaportitem', $item);
 
+    // Store the selected submission as primary structured content, without a legacy duplicate.
+    if ($file) {
+        block_exaport_import_stored_file_into_content_block($item, $file);
+    }
+
     // Sync category via the relation table.
     if ($categoryid > 0) {
         item_category_helper::sync_item_categories($item->id, [$categoryid]);
-
-        // Send notifications to users who have this category shared with notify=1.
-        exaport_send_category_notifications($categoryid, $courseid);
-    }
-
-    // Save submission file if provided
-    if ($file) {
-        $filerecord = new stdClass();
-        $filerecord->contextid = context_user::instance($USER->id)->id;
-        $filerecord->component = 'block_exaport';
-        $filerecord->filearea = 'item_file';
-        $filerecord->itemid = $item->id;
-        $fs->create_file_from_storedfile($filerecord, $file);
     }
 
     // Get course module
@@ -3282,6 +3275,13 @@ function block_exaport_create_item_from_assignment($assignment, $file = null, $c
 
         // Add teacher feedback (both comment text and files)
         block_exaport_add_teacher_feedback_to_item($item->id, $cm, $assignment->assignment);
+    }
+
+    $transaction->allow_commit();
+
+    if ($categoryid > 0) {
+        // Notify only after the artifact and all of its required content committed successfully.
+        exaport_send_category_notifications($categoryid, $courseid);
     }
 
     return $item->id;

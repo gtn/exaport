@@ -312,6 +312,126 @@ function block_exaport_create_file_content_block(int $itemid, string $title, arr
 }
 
 /**
+ * Copy a stored file into a new structured file block.
+ *
+ * The caller owns the transaction which created the parent item. The empty
+ * title is intentional: imported artifact titles live on the parent item.
+ *
+ * @param stdClass $item Trusted destination item, including id and userid.
+ * @param stored_file $file Source file.
+ * @param string $title Optional distinct content title.
+ * @return stdClass Created file block.
+ */
+function block_exaport_import_stored_file_into_content_block(
+    stdClass $item,
+    stored_file $file,
+    string $title = ''
+): stdClass {
+    if (empty($item->id) || empty($item->userid)) {
+        throw new coding_exception('Structured file import requires item and owner IDs');
+    }
+
+    $block = block_exaport_create_file_content_block((int)$item->id, $title);
+    get_file_storage()->create_file_from_storedfile([
+        'contextid' => context_user::instance((int)$item->userid)->id,
+        'component' => 'block_exaport',
+        'filearea' => 'item_content_file',
+        'itemid' => $block->id,
+        'userid' => (int)$item->userid,
+    ], $file);
+    return $block;
+}
+
+/**
+ * Resolve an archive-relative path while keeping it beneath the extraction root.
+ *
+ * @param string $root Extraction directory.
+ * @param string $basedir Directory containing the referring package document.
+ * @param string $path Untrusted package-relative path.
+ * @return array{pathname: string, filepath: string, filename: string}
+ */
+function block_exaport_resolve_import_file_path(string $root, string $basedir, string $path): array {
+    $decodedpath = html_entity_decode($path, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $decodedpath = str_replace('\\', '/', $decodedpath);
+    if ($decodedpath === '' || $decodedpath[0] === '/' || preg_match('/^[a-zA-Z]:\//', $decodedpath)) {
+        throw new invalid_parameter_exception('Invalid absolute package file path');
+    }
+    $segments = explode('/', $decodedpath);
+    if (in_array('..', $segments, true) || in_array('', $segments, true)) {
+        throw new invalid_parameter_exception('Invalid package file path traversal');
+    }
+
+    $rootpath = realpath($root);
+    $basepath = realpath($basedir);
+    $candidate = realpath($basedir . '/' . implode('/', array_map(static function(string $segment): string {
+        return clean_param($segment, PARAM_FILE);
+    }, $segments)));
+    if ($rootpath === false || $basepath === false || $candidate === false || !is_file($candidate)) {
+        throw new invalid_parameter_exception('Package file does not exist');
+    }
+    $rootprefix = rtrim($rootpath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    $baseprefix = rtrim($basepath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    if (strpos($candidate, $rootprefix) !== 0 || strpos($basepath . DIRECTORY_SEPARATOR, $rootprefix) !== 0 ||
+            strpos($candidate, $baseprefix) !== 0) {
+        throw new invalid_parameter_exception('Package file is outside the import directory');
+    }
+
+    $relative = substr($candidate, strlen($baseprefix));
+    $dirname = dirname($relative);
+    return [
+        'pathname' => $candidate,
+        'filepath' => $dirname === '.' ? '/' : '/' . trim($dirname, '/') . '/',
+        'filename' => basename($relative),
+    ];
+}
+
+/**
+ * Import a declared group of package files into one structured file block.
+ *
+ * All paths are validated before the block is created, so a missing or unsafe
+ * required file cannot produce an empty or partially populated block. The
+ * caller owns the surrounding delegated transaction.
+ *
+ * @param stdClass $item Trusted destination item, including id and userid.
+ * @param string $root Extraction directory boundary.
+ * @param string $basedir Directory containing the referring package document.
+ * @param string[] $paths Declared package-relative paths.
+ * @param string $title Optional distinct content title.
+ * @return stdClass Created file block.
+ */
+function block_exaport_import_path_files_into_content_block(
+    stdClass $item,
+    string $root,
+    string $basedir,
+    array $paths,
+    string $title = ''
+): stdClass {
+    if (empty($item->id) || empty($item->userid) || !$paths) {
+        throw new coding_exception('Structured package import requires an item, owner, and files');
+    }
+    $resolvedfiles = [];
+    foreach ($paths as $path) {
+        $resolvedfiles[] = block_exaport_resolve_import_file_path($root, $basedir, (string)$path);
+    }
+
+    $block = block_exaport_create_file_content_block((int)$item->id, $title);
+    $contextid = context_user::instance((int)$item->userid)->id;
+    $fs = get_file_storage();
+    foreach ($resolvedfiles as $resolvedfile) {
+        $fs->create_file_from_pathname([
+            'contextid' => $contextid,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $block->id,
+            'filepath' => $resolvedfile['filepath'],
+            'filename' => $resolvedfile['filename'],
+            'userid' => (int)$item->userid,
+        ], $resolvedfile['pathname']);
+    }
+    return $block;
+}
+
+/**
  * Return to the parent item editor after a content operation.
  *
  * @param int $courseid Course ID.

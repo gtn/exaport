@@ -20,6 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 use block_exaport\item_category_helper;
 
 require_once($CFG->libdir . '/portfoliolib.php');
+require_once(__DIR__ . '/../item_content_helpers.php');
 
 class portfolio_plugin_exaport extends portfolio_plugin_push_base {
 
@@ -63,8 +64,6 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
             return;
         }
 
-        $fs = get_file_storage();
-
         // Save files to first category, so read that id.
         // $categoryid = $DB->get_field_sql("SELECT id FROM {block_exaportcate} ".
         // " WHERE userid = ? ORDER BY name LIMIT 1", array($USER->id));
@@ -72,6 +71,7 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
         $categoryid = 0;
 
         foreach ($files as $file) {
+            $transaction = $DB->start_delegated_transaction();
 
             $item = new stdClass;
             $item->userid = $USER->id;
@@ -80,6 +80,8 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
             $item->name = $file->get_filename();
             $item->type = 'file';
             $item->intro = '';
+            $item->url = '';
+            $item->attachment = '';
 
             // Insert.
             if ($item->id = $DB->insert_record('block_exaportitem', $item)) {
@@ -87,15 +89,10 @@ class portfolio_plugin_exaport extends portfolio_plugin_push_base {
                     item_category_helper::sync_item_categories($item->id, [$categoryid]);
                 }
 
-                $filerecord = new stdClass();
-                $filerecord->contextid = context_user::instance($USER->id)->id;
-                $filerecord->component = 'block_exaport';
-                $filerecord->filearea = 'item_file';
-                $filerecord->itemid = $item->id;
-
-                $fs->create_file_from_storedfile($filerecord, $file);
+                block_exaport_import_stored_file_into_content_block($item, $file);
 
                 $this->lastitem = $item;
+                $transaction->allow_commit();
             }
         }
     }

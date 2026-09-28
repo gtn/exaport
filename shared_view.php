@@ -19,6 +19,7 @@ use Dompdf\Dompdf;
 use function block_exaport\common\print_error;
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/item_content_helpers.php');
 require_once(__DIR__ . '/blockmediafunc.php');
 
 $access = optional_param('access', 0, PARAM_TEXT);
@@ -428,67 +429,63 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $href = 'shared_item.php?access=view/' . $access . '&itemid=' . $item->id . '&att=' . $item->attachment;
 
                     $general_content .= '<div class="view-item view-item-type-' . $item->type . '">';
-                    // Thumbnail of item.
+                    // Transitional legacy previews remain until the migration removes their source files.
                     $fileparams = '';
-                    if ($item->type == "file") {
-                        $select = "contextid='" . context_user::instance($item->userid)->id . "' " .
-                            " AND component='block_exaport' AND filearea='item_file' AND itemid='" . $item->id . "' AND filesize>0 ";
-                        if ($files = $DB->get_records_select('files', $select, null, 'id, filename, mimetype, filesize')) {
-                            if (is_array($files)) {
-                                $width = '';
-                                if (count($files) > 5) {
-                                    $width = 's35';
-                                } else if (count($files) > 3) {
-                                    $width = 's40';
-                                } else if (count($files) > 2) {
-                                    $width = 's50';
-                                } else if (count($files) > 1) {
-                                    $width = 's75';
-                                }
-
-                                foreach ($files as $file) {
-                                    if (strpos($file->mimetype, "image") !== false) {
-                                        $imgsrc = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($item->userid)->id .
-                                            "/" . 'block_exaport' . "/" . 'item_file' . "/view/" . $access . "/itemid/" . $item->id . "/" .
-                                            $file->filename;
-                                        $general_content .= '<div class="view-item-image"><img src="' . $imgsrc . '" class="' . $width . '" alt=""/></div>';
-                                        $blockForPdf .= '<div class="view-item-image">
-                                                            <img align = "right"
-                                                                border = "0"
-                                                                src = "' . $imgsrc . '"
-                                                                width = "' . ((int)filter_var($width, FILTER_SANITIZE_NUMBER_INT) ?: '100') . '"
-                                                                alt = "" />
-                                                         </div>';
-                                    } else {
-                                        // Link to file.
-                                        $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/" . $access .
-                                            "&itemid=" . $item->id . "&inst=" . $file->pathnamehash);
-                                        // Human filesize.
-                                        $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-                                        $power = $file->filesize > 0 ? floor(log($file->filesize, 1024)) : 0;
-                                        $filesize = number_format($file->filesize / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
-                                        // Fileinfo block.
-                                        $fileparams = '<div class="view-item-file"><a href="' . $ffurl . '" >' . $file->filename . '</a> ' .
-                                            '<span class="filedescription">(' . $filesize . ')</span></div>';
-                                        if (block_exaport_is_valid_media_by_filename($file->filename)) {
-                                            $general_content .= '<div class="view-item-image">
-													<img height="60" src="' . $CFG->wwwroot . '/blocks/exaport/pix/media.png" alt="" />
-												</div>';
-                                            $blockForPdf .= '<img height="60" src="' . $CFG->wwwroot . '/blocks/exaport/pix/media.png" align="right" />';
-                                        }
-                                    };
+                    if ($item->type == 'file') {
+                        $legacyfiles = block_exaport_get_item_files_array($item);
+                        $legacyimages = array_values(array_filter($legacyfiles, static function($file) {
+                            return $file->is_valid_image();
+                        }));
+                        $width = '';
+                        if (count($legacyimages) > 5) {
+                            $width = 's35';
+                        } else if (count($legacyimages) > 3) {
+                            $width = 's40';
+                        } else if (count($legacyimages) > 2) {
+                            $width = 's50';
+                        } else if (count($legacyimages) > 1) {
+                            $width = 's75';
+                        }
+                        foreach ($legacyfiles as $fileindex => $file) {
+                            $filename = $file->get_filename();
+                            $ffurl = new moodle_url('/blocks/exaport/portfoliofile.php', [
+                                'access' => 'view/' . $access,
+                                'itemid' => $item->id,
+                                'inst' => $fileindex,
+                            ]);
+                            if ($file->is_valid_image()) {
+                                $image = html_writer::empty_tag('img', [
+                                    'src' => $ffurl->out(false),
+                                    'class' => $width,
+                                    'alt' => $filename,
+                                ]);
+                                $general_content .= html_writer::div($image, 'view-item-image');
+                                $blockForPdf .= html_writer::div($image, 'view-item-image');
+                            } else {
+                                $fileparams .= html_writer::div(
+                                    html_writer::link($ffurl, $filename) . ' ' .
+                                        html_writer::span('(' . display_size($file->get_filesize()) . ')', 'filedescription'),
+                                    'view-item-file'
+                                );
+                                if (block_exaport_is_valid_media_by_filename($filename)) {
+                                    $mediaimage = html_writer::empty_tag('img', [
+                                        'height' => 60,
+                                        'src' => $CFG->wwwroot . '/blocks/exaport/pix/media.png',
+                                        'alt' => '',
+                                    ]);
+                                    $general_content .= html_writer::div($mediaimage, 'view-item-image');
+                                    $blockForPdf .= $mediaimage;
                                 }
                             }
-                        };
-                    } else if ($item->type == "link") {
+                        }
+                    } else if ($item->type == 'link') {
                         $general_content .= '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="' .
-                            $href . '"><img style="max-width: 100%; max-height: 100%;" src="' . $CFG->wwwroot .
-                            '/blocks/exaport/item_thumb.php?item_id=' . $item->id . '&access=' . $access . '" alt=""/></a></div>';
-                        $blockForPdf .= '<img align="right"
-                                                style="" height="100"
-                                                src="' . $CFG->wwwroot . '/blocks/exaport/item_thumb.php?item_id=' . $item->id . '&access=' . $access . '&ispdf=1&vhash=' . $view->hash . '&vid=' . $view->id . '&uid=' . $USER->id . '"
-                                                alt="" />';
-                    };
+                            s($href) . '"><img style="max-width: 100%; max-height: 100%;" src="' . $CFG->wwwroot .
+                            '/blocks/exaport/item_thumb.php?item_id=' . (int)$item->id . '&access=' . s($access) . '" alt=""/></a></div>';
+                        $blockForPdf .= '<img align="right" height="100" src="' . $CFG->wwwroot .
+                            '/blocks/exaport/item_thumb.php?item_id=' . (int)$item->id . '&access=' . s($access) .
+                            '&ispdf=1&vhash=' . s($view->hash) . '&vid=' . (int)$view->id . '&uid=' . (int)$USER->id . '" alt="" />';
+                    }
                     $general_content .= '<div class="view-item-header" title="' . $item->type . '">' . $item->name;
                     // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.
                     if ($comp && has_capability('block/exaport:competences', $context)) {
@@ -517,6 +514,20 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     }
                     $general_content .= $intro . '</div>';
                     $blockForPdf .= $intro . '</div>';
+
+                    // Structured blocks coexist with unrelated legacy content during the migration window.
+                    $structuredblocks = block_exaport_get_item_content_blocks((int)$item->id);
+                    if ($structuredblocks) {
+                        $structuredrenderable = new \block_exaport\output\item_content_blocks(
+                            $structuredblocks, null, (int)$item->userid, false, false, 'view/' . $access
+                        );
+                        $structureddata = $structuredrenderable->export_for_template($OUTPUT);
+                        $general_content .= $OUTPUT->render_from_template(
+                            'block_exaport/item_content_blocks',
+                            $structureddata
+                        );
+                        $blockForPdf .= $structuredrenderable->render_for_pdf($OUTPUT, $structureddata);
+                    }
                     if (is_array($competencies) && count($competencies) > 0) {
                         $general_content .= '<div class="view-item-competences">' .
                             '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>' .

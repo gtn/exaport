@@ -79,6 +79,26 @@ function block_exaport_get_item_content_files(int $userid, int $blockid): array 
 }
 
 /**
+ * Load a file block only when it belongs to the requested item.
+ *
+ * This is the authoritative relationship check used before serving structured
+ * files; callers must still authorize access to the returned block's item.
+ *
+ * @param int $itemid Item expected to own the block.
+ * @param int $blockid Content block ID.
+ * @return stdClass|false Matching file block, or false.
+ */
+function block_exaport_get_item_content_file_block(int $itemid, int $blockid) {
+    global $DB;
+
+    return $DB->get_record('block_exaportitemblock', [
+        'id' => $blockid,
+        'itemid' => $itemid,
+        'type' => 'file',
+    ]);
+}
+
+/**
  * Whether an item contains link or file blocks.
  *
  * Text-only structured content does not count because legacy item content can

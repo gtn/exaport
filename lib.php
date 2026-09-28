@@ -16,6 +16,7 @@
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
 require_once(__DIR__ . '/inc.php');
+require_once(__DIR__ . '/lib/item_content_helpers.php');
 
 use block_exaport\blockedit;
 use function block_exaport\common\print_error;
@@ -71,11 +72,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             }
             $access = join('/', $args);
 
-            $block = $DB->get_record('block_exaportitemblock', [
-                'id' => $blockid,
-                'itemid' => $itemid,
-                'type' => 'file',
-            ]);
+            $block = block_exaport_get_item_content_file_block((int)$itemid, (int)$blockid);
             if (!$block) {
                 return false;
             }

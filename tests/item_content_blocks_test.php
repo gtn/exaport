@@ -34,6 +34,18 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertFalse(block_exaport_item_has_structured_link_or_file_content($itemid));
     }
 
+    public function test_file_block_relationship_cannot_be_substituted(): void {
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $otheritemid = $this->insert_item($owner->id, $course->id);
+        $blockid = $this->insert_block($itemid, 'file', 0, 'Private file');
+
+        $this->assertNotFalse(block_exaport_get_item_content_file_block($itemid, $blockid));
+        $this->assertFalse(block_exaport_get_item_content_file_block($otheritemid, $blockid));
+    }
+
     public function test_record_creation_helpers_append_without_form_data(): void {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
@@ -257,6 +269,152 @@ final class item_content_blocks_test extends \advanced_testcase {
         $embeddedhtml = $OUTPUT->render_from_template('block_exaport/item_content_blocks', $embeddeddata);
         $this->assertStringNotContainsString('exaport-item-content-heading', $embeddedhtml);
         $this->assertStringContainsString('aria-label="Content"', $embeddedhtml);
+    }
+
+    public function test_mixed_content_is_safe_media_aware_and_available_to_pdf(): void {
+        global $OUTPUT;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->insert_block($itemid, 'text', 0, '<img src=x onerror=alert(1)>', '<p>First</p>');
+        $this->insert_block($itemid, 'link', 1, 'Safe link', '', 'https://example.com/path?a=1&b=2');
+        $fileid = $this->insert_block($itemid, 'file', 2, 'Media');
+        $context = \context_user::instance($owner->id);
+        foreach ([
+            'photo.png' => ['image/png', 'image'],
+            'movie.webm' => ['video/webm', 'video'],
+            'notes<script>.txt' => ['text/plain', 'text'],
+        ] as $filename => [$mimetype, $content]) {
+            get_file_storage()->create_file_from_string([
+                'contextid' => $context->id,
+                'component' => 'block_exaport',
+                'filearea' => 'item_content_file',
+                'itemid' => $fileid,
+                'filepath' => '/',
+                'filename' => $filename,
+                'mimetype' => $mimetype,
+            ], $content);
+        }
+
+        $renderable = new \block_exaport\output\item_content_blocks(
+            block_exaport_get_item_content_blocks($itemid), null, $owner->id, false, false, 'view/public-token'
+        );
+        $data = $renderable->export_for_template($OUTPUT);
+
+        $this->assertTrue(\block_exaport\output\item_content_blocks::has_displayable_content($data));
+        $this->assertSame(['text', 'link', 'file'], array_column($data['blocks'], 'type'));
+        $this->assertCount(3, $data['blocks'][2]['files']);
+        $videofiles = array_values(array_filter($data['blocks'][2]['files'], static function(array $file): bool {
+            return $file['isvideo'];
+        }));
+        $this->assertCount(1, $videofiles);
+        $this->assertStringContainsString('/item_content_file/view/public-token/itemid/' . $itemid .
+            '/blockid/' . $fileid . '/', $data['blocks'][2]['files'][0]['url']);
+
+        $html = $OUTPUT->render_from_template('block_exaport/item_content_blocks', $data);
+        $pdf = $renderable->render_for_pdf($OUTPUT, $data);
+        $this->assertStringContainsString('<video controls', $html);
+        $this->assertStringContainsString('First', $pdf);
+        $this->assertStringContainsString('https://example.com/path?a=1&amp;b=2', $pdf);
+        $this->assertStringContainsString('photo.png', $pdf);
+        $this->assertStringNotContainsString('<img src=x onerror=', $html);
+        $this->assertStringContainsString('&lt;img src=x onerror=alert(1)&gt;', $html);
+        $this->assertStringNotContainsString('<script>', $html);
+    }
+
+    public function test_empty_file_block_does_not_mask_missing_content(): void {
+        global $OUTPUT;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->insert_block($itemid, 'file', 0, 'Empty');
+        $this->insert_block($itemid, 'text', 1, 'Also empty', '');
+        $data = (new \block_exaport\output\item_content_blocks(
+            block_exaport_get_item_content_blocks($itemid), null, $owner->id, false
+        ))->export_for_template($OUTPUT);
+
+        $this->assertFalse(\block_exaport\output\item_content_blocks::has_displayable_content($data));
+    }
+
+    public function test_external_item_renders_legacy_and_structured_content_without_missing_file(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $this->setUser($owner);
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $DB->set_field('block_exaportitem', 'type', 'file', ['id' => $itemid]);
+        $DB->set_field('block_exaportitem', 'url', 'https://legacy.example/', ['id' => $itemid]);
+        $this->insert_block($itemid, 'text', 0, 'Structured text', '<p>Structured body</p>');
+        $fileid = $this->insert_block($itemid, 'file', 1, 'Structured files');
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($owner->id)->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $fileid,
+            'filepath' => '/',
+            'filename' => 'structured.pdf',
+        ], 'pdf');
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+
+        ob_start();
+        block_exaport_print_extern_item($item, '');
+        $html = ob_get_clean();
+
+        $this->assertStringContainsString('https://legacy.example/', $html);
+        $this->assertStringContainsString('Structured body', $html);
+        $this->assertStringContainsString('structured.pdf', $html);
+        $this->assertStringNotContainsString(block_exaport_get_string('filenotfound'), $html);
+    }
+
+    public function test_view_editor_block_data_contains_structured_content(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $this->setUser($owner);
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $this->insert_block($itemid, 'text', 0, 'Editor content', '<p>Visible in editor</p>');
+        $fileblockid = $this->insert_block($itemid, 'file', 1, 'Editor file');
+        $ownercontext = \context_user::instance($owner->id);
+        get_file_storage()->create_file_from_string([
+            'contextid' => $ownercontext->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $fileblockid,
+            'filepath' => '/',
+            'filename' => 'editor.pdf',
+        ], 'pdf');
+        $viewid = $DB->insert_record('block_exaportview', (object)[
+            'userid' => $owner->id,
+            'creatorid' => $owner->id,
+            'name' => 'Editor preview',
+            'timemodified' => time(),
+        ]);
+        $viewblockid = $DB->insert_record('block_exaportviewblock', (object)[
+            'viewid' => $viewid,
+            'positionx' => 1,
+            'positiony' => 1,
+            'type' => 'item',
+            'itemid' => $itemid,
+            'width' => 320,
+            'height' => 240,
+        ]);
+
+        $blocks = block_exaport_get_view_blocks((object)['id' => $viewid, 'userid' => $owner->id]);
+
+        $this->assertArrayHasKey($viewblockid, $blocks);
+        $this->assertStringContainsString('Visible in editor', $blocks[$viewblockid]->item->intro);
+        $this->assertStringContainsString('exaport-item-content-section', $blocks[$viewblockid]->item->intro);
+        $this->assertStringContainsString('/pluginfile.php/' . $ownercontext->id .
+            '/block_exaport/item_content_file/itemid/' . $itemid . '/blockid/' . $fileblockid . '/editor.pdf',
+            $blocks[$viewblockid]->item->intro);
     }
 
     /**

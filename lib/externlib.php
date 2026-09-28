@@ -103,6 +103,11 @@ function block_exaport_print_extern_item($item, $access) {
 
     $boxcontent = '';
     $filescontent = '';
+    $structuredblocks = block_exaport_get_item_content_blocks((int)$item->id);
+    $structuredrenderable = new \block_exaport\output\item_content_blocks(
+        $structuredblocks, null, (int)$item->userid, false, true, $access
+    );
+    $structureddata = $structuredrenderable->export_for_template($PAGE->get_renderer('block_exaport'));
     if ($files = block_exaport_get_item_files($item)) {
         foreach ($files as $fileindex => $file) {
             if (!$file) {
@@ -143,7 +148,8 @@ function block_exaport_print_extern_item($item, $access) {
         }
     }
 
-    if (!$filescontent && !$item->url) {
+    $hasstructuredcontent = \block_exaport\output\item_content_blocks::has_displayable_content($structureddata);
+    if (!$filescontent && !$item->url && !$hasstructuredcontent) {
         if ($item->type != 'note') { // notes can be without files
             $boxcontent = block_exaport_get_string('filenotfound');
         }
@@ -223,18 +229,9 @@ function block_exaport_print_extern_item($item, $access) {
         }
     }
 
-    $structuredblocks = block_exaport_get_item_content_blocks((int)$item->id);
+    // Transitional: legacy fields above and structured blocks may contain different user content.
     if ($structuredblocks) {
-        $boxcontent .= $PAGE->get_renderer('block_exaport')->render(
-            new \block_exaport\output\item_content_blocks(
-                $structuredblocks,
-                null,
-                (int)$item->userid,
-                false,
-                true,
-                $access
-            )
-        );
+        $boxcontent .= $OUTPUT->render_from_template('block_exaport/item_content_blocks', $structureddata);
     }
 
     echo $OUTPUT->box($boxcontent);

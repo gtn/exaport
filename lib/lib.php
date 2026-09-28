@@ -1414,7 +1414,10 @@ function block_exaport_share_view_to_teachers($viewid) {
  * @throws dml_exception
  */
 function block_exaport_get_view_blocks($view) {
-    global $DB, $USER, $CFG;
+    global $DB, $USER, $CFG, $OUTPUT;
+
+    // This function also supplies the JSON used by the interactive view editor.
+    require_once(__DIR__ . '/item_content_helpers.php');
 
     $portfolioitems = block_exaport_get_portfolio_items();
 
@@ -1425,8 +1428,9 @@ function block_exaport_get_view_blocks($view) {
     }
     $badges = block_exaport_get_all_user_badges($userid);
 
-    $query = "SELECT b.*
+    $query = "SELECT b.*, i.userid AS itemownerid
               FROM {block_exaportviewblock} b
+         LEFT JOIN {block_exaportitem} i ON i.id = b.itemid
               WHERE b.viewid = ?
               ORDER BY b.positionx, b.positiony";
 
@@ -1454,6 +1458,23 @@ function block_exaport_get_view_blocks($view) {
             }
             $portfolioitems[$block->itemid]->intro = process_media_url($portfolioitems[$block->itemid]->intro,
                 $block->width, $block->height);
+            $contentblocks = block_exaport_get_item_content_blocks((int)$block->itemid);
+            if ($contentblocks) {
+                $contentrenderable = new \block_exaport\output\item_content_blocks(
+                    $contentblocks,
+                    null,
+                    (int)$block->itemownerid,
+                    false,
+                    false
+                );
+                // The editor already treats intro as server-formatted HTML. Appending the same
+                // Mustache output used by read-only views keeps its preview in sync and safe.
+                $contentdata = $contentrenderable->export_for_template($OUTPUT);
+                $portfolioitems[$block->itemid]->intro .= $OUTPUT->render_from_template(
+                    'block_exaport/item_content_blocks',
+                    $contentdata
+                );
+            }
             $block->item = $portfolioitems[$block->itemid];
         } else if ($block->type == 'badge') {
             // Find badge by id.

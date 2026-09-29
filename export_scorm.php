@@ -18,6 +18,7 @@
 global $PAGE, $USER, $OUTPUT;
 require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/lib/minixml.inc.php');
+require_once(__DIR__ . '/lib/scorm_export_helpers.php');
 global $DB, $CFG;
 
 $itemsArray = array();
@@ -189,18 +190,6 @@ function get_category_items($categoryid, $viewid = null, $type = null) {
 }
 
 /**
- * Return a safe archive path component while retaining a useful display name in HTML.
- *
- * @param string $value Untrusted stored path component.
- * @return string
- */
-function block_exaport_scorm_path_component($value) {
-    $value = clean_param(rawurldecode((string)$value), PARAM_FILE);
-    $value = str_replace(['/', '\\', '..'], '_', $value);
-    return $value === '' ? 'file' : $value;
-}
-
-/**
  * Add a stored file to the package once and return its collision-safe archive path.
  *
  * @param stored_file $file File to package.
@@ -210,33 +199,10 @@ function block_exaport_scorm_path_component($value) {
 function block_exaport_scorm_add_file(stored_file $file, $base) {
     global $zip, $existingfilesarray;
 
-    $parts = array_filter(explode('/', trim($file->get_filepath(), '/')), 'strlen');
-    $parts = array_map('block_exaport_scorm_path_component', $parts);
-    $path = rtrim($base, '/') . '/' . ($parts ? implode('/', $parts) . '/' : '') .
-        block_exaport_scorm_path_component($file->get_filename());
-    $candidate = $path;
-    $suffix = 1;
-    while (in_array($candidate, $existingfilesarray, true)) {
-        $candidate = $path . '-' . $suffix++;
-    }
+    $candidate = block_exaport_scorm_archive_path($file, $base, $existingfilesarray);
     $existingfilesarray[] = $candidate;
     $zip->addFromString($candidate, $file->get_content());
     return $candidate;
-}
-
-/**
- * Find the relative URL from a generated page to an archive asset.
- *
- * @param string $page Generated page archive path.
- * @param string $asset Asset archive path.
- * @return string
- */
-function block_exaport_scorm_relative_url($page, $asset) {
-    $depth = substr_count(trim(dirname($page), './'), '/');
-    if (dirname($page) !== '.' && trim(dirname($page), './') !== '') {
-        $depth++;
-    }
-    return str_repeat('../', $depth) . implode('/', array_map('rawurlencode', explode('/', $asset)));
 }
 
 /**
@@ -274,56 +240,15 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             clean_text($item->intro, FORMAT_HTML) . '<!--###BOOKMARK_' . $descriptionmarker . '_DESC###--></div>' . "\n";
 
         // Transitional order is intro, legacy URL, legacy files, then ordered structured blocks.
-        if (!empty($item->url) && $item->url !== 'false') {
-            $url = clean_param($item->url, PARAM_URL);
-            if ($url !== '') {
-                $content .= '<div class="legacy-url"><a href="' . spch($url) . '"><!--###BOOKMARK_EXT_URL###-->' .
-                    spch($url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
-            }
-        }
-        foreach (block_exaport_get_item_files_array($item) as $legacyfile) {
-            $asset = block_exaport_scorm_add_file($legacyfile, 'items/' . $item->id . '/legacy');
-            $assets[] = $asset;
-            $content .= '<div class="legacy-file"><a href="' . spch(block_exaport_scorm_relative_url($filepath, $asset)) .
-                '"><!--###BOOKMARK_FILE_URL###-->' . spch($legacyfile->get_filename()) .
-                '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
-        }
-
-        foreach (block_exaport_get_item_content_export_data($item) as $block) {
-            $content .= '<section class="item-content-block item-content-' . spch($block['type']) .
-                '" data-block-id="' . $block['blockid'] . '">';
-            if ($block['title'] !== '') {
-                $content .= '<h2>' . spch(format_string($block['title'])) . '</h2>';
-            }
-            if ($block['type'] === 'link') {
-                $url = clean_param($block['url'], PARAM_URL);
-                if ($url !== '') {
-                    $content .= '<a href="' . spch($url) . '">' . spch($url) . '</a>';
-                }
-            } else if ($block['type'] === 'file') {
-                foreach ($block['files'] as $file) {
-                    $asset = block_exaport_scorm_add_file($file,
-                        'items/' . $item->id . '/blocks/' . $block['blockid']);
-                    $assets[] = $asset;
-                    $content .= '<a class="structured-file" href="' .
-                        spch(block_exaport_scorm_relative_url($filepath, $asset)) . '">' .
-                        spch($file->get_filename()) . '</a>';
-                }
-            } else if ($block['type'] === 'text') {
-                $text = clean_text($block['content'], $block['contentformat']);
-                foreach ($block['editorfiles'] as $file) {
-                    $asset = block_exaport_scorm_add_file($file,
-                        'items/' . $item->id . '/blocks/' . $block['blockid'] . '/editor');
-                    $assets[] = $asset;
-                    $reference = ltrim($file->get_filepath(), '/') . $file->get_filename();
-                    $replacement = block_exaport_scorm_relative_url($filepath, $asset);
-                    $text = str_replace('@@PLUGINFILE@@/' . $reference, $replacement, $text);
-                    $text = str_replace('@@PLUGINFILE@@' . $file->get_filepath() . $file->get_filename(), $replacement, $text);
-                }
-                $content .= '<div class="structured-text">' . $text . '</div>';
-            }
-            $content .= '</section>' . "\n";
-        }
+        $rendered = block_exaport_scorm_render_item_content(
+            $item,
+            block_exaport_get_item_files_array($item),
+            block_exaport_get_item_content_export_data($item),
+            $filepath,
+            'block_exaport_scorm_add_file'
+        );
+        $content .= $rendered['html'];
+        $assets = $rendered['assets'];
 
         $content .= add_comments('block_exaportitemcomm', $item->id);
         if (block_exaport_check_competence_interaction()) {

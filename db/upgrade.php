@@ -1535,5 +1535,31 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026091602, 'exaport');
     }
 
+    if ($oldversion < 2026092900) {
+        require_once(__DIR__ . '/upgradelib.php');
+
+        upgrade_set_timeout(0);
+        // ID-based batches avoid an unbounded result set and permit File API queries on all DB drivers.
+        $lastprocessedid = 0;
+        $batchsize = 500;
+        do {
+            $items = $DB->get_records_select(
+                'block_exaportitem',
+                'id > ?',
+                [$lastprocessedid],
+                'id ASC',
+                '*',
+                0,
+                $batchsize
+            );
+            foreach ($items as $item) {
+                block_exaport_migrate_legacy_item_content($item);
+                $lastprocessedid = (int)$item->id;
+            }
+        } while (count($items) === $batchsize);
+
+        upgrade_block_savepoint(true, 2026092900, 'exaport');
+    }
+
     return $result;
 }

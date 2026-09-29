@@ -630,6 +630,14 @@ return [
         'Speichern und weiter bearbeiten',
         'Save and keep editing',
     ],
+    'contentaftersave' => [
+        'Speichern Sie und bearbeiten Sie weiter, um Text, Links und Dateien im Inhaltsbereich hinzuzufügen.',
+        'Save and keep editing to add text, links, and files in the structured content section.',
+    ],
+    'disableditemwriteapi' => [
+        'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.',
+        'This legacy item write service is disabled. Use the structured content interface.',
+    ],
 
     // === Notes.
     'deletenoteconfirm' => [

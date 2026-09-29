@@ -392,7 +392,7 @@ function block_exaport_add_to_log($courseid, $module, $action, $url = '', $info 
  * Delete only the legacy file attached to an item.
  *
  * This deliberately does not remove editor, icon, or structured-content files.
- * It is used while the legacy update API still supports replacing item_file.
+ * Compatibility-only deletion of residual legacy files. Active writers must not use this helper.
  *
  * @param stdClass $item Trusted item containing id and userid.
  * @return void

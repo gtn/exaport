@@ -66,6 +66,7 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         $newitem->userid = g::$USER->id;
         $newitem->type = $item->type;
         $newitem->name = $item->name;
+        // Compatibility-only: preserve anomalous residual legacy content until the Phase 10 audit/removal.
         $newitem->url = $item->url;
         $newitem->intro = $item->intro;
         $newitem->attachment = $item->attachment;
@@ -79,7 +80,7 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
 
         \block_exaport_copy_item_content($item, $newitem);
 
-        // Files.
+        // Compatibility-only legacy files. Structured blocks were copied above.
         $fs = get_file_storage();
         if ($file = block_exaport_get_item_files($item)) {
             foreach ($file as $fileindex => $fileobject) {

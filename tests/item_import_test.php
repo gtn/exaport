@@ -57,10 +57,10 @@ final class item_import_test extends \advanced_testcase {
         $files = block_exaport_get_item_content_files($user->id, $blocks[0]->id);
         $this->assertCount(1, $files);
         $this->assertSame('submission.txt', $files[0]->get_filename());
-        $this->assertSame($user->id, (int)$files[0]->get_userid());
+        $this->assertSame((int)$user->id, (int)$files[0]->get_userid());
         $this->assertSame('assignment submission', $source->get_content());
         $this->assertEmpty(get_file_storage()->get_area_files(
-            context_user::instance($user->id)->id,
+            \context_user::instance($user->id)->id,
             'block_exaport',
             'item_file',
             $itemid,
@@ -124,15 +124,19 @@ final class item_import_test extends \advanced_testcase {
         try {
             (function() use ($DB, $user, $course, $root, &$itemid): void {
                 $transaction = $DB->start_delegated_transaction();
-                $item = $this->insert_item($user->id, $course->id);
-                $itemid = $item->id;
-                block_exaport_import_path_files_into_content_block(
-                    $item,
-                    $root,
-                    $root . '/entry',
-                    ['present.txt', 'missing.txt']
-                );
-                $transaction->allow_commit();
+                try {
+                    $item = $this->insert_item($user->id, $course->id);
+                    $itemid = $item->id;
+                    block_exaport_import_path_files_into_content_block(
+                        $item,
+                        $root,
+                        $root . '/entry',
+                        ['present.txt', 'missing.txt']
+                    );
+                    $transaction->allow_commit();
+                } catch (\Throwable $exception) {
+                    $transaction->rollback($exception);
+                }
             })();
             $this->fail('Missing required package file was accepted');
         } catch (\invalid_parameter_exception $exception) {
@@ -163,7 +167,7 @@ final class item_import_test extends \advanced_testcase {
 
     private function create_source_file(int $userid, string $filename, string $content): \stored_file {
         return get_file_storage()->create_file_from_string([
-            'contextid' => context_user::instance($userid)->id,
+            'contextid' => \context_user::instance($userid)->id,
             'component' => 'user',
             'filearea' => 'private',
             'itemid' => 0,

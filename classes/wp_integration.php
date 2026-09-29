@@ -28,6 +28,7 @@ use html_table;
 use html_table_cell;
 use html_table_row;
 use html_writer;
+use moodle_url;
 use stored_file;
 
 /**
@@ -681,6 +682,7 @@ class wp_integration {
                 ];
                 // add information about files:
                 $type_content['files'] = $this->prepareItemFiles($item);
+                $type_content['structured_blocks'] = $this->prepareStructuredItemContent($item);
                 break;
             case 'personal_information':
                 if ($this->sendFilesAsUrls()) {
@@ -950,55 +952,62 @@ class wp_integration {
      * returns information about files for the block item
      */
     private function prepareItemFiles($item) {
-        global $DB, $CFG, $USER;
-
-        $userId = $USER->id; // only OWN !!! ???
-
         $itemFiles = [];
-
-        // get files right from DB
-        $select = "contextid='" . context_user::instance($userId)->id . "' " .
-            " AND component='block_exaport' AND filearea='item_file' AND itemid='" . $item->id . "' AND filesize>0 ";
-
-        if ($files = $DB->get_records_select('files', $select)) {
-            if (is_array($files)) {
-
-                foreach ($files as $file) {
-                    // opt 1: files as URLs
-                    if ($this->sendFilesAsUrls()) {
-                        $isMedia = false;
-
-                        if (strpos($file->mimetype, "image") !== false) {
-                            // Link to file.
-                            $fileUrl = $CFG->wwwroot . "/pluginfile.php/" . context_user::instance($userId)->id .
-                                "/" . 'block_exaport' . "/" . 'item_file' . "/view/" . $access . "/itemid/" . $item->id . "/" .
-                                $file->filename;
-                        } else {
-                            // Link to file.
-                            $fileUrl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=view/" . $access .
-                                "&itemid=" . $item->id . "&inst=" . $file->pathnamehash);
-                            if (block_exaport_is_valid_media_by_filename($file->filename)) {
-                                $isMedia = true;
-                            }
-                        };
-
-                        $itemFiles[] = [
-                            'url' => $fileUrl,
-                            'filename' => $file->filename,
-                            'mimetype' => $file->mimetype,
-                            'isMedia' => $isMedia, // needed?
-                        ];
-                    } else {
-
-                        // opt 2: files for direct POST exporting
-                        // relate the item to the file
-                        $itemFiles[] = $this->addFileToPost($file/*, 'i' . $item->id . '_'*/);
-                    }
-                }
+        foreach (block_exaport_get_item_files_array($item) as $file) {
+            // Option 1: files as URLs (retained for compatibility; multipart is currently selected).
+            if ($this->sendFilesAsUrls()) {
+                $fileUrl = moodle_url::make_pluginfile_url($file->get_contextid(), 'block_exaport',
+                    'item_file', $item->id, $file->get_filepath(), $file->get_filename())->out(false);
+                $itemFiles[] = [
+                    'url' => $fileUrl,
+                    'filename' => $file->get_filename(),
+                    'mimetype' => $file->get_mimetype(),
+                    'isMedia' => block_exaport_is_valid_media_by_filename($file->get_filename()),
+                ];
+            } else {
+                // Option 2: files transferred in the authenticated multipart request.
+                $itemFiles[] = $this->addFileToPost($file/*, 'i' . $item->id . '_'*/);
             }
-        };
+        }
 
         return $itemFiles;
+    }
+
+    /**
+     * Prepare the additive ordered structured-content payload understood by current receivers.
+     *
+     * Files are transferred through the existing multipart contract. Text editor files are
+     * exposed alongside their block so a receiver can resolve @@PLUGINFILE@@ references.
+     *
+     * @param stdClass $item Item being exported.
+     * @return array
+     */
+    private function prepareStructuredItemContent($item): array {
+        $result = [];
+        foreach (block_exaport_get_item_content_export_data($item) as $block) {
+            $data = [
+                'id' => $block['blockid'],
+                'sortorder' => $block['sortorder'],
+                'type' => $block['type'],
+                'title' => $block['title'],
+                'content' => clean_text($block['content'], $block['contentformat']),
+                'contentformat' => $block['contentformat'],
+                'url' => clean_param($block['url'], PARAM_URL),
+                'files' => [],
+                'editorfiles' => [],
+            ];
+            foreach ($block['files'] as $file) {
+                $data['files'][] = $this->addFileToPost($file, 'item-' . $item->id . '-block-' . $block['blockid'] . '-');
+            }
+            foreach ($block['editorfiles'] as $file) {
+                $data['editorfiles'][] = [
+                    'reference' => ltrim($file->get_filepath(), '/') . $file->get_filename(),
+                    'file' => $this->addFileToPost($file, 'item-' . $item->id . '-block-' . $block['blockid'] . '-'),
+                ];
+            }
+            $result[] = $data;
+        }
+        return $result;
     }
 
     /**

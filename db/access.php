@@ -18,6 +18,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
+    'block/exaport:audititemcontent' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW,
+        ),
+    ),
     'block/exaport:use' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,

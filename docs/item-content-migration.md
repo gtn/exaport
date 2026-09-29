@@ -26,7 +26,24 @@ Back up both the database and Moodledata before upgrading. Run the audit before
 upgrade where possible to record the legacy baseline, immediately after the
 upgrade, after release validation, and before any future Phase 10B cleanup.
 
-## Running the audit
+## Running the audit in Moodle administration
+
+No shell or Bash access is required. A manager with the
+`block/exaport:audititemcontent` capability can navigate to:
+
+**Site administration → Plugins → Blocks → Item-content migration audit**
+
+Visiting the page does not run a query. Choose an optional positive item ID, a
+sample limit from 1 to 1000, and whether to show verbose bounded identifiers,
+then select **Run audit**. Select **Run audit and download JSON** to receive the
+same result as a privacy-safe JSON file. Both actions are authenticated Moodle
+form submissions protected by a session key.
+
+## Optional command-line automation
+
+The administration page provides all interactive audit functionality. The CLI
+remains available only as an optional release-automation interface for operators
+who already have shell access.
 
 From the Moodle root:
 
@@ -36,7 +53,7 @@ php blocks/exaport/cli/audit_item_content.php --json
 php blocks/exaport/cli/audit_item_content.php --itemid=123 --verbose
 ```
 
-Options are `--help`, `--json`, `--verbose`, `--itemid=<positive id>`, and
+CLI options are `--help`, `--json`, `--verbose`, `--itemid=<positive id>`, and
 `--sample-limit=<1..1000>` (default 20). An item filter restricts attributable
 item, block, and file checks to that parent. Site-wide orphan checks are skipped
 because an orphan cannot be safely attributed to the requested item. It never

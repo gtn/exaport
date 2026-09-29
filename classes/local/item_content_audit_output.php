@@ -49,6 +49,62 @@ final class item_content_audit_output {
         return implode(PHP_EOL, $lines) . PHP_EOL;
     }
 
+    /** Format an accessible, privacy-safe report for a Moodle administration page. */
+    public static function html(array $result, bool $verbose = false): string {
+        global $OUTPUT;
+
+        $status = strtoupper($result['status']);
+        $notificationtype = $result['status'] === 'error' ? 'error' :
+            ($result['status'] === 'warning' ? 'warning' : 'success');
+        $summary = get_string('audititemcontentsummary', 'block_exaport', (object)[
+            'status' => $status,
+            'errors' => $result['errorcount'],
+            'warnings' => $result['warningcount'],
+        ]);
+        $html = $OUTPUT->notification($summary, $notificationtype, false);
+
+        if (empty($result['findings'])) {
+            return $html . html_writer::tag('p', get_string('audititemcontentnofindings', 'block_exaport'));
+        }
+
+        $table = new \html_table();
+        $table->attributes['class'] = 'generaltable';
+        $table->head = [get_string('audititemcontentseverity', 'block_exaport'),
+            get_string('audititemcontentcode', 'block_exaport'), get_string('audititemcontentcount', 'block_exaport'),
+            get_string('audititemcontentsamples', 'block_exaport'), get_string('audititemcontentguidance', 'block_exaport')];
+        foreach ($result['findings'] as $finding) {
+            $samples = implode(', ', array_map('strval', $finding['sampleids'])) ?: get_string('none');
+            if ($verbose && !empty($finding['secondarysampleids'])) {
+                $samples .= html_writer::empty_tag('br') . get_string('audititemcontentrelatedids', 'block_exaport') . ': ' .
+                    implode(', ', array_map('strval', $finding['secondarysampleids']));
+            }
+            $count = (string)$finding['count'];
+            if (isset($finding['affecteditemcount'])) {
+                $count .= html_writer::empty_tag('br') . get_string('audititemcontentaffecteditems', 'block_exaport') .
+                    ': ' . $finding['affecteditemcount'];
+            }
+            $guidance = s($finding['description']) . html_writer::empty_tag('br') .
+                html_writer::tag('strong', get_string('audititemcontentaction', 'block_exaport') . ':') . ' ' .
+                s($finding['action']);
+            $table->data[] = [s(strtoupper($finding['severity'])), html_writer::tag('code', s($finding['code'])),
+                $count, $samples, $guidance];
+        }
+        $html .= html_writer::table($table);
+
+        if ($verbose) {
+            $counttable = new \html_table();
+            $counttable->attributes['class'] = 'generaltable';
+            $counttable->head = [get_string('audititemcontentcode', 'block_exaport'),
+                get_string('audititemcontentcount', 'block_exaport')];
+            foreach ($result['counts'] as $code => $count) {
+                $counttable->data[] = [html_writer::tag('code', s($code)), (int)$count];
+            }
+            $html .= html_writer::tag('h3', get_string('audititemcontentinformation', 'block_exaport'));
+            $html .= html_writer::table($counttable);
+        }
+        return $html;
+    }
+
     /** Map audit status to the documented process exit status. */
     public static function exit_code(array $result): int {
         return $result['status'] === 'error' ? 2 : ($result['status'] === 'warning' ? 1 : 0);

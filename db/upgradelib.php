@@ -29,25 +29,27 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
         throw new coding_exception('Legacy item content migration requires item and owner IDs');
     }
 
-    // context_user::instance() recreates a missing context for an active user. It can also return a
-    // lingering context for a soft-deleted user, so validate the owner record explicitly first.
-    if (!$DB->record_exists('user', ['id' => $ownerid, 'deleted' => 0])) {
-        throw new coding_exception(
-            "Cannot migrate legacy content for item {$itemid}: owner {$ownerid} is missing or deleted"
-        );
-    }
-    if (!$DB->record_exists('context', ['contextlevel' => CONTEXT_USER, 'instanceid' => $ownerid])) {
-        throw new coding_exception(
-            "Cannot migrate legacy content for item {$itemid}: owner {$ownerid} has no user context"
-        );
-    }
-    try {
-        $context = context_user::instance($ownerid, MUST_EXIST);
-    } catch (Throwable $exception) {
-        throw new coding_exception(
-            "Cannot migrate legacy content for item {$itemid}: owner {$ownerid} has no user context",
-            $exception->getMessage()
-        );
+    // Do not use context_user::instance(): it recreates a missing context for an active user. A
+    // soft-deleted user may legitimately retain a context and files, which are still safe to migrate.
+    $contextrecord = $DB->get_record('context', [
+        'contextlevel' => CONTEXT_USER,
+        'instanceid' => $ownerid,
+    ]);
+    $context = null;
+    if ($contextrecord) {
+        if (!$DB->record_exists('user', ['id' => $ownerid])) {
+            throw new coding_exception(
+                "Cannot migrate legacy content for item {$itemid}: context owner {$ownerid} is missing"
+            );
+        }
+        try {
+            $context = context::instance_by_id((int)$contextrecord->id, MUST_EXIST);
+        } catch (Throwable $exception) {
+            throw new coding_exception(
+                "Cannot migrate legacy content for item {$itemid}: owner {$ownerid} has an invalid user context",
+                $exception->getMessage()
+            );
+        }
     }
 
     $transaction = $DB->start_delegated_transaction();
@@ -55,14 +57,16 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
         // Re-read inside the transaction so a stale batch record cannot recreate already migrated content.
         $current = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
         $fs = get_file_storage();
-        $sourcefiles = array_values($fs->get_area_files(
+        // File records are context-bound. If the context was deleted, Moodle deletes its file areas too;
+        // do not recreate the context merely to migrate a URL or clear stale attachment metadata.
+        $sourcefiles = $context ? array_values($fs->get_area_files(
             $context->id,
             'block_exaport',
             'item_file',
             $itemid,
             'filepath ASC, filename ASC, id ASC',
             false
-        ));
+        )) : [];
 
         $storedurl = (string)($current->url ?? '');
         $testedurl = trim($storedurl);
@@ -166,7 +170,9 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
             $DB->update_record('block_exaportitem', $update);
         }
         // Also removes harmless directory placeholders after the (possibly empty) verification set succeeds.
-        $fs->delete_area_files($context->id, 'block_exaport', 'item_file', $itemid);
+        if ($context) {
+            $fs->delete_area_files($context->id, 'block_exaport', 'item_file', $itemid);
+        }
 
         $transaction->allow_commit();
         return $result;

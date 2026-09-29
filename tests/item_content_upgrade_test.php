@@ -367,7 +367,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame((int)$secondblock->timecreated, (int)$secondblock->timemodified);
     }
 
-    public function test_missing_owner_context_fails_without_creating_a_link_block(): void {
+    public function test_missing_owner_context_migrates_url_without_recreating_context(): void {
         global $DB;
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
@@ -376,38 +376,53 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $context->delete();
         \context_helper::reset_caches();
 
-        try {
-            \block_exaport_migrate_legacy_item_content($item);
-            $this->fail('Item without an owner context was migrated');
-        } catch (\coding_exception $exception) {
-            $this->assertStringContainsString((string)$item->id, $exception->getMessage());
-            $this->assertStringContainsString((string)$user->id, $exception->getMessage());
-            $this->assertStringNotContainsString('private:value', $exception->getMessage());
-        }
-        $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]));
-        $this->assertSame('private:value', $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
-        $this->assertSame('kept', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $result = \block_exaport_migrate_legacy_item_content($item);
+        $block = $DB->get_record('block_exaportitemblock', ['id' => $result['linkblockid']], '*', MUST_EXIST);
+        $this->assertSame('private:value', $block->url);
+        $this->assertSame('', $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
+        $this->assertSame('', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $this->assertFalse($DB->record_exists('context', [
+            'contextlevel' => CONTEXT_USER, 'instanceid' => $user->id,
+        ]));
     }
 
-    public function test_deleted_owner_fails_even_when_a_context_record_remains(): void {
+    public function test_deleted_owner_with_context_migrates_url_and_files(): void {
         global $DB;
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         $item = $this->create_item($user->id, 'note', 'deleted-owner:value', 'kept');
-        \context_user::instance($user->id);
+        $source = $this->create_legacy_file($item, 'deleted-owner.txt', 'preserved');
+        $contextid = \context_user::instance($user->id)->id;
         $DB->set_field('user', 'deleted', 1, ['id' => $user->id]);
 
-        try {
-            \block_exaport_migrate_legacy_item_content($item);
-            $this->fail('Item belonging to a deleted owner was migrated');
-        } catch (\coding_exception $exception) {
-            $this->assertStringContainsString((string)$item->id, $exception->getMessage());
-            $this->assertStringContainsString((string)$user->id, $exception->getMessage());
-            $this->assertStringNotContainsString('deleted-owner:value', $exception->getMessage());
-        }
-        $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]));
-        $this->assertSame('deleted-owner:value', $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
-        $this->assertSame('kept', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $result = \block_exaport_migrate_legacy_item_content($item);
+        $this->assertNotNull($result['linkblockid']);
+        $this->assertNotNull($result['fileblockid']);
+        $copy = get_file_storage()->get_file($contextid, 'block_exaport', 'item_content_file',
+            $result['fileblockid'], '/', 'deleted-owner.txt');
+        $this->assertNotFalse($copy);
+        $this->assertSame($source->get_contenthash(), $copy->get_contenthash());
+        $this->assertSame('', $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
+        $this->assertSame('', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $this->assertSame([], get_file_storage()->get_area_files(
+            $contextid, 'block_exaport', 'item_file', $item->id, 'id', false));
+    }
+
+    public function test_contextless_empty_item_does_not_block_later_batch_items(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $firstuser = $this->getDataGenerator()->create_user();
+        $seconduser = $this->getDataGenerator()->create_user();
+        $emptyitem = $this->create_item($firstuser->id, 'note', '', '');
+        $lateritem = $this->create_item($seconduser->id, 'link', 'later:value');
+        $context = \context_user::instance($firstuser->id);
+        $context->delete();
+        \context_helper::reset_caches();
+
+        \block_exaport_migrate_legacy_item_content_batches(1);
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $emptyitem->id]));
+        $this->assertSame(1, $DB->count_records('block_exaportitemblock', ['itemid' => $lateritem->id]));
+        $this->assertSame('', $DB->get_field('block_exaportitem', 'url', ['id' => $lateritem->id]));
     }
 
     public function test_copy_failure_rolls_back_blocks_and_preserves_all_sources(): void {

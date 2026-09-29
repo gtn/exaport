@@ -28,8 +28,8 @@ upgrade, after release validation, and before any future Phase 10B cleanup.
 
 ## Running the audit in Moodle administration
 
-No shell or Bash access is required. A manager with the
-`block/exaport:audititemcontent` capability can navigate to:
+No shell or Bash access is required. Only Moodle site administrators can access
+the audit page. Navigate to:
 
 **Site administration → Plugins → Blocks → Item-content migration audit**
 
@@ -39,32 +39,10 @@ then select **Run audit**. Select **Run audit and download JSON** to receive the
 same result as a privacy-safe JSON file. Both actions are authenticated Moodle
 form submissions protected by a session key.
 
-## Optional command-line automation
-
-The administration page provides all interactive audit functionality. The CLI
-remains available only as an optional release-automation interface for operators
-who already have shell access.
-
-From the Moodle root:
-
-```bash
-php blocks/exaport/cli/audit_item_content.php
-php blocks/exaport/cli/audit_item_content.php --json
-php blocks/exaport/cli/audit_item_content.php --itemid=123 --verbose
-```
-
-CLI options are `--help`, `--json`, `--verbose`, `--itemid=<positive id>`, and
-`--sample-limit=<1..1000>` (default 20). An item filter restricts attributable
+An item filter restricts attributable
 item, block, and file checks to that parent. Site-wide orphan checks are skipped
 because an orphan cannot be safely attributed to the requested item. It never
 silently expands a filtered audit to the full site.
-
-Exit statuses are stable for automation:
-
-* `0`: clean (informational counts are allowed);
-* `1`: one or more warnings and no errors;
-* `2`: one or more errors;
-* `3`: invalid command options or a runtime/configuration failure.
 
 JSON includes the audit format version, installed plugin version, UTC generation
 time, status, severity totals, informational counts, findings, bounded IDs, and
@@ -120,7 +98,7 @@ Counts use aggregate SQL. Samples use independently bounded queries. File
 queries always constrain both component and file area, parent/context checks use
 joins or `EXISTS`, and the implementation does not issue a context query per
 file. The item filter is pushed into applicable SQL. Thus full counts remain
-accurate while CLI/JSON output and sample memory are bounded; no file binary is
+accurate while web/JSON output and sample memory are bounded; no file binary is
 read. Phase 10B repair or cleanup requires separate design and review.
 
 ## Retained read-only compatibility inventory (Phase 10B checklist)

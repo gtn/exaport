@@ -181,17 +181,12 @@ final class item_content_audit_test extends \advanced_testcase {
         $this->assertEquals($beforeconfig, $DB->get_records('config_plugins', ['plugin' => 'block_exaport']));
 
         $json = json_encode(item_content_audit_output::with_metadata($result, '2026092902', 0));
-        $human = item_content_audit_output::human($result);
         $html = item_content_audit_output::html($result, true);
         $this->assertJson($json);
         $this->assertStringContainsString('"auditformatversion":1', $json);
-        $this->assertStringContainsString('Status: ERROR', $human);
         $this->assertStringContainsString('legacy_url', $html);
-        $this->assertStringNotContainsString('secret:value', $json . $human . $html);
-        $this->assertStringNotContainsString('private-name.txt', $json . $human . $html);
-        $this->assertSame(2, item_content_audit_output::exit_code($result));
-        $this->assertSame(1, item_content_audit_output::exit_code(['status' => 'warning']));
-        $this->assertSame(0, item_content_audit_output::exit_code(['status' => 'clean']));
+        $this->assertStringNotContainsString('secret:value', $json . $html);
+        $this->assertStringNotContainsString('private-name.txt', $json . $html);
     }
 
     public function test_admin_page_is_explicitly_submitted_and_capability_protected(): void {
@@ -199,10 +194,12 @@ final class item_content_audit_test extends \advanced_testcase {
         $settings = file_get_contents(__DIR__ . '/../settings.php');
         $access = file_get_contents(__DIR__ . '/../db/access.php');
 
-        $this->assertStringContainsString("require_capability('block/exaport:audititemcontent'", $page);
+        $this->assertStringContainsString('require_admin();', $page);
         $this->assertStringContainsString('if ($data = $form->get_data())', $page);
         $this->assertStringContainsString("'block_exaport_item_content_audit'", $settings);
-        $this->assertStringContainsString("'manager' => CAP_ALLOW", $access);
+        $capability = substr($access, strpos($access, "'block/exaport:audititemcontent'"), 220);
+        $this->assertStringNotContainsString("'manager' => CAP_ALLOW", $capability);
         $this->assertStringNotContainsString('optional_param', $page);
+        $this->assertFileDoesNotExist(__DIR__ . '/../cli/audit_item_content.php');
     }
 }

@@ -9,9 +9,9 @@ use block_exaport\form\item_content_audit as item_content_audit_form;
 use block_exaport\local\item_content_audit;
 use block_exaport\local\item_content_audit_output;
 
+require_admin();
 admin_externalpage_setup('block_exaport_item_content_audit');
 $context = context_system::instance();
-require_capability('block/exaport:audititemcontent', $context);
 
 $url = new moodle_url('/blocks/exaport/item_content_audit.php');
 $PAGE->set_url($url);

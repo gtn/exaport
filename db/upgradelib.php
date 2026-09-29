@@ -17,9 +17,10 @@ defined('MOODLE_INTERNAL') || die();
  * Once the transaction is durable, cleared source fields make a rerun a no-op.
  *
  * @param stdClass $item Trusted block_exaportitem record.
+ * @param callable|null $progresscallback Optional test/diagnostic callback receiving the stage and related value.
  * @return array{linkblockid: int|null, fileblockid: int|null, filecount: int}
  */
-function block_exaport_migrate_legacy_item_content(stdClass $item): array {
+function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $progresscallback = null): array {
     global $DB;
 
     $itemid = (int)($item->id ?? 0);
@@ -82,6 +83,9 @@ function block_exaport_migrate_legacy_item_content(stdClass $item): array {
                 'url' => $storedurl,
             ]);
             $result['linkblockid'] = (int)$DB->insert_record('block_exaportitemblock', $link);
+            if ($progresscallback) {
+                $progresscallback('link_created', $result['linkblockid']);
+            }
         }
 
         if ($sourcefiles) {
@@ -102,9 +106,15 @@ function block_exaport_migrate_legacy_item_content(stdClass $item): array {
                     'itemid' => $fileblock->id,
                     'userid' => $ownerid,
                 ], $sourcefile);
+                if ($progresscallback) {
+                    $progresscallback('file_copied', $sourcefile);
+                }
             }
 
             // Verify identity, placement, and bytes for each file; a count alone can hide collisions.
+            if ($progresscallback) {
+                $progresscallback('before_verification', $fileblock->id);
+            }
             foreach ($sourcefiles as $sourcefile) {
                 $destination = $fs->get_file(
                     $context->id,
@@ -153,4 +163,42 @@ function block_exaport_migrate_legacy_item_content(stdClass $item): array {
             $exception->getMessage()
         ));
     }
+}
+
+/**
+ * Migrate all legacy items in bounded ascending-ID batches.
+ *
+ * The injectable migrator keeps interruption/restart behavior testable without
+ * making the production upgrade depend on PHPUnit or request state.
+ *
+ * @param int $batchsize Maximum items fetched at once.
+ * @param callable|null $migrator Optional item migrator, used by tests to simulate interruption.
+ * @return void
+ */
+function block_exaport_migrate_legacy_item_content_batches(
+    int $batchsize = 500,
+    ?callable $migrator = null
+): void {
+    global $DB;
+
+    if ($batchsize < 1) {
+        throw new coding_exception('Legacy item content migration batch size must be positive');
+    }
+    $migrator = $migrator ?? 'block_exaport_migrate_legacy_item_content';
+    $lastprocessedid = 0;
+    do {
+        $items = $DB->get_records_select(
+            'block_exaportitem',
+            'id > ?',
+            [$lastprocessedid],
+            'id ASC',
+            '*',
+            0,
+            $batchsize
+        );
+        foreach ($items as $item) {
+            $migrator($item);
+            $lastprocessedid = (int)$item->id;
+        }
+    } while (count($items) === $batchsize);
 }

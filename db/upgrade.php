@@ -1540,23 +1540,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
         upgrade_set_timeout(0);
         // ID-based batches avoid an unbounded result set and permit File API queries on all DB drivers.
-        $lastprocessedid = 0;
-        $batchsize = 500;
-        do {
-            $items = $DB->get_records_select(
-                'block_exaportitem',
-                'id > ?',
-                [$lastprocessedid],
-                'id ASC',
-                '*',
-                0,
-                $batchsize
-            );
-            foreach ($items as $item) {
-                block_exaport_migrate_legacy_item_content($item);
-                $lastprocessedid = (int)$item->id;
-            }
-        } while (count($items) === $batchsize);
+        block_exaport_migrate_legacy_item_content_batches();
 
         upgrade_block_savepoint(true, 2026092900, 'exaport');
     }

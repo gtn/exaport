@@ -57,7 +57,7 @@ final class item_import_test extends \advanced_testcase {
         $files = block_exaport_get_item_content_files($user->id, $blocks[0]->id);
         $this->assertCount(1, $files);
         $this->assertSame('submission.txt', $files[0]->get_filename());
-        $this->assertSame($user->id, (int)$files[0]->get_userid());
+        $this->assertSame((int)$user->id, (int)$files[0]->get_userid());
         $this->assertSame('assignment submission', $source->get_content());
         $this->assertEmpty(get_file_storage()->get_area_files(
             \context_user::instance($user->id)->id,

@@ -70,7 +70,7 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertSame(['link', 'text', 'file'], array_column($projection, 'type'));
         $this->assertSame('https://example.test/link', $projection[0]['url']);
         $this->assertSame('<p>Body</p>', $projection[1]['content']);
-        $this->assertSame(FORMAT_HTML, $projection[1]['contentformat']);
+        $this->assertSame((int)FORMAT_HTML, $projection[1]['contentformat']);
         $this->assertSame('embedded.png', $projection[1]['editorfiles'][0]->get_filename());
         $this->assertSame('document.pdf', $projection[2]['files'][0]->get_filename());
         $this->assertSame($itemid, $projection[2]['itemid']);

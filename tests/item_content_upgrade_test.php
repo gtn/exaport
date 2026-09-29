@@ -425,6 +425,114 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame('', $DB->get_field('block_exaportitem', 'url', ['id' => $lateritem->id]));
     }
 
+    public function test_real_core_user_deletion_then_migration_preserves_all_surviving_data(): void {
+        global $CFG, $DB;
+        require_once($CFG->libdir . '/moodlelib.php');
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $activeowner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $cohort = $this->getDataGenerator()->create_cohort();
+        $context = \context_user::instance($owner->id);
+
+        $urlonly = $this->create_item($owner->id, 'link', 'https://deleted.example/url', 'stale-url');
+        $fileonly = $this->create_item($owner->id, 'file', '', 'stale-file');
+        $combined = $this->create_item($owner->id, 'note', 'https://deleted.example/combined', 'stale-both');
+        $structured = $this->create_item($owner->id, 'note', 'https://deleted.example/structured', 'stale');
+        $this->create_legacy_file($fileonly, 'file-only.pdf', 'file only', '/', 'application/pdf');
+        $this->create_legacy_file($combined, 'combined.png', 'combined', '/nested/', 'image/png');
+        $this->create_legacy_file($structured, 'legacy.txt', 'legacy');
+        $existingblockid = $this->create_block($structured, 'file', 6);
+        get_file_storage()->create_file_from_string([
+            'contextid' => $context->id, 'component' => 'block_exaport',
+            'filearea' => 'item_content_file', 'itemid' => $existingblockid,
+            'filepath' => '/', 'filename' => 'already-structured.txt', 'userid' => $owner->id,
+        ], 'structured');
+
+        $categoryid = $this->create_category($owner, 'Deleted owner category');
+        $viewid = $this->create_view($owner, 1);
+        $relationshipids = [];
+        $relationshipids['block_exaportitemcate'] = (int)$DB->insert_record('block_exaportitemcate',
+            (object)['itemid' => $combined->id, 'cateid' => $categoryid]);
+        $relationshipids['block_exaportitemshar'] = (int)$DB->insert_record('block_exaportitemshar', (object)[
+            'itemid' => $combined->id, 'userid' => $recipient->id, 'original' => $owner->id,
+            'courseid' => $course->id, 'notify' => 1,
+        ]);
+        $relationshipids['block_exaportitemgroupshar'] = (int)$DB->insert_record(
+            'block_exaportitemgroupshar', (object)['itemid' => $combined->id, 'groupid' => $cohort->id]);
+        $relationshipids['block_exaportitemcomm'] = (int)$DB->insert_record('block_exaportitemcomm', (object)[
+            'itemid' => $combined->id, 'userid' => $recipient->id,
+            'entry' => 'Surviving comment', 'timemodified' => 456,
+        ]);
+        $relationshipids['block_exaportviewblock'] = (int)$DB->insert_record('block_exaportviewblock', (object)[
+            'viewid' => $viewid, 'positionx' => 1, 'positiony' => 1,
+            'type' => 'item', 'itemid' => $combined->id, 'block_title' => 'Surviving placement',
+        ]);
+        $relationshipids['block_exaportviewshar'] = (int)$DB->insert_record('block_exaportviewshar',
+            (object)['viewid' => $viewid, 'userid' => $recipient->id, 'notify' => 1]);
+        $relationshipids['block_exaportviewgroupshar'] = (int)$DB->insert_record(
+            'block_exaportviewgroupshar', (object)['viewid' => $viewid, 'groupid' => $cohort->id]);
+        $relationships = [];
+        foreach ($relationshipids as $table => $id) {
+            $relationships[$table] = $this->record_array($table, $id);
+        }
+
+        // This later active-user item proves a deleted owner cannot stop the rest of the batch.
+        $activeitem = $this->create_item($activeowner->id, 'file', 'https://active.example/', 'active-stale');
+        $activefile = $this->create_legacy_file($activeitem, 'active.txt', 'active');
+
+        $this->assertTrue(delete_user($owner));
+        $deleteduser = $DB->get_record('user', ['id' => $owner->id], '*', MUST_EXIST);
+        $this->assertSame(1, (int)$deleteduser->deleted);
+        $this->assertTrue($DB->record_exists('context', ['id' => $context->id]));
+        // Core deletion removes context content before Exaport's upgrade runs; the item rows survive.
+        $this->assertSame([], get_file_storage()->get_area_files(
+            $context->id, 'block_exaport', 'item_file', false, 'id', false));
+        $this->assertSame([], get_file_storage()->get_area_files(
+            $context->id, 'block_exaport', 'item_content_file', false, 'id', false));
+        foreach ([$urlonly, $fileonly, $combined, $structured] as $item) {
+            $this->assertTrue($DB->record_exists('block_exaportitem', ['id' => $item->id]));
+        }
+
+        \block_exaport_migrate_legacy_item_content_batches(2);
+        $this->assertSame(['link'], array_column(array_values($DB->get_records(
+            'block_exaportitemblock', ['itemid' => $urlonly->id], 'sortorder ASC')), 'type'));
+        $this->assertSame([], array_values($DB->get_records(
+            'block_exaportitemblock', ['itemid' => $fileonly->id])));
+        $this->assertSame(['link'], array_column(array_values($DB->get_records(
+            'block_exaportitemblock', ['itemid' => $combined->id], 'sortorder ASC')), 'type'));
+        $structuredblocks = array_values($DB->get_records(
+            'block_exaportitemblock', ['itemid' => $structured->id], 'sortorder ASC, id ASC'));
+        $this->assertSame(['file', 'link'], array_column($structuredblocks, 'type'));
+        $this->assertSame([6, 7], array_map(fn($block) => (int)$block->sortorder, $structuredblocks));
+        foreach ([$urlonly, $fileonly, $combined, $structured] as $item) {
+            $parent = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
+            $this->assertSame('', $parent->url);
+            $this->assertSame('', $parent->attachment);
+        }
+        foreach ($relationships as $table => $record) {
+            $this->assertSame($record, $this->record_array($table, (int)$record['id']));
+        }
+        $activeblocks = array_values($DB->get_records(
+            'block_exaportitemblock', ['itemid' => $activeitem->id], 'sortorder ASC'));
+        $this->assertSame(['link', 'file'], array_column($activeblocks, 'type'));
+        $activecopy = get_file_storage()->get_file(\context_user::instance($activeowner->id)->id,
+            'block_exaport', 'item_content_file', $activeblocks[1]->id, '/', 'active.txt');
+        $this->assertNotFalse($activecopy);
+        $this->assertSame($activefile->get_contenthash(), $activecopy->get_contenthash());
+
+        $counts = [];
+        foreach ([$urlonly, $fileonly, $combined, $structured, $activeitem] as $item) {
+            $counts[$item->id] = $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]);
+        }
+        \block_exaport_migrate_legacy_item_content_batches(1);
+        foreach ($counts as $itemid => $count) {
+            $this->assertSame($count, $DB->count_records('block_exaportitemblock', ['itemid' => $itemid]));
+        }
+    }
+
     public function test_copy_failure_rolls_back_blocks_and_preserves_all_sources(): void {
         global $DB;
         $this->resetAfterTest(true);

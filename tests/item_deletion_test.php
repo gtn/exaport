@@ -145,4 +145,30 @@ final class item_deletion_test extends \advanced_testcase {
         $this->assertCount(1, get_file_storage()->get_area_files(
             $context->id, 'block_exaport', 'item_content_file', $blockid, 'id', false));
     }
+
+    /**
+     * User cleanup removes attachments from comments on retained items.
+     */
+    public function test_user_cleanup_removes_comment_attachment_from_other_users_item(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $commenter = $this->getDataGenerator()->create_user();
+        $item = $this->create_item($owner);
+        $commentid = $DB->insert_record('block_exaportitemcomm', (object)[
+            'itemid' => $item->id,
+            'userid' => $commenter->id,
+            'entry' => 'Delete my comment',
+            'timemodified' => time(),
+        ]);
+        $systemcontext = \context_system::instance();
+        $this->create_file($systemcontext->id, 'item_comment_file', $commentid, 'personal.txt');
+
+        \block_exaport\api::delete_user_data($commenter->id);
+
+        $this->assertTrue($DB->record_exists('block_exaportitem', ['id' => $item->id]));
+        $this->assertFalse($DB->record_exists('block_exaportitemcomm', ['id' => $commentid]));
+        $this->assertEmpty(get_file_storage()->get_area_files(
+            $systemcontext->id, 'block_exaport', 'item_comment_file', $commentid, 'id', false));
+    }
 }

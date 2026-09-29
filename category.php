@@ -86,21 +86,22 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
     if (optional_param('confirm', 0, PARAM_INT)) {
         confirm_sesskey();
 
-        function block_exaport_recursive_delete_category($id) {
+        function block_exaport_recursive_delete_category($id, $userid) {
             global $DB;
 
             // Delete subcategories.
-            if ($entries = $DB->get_records('block_exaportcate', array("pid" => $id))) {
+            if ($entries = $DB->get_records('block_exaportcate', ['pid' => $id, 'userid' => $userid])) {
                 foreach ($entries as $entry) {
-                    block_exaport_recursive_delete_category($entry->id);
+                    block_exaport_recursive_delete_category($entry->id, $userid);
                 }
             }
-            $DB->delete_records('block_exaportcate', array('pid' => $id));
+            $DB->delete_records('block_exaportcate', ['pid' => $id, 'userid' => $userid]);
 
             $catitems = $DB->get_records_sql('
                 SELECT i.id FROM {block_exaportitem} i
                 JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
-            ', [$id]);
+                WHERE i.userid = ?
+            ', [$id, $userid]);
             // Delete items that belong exclusively to this category.
             foreach ($catitems as $entry) {
                 // Remove the category link.
@@ -113,14 +114,12 @@ if (optional_param('action', '', PARAM_ALPHA) == 'delete') {
             }
         }
 
-        block_exaport_recursive_delete_category($category->id);
-
-        if (!$DB->delete_records('block_exaportcate', array('id' => $category->id))) {
-            $message = "Could not delete your record";
-        } else {
-            block_exaport_add_to_log($courseid, "bookmark", "delete category", "", $category->id);
-            redirect('view_items.php?courseid=' . $courseid . '&categoryid=' . $category->pid);
-        }
+        $transaction = $DB->start_delegated_transaction();
+        block_exaport_recursive_delete_category($category->id, $category->userid);
+        $DB->delete_records('block_exaportcate', ['id' => $category->id, 'userid' => $category->userid]);
+        $transaction->allow_commit();
+        block_exaport_add_to_log($courseid, "bookmark", "delete category", "", $category->id);
+        redirect('view_items.php?courseid=' . $courseid . '&categoryid=' . $category->pid);
     }
 
     $optionsyes = array('action' => 'delete', 'courseid' => $courseid, 'confirm' => 1, 'sesskey' => sesskey(), 'id' => $id);

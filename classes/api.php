@@ -46,6 +46,11 @@ class api {
         $DB->delete_records('block_exaportcate', array('userid' => $userid));
         $DB->delete_records('block_exaportcatshar', array('userid' => $userid));
         $DB->delete_records('block_exaportcat_structshar', array('userid' => $userid));
+        $comments = $DB->get_recordset('block_exaportitemcomm', array('userid' => $userid), '', 'id');
+        foreach ($comments as $comment) {
+            block_exaport_delete_item_comment_files($comment);
+        }
+        $comments->close();
         $DB->delete_records('block_exaportitemcomm', array('userid' => $userid));
         $DB->delete_records('block_exaportitemshar', array('userid' => $userid));
         $DB->delete_records('block_exaportview', array('userid' => $userid));

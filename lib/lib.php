@@ -429,6 +429,28 @@ function block_exaport_delete_item_file_areas(stdClass $item): void {
 }
 
 /**
+ * Delete the File API area belonging to an item comment.
+ *
+ * Comment attachments are stored in the system context. The comment row is
+ * deliberately left intact so callers can remove files for a recordset before
+ * issuing a bounded bulk deletion of the rows.
+ *
+ * @param stdClass $comment Trusted comment containing an id.
+ * @return void
+ */
+function block_exaport_delete_item_comment_files(stdClass $comment): void {
+    if (empty($comment->id)) {
+        throw new invalid_parameter_exception('A comment id is required');
+    }
+    get_file_storage()->delete_area_files(
+        context_system::instance()->id,
+        'block_exaport',
+        'item_comment_file',
+        (int)$comment->id
+    );
+}
+
+/**
  * Permanently delete an Exaport item and all dependent data.
  *
  * Authorization is the caller's responsibility. The authoritative row is
@@ -449,13 +471,11 @@ function block_exaport_delete_item(stdClass $item): void {
     context_user::instance((int)$item->userid, MUST_EXIST);
     $transaction = $DB->start_delegated_transaction();
 
-    $comments = $DB->get_records('block_exaportitemcomm', ['itemid' => $item->id], '', 'id');
-    $fs = get_file_storage();
-    $systemcontext = context_system::instance();
+    $comments = $DB->get_recordset('block_exaportitemcomm', ['itemid' => $item->id], '', 'id');
     foreach ($comments as $comment) {
-        // Comment attachments have historically been stored in the system context.
-        $fs->delete_area_files($systemcontext->id, 'block_exaport', 'item_comment_file', $comment->id);
+        block_exaport_delete_item_comment_files($comment);
     }
+    $comments->close();
 
     block_exaport_delete_item_content($item);
     block_exaport_delete_item_file_areas($item);

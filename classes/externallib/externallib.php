@@ -728,6 +728,7 @@ class externallib extends external_api {
                 'text' => $block->text,
                 'url' => '',
                 'files' => [],
+                'contentblocks' => [],
                 'resume_itemtype' => null,
             ];
 
@@ -745,6 +746,7 @@ class externallib extends external_api {
                 $resultBlock->text = $item->description;
                 $resultBlock->url = $item->url;
                 $resultBlock->files = $item->files;
+                $resultBlock->contentblocks = $item->contentblocks;
             }
 
             if ($block->type == 'headline') {
@@ -1932,9 +1934,15 @@ class externallib extends external_api {
             foreach ($contentblock['files'] as $file) {
                 $path = '/' . $file->get_contextid() . '/block_exaport/item_content_file/itemid/' .
                     $item->id . '/blockid/' . $contentblock['blockid'] . '/' . $file->get_filename();
+                $token = static::wstoken();
+                $script = $token ? '/webservice/pluginfile.php' : '/pluginfile.php';
+                $fileurl = file_encode_url(g::$CFG->wwwroot . $script, $path, true);
+                if ($token) {
+                    $fileurl .= '?token=' . rawurlencode($token);
+                }
                 $resultblock->files[] = [
                     'filename' => $file->get_filename(),
-                    'url' => file_encode_url(g::$CFG->wwwroot . '/pluginfile.php', $path, true),
+                    'url' => $fileurl,
                     'mimetype' => $file->get_mimetype(),
                 ];
             }

@@ -363,7 +363,22 @@ class ExaportVievPdf {
                         $structuredhtml .= html_writer::tag('strong', s($contentblock['title']));
                     }
                     if ($contentblock['type'] === 'text' && $contentblock['content'] !== '') {
-                        $structuredhtml .= format_text($contentblock['content'], $contentblock['contentformat']);
+                        $textfilebase = '/' . context_user::instance($item->userid)->id .
+                            '/block_exaport/item_content_text/view/' . $access . '/itemid/' . $item->id .
+                            '/blockid/' . $contentblock['blockid'];
+                        $textcontent = preg_replace_callback(
+                            '~@@PLUGINFILE@@(/[^"\'<>\s]+)~',
+                            function($matches) use ($CFG, $textfilebase, $view, $USER) {
+                                $fileurl = file_encode_url(
+                                    $CFG->wwwroot . '/pluginfile.php',
+                                    $textfilebase . $matches[1],
+                                    false
+                                );
+                                return $fileurl . '/forPdf/' . $view->hash . '/' . $view->id . '/' . $USER->id;
+                            },
+                            $contentblock['content']
+                        );
+                        $structuredhtml .= format_text($textcontent, $contentblock['contentformat']);
                     }
                     if ($contentblock['type'] === 'link' && $contentblock['url'] !== '') {
                         $structuredhtml .= html_writer::div(html_writer::link(
@@ -1305,4 +1320,3 @@ class ExaportVievPdf {
         $this->pdf->SetY($current_y, false);
     }
 }
-

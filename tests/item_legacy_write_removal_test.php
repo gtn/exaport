@@ -61,4 +61,18 @@ final class item_legacy_write_removal_test extends \advanced_testcase {
         $this->assertStringNotContainsString('update_record', $updatemethod[0]);
         $this->assertStringNotContainsString('item_file', $addmethod[0] . $updatemethod[0]);
     }
+
+    public function test_external_and_report_structured_content_contracts_are_complete(): void {
+        $external = file_get_contents(__DIR__ . '/../classes/externallib/externallib.php');
+        $report = file_get_contents(__DIR__ . '/../lib/reportlib.php');
+        $pluginfile = file_get_contents(__DIR__ . '/../lib.php');
+
+        $this->assertStringContainsString("'contentblocks' => []", $external);
+        $this->assertStringContainsString('$resultBlock->contentblocks = $item->contentblocks;', $external);
+        $this->assertStringContainsString("'/webservice/pluginfile.php'", $external);
+        $this->assertStringContainsString("'?token=' . rawurlencode(\$token)", $external);
+        $this->assertStringContainsString("'@@PLUGINFILE@@'", $report);
+        $this->assertStringContainsString("case 'item_content_text':", $pluginfile);
+        $this->assertStringContainsString('block_exaport_can_user_access_shared_item', $pluginfile);
+    }
 }

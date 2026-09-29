@@ -106,7 +106,8 @@ final class item_content_upgrade_test extends \advanced_testcase {
             $result['fileblockid'], '/nested/', 'image.png');
         $this->assertNotFalse($copy);
         $this->assertSame($first->get_contenthash(), $copy->get_contenthash());
-        $this->assertSame($first->get_filesize(), $copy->get_filesize());
+        // File API numeric getters expose driver-native DML values (for example, PostgreSQL strings).
+        $this->assertSame((int)$first->get_filesize(), (int)$copy->get_filesize());
         $this->assertSame('image/png', $copy->get_mimetype());
         $this->assertSame('legacy-source', $copy->get_source());
         $this->assertSame('Legacy Author', $copy->get_author());
@@ -319,13 +320,15 @@ final class item_content_upgrade_test extends \advanced_testcase {
                 $result['fileblockid'], $source->get_filepath(), $source->get_filename());
             $this->assertNotFalse($destination);
             $this->assertSame($source->get_contenthash(), $destination->get_contenthash());
-            $this->assertSame($source->get_filesize(), $destination->get_filesize());
+            // Normalize numeric DML fields; their PHP scalar type varies across supported DB drivers.
+            $this->assertSame((int)$source->get_filesize(), (int)$destination->get_filesize());
             $this->assertSame($source->get_mimetype(), $destination->get_mimetype());
             $this->assertSame($source->get_source(), $destination->get_source());
             $this->assertSame($source->get_author(), $destination->get_author());
             $this->assertSame($source->get_license(), $destination->get_license());
-            $this->assertSame($source->get_timecreated(), $destination->get_timecreated());
-            $this->assertSame($source->get_timemodified(), $destination->get_timemodified());
+            $this->assertSame((int)$source->get_timecreated(), (int)$destination->get_timecreated());
+            $this->assertSame((int)$source->get_timemodified(), (int)$destination->get_timemodified());
+            $this->assertSame((int)$contextid, (int)$destination->get_contextid());
             $this->assertSame((int)$user->id, (int)$destination->get_userid());
         }
     }

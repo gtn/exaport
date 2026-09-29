@@ -127,54 +127,15 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->add_exaport_help_button('categoryids', 'forms.item.categoryid');
 
 
-        // 'link' input for all types:
-        $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
-        $mform->setType('url', PARAM_TEXT);
-        /*if ($type == 'link') {
-            $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60" value="http://"');
-            $mform->setType('url', PARAM_TEXT);
-            $mform->addRule('url', get_string("urlnotempty", "block_exaport"), 'required', null, 'client');
-        } else {
-            $mform->addElement('text', 'url', get_string("url", "block_exaport"), 'maxlength="255" size="60"');
-            $mform->setType('url', PARAM_TEXT);
-        }*/
-        $mform->add_exaport_help_button('url', 'forms.item.url');
-
-        // 'File' input is for ALL types
-        if ($type == 'link' && 11 == 22) {
-            // For code checker.
-            $tempvar = 1;
-        } else if (11 == 11 /* for ALL */ /*$type == 'file'*/) {
-            $filelimits = 1;
-            if ($CFG->block_exaport_multiple_files_in_item) {
-                $filelimits = 10;
+        // Assignment import still needs its source identifiers; its files are saved as structured content.
+        if ($this->_customdata['action'] == 'assignment_import') {
+            foreach (['submissionid' => PARAM_INT, 'fileid' => PARAM_TEXT, 'nosubmission' => PARAM_INT,
+                    'onlinetext' => PARAM_INT, 'aid' => PARAM_INT] as $field => $paramtype) {
+                $mform->addElement('hidden', $field);
+                $mform->setType($field, $paramtype);
             }
-            if ($this->_customdata['action'] == 'assignment_import') {
-                // Assignment import.
-                $mform->addElement('hidden', 'submissionid');
-                $mform->setType('submissionid', PARAM_INT);
-                $mform->addElement('hidden', 'fileid');
-                $mform->setType('fileid', PARAM_TEXT);
-                $mform->addElement('hidden', 'nosubmission');
-                $mform->setType('nosubmission', PARAM_INT);
-                $mform->addElement('hidden', 'onlinetext');
-                $mform->setType('onlinetext', PARAM_INT);
-                $mform->addElement('hidden', 'aid');
-                $mform->setType('aid', PARAM_INT);
-            } else if ($this->_customdata['action'] == 'add') {
-                $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null,
-                    array('subdirs' => false, 'maxfiles' => $filelimits, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-                // 'required' was disabled, because this input is for all types from now
-                //                $mform->addRule('file', null, 'required', null, 'client');
-
-            } else {
-                // Filemanager for edit file.
-                $mform->addElement('filemanager', 'file', get_string('file', 'block_exaport'), null,
-                    array('subdirs' => false, 'maxfiles' => $filelimits, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-                // 'required' was disabled, because this input is for all types from now
-                //                $mform->addRule('file', null, 'required', null, 'client');
-                $mform->add_exaport_help_button('file', 'forms.item.file');
-            }
+        } else if (empty($this->_customdata['current'])) {
+            $mform->addElement('static', 'contentaftersave', '', get_string('contentaftersave', 'block_exaport'));
         }
 
         if (block_exaport_course_has_desp()) {
@@ -368,8 +329,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
             $mform->disabledIf('name', 'allowedit', 'neq', 1);
             $mform->disabledIf('categoryids', 'allowedit', 'neq', 1);
-            $mform->disabledIf('url', 'allowedit', 'neq', 1);
-            $mform->disabledIf('file', 'allowedit', 'neq', 1);
             $mform->disabledIf('intro', 'allowedit', 'neq', 1);
             $mform->disabledIf('intro_editor', 'allowedit', 'neq', 1);
             $mform->disabledIf('iconfile', 'allowedit', 'neq', 1);

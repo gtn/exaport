@@ -179,6 +179,8 @@ $string['gradeitem'] = 'Abgabe beurteilen';
 $string['submititem'] = 'Abgeben';
 $string['saveitem'] = 'Speichern und schließen';
 $string['saveandkeepediting'] = 'Speichern und weiter bearbeiten';
+$string['contentaftersave'] = 'Speichern Sie und bearbeiten Sie weiter, um Text, Links und Dateien im Inhaltsbereich hinzuzufügen.';
+$string['disableditemwriteapi'] = 'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.';
 
 // === Notes.
 $string['deletenoteconfirm'] = 'Möchtest du diese Notiz wirklich l&ouml;schen?';

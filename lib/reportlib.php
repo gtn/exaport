@@ -356,7 +356,65 @@ class ExaportVievPdf {
                     $linked = true;
                 }
 
-                switch ($item->type) {
+                // Structured blocks are authoritative and may contain mixed content independent of the parent type.
+                foreach (block_exaport_get_item_content_export_data($item) as $contentblock) {
+                    $structuredhtml = '';
+                    if ($contentblock['title'] !== '') {
+                        $structuredhtml .= html_writer::tag('strong', s($contentblock['title']));
+                    }
+                    if ($contentblock['type'] === 'text' && $contentblock['content'] !== '') {
+                        $textfilebase = '/' . context_user::instance($item->userid)->id .
+                            '/block_exaport/item_content_text/view/' . $access . '/itemid/' . $item->id .
+                            '/blockid/' . $contentblock['blockid'];
+                        $textcontent = preg_replace_callback(
+                            '~@@PLUGINFILE@@(/[^"\'<>\s]+)~',
+                            function($matches) use ($CFG, $textfilebase, $view, $USER) {
+                                $fileurl = file_encode_url(
+                                    $CFG->wwwroot . '/pluginfile.php',
+                                    $textfilebase . $matches[1],
+                                    false
+                                );
+                                return $fileurl . '/forPdf/' . $view->hash . '/' . $view->id . '/' . $USER->id;
+                            },
+                            $contentblock['content']
+                        );
+                        $structuredhtml .= format_text($textcontent, $contentblock['contentformat']);
+                    }
+                    if ($contentblock['type'] === 'link' && $contentblock['url'] !== '') {
+                        $structuredhtml .= html_writer::div(html_writer::link(
+                            $contentblock['url'],
+                            s($contentblock['url'])
+                        ));
+                    }
+                    foreach ($contentblock['files'] as $structuredfile) {
+                        $filepath = '/' . context_user::instance($item->userid)->id .
+                            '/block_exaport/item_content_file/view/' . $access . '/itemid/' . $item->id .
+                            '/blockid/' . $contentblock['blockid'] . '/' . $structuredfile->get_filename();
+                        $fileurl = file_encode_url($CFG->wwwroot . '/pluginfile.php', $filepath, true);
+                        $structuredhtml .= html_writer::div(html_writer::link(
+                            $fileurl,
+                            s($structuredfile->get_filename())
+                        ) . ' (' . s(display_size($structuredfile->get_filesize())) . ')');
+                    }
+                    if ($structuredhtml !== '') {
+                        $structuredhtml = $this->convertHtmlToPdfHtml($structuredhtml);
+                        $contentheight = $this->writeHTMLCellReturnHeight(
+                            $column_width,
+                            $x,
+                            $y_block_current,
+                            $structuredhtml
+                        );
+                        $height_block_current += $contentheight;
+                        $y_block_current = $this->increaseBlockY($y_block_current, $contentheight);
+                    }
+                }
+
+                // Compatibility-only fallback for anomalous items that still retain legacy content.
+                $legacytype = !empty($item->url) ? 'link' : '';
+                if ($legacytype === '' && $item->type === 'file' && block_exaport_get_item_files_array($item)) {
+                    $legacytype = 'file';
+                }
+                switch ($legacytype) {
                     case 'file':
                         $file_links = [];
                         $select = "contextid='" . context_user::instance($item->userid)->id . "' " .
@@ -1262,6 +1320,3 @@ class ExaportVievPdf {
         $this->pdf->SetY($current_y, false);
     }
 }
-
-
-

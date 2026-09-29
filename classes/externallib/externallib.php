@@ -312,56 +312,7 @@ class externallib extends external_api {
      * @return array of course subjects
      */
     public static function add_item($title, $categoryid, $url, $intro, $type, $fileitemid, $filename) {
-        throw new \moodle_exception('disabled, old dakora code, needs security check!');
-
-        global $DB, $USER;
-
-        $params = self::validate_parameters(self::add_item_parameters(),
-            array('title' => $title, 'categoryid' => $categoryid, 'url' => $url, 'intro' => $intro, 'type' => $type,
-                'fileitemid' => $fileitemid, 'filename' => $filename));
-
-        $context = context_user::instance($USER->id);
-        $fs = get_file_storage();
-        $file = null;
-
-        if (!$file && $fileitemid) {
-            $file = current($fs->get_area_files($context->id, "user", "draft", $fileitemid, null, false));
-        }
-        if (!$file && $filename) {
-            $file = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
-        }
-
-        if (!$type) {
-            if ($file) {
-                $type = 'file';
-            } else if ($url) {
-                $type = 'link';
-            } else {
-                $type = 'note';
-            }
-        }
-
-        $itemid = $DB->insert_record("block_exaportitem",
-            array('userid' => $USER->id, 'name' => $title, 'url' => $url, 'intro' => $intro,
-                'type' => $type, 'timemodified' => time()));
-
-        // Sync the category via the relation table.
-        if ($categoryid > 0) {
-            item_category_helper::sync_item_categories($itemid, [$categoryid]);
-        }
-
-        // If a file is added we need to copy the file from the user/private filearea to block_exaport/item_file
-        // with the itemid from above.
-        if ($file) {
-            $fs->create_file_from_storedfile(array(
-                'contextid' => $context->id,
-                'component' => 'block_exaport',
-                'filearea' => 'item_file',
-                'itemid' => $itemid,
-            ), $file);
-        }
-
-        return ["success" => true];
+        throw new \moodle_exception('disableditemwriteapi', 'block_exaport');
     }
 
     /**
@@ -406,58 +357,7 @@ class externallib extends external_api {
      * @return array of course subjects
      */
     public static function update_item($id, $title, $url, $intro, $type, $fileitemid, $filename) {
-        throw new \moodle_exception('disabled, old dakora code, needs security check!');
-
-        global $DB, $USER;
-
-        $params = self::validate_parameters(self::update_item_parameters(),
-            array('id' => $id, 'title' => $title, 'url' => $url, 'intro' => $intro, 'type' => $type,
-                'fileitemid' => $fileitemid, 'filename' => $filename));
-
-        $context = context_user::instance($USER->id);
-        $fs = get_file_storage();
-        $file = null;
-
-        if (!$file && $fileitemid) {
-            $file = current($fs->get_area_files($context->id, "user", "draft", $fileitemid, null, false));
-        }
-        if (!$file && $filename) {
-            $file = $fs->get_file($context->id, "user", "private", 0, "/", $filename);
-        }
-
-        if (!$type) {
-            if ($file) {
-                $type = 'file';
-            } else if ($url) {
-                $type = 'link';
-            } else {
-                $type = 'note';
-            }
-        }
-
-        $record = new stdClass();
-        $record->id = $id;
-        $record->name = $title;
-        $record->url = $url;
-        $record->intro = $intro;
-        $record->type = $type;
-
-        $DB->update_record("block_exaportitem", $record);
-
-        if ($file) {
-            block_exaport_delete_legacy_item_file($DB->get_record("block_exaportitem", array("id" => $id)));
-
-            $fs->create_file_from_storedfile(array(
-                'contextid' => $context->id,
-                'component' => 'block_exaport',
-                'filearea' => 'item_file',
-                'itemid' => $id,
-            ), $file);
-        } else if ($fileitemid === 0) {
-            block_exaport_delete_legacy_item_file($DB->get_record("block_exaportitem", array("id" => $id)));
-        }
-
-        return ["success" => true];
+        throw new \moodle_exception('disableditemwriteapi', 'block_exaport');
     }
 
     /**
@@ -828,6 +728,7 @@ class externallib extends external_api {
                 'text' => $block->text,
                 'url' => '',
                 'files' => [],
+                'contentblocks' => [],
                 'resume_itemtype' => null,
             ];
 
@@ -845,6 +746,7 @@ class externallib extends external_api {
                 $resultBlock->text = $item->description;
                 $resultBlock->url = $item->url;
                 $resultBlock->files = $item->files;
+                $resultBlock->contentblocks = $item->contentblocks;
             }
 
             if ($block->type == 'headline') {
@@ -889,6 +791,7 @@ class externallib extends external_api {
                     'url' => new external_value(PARAM_URL, 'file url'),
                     'mimetype' => new external_value(PARAM_TEXT, 'mime type for file'),
                 ])),
+                'contentblocks' => self::item_content_blocks_returns(),
                 'resume_itemtype' => new external_value(PARAM_TEXT, 'only for type=cv_information and cv_group', VALUE_DEFAULT, null),
             ])),
         ));
@@ -1153,6 +1056,7 @@ class externallib extends external_api {
                                     'url' => new external_value(PARAM_URL, 'file url'),
                                     'mimetype' => new external_value(PARAM_TEXT, 'mime type for file'),
                                 ])),
+                                'contentblocks' => self::item_content_blocks_returns(),
                                 // 'type' => new external_value(PARAM_TEXT, 'type of item ENUM(note,file,link)'),
                                 // 'filename' => new external_value(PARAM_TEXT, 'title of item'),
                                 // 'file' => new external_value(PARAM_URL, 'file url'),
@@ -2014,6 +1918,36 @@ class externallib extends external_api {
         // $result_item->mimetype = "";
         $result_item->description = format_text($item->intro, FORMAT_HTML);
         $result_item->files = [];
+        $result_item->contentblocks = [];
+
+        foreach (block_exaport_get_item_content_export_data($item) as $contentblock) {
+            $resultblock = (object)[
+                'id' => $contentblock['blockid'],
+                'sortorder' => $contentblock['sortorder'],
+                'type' => $contentblock['type'],
+                'title' => $contentblock['title'],
+                'content' => $contentblock['content'],
+                'contentformat' => $contentblock['contentformat'],
+                'url' => $contentblock['url'],
+                'files' => [],
+            ];
+            foreach ($contentblock['files'] as $file) {
+                $path = '/' . $file->get_contextid() . '/block_exaport/item_content_file/itemid/' .
+                    $item->id . '/blockid/' . $contentblock['blockid'] . '/' . $file->get_filename();
+                $token = static::wstoken();
+                $script = $token ? '/webservice/pluginfile.php' : '/pluginfile.php';
+                $fileurl = file_encode_url(g::$CFG->wwwroot . $script, $path, true);
+                if ($token) {
+                    $fileurl .= '?token=' . rawurlencode($token);
+                }
+                $resultblock->files[] = [
+                    'filename' => $file->get_filename(),
+                    'url' => $fileurl,
+                    'mimetype' => $file->get_mimetype(),
+                ];
+            }
+            $result_item->contentblocks[] = $resultblock;
+        }
 
         foreach (block_exaport_get_item_files_array($item) as $file) {
             $result_file = (object)[];
@@ -2025,6 +1959,30 @@ class externallib extends external_api {
         }
 
         return $result_item;
+    }
+
+    /**
+     * Return declaration for the additive, ordered structured item content representation.
+     *
+     * The legacy URL and files fields remain unchanged for compatibility.
+     *
+     * @return external_multiple_structure
+     */
+    private static function item_content_blocks_returns(): external_multiple_structure {
+        return new external_multiple_structure(new external_single_structure([
+            'id' => new external_value(PARAM_INT, 'content block id'),
+            'sortorder' => new external_value(PARAM_INT, 'content block sort order'),
+            'type' => new external_value(PARAM_TEXT, 'content block type'),
+            'title' => new external_value(PARAM_TEXT, 'content block title'),
+            'content' => new external_value(PARAM_RAW, 'content block body'),
+            'contentformat' => new external_value(PARAM_INT, 'Moodle text format'),
+            'url' => new external_value(PARAM_TEXT, 'link block URL'),
+            'files' => new external_multiple_structure(new external_single_structure([
+                'filename' => new external_value(PARAM_TEXT, 'filename'),
+                'url' => new external_value(PARAM_URL, 'authorized structured file URL'),
+                'mimetype' => new external_value(PARAM_TEXT, 'file MIME type'),
+            ])),
+        ]));
     }
 
     public static function view_block_sorting_parameters() {

@@ -179,6 +179,8 @@ $string['gradeitem'] = 'Grade the item';
 $string['submititem'] = 'Submit';
 $string['saveitem'] = 'Save and close';
 $string['saveandkeepediting'] = 'Save and keep editing';
+$string['contentaftersave'] = 'Save and keep editing to add text, links, and files in the structured content section.';
+$string['disableditemwriteapi'] = 'This legacy item write service is disabled. Use the structured content interface.';
 
 // === Notes.
 $string['deletenoteconfirm'] = 'Do you really want to delete this note?';

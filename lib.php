@@ -103,6 +103,56 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             }
             send_stored_file($file, 86400, 0, $forcedownload);
             break;
+        case 'item_content_text':
+            $itemmarker = array_search('itemid', $args, true);
+            $blockmarker = array_search('blockid', $args, true);
+            if ($itemmarker === false && $blockmarker === false) {
+                $blockid = (int)array_shift($args);
+                $block = $DB->get_record('block_exaportitemblock', ['id' => $blockid, 'type' => 'text']);
+                $itemid = $block ? (int)$block->itemid : 0;
+                $access = '';
+            } else {
+                if ($itemmarker === false || $blockmarker === false || $blockmarker !== $itemmarker + 2) {
+                    return false;
+                }
+                $access = join('/', array_slice($args, 0, $itemmarker));
+                $itemid = (int)$args[$itemmarker + 1];
+                $blockid = (int)$args[$blockmarker + 1];
+                $args = array_slice($args, $blockmarker + 2);
+                $block = $DB->get_record('block_exaportitemblock', [
+                    'id' => $blockid,
+                    'itemid' => $itemid,
+                    'type' => 'text',
+                ]);
+            }
+            $filename = array_pop($args);
+            $filepath = '/' . ($args ? join('/', $args) . '/' : '');
+
+            if ($access !== '') {
+                $item = $block ? block_exaport_get_item($itemid, $access, false, $is_for_pdf, $pdfforuserid) : false;
+            } else {
+                $item = $block ? $DB->get_record('block_exaportitem', ['id' => $itemid]) : false;
+                $sharedownerid = $item ? block_exaport_can_user_access_shared_item($USER->id, $itemid) : false;
+                if (!$item || ((int)$item->userid !== (int)$USER->id && !$sharedownerid)) {
+                    $item = false;
+                }
+            }
+            if (!$item) {
+                return false;
+            }
+            $file = get_file_storage()->get_file(
+                context_user::instance($item->userid)->id,
+                'block_exaport',
+                'item_content_text',
+                $blockid,
+                $filepath,
+                $filename
+            );
+            if (!$file || $file->is_directory()) {
+                return false;
+            }
+            send_stored_file($file, 86400, 0, $forcedownload);
+            break;
         case 'item_file':
         case 'item_iconfile':
             $filename = array_pop($args);

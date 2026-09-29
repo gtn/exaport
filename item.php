@@ -99,7 +99,7 @@ if ($action == 'copytoself') {
     // copy is deliberately left in the recipient's uncategorized area.
     block_exaport_copy_item_content($sourceitem, $copy);
 
-    // Keep copying the legacy file area during the structured-content transition.
+    // Compatibility-only: preserve anomalous residual legacy content until the Phase 10 audit/removal.
     $fs = get_file_storage();
     $ownerusercontext = context_user::instance($ownerid);
     $usercontext = context_user::instance($USER->id);
@@ -319,7 +319,6 @@ if ($editform->is_cancelled()) {
 }
 
 $straction = "";
-$extracontent = '';
 // Gui setup.
 $post = new stdClass();
 $post->introformat = FORMAT_HTML;
@@ -369,48 +368,6 @@ switch ($action) {
         }
 
         $straction = get_string('edit');
-        $post->url = $existing->url;
-        if ($type == 'file') {
-            $file = block_exaport_get_item_files($post, false);
-            $filelimit = 1;
-            if ($CFG->block_exaport_multiple_files_in_item) {
-                $filelimit = 10;
-            }
-            if ($file) {
-                if (!is_array($file)) {
-                    $file = array($file);
-                }
-                $extracontent = "<div class='block_eportfolio_center'>\n";
-                foreach ($file as $fileindex => $fileobject) {
-                    if (!$fileobject) {
-                        continue;
-                    }
-                    $ffurl = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $post->userid . "&itemid=" .
-                        $post->id . '&inst=' . $fileindex;
-
-                    if ($fileobject->is_valid_image()) {
-                        $extracontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . format_string($post->name) .
-                            "\" /></div>";
-                    } else {
-                        $icon = $OUTPUT->pix_icon(file_file_icon($fileobject), '');
-                        $extracontent .= "<p>" . $icon . ' ' .
-                            $OUTPUT->action_link($ffurl, $fileobject->get_filename(), new popup_action ('click', $ffurl)) . "</p>";
-                    }
-
-                    // Filemanager for editing file.
-                    $draftitemid = file_get_submitted_draft_itemid('file');
-                    $context = context_user::instance($USER->id);
-                    file_prepare_draft_area($draftitemid, $context->id, 'block_exaport', 'item_file', $post->id,
-                        array('subdirs' => false, 'maxfiles' => $filelimit, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-                    $post->file = $draftitemid;
-                }
-                $extracontent .= "</div>";
-            }
-            if (!$extracontent && !$post->url) {
-                $extracontent = 'File not found';
-            }
-        }
-
         // Filemanager for editing icon picture.
         $draftitemid = file_get_submitted_draft_itemid('iconfile');
         $context = context_user::instance($USER->id);
@@ -445,7 +402,6 @@ if ($itemeditsections['content'] && $allowedit) {
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
 
 $editform->set_data($post);
-echo $OUTPUT->box($extracontent);
 if (has_capability('block/exaport:shareintern', context_system::instance())) {
     // Translations.
     $translations = array(
@@ -478,8 +434,7 @@ echo $OUTPUT->footer($course);
 function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextareas) {
     global $CFG, $USER, $DB;
 
-    // Convert the type into the type by post data:
-    block_exaport_convert_item_type($post);
+    $existing = $DB->get_record('block_exaportitem', ['id' => $post->id, 'userid' => $USER->id], '*', MUST_EXIST);
 
     $post->timemodified = time();
     foreach ($usetextareas as $fieldname => $usetextarea) {
@@ -490,26 +445,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
         }
     }
 
-    if (!empty($post->url)) {
-        if ($post->url == 'http://') {
-            $post->url = "";
-        } else if (strpos($post->url, 'http://') === false && strpos($post->url, 'https://') === false) {
-            $post->url = "http://" . $post->url;
-        }
-    }
-
     $context = context_user::instance($USER->id);
-    // Updating file.
-    if ($post->type == 'file') {
-        // Checking userquoata.
-        $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->file);
-        if (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
-            block_exaport_get_maxfilesize_by_draftid_check($post->file)
-        ) {
-            file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id,
-                array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-        };
-    }
 
     // Icon for item.
     // Checking userquoata.
@@ -521,7 +457,8 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
             array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
     };
 
-    if ($DB->update_record('block_exaportitem', $post)) {
+    $updaterecord = block_exaport_item_parent_record($post, $existing);
+    if ($DB->update_record('block_exaportitem', $updaterecord)) {
         item_category_helper::sync_item_categories($post->id, block_exaport_normalize_item_categoryids($post->categoryids ?? []));
         if (block_exaport_check_competence_interaction()) {
             block_exaport_update_item_competence_metadata($post);
@@ -554,18 +491,9 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
     $post->timemodified = time();
     $post->courseid = $courseid;
 
-    // Convert 'mixed' type into correct type by post data:
-    if ($post->type == 'mixed') {
-        block_exaport_convert_item_type($post);
-    }
-
-    if (!empty($post->url)) {
-        if ($post->url == 'http://') {
-            $post->url = "";
-        } else if (strpos($post->url, 'http://') === false && strpos($post->url, 'https://') === false) {
-            $post->url = "http://" . $post->url;
-        }
-    }
+    $post->type = $post->type === 'mixed' ? 'note' : $post->type;
+    $post->url = '';
+    $post->attachment = '';
 
     foreach ($usetextareas as $fieldname => $usetextarea) {
         if (!$usetextarea) {
@@ -574,7 +502,8 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
     }
 
     // Insert the new entry.
-    if ($post->id = $DB->insert_record('block_exaportitem', $post)) {
+    $insertrecord = block_exaport_item_parent_record($post);
+    if ($post->id = $DB->insert_record('block_exaportitem', $insertrecord)) {
         $newcategoryids = block_exaport_normalize_item_categoryids($post->categoryids ?? []);
         item_category_helper::sync_item_categories($post->id, $newcategoryids);
         block_exaport_save_item_shares($post->id);
@@ -608,22 +537,10 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
         }
 
         if ($postupdate) {
-            $DB->update_record('block_exaportitem', $post);
+            $DB->update_record('block_exaportitem', block_exaport_item_parent_record($post));
         }
 
         $context = context_user::instance($USER->id);
-        if ($post->type == 'file') {
-            // Save uploaded file in user filearea
-            // checking userquoata.
-            $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->file);
-            if (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
-                block_exaport_get_maxfilesize_by_draftid_check($post->file)
-            ) {
-                file_save_draft_area_files($post->file, $context->id, 'block_exaport', 'item_file', $post->id,
-                    array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-            }
-        }
-
         // Icon picture.
         if ($post->iconfile) {
             // Checking userquoata.
@@ -721,18 +638,17 @@ function block_exaport_normalize_item_categoryids($categoryids) {
     return $categoryids;
 }
 
-function block_exaport_convert_item_type(&$post) {
-    // 1. default type is 'note'
-    $post->type = 'note';
-    // 2. Check 'url' data.
-    if (!empty($post->url) && $post->url) {
-        $post->type = 'link';
-    }
-    // 3. Check 'file' uploading.
-    if (!empty($post->file)) {
-        $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->file);
-        if ($uploadfilesizes > 0) {
-            $post->type = 'file';
+function block_exaport_item_parent_record(stdClass $post, ?stdClass $existing = null): stdClass {
+    $record = new stdClass();
+    foreach (['id', 'name', 'intro', 'project_description', 'project_process', 'project_result', 'langid',
+            'timemodified', 'courseid'] as $field) {
+        if (property_exists($post, $field)) {
+            $record->{$field} = $post->{$field};
         }
     }
+    $record->userid = $existing ? $existing->userid : $post->userid;
+    $record->type = $existing ? $existing->type : $post->type;
+    $record->url = '';
+    $record->attachment = '';
+    return $record;
 }

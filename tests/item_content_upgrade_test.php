@@ -389,6 +389,27 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame('kept', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
     }
 
+    public function test_deleted_owner_fails_even_when_a_context_record_remains(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $item = $this->create_item($user->id, 'note', 'deleted-owner:value', 'kept');
+        \context_user::instance($user->id);
+        $DB->set_field('user', 'deleted', 1, ['id' => $user->id]);
+
+        try {
+            \block_exaport_migrate_legacy_item_content($item);
+            $this->fail('Item belonging to a deleted owner was migrated');
+        } catch (\coding_exception $exception) {
+            $this->assertStringContainsString((string)$item->id, $exception->getMessage());
+            $this->assertStringContainsString((string)$user->id, $exception->getMessage());
+            $this->assertStringNotContainsString('deleted-owner:value', $exception->getMessage());
+        }
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]));
+        $this->assertSame('deleted-owner:value', $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
+        $this->assertSame('kept', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+    }
+
     public function test_copy_failure_rolls_back_blocks_and_preserves_all_sources(): void {
         global $DB;
         $this->resetAfterTest(true);

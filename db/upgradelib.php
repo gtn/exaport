@@ -29,6 +29,18 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
         throw new coding_exception('Legacy item content migration requires item and owner IDs');
     }
 
+    // context_user::instance() recreates a missing context for an active user. It can also return a
+    // lingering context for a soft-deleted user, so validate the owner record explicitly first.
+    if (!$DB->record_exists('user', ['id' => $ownerid, 'deleted' => 0])) {
+        throw new coding_exception(
+            "Cannot migrate legacy content for item {$itemid}: owner {$ownerid} is missing or deleted"
+        );
+    }
+    if (!$DB->record_exists('context', ['contextlevel' => CONTEXT_USER, 'instanceid' => $ownerid])) {
+        throw new coding_exception(
+            "Cannot migrate legacy content for item {$itemid}: owner {$ownerid} has no user context"
+        );
+    }
     try {
         $context = context_user::instance($ownerid, MUST_EXIST);
     } catch (Throwable $exception) {
@@ -124,14 +136,15 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
                     $sourcefile->get_filepath(),
                     $sourcefile->get_filename()
                 );
+                // Numeric DML fields may be returned as numeric strings, depending on the database driver.
                 if (!$destination || $destination->is_directory() ||
-                        $destination->get_contextid() !== $context->id ||
+                        (int)$destination->get_contextid() !== (int)$context->id ||
                         $destination->get_component() !== 'block_exaport' ||
                         $destination->get_filearea() !== 'item_content_file' ||
                         (int)$destination->get_itemid() !== $fileblock->id ||
                         (int)$destination->get_userid() !== $ownerid ||
                         $destination->get_contenthash() !== $sourcefile->get_contenthash() ||
-                        $destination->get_filesize() !== $sourcefile->get_filesize()) {
+                        (int)$destination->get_filesize() !== (int)$sourcefile->get_filesize()) {
                     throw new coding_exception("File verification failed while migrating item {$itemid}");
                 }
             }

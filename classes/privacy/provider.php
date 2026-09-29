@@ -358,6 +358,11 @@ class provider implements
                                 'block_exaport',
                                 'item_content_file',
                                 $contentblock->id
+                            )->export_area_files(
+                                $blockpath,
+                                'block_exaport',
+                                'item_content_text',
+                                $contentblock->id
                             );
                     }
                 }

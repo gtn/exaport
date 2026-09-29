@@ -79,6 +79,57 @@ function block_exaport_get_item_content_files(int $userid, int $blockid): array 
 }
 
 /**
+ * Build the target-neutral structured-content projection used by exporters.
+ *
+ * File contents are deliberately not read. Both file lists contain stored_file
+ * instances and are ordered deterministically by filepath, filename, then id.
+ * Legacy URL and item_file content are intentionally not merged into this
+ * projection: exporters must represent those separately during the transition.
+ *
+ * @param stdClass $item Trusted item record containing id and userid.
+ * @return array[] Ordered block projections.
+ */
+function block_exaport_get_item_content_export_data(stdClass $item): array {
+    if (empty($item->id) || empty($item->userid)) {
+        throw new coding_exception('Item content export requires item and owner IDs');
+    }
+
+    $context = context_user::instance((int)$item->userid);
+    $fs = get_file_storage();
+    $result = [];
+    foreach (block_exaport_get_item_content_blocks((int)$item->id) as $block) {
+        $files = [];
+        $editorfiles = [];
+        if ($block->type === 'file') {
+            $files = block_exaport_get_item_content_files((int)$item->userid, (int)$block->id);
+        } else if ($block->type === 'text') {
+            $editorfiles = array_values($fs->get_area_files(
+                $context->id,
+                'block_exaport',
+                'item_content_text',
+                (int)$block->id,
+                'filepath ASC, filename ASC, id ASC',
+                false
+            ));
+        }
+        $result[] = [
+            'itemid' => (int)$item->id,
+            'ownerid' => (int)$item->userid,
+            'blockid' => (int)$block->id,
+            'sortorder' => (int)$block->sortorder,
+            'type' => $block->type,
+            'title' => (string)($block->title ?? ''),
+            'content' => (string)($block->content ?? ''),
+            'contentformat' => (int)($block->contentformat ?? FORMAT_HTML),
+            'url' => (string)($block->url ?? ''),
+            'files' => $files,
+            'editorfiles' => $editorfiles,
+        ];
+    }
+    return $result;
+}
+
+/**
  * Copy all supported structured content between two existing items.
  *
  * Blocks are inserted in their existing sortorder/id order and retain their

@@ -24,6 +24,8 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
 final class item_content_blocks_test extends \advanced_testcase {
 
     public function test_empty_item_helpers_return_empty_defaults(): void {
+        global $DB;
+
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
         $course = $this->getDataGenerator()->create_course();
@@ -32,6 +34,48 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertSame([], block_exaport_get_item_content_blocks($itemid));
         $this->assertSame(0, block_exaport_get_next_item_content_sortorder($itemid));
         $this->assertFalse(block_exaport_item_has_structured_link_or_file_content($itemid));
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+        $this->assertSame([], block_exaport_get_item_content_export_data($item));
+    }
+
+    public function test_export_projection_preserves_order_fields_and_file_areas(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $fileid = $this->insert_block($itemid, 'file', 20, 'Files');
+        $linkid = $this->insert_block($itemid, 'link', 10, 'Link', '', 'https://example.test/link');
+        $textid = $this->insert_block($itemid, 'text', 10, 'Text', '<p>Body</p>');
+        $context = \context_user::instance($owner->id);
+        foreach ([
+            [$fileid, 'item_content_file', '/nested/', 'document.pdf'],
+            [$textid, 'item_content_text', '/', 'embedded.png'],
+        ] as [$blockid, $filearea, $filepath, $filename]) {
+            get_file_storage()->create_file_from_string([
+                'contextid' => $context->id,
+                'component' => 'block_exaport',
+                'filearea' => $filearea,
+                'itemid' => $blockid,
+                'filepath' => $filepath,
+                'filename' => $filename,
+            ], 'content');
+        }
+
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+        $projection = block_exaport_get_item_content_export_data($item);
+
+        $this->assertSame([$linkid, $textid, $fileid], array_column($projection, 'blockid'));
+        $this->assertSame(['link', 'text', 'file'], array_column($projection, 'type'));
+        $this->assertSame('https://example.test/link', $projection[0]['url']);
+        $this->assertSame('<p>Body</p>', $projection[1]['content']);
+        $this->assertSame(FORMAT_HTML, $projection[1]['contentformat']);
+        $this->assertSame('embedded.png', $projection[1]['editorfiles'][0]->get_filename());
+        $this->assertSame('document.pdf', $projection[2]['files'][0]->get_filename());
+        $this->assertSame($itemid, $projection[2]['itemid']);
+        $this->assertSame($owner->id, $projection[2]['ownerid']);
+        $this->assertNotSame($projection[2]['itemid'], $projection[2]['blockid']);
     }
 
     public function test_file_block_relationship_cannot_be_substituted(): void {

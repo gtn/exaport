@@ -83,7 +83,7 @@ function titlespch($text) {
     return clean_param($text, PARAM_ALPHANUM);
 }
 
-function create_ressource(&$resources, $ridentifier, $filename) {
+function create_ressource(&$resources, $ridentifier, $filename, $assets = []) {
     // At an external ressource no file is needed inside resource.
     $resource = &$resources->createChild('resource');
     $resource->attribute('identifier', $ridentifier);
@@ -92,6 +92,10 @@ function create_ressource(&$resources, $ridentifier, $filename) {
     $resource->attribute('href', $filename);
     $file = &$resource->createChild('file');
     $file->attribute('href', $filename);
+    foreach ($assets as $asset) {
+        $assetfile = &$resource->createChild('file');
+        $assetfile->attribute('href', $asset);
+    }
     return true;
 }
 
@@ -162,7 +166,7 @@ function get_category_items($categoryid, $viewid = null, $type = null) {
                 " AND vb.viewid=? AND vb.itemid=i.id" : '') .
             " WHERE i.userid = ?" .
             ($type ? " AND i.type=?" : '') .
-            " ORDER BY i.name desc";
+            " ORDER BY i.name DESC, i.id ASC";
     } else {
         $itemquery = "SELECT i.*" .
             " FROM {block_exaportitem} i" .
@@ -170,7 +174,7 @@ function get_category_items($categoryid, $viewid = null, $type = null) {
             ($viewid ? " JOIN {block_exaportviewblock} vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
             " WHERE i.userid = ?" .
             ($type ? " AND i.type=?" : '') .
-            " ORDER BY i.name desc";
+            " ORDER BY i.name DESC, i.id ASC";
     }
     $conditions[] = $categoryid;
     if ($viewid) {
@@ -184,335 +188,177 @@ function get_category_items($categoryid, $viewid = null, $type = null) {
     return $DB->get_records_sql($itemquery, $conditions);
 }
 
-function get_category_files($categoryid, $viewid = null) {
-    global $USER, $CFG, $DB;
-
-    $conditions = array();
-    if (strcmp($CFG->dbtype, "sqlsrv") == 0) {
-        $itemquery = "select " . ($viewid ? " vb.id as vbid," : "") . " i.*" .
-            " FROM {block_exaportitem} i" .
-            " JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?" .
-            ($viewid ? " JOIN {block_exaportviewblock} vb ON cast(vb.type AS varchar(11))='item' " .
-                " AND vb.viewid=? AND vb.itemid=i.id" : '') .
-            " WHERE i.userid = ?" .
-            " AND i.type='file'" .
-            " ORDER BY i.name desc";
-    } else {
-        $itemquery = "select " . ($viewid ? " vb.id as vbid," : "") . "i.*" .
-            " FROM {block_exaportitem} i" .
-            " JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?" .
-            ($viewid ? " JOIN {block_exaportviewblock} vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
-            " WHERE i.userid = ?" .
-            " AND i.type='file'" .
-            " ORDER BY i.name desc";
-    }
-    $conditions[] = $categoryid;
-    if ($viewid) {
-        $conditions[] = $viewid;
-    }
-    $conditions[] = $USER->id;
-    return $DB->get_records_sql($itemquery, $conditions);
+/**
+ * Return a safe archive path component while retaining a useful display name in HTML.
+ *
+ * @param string $value Untrusted stored path component.
+ * @return string
+ */
+function block_exaport_scorm_path_component($value) {
+    $value = clean_param(rawurldecode((string)$value), PARAM_FILE);
+    $value = str_replace(['/', '\\', '..'], '_', $value);
+    return $value === '' ? 'file' : $value;
 }
 
+/**
+ * Add a stored file to the package once and return its collision-safe archive path.
+ *
+ * @param stored_file $file File to package.
+ * @param string $base Trusted archive base directory.
+ * @return string
+ */
+function block_exaport_scorm_add_file(stored_file $file, $base) {
+    global $zip, $existingfilesarray;
+
+    $parts = array_filter(explode('/', trim($file->get_filepath(), '/')), 'strlen');
+    $parts = array_map('block_exaport_scorm_path_component', $parts);
+    $path = rtrim($base, '/') . '/' . ($parts ? implode('/', $parts) . '/' : '') .
+        block_exaport_scorm_path_component($file->get_filename());
+    $candidate = $path;
+    $suffix = 1;
+    while (in_array($candidate, $existingfilesarray, true)) {
+        $candidate = $path . '-' . $suffix++;
+    }
+    $existingfilesarray[] = $candidate;
+    $zip->addFromString($candidate, $file->get_content());
+    return $candidate;
+}
+
+/**
+ * Find the relative URL from a generated page to an archive asset.
+ *
+ * @param string $page Generated page archive path.
+ * @param string $asset Asset archive path.
+ * @return string
+ */
+function block_exaport_scorm_relative_url($page, $asset) {
+    $depth = substr_count(trim(dirname($page), './'), '/');
+    if (dirname($page) !== '.' && trim(dirname($page), './') !== '') {
+        $depth++;
+    }
+    return str_repeat('../', $depth) . implode('/', array_map('rawurlencode', explode('/', $asset)));
+}
+
+/**
+ * Export every item in a category exactly once, independently of its legacy type.
+ */
 function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath, $exportdir, &$identifier, &$ridentifier, $viewid,
     &$itemscomp, $depth = 0) {
-    global $USER, $CFG, $COURSE, $DB, $zip, $existingfilesarray, $exportwpfile;
-    // Index file for category.
-    $indexfilecontent = '';
-    $indexfilecontent .= create_html_header(spch($name), $depth + 1);
-    $indexfilecontent .= '<body>' . "\n";
-    $indexfilecontent .= '<div id="exa_ex">' . "\n";
-    $indexfilecontent .= '<h1>' . get_string("current_category", "block_exaport") . ': ' . spch($name) . '</h1>' . "\n";
+    global $USER, $DB, $zip, $exportwpfile;
+
+    $indexfilecontent = create_html_header(spch($name), $depth + 1) . '<body>' . "\n" . '<div id="exa_ex">' . "\n";
+    $indexfilecontent .= '<h1>' . get_string('current_category', 'block_exaport') . ': ' . spch($name) . '</h1>' . "\n";
+    $indexfileitems = '';
     if (!$exportwpfile) {
-        $indexfileitems = '';
-        // Subcategory links.
-        $cats = $DB->get_records_select("block_exaportcate", "userid=$USER->id AND pid='$id'", null, "name ASC");
+        $cats = $DB->get_records_select('block_exaportcate', 'userid=:userid AND pid=:pid',
+            ['userid' => $USER->id, 'pid' => $id], 'name ASC');
         if ($cats) {
-            $indexfilecontent .= '<h2>' . get_string("categories", "block_exaport") . '</h2>';
-            $indexfilecontent .= '<ul>';
+            $indexfilecontent .= '<h2>' . get_string('categories', 'block_exaport') . '</h2><ul>';
             foreach ($cats as $cat) {
                 $subdirname = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $cat->name);
                 $subdirname = mb_ereg_replace("([\.]{2,})", '', $subdirname);
-                //wichtig
-                $indexfilecontent .= '<li><a href="' . $subdirname . '/index.html">' . $cat->name . '</a></li>';
+                $indexfilecontent .= '<li><a href="' . spch($subdirname) . '/index.html">' . spch($cat->name) . '</a></li>';
             }
             $indexfilecontent .= '</ul>';
         }
     }
 
-    $bookmarks = get_category_items($id, $viewid, 'link');
+    $items = get_category_items($id, $viewid);
+    foreach ($items as $item) {
+        list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $item->name);
+        $assets = [];
+        $content = create_html_header(spch($item->name), $depth + 1) . '<body><div id="exa_ex">' . "\n";
+        $content .= '<h1 id="header">' . spch(format_string($item->name)) . '</h1>' . "\n";
+        $descriptionmarker = ['link' => 'EXT', 'file' => 'FILE', 'note' => 'NOTE'][$item->type] ?? 'NOTE';
+        $content .= '<div id="description"><!--###BOOKMARK_' . $descriptionmarker . '_DESC###-->' .
+            clean_text($item->intro, FORMAT_HTML) . '<!--###BOOKMARK_' . $descriptionmarker . '_DESC###--></div>' . "\n";
 
-    $hasitems = false;
-    if ($bookmarks) {
-        $hasitems = true;
-        foreach ($bookmarks as $bookmark) {
-            if (block_exaport_check_competence_interaction()) {
-                // Begin.
-                $compids = block_exaport_get_active_compids_for_item($bookmark);
-
-                if ($compids) {
-                    $competences = "";
-                    $competencesids = array();
-                    foreach ($compids as $compid) {
-
-                        $conditions = array("id" => $compid);
-                        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*',
-                            $strictness = IGNORE_MISSING);
-                        if ($competencesdb != null) {
-                            $competences .= $competencesdb->title . '<br />';
-                            array_push($competencesids, $competencesdb->sourceid);
-                        }
-                    }
-                    $competences = str_replace("\r", "", $competences);
-                    $competences = str_replace("\n", "", $competences);
-                    $bookmark->competences = $competences;
-
-                    $itemscomp[$bookmark->id] = $competencesids;
-
-                }
+        // Transitional order is intro, legacy URL, legacy files, then ordered structured blocks.
+        if (!empty($item->url) && $item->url !== 'false') {
+            $url = clean_param($item->url, PARAM_URL);
+            if ($url !== '') {
+                $content .= '<div class="legacy-url"><a href="' . spch($url) . '"><!--###BOOKMARK_EXT_URL###-->' .
+                    spch($url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
             }
-            // End.
-            unset($filecontent);
-            unset($filename);
-
-            $filecontent = create_html_header(spch((fullname($USER, $USER->id))), $depth + 1);
-            $filecontent .= '<body>' . "\n";
-            $filecontent .= '<div id="exa_ex">' . "\n";
-            $filecontent .= '  <h1 id="header">' . spch(format_string($bookmark->name)) . '</h1>' . "\n";
-            $filecontent .= '  <div id="url"><a href="' . $bookmark->url . '"><!--###BOOKMARK_EXT_URL###-->' .
-                spch($bookmark->url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
-            $filecontent .= '  <div id="description"><!--###BOOKMARK_EXT_DESC###-->' . spch_text($bookmark->intro) .
-                '<!--###BOOKMARK_EXT_DESC###--></div>' . "\n";
-            $filecontent .= add_comments('block_exaportitemcomm', $bookmark->id);
-            if (isset($bookmark->competences)) {
-                $filecontent .= '<br /> <div id="competences">' . $bookmark->competences . '<div>';
-            }
-            $filecontent .= '</div>' . "\n";
-            $filecontent .= '</body>' . "\n";
-            $filecontent .= '</html>' . "\n";
-
-            list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $bookmark->name);
-            if (!$exportwpfile) {
-                $zip->addFromString($filepath, $filecontent);
-            }
-            create_ressource($resources, 'RES-' . $ridentifier, $filepath);
-            create_item($xmlelement, 'ITEM-' . $identifier, $bookmark->name, 'RES-' . $ridentifier, $bookmark->id);
-            $indexfileitems .= '<li><a href="' . $resfilename . '">' . $bookmark->name . '</a></li>';
-            $identifier++;
-            $ridentifier++;
+        }
+        foreach (block_exaport_get_item_files_array($item) as $legacyfile) {
+            $asset = block_exaport_scorm_add_file($legacyfile, 'items/' . $item->id . '/legacy');
+            $assets[] = $asset;
+            $content .= '<div class="legacy-file"><a href="' . spch(block_exaport_scorm_relative_url($filepath, $asset)) .
+                '"><!--###BOOKMARK_FILE_URL###-->' . spch($legacyfile->get_filename()) .
+                '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
         }
 
-    }
-    $files = get_category_files($id, $viewid);
-
-    if ($files) {
-        $fs = get_file_storage();
-        $hasitems = true;
-        foreach ($files as $file) {
-            if (block_exaport_check_competence_interaction()) {
-                $compids = block_exaport_get_active_compids_for_item($file);
-                if ($compids) {
-                    $competences = "";
-                    $competencesids = array();
-                    foreach ($compids as $compid) {
-                        $conditions = array("id" => $compid);
-                        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*',
-                            $strictness = IGNORE_MISSING);
-                        if ($competencesdb != null) {
-                            $competences .= $competencesdb->title . '<br />';
-                            array_push($competencesids, $competencesdb->sourceid);
-                        }
-                    }
-                    $competences = str_replace("\r", "", $competences);
-                    $competences = str_replace("\n", "", $competences);
-
-                    $file->competences = $competences;
-                    $itemscomp[$file->id] = $competencesids;
-
+        foreach (block_exaport_get_item_content_export_data($item) as $block) {
+            $content .= '<section class="item-content-block item-content-' . spch($block['type']) .
+                '" data-block-id="' . $block['blockid'] . '">';
+            if ($block['title'] !== '') {
+                $content .= '<h2>' . spch(format_string($block['title'])) . '</h2>';
+            }
+            if ($block['type'] === 'link') {
+                $url = clean_param($block['url'], PARAM_URL);
+                if ($url !== '') {
+                    $content .= '<a href="' . spch($url) . '">' . spch($url) . '</a>';
                 }
-            }
-            unset($filecontent);
-            unset($filename);
-
-            $fsfiles = block_exaport_get_item_files($file);
-
-            if (!$fsfiles) {
-                continue;
-            }
-            $filelinks = '';
-            $j = 0;
-            foreach ($fsfiles as $ind => $fsfile) {
-                $i = 0;
-                $contentfilename = $fsfile->get_filename();
-                while (in_array($exportdir . $contentfilename, $existingfilesarray)) {
-                    $i++;
-                    $contentfilename = $i . '-' . $fsfile->get_filename();
+            } else if ($block['type'] === 'file') {
+                foreach ($block['files'] as $file) {
+                    $asset = block_exaport_scorm_add_file($file,
+                        'items/' . $item->id . '/blocks/' . $block['blockid']);
+                    $assets[] = $asset;
+                    $content .= '<a class="structured-file" href="' .
+                        spch(block_exaport_scorm_relative_url($filepath, $asset)) . '">' .
+                        spch($file->get_filename()) . '</a>';
                 }
-                $existingfilesarray[] = $exportdir . $contentfilename;
-                if (!$exportwpfile) {
-                    $zip->addFromString($contentfilename, $fsfile->get_content());
+            } else if ($block['type'] === 'text') {
+                $text = clean_text($block['content'], $block['contentformat']);
+                foreach ($block['editorfiles'] as $file) {
+                    $asset = block_exaport_scorm_add_file($file,
+                        'items/' . $item->id . '/blocks/' . $block['blockid'] . '/editor');
+                    $assets[] = $asset;
+                    $reference = ltrim($file->get_filepath(), '/') . $file->get_filename();
+                    $replacement = block_exaport_scorm_relative_url($filepath, $asset);
+                    $text = str_replace('@@PLUGINFILE@@/' . $reference, $replacement, $text);
+                    $text = str_replace('@@PLUGINFILE@@' . $file->get_filepath() . $file->get_filename(), $replacement, $text);
                 }
-                $filelinks .= '  <div id="url-' . $j . '"><a href="../' . spch($contentfilename) . '"><!--###BOOKMARK_FILE_URL###-->' .
-                    spch($contentfilename) . '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
-                $j++;
+                $content .= '<div class="structured-text">' . $text . '</div>';
             }
-
-            $filecontent = create_html_header(spch($file->name), $depth + 1);
-            $filecontent .= '<body>' . "\n";
-            $filecontent .= '<div id="exa_ex">' . "\n";
-            $filecontent .= '  <h1 id="header">' . spch($file->name) . '</h1>' . "\n";
-            $filecontent .= $filelinks;
-            $filecontent .= '  <div id="description"><!--###BOOKMARK_FILE_DESC###-->' . spch_text($file->intro) .
-                '<!--###BOOKMARK_FILE_DESC###--></div>' . "\n";
-            $filecontent .= add_comments('block_exaportitemcomm', $file->id);
-            if (isset($file->competences)) {
-                $filecontent .= '<br /> <div id="competences">' . $file->competences . '<div>';
-            }
-            $filecontent .= '</div>' . "\n";
-            $filecontent .= '</body>' . "\n";
-            $filecontent .= '</html>' . "\n";
-
-            list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $file->name);
-            if (!$exportwpfile) {
-                $zip->addFromString($filepath, $filecontent);
-                create_ressource($resources, 'RES-' . $ridentifier, $filepath);
-                create_item($xmlelement, 'ITEM-' . $identifier, $file->name, 'RES-' . $ridentifier, $file->id);
-                $indexfileitems .= '<li><a href="' . $resfilename . '">' . $file->name . '</a></li>';
-
-            }
-            if ($exportwpfile) {
-                $itemArray = array();
-                $itemArray[] = get_category_items($id, $viewid, 'link');
-                $itemArray[] = get_category_items($id, $viewid, 'file');
-                $itemArray[] = get_category_items($id, $viewid, 'note');
-                $filecontent = '';
-                $filecontent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-                $filecontent .= "<rss version=\"2.0\"\n";
-                $filecontent .= "xmlns:excerpt=\"http://wordpress.org/export/1.2/excerpt/\"\n";
-                $filecontent .= "xmlns:content=\"http://purl.org/rss/1.0/modules/content/\"\n";
-                $filecontent .= "xmlns:wfw=\"http://wellformedweb.org/CommentAPI/\"\n";
-                $filecontent .= "xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n";
-                $filecontent .= "xmlns:wp=\"http://wordpress.org/export/1.2/\">\n";
-                $filecontent .= "<channel>\n";
-                $filecontent .= "<title>" . spch(fullname($USER, $USER->id)) . "</title>\n";
-                // Author
-                $filecontent .= "<wp:author>";
-                $filecontent .= "<wp:author_id>" . $USER->id . "</wp:author_id>\n";
-                $filecontent .= "<wp:author_login>" . "<![CDATA[" . fullname($USER, $USER->id) . "]]>" . "</wp:author_login>\n";
-                $filecontent .= "<wp:author_email>" . "<![CDATA[" . $USER->email . "]]>" . "</wp:author_email>\n";
-                $filecontent .= "<wp:author_display_name>" . "<![CDATA[" . fullname($USER, $USER->id) . "]]>" . "</wp:author_display_name>\n";
-                $filecontent .= "<wp:author_first_name>" . "<![CDATA[" . $USER->firstname . "]]>" . "</wp:author_first_name>\n";
-                $filecontent .= "<wp:author_last_name>" . "<![CDATA[" . $USER->lastname . "]]>" . "</wp:author_last_name>\n";
-                $filecontent .= "</wp:author>\n";
-
-
-                //items
-                foreach ($itemArray as $subArray) {
-                    foreach ($subArray as $blabla) {
-                        $filecontent .= "<wp:category>\n";
-                        $filecontent .= "<wp:term_id>" . $id . "</wp:term_id>\n";
-                        $filecontent .= "<wp:category_nicename>" . "<![CDATA[" . spch($name) . "]]>" . "</wp:category_nicename>\n";
-                        $filecontent .= "</wp:category>\n";
-                        $filecontent .= "<item>\n";
-                        $filecontent .= "<title>" . "<![CDATA[" . $blabla->name . "]]>" . "</title>\n";
-                        if (add_comments('block_exaportitemcomm', $blabla->id) != '') {
-                            $filecontent .= "<content:encoded>" . "<![CDATA[<!-- wp:peregraph --> <p>" . add_comments("block_exaportitemcomm", $blabla->id) . "</p> <!-- wp:peregraph -->]]> " . "</content:encoded>\n";
-                        }
-                        if ($blabla->intro != '') {
-
-                            $filecontent .= "<description>" . "<![CDATA[" . spch_text($blabla->intro) . "]]>" . "</description>\n";
-                        }
-                        $filecontent .= "</item>\n";
-                    }
-                }
-                $filecontent .= "</channel>\n";
-                $filecontent .= "</rss>";
-                $zip->addFromString('wordpress.xml', $filecontent);
-                $zipname = clean_param($USER->username, PARAM_ALPHANUM) . strftime("_%Y_%m_%d_%H%M") . ".zip";
-                $zipfile = $zip->filename;
-                $zip->close();
-                header('Content-Type: application/zip');
-                header('Content-Length: ' . filesize($zipfile));
-                header('Content-Disposition: attachment; filename="' . $zipname . '"');
-                readfile($zipfile);
-                unlink($zipfile);
-                exit;
-            }
-            $identifier++;
-            $ridentifier++;
+            $content .= '</section>' . "\n";
         }
-    }
 
-    $notes = get_category_items($id, $viewid, 'note');
-
-    if ($notes) {
-        $hasitems = true;
-        foreach ($notes as $note) {
-            if (block_exaport_check_competence_interaction()) {
-                $compids = block_exaport_get_active_compids_for_item($note);
-
-                if ($compids) {
-                    $competences = "";
-                    $competencesids = array();
-                    foreach ($compids as $compid) {
-
-                        $conditions = array("id" => $compid);
-                        $competencesdb = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, $conditions, $fields = '*',
-                            $strictness = IGNORE_MISSING);
-                        if ($competencesdb != null) {
-                            $competences .= $competencesdb->title . '<br />';
-                            array_push($competencesids, $competencesdb->sourceid);
-                        }
-                    }
-                    $competences = str_replace("\r", "", $competences);
-                    $competences = str_replace("\n", "", $competences);
-
-                    $note->competences = $competences;
-                    $itemscomp[$note->id] = $competencesids;
-
+        $content .= add_comments('block_exaportitemcomm', $item->id);
+        if (block_exaport_check_competence_interaction()) {
+            $competences = [];
+            $competenceids = [];
+            foreach (block_exaport_get_active_compids_for_item($item) ?: [] as $compid) {
+                $competence = $DB->get_record(BLOCK_EXACOMP_DB_DESCRIPTORS, ['id' => $compid]);
+                if ($competence) {
+                    $competences[] = spch($competence->title);
+                    $competenceids[] = $competence->sourceid;
                 }
             }
-            unset($filecontent);
-            unset($filename);
-            $filecontent = '';
-            $filecontent .= create_html_header(spch($note->name), $depth + 1);
-            $filecontent .= '<body>' . "\n";
-            $filecontent .= '<div id="exa_ex">' . "\n";
-            $filecontent .= '  <h1 id="header">' . spch($note->name) . '</h1>' . "\n";
-            $filecontent .= '  <div id="description"><!--###BOOKMARK_NOTE_DESC###-->' . spch_text($note->intro) .
-                '<!--###BOOKMARK_NOTE_DESC###--></div>' . "\n";
-            $filecontent .= add_comments('block_exaportitemcomm', $note->id);
-            if (isset($note->competences)) {
-                $filecontent .= '<br /> <div id="competences">' . $note->competences . '<div>';
+            if ($competences) {
+                $content .= '<div id="competences">' . implode('<br />', $competences) . '</div>';
+                $itemscomp[$item->id] = $competenceids;
             }
-            $filecontent .= '</div>' . "\n";
-            $filecontent .= '</body>' . "\n";
-            $filecontent .= '</html>' . "\n";
-
-            list ($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $note->name);
-            $zip->addFromString($filepath, $filecontent);
-            create_ressource($resources, 'RES-' . $ridentifier, $filepath);
-            create_item($xmlelement, 'ITEM-' . $identifier, $note->name, 'RES-' . $ridentifier, $note->id);
-
-            $indexfileitems .= '<li><a href="' . $resfilename . '">' . $note->name . '</a></li>';
-
-            $identifier++;
-            $ridentifier++;
         }
+        $content .= '</div></body></html>';
+        if (!$exportwpfile) {
+            $zip->addFromString($filepath, $content);
+        }
+        create_ressource($resources, 'RES-' . $ridentifier, $filepath, $assets);
+        create_item($xmlelement, 'ITEM-' . $identifier, $item->name, 'RES-' . $ridentifier, $item->id);
+        $indexfileitems .= '<li><a href="' . spch($resfilename) . '">' . spch($item->name) . '</a></li>';
+        $identifier++;
+        $ridentifier++;
     }
-    if ($hasitems) {
-        $indexfilecontent .= '<h2>' . get_string("listofartefacts", "block_exaport") . '</h2>';
-        $indexfilecontent .= '<ul>';
-        $indexfilecontent .= $indexfileitems;
-        $indexfilecontent .= '</ul>';
+
+    if ($items) {
+        $indexfilecontent .= '<h2>' . get_string('listofartefacts', 'block_exaport') . '</h2><ul>' .
+            $indexfileitems . '</ul>';
     }
-    $indexfilecontent .= '</div>' . "\n";
-    $indexfilecontent .= '</body>' . "\n";
-    $indexfilecontent .= '</html>' . "\n";
+    $indexfilecontent .= '</div></body></html>';
     $zip->addFromString($exportdir . 'index.html', $indexfilecontent);
-
-
-    return $hasitems;
+    return !empty($items);
 }
 
 function rekcat($owncats, $parseddoc, $resources, $exportdir, $identifier, $ridentifier, $viewid, $organization, $i, &$itemscomp,

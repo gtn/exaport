@@ -144,26 +144,26 @@ if ($cataction) {
                     if ($delid > 0) {
                         $newentry->id = $delid;
                         $conditions = array("id" => $newentry->id, "userid" => $USER->id);
-                        if (!$DB->delete_records('block_exaportcate', $conditions)) {
+                        $category = $DB->get_record('block_exaportcate', $conditions);
+                        if (!$category) {
                             $message = "Could not delete your record";
                         } else {
+                            $transaction = $DB->start_delegated_transaction();
                             // Delete items in this category via itemcate.
                             $catitems = $DB->get_records_sql('
                                 SELECT i.id FROM {block_exaportitem} i
                                 JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
-                            ', [$delid]);
-                            if ($catitems) {
-                                foreach ($catitems as $entry) {
-                                    $DB->delete_records('block_exaportitemshar', array('itemid' => $entry->id));
-                                    $DB->delete_records('block_exaportitemgroupshar', array('itemid' => $entry->id));
-                                }
-                            }
+                                WHERE i.userid = ?
+                            ', [$delid, $category->userid]);
                             foreach ($catitems as $entry) {
                                 $DB->delete_records('block_exaportitemcate', ['itemid' => $entry->id, 'cateid' => $delid]);
                                 if (!$DB->record_exists('block_exaportitemcate', ['itemid' => $entry->id])) {
-                                    $DB->delete_records('block_exaportitem', ['id' => $entry->id]);
+                                    $item = $DB->get_record('block_exaportitem', ['id' => $entry->id], '*', MUST_EXIST);
+                                    block_exaport_delete_item($item);
                                 }
                             }
+                            $DB->delete_records('block_exaportcate', $conditions);
+                            $transaction->allow_commit();
 
                             block_exaport_add_to_log($courseid, "bookmark", "delete category", "", $newentry->id);
                             $message = get_string("categorydeleted", "block_exaport");

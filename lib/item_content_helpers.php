@@ -43,6 +43,32 @@ function block_exaport_get_item_content_blocks(int $itemid): array {
 }
 
 /**
+ * Delete all structured blocks and their files for an item.
+ *
+ * Authorization is the caller's responsibility. This operation does not delete
+ * the parent item or any item-level data.
+ *
+ * @param stdClass $item Trusted item containing id and userid.
+ * @return void
+ */
+function block_exaport_delete_item_content(stdClass $item): void {
+    global $DB;
+
+    if (empty($item->id) || empty($item->userid)) {
+        throw new invalid_parameter_exception('An item id and owner id are required');
+    }
+
+    $context = context_user::instance((int)$item->userid, MUST_EXIST);
+    $fs = get_file_storage();
+    $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $item->id], '', 'id');
+    foreach ($blocks as $block) {
+        $fs->delete_area_files($context->id, 'block_exaport', 'item_content_text', $block->id);
+        $fs->delete_area_files($context->id, 'block_exaport', 'item_content_file', $block->id);
+    }
+    $DB->delete_records('block_exaportitemblock', ['itemid' => $item->id]);
+}
+
+/**
  * Backwards-compatible loader for text blocks only.
  *
  * @param int $itemid Item ID.

@@ -381,7 +381,8 @@ function do_add($cm, $post, $blogeditform, $returnurl, $courseid, $checkedfile, 
 function do_delete($post, $returnurl, $courseid) {
 
     global $DB;
-    $status = $DB->delete_records('block_exaportitem', 'id', $post->id);
+    block_exaport_delete_item($post);
+    $status = true;
 
     block_exaport_add_to_log(SITEID, 'blog', 'delete',
         'add_file.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1', $post->name);

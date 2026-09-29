@@ -37,6 +37,24 @@ class provider implements
     core_userlist_provider,
     \core_privacy\local\request\plugin\provider {
 
+    /**
+     * Delete comment attachments and then their database rows.
+     *
+     * @param string $select SQL selection for block_exaportitemcomm.
+     * @param array $params SQL parameters.
+     * @return void
+     */
+    private static function delete_comments_select(string $select, array $params): void {
+        global $DB;
+
+        $comments = $DB->get_recordset_select('block_exaportitemcomm', $select, $params, '', 'id');
+        foreach ($comments as $comment) {
+            block_exaport_delete_item_comment_files($comment);
+        }
+        $comments->close();
+        $DB->delete_records_select('block_exaportitemcomm', $select, $params);
+    }
+
     public static function get_metadata(collection $collection): collection {
 
         // block_exaportuser
@@ -789,19 +807,19 @@ class provider implements
         $courseid = $context->instanceid;
         if ($courseid) {
 
-            // categories
+            // Artifacts must be deleted before categories because item-category relationships do not cascade.
+            $artifacts = $DB->get_recordset('block_exaportitem', ['courseid' => $courseid]);
+            foreach ($artifacts as $artifact) {
+                block_exaport_delete_item($artifact);
+            }
+            $artifacts->close();
+
+            // Categories.
             $cats = $DB->get_records('block_exaportcate', ['courseid' => $courseid]);
             foreach ($cats as $category) {
                 self::delete_category_data($category->id);
             }
             $DB->delete_records('block_exaportcate', ['courseid' => $courseid]);
-
-            // artifatcs
-            $artifacts = $DB->get_records('block_exaportitem', ['courseid' => $courseid]);
-            foreach ($artifacts as $artifact) {
-                self::delete_atifact_data($artifact->id);
-            }
-            $DB->delete_records('block_exaportitem', ['courseid' => $courseid]);
             // other shared
             $DB->delete_records('block_exaportitemshar', ['courseid' => $courseid]);
 
@@ -829,19 +847,8 @@ class provider implements
         global $DB;
         $artifact = $DB->get_record('block_exaportitem', ['id' => $artifact_id]);
         if ($artifact) {
-            $fs = get_file_storage();
-            $contextid = context_user::instance($artifact->userid)->id;
-            $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $artifact_id], '', 'id');
-            foreach ($blocks as $block) {
-                $fs->delete_area_files($contextid, 'block_exaport', 'item_content_text', $block->id);
-                $fs->delete_area_files($contextid, 'block_exaport', 'item_content_file', $block->id);
-            }
+            block_exaport_delete_item($artifact);
         }
-        $DB->delete_records('block_exaportitemshar', ['itemid' => $artifact_id]);
-        $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $artifact_id]);
-        $DB->delete_records('block_exaportitemcomm', ['itemid' => $artifact_id]);
-        $DB->delete_records('block_exaportviewblock', ['itemid' => $artifact_id]);
-        $DB->delete_records('block_exaportitemblock', ['itemid' => $artifact_id]);
         return true;
     }
 
@@ -880,29 +887,29 @@ class provider implements
             }
             $DB->delete_records('block_exaportresume', ['user_id' => $userid]);
 
-            // categories
+            // category relations to user (categories from other users)
+            $DB->delete_records('block_exaportcatshar', ['userid' => $userid]);
+            $DB->delete_records('block_exaportcat_structshar', ['userid' => $userid]);
+
+            // artifacts
+            $artifacts = $DB->get_recordset('block_exaportitem', ['userid' => $userid, 'courseid' => $courseid]);
+            foreach ($artifacts as $artifact) {
+                block_exaport_delete_item($artifact);
+            }
+            $artifacts->close();
+
+            // Categories can now be removed without relying on item-category cascading.
             $cats = $DB->get_records('block_exaportcate', ['userid' => $userid, 'courseid' => $courseid]);
             foreach ($cats as $category) {
                 self::delete_category_data($category->id);
             }
             $DB->delete_records('block_exaportcate', ['userid' => $userid, 'courseid' => $courseid]);
 
-            // category relations to user (categories from other users)
-            $DB->delete_records('block_exaportcatshar', ['userid' => $userid]);
-            $DB->delete_records('block_exaportcat_structshar', ['userid' => $userid]);
-
-            // artifacts
-            $artifacts = $DB->get_records('block_exaportitem', ['userid' => $userid, 'courseid' => $courseid]);
-            foreach ($artifacts as $artifact) {
-                self::delete_atifact_data($artifact->id);
-            }
-            $DB->delete_records('block_exaportitem', ['userid' => $userid, 'courseid' => $courseid]);
-
             // artifact shares (into artefacts from other users)
             $DB->delete_records('block_exaportitemshar', ['userid' => $userid]);
 
             // my comments to artifacts
-            $DB->delete_records('block_exaportitemcomm', ['userid' => $userid]);
+            self::delete_comments_select('userid = :userid', ['userid' => $userid]);
 
             // views
             $views = $DB->get_records('block_exaportview', ['userid' => $userid]);
@@ -939,10 +946,11 @@ class provider implements
         $DB->delete_records_select('block_exaportuser', $select, $params);
 
         // resume
-        $resumes = $DB->get_record_select('block_exaportresume', $select, $params);
+        $resumes = $DB->get_recordset_select('block_exaportresume', $select, $params);
         foreach ($resumes as $resume) {
             self::delete_resume_data($resume->id);
         }
+        $resumes->close();
         $DB->delete_records_select('block_exaportresume', $select, $params);
 
         $select = " userid {$in_sql}";
@@ -951,26 +959,27 @@ class provider implements
         $DB->delete_records_select('block_exaportcatshar', $select, $params);
         $DB->delete_records_select('block_exaportcat_structshar', $select, $params);
         $DB->delete_records_select('block_exaportitemshar', $select, $params);
-        $DB->delete_records_select('block_exaportitemcomm', $select, $params);
+        self::delete_comments_select($select, $params);
         $DB->delete_records_select('block_exaportview', $select, $params);
         $DB->delete_records_select('block_exaportviewshar', $select, $params);
 
         $params += ['courseid' => $courseid];
         $select = " userid {$in_sql} AND courseid = :courseid ";
 
-        // categories
-        $cats = $DB->get_record_select('block_exaportcate', $select, $params);
+        // Artifacts must be deleted before categories because item-category relationships do not cascade.
+        $artifacts = $DB->get_recordset_select('block_exaportitem', $select, $params);
+        foreach ($artifacts as $artifact) {
+            block_exaport_delete_item($artifact);
+        }
+        $artifacts->close();
+
+        // Categories.
+        $cats = $DB->get_recordset_select('block_exaportcate', $select, $params);
         foreach ($cats as $category) {
             self::delete_category_data($category->id);
         }
+        $cats->close();
         $DB->delete_records_select('block_exaportcate', $select, $params);
-
-        // artifacts
-        $artifacts = $DB->get_record_select('block_exaportitem', $select, $params);
-        foreach ($artifacts as $artifact) {
-            self::delete_atifact_data($artifact->id);
-        }
-        $DB->delete_records_select('block_exaportitem', $select, $params);
 
     }
 }

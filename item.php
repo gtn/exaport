@@ -703,32 +703,11 @@ function block_exaport_save_item_shares($itemid) {
  */
 function block_exaport_do_delete($post, $returnurl = "", $courseid = 0) {
 
-    global $DB, $USER;
-
-    // Try to delete the item file.
-    block_exaport_file_remove($post);
-
-    $conditions = array("id" => $post->id);
-    $DB->delete_records('block_exaportitemcate', ['itemid' => $post->id]);
-    $DB->delete_records('block_exaportitemshar', ['itemid' => $post->id]);
-    $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $post->id]);
-    $DB->delete_records('block_exaportitemblock', ['itemid' => $post->id]);
-    $status = $DB->delete_records('block_exaportitem', $conditions);
-
-    $interaction = block_exaport_check_competence_interaction();
-    if ($interaction) {
-        $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $post->id, "eportfolioitem" => 1));
-        $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-            array("activityid" => $post->id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
-        $DB->delete_records(BLOCK_EXACOMP_DB_ITEM_MM, array('itemid' => $post->id));
-    }
+    block_exaport_delete_item($post);
 
     block_exaport_add_to_log(SITEID, 'blog', 'delete', 'item.php?courseid=' . $courseid . '&id=' . $post->id . '&action=delete&confirm=1',
         $post->name);
 
-    if (!$status) {
-        print_error('deleteposterror', 'block_exaport', $returnurl);
-    }
 }
 
 function block_exaport_normalize_item_categoryids($categoryids) {

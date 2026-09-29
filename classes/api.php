@@ -36,22 +36,20 @@ class api {
     public static function delete_user_data($userid) {
         global $DB;
 
-        $ownitemids = $DB->get_fieldset_select('block_exaportitem', 'id', 'userid = ?', [$userid]);
+        $items = $DB->get_recordset('block_exaportitem', ['userid' => $userid]);
 
+        // Items must go first because their category links do not declare cascading deletion.
+        foreach ($items as $item) {
+            block_exaport_delete_item($item);
+        }
+        $items->close();
         $DB->delete_records('block_exaportcate', array('userid' => $userid));
         $DB->delete_records('block_exaportcatshar', array('userid' => $userid));
         $DB->delete_records('block_exaportcat_structshar', array('userid' => $userid));
-        $DB->delete_records('block_exaportitem', array('userid' => $userid));
         $DB->delete_records('block_exaportitemcomm', array('userid' => $userid));
         $DB->delete_records('block_exaportitemshar', array('userid' => $userid));
         $DB->delete_records('block_exaportview', array('userid' => $userid));
         $DB->delete_records('block_exaportviewshar', array('userid' => $userid));
-
-        if ($ownitemids) {
-            [$insql, $inparams] = $DB->get_in_or_equal($ownitemids);
-            $DB->delete_records_select('block_exaportitemshar', "itemid $insql", $inparams);
-            $DB->delete_records_select('block_exaportitemgroupshar', "itemid $insql", $inparams);
-        }
 
         $DB->delete_records('block_exaportresume', array('user_id' => $userid));
         $DB->delete_records('block_exaportuser', array('user_id' => $userid));

@@ -445,7 +445,7 @@ class externallib extends external_api {
         $DB->update_record("block_exaportitem", $record);
 
         if ($file) {
-            block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
+            block_exaport_delete_legacy_item_file($DB->get_record("block_exaportitem", array("id" => $id)));
 
             $fs->create_file_from_storedfile(array(
                 'contextid' => $context->id,
@@ -454,7 +454,7 @@ class externallib extends external_api {
                 'itemid' => $id,
             ), $file);
         } else if ($fileitemid === 0) {
-            block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
+            block_exaport_delete_legacy_item_file($DB->get_record("block_exaportitem", array("id" => $id)));
         }
 
         return ["success" => true];
@@ -502,16 +502,7 @@ class externallib extends external_api {
             'userid' => $USER->id,
         ], '*', MUST_EXIST);
 
-        block_exaport_file_remove($DB->get_record("block_exaportitem", array("id" => $id)));
-
-        $DB->delete_records("block_exaportitem", array('id' => $id));
-
-        $interaction = block_exaport_check_competence_interaction();
-        if ($interaction) {
-            $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, array("activityid" => $id, "eportfolioitem" => 1));
-            $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
-                array("activityid" => $id, "eportfolioitem" => 1, "reviewerid" => $USER->id));
-        }
+        block_exaport_delete_item($item);
 
         return array("success" => true);
     }
@@ -1764,28 +1755,21 @@ class externallib extends external_api {
         // Delete subcategories.
         if ($entries = $DB->get_records('block_exaportcate', array("pid" => $id))) {
             foreach ($entries as $entry) {
-                block_exaport_recursive_delete_category($entry->id);
+                self::block_exaport_recursive_delete_category($entry->id);
             }
         }
         $DB->delete_records('block_exaportcate', array('pid' => $id));
 
-        // Delete itemsharing.
         $catitems = $DB->get_records_sql('
             SELECT i.id FROM {block_exaportitem} i
             JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
         ', [$id]);
-        if ($catitems) {
-            foreach ($catitems as $entry) {
-                $DB->delete_records('block_exaportitemshar', array('itemid' => $entry->id));
-                $DB->delete_records('block_exaportitemgroupshar', array('itemid' => $entry->id));
-            }
-        }
-
         // Delete items that belong exclusively to this category.
         foreach ($catitems as $entry) {
             $DB->delete_records('block_exaportitemcate', ['itemid' => $entry->id, 'cateid' => $id]);
             if (!$DB->record_exists('block_exaportitemcate', ['itemid' => $entry->id])) {
-                $DB->delete_records('block_exaportitem', ['id' => $entry->id]);
+                $item = $DB->get_record('block_exaportitem', ['id' => $entry->id], '*', MUST_EXIST);
+                block_exaport_delete_item($item);
             }
         }
     }

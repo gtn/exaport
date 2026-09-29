@@ -152,16 +152,11 @@ if ($cataction) {
                                 SELECT i.id FROM {block_exaportitem} i
                                 JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
                             ', [$delid]);
-                            if ($catitems) {
-                                foreach ($catitems as $entry) {
-                                    $DB->delete_records('block_exaportitemshar', array('itemid' => $entry->id));
-                                    $DB->delete_records('block_exaportitemgroupshar', array('itemid' => $entry->id));
-                                }
-                            }
                             foreach ($catitems as $entry) {
                                 $DB->delete_records('block_exaportitemcate', ['itemid' => $entry->id, 'cateid' => $delid]);
                                 if (!$DB->record_exists('block_exaportitemcate', ['itemid' => $entry->id])) {
-                                    $DB->delete_records('block_exaportitem', ['id' => $entry->id]);
+                                    $item = $DB->get_record('block_exaportitem', ['id' => $entry->id], '*', MUST_EXIST);
+                                    block_exaport_delete_item($item);
                                 }
                             }
 

@@ -388,20 +388,113 @@ function block_exaport_add_to_log($courseid, $module, $action, $url = '', $info 
     }
 }
 
-function block_exaport_file_remove($item) {
+/**
+ * Delete only the legacy file attached to an item.
+ *
+ * This deliberately does not remove editor, icon, or structured-content files.
+ * It is used while the legacy update API still supports replacing item_file.
+ *
+ * @param stdClass $item Trusted item containing id and userid.
+ * @return void
+ */
+function block_exaport_delete_legacy_item_file(stdClass $item): void {
     $fs = get_file_storage();
     $contextid = context_user::instance($item->userid)->id;
-    // Associated file (if it's a file item).
     $fs->delete_area_files($contextid, 'block_exaport', 'item_file', $item->id);
-    // Item content (intro) inside the html editor.
-    $fs->delete_area_files($contextid, 'block_exaport', 'item_content', $item->id);
-    // Structured item blocks use the block ID as their File API item ID.
-    global $DB;
-    $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $item->id], '', 'id');
-    foreach ($blocks as $block) {
-        $fs->delete_area_files($contextid, 'block_exaport', 'item_content_text', $block->id);
-        $fs->delete_area_files($contextid, 'block_exaport', 'item_content_file', $block->id);
+}
+
+/**
+ * Delete all item-level file areas (structured block files are separate).
+ *
+ * @param stdClass $item Trusted item containing id and userid.
+ * @return void
+ */
+function block_exaport_delete_item_file_areas(stdClass $item): void {
+    if (empty($item->id) || empty($item->userid)) {
+        throw new invalid_parameter_exception('An item id and owner id are required');
     }
+    $context = context_user::instance((int)$item->userid, MUST_EXIST);
+    $fs = get_file_storage();
+    $areas = [
+        'item_file',
+        'item_content',
+        'item_iconfile',
+        'item_content_project_description',
+        'item_content_project_process',
+        'item_content_project_result',
+    ];
+    foreach ($areas as $area) {
+        $fs->delete_area_files($context->id, 'block_exaport', $area, $item->id);
+    }
+}
+
+/**
+ * Permanently delete an Exaport item and all dependent data.
+ *
+ * Authorization is the caller's responsibility. The authoritative row is
+ * reloaded and must still exist. A delegated transaction is used; when the
+ * caller already owns a transaction Moodle nests this transaction safely.
+ *
+ * @param stdClass $item Trusted complete item record.
+ * @return void
+ */
+function block_exaport_delete_item(stdClass $item): void {
+    global $DB;
+
+    if (empty($item->id) || empty($item->userid)) {
+        throw new invalid_parameter_exception('An item id and owner id are required');
+    }
+    $item = $DB->get_record('block_exaportitem', ['id' => $item->id, 'userid' => $item->userid], '*', MUST_EXIST);
+    // Resolve the owner context before changing any data. Retained contexts for deleted users remain addressable by instance id.
+    context_user::instance((int)$item->userid, MUST_EXIST);
+    $transaction = $DB->start_delegated_transaction();
+
+    $comments = $DB->get_records('block_exaportitemcomm', ['itemid' => $item->id], '', 'id');
+    $fs = get_file_storage();
+    $systemcontext = context_system::instance();
+    foreach ($comments as $comment) {
+        // Comment attachments have historically been stored in the system context.
+        $fs->delete_area_files($systemcontext->id, 'block_exaport', 'item_comment_file', $comment->id);
+    }
+
+    block_exaport_delete_item_content($item);
+    block_exaport_delete_item_file_areas($item);
+    $DB->delete_records('block_exaportitemcomm', ['itemid' => $item->id]);
+    $DB->delete_records('block_exaportitemcate', ['itemid' => $item->id]);
+    $DB->delete_records('block_exaportitemshar', ['itemid' => $item->id]);
+    $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $item->id]);
+    $DB->delete_records('block_exaportviewblock', ['itemid' => $item->id]);
+
+    if (class_exists('core_tag_tag')) {
+        core_tag_tag::delete_instances('block_exaport', 'block_exaportitem', $item->id);
+    }
+    if (block_exaport_check_competence_interaction()) {
+        $tables = [
+            'BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY' => ['activityid' => $item->id, 'eportfolioitem' => 1],
+            'BLOCK_EXACOMP_DB_COMPETENCE_USER_MM' => ['activityid' => $item->id, 'eportfolioitem' => 1],
+            'BLOCK_EXACOMP_DB_ITEM_MM' => ['itemid' => $item->id],
+        ];
+        $dbman = $DB->get_manager();
+        foreach ($tables as $constant => $conditions) {
+            if (defined($constant) && $dbman->table_exists(constant($constant))) {
+                $DB->delete_records(constant($constant), $conditions);
+            }
+        }
+    }
+
+    $DB->delete_records('block_exaportitem', ['id' => $item->id]);
+    $transaction->allow_commit();
+}
+
+/**
+ * Legacy compatibility wrapper. This now has narrow legacy-file semantics.
+ *
+ * @deprecated Use block_exaport_delete_legacy_item_file() or block_exaport_delete_item().
+ * @param stdClass $item Item record.
+ * @return void
+ */
+function block_exaport_file_remove($item) {
+    block_exaport_delete_legacy_item_file($item);
 }
 
 /*** GENERAL FUNCTIONS **********************************************************************/

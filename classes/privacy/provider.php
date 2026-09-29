@@ -797,11 +797,11 @@ class provider implements
             $DB->delete_records('block_exaportcate', ['courseid' => $courseid]);
 
             // artifatcs
-            $artifacts = $DB->get_records('block_exaportitem', ['courseid' => $courseid]);
+            $artifacts = $DB->get_recordset('block_exaportitem', ['courseid' => $courseid]);
             foreach ($artifacts as $artifact) {
-                self::delete_atifact_data($artifact->id);
+                block_exaport_delete_item($artifact);
             }
-            $DB->delete_records('block_exaportitem', ['courseid' => $courseid]);
+            $artifacts->close();
             // other shared
             $DB->delete_records('block_exaportitemshar', ['courseid' => $courseid]);
 
@@ -829,19 +829,8 @@ class provider implements
         global $DB;
         $artifact = $DB->get_record('block_exaportitem', ['id' => $artifact_id]);
         if ($artifact) {
-            $fs = get_file_storage();
-            $contextid = context_user::instance($artifact->userid)->id;
-            $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $artifact_id], '', 'id');
-            foreach ($blocks as $block) {
-                $fs->delete_area_files($contextid, 'block_exaport', 'item_content_text', $block->id);
-                $fs->delete_area_files($contextid, 'block_exaport', 'item_content_file', $block->id);
-            }
+            block_exaport_delete_item($artifact);
         }
-        $DB->delete_records('block_exaportitemshar', ['itemid' => $artifact_id]);
-        $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $artifact_id]);
-        $DB->delete_records('block_exaportitemcomm', ['itemid' => $artifact_id]);
-        $DB->delete_records('block_exaportviewblock', ['itemid' => $artifact_id]);
-        $DB->delete_records('block_exaportitemblock', ['itemid' => $artifact_id]);
         return true;
     }
 
@@ -892,11 +881,11 @@ class provider implements
             $DB->delete_records('block_exaportcat_structshar', ['userid' => $userid]);
 
             // artifacts
-            $artifacts = $DB->get_records('block_exaportitem', ['userid' => $userid, 'courseid' => $courseid]);
+            $artifacts = $DB->get_recordset('block_exaportitem', ['userid' => $userid, 'courseid' => $courseid]);
             foreach ($artifacts as $artifact) {
-                self::delete_atifact_data($artifact->id);
+                block_exaport_delete_item($artifact);
             }
-            $DB->delete_records('block_exaportitem', ['userid' => $userid, 'courseid' => $courseid]);
+            $artifacts->close();
 
             // artifact shares (into artefacts from other users)
             $DB->delete_records('block_exaportitemshar', ['userid' => $userid]);
@@ -939,10 +928,11 @@ class provider implements
         $DB->delete_records_select('block_exaportuser', $select, $params);
 
         // resume
-        $resumes = $DB->get_record_select('block_exaportresume', $select, $params);
+        $resumes = $DB->get_recordset_select('block_exaportresume', $select, $params);
         foreach ($resumes as $resume) {
             self::delete_resume_data($resume->id);
         }
+        $resumes->close();
         $DB->delete_records_select('block_exaportresume', $select, $params);
 
         $select = " userid {$in_sql}";
@@ -959,18 +949,19 @@ class provider implements
         $select = " userid {$in_sql} AND courseid = :courseid ";
 
         // categories
-        $cats = $DB->get_record_select('block_exaportcate', $select, $params);
+        $cats = $DB->get_recordset_select('block_exaportcate', $select, $params);
         foreach ($cats as $category) {
             self::delete_category_data($category->id);
         }
+        $cats->close();
         $DB->delete_records_select('block_exaportcate', $select, $params);
 
         // artifacts
-        $artifacts = $DB->get_record_select('block_exaportitem', $select, $params);
+        $artifacts = $DB->get_recordset_select('block_exaportitem', $select, $params);
         foreach ($artifacts as $artifact) {
-            self::delete_atifact_data($artifact->id);
+            block_exaport_delete_item($artifact);
         }
-        $DB->delete_records_select('block_exaportitem', $select, $params);
+        $artifacts->close();
 
     }
 }

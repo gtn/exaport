@@ -244,6 +244,7 @@ function import_user_image($unzipdir, $url) {
             $informationform->set_data($data);
             $informationform->display();
 
+            // This is a display-only temporary row with no categories, files, blocks, or relationships.
             $DB->delete_records("block_exaportitem", array("id" => $new->id));
         } else {
             $OUTPUT->notification(get_string("linkedfilenotfound", "block_exaport", array("url" => $url, "title" => "test")));

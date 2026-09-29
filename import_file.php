@@ -76,6 +76,15 @@ if ($fromform = $exteditform->get_data()) {
                 if (mkdir($unzipdir)) {
                     $zip = new ZipArchive();
                     if ($zip->open($dir . '/' . $newfilename) == true) {
+                        for ($index = 0; $index < $zip->numFiles; $index++) {
+                            $entryname = str_replace('\\', '/', $zip->getNameIndex($index));
+                            $entryparts = explode('/', $entryname);
+                            if ($entryname === '' || $entryname[0] === '/' || preg_match('/^[a-zA-Z]:\//', $entryname) ||
+                                    in_array('..', $entryparts, true)) {
+                                $zip->close();
+                                error(get_string("couldntextractscormfile", "block_exaport"));
+                            }
+                        }
                         $zip->extractTo($unzipdir);
                         // if (unzip_file($dir.'/'.$newfilename, $unzipdir, false)) {
                         if (is_file($unzipdir . "/itemscomp.xml")) {
@@ -273,7 +282,7 @@ function import_user_description($file, $unzipdir) {
 }
 
 function import_structure($unzipdir, $structures, $course, $i = 0, &$xml = null, $previd = null) {
-    global $USER, $COURSE, $DB, $OUTPUT;
+    global $USER, $DB, $OUTPUT;
     foreach ($structures as $structure) {
         if (isset($structure["data"])) {
             if (isset($structure["data"]["title"])
@@ -388,8 +397,16 @@ function block_exaport_clean_path($text) {
 }
 
 function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null, $id = null) {
-    global $USER, $CFG, $COURSE, $DB, $OUTPUT;
-    $filepath = $unzipdir . '/' . $url;
+    global $USER, $DB, $OUTPUT;
+
+    try {
+        $entryfile = block_exaport_resolve_import_file_path($unzipdir, $unzipdir, $url);
+    } catch (invalid_parameter_exception $exception) {
+        $OUTPUT->notification(get_string("linkedfilenotfound", "block_exaport",
+            ["filename" => $url, "url" => $url, "title" => $title]));
+        return;
+    }
+    $filepath = $entryfile['pathname'];
     $content = file_get_contents($filepath);
 
     if ((($starturl = strpos($content, '<!--###BOOKMARK_EXT_URL###-->')) !== false) &&
@@ -403,23 +420,26 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
             $new = new stdClass();
             $new->userid = $USER->id;
             $new->name = block_exaport_clean_title($title);
-            $new->url = block_exaport_clean_url(substr($content, $starturl, $endurl - $starturl));
+            $linkurl = block_exaport_clean_url(substr($content, $starturl, $endurl - $starturl));
+            $new->url = '';
+            $new->attachment = '';
             $new->intro = block_exaport_clean_text(substr($content, $startdesc, $enddesc - $startdesc));
             $new->timemodified = time();
             $new->type = 'link';
-            $new->course = $COURSE->id;
+            $new->courseid = $course->id;
 
-            if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
-                if ($category > 0) {
-                    item_category_helper::sync_item_categories($new->id, [$category]);
-                }
-                if (isset($xml) && isset($id)) {
-                    import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
-                }
-                get_comments($content, $new->id, 'block_exaportitemcomm');
-            } else {
-                $OUTPUT->notification(get_string("couldntinsert", "block_exaport", $title));
+            $transaction = $DB->start_delegated_transaction();
+            $new->id = $DB->insert_record('block_exaportitem', $new);
+            // Imported entries use an empty block title because the exported title belongs to the parent item.
+            block_exaport_create_link_content_block($new->id, '', $linkurl);
+            if ($category > 0) {
+                item_category_helper::sync_item_categories($new->id, [$category]);
             }
+            if (isset($xml) && isset($id)) {
+                import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
+            }
+            get_comments($content, $new->id, 'block_exaportitemcomm');
+            $transaction->allow_commit();
         } else {
             $OUTPUT->notification(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
         }
@@ -429,64 +449,33 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
 
         preg_match_all('/<!--###BOOKMARK_FILE_URL###-->(.*)<!--###BOOKMARK_FILE_URL###-->/m', $content, $matches);
         $allfiles = $matches[1];
+        $startdesc += strlen('<!--###BOOKMARK_FILE_DESC###-->');
         $enddesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startdesc);
-        if (is_file(dirname($filepath) . '/' . block_exaport_clean_path($allfiles[0]))) {
+        if ($allfiles && $enddesc !== false) {
             $new = new stdClass();
             $new->userid = $USER->id;
             $new->name = block_exaport_clean_title($title);
             $new->intro = block_exaport_clean_text(substr($content, $startdesc, $enddesc - $startdesc));
             $new->timemodified = time();
             $new->type = 'file';
-            $new->course = $COURSE->id;
+            $new->courseid = $course->id;
+            $new->url = '';
+            $new->attachment = '';
 
-            if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
-                if ($category > 0) {
-                    item_category_helper::sync_item_categories($new->id, [$category]);
-                }
-                if (isset($xml) && isset($id)) {
-                    import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
-                }
-                $fs = get_file_storage();
-
-                // Prepare file record object.
-                $fileinfo = array(
-                    'contextid' => context_user::instance($USER->id)->id,
-                    'component' => 'block_exaport', // Usually = table name.
-                    'filearea' => 'item_file',     // Usually = table name.
-                    'itemid' => $new->id,          // Usually = ID of row in table.
-                    'filepath' => '/',              // Any path beginning and ending in /.
-                    'filename' => null, // Setup later.
-                    'userid' => $USER->id);
-                // add file instances
-                foreach ($allfiles as $filename) {
-                    // $starturl += strlen('<!--###BOOKMARK_FILE_URL###-->');
-                    // $startdesc += strlen('<!--###BOOKMARK_FILE_DESC###-->');
-                    // if ((($endurl = strpos($content, '<!--###BOOKMARK_FILE_URL###-->', $starturl)) !== false) &&
-                    // (($enddesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startdesc)) !== false)
-                    // ) {
-                    // $linkedfilename = block_exaport_clean_path(substr($content, $starturl, $endurl - $starturl));
-                    $linkedfilename = block_exaport_clean_path($filename);
-                    $linkedfilepath = dirname($filepath) . '/' . $linkedfilename;
-                    if (is_file($linkedfilepath)) {
-                        $fileinfo['filename'] = $linkedfilename;
-                        // Eindeutige itemid generieren.
-                        if (!$ret = $fs->create_file_from_pathname($fileinfo, $linkedfilepath)) {
-                            $DB->delete_records("block_exaportitem", array("id" => $new->id));
-                            $OUTPUT->notification(get_string("couldntcopyfile", "block_exaport", $title));
-                        } else {
-                            get_comments($content, $new->id, 'block_exaportitemcomm');
-                        }
-                    } else {
-                        $OUTPUT->notification(get_string("couldntinsert", "block_exaport", $title));
-                    }
-                }
+            $transaction = $DB->start_delegated_transaction();
+            $new->id = $DB->insert_record('block_exaportitem', $new);
+            block_exaport_import_path_files_into_content_block($new, $unzipdir, dirname($filepath), $allfiles);
+            if ($category > 0) {
+                item_category_helper::sync_item_categories($new->id, [$category]);
             }
-            // } else {
-            // notify(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
-            // }
+            if (isset($xml) && isset($id)) {
+                import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
+            }
+            get_comments($content, $new->id, 'block_exaportitemcomm');
+            $transaction->allow_commit();
         } else {
             $OUTPUT->notification(get_string("linkedfilenotfound", "block_exaport",
-                array("filename" => dirname($filepath) . '/' . block_exaport_clean_path($allfiles[0]), "url" => $url, "title" => $title)));
+                array("filename" => $url, "url" => $url, "title" => $title)));
         }
     } else if ((($startdesc = strpos($content, '<!--###BOOKMARK_NOTE_DESC###-->')) !== false)) {
         $startdesc += strlen('<!--###BOOKMARK_NOTE_DESC###-->');
@@ -497,19 +486,20 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
             $new->intro = block_exaport_clean_text(substr($content, $startdesc, $enddesc - $startdesc));
             $new->timemodified = time();
             $new->type = 'note';
-            $new->course = $COURSE->id;
+            $new->courseid = $course->id;
+            $new->url = '';
+            $new->attachment = '';
 
-            if ($new->id = $DB->insert_record('block_exaportitem', $new)) {
-                if ($category > 0) {
-                    item_category_helper::sync_item_categories($new->id, [$category]);
-                }
-                if (isset($xml) && isset($id)) {
-                    import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
-                }
-                get_comments($content, $new->id, 'block_exaportitemcomm');
-            } else {
-                $OUTPUT->notification(get_string("couldntinsert", "block_exaport", $title));
+            $transaction = $DB->start_delegated_transaction();
+            $new->id = $DB->insert_record('block_exaportitem', $new);
+            if ($category > 0) {
+                item_category_helper::sync_item_categories($new->id, [$category]);
             }
+            if (isset($xml) && isset($id)) {
+                import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
+            }
+            get_comments($content, $new->id, 'block_exaportitemcomm');
+            $transaction->allow_commit();
         } else {
             $OUTPUT->notification(get_string("filetypenotdetected", "block_exaport", array("filename" => $url, "title" => $title)));
         }

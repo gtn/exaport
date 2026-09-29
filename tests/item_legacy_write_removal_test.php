@@ -71,7 +71,7 @@ final class item_legacy_write_removal_test extends \advanced_testcase {
         $this->assertStringContainsString('$resultBlock->contentblocks = $item->contentblocks;', $external);
         $this->assertStringContainsString("'/webservice/pluginfile.php'", $external);
         $this->assertStringContainsString("'?token=' . rawurlencode(\$token)", $external);
-        $this->assertStringContainsString("'@@PLUGINFILE@@'", $report);
+        $this->assertStringContainsString('@@PLUGINFILE@@', $report);
         $this->assertStringContainsString("case 'item_content_text':", $pluginfile);
         $this->assertStringContainsString('block_exaport_can_user_access_shared_item', $pluginfile);
     }

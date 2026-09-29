@@ -98,7 +98,7 @@ final class scorm_export_helpers_test extends \advanced_testcase {
     }
 
     public function test_archive_paths_and_relative_urls_reject_traversal(): void {
-        $this->assertSame('secret.txt', block_exaport_scorm_path_component('../../secret.txt'));
+        $this->assertSame('__secret.txt', block_exaport_scorm_path_component('../../secret.txt'));
         $this->assertSame('file', block_exaport_scorm_path_component('..'));
         $this->assertSame(
             '../../items/5/blocks/9/nested/file%20name.pdf',

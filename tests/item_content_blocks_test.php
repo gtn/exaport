@@ -74,7 +74,7 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertSame('embedded.png', $projection[1]['editorfiles'][0]->get_filename());
         $this->assertSame('document.pdf', $projection[2]['files'][0]->get_filename());
         $this->assertSame($itemid, $projection[2]['itemid']);
-        $this->assertSame($owner->id, $projection[2]['ownerid']);
+        $this->assertSame((int)$owner->id, $projection[2]['ownerid']);
         $this->assertNotSame($projection[2]['itemid'], $projection[2]['blockid']);
     }
 

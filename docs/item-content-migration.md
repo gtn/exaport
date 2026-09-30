@@ -28,12 +28,26 @@ audit does not re-run it and deliberately does not compare URLs, filenames, or
 content hashes to guess whether content is duplicated. See also
 [structured content export](structured-content-export.md).
 
-The migration uses a finite one-hour PHP upgrade timeout and reports aggregate
-progress after each ID-based batch. It does not reset the timeout per batch. A
-timeout can therefore stop a genuinely stuck PHP process, while source clearing
-and per-item transactions keep the migration safe to retry. Web servers, process
-managers, databases, and storage systems may enforce independent timeouts; large
-production upgrades should be supervised accordingly.
+The migration fetches at most 500 items at a time using ascending-ID keyset
+pagination. Immediately before processing each non-empty batch it gives that
+batch a fresh one-hour Moodle timeout. There is no fixed batch-count limit or
+total duration limit, so a healthy migration may continue for many hours while
+still retaining a finite application-level guardrail for each batch. Aggregate,
+privacy-safe progress is reported after every completed batch.
+
+Each item commits in its own delegated transaction. If, for example, a later
+batch fails, items completed in earlier batches remain committed, but the
+2026092900 upgrade savepoint and final migration report remain unapplied. The
+next Moodle upgrade attempt scans again from ID zero. Completed items have empty
+legacy sources and are harmless no-ops; the first incomplete item is retried
+from its intact legacy source.
+
+Renewing Moodle's PHP timeout is only an application-level guardrail. It cannot
+guarantee interruption of every blocked external operation or override limits
+from PHP-FPM, Apache or another web server, reverse proxies, process supervisors,
+containers, database servers, network or remote/object storage, or operating-
+system process limits. Administrators should run large upgrades through a
+supervised CLI upgrade where possible.
 
 Legacy and imported File API paths are preserved, including nested directories.
 Structured file links, thumbnails, shared views, and integration URLs include

@@ -384,6 +384,35 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->assertFalse(\block_exaport\output\item_content_blocks::has_displayable_content($data));
     }
 
+    public function test_nested_file_block_url_preserves_filepath(): void {
+        global $OUTPUT;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $fileblockid = $this->insert_block($itemid, 'file', 0, 'Nested file');
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($owner->id)->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $fileblockid,
+            'filepath' => '/folder1/folder2/',
+            'filename' => 'evidence image.png',
+            'mimetype' => 'image/png',
+        ], 'image');
+
+        $data = (new \block_exaport\output\item_content_blocks(
+            block_exaport_get_item_content_blocks($itemid), null, $owner->id, false, false, 'view/public-token'
+        ))->export_for_template($OUTPUT);
+
+        $this->assertStringContainsString(
+            '/item_content_file/view/public-token/itemid/' . $itemid . '/blockid/' . $fileblockid .
+                '/folder1/folder2/evidence%20image.png',
+            $data['blocks'][0]['files'][0]['url']
+        );
+    }
+
     public function test_external_item_renders_legacy_and_structured_content_without_missing_file(): void {
         global $DB;
 

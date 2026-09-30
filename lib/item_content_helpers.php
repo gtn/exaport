@@ -420,6 +420,87 @@ function block_exaport_import_stored_file_into_content_block(
 }
 
 /**
+ * Build an access-aware URL for a structured block file, preserving its File API filepath.
+ *
+ * @param int $itemid Parent Exaport item ID.
+ * @param int $blockid Structured file block ID.
+ * @param stored_file $file Stored file belonging to the block.
+ * @param string $access Optional Exaport authorization path.
+ * @param string $script Pluginfile script, normally /pluginfile.php or /webservice/pluginfile.php.
+ * @return string
+ */
+function block_exaport_get_item_content_file_url(
+    int $itemid,
+    int $blockid,
+    stored_file $file,
+    string $access = '',
+    string $script = '/pluginfile.php'
+): string {
+    global $CFG;
+
+    $parts = [(int)$file->get_contextid(), 'block_exaport', 'item_content_file'];
+    if (trim($access, '/') !== '') {
+        $parts = array_merge($parts, explode('/', trim($access, '/')));
+    }
+    $parts[] = 'itemid';
+    $parts[] = $itemid;
+    $parts[] = 'blockid';
+    $parts[] = $blockid;
+    $filepath = trim($file->get_filepath(), '/');
+    if ($filepath !== '') {
+        $parts = array_merge($parts, explode('/', $filepath));
+    }
+    $parts[] = $file->get_filename();
+
+    return file_encode_url($CFG->wwwroot . $script, '/' . implode('/', $parts), true);
+}
+
+/**
+ * Parse item_content_file pluginfile arguments without discarding nested paths.
+ *
+ * @param array $args Decoded pluginfile arguments following the file area.
+ * @return array|false Parsed access, itemid, blockid, filepath, and filename; false for malformed input.
+ */
+function block_exaport_parse_item_content_file_args(array $args) {
+    $args = array_values($args);
+    $itemmarker = false;
+    foreach ($args as $index => $argument) {
+        if ($argument === 'itemid' && isset($args[$index + 1], $args[$index + 2], $args[$index + 3]) &&
+                $args[$index + 2] === 'blockid' && ctype_digit((string)$args[$index + 1]) &&
+                ctype_digit((string)$args[$index + 3])) {
+            $itemmarker = $index;
+            break;
+        }
+    }
+    if ($itemmarker === false || (int)$args[$itemmarker + 1] < 1 || (int)$args[$itemmarker + 3] < 1) {
+        return false;
+    }
+    $blockmarker = $itemmarker + 2;
+
+    $pathargs = array_values(array_slice($args, $blockmarker + 2));
+    if (!$pathargs) {
+        return false;
+    }
+    $filename = array_pop($pathargs);
+    if ($filename === '' || $filename === '.' || $filename === '..') {
+        return false;
+    }
+    foreach ($pathargs as $segment) {
+        if ($segment === '' || $segment === '.' || $segment === '..') {
+            return false;
+        }
+    }
+
+    return [
+        'access' => implode('/', array_slice($args, 0, $itemmarker)),
+        'itemid' => (int)$args[$itemmarker + 1],
+        'blockid' => (int)$args[$blockmarker + 1],
+        'filepath' => $pathargs ? '/' . implode('/', $pathargs) . '/' : '/',
+        'filename' => $filename,
+    ];
+}
+
+/**
  * Resolve an archive-relative path while keeping it beneath the extraction root.
  *
  * @param string $root Extraction directory.

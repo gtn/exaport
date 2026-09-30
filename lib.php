@@ -61,16 +61,12 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 
     switch ($filearea) {
         case 'item_content_file':
-            $filename = array_pop($args);
-            $blockid = array_pop($args);
-            if (array_pop($args) !== 'blockid') {
-                print_error('wrong params');
+            $parsed = block_exaport_parse_item_content_file_args($args);
+            if (!$parsed) {
+                return false;
             }
-            $itemid = array_pop($args);
-            if (array_pop($args) !== 'itemid') {
-                print_error('wrong params');
-            }
-            $access = join('/', $args);
+            ['access' => $access, 'itemid' => $itemid, 'blockid' => $blockid,
+                'filepath' => $filepath, 'filename' => $filename] = $parsed;
 
             $block = block_exaport_get_item_content_file_block((int)$itemid, (int)$blockid);
             if (!$block) {
@@ -95,7 +91,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 'block_exaport',
                 'item_content_file',
                 $blockid,
-                '/',
+                $filepath,
                 $filename
             );
             if (!$file || $file->is_directory()) {

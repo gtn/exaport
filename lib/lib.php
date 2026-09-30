@@ -243,8 +243,12 @@ function block_exaport_get_item_thumbnail_source_url(\stdClass $source, string $
     $parts[] = 'itemid';
     $parts[] = (int)$source->itemid;
     if ($source->filearea === 'item_content_file') {
-        $parts[] = 'blockid';
-        $parts[] = (int)$source->blockid;
+        return block_exaport_get_item_content_file_url(
+            (int)$source->itemid,
+            (int)$source->blockid,
+            $source->file,
+            $access
+        );
     }
     $parts[] = $source->file->get_filename();
 

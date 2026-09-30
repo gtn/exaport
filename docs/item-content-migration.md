@@ -35,6 +35,11 @@ and per-item transactions keep the migration safe to retry. Web servers, process
 managers, databases, and storage systems may enforce independent timeouts; large
 production upgrades should be supervised accordingly.
 
+Legacy and imported File API paths are preserved, including nested directories.
+Structured file links, thumbnails, shared views, and integration URLs include
+that stored filepath when serving content. This is a runtime serving guarantee:
+already migrated nested files require no repair, flattening, or remigration.
+
 Back up both the database and Moodledata before upgrading. Run the audit before
 upgrade where possible to record the legacy baseline, immediately after the
 upgrade, after release validation, and before any future Phase 10B cleanup.

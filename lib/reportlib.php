@@ -387,10 +387,12 @@ class ExaportVievPdf {
                         ));
                     }
                     foreach ($contentblock['files'] as $structuredfile) {
-                        $filepath = '/' . context_user::instance($item->userid)->id .
-                            '/block_exaport/item_content_file/view/' . $access . '/itemid/' . $item->id .
-                            '/blockid/' . $contentblock['blockid'] . '/' . $structuredfile->get_filename();
-                        $fileurl = file_encode_url($CFG->wwwroot . '/pluginfile.php', $filepath, true);
+                        $fileurl = block_exaport_get_item_content_file_url(
+                            (int)$item->id,
+                            (int)$contentblock['blockid'],
+                            $structuredfile,
+                            'view/' . $access
+                        );
                         $structuredhtml .= html_writer::div(html_writer::link(
                             $fileurl,
                             s($structuredfile->get_filename())

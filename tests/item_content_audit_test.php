@@ -182,9 +182,15 @@ final class item_content_audit_test extends \advanced_testcase {
 
         $json = json_encode(item_content_audit_output::with_metadata($result, '2026092902', 0));
         $html = item_content_audit_output::html($result, true);
+        $migrationhtml = item_content_audit_output::migration_report_html((object)[
+            'migrationversion' => 2026092900,
+            'timecompleted' => 123,
+            'summaryjson' => json_encode(['before' => ['legacy_files' => 1]]),
+        ]);
         $this->assertJson($json);
         $this->assertStringContainsString('"auditformatversion":1', $json);
         $this->assertStringContainsString('legacy_url', $html);
+        $this->assertStringContainsString('legacy_files', $migrationhtml);
         $this->assertStringNotContainsString('secret:value', $json . $html);
         $this->assertStringNotContainsString('private-name.txt', $json . $html);
     }

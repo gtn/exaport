@@ -20,6 +20,7 @@ $PAGE->set_title(get_string('audititemcontent', 'block_exaport'));
 $PAGE->set_heading(get_string('audititemcontent', 'block_exaport'));
 
 $form = new item_content_audit_form($url);
+$migrationreport = $DB->get_record('block_exaportmigration', ['migrationversion' => 2026092900]);
 $result = null;
 if ($data = $form->get_data()) {
     // moodleform validates its POST sesskey before returning submitted data.
@@ -28,8 +29,17 @@ if ($data = $form->get_data()) {
 
     if (!empty($data->downloadjson)) {
         $plugin = get_config('block_exaport');
-        $json = json_encode(item_content_audit_output::with_metadata($result, (string)$plugin->version),
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $output = item_content_audit_output::with_metadata($result, (string)$plugin->version);
+        if ($migrationreport) {
+            $output['migrationreport'] = [
+                'migrationversion' => (int)$migrationreport->migrationversion,
+                'formatversion' => (int)$migrationreport->formatversion,
+                'timestarted' => (int)$migrationreport->timestarted,
+                'timecompleted' => (int)$migrationreport->timecompleted,
+                'summary' => json_decode($migrationreport->summaryjson, true),
+            ];
+        }
+        $json = json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         if ($json === false) {
             throw new coding_exception('Unable to encode the item-content audit result');
         }
@@ -45,6 +55,9 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('audititemcontent', 'block_exaport'));
 echo $OUTPUT->notification(get_string('audititemcontentreadonlynotice', 'block_exaport'), 'info', false);
 echo html_writer::tag('p', get_string('audititemcontentperformancewarning', 'block_exaport'));
+echo html_writer::tag('h3', get_string('audititemcontenthistoricalreport', 'block_exaport'));
+echo item_content_audit_output::migration_report_html($migrationreport);
+echo html_writer::tag('h3', get_string('audititemcontentcurrentaudit', 'block_exaport'));
 $form->display();
 
 if ($result !== null) {

@@ -17,6 +17,12 @@ files. Its expected clean postcondition is:
 * no non-directory files remain in `item_file`; and
 * each migrated URL/file has a corresponding structured link/file block.
 
+The same upgrade stores one privacy-safe aggregate report in
+`block_exaportmigration`. It records source counts at the start of the successful
+run, operations completed by that run, residual counts at its end, and timing.
+The unique migration version prevents duplicate completed reports. It contains
+no item IDs, owner IDs, URLs, filenames, titles, user details, or file contents.
+
 The upgrade is restart-safe and remains in the historical upgrade code. The
 audit does not re-run it and deliberately does not compare URLs, filenames, or
 content hashes to guess whether content is duplicated. See also
@@ -38,6 +44,11 @@ sample limit from 1 to 1000, and whether to show verbose bounded identifiers,
 then select **Run audit**. Select **Run audit and download JSON** to receive the
 same result as a privacy-safe JSON file. Both actions are authenticated Moodle
 form submissions protected by a session key.
+
+The page displays the stored historical report separately from the current
+integrity audit. The JSON download includes both sections. The historical report
+explains what happened during migration; the live audit remains authoritative
+for the installation's current state.
 
 An item filter restricts attributable
 item, block, and file checks to that parent. Site-wide orphan checks are skipped

@@ -18,7 +18,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @param stdClass $item Trusted block_exaportitem record.
  * @param callable|null $progresscallback Optional test/diagnostic callback receiving the stage and related value.
- * @return array{linkblockid: int|null, fileblockid: int|null, filecount: int}
+ * @return array Migration operation counts and created block IDs.
  */
 function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $progresscallback = null): array {
     global $DB;
@@ -89,7 +89,15 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
             'timecreated' => $timecreated,
             'timemodified' => $timemodified,
         ];
-        $result = ['linkblockid' => null, 'fileblockid' => null, 'filecount' => count($sourcefiles)];
+        $result = [
+            'linkblockid' => null,
+            'fileblockid' => null,
+            'filecount' => count($sourcefiles),
+            'urlcleared' => $storedurl !== '' ? 1 : 0,
+            'attachmentcleared' => (string)($current->attachment ?? '') !== '' ? 1 : 0,
+            'legacyfileareacleared' => $sourcefiles ? 1 : 0,
+            'alreadyclean' => $storedurl === '' && (string)($current->attachment ?? '') === '' && !$sourcefiles ? 1 : 0,
+        ];
 
         if ($hasurl) {
             $link = (object)array_merge($common, [
@@ -192,18 +200,28 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
  *
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional item migrator, used by tests to simulate interruption.
- * @return void
+ * @return array Privacy-safe aggregate operation counts.
  */
 function block_exaport_migrate_legacy_item_content_batches(
     int $batchsize = 500,
     ?callable $migrator = null
-): void {
+): array {
     global $DB;
 
     if ($batchsize < 1) {
         throw new coding_exception('Legacy item content migration batch size must be positive');
     }
     $migrator = $migrator ?? 'block_exaport_migrate_legacy_item_content';
+    $counts = [
+        'items_processed' => 0,
+        'items_already_clean' => 0,
+        'link_blocks_created' => 0,
+        'file_blocks_created' => 0,
+        'files_copied' => 0,
+        'urls_cleared' => 0,
+        'attachments_cleared' => 0,
+        'legacy_file_areas_cleared' => 0,
+    ];
     $lastprocessedid = 0;
     do {
         $items = $DB->get_records_select(
@@ -216,8 +234,90 @@ function block_exaport_migrate_legacy_item_content_batches(
             $batchsize
         );
         foreach ($items as $item) {
-            $migrator($item);
+            $result = $migrator($item);
+            // Injectable test migrators written before telemetry may return void.
+            $result = is_array($result) ? $result : [];
+            $counts['items_processed']++;
+            $counts['items_already_clean'] += (int)($result['alreadyclean'] ?? 0);
+            $counts['link_blocks_created'] += empty($result['linkblockid']) ? 0 : 1;
+            $counts['file_blocks_created'] += empty($result['fileblockid']) ? 0 : 1;
+            $counts['files_copied'] += (int)($result['filecount'] ?? 0);
+            $counts['urls_cleared'] += (int)($result['urlcleared'] ?? 0);
+            $counts['attachments_cleared'] += (int)($result['attachmentcleared'] ?? 0);
+            $counts['legacy_file_areas_cleared'] += (int)($result['legacyfileareacleared'] ?? 0);
             $lastprocessedid = (int)$item->id;
         }
     } while (count($items) === $batchsize);
+    return $counts;
+}
+
+/**
+ * Count legacy migration sources or residuals without reading sensitive values.
+ *
+ * @return array Aggregate counts only.
+ */
+function block_exaport_legacy_item_content_counts(): array {
+    global $DB;
+
+    $filewhere = "component = :component AND filearea = :filearea AND filename <> :directory";
+    $fileparams = ['component' => 'block_exaport', 'filearea' => 'item_file', 'directory' => '.'];
+    return [
+        'total_items' => $DB->count_records('block_exaportitem'),
+        'meaningful_legacy_urls' => (int)$DB->count_records_sql("SELECT COUNT(1)
+              FROM {block_exaportitem}
+             WHERE TRIM(url) <> '' AND TRIM(url) <> :falsevalue", ['falsevalue' => 'false']),
+        'sentinel_legacy_urls' => (int)$DB->count_records_sql("SELECT COUNT(1)
+              FROM {block_exaportitem}
+             WHERE url <> '' AND (TRIM(url) = '' OR TRIM(url) = :falsevalue)", ['falsevalue' => 'false']),
+        'legacy_attachments' => $DB->count_records_select('block_exaportitem', "attachment <> ''"),
+        'legacy_files' => (int)$DB->count_records_select('files', $filewhere, $fileparams),
+        'items_with_legacy_files' => (int)$DB->count_records_sql(
+            "SELECT COUNT(DISTINCT itemid) FROM {files} WHERE $filewhere", $fileparams),
+    ];
+}
+
+/**
+ * Run migration 2026092900 and persist its completed aggregate report.
+ *
+ * No report row is written if migration or post-migration counting fails.
+ * Existing completed evidence is never overwritten on an upgrade retry.
+ *
+ * @param int $batchsize Maximum items fetched at once.
+ * @param callable|null $migrator Optional migrator for tests.
+ * @return stdClass Completed report record.
+ */
+function block_exaport_migrate_legacy_item_content_with_report(
+    int $batchsize = 500,
+    ?callable $migrator = null
+): stdClass {
+    global $DB;
+
+    $migrationversion = 2026092900;
+    $existing = $DB->get_record('block_exaportmigration', ['migrationversion' => $migrationversion]);
+    if ($existing) {
+        return $existing;
+    }
+
+    $timestarted = time();
+    $before = block_exaport_legacy_item_content_counts();
+    $operations = block_exaport_migrate_legacy_item_content_batches($batchsize, $migrator);
+    $after = block_exaport_legacy_item_content_counts();
+    $summary = [
+        'source_counts_at_successful_run_start' => $before,
+        'operations_in_successful_run' => $operations,
+        'residual_counts_at_successful_run_end' => $after,
+    ];
+    $summaryjson = json_encode($summary, JSON_UNESCAPED_SLASHES);
+    if ($summaryjson === false) {
+        throw new coding_exception('Unable to encode the item-content migration report');
+    }
+    $record = (object)[
+        'migrationversion' => $migrationversion,
+        'formatversion' => 1,
+        'timestarted' => $timestarted,
+        'timecompleted' => time(),
+        'summaryjson' => $summaryjson,
+    ];
+    $record->id = (int)$DB->insert_record('block_exaportmigration', $record);
+    return $record;
 }

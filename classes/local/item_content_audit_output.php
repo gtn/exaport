@@ -13,6 +13,37 @@ final class item_content_audit_output {
             'generatedat' => gmdate('c', $generatedat ?? time())] + $result;
     }
 
+    /** Render a completed historical migration report containing aggregate counts only. */
+    public static function migration_report_html(?\stdClass $record): string {
+        if (!$record) {
+            return html_writer::tag('p', get_string('audititemcontentnoreport', 'block_exaport'));
+        }
+        $summary = json_decode($record->summaryjson, true);
+        if (!is_array($summary)) {
+            return html_writer::tag('p', get_string('audititemcontentinvalidreport', 'block_exaport'));
+        }
+
+        $html = html_writer::tag('p', get_string('audititemcontentreportmeta', 'block_exaport', (object)[
+            'version' => (int)$record->migrationversion,
+            'completed' => userdate((int)$record->timecompleted),
+        ]));
+        foreach ($summary as $section => $counts) {
+            if (!is_array($counts)) {
+                continue;
+            }
+            $table = new \html_table();
+            $table->attributes['class'] = 'generaltable';
+            $table->head = [get_string('audititemcontentcode', 'block_exaport'),
+                get_string('audititemcontentcount', 'block_exaport')];
+            foreach ($counts as $code => $count) {
+                $table->data[] = [html_writer::tag('code', s($code)), (int)$count];
+            }
+            $html .= html_writer::tag('h4', s(str_replace('_', ' ', ucfirst($section))));
+            $html .= html_writer::table($table);
+        }
+        return $html;
+    }
+
     /** Format an accessible, privacy-safe report for a Moodle administration page. */
     public static function html(array $result, bool $verbose = false): string {
         global $OUTPUT;

@@ -1538,9 +1538,23 @@ function xmldb_block_exaport_upgrade($oldversion) {
     if ($oldversion < 2026092900) {
         require_once(__DIR__ . '/upgradelib.php');
 
+        $table = new xmldb_table('block_exaportmigration');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('migrationversion', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('formatversion', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('timestarted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecompleted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('summaryjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('migrationversion', XMLDB_INDEX_UNIQUE, ['migrationversion']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
         upgrade_set_timeout(0);
         // ID-based batches avoid an unbounded result set and permit File API queries on all DB drivers.
-        block_exaport_migrate_legacy_item_content_batches();
+        $report = block_exaport_migrate_legacy_item_content_with_report();
+        mtrace('Exaport item-content migration report: ' . $report->summaryjson);
 
         upgrade_block_savepoint(true, 2026092900, 'exaport');
     }

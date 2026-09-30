@@ -217,7 +217,7 @@ function block_exaport_migrate_legacy_item_content_batches(
     }
     $migrator = $migrator ?? 'block_exaport_migrate_legacy_item_content';
     $timeoutcallback = $timeoutcallback ?? static function(): void {
-        upgrade_set_timeout(3600);
+        upgrade_set_timeout(1800);
     };
     $counts = [
         'items_processed' => 0,

@@ -58,10 +58,118 @@ final class item_content_upgrade_test extends \advanced_testcase {
         return (array)$DB->get_record($table, ['id' => $id], '*', MUST_EXIST);
     }
 
-    public function test_upgrade_uses_a_finite_migration_timeout(): void {
-        $source = file_get_contents(__DIR__ . '/../db/upgrade.php');
-        $this->assertStringContainsString('upgrade_set_timeout(3600);', $source);
-        $this->assertStringNotContainsString('upgrade_set_timeout(0);', $source);
+    public function test_upgrade_renews_a_finite_timeout_inside_the_batch_loop(): void {
+        $upgradelib = file_get_contents(__DIR__ . '/../db/upgradelib.php');
+        $upgrade = file_get_contents(__DIR__ . '/../db/upgrade.php');
+        $this->assertStringContainsString('upgrade_set_timeout(3600);', $upgradelib);
+        $this->assertStringNotContainsString('upgrade_set_timeout(0);', $upgradelib . $upgrade);
+        $this->assertStringNotContainsString('upgrade_set_timeout(3600);', $upgrade);
+
+        $reportposition = strpos($upgrade, 'block_exaport_migrate_legacy_item_content_with_report(500');
+        $savepointposition = strpos($upgrade, "upgrade_block_savepoint(true, 2026092900, 'exaport')");
+        $this->assertNotFalse($reportposition);
+        $this->assertNotFalse($savepointposition);
+        $this->assertLessThan($savepointposition, $reportposition);
+    }
+
+    public function test_short_batch_renews_timeout_before_processing_and_reports_aggregate_progress(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->create_item($user->id, 'note', 'private:first');
+        $this->create_item($user->id, 'note', 'private:second');
+        $events = [];
+        $progress = [];
+
+        \block_exaport_migrate_legacy_item_content_batches(500,
+            static function(\stdClass $item) use (&$events): array {
+                $events[] = 'item';
+                return [];
+            },
+            static function(int $processed, array $counts) use (&$progress): void {
+                $progress[] = [$processed, $counts];
+            },
+            static function() use (&$events): void {
+                $events[] = 'timeout';
+            });
+
+        $this->assertSame(['timeout', 'item', 'item'], $events);
+        $this->assertCount(1, $progress);
+        $this->assertSame(2, $progress[0][0]);
+        $this->assertSame(2, $progress[0][1]['items_processed']);
+        $this->assertStringNotContainsString('private:first', json_encode($progress));
+        $this->assertSame([
+            'items_processed', 'items_already_clean', 'link_blocks_created', 'file_blocks_created',
+            'files_copied', 'urls_cleared', 'attachments_cleared', 'legacy_file_areas_cleared',
+        ], array_keys($progress[0][1]));
+    }
+
+    public function test_exactly_500_items_renew_once_despite_terminating_fetch(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        for ($index = 0; $index < 500; $index++) {
+            $this->create_item($user->id);
+        }
+        $timeouts = 0;
+        $progress = 0;
+
+        $counts = \block_exaport_migrate_legacy_item_content_batches(500,
+            static function(): array {
+                return [];
+            },
+            static function() use (&$progress): void {
+                $progress++;
+            },
+            static function() use (&$timeouts): void {
+                $timeouts++;
+            });
+
+        $this->assertSame(500, $counts['items_processed']);
+        $this->assertSame(1, $timeouts);
+        $this->assertSame(1, $progress);
+    }
+
+    public function test_more_than_500_items_renew_once_per_nonempty_batch(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        for ($index = 0; $index < 501; $index++) {
+            $this->create_item($user->id);
+        }
+        $timeouts = 0;
+
+        $counts = \block_exaport_migrate_legacy_item_content_batches(500,
+            static function(): array {
+                return [];
+            }, null,
+            static function() use (&$timeouts): void {
+                $timeouts++;
+            });
+
+        $this->assertSame(501, $counts['items_processed']);
+        $this->assertSame(2, $timeouts);
+    }
+
+    public function test_many_batches_have_one_timeout_each_and_no_total_batch_limit(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        for ($index = 0; $index < 11; $index++) {
+            $this->create_item($user->id);
+        }
+        $timeouts = 0;
+        $progress = [];
+
+        \block_exaport_migrate_legacy_item_content_batches(2,
+            static function(): array {
+                return [];
+            },
+            static function(int $processed) use (&$progress): void {
+                $progress[] = $processed;
+            },
+            static function() use (&$timeouts): void {
+                $timeouts++;
+            });
+
+        $this->assertSame(6, $timeouts);
+        $this->assertSame([2, 4, 6, 8, 10, 11], $progress);
     }
 
     public function test_empty_and_false_urls_create_no_blocks_and_clear_compatibility_values(): void {
@@ -676,6 +784,8 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->create_item($user->id, 'note', 'first:value');
         $second = $this->create_item($user->id, 'note', 'second:value');
+        $timeouts = 0;
+        $progress = [];
 
         try {
             \block_exaport_migrate_legacy_item_content_with_report(1,
@@ -684,6 +794,12 @@ final class item_content_upgrade_test extends \advanced_testcase {
                         throw new \coding_exception('Injected report interruption');
                     }
                     return \block_exaport_migrate_legacy_item_content($item);
+                },
+                static function(int $processed) use (&$progress): void {
+                    $progress[] = $processed;
+                },
+                static function() use (&$timeouts): void {
+                    $timeouts++;
                 });
             $this->fail('Injected report interruption was ignored');
         } catch (\coding_exception $exception) {
@@ -691,5 +807,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         }
 
         $this->assertSame(0, $DB->count_records('block_exaportmigration'));
+        $this->assertSame(2, $timeouts);
+        $this->assertSame([1], $progress);
     }
 }

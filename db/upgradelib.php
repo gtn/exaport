@@ -217,7 +217,13 @@ function block_exaport_migrate_legacy_item_content_batches(
     }
     $migrator = $migrator ?? 'block_exaport_migrate_legacy_item_content';
     $timeoutcallback = $timeoutcallback ?? static function(): void {
-        upgrade_set_timeout(1800);
+        // PHPUnit can load this helper without loading Moodle's upgrade library, where
+        // upgrade_set_timeout() is defined. Keep the same finite limit in that context.
+        if (function_exists('upgrade_set_timeout')) {
+            upgrade_set_timeout(3600);
+        } else {
+            core_php_time_limit(3600);
+        }
     };
     $counts = [
         'items_processed' => 0,

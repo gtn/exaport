@@ -247,6 +247,10 @@ function block_exaport_migrate_legacy_item_content_batches(
             $counts['legacy_file_areas_cleared'] += (int)($result['legacyfileareacleared'] ?? 0);
             $lastprocessedid = (int)$item->id;
         }
+        if ($items) {
+            // Aggregate progress only: never expose item, owner, URL, or file details.
+            mtrace("Exaport item-content migration: {$counts['items_processed']} items processed");
+        }
     } while (count($items) === $batchsize);
     return $counts;
 }

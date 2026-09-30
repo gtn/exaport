@@ -28,6 +28,13 @@ audit does not re-run it and deliberately does not compare URLs, filenames, or
 content hashes to guess whether content is duplicated. See also
 [structured content export](structured-content-export.md).
 
+The migration uses a finite one-hour PHP upgrade timeout and reports aggregate
+progress after each ID-based batch. It does not reset the timeout per batch. A
+timeout can therefore stop a genuinely stuck PHP process, while source clearing
+and per-item transactions keep the migration safe to retry. Web servers, process
+managers, databases, and storage systems may enforce independent timeouts; large
+production upgrades should be supervised accordingly.
+
 Back up both the database and Moodledata before upgrading. Run the audit before
 upgrade where possible to record the legacy baseline, immediately after the
 upgrade, after release validation, and before any future Phase 10B cleanup.

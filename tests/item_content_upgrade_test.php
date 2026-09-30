@@ -58,6 +58,12 @@ final class item_content_upgrade_test extends \advanced_testcase {
         return (array)$DB->get_record($table, ['id' => $id], '*', MUST_EXIST);
     }
 
+    public function test_upgrade_uses_a_finite_migration_timeout(): void {
+        $source = file_get_contents(__DIR__ . '/../db/upgrade.php');
+        $this->assertStringContainsString('upgrade_set_timeout(3600);', $source);
+        $this->assertStringNotContainsString('upgrade_set_timeout(0);', $source);
+    }
+
     public function test_empty_and_false_urls_create_no_blocks_and_clear_compatibility_values(): void {
         global $DB;
         $this->resetAfterTest();

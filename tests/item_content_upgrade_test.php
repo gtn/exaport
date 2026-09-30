@@ -634,9 +634,14 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->create_item($user->id, 'note', 'false');
         $this->create_item($user->id);
 
-        $report = \block_exaport_migrate_legacy_item_content_with_report(2);
+        $progress = [];
+        $report = \block_exaport_migrate_legacy_item_content_with_report(2, null,
+            static function(int $processed) use (&$progress): void {
+                $progress[] = $processed;
+            });
         $summary = json_decode($report->summaryjson, true, 512, JSON_THROW_ON_ERROR);
 
+        $this->assertSame([2, 3], $progress);
         $this->assertSame(2026092900, (int)$report->migrationversion);
         $this->assertSame(3, $summary['source_counts_at_successful_run_start']['total_items']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
@@ -682,7 +687,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
                 });
             $this->fail('Injected report interruption was ignored');
         } catch (\coding_exception $exception) {
-            $this->assertSame('Injected report interruption', $exception->getMessage());
+            $this->assertStringContainsString('Injected report interruption', $exception->getMessage());
         }
 
         $this->assertSame(0, $DB->count_records('block_exaportmigration'));

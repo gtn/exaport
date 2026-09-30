@@ -200,11 +200,13 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
  *
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional item migrator, used by tests to simulate interruption.
+ * @param callable|null $progresscallback Optional callback receiving cumulative count and aggregate counters.
  * @return array Privacy-safe aggregate operation counts.
  */
 function block_exaport_migrate_legacy_item_content_batches(
     int $batchsize = 500,
-    ?callable $migrator = null
+    ?callable $migrator = null,
+    ?callable $progresscallback = null
 ): array {
     global $DB;
 
@@ -247,9 +249,8 @@ function block_exaport_migrate_legacy_item_content_batches(
             $counts['legacy_file_areas_cleared'] += (int)($result['legacyfileareacleared'] ?? 0);
             $lastprocessedid = (int)$item->id;
         }
-        if ($items) {
-            // Aggregate progress only: never expose item, owner, URL, or file details.
-            mtrace("Exaport item-content migration: {$counts['items_processed']} items processed");
+        if ($items && $progresscallback) {
+            $progresscallback($counts['items_processed'], $counts);
         }
     } while (count($items) === $batchsize);
     return $counts;
@@ -265,6 +266,8 @@ function block_exaport_legacy_item_content_counts(): array {
 
     $filewhere = "component = :component AND filearea = :filearea AND filename <> :directory";
     $fileparams = ['component' => 'block_exaport', 'filearea' => 'item_file', 'directory' => '.'];
+    $urllength = $DB->sql_length('url');
+    $attachmentlength = $DB->sql_length('attachment');
     return [
         'total_items' => $DB->count_records('block_exaportitem'),
         'meaningful_legacy_urls' => (int)$DB->count_records_sql("SELECT COUNT(1)
@@ -272,8 +275,8 @@ function block_exaport_legacy_item_content_counts(): array {
              WHERE TRIM(url) <> '' AND TRIM(url) <> :falsevalue", ['falsevalue' => 'false']),
         'sentinel_legacy_urls' => (int)$DB->count_records_sql("SELECT COUNT(1)
               FROM {block_exaportitem}
-             WHERE url <> '' AND (TRIM(url) = '' OR TRIM(url) = :falsevalue)", ['falsevalue' => 'false']),
-        'legacy_attachments' => $DB->count_records_select('block_exaportitem', "attachment <> ''"),
+             WHERE $urllength > 0 AND (TRIM(url) = '' OR TRIM(url) = :falsevalue)", ['falsevalue' => 'false']),
+        'legacy_attachments' => $DB->count_records_select('block_exaportitem', "$attachmentlength > 0"),
         'legacy_files' => (int)$DB->count_records_select('files', $filewhere, $fileparams),
         'items_with_legacy_files' => (int)$DB->count_records_sql(
             "SELECT COUNT(DISTINCT itemid) FROM {files} WHERE $filewhere", $fileparams),
@@ -288,11 +291,13 @@ function block_exaport_legacy_item_content_counts(): array {
  *
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional migrator for tests.
+ * @param callable|null $progresscallback Optional aggregate batch progress callback.
  * @return stdClass Completed report record.
  */
 function block_exaport_migrate_legacy_item_content_with_report(
     int $batchsize = 500,
-    ?callable $migrator = null
+    ?callable $migrator = null,
+    ?callable $progresscallback = null
 ): stdClass {
     global $DB;
 
@@ -304,7 +309,7 @@ function block_exaport_migrate_legacy_item_content_with_report(
 
     $timestarted = time();
     $before = block_exaport_legacy_item_content_counts();
-    $operations = block_exaport_migrate_legacy_item_content_batches($batchsize, $migrator);
+    $operations = block_exaport_migrate_legacy_item_content_batches($batchsize, $migrator, $progresscallback);
     $after = block_exaport_legacy_item_content_counts();
     $summary = [
         'source_counts_at_successful_run_start' => $before,

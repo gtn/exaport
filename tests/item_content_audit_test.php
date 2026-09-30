@@ -75,13 +75,14 @@ final class item_content_audit_test extends \advanced_testcase {
         $privateurl = 'https://secret.example/private-token';
         $meaningful = $this->item($owner->id, $privateurl, 'not-a-file-id');
         $this->item($owner->id, '   ');
-        $this->item($owner->id, 'false');
+        $this->item($owner->id, 'false', '   ');
 
         $result = (new item_content_audit())->run();
         $this->assertSame('error', $result['status']);
         $this->assertSame('error', $this->finding($result, 'legacy_url')['severity']);
         $this->assertSame(2, $this->finding($result, 'legacy_url_sentinel')['count']);
         $this->assertSame('warning', $this->finding($result, 'legacy_attachment')['severity']);
+        $this->assertSame(2, $this->finding($result, 'legacy_attachment')['count']);
         $this->assertContains($meaningful->id, $this->finding($result, 'legacy_url')['sampleids']);
         $this->assertStringNotContainsString($privateurl, json_encode($result));
     }

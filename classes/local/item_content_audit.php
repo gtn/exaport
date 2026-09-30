@@ -98,18 +98,21 @@ final class item_content_audit {
     /** Audit URL and attachment columns. */
     private function audit_legacy_columns(): void {
         [$where, $params] = $this->item_condition('i');
+        $urllength = $this->db->sql_length('i.url');
+        $attachmentlength = $this->db->sql_length('i.attachment');
         $this->add_query_finding('legacy_url', 'error',
             "FROM {block_exaportitem} i WHERE $where AND TRIM(i.url) <> '' AND TRIM(i.url) <> :falsevalue",
             $params + ['falsevalue' => 'false'], 'i.id', 'itemids',
             'Meaningful legacy item URLs remain.',
             'Do not remove compatibility fallbacks. Back up the site and investigate the 2026092900 migration.');
         $this->add_query_finding('legacy_url_sentinel', 'warning',
-            "FROM {block_exaportitem} i WHERE $where AND i.url <> '' AND (TRIM(i.url) = '' OR TRIM(i.url) = :falsevalue)",
+            "FROM {block_exaportitem} i WHERE $where AND $urllength > 0
+                  AND (TRIM(i.url) = '' OR TRIM(i.url) = :falsevalue)",
             $params + ['falsevalue' => 'false'], 'i.id', 'itemids',
             'Historical sentinel or whitespace-only legacy URLs remain.',
             'Inspect the migration history; these values contain no link content and should not be repaired by this audit.');
         $this->add_query_finding('legacy_attachment', 'warning',
-            "FROM {block_exaportitem} i WHERE $where AND i.attachment <> ''", $params, 'i.id', 'itemids',
+            "FROM {block_exaportitem} i WHERE $where AND $attachmentlength > 0", $params, 'i.id', 'itemids',
             'Stale legacy attachment metadata remains.',
             'Do not treat this value as a File API ID; inspect it together with the item file areas.');
     }

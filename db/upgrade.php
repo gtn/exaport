@@ -1554,7 +1554,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
         // Keep a finite safety ceiling: batches are restart-safe, so a genuine hang must not run forever.
         upgrade_set_timeout(3600);
         // ID-based batches avoid an unbounded result set and permit File API queries on all DB drivers.
-        $report = block_exaport_migrate_legacy_item_content_with_report();
+        $report = block_exaport_migrate_legacy_item_content_with_report(500, null,
+            static function(int $processed): void {
+                // Aggregate progress only: never expose item, owner, URL, or file details.
+                mtrace("Exaport item-content migration: {$processed} items processed");
+            });
         mtrace('Exaport item-content migration report: ' . $report->summaryjson);
 
         upgrade_block_savepoint(true, 2026092900, 'exaport');

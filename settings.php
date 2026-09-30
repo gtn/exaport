@@ -22,6 +22,13 @@ defined('MOODLE_INTERNAL') || die;
 require_once(__DIR__ . '/lib/lib.php');
 require_once __DIR__ . '/lib/settings_helper.php';
 
+$ADMIN->add('blocksettings', new admin_externalpage(
+    'block_exaport_item_content_audit',
+    get_string('audititemcontent', 'block_exaport'),
+    new moodle_url('/blocks/exaport/item_content_audit.php'),
+    'block/exaport:audititemcontent'
+));
+
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas',
         get_string('settings_allow_loginas_head_alternative', 'block_exaport'),

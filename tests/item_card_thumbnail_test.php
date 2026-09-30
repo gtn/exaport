@@ -93,14 +93,14 @@ final class item_card_thumbnail_test extends \advanced_testcase {
     }
 
     private function add_structured_file(\stdClass $item, int $sortorder, string $filename, string $content,
-                                         string $mimetype): int {
+                                         string $mimetype, string $filepath = '/'): int {
         $block = block_exaport_create_file_content_block($item->id, 'Files', ['sortorder' => $sortorder]);
         get_file_storage()->create_file_from_string([
             'contextid' => \context_user::instance($item->userid)->id,
             'component' => 'block_exaport',
             'filearea' => 'item_content_file',
             'itemid' => $block->id,
-            'filepath' => '/',
+            'filepath' => $filepath,
             'filename' => $filename,
             'mimetype' => $mimetype,
         ], $content);
@@ -308,6 +308,54 @@ final class item_card_thumbnail_test extends \advanced_testcase {
             '/item_content_file/view/hash/sharedtoken/itemid/' . $item->id . '/blockid/' . $blockid . '/photo.png',
             $viewurl
         );
+    }
+
+    public function test_nested_structured_thumbnail_url_and_pluginfile_arguments_preserve_path(): void {
+        $item = $this->create_item();
+        $blockid = $this->add_structured_file(
+            $item,
+            0,
+            'nested image.png',
+            $this->get_png_content(),
+            'image/png',
+            '/folder1/folder2/'
+        );
+        $source = block_exaport_get_item_thumbnail_source($item);
+
+        $url = block_exaport_get_item_thumbnail_source_url(
+            $source,
+            'portfolio/id/' . $this->owner->id
+        );
+        $this->assertStringContainsString(
+            '/itemid/' . $item->id . '/blockid/' . $blockid . '/folder1/folder2/nested%20image.png',
+            $url
+        );
+        $parsed = block_exaport_parse_item_content_file_args([
+            'portfolio', 'id', (string)$this->owner->id, 'itemid', (string)$item->id,
+            'blockid', (string)$blockid, 'folder1', 'folder2', 'nested image.png',
+        ]);
+        $this->assertSame('portfolio/id/' . $this->owner->id, $parsed['access']);
+        $this->assertSame((int)$item->id, $parsed['itemid']);
+        $this->assertSame($blockid, $parsed['blockid']);
+        $this->assertSame('/folder1/folder2/', $parsed['filepath']);
+        $this->assertSame('nested image.png', $parsed['filename']);
+
+        $data = $this->export_item_card($item);
+        $this->assertStringContainsString('/folder1/folder2/nested%20image.png', $data['thumbnailurl']);
+    }
+
+    public function test_structured_file_argument_parser_rejects_traversal_and_supports_root(): void {
+        $root = block_exaport_parse_item_content_file_args([
+            'itemid', '12', 'blockid', '34', 'root.txt',
+        ]);
+        $this->assertSame('/', $root['filepath']);
+        $this->assertSame('root.txt', $root['filename']);
+        $this->assertFalse(block_exaport_parse_item_content_file_args([
+            'itemid', '12', 'blockid', '34', '..', 'secret.txt',
+        ]));
+        $this->assertFalse(block_exaport_parse_item_content_file_args([
+            'itemid', '12', 'blockid', '34', '.',
+        ]));
     }
 
     public function test_structured_non_image_is_candidate_but_not_card_thumbnail(): void {

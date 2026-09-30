@@ -58,6 +58,12 @@ final class item_content_upgrade_test extends \advanced_testcase {
         return (array)$DB->get_record($table, ['id' => $id], '*', MUST_EXIST);
     }
 
+    public function test_upgrade_uses_a_finite_migration_timeout(): void {
+        $source = file_get_contents(__DIR__ . '/../db/upgrade.php');
+        $this->assertStringContainsString('upgrade_set_timeout(3600);', $source);
+        $this->assertStringNotContainsString('upgrade_set_timeout(0);', $source);
+    }
+
     public function test_empty_and_false_urls_create_no_blocks_and_clear_compatibility_values(): void {
         global $DB;
         $this->resetAfterTest();
@@ -616,5 +622,74 @@ final class item_content_upgrade_test extends \advanced_testcase {
             $this->assertSame(1, $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]));
             $this->assertSame('', $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
         }
+    }
+
+    public function test_completed_migration_report_reconciles_aggregate_counts(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $combined = $this->create_item($user->id, 'note', 'https://example.test/private', 'stale');
+        $this->create_legacy_file($combined, 'one.txt', 'one');
+        $this->create_legacy_file($combined, 'two.txt', 'two');
+        $this->create_item($user->id, 'note', 'false');
+        $this->create_item($user->id);
+
+        $progress = [];
+        $report = \block_exaport_migrate_legacy_item_content_with_report(2, null,
+            static function(int $processed) use (&$progress): void {
+                $progress[] = $processed;
+            });
+        $summary = json_decode($report->summaryjson, true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame([2, 3], $progress);
+        $this->assertSame(2026092900, (int)$report->migrationversion);
+        $this->assertSame(3, $summary['source_counts_at_successful_run_start']['total_items']);
+        $this->assertSame(1, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
+        $this->assertSame(1, $summary['source_counts_at_successful_run_start']['sentinel_legacy_urls']);
+        $this->assertSame(1, $summary['source_counts_at_successful_run_start']['legacy_attachments']);
+        $this->assertSame(2, $summary['source_counts_at_successful_run_start']['legacy_files']);
+        $this->assertSame(1, $summary['source_counts_at_successful_run_start']['items_with_legacy_files']);
+        $this->assertSame([
+            'items_processed' => 3,
+            'items_already_clean' => 1,
+            'link_blocks_created' => 1,
+            'file_blocks_created' => 1,
+            'files_copied' => 2,
+            'urls_cleared' => 2,
+            'attachments_cleared' => 1,
+            'legacy_file_areas_cleared' => 1,
+        ], $summary['operations_in_successful_run']);
+        $this->assertSame(0, $summary['residual_counts_at_successful_run_end']['meaningful_legacy_urls']);
+        $this->assertSame(0, $summary['residual_counts_at_successful_run_end']['legacy_files']);
+        $this->assertSame(1, $DB->count_records('block_exaportmigration'));
+
+        $rerun = \block_exaport_migrate_legacy_item_content_with_report(1);
+        $this->assertSame((int)$report->id, (int)$rerun->id);
+        $this->assertSame(1, $DB->count_records('block_exaportmigration'));
+        $this->assertStringNotContainsString('example.test', $report->summaryjson);
+        $this->assertStringNotContainsString('one.txt', $report->summaryjson);
+    }
+
+    public function test_interrupted_migration_does_not_store_completed_report(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $this->create_item($user->id, 'note', 'first:value');
+        $second = $this->create_item($user->id, 'note', 'second:value');
+
+        try {
+            \block_exaport_migrate_legacy_item_content_with_report(1,
+                static function(\stdClass $item) use ($second): array {
+                    if ((int)$item->id === (int)$second->id) {
+                        throw new \coding_exception('Injected report interruption');
+                    }
+                    return \block_exaport_migrate_legacy_item_content($item);
+                });
+            $this->fail('Injected report interruption was ignored');
+        } catch (\coding_exception $exception) {
+            $this->assertStringContainsString('Injected report interruption', $exception->getMessage());
+        }
+
+        $this->assertSame(0, $DB->count_records('block_exaportmigration'));
     }
 }

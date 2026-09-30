@@ -247,19 +247,12 @@ class item_content_blocks implements renderable, templatable {
      * @return string
      */
     private function get_file_url(\stdClass $block, \stored_file $file): string {
-        global $CFG;
-
-        $parts = [];
-        if ($this->access !== null && $this->access !== '') {
-            $parts[] = trim($this->access, '/');
-        }
-        $parts[] = 'itemid/' . (int)$block->itemid;
-        $parts[] = 'blockid/' . (int)$block->id;
-        $parts[] = $file->get_filename();
-        $path = '/' . context_user::instance($this->ownerid)->id . '/block_exaport/item_content_file/' .
-            implode('/', $parts);
-
-        return file_encode_url($CFG->wwwroot . '/pluginfile.php', $path, true);
+        return \block_exaport_get_item_content_file_url(
+            (int)$block->itemid,
+            (int)$block->id,
+            $file,
+            (string)($this->access ?? '')
+        );
     }
 
     /**

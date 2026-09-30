@@ -1932,11 +1932,15 @@ class externallib extends external_api {
                 'files' => [],
             ];
             foreach ($contentblock['files'] as $file) {
-                $path = '/' . $file->get_contextid() . '/block_exaport/item_content_file/itemid/' .
-                    $item->id . '/blockid/' . $contentblock['blockid'] . '/' . $file->get_filename();
                 $token = static::wstoken();
                 $script = $token ? '/webservice/pluginfile.php' : '/pluginfile.php';
-                $fileurl = file_encode_url(g::$CFG->wwwroot . $script, $path, true);
+                $fileurl = block_exaport_get_item_content_file_url(
+                    (int)$item->id,
+                    (int)$contentblock['blockid'],
+                    $file,
+                    '',
+                    $script
+                );
                 if ($token) {
                     $fileurl .= '?token=' . rawurlencode($token);
                 }

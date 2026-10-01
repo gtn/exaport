@@ -135,7 +135,7 @@ final class backup_restore_test extends \advanced_testcase {
         // Both block tasks ran, but exactly one owns the shared section. Ownership is selected by
         // instance id in the backup step, not by the order in which Moodle executes these tasks.
         $temppath = make_backup_temp_directory($tempname);
-        $exaportxmls = glob($temppath . '/blocks/exaport_*/exaport.xml');
+        $exaportxmls = glob($temppath . '/course/blocks/exaport_*/exaport.xml');
         $this->assertCount(2, $exaportxmls);
         $serializeditemcounts = [];
         foreach ($exaportxmls as $exaportxml) {
@@ -286,7 +286,7 @@ final class backup_restore_test extends \advanced_testcase {
         $adminid = (int)get_admin()->id;
         $tempname = $this->backup_course($course->id, $adminid, false);
         $temppath = make_backup_temp_directory($tempname);
-        $exaportxmls = glob($temppath . '/blocks/exaport_*/exaport.xml');
+        $exaportxmls = glob($temppath . '/course/blocks/exaport_*/exaport.xml');
         $this->assertCount(2, $exaportxmls);
         foreach ($exaportxmls as $exaportxml) {
             $xml = file_get_contents($exaportxml);
@@ -331,7 +331,9 @@ final class backup_restore_test extends \advanced_testcase {
 
         $adminid = (int)get_admin()->id;
         $tempname = $this->backup_course($course->id, $adminid);
-        $exaportxmls = glob(make_backup_temp_directory($tempname) . '/blocks/exaport_*/exaport.xml');
+        $exaportxmls = glob(
+            make_backup_temp_directory($tempname) . '/course/blocks/exaport_*/exaport.xml'
+        );
         $this->assertCount(1, $exaportxmls);
         $xml = file_get_contents($exaportxmls[0]);
         $this->assertNotFalse($xml);

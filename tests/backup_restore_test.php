@@ -182,8 +182,8 @@ final class backup_restore_test extends \advanced_testcase {
         $restoredblockids = array_map(static fn($block): int => (int)$block->id, $mixedblocks);
         \block_exaport_delete_item($restoredmixed);
         $this->assertFalse($DB->record_exists('block_exaportitem', ['id' => $restoredmixed->id]));
-        $this->assertFalse($DB->record_exists_list('block_exaportitemblock', 'id', $restoredblockids));
         foreach ($restoredblockids as $restoredblockid) {
+            $this->assertFalse($DB->record_exists('block_exaportitemblock', ['id' => $restoredblockid]));
             foreach (['item_content_text', 'item_content_file'] as $area) {
                 $this->assertEmpty(get_file_storage()->get_area_files(
                     $ownercontext, 'block_exaport', $area, $restoredblockid, 'id', false

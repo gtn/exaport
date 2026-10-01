@@ -23,6 +23,12 @@ class restore_exaport_block_structure_step extends restore_structure_step {
     /** @var int[] Items created by this restore, keyed by their new id. */
     private $restoreditems = array();
 
+    /** @var int[] Source user context IDs present in this backup. */
+    private $usercontexts = array();
+
+    /** @var int[] Source user context ID for each source item ID. */
+    private $itemcontexts = array();
+
     /**
      * Define the structure to be restored
      */
@@ -120,10 +126,27 @@ class restore_exaport_block_structure_step extends restore_structure_step {
 
         $data = (object)$data;
         $oldid = (int)$data->id;
+        // usercontextid was introduced with explicit support for user-context files. Keep older
+        // archives restorable; they can still contain records and legacy URLs, but their standard
+        // block-context annotation could never have included these user-context files.
+        $oldusercontextid = !empty($data->usercontextid) ? (int)$data->usercontextid : 0;
+        unset($data->usercontextid);
         $data->courseid = $this->get_courseid();
         $data->userid = $this->get_mappingid('user', $data->userid);
         $data->id = (int)$DB->insert_record('block_exaportitem', $data);
-        $this->set_mapping('exaport_item', $oldid, $data->id);
+        // File mappings are joined to backup files by their source context. Supplying that context
+        // as the mapping's parent item is therefore required for add_related_files() to find files
+        // which were explicitly annotated outside this block task's own context.
+        $this->set_mapping('exaport_item', $oldid, $data->id, false, null,
+            $oldusercontextid ?: null);
+        // Core's file restoration needs an explicit context mapping because this block task's
+        // natural context is the block, while every annotated Exaport file has a user context.
+        if ($oldusercontextid) {
+            $newusercontextid = context_user::instance((int)$data->userid)->id;
+            $this->set_mapping('context', $oldusercontextid, $newusercontextid);
+            $this->usercontexts[$oldusercontextid] = $oldusercontextid;
+            $this->itemcontexts[$oldid] = $oldusercontextid;
+        }
         $this->restoreditems[$data->id] = $data->id;
     }
 
@@ -135,9 +158,11 @@ class restore_exaport_block_structure_step extends restore_structure_step {
 
         $data = (object)$data;
         $oldid = (int)$data->id;
-        $data->itemid = $this->get_mappingid('exaport_item', $data->itemid);
+        $olditemid = (int)$data->itemid;
+        $data->itemid = $this->get_mappingid('exaport_item', $olditemid);
         $data->id = (int)$DB->insert_record('block_exaportitemblock', $data);
-        $this->set_mapping('exaport_item_content_block', $oldid, $data->id);
+        $this->set_mapping('exaport_item_content_block', $oldid, $data->id, false, null,
+            $this->itemcontexts[$olditemid] ?? null);
     }
 
     /**
@@ -156,9 +181,15 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         require_once($CFG->dirroot . '/blocks/exaport/db/upgradelib.php');
         // Restore files only after every item/block mapping is known. Old archives have item_file;
         // current archives have the two block-keyed structured areas.
-        $this->add_related_files('block_exaport', 'item_file', 'exaport_item');
-        $this->add_related_files('block_exaport', 'item_content_file', 'exaport_item_content_block');
-        $this->add_related_files('block_exaport', 'item_content_text', 'exaport_item_content_block');
+        foreach ($this->usercontexts as $oldusercontextid) {
+            $this->add_related_files('block_exaport', 'item_file', 'exaport_item', $oldusercontextid);
+            $this->add_related_files(
+                'block_exaport', 'item_content_file', 'exaport_item_content_block', $oldusercontextid
+            );
+            $this->add_related_files(
+                'block_exaport', 'item_content_text', 'exaport_item_content_block', $oldusercontextid
+            );
+        }
         foreach ($this->restoreditems as $itemid) {
             $item = $DB->get_record('block_exaportitem', array('id' => $itemid), '*', MUST_EXIST);
             $this->migrate_legacy_item_content($item);

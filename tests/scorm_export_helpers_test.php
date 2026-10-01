@@ -13,7 +13,6 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
 require_once($CFG->dirroot . '/blocks/exaport/lib/scorm_export_helpers.php');
-require_once($CFG->dirroot . '/blocks/exaport/db/upgradelib.php');
 
 /**
  * Tests SCORM rendering of structured item content.
@@ -24,12 +23,15 @@ require_once($CFG->dirroot . '/blocks/exaport/db/upgradelib.php');
  */
 final class scorm_export_helpers_test extends \advanced_testcase {
 
-    public function test_migrated_content_is_rendered_in_order_with_collision_safe_paths(): void {
-        global $DB;
-
+    public function test_residual_legacy_content_is_ignored_in_favour_of_structured_blocks(): void {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
-        $item = $this->create_item($owner->id, 'note', 'https://legacy.example/path?a=1&b=2');
+        $item = $this->create_item(
+            $owner->id,
+            'note',
+            'https://legacy.example/path?a=1&b=2',
+            'same.pdf'
+        );
         $textid = $this->create_block($item->id, 'text', 1, 'First',
             '<p>Text <img src="@@PLUGINFILE@@/images/editor.png"></p>');
         $linkid = $this->create_block($item->id, 'link', 2, 'Second', '', 'https://structured.example/?a=1&b=2');
@@ -39,8 +41,6 @@ final class scorm_export_helpers_test extends \advanced_testcase {
         $this->create_file($owner->id, 'item_content_text', $textid, '/images/', 'editor.png');
         $this->create_file($owner->id, 'item_content_file', $fileid1, '/nested/', 'same.pdf');
         $this->create_file($owner->id, 'item_content_file', $fileid2, '/nested/', 'same.pdf');
-        $migration = block_exaport_migrate_legacy_item_content($item);
-        $item = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
         $calls = [];
         $package = static function(\stored_file $file, string $base) use (&$calls): string {
             $path = $base . $file->get_filepath() . block_exaport_scorm_path_component($file->get_filename());
@@ -57,14 +57,13 @@ final class scorm_export_helpers_test extends \advanced_testcase {
 
         $html = $result['html'];
         $this->assertSame($calls, $result['assets']);
-        $this->assertCount(4, $result['assets']);
+        $this->assertCount(3, $result['assets']);
         $this->assertSame([
             'items/' . $item->id . '/blocks/' . $textid . '/editor/images/editor.png',
             'items/' . $item->id . '/blocks/' . $fileid1 . '/nested/same.pdf',
             'items/' . $item->id . '/blocks/' . $fileid2 . '/nested/same.pdf',
-            'items/' . $item->id . '/blocks/' . $migration['fileblockid'] . '/same.pdf',
         ], $result['assets']);
-        $this->assertStringContainsString('https://legacy.example/path?a=1&amp;b=2', $html);
+        $this->assertStringNotContainsString('https://legacy.example/path', $html);
         $this->assertStringContainsString('https://structured.example/?a=1&amp;b=2', $html);
         $this->assertStringNotContainsString('@@PLUGINFILE@@', $html);
         $this->assertStringContainsString('../../items/' . $item->id . '/blocks/' . $textid .
@@ -116,11 +115,11 @@ final class scorm_export_helpers_test extends \advanced_testcase {
         $this->assertSame($path . '-1', block_exaport_scorm_archive_path($file, 'items/1/blocks/99', [$path]));
     }
 
-    private function create_item(int $userid, string $type, string $url = ''): \stdClass {
+    private function create_item(int $userid, string $type, string $url = '', string $attachment = ''): \stdClass {
         global $DB;
         $item = (object)[
             'userid' => $userid, 'type' => $type, 'categoryid' => 0, 'name' => 'Export item',
-            'url' => $url, 'intro' => '', 'attachment' => '', 'timecreated' => time(),
+            'url' => $url, 'intro' => '', 'attachment' => $attachment, 'timecreated' => time(),
             'timemodified' => time(), 'courseid' => 0, 'shareall' => 0, 'externaccess' => 0,
             'externcomment' => 0, 'sortorder' => 0, 'isoez' => 0, 'langid' => 0,
             'source' => 0, 'sourceid' => 0, 'iseditable' => 1, 'parentid' => 0,

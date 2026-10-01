@@ -86,11 +86,19 @@ final class item_import_test extends \advanced_testcase {
         $this->assertSame([], block_exaport_get_item_content_blocks($itemid));
     }
 
-    public function test_package_file_group_preserves_all_files_and_paths(): void {
+    public function test_package_import_ignores_residual_content_and_preserves_structured_paths(): void {
+        global $DB;
+
         $this->resetAfterTest(true);
         $user = $this->getDataGenerator()->create_user();
         $course = $this->getDataGenerator()->create_course();
         $item = $this->insert_item($user->id, $course->id);
+        $DB->set_field('block_exaportitem', 'url', 'https://legacy.example/', ['id' => $item->id]);
+        $DB->set_field('block_exaportitem', 'attachment', 'legacy.txt', ['id' => $item->id]);
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($user->id)->id, 'component' => 'block_exaport',
+            'filearea' => 'item_file', 'itemid' => $item->id, 'filepath' => '/', 'filename' => 'legacy.txt',
+        ], 'legacy');
         $root = make_request_directory();
         mkdir($root . '/entry/nested', 0777, true);
         file_put_contents($root . '/entry/first.txt', 'first');
@@ -108,6 +116,11 @@ final class item_import_test extends \advanced_testcase {
         $this->assertSame(['/first.txt', '/nested/second.txt'], array_map(static function(\stored_file $file): string {
             return $file->get_filepath() . $file->get_filename();
         }, $files));
+        $this->assertCount(1, block_exaport_get_item_content_blocks($item->id));
+        $this->assertSame('https://legacy.example/',
+            $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
+        $this->assertCount(1, get_file_storage()->get_area_files(
+            \context_user::instance($user->id)->id, 'block_exaport', 'item_file', $item->id, 'id', false));
     }
 
     public function test_package_path_failure_rolls_back_parent_block_and_files(): void {

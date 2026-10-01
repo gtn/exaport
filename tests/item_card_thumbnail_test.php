@@ -260,7 +260,7 @@ final class item_card_thumbnail_test extends \advanced_testcase {
         );
     }
 
-    public function test_structured_image_precedes_legacy_image_but_custom_icon_precedes_both(): void {
+    public function test_structured_image_is_authoritative_over_residual_legacy_image(): void {
         $item = $this->create_item();
         $this->add_item_file($item, 'item_file', 'legacy.png', $this->get_png_content(), 'image/png');
         $this->add_structured_file($item, 0, 'structured.png', $this->get_png_content(), 'image/png');

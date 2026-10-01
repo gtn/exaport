@@ -414,7 +414,7 @@ final class item_content_blocks_test extends \advanced_testcase {
         );
     }
 
-    public function test_external_item_renders_migrated_and_existing_structured_content(): void {
+    public function test_external_item_ignores_residual_legacy_content_and_renders_structured_content(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -424,6 +424,7 @@ final class item_content_blocks_test extends \advanced_testcase {
         $itemid = $this->insert_item($owner->id, $course->id);
         $DB->set_field('block_exaportitem', 'type', 'file', ['id' => $itemid]);
         $DB->set_field('block_exaportitem', 'url', 'https://legacy.example/', ['id' => $itemid]);
+        $DB->set_field('block_exaportitem', 'attachment', 'legacy.pdf', ['id' => $itemid]);
         $this->insert_block($itemid, 'text', 0, 'Structured text', '<p>Structured body</p>');
         $fileid = $this->insert_block($itemid, 'file', 1, 'Structured files');
         get_file_storage()->create_file_from_string([
@@ -434,15 +435,22 @@ final class item_content_blocks_test extends \advanced_testcase {
             'filepath' => '/',
             'filename' => 'structured.pdf',
         ], 'pdf');
-        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
-        block_exaport_migrate_legacy_item_content($item);
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($owner->id)->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_file',
+            'itemid' => $itemid,
+            'filepath' => '/',
+            'filename' => 'legacy.pdf',
+        ], 'legacy pdf');
         $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
 
         ob_start();
         block_exaport_print_extern_item($item, '');
         $html = ob_get_clean();
 
-        $this->assertStringContainsString('https://legacy.example/', $html);
+        $this->assertStringNotContainsString('https://legacy.example/', $html);
+        $this->assertStringNotContainsString('legacy.pdf', $html);
         $this->assertStringContainsString('Structured body', $html);
         $this->assertStringContainsString('structured.pdf', $html);
         $this->assertStringNotContainsString(block_exaport_get_string('filenotfound'), $html);

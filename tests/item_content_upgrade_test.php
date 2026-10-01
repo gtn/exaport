@@ -5,6 +5,8 @@ namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once($CFG->libdir . '/upgradelib.php');
 require_once(__DIR__ . '/../db/upgradelib.php');
 require_once(__DIR__ . '/fixtures/exaport_test_helpers_trait.php');
 

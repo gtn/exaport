@@ -728,6 +728,7 @@ class externallib extends external_api {
                 $item = static::make_item_result($item);
 
                 $resultBlock->title = $item->name;
+                $resultBlock->itemid = $item->id;
                 $resultBlock->text = $item->description;
                 $resultBlock->url = $item->url;
                 $resultBlock->files = $item->files;
@@ -1894,7 +1895,8 @@ class externallib extends external_api {
         $result_item = (object)[];
         $result_item->id = $item->id;
         $result_item->name = $item->name;
-        $result_item->url = '';
+        $content = block_exaport_get_item_content_webservice_data($item, static::wstoken());
+        $result_item->url = $content['url'];
 
         // $result_item->type = $item->type;
         // $result_item->file = "";
@@ -1902,41 +1904,8 @@ class externallib extends external_api {
         // $result_item->filename = "";
         // $result_item->mimetype = "";
         $result_item->description = format_text($item->intro, FORMAT_HTML);
-        $result_item->files = [];
-        $result_item->contentblocks = [];
-
-        foreach (block_exaport_get_item_content_export_data($item) as $contentblock) {
-            $resultblock = (object)[
-                'id' => $contentblock['blockid'],
-                'sortorder' => $contentblock['sortorder'],
-                'type' => $contentblock['type'],
-                'title' => $contentblock['title'],
-                'content' => $contentblock['content'],
-                'contentformat' => $contentblock['contentformat'],
-                'url' => $contentblock['url'],
-                'files' => [],
-            ];
-            foreach ($contentblock['files'] as $file) {
-                $token = static::wstoken();
-                $script = $token ? '/webservice/pluginfile.php' : '/pluginfile.php';
-                $fileurl = block_exaport_get_item_content_file_url(
-                    (int)$item->id,
-                    (int)$contentblock['blockid'],
-                    $file,
-                    '',
-                    $script
-                );
-                if ($token) {
-                    $fileurl .= '?token=' . rawurlencode($token);
-                }
-                $resultblock->files[] = [
-                    'filename' => $file->get_filename(),
-                    'url' => $fileurl,
-                    'mimetype' => $file->get_mimetype(),
-                ];
-            }
-            $result_item->contentblocks[] = $resultblock;
-        }
+        $result_item->files = $content['files'];
+        $result_item->contentblocks = $content['contentblocks'];
 
         return $result_item;
     }
@@ -1944,7 +1913,7 @@ class externallib extends external_api {
     /**
      * Return declaration for the additive, ordered structured item content representation.
      *
-     * Legacy URL and files fields remain in the response with neutral values.
+     * Legacy URL and files fields are lossy projections of these same blocks.
      *
      * @return external_multiple_structure
      */

@@ -26,6 +26,9 @@ class restore_exaport_block_structure_step extends restore_structure_step {
     /** @var int[] Source user context IDs present in this backup. */
     private $usercontexts = array();
 
+    /** @var int[] Source user context ID for each source item ID. */
+    private $itemcontexts = array();
+
     /**
      * Define the structure to be restored
      */
@@ -131,13 +134,18 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         $data->courseid = $this->get_courseid();
         $data->userid = $this->get_mappingid('user', $data->userid);
         $data->id = (int)$DB->insert_record('block_exaportitem', $data);
-        $this->set_mapping('exaport_item', $oldid, $data->id);
+        // File mappings are joined to backup files by their source context. Supplying that context
+        // as the mapping's parent item is therefore required for add_related_files() to find files
+        // which were explicitly annotated outside this block task's own context.
+        $this->set_mapping('exaport_item', $oldid, $data->id, false, null,
+            $oldusercontextid ?: null);
         // Core's file restoration needs an explicit context mapping because this block task's
         // natural context is the block, while every annotated Exaport file has a user context.
         if ($oldusercontextid) {
             $newusercontextid = context_user::instance((int)$data->userid)->id;
             $this->set_mapping('context', $oldusercontextid, $newusercontextid);
             $this->usercontexts[$oldusercontextid] = $oldusercontextid;
+            $this->itemcontexts[$oldid] = $oldusercontextid;
         }
         $this->restoreditems[$data->id] = $data->id;
     }
@@ -150,9 +158,11 @@ class restore_exaport_block_structure_step extends restore_structure_step {
 
         $data = (object)$data;
         $oldid = (int)$data->id;
-        $data->itemid = $this->get_mappingid('exaport_item', $data->itemid);
+        $olditemid = (int)$data->itemid;
+        $data->itemid = $this->get_mappingid('exaport_item', $olditemid);
         $data->id = (int)$DB->insert_record('block_exaportitemblock', $data);
-        $this->set_mapping('exaport_item_content_block', $oldid, $data->id);
+        $this->set_mapping('exaport_item_content_block', $oldid, $data->id, false, null,
+            $this->itemcontexts[$olditemid] ?? null);
     }
 
     /**

@@ -426,8 +426,6 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
 
                     }
 
-                    $href = 'shared_item.php?access=view/' . $access . '&itemid=' . $item->id . '&att=' . $item->attachment;
-
                     $general_content .= '<div class="view-item view-item-type-' . $item->type . '">';
                     $general_content .= '<div class="view-item-header" title="' . $item->type . '">' . $item->name;
                     // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.

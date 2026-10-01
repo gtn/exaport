@@ -1085,12 +1085,6 @@ foreach ($items as $item) {
 
         $icons .= block_exaport_get_item_comp_icon($item);
 
-        // Copy files to course.
-        if ($item->type == 'file' && block_exaport_feature_enabled('copy_to_course')) {
-            $icons .= ' <a href="' . $CFG->wwwroot . '/blocks/exaport/copy_item_to_course.php?courseid=' . $courseid . '&itemid=' . $item->id .
-                '&backtype=">' . get_string("copyitemtocourse", "block_exaport") . '</a>';
-        }
-
         if ($type == 'mine') {
             $share = \block_exaport\item_helper::build_share_info($item);
             $icons .= block_exaport_render_share_icon($share);

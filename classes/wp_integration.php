@@ -28,7 +28,6 @@ use html_table;
 use html_table_cell;
 use html_table_row;
 use html_writer;
-use moodle_url;
 use stored_file;
 
 /**
@@ -678,10 +677,9 @@ class wp_integration {
                     'name' => $item->name,
                     'type' => $item->type,
                     'content' => $item->intro,
-                    'link' => $item->link,
+                    'link' => '',
+                    'files' => [],
                 ];
-                // add information about files:
-                $type_content['files'] = $this->prepareItemFiles($item);
                 $type_content['structured_blocks'] = $this->prepareStructuredItemContent($item);
                 break;
             case 'personal_information':
@@ -946,31 +944,6 @@ class wp_integration {
             }
         }
         return $addAttachments;
-    }
-
-    /**
-     * returns information about files for the block item
-     */
-    private function prepareItemFiles($item) {
-        $itemFiles = [];
-        foreach (block_exaport_get_item_files_array($item) as $file) {
-            // Option 1: files as URLs (retained for compatibility; multipart is currently selected).
-            if ($this->sendFilesAsUrls()) {
-                $fileUrl = moodle_url::make_pluginfile_url($file->get_contextid(), 'block_exaport',
-                    'item_file', $item->id, $file->get_filepath(), $file->get_filename())->out(false);
-                $itemFiles[] = [
-                    'url' => $fileUrl,
-                    'filename' => $file->get_filename(),
-                    'mimetype' => $file->get_mimetype(),
-                    'isMedia' => block_exaport_is_valid_media_by_filename($file->get_filename()),
-                ];
-            } else {
-                // Option 2: files transferred in the authenticated multipart request.
-                $itemFiles[] = $this->addFileToPost($file/*, 'i' . $item->id . '_'*/);
-            }
-        }
-
-        return $itemFiles;
     }
 
     /**

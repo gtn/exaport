@@ -347,7 +347,7 @@ class ExaportVievPdf {
 
                 // link to web-preview
                 $linked = false;
-                $block_href = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=view/' . $access . '&itemid=' . $item->id . '&att=' . $item->attachment;
+                $block_href = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=view/' . $access . '&itemid=' . $item->id;
 
                 if ($item->name) {
                     $head_hight = $this->addHeadLine(strip_tags($item->name), $x, $y_block_current, $column_width, 0, null, true, 'L', $block_href);
@@ -438,7 +438,6 @@ class ExaportVievPdf {
 
                 // add link to block web-view if it is not linked in title
                 if (!$linked) {
-                    $href = $CFG->wwwroot . '/blocks/exaport/shared_item.php?access=view/' . $access . '&itemid=' . $item->id . '&att=' . $item->attachment;
                     $link_height = $this->addLinkToBlock($block_href, $x, $y_block_current);
                     $y_block_current = $this->increaseBlockY($y_block_current, $link_height);
                     $height_block_current += $link_height;

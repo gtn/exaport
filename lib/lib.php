@@ -133,19 +133,14 @@ function block_exaport_get_item_structured_files($item): array {
 /**
  * Returns all deterministic thumbnail endpoint candidates for one source.
  *
- * If structured files exist they are authoritative for indexed requests;
- * otherwise the legacy list is returned. This preserves the meaning of legacy
- * imindex values while giving structured-only items deterministic indexing.
+ * Legacy item files remain available through their access-controlled
+ * compatibility endpoint, but are not ordinary thumbnail content.
  *
  * @param \stdClass $item Item record.
  * @return \stored_file[]
  */
 function block_exaport_get_item_thumbnail_candidates($item): array {
-    $structuredfiles = block_exaport_get_item_structured_files($item);
-    if ($structuredfiles) {
-        return $structuredfiles;
-    }
-    return array_values(block_exaport_get_item_files_array($item));
+    return block_exaport_get_item_structured_files($item);
 }
 
 
@@ -196,18 +191,6 @@ function block_exaport_get_item_thumbnail_source($item) {
         }
     }
 
-    foreach (block_exaport_get_item_files_array($item) as $file) {
-        if ($file && $file->is_valid_image()) {
-            return (object)[
-                'file' => $file,
-                'filearea' => 'item_file',
-                'itemid' => (int)$item->id,
-                'blockid' => null,
-                'ownerid' => (int)$item->userid,
-            ];
-        }
-    }
-
     return false;
 }
 
@@ -215,7 +198,7 @@ function block_exaport_get_item_thumbnail_source($item) {
  * Returns the preferred thumbnail file for an item.
  *
  * Compatibility wrapper for callers expecting stored_file|false. Selection is
- * custom icon, structured image, then legacy image and is independent of type.
+ * a custom icon followed by a structured image and is independent of type.
  *
  * @param \stdClass $item Item record.
  * @return \stored_file|false
@@ -1803,7 +1786,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
     } else {
         $where = " i.userid = ? " . $addwhere;
     }
-    $query = "SELECT i.id, i.name, i.type, i.intro AS intro, i.url AS link, ic.name AS cname, ic.id AS catid, " .
+    $query = "SELECT i.id, i.name, i.type, i.intro AS intro, '' AS link, ic.name AS cname, ic.id AS catid, " .
         " ic2.name AS cname_parent, i.userid, COUNT(com.id) AS comments" .
         " FROM {block_exaportitem} i" .
         " LEFT JOIN {block_exaportitemcate} icat ON icat.itemid = i.id" .
@@ -1811,7 +1794,7 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
         " LEFT JOIN {block_exaportcate} ic2 ON ic.pid = ic2.id" .
         " LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id" .
         " WHERE " . $where .
-        " GROUP BY i.id, i.name, i.type, i.intro, i.url, ic.id, ic.name, ic2.name, i.userid" .
+        " GROUP BY i.id, i.name, i.type, i.intro, ic.id, ic.name, ic2.name, i.userid" .
         " ORDER BY i.name";
     $portfolioitems = $DB->get_records_sql($query, array($USER->id));
     if (!$portfolioitems) {
@@ -1855,14 +1838,6 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
                 } else {
                     break;
                 }
-            }
-        }
-
-        if ($item->type == 'file') {
-            // if not icon - store information about count of related files
-            if (!block_exaport_get_single_file($item, 'item_iconfile')) {
-                $files = block_exaport_get_item_files($item);
-                $item->filescount = count($files);
             }
         }
 

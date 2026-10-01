@@ -211,7 +211,7 @@ class externallib extends external_api {
         }
 
         $conditions = array("id" => $itemid, "userid" => $userid);
-        $item = $DB->get_record("block_exaportitem", $conditions, 'id,userid,type,name,intro,url', MUST_EXIST);
+        $item = $DB->get_record("block_exaportitem", $conditions, 'id,userid,type,name,intro', MUST_EXIST);
         $cateid = $DB->get_field_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$item->id]);
         $category = $cateid ? $DB->get_field("block_exaportcate", "name", array("id" => $cateid)) : '';
 
@@ -224,23 +224,8 @@ class externallib extends external_api {
         $item->isimage = false;
         $item->filename = "";
         $item->mimetype = "";
+        $item->url = '';
         $item->intro = format_text($item->intro, FORMAT_HTML);
-
-        if ($item->type == 'file') {
-            if ($file = block_exaport_get_item_single_file($item)) {
-                if ($shared_item) {
-                    $item->file = "{$CFG->wwwroot}/blocks/exaport/shared_item.php?access=portfolio/id/" . $userid .
-                        "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
-                } else {
-                    $item->file = "{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=portfolio/id/" . $userid .
-                        "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
-                }
-
-                $item->isimage = $file->is_valid_image();
-                $item->filename = $file->get_filename();
-                $item->mimetype = $file->get_mimetype();
-            }
-        }
 
         $item->comments = g::$DB->get_records('block_exaportitemcomm', ['itemid' => $item->id], 'timemodified ASC');
         foreach ($item->comments as $comment) {
@@ -1909,7 +1894,7 @@ class externallib extends external_api {
         $result_item = (object)[];
         $result_item->id = $item->id;
         $result_item->name = $item->name;
-        $result_item->url = $item->url;
+        $result_item->url = '';
 
         // $result_item->type = $item->type;
         // $result_item->file = "";
@@ -1953,22 +1938,13 @@ class externallib extends external_api {
             $result_item->contentblocks[] = $resultblock;
         }
 
-        foreach (block_exaport_get_item_files_array($item) as $file) {
-            $result_file = (object)[];
-            $result_file->url = g::$CFG->wwwroot . "/blocks/exaport/portfoliofile.php?access=portfolio/id/" . g::$USER->id . "&itemid=" . $item->id . "&wstoken=" . static::wstoken();
-            // $result_file->isimage = $file->is_valid_image();
-            $result_file->filename = $file->get_filename();
-            $result_file->mimetype = $file->get_mimetype();
-            $result_item->files[] = $result_file;
-        }
-
         return $result_item;
     }
 
     /**
      * Return declaration for the additive, ordered structured item content representation.
      *
-     * The legacy URL and files fields remain unchanged for compatibility.
+     * Legacy URL and files fields remain in the response with neutral values.
      *
      * @return external_multiple_structure
      */

@@ -87,11 +87,16 @@ final class lib_functions_test extends \advanced_testcase {
 
     /**
      * Helper: create an item assigned to a category via the junction table.
+     *
+     * @param int $categoryid Category ID, or zero for an uncategorized item.
+     * @param string $name Item name.
+     * @param array $fields Item field overrides.
+     * @return int Item ID.
      */
-    private function create_item(int $categoryid, string $name = 'Item'): int {
+    private function create_item(int $categoryid, string $name = 'Item', array $fields = []): int {
         global $DB;
 
-        $itemid = (int)$DB->insert_record('block_exaportitem', (object)[
+        $record = [
             'userid' => $this->user->id,
             'type' => 'note',
             'categoryid' => 0, // Legacy field; real mapping is via block_exaportitemcate.
@@ -112,7 +117,8 @@ final class lib_functions_test extends \advanced_testcase {
             'sourceid' => 0,
             'iseditable' => 1,
             'parentid' => 0,
-        ]);
+        ];
+        $itemid = (int)$DB->insert_record('block_exaportitem', (object)array_replace($record, $fields));
 
         if ($categoryid > 0) {
             $DB->insert_record('block_exaportitemcate', (object)[
@@ -122,6 +128,139 @@ final class lib_functions_test extends \advanced_testcase {
         }
 
         return $itemid;
+    }
+
+    /**
+     * Helper: add a structured content block to an item.
+     *
+     * @param int $itemid Item ID.
+     * @param string $type Block type.
+     * @return int Block ID.
+     */
+    private function create_item_block(int $itemid, string $type): int {
+        global $DB;
+
+        return (int)$DB->insert_record('block_exaportitemblock', (object)[
+            'itemid' => $itemid,
+            'type' => $type,
+            'sortorder' => 0,
+            'title' => '',
+            'content' => '',
+            'contentformat' => FORMAT_HTML,
+            'url' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+    }
+
+    /**
+     * Helper: apply the historical-item filter through its item-list caller.
+     */
+    private function get_all_filtered_items(): array {
+        return block_exaport_get_items_by_category_and_user($this->user->id, null);
+    }
+
+    public function test_item_where_keeps_ordinary_item_visible(): void {
+        $itemid = $this->create_item(0, 'Ordinary', [
+            'isoez' => 0,
+            'intro' => '',
+        ]);
+
+        $this->assertArrayHasKey($itemid, $this->get_all_filtered_items());
+    }
+
+    public function test_item_where_hides_empty_oez_placeholder(): void {
+        $itemid = $this->create_item(0, 'Empty OEZ', [
+            'isoez' => 1,
+            'intro' => '',
+        ]);
+
+        $this->assertArrayNotHasKey($itemid, $this->get_all_filtered_items());
+    }
+
+    public function test_item_where_keeps_oez_item_with_intro_visible(): void {
+        $itemid = $this->create_item(0, 'OEZ text', [
+            'isoez' => 1,
+            'intro' => 'Legacy introduction',
+        ]);
+
+        $this->assertArrayHasKey($itemid, $this->get_all_filtered_items());
+    }
+
+    /**
+     * @dataProvider supported_structured_block_type_provider
+     */
+    public function test_item_where_keeps_oez_item_with_supported_structured_block_visible(string $type): void {
+        $itemid = $this->create_item(0, "OEZ {$type}", [
+            'isoez' => 1,
+            'intro' => '',
+        ]);
+        $this->create_item_block($itemid, $type);
+
+        $this->assertArrayHasKey($itemid, $this->get_all_filtered_items());
+    }
+
+    public static function supported_structured_block_type_provider(): array {
+        return [
+            'text block' => ['text'],
+            'link block' => ['link'],
+            'file block' => ['file'],
+        ];
+    }
+
+    public function test_item_where_keeps_migrated_oez_url_and_file_items_after_legacy_fields_are_cleared(): void {
+        global $DB;
+
+        $urlitemid = $this->create_item(0, 'Migrated URL', [
+            'isoez' => 1,
+            'intro' => '',
+            'url' => 'https://example.test/legacy',
+        ]);
+        $fileitemid = $this->create_item(0, 'Migrated file', [
+            'isoez' => 1,
+            'intro' => '',
+            'attachment' => 'legacy.pdf',
+        ]);
+
+        $legacyitems = $this->get_all_filtered_items();
+        $this->assertArrayHasKey($urlitemid, $legacyitems);
+        $this->assertArrayHasKey($fileitemid, $legacyitems);
+
+        $this->create_item_block($urlitemid, 'link');
+        $this->create_item_block($fileitemid, 'file');
+
+        $DB->set_field('block_exaportitem', 'url', '', ['id' => $urlitemid]);
+        $DB->set_field('block_exaportitem', 'attachment', '', ['id' => $fileitemid]);
+
+        $items = $this->get_all_filtered_items();
+        $this->assertArrayHasKey($urlitemid, $items);
+        $this->assertArrayHasKey($fileitemid, $items);
+    }
+
+    public function test_item_where_ignores_unsupported_structured_block_types(): void {
+        $itemid = $this->create_item(0, 'Unsupported block', [
+            'isoez' => 1,
+            'intro' => '',
+        ]);
+        $this->create_item_block($itemid, 'unsupported');
+
+        $this->assertArrayNotHasKey($itemid, $this->get_all_filtered_items());
+    }
+
+    public function test_item_where_structured_blocks_do_not_duplicate_category_counts(): void {
+        $categoryid = $this->create_category('Structured category');
+        $itemid = $this->create_item($categoryid, 'Multiple blocks', [
+            'isoez' => 1,
+            'intro' => '',
+        ]);
+        foreach (['text', 'link', 'file'] as $type) {
+            $this->create_item_block($itemid, $type);
+        }
+
+        $categories = block_exaport_get_all_categories_for_user($this->user->id);
+
+        $this->assertArrayHasKey($categoryid, $categories);
+        $this->assertEquals(1, $categories[$categoryid]->item_cnt);
     }
 
     /**

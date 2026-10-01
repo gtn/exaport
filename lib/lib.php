@@ -1450,7 +1450,14 @@ function block_exaport_set_user_preferences($userid, $preferences = null) {
 
 function block_exaport_get_item_where() {
     // Extra where for epop.
-    return "(i.isoez=0 OR (i.isoez=1 AND (i.intro<>'' OR i.url<>'' OR i.attachment<>'')))";
+    return "(i.isoez=0 OR (i.isoez=1 AND (
+        i.intro<>'' OR i.url<>'' OR i.attachment<>'' OR EXISTS (
+            SELECT 1
+              FROM {block_exaportitemblock} ib
+             WHERE ib.itemid = i.id
+               AND ib.type IN ('text', 'link', 'file')
+        )
+    )))";
 }
 
 function block_exaport_get_category($id) {

@@ -27,7 +27,7 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
         global $DB;
 
         // Get the block instance.
-        $block = $this->get_task()->get_blockid();
+        $block = (int)$this->get_task()->get_blockid();
         $courseid = $this->get_task()->get_courseid();
 
         // Define the root element.
@@ -81,6 +81,23 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
         $items->add_child($item);
         $item->add_child($contentblocks);
         $contentblocks->add_child($contentblock);
+
+        // Everything in this structure is course-scoped, despite Moodle invoking this step once
+        // for every Exaport block instance. Give ownership to the lowest instance id in the course
+        // rather than to whichever task happens to execute first. This is deterministic across
+        // backup plan ordering and produces one populated exaport.xml; the other instances retain
+        // their normal block backup but have an empty plugin structure. A normal course backup
+        // includes every block instance, so the elected owner is part of the same backup plan.
+        $coursecontextid = context_course::instance($courseid)->id;
+        $ownerblock = (int)$DB->get_field_sql(
+            'SELECT MIN(id)
+               FROM {block_instances}
+              WHERE blockname = :blockname AND parentcontextid = :contextid',
+            array('blockname' => 'exaport', 'contextid' => $coursecontextid)
+        );
+        if ($block !== $ownerblock) {
+            return $this->prepare_block_structure($exaport);
+        }
 
         // Define data sources.
         $course_template->set_source_table('block_exaport_course_templ', array('courseid' => backup::VAR_COURSEID));

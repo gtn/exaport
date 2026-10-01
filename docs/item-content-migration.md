@@ -30,10 +30,11 @@ content hashes to guess whether content is duplicated. See also
 
 The migration fetches at most 500 items at a time using ascending-ID keyset
 pagination. Immediately before processing each non-empty batch it gives that
-batch a fresh one-hour Moodle timeout. There is no fixed batch-count limit or
-total duration limit, so a healthy migration may continue for many hours while
-still retaining a finite application-level guardrail for each batch. Aggregate,
-privacy-safe progress is reported after every completed batch.
+batch a fresh 30-minute (1,800-second) Moodle timeout. There is no fixed
+batch-count limit or total duration limit, so a healthy migration may continue
+for many hours while still retaining a finite application-level guardrail for
+each batch. Aggregate, privacy-safe progress is reported after every completed
+batch.
 
 Each item commits in its own delegated transaction. If, for example, a later
 batch fails, items completed in earlier batches remain committed, but the

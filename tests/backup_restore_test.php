@@ -83,7 +83,24 @@ final class backup_restore_test extends \advanced_testcase {
         $ownertwo = $generator->create_user(['username' => 'portfolio_owner_two']);
         $generator->enrol_user($ownerone->id, $course->id, 'student');
         $generator->enrol_user($ownertwo->id, $course->id, 'student');
-        $generator->create_block('exaport', ['parentcontextid' => \context_course::instance($course->id)->id]);
+        $coursecontextid = \context_course::instance($course->id)->id;
+        $firstinstance = $generator->create_block('exaport', ['parentcontextid' => $coursecontextid]);
+        $secondinstance = $generator->create_block('exaport', ['parentcontextid' => $coursecontextid]);
+        $this->assertLessThan((int)$secondinstance->id, (int)$firstinstance->id);
+
+        // Course-scoped records must be emitted by only one of the two block backup tasks.
+        $DB->insert_record('block_exaport_course_templ', (object)[
+            'courseid' => $course->id, 'pid' => 0, 'name' => 'Course template',
+            'sortorder' => 4, 'share_to_teachers' => 1, 'timemodified' => 200,
+        ]);
+        $DB->insert_record('block_exaport_view_templ', (object)[
+            'courseid' => $course->id, 'name' => 'View template', 'description' => 'Description',
+            'sortorder' => 5, 'share_to_teachers' => 1, 'timemodified' => 200,
+        ]);
+        $DB->insert_record('block_exaport_templ_dist', (object)[
+            'courseid' => $course->id, 'auto_distribute' => 1,
+            'auto_distribute_views' => 1, 'timemodified' => 200,
+        ]);
 
         // This item deliberately mixes already-structured content and both kinds of legacy source.
         $mixed = $this->item($course->id, $ownerone->id, 'Mixed content',
@@ -113,6 +130,22 @@ final class backup_restore_test extends \advanced_testcase {
         $oldblockids = [$text->id, $firstfiles->id, $secondfiles->id, $otherblock->id];
         $adminid = (int)get_admin()->id;
         $tempname = $this->backup_course($course->id, $adminid);
+
+        // Both block tasks ran, but exactly one owns the shared section. Ownership is selected by
+        // instance id in the backup step, not by the order in which Moodle executes these tasks.
+        $temppath = make_backup_temp_directory($tempname);
+        $exaportxmls = glob($temppath . '/blocks/exaport_*/exaport.xml');
+        $this->assertCount(2, $exaportxmls);
+        $serializeditemcounts = [];
+        foreach ($exaportxmls as $exaportxml) {
+            $xml = file_get_contents($exaportxml);
+            $this->assertNotFalse($xml);
+            $serializeditemcounts[] = substr_count($xml, '<item id="');
+        }
+        sort($serializeditemcounts);
+        $this->assertSame([0, 2], $serializeditemcounts,
+            'Only the deterministic owner instance may serialize course-scoped data');
+
         $restore = new \restore_controller(
             $tempname, $destination->id, \backup::INTERACTIVE_NO, \backup::MODE_GENERAL,
             $adminid, \backup::TARGET_EXISTING_ADDING
@@ -124,6 +157,12 @@ final class backup_restore_test extends \advanced_testcase {
         $restoreditems = array_values($DB->get_records('block_exaportitem',
             ['courseid' => $destination->id], 'id ASC'));
         $this->assertCount(2, $restoreditems, 'Each source item must be restored exactly once');
+        $this->assertSame(1, $DB->count_records('block_exaport_course_templ',
+            ['courseid' => $destination->id]), 'Course templates must not be duplicated');
+        $this->assertSame(1, $DB->count_records('block_exaport_view_templ',
+            ['courseid' => $destination->id]), 'View templates must not be duplicated');
+        $this->assertSame(1, $DB->count_records('block_exaport_templ_dist',
+            ['courseid' => $destination->id]), 'Distribution settings must not be duplicated');
         $restoredmixed = $DB->get_record('block_exaportitem',
             ['courseid' => $destination->id, 'name' => 'Mixed content'], '*', MUST_EXIST);
         $restoredother = $DB->get_record('block_exaportitem',
@@ -135,6 +174,10 @@ final class backup_restore_test extends \advanced_testcase {
 
         $mixedblocks = array_values($DB->get_records('block_exaportitemblock',
             ['itemid' => $restoredmixed->id], 'sortorder ASC, id ASC'));
+        $this->assertSame(6, $DB->count_records_select('block_exaportitemblock',
+            'itemid IN (:mixed, :other)',
+            ['mixed' => $restoredmixed->id, 'other' => $restoredother->id]),
+            'Each source structured block and each legacy conversion block is restored once');
         $this->assertSame(['text', 'file', 'file', 'link', 'file'], array_column($mixedblocks, 'type'));
         $this->assertSame([3, 7, 11, 12, 13], array_map('intval', array_column($mixedblocks, 'sortorder')),
             'Legacy blocks must append after existing structured blocks');
@@ -160,6 +203,22 @@ final class backup_restore_test extends \advanced_testcase {
             $this->assertSame((int)$ownerone->id, (int)$file->get_userid());
             $this->assertSame((int)$block->id, (int)$file->get_itemid());
         }
+        $this->assertCount(4, array_filter(get_file_storage()->get_area_files(
+            $ownercontext, 'block_exaport', 'item_content_file', false, 'id', false
+        ), static function($file) use ($restoredmixed): bool {
+            global $DB;
+            return $DB->record_exists('block_exaportitemblock', [
+                'id' => $file->get_itemid(), 'itemid' => $restoredmixed->id,
+            ]);
+        }), 'Every expected structured file record for the mixed item must exist exactly once');
+        $this->assertCount(1, array_filter(get_file_storage()->get_area_files(
+            $ownercontext, 'block_exaport', 'item_content_text', false, 'id', false
+        ), static function($file) use ($restoredmixed): bool {
+            global $DB;
+            return $DB->record_exists('block_exaportitemblock', [
+                'id' => $file->get_itemid(), 'itemid' => $restoredmixed->id,
+            ]);
+        }), 'The structured editor file record must exist exactly once');
         $this->assertEmpty(get_file_storage()->get_area_files(
             $ownercontext, 'block_exaport', 'item_file', $restoredmixed->id, 'id', false
         ));
@@ -170,6 +229,10 @@ final class backup_restore_test extends \advanced_testcase {
         $otherfile = get_file_storage()->get_file(\context_user::instance($ownertwo->id)->id,
             'block_exaport', 'item_content_file', $otherblocks[0]->id, '/nested/', '第二.txt');
         $this->assertNotFalse($otherfile);
+        $this->assertCount(1, get_file_storage()->get_area_files(
+            \context_user::instance($ownertwo->id)->id, 'block_exaport', 'item_content_file',
+            $otherblocks[0]->id, 'id', false
+        ), 'The second owner File API record must be restored exactly once');
         $this->assertSame($expected['owner2'], $otherfile->get_contenthash());
         $this->assertSame((int)$ownertwo->id, (int)$otherfile->get_userid());
 

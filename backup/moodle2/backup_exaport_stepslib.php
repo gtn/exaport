@@ -95,7 +95,8 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
                FROM {block_exaportitem} i
                JOIN {context} ctx ON ctx.contextlevel = :userlevel AND ctx.instanceid = i.userid
               WHERE i.courseid = :courseid',
-            array('userlevel' => CONTEXT_USER, 'courseid' => backup::VAR_COURSEID)
+            // Positive scalar source parameters are otherwise interpreted as element paths.
+            array('userlevel' => array('sqlparam' => CONTEXT_USER), 'courseid' => backup::VAR_COURSEID)
         );
         $contentblock->set_source_table('block_exaportitemblock', array('itemid' => backup::VAR_PARENTID));
 

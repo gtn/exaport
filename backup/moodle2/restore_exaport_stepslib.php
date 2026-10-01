@@ -131,8 +131,13 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         // block-context annotation could never have included these user-context files.
         $oldusercontextid = !empty($data->usercontextid) ? (int)$data->usercontextid : 0;
         unset($data->usercontextid);
+        $sourceuserid = (int)$data->userid;
+        $newuserid = $this->get_mappingid('user', $sourceuserid);
+        if (empty($newuserid)) {
+            throw new moodle_exception('restoremissingusermapping', 'block_exaport', '', $sourceuserid);
+        }
         $data->courseid = $this->get_courseid();
-        $data->userid = $this->get_mappingid('user', $data->userid);
+        $data->userid = (int)$newuserid;
         $data->id = (int)$DB->insert_record('block_exaportitem', $data);
         // File mappings are joined to backup files by their source context. Supplying that context
         // as the mapping's parent item is therefore required for add_related_files() to find files

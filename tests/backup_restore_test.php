@@ -57,11 +57,12 @@ final class backup_restore_test extends \advanced_testcase {
     }
 
     /** Make and unpack a real Moodle course backup, returning its temporary restore name. */
-    private function backup_course(int $courseid, int $userid): string {
+    private function backup_course(int $courseid, int $userid, bool $includeusers = true): string {
         $controller = new \backup_controller(
             \backup::TYPE_1COURSE, $courseid, \backup::FORMAT_MOODLE,
             \backup::INTERACTIVE_NO, \backup::MODE_GENERAL, $userid
         );
+        $controller->get_plan()->get_setting('users')->set_value($includeusers);
         $controller->execute_plan();
         $results = $controller->get_results();
         $backupfile = $results['backup_destination'];
@@ -258,5 +259,104 @@ final class backup_restore_test extends \advanced_testcase {
                 $ownercontext, 'block_exaport', $area, $restoredmixed->id, 'id', false
             ));
         }
+    }
+
+    public function test_backup_without_users_omits_personal_items_blocks_and_files(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $destination = $generator->create_course();
+        $owner = $generator->create_user(['username' => 'excluded_portfolio_owner']);
+        $generator->enrol_user($owner->id, $course->id, 'student');
+        $coursecontextid = \context_course::instance($course->id)->id;
+        $generator->create_block('exaport', ['parentcontextid' => $coursecontextid]);
+        $generator->create_block('exaport', ['parentcontextid' => $coursecontextid]);
+
+        $item = $this->item($course->id, $owner->id, 'Must not be backed up');
+        $block = $this->content_block($item->id, 'file', 0, 'Private document');
+        $contenthash = $this->file($owner->id, 'item_content_file', $block->id,
+            '/private/', 'private.txt', 'private-content');
+        $initialblockcount = $DB->count_records('block_exaportitemblock');
+        $initialfilecount = count(get_file_storage()->get_area_files(
+            \context_user::instance($owner->id)->id, 'block_exaport', 'item_content_file',
+            $block->id, 'id', false
+        ));
+
+        $adminid = (int)get_admin()->id;
+        $tempname = $this->backup_course($course->id, $adminid, false);
+        $temppath = make_backup_temp_directory($tempname);
+        $exaportxmls = glob($temppath . '/blocks/exaport_*/exaport.xml');
+        $this->assertCount(2, $exaportxmls);
+        foreach ($exaportxmls as $exaportxml) {
+            $xml = file_get_contents($exaportxml);
+            $this->assertNotFalse($xml);
+            $this->assertStringNotContainsString('<item id="', $xml);
+            $this->assertStringNotContainsString('<content_block id="', $xml);
+        }
+        $filesxml = file_get_contents($temppath . '/files.xml');
+        $this->assertNotFalse($filesxml);
+        $this->assertStringNotContainsString($contenthash, $filesxml,
+            'Excluded personal item content must not enter the backup file pool');
+
+        $restore = new \restore_controller(
+            $tempname, $destination->id, \backup::INTERACTIVE_NO, \backup::MODE_GENERAL,
+            $adminid, \backup::TARGET_EXISTING_ADDING
+        );
+        $this->assertTrue($restore->execute_precheck());
+        $restore->execute_plan();
+        $restore->destroy();
+
+        $this->assertSame(0, $DB->count_records('block_exaportitem',
+            ['courseid' => $destination->id]));
+        $this->assertSame($initialblockcount, $DB->count_records('block_exaportitemblock'));
+        $this->assertCount($initialfilecount, get_file_storage()->get_area_files(
+            \context_user::instance($owner->id)->id, 'block_exaport', 'item_content_file',
+            $block->id, 'id', false
+        ), 'Restore must not add another copy of excluded item content');
+    }
+
+    public function test_restore_rejects_item_without_user_mapping_before_insert(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $destination = $generator->create_course();
+        $owner = $generator->create_user(['username' => 'unmapped_portfolio_owner']);
+        $generator->enrol_user($owner->id, $course->id, 'student');
+        $generator->create_block('exaport', [
+            'parentcontextid' => \context_course::instance($course->id)->id,
+        ]);
+        $this->item($course->id, $owner->id, 'Owner mapping required');
+
+        $adminid = (int)get_admin()->id;
+        $tempname = $this->backup_course($course->id, $adminid);
+        $exaportxmls = glob(make_backup_temp_directory($tempname) . '/blocks/exaport_*/exaport.xml');
+        $this->assertCount(1, $exaportxmls);
+        $xml = file_get_contents($exaportxmls[0]);
+        $this->assertNotFalse($xml);
+        $missinguserid = 999999999;
+        $xml = str_replace('<userid>' . $owner->id . '</userid>',
+            '<userid>' . $missinguserid . '</userid>', $xml, $replacements);
+        $this->assertSame(1, $replacements);
+        file_put_contents($exaportxmls[0], $xml);
+
+        $restore = new \restore_controller(
+            $tempname, $destination->id, \backup::INTERACTIVE_NO, \backup::MODE_GENERAL,
+            $adminid, \backup::TARGET_EXISTING_ADDING
+        );
+        $this->assertTrue($restore->execute_precheck());
+        try {
+            $restore->execute_plan();
+            $this->fail('Restore must reject an Exaport item whose owner has no user mapping');
+        } catch (\moodle_exception $exception) {
+            $this->assertSame('restoremissingusermapping', $exception->errorcode);
+            $this->assertStringContainsString((string)$missinguserid, $exception->getMessage());
+        } finally {
+            $restore->destroy();
+        }
+        $this->assertSame(0, $DB->count_records('block_exaportitem',
+            ['courseid' => $destination->id]),
+            'Mapping validation must happen before the item is inserted');
     }
 }

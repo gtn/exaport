@@ -1068,6 +1068,7 @@ $string['privacy:metadata:block_exaportitemblock:contentformat'] = 'The format o
 $string['privacy:metadata:block_exaportitemblock:url'] = 'The URL stored in a link content block.';
 $string['privacy:metadata:block_exaportitemblock:timecreated'] = 'When the content block was created.';
 $string['privacy:metadata:block_exaportitemblock:timemodified'] = 'When the content block was last changed.';
+$string['restoremissingusermapping'] = 'Cannot restore the Exaport item because its owner (source user ID {$a}) has no destination user mapping.';
 
 // === Item competences ===
 $string['competencessection'] = 'Competences';

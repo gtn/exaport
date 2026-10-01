@@ -38,6 +38,15 @@ final class item_content_copy_test extends \advanced_testcase {
         ], $content);
     }
 
+    /** Add a residual file in the legacy parent item file area. */
+    private function create_legacy_item_file(\stdClass $item, string $filename, string $content): \stored_file {
+        return get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($item->userid)->id,
+            'component' => 'block_exaport', 'filearea' => 'item_file', 'itemid' => $item->id,
+            'filepath' => '/', 'filename' => $filename, 'userid' => $item->userid,
+        ], $content);
+    }
+
     public function test_no_blocks_returns_empty_map(): void {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
@@ -100,6 +109,10 @@ final class item_content_copy_test extends \advanced_testcase {
         $this->assertSame('copy-source', $subfile->get_source());
         $this->assertSame('Copy Author', $subfile->get_author());
         $this->assertSame((int)$destinationuser->id, (int)$subfile->get_userid());
+        $sourcefile = get_file_storage()->get_file(\context_user::instance($sourceuser->id)->id,
+            'block_exaport', 'item_content_file', $first->id, '/sub/', 'one.txt');
+        $this->assertNotFalse($sourcefile);
+        $this->assertSame($sourcefile->get_contenthash(), $subfile->get_contenthash());
         $this->assertCount(1, get_file_storage()->get_area_files(\context_user::instance($destinationuser->id)->id,
             'block_exaport', 'item_content_file', $map[$second->id], 'id ASC', false));
         $this->assertSame(2, $DB->count_records('block_exaportitemblock', ['itemid' => $source->id]));
@@ -161,6 +174,103 @@ final class item_content_copy_test extends \advanced_testcase {
             $this->assertTrue($DB->record_exists('block_exaportitemblock', ['id' => $block->id]));
             $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $destination->id]));
         }
+    }
+
+    public function test_residual_legacy_content_is_ignored_and_source_is_unchanged(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $sourceuser = $this->getDataGenerator()->create_user();
+        $destinationuser = $this->getDataGenerator()->create_user();
+        $source = $this->create_item($sourceuser->id, 'file');
+        $DB->set_field('block_exaportitem', 'url', 'https://legacy.example/source', ['id' => $source->id]);
+        $DB->set_field('block_exaportitem', 'attachment', 'legacy.txt', ['id' => $source->id]);
+        $source->url = 'https://legacy.example/source';
+        $source->attachment = 'legacy.txt';
+        $legacyfile = $this->create_legacy_item_file($source, 'legacy.txt', 'legacy bytes');
+        $block = \block_exaport_create_file_content_block($source->id, 'Authoritative', ['sortorder' => 4]);
+        $structuredfile = $this->create_block_file(
+            $sourceuser->id,
+            'item_content_file',
+            $block->id,
+            'structured.txt',
+            'structured bytes',
+            '/nested/'
+        );
+        $destination = $this->create_item($destinationuser->id, 'file');
+
+        $map = \block_exaport_copy_item_content($source, $destination);
+
+        $sourceafter = $DB->get_record('block_exaportitem', ['id' => $source->id], '*', MUST_EXIST);
+        $destinationafter = $DB->get_record('block_exaportitem', ['id' => $destination->id], '*', MUST_EXIST);
+        $this->assertSame('https://legacy.example/source', $sourceafter->url);
+        $this->assertSame('legacy.txt', $sourceafter->attachment);
+        $this->assertSame('legacy bytes', $legacyfile->get_content());
+        $this->assertSame('', $destinationafter->url);
+        $this->assertSame('', $destinationafter->attachment);
+        $this->assertEmpty(get_file_storage()->get_area_files(
+            \context_user::instance($destinationuser->id)->id,
+            'block_exaport',
+            'item_file',
+            $destination->id,
+            'id',
+            false
+        ));
+        $copiedfile = get_file_storage()->get_file(
+            \context_user::instance($destinationuser->id)->id,
+            'block_exaport',
+            'item_content_file',
+            $map[$block->id],
+            '/nested/',
+            'structured.txt'
+        );
+        $this->assertNotFalse($copiedfile);
+        $this->assertSame($structuredfile->get_contenthash(), $copiedfile->get_contenthash());
+        $this->assertSame((int)$destinationuser->id, (int)$copiedfile->get_userid());
+    }
+
+    public function test_structured_file_failure_rolls_back_destination_copy(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $sourceuser = $this->getDataGenerator()->create_user();
+        $destinationuser = $this->getDataGenerator()->create_user();
+        $source = $this->create_item($sourceuser->id, 'file');
+        $block = \block_exaport_create_file_content_block($source->id, 'File');
+        $sourcefile = $this->create_block_file(
+            $sourceuser->id,
+            'item_content_file',
+            $block->id,
+            'source.txt',
+            'source remains'
+        );
+        $destinationid = 0;
+
+        try {
+            (function() use ($DB, $destinationuser, $source, &$destinationid): void {
+                $transaction = $DB->start_delegated_transaction();
+                try {
+                    $destination = $this->create_item($destinationuser->id, 'file');
+                    $destinationid = $destination->id;
+                    \block_exaport_copy_item_content(
+                        $source,
+                        $destination,
+                        static function(array $fileinfo, \stored_file $file): void {
+                            throw new \RuntimeException('Injected structured-file copy failure');
+                        }
+                    );
+                    $transaction->allow_commit();
+                } catch (\Throwable $exception) {
+                    $transaction->rollback($exception);
+                }
+            })();
+            $this->fail('Injected structured-file copy failure was accepted');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame('Injected structured-file copy failure', $exception->getMessage());
+        }
+
+        $this->assertFalse($DB->record_exists('block_exaportitem', ['id' => $destinationid]));
+        $this->assertFalse($DB->record_exists('block_exaportitemblock', ['itemid' => $destinationid]));
+        $this->assertTrue($DB->record_exists('block_exaportitemblock', ['id' => $block->id]));
+        $this->assertSame('source remains', $sourcefile->get_content());
     }
 
     /** Convenience wrapper which keeps assertions readable across Moodle versions. */

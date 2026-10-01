@@ -166,9 +166,14 @@ function block_exaport_get_item_content_export_data(stdClass $item): array {
  *
  * @param stdClass $sourceitem Source item containing trusted id and userid.
  * @param stdClass $destinationitem Destination item containing trusted id and userid.
+ * @param callable|null $filecopier Optional stored-file copier receiving target metadata and source file.
  * @return array<int, int> Source block ID to destination block ID map.
  */
-function block_exaport_copy_item_content(stdClass $sourceitem, stdClass $destinationitem): array {
+function block_exaport_copy_item_content(
+    stdClass $sourceitem,
+    stdClass $destinationitem,
+    ?callable $filecopier = null
+): array {
     global $DB;
 
     if (empty($sourceitem->id) || empty($sourceitem->userid) ||
@@ -179,6 +184,9 @@ function block_exaport_copy_item_content(stdClass $sourceitem, stdClass $destina
     $sourcecontext = context_user::instance((int)$sourceitem->userid);
     $destinationcontext = context_user::instance((int)$destinationitem->userid);
     $fs = get_file_storage();
+    $filecopier = $filecopier ?? static function(array $fileinfo, stored_file $sourcefile) use ($fs): void {
+        $fs->create_file_from_storedfile($fileinfo, $sourcefile);
+    };
     $blockmap = [];
     $copytime = time();
 
@@ -216,7 +224,7 @@ function block_exaport_copy_item_content(stdClass $sourceitem, stdClass $destina
 
         foreach ($fileareas as $filearea => $files) {
             foreach ($files as $file) {
-                $fs->create_file_from_storedfile([
+                $filecopier([
                     'contextid' => $destinationcontext->id,
                     'component' => 'block_exaport',
                     'filearea' => $filearea,

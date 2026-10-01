@@ -51,6 +51,22 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
             'courseid', 'auto_distribute', 'auto_distribute_views', 'timemodified'
         ));
 
+        // Portfolio items belong to a course too. Keep their content blocks below the item so the
+        // restore step can map both block records and the block-keyed file areas without guessing.
+        $items = new backup_nested_element('items');
+        $item = new backup_nested_element('item', array('id'), array(
+            'userid', 'type', 'categoryid', 'name', 'url', 'intro', 'attachment', 'timecreated',
+            'timemodified', 'courseid', 'shareall', 'externaccess', 'externcomment', 'sortorder',
+            'isoez', 'fileurl', 'beispiel_url', 'exampid', 'langid', 'beispiel_angabe', 'source',
+            'sourceid', 'iseditable', 'example_url', 'parentid', 'project_description',
+            'project_process', 'project_result'
+        ));
+        $contentblocks = new backup_nested_element('content_blocks');
+        $contentblock = new backup_nested_element('content_block', array('id'), array(
+            'itemid', 'type', 'sortorder', 'title', 'content', 'contentformat', 'url',
+            'timecreated', 'timemodified'
+        ));
+
         // Build the tree structure.
         $exaport->add_child($course_templates);
         $course_templates->add_child($course_template);
@@ -61,12 +77,25 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
         $exaport->add_child($dist_settings);
         $dist_settings->add_child($dist_setting);
 
+        $exaport->add_child($items);
+        $items->add_child($item);
+        $item->add_child($contentblocks);
+        $contentblocks->add_child($contentblock);
+
         // Define data sources.
         $course_template->set_source_table('block_exaport_course_templ', array('courseid' => backup::VAR_COURSEID));
         $view_template->set_source_table('block_exaport_view_templ', array('courseid' => backup::VAR_COURSEID));
         $dist_setting->set_source_table('block_exaport_templ_dist', array('courseid' => backup::VAR_COURSEID));
 
-        // No files to annotate for these tables.
+        $item->set_source_table('block_exaportitem', array('courseid' => backup::VAR_COURSEID));
+        $contentblock->set_source_table('block_exaportitemblock', array('itemid' => backup::VAR_PARENTID));
+
+        $item->annotate_ids('user', 'userid');
+        // item_file is retained here solely so pre-migration data can be recovered safely by the
+        // restore compatibility path. Normal new backups contain only the two structured areas.
+        $item->annotate_files('block_exaport', 'item_file', 'id');
+        $contentblock->annotate_files('block_exaport', 'item_content_file', 'id');
+        $contentblock->annotate_files('block_exaport', 'item_content_text', 'id');
 
         // Return the root element.
         return $this->prepare_block_structure($exaport);

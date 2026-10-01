@@ -43,7 +43,7 @@ class backup_exaport_block_task extends backup_block_task {
      * Code to prepare file area for backup
      */
     public function get_fileareas() {
-        return array(); // No file areas to backup for these tables.
+        return array('item_file', 'item_content_file', 'item_content_text');
     }
 
     /**

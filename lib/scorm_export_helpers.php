@@ -58,13 +58,12 @@ function block_exaport_scorm_archive_path(stored_file $file, string $base, array
 }
 
 /**
- * Render legacy and normalized structured content for one SCORM item.
+ * Render normalized structured content for one SCORM item.
  *
  * The callback packages a file under the supplied trusted base and returns its
  * final archive path. This keeps rendering independently testable from ZipArchive.
  *
  * @param stdClass $item Parent item.
- * @param stored_file[] $legacyfiles Legacy item_file files.
  * @param array[] $blocks Normalized structured blocks.
  * @param string $pagepath Generated item page archive path.
  * @param callable $packagefile Callback accepting stored_file and archive base.
@@ -72,27 +71,12 @@ function block_exaport_scorm_archive_path(stored_file $file, string $base, array
  */
 function block_exaport_scorm_render_item_content(
     stdClass $item,
-    array $legacyfiles,
     array $blocks,
     string $pagepath,
     callable $packagefile
 ): array {
     $html = '';
     $assets = [];
-    if (!empty($item->url) && $item->url !== 'false') {
-        $url = clean_param($item->url, PARAM_URL);
-        if ($url !== '') {
-            $html .= '<div class="legacy-url"><a href="' . s($url) . '"><!--###BOOKMARK_EXT_URL###-->' .
-                s($url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
-        }
-    }
-    foreach ($legacyfiles as $file) {
-        $asset = $packagefile($file, 'items/' . $item->id . '/legacy');
-        $assets[] = $asset;
-        $html .= '<div class="legacy-file"><a href="' . s(block_exaport_scorm_relative_url($pagepath, $asset)) .
-            '"><!--###BOOKMARK_FILE_URL###-->' . s($file->get_filename()) .
-            '<!--###BOOKMARK_FILE_URL###--></a></div>' . "\n";
-    }
     foreach ($blocks as $block) {
         $html .= '<section class="item-content-block item-content-' . s($block['type']) .
             '" data-block-id="' . (int)$block['blockid'] . '">';

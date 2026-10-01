@@ -13,6 +13,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/externlib.php');
 require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
+require_once($CFG->dirroot . '/blocks/exaport/db/upgradelib.php');
 
 /**
  * Tests structured item content loading and read-only output.
@@ -413,7 +414,7 @@ final class item_content_blocks_test extends \advanced_testcase {
         );
     }
 
-    public function test_external_item_renders_legacy_and_structured_content_without_missing_file(): void {
+    public function test_external_item_renders_migrated_and_existing_structured_content(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -433,6 +434,8 @@ final class item_content_blocks_test extends \advanced_testcase {
             'filepath' => '/',
             'filename' => 'structured.pdf',
         ], 'pdf');
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+        block_exaport_migrate_legacy_item_content($item);
         $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
 
         ob_start();

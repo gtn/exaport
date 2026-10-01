@@ -239,10 +239,9 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
         $content .= '<div id="description"><!--###BOOKMARK_' . $descriptionmarker . '_DESC###-->' .
             clean_text($item->intro, FORMAT_HTML) . '<!--###BOOKMARK_' . $descriptionmarker . '_DESC###--></div>' . "\n";
 
-        // Transitional order is intro, legacy URL, legacy files, then ordered structured blocks.
+        // Parent metadata is followed by the ordered structured content blocks.
         $rendered = block_exaport_scorm_render_item_content(
             $item,
-            block_exaport_get_item_files_array($item),
             block_exaport_get_item_content_export_data($item),
             $filepath,
             'block_exaport_scorm_add_file'

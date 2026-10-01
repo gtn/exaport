@@ -102,65 +102,16 @@ function block_exaport_print_extern_item($item, $access) {
     }
 
     $boxcontent = '';
-    $filescontent = '';
     $structuredblocks = block_exaport_get_item_content_blocks((int)$item->id);
     $structuredrenderable = new \block_exaport\output\item_content_blocks(
         $structuredblocks, null, (int)$item->userid, false, true, $access
     );
     $structureddata = $structuredrenderable->export_for_template($PAGE->get_renderer('block_exaport'));
-    if ($files = block_exaport_get_item_files($item)) {
-        foreach ($files as $fileindex => $file) {
-            if (!$file) {
-                continue; // Is here possible that $file is null?
-            }
-            $ffurl = s("{$CFG->wwwroot}/blocks/exaport/portfoliofile.php?access=" . $access . "&itemid=" . $item->id . '&inst=' . $fileindex);
-            if ($file->is_valid_image()) { // Image attachments don't get printed as links.
-                $filescontent .= "<div class=\"item-detail-image\"><img src=\"$ffurl\" alt=\"" . s($item->name) . "\" /></div>";
-            } else {
-                $icon = $OUTPUT->pix_icon(file_file_icon($file), '');
-                $filescontent .= "<p class=\"filelink\">" . $icon . ' ' .
-                    $OUTPUT->action_link($ffurl, format_string($file->get_filename()), new popup_action ('click', $ffurl)) . "</p>";
-                if (block_exaport_is_valid_media_by_filename($file->get_filename())) {
-                    // Videoblock.
-                    $filescontent .= '
-                    <div id="video_block">
-                        <div id="video_content">
-                            <video id="video_file" class="video-js vjs-default-skin vjs-big-play-centered"
-                                        controls preload="auto" width="640" height="480"
-                                        data-setup=\'{}\'>
-                                <source src="' . $ffurl . '" type="video/mp4" />
-                                <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading
-                                        to a web browser that
-                                        <a href="http://videojs.com/html5-video-support/" target="_blank">
-                                            supports HTML5 video</a></p>
-                            </video>
-                        </div>
-                        <div id="video_error" style="display: none;" class="incompatible_video">';
-                    $a = new stdClass ();
-                    $a->link = $OUTPUT->action_link($ffurl, format_string($file->get_filename()), new popup_action ('click', $ffurl));
-                    $filescontent .= get_string('incompatible_video', 'block_exaport', $a);
-                    $filescontent .= '</div>
-                                    </div>';
-                    $filescontent .= "
-                    <script src=\"" . $CFG->wwwroot . "/blocks/exaport/javascript/vedeo-js/exaport_video.js\"></script>";
-                };
-            }
-        }
-    }
-
     $hasstructuredcontent = \block_exaport\output\item_content_blocks::has_displayable_content($structureddata);
-    if (!$filescontent && !$item->url && !$hasstructuredcontent) {
+    if (!$hasstructuredcontent) {
         if ($item->type != 'note') { // notes can be without files
             $boxcontent = block_exaport_get_string('filenotfound');
         }
-    }
-
-    // Display files/attachments with heading if they exist
-    if ($filescontent) {
-        $boxcontent .= '<div class="item-project-section">';
-        $boxcontent .= '<h4>' . get_string('file', 'block_exaport') . '</h4>';
-        $boxcontent .= $filescontent;
-        $boxcontent .= '</div>';
     }
 
     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
@@ -172,14 +123,6 @@ function block_exaport_print_extern_item($item, $access) {
         // TODO: test - if the intro is empty - it will have wrapper template (Moodle api)
         // in this case it is possible that it is cleaned media link. Get it again
         $intro = $item->intro;
-    }
-
-    // Display URL with heading if it exists
-    if ($item->url && $item->url != "false") {
-        $boxcontent .= '<div class="item-project-section">';
-        $boxcontent .= '<h4>' . get_string('url', 'block_exaport') . '</h4>';
-        $boxcontent .= '<p><a target="_blank" href="' . s($item->url) . '">' . str_replace('http://', '', $item->url) . '</a></p>';
-        $boxcontent .= '</div>';
     }
 
     // Display short description (intro field) with heading
@@ -229,7 +172,7 @@ function block_exaport_print_extern_item($item, $access) {
         }
     }
 
-    // Transitional: legacy fields above and structured blocks may contain different user content.
+    // Structured blocks render alongside the unrelated parent metadata above.
     if ($structuredblocks) {
         $boxcontent .= $OUTPUT->render_from_template('block_exaport/item_content_blocks', $structureddata);
     }

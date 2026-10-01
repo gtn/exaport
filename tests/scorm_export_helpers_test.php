@@ -13,9 +13,10 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
 require_once($CFG->dirroot . '/blocks/exaport/lib/scorm_export_helpers.php');
+require_once($CFG->dirroot . '/blocks/exaport/db/upgradelib.php');
 
 /**
- * Tests SCORM rendering of legacy and structured item content.
+ * Tests SCORM rendering of structured item content.
  *
  * @package block_exaport
  * @copyright 2026 gtn gmbh
@@ -23,7 +24,7 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/scorm_export_helpers.php');
  */
 final class scorm_export_helpers_test extends \advanced_testcase {
 
-    public function test_mixed_content_is_rendered_in_order_with_collision_safe_paths(): void {
+    public function test_migrated_content_is_rendered_in_order_with_collision_safe_paths(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -34,10 +35,11 @@ final class scorm_export_helpers_test extends \advanced_testcase {
         $linkid = $this->create_block($item->id, 'link', 2, 'Second', '', 'https://structured.example/?a=1&b=2');
         $fileid1 = $this->create_block($item->id, 'file', 3, 'Third');
         $fileid2 = $this->create_block($item->id, 'file', 4, 'Fourth');
-        $legacyfile = $this->create_file($owner->id, 'item_file', $item->id, '/', 'same.pdf');
+        $this->create_file($owner->id, 'item_file', $item->id, '/', 'same.pdf');
         $this->create_file($owner->id, 'item_content_text', $textid, '/images/', 'editor.png');
         $this->create_file($owner->id, 'item_content_file', $fileid1, '/nested/', 'same.pdf');
         $this->create_file($owner->id, 'item_content_file', $fileid2, '/nested/', 'same.pdf');
+        $migration = block_exaport_migrate_legacy_item_content($item);
         $item = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
         $calls = [];
         $package = static function(\stored_file $file, string $base) use (&$calls): string {
@@ -48,7 +50,6 @@ final class scorm_export_helpers_test extends \advanced_testcase {
 
         $result = block_exaport_scorm_render_item_content(
             $item,
-            [$legacyfile],
             block_exaport_get_item_content_export_data($item),
             'categories/sub/item.html',
             $package
@@ -58,10 +59,10 @@ final class scorm_export_helpers_test extends \advanced_testcase {
         $this->assertSame($calls, $result['assets']);
         $this->assertCount(4, $result['assets']);
         $this->assertSame([
-            'items/' . $item->id . '/legacy/same.pdf',
             'items/' . $item->id . '/blocks/' . $textid . '/editor/images/editor.png',
             'items/' . $item->id . '/blocks/' . $fileid1 . '/nested/same.pdf',
             'items/' . $item->id . '/blocks/' . $fileid2 . '/nested/same.pdf',
+            'items/' . $item->id . '/blocks/' . $migration['fileblockid'] . '/same.pdf',
         ], $result['assets']);
         $this->assertStringContainsString('https://legacy.example/path?a=1&amp;b=2', $html);
         $this->assertStringContainsString('https://structured.example/?a=1&amp;b=2', $html);
@@ -85,7 +86,6 @@ final class scorm_export_helpers_test extends \advanced_testcase {
 
         $result = block_exaport_scorm_render_item_content(
             $item,
-            [],
             block_exaport_get_item_content_export_data($item),
             'item.html',
             static function(\stored_file $file, string $base): string {

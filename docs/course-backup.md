@@ -10,6 +10,11 @@ block-instance backup. Choosing an owner from persistent instance ids, rather th
 first task that executes, makes the result independent of backup task processing order. A normal
 course backup includes all of the course's block instances, including the elected owner.
 
+Personal portfolio items, their structured blocks, and their files follow Moodle's standard
+**Include users** backup setting. They are omitted when user data is excluded. Restoring personal
+portfolio content requires Moodle to provide a valid destination mapping for its owner; restore
+fails rather than assigning an item to a guessed user when that mapping is absent.
+
 Restore consequently inserts each personal and course-scoped record once. In particular, restore
 does not insert duplicate portfolio data and then attempt to deduplicate it. Legacy item fields are
 converted only after that item's files and structured blocks have been restored, so one legacy URL

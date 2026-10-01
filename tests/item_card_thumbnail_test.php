@@ -131,17 +131,15 @@ final class item_card_thumbnail_test extends \advanced_testcase {
         );
     }
 
-    public function test_shared_image_file_item_exports_thumbnail(): void {
+    public function test_legacy_image_file_is_not_an_ordinary_thumbnail(): void {
         $item = $this->create_item();
         $this->add_item_file($item, 'item_file', 'photo.png', $this->get_png_content(), 'image/png');
 
         $data = $this->export_item_card($item);
 
-        $this->assertTrue($data['hasthumbnail']);
-        $this->assertStringContainsString('/pluginfile.php/', $data['thumbnailurl']);
-        $this->assertStringContainsString('/item_file/portfolio/id/' . $this->owner->id . '/itemid/' . $item->id . '/photo.png',
-            $data['thumbnailurl']);
-        $this->assertSame('Test item', $data['thumbnailalt']);
+        $this->assertFalse($data['hasthumbnail']);
+        $this->assertSame('', $data['thumbnailurl']);
+        $this->assertSame('', $data['thumbnailalt']);
     }
 
     public function test_non_image_file_item_exports_no_thumbnail(): void {
@@ -175,7 +173,7 @@ final class item_card_thumbnail_test extends \advanced_testcase {
             $data['thumbnailurl']);
     }
 
-    public function test_external_category_item_uses_external_thumbnail_access(): void {
+    public function test_external_category_does_not_expose_legacy_item_file_thumbnail(): void {
         $item = $this->create_item();
         $item->thumbnail_access = 'category/hash/' . $this->owner->id . '-abcdef12';
         $item->extern_item_url = 'https://example.invalid/shared-item';
@@ -183,11 +181,8 @@ final class item_card_thumbnail_test extends \advanced_testcase {
 
         $data = $this->export_item_card($item, 'extern_category');
 
-        $this->assertTrue($data['hasthumbnail']);
-        $this->assertStringContainsString(
-            '/item_file/category/hash/' . $this->owner->id . '-abcdef12/itemid/' . $item->id . '/photo.png',
-            $data['thumbnailurl']
-        );
+        $this->assertFalse($data['hasthumbnail']);
+        $this->assertSame('', $data['thumbnailurl']);
     }
 
     public function test_external_category_custom_icon_uses_item_iconfile_path(): void {
@@ -276,16 +271,12 @@ final class item_card_thumbnail_test extends \advanced_testcase {
         $this->assertSame('custom.png', block_exaport_get_item_thumbnail_file($item)->get_filename());
     }
 
-    public function test_legacy_image_remains_fallback_and_url_shape_is_unchanged(): void {
+    public function test_legacy_image_is_not_a_thumbnail_fallback(): void {
         $item = $this->create_item();
         $this->add_item_file($item, 'item_file', 'legacy image.png', $this->get_png_content(), 'image/png');
 
-        $source = block_exaport_get_item_thumbnail_source($item);
-        $this->assertSame('item_file', $source->filearea);
-        $this->assertStringContainsString(
-            '/item_file/portfolio/id/' . $this->owner->id . '/itemid/' . $item->id . '/legacy%20image.png',
-            block_exaport_get_item_thumbnail_source_url($source, 'portfolio/id/' . $this->owner->id)
-        );
+        $this->assertFalse(block_exaport_get_item_thumbnail_source($item));
+        $this->assertSame([], block_exaport_get_item_thumbnail_candidates($item));
     }
 
     public function test_structured_external_access_url_keeps_parent_and_block_ids_distinct(): void {
@@ -367,10 +358,10 @@ final class item_card_thumbnail_test extends \advanced_testcase {
         $this->assertFalse($this->export_item_card($item)['hasthumbnail']);
     }
 
-    public function test_imindex_candidates_prefer_structured_list_and_legacy_list_is_preserved(): void {
+    public function test_imindex_candidates_only_use_structured_files(): void {
         $item = $this->create_item();
         $this->add_item_file($item, 'item_file', 'legacy.png', $this->get_png_content(), 'image/png');
-        $this->assertSame('legacy.png', block_exaport_get_item_thumbnail_candidates($item)[0]->get_filename());
+        $this->assertSame([], block_exaport_get_item_thumbnail_candidates($item));
 
         $this->add_structured_file($item, 0, 'structured.txt', 'text', 'text/plain');
         $this->assertSame(

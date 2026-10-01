@@ -60,8 +60,8 @@ final class wp_integration_export_test extends \advanced_testcase {
 
         $this->assertSame('Mixed item', $payload['name']);
         $this->assertSame('<p>Legacy intro</p>', $payload['content']);
-        $this->assertSame('https://legacy.example/', $payload['link']);
-        $this->assertSame([$legacyfile->get_contenthash()], $payload['files']);
+        $this->assertSame('', $payload['link']);
+        $this->assertSame([], $payload['files']);
         $this->assertSame(['link', 'text', 'file'], array_column($payload['structured_blocks'], 'type'));
         $this->assertSame([$linkid, $textid, $fileid], array_column($payload['structured_blocks'], 'id'));
         $this->assertSame('https://structured.example/', $payload['structured_blocks'][0]['url']);

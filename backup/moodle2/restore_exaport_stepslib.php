@@ -20,6 +20,9 @@
  */
 class restore_exaport_block_structure_step extends restore_structure_step {
 
+    /** @var int[] Items created by this restore, keyed by their new id. */
+    private $restoreditems = array();
+
     /**
      * Define the structure to be restored
      */
@@ -31,6 +34,9 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         $paths[] = new restore_path_element('course_template', '/block/block_exaport/course_templates/course_template');
         $paths[] = new restore_path_element('view_template', '/block/block_exaport/view_templates/view_template');
         $paths[] = new restore_path_element('distribution_setting', '/block/block_exaport/distribution_settings/distribution_setting');
+        $paths[] = new restore_path_element('item', '/block/block_exaport/items/item');
+        $paths[] = new restore_path_element('content_block',
+            '/block/block_exaport/items/item/content_blocks/content_block');
 
         return $paths;
     }
@@ -107,9 +113,55 @@ class restore_exaport_block_structure_step extends restore_structure_step {
     }
 
     /**
+     * Restore a portfolio item, including the legacy fields needed to import old backups.
+     */
+    protected function process_item($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = (int)$data->id;
+        $data->courseid = $this->get_courseid();
+        $data->userid = $this->get_mappingid('user', $data->userid);
+        $data->id = (int)$DB->insert_record('block_exaportitem', $data);
+        $this->set_mapping('exaport_item', $oldid, $data->id);
+        $this->restoreditems[$data->id] = $data->id;
+    }
+
+    /**
+     * Restore one structured content block and its two block-keyed file areas.
+     */
+    protected function process_content_block($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = (int)$data->id;
+        $data->itemid = $this->get_mappingid('exaport_item', $data->itemid);
+        $data->id = (int)$DB->insert_record('block_exaportitemblock', $data);
+        $this->set_mapping('exaport_item_content_block', $oldid, $data->id);
+    }
+
+    /**
+     * Conversion seam kept separate so restore tests can inject a copy failure.
+     */
+    protected function migrate_legacy_item_content(stdClass $item): void {
+        block_exaport_migrate_legacy_item_content($item);
+    }
+
+    /**
      * Actions to be executed after the restore
      */
     protected function after_execute() {
-        // No additional processing needed after restore.
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot . '/blocks/exaport/db/upgradelib.php');
+        // Restore files only after every item/block mapping is known. Old archives have item_file;
+        // current archives have the two block-keyed structured areas.
+        $this->add_related_files('block_exaport', 'item_file', 'exaport_item');
+        $this->add_related_files('block_exaport', 'item_content_file', 'exaport_item_content_block');
+        $this->add_related_files('block_exaport', 'item_content_text', 'exaport_item_content_block');
+        foreach ($this->restoreditems as $itemid) {
+            $item = $DB->get_record('block_exaportitem', array('id' => $itemid), '*', MUST_EXIST);
+            $this->migrate_legacy_item_content($item);
+        }
     }
 }

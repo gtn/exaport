@@ -66,10 +66,11 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         $newitem->userid = g::$USER->id;
         $newitem->type = $item->type;
         $newitem->name = $item->name;
-        // Compatibility-only: preserve anomalous residual legacy content until the Phase 10 audit/removal.
-        $newitem->url = $item->url;
+        // Structured blocks are authoritative. Residual legacy parent content
+        // is neither repaired nor propagated by an ordinary copy.
+        $newitem->url = '';
         $newitem->intro = $item->intro;
-        $newitem->attachment = $item->attachment;
+        $newitem->attachment = '';
         $newitem->timemodified = $item->timemodified;
         $newitem->courseid = g::$COURSE->id;
         $newitem->sortorder = $item->sortorder;
@@ -80,20 +81,8 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
 
         \block_exaport_copy_item_content($item, $newitem);
 
-        // Compatibility-only legacy files. Structured blocks were copied above.
+        // The presentation icon remains independent of item content.
         $fs = get_file_storage();
-        if ($file = block_exaport_get_item_files($item)) {
-            foreach ($file as $fileindex => $fileobject) {
-                if ($fileobject) {
-                    $fs->create_file_from_storedfile(array(
-                        'contextid' => \context_user::instance(g::$USER->id)->id,
-                        'component' => 'block_exaport',
-                        'filearea' => 'item_file',
-                        'itemid' => $newitem->id,
-                    ), $fileobject);
-                }
-            }
-        }
         if ($file = block_exaport_get_single_file($item, 'item_iconfile')) {
             $fs->create_file_from_storedfile(array(
                 'contextid' => \context_user::instance(g::$USER->id)->id,

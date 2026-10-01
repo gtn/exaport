@@ -6,141 +6,194 @@ namespace block_exaport;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->libdir . '/upgradelib.php');
-require_once(__DIR__ . '/../db/upgradelib.php');
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+require_once(__DIR__ . '/../lib/item_content_helpers.php');
 
 /**
- * Regression tests for the legacy-content compatibility phase used after restore.
+ * End-to-end coverage for course backup and restore of user-context portfolio content.
  *
- * The fixtures model the state immediately after Moodle has restored the archive's files and item
- * records. The restore structure step then invokes the same transactional converter tested here.
- *
- * @covers ::block_exaport_migrate_legacy_item_content
+ * @covers \backup_exaport_block_structure_step
+ * @covers \restore_exaport_block_structure_step
  */
 final class backup_restore_test extends \advanced_testcase {
-
-    public function test_backup_and_restore_definitions_include_structured_content(): void {
-        $backup = file_get_contents(__DIR__ . '/../backup/moodle2/backup_exaport_stepslib.php');
-        $restore = file_get_contents(__DIR__ . '/../backup/moodle2/restore_exaport_stepslib.php');
-        $backuptask = file_get_contents(__DIR__ . '/../backup/moodle2/backup_exaport_block_task.class.php');
-        $restoretask = file_get_contents(__DIR__ . '/../backup/moodle2/restore_exaport_block_task.class.php');
-
-        $this->assertStringContainsString("new backup_nested_element('content_block'", $backup);
-        foreach (['item_content_file', 'item_content_text'] as $filearea) {
-            $this->assertStringContainsString("annotate_files('block_exaport', '{$filearea}', 'id')", $backup);
-            $this->assertStringContainsString("add_related_files('block_exaport', '{$filearea}'", $restore);
-            $this->assertStringContainsString("'{$filearea}'", $backuptask);
-            $this->assertStringContainsString("'{$filearea}'", $restoretask);
-        }
-        $this->assertStringContainsString("add_related_files('block_exaport', 'item_file'", $restore);
-        $this->assertStringContainsString('migrate_legacy_item_content($item)', $restore);
-    }
-
-    /** Create an item in the state produced from an old backup. */
-    private function item(int $userid, string $url = '', string $attachment = ''): \stdClass {
+    /** Insert a course portfolio item. */
+    private function item(int $courseid, int $userid, string $name, string $url = '',
+            string $attachment = ''): \stdClass {
         global $DB;
         $item = (object)[
-            'userid' => $userid, 'type' => 'note', 'name' => 'Restored item', 'url' => $url,
+            'userid' => $userid, 'type' => 'note', 'name' => $name, 'url' => $url,
             'intro' => '', 'attachment' => $attachment, 'timecreated' => 100,
-            'timemodified' => 200, 'courseid' => 0, 'shareall' => 0, 'externaccess' => 0,
-            'externcomment' => 0,
+            'timemodified' => 200, 'courseid' => $courseid, 'shareall' => 0,
+            'externaccess' => 0, 'externcomment' => 0,
         ];
         $item->id = (int)$DB->insert_record('block_exaportitem', $item);
         return $item;
     }
 
-    /** Create a file as restored from an old item_file archive entry. */
-    private function legacy_file(\stdClass $item, string $path, string $name, string $content): \stored_file {
-        return get_file_storage()->create_file_from_string([
-            'contextid' => \context_user::instance($item->userid)->id,
-            'component' => 'block_exaport', 'filearea' => 'item_file', 'itemid' => $item->id,
-            'filepath' => $path, 'filename' => $name, 'userid' => $item->userid,
-        ], $content);
-    }
-
-    /** Assert that no legacy runtime content remains after a successful restore conversion. */
-    private function assert_legacy_content_removed(\stdClass $item): void {
+    /** Insert a structured block without involving form code. */
+    private function content_block(int $itemid, string $type, int $sortorder, string $title,
+            string $content = '', string $url = ''): \stdClass {
         global $DB;
-        $parent = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
-        $this->assertSame('', $parent->url);
-        $this->assertSame('', $parent->attachment);
-        $this->assertSame([], get_file_storage()->get_area_files(
-            \context_user::instance($item->userid)->id,
-            'block_exaport', 'item_file', $item->id, 'id', false
-        ));
-    }
-
-    public function test_old_and_structured_backup_content_is_restored_as_structured_blocks(): void {
-        global $DB;
-        $this->resetAfterTest();
-        $owner = $this->getDataGenerator()->create_user();
-
-        $urlonly = $this->item($owner->id, 'https://restore.example/url', 'stale-url-name');
-        $fileonly = $this->item($owner->id, '', 'old-file-name');
-        $file = $this->legacy_file($fileonly, '/deep/path/', 'file-only.txt', 'file only');
-        $combined = $this->item($owner->id, 'https://restore.example/combined', 'combined-name');
-        $combinedfile = $this->legacy_file($combined, '/one/two/', 'combined.txt', 'combined');
-        $structured = $this->item($owner->id);
-        $structuredblock = (object)[
-            'itemid' => $structured->id, 'type' => 'text', 'sortorder' => 4, 'title' => 'Kept',
-            'content' => '<p>Structured</p>', 'contentformat' => FORMAT_HTML, 'url' => '',
+        $block = (object)[
+            'itemid' => $itemid, 'type' => $type, 'sortorder' => $sortorder, 'title' => $title,
+            'content' => $content, 'contentformat' => FORMAT_HTML, 'url' => $url,
             'timecreated' => 100, 'timemodified' => 200,
         ];
-        $structuredblock->id = (int)$DB->insert_record('block_exaportitemblock', $structuredblock);
-        $structuredfile = get_file_storage()->create_file_from_string([
-            'contextid' => \context_user::instance($owner->id)->id, 'component' => 'block_exaport',
-            'filearea' => 'item_content_text', 'itemid' => $structuredblock->id,
-            'filepath' => '/images/', 'filename' => 'existing.png', 'userid' => $owner->id,
-        ], 'image');
-
-        foreach ([$urlonly, $fileonly, $combined, $structured] as $item) {
-            \block_exaport_migrate_legacy_item_content($item);
-            $this->assert_legacy_content_removed($item);
-        }
-
-        $this->assertSame(['link'], array_column(array_values($DB->get_records(
-            'block_exaportitemblock', ['itemid' => $urlonly->id], 'sortorder ASC')), 'type'));
-        $fileblocks = array_values($DB->get_records('block_exaportitemblock', ['itemid' => $fileonly->id]));
-        $this->assertSame(['file'], array_column($fileblocks, 'type'));
-        $copy = get_file_storage()->get_file(\context_user::instance($owner->id)->id,
-            'block_exaport', 'item_content_file', $fileblocks[0]->id, '/deep/path/', 'file-only.txt');
-        $this->assertNotFalse($copy);
-        $this->assertSame($file->get_contenthash(), $copy->get_contenthash());
-
-        $combinedblocks = array_values($DB->get_records(
-            'block_exaportitemblock', ['itemid' => $combined->id], 'sortorder ASC'));
-        $this->assertSame(['link', 'file'], array_column($combinedblocks, 'type'));
-        $combinedcopy = get_file_storage()->get_file(\context_user::instance($owner->id)->id,
-            'block_exaport', 'item_content_file', $combinedblocks[1]->id, '/one/two/', 'combined.txt');
-        $this->assertNotFalse($combinedcopy);
-        $this->assertSame($combinedfile->get_contenthash(), $combinedcopy->get_contenthash());
-
-        $this->assertSame(1, $DB->count_records('block_exaportitemblock', ['itemid' => $structured->id]));
-        $this->assertNotFalse(get_file_storage()->get_file_by_id($structuredfile->get_id()));
+        $block->id = (int)$DB->insert_record('block_exaportitemblock', $block);
+        return $block;
     }
 
-    public function test_failed_restored_file_conversion_rolls_back_parent_and_blocks(): void {
-        global $DB;
+    /** Add a file in its owner's context and return the expected content hash. */
+    private function file(int $userid, string $filearea, int $itemid, string $filepath,
+            string $filename, string $content): string {
+        $file = get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($userid)->id,
+            'component' => 'block_exaport', 'filearea' => $filearea, 'itemid' => $itemid,
+            'filepath' => $filepath, 'filename' => $filename, 'userid' => $userid,
+            'mimetype' => 'text/plain',
+        ], $content);
+        return $file->get_contenthash();
+    }
+
+    /** Make and unpack a real Moodle course backup, returning its temporary restore name. */
+    private function backup_course(int $courseid, int $userid): string {
+        $controller = new \backup_controller(
+            \backup::TYPE_1COURSE, $courseid, \backup::FORMAT_MOODLE,
+            \backup::INTERACTIVE_NO, \backup::MODE_GENERAL, $userid
+        );
+        $controller->execute_plan();
+        $results = $controller->get_results();
+        $backupfile = $results['backup_destination'];
+        $controller->destroy();
+
+        $tempname = \restore_controller::get_tempdir_name($courseid, $userid);
+        $temppath = make_backup_temp_directory($tempname);
+        get_file_packer('application/vnd.moodle.backup')->extract_to_pathname($backupfile, $temppath);
+        return $tempname;
+    }
+
+    public function test_real_course_backup_restores_structured_and_legacy_user_files(): void {
+        global $DB, $PAGE;
         $this->resetAfterTest();
-        $owner = $this->getDataGenerator()->create_user();
-        $item = $this->item($owner->id, 'https://restore.example/rollback', 'must-remain');
-        $source = $this->legacy_file($item, '/nested/', 'source.txt', 'source');
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $destination = $generator->create_course();
+        $ownerone = $generator->create_user(['username' => 'portfolio_owner_one']);
+        $ownertwo = $generator->create_user(['username' => 'portfolio_owner_two']);
+        $generator->enrol_user($ownerone->id, $course->id, 'student');
+        $generator->enrol_user($ownertwo->id, $course->id, 'student');
+        $generator->create_block('exaport', ['parentcontextid' => \context_course::instance($course->id)->id]);
 
-        try {
-            \block_exaport_migrate_legacy_item_content($item, static function(string $stage): void {
-                if ($stage === 'file_copied') {
-                    throw new \coding_exception('Injected restored-file failure');
-                }
-            });
-            $this->fail('Injected restoration failure was ignored');
-        } catch (\coding_exception $exception) {
-            $this->assertStringContainsString((string)$item->id, $exception->getMessage());
+        // This item deliberately mixes already-structured content and both kinds of legacy source.
+        $mixed = $this->item($course->id, $ownerone->id, 'Mixed content',
+            'https://legacy.example/parent', 'legacy-attachment.txt');
+        $text = $this->content_block($mixed->id, 'text', 3, 'Rich text',
+            '<p>Editor image <img src="@@PLUGINFILE@@/images/über.png"></p>');
+        $firstfiles = $this->content_block($mixed->id, 'file', 7, 'Documents A');
+        $secondfiles = $this->content_block($mixed->id, 'file', 11, 'Documents B');
+        $expected = [];
+        $expected['editor'] = $this->file($ownerone->id, 'item_content_text', $text->id,
+            '/images/', 'über.png', 'editor-image');
+        $expected['nested'] = $this->file($ownerone->id, 'item_content_file', $firstfiles->id,
+            '/deep/one/', 'résumé.txt', 'nested-content');
+        $expected['second'] = $this->file($ownerone->id, 'item_content_file', $firstfiles->id,
+            '/', 'plain.txt', 'plain-content');
+        $expected['other'] = $this->file($ownerone->id, 'item_content_file', $secondfiles->id,
+            '/資料/', '二番.txt', 'other-content');
+        $expected['legacy'] = $this->file($ownerone->id, 'item_file', $mixed->id,
+            '/old/archive/', 'älter.txt', 'legacy-content');
+
+        // A second owner proves that files and users are not accidentally collapsed to one context.
+        $other = $this->item($course->id, $ownertwo->id, 'Second owner');
+        $otherblock = $this->content_block($other->id, 'file', 0, 'Owner two file');
+        $expected['owner2'] = $this->file($ownertwo->id, 'item_content_file', $otherblock->id,
+            '/nested/', '第二.txt', 'owner-two-content');
+
+        $oldblockids = [$text->id, $firstfiles->id, $secondfiles->id, $otherblock->id];
+        $adminid = (int)get_admin()->id;
+        $tempname = $this->backup_course($course->id, $adminid);
+        $restore = new \restore_controller(
+            $tempname, $destination->id, \backup::INTERACTIVE_NO, \backup::MODE_GENERAL,
+            $adminid, \backup::TARGET_EXISTING_ADDING
+        );
+        $this->assertTrue($restore->execute_precheck());
+        $restore->execute_plan();
+        $restore->destroy();
+
+        $restoreditems = array_values($DB->get_records('block_exaportitem',
+            ['courseid' => $destination->id], 'id ASC'));
+        $this->assertCount(2, $restoreditems, 'Each source item must be restored exactly once');
+        $restoredmixed = $DB->get_record('block_exaportitem',
+            ['courseid' => $destination->id, 'name' => 'Mixed content'], '*', MUST_EXIST);
+        $restoredother = $DB->get_record('block_exaportitem',
+            ['courseid' => $destination->id, 'name' => 'Second owner'], '*', MUST_EXIST);
+        $this->assertSame((int)$ownerone->id, (int)$restoredmixed->userid);
+        $this->assertSame((int)$ownertwo->id, (int)$restoredother->userid);
+        $this->assertSame('', $restoredmixed->url);
+        $this->assertSame('', $restoredmixed->attachment);
+
+        $mixedblocks = array_values($DB->get_records('block_exaportitemblock',
+            ['itemid' => $restoredmixed->id], 'sortorder ASC, id ASC'));
+        $this->assertSame(['text', 'file', 'file', 'link', 'file'], array_column($mixedblocks, 'type'));
+        $this->assertSame([3, 7, 11, 12, 13], array_map('intval', array_column($mixedblocks, 'sortorder')),
+            'Legacy blocks must append after existing structured blocks');
+        foreach (array_slice($mixedblocks, 0, 3) as $block) {
+            $this->assertNotContains((int)$block->id, array_map('intval', $oldblockids));
         }
+        $this->assertSame('https://legacy.example/parent', $mixedblocks[3]->url);
 
-        $parent = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
-        $this->assertSame('https://restore.example/rollback', $parent->url);
-        $this->assertSame('must-remain', $parent->attachment);
-        $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]));
-        $this->assertNotFalse(get_file_storage()->get_file_by_id($source->get_id()));
+        $ownercontext = \context_user::instance($ownerone->id)->id;
+        $checks = [
+            [$mixedblocks[0], 'item_content_text', '/images/', 'über.png', $expected['editor']],
+            [$mixedblocks[1], 'item_content_file', '/deep/one/', 'résumé.txt', $expected['nested']],
+            [$mixedblocks[1], 'item_content_file', '/', 'plain.txt', $expected['second']],
+            [$mixedblocks[2], 'item_content_file', '/資料/', '二番.txt', $expected['other']],
+            [$mixedblocks[4], 'item_content_file', '/old/archive/', 'älter.txt', $expected['legacy']],
+        ];
+        foreach ($checks as [$block, $area, $path, $name, $hash]) {
+            $file = get_file_storage()->get_file(
+                $ownercontext, 'block_exaport', $area, $block->id, $path, $name
+            );
+            $this->assertNotFalse($file, $path . $name);
+            $this->assertSame($hash, $file->get_contenthash());
+            $this->assertSame((int)$ownerone->id, (int)$file->get_userid());
+            $this->assertSame((int)$block->id, (int)$file->get_itemid());
+        }
+        $this->assertEmpty(get_file_storage()->get_area_files(
+            $ownercontext, 'block_exaport', 'item_file', $restoredmixed->id, 'id', false
+        ));
+
+        $otherblocks = array_values($DB->get_records('block_exaportitemblock',
+            ['itemid' => $restoredother->id], 'sortorder ASC, id ASC'));
+        $this->assertCount(1, $otherblocks);
+        $otherfile = get_file_storage()->get_file(\context_user::instance($ownertwo->id)->id,
+            'block_exaport', 'item_content_file', $otherblocks[0]->id, '/nested/', '第二.txt');
+        $this->assertNotFalse($otherfile);
+        $this->assertSame($expected['owner2'], $otherfile->get_contenthash());
+        $this->assertSame((int)$ownertwo->id, (int)$otherfile->get_userid());
+
+        $PAGE->set_context(\context_course::instance($destination->id));
+        $html = \block_exaport_render_item_content_blocks($destination->id, $restoredmixed);
+        $this->assertStringContainsString('Rich text', $html);
+        $this->assertStringContainsString('résumé.txt', $html);
+        $this->assertStringNotContainsString('@@PLUGINFILE@@', $html);
+
+        $restoredblockids = array_map(static fn($block): int => (int)$block->id, $mixedblocks);
+        \block_exaport_delete_item($restoredmixed);
+        $this->assertFalse($DB->record_exists('block_exaportitem', ['id' => $restoredmixed->id]));
+        $this->assertFalse($DB->record_exists_list('block_exaportitemblock', 'id', $restoredblockids));
+        foreach ($restoredblockids as $restoredblockid) {
+            foreach (['item_content_text', 'item_content_file'] as $area) {
+                $this->assertEmpty(get_file_storage()->get_area_files(
+                    $ownercontext, 'block_exaport', $area, $restoredblockid, 'id', false
+                ));
+            }
+        }
+        foreach (['item_file', 'item_content'] as $area) {
+            $this->assertEmpty(get_file_storage()->get_area_files(
+                $ownercontext, 'block_exaport', $area, $restoredmixed->id, 'id', false
+            ));
+        }
     }
 }

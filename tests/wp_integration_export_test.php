@@ -22,7 +22,7 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
  */
 final class wp_integration_export_test extends \advanced_testcase {
 
-    public function test_payload_preserves_legacy_fields_and_ordered_structured_blocks(): void {
+    public function test_payload_ignores_residual_legacy_fields_and_exports_structured_blocks(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -30,7 +30,7 @@ final class wp_integration_export_test extends \advanced_testcase {
         $this->setUser($owner);
         $item = (object)[
             'userid' => $owner->id, 'type' => 'note', 'categoryid' => 0, 'name' => 'Mixed item',
-            'url' => 'https://legacy.example/', 'intro' => '<p>Legacy intro</p>', 'attachment' => '',
+            'url' => 'https://legacy.example/', 'intro' => '<p>Legacy intro</p>', 'attachment' => 'structured.pdf',
             'timecreated' => time(), 'timemodified' => time(), 'courseid' => 0, 'shareall' => 0,
             'externaccess' => 0, 'externcomment' => 0, 'sortorder' => 0, 'isoez' => 0,
             'langid' => 0, 'source' => 0, 'sourceid' => 0, 'iseditable' => 1, 'parentid' => 0,
@@ -62,6 +62,7 @@ final class wp_integration_export_test extends \advanced_testcase {
         $this->assertSame('<p>Legacy intro</p>', $payload['content']);
         $this->assertSame('', $payload['link']);
         $this->assertSame([], $payload['files']);
+        $this->assertNotSame($legacyfile->get_contenthash(), $structuredfile->get_contenthash());
         $this->assertSame(['link', 'text', 'file'], array_column($payload['structured_blocks'], 'type'));
         $this->assertSame([$linkid, $textid, $fileid], array_column($payload['structured_blocks'], 'id'));
         $this->assertSame('https://structured.example/', $payload['structured_blocks'][0]['url']);

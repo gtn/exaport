@@ -75,4 +75,20 @@ final class item_legacy_write_removal_test extends \advanced_testcase {
         $this->assertStringContainsString("case 'item_content_text':", $pluginfile);
         $this->assertStringContainsString('block_exaport_can_user_access_shared_item', $pluginfile);
     }
+
+    public function test_residual_files_remain_at_compliance_and_authorized_serving_boundaries(): void {
+        $privacy = file_get_contents(__DIR__ . '/../classes/privacy/provider.php');
+        $pluginfile = file_get_contents(__DIR__ . '/../lib.php');
+
+        $this->assertStringContainsString(
+            "export_area_files([\$subcontext_name . \$add_tosubcontext_name], 'block_exaport', 'item_file', \$item_id)",
+            $privacy
+        );
+        $this->assertStringContainsString("case 'item_file':", $pluginfile);
+        $this->assertStringContainsString(
+            'block_exaport_get_item($id, $access, false, $is_for_pdf, $pdfforuserid)',
+            $pluginfile
+        );
+        $this->assertStringContainsString('send_stored_file($file)', $pluginfile);
+    }
 }

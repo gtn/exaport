@@ -118,9 +118,11 @@ not corruption, because they may have been produced by a newer version. Empty
 file blocks are warnings because an upload may simply have been abandoned.
 Soft-deleted users are not findings when their retained user context is valid.
 
-Every error is a release blocker for removal of legacy compatibility fallbacks
-and should be investigated before shipping migration cleanup. Warnings require
-review and explanation but do not automatically mean content loss. In
+Every error identifies residual data that must be investigated before schema or
+storage cleanup. Ordinary runtime paths do not present residual parent `url`,
+`attachment`, or `item_file` content: structured blocks are authoritative even
+when both representations remain on an item. Warnings require review and
+explanation but do not automatically mean content loss. In
 particular, never manually delete residual data before taking and preserving
 database and Moodledata backups. Determine provenance and ownership first.
 
@@ -139,21 +141,22 @@ file. The item filter is pushed into applicable SQL. Thus full counts remain
 accurate while web/JSON output and sample memory are bounded; no file binary is
 read. Phase 10B repair or cleanup requires separate design and review.
 
-## Retained read-only compatibility inventory (Phase 10B checklist)
+## Residual-data boundaries (Phase 10B checklist)
 
-The first migration release intentionally retains these paths:
+Residual legacy data is retained only at explicit migration, recovery,
+compliance, and cleanup boundaries. It is not an ordinary-runtime fallback:
 
 | Compatibility path | Source | Why retained now | Future Phase 10B review |
 |---|---|---|---|
-| Legacy URL and `item_file` rendering | `classes/output/item_content_blocks.php`, `lib/reportlib.php` | Items missed by upgrade must remain viewable in normal/shared/PDF output. | Remove only after audits and release evidence establish no residual content. |
-| Legacy thumbnail selection | `lib/lib.php` and thumbnail consumers | Residual legacy images still need previews. | Remove legacy candidate lookup after blocker-free qualification. |
-| Legacy `item_file` pluginfile serving | `lib.php` | Existing URLs and shared content must continue resolving. | Remove the file-area route only with a separately reviewed compatibility policy. |
-| Legacy export fallbacks | `classes/externallib/externallib.php`, `classes/wp_integration.php`, `lib/lib.exaport.php`, `lib/reportlib.php` | Integrations must not omit anomalous residual content. | Remove fallback projection after every supported export path is validated. |
-| Compatibility copy of residual content | `lib/lib.php` | Copying an anomalous old item must not lose its remaining file. | Remove after residual storage is resolved, without changing structured copying. |
+| Authorized legacy `item_file` pluginfile serving | `lib.php` | Previously issued, permission-checked file URLs can continue resolving while residual storage exists. | Remove the route only with a separately reviewed compatibility policy. |
+| Upgrade and restore conversion | `db/upgradelib.php`, `backup/moodle2/restore_exaport_stepslib.php` | Upgrade converts stored legacy sources; restore converts legacy backup data after restoration. | Keep historical upgrade logic and supported old-backup conversion. |
+| Migration audit | `classes/local/item_content_audit.php` | Administrators need privacy-safe evidence of residual data. | Retain until schema and storage cleanup is complete. |
 | Legacy file deletion cleanup | `lib/lib.php` | Deletion must remove both modern and residual storage to avoid orphaned private files. | Retain until legacy serving/storage is conclusively retired. |
 | Privacy export of residual `item_file` | `classes/privacy/provider.php` | Data-subject exports must include retained legacy user data. | Remove only when storage is absent and the privacy impact is reviewed. |
-| Historical migration implementation | `db/upgradelib.php`, `db/upgrade.php` | Existing sites may still upgrade through 2026092900. | Keep historical upgrade code; Phase 10B must not rewrite an already shipped upgrade. |
 
-These fallbacks are read compatibility and lifecycle safeguards, not permission
-to continue legacy writes. Phase 10A removes none of them and does not change
-normal item UI, imports, exports, copies, deletion, or pluginfile behaviour.
+Renderers, thumbnails, item lists, copies, imports, external-service responses,
+WordPress export, and SCORM export read structured blocks only. A residual
+legacy value therefore cannot override, duplicate, or supplement structured
+content. Privacy export intentionally remains broader because it must return
+retained personal data, and deletion intentionally remains broader so it cannot
+leave orphaned files.

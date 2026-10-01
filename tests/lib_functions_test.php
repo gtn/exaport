@@ -208,9 +208,7 @@ final class lib_functions_test extends \advanced_testcase {
         ];
     }
 
-    public function test_item_where_keeps_migrated_oez_url_and_file_items_after_legacy_fields_are_cleared(): void {
-        global $DB;
-
+    public function test_item_where_ignores_residual_legacy_fields_and_uses_structured_blocks(): void {
         $urlitemid = $this->create_item(0, 'Migrated URL', [
             'isoez' => 1,
             'intro' => '',
@@ -223,14 +221,11 @@ final class lib_functions_test extends \advanced_testcase {
         ]);
 
         $legacyitems = $this->get_all_filtered_items();
-        $this->assertArrayHasKey($urlitemid, $legacyitems);
-        $this->assertArrayHasKey($fileitemid, $legacyitems);
+        $this->assertArrayNotHasKey($urlitemid, $legacyitems);
+        $this->assertArrayNotHasKey($fileitemid, $legacyitems);
 
         $this->create_item_block($urlitemid, 'link');
         $this->create_item_block($fileitemid, 'file');
-
-        $DB->set_field('block_exaportitem', 'url', '', ['id' => $urlitemid]);
-        $DB->set_field('block_exaportitem', 'attachment', '', ['id' => $fileitemid]);
 
         $items = $this->get_all_filtered_items();
         $this->assertArrayHasKey($urlitemid, $items);

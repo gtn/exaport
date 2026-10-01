@@ -201,14 +201,12 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional item migrator, used by tests to simulate interruption.
  * @param callable|null $progresscallback Optional callback receiving cumulative count and aggregate counters.
- * @param callable|null $timeoutcallback Optional callback renewing the timeout for a non-empty batch.
  * @return array Privacy-safe aggregate operation counts.
  */
 function block_exaport_migrate_legacy_item_content_batches(
     int $batchsize = 500,
     ?callable $migrator = null,
-    ?callable $progresscallback = null,
-    ?callable $timeoutcallback = null
+    ?callable $progresscallback = null
 ): array {
     global $DB;
 
@@ -216,9 +214,6 @@ function block_exaport_migrate_legacy_item_content_batches(
         throw new coding_exception('Legacy item content migration batch size must be positive');
     }
     $migrator = $migrator ?? 'block_exaport_migrate_legacy_item_content';
-    $timeoutcallback = $timeoutcallback ?? static function(): void {
-        upgrade_set_timeout(1800);
-    };
     $counts = [
         'items_processed' => 0,
         'items_already_clean' => 0,
@@ -242,7 +237,7 @@ function block_exaport_migrate_legacy_item_content_batches(
         );
         if ($items) {
             // Renew immediately before this bounded batch; there is no whole-migration time ceiling.
-            $timeoutcallback();
+            upgrade_set_timeout(1800);
         }
         foreach ($items as $item) {
             $result = $migrator($item);
@@ -301,14 +296,12 @@ function block_exaport_legacy_item_content_counts(): array {
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional migrator for tests.
  * @param callable|null $progresscallback Optional aggregate batch progress callback.
- * @param callable|null $timeoutcallback Optional callback renewing the timeout for a non-empty batch.
  * @return stdClass Completed report record.
  */
 function block_exaport_migrate_legacy_item_content_with_report(
     int $batchsize = 500,
     ?callable $migrator = null,
-    ?callable $progresscallback = null,
-    ?callable $timeoutcallback = null
+    ?callable $progresscallback = null
 ): stdClass {
     global $DB;
 
@@ -323,8 +316,7 @@ function block_exaport_migrate_legacy_item_content_with_report(
     $operations = block_exaport_migrate_legacy_item_content_batches(
         $batchsize,
         $migrator,
-        $progresscallback,
-        $timeoutcallback
+        $progresscallback
     );
     $after = block_exaport_legacy_item_content_counts();
     $summary = [

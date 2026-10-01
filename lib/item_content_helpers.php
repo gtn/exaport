@@ -270,6 +270,62 @@ function block_exaport_item_has_structured_link_or_file_content(int $itemid): bo
 }
 
 /**
+ * Whether structured content contains a link which can actually be displayed.
+ *
+ * Merely having an empty link block must not hide a recoverable parent URL.
+ * This deliberately does not compare the two URLs: a usable structured link is
+ * authoritative for compatibility rendering even when its value differs.
+ *
+ * @param array $blocks Block records or export-data projections.
+ * @return bool
+ */
+function block_exaport_item_content_has_usable_link(array $blocks): bool {
+    foreach ($blocks as $block) {
+        $type = is_array($block) ? ($block['type'] ?? '') : ($block->type ?? '');
+        $url = is_array($block) ? ($block['url'] ?? '') : ($block->url ?? '');
+        if ($type === 'link' && clean_param((string)$url, PARAM_URL) !== '') {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Whether structured content contains a file block with at least one real file.
+ *
+ * Empty file blocks (including blocks whose files have been lost) do not hide
+ * legacy item_file content, preserving a recovery path for partially migrated
+ * items. Export projections may be passed directly; record callers must supply
+ * the item owner so the block file areas can be inspected.
+ *
+ * @param array $blocks Block records or export-data projections.
+ * @param int|null $ownerid Owner ID when block records are supplied.
+ * @return bool
+ */
+function block_exaport_item_content_has_usable_files(array $blocks, ?int $ownerid = null): bool {
+    foreach ($blocks as $block) {
+        $type = is_array($block) ? ($block['type'] ?? '') : ($block->type ?? '');
+        if ($type !== 'file') {
+            continue;
+        }
+        if (is_array($block) && array_key_exists('files', $block)) {
+            if (!empty($block['files'])) {
+                return true;
+            }
+            continue;
+        }
+        if ($ownerid === null) {
+            throw new coding_exception('An owner ID is required for file block records');
+        }
+        $blockid = is_array($block) ? (int)($block['blockid'] ?? $block['id'] ?? 0) : (int)($block->id ?? 0);
+        if ($blockid && block_exaport_get_item_content_files($ownerid, $blockid)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * Obtain the sort order to use when appending a block to an item.
  *
  * @param int $itemid Item ID.

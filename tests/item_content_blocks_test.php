@@ -23,6 +23,37 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
  */
 final class item_content_blocks_test extends \advanced_testcase {
 
+    public function test_compatibility_decisions_cover_independent_content_states(): void {
+        $states = [
+            'structured-only' => [[
+                ['type' => 'link', 'url' => 'https://structured.example/', 'files' => []],
+                ['type' => 'file', 'url' => '', 'files' => [new \stdClass()]],
+            ], true, true],
+            'legacy-only' => [[], false, false],
+            'both-present' => [[
+                ['type' => 'link', 'url' => 'https://structured.example/', 'files' => []],
+                ['type' => 'file', 'url' => '', 'files' => [new \stdClass()]],
+            ], true, true],
+            'empty-structured-link' => [[
+                ['type' => 'link', 'url' => '', 'files' => []],
+            ], false, false],
+            'empty-structured-file' => [[
+                ['type' => 'file', 'url' => '', 'files' => []],
+            ], false, false],
+            'structured-link-plus-legacy-files' => [[
+                ['type' => 'link', 'url' => 'https://structured.example/', 'files' => []],
+            ], true, false],
+            'legacy-link-plus-structured-files' => [[
+                ['type' => 'file', 'url' => '', 'files' => [new \stdClass()]],
+            ], false, true],
+        ];
+
+        foreach ($states as $name => [$blocks, $haslink, $hasfiles]) {
+            $this->assertSame($haslink, block_exaport_item_content_has_usable_link($blocks), $name);
+            $this->assertSame($hasfiles, block_exaport_item_content_has_usable_files($blocks), $name);
+        }
+    }
+
     public function test_empty_item_helpers_return_empty_defaults(): void {
         global $DB;
 

@@ -357,7 +357,8 @@ class ExaportVievPdf {
                 }
 
                 // Structured blocks are authoritative and may contain mixed content independent of the parent type.
-                foreach (block_exaport_get_item_content_export_data($item) as $contentblock) {
+                $structuredblocks = block_exaport_get_item_content_export_data($item);
+                foreach ($structuredblocks as $contentblock) {
                     $structuredhtml = '';
                     if ($contentblock['title'] !== '') {
                         $structuredhtml .= html_writer::tag('strong', s($contentblock['title']));
@@ -412,11 +413,16 @@ class ExaportVievPdf {
                 }
 
                 // Compatibility-only fallback for anomalous items that still retain legacy content.
-                $legacytype = !empty($item->url) ? 'link' : '';
-                if ($legacytype === '' && $item->type === 'file' && block_exaport_get_item_files_array($item)) {
-                    $legacytype = 'file';
+                $legacytypes = [];
+                if (!block_exaport_item_content_has_usable_files($structuredblocks) &&
+                        block_exaport_get_item_files_array($item)) {
+                    $legacytypes[] = 'file';
                 }
-                switch ($legacytype) {
+                if (!block_exaport_item_content_has_usable_link($structuredblocks) && !empty($item->url)) {
+                    $legacytypes[] = 'link';
+                }
+                foreach ($legacytypes as $legacytype) {
+                    switch ($legacytype) {
                     case 'file':
                         $file_links = [];
                         $select = "contextid='" . context_user::instance($item->userid)->id . "' " .
@@ -515,8 +521,12 @@ class ExaportVievPdf {
                         }
 
                         break;
-                    default:
-
+                        default:
+                    }
+                }
+                // A structured link suppresses the generic legacy URL fallback below as well.
+                if (block_exaport_item_content_has_usable_link($structuredblocks)) {
+                    $item->url = false;
                 }
                 // item url
                 if ($item->url && $item->url != "false") {

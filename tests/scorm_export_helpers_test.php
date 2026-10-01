@@ -56,14 +56,13 @@ final class scorm_export_helpers_test extends \advanced_testcase {
 
         $html = $result['html'];
         $this->assertSame($calls, $result['assets']);
-        $this->assertCount(4, $result['assets']);
+        $this->assertCount(3, $result['assets']);
         $this->assertSame([
-            'items/' . $item->id . '/legacy/same.pdf',
             'items/' . $item->id . '/blocks/' . $textid . '/editor/images/editor.png',
             'items/' . $item->id . '/blocks/' . $fileid1 . '/nested/same.pdf',
             'items/' . $item->id . '/blocks/' . $fileid2 . '/nested/same.pdf',
         ], $result['assets']);
-        $this->assertStringContainsString('https://legacy.example/path?a=1&amp;b=2', $html);
+        $this->assertStringNotContainsString('https://legacy.example/path?a=1&amp;b=2', $html);
         $this->assertStringContainsString('https://structured.example/?a=1&amp;b=2', $html);
         $this->assertStringNotContainsString('@@PLUGINFILE@@', $html);
         $this->assertStringContainsString('../../items/' . $item->id . '/blocks/' . $textid .
@@ -71,6 +70,33 @@ final class scorm_export_helpers_test extends \advanced_testcase {
         $this->assertLessThan(strpos($html, 'Second'), strpos($html, 'First'));
         $this->assertLessThan(strpos($html, 'Third'), strpos($html, 'Second'));
         $this->assertLessThan(strpos($html, 'Fourth'), strpos($html, 'Third'));
+    }
+
+    public function test_empty_structured_blocks_preserve_legacy_recovery_content(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $item = $this->create_item($owner->id, 'file', 'https://legacy.example/recovery');
+        $this->create_block($item->id, 'link', 0, 'Empty link');
+        $this->create_block($item->id, 'file', 1, 'Missing files');
+        $legacyfile = $this->create_file($owner->id, 'item_file', $item->id, '/', 'recovery.pdf');
+        $item = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
+
+        $result = block_exaport_scorm_render_item_content(
+            $item,
+            [$legacyfile],
+            block_exaport_get_item_content_export_data($item),
+            'item.html',
+            static function(\stored_file $file, string $base): string {
+                return $base . '/' . $file->get_filename();
+            }
+        );
+
+        $this->assertStringContainsString('https://legacy.example/recovery', $result['html']);
+        $this->assertStringContainsString('recovery.pdf', $result['html']);
+        $this->assertStringContainsString('Empty link', $result['html']);
+        $this->assertStringContainsString('Missing files', $result['html']);
     }
 
     public function test_structured_content_is_independent_of_parent_legacy_type(): void {

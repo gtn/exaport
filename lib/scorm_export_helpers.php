@@ -79,14 +79,16 @@ function block_exaport_scorm_render_item_content(
 ): array {
     $html = '';
     $assets = [];
-    if (!empty($item->url) && $item->url !== 'false') {
+    $hasstructuredlink = block_exaport_item_content_has_usable_link($blocks);
+    $hasstructuredfiles = block_exaport_item_content_has_usable_files($blocks);
+    if (!$hasstructuredlink && !empty($item->url) && $item->url !== 'false') {
         $url = clean_param($item->url, PARAM_URL);
         if ($url !== '') {
             $html .= '<div class="legacy-url"><a href="' . s($url) . '"><!--###BOOKMARK_EXT_URL###-->' .
                 s($url) . '<!--###BOOKMARK_EXT_URL###--></a></div>' . "\n";
         }
     }
-    foreach ($legacyfiles as $file) {
+    foreach ($hasstructuredfiles ? [] : $legacyfiles as $file) {
         $asset = $packagefile($file, 'items/' . $item->id . '/legacy');
         $assets[] = $asset;
         $html .= '<div class="legacy-file"><a href="' . s(block_exaport_scorm_relative_url($pagepath, $asset)) .

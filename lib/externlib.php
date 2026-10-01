@@ -108,7 +108,9 @@ function block_exaport_print_extern_item($item, $access) {
         $structuredblocks, null, (int)$item->userid, false, true, $access
     );
     $structureddata = $structuredrenderable->export_for_template($PAGE->get_renderer('block_exaport'));
-    if ($files = block_exaport_get_item_files($item)) {
+    $hasstructuredlink = block_exaport_item_content_has_usable_link($structuredblocks);
+    $hasstructuredfiles = block_exaport_item_content_has_usable_files($structuredblocks, (int)$item->userid);
+    if (!$hasstructuredfiles && ($files = block_exaport_get_item_files_array($item))) {
         foreach ($files as $fileindex => $file) {
             if (!$file) {
                 continue; // Is here possible that $file is null?
@@ -175,7 +177,7 @@ function block_exaport_print_extern_item($item, $access) {
     }
 
     // Display URL with heading if it exists
-    if ($item->url && $item->url != "false") {
+    if (!$hasstructuredlink && $item->url && $item->url != "false") {
         $boxcontent .= '<div class="item-project-section">';
         $boxcontent .= '<h4>' . get_string('url', 'block_exaport') . '</h4>';
         $boxcontent .= '<p><a target="_blank" href="' . s($item->url) . '">' . str_replace('http://', '', $item->url) . '</a></p>';

@@ -429,10 +429,16 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $href = 'shared_item.php?access=view/' . $access . '&itemid=' . $item->id . '&att=' . $item->attachment;
 
                     $general_content .= '<div class="view-item view-item-type-' . $item->type . '">';
+                    $structuredblocks = block_exaport_get_item_content_blocks((int)$item->id);
+                    $hasstructuredlink = block_exaport_item_content_has_usable_link($structuredblocks);
+                    $hasstructuredfiles = block_exaport_item_content_has_usable_files(
+                        $structuredblocks,
+                        (int)$item->userid
+                    );
                     // Transitional legacy previews remain until the migration removes their source files.
                     $fileparams = '';
-                    if ($item->type == 'file') {
-                        $legacyfiles = block_exaport_get_item_files_array($item);
+                    $legacyfiles = $hasstructuredfiles ? [] : block_exaport_get_item_files_array($item);
+                    if ($legacyfiles) {
                         $legacyimages = array_values(array_filter($legacyfiles, static function($file) {
                             return $file->is_valid_image();
                         }));
@@ -478,7 +484,8 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                                 }
                             }
                         }
-                    } else if ($item->type == 'link') {
+                    }
+                    if ($item->type == 'link') {
                         $general_content .= '<div class="picture" style="float:right; position: relative; height: 100px; width: 100px;"><a href="' .
                             s($href) . '"><img style="max-width: 100%; max-height: 100%;" src="' . $CFG->wwwroot .
                             '/blocks/exaport/item_thumb.php?item_id=' . (int)$item->id . '&access=' . s($access) . '" alt=""/></a></div>';
@@ -507,7 +514,7 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $intro = format_text($intro, FORMAT_HTML);
                     $general_content .= '<div class="view-item-text">';
                     $blockForPdf .= '<div class="view-item-text">';
-                    if ($item->url && $item->url != "false") {
+                    if (!$hasstructuredlink && $item->url && $item->url != "false") {
                         // Link.
                         $general_content .= '<a href="' . s($item->url) . '" target="_blank">' . str_replace('http://', '', $item->url) . '</a><br />';
                         $blockForPdf .= '<a href="' . s($item->url) . '" target="_blank">' . str_replace('http://', '', $item->url) . '</a><br />';
@@ -516,7 +523,6 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     $blockForPdf .= $intro . '</div>';
 
                     // Structured blocks coexist with unrelated legacy content during the migration window.
-                    $structuredblocks = block_exaport_get_item_content_blocks((int)$item->id);
                     if ($structuredblocks) {
                         $structuredrenderable = new \block_exaport\output\item_content_blocks(
                             $structuredblocks, null, (int)$item->userid, false, false, 'view/' . $access

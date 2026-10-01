@@ -80,42 +80,9 @@ if ($action == 'copytoself') {
     $conditions = array("id" => $id, "userid" => $ownerid);
     $sourceitem = $DB->get_record('block_exaportitem', $conditions);
 
-    $copy = $sourceitem;
-
-    unset($copy->id);
-    $copy->userid = $USER->id;
-    $copy->timemodified = time();
-    $copy->shareall = 0;
-    $copy->externaccess = 0;
-    $copy->externcomment = 0;
-    $copy->shareall = 0;
-    $copy->categoryid = 0;
-
-    $transaction = $DB->start_delegated_transaction();
-    $newitemid = $DB->insert_record('block_exaportitem', $copy);
-    $copy->id = $newitemid;
-
     // Source categories can be private to their owner, so a direct cross-user
     // copy is deliberately left in the recipient's uncategorized area.
-    block_exaport_copy_item_content($sourceitem, $copy);
-
-    // Compatibility-only: preserve anomalous residual legacy content until the Phase 10 audit/removal.
-    $fs = get_file_storage();
-    $ownerusercontext = context_user::instance($ownerid);
-    $usercontext = context_user::instance($USER->id);
-    $oldfiles = $fs->get_area_files($ownerusercontext->id, 'block_exaport', 'item_file', $id);
-    foreach ($oldfiles as $f) {
-        if ($f->is_directory()) {
-            continue;
-        }
-        $newfileparams = array(
-            'contextid' => $usercontext->id,
-            'itemid' => $newitemid,
-            'userid' => $USER->id,
-        );
-        $fs->create_file_from_storedfile($newfileparams, $f);
-    }
-    $transaction->allow_commit();
+    $copy = block_exaport_copy_item_to_user($sourceitem, (int)$USER->id);
 
     $returnurl = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . "&categoryid=-1&userid=" . $ownerid;
     redirect($returnurl);

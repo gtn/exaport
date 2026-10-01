@@ -22,7 +22,7 @@ use block_exaport\globals as g;
 defined('MOODLE_INTERNAL') || die();
 
 // Copy shared structure tree to user.
-function copy_category_to_myself($categoryid) {
+function copy_category_to_myself($categoryid, ?callable $copyprogresscallback = null) {
     $rootcat = g::$DB->get_record("block_exaportcate", array('id' => $categoryid));
     if (!$rootcat) {
         throw new moodle_exception('category not found');
@@ -30,12 +30,12 @@ function copy_category_to_myself($categoryid) {
 
     // A requested tree is copied atomically: failures never report a partial tree.
     $transaction = g::$DB->start_delegated_transaction();
-    $newroot = _copy_category_to_myself_iterator($rootcat, 0);
+    $newroot = _copy_category_to_myself_iterator($rootcat, 0, $copyprogresscallback);
     $transaction->allow_commit();
     return $newroot;
 }
 
-function _copy_category_to_myself_iterator($currcat, $parentcatid) {
+function _copy_category_to_myself_iterator($currcat, $parentcatid, ?callable $copyprogresscallback = null) {
     global $CFG, $USER;
     $newcat = new \stdClass();
     $newcat->pid = $parentcatid;
@@ -53,7 +53,7 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
 
     $children = g::$DB->get_records("block_exaportcate", array('pid' => $currcat->id));
     foreach ($children as $category) {
-        _copy_category_to_myself_iterator($category, $newcat->id);
+        _copy_category_to_myself_iterator($category, $newcat->id, $copyprogresscallback);
     }
 
     $items = g::$DB->get_records_sql('
@@ -66,10 +66,9 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         $newitem->userid = g::$USER->id;
         $newitem->type = $item->type;
         $newitem->name = $item->name;
-        // Compatibility-only: preserve anomalous residual legacy content until the Phase 10 audit/removal.
-        $newitem->url = $item->url;
+        $newitem->url = '';
         $newitem->intro = $item->intro;
-        $newitem->attachment = $item->attachment;
+        $newitem->attachment = '';
         $newitem->timemodified = $item->timemodified;
         $newitem->courseid = g::$COURSE->id;
         $newitem->sortorder = $item->sortorder;
@@ -79,21 +78,9 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         item_category_helper::sync_item_categories($newitem->id, [$newcat->id]);
 
         \block_exaport_copy_item_content($item, $newitem);
+        \block_exaport_copy_residual_item_content($item, $newitem, $copyprogresscallback);
 
-        // Compatibility-only legacy files. Structured blocks were copied above.
         $fs = get_file_storage();
-        if ($file = block_exaport_get_item_files($item)) {
-            foreach ($file as $fileindex => $fileobject) {
-                if ($fileobject) {
-                    $fs->create_file_from_storedfile(array(
-                        'contextid' => \context_user::instance(g::$USER->id)->id,
-                        'component' => 'block_exaport',
-                        'filearea' => 'item_file',
-                        'itemid' => $newitem->id,
-                    ), $fileobject);
-                }
-            }
-        }
         if ($file = block_exaport_get_single_file($item, 'item_iconfile')) {
             $fs->create_file_from_storedfile(array(
                 'contextid' => \context_user::instance(g::$USER->id)->id,

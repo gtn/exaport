@@ -6,6 +6,7 @@ namespace block_exaport;
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../lib/item_content_helpers.php');
+require_once(__DIR__ . '/../lib/lib.exaport.php');
 
 /**
  * Tests for independent structured-content copies.
@@ -21,6 +22,7 @@ final class item_content_copy_test extends \advanced_testcase {
             'userid' => $userid, 'type' => $type, 'name' => 'Copy test', 'url' => '',
             'intro' => '', 'attachment' => '', 'timecreated' => $now, 'timemodified' => $now,
             'courseid' => 0, 'shareall' => 0, 'externaccess' => 0, 'externcomment' => 0,
+            'sortorder' => 0,
         ];
         $item->id = (int)$DB->insert_record('block_exaportitem', $item);
         return $item;
@@ -36,6 +38,35 @@ final class item_content_copy_test extends \advanced_testcase {
             'mimetype' => 'text/plain', 'source' => 'copy-source', 'author' => 'Copy Author',
             'license' => 'allrightsreserved',
         ], $content);
+    }
+
+    /** Add a residual legacy file to an item. */
+    private function create_legacy_file(\stdClass $item, string $filename, string $content,
+            string $filepath = '/'): \stored_file {
+        return $this->create_block_file(
+            (int)$item->userid,
+            'item_file',
+            (int)$item->id,
+            $filename,
+            $content,
+            $filepath
+        );
+    }
+
+    /** Assert the copied parent cannot expose either legacy representation. */
+    private function assert_clean_destination(\stdClass $item): void {
+        global $DB;
+        $stored = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
+        $this->assertSame('', $stored->url);
+        $this->assertSame('', $stored->attachment);
+        $this->assertCount(0, get_file_storage()->get_area_files(
+            context_user::instance((int)$item->userid)->id,
+            'block_exaport',
+            'item_file',
+            (int)$item->id,
+            'id',
+            false
+        ));
     }
 
     public function test_no_blocks_returns_empty_map(): void {
@@ -161,6 +192,193 @@ final class item_content_copy_test extends \advanced_testcase {
             $this->assertTrue($DB->record_exists('block_exaportitemblock', ['id' => $block->id]));
             $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $destination->id]));
         }
+    }
+
+    public function test_direct_copy_converts_residual_url_only(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $source = $this->create_item($owner->id, 'link');
+        $source->url = ' https://legacy.example/path ';
+        $source->attachment = 'stale';
+        $DB->update_record('block_exaportitem', $source);
+
+        $copy = \block_exaport_copy_item_to_user($source, (int)$recipient->id);
+        $blocks = \block_exaport_get_item_content_blocks((int)$copy->id);
+        $this->assertCount(1, $blocks);
+        $this->assertSame('link', $blocks[0]->type);
+        $this->assertSame($source->url, $blocks[0]->url);
+        $this->assert_clean_destination($copy);
+        $this->assertSame($source->url,
+            $DB->get_field('block_exaportitem', 'url', ['id' => $source->id]));
+    }
+
+    public function test_direct_copy_converts_one_residual_file_cross_user(): void {
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $source = $this->create_item($owner->id);
+        $legacy = $this->create_legacy_file($source, 'one.txt', 'one');
+
+        $copy = \block_exaport_copy_item_to_user($source, (int)$recipient->id);
+        $block = \block_exaport_get_item_content_blocks((int)$copy->id)[0];
+        $this->assertSame('file', $block->type);
+        $copied = \block_exaport_get_item_content_files((int)$recipient->id, (int)$block->id);
+        $this->assertCount(1, $copied);
+        $this->assertSame($legacy->get_contenthash(), $copied[0]->get_contenthash());
+        $this->assertSame((int)$recipient->id, (int)$copied[0]->get_userid());
+        $this->assert_clean_destination($copy);
+        $this->assertNotFalse(get_file_storage()->get_file(
+            context_user::instance((int)$owner->id)->id,
+            'block_exaport', 'item_file', (int)$source->id, '/', 'one.txt'));
+    }
+
+    public function test_direct_copy_appends_multiple_nested_non_ascii_files_after_url_and_existing_blocks(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $source = $this->create_item($owner->id);
+        $source->url = 'https://legacy.example/both';
+        $DB->update_record('block_exaportitem', $source);
+        \block_exaport_create_content_block((int)$source->id, 'text', 'Existing', '', ['sortorder' => 7]);
+        $first = $this->create_legacy_file($source, 'résumé.txt', 'alpha', '/資料/');
+        $second = $this->create_legacy_file($source, 'second.txt', 'beta', '/deep/path/');
+
+        $copy = \block_exaport_copy_item_to_user($source, (int)$recipient->id);
+        $blocks = \block_exaport_get_item_content_blocks((int)$copy->id);
+        $this->assertSame(['text', 'link', 'file'], array_column($blocks, 'type'));
+        $files = \block_exaport_get_item_content_files((int)$recipient->id, (int)$blocks[2]->id);
+        $this->assertCount(2, $files);
+        $expected = [
+            $second->get_filepath() . $second->get_filename() => $second->get_contenthash(),
+            $first->get_filepath() . $first->get_filename() => $first->get_contenthash(),
+        ];
+        foreach ($files as $file) {
+            $this->assertSame($expected[$file->get_filepath() . $file->get_filename()], $file->get_contenthash());
+            $this->assertSame((int)$blocks[2]->id, (int)$file->get_itemid());
+        }
+        $this->assert_clean_destination($copy);
+    }
+
+    public function test_direct_copy_does_not_duplicate_usable_structured_equivalents(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $source = $this->create_item($owner->id);
+        $source->url = 'https://legacy.example/equivalent';
+        $DB->update_record('block_exaportitem', $source);
+        \block_exaport_create_link_content_block((int)$source->id, '', $source->url);
+        $legacy = $this->create_legacy_file($source, 'same.txt', 'identical', '/nested/');
+        $fileblock = \block_exaport_create_file_content_block((int)$source->id, 'Already structured');
+        $this->create_block_file((int)$owner->id, 'item_content_file', (int)$fileblock->id,
+            $legacy->get_filename(), 'identical', $legacy->get_filepath());
+
+        $copy = \block_exaport_copy_item_to_user($source, (int)$recipient->id);
+        $this->assertSame(['link', 'file'], array_column(
+            \block_exaport_get_item_content_blocks((int)$copy->id), 'type'));
+        $this->assert_clean_destination($copy);
+    }
+
+    public function test_direct_copy_failure_rolls_back_parent_blocks_and_files(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $source = $this->create_item($owner->id);
+        $this->create_legacy_file($source, 'failure.txt', 'failure');
+        $beforeitems = $DB->count_records('block_exaportitem');
+
+        try {
+            \block_exaport_copy_item_to_user($source, (int)$recipient->id,
+                static function(string $stage): void {
+                    if ($stage === 'before_verification') {
+                        throw new \coding_exception('Injected copy failure');
+                    }
+                });
+            $this->fail('The injected failure should escape the copy operation');
+        } catch (\coding_exception $exception) {
+            $this->assertSame('Injected copy failure', $exception->getMessage());
+        }
+        $this->assertSame($beforeitems, $DB->count_records('block_exaportitem'));
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
+        $this->assertCount(0, get_file_storage()->get_area_files(
+            context_user::instance((int)$recipient->id)->id,
+            'block_exaport', 'item_content_file', false, 'id', false));
+    }
+
+    public function test_category_tree_copy_converts_residual_url_and_files(): void {
+        global $COURSE, $DB;
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $COURSE = $course;
+        $this->setUser($recipient);
+        $category = (object)[
+            'pid' => 0, 'userid' => $owner->id, 'name' => 'Shared tree', 'timemodified' => time(),
+            'courseid' => $course->id, 'description' => '', 'creatorid' => $owner->id,
+        ];
+        $category->id = $DB->insert_record('block_exaportcate', $category);
+        $source = $this->create_item($owner->id);
+        $source->courseid = $course->id;
+        $source->url = 'https://legacy.example/tree';
+        $DB->update_record('block_exaportitem', $source);
+        $DB->insert_record('block_exaportitemcate', (object)[
+            'itemid' => $source->id, 'cateid' => $category->id,
+        ]);
+        $this->create_legacy_file($source, '樹.txt', 'tree', '/枝/');
+
+        \block_exaport\copy_category_to_myself((int)$category->id);
+        $copy = $DB->get_record('block_exaportitem', ['userid' => $recipient->id], '*', MUST_EXIST);
+        $blocks = \block_exaport_get_item_content_blocks((int)$copy->id);
+        $this->assertSame(['link', 'file'], array_column($blocks, 'type'));
+        $this->assertNotFalse(get_file_storage()->get_file(
+            context_user::instance((int)$recipient->id)->id,
+            'block_exaport', 'item_content_file', (int)$blocks[1]->id, '/枝/', '樹.txt'));
+        $this->assert_clean_destination($copy);
+    }
+
+    public function test_category_tree_copy_failure_rolls_back_tree_item_blocks_and_files(): void {
+        global $COURSE, $DB;
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $COURSE = $course;
+        $this->setUser($recipient);
+        $category = (object)[
+            'pid' => 0, 'userid' => $owner->id, 'name' => 'Rollback tree', 'timemodified' => time(),
+            'courseid' => $course->id, 'description' => '', 'creatorid' => $owner->id,
+        ];
+        $category->id = $DB->insert_record('block_exaportcate', $category);
+        $source = $this->create_item($owner->id);
+        $source->courseid = $course->id;
+        $DB->update_record('block_exaportitem', $source);
+        $DB->insert_record('block_exaportitemcate', (object)[
+            'itemid' => $source->id, 'cateid' => $category->id,
+        ]);
+        $this->create_legacy_file($source, 'failure.txt', 'failure');
+
+        try {
+            \block_exaport\copy_category_to_myself((int)$category->id,
+                static function(string $stage): void {
+                    if ($stage === 'before_verification') {
+                        throw new \coding_exception('Injected tree copy failure');
+                    }
+                });
+            $this->fail('The injected failure should escape the tree copy operation');
+        } catch (\coding_exception $exception) {
+            $this->assertSame('Injected tree copy failure', $exception->getMessage());
+        }
+        $this->assertSame(0, $DB->count_records('block_exaportcate', ['userid' => $recipient->id]));
+        $this->assertSame(0, $DB->count_records('block_exaportitem', ['userid' => $recipient->id]));
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
+        $this->assertCount(0, get_file_storage()->get_area_files(
+            context_user::instance((int)$recipient->id)->id,
+            'block_exaport', 'item_content_file', false, 'id', false));
     }
 
     /** Convenience wrapper which keeps assertions readable across Moodle versions. */

@@ -231,6 +231,188 @@ function block_exaport_copy_item_content(stdClass $sourceitem, stdClass $destina
 }
 
 /**
+ * Copy one shared item into a user's uncategorized area as one atomic operation.
+ *
+ * @param stdClass $sourceitem Trusted source item.
+ * @param int $destinationuserid Recipient user ID.
+ * @param callable|null $progresscallback Test/diagnostic hook for residual file copying.
+ * @return stdClass Newly inserted destination item.
+ */
+function block_exaport_copy_item_to_user(
+    stdClass $sourceitem,
+    int $destinationuserid,
+    ?callable $progresscallback = null
+): stdClass {
+    global $DB;
+
+    if (empty($sourceitem->id) || empty($sourceitem->userid) || !$destinationuserid) {
+        throw new coding_exception('Direct item copying requires item and owner IDs');
+    }
+
+    $copy = clone $sourceitem;
+    unset($copy->id);
+    $copy->userid = $destinationuserid;
+    $copy->timemodified = time();
+    $copy->shareall = 0;
+    $copy->externaccess = 0;
+    $copy->externcomment = 0;
+    $copy->categoryid = 0;
+    $copy->url = '';
+    $copy->attachment = '';
+
+    $transaction = $DB->start_delegated_transaction();
+    $copy->id = (int)$DB->insert_record('block_exaportitem', $copy);
+    block_exaport_copy_item_content($sourceitem, $copy);
+    block_exaport_copy_residual_item_content($sourceitem, $copy, $progresscallback);
+    $transaction->allow_commit();
+    return $copy;
+}
+
+/**
+ * Append residual legacy parent content to a newly copied item's structured content.
+ *
+ * This is deliberately separate from block_exaport_copy_item_content(): callers first copy the
+ * canonical blocks, then append any genuinely missing legacy link/file representation. The legacy
+ * source is never modified. The caller owns the transaction which created the destination item.
+ *
+ * @param stdClass $sourceitem Trusted source item containing id and userid.
+ * @param stdClass $destinationitem Trusted destination item containing id and userid.
+ * @param callable|null $progresscallback Test/diagnostic hook receiving a stage and related value.
+ * @return array IDs of the optional appended link and file blocks.
+ */
+function block_exaport_copy_residual_item_content(
+    stdClass $sourceitem,
+    stdClass $destinationitem,
+    ?callable $progresscallback = null
+): array {
+    global $DB;
+
+    if (empty($sourceitem->id) || empty($sourceitem->userid) ||
+            empty($destinationitem->id) || empty($destinationitem->userid)) {
+        throw new coding_exception('Residual item content copying requires item and owner IDs');
+    }
+
+    $sourcecontext = context_user::instance((int)$sourceitem->userid, MUST_EXIST);
+    $destinationcontext = context_user::instance((int)$destinationitem->userid, MUST_EXIST);
+    $fs = get_file_storage();
+    $sourceblocks = block_exaport_get_item_content_blocks((int)$sourceitem->id);
+    $result = ['linkblockid' => null, 'fileblockid' => null];
+
+    $storedurl = (string)($sourceitem->url ?? '');
+    $testedurl = trim($storedurl);
+    $hasmeaningfulurl = $testedurl !== '' && $testedurl !== 'false';
+    $haslinkequivalent = false;
+    foreach ($sourceblocks as $sourceblock) {
+        if ($sourceblock->type === 'link' && trim((string)$sourceblock->url) === $testedurl) {
+            $haslinkequivalent = true;
+            break;
+        }
+    }
+
+    $sourcefiles = array_values($fs->get_area_files(
+        $sourcecontext->id,
+        'block_exaport',
+        'item_file',
+        (int)$sourceitem->id,
+        'filepath ASC, filename ASC, id ASC',
+        false
+    ));
+    $hasfileequivalent = !$sourcefiles;
+    if ($sourcefiles) {
+        foreach ($sourceblocks as $sourceblock) {
+            if ($sourceblock->type !== 'file') {
+                continue;
+            }
+            $structuredfiles = block_exaport_get_item_content_files(
+                (int)$sourceitem->userid,
+                (int)$sourceblock->id
+            );
+            $structuredidentities = [];
+            foreach ($structuredfiles as $structuredfile) {
+                $structuredidentities[$structuredfile->get_filepath() . "\0" . $structuredfile->get_filename() .
+                    "\0" . $structuredfile->get_contenthash()] = true;
+            }
+            $hasfileequivalent = true;
+            foreach ($sourcefiles as $sourcefile) {
+                $identity = $sourcefile->get_filepath() . "\0" . $sourcefile->get_filename() .
+                    "\0" . $sourcefile->get_contenthash();
+                if (empty($structuredidentities[$identity])) {
+                    $hasfileequivalent = false;
+                    break;
+                }
+            }
+            if ($hasfileequivalent) {
+                break;
+            }
+        }
+    }
+
+    $blocktimecreated = !empty($sourceitem->timecreated) ? (int)$sourceitem->timecreated :
+        (!empty($sourceitem->timemodified) ? (int)$sourceitem->timemodified : time());
+    $blocktimemodified = !empty($sourceitem->timemodified) ?
+        (int)$sourceitem->timemodified : $blocktimecreated;
+    $blockfields = ['timecreated' => $blocktimecreated, 'timemodified' => $blocktimemodified];
+
+    // Link is intentionally appended first when both kinds of residual content exist.
+    if ($hasmeaningfulurl && !$haslinkequivalent) {
+        $linkblock = block_exaport_create_link_content_block(
+            (int)$destinationitem->id,
+            '',
+            $storedurl,
+            $blockfields
+        );
+        $result['linkblockid'] = (int)$linkblock->id;
+    }
+
+    if ($sourcefiles && !$hasfileequivalent) {
+        $fileblock = block_exaport_create_file_content_block((int)$destinationitem->id, '', $blockfields);
+        $result['fileblockid'] = (int)$fileblock->id;
+        foreach ($sourcefiles as $sourcefile) {
+            $fs->create_file_from_storedfile([
+                'contextid' => $destinationcontext->id,
+                'component' => 'block_exaport',
+                'filearea' => 'item_content_file',
+                'itemid' => $fileblock->id,
+                'userid' => (int)$destinationitem->userid,
+            ], $sourcefile);
+            if ($progresscallback) {
+                $progresscallback('file_copied', $sourcefile);
+            }
+        }
+
+        if ($progresscallback) {
+            $progresscallback('before_verification', $fileblock->id);
+        }
+        foreach ($sourcefiles as $sourcefile) {
+            $destinationfile = $fs->get_file(
+                $destinationcontext->id,
+                'block_exaport',
+                'item_content_file',
+                $fileblock->id,
+                $sourcefile->get_filepath(),
+                $sourcefile->get_filename()
+            );
+            if (!$destinationfile || $destinationfile->is_directory() ||
+                    (int)$destinationfile->get_contextid() !== (int)$destinationcontext->id ||
+                    $destinationfile->get_component() !== 'block_exaport' ||
+                    $destinationfile->get_filearea() !== 'item_content_file' ||
+                    (int)$destinationfile->get_itemid() !== (int)$fileblock->id ||
+                    (int)$destinationfile->get_userid() !== (int)$destinationitem->userid ||
+                    $destinationfile->get_filepath() !== $sourcefile->get_filepath() ||
+                    $destinationfile->get_filename() !== $sourcefile->get_filename() ||
+                    $destinationfile->get_contenthash() !== $sourcefile->get_contenthash() ||
+                    (int)$destinationfile->get_filesize() !== (int)$sourcefile->get_filesize()) {
+                throw new coding_exception(
+                    "File verification failed while copying item {$sourceitem->id} to {$destinationitem->id}"
+                );
+            }
+        }
+    }
+
+    return $result;
+}
+
+/**
  * Load a file block only when it belongs to the requested item.
  *
  * This is the authoritative relationship check used before serving structured

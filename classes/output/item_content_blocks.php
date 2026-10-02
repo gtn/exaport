@@ -358,13 +358,16 @@ class item_content_blocks implements renderable, templatable {
 
         $contentformat = isset($block->contentformat) ? (int)$block->contentformat : FORMAT_HTML;
         $ownercontext = context_user::instance($this->ownerid);
+        $access = trim((string)($this->access ?? ''), '/');
+        $access = $access === '' ? '' : $access . '/';
+        $fileargs = $access . 'itemid/' . (int)$block->itemid . '/blockid/' . (int)$block->id;
         $content = file_rewrite_pluginfile_urls(
             $content,
             'pluginfile.php',
             $ownercontext->id,
             'block_exaport',
             'item_content_text',
-            $block->id
+            $fileargs
         );
 
         return format_text($content, $contentformat, [

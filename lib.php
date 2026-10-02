@@ -39,7 +39,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
     $is_for_pdf = false;
     $pdfforuserid = 0;
 
-    if ($p = array_search('forPdf', $args)) {
+    if (($p = array_search('forPdf', $args, true)) !== false) {
         // added to link of the file: /forPdf/--hash--/--viewid--/--curruserid--
         $pdfforuserid = array_pop($args);
         $viewid = array_pop($args);
@@ -74,12 +74,16 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             }
 
             if ($access !== '') {
-                $item = block_exaport_get_item($itemid, $access);
+                $item = block_exaport_get_item($itemid, $access, false, $is_for_pdf, $pdfforuserid);
             } else {
                 $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
                 $sharedownerid = $item ? block_exaport_can_user_access_shared_item($USER->id, $itemid) : false;
                 if (!$item || ((int)$item->userid !== (int)$USER->id && !$sharedownerid)) {
-                    $item = false;
+                    $item = $item ? block_exaport_get_item_for_webservice(
+                        (int)$itemid,
+                        (int)$item->userid,
+                        (int)$USER->id
+                    ) : false;
                 }
             }
             if (!$item) {

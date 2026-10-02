@@ -195,9 +195,11 @@ function block_exaport_get_item_content_webservice_data(stdClass $item, ?string 
                 $fileurl .= '?token=' . rawurlencode($token);
             }
             $fileentry = [
+                'id' => $file->get_id(),
                 'filename' => $file->get_filename(),
                 'url' => $fileurl,
                 'mimetype' => $file->get_mimetype(),
+                'isimage' => strpos((string)$file->get_mimetype(), 'image/') === 0,
             ];
             $resultblock->files[] = $fileentry;
             if ($contentblock['type'] === 'file') {
@@ -310,6 +312,31 @@ function block_exaport_get_item_content_file_block(int $itemid, int $blockid) {
         'itemid' => $itemid,
         'type' => 'file',
     ]);
+}
+
+/**
+ * Resolve an old portfoliofile item selector against current structured files.
+ *
+ * File API IDs are retained as exact selectors only; selectors are never
+ * treated as array indexes because migration creates new stored-file records.
+ * An omitted selector is safe only when there is exactly one structured file.
+ *
+ * @param stdClass $item Trusted item record containing id and userid.
+ * @param string $selector Legacy stored-file ID selector, if supplied.
+ * @return stored_file|false
+ */
+function block_exaport_resolve_legacy_item_file(stdClass $item, string $selector = '') {
+    $files = block_exaport_get_item_structured_files($item);
+    if ($selector !== '' && $selector !== '0') {
+        foreach ($files as $file) {
+            if ((string)$file->get_id() === $selector) {
+                return $file;
+            }
+        }
+        return false;
+    }
+
+    return count($files) === 1 ? reset($files) : false;
 }
 
 /**

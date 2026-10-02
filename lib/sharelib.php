@@ -452,15 +452,26 @@ namespace {
 
     function block_exaport_get_item_for_webservice($itemid, $itemOwnerid, $currentUserid) {
         global $DB;
-        // Check if user is userid or if user is trainer of userid.
-        if ($itemOwnerid == $currentUserid) {
-            return $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $itemOwnerid));
+
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
+        if (!$item || $item->userid != $itemOwnerid) {
+            return false;
         }
 
-        // old external trainer logic
-        $found = $DB->record_exists(BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS, array('trainerid' => $currentUserid, 'studentid' => $itemOwnerid));
-        if ($found) {
-            return $DB->get_record('block_exaportitem', array('id' => $itemid));
+        $ownerid = $item->userid;
+
+        // Check if user is userid or if user is trainer of userid.
+        if ($ownerid == $currentUserid) {
+            return $item;
+        }
+
+        // Old external trainer logic is only available when Exacomp defines its table.
+        if (defined('BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS')) {
+            $found = $DB->record_exists(BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS,
+                ['trainerid' => $currentUserid, 'studentid' => $ownerid]);
+            if ($found) {
+                return $item;
+            }
         }
 
         // in a view shared with user?
@@ -469,14 +480,13 @@ namespace {
             " JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ? ";
         $found = $DB->record_exists_sql($sql, array($itemid, $currentUserid));
         if ($found) {
-            return $DB->get_record('block_exaportitem', array('id' => $itemid));
+            return $item;
         }
 
         // in an exacomp course (for diggr+ / dakora+)
         if (class_exists('\block_exacomp\api')) {
-            $courseid = $DB->get_field('block_exaportitem', 'courseid', array('id' => $itemid));
-            if ($courseid && block_exacomp_is_teacher($courseid, $currentUserid)) {
-                return $DB->get_record('block_exaportitem', array('id' => $itemid));
+            if ($item->courseid && block_exacomp_is_teacher($item->courseid, $currentUserid)) {
+                return $item;
             }
         }
 

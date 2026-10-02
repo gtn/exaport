@@ -773,9 +773,11 @@ class externallib extends external_api {
                 'text' => new external_value(PARAM_RAW, 'description'),
                 'url' => new external_value(PARAM_TEXT, 'url'),
                 'files' => new external_multiple_structure(new external_single_structure([
+                    'id' => new external_value(PARAM_INT, 'stored-file ID used for deletion'),
                     'filename' => new external_value(PARAM_TEXT, 'filename'),
                     'url' => new external_value(PARAM_URL, 'file url'),
                     'mimetype' => new external_value(PARAM_TEXT, 'mime type for file'),
+                    'isimage' => new external_value(PARAM_BOOL, 'whether the file is an image'),
                 ])),
                 'contentblocks' => self::item_content_blocks_returns(),
                 'resume_itemtype' => new external_value(PARAM_TEXT, 'only for type=cv_information and cv_group', VALUE_DEFAULT, null),
@@ -1038,9 +1040,11 @@ class externallib extends external_api {
                                 'url' => new external_value(PARAM_TEXT, 'url'),
                                 'description' => new external_value(PARAM_RAW, 'description of item'),
                                 'files' => new external_multiple_structure(new external_single_structure([
+                                    'id' => new external_value(PARAM_INT, 'stored-file ID used for deletion'),
                                     'filename' => new external_value(PARAM_TEXT, 'filename'),
                                     'url' => new external_value(PARAM_URL, 'file url'),
                                     'mimetype' => new external_value(PARAM_TEXT, 'mime type for file'),
+                                    'isimage' => new external_value(PARAM_BOOL, 'whether the file is an image'),
                                 ])),
                                 'contentblocks' => self::item_content_blocks_returns(),
                                 // 'type' => new external_value(PARAM_TEXT, 'type of item ENUM(note,file,link)'),
@@ -1927,9 +1931,11 @@ class externallib extends external_api {
             'contentformat' => new external_value(PARAM_INT, 'Moodle text format'),
             'url' => new external_value(PARAM_TEXT, 'link block URL'),
             'files' => new external_multiple_structure(new external_single_structure([
+                'id' => new external_value(PARAM_INT, 'stored-file ID used for deletion'),
                 'filename' => new external_value(PARAM_TEXT, 'filename'),
                 'url' => new external_value(PARAM_URL, 'authorized structured file URL'),
                 'mimetype' => new external_value(PARAM_TEXT, 'file MIME type'),
+                'isimage' => new external_value(PARAM_BOOL, 'whether the file is an image'),
             ])),
         ]));
     }

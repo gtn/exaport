@@ -458,7 +458,12 @@ namespace {
         }
 
         // old external trainer logic
-        $found = $DB->record_exists(BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS, array('trainerid' => $currentUserid, 'studentid' => $itemOwnerid));
+        $found = defined('BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS') &&
+            $DB->get_manager()->table_exists(BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS) &&
+            $DB->record_exists(BLOCK_EXACOMP_DB_EXTERNAL_TRAINERS, [
+                'trainerid' => $currentUserid,
+                'studentid' => $itemOwnerid,
+            ]);
         if ($found) {
             return $DB->get_record('block_exaportitem', array('id' => $itemid));
         }

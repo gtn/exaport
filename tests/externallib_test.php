@@ -18,15 +18,26 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
 final class externallib_test extends \advanced_testcase {
 
     /** Create a stored structured or residual file. */
-    private function create_file(int $userid, string $area, int $itemid, string $path, string $name): void {
-        get_file_storage()->create_file_from_string([
+    private function create_file(
+        int $userid,
+        string $area,
+        int $itemid,
+        string $path,
+        string $name,
+        ?string $mimetype = null
+    ): \stored_file {
+        $record = [
             'contextid' => \context_user::instance($userid)->id,
             'component' => 'block_exaport',
             'filearea' => $area,
             'itemid' => $itemid,
             'filepath' => $path,
             'filename' => $name,
-        ], $name);
+        ];
+        if ($mimetype !== null) {
+            $record['mimetype'] = $mimetype;
+        }
+        return get_file_storage()->create_file_from_string($record, $name);
     }
 
     public function test_response_ignores_residual_parent_content_and_returns_structured_content(): void {
@@ -57,11 +68,54 @@ final class externallib_test extends \advanced_testcase {
 
         $this->assertSame('', $response->url);
         $this->assertSame('structured.pdf', $response->files[0]['filename']);
+        $this->assertSame(
+            (int)get_file_storage()->get_file(
+                \context_user::instance($owner->id)->id,
+                'block_exaport',
+                'item_content_file',
+                $block->id,
+                '/',
+                'structured.pdf'
+            )->get_id(),
+            $response->files[0]['id']
+        );
+        $this->assertFalse($response->files[0]['isimage']);
         $this->assertCount(1, $response->contentblocks);
         $this->assertSame('file', $response->contentblocks[0]->type);
         $this->assertSame('structured.pdf', $response->contentblocks[0]->files[0]['filename']);
         $this->assertStringNotContainsString('item_file', $response->contentblocks[0]->files[0]['url']);
         $this->assertStringContainsString('item_content_file', $response->contentblocks[0]->files[0]['url']);
+    }
+
+    public function test_file_identity_and_image_metadata_survive_remove_and_reload(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $item = (object)[
+            'userid' => $owner->id, 'type' => 'note', 'categoryid' => 0, 'name' => 'Files',
+            'url' => '', 'intro' => '', 'attachment' => '',
+            'timecreated' => time(), 'timemodified' => time(), 'courseid' => 0,
+        ];
+        $item->id = (int)$DB->insert_record('block_exaportitem', $item);
+        $block = block_exaport_create_file_content_block($item->id, 'Attachments');
+        $first = $this->create_file(
+            $owner->id, 'item_content_file', $block->id, '/nested/', 'first.png', 'image/png'
+        );
+        $second = $this->create_file(
+            $owner->id, 'item_content_file', $block->id, '/nested/', 'second.pdf', 'application/pdf'
+        );
+
+        $before = block_exaport_get_item_content_webservice_data($item);
+        $this->assertSame([(int)$first->get_id(), (int)$second->get_id()], array_column($before['files'], 'id'));
+        $this->assertSame([true, false], array_column($before['files'], 'isimage'));
+        $this->assertSame((int)$first->get_id(), $before['contentblocks'][0]->files[0]['id']);
+
+        get_file_storage()->get_file_by_id($before['files'][0]['id'])->delete();
+        $after = block_exaport_get_item_content_webservice_data($item);
+        $this->assertCount(1, $after['files']);
+        $this->assertSame((int)$second->get_id(), $after['files'][0]['id']);
+        $this->assertSame('second.pdf', $after['files'][0]['filename']);
     }
 
     public function test_webservice_projection_preserves_order_and_uses_structured_content_only(): void {
@@ -105,6 +159,20 @@ final class externallib_test extends \advanced_testcase {
         ]);
         $this->assertSame('Structured text', $response['contentblocks'][3]->content);
         $this->assertSame(['z.txt', 'b.txt', 'c.txt'], array_column($response['files'], 'filename'));
+        $this->assertSame(
+            array_map(static function(string $name) use ($owner, $filesone, $filestwo): int {
+                $file = get_file_storage()->get_file(
+                    \context_user::instance($owner->id)->id,
+                    'block_exaport',
+                    'item_content_file',
+                    $name === 'c.txt' ? $filestwo->id : $filesone->id,
+                    $name === 'z.txt' ? '/a/' : ($name === 'b.txt' ? '/z/' : '/'),
+                    $name
+                );
+                return (int)$file->get_id();
+            }, ['z.txt', 'b.txt', 'c.txt']),
+            array_column($response['files'], 'id')
+        );
         $this->assertSame($response['contentblocks'][4]->files[0], $response['files'][0]);
         foreach ($response['files'] as $index => $file) {
             $blockid = $index < 2 ? $filesone->id : $filestwo->id;
@@ -117,6 +185,20 @@ final class externallib_test extends \advanced_testcase {
         }
         $this->assertNotContains('legacy.txt', array_column($response['files'], 'filename'));
         $this->assertNotSame($item->url, $response['url']);
+
+        $method = new \ReflectionMethod(externallib::class, 'make_item_result');
+        $apiitem = $method->invoke(null, $item);
+        $validated = \external_api::clean_returnvalue(
+            externallib::get_all_user_items_returns(),
+            [(object)[
+                'id' => 0,
+                'pid' => '0',
+                'name' => 'root',
+                'items' => [$apiitem],
+            ]]
+        );
+        $this->assertSame((int)$firstlink->id, (int)$validated[0]->items[0]->contentblocks[1]->id);
+        $this->assertSame($apiitem->files[0]['id'], $validated[0]->items[0]->files[0]['id']);
     }
 
     public function test_text_only_projection_has_no_fabricated_legacy_values(): void {

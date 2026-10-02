@@ -52,7 +52,7 @@ final class externallib_test extends \advanced_testcase {
             'filename' => 'structured.pdf',
         ], 'structured');
 
-        $method = new \ReflectionMethod(externallib::class, 'make_item_result');
+        $method = new \ReflectionMethod(\block_exaport\externallib\externallib::class, 'make_item_result');
         $response = $method->invoke(null, $item);
 
         $this->assertSame('', $response->url);

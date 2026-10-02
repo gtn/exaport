@@ -74,7 +74,7 @@ if ($token) {
     }
 
 
-    if ($file = block_exaport_get_item_single_file($item)) {
+    if ($file = block_exaport_resolve_legacy_item_file($item, (string)$inst)) {
         send_stored_file($file);
     } else {
         not_found();
@@ -120,14 +120,7 @@ if ($itemid) {
         $file = block_exaport_get_item_comment_file($comment->id);
 
     } else {
-        $files = block_exaport_get_item_files_array($item);
-
-        if ($inst && !empty($files[$inst])) {
-            $file = $files[$inst];
-        } else {
-            // fallback: always get first file
-            $file = reset($files);
-        }
+        $file = block_exaport_resolve_legacy_item_file($item, (string)$inst);
     }
 
     if ($file) {

@@ -21,6 +21,48 @@ require_once(__DIR__ . '/lib/item_content_helpers.php');
 use block_exaport\blockedit;
 use function block_exaport\common\print_error;
 
+/**
+ * Resolve an authorized structured file request to its stored file.
+ *
+ * @param array $parsed Parsed structured-file pluginfile arguments.
+ * @param bool $is_for_pdf Whether Moodle validated private-view PDF authorization.
+ * @param int $pdfforuserid User whose private view is being rendered.
+ * @return stored_file|false
+ */
+function block_exaport_get_item_content_file_for_access(array $parsed, bool $is_for_pdf = false, int $pdfforuserid = 0) {
+    global $DB, $USER;
+
+    $itemid = (int)$parsed['itemid'];
+    $blockid = (int)$parsed['blockid'];
+    $block = block_exaport_get_item_content_file_block($itemid, $blockid);
+    if (!$block) {
+        return false;
+    }
+
+    if ($parsed['access'] !== '') {
+        $item = block_exaport_get_item($itemid, $parsed['access'], false, $is_for_pdf, $pdfforuserid);
+    } else {
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
+        $sharedownerid = $item ? block_exaport_can_user_access_shared_item($USER->id, $itemid) : false;
+        if ($item && (int)$item->userid !== (int)$USER->id && !$sharedownerid) {
+            $item = block_exaport_get_item_for_webservice($itemid, (int)$item->userid, (int)$USER->id);
+        }
+    }
+    if (!$item) {
+        return false;
+    }
+
+    $file = get_file_storage()->get_file(
+        context_user::instance((int)$item->userid)->id,
+        'block_exaport',
+        'item_content_file',
+        $blockid,
+        $parsed['filepath'],
+        $parsed['filename']
+    );
+    return $file && !$file->is_directory() ? $file : false;
+}
+
 // Called from pluginfile.php
 // to serve the file of a plugin
 // urlformat:
@@ -65,40 +107,8 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (!$parsed) {
                 return false;
             }
-            ['access' => $access, 'itemid' => $itemid, 'blockid' => $blockid,
-                'filepath' => $filepath, 'filename' => $filename] = $parsed;
-
-            $block = block_exaport_get_item_content_file_block((int)$itemid, (int)$blockid);
-            if (!$block) {
-                return false;
-            }
-
-            if ($access !== '') {
-                $item = block_exaport_get_item($itemid, $access, false, $is_for_pdf, $pdfforuserid);
-            } else {
-                $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
-                $sharedownerid = $item ? block_exaport_can_user_access_shared_item($USER->id, $itemid) : false;
-                if (!$item || ((int)$item->userid !== (int)$USER->id && !$sharedownerid)) {
-                    $item = $item ? block_exaport_get_item_for_webservice(
-                        (int)$itemid,
-                        (int)$item->userid,
-                        (int)$USER->id
-                    ) : false;
-                }
-            }
-            if (!$item) {
-                return false;
-            }
-
-            $file = get_file_storage()->get_file(
-                context_user::instance($item->userid)->id,
-                'block_exaport',
-                'item_content_file',
-                $blockid,
-                $filepath,
-                $filename
-            );
-            if (!$file || $file->is_directory()) {
+            $file = block_exaport_get_item_content_file_for_access($parsed, $is_for_pdf, (int)$pdfforuserid);
+            if (!$file) {
                 return false;
             }
             send_stored_file($file, 86400, 0, $forcedownload);

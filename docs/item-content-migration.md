@@ -168,6 +168,9 @@ The active item-bearing read services (`view_details` and
 `contentblocks`. For compatibility with clients using the pre-migration shape,
 they also derive the top-level `url` (the first non-empty ordered link block)
 and `files` (all ordered file blocks flattened) from that same structured data.
+Each flat and block-level file entry includes the stored-file `id` (the selector
+used when removing one file) and `isimage`; the parent item ID, content block ID,
+and stored-file ID are separate identifiers.
 This is a projection, not a runtime fallback: the parent `url` and `attachment`
 columns and the `item_file` area are never read for these responses.
 
@@ -178,3 +181,11 @@ cached `portfoliofile.php` URLs are intentionally outside this compatibility
 guarantee. Clients should migrate to `contentblocks` to retain multiple ordered
 links, text blocks, and distinct file groups; the legacy fields cannot express
 that complete structure.
+
+For retained `portfoliofile.php` item-download requests, Exaport resolves an
+explicit `inst` only when it exactly matches a current structured stored-file ID.
+Without `inst`, the request is served only when the item has exactly one
+structured file. Migration creates new File API records, so a cached pre-migration
+file ID cannot be mapped safely to a new record; ambiguous or unmappable requests
+return not found instead of downloading a different file. Comment-download
+requests retain their separate existing behavior.

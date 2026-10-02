@@ -284,14 +284,16 @@ final class item_content_blocks_test extends \advanced_testcase {
             ],
             null,
             $owner->id,
-            false
+            false,
+            true,
+            'view/id/' . $owner->id . '-17'
         ))->export_for_template($renderer);
 
         $this->assertFalse($data['showaddbutton']);
         $this->assertCount(1, $data['blocks']);
         $this->assertStringContainsString(
             '/pluginfile.php/' . \context_user::instance($owner->id)->id . '/block_exaport/item_content_text/' .
-                $blockid . '/owner.txt',
+                'view/id/' . $owner->id . '-17/itemid/' . $itemid . '/blockid/' . $blockid . '/owner.txt',
             $data['blocks'][0]['content']
         );
         $this->assertStringContainsString('Safe content', $data['blocks'][0]['content']);

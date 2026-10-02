@@ -156,6 +156,60 @@ function block_exaport_get_item_content_export_data(stdClass $item): array {
 }
 
 /**
+ * Build the structured and legacy-compatible Exaport web-service projections.
+ *
+ * Structured blocks are the only runtime source. The legacy URL and files are
+ * deliberately lossy projections: URL is the first non-empty link and files
+ * flatten every file block. Parent item legacy columns and item_file storage
+ * are never inspected. Callers should pass the current web-service token so
+ * file links use Moodle's authenticated web-service endpoint.
+ *
+ * @param stdClass $item Trusted item record containing id and userid.
+ * @param string|null $token Current web-service token, if token authenticated.
+ * @return array{contentblocks: array, url: string, files: array}
+ */
+function block_exaport_get_item_content_webservice_data(stdClass $item, ?string $token = null): array {
+    $result = ['contentblocks' => [], 'url' => '', 'files' => []];
+    $script = $token !== null && $token !== '' ? '/webservice/pluginfile.php' : '/pluginfile.php';
+
+    // Load blocks and their files once, then derive both response shapes from that data.
+    foreach (block_exaport_get_item_content_export_data($item) as $contentblock) {
+        $resultblock = (object)[
+            'id' => $contentblock['blockid'],
+            'sortorder' => $contentblock['sortorder'],
+            'type' => $contentblock['type'],
+            'title' => $contentblock['title'],
+            'content' => $contentblock['content'],
+            'contentformat' => $contentblock['contentformat'],
+            'url' => $contentblock['url'],
+            'files' => [],
+        ];
+        if ($contentblock['type'] === 'link' && $result['url'] === '' && trim($contentblock['url']) !== '') {
+            $result['url'] = $contentblock['url'];
+        }
+        foreach ($contentblock['files'] as $file) {
+            $fileurl = block_exaport_get_item_content_file_url(
+                (int)$item->id, (int)$contentblock['blockid'], $file, '', $script
+            );
+            if ($token !== null && $token !== '') {
+                $fileurl .= '?token=' . rawurlencode($token);
+            }
+            $fileentry = [
+                'filename' => $file->get_filename(),
+                'url' => $fileurl,
+                'mimetype' => $file->get_mimetype(),
+            ];
+            $resultblock->files[] = $fileentry;
+            if ($contentblock['type'] === 'file') {
+                $result['files'][] = $fileentry;
+            }
+        }
+        $result['contentblocks'][] = $resultblock;
+    }
+    return $result;
+}
+
+/**
  * Copy all supported structured content between two existing items.
  *
  * Blocks are inserted in their existing sortorder/id order and retain their

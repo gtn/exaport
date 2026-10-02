@@ -160,3 +160,21 @@ legacy value therefore cannot override, duplicate, or supplement structured
 content. Privacy export intentionally remains broader because it must return
 retained personal data, and deletion intentionally remains broader so it cannot
 leave orphaned files.
+
+### Web-service compatibility projection
+
+The active item-bearing read services (`view_details` and
+`get_all_user_items`) return the complete ordered structured data in
+`contentblocks`. For compatibility with clients using the pre-migration shape,
+they also derive the top-level `url` (the first non-empty ordered link block)
+and `files` (all ordered file blocks flattened) from that same structured data.
+This is a projection, not a runtime fallback: the parent `url` and `attachment`
+columns and the `item_file` area are never read for these responses.
+
+After an application refreshes its web-service data, structured files use
+authorized `item_content_file` URLs. Token-authenticated requests receive
+`/webservice/pluginfile.php` URLs containing the current token. Previously
+cached `portfoliofile.php` URLs are intentionally outside this compatibility
+guarantee. Clients should migrate to `contentblocks` to retain multiple ordered
+links, text blocks, and distinct file groups; the legacy fields cannot express
+that complete structure.

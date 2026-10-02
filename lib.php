@@ -73,8 +73,10 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
                 return false;
             }
 
-            if ($access !== '') {
-                $item = block_exaport_get_item($itemid, $access);
+            if (preg_match('~^webservice/(\d+)$~', $access, $matches)) {
+                $item = block_exaport_get_item_for_webservice($itemid, (int)$matches[1], (int)$USER->id);
+            } else if ($access !== '') {
+                $item = block_exaport_get_item($itemid, $access, false, $is_for_pdf, $pdfforuserid);
             } else {
                 $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
                 $sharedownerid = $item ? block_exaport_can_user_access_shared_item($USER->id, $itemid) : false;

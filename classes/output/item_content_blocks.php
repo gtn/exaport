@@ -358,13 +358,20 @@ class item_content_blocks implements renderable, templatable {
 
         $contentformat = isset($block->contentformat) ? (int)$block->contentformat : FORMAT_HTML;
         $ownercontext = context_user::instance($this->ownerid);
+        $fileitemid = (string)$block->id;
+        if (trim((string)$this->access, '/') !== '') {
+            // Keep the parent item and authorization route in editor-file URLs. The file
+            // area's actual itemid remains the content block ID at the end of this route.
+            $fileitemid = trim((string)$this->access, '/') . '/itemid/' . (int)$block->itemid .
+                '/blockid/' . (int)$block->id;
+        }
         $content = file_rewrite_pluginfile_urls(
             $content,
             'pluginfile.php',
             $ownercontext->id,
             'block_exaport',
             'item_content_text',
-            $block->id
+            $fileitemid
         );
 
         return format_text($content, $contentformat, [

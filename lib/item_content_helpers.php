@@ -188,16 +188,22 @@ function block_exaport_get_item_content_webservice_data(stdClass $item, ?string 
             $result['url'] = $contentblock['url'];
         }
         foreach ($contentblock['files'] as $file) {
+            // The web-service route deliberately carries the trusted owner ID. pluginfile.php
+            // can then apply the same owner/teacher/trainer/shared-view policy as the old
+            // portfoliofile.php endpoint instead of treating every token user as an owner.
+            $access = $token !== null && $token !== '' ? 'webservice/' . (int)$item->userid : '';
             $fileurl = block_exaport_get_item_content_file_url(
-                (int)$item->id, (int)$contentblock['blockid'], $file, '', $script
+                (int)$item->id, (int)$contentblock['blockid'], $file, $access, $script
             );
             if ($token !== null && $token !== '') {
                 $fileurl .= '?token=' . rawurlencode($token);
             }
             $fileentry = [
+                'id' => (int)$file->get_id(),
                 'filename' => $file->get_filename(),
                 'url' => $fileurl,
                 'mimetype' => $file->get_mimetype(),
+                'isimage' => strpos((string)$file->get_mimetype(), 'image/') === 0,
             ];
             $resultblock->files[] = $fileentry;
             if ($contentblock['type'] === 'file') {

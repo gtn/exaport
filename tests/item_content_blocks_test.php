@@ -414,6 +414,24 @@ final class item_content_blocks_test extends \advanced_testcase {
         );
     }
 
+    public function test_shared_text_block_embedded_file_url_preserves_access_route(): void {
+        global $OUTPUT;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $blockid = $this->insert_block($itemid, 'text', 0, 'Embedded',
+            '<img src="@@PLUGINFILE@@/nested/picture.png">');
+
+        $data = (new \block_exaport\output\item_content_blocks(
+            block_exaport_get_item_content_blocks($itemid), null, $owner->id, false, false, 'view/public-token'
+        ))->export_for_template($OUTPUT);
+
+        $this->assertStringContainsString('/item_content_text/view/public-token/itemid/' . $itemid .
+            '/blockid/' . $blockid . '/nested/picture.png', $data['blocks'][0]['content']);
+    }
+
     public function test_external_item_ignores_residual_legacy_content_and_renders_structured_content(): void {
         global $DB;
 

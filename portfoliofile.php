@@ -74,7 +74,8 @@ if ($token) {
     }
 
 
-    if ($file = block_exaport_get_item_single_file($item)) {
+    $files = block_exaport_get_item_structured_files($item);
+    if ($file = reset($files)) {
         send_stored_file($file);
     } else {
         not_found();
@@ -120,12 +121,21 @@ if ($itemid) {
         $file = block_exaport_get_item_comment_file($comment->id);
 
     } else {
-        $files = block_exaport_get_item_files_array($item);
+        $files = block_exaport_get_item_structured_files($item);
 
-        if ($inst && !empty($files[$inst])) {
-            $file = $files[$inst];
+        if ($inst) {
+            // get_area_files() historically keyed this selector by stored-file ID. Migration
+            // necessarily creates new records, so an obsolete ID cannot be mapped safely.
+            // Never reinterpret it as a list offset and accidentally return another file.
+            $file = false;
+            foreach ($files as $candidate) {
+                if ((string)$candidate->get_id() === (string)$inst) {
+                    $file = $candidate;
+                    break;
+                }
+            }
         } else {
-            // fallback: always get first file
+            // The selector-less compatibility URL has always represented the first file.
             $file = reset($files);
         }
     }

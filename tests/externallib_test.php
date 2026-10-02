@@ -52,7 +52,7 @@ final class externallib_test extends \advanced_testcase {
             'filename' => 'structured.pdf',
         ], 'structured');
 
-        $method = new \ReflectionMethod(externallib::class, 'make_item_result');
+        $method = new \ReflectionMethod(\block_exaport\externallib\externallib::class, 'make_item_result');
         $response = $method->invoke(null, $item);
 
         $this->assertSame('', $response->url);
@@ -105,11 +105,13 @@ final class externallib_test extends \advanced_testcase {
         ]);
         $this->assertSame('Structured text', $response['contentblocks'][3]->content);
         $this->assertSame(['z.txt', 'b.txt', 'c.txt'], array_column($response['files'], 'filename'));
+        $this->assertCount(3, array_unique(array_column($response['files'], 'id')));
+        $this->assertSame([false, false, false], array_column($response['files'], 'isimage'));
         $this->assertSame($response['contentblocks'][4]->files[0], $response['files'][0]);
         foreach ($response['files'] as $index => $file) {
             $blockid = $index < 2 ? $filesone->id : $filestwo->id;
             $this->assertStringContainsString('/webservice/pluginfile.php/', $file['url']);
-            $this->assertStringContainsString('/item_content_file/itemid/' . $item->id .
+            $this->assertStringContainsString('/item_content_file/webservice/' . $owner->id . '/itemid/' . $item->id .
                 '/blockid/' . $blockid . '/', $file['url']);
             $this->assertStringEndsWith('?token=token123', $file['url']);
             $this->assertStringNotContainsString('portfoliofile.php', $file['url']);
@@ -117,6 +119,26 @@ final class externallib_test extends \advanced_testcase {
         }
         $this->assertNotContains('legacy.txt', array_column($response['files'], 'filename'));
         $this->assertNotSame($item->url, $response['url']);
+    }
+
+    public function test_image_projection_exposes_stored_file_identity_and_metadata(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $item = (object)['userid' => $owner->id, 'type' => 'file', 'categoryid' => 0, 'name' => 'Image',
+            'url' => '', 'intro' => '', 'attachment' => '', 'timecreated' => time(),
+            'timemodified' => time(), 'courseid' => 0];
+        $item->id = (int)$DB->insert_record('block_exaportitem', $item);
+        $block = block_exaport_create_file_content_block($item->id, 'Picture');
+        $this->create_file($owner->id, 'item_content_file', $block->id, '/nested/', 'picture.png');
+
+        $storedfile = block_exaport_get_item_content_files($owner->id, $block->id)[0];
+        $response = block_exaport_get_item_content_webservice_data($item);
+
+        $this->assertSame((int)$storedfile->get_id(), $response['files'][0]['id']);
+        $this->assertTrue($response['files'][0]['isimage']);
+        $this->assertStringContainsString('/nested/picture.png', $response['files'][0]['url']);
     }
 
     public function test_text_only_projection_has_no_fabricated_legacy_values(): void {

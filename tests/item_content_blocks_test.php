@@ -564,7 +564,7 @@ final class item_content_blocks_test extends \advanced_testcase {
             $fs->create_file_from_string([
                 'contextid' => \context_user::instance($owner->id)->id,
                 'component' => 'block_exaport', 'filearea' => 'item_content_file', 'itemid' => $blockid,
-                'filepath' => $i % 2 ? '/nested/' : '/other/', 'filename' => 'same-' . ($i % 6) . '.txt',
+                'filepath' => $i < 6 ? '/nested/' : '/other/', 'filename' => 'same-' . ($i % 6) . '.txt',
             ], (string)$i);
         }
         $options = block_exaport_item_content_file_options($item, $block);

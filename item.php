@@ -381,7 +381,9 @@ if ($itemeditsections['content'] && $allowedit) {
         'contextId' => $context->id,
         'courseId' => (int)$courseid,
         'itemId' => (int)$existing->id,
-        'title' => get_string('addcontentblock', 'block_exaport'),
+        'title' => get_string('editcontentblock', 'block_exaport'),
+        'deleteTitle' => get_string('deletecontentblock', 'block_exaport'),
+        'deleteLabel' => get_string('delete'),
         'saveLabel' => get_string('save'),
     ]]);
 }

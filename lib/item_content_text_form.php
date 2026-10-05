@@ -33,6 +33,8 @@ class block_exaport_item_content_text_form extends block_exaport_moodleform {
 
         $mform->addElement('hidden', 'itemid');
         $mform->setType('itemid', PARAM_INT);
+        $mform->addElement('hidden', 'blockid');
+        $mform->setType('blockid', PARAM_INT);
 
         $mform->addElement('text', 'title', get_string('title', 'block_exaport'), [
             'maxlength' => 255,

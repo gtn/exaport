@@ -69,6 +69,9 @@ class item_content_blocks implements renderable, templatable {
     /** @var string|null */
     private $access;
 
+    /** @var int Navigation course ID used by standalone fallbacks. */
+    private $courseid = 0;
+
     /**
      * @param array $blocks Ordered item content block records.
      * @param moodle_url[]|moodle_url|null $addurl URLs for adding supported blocks.
@@ -91,6 +94,13 @@ class item_content_blocks implements renderable, templatable {
         $this->showaddbutton = $showaddbutton;
         $this->showheading = $showheading;
         $this->access = $access;
+        $candidateurls = $addurl instanceof moodle_url ? [$addurl] : (is_array($addurl) ? $addurl : []);
+        foreach ($candidateurls as $candidateurl) {
+            if ($candidateurl instanceof moodle_url) {
+                $this->courseid = (int)$candidateurl->get_param('courseid');
+                break;
+            }
+        }
     }
 
     /**
@@ -106,6 +116,7 @@ class item_content_blocks implements renderable, templatable {
             $typelabel = $typeinfo['label'];
 
             $row = [
+                'id' => (int)$block->id,
                 'type' => $type,
                 'icon' => $this->get_type_icon($output, $typeinfo, $typelabel),
                 'typelabel' => $typelabel,
@@ -113,6 +124,13 @@ class item_content_blocks implements renderable, templatable {
                 'content' => $type === 'text' ? $this->format_content($block) : '',
                 'preview' => $this->build_preview($block, $type),
             ];
+            if ($this->showaddbutton && $this->addurl !== null) {
+                $baseparams = ['courseid' => $this->courseid, 'itemid' => $block->itemid, 'blockid' => $block->id];
+                $row['editurl'] = (new moodle_url('/blocks/exaport/item_content_' . $type . '.php', $baseparams))->out(false);
+                $row['deleteurl'] = (new moodle_url('/blocks/exaport/item_content_' . $type . '.php',
+                    $baseparams + ['operation' => 'delete']))->out(false);
+                $row['canedit'] = true;
+            }
             if ($type === 'link' && !empty($block->url)) {
                 $row['linkurl'] = clean_param($block->url, PARAM_URL);
             } else if ($type === 'file') {
@@ -134,6 +152,8 @@ class item_content_blocks implements renderable, templatable {
             'hasaddactions' => !empty($addactions),
             'showaddbutton' => $this->showaddbutton,
             'showheading' => $this->showheading,
+            'editlabel' => get_string('edit'),
+            'deletelabel' => get_string('delete'),
         ];
     }
 

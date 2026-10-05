@@ -43,6 +43,40 @@ function block_exaport_get_item_content_blocks(int $itemid): array {
 }
 
 /**
+ * Load a content block through its already-authorised parent item.
+ *
+ * @param stdClass $item Trusted parent item.
+ * @param int $blockid Block ID supplied by the request.
+ * @return stdClass
+ */
+function block_exaport_get_item_content_block(stdClass $item, int $blockid): stdClass {
+    global $DB;
+
+    $block = $DB->get_record('block_exaportitemblock', [
+        'id' => $blockid,
+        'itemid' => $item->id,
+    ]);
+    if (!$block || !in_array($block->type ?? '', ['text', 'link', 'file'], true)) {
+        throw new invalid_parameter_exception('Content block does not belong to this item');
+    }
+    return $block;
+}
+
+/** Delete one block and both of its possible file areas. */
+function block_exaport_delete_item_content_block(stdClass $item, stdClass $block): void {
+    global $DB;
+
+    if ((int)$block->itemid !== (int)$item->id) {
+        throw new invalid_parameter_exception('Content block does not belong to this item');
+    }
+    $context = context_user::instance((int)$item->userid, MUST_EXIST);
+    $fs = get_file_storage();
+    $fs->delete_area_files($context->id, 'block_exaport', 'item_content_text', (int)$block->id);
+    $fs->delete_area_files($context->id, 'block_exaport', 'item_content_file', (int)$block->id);
+    $DB->delete_records('block_exaportitemblock', ['id' => $block->id, 'itemid' => $item->id]);
+}
+
+/**
  * Delete all structured blocks and their files for an item.
  *
  * Authorization is the caller's responsibility. This operation does not delete
@@ -680,9 +714,19 @@ function block_exaport_item_content_editor_options(): array {
 }
 
 /** Return options shared by standalone and dynamic file forms. */
-function block_exaport_item_content_file_options(): array {
+function block_exaport_item_content_file_options(?stdClass $item = null, ?stdClass $block = null): array {
     global $CFG;
-    return ['subdirs' => false, 'maxfiles' => !empty($CFG->block_exaport_multiple_files_in_item) ? 10 : 1,
+    $maxfiles = !empty($CFG->block_exaport_multiple_files_in_item) ? 10 : 1;
+    $subdirs = false;
+    if ($item && $block) {
+        $files = block_exaport_get_item_content_files((int)$item->userid, (int)$block->id);
+        // Never truncate migrated files, while retaining room for the configured number of new uploads.
+        $maxfiles = max($maxfiles, count($files) + $maxfiles);
+        foreach ($files as $file) {
+            $subdirs = $subdirs || $file->get_filepath() !== '/';
+        }
+    }
+    return ['subdirs' => $subdirs, 'maxfiles' => $maxfiles,
         'maxbytes' => $CFG->block_exaport_max_uploadfile_size, 'accepted_types' => '*'];
 }
 
@@ -697,29 +741,35 @@ function block_exaport_item_content_file_options(): array {
  * @param int $itemid Item ID.
  * @return moodleform
  */
-function block_exaport_create_item_content_form(string $type, int $courseid, int $itemid) {
-    global $USER;
-
-    $usercontext = context_user::instance($USER->id);
+function block_exaport_create_item_content_form(string $type, int $courseid, int $itemid, int $blockid = 0) {
+    $item = block_exaport_get_editable_content_item($itemid, $courseid);
+    $block = $blockid ? block_exaport_get_item_content_block($item, $blockid) : null;
+    if ($block && $block->type !== $type) {
+        throw new invalid_parameter_exception('Content block type does not match the form');
+    }
+    $usercontext = context_user::instance((int)$item->userid);
     if ($type === 'text') {
         require_once(__DIR__ . '/item_content_text_form.php');
         $options = block_exaport_item_content_editor_options();
         $form = new block_exaport_item_content_text_form(null, ['editoroptions' => $options]);
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'title' => '',
-            'content' => '', 'contentformat' => FORMAT_HTML];
+        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
+            'title' => $block->title ?? '', 'content' => $block->content ?? '',
+            'contentformat' => $block->contentformat ?? FORMAT_HTML];
         $data = file_prepare_standard_editor($data, 'content', $options, $usercontext,
-            'block_exaport', 'item_content_text', 0);
+            'block_exaport', 'item_content_text', $blockid);
     } else if ($type === 'file') {
         require_once(__DIR__ . '/item_content_form.php');
-        $options = block_exaport_item_content_file_options();
-        $form = new block_exaport_item_content_file_form(null, ['fileoptions' => $options]);
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'title' => '', 'files' => ''];
+        $options = block_exaport_item_content_file_options($item, $block);
+        $form = new block_exaport_item_content_file_form(null, ['fileoptions' => $options, 'blockid' => $blockid]);
+        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
+            'title' => $block->title ?? '', 'files' => ''];
         $data = file_prepare_standard_filemanager($data, 'files', $options, $usercontext,
-            'block_exaport', 'item_content_file', 0);
+            'block_exaport', 'item_content_file', $blockid);
     } else if ($type === 'link') {
         require_once(__DIR__ . '/item_content_form.php');
         $form = new block_exaport_item_content_link_form();
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid];
+        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
+            'title' => $block->title ?? '', 'url' => $block->url ?? ''];
     } else {
         throw new coding_exception('Unsupported Exaport item content block type');
     }

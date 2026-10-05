@@ -15,9 +15,11 @@ const open = (trigger, config) => {
             contenttype: trigger.dataset.contentType,
             courseid: config.courseId,
             itemid: config.itemId,
+            blockid: trigger.dataset.blockId || 0,
+            operation: trigger.dataset.operation || 'save',
         },
-        modalConfig: {title: config.title},
-        saveButtonText: config.saveLabel,
+        modalConfig: {title: trigger.dataset.operation === 'delete' ? config.deleteTitle : config.title},
+        saveButtonText: trigger.dataset.operation === 'delete' ? config.deleteLabel : config.saveLabel,
         returnFocus: trigger,
     });
 
@@ -37,7 +39,9 @@ const open = (trigger, config) => {
  */
 export const init = config => {
     document.addEventListener('click', event => {
-        const trigger = event.target.closest('.exaport-item-content-add');
+        const trigger = event.target.closest(
+            '.exaport-item-content-add, .exaport-item-content-edit, .exaport-item-content-delete'
+        );
         if (!trigger) {
             return;
         }

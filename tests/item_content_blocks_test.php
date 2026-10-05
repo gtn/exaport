@@ -519,6 +519,62 @@ final class item_content_blocks_test extends \advanced_testcase {
             $blocks[$viewblockid]->item->intro);
     }
 
+    public function test_single_block_delete_preserves_parent_order_and_other_blocks(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+        $firstid = $this->insert_block($itemid, 'text', 4, 'First');
+        $deletedid = $this->insert_block($itemid, 'file', 9, 'Delete');
+        $lastid = $this->insert_block($itemid, 'link', 15, 'Last', '', 'https://example.test');
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($owner->id)->id,
+            'component' => 'block_exaport', 'filearea' => 'item_content_file',
+            'itemid' => $deletedid, 'filepath' => '/', 'filename' => 'delete.txt',
+        ], 'delete');
+
+        $block = block_exaport_get_item_content_block($item, $deletedid);
+        block_exaport_delete_item_content_block($item, $block);
+
+        $this->assertTrue($DB->record_exists('block_exaportitem', ['id' => $itemid]));
+        $remaining = block_exaport_get_item_content_blocks($itemid);
+        $this->assertSame([$firstid, $lastid], array_map(fn($entry) => (int)$entry->id, $remaining));
+        $this->assertSame([4, 15], array_map(fn($entry) => (int)$entry->sortorder, $remaining));
+        $this->assertSame([], block_exaport_get_item_content_files($owner->id, $deletedid));
+    }
+
+    public function test_block_lookup_rejects_foreign_item_and_file_options_preserve_migrated_shape(): void {
+        global $CFG, $DB;
+
+        $this->resetAfterTest(true);
+        $CFG->block_exaport_multiple_files_in_item = 0;
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $otheritemid = $this->insert_item($owner->id, $course->id);
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+        $otheritem = $DB->get_record('block_exaportitem', ['id' => $otheritemid], '*', MUST_EXIST);
+        $blockid = $this->insert_block($itemid, 'file', 7, 'Migrated');
+        $block = block_exaport_get_item_content_block($item, $blockid);
+        $fs = get_file_storage();
+        for ($i = 0; $i < 12; $i++) {
+            $fs->create_file_from_string([
+                'contextid' => \context_user::instance($owner->id)->id,
+                'component' => 'block_exaport', 'filearea' => 'item_content_file', 'itemid' => $blockid,
+                'filepath' => $i % 2 ? '/nested/' : '/other/', 'filename' => 'same-' . ($i % 6) . '.txt',
+            ], (string)$i);
+        }
+        $options = block_exaport_item_content_file_options($item, $block);
+        $this->assertTrue($options['subdirs']);
+        $this->assertSame(13, $options['maxfiles']);
+
+        $this->expectException(\invalid_parameter_exception::class);
+        block_exaport_get_item_content_block($otheritem, $blockid);
+    }
+
     /**
      * @param int $itemid
      * @param string $type

@@ -18,6 +18,14 @@
                 <div class="d-flex flex-wrap align-items-baseline gap-2">
                     <span class="exaport-item-content-type text-muted small">{{typelabel}}</span>
                     {{#title}}<span class="exaport-item-content-title fw-semibold">{{title}}</span>{{/title}}
+                    {{#canedit}}
+                    <span class="ms-auto exaport-item-content-actions">
+                        <a href="{{editurl}}" class="btn btn-sm btn-link exaport-item-content-edit"
+                           data-content-type="{{type}}" data-block-id="{{id}}" data-operation="save">{{editlabel}}</a>
+                        <a href="{{deleteurl}}" class="btn btn-sm btn-link text-danger exaport-item-content-delete"
+                           data-content-type="{{type}}" data-block-id="{{id}}" data-operation="delete">{{deletelabel}}</a>
+                    </span>
+                    {{/canedit}}
                 </div>
                 {{#content}}<div class="exaport-item-content-preview mt-1">{{{content}}}</div>{{/content}}
                 {{#linkurl}}

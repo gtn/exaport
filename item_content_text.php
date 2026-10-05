@@ -17,23 +17,43 @@ require_once(__DIR__ . '/lib/item_content_helpers.php');
 
 $courseid = required_param('courseid', PARAM_INT);
 $itemid = required_param('itemid', PARAM_INT);
+$blockid = optional_param('blockid', 0, PARAM_INT);
+$operation = optional_param('operation', 'save', PARAM_ALPHA);
 
 $context = context_system::instance();
 require_login($courseid);
 require_capability('block/exaport:use', $context);
 
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
-block_exaport_get_editable_content_item($itemid, $courseid);
+$item = block_exaport_get_editable_content_item($itemid, $courseid);
+$block = $blockid ? block_exaport_get_item_content_block($item, $blockid) : null;
 
 $PAGE->set_url(new moodle_url('/blocks/exaport/item_content_text.php', [
     'courseid' => $courseid,
     'itemid' => $itemid,
+    'blockid' => $blockid,
+    'operation' => $operation,
 ]));
 
 $returnurl = block_exaport_content_return_url($courseid, $itemid);
 $editoroptions = block_exaport_item_content_editor_options();
 
-$form = block_exaport_create_item_content_form('text', $courseid, $itemid);
+$form = block_exaport_create_item_content_form('text', $courseid, $itemid, $blockid);
+
+if ($operation === 'delete' && $block) {
+    if (optional_param('confirm', 0, PARAM_BOOL)) {
+        require_sesskey();
+        $transaction = $DB->start_delegated_transaction();
+        block_exaport_delete_item_content_block($item, $block);
+        $transaction->allow_commit();
+        redirect($returnurl);
+    }
+    block_exaport_print_header('bookmarks' . block_exaport_get_plural_item_type('all'), 'edit');
+    echo $OUTPUT->confirm(get_string('deletecontentblockconfirm', 'block_exaport'), new moodle_url($PAGE->url,
+        ['confirm' => 1, 'sesskey' => sesskey()]), $returnurl);
+    echo $OUTPUT->footer($course);
+    exit;
+}
 
 if ($form->is_cancelled()) {
     redirect($returnurl);
@@ -41,22 +61,24 @@ if ($form->is_cancelled()) {
     require_sesskey();
 
     // Re-check ownership and editability at save time.
-    block_exaport_get_editable_content_item($itemid, $courseid);
+    $item = block_exaport_get_editable_content_item($itemid, $courseid);
+    $block = $blockid ? block_exaport_get_item_content_block($item, $blockid) : null;
 
     $transaction = $DB->start_delegated_transaction();
-    $block = block_exaport_create_content_block($itemid, 'text', $fromform->title);
+    $block = $block ?: block_exaport_create_content_block($itemid, 'text', $fromform->title);
 
     $fromform = file_postupdate_standard_editor(
         $fromform,
         'content',
         $editoroptions,
-        context_user::instance($USER->id),
+        context_user::instance((int)$item->userid),
         'block_exaport',
         'item_content_text',
         $block->id
     );
     $DB->update_record('block_exaportitemblock', (object)[
         'id' => $block->id,
+        'title' => $fromform->title,
         'content' => $fromform->content,
         'contentformat' => $fromform->contentformat,
         'timemodified' => time(),

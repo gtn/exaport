@@ -37,8 +37,17 @@ class item_content extends dynamic_form {
         $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'itemid', $this->optional_param('itemid', 0, PARAM_INT));
         $mform->setType('itemid', PARAM_INT);
+        $mform->addElement('hidden', 'blockid', $this->optional_param('blockid', 0, PARAM_INT));
+        $mform->setType('blockid', PARAM_INT);
+        $mform->addElement('hidden', 'operation', $this->get_operation());
+        $mform->setType('operation', PARAM_ALPHA);
         $mform->addElement('hidden', 'contenttype', $type);
         $mform->setType('contenttype', PARAM_ALPHA);
+
+        if ($this->get_operation() === 'delete') {
+            $mform->addElement('static', 'confirmation', '', get_string('deletecontentblockconfirm', 'block_exaport'));
+            return;
+        }
 
         $mform->addElement('text', 'title', get_string('title', 'block_exaport'), ['maxlength' => 255]);
         $mform->setType('title', PARAM_TEXT);
@@ -52,9 +61,19 @@ class item_content extends dynamic_form {
             $mform->setType('url', PARAM_URL);
             $mform->addRule('url', get_string('required'), 'required', null, 'client');
         } else {
-            $mform->addElement('filemanager', 'files_filemanager', get_string('files'), null,
-                block_exaport_item_content_file_options());
-            $mform->addRule('files_filemanager', get_string('required'), 'required', null, 'client');
+            $options = block_exaport_item_content_file_options();
+            if ($this->optional_param('blockid', 0, PARAM_INT)) {
+                $item = block_exaport_get_editable_content_item(
+                    $this->optional_param('itemid', 0, PARAM_INT),
+                    $this->optional_param('courseid', 0, PARAM_INT)
+                );
+                $block = block_exaport_get_item_content_block($item, $this->optional_param('blockid', 0, PARAM_INT));
+                $options = block_exaport_item_content_file_options($item, $block);
+            }
+            $mform->addElement('filemanager', 'files_filemanager', get_string('files'), null, $options);
+            if (!$this->optional_param('blockid', 0, PARAM_INT)) {
+                $mform->addRule('files_filemanager', get_string('required'), 'required', null, 'client');
+            }
         }
     }
 
@@ -63,7 +82,8 @@ class item_content extends dynamic_form {
         global $USER;
 
         $errors = parent::validation($data, $files);
-        if (($data['contenttype'] ?? '') !== 'file') {
+        if (($data['contenttype'] ?? '') !== 'file' || !empty($data['blockid']) ||
+                ($data['operation'] ?? '') === 'delete') {
             return $errors;
         }
         $draftitemid = (int)($data['files_filemanager'] ?? 0);
@@ -89,10 +109,17 @@ class item_content extends dynamic_form {
     /** Check access before Moodle renders or processes the form. */
     protected function check_access_for_dynamic_submission(): void {
         require_capability('block/exaport:use', $this->get_context_for_dynamic_submission());
-        block_exaport_get_editable_content_item(
+        $item = block_exaport_get_editable_content_item(
             $this->optional_param('itemid', 0, PARAM_INT),
             $this->optional_param('courseid', 0, PARAM_INT)
         );
+        $blockid = $this->optional_param('blockid', 0, PARAM_INT);
+        if ($blockid) {
+            $block = block_exaport_get_item_content_block($item, $blockid);
+            if ($block->type !== $this->get_content_type()) {
+                throw new \invalid_parameter_exception('Content block type does not match the form');
+            }
+        }
     }
 
     /** Return the canonical standalone URL used by editor autosave and form elements. */
@@ -105,44 +132,69 @@ class item_content extends dynamic_form {
 
     /** Prepare initial editor or file-manager drafts. */
     public function set_data_for_dynamic_submission(): void {
-        global $USER;
-
         $type = $this->get_content_type();
         $data = (object)[
             'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
             'itemid' => $this->optional_param('itemid', 0, PARAM_INT),
+            'blockid' => $this->optional_param('blockid', 0, PARAM_INT),
+            'operation' => $this->get_operation(),
             'contenttype' => $type,
             'title' => '',
         ];
-        $context = context_user::instance($USER->id);
+        $item = block_exaport_get_editable_content_item((int)$data->itemid, (int)$data->courseid);
+        $block = $data->blockid ? block_exaport_get_item_content_block($item, (int)$data->blockid) : null;
+        if ($block) {
+            $data->title = $block->title;
+        }
+        if ($data->operation === 'delete') {
+            $this->set_data($data);
+            return;
+        }
+        $context = context_user::instance((int)$item->userid);
         if ($type === 'text') {
-            $data->content = '';
-            $data->contentformat = FORMAT_HTML;
+            $data->content = $block->content ?? '';
+            $data->contentformat = $block->contentformat ?? FORMAT_HTML;
             $data = file_prepare_standard_editor($data, 'content', block_exaport_item_content_editor_options(),
-                $context, 'block_exaport', 'item_content_text', 0);
+                $context, 'block_exaport', 'item_content_text', (int)$data->blockid);
+        } else if ($type === 'link') {
+            $data->url = $block->url ?? '';
         } else if ($type === 'file') {
             $data->files = '';
-            $data = file_prepare_standard_filemanager($data, 'files', block_exaport_item_content_file_options(),
-                $context, 'block_exaport', 'item_content_file', 0);
+            $options = block_exaport_item_content_file_options($item, $block);
+            $data = file_prepare_standard_filemanager($data, 'files', $options,
+                $context, 'block_exaport', 'item_content_file', (int)$data->blockid);
         }
         $this->set_data($data);
     }
 
     /** Persist a validated form submission and return the refreshed section HTML. */
     public function process_dynamic_submission(): array {
-        global $DB, $USER;
+        global $DB;
 
         require_sesskey();
         $data = $this->get_data();
         $item = block_exaport_get_editable_content_item((int)$data->itemid, (int)$data->courseid);
         $transaction = $DB->start_delegated_transaction();
-        $block = block_exaport_create_content_block(
-            (int)$data->itemid,
-            $data->contenttype,
-            $data->title,
-            $data->contenttype === 'link' ? $data->url : ''
-        );
-        $context = context_user::instance($USER->id);
+        $block = !empty($data->blockid)
+            ? block_exaport_get_item_content_block($item, (int)$data->blockid)
+            : block_exaport_create_content_block(
+                (int)$data->itemid,
+                $data->contenttype,
+                $data->title,
+                $data->contenttype === 'link' ? $data->url : ''
+            );
+        if (($data->operation ?? '') === 'delete') {
+            block_exaport_delete_item_content_block($item, $block);
+            $transaction->allow_commit();
+            return ['content' => block_exaport_render_item_content_blocks((int)$data->courseid, $item)];
+        }
+        $DB->update_record('block_exaportitemblock', (object)[
+            'id' => $block->id,
+            'title' => $data->title,
+            'url' => $data->contenttype === 'link' ? $data->url : '',
+            'timemodified' => time(),
+        ]);
+        $context = context_user::instance((int)$item->userid);
         if ($data->contenttype === 'text') {
             $data = file_postupdate_standard_editor($data, 'content', block_exaport_item_content_editor_options(),
                 $context, 'block_exaport', 'item_content_text', $block->id);
@@ -153,8 +205,13 @@ class item_content extends dynamic_form {
                 'timemodified' => time(),
             ]);
         } else if ($data->contenttype === 'file') {
-            file_postupdate_standard_filemanager($data, 'files', block_exaport_item_content_file_options(),
+            $options = block_exaport_item_content_file_options($item, $block);
+            file_postupdate_standard_filemanager($data, 'files', $options,
                 $context, 'block_exaport', 'item_content_file', $block->id);
+            if (!block_exaport_get_item_content_files((int)$item->userid, (int)$block->id)) {
+                // Removing the final file intentionally removes its now-empty content block.
+                block_exaport_delete_item_content_block($item, $block);
+            }
         }
         $transaction->allow_commit();
         return ['content' => block_exaport_render_item_content_blocks((int)$data->courseid, $item)];
@@ -167,5 +224,14 @@ class item_content extends dynamic_form {
             throw new \coding_exception('Unsupported Exaport item content block type');
         }
         return $type;
+    }
+
+    /** Return the requested operation. */
+    private function get_operation(): string {
+        $operation = $this->optional_param('operation', 'save', PARAM_ALPHA);
+        if (!in_array($operation, ['save', 'delete'], true)) {
+            throw new \coding_exception('Unsupported Exaport item content operation');
+        }
+        return $operation;
     }
 }

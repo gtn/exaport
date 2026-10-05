@@ -23,6 +23,8 @@ class block_exaport_item_content_link_form extends block_exaport_moodleform {
         $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'itemid');
         $mform->setType('itemid', PARAM_INT);
+        $mform->addElement('hidden', 'blockid');
+        $mform->setType('blockid', PARAM_INT);
 
         $mform->addElement('text', 'title', get_string('title', 'block_exaport'), ['maxlength' => 255]);
         $mform->setType('title', PARAM_TEXT);
@@ -50,6 +52,8 @@ class block_exaport_item_content_file_form extends block_exaport_moodleform {
         $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'itemid');
         $mform->setType('itemid', PARAM_INT);
+        $mform->addElement('hidden', 'blockid');
+        $mform->setType('blockid', PARAM_INT);
 
         $mform->addElement('text', 'title', get_string('title', 'block_exaport'), ['maxlength' => 255]);
         $mform->setType('title', PARAM_TEXT);
@@ -61,7 +65,9 @@ class block_exaport_item_content_file_form extends block_exaport_moodleform {
             null,
             $this->_customdata['fileoptions']
         );
-        $mform->addRule('files_filemanager', get_string('required'), 'required', null, 'client');
+        if (empty($this->_customdata['blockid'])) {
+            $mform->addRule('files_filemanager', get_string('required'), 'required', null, 'client');
+        }
 
         $this->add_action_buttons(true, get_string('addcontentblock', 'block_exaport'));
     }
@@ -87,7 +93,7 @@ class block_exaport_item_content_file_form extends block_exaport_moodleform {
             'id',
             false
         );
-        if (!$draftitemid || !$draftfiles) {
+        if (empty($data['blockid']) && (!$draftitemid || !$draftfiles)) {
             $errors['files_filemanager'] = get_string('required');
         }
 

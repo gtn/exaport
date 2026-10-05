@@ -12,6 +12,8 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
+require_once($CFG->dirroot . '/blocks/exaport/lib/package_import_helpers.php');
+require_once($CFG->dirroot . '/blocks/exaport/tests/fixtures/exaport_test_helpers_trait.php');
 
 /**
  * Tests structured-content services used by active item imports.
@@ -21,6 +23,115 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class item_import_test extends \advanced_testcase {
+
+    use \block_exaport\tests\exaport_test_helpers_trait;
+
+    public function test_historical_markers_import_root_files_and_decode_url(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $categoryid = $this->create_category($user, 'Work');
+        $root = make_request_directory();
+        mkdir($root . '/categories/Work', 0777, true);
+        file_put_contents($root . '/document.pdf', 'root pdf bytes');
+        file_put_contents($root . '/notes.txt', 'root notes bytes');
+        file_put_contents($root . '/categories/Work/document.pdf', 'wrong adjacent bytes');
+        $filehtml = '<!--###BOOKMARK_FILE_URL###-->document.pdf<!--###BOOKMARK_FILE_URL###-->' .
+            '<!--###BOOKMARK_FILE_URL###-->notes.txt<!--###BOOKMARK_FILE_URL###-->' .
+            '<!--###BOOKMARK_FILE_DESC###--><p>Historical file description</p>' .
+            '<!--###BOOKMARK_FILE_DESC###-->';
+        file_put_contents($root . '/categories/Work/item.html', $filehtml);
+        $associate = static function(\stdClass $item) use ($categoryid): void {
+            item_category_helper::sync_item_categories($item->id, [$categoryid]);
+        };
+
+        $fileitem = block_exaport_import_legacy_item(
+            $root, file_get_contents($root . '/categories/Work/item.html'), 'Files', $course->id, $user->id, $associate
+        );
+        $linkitem = block_exaport_import_legacy_item($root,
+            '<!--###BOOKMARK_EXT_URL###-->https://example.test/view?a=1&amp;b=2&amp;c=3' .
+                '<!--###BOOKMARK_EXT_URL###--><!--###BOOKMARK_EXT_DESC###--><p>Link description</p>' .
+                '<!--###BOOKMARK_EXT_DESC###-->',
+            'Link', $course->id, $user->id, $associate);
+
+        $fileblocks = block_exaport_get_item_content_blocks($fileitem->id);
+        $this->assertCount(1, $fileblocks);
+        $files = block_exaport_get_item_content_files($user->id, $fileblocks[0]->id);
+        $this->assertSame([(int)$fileblocks[0]->id, (int)$fileblocks[0]->id],
+            array_map(fn($file) => (int)$file->get_itemid(), $files));
+        $this->assertSame([(int)$user->id, (int)$user->id],
+            array_map(fn($file) => (int)$file->get_userid(), $files));
+        $this->assertSame(['document.pdf' => 'root pdf bytes', 'notes.txt' => 'root notes bytes'],
+            array_combine(array_map(fn($file) => $file->get_filename(), $files),
+                array_map(fn($file) => $file->get_content(), $files)));
+        $linkblocks = block_exaport_get_item_content_blocks($linkitem->id);
+        $this->assertSame('https://example.test/view?a=1&b=2&c=3', $linkblocks[0]->url);
+        $this->assertSame('<p>Historical file description</p>', $fileitem->intro);
+        $this->assertSame('<p>Link description</p>', $linkitem->intro);
+        foreach ([$fileitem, $linkitem] as $item) {
+            $storeditem = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
+            $this->assertSame('', $storeditem->url);
+            $this->assertSame('', $storeditem->attachment);
+            $this->assertTrue($DB->record_exists('block_exaportitemcate',
+                ['itemid' => $item->id, 'cateid' => $categoryid]));
+            $this->assertEmpty(get_file_storage()->get_area_files(\context_user::instance($user->id)->id,
+                'block_exaport', 'item_file', $item->id, 'id', false));
+        }
+    }
+
+    public function test_historical_file_failure_rolls_back_whole_item(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $root = make_request_directory();
+        file_put_contents($root . '/present.txt', 'present');
+        $html = '<!--###BOOKMARK_FILE_URL###-->present.txt<!--###BOOKMARK_FILE_URL###-->' .
+            '<!--###BOOKMARK_FILE_URL###-->missing.txt<!--###BOOKMARK_FILE_URL###-->' .
+            '<!--###BOOKMARK_FILE_DESC###-->Description<!--###BOOKMARK_FILE_DESC###-->';
+
+        try {
+            block_exaport_import_legacy_item($root, $html, 'Incomplete', $course->id, $user->id,
+                static function(): void {});
+            $this->fail('A missing historical attachment was accepted');
+        } catch (\invalid_parameter_exception $exception) {
+            $this->assertSame(0, $DB->count_records('block_exaportitem', ['userid' => $user->id]));
+            $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
+        }
+    }
+
+    public function test_historical_file_marker_rejects_unsafe_path(): void {
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $html = '<!--###BOOKMARK_FILE_URL###-->../outside.txt<!--###BOOKMARK_FILE_URL###-->' .
+            '<!--###BOOKMARK_FILE_DESC###-->Description<!--###BOOKMARK_FILE_DESC###-->';
+
+        $this->expectException(\invalid_parameter_exception::class);
+        block_exaport_import_legacy_item(make_request_directory(), $html, 'Unsafe', $course->id, $user->id,
+            static function(): void {});
+    }
+
+    public function test_historical_invalid_url_is_rejected_without_partial_item(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $html = '<!--###BOOKMARK_EXT_URL###--><!--###BOOKMARK_EXT_URL###-->' .
+            '<!--###BOOKMARK_EXT_DESC###-->Description<!--###BOOKMARK_EXT_DESC###-->';
+
+        $this->expectException(\invalid_parameter_exception::class);
+        try {
+            block_exaport_import_legacy_item(make_request_directory(), $html, 'Invalid', $course->id, $user->id,
+                static function(): void {});
+        } finally {
+            $this->assertSame(0, $DB->count_records('block_exaportitem', ['userid' => $user->id]));
+        }
+    }
 
     public function test_assignment_file_import_is_structured_only(): void {
         global $DB;

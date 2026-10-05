@@ -13,6 +13,91 @@ function block_exaport_package_sidecar_path(string $html): ?string {
     return html_entity_decode(trim($matches[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
+/**
+ * Import one item described by the compatibility markers used by historical exports.
+ *
+ * Historical attachment names are relative to the archive root, not to the item HTML page.
+ * The callback runs inside the same transaction as the parent and content writes.
+ *
+ * @param string $root Extraction directory.
+ * @param string $html Historical item HTML.
+ * @param string $title Item title from the SCORM manifest.
+ * @param int $courseid Destination course ID.
+ * @param int $userid Destination owner ID.
+ * @param callable $aftercreate Associated import writes, receiving the new item.
+ * @return stdClass|null The imported item, or null when no supported marker is present.
+ */
+function block_exaport_import_legacy_item(
+    string $root,
+    string $html,
+    string $title,
+    int $courseid,
+    int $userid,
+    callable $aftercreate
+): ?stdClass {
+    global $DB;
+
+    $marker = static function(string $name) use ($html): ?string {
+        $delimiter = '<!--###' . $name . '###-->';
+        $start = strpos($html, $delimiter);
+        if ($start === false) {
+            return null;
+        }
+        $start += strlen($delimiter);
+        $end = strpos($html, $delimiter, $start);
+        return $end === false ? null : substr($html, $start, $end - $start);
+    };
+
+    $type = null;
+    $intro = null;
+    $url = null;
+    $files = [];
+    if (($rawurl = $marker('BOOKMARK_EXT_URL')) !== null &&
+            ($intro = $marker('BOOKMARK_EXT_DESC')) !== null) {
+        $type = 'link';
+        $decodedurl = html_entity_decode($rawurl, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $url = clean_param($decodedurl, PARAM_URL);
+        if ($url === '') {
+            throw new invalid_parameter_exception('Invalid legacy item URL');
+        }
+    } else if (($intro = $marker('BOOKMARK_FILE_DESC')) !== null &&
+            preg_match_all('/<!--###BOOKMARK_FILE_URL###-->(.*?)<!--###BOOKMARK_FILE_URL###-->/s',
+                $html, $matches) && $matches[1]) {
+        $type = 'file';
+        $files = $matches[1];
+    } else if (($intro = $marker('BOOKMARK_NOTE_DESC')) !== null) {
+        $type = 'note';
+    } else {
+        return null;
+    }
+
+    $item = (object)[
+        'userid' => $userid,
+        'name' => clean_param($title, PARAM_TEXT),
+        'intro' => $intro,
+        'timemodified' => time(),
+        'type' => $type,
+        'courseid' => $courseid,
+        'url' => '',
+        'attachment' => '',
+    ];
+    $transaction = $DB->start_delegated_transaction();
+    try {
+        $item->id = $DB->insert_record('block_exaportitem', $item);
+        if ($type === 'link') {
+            block_exaport_create_link_content_block($item->id, '', $url);
+        } else if ($type === 'file') {
+            // The old exporter wrote every attachment directly at the ZIP root.
+            block_exaport_import_path_files_into_content_block($item, $root, $root, $files);
+        }
+        $aftercreate($item);
+        $transaction->allow_commit();
+    } catch (Throwable $exception) {
+        $transaction->rollback($exception);
+    }
+    return $item;
+}
+
 /** Validate a File API path supplied by the structured package. */
 function block_exaport_validate_package_filepath(string $filepath): string {
     if ($filepath === '' || $filepath[0] !== '/' || substr($filepath, -1) !== '/' ||

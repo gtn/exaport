@@ -13,6 +13,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
 require_once($CFG->dirroot . '/blocks/exaport/lib/scorm_export_helpers.php');
+require_once($CFG->dirroot . '/blocks/exaport/lib/package_import_helpers.php');
 
 /**
  * Tests SCORM rendering of structured item content.
@@ -113,6 +114,79 @@ final class scorm_export_helpers_test extends \advanced_testcase {
         $path = 'items/1/blocks/99/nested/duplicate.pdf';
         $this->assertSame($path, block_exaport_scorm_archive_path($file, 'items/1/blocks/99', []));
         $this->assertSame($path . '-1', block_exaport_scorm_archive_path($file, 'items/1/blocks/99', [$path]));
+    }
+
+    public function test_structured_package_round_trip_preserves_mixed_content_and_files(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $source = $this->create_item($owner->id, 'file');
+        $source->intro = '<p>Parent intro</p>';
+        $DB->set_field('block_exaportitem', 'intro', $source->intro, ['id' => $source->id]);
+        $textid = $this->create_block($source->id, 'text', 10, 'Rich text',
+            '<p><img src="@@PLUGINFILE@@/images/picture one.png"></p>');
+        $this->create_block($source->id, 'link', 20, 'First link', '', 'https://example.test/one');
+        $fileid1 = $this->create_block($source->id, 'file', 30, 'Documents');
+        $this->create_block($source->id, 'link', 40, 'Second link', '', 'https://example.test/two');
+        $fileid2 = $this->create_block($source->id, 'file', 50, 'Duplicate name');
+        $this->create_file($owner->id, 'item_content_text', $textid, '/images/', 'picture one.png');
+        $this->create_file($owner->id, 'item_content_file', $fileid1, '/nested path/', 'same #.txt');
+        $this->create_file($owner->id, 'item_content_file', $fileid2, '/elsewhere/', 'same #.txt');
+
+        $root = make_request_directory();
+        $package = static function(\stored_file $file, string $base) use ($root): string {
+            $path = block_exaport_scorm_archive_path($file, $base, []);
+            check_dir_exists(dirname($root . '/' . $path));
+            file_put_contents($root . '/' . $path, $file->get_content());
+            return $path;
+        };
+        $export = block_exaport_scorm_build_item_package($source,
+            block_exaport_get_item_content_export_data($source), 'category/item.html', $package);
+        $json = json_encode($export['manifest']);
+        $manifest = block_exaport_decode_item_package($json);
+        $destination = $this->create_item($owner->id, 'file', 'https://must.be/cleared', 'old.txt');
+        $DB->set_field('block_exaportitem', 'url', '', ['id' => $destination->id]);
+        $DB->set_field('block_exaportitem', 'attachment', '', ['id' => $destination->id]);
+        block_exaport_import_item_package($destination, $root, $manifest);
+
+        $blocks = block_exaport_get_item_content_blocks($destination->id);
+        $this->assertSame(['text', 'link', 'file', 'link', 'file'], array_column($blocks, 'type'));
+        $this->assertSame([10, 20, 30, 40, 50], array_map('intval', array_column($blocks, 'sortorder')));
+        $this->assertSame(['Rich text', 'First link', 'Documents', 'Second link', 'Duplicate name'],
+            array_column($blocks, 'title'));
+        $this->assertSame('https://example.test/one', $blocks[1]->url);
+        $this->assertSame('https://example.test/two', $blocks[3]->url);
+        $editorfiles = get_file_storage()->get_area_files(\context_user::instance($owner->id)->id,
+            'block_exaport', 'item_content_text', $blocks[0]->id, 'id', false);
+        $this->assertCount(1, $editorfiles);
+        $this->assertSame('/images/picture one.png', reset($editorfiles)->get_filepath() . reset($editorfiles)->get_filename());
+        $firstfiles = block_exaport_get_item_content_files($owner->id, $blocks[2]->id);
+        $secondfiles = block_exaport_get_item_content_files($owner->id, $blocks[4]->id);
+        $this->assertSame('/nested path/same #.txt', $firstfiles[0]->get_filepath() . $firstfiles[0]->get_filename());
+        $this->assertSame('/elsewhere/same #.txt', $secondfiles[0]->get_filepath() . $secondfiles[0]->get_filename());
+        $this->assertSame('same #.txt content', $firstfiles[0]->get_content());
+        $this->assertStringNotContainsString('@@PLUGINFILE@@', $export['html']);
+    }
+
+    public function test_structured_package_rejects_malformed_and_unsafe_metadata(): void {
+        $this->expectException(\invalid_parameter_exception::class);
+        block_exaport_decode_item_package('{"format":"exaport-item-content","version":2}');
+    }
+
+    public function test_structured_package_rejects_unsafe_asset_path(): void {
+        $manifest = [
+            'format' => 'exaport-item-content', 'version' => 1,
+            'parent' => ['type' => 'note', 'intro' => ''],
+            'blocks' => [[
+                'type' => 'file', 'sortorder' => 0, 'title' => '', 'content' => '',
+                'contentformat' => FORMAT_HTML, 'url' => '',
+                'files' => [['filepath' => '/../', 'filename' => 'secret.txt',
+                    'archivepath' => '../secret.txt']], 'textassets' => [],
+            ]],
+        ];
+        $this->expectException(\invalid_parameter_exception::class);
+        block_exaport_decode_item_package(json_encode($manifest));
     }
 
     private function create_item(int $userid, string $type, string $url = '', string $attachment = ''): \stdClass {

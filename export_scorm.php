@@ -240,7 +240,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             clean_text($item->intro, FORMAT_HTML) . '<!--###BOOKMARK_' . $descriptionmarker . '_DESC###--></div>' . "\n";
 
         // Parent metadata is followed by the ordered structured content blocks.
-        $rendered = block_exaport_scorm_render_item_content(
+        $rendered = block_exaport_scorm_build_item_package(
             $item,
             block_exaport_get_item_content_export_data($item),
             $filepath,
@@ -248,6 +248,15 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
         );
         $content .= $rendered['html'];
         $assets = $rendered['assets'];
+        $sidecarpath = 'items/' . (int)$item->id . '/content.json';
+        $sidecar = json_encode($rendered['manifest'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($sidecar === false) {
+            throw new coding_exception('Could not serialize structured item content');
+        }
+        $zip->addFromString($sidecarpath, $sidecar);
+        $assets[] = $sidecarpath;
+        // The HTML remains independently viewable; this marker only locates authoritative import metadata.
+        $content .= '<!--###EXAPORT_ITEM_CONTENT_V1:' . s($sidecarpath) . '###-->' . "\n";
 
         $content .= add_comments('block_exaportitemcomm', $item->id);
         if (block_exaport_check_competence_interaction()) {

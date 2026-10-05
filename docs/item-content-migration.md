@@ -10,7 +10,7 @@ ordered set of `block_exaportitemblock` rows of type `text`, `link`, or `file`.
 File blocks use `item_content_file/<block id>` and embedded text-editor files use
 `item_content_text/<block id>`, both in the parent item's owner user context.
 
-Upgrade **2026092900** migrated meaningful legacy URLs and non-directory legacy
+Upgrade **2026092900** migrates meaningful legacy URLs and non-directory legacy
 files. Its expected clean postcondition is:
 
 * the parent `url` and `attachment` columns are empty;
@@ -20,6 +20,15 @@ files. Its expected clean postcondition is:
 The same upgrade stores one privacy-safe aggregate report in
 `block_exaportmigration`. It records source counts at the start of the successful
 run, operations completed by that run, residual counts at its end, and timing.
+Its `status.clean` flag means only that all counted legacy residuals are zero (the
+informational `total_items` count is excluded). `status.requires_review` is true when
+any counted residual remains. Neither flag proves that application flows or
+all structured-data relationships are correct; continue release validation and
+the read-only audit. Residual files, including orphans or files outside the
+owner's context, remain untouched for investigation. Preserve backups and
+review their provenance and ownership before deciding on any manual correction;
+the report does not move, delete, deduplicate, or guess ownership.
+The administration report displays these flags as `1` (true) or `0` (false).
 The unique migration version prevents duplicate completed reports. It contains
 no item IDs, owner IDs, URLs, filenames, titles, user details, or file contents.
 
@@ -41,7 +50,25 @@ batch fails, items completed in earlier batches remain committed, but the
 2026092900 upgrade savepoint and final migration report remain unapplied. The
 next Moodle upgrade attempt scans again from ID zero. Completed items have empty
 legacy sources and are harmless no-ops; the first incomplete item is retried
-from its intact legacy source.
+from its surviving legacy source records.
+
+Before clearing legacy fields or deleting legacy file records, the migration
+opens both source and destination content and reads each in bounded chunks.
+It independently calculates each byte count and SHA-1 digest, compares them to
+each other, and checks them against the stored filesize and File API content
+hash. This also detects damaged shared backing content that matching file
+records alone would miss. Handles are closed even on verification failure.
+These reads occur only during migration; runtime requests and the database
+audit do not read file bodies for verification.
+
+An open, read, or verification failure aborts that item's transaction, preserving
+legacy fields and file records and rolling back new blocks and destination
+records. No completed report is stored for a failed run. Missing bytes that
+predate migration cannot be restored by rollback. Administrators should preserve
+the surviving records and logs, investigate storage access and backing content,
+restore missing or damaged bytes from a verified backup where available, and
+retry the Moodle CLI upgrade once the cause is resolved. Do not clear legacy
+records merely to make the upgrade finish.
 
 Renewing Moodle's PHP timeout is only an application-level guardrail. It cannot
 guarantee interruption of every blocked external operation or override limits

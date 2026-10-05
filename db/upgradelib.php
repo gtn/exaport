@@ -9,6 +9,29 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * Read and digest a stored file, proving that its backing bytes are retrievable.
+ *
+ * This deliberately does not trust the File API contenthash. It is used only by
+ * the one-off migration, not by normal requests.
+ *
+ * @param stored_file $file File to read.
+ * @return array{hash: string, bytes: int}
+ */
+function block_exaport_digest_stored_file(stored_file $file): array {
+    $handle = $file->get_content_file_handle();
+    if (!is_resource($handle)) {
+        throw new coding_exception('Unable to open stored file content');
+    }
+    $hash = hash_init('sha256');
+    $bytes = hash_update_stream($hash, $handle);
+    fclose($handle);
+    if ($bytes === false) {
+        throw new coding_exception('Unable to read stored file content');
+    }
+    return ['hash' => hash_final($hash), 'bytes' => (int)$bytes];
+}
+
+/**
  * Migrate one item's legacy URL and files to structured content blocks.
  *
  * The legacy File API area, rather than the attachment column, is authoritative.
@@ -158,6 +181,15 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
                         $destination->get_contenthash() !== $sourcefile->get_contenthash() ||
                         (int)$destination->get_filesize() !== (int)$sourcefile->get_filesize()) {
                     throw new coding_exception("File verification failed while migrating item {$itemid}");
+                }
+                // Contenthash/size metadata alone does not prove that object storage or Moodledata can
+                // return the bytes. Stream both records once during migration and compare independent
+                // digests before deleting the source record.
+                $sourcedigest = block_exaport_digest_stored_file($sourcefile);
+                $destinationdigest = block_exaport_digest_stored_file($destination);
+                if ($sourcedigest !== $destinationdigest ||
+                        $destinationdigest['bytes'] !== (int)$destination->get_filesize()) {
+                    throw new coding_exception("File byte verification failed while migrating item {$itemid}");
                 }
             }
         }
@@ -319,7 +351,14 @@ function block_exaport_migrate_legacy_item_content_with_report(
         $progresscallback
     );
     $after = block_exaport_legacy_item_content_counts();
+    $residualcount = (int)$after['meaningful_legacy_urls'] + (int)$after['sentinel_legacy_urls'] +
+        (int)$after['legacy_attachments'] + (int)$after['legacy_files'];
     $summary = [
+        'migration_status' => [
+            'clean' => $residualcount === 0 ? 1 : 0,
+            'requires_review' => $residualcount === 0 ? 0 : 1,
+            'residual_records' => $residualcount,
+        ],
         'source_counts_at_successful_run_start' => $before,
         'operations_in_successful_run' => $operations,
         'residual_counts_at_successful_run_end' => $after,
@@ -332,6 +371,56 @@ function block_exaport_migrate_legacy_item_content_with_report(
         'migrationversion' => $migrationversion,
         'formatversion' => 1,
         'timestarted' => $timestarted,
+        'timecompleted' => time(),
+        'summaryjson' => $summaryjson,
+    ];
+    $record->id = (int)$DB->insert_record('block_exaportmigration', $record);
+    return $record;
+}
+
+/**
+ * Store a fresh, privacy-safe integrity snapshot for installations that may
+ * already have passed the historical migration savepoint.
+ *
+ * This is intentionally verification, not an automatic repair: matching a
+ * residual source to an existing block would require guessing provenance.
+ *
+ * @param int $verificationversion Version identifying the verification step.
+ * @return stdClass Verification report record.
+ */
+function block_exaport_record_item_content_verification(int $verificationversion): stdClass {
+    global $DB;
+
+    $existing = $DB->get_record('block_exaportmigration', ['migrationversion' => $verificationversion]);
+    if ($existing) {
+        return $existing;
+    }
+
+    $started = time();
+    $audit = (new \block_exaport\local\item_content_audit())->run(null, 20);
+    $findingcounts = [];
+    foreach ($audit['findings'] as $finding) {
+        $code = (string)$finding['code'];
+        $findingcounts[$code] = ($findingcounts[$code] ?? 0) + (int)$finding['count'];
+    }
+    ksort($findingcounts);
+    $summary = [
+        'verification_status' => [
+            'clean' => $audit['status'] === 'clean' ? 1 : 0,
+            'requires_review' => $audit['status'] === 'clean' ? 0 : 1,
+            'error_findings' => (int)$audit['errorcount'],
+            'warning_findings' => (int)$audit['warningcount'],
+        ],
+        'finding_record_counts' => $findingcounts,
+    ];
+    $summaryjson = json_encode($summary, JSON_UNESCAPED_SLASHES);
+    if ($summaryjson === false) {
+        throw new coding_exception('Unable to encode the item-content verification report');
+    }
+    $record = (object)[
+        'migrationversion' => $verificationversion,
+        'formatversion' => 2,
+        'timestarted' => $started,
         'timecompleted' => time(),
         'summaryjson' => $summaryjson,
     ];

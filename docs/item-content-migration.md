@@ -28,6 +28,15 @@ audit does not re-run it and deliberately does not compare URLs, filenames, or
 content hashes to guess whether content is duplicated. See also
 [structured content export](structured-content-export.md).
 
+Upgrade **2026100500** is a post-migration verification step for development
+installations that had already passed 2026092900 (the last such published
+development version was 2026092910). It records a new aggregate snapshot with
+an explicit `clean`/`requires_review` result. It never returns early because a
+2026092900 report exists, never reruns conversion, and never guesses that a URL,
+filename, or hash makes two representations equivalent. Fresh installs create
+the current schema directly and therefore have no historical migration report;
+their live audit is the authoritative check.
+
 The migration fetches at most 500 items at a time using ascending-ID keyset
 pagination. Immediately before processing each non-empty batch it gives that
 batch a fresh 30-minute (1,800-second) Moodle timeout. There is no fixed
@@ -54,6 +63,10 @@ Legacy and imported File API paths are preserved, including nested directories.
 Structured file links, thumbnails, shared views, and integration URLs include
 that stored filepath when serving content. This is a runtime serving guarantee:
 already migrated nested files require no repair, flattening, or remigration.
+During migration, source and destination streams are both opened and digested,
+and their actual byte counts are checked before the legacy area is deleted.
+This one-off check proves that backing bytes are retrievable without adding file
+reads to normal rendering or download requests.
 
 Back up both the database and Moodledata before upgrading. Run the audit before
 upgrade where possible to record the legacy baseline, immediately after the
@@ -125,6 +138,47 @@ when both representations remain on an item. Warnings require review and
 explanation but do not automatically mean content loss. In
 particular, never manually delete residual data before taking and preserving
 database and Moodledata backups. Determine provenance and ownership first.
+
+## Supported upgrade and recovery procedure
+
+The supported direct source for this experimental rework is **2026091001**.
+Upgrades from that baseline run schema creation (2026091602), migration
+(2026092900), and post-migration verification (2026100500) in order. Versions
+between those savepoints, including deployed development version 2026092910,
+resume at the first unapplied step. Older production Exaport installations use
+the existing historical upgrade chain to reach 2026091001 first; they must be
+tested from the exact locally deployed version and Moodle release. Moodle 4.2
+or later is required. A fresh install is a separate path through `install.xml`
+and does not exercise migration.
+
+Before any upgrade or recovery, take a mutually consistent database and
+Moodledata backup. A database-only rollback can point restored file records at
+deleted bytes, while a Moodledata-only rollback cannot restore the corresponding
+rows. To roll back, restore **both** backups from the same point and deploy the
+matching older plugin code; there is no downgrade routine.
+
+After upgrade, run the site-wide audit and retain its JSON. `clean` means no
+current finding; `warning` requires an explanation; `error` blocks treating the
+migration as clean. For residual data:
+
+1. Stop writes and preserve the matching backups and audit JSON.
+2. Use bounded item/file/block IDs from verbose audit output to establish the
+   original owner and context. Never infer ownership from a filename, URL, or
+   content hash.
+3. If an item contains both structured and legacy representations, compare it
+   with the pre-upgrade backup and user-visible intent. Do not rerun the report-
+   driven migration: its completed report is evidence, not a repair command.
+4. For wrong-context or orphan files, use a reviewed, site-specific Moodle File
+   API script to copy (not move) the record into an explicitly confirmed owner,
+   item and block. Verify streamed bytes and application access before deleting
+   the source. Missing users/contexts require an ownership decision; the plugin
+   deliberately does not create a user context or guess a replacement owner.
+5. Rerun the audit for the affected item and then site-wide. Remove preserved
+   sources only after review, byte/download verification, and a fresh backup.
+
+An interrupted 2026092900 run is different from a prior or manual conversion.
+The former retains its source transactionally and can be retried; the latter may
+already contain both representations and must follow the controlled review above.
 
 ## Read-only and performance guarantees
 

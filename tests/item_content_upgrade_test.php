@@ -195,7 +195,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $item = $this->create_item($user->id, 'note', '', '999');
         $first = $this->create_legacy_file($item, 'image.png', 'image bytes', '/nested/', 'image/png');
-        $second = $this->create_legacy_file($item, 'document.pdf', 'pdf bytes', '/', 'application/pdf');
+        $second = $this->create_legacy_file($item, 'image.png', 'root image bytes', '/', 'image/png');
 
         $result = \block_exaport_migrate_legacy_item_content($item);
         $contextid = \context_user::instance($user->id)->id;
@@ -215,7 +215,11 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame((int)$user->id, (int)$copy->get_userid());
         $this->assertSame('/nested/', $copy->get_filepath());
         $this->assertSame('image.png', $copy->get_filename());
-        $this->assertSame($second->get_contenthash(), array_values($files)[0]->get_contenthash());
+        $rootcopy = get_file_storage()->get_file($contextid, 'block_exaport', 'item_content_file',
+            $result['fileblockid'], '/', 'image.png');
+        $this->assertNotFalse($rootcopy);
+        $this->assertSame($second->get_contenthash(), $rootcopy->get_contenthash());
+        $this->assertNotSame($copy->get_contenthash(), $rootcopy->get_contenthash());
         $this->assertSame([], get_file_storage()->get_area_files(
             $contextid, 'block_exaport', 'item_file', $item->id, 'id', false));
         $this->assertSame('', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
@@ -743,6 +747,8 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['legacy_attachments']);
         $this->assertSame(2, $summary['source_counts_at_successful_run_start']['legacy_files']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['items_with_legacy_files']);
+        $this->assertSame(['clean' => 1, 'requires_review' => 0, 'residual_records' => 0],
+            $summary['migration_status']);
         $this->assertSame([
             'items_processed' => 3,
             'items_already_clean' => 1,
@@ -790,5 +796,34 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
         $this->assertSame(0, $DB->count_records('block_exaportmigration'));
         $this->assertSame([1], $progress);
+    }
+
+    public function test_post_migration_verification_records_residuals_without_modifying_them(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+        $item = $this->create_item($owner->id, 'note', 'residual:value', 'stale');
+        $wrongcontextfile = get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($other->id)->id,
+            'component' => 'block_exaport', 'filearea' => 'item_file', 'itemid' => $item->id,
+            'filepath' => '/', 'filename' => 'preserve.txt', 'userid' => $owner->id,
+        ], 'preserve bytes');
+
+        $beforeitem = $this->record_array('block_exaportitem', $item->id);
+        $report = \block_exaport_record_item_content_verification(2026100500);
+        $summary = json_decode($report->summaryjson, true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame(2, (int)$report->formatversion);
+        $this->assertSame(0, $summary['verification_status']['clean']);
+        $this->assertSame(1, $summary['verification_status']['requires_review']);
+        $this->assertGreaterThanOrEqual(1, $summary['finding_record_counts']['legacy_item_file']);
+        $this->assertGreaterThanOrEqual(1, $summary['finding_record_counts']['legacy_file_context_mismatch']);
+        $this->assertSame($beforeitem, $this->record_array('block_exaportitem', $item->id));
+        $this->assertNotFalse(get_file_storage()->get_file_by_id($wrongcontextfile->get_id()));
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]));
+
+        $rerun = \block_exaport_record_item_content_verification(2026100500);
+        $this->assertSame((int)$report->id, (int)$rerun->id);
     }
 }

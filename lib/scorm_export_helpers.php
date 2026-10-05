@@ -67,7 +67,7 @@ function block_exaport_scorm_archive_path(stored_file $file, string $base, array
  * @param array[] $blocks Normalized structured blocks.
  * @param string $pagepath Generated item page archive path.
  * @param callable $packagefile Callback accepting stored_file and archive base.
- * @return array{html: string, assets: string[]}
+ * @return array{html: string, assets: string[], assetmap: array[]}
  */
 function block_exaport_scorm_render_item_content(
     stdClass $item,
@@ -77,7 +77,9 @@ function block_exaport_scorm_render_item_content(
 ): array {
     $html = '';
     $assets = [];
-    foreach ($blocks as $block) {
+    $assetmap = [];
+    foreach ($blocks as $blockindex => $block) {
+        $assetmap[$blockindex] = ['files' => [], 'editorfiles' => []];
         $html .= '<section class="item-content-block item-content-' . s($block['type']) .
             '" data-block-id="' . (int)$block['blockid'] . '">';
         if ($block['title'] !== '') {
@@ -92,6 +94,7 @@ function block_exaport_scorm_render_item_content(
             foreach ($block['files'] as $file) {
                 $asset = $packagefile($file, 'items/' . $item->id . '/blocks/' . $block['blockid']);
                 $assets[] = $asset;
+                $assetmap[$blockindex]['files'][] = $asset;
                 $html .= '<a class="structured-file" href="' .
                     s(block_exaport_scorm_relative_url($pagepath, $asset)) . '">' . s($file->get_filename()) . '</a>';
             }
@@ -101,14 +104,82 @@ function block_exaport_scorm_render_item_content(
                 $asset = $packagefile($file,
                     'items/' . $item->id . '/blocks/' . $block['blockid'] . '/editor');
                 $assets[] = $asset;
+                $assetmap[$blockindex]['editorfiles'][] = $asset;
                 $reference = ltrim($file->get_filepath(), '/') . $file->get_filename();
                 $replacement = block_exaport_scorm_relative_url($pagepath, $asset);
-                $text = str_replace('@@PLUGINFILE@@/' . $reference, $replacement, $text);
-                $text = str_replace('@@PLUGINFILE@@' . $file->get_filepath() . $file->get_filename(), $replacement, $text);
+                $encodedreference = implode('/', array_map('rawurlencode', explode('/', $reference)));
+                // format_text()/clean_text() may URL-encode a valid placeholder
+                // before export (notably spaces and # in editor-file names).
+                $text = str_replace([
+                    '@@PLUGINFILE@@/' . $reference,
+                    '@@PLUGINFILE@@/' . $encodedreference,
+                    '@@PLUGINFILE@@' . $file->get_filepath() . $file->get_filename(),
+                ], $replacement, $text);
             }
             $html .= '<div class="structured-text">' . $text . '</div>';
         }
         $html .= '</section>' . "\n";
     }
-    return ['html' => $html, 'assets' => $assets];
+    return ['html' => $html, 'assets' => $assets, 'assetmap' => $assetmap];
+}
+
+/**
+ * Build the version 1 structured-content sidecar while rendering its viewable HTML.
+ *
+ * Database identifiers are deliberately absent from the sidecar. Blocks are an
+ * ordered JSON array and files point at archive members allocated by the exporter.
+ *
+ * @param stdClass $item Parent item.
+ * @param array[] $blocks Export projections.
+ * @param string $pagepath Item HTML archive path.
+ * @param callable $packagefile File packager.
+ * @return array{html:string, assets:string[], manifest:array}
+ */
+function block_exaport_scorm_build_item_package(
+    stdClass $item,
+    array $blocks,
+    string $pagepath,
+    callable $packagefile
+): array {
+    // Replace database block IDs in archive paths and display-only attributes
+    // with export-local sequence numbers before rendering.
+    $portableblocks = [];
+    foreach ($blocks as $index => $block) {
+        $block['blockid'] = $index + 1;
+        $portableblocks[] = $block;
+    }
+    $rendered = block_exaport_scorm_render_item_content($item, $portableblocks, $pagepath, $packagefile);
+    $manifestblocks = [];
+    foreach ($blocks as $index => $block) {
+        $manifestblock = [
+            'type' => $block['type'],
+            'sortorder' => (int)$block['sortorder'],
+            'title' => (string)$block['title'],
+            'content' => (string)$block['content'],
+            'contentformat' => (int)$block['contentformat'],
+            'url' => (string)$block['url'],
+            'files' => [],
+            'textassets' => [],
+        ];
+        foreach (['files' => 'files', 'editorfiles' => 'textassets'] as $source => $destination) {
+            foreach ($block[$source] as $fileindex => $file) {
+                $manifestblock[$destination][] = [
+                    'filepath' => $file->get_filepath(),
+                    'filename' => $file->get_filename(),
+                    'archivepath' => $rendered['assetmap'][$index][$source][$fileindex],
+                ];
+            }
+        }
+        $manifestblocks[] = $manifestblock;
+    }
+    return [
+        'html' => $rendered['html'],
+        'assets' => $rendered['assets'],
+        'manifest' => [
+            'format' => 'exaport-item-content',
+            'version' => 1,
+            'parent' => ['type' => (string)$item->type, 'intro' => (string)$item->intro],
+            'blocks' => $manifestblocks,
+        ],
+    ];
 }

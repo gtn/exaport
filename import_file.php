@@ -20,6 +20,7 @@ require_once(__DIR__ . '/lib/edit_form.php');
 require_once(__DIR__ . '/lib/minixml.inc.php');
 require_once(__DIR__ . '/lib/class.scormparser.php');
 require_once(__DIR__ . '/lib/information_edit_form.php');
+require_once(__DIR__ . '/lib/package_import_helpers.php');
 
 use function block_exaport\common\print_error;
 use block_exaport\item_category_helper;
@@ -410,6 +411,39 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
     $filepath = $entryfile['pathname'];
     $content = file_get_contents($filepath);
 
+    // Versioned metadata is authoritative. Compatibility markers may coexist in
+    // the HTML for viewing, but must never cause a second item to be imported.
+    if (($sidecarpath = block_exaport_package_sidecar_path($content)) !== null) {
+        $sidecarfile = block_exaport_resolve_import_file_path($unzipdir, $unzipdir, $sidecarpath);
+        $manifest = block_exaport_decode_item_package(file_get_contents($sidecarfile['pathname']));
+        $new = (object)[
+            'userid' => $USER->id,
+            'name' => block_exaport_clean_title($title),
+            'intro' => $manifest['parent']['intro'],
+            'timemodified' => time(),
+            'type' => $manifest['parent']['type'],
+            'courseid' => $course->id,
+            'url' => '',
+            'attachment' => '',
+        ];
+        $transaction = $DB->start_delegated_transaction();
+        try {
+            $new->id = $DB->insert_record('block_exaportitem', $new);
+            block_exaport_import_item_package($new, $unzipdir, $manifest);
+            if ($category > 0) {
+                item_category_helper::sync_item_categories($new->id, [$category]);
+            }
+            if (isset($xml) && isset($id)) {
+                import_item_competences($new->id, $id, $xml, $unzipdir, $new->name);
+            }
+            get_comments($content, $new->id, 'block_exaportitemcomm');
+            $transaction->allow_commit();
+        } catch (Throwable $exception) {
+            $transaction->rollback($exception);
+        }
+        return;
+    }
+
     if ((($starturl = strpos($content, '<!--###BOOKMARK_EXT_URL###-->')) !== false) &&
         (($startdesc = strpos($content, '<!--###BOOKMARK_EXT_DESC###-->')) !== false)
     ) {
@@ -448,7 +482,7 @@ function insert_entry($unzipdir, $url, $title, $category, $course, &$xml = null,
         (($startdesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->')) !== false)
     ) {
 
-        preg_match_all('/<!--###BOOKMARK_FILE_URL###-->(.*)<!--###BOOKMARK_FILE_URL###-->/m', $content, $matches);
+        preg_match_all('/<!--###BOOKMARK_FILE_URL###-->(.*?)<!--###BOOKMARK_FILE_URL###-->/s', $content, $matches);
         $allfiles = $matches[1];
         $startdesc += strlen('<!--###BOOKMARK_FILE_DESC###-->');
         $enddesc = strpos($content, '<!--###BOOKMARK_FILE_DESC###-->', $startdesc);

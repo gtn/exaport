@@ -9,6 +9,43 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * Read and verify backing bytes during the upgrade only.
+ *
+ * File API copies can share backing storage, so matching record metadata alone
+ * does not establish that either file is readable or has its expected content.
+ *
+ * @param stored_file $file Source or destination file.
+ * @return array Actual byte count and independently calculated content digest.
+ */
+function block_exaport_verify_migration_file_content(stored_file $file): array {
+    // File systems may warn and return false rather than throw on I/O failures.
+    $handle = @$file->get_content_file_handle();
+    if (!is_resource($handle)) {
+        throw new coding_exception('Unable to open file content during legacy item migration');
+    }
+
+    try {
+        $digest = hash_init('sha1');
+        $bytes = 0;
+        while (!feof($handle)) {
+            $chunk = @fread($handle, 1048576);
+            if ($chunk === false || ($chunk === '' && !feof($handle))) {
+                throw new coding_exception('Unable to read file content during legacy item migration');
+            }
+            $bytes += strlen($chunk);
+            hash_update($digest, $chunk);
+        }
+        $contenthash = hash_final($digest);
+        if ($bytes !== (int)$file->get_filesize() || $contenthash !== $file->get_contenthash()) {
+            throw new coding_exception('File bytes do not match stored metadata during legacy item migration');
+        }
+        return ['bytes' => $bytes, 'contenthash' => $contenthash];
+    } finally {
+        fclose($handle);
+    }
+}
+
+/**
  * Migrate one item's legacy URL and files to structured content blocks.
  *
  * The legacy File API area, rather than the attachment column, is authoritative.
@@ -158,6 +195,11 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
                         $destination->get_contenthash() !== $sourcefile->get_contenthash() ||
                         (int)$destination->get_filesize() !== (int)$sourcefile->get_filesize()) {
                     throw new coding_exception("File verification failed while migrating item {$itemid}");
+                }
+                $sourcecontent = block_exaport_verify_migration_file_content($sourcefile);
+                $destinationcontent = block_exaport_verify_migration_file_content($destination);
+                if ($sourcecontent !== $destinationcontent) {
+                    throw new coding_exception("File byte verification failed while migrating item {$itemid}");
                 }
             }
         }
@@ -319,7 +361,15 @@ function block_exaport_migrate_legacy_item_content_with_report(
         $progresscallback
     );
     $after = block_exaport_legacy_item_content_counts();
+    // Total parent items are informational, not legacy residuals.
+    $residuals = $after;
+    unset($residuals['total_items']);
+    $clean = !array_filter($residuals);
     $summary = [
+        'status' => [
+            'clean' => $clean,
+            'requires_review' => !$clean,
+        ],
         'source_counts_at_successful_run_start' => $before,
         'operations_in_successful_run' => $operations,
         'residual_counts_at_successful_run_end' => $after,

@@ -2149,12 +2149,15 @@ function block_exaport_get_students_for_teacher($userid = null, $courseid = 0) {
     return $students;
 }
 
-function block_exaport_file_userquotecheck($addingfiles = 0, $id = 0) {
+function block_exaport_file_userquotecheck($addingfiles = 0, $id = 0, $throwexception = true) {
     global $DB, $USER, $CFG;
     $result = $DB->get_record_sql("SELECT SUM(filesize) as allfilesize " .
         " FROM {files} WHERE contextid = ? and component='block_exaport'",
         array(context_user::instance($USER->id)->id));
     if ($result->allfilesize + $addingfiles > $CFG->block_exaport_userquota) {
+        if (!$throwexception) {
+            return false;
+        }
         $courseid = optional_param('courseid', 0, PARAM_INT);
         $categoryid = optional_param('categoryid', 0, PARAM_INT);
         $type = optional_param('type', 0, PARAM_RAW);
@@ -2182,12 +2185,15 @@ function block_exaport_get_filessize_by_draftid($draftid = 0) {
     }
 }
 
-function block_exaport_get_maxfilesize_by_draftid_check($draftid = 0) {
+function block_exaport_get_maxfilesize_by_draftid_check($draftid = 0, $throwexception = true) {
     global $DB, $USER, $CFG;
     $result = $DB->get_record_sql("SELECT MAX(filesize) AS maxfilesize FROM {files} " .
         " WHERE contextid = ? AND component = 'user' AND filearea='draft' AND itemid = ?",
         array(context_user::instance($USER->id)->id, $draftid));
     if (($CFG->block_exaport_max_uploadfile_size > 0) && ($result->maxfilesize > $CFG->block_exaport_max_uploadfile_size)) {
+        if (!$throwexception) {
+            return false;
+        }
         print_error('maxbytes', 'exaport', 'blocks/exaport/view_items.php', null);
     }
 

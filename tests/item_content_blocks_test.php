@@ -575,6 +575,103 @@ final class item_content_blocks_test extends \advanced_testcase {
         block_exaport_get_item_content_block($otheritem, $blockid);
     }
 
+    public function test_file_block_upload_over_remaining_quota_is_rejected_without_saving(): void {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $this->setUser($owner);
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $existingblockid = $this->insert_block($itemid, 'file', 0, 'Existing');
+        $newblockid = $this->insert_block($itemid, 'file', 1, 'New');
+        $this->create_content_file($owner->id, $existingblockid, 'existing.txt', '12345678');
+        $draftitemid = $this->create_file_draft($owner->id, 'upload.txt', '12345');
+        $CFG->block_exaport_userquota = 12;
+        $CFG->block_exaport_max_uploadfile_size = 100;
+
+        $error = block_exaport_validate_item_content_file_draft($draftitemid);
+
+        $this->assertSame(get_string('userquotalimit'), $error);
+        $this->assertSame([], block_exaport_get_item_content_files($owner->id, $newblockid));
+    }
+
+    public function test_file_block_upload_over_max_file_size_is_rejected(): void {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $this->setUser($owner);
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $draftitemid = $this->create_file_draft($owner->id, 'large.txt', '12345');
+        $CFG->block_exaport_userquota = 100;
+        $CFG->block_exaport_max_uploadfile_size = 4;
+
+        $this->assertSame(
+            get_string('maxbytes', 'error'),
+            block_exaport_validate_item_content_file_draft($draftitemid)
+        );
+    }
+
+    public function test_file_block_upload_within_limits_succeeds(): void {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $this->setUser($owner);
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $blockid = $this->insert_block($itemid, 'file', 0, 'Files');
+        $draftitemid = $this->create_file_draft($owner->id, 'allowed.txt', '12345');
+        $CFG->block_exaport_userquota = 10;
+        $CFG->block_exaport_max_uploadfile_size = 5;
+
+        $this->assertNull(block_exaport_validate_item_content_file_draft($draftitemid));
+        file_save_draft_area_files(
+            $draftitemid,
+            \context_user::instance($owner->id)->id,
+            'block_exaport',
+            'item_content_file',
+            $blockid,
+            ['maxbytes' => $CFG->block_exaport_max_uploadfile_size]
+        );
+
+        $files = block_exaport_get_item_content_files($owner->id, $blockid);
+        $this->assertCount(1, $files);
+        $this->assertSame(5, $files[0]->get_filesize());
+    }
+
+    public function test_replacing_file_block_files_does_not_double_count_existing_usage(): void {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $this->setUser($owner);
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $blockid = $this->insert_block($itemid, 'file', 0, 'Files');
+        $this->create_content_file($owner->id, $blockid, 'existing.txt', '12345');
+        $draftitemid = $this->create_file_draft($owner->id, 'replacement.txt', '12345');
+        $CFG->block_exaport_userquota = 5;
+        $CFG->block_exaport_max_uploadfile_size = 5;
+
+        $this->assertNull(block_exaport_validate_item_content_file_draft($draftitemid, $blockid));
+        file_save_draft_area_files(
+            $draftitemid,
+            \context_user::instance($owner->id)->id,
+            'block_exaport',
+            'item_content_file',
+            $blockid,
+            ['maxbytes' => $CFG->block_exaport_max_uploadfile_size]
+        );
+
+        $files = block_exaport_get_item_content_files($owner->id, $blockid);
+        $this->assertCount(1, $files);
+        $this->assertSame('replacement.txt', $files[0]->get_filename());
+        $this->assertSame(5, $files[0]->get_filesize());
+    }
+
     /**
      * @param int $itemid
      * @param string $type
@@ -605,6 +702,30 @@ final class item_content_blocks_test extends \advanced_testcase {
             'timecreated' => time(),
             'timemodified' => time(),
         ]);
+    }
+
+    private function create_content_file(int $userid, int $blockid, string $filename, string $content): void {
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($userid)->id,
+            'component' => 'block_exaport',
+            'filearea' => 'item_content_file',
+            'itemid' => $blockid,
+            'filepath' => '/',
+            'filename' => $filename,
+        ], $content);
+    }
+
+    private function create_file_draft(int $userid, string $filename, string $content): int {
+        $draftitemid = file_get_unused_draft_itemid($userid);
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($userid)->id,
+            'component' => 'user',
+            'filearea' => 'draft',
+            'itemid' => $draftitemid,
+            'filepath' => '/',
+            'filename' => $filename,
+        ], $content);
+        return $draftitemid;
     }
 
     private function insert_item(int $userid, int $courseid): int {

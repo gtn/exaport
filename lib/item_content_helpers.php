@@ -353,6 +353,39 @@ function block_exaport_get_item_content_file_block(int $itemid, int $blockid) {
 }
 
 /**
+ * Validate a file-block draft against the user's configured upload limits.
+ *
+ * Replaced block files are already included in the user's stored usage, so
+ * subtract their size before checking the full replacement draft.
+ *
+ * @param int $draftitemid User draft area item ID.
+ * @param int|null $replacedblockid Existing file block being replaced.
+ * @return string|null Validation error, or null when the draft is allowed.
+ */
+function block_exaport_validate_item_content_file_draft(int $draftitemid, ?int $replacedblockid = null): ?string {
+    global $DB, $USER;
+
+    $draftsize = block_exaport_get_filessize_by_draftid($draftitemid);
+    $replacedfilesize = 0;
+    if ($replacedblockid) {
+        $replacedfilesize = (int)$DB->get_field_sql(
+            "SELECT SUM(filesize) FROM {files}
+              WHERE contextid = ? AND component = 'block_exaport'
+                AND filearea = 'item_content_file' AND itemid = ?",
+            [context_user::instance($USER->id)->id, $replacedblockid]
+        );
+    }
+
+    if (!block_exaport_file_userquotecheck($draftsize - $replacedfilesize, 0, false)) {
+        return get_string('userquotalimit');
+    }
+    if (!block_exaport_get_maxfilesize_by_draftid_check($draftitemid, false)) {
+        return get_string('maxbytes', 'error');
+    }
+    return null;
+}
+
+/**
  * Whether an item contains link or file blocks.
  *
  * Text-only structured content does not count because legacy item content can

@@ -82,10 +82,10 @@ class item_content extends dynamic_form {
         global $USER;
 
         $errors = parent::validation($data, $files);
-        if (($data['contenttype'] ?? '') !== 'file' || !empty($data['blockid']) ||
-                ($data['operation'] ?? '') === 'delete') {
+        if (($data['contenttype'] ?? '') !== 'file' || ($data['operation'] ?? '') === 'delete') {
             return $errors;
         }
+        $blockid = (int)($data['blockid'] ?? 0);
         $draftitemid = (int)($data['files_filemanager'] ?? 0);
         $draftfiles = get_file_storage()->get_area_files(
             context_user::instance($USER->id)->id,
@@ -95,8 +95,24 @@ class item_content extends dynamic_form {
             'id',
             false
         );
-        if (!$draftitemid || !$draftfiles) {
+        if (!$blockid && (!$draftitemid || !$draftfiles)) {
             $errors['files_filemanager'] = get_string('required');
+        }
+        if ($draftitemid || $blockid) {
+            $item = block_exaport_get_editable_content_item(
+                (int)($data['itemid'] ?? 0),
+                (int)($data['courseid'] ?? 0)
+            );
+            if ($blockid) {
+                block_exaport_get_item_content_block($item, $blockid);
+            }
+            $validationerror = block_exaport_validate_item_content_file_draft(
+                $draftitemid,
+                $blockid ?: null
+            );
+            if ($validationerror !== null) {
+                $errors['files_filemanager'] = $validationerror;
+            }
         }
         return $errors;
     }

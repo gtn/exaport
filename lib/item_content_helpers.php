@@ -139,6 +139,52 @@ function block_exaport_get_item_content_files(int $userid, int $blockid): array 
 }
 
 /**
+ * Check a file draft against the legacy limits without writing permanent data.
+ *
+ * Only files replaced in this block are discounted from the user's quota.
+ * Return the original exception so forms can display its message and save paths
+ * can throw it again without changing the legacy error code or component.
+ *
+ * @param int $draftitemid Current user's draft area ID.
+ * @param int $itemid Parent item ID.
+ * @param int $courseid Navigation course ID.
+ * @param int $blockid Existing block ID, or zero when adding.
+ * @return moodle_exception|null A limit error, or null when within limits.
+ */
+function block_exaport_validate_item_content_files(
+    int $draftitemid,
+    int $itemid,
+    int $courseid,
+    int $blockid = 0
+): ?moodle_exception {
+    $item = block_exaport_get_editable_content_item($itemid, $courseid);
+    $replacedbytes = 0;
+    if ($blockid) {
+        $block = block_exaport_get_item_content_block($item, $blockid);
+        if ($block->type !== 'file') {
+            throw new invalid_parameter_exception('Content block type does not match the form');
+        }
+        foreach (block_exaport_get_item_content_files((int)$item->userid, $blockid) as $file) {
+            $replacedbytes += $file->get_filesize();
+        }
+    }
+
+    try {
+        block_exaport_file_userquotecheck(
+            block_exaport_get_filessize_by_draftid($draftitemid) - $replacedbytes,
+            $itemid
+        );
+        block_exaport_get_maxfilesize_by_draftid_check($draftitemid);
+    } catch (moodle_exception $exception) {
+        if (!in_array($exception->errorcode, ['userquotalimit', 'maxbytes'], true)) {
+            throw $exception;
+        }
+        return $exception;
+    }
+    return null;
+}
+
+/**
  * Build the target-neutral structured-content projection used by exporters.
  *
  * File contents are deliberately not read. Both file lists contain stored_file

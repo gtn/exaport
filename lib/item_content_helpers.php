@@ -380,7 +380,7 @@ function block_exaport_validate_item_content_file_draft(int $draftitemid, ?int $
         return get_string('userquotalimit');
     }
     if (!block_exaport_get_maxfilesize_by_draftid_check($draftitemid, false)) {
-        return get_string('maxbytes', 'error');
+        return get_string('maxbytes', 'exaport');
     }
     return null;
 }

@@ -609,7 +609,7 @@ final class item_content_blocks_test extends \advanced_testcase {
         $CFG->block_exaport_max_uploadfile_size = 4;
 
         $this->assertSame(
-            get_string('maxbytes', 'error'),
+            get_string('maxbytes', 'exaport'),
             block_exaport_validate_item_content_file_draft($draftitemid)
         );
     }

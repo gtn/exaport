@@ -93,4 +93,29 @@ define(['jquery', 'block_exaport/views'], function($, Views) {
         assert.strictEqual($('.exaport-item-intro').html(), '<p>Description only</p>');
         assert.strictEqual($('.exaport-item-content').html(), '');
     });
+
+    QUnit.test('an SVG competence icon renders at a small size', function(assert) {
+        var done = assert.async();
+        window.M.util.image_url = function() {
+            return 'data:image/svg+xml,' + encodeURIComponent(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
+                '<rect width="512" height="512" /></svg>'
+            );
+        };
+        $('input[name=blocks]').val(JSON.stringify([{type: 'item', itemid: 42, item: {
+            id: 42, name: 'SVG icon', type: 'note', category: '', comments: 0,
+            filescount: 0, link: '', intro: '', contenthtml: '', competences: 'Competence title<br>'
+        }}]));
+        Views.initialise(1);
+        var icon = $('.portfolioDesignBlocks img[alt="competences"]')[0];
+        icon.decode().then(function() {
+            var bounds = icon.getBoundingClientRect();
+            assert.strictEqual(bounds.width, 16, 'the loaded SVG is 16 pixels wide');
+            assert.strictEqual(bounds.height, 16, 'the loaded SVG is 16 pixels high');
+            done();
+        }).catch(function(error) {
+            assert.ok(false, 'SVG failed to load: ' + error.message);
+            done();
+        });
+    });
 });

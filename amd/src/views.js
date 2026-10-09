@@ -495,7 +495,7 @@ define(['jquery',
       tempString += $E.translate('category') + ': ' + escapeHtml(item_data.category) + '<br />' + ilink;
       tempString += $E.translate('comments') + ': ' + escapeHtml(item_data.comments) + '<div class="exaport-item-intro"></div>';
       if (item_data.competences) {
-        tempString += '<a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + escapeHtml(M.util.image_url('t/grades', 'core')) + '" class="iconsmall" alt="' + escapeHtml($E.translate('competences')) + '" /></a>';
+        tempString += '<a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + escapeHtml(M.util.image_url('t/grades', 'core')) + '" class="icon iconsmall" width="16" height="16" alt="' + escapeHtml($E.translate('competences')) + '" /></a>';
       }
       tempString += '<div class="exaport-item-content"></div>';
       tempString += '</div></div>';

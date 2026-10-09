@@ -1,5 +1,6 @@
 /* global QUnit */
-define(['jquery', 'block_exaport/views', 'core_filters/events'], function($, Views, FilterEvents) {
+define(['jquery', 'block_exaport/views', 'core_filters/events', 'block_exaport/competence_badges'],
+    function($, Views, FilterEvents, CompetenceBadges) {
     QUnit.module('block_exaport/views structured content', {
         beforeEach: function() {
             this.originalConfig = window.M;
@@ -28,7 +29,7 @@ define(['jquery', 'block_exaport/views', 'core_filters/events'], function($, Vie
         file: '<a class="exaport-item-content-file" href="/pluginfile.php/file">document.pdf</a>'
     };
     contents.mixed = contents.link + contents.text + contents.file;
-    var compbadge = '<span class="eportoflio-comment me-2">' +
+    var compbadge = '<span class="eportoflio-comment me-2" data-region="item-competence-badge">' +
         '<i class="icon icon-comment fa fa-lightbulb" aria-label="competences" data-bs-toggle="tooltip" ' +
         'data-bs-html="true" data-bs-title="&lt;ul&gt;&lt;li&gt;Competence title&lt;/li&gt;&lt;/ul&gt;"></i>' +
         '<span class="eportfolio-comment-count">1</span></span>';
@@ -99,12 +100,17 @@ define(['jquery', 'block_exaport/views', 'core_filters/events'], function($, Vie
     QUnit.test('tooltips are initialized after FontAwesome has replaced the icon', function(assert) {
         var done = assert.async();
         var completeConversion;
+        var converted = false;
         window.block_exaport_update_fontawesome_icons = function(block) {
+            if (converted) {
+                return Promise.resolve();
+            }
             return new Promise(function(resolve) {
                 completeConversion = function() {
                     block.find('.fa-lightbulb').replaceWith(
                         '<svg class="icon fa-lightbulb" data-bs-toggle="tooltip"></svg>'
                     );
+                    converted = true;
                     resolve();
                 };
             });
@@ -115,19 +121,28 @@ define(['jquery', 'block_exaport/views', 'core_filters/events'], function($, Vie
         }}]));
         Views.initialise(1);
         var block = $('.portfolioDesignBlocks > li')[0];
-        var notified = false;
+        var badge = $(block).find('[data-region="item-competence-badge"]')[0];
+        var notifications = 0;
         var onUpdated = function(event) {
-            if (!event.detail.nodes.includes(block)) {
+            if (!event.detail.nodes.includes(badge)) {
                 return;
             }
-            notified = true;
-            document.removeEventListener(FilterEvents.eventTypes.filterContentUpdated, onUpdated);
+            notifications++;
             assert.strictEqual($(block).find('svg.fa-lightbulb').length, 1,
                 'the notification targets the converted icon');
-            done();
         };
         document.addEventListener(FilterEvents.eventTypes.filterContentUpdated, onUpdated);
-        assert.notOk(notified, 'tooltips wait for conversion');
+        assert.strictEqual(notifications, 0, 'tooltips wait for conversion');
         completeConversion();
+        CompetenceBadges.initialise(block).then(function() {
+            assert.strictEqual(notifications, 1, 'repeated initialization does not duplicate tooltips');
+            // A concurrent page-wide conversion can replace the icon in an already initialized badge.
+            $(badge).find('svg').replaceWith('<svg class="icon fa-lightbulb" data-bs-toggle="tooltip"></svg>');
+            return CompetenceBadges.initialise(block);
+        }).then(function() {
+            assert.strictEqual(notifications, 2, 'a replacement icon receives its own tooltip initialization');
+            document.removeEventListener(FilterEvents.eventTypes.filterContentUpdated, onUpdated);
+            done();
+        });
     });
 });

@@ -8,8 +8,8 @@ define(['jquery',
   'core/modal_events',
   'core/fragment',
   'core/templates',
-  'core_filters/events'
-], function ($, jqui, jquitp, Modal, modalEvents, Fragment, Templates, FilterEvents) {
+  'block_exaport/competence_badges'
+], function ($, jqui, jquitp, Modal, modalEvents, Fragment, Templates, CompetenceBadges) {
 
   var helpDialogue;
   var contextId;
@@ -1035,12 +1035,7 @@ define(['jquery',
     }
 
     // update fontawesome icons
-    var iconConversion = block_exaport_update_fontawesome_icons($item);
-    if ($item.find('.exaport-item-compbadge [data-bs-toggle="tooltip"]').length) {
-      Promise.resolve(iconConversion).then(function () {
-        FilterEvents.notifyFilterContentUpdated([$item[0]]);
-      });
-    }
+    CompetenceBadges.initialise($item);
 
     return $item;
   }

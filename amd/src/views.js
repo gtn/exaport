@@ -497,12 +497,14 @@ define(['jquery',
       if (item_data.competences) {
         tempString += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
       }
+      tempString += '<div class="exaport-item-content"></div>';
       tempString += '</div></div>';
       $item.html(tempString);
       if (!item_data.competences) {
         // Insert the already-sanitized rich HTML separately from the generated wrapper.
         $item.find('.exaport-item-intro').html(item_data.intro || '');
       }
+      $item.find('.exaport-item-content').html(item_data.contenthtml || '');
     } else if (data.type == 'personal_information') {
       var tempString = '<div id="id_holder" style="display:none;"></div>';
       tempString += '<div class="personal_info" style="overflow: hidden;">';

@@ -1696,6 +1696,7 @@ function block_exaport_get_view_blocks($view) {
             }
             $portfolioitems[$block->itemid]->intro = process_media_url($portfolioitems[$block->itemid]->intro,
                 $block->width, $block->height);
+            $portfolioitems[$block->itemid]->contenthtml = '';
             $contentblocks = block_exaport_get_item_content_blocks((int)$block->itemid);
             if ($contentblocks) {
                 $contentrenderable = new \block_exaport\output\item_content_blocks(
@@ -1705,10 +1706,10 @@ function block_exaport_get_view_blocks($view) {
                     false,
                     false
                 );
-                // The editor already treats intro as server-formatted HTML. Appending the same
-                // Mustache output used by read-only views keeps its preview in sync and safe.
+                // Keep structured content independent of the parent description, which the
+                // editor suppresses when competences are displayed. Reuse the read-only renderer.
                 $contentdata = $contentrenderable->export_for_template($OUTPUT);
-                $portfolioitems[$block->itemid]->intro .= $OUTPUT->render_from_template(
+                $portfolioitems[$block->itemid]->contenthtml = $OUTPUT->render_from_template(
                     'block_exaport/item_content_blocks',
                     $contentdata
                 );

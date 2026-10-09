@@ -1,16 +1,11 @@
 /* global QUnit */
-define(['jquery', 'block_exaport/views'], function($, Views) {
+define(['jquery', 'block_exaport/views', 'core_filters/events'], function($, Views, FilterEvents) {
     QUnit.module('block_exaport/views structured content', {
         beforeEach: function() {
             this.originalConfig = window.M;
             this.originalExaport = window.block_exaport;
             this.originalIcons = window.block_exaport_update_fontawesome_icons;
-            window.M = {
-                cfg: {wwwroot: 'https://moodle.example.test'},
-                util: {image_url: function(image, component) {
-                    return 'https://moodle.example.test/theme/image.php?image=' + image + '&component=' + component;
-                }}
-            };
+            window.M = {cfg: {wwwroot: 'https://moodle.example.test'}};
             window.block_exaport = {translate: function(key) { return key; }};
             window.block_exaport_update_fontawesome_icons = function() {};
             $('#qunit-fixture').html(
@@ -33,6 +28,10 @@ define(['jquery', 'block_exaport/views'], function($, Views) {
         file: '<a class="exaport-item-content-file" href="/pluginfile.php/file">document.pdf</a>'
     };
     contents.mixed = contents.link + contents.text + contents.file;
+    var compbadge = '<span class="eportoflio-comment me-2">' +
+        '<i class="icon icon-comment fa fa-lightbulb" aria-label="competences" data-bs-toggle="tooltip" ' +
+        'data-bs-html="true" data-bs-title="&lt;ul&gt;&lt;li&gt;Competence title&lt;/li&gt;&lt;/ul&gt;"></i>' +
+        '<span class="eportfolio-comment-count">1</span></span>';
 
     Object.keys(contents).forEach(function(type) {
         [false, true].forEach(function(hasCompetences) {
@@ -48,7 +47,8 @@ define(['jquery', 'block_exaport/views'], function($, Views) {
                     link: '',
                     intro: '<p>Parent description</p>',
                     contenthtml: contenthtml,
-                    competences: hasCompetences ? 'Competence title<br>' : ''
+                    competences: hasCompetences ? 'Competence title<br>' : '',
+                    compbadge: hasCompetences ? compbadge : ''
                 };
                 $('input[name=blocks]').val(JSON.stringify([
                     {id: 7, type: 'item', itemid: item.id, positionx: 1, positiony: 1, item: item}
@@ -60,13 +60,14 @@ define(['jquery', 'block_exaport/views'], function($, Views) {
                 assert.strictEqual(block.find('.exaport-item-content').html(), contenthtml);
                 assert.strictEqual(block.find('.exaport-item-intro').html(),
                     hasCompetences ? '' : item.intro, 'parent-description behavior is preserved');
-                assert.strictEqual(block.find('img[alt="competences"]').length, hasCompetences ? 1 : 0,
+                assert.strictEqual(block.find('.exaport-item-compbadge').html(), item.compbadge,
+                    'the server-rendered card badge is reused unchanged');
+                assert.strictEqual(block.find('.fa-lightbulb').length, hasCompetences ? 1 : 0,
                     'the competence tooltip remains independent');
                 if (hasCompetences) {
-                    assert.ok(block.find('a[onmouseover]').attr('onmouseover').includes('Competence title'),
+                    assert.ok(block.find('[data-bs-toggle="tooltip"]').attr('data-bs-title').includes('Competence title'),
                         'the tooltip retains its competence text');
-                    assert.strictEqual(block.find('img[alt="competences"]').attr('src'),
-                        window.M.util.image_url('t/grades', 'core'), 'Moodle resolves the competence icon');
+                    assert.strictEqual(block.find('.eportfolio-comment-count').text(), '1', 'the card count is retained');
                 }
                 assert.strictEqual(block.find('script').length, 0, 'rendering does not reload the tooltip library');
                 assert.ok(block.find('.picture img').attr('src').endsWith('/item_thumb.php?item_id=42'),
@@ -76,6 +77,7 @@ define(['jquery', 'block_exaport/views'], function($, Views) {
 
                 var saved = JSON.parse($('input[name=blocks]').val());
                 assert.strictEqual(saved[0].item.contenthtml, contenthtml, 'serialization retains content');
+                assert.strictEqual(saved[0].item.compbadge, item.compbadge, 'serialization retains the badge');
                 Views.initialise(1);
                 assert.strictEqual($('.exaport-item-content-section').length, 1,
                     'refreshing from serialized blocks does not duplicate structured content');
@@ -94,28 +96,38 @@ define(['jquery', 'block_exaport/views'], function($, Views) {
         assert.strictEqual($('.exaport-item-content').html(), '');
     });
 
-    QUnit.test('an SVG competence icon renders at a small size', function(assert) {
+    QUnit.test('tooltips are initialized after FontAwesome has replaced the icon', function(assert) {
         var done = assert.async();
-        window.M.util.image_url = function() {
-            return 'data:image/svg+xml,' + encodeURIComponent(
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
-                '<rect width="512" height="512" /></svg>'
-            );
+        var completeConversion;
+        window.block_exaport_update_fontawesome_icons = function(block) {
+            return new Promise(function(resolve) {
+                completeConversion = function() {
+                    block.find('.fa-lightbulb').replaceWith(
+                        '<svg class="icon fa-lightbulb" data-bs-toggle="tooltip"></svg>'
+                    );
+                    resolve();
+                };
+            });
         };
         $('input[name=blocks]').val(JSON.stringify([{type: 'item', itemid: 42, item: {
-            id: 42, name: 'SVG icon', type: 'note', category: '', comments: 0,
-            filescount: 0, link: '', intro: '', contenthtml: '', competences: 'Competence title<br>'
+            id: 42, name: 'Shared badge', type: 'note', category: '', comments: 0,
+            filescount: 0, link: '', intro: '', contenthtml: '', competences: 'Competence title<br>', compbadge: compbadge
         }}]));
         Views.initialise(1);
-        var icon = $('.portfolioDesignBlocks img[alt="competences"]')[0];
-        icon.decode().then(function() {
-            var bounds = icon.getBoundingClientRect();
-            assert.strictEqual(bounds.width, 16, 'the loaded SVG is 16 pixels wide');
-            assert.strictEqual(bounds.height, 16, 'the loaded SVG is 16 pixels high');
+        var block = $('.portfolioDesignBlocks > li')[0];
+        var notified = false;
+        var onUpdated = function(event) {
+            if (!event.detail.nodes.includes(block)) {
+                return;
+            }
+            notified = true;
+            document.removeEventListener(FilterEvents.eventTypes.filterContentUpdated, onUpdated);
+            assert.strictEqual($(block).find('svg.fa-lightbulb').length, 1,
+                'the notification targets the converted icon');
             done();
-        }).catch(function(error) {
-            assert.ok(false, 'SVG failed to load: ' + error.message);
-            done();
-        });
+        };
+        document.addEventListener(FilterEvents.eventTypes.filterContentUpdated, onUpdated);
+        assert.notOk(notified, 'tooltips wait for conversion');
+        completeConversion();
     });
 });

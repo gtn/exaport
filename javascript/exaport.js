@@ -664,7 +664,7 @@ function block_exaport_update_fontawesome_icons(element) {
 
     // Replace icons within this block
     if (iconsBlock) {
-      FontAwesome.dom.i2svg({node: iconsBlock});
+      return FontAwesome.dom.i2svg({node: iconsBlock});
     }
   }
 }

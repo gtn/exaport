@@ -84,8 +84,8 @@ function block_exaport_get_item_comp_footer_badge($item) {
     }
     $tooltiphtml = html_writer::tag('ul', $items, ['class' => 'tooltiplist']);
 
-    return '<span class="eportoflio-comment me-2">'
-        . '<i class="icon icon-comment fa fa-lightbulb" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' . s($tooltiphtml) . '"></i>'
+    return '<span class="eportoflio-comment me-2" data-region="item-competence-badge">'
+        . '<i class="icon icon-comment fa fa-lightbulb" role="img" aria-label="' . s(get_string('competences', 'block_exaport')) . '" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' . s($tooltiphtml) . '"></i>'
         . '<span class="eportfolio-comment-count">' . count($titles) . '</span>'
         . '</span>';
 }

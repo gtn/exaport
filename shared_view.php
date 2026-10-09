@@ -21,6 +21,7 @@ use function block_exaport\common\print_error;
 require_once(__DIR__ . '/inc.php');
 require_once(__DIR__ . '/lib/item_content_helpers.php');
 require_once(__DIR__ . '/blockmediafunc.php');
+require_once(__DIR__ . '/locallib.php');
 
 $access = optional_param('access', 0, PARAM_TEXT);
 
@@ -311,6 +312,9 @@ foreach ($blocks as $block) {
 }
 
 block_exaport_init_js_css();
+if (!$is_pdf) {
+    block_exaport_add_iconpack();
+}
 
 if (!$is_pdf) {
     if ($view->access->request == 'intern') {
@@ -345,8 +349,6 @@ if (!$is_pdf) {
     </script>
     <?php
 }
-
-$comp = block_exaport_check_competence_interaction();
 
 require_once(__DIR__ . '/lib/resumelib.php');
 $resume = block_exaport_get_resume_params($view->userid, true);
@@ -395,46 +397,10 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
             switch ($block->type) {
                 case 'item':
                     $item = $block->item;
-                    $competencies = null;
-
-                    if ($comp) {
-                        $comps = block_exaport_get_active_comps_for_item($item);
-                        if ($comps && is_array($comps) && array_key_exists('descriptors', $comps)) {
-                            $competencies = $comps['descriptors'];
-                        } else {
-                            $competencies = null;
-                        }
-
-                        if (is_array($competencies)) {
-                            $competenciesoutput = "";
-                            foreach ($competencies as $competence) {
-                                // Titles are user/import supplied text, not trusted HTML. They end up
-                                // inside the inline onmouseover="Tip('...')" attribute below, whose
-                                // value wz_tooltip.js assigns directly to .innerHTML, so each title
-                                // must be escaped twice — see
-                                // block_exaport_escape_for_inline_tooltip() for the full explanation.
-                                // The '<br/>' separator itself must stay real markup (unescaped) so
-                                // it still renders as a line break.
-                                $competenciesoutput .= block_exaport_escape_for_inline_tooltip($competence->title) . '<br/>';
-                            }
-
-                            $competenciesoutput = str_replace("\r", "", $competenciesoutput);
-                            $competenciesoutput = str_replace("\n", "", $competenciesoutput);
-
-                            $item->competences = $competenciesoutput;
-                        }
-
-                    }
+                    $compbadge = block_exaport_get_item_comp_footer_badge($item);
 
                     $general_content .= '<div class="view-item view-item-type-' . $item->type . '">';
                     $general_content .= '<div class="view-item-header" title="' . $item->type . '">' . $item->name;
-                    // Falls Interaktion ePortfolio - competences aktiv und User ist Lehrer.
-                    if ($comp && has_capability('block/exaport:competences', $context)) {
-                        if (is_array($competencies) && count($competencies) > 0) {
-                            $general_content .= '<img align="right" src="' . $CFG->wwwroot .
-                                '/blocks/exaport/pix/application_view_tile.png" alt="competences"/>';
-                        }
-                    }
                     $general_content .= '</div>';
                     $blockForPdf .= '<h4>' . $item->name . '</h4>';
                     $intro = file_rewrite_pluginfile_urls($item->intro, 'pluginfile.php', context_user::instance($item->userid)->id,
@@ -462,12 +428,8 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                         );
                         $blockForPdf .= $structuredrenderable->render_for_pdf($OUTPUT, $structureddata);
                     }
-                    if (is_array($competencies) && count($competencies) > 0) {
-                        $general_content .= '<div class="view-item-competences">' .
-                            '<script type="text/javascript" src="javascript/wz_tooltip.js"></script>' .
-                            '<a onmouseover="Tip(\'' . $item->competences . '\')" onmouseout="UnTip()">' .
-                            '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/comp.png" class="iconsmall" alt="' . 'competences' . '" />' .
-                            '</a></div>';
+                    if ($compbadge) {
+                        $general_content .= '<div class="view-item-competences">' . $compbadge . '</div>';
                     }
                     $general_content .= '<div class="view-item-link"><a href="' . s($href) . '">' . block_exaport_get_string('show') . '</a></div>';
                     $general_content .= '</div>';

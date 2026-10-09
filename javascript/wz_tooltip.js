@@ -852,8 +852,7 @@ function tt_DeAlt(el)
 
 	if(el)
 	{
-		if(el.alt)
-			el.alt = "";
+		// Preserve image alternative text; only suppress the native title tooltip.
 		if(el.title)
 			el.title = "";
 		aKid = el.childNodes || el.children || null;

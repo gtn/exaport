@@ -1656,6 +1656,7 @@ function block_exaport_get_view_blocks($view) {
     // This function also supplies the JSON used by the interactive view editor.
     require_once(__DIR__ . '/item_content_helpers.php');
     require_once(__DIR__ . '/../blockmediafunc.php');
+    require_once(__DIR__ . '/../locallib.php');
 
     $portfolioitems = block_exaport_get_portfolio_items();
 
@@ -1666,7 +1667,7 @@ function block_exaport_get_view_blocks($view) {
     }
     $badges = block_exaport_get_all_user_badges($userid);
 
-    $query = "SELECT b.*, i.userid AS itemownerid
+    $query = "SELECT b.*, i.userid AS itemownerid, i.courseid AS itemcourseid
               FROM {block_exaportviewblock} b
          LEFT JOIN {block_exaportitem} i ON i.id = b.itemid
               WHERE b.viewid = ?
@@ -1696,6 +1697,13 @@ function block_exaport_get_view_blocks($view) {
             }
             $portfolioitems[$block->itemid]->intro = process_media_url($portfolioitems[$block->itemid]->intro,
                 $block->width, $block->height);
+            // Reuse the competence badge shown on item cards, with the source item's identity.
+            $portfolioitems[$block->itemid]->compbadge = block_exaport_get_item_comp_footer_badge((object)[
+                'id' => (int)$block->itemid,
+                'userid' => (int)$block->itemownerid,
+                'courseid' => (int)$block->itemcourseid,
+            ]);
+            $portfolioitems[$block->itemid]->contenthtml = '';
             $contentblocks = block_exaport_get_item_content_blocks((int)$block->itemid);
             if ($contentblocks) {
                 $contentrenderable = new \block_exaport\output\item_content_blocks(
@@ -1705,10 +1713,10 @@ function block_exaport_get_view_blocks($view) {
                     false,
                     false
                 );
-                // The editor already treats intro as server-formatted HTML. Appending the same
-                // Mustache output used by read-only views keeps its preview in sync and safe.
+                // Keep structured content independent of the parent description, which the
+                // editor suppresses when competences are displayed. Reuse the read-only renderer.
                 $contentdata = $contentrenderable->export_for_template($OUTPUT);
-                $portfolioitems[$block->itemid]->intro .= $OUTPUT->render_from_template(
+                $portfolioitems[$block->itemid]->contenthtml = $OUTPUT->render_from_template(
                     'block_exaport/item_content_blocks',
                     $contentdata
                 );

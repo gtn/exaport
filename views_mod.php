@@ -60,6 +60,7 @@ $PAGE->requires->js_call_amd('block_exaport/sharing_form', 'init', ['views_mod']
 $PAGE->requires->js(new moodle_url($CFG->wwwroot . '/blocks/exaport/javascript/popover.min.js'), false);
 $PAGE->requires->js('/blocks/exaport/javascript/popper.min.js', true);
 $PAGE->requires->js('/blocks/exaport/javascript/tippy-bundle.umd.js', true);
+$PAGE->requires->js('/blocks/exaport/javascript/wz_tooltip.js', false);
 // $PAGE->requires->js_call_amd('block_exaport/config', 'initialise');
 $PAGE->requires->css('/blocks/exaport/css/preloadinator.css', true);
 
@@ -834,7 +835,7 @@ $translations = array(
     'internalaccessgroups', 'grouptitle', 'membercount', 'nogroupsfound',
     'view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text', 'view_specialitem_media',
     'view_specialitem_badge', 'view_specialitem_text_defaulttext',
-    'viewitem', 'comments', 'category', 'link', 'type', 'personalinformation',
+    'viewitem', 'comments', 'category', 'link', 'type', 'personalinformation', 'competences',
     'cvinformation', 'cvgroup', 'cofigureblock_cvinfo_education_history', 'cofigureblock_cvinfo_employment_history',
     'cofigureblock_cvinfo_certif', 'cofigureblock_cvinfo_public', 'cofigureblock_cvinfo_mbrship',
     'cofigureblock_cvinfo_goals', 'cofigureblock_cvinfo_skills', 'cofigureblock_cvinfo_interests', 'cofigureblock_cvinfo_cover',

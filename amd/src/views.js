@@ -495,7 +495,7 @@ define(['jquery',
       tempString += $E.translate('category') + ': ' + escapeHtml(item_data.category) + '<br />' + ilink;
       tempString += $E.translate('comments') + ': ' + escapeHtml(item_data.comments) + '<div class="exaport-item-intro"></div>';
       if (item_data.competences) {
-        tempString += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
+        tempString += '<a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + escapeHtml(M.util.image_url('t/grades', 'core')) + '" class="iconsmall" alt="' + escapeHtml($E.translate('competences')) + '" /></a>';
       }
       tempString += '<div class="exaport-item-content"></div>';
       tempString += '</div></div>';

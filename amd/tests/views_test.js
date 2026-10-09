@@ -5,7 +5,12 @@ define(['jquery', 'block_exaport/views'], function($, Views) {
             this.originalConfig = window.M;
             this.originalExaport = window.block_exaport;
             this.originalIcons = window.block_exaport_update_fontawesome_icons;
-            window.M = {cfg: {wwwroot: 'https://moodle.example.test'}};
+            window.M = {
+                cfg: {wwwroot: 'https://moodle.example.test'},
+                util: {image_url: function(image, component) {
+                    return 'https://moodle.example.test/theme/image.php?image=' + image + '&component=' + component;
+                }}
+            };
             window.block_exaport = {translate: function(key) { return key; }};
             window.block_exaport_update_fontawesome_icons = function() {};
             $('#qunit-fixture').html(
@@ -60,7 +65,10 @@ define(['jquery', 'block_exaport/views'], function($, Views) {
                 if (hasCompetences) {
                     assert.ok(block.find('a[onmouseover]').attr('onmouseover').includes('Competence title'),
                         'the tooltip retains its competence text');
+                    assert.strictEqual(block.find('img[alt="competences"]').attr('src'),
+                        window.M.util.image_url('t/grades', 'core'), 'Moodle resolves the competence icon');
                 }
+                assert.strictEqual(block.find('script').length, 0, 'rendering does not reload the tooltip library');
                 assert.ok(block.find('.picture img').attr('src').endsWith('/item_thumb.php?item_id=42'),
                     'the existing thumbnail endpoint remains in use');
                 assert.strictEqual(block.find('.header').text(), 'viewitem: Artifact <title>',

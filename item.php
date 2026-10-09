@@ -80,7 +80,8 @@ if ($action == 'copytoself') {
     $conditions = array("id" => $id, "userid" => $ownerid);
     $sourceitem = $DB->get_record('block_exaportitem', $conditions);
 
-    $copy = $sourceitem;
+    // Keep the trusted source ID and owner intact while constructing the copy.
+    $copy = clone $sourceitem;
 
     unset($copy->id);
     $copy->userid = $USER->id;

@@ -77,12 +77,12 @@ class item_content extends dynamic_form {
         }
     }
 
-    /** Validate file-manager submissions contain a file. */
+    /** Check required files and the legacy upload limits for file blocks only. */
     public function validation($data, $files): array {
         global $USER;
 
         $errors = parent::validation($data, $files);
-        if (($data['contenttype'] ?? '') !== 'file' || !empty($data['blockid']) ||
+        if (($data['contenttype'] ?? '') !== 'file' ||
                 ($data['operation'] ?? '') === 'delete') {
             return $errors;
         }
@@ -95,8 +95,12 @@ class item_content extends dynamic_form {
             'id',
             false
         );
-        if (!$draftitemid || !$draftfiles) {
+        if (empty($data['blockid']) && (!$draftitemid || !$draftfiles)) {
             $errors['files_filemanager'] = get_string('required');
+        } else if ($error = block_exaport_validate_item_content_files(
+            $draftitemid, (int)$data['itemid'], (int)$data['courseid'], (int)($data['blockid'] ?? 0)
+        )) {
+            $errors['files_filemanager'] = $error->getMessage();
         }
         return $errors;
     }
@@ -174,6 +178,13 @@ class item_content extends dynamic_form {
         require_sesskey();
         $data = $this->get_data();
         $item = block_exaport_get_editable_content_item((int)$data->itemid, (int)$data->courseid);
+        // Recheck before creating or updating a block, even if validation was bypassed.
+        if ($data->contenttype === 'file' && ($data->operation ?? '') !== 'delete' &&
+                ($error = block_exaport_validate_item_content_files(
+                    (int)$data->files_filemanager, (int)$item->id, (int)$data->courseid, (int)($data->blockid ?? 0)
+                ))) {
+            throw $error;
+        }
         $transaction = $DB->start_delegated_transaction();
         $block = !empty($data->blockid)
             ? block_exaport_get_item_content_block($item, (int)$data->blockid)

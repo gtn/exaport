@@ -73,7 +73,7 @@ class block_exaport_item_content_file_form extends block_exaport_moodleform {
     }
 
     /**
-     * Ensure the draft contains at least one real file.
+     * Check required files and the legacy upload limits.
      *
      * @param array $data Submitted data.
      * @param array $files Submitted files.
@@ -95,6 +95,10 @@ class block_exaport_item_content_file_form extends block_exaport_moodleform {
         );
         if (empty($data['blockid']) && (!$draftitemid || !$draftfiles)) {
             $errors['files_filemanager'] = get_string('required');
+        } else if ($error = block_exaport_validate_item_content_files(
+            $draftitemid, (int)$data['itemid'], (int)$data['courseid'], (int)($data['blockid'] ?? 0)
+        )) {
+            $errors['files_filemanager'] = $error->getMessage();
         }
 
         return $errors;

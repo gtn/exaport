@@ -48,6 +48,12 @@ if ($form->is_cancelled()) {
     $item = block_exaport_get_editable_content_item($itemid, $courseid);
     $block = $blockid ? block_exaport_get_item_content_block($item, $blockid) : null;
 
+    // Recheck before creating or updating a block if the draft or quota changed.
+    if ($error = block_exaport_validate_item_content_files(
+        (int)$fromform->files_filemanager, $itemid, $courseid, $blockid
+    )) {
+        throw $error;
+    }
     $transaction = $DB->start_delegated_transaction();
     $block = $block ?: block_exaport_create_file_content_block($itemid, $fromform->title);
     $DB->update_record('block_exaportitemblock', (object)['id' => $block->id, 'title' => $fromform->title,

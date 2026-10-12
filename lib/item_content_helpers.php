@@ -731,6 +731,83 @@ function block_exaport_item_content_file_options(?stdClass $item = null, ?stdCla
 }
 
 /**
+ * Validate the proposed replacement of one file block before changing stored content.
+ *
+ * Quota usage includes every Exaport file area in the destination owner's context,
+ * as in the legacy quota check. Drafts belong to the submitting user. Existing
+ * block files are subtracted before counting the complete submitted draft.
+ * Owners already over quota may retain or reduce their usage, but not increase it.
+ * This is an upload-form boundary; migration and copy helpers do not call it.
+ *
+ * @param stdClass $item Trusted destination item.
+ * @param stdClass|null $block Trusted existing file block, or null for an addition.
+ * @param int $draftitemid Submitted file-manager draft ID.
+ * @return array|null Error code, component and string arguments, or null when valid.
+ */
+function block_exaport_item_content_file_submission_error(stdClass $item, ?stdClass $block, int $draftitemid): ?array {
+    global $CFG, $DB, $USER;
+
+    if ($block && ((int)$block->itemid !== (int)$item->id || $block->type !== 'file')) {
+        throw new invalid_parameter_exception('File block does not belong to this item');
+    }
+    $draftfiles = $draftitemid ? get_file_storage()->get_area_files(
+        context_user::instance((int)$USER->id)->id, 'user', 'draft', $draftitemid, 'id', false
+    ) : [];
+    if (!$block && !$draftfiles) {
+        return ['required', 'moodle', null];
+    }
+    if (!$draftitemid) {
+        // file_postupdate_standard_filemanager() leaves the existing area unchanged for draft ID zero.
+        return null;
+    }
+    $existingfiles = $block ? block_exaport_get_item_content_files((int)$item->userid, (int)$block->id) : [];
+    $existingbytes = 0;
+    $retained = [];
+    foreach ($existingfiles as $file) {
+        $existingbytes += $file->get_filesize();
+        $hash = $file->get_contenthash();
+        $retained[$hash] = ($retained[$hash] ?? 0) + 1;
+    }
+    $draftbytes = array_sum(array_map(static function(stored_file $file): int {
+        return (int)$file->get_filesize();
+    }, $draftfiles));
+    $ownercontext = context_user::instance((int)$item->userid);
+    $currentbytes = (int)$DB->get_field_sql(
+        'SELECT COALESCE(SUM(filesize), 0) FROM {files} WHERE contextid = ? AND component = ? AND filename <> ?',
+        [$ownercontext->id, 'block_exaport', '.']
+    );
+    $quota = (int)($CFG->block_exaport_userquota ?? 104857600);
+    if ($currentbytes - $existingbytes + $draftbytes > max($quota, $currentbytes)) {
+        return ['userquotalimit', 'error', null];
+    }
+
+    // Core's draft saver silently drops oversized files, including grandfathered files.
+    // Validate new/replaced bytes here so saving can retain old bytes without that filter.
+    $options = block_exaport_item_content_file_options();
+    foreach ($draftfiles as $file) {
+        $hash = $file->get_contenthash();
+        if (!empty($retained[$hash])) {
+            $retained[$hash]--;
+            continue;
+        }
+        $usermaxbytes = get_user_max_upload_file_size($ownercontext, $options['maxbytes'], 0, 0, $file->get_userid());
+        if ($usermaxbytes !== USER_CAN_IGNORE_FILE_SIZE_LIMITS && $options['maxbytes'] > 0 &&
+                $file->get_filesize() > $options['maxbytes']) {
+            return ['maxbytesfile', 'error', (object)['file' => $file->get_filename(),
+                'size' => display_size($options['maxbytes'])]];
+        }
+    }
+    return null;
+}
+
+/** Recheck upload validation immediately before any block or file persistence. */
+function block_exaport_check_item_content_file_submission(stdClass $item, ?stdClass $block, int $draftitemid): void {
+    if ($error = block_exaport_item_content_file_submission_error($item, $block, $draftitemid)) {
+        throw new moodle_exception($error[0], $error[1], '', $error[2]);
+    }
+}
+
+/**
  * Create and initialise an add-content form.
  *
  * Keeping this here makes the exact same Moodle form available to both the
@@ -760,7 +837,8 @@ function block_exaport_create_item_content_form(string $type, int $courseid, int
     } else if ($type === 'file') {
         require_once(__DIR__ . '/item_content_form.php');
         $options = block_exaport_item_content_file_options($item, $block);
-        $form = new block_exaport_item_content_file_form(null, ['fileoptions' => $options, 'blockid' => $blockid]);
+        $form = new block_exaport_item_content_file_form(null, ['fileoptions' => $options, 'blockid' => $blockid,
+            'item' => $item, 'block' => $block]);
         $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
             'title' => $block->title ?? '', 'files' => ''];
         $data = file_prepare_standard_filemanager($data, 'files', $options, $usercontext,

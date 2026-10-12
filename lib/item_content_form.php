@@ -73,28 +73,19 @@ class block_exaport_item_content_file_form extends block_exaport_moodleform {
     }
 
     /**
-     * Ensure the draft contains at least one real file.
+     * Validate the draft against the destination owner's storage quota.
      *
      * @param array $data Submitted data.
      * @param array $files Submitted files.
      * @return array
      */
     public function validation($data, $files) {
-        global $USER;
-
         $errors = parent::validation($data, $files);
         $draftitemid = (int)($data['files_filemanager'] ?? 0);
-        $usercontext = context_user::instance($USER->id);
-        $draftfiles = get_file_storage()->get_area_files(
-            $usercontext->id,
-            'user',
-            'draft',
-            $draftitemid,
-            'id',
-            false
-        );
-        if (empty($data['blockid']) && (!$draftitemid || !$draftfiles)) {
-            $errors['files_filemanager'] = get_string('required');
+        if ($error = block_exaport_item_content_file_submission_error(
+            $this->_customdata['item'], $this->_customdata['block'], $draftitemid
+        )) {
+            $errors['files_filemanager'] = get_string($error[0], $error[1], $error[2]);
         }
 
         return $errors;

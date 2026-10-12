@@ -47,11 +47,14 @@ if ($form->is_cancelled()) {
     require_sesskey();
     $item = block_exaport_get_editable_content_item($itemid, $courseid);
     $block = $blockid ? block_exaport_get_item_content_block($item, $blockid) : null;
+    block_exaport_check_item_content_file_submission($item, $block, (int)$fromform->files_filemanager);
 
     $transaction = $DB->start_delegated_transaction();
     $block = $block ?: block_exaport_create_file_content_block($itemid, $fromform->title);
     $DB->update_record('block_exaportitemblock', (object)['id' => $block->id, 'title' => $fromform->title,
         'timemodified' => time()]);
+    // Upload validation handles new files; do not silently discard grandfathered files on save.
+    $fileoptions['maxbytes'] = 0;
     file_postupdate_standard_filemanager(
         $fromform,
         'files',

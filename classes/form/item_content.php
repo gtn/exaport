@@ -77,26 +77,18 @@ class item_content extends dynamic_form {
         }
     }
 
-    /** Validate file-manager submissions contain a file. */
+    /** Validate file-manager submissions against the destination owner's quota. */
     public function validation($data, $files): array {
-        global $USER;
-
         $errors = parent::validation($data, $files);
-        if (($data['contenttype'] ?? '') !== 'file' || !empty($data['blockid']) ||
+        if (($data['contenttype'] ?? '') !== 'file' ||
                 ($data['operation'] ?? '') === 'delete') {
             return $errors;
         }
+        $item = block_exaport_get_editable_content_item((int)$data['itemid'], (int)$data['courseid']);
+        $block = !empty($data['blockid']) ? block_exaport_get_item_content_block($item, (int)$data['blockid']) : null;
         $draftitemid = (int)($data['files_filemanager'] ?? 0);
-        $draftfiles = get_file_storage()->get_area_files(
-            context_user::instance($USER->id)->id,
-            'user',
-            'draft',
-            $draftitemid,
-            'id',
-            false
-        );
-        if (!$draftitemid || !$draftfiles) {
-            $errors['files_filemanager'] = get_string('required');
+        if ($error = block_exaport_item_content_file_submission_error($item, $block, $draftitemid)) {
+            $errors['files_filemanager'] = get_string($error[0], $error[1], $error[2]);
         }
         return $errors;
     }
@@ -174,15 +166,17 @@ class item_content extends dynamic_form {
         require_sesskey();
         $data = $this->get_data();
         $item = block_exaport_get_editable_content_item((int)$data->itemid, (int)$data->courseid);
+        $block = !empty($data->blockid) ? block_exaport_get_item_content_block($item, (int)$data->blockid) : null;
+        if ($data->contenttype === 'file' && ($data->operation ?? '') !== 'delete') {
+            block_exaport_check_item_content_file_submission($item, $block, (int)$data->files_filemanager);
+        }
         $transaction = $DB->start_delegated_transaction();
-        $block = !empty($data->blockid)
-            ? block_exaport_get_item_content_block($item, (int)$data->blockid)
-            : block_exaport_create_content_block(
-                (int)$data->itemid,
-                $data->contenttype,
-                $data->title,
-                $data->contenttype === 'link' ? $data->url : ''
-            );
+        $block = $block ?: block_exaport_create_content_block(
+            (int)$data->itemid,
+            $data->contenttype,
+            $data->title,
+            $data->contenttype === 'link' ? $data->url : ''
+        );
         if (($data->operation ?? '') === 'delete') {
             block_exaport_delete_item_content_block($item, $block);
             $transaction->allow_commit();
@@ -206,6 +200,8 @@ class item_content extends dynamic_form {
             ]);
         } else if ($data->contenttype === 'file') {
             $options = block_exaport_item_content_file_options($item, $block);
+            // Upload validation handles new files; retain grandfathered files on save.
+            $options['maxbytes'] = 0;
             file_postupdate_standard_filemanager($data, 'files', $options,
                 $context, 'block_exaport', 'item_content_file', $block->id);
             if (!block_exaport_get_item_content_files((int)$item->userid, (int)$block->id)) {

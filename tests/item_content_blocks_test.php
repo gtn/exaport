@@ -482,6 +482,7 @@ final class item_content_blocks_test extends \advanced_testcase {
         $this->setUser($owner);
         $course = $this->getDataGenerator()->create_course();
         $itemid = $this->insert_item($owner->id, $course->id);
+        $DB->set_field('block_exaportitem', 'intro', '<p>Parent description</p>', ['id' => $itemid]);
         $this->insert_block($itemid, 'text', 0, 'Editor content', '<p>Visible in editor</p>');
         $fileblockid = $this->insert_block($itemid, 'file', 1, 'Editor file');
         $ownercontext = \context_user::instance($owner->id);
@@ -512,11 +513,13 @@ final class item_content_blocks_test extends \advanced_testcase {
         $blocks = block_exaport_get_view_blocks((object)['id' => $viewid, 'userid' => $owner->id]);
 
         $this->assertArrayHasKey($viewblockid, $blocks);
-        $this->assertStringContainsString('Visible in editor', $blocks[$viewblockid]->item->intro);
-        $this->assertStringContainsString('exaport-item-content-section', $blocks[$viewblockid]->item->intro);
+        $this->assertStringContainsString('Parent description', $blocks[$viewblockid]->item->intro);
+        $this->assertStringNotContainsString('Visible in editor', $blocks[$viewblockid]->item->intro);
+        $this->assertStringContainsString('Visible in editor', $blocks[$viewblockid]->item->contenthtml);
+        $this->assertStringContainsString('exaport-item-content-section', $blocks[$viewblockid]->item->contenthtml);
         $this->assertStringContainsString('/pluginfile.php/' . $ownercontext->id .
             '/block_exaport/item_content_file/itemid/' . $itemid . '/blockid/' . $fileblockid . '/editor.pdf',
-            $blocks[$viewblockid]->item->intro);
+            $blocks[$viewblockid]->item->contenthtml);
     }
 
     public function test_single_block_delete_preserves_parent_order_and_other_blocks(): void {

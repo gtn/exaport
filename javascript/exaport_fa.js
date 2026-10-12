@@ -6,7 +6,8 @@ window.FontAwesomeConfig = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-  var mainBlock = $('#exaport');
-  block_exaport_update_fontawesome_icons(mainBlock);
+  require(['block_exaport/competence_badges'], function (CompetenceBadges) {
+    CompetenceBadges.initialise(document.getElementById('exaport'));
+  });
 });
 

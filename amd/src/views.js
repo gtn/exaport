@@ -7,8 +7,9 @@ define(['jquery',
   'core/modal',
   'core/modal_events',
   'core/fragment',
-  'core/templates'
-], function ($, jqui, jquitp, Modal, modalEvents, Fragment, Templates) {
+  'core/templates',
+  'block_exaport/competence_badges'
+], function ($, jqui, jquitp, Modal, modalEvents, Fragment, Templates, CompetenceBadges) {
 
   var helpDialogue;
   var contextId;
@@ -494,15 +495,16 @@ define(['jquery',
       tempString += '<div class="body">' + $E.translate('type') + ': ' + $E.translate(item_data.type) + '<br />';
       tempString += $E.translate('category') + ': ' + escapeHtml(item_data.category) + '<br />' + ilink;
       tempString += $E.translate('comments') + ': ' + escapeHtml(item_data.comments) + '<div class="exaport-item-intro"></div>';
-      if (item_data.competences) {
-        tempString += '<script type="text/javascript" src="javascript/wz_tooltip.js"></script><a onmouseover="Tip(\'' + item_data.competences + '\')" onmouseout="UnTip()"><img src="' + M.cfg['wwwroot'] + '/pix/t/grades.png" class="iconsmall" alt="' + 'competences' + '" /></a>';
-      }
+      tempString += '<span class="exaport-item-compbadge"></span>';
+      tempString += '<div class="exaport-item-content"></div>';
       tempString += '</div></div>';
       $item.html(tempString);
       if (!item_data.competences) {
         // Insert the already-sanitized rich HTML separately from the generated wrapper.
         $item.find('.exaport-item-intro').html(item_data.intro || '');
       }
+      $item.find('.exaport-item-compbadge').html(item_data.compbadge || '');
+      $item.find('.exaport-item-content').html(item_data.contenthtml || '');
     } else if (data.type == 'personal_information') {
       var tempString = '<div id="id_holder" style="display:none;"></div>';
       tempString += '<div class="personal_info" style="overflow: hidden;">';
@@ -1033,7 +1035,7 @@ define(['jquery',
     }
 
     // update fontawesome icons
-    block_exaport_update_fontawesome_icons($item);
+    CompetenceBadges.initialise($item);
 
     return $item;
   }

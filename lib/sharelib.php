@@ -450,6 +450,15 @@ namespace {
         }
     }
 
+    /**
+     * @param $itemid
+     * @param $itemOwnerid
+     * @param $currentUserid
+     * @return false|mixed|stdClass
+     * @throws dml_exception
+     * This function is called by both the portfoliofile.php and the block_exaport_pluginfile which is called by the webservice/pluginfile.php.
+     * It checks if the current user has access to the item with id $itemid owned by $itemOwnerid.
+     */
     function block_exaport_get_item_for_webservice($itemid, $itemOwnerid, $currentUserid) {
         global $DB;
 

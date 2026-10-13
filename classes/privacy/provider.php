@@ -224,7 +224,7 @@ class provider implements
     public static function get_users_in_context(userlist $userlist) {
         global $DB;
         $context = $userlist->get_context();
-        if (get_class($context) != 'context_course') {
+        if (!($context instanceof \core\context\course)) {
             return;
         }
         $courseid = $context->instanceid;
@@ -346,7 +346,7 @@ class provider implements
         // got only context_cources
         $exaportcoursescontexts = $contextlist->get_contexts();
         foreach ($exaportcoursescontexts as $k => $context) {
-            if (get_class($context) != 'context_course') {
+            if (!($context instanceof \core\context\course)) {
                 unset($exaportcoursescontexts[$k]);
             }
         }
@@ -721,14 +721,13 @@ class provider implements
 
     }
 
-    public function delete_resume_data($resume_id) {
+    public static function delete_resume_data($resume_id) {
 
         global $DB;
         $DB->delete_records('block_exaportresume_certif', ['resume_id' => $resume_id]);
         $DB->delete_records('block_exaportresume_edu', ['resume_id' => $resume_id]);
         $DB->delete_records('block_exaportresume_employ', ['resume_id' => $resume_id]);
         $DB->delete_records('block_exaportresume_mbrship', ['resume_id' => $resume_id]);
-        $DB->delete_records('block_exaportresume_linkedin', ['resume_id' => $resume_id]);
         $DB->delete_records('block_exaportresume_public', ['resume_id' => $resume_id]);
         $DB->delete_records('block_exaportresume_badges', ['resumeid' => $resume_id]);
         $DB->delete_records('block_exaportcompresume_mm', ['resumeid' => $resume_id]);
@@ -742,7 +741,7 @@ class provider implements
      */
     public static function delete_data_for_all_users_in_context(context $context) {
         global $DB;
-        if (get_class($context) != 'context_course') {
+        if (!($context instanceof \core\context\course)) {
             return;
         }
         $courseid = $context->instanceid;
@@ -775,7 +774,7 @@ class provider implements
         return;
     }
 
-    public function delete_category_data($category_id) {
+    public static function delete_category_data($category_id) {
         global $DB;
         $DB->delete_records('block_exaportcatshar', ['catid' => $category_id]);
         $DB->delete_records('block_exaportcatgroupshar', ['catid' => $category_id]);
@@ -784,7 +783,7 @@ class provider implements
         return true;
     }
 
-    public function delete_atifact_data($artifact_id) {
+    public static function delete_atifact_data($artifact_id) {
         global $DB;
         $DB->delete_records('block_exaportitemshar', ['itemid' => $artifact_id]);
         $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $artifact_id]);
@@ -793,7 +792,7 @@ class provider implements
         return true;
     }
 
-    public function delete_view_data($view_id) {
+    public static function delete_view_data($view_id) {
         global $DB;
         $DB->delete_records('block_exaportviewblock', ['viewid' => $view_id]);
         $DB->delete_records('block_exaportviewshar', ['viewid' => $view_id]);
@@ -811,7 +810,7 @@ class provider implements
 
         $exaportcoursescontexts = $contextlist->get_contexts();
         foreach ($exaportcoursescontexts as $k => $context) {
-            if (get_class($context) != 'context_course') {
+            if (!($context instanceof \core\context\course)) {
                 unset($exaportcoursescontexts[$k]);
             }
         }
@@ -873,7 +872,7 @@ class provider implements
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;
         $context = $userlist->get_context();
-        if (get_class($context) != 'context_course') {
+        if (!($context instanceof \core\context\course) || !$userlist->get_userids()) {
             return;
         }
         $courseid = $context->instanceid;
@@ -887,7 +886,7 @@ class provider implements
         $DB->delete_records_select('block_exaportuser', $select, $params);
 
         // resume
-        $resumes = $DB->get_record_select('block_exaportresume', $select, $params);
+        $resumes = $DB->get_records_select('block_exaportresume', $select, $params);
         foreach ($resumes as $resume) {
             self::delete_resume_data($resume->id);
         }
@@ -900,6 +899,9 @@ class provider implements
         $DB->delete_records_select('block_exaportcat_structshar', $select, $params);
         $DB->delete_records_select('block_exaportitemshar', $select, $params);
         $DB->delete_records_select('block_exaportitemcomm', $select, $params);
+        foreach ($DB->get_records_select('block_exaportview', $select, $params) as $view) {
+            self::delete_view_data($view->id);
+        }
         $DB->delete_records_select('block_exaportview', $select, $params);
         $DB->delete_records_select('block_exaportviewshar', $select, $params);
 
@@ -907,14 +909,14 @@ class provider implements
         $select = " userid {$in_sql} AND courseid = :courseid ";
 
         // categories
-        $cats = $DB->get_record_select('block_exaportcate', $select, $params);
+        $cats = $DB->get_records_select('block_exaportcate', $select, $params);
         foreach ($cats as $category) {
             self::delete_category_data($category->id);
         }
         $DB->delete_records_select('block_exaportcate', $select, $params);
 
         // artifacts
-        $artifacts = $DB->get_record_select('block_exaportitem', $select, $params);
+        $artifacts = $DB->get_records_select('block_exaportitem', $select, $params);
         foreach ($artifacts as $artifact) {
             self::delete_atifact_data($artifact->id);
         }

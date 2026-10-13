@@ -1,4 +1,5 @@
 ### v5.2 (2026092909) ###
+* Item attachment delivery sanitises HTML across pluginfile and compatibility routes, enforces shared-view item membership, and versions structured file URLs by content hash.
 * Structured blocks are now the authoritative item-content model for rendering, thumbnails, copying, imports, exports, privacy, and deletion. See [structured content export](docs/structured-content-export.md).
 * Migration moves meaningful parent URLs and real `item_file` files, verifies each copied file before deleting its legacy source, and keeps migrated OEZ/ePOP items visible.
 * Migration is restart-safe, uses one transaction per item, processes up to 500 items per batch, and renews the 1,800-second timeout for every non-empty batch. See [item-content migration](docs/item-content-migration.md).

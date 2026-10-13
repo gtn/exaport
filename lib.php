@@ -33,7 +33,7 @@ use function block_exaport\common\print_error;
 // itemid (string)
 // itemid
 // file name.
-function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
+function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $USER, $CFG, $DB;
 
     $is_for_pdf = false;
@@ -99,7 +99,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (!$file || $file->is_directory()) {
                 return false;
             }
-            send_stored_file($file, 86400, 0, $forcedownload);
+            block_exaport_send_item_file($file, null, $forcedownload, $options);
             break;
         case 'item_content_text':
             $itemmarker = array_search('itemid', $args, true);
@@ -149,7 +149,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (!$file || $file->is_directory()) {
                 return false;
             }
-            send_stored_file($file, 86400, 0, $forcedownload);
+            block_exaport_send_item_file($file, null, $forcedownload, $options);
             break;
         case 'item_file':
         case 'item_iconfile':
@@ -173,7 +173,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 
             // Serve file.
             if ($file) {
-                send_stored_file($file);
+                block_exaport_send_item_file($file, null, $forcedownload, $options);
             } else {
                 return false;
             }

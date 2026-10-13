@@ -542,7 +542,11 @@ namespace {
                         LIMIT 1";
             }
 
-            $viewblock = $DB->get_record_sql($sql, array($view->id, $itemid)); // Nobody, but me.
+            $viewblock = $DB->get_record_sql($sql, array($view->id, $itemid));
+            if (!$viewblock) {
+                // A view grant only authorises the items included in that view.
+                return false;
+            }
 
             // Share artefact can not only owner. So we find did share item to others users.
             // If shared - take owner and insert into select.

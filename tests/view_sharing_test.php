@@ -109,6 +109,77 @@ final class view_sharing_test extends \advanced_testcase {
     }
 
     // =========================================================================
+    // Item access through shared views.
+    // =========================================================================
+
+    public function test_public_view_only_authorises_items_in_item_blocks(): void {
+        global $DB;
+
+        $this->setGuestUser();
+        $viewid = $this->create_view($this->owner, 0, 1);
+        $view = $DB->get_record('block_exaportview', ['id' => $viewid]);
+        $itemid = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $this->owner->id, 'name' => 'Unlisted item', 'type' => 'file',
+        ]);
+        $access = 'view/hash/' . $this->owner->id . '-' . $view->hash;
+        $this->assertFalse(block_exaport_get_item($itemid, $access));
+
+        $DB->insert_record('block_exaportviewblock', (object)[
+            'viewid' => $viewid, 'itemid' => $itemid, 'type' => 'text',
+        ]);
+        $this->assertFalse(block_exaport_get_item($itemid, $access));
+
+        $DB->insert_record('block_exaportviewblock', (object)[
+            'viewid' => $viewid, 'itemid' => $itemid, 'type' => 'item',
+        ]);
+        $this->assertEquals($itemid, block_exaport_get_item($itemid, $access)->id);
+        $otheritemid = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $this->owner->id, 'name' => 'Another unlisted item', 'type' => 'file',
+        ]);
+        $this->assertFalse(block_exaport_get_item($otheritemid, $access));
+    }
+
+    public function test_internal_view_share_does_not_grant_other_items_of_the_owner(): void {
+        global $DB;
+
+        $this->setUser($this->recipient);
+        $viewid = $this->create_view($this->owner);
+        $DB->insert_record('block_exaportviewshar', (object)[
+            'viewid' => $viewid, 'userid' => $this->recipient->id,
+        ]);
+        $itemid = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $this->owner->id, 'name' => 'Unlisted item', 'type' => 'file',
+        ]);
+        $access = 'view/id/' . $this->owner->id . '-' . $viewid;
+        $this->assertFalse(block_exaport_get_item($itemid, $access));
+        $DB->insert_record('block_exaportviewblock', (object)[
+            'viewid' => $viewid, 'itemid' => $itemid, 'type' => 'item',
+        ]);
+        $this->assertEquals($itemid, block_exaport_get_item($itemid, $access)->id);
+    }
+
+    public function test_public_view_can_still_include_an_item_shared_to_its_owner(): void {
+        global $DB;
+
+        $this->setGuestUser();
+        $originalowner = $this->getDataGenerator()->create_user();
+        $itemid = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $originalowner->id, 'name' => 'Reshared item', 'type' => 'file',
+        ]);
+        $DB->insert_record('block_exaportitemshar', (object)[
+            'itemid' => $itemid, 'userid' => $this->owner->id,
+        ]);
+        $viewid = $this->create_view($this->owner, 0, 1);
+        $view = $DB->get_record('block_exaportview', ['id' => $viewid]);
+        $DB->insert_record('block_exaportviewblock', (object)[
+            'viewid' => $viewid, 'itemid' => $itemid, 'type' => 'item',
+        ]);
+        $actual = block_exaport_get_item($itemid, 'view/hash/' . $this->owner->id . '-' . $view->hash);
+        $this->assertEquals($itemid, $actual->id);
+        $this->assertEquals($originalowner->id, $actual->userid);
+    }
+
+    // =========================================================================
     // get_category_shared_view_ids() tests
     // =========================================================================
 

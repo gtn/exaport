@@ -916,7 +916,7 @@ function block_exaport_build_comp_table($item, $role = "teacher", $competences =
 function block_exaport_set_competences($values, $item, $reviewerid, $role = 1) {
     global $DB;
 
-    \block_exaport\exacomp_helper::require_descriptor_access(array_filter((array)$values), $item->id);
+    \block_exaport\exacomp_helper::require_can_access_descriptors(array_filter((array)$values), $item->id);
 
     $DB->delete_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM,
         array("activityid" => $item->id, "eportfolioitem" => 1, "role" => $role, "userid" => $item->userid));

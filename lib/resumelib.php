@@ -827,7 +827,7 @@ function block_exaport_resume_competences_form($resume, $id, $typeblock) {
         $interaction = block_exaport_check_competence_interaction();
         if ($interaction) {
             $descriptorids = array_filter(optional_param_array('desc', [], PARAM_INT));
-            \block_exaport\exacomp_helper::require_descriptor_access($descriptorids);
+            \block_exaport\exacomp_helper::require_can_access_descriptors($descriptorids);
             $DB->delete_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
             foreach ($descriptorids as $descriptorid) {
                 $DB->insert_record('block_exaportcompresume_mm',

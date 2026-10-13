@@ -507,7 +507,7 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     global $CFG, $USER, $DB;
 
     // array_filter: without selected competences the list only contains an empty value
-    \block_exaport\exacomp_helper::require_descriptor_access(array_filter(explode(',', $post->compids ?? '')), $post->id);
+    \block_exaport\exacomp_helper::require_can_access_descriptors(array_filter(explode(',', $post->compids ?? '')), $post->id);
 
     // Convert the type into the type by post data:
     block_exaport_convert_item_type($post);
@@ -602,7 +602,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
     global $CFG, $USER, $DB;
 
     // array_filter: without selected competences the list only contains an empty value
-    \block_exaport\exacomp_helper::require_descriptor_access(array_filter(explode(',', $post->compids ?? '')));
+    \block_exaport\exacomp_helper::require_can_access_descriptors(array_filter(explode(',', $post->compids ?? '')));
 
     $post->userid = $USER->id;
     $post->timemodified = time();

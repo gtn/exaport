@@ -26,10 +26,10 @@ class exacomp_helper {
      * Has to be called for all descriptor ids, which come from the request, else any descriptor could be used by changing the id.
      * The check itself is done by exacomp.
      */
-    public static function require_descriptor_access(array $descriptorids, int $itemid = 0): void {
+    public static function require_can_access_descriptors(array $descriptorids, int $itemid = 0): void {
         // exacomp is optional and older versions of it don't have the check method
-        if (block_exaport_check_competence_interaction() && method_exists(\block_exacomp\api::class, 'require_descriptor_access_for_exaport')) {
-            \block_exacomp\api::require_descriptor_access_for_exaport($descriptorids, $itemid);
+        if (block_exaport_check_competence_interaction() && method_exists(\block_exacomp\api::class, 'require_can_access_descriptors_for_exaport')) {
+            \block_exacomp\api::require_can_access_descriptors_for_exaport($descriptorids, $itemid);
         }
     }
 }

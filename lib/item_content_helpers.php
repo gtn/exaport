@@ -554,7 +554,9 @@ function block_exaport_get_item_content_file_url(
     }
     $parts[] = $file->get_filename();
 
-    return file_encode_url($CFG->wwwroot . $script, '/' . implode('/', $parts), true);
+    $url = moodle_url::make_file_url($CFG->wwwroot . $script, '/' . implode('/', $parts), true);
+    $url->param('contenthash', $file->get_contenthash());
+    return $url->out(false);
 }
 
 /**

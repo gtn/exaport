@@ -76,7 +76,7 @@ if ($token) {
 
     $files = block_exaport_get_item_structured_files($item);
     if ($file = reset($files)) {
-        send_stored_file($file);
+        block_exaport_send_item_file($file);
     } else {
         not_found();
     }
@@ -141,22 +141,12 @@ if ($itemid) {
     }
 
     if ($file) {
-        // TODO: check this code
-        $mimetype = $file->get_mimetype();
-        if (strpos($mimetype, 'html') !== false || strpos($mimetype, 'text') === true) { // clean HTML ; TODO: 'text' - do we need?
-            $tempfilecontent = $file->get_content();
-            $tempfilecontent = clean_text($tempfilecontent, FORMAT_HTML, ['newlines' => false]);
-            readstring_accel($tempfilecontent, $mimetype, false);
-            die;
-        }
-
-
         $as_pdf = optional_param('as_pdf', false, PARAM_BOOL);
-        if ($as_pdf && class_exists('\block_exacomp\api')) {
+        if ($as_pdf && !block_exaport_is_html_item_file($file) && class_exists('\block_exacomp\api')) {
             \block_exacomp\api::send_stored_file_as_pdf($file, $download);
         }
 
-        send_stored_file($file, null, 0, $download);
+        block_exaport_send_item_file($file, null, $download);
     } else {
         not_found();
     }

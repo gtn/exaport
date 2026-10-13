@@ -159,6 +159,7 @@ final class externallib_test extends \advanced_testcase {
         parse_str(parse_url($file['url'], PHP_URL_QUERY), $query);
         $this->assertSame('1', $query['forcedownload']);
         $this->assertSame('downloadtoken123', $query['token'] ?? null);
+        $this->assertSame($storedfile->get_contenthash(), $query['contenthash'] ?? null);
         $this->assertStringContainsString('/webservice/pluginfile.php/', $file['url']);
         $this->assertStringEndsWith($storedfile->get_filepath() . $storedfile->get_filename(),
             rawurldecode(parse_url($file['url'], PHP_URL_PATH)));
@@ -182,6 +183,53 @@ final class externallib_test extends \advanced_testcase {
         $this->assertSame((int)$storedfile->get_id(), $response['files'][0]['id']);
         $this->assertTrue($response['files'][0]['isimage']);
         $this->assertStringContainsString('/nested/picture.png', $response['files'][0]['url']);
+    }
+
+    /** @return array Slash-argument modes supported by Moodle. */
+    public static function slash_argument_modes(): array {
+        return ['slash arguments' => [true], 'query arguments' => [false]];
+    }
+
+    /** @dataProvider slash_argument_modes */
+    public function test_replacing_file_contents_changes_url_version_without_changing_path(bool $slasharguments): void {
+        global $CFG, $DB;
+
+        $this->resetAfterTest(true);
+        $CFG->slasharguments = $slasharguments;
+        $owner = $this->getDataGenerator()->create_user();
+        $item = (object)['userid' => $owner->id, 'name' => 'Versioned attachment', 'type' => 'file'];
+        $item->id = (int)$DB->insert_record('block_exaportitem', $item);
+        $block = block_exaport_create_file_content_block($item->id, 'Attachment');
+        $record = [
+            'contextid' => \context_user::instance($owner->id)->id,
+            'component' => 'block_exaport', 'filearea' => 'item_content_file', 'itemid' => $block->id,
+            'filepath' => '/nested/', 'filename' => 'report & notes.txt',
+        ];
+        $file = get_file_storage()->create_file_from_string($record, 'First version');
+        $before = block_exaport_get_item_content_webservice_data($item, 'token123');
+        $file->delete();
+        $replacement = get_file_storage()->create_file_from_string($record, 'Second version');
+        $after = block_exaport_get_item_content_webservice_data($item, 'token123');
+
+        $beforeurl = $before['files'][0]['url'];
+        $afterurl = $after['files'][0]['url'];
+        $this->assertNotSame($beforeurl, $afterurl);
+        $this->assertSame(parse_url($beforeurl, PHP_URL_PATH), parse_url($afterurl, PHP_URL_PATH));
+        parse_str(parse_url($beforeurl, PHP_URL_QUERY), $beforequery);
+        parse_str(parse_url($afterurl, PHP_URL_QUERY), $afterquery);
+        $this->assertSame(sha1('First version'), $beforequery['contenthash']);
+        $this->assertSame($replacement->get_contenthash(), $afterquery['contenthash']);
+        $this->assertSame('token123', $afterquery['token']);
+        $this->assertSame('1', $afterquery['forcedownload']);
+        if (!$slasharguments) {
+            $this->assertSame($beforequery['file'], $afterquery['file']);
+            $this->assertStringEndsWith($replacement->get_filepath() . $replacement->get_filename(), $afterquery['file']);
+        }
+        $this->assertSame($after['files'][0], $after['contentblocks'][0]->files[0]);
+        $sessionresponse = block_exaport_get_item_content_webservice_data($item);
+        parse_str(parse_url($sessionresponse['files'][0]['url'], PHP_URL_QUERY), $sessionquery);
+        $this->assertSame($replacement->get_contenthash(), $sessionquery['contenthash']);
+        $this->assertArrayNotHasKey('token', $sessionquery);
     }
 
     public function test_text_only_projection_has_no_fabricated_legacy_values(): void {

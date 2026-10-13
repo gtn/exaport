@@ -23,6 +23,7 @@ use core_privacy\local\request\transform;
 use function block_exaport\common\print_error;
 
 require_once($CFG->libdir . '/filelib.php');
+require_once(__DIR__ . '/item_file_helpers.php');
 
 if (block_exaport_check_competence_interaction()) {
     // TODO: don't use any of the exacomp functions, use \block_exacomp\api::method() instead!

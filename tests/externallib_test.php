@@ -14,6 +14,8 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/item_content_helpers.php');
  * @package block_exaport
  * @copyright 2026 gtn gmbh
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 final class externallib_test extends \advanced_testcase {
 
@@ -113,12 +115,53 @@ final class externallib_test extends \advanced_testcase {
             $this->assertStringContainsString('/webservice/pluginfile.php/', $file['url']);
             $this->assertStringContainsString('/item_content_file/webservice/' . $owner->id . '/itemid/' . $item->id .
                 '/blockid/' . $blockid . '/', $file['url']);
-            $this->assertStringEndsWith('?token=token123', $file['url']);
+            parse_str(parse_url($file['url'], PHP_URL_QUERY), $query);
+            $this->assertSame('1', $query['forcedownload']);
+            $this->assertSame('token123', $query['token'] ?? null);
             $this->assertStringNotContainsString('portfoliofile.php', $file['url']);
             $this->assertStringNotContainsString('/item_file/', $file['url']);
         }
         $this->assertNotContains('legacy.txt', array_column($response['files'], 'filename'));
         $this->assertNotSame($item->url, $response['url']);
+    }
+
+    public function test_listing_returns_download_url_with_independent_token_parameter(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $this->setUser($owner);
+        $itemid = (int)$DB->insert_record('block_exaportitem', (object)[
+            'userid' => $owner->id, 'type' => 'file', 'categoryid' => 0, 'name' => 'Download',
+            'url' => '', 'intro' => '', 'attachment' => '', 'timecreated' => time(),
+            'timemodified' => time(), 'courseid' => 0,
+        ]);
+        $DB->insert_record('block_exaportitemcate', ['itemid' => $itemid, 'cateid' => 0]);
+        $block = block_exaport_create_file_content_block($itemid, 'Attachment');
+        $this->create_file($owner->id, 'item_content_file', $block->id, '/nested/', 'report & notes.txt');
+        $storedfile = block_exaport_get_item_content_files($owner->id, $block->id)[0];
+
+        $savedpost = $_POST;
+        $_POST['wstoken'] = 'downloadtoken123';
+        try {
+            $response = \block_exaport\externallib\externallib::get_all_user_items();
+            $response = \core_external\external_api::clean_returnvalue(
+                \block_exaport\externallib\externallib::get_all_user_items_returns(), $response
+            );
+        } finally {
+            $_POST = $savedpost;
+        }
+
+        $this->assertCount(1, $response[0]['items']);
+        $item = $response[0]['items'][0];
+        $file = $item['files'][0];
+        $this->assertSame($file, $item['contentblocks'][0]['files'][0]);
+        parse_str(parse_url($file['url'], PHP_URL_QUERY), $query);
+        $this->assertSame('1', $query['forcedownload']);
+        $this->assertSame('downloadtoken123', $query['token'] ?? null);
+        $this->assertStringContainsString('/webservice/pluginfile.php/', $file['url']);
+        $this->assertStringEndsWith($storedfile->get_filepath() . $storedfile->get_filename(),
+            rawurldecode(parse_url($file['url'], PHP_URL_PATH)));
     }
 
     public function test_image_projection_exposes_stored_file_identity_and_metadata(): void {

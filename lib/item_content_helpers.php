@@ -230,7 +230,7 @@ function block_exaport_get_item_content_webservice_data(stdClass $item, ?string 
                 (int)$item->id, (int)$contentblock['blockid'], $file, $access, $script
             );
             if ($token !== null && $token !== '') {
-                $fileurl .= '?token=' . rawurlencode($token);
+                $fileurl = (new moodle_url($fileurl, ['token' => $token]))->out(false);
             }
             $fileentry = [
                 'id' => (int)$file->get_id(),

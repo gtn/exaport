@@ -826,13 +826,12 @@ function block_exaport_resume_competences_form($resume, $id, $typeblock) {
     if ($save) {
         $interaction = block_exaport_check_competence_interaction();
         if ($interaction) {
+            $descriptorids = array_filter(optional_param_array('desc', [], PARAM_INT));
+            \block_exaport\exacomp_helper::require_descriptor_access($descriptorids);
             $DB->delete_records('block_exaportcompresume_mm', array("resumeid" => $resume->id, "comptype" => $type));
-            $compids = optional_param_array('desc', array(), PARAM_INT);
-            if (count($compids) > 0) {
-                foreach ($compids as $compid) {
-                    $DB->insert_record('block_exaportcompresume_mm',
-                        array("resumeid" => $resume->id, "compid" => $compid, "comptype" => $type));
-                }
+            foreach ($descriptorids as $descriptorid) {
+                $DB->insert_record('block_exaportcompresume_mm',
+                    array("resumeid" => $resume->id, "compid" => $descriptorid, "comptype" => $type));
             }
         }
         return true;

@@ -1038,6 +1038,8 @@ $string['privacy:metadata:block_exaportitemblock:timemodified'] = 'Der letzte Ä
 $string['competencessection'] = 'Kompetenzen';
 $string['addcompetences'] = 'Kompetenzen hinzufügen';
 $string['collapsecomps'] = 'Alle einklappen';
+$string['previouslyassignedcompetences'] = 'Bereits zugeordnete Kompetenzen';
+$string['unavailablecompetence'] = 'Nicht verfügbare Kompetenz';
 
 // === Sharing form ===
 $string['sharing_enable'] = 'Teilen aktivieren';

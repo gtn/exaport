@@ -10,6 +10,8 @@ namespace block_exaport\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/../../lib/item_competence_helpers.php');
+
 use renderer_base;
 use renderable;
 use templatable;
@@ -43,9 +45,9 @@ class item_competences implements renderable, templatable {
     public function export_for_template(renderer_base $output): array {
         global $USER;
 
-        $selectedids = array_map('intval', $this->item->compids_array ?? []);
+        $selectedids = block_exaport_normalize_competenceids($this->item->compids_array ?? []);
         $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
-        $nodes = $this->export_nodes($tree, $selectedids);
+        $nodes = $this->export_nodes_for_selection($tree, $selectedids);
         $summary = $this->export_summary_from_nodes($nodes);
 
         return [
@@ -75,10 +77,55 @@ class item_competences implements renderable, templatable {
         if ($tree === null) {
             $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
         }
-        $selectedids = array_map('intval', $this->item->compids_array ?? []);
-        $nodes = $this->export_nodes($tree, $selectedids);
+        $selectedids = block_exaport_normalize_competenceids($this->item->compids_array ?? []);
+        $nodes = $this->export_nodes_for_selection($tree, $selectedids);
 
         return $this->export_summary_from_nodes($nodes);
+    }
+
+    /** Include persisted assignments outside the current tree as removable, selected nodes. */
+    private function export_nodes_for_selection(array $tree, array $selectedids): array {
+        global $DB;
+
+        $nodes = $this->export_nodes($tree, $selectedids);
+        $missingids = array_diff($selectedids, block_exaport_competence_tree_descriptorids($tree));
+        if (!$missingids || empty($this->item->id)) {
+            return $nodes;
+        }
+
+        // Only persisted assignments on this item may expose descriptors outside the current tree.
+        $assignedids = $DB->get_fieldset_select(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, 'compid',
+            'activityid = ? AND eportfolioitem = 1 AND comptype = ?',
+            [(int)$this->item->id, BLOCK_EXACOMP_TYPE_DESCRIPTOR]);
+        $missingids = array_intersect($missingids, $assignedids);
+        if (!$missingids) {
+            return $nodes;
+        }
+
+        $descriptors = $DB->get_records_list(BLOCK_EXACOMP_DB_DESCRIPTORS, 'id', $missingids, '', 'id,title');
+        $children = [];
+        foreach ($missingids as $id) {
+            $children[] = [
+                'id' => (int)$id,
+                'title' => $descriptors[$id]->title ?? get_string('unavailablecompetence', 'block_exaport'),
+                'isdescriptor' => true,
+                'isgroup' => false,
+                'checked' => true,
+                'children' => [],
+                'haschildren' => false,
+            ];
+        }
+        $nodes[] = [
+            'id' => 0,
+            'title' => get_string('previouslyassignedcompetences', 'block_exaport'),
+            'isdescriptor' => false,
+            'isgroup' => true,
+            'checked' => false,
+            'children' => $children,
+            'haschildren' => true,
+        ];
+
+        return $nodes;
     }
 
     /** Return summary template data from an already prepared node tree. */

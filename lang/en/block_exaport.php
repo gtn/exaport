@@ -1077,6 +1077,8 @@ $string['restoremissingusermapping'] = 'Cannot restore the Exaport item because 
 $string['competencessection'] = 'Competences';
 $string['addcompetences'] = 'Add competences';
 $string['collapsecomps'] = 'Collapse all';
+$string['previouslyassignedcompetences'] = 'Previously assigned competences';
+$string['unavailablecompetence'] = 'Unavailable competence';
 
 // === Sharing form ===
 $string['sharing_enable'] = 'Enable sharing';

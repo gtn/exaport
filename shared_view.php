@@ -431,7 +431,15 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
                     if ($compbadge) {
                         $general_content .= '<div class="view-item-competences">' . $compbadge . '</div>';
                     }
-                    $general_content .= '<div class="view-item-link"><a href="' . s($href) . '">' . block_exaport_get_string('show') . '</a></div>';
+                    $itemurl = new moodle_url('/blocks/exaport/shared_item.php', [
+                        'access' => 'view/' . $access,
+                        'itemid' => (int)$item->id,
+                    ]);
+
+                    $general_content .= html_writer::div(
+                        html_writer::link($itemurl, block_exaport_get_string('show')),
+                        'view-item-link'
+                    );
                     $general_content .= '</div>';
                     break;
                 case 'personal_information':

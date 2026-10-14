@@ -51,6 +51,10 @@ class item_competences extends dynamic_form {
             $ids = block_exaport_parse_competenceids($data['competenceids'] ?? '');
             $availableids = block_exaport_competence_tree_descriptorids(
                 \block_exacomp\api::get_comp_tree_for_exaport($USER->id));
+            $availableids = array_merge(
+                $availableids,
+                $this->get_selected_ids((int)$data['itemid'])
+            );
             block_exaport_validate_competenceids($ids, $availableids);
         } catch (\invalid_parameter_exception $exception) {
             $errors['competenceids'] = get_string('invaliddata', 'error');
@@ -103,7 +107,15 @@ class item_competences extends dynamic_form {
         $ids = block_exaport_parse_competenceids($data->competenceids ?? '');
         $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
         $availableids = block_exaport_competence_tree_descriptorids($tree);
+        $availableids = array_merge(
+            $availableids,
+            $this->get_selected_ids((int)$item->id)
+        );
         $ids = block_exaport_validate_competenceids($ids, $availableids);
+        \block_exaport\exacomp_helper::require_can_access_descriptors(
+            $ids,
+            (int)$item->id
+        );
         block_exaport_sync_item_competences($item, $ids);
         $item->compids_array = $this->get_selected_ids((int)$item->id);
 

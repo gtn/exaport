@@ -14,7 +14,6 @@
 defined('BLOCK_EXAPORT_INTERNAL_ITEM_BLOCKS') || die();
 
 require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
-use block_exaport\item_category_helper;
 
 $textfieldoptions = \block_exaport\item_block::get_editor_options((object)['userid' => $USER->id]);
 $structuredreturnurl = $returnurl;
@@ -31,9 +30,82 @@ $blockaction = optional_param('blockaction', '', PARAM_ALPHA);
 $blocktype = optional_param('blocktype', '', PARAM_ALPHA);
 $blockid = optional_param('blockid', 0, PARAM_INT);
 $deleteblock = optional_param('deleteblock', 0, PARAM_INT);
+$ajax = optional_param('ajax', 0, PARAM_BOOL);
+$ajaxaction = optional_param('ajaxaction', '', PARAM_ALPHA);
 
 if ($existing && !$allowedit && ($deleteblock || in_array($blockaction, ['add', 'edit'], true))) {
     print_error('nopermissions', 'error', '', get_string('edit'));
+}
+
+if ($ajax && $existing) {
+    require_sesskey();
+    $effectiveblocktype = $blocktype;
+    try {
+        if (!$allowedit) {
+            throw new moodle_exception('nopermissions', 'error', '', get_string('edit'));
+        }
+
+        if ($ajaxaction === 'saveblock') {
+            $blockaction = optional_param('blockaction', '', PARAM_ALPHA);
+            $blocktype = optional_param('blocktype', '', PARAM_ALPHA);
+            $blockid = optional_param('blockid', 0, PARAM_INT);
+            $submitteddata = block_exaport_get_submitted_item_block_data($blocktype);
+
+            if ($blockaction === 'edit') {
+                $block = \block_exaport\item_block::get_block($blockid, $existing->id);
+                if (!$block) {
+                    throw new moodle_exception('invalidblockid', 'block_exaport');
+                }
+                $blocktype = $block->type;
+                $effectiveblocktype = $blocktype;
+                \block_exaport\item_block::update_block($existing, $block, $submitteddata);
+                $savedblockid = $block->id;
+            } else if ($blockaction === 'add') {
+                \block_exaport\item_block::validate_type($blocktype);
+                $effectiveblocktype = $blocktype;
+                $savedblockid = \block_exaport\item_block::create_block($existing, $blocktype, $submitteddata);
+            } else {
+                throw new moodle_exception('invalidblockid', 'block_exaport');
+            }
+
+            block_exaport_send_json([
+                'success' => true,
+                'blockid' => $savedblockid,
+                'listhtml' => block_exaport_render_item_block_editor_rows($existing, $courseid, $categoryid, $cattype),
+                'hasblocks' => true,
+            ]);
+        }
+
+        if ($ajaxaction === 'deleteblock') {
+            $deleteblockid = optional_param('blockid', 0, PARAM_INT);
+            $block = \block_exaport\item_block::get_block($deleteblockid, $existing->id);
+            if (!$block) {
+                throw new moodle_exception('invalidblockid', 'block_exaport');
+            }
+            \block_exaport\item_block::delete_block($existing, $block);
+            block_exaport_send_json([
+                'success' => true,
+                'listhtml' => block_exaport_render_item_block_editor_rows($existing, $courseid, $categoryid, $cattype),
+                'hasblocks' => !empty(\block_exaport\item_block::get_blocks((int)$existing->id)),
+            ]);
+        }
+
+        if ($ajaxaction === 'saveblockorder') {
+            $submittedorder = json_decode((string)optional_param('blockorder', '', PARAM_RAW_TRIMMED), true);
+            \block_exaport\item_block::save_order($existing->id, is_array($submittedorder) ? $submittedorder : []);
+            block_exaport_send_json(['success' => true]);
+        }
+
+        throw new moodle_exception('invalidblockid', 'block_exaport');
+    } catch (\Throwable $exception) {
+        $message = $exception instanceof moodle_exception ? $exception->getMessage() : get_string('error');
+        $errorcode = $exception instanceof moodle_exception ? $exception->errorcode : '';
+        block_exaport_send_json([
+            'success' => false,
+            'message' => $message,
+            'fielderrors' => block_exaport_get_item_block_validation_errors($errorcode, $effectiveblocktype),
+        ]);
+    }
 }
 
 if ($deleteblock && $existing && $allowedit) {
@@ -61,43 +133,14 @@ $edititemurl = null;
 if ($existing) {
     $edititemurl = new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id]);
 }
+$ajaxurl = $edititemurl ? new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'ajax' => 1]) : null;
 
 $blockform = null;
 if ($existing && in_array($blockaction, ['add', 'edit'], true)) {
-    if ($blockaction === 'edit') {
-        $block = \block_exaport\item_block::get_block($blockid, $existing->id);
-        if (!$block) {
-            print_error('invalidblockid', 'block_exaport');
-        }
-        $blocktype = $block->type;
-    } else {
-        \block_exaport\item_block::validate_type($blocktype);
-        $block = (object)[
-            'id' => 0,
-            'itemid' => $existing->id,
-            'type' => $blocktype,
-            'title' => '',
-            'content' => '',
-            'contentformat' => FORMAT_HTML,
-            'url' => '',
-        ];
-        if ($blocktype === \block_exaport\item_block::TYPE_FILE) {
-            $draftitemid = file_get_submitted_draft_itemid('file');
-            $block->file = $draftitemid;
-        }
-    }
-
-    $blockform = new block_exaport_item_block_edit_form($_SERVER['REQUEST_URI'], [
-        'blocktype' => $blocktype,
-        'editoroptions' => \block_exaport\item_block::get_editor_options($existing),
-        'fileoptions' => \block_exaport\item_block::get_filemanager_options(),
-    ]);
-
-    if ($blockaction === 'edit') {
-        $blockform->set_data(\block_exaport\item_block::prepare_block_for_edit($block, $existing));
-    } else {
-        $blockform->set_data($block);
-    }
+    $blockformstate = block_exaport_build_item_block_edit_form($existing, $blockaction, $blockid, $blocktype);
+    $blockform = $blockformstate['form'];
+    $block = $blockformstate['block'];
+    $blocktype = $blockformstate['blocktype'];
 }
 
 if ($blockform && $blockform->is_cancelled()) {
@@ -171,21 +214,26 @@ $exacompactive = block_exaport_check_competence_interaction() && $descriptorsele
 $PAGE->requires->js('/blocks/exaport/javascript/item.js', true);
 $PAGE->requires->js_call_amd('block_exaport/item_blocks', 'init', [[
     'hasitem' => (bool)$existing,
-    'addurls' => $edititemurl ? [
-        'text' => (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
-            'blocktype' => 'text']))->out(false),
-        'file' => (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
-            'blocktype' => 'file']))->out(false),
-        'link' => (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
-            'blocktype' => 'link']))->out(false),
-    ] : [],
+    'itemid' => $existing ? (int)$existing->id : 0,
+    'courseid' => (int)$courseid,
+    'categoryid' => (int)$categoryid,
+    'cattype' => (string)$cattype,
+    'ajaxurl' => $ajaxurl ? $ajaxurl->out(false) : '',
+    'fragmentcontextid' => context_system::instance()->id,
+    'editurl' => $edititemurl ? $edititemurl->out(false) : '',
     'strings' => [
         'choosertitle' => get_string('itemblock_addcontent', 'block_exaport'),
         'text' => get_string('text', 'block_exaport'),
         'file' => get_string('file', 'block_exaport'),
         'link' => get_string('link', 'block_exaport'),
+        'add' => get_string('add'),
+        'edit' => get_string('edit'),
+        'delete' => get_string('delete'),
         'cancel' => get_string('cancel'),
         'savefirst' => get_string('itemblock_savefirst', 'block_exaport'),
+        'ajaxerror' => get_string('itemblock_ajaxerror', 'block_exaport'),
+        'deleteconfirm' => get_string('itemblock_deleteconfirm', 'block_exaport'),
+        'empty' => get_string('itemblock_empty', 'block_exaport'),
     ],
 ]]);
 
@@ -263,24 +311,44 @@ echo html_writer::start_div('exaport-item-blocks-editor mt-4');
 echo html_writer::tag('h3', get_string('itemblock_contentblocks', 'block_exaport'));
 echo html_writer::tag('button',
     block_exaport_fontawesome_icon('plus', 'solid', 1) . ' ' . get_string('itemblock_addcontent', 'block_exaport'),
-    ['type' => 'button', 'class' => 'btn btn-secondary exaport-add-content', 'data-action' => 'choose-content']
+    ['type' => 'button', 'class' => 'btn btn-secondary exaport-add-content', 'data-action' => 'choose-content',
+        'aria-haspopup' => 'dialog']
 );
 
 if (!$existing) {
     echo html_writer::tag('p', get_string('itemblock_savefirst', 'block_exaport'), ['class' => 'mt-3 text-muted']);
 } else {
     $blocks = \block_exaport\item_block::get_display_blocks($existing, 'portfolio/id/' . $existing->userid);
+    echo html_writer::start_tag('ul', ['class' => 'list-group mt-3 exaport-item-block-list' . ($blocks ? '' : ' d-none'),
+        'data-itemid' => $existing->id, 'aria-hidden' => $blocks ? 'false' : 'true']);
     if ($blocks) {
-        echo html_writer::start_tag('ul', ['class' => 'list-group mt-3 exaport-item-block-list', 'data-itemid' => $existing->id]);
         foreach ($blocks as $displayblock) {
             echo block_exaport_render_item_block_editor_row($displayblock, $existing, $courseid, $categoryid, $cattype);
         }
-        echo html_writer::end_tag('ul');
-        echo html_writer::tag('p', get_string('itemblock_dragdrophelp', 'block_exaport'),
-            ['class' => 'text-muted mt-2 mb-0', 'id' => 'exaport-item-block-help']);
-    } else {
-        echo html_writer::tag('p', get_string('itemblock_empty', 'block_exaport'), ['class' => 'mt-3 text-muted']);
     }
+    echo html_writer::end_tag('ul');
+    echo html_writer::tag('p', get_string('itemblock_empty', 'block_exaport'), [
+        'class' => 'mt-3 text-muted exaport-item-block-empty' . ($blocks ? ' d-none' : ''),
+        'aria-hidden' => $blocks ? 'true' : 'false',
+    ]);
+    echo html_writer::tag('p', get_string('itemblock_dragdrophelp', 'block_exaport'),
+        ['class' => 'text-muted mt-2 mb-0 exaport-item-block-help' . ($blocks ? '' : ' d-none'),
+            'id' => 'exaport-item-block-help', 'aria-hidden' => $blocks ? 'false' : 'true']);
+    echo '<noscript>';
+    echo html_writer::tag('div', html_writer::link(
+        (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
+            'blocktype' => 'text']))->out(false),
+        get_string('itemblock_addcontent', 'block_exaport') . ': ' . get_string('text', 'block_exaport')
+    ) . ' | ' . html_writer::link(
+        (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
+            'blocktype' => 'link']))->out(false),
+        get_string('itemblock_addcontent', 'block_exaport') . ': ' . get_string('link', 'block_exaport')
+    ) . ' | ' . html_writer::link(
+        (new moodle_url('/blocks/exaport/item.php', $baseeditparams + ['id' => $existing->id, 'blockaction' => 'add',
+            'blocktype' => 'file']))->out(false),
+        get_string('itemblock_addcontent', 'block_exaport') . ': ' . get_string('file', 'block_exaport')
+    ), '', ['class' => 'mt-2']);
+    echo '</noscript>';
 }
 echo html_writer::end_div();
 
@@ -369,10 +437,15 @@ function block_exaport_render_item_block_editor_row($block, $item, $courseid, $c
         'class' => 'btn btn-sm btn-outline-secondary exaport-item-block-move',
         'data-direction' => 'down',
     ]);
-    $content .= html_writer::link($editurl, get_string('edit'), ['class' => 'btn btn-sm btn-outline-primary']);
+    $content .= html_writer::link($editurl, get_string('edit'), [
+        'class' => 'btn btn-sm btn-outline-primary exaport-item-block-edit',
+        'data-blockid' => $block->id,
+        'data-blocktype' => $block->type,
+    ]);
     $content .= html_writer::link($deleteurl, get_string('delete'), [
-        'class' => 'btn btn-sm btn-outline-danger',
-        'onclick' => 'return confirm(' . json_encode(get_string('itemblock_deleteconfirm', 'block_exaport')) . ');',
+        'class' => 'btn btn-sm btn-outline-danger exaport-item-block-delete',
+        'data-blockid' => $block->id,
+        'data-blocktype' => $block->type,
     ]);
     $content .= html_writer::end_div();
     $content .= html_writer::end_div();
@@ -415,7 +488,7 @@ function block_exaport_do_add_structured($post, $courseid) {
     $post->beispiel_angabe = '';
 
     $itemid = (int)$DB->insert_record('block_exaportitem', $post);
-    item_category_helper::sync_item_categories($itemid, $post->categoryids ?? []);
+    \block_exaport\item_category_helper::sync_item_categories($itemid, $post->categoryids ?? []);
     block_exaport_save_item_shares($itemid);
 
     if (!empty($post->iconfile)) {
@@ -466,7 +539,7 @@ function block_exaport_do_edit_structured($existing, $post, $courseid) {
         'timemodified' => time(),
     ];
     $DB->update_record('block_exaportitem', $record);
-    item_category_helper::sync_item_categories($existing->id, $post->categoryids ?? []);
+    \block_exaport\item_category_helper::sync_item_categories($existing->id, $post->categoryids ?? []);
     block_exaport_save_item_shares($existing->id);
 
     if (isset($post->iconfile)) {
@@ -508,4 +581,51 @@ function block_exaport_do_edit_structured($existing, $post, $courseid) {
 
     block_exaport_add_to_log(SITEID, 'bookmark', 'update', 'item.php?courseid=' . $courseid . '&id=' . $existing->id . '&action=edit',
         $post->name);
+}
+
+/**
+ * Collect submitted block data for AJAX save requests.
+ *
+ * Text/link blocks return title, url, and a content_editor array with text, format, and draft itemid.
+ * File blocks return title, url, and the file draft itemid.
+ *
+ * @param string $blocktype
+ * @return stdClass
+ */
+function block_exaport_get_submitted_item_block_data(string $blocktype): stdClass {
+    $data = (object)[
+        'title' => optional_param('title', '', PARAM_TEXT),
+        'url' => optional_param('url', '', PARAM_RAW_TRIMMED),
+    ];
+
+    if (in_array($blocktype, [\block_exaport\item_block::TYPE_TEXT, \block_exaport\item_block::TYPE_LINK], true)) {
+        $contenteditor = optional_param_array('content_editor', [], PARAM_RAW);
+        $data->content_editor = [
+            'text' => (string)($contenteditor['text'] ?? ''),
+            'format' => clean_param($contenteditor['format'] ?? FORMAT_HTML, PARAM_INT),
+            'itemid' => clean_param($contenteditor['itemid'] ?? 0, PARAM_INT),
+        ];
+    }
+
+    if ($blocktype === \block_exaport\item_block::TYPE_FILE) {
+        $data->file = optional_param('file', 0, PARAM_INT);
+    }
+
+    return $data;
+}
+
+function block_exaport_send_json(array $payload): void {
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/json');
+    die(json_encode($payload));
+}
+
+function block_exaport_render_item_block_editor_rows(stdClass $item, int $courseid, int $categoryid, string $cattype): string {
+    $output = '';
+    foreach (\block_exaport\item_block::get_display_blocks($item, 'portfolio/id/' . $item->userid) as $displayblock) {
+        $output .= block_exaport_render_item_block_editor_row($displayblock, $item, $courseid, $categoryid, $cattype);
+    }
+    return $output;
 }

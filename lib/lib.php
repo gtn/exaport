@@ -98,6 +98,99 @@ function block_exaport_get_item_files_array($item) {
     return block_exaport_get_files($item, 'item_file'); // Multiple files
 }
 
+/**
+ * Returns the preferred thumbnail source file for an item.
+ *
+ * Custom uploaded item icons keep precedence. For file items without a custom
+ * icon, the first valid stored image file is used.
+ *
+ * @param \stdClass $item
+ * @return \stored_file|false
+ */
+function block_exaport_get_item_thumbnail_file($item) {
+    $iconfile = block_exaport_get_single_file($item, 'item_iconfile');
+    if ($iconfile && $iconfile->is_valid_image()) {
+        return $iconfile;
+    }
+
+    if (\block_exaport\item_block::item_uses_blocks((int)$item->id)) {
+        return \block_exaport\item_block::get_thumbnail_file($item);
+    }
+
+    if (($item->type ?? '') === 'file') {
+        foreach (block_exaport_get_item_files_array($item) as $file) {
+            if ($file && $file->is_valid_image()) {
+                return $file;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Builds an access-controlled pluginfile URL for an item file or custom icon.
+ *
+ * @param \stored_file $file
+ * @param string $access
+ * @return string
+ */
+function block_exaport_get_item_thumbnail_url(\stored_file $file, string $access): string {
+    $access = trim($access, '/');
+    $idlabel = 'itemid';
+    if ($file->get_filearea() === 'itemblock_file') {
+        $idlabel = 'blockid';
+    }
+    $filearea = $file->get_filearea() . '/' . $access . '/' . $idlabel;
+
+    return moodle_url::make_pluginfile_url(
+        $file->get_contextid(),
+        $file->get_component(),
+        $filearea,
+        $file->get_itemid(),
+        $file->get_filepath(),
+        $file->get_filename(),
+        false,
+        false
+    )->out(false);
+}
+
+/**
+ * Returns thumbnail template context for an item card.
+ *
+ * @param \stdClass $item
+ * @param string $access
+ * @return array
+ */
+function block_exaport_get_item_thumbnail_context($item, string $access = ''): array {
+    if (empty($item->userid)) {
+        return [
+            'hasthumbnail' => false,
+            'thumbnailurl' => '',
+            'thumbnailalt' => '',
+        ];
+    }
+
+    if ($access === '') {
+        $access = 'portfolio/id/' . $item->userid;
+    }
+
+    $file = block_exaport_get_item_thumbnail_file($item);
+    if (!$file) {
+        return [
+            'hasthumbnail' => false,
+            'thumbnailurl' => '',
+            'thumbnailalt' => '',
+        ];
+    }
+
+    return [
+        'hasthumbnail' => true,
+        'thumbnailurl' => block_exaport_get_item_thumbnail_url($file, $access),
+        'thumbnailalt' => format_string($item->name ?? ''),
+    ];
+}
+
 function block_exaport_get_single_file($item, $type) {
     $file = block_exaport_get_files($item, $type);
 
@@ -177,6 +270,10 @@ function block_exaport_file_remove($item) {
     $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_file', $item->id);
     // Item content (intro) inside the html editor.
     $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content', $item->id);
+    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content_project_description', $item->id);
+    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content_project_process', $item->id);
+    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_content_project_result', $item->id);
+    $fs->delete_area_files(context_user::instance($item->userid)->id, 'block_exaport', 'item_iconfile', $item->id);
 }
 
 /*** GENERAL FUNCTIONS **********************************************************************/
@@ -2856,6 +2953,10 @@ function block_exaport_fontawesome_icon($icon, $iconStyle = 'regular', $iconSize
 function block_exaport_item_icon_type_options($itemtype) {
     // Icon with the type of the item
     switch ($itemtype) {
+        case 'mixed':
+            $iconTypes = 'rectangle-list';
+            $st = 'regular';
+            break;
         case 'link':
             $iconTypes = 'link';
             $st = 'solid';

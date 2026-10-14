@@ -184,6 +184,14 @@ function get_category_items($categoryid, $viewid = null, $type = null) {
     return $DB->get_records_sql($itemquery, $conditions);
 }
 
+function block_exaport_export_item_text($item): string {
+    return spch_text(\block_exaport\item_block::get_export_text($item, 'portfolio/id/' . $item->userid));
+}
+
+function block_exaport_export_item_files($item): array {
+    return \block_exaport\item_block::get_export_files($item);
+}
+
 function get_category_files($categoryid, $viewid = null) {
     global $USER, $CFG, $DB;
 
@@ -385,6 +393,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                 $itemArray[] = get_category_items($id, $viewid, 'link');
                 $itemArray[] = get_category_items($id, $viewid, 'file');
                 $itemArray[] = get_category_items($id, $viewid, 'note');
+                $itemArray[] = get_category_items($id, $viewid, 'mixed');
                 $filecontent = '';
                 $filecontent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
                 $filecontent .= "<rss version=\"2.0\"\n";
@@ -418,9 +427,9 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                         if (add_comments('block_exaportitemcomm', $blabla->id) != '') {
                             $filecontent .= "<content:encoded>" . "<![CDATA[<!-- wp:peregraph --> <p>" . add_comments("block_exaportitemcomm", $blabla->id) . "</p> <!-- wp:peregraph -->]]> " . "</content:encoded>\n";
                         }
-                        if ($blabla->intro != '') {
-
-                            $filecontent .= "<description>" . "<![CDATA[" . spch_text($blabla->intro) . "]]>" . "</description>\n";
+                        $description = block_exaport_export_item_text($blabla);
+                        if ($description != '') {
+                            $filecontent .= "<description>" . "<![CDATA[" . $description . "]]>" . "</description>\n";
                         }
                         $filecontent .= "</item>\n";
                     }
@@ -438,6 +447,55 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
                 unlink($zipfile);
                 exit;
             }
+            $identifier++;
+            $ridentifier++;
+        }
+    }
+    $mixeditems = get_category_items($id, $viewid, 'mixed');
+
+    if ($mixeditems) {
+        $hasitems = true;
+        foreach ($mixeditems as $mixeditem) {
+            unset($filecontent);
+            $filecontent = create_html_header(spch($mixeditem->name), $depth + 1);
+            $filecontent .= '<body>' . "\n";
+            $filecontent .= '<div id="exa_ex">' . "\n";
+            $filecontent .= '  <h1 id="header">' . spch($mixeditem->name) . '</h1>' . "\n";
+
+            $filelinks = '';
+            $j = 0;
+            foreach (block_exaport_export_item_files($mixeditem) as $fsfile) {
+                $i = 0;
+                $contentfilename = $fsfile->get_filename();
+                while (in_array($exportdir . $contentfilename, $existingfilesarray)) {
+                    $i++;
+                    $contentfilename = $i . '-' . $fsfile->get_filename();
+                }
+                $existingfilesarray[] = $exportdir . $contentfilename;
+                if (!$exportwpfile) {
+                    $zip->addFromString($contentfilename, $fsfile->get_content());
+                }
+                $filelinks .= '  <div id="url-' . $j . '"><a href="../' . spch($contentfilename) . '">' .
+                    spch($contentfilename) . '</a></div>' . "\n";
+                $j++;
+            }
+
+            $filecontent .= $filelinks;
+            $filecontent .= '  <div id="description"><!--###BOOKMARK_NOTE_DESC###-->' .
+                block_exaport_export_item_text($mixeditem) . '<!--###BOOKMARK_NOTE_DESC###--></div>' . "\n";
+            $filecontent .= add_comments('block_exaportitemcomm', $mixeditem->id);
+            $filecontent .= '</div>' . "\n";
+            $filecontent .= '</body>' . "\n";
+            $filecontent .= '</html>' . "\n";
+
+            list($resfilename, $filepath) = get_htmlfile_name_path($exportpath, $exportdir, $mixeditem->name);
+            if (!$exportwpfile) {
+                $zip->addFromString($filepath, $filecontent);
+                create_ressource($resources, 'RES-' . $ridentifier, $filepath);
+                create_item($xmlelement, 'ITEM-' . $identifier, $mixeditem->name, 'RES-' . $ridentifier, $mixeditem->id);
+                $indexfileitems .= '<li><a href="' . $resfilename . '">' . $mixeditem->name . '</a></li>';
+            }
+
             $identifier++;
             $ridentifier++;
         }
@@ -479,7 +537,7 @@ function get_category_content(&$xmlelement, &$resources, $id, $name, $exportpath
             $filecontent .= '<body>' . "\n";
             $filecontent .= '<div id="exa_ex">' . "\n";
             $filecontent .= '  <h1 id="header">' . spch($note->name) . '</h1>' . "\n";
-            $filecontent .= '  <div id="description"><!--###BOOKMARK_NOTE_DESC###-->' . spch_text($note->intro) .
+            $filecontent .= '  <div id="description"><!--###BOOKMARK_NOTE_DESC###-->' . block_exaport_export_item_text($note) .
                 '<!--###BOOKMARK_NOTE_DESC###--></div>' . "\n";
             $filecontent .= add_comments('block_exaportitemcomm', $note->id);
             if (isset($note->competences)) {

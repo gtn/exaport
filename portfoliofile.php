@@ -46,6 +46,7 @@ header("Access-Control-Allow-Origin: *");
 $relativepath = get_file_argument('portfoliofile.php');
 $access = optional_param('access', 0, PARAM_TEXT);
 $itemid = optional_param('itemid', 0, PARAM_INT);
+$blockid = optional_param('blockid', 0, PARAM_INT);
 $inst = optional_param('inst', 0, PARAM_ALPHANUM);
 $userhash = optional_param('hv', 0, PARAM_ALPHANUM);
 // Old elove token - moodle sometimes uses wstoken, sometimes token.
@@ -119,6 +120,19 @@ if ($itemid) {
         }
         $file = block_exaport_get_item_comment_file($comment->id);
 
+    } else if ($blockid) {
+        $block = \block_exaport\item_block::get_block($blockid, $item->id);
+        if (!$block || $block->type !== \block_exaport\item_block::TYPE_FILE) {
+            not_found();
+        }
+        $files = \block_exaport\item_block::get_block_files($block, $item->userid);
+        if ($inst && isset($files[$inst])) {
+            $file = $files[$inst];
+        } else if (count($files) === 1) {
+            $file = reset($files);
+        } else {
+            not_found();
+        }
     } else {
         $files = block_exaport_get_item_files_array($item);
 

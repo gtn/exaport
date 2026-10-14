@@ -38,22 +38,21 @@ class item_competences extends dynamic_form {
         $item = (object)['id' => $itemid, 'compids_array' => $this->get_selected_ids($itemid)];
         $renderable = new \block_exaport\output\item_competences($item, true);
         $data = $renderable->export_for_template($OUTPUT);
-        $mform->addElement('html', $OUTPUT->render_from_template(
+        $mform->addElement('static', 'competencepicker', '', $OUTPUT->render_from_template(
             'block_exaport/item_competence_picker', $data['picker']));
     }
 
-    /** Validate the submitted sequence against the current user's Exacomp tree. */
+    /** Validate the sequence against the current tree and this item's existing assignments. */
     public function validation($data, $files): array {
-        global $USER;
-
         $errors = parent::validation($data, $files);
         try {
+            $item = block_exaport_get_editable_competence_item(
+                (int)$data['itemid'], (int)$data['courseid']);
             $ids = block_exaport_parse_competenceids($data['competenceids'] ?? '');
-            $availableids = block_exaport_competence_tree_descriptorids(
-                \block_exacomp\api::get_comp_tree_for_exaport($USER->id));
-            block_exaport_validate_competenceids($ids, $availableids);
-        } catch (\invalid_parameter_exception $exception) {
+            block_exaport_validate_item_competenceids($item, $ids);
+        } catch (\invalid_parameter_exception | \block_exacomp_permission_exception $exception) {
             $errors['competenceids'] = get_string('invaliddata', 'error');
+            $errors['competencepicker'] = $errors['competenceids'];
         }
         return $errors;
     }
@@ -102,8 +101,7 @@ class item_competences extends dynamic_form {
         $item = block_exaport_get_editable_competence_item((int)$data->itemid, (int)$data->courseid);
         $ids = block_exaport_parse_competenceids($data->competenceids ?? '');
         $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
-        $availableids = block_exaport_competence_tree_descriptorids($tree);
-        $ids = block_exaport_validate_competenceids($ids, $availableids);
+        $ids = block_exaport_validate_item_competenceids($item, $ids, $tree);
         block_exaport_sync_item_competences($item, $ids);
         $item->compids_array = $this->get_selected_ids((int)$item->id);
 

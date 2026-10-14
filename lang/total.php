@@ -3795,6 +3795,14 @@ return [
         'Alle einklappen',
         'Collapse all',
     ],
+    'previouslyassignedcompetences' => [
+        'Bereits zugeordnete Kompetenzen',
+        'Previously assigned competences',
+    ],
+    'unavailablecompetence' => [
+        'Nicht verfügbare Kompetenz',
+        'Unavailable competence',
+    ],
 
     // === Sharing form ===
     'sharing_enable' => [

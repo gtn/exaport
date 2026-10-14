@@ -84,6 +84,130 @@ return [
         'Kompetenzen erlauben',
         'Allow competences',
     ],
+    'exaport:audititemcontent' => [
+        null,
+        'Audit Exaport item content',
+    ],
+    'audititemcontent' => [
+        null,
+        'Item-content migration audit',
+    ],
+    'audititemcontentaction' => [
+        null,
+        'Action',
+    ],
+    'audititemcontentaffecteditems' => [
+        null,
+        'Affected items',
+    ],
+    'audititemcontentcode' => [
+        null,
+        'Finding code',
+    ],
+    'audititemcontentcount' => [
+        null,
+        'Count',
+    ],
+    'audititemcontentcurrentaudit' => [
+        null,
+        'Current integrity audit',
+    ],
+    'audititemcontentdownloadjson' => [
+        null,
+        'Run audit and download JSON',
+    ],
+    'audititemcontentfilters' => [
+        null,
+        'Audit scope',
+    ],
+    'audititemcontentguidance' => [
+        null,
+        'Details and guidance',
+    ],
+    'audititemcontenthistoricalreport' => [
+        null,
+        'Historical migration report',
+    ],
+    'audititemcontentinformation' => [
+        null,
+        'Informational counts',
+    ],
+    'audititemcontentinvalidreport' => [
+        null,
+        'The stored migration report could not be decoded.',
+    ],
+    'audititemcontentitemid' => [
+        null,
+        'Item ID',
+    ],
+    'audititemcontentitemid_help' => [
+        null,
+        'Leave empty for a site-wide audit, or enter a positive item ID to restrict attributable checks.',
+    ],
+    'audititemcontentnofindings' => [
+        null,
+        'No warning or error findings were reported.',
+    ],
+    'audititemcontentnoreport' => [
+        null,
+        'No completed report is stored for migration 2026092900.',
+    ],
+    'audititemcontentperformancewarning' => [
+        null,
+        'A site-wide audit may take time on a large installation. The audit runs only when you submit this form.',
+    ],
+    'audititemcontentpositive' => [
+        null,
+        'Enter a positive item ID.',
+    ],
+    'audititemcontentreadonlynotice' => [
+        null,
+        'This audit is read-only. It never migrates, repairs, moves, creates, or deletes content.',
+    ],
+    'audititemcontentrelatedids' => [
+        null,
+        'Related record IDs',
+    ],
+    'audititemcontentreportmeta' => [
+        null,
+        'Migration {$a->version}, completed {$a->completed}.',
+    ],
+    'audititemcontentrun' => [
+        null,
+        'Run audit',
+    ],
+    'audititemcontentsamplelimit' => [
+        null,
+        'Sample limit',
+    ],
+    'audititemcontentsamplelimit_help' => [
+        null,
+        'Maximum diagnostic IDs shown for each finding, from 1 to 1000.',
+    ],
+    'audititemcontentsamplerange' => [
+        null,
+        'Enter a sample limit from 1 to 1000.',
+    ],
+    'audititemcontentsamples' => [
+        null,
+        'Bounded sample IDs',
+    ],
+    'audititemcontentseverity' => [
+        null,
+        'Severity',
+    ],
+    'audititemcontentsummary' => [
+        null,
+        'Status: {$a->status}. Error findings: {$a->errors}. Warning findings: {$a->warnings}.',
+    ],
+    'audititemcontentverbose' => [
+        null,
+        'Show informational and related record IDs',
+    ],
+    'audititemcontentverbose_help' => [
+        null,
+        'Shows additional bounded identifiers and informational counts. Sensitive values remain hidden.',
+    ],
     'exaport:viewartifactsfromstudents' => [
         'Portfolio Seiten der eigenen SuS sehen',
         'Can see portfolio pages of own students',
@@ -637,6 +761,10 @@ return [
     'disableditemwriteapi' => [
         'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.',
         'This legacy item write service is disabled. Use the structured content interface.',
+    ],
+    'restoremissingusermapping' => [
+        null,
+        'Cannot restore the Exaport item because its owner (source user ID {$a}) has no destination user mapping.',
     ],
 
     // === Notes.
@@ -3600,6 +3728,18 @@ return [
     'contentblockadded' => [
         'Inhalt wurde hinzugefügt.',
         'Content added.',
+    ],
+    'editcontentblock' => [
+        null,
+        'Edit content',
+    ],
+    'deletecontentblock' => [
+        null,
+        'Delete content',
+    ],
+    'deletecontentblockconfirm' => [
+        null,
+        'Delete this content block? Its files will also be permanently deleted.',
     ],
     'privacy:metadata:block_exaportitemblock' => [
         'Geordnete Inhalte eines Portfolioeintrags.',

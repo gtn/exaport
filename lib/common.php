@@ -18,151 +18,13 @@
 namespace block_exaport\common {
 
     use block_exaport\developer;
+    use block_exaport\moodle_exception;
 
     defined('MOODLE_INTERNAL') || die();
 
-    class url extends \moodle_url {
-        public static function create($url, array $params = null, $anchor = null) {
-            return new static($url, $params, $anchor);
-        }
-
-        /**
-         *
-         * @param array $overrideparams new attributes for object
-         * @return self
-         */
-        public function copy(array $overrideparams = null) {
-            $object = new static($this);
-            if ($overrideparams) {
-                $object->params($overrideparams);
-            }
-
-            return $object;
-        }
-
-        protected function merge_overrideparams(array $overrideparams = null) {
-            $params = parent::merge_overrideparams($overrideparams);
-
-            $overrideparams = (array)$overrideparams;
-            foreach ($overrideparams as $key => $value) {
-                if ($value === null) {
-                    unset($params[$key]);
-                }
-            }
-
-            return $params;
-        }
-
-        public function params(array $params = null) {
-            parent::params($params);
-
-            $params = (array)$params;
-            foreach ($params as $key => $value) {
-                if ($value === null) {
-                    unset($this->params[$key]);
-                }
-            }
-
-            return $this->params;
-        }
-
-        public static function request_uri() {
-            global $CFG;
-
-            return new static(preg_replace('!^' . preg_quote(parse_url($CFG->wwwroot)['path'], '!') . '!', '',
-                $_SERVER['REQUEST_URI']));
-        }
-    }
-
-    abstract class event extends \core\event\base {
-
-        protected static function preparedata(array &$data) {
-            if (!isset($data['contextid'])) {
-                if (!empty($data['courseid'])) {
-                    $data['contextid'] = \context_course::instance($data['courseid'])->id;
-                } else {
-                    $data['contextid'] = \context_system::instance()->id;
-                }
-            }
-        }
-
-        public static function log(array $data) {
-            static::preparedata($data);
-
-            return static::create($data)->trigger();
-        }
-    }
-
-    class moodle_exception extends \moodle_exception {
-        public function __construct($errorcode, $module = '', $link = '', $a = null, $debuginfo = null) {
-
-            // Try to get local error message (use namespace as $component).
-            if (empty($module)) {
-                if (get_string_manager()->string_exists($errorcode, _plugin_name())) {
-                    $module = _plugin_name();
-                }
-            }
-
-            return parent::__construct($errorcode, $module, $link, $a, $debuginfo);
-        }
-    }
-
-    class SimpleXMLElement extends \SimpleXMLElement {
-        /**
-         * Adds a child with $value inside CDATA
-         *
-         * @param string $name
-         * @param mixed $value
-         * @return SimpleXMLElement
-         */
-        public function add_child_with_cdata($name, $value = null) {
-            $newchild = $this->add_child($name);
-
-            if ($newchild !== null) {
-                $node = dom_import_simplexml($newchild);
-                $no = $node->ownerDocument;
-                $node->appendChild($no->createCDATASection($value));
-            }
-
-            return $newchild;
-        }
-
-        public static function create($rootelement) {
-            return new static('<?xml version="1.0" encoding="UTF-8"?><' . $rootelement . ' />');
-        }
-
-        public function add_child_with_cdata_if_value($name, $value = null) {
-            if ($value) {
-                return $this->add_child_with_cdata($name, $value);
-            } else {
-                return $this->add_child($name, $value);
-            }
-        }
-
-        public function add_child($name, $value = null, $namespace = null) {
-            if ($name instanceof SimpleXMLElement) {
-                $newnode = $name;
-                $node = dom_import_simplexml($this);
-                $newnode = $node->ownerDocument->importNode(dom_import_simplexml($newnode), true);
-                $node->appendChild($newnode);
-
-                // Return last child, this is the added child!
-                $children = $this->children();
-
-                return $children[$children->count() - 1];
-            } else {
-                return parent::add_child($name, $value, $namespace);
-            }
-        }
-
-        public function as_pretty_xml() {
-            $dom = dom_import_simplexml($this)->ownerDocument;
-            $dom->formatOutput = true;
-
-            return $dom->saveXML();
-        }
-    }
-
+    /**
+     * @deprecated use global $DB; for update_record() with a where condition and insert_or_update_record() use \block_exaport\db
+     */
     abstract class exadb extends \moodle_database {
         /**
          * @param string $table
@@ -181,6 +43,8 @@ namespace block_exaport\common {
      * Class exadb_forwarder
      * exadb_extender extends this call,
      * which allows exadb_extender to call parent::function(), which gets forwarded to $DB->function()
+     *
+     * @deprecated use global $DB;
      */
     class exadb_forwarder {
         public function __call($func, $args) {
@@ -190,6 +54,9 @@ namespace block_exaport\common {
         }
     }
 
+    /**
+     * @deprecated use global $DB; for update_record() with a where condition and insert_or_update_record() use \block_exaport\db
+     */
     class exadb_extender extends exadb_forwarder {
 
         /**
@@ -265,190 +132,59 @@ namespace block_exaport\common {
         }
     }
 
-    class param {
-        public static function clean_object($values, $definition) {
-            if (!is_object($values) && !is_array($values)) {
-                return null;
-            }
-
-            // Some value => type.
-            $ret = new \stdClass;
-            $values = (object)$values;
-            $definition = (array)$definition;
-
-            foreach ($definition as $key => $valuetype) {
-                $value = isset($values->$key) ? $values->$key : null;
-
-                $ret->$key = static::_clean($value, $valuetype);
-            }
-
-            return $ret;
-        }
-
-        public static function clean_array($values, $definition) {
-            $definition = (array)$definition;
-
-            if (is_object($values)) {
-                $values = (array)$values;
-            } else if (!is_array($values)) {
-                return array();
-            }
-
-            $keytype = key($definition);
-            $valuetype = reset($definition);
-
-            // Allow clean_array(PARAM_TEXT): which means PARAM_INT=>PARAM_TEXT.
-            if ($keytype === 0) {
-                $keytype = PARAM_SEQUENCE;
-            }
-
-            if ($keytype !== PARAM_INT && $keytype !== PARAM_TEXT && $keytype !== PARAM_SEQUENCE) {
-                throw new moodle_exception('wrong key type: ' . $keytype);
-            }
-
-            $ret = array();
-            foreach ($values as $key => $value) {
-                $value = static::_clean($value, $valuetype);
-                if ($value === null) {
-                    continue;
-                }
-
-                if ($keytype == PARAM_SEQUENCE) {
-                    $ret[] = $value;
-                } else {
-                    $ret[clean_param($key, $keytype)] = $value;
-                }
-            }
-
-            return $ret;
-        }
-
-        protected static function _clean($value, $definition) {
-            if (is_object($definition)) {
-                return static::clean_object($value, $definition);
-            } else if (is_array($definition)) {
-                return static::clean_array($value, $definition);
-            } else {
-                return clean_param($value, $definition);
-            }
-        }
-
-        public static function get_param($parname, $isarray = false) {
-            // POST has precedence.
-            if ($isarray) {
-                return optional_param_array($parname, null, PARAM_RAW);
-            } else {
-                return optional_param($parname, null, PARAM_RAW);
-            }
-        }
-
-        public static function get_required_param($parname, $isarray = false) {
-            $param = static::get_param($parname, $isarray);
-
-            if ($param === null) {
-                throw new moodle_exception('param not found: ' . $parname);
-            }
-
-            return $param;
-        }
-
-        public static function optional_array($parname, $definition) {
-            $param = static::get_param($parname, true);
-
-            if ($param === null) {
-                return array();
-            } else {
-                return static::clean_array($param, $definition);
-            }
-        }
-
-        public static function required_array($parname, $definition) {
-            $param = static::get_required_param($parname, true);
-
-            if (!is_array($param)) {
-                throw new moodle_exception("required parameter '$parname' is not an array");
-            }
-
-            return static::clean_array($param, $definition);
-        }
-
-        public static function optional_object($parname, $definition) {
-            $param = static::get_param($parname);
-
-            if ($param === null) {
-                return null;
-            } else {
-                return static::clean_object($param, $definition);
-            }
-        }
-
-        public static function required_object($parname, $definition) {
-            $param = static::get_required_param($parname);
-
-            if (!is_array($param)) {
-                throw new moodle_exception("required parameter '$parname' is not an array an can not converted to object");
-            }
-
-            return static::clean_object($param, $definition);
-        }
-
-        public static function required_json($parname, $definition = null) {
-            $data = required_param($parname, PARAM_RAW);
-
-            $data = json_decode($data, true);
-            if ($data === null) {
-                throw new moodle_exception('missingparam', '', '', $parname);
-            }
-
-            if ($definition === null) {
-                return $data;
-            } else {
-                return static::_clean($data, $definition);
-            }
-        }
-    }
-
     /**
      * @property string $wwwroot moodle url
      * @property string $dirroot moodle path
      * @property string $libdir lib path
+     *
+     * @deprecated use global $CFG;
      */
     class _globals_dummy_CFG {
     }
 
+    /**
+     * @deprecated use the Moodle globals in the function instead, eg. global $DB, $USER;
+     */
     class globals {
         /**
          * @var exadb
+         * @deprecated use global $DB; for update_record() with a where condition and insert_or_update_record() use \block_exaport\db
          */
         public static $DB;
 
         /**
          * @var \moodle_page
+         * @deprecated use global $PAGE;
          */
         public static $PAGE;
 
         /**
          * @var \core_renderer
+         * @deprecated use global $OUTPUT;
          */
         public static $OUTPUT;
 
         /**
          * @var \stdClass
+         * @deprecated use global $COURSE;
          */
         public static $COURSE;
 
         /**
          * @var \stdClass
+         * @deprecated use global $USER;
          */
         public static $USER;
 
         /**
          * @var \stdClass
+         * @deprecated use global $SITE;
          */
         public static $SITE;
 
         /**
          * @var _globals_dummy_CFG
+         * @deprecated use global $CFG;
          */
         public static $CFG;
 
@@ -466,6 +202,9 @@ namespace block_exaport\common {
 
     globals::init();
 
+    /**
+     * @deprecated do not use
+     */
     function _plugin_name() {
         return preg_replace('!\\\\.*$!', '', __NAMESPACE__); // The \\\\ syntax matches a \ (backslash)!
     }
@@ -568,197 +307,17 @@ namespace block_exaport\common {
     });
 
     /**
-     * get a language string from current plugin or else from global language strings
-     *
-     * @param $identifier
-     * @param null $component
-     * @param null $a
-     * @return string
+     * @deprecated throw new \block_exaport\moodle_exception() instead
      */
-    function get_string($identifier, $component = null, $a = null) {
-        $manager = get_string_manager();
-
-        if ($component === null) {
-            $component = _plugin_name();
-        }
-
-        if ($manager->string_exists($identifier, $component)) {
-            return $manager->get_string($identifier, $component, $a);
-        }
-
-        return $manager->get_string($identifier, '', $a);
-    }
-
     function print_error($errorcode, $module = 'error', $link = '', $a = null, $debuginfo = null) {
         throw new moodle_exception($errorcode, $module, $link, $a, $debuginfo);
     }
-
-    function _t_check_identifier($string) {
-        if (preg_match('!^([^:]+):(.*)$!s', $string, $matches)) {
-            return $matches;
-        } else {
-            return null;
-        }
-    }
-
-    function _t_parse_string($string, $a) {
-        // Copy from moodle/lib/classes/string_manager_standard.php
-        // Process array's and objects (except lang_strings).
-        if (is_array($a) or (is_object($a) && !($a instanceof \lang_string))) {
-            $a = (array)$a;
-            $search = array();
-            $replace = array();
-            foreach ($a as $key => $value) {
-                if (is_int($key)) {
-                    // We do not support numeric keys - sorry!
-                    continue;
-                }
-                if (is_array($value) or (is_object($value) && !($value instanceof \lang_string))) {
-                    // We support just string or lang_string as value.
-                    continue;
-                }
-                $search[] = '{$a->' . $key . '}';
-                $replace[] = (string)$value;
-            }
-            if ($search) {
-                $string = str_replace($search, $replace, $string);
-            }
-        } else {
-            $string = str_replace('{$a}', (string)$a, $string);
-        }
-
-        return $string;
-    }
-
-    /**
-     * translator function
-     */
-    function trans($stringorstrings, $argorargs = null) {
-
-        $origargs = $args = func_get_args();
-
-        $languagestrings = null;
-        $identifier = '';
-        $a = null;
-
-        if (empty($args)) {
-            throw new moodle_exception('no args');
-        }
-
-        $arg = array_shift($args);
-        if (is_string($arg) && !_t_check_identifier($arg)) {
-            $identifier = $arg;
-            $arg = array_shift($args);
-        }
-
-        if ($arg === null) {
-            // Just id submitted.
-            $languagestrings = [];
-        } else if (is_array($arg)) {
-            $languagestrings = $arg;
-        } else if (is_string($arg) && $matches = _t_check_identifier($arg)) {
-            $languagestrings = [$matches[1] => $matches[2]];
-        } else {
-            throw new moodle_exception('wrong args: ' . json_encode($origargs));
-        }
-
-        if ($args) {
-            $a = array_shift($args);
-        }
-
-        if ($args) {
-            throw new moodle_exception('too many arguments: ' . json_encode($origargs, true));
-        }
-
-        // Parse $languagestrings.
-        foreach ($languagestrings as $key => $string) {
-            if (is_number($key)) {
-                if ($matches = _t_check_identifier($string)) {
-                    $languagestrings[$matches[1]] = $matches[2];
-                    unset($languagestrings[$key]);
-                } else {
-                    throw new moodle_exception('wrong language string: ' . $origargs);
-                }
-            }
-        }
-
-        $lang = current_language();
-
-        $manager = get_string_manager();
-        $component = _plugin_name();
-
-        // Try with $identifier from args.
-        if ($identifier && $manager->string_exists($identifier, $component)) {
-            return $manager->get_string($identifier, $component, $a);
-        }
-
-        // Try submitted language strings.
-        if (isset($languagestrings[$lang])) {
-            return _t_parse_string($languagestrings[$lang], $a);
-        }
-
-        // Try language string.
-        $identifier = reset($languagestrings);
-        $identifier = key($languagestrings) . ':' . $identifier;
-        if ($manager->string_exists($identifier, $component)) {
-            return $manager->get_string($identifier, $component, $a);
-        }
-
-        if ($languagestrings) {
-            return _t_parse_string(reset($languagestrings), $a);
-        } else {
-            $message = "language string '{$origargs[0]}' not found, did you forget to prefix a language? 'en:{$origargs[0]}'";
-            throw new moodle_exception($message);
-        }
-    }
 }
 
-// Exporting all classes and functions from the common namespace to the plugin namespace
-// the whole part below is done, so eclipse knows the common classes and functions.
-
 namespace block_exaport {
-
-    function _should_export_class($classname) {
-        return !class_exists(__NAMESPACE__ . '\\' . $classname);
-    }
-
-    function _export_function($function) {
-        if (!function_exists(__NAMESPACE__ . '\\' . $function)) {
-            /*eval('
-                namespace '.__NAMESPACE__.' {
-                    function '.$function.'() {
-                        return call_user_func_array(\'\\'.__NAMESPACE__.'\common\\'.$function.'\', func_get_args());
-                    }
-                }
-            ');*/
-        }
-
-        return false;
-    }
-
-    // Export classnames, if not already existing.
-    if (_should_export_class('event')) {
-        abstract class event extends common\event {
-        }
-    }
-    if (_should_export_class('moodle_exception')) {
-        class moodle_exception extends common\moodle_exception {
-        }
-    }
-    if (_should_export_class('globals')) {
-        class globals extends common\globals {
-        }
-    }
-    if (_should_export_class('param')) {
-        class param extends common\param {
-        }
-    }
-    if (_should_export_class('SimpleXMLElement')) {
-        class SimpleXMLElement extends common\SimpleXMLElement {
-        }
-    }
-    if (_should_export_class('url')) {
-        class url extends common\url {
-        }
+    /**
+     * @deprecated use the Moodle globals in the function instead, eg. global $DB, $USER;
+     */
+    class globals extends common\globals {
     }
 }

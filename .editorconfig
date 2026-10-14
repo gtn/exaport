@@ -1,4 +1,7 @@
-# File: .editorconfig | Version: 2025082700 | Author: pro-web.at
+# File: .editorconfig | Version: 2026101400 | Author: pro-web.at
+#
+# History:
+# 2026101400: CRLF line endings for *.bat files
 
 # top-most EditorConfig file
 root = true
@@ -20,6 +23,11 @@ ij_formatter_enabled = false
 # disable formatting for these files
 [{package.json,composer.json,db/install.xml,.travis.yml,*.svg}]
 ij_formatter_enabled = false
+
+# Batch-Files: cmd.exe needs CRLF, with LF it misparses the file (labels/goto and multi-line blocks break),
+# so the global "end_of_line = lf" must not apply here
+[*.bat]
+end_of_line = crlf
 
 # TS/JS-Files
 [*.{ts,js}]

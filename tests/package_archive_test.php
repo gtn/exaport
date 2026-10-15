@@ -153,6 +153,8 @@ final class package_archive_test extends \advanced_testcase {
 
     /** A real ZIP round trip preserves ordered mixed blocks across owners in both layouts. */
     public function test_structured_archives_preserve_content_files_and_embedded_assets(): void {
+        global $DB;
+
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
         $recipient = $this->getDataGenerator()->create_user();
@@ -166,6 +168,16 @@ final class package_archive_test extends \advanced_testcase {
         $this->file($owner->id, 'item_content_text', $text->id, '/images/', 'picture.png', 'Embedded image bytes');
         $this->file($owner->id, 'item_content_file', $first->id, '/nested space/', 'same ü.txt', 'First file bytes');
         $this->file($owner->id, 'item_content_file', $second->id, '/other/', 'same ü.txt', 'Second file bytes');
+        $viewid = $DB->insert_record('block_exaportview', (object)[
+            'userid' => $owner->id, 'name' => 'Root item export', 'layout' => 1,
+        ]);
+        $DB->insert_record('block_exaportviewblock', (object)[
+            'viewid' => $viewid, 'itemid' => $source->id, 'type' => 'item',
+        ]);
+        // Use the real export selection, so omitted root items cannot pass the ZIP round-trip test.
+        $selected = block_exaport_scorm_get_category_items($owner->id, 0, $viewid);
+        $this->assertCount(1, $selected);
+        $source = reset($selected);
         $sourceblocks = block_exaport_get_item_content_export_data($source);
 
         foreach (['categories/', '/categories/'] as $directory) {

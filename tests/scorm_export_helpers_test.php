@@ -24,6 +24,60 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/package_import_helpers.php');
  */
 final class scorm_export_helpers_test extends \advanced_testcase {
 
+    /** Root selection uses uncategorized items and preserves owner/type restrictions. */
+    public function test_root_export_selects_uncategorized_items_without_category_zero_rows(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+        $rootfile = $this->create_item($owner->id, 'file');
+        $rootlink = $this->create_item($owner->id, 'link');
+        $categorized = $this->create_item($owner->id, 'file');
+        $this->create_item($other->id, 'file');
+        $categoryid = $DB->insert_record('block_exaportcate', (object)[
+            'userid' => $owner->id, 'creatorid' => $owner->id, 'name' => 'Export category',
+        ]);
+        item_category_helper::sync_item_categories($categorized->id, [$categoryid]);
+
+        $this->assertFalse($DB->record_exists('block_exaportitemcate', ['itemid' => $rootfile->id]));
+        $this->assertSame([$rootfile->id, $rootlink->id], array_keys(
+            block_exaport_scorm_get_category_items($owner->id, 0)));
+        $this->assertSame([$rootlink->id], array_keys(
+            block_exaport_scorm_get_category_items($owner->id, 0, null, 'link')));
+        $this->assertSame([$categorized->id], array_keys(
+            block_exaport_scorm_get_category_items($owner->id, $categoryid)));
+    }
+
+    /** Selecting a view must still exclude other views, special blocks and other owners. */
+    public function test_root_export_respects_selected_view_membership(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+        $selected = $this->create_item($owner->id, 'file');
+        $elsewhere = $this->create_item($owner->id, 'file');
+        $foreign = $this->create_item($other->id, 'file');
+        $viewid = $DB->insert_record('block_exaportview', (object)[
+            'userid' => $owner->id, 'name' => 'Selected export view', 'layout' => 1,
+        ]);
+        $otherviewid = $DB->insert_record('block_exaportview', (object)[
+            'userid' => $owner->id, 'name' => 'Other export view', 'layout' => 1,
+        ]);
+        foreach ([[$selected, $viewid, 'item'], [$elsewhere, $viewid, 'text'],
+                [$elsewhere, $otherviewid, 'item'], [$foreign, $viewid, 'item']] as [$item, $view, $type]) {
+            $DB->insert_record('block_exaportviewblock', (object)[
+                'viewid' => $view, 'itemid' => $item->id, 'type' => $type,
+            ]);
+        }
+
+        $this->assertSame([$selected->id], array_keys(
+            block_exaport_scorm_get_category_items($owner->id, 0, $viewid)));
+        $this->assertSame([$elsewhere->id], array_keys(
+            block_exaport_scorm_get_category_items($owner->id, 0, $otherviewid)));
+    }
+
     public function test_residual_legacy_content_is_ignored_in_favour_of_structured_blocks(): void {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();

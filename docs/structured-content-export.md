@@ -9,6 +9,9 @@ remains item metadata/description and is exported where the format supports it.
 ## Active serializers
 
 * The SCORM/package exporter packages structured text, link, and file blocks.
+  Root items have no category relationship and are included alongside categorized
+  items. Selecting a collection restricts which items are exported; import recreates
+  items and their category structure, without recreating the collection or its layout.
   File-block assets use
   `items/<item id>/blocks/<block id>/<filepath>/<filename>` and editor assets use
   the same block directory with an `editor` segment. Unsafe path components are

@@ -5,6 +5,39 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/item_content_helpers.php');
 
+/**
+ * Validate an import archive before extracting any of its entries.
+ *
+ * Older Exaport exports contain an absolute /categories/ directory marker;
+ * their actual files use relative paths. Ignore only that marker and pass an
+ * explicit allowlist to ZipArchive, so it is never extracted. Relative child
+ * entries create the directory when needed.
+ *
+ * @param ZipArchive $zip Open import archive.
+ * @param string $destination Empty extraction directory.
+ * @throws moodle_exception When an entry is unsafe or extraction fails.
+ */
+function block_exaport_extract_import_archive(ZipArchive $zip, string $destination): void {
+    $entries = [];
+    for ($index = 0; $index < $zip->numFiles; $index++) {
+        $name = $zip->getNameIndex($index);
+        if ($name === '/categories/') {
+            continue;
+        }
+        $entryname = str_replace('\\', '/', (string)$name);
+        if ($entryname === '' || $entryname[0] === '/' || strpos($entryname, "\0") !== false ||
+                preg_match('/^[a-zA-Z]:/', $entryname) || in_array('..', explode('/', $entryname), true)) {
+            throw new moodle_exception('couldntextractscormfile', 'block_exaport');
+        }
+        $entries[] = $name;
+    }
+
+    // An empty selection must never fall back to extracting the whole archive.
+    if (!$entries || !$zip->extractTo($destination, $entries)) {
+        throw new moodle_exception('couldntextractscormfile', 'block_exaport');
+    }
+}
+
 /** Extract the structured sidecar archive path from an item page. */
 function block_exaport_package_sidecar_path(string $html): ?string {
     if (!preg_match('/<!--###EXAPORT_ITEM_CONTENT_V1:([^\r\n<>]+)###-->/', $html, $matches)) {

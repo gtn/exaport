@@ -9,6 +9,41 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * Select the owner's items for a package category, optionally restricted to a view.
+ *
+ * @param int $userid Export owner.
+ * @param int $categoryid Category ID, or zero for uncategorized root items.
+ * @param int|null $viewid Optional selected view.
+ * @param string|null $type Optional parent item type.
+ * @return stdClass[] Items in export order, keyed by item ID.
+ */
+function block_exaport_scorm_get_category_items(int $userid, int $categoryid, ?int $viewid = null, ?string $type = null): array {
+    global $CFG, $DB;
+
+    $conditions = [];
+    $viewblocktype = $CFG->dbtype === 'sqlsrv' ? 'CAST(vb.type AS varchar(11))' : 'vb.type';
+    $itemquery = "SELECT i.* FROM {block_exaportitem} i" .
+        ($categoryid > 0 ? " JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?" : '') .
+        ($viewid ? " JOIN {block_exaportviewblock} vb ON $viewblocktype='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
+        " WHERE i.userid = ?" .
+        // Root is represented by the absence of category relationships, not a relationship to category zero.
+        ($categoryid > 0 ? '' : " AND NOT EXISTS (SELECT 1 FROM {block_exaportitemcate} ic WHERE ic.itemid = i.id)") .
+        ($type ? " AND i.type=?" : '') .
+        " ORDER BY i.name DESC, i.id ASC";
+    if ($categoryid > 0) {
+        $conditions[] = $categoryid;
+    }
+    if ($viewid) {
+        $conditions[] = $viewid;
+    }
+    $conditions[] = $userid;
+    if ($type) {
+        $conditions[] = $type;
+    }
+    return $DB->get_records_sql($itemquery, $conditions);
+}
+
+/**
  * Return a safe SCORM archive path component.
  *
  * @param string $value Untrusted stored path component.

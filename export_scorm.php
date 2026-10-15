@@ -157,36 +157,9 @@ function add_comments($table, $bookmarkid) {
 }
 
 function get_category_items($categoryid, $viewid = null, $type = null) {
-    global $USER, $CFG, $DB;
-    $conditions = array();
-    if (strcmp($CFG->dbtype, "sqlsrv") == 0) {
-        $itemquery = "SELECT i.*" .
-            " FROM {block_exaportitem} i" .
-            " JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?" .
-            ($viewid ? " JOIN {block_exaportviewblock} vb ON cast(vb.type AS varchar(11))='item' " .
-                " AND vb.viewid=? AND vb.itemid=i.id" : '') .
-            " WHERE i.userid = ?" .
-            ($type ? " AND i.type=?" : '') .
-            " ORDER BY i.name DESC, i.id ASC";
-    } else {
-        $itemquery = "SELECT i.*" .
-            " FROM {block_exaportitem} i" .
-            " JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?" .
-            ($viewid ? " JOIN {block_exaportviewblock} vb ON vb.type='item' AND vb.viewid=? AND vb.itemid=i.id" : '') .
-            " WHERE i.userid = ?" .
-            ($type ? " AND i.type=?" : '') .
-            " ORDER BY i.name DESC, i.id ASC";
-    }
-    $conditions[] = $categoryid;
-    if ($viewid) {
-        $conditions[] = $viewid;
-    }
-    $conditions[] = $USER->id;
-    if ($type) {
-        $conditions[] = $type;
-    }
+    global $USER;
 
-    return $DB->get_records_sql($itemquery, $conditions);
+    return block_exaport_scorm_get_category_items($USER->id, $categoryid, $viewid, $type);
 }
 
 /**
@@ -390,12 +363,8 @@ if ($confirm) {
         error('Bad Session Key');
     }
 
+    // ZIP entry names are relative to the archive root, including directory markers.
     $exportdir = '';
-
-    // Put a / on the end.
-    if (substr($exportdir, -1) != "/") {
-        $exportdir .= "/";
-    }
 
     // Create directory for data files.
 

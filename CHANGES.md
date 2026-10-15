@@ -1,4 +1,6 @@
 ### v5.2 (2026092909) ###
+* SCORM ZIP exports include uncategorized root items while retaining the selected collection and owner restrictions.
+* ZIP exports use relative directory entries; imports accept the historical `/categories/` marker while rejecting unsafe paths before extraction.
 * Item attachment delivery sanitises HTML across pluginfile and compatibility routes, enforces shared-view item membership, and versions structured file URLs by content hash.
 * Structured blocks are now the authoritative item-content model for rendering, thumbnails, copying, imports, exports, privacy, and deletion. See [structured content export](docs/structured-content-export.md).
 * Migration moves meaningful parent URLs and real `item_file` files, verifies each copied file before deleting its legacy source, and keeps migrated OEZ/ePOP items visible.

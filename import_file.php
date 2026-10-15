@@ -76,18 +76,12 @@ if ($fromform = $exteditform->get_data()) {
 
                 if (mkdir($unzipdir)) {
                     $zip = new ZipArchive();
-                    if ($zip->open($dir . '/' . $newfilename) == true) {
-                        for ($index = 0; $index < $zip->numFiles; $index++) {
-                            $entryname = str_replace('\\', '/', $zip->getNameIndex($index));
-                            $entryparts = explode('/', $entryname);
-                            if ($entryname === '' || $entryname[0] === '/' || preg_match('/^[a-zA-Z]:\//', $entryname) ||
-                                    in_array('..', $entryparts, true)) {
-                                $zip->close();
-                                error(get_string("couldntextractscormfile", "block_exaport"));
-                            }
+                    if ($zip->open($dir . '/' . $newfilename) === true) {
+                        try {
+                            block_exaport_extract_import_archive($zip, $unzipdir);
+                        } finally {
+                            $zip->close();
                         }
-                        $zip->extractTo($unzipdir);
-                        // if (unzip_file($dir.'/'.$newfilename, $unzipdir, false)) {
                         if (is_file($unzipdir . "/itemscomp.xml")) {
                             $xml = simplexml_load_file($unzipdir . "/itemscomp.xml");
                         }
@@ -128,7 +122,7 @@ if ($fromform = $exteditform->get_data()) {
                             }
                         }
                     } else {
-                        error(get_string("couldntextractscormfile", "block_exaport"));
+                        throw new moodle_exception('couldntextractscormfile', 'block_exaport');
                     }
                 } else {
                     error(get_string("couldntcreatetempdir", "block_exaport"));

@@ -390,12 +390,8 @@ if ($confirm) {
         error('Bad Session Key');
     }
 
+    // ZIP entry names are relative to the archive root, including directory markers.
     $exportdir = '';
-
-    // Put a / on the end.
-    if (substr($exportdir, -1) != "/") {
-        $exportdir .= "/";
-    }
 
     // Create directory for data files.
 

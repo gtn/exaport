@@ -37,6 +37,12 @@ remains item metadata/description and is exported where the format supports it.
 
 ## Import and compatibility policy
 
+New ZIP exports use relative entry names. Import validates the complete entry
+list before extraction and extracts only the accepted entries. The exact
+`/categories/` directory marker used by historical Exaport exports is skipped;
+relative child entries recreate that directory. Other absolute paths and
+traversal entries remain invalid. Existing recovery ZIPs do not need repacking.
+
 New packages are identified explicitly by the versioned page marker. Their
 sidecars are authoritative even if compatibility description markup is also
 present, so each item is imported exactly once. Import allocates a new parent

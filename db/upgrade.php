@@ -1508,7 +1508,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026090300, 'exaport');
     }
 
-    if ($oldversion < 2026091602) {
+    if ($oldversion < 2026101501) {
         // TODO when merging: change version so it runs
         $table = new xmldb_table('block_exaportitemblock');
 
@@ -1533,10 +1533,10 @@ function xmldb_block_exaport_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-        upgrade_block_savepoint(true, 2026091602, 'exaport');
+        upgrade_block_savepoint(true, 2026101501, 'exaport');
     }
 
-    if ($oldversion < 2026092900) {
+    if ($oldversion < 2026101502) {
         // TODO when merging: change version so it runs
         require_once(__DIR__ . '/upgradelib.php');
 
@@ -1561,7 +1561,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
             });
         mtrace('Exaport item-content migration report: ' . $report->summaryjson);
 
-        upgrade_block_savepoint(true, 2026092900, 'exaport');
+        upgrade_block_savepoint(true, 2026101502, 'exaport');
     }
 
     return $result;

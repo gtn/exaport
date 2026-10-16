@@ -1092,3 +1092,5 @@ $string['sharing_internal_heading'] = 'People and groups';
 $string['sharing_email_heading'] = 'Email invitations';
 $string['sharing_audience'] = 'Who can access this?';
 $string['sharing_everyone'] = 'Everyone with an account';
+
+$string['exacompupdaterequired'] = 'Exaport cannot be installed or upgraded with the existing Exacomp. Please update the Exacomp code to version {$a} or later first, then retry the Moodle upgrade. Exaport can also be used without Exacomp.';

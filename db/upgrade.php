@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 
 function xmldb_block_exaport_upgrade($oldversion) {
     global $DB, $CFG;
+    \block_exaport\local\exacomp_compatibility::require_compatible_code();
     $dbman = $DB->get_manager();
     $result = true;
 

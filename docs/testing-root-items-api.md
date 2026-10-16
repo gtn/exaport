@@ -5,18 +5,18 @@ was empty even when the current user had uncategorized items. Root means an item
 with **no rows in `block_exaportitemcate`**, matching the portfolio UI. The legacy
 `block_exaportitem.categoryid` column is not used to decide membership.
 
-Use a disposable local Moodle installation installed from Exaport `main` for the
-branch-switching steps below. Do not switch an already-upgraded experimental
-database back to Main code. The same data and web-service token can be used before
-and after the fix; no migration or data repair is needed.
+This PR targets **`experimental-item-upgrade-simple-steps-cleanup` only**.
+Use a disposable local site already installed/upgraded with both experimental
+plugins (Exaport and the matching Exacomp `experimental-exaport-item-rework`).
+Keep Exacomp in place while comparing the API. If updating an older experimental
+installation first, deploy both target plugins and complete the ordinary Moodle
+upgrade before creating these fixtures.
 
-If your disposable local site already runs the item-content experimental branch,
-keep it on that branch for the before test. After reproducing the empty root,
-fetch `fix/root-items-api` and cherry-pick the implementation commit
-`fc2c9b60619897ea4d076ebc7e7439881ad0c868` onto a local test branch, then repeat the
-same request. Do not use the Main checkout commands in sections 3 and 4 in that
-case. This preserves the experimental plugin version and database schema; the
-reported automated/live validation for this PR was performed on Main.
+The unpatched baseline tested here is Exaport
+`a6938863e0b62e73cbc7819446a70aeb9eb2ce18` (version `2026101502`) with Exacomp
+`836aef933b48fde84c8048ee32688645b9b1ed54`. The fix changes no plugin version,
+schema or data; the same database, fixtures and token are used before and after.
+Do not switch this database to Main code.
 
 ## 1. Prepare representative data through the UI
 
@@ -47,13 +47,13 @@ Use user A's token, not the administrator's: results belong to the token's user.
 If the response is an authentication/capability error instead of a category list,
 complete the service setup before testing this bug.
 
-## 3. Reproduce on unpatched main
+## 3. Reproduce on the unpatched experimental branch
 
 In the local `blocks/exaport` checkout (with no unrelated local changes):
 
 ```bash
-git fetch origin main fix/root-items-api
-git switch --detach origin/main
+git fetch origin experimental-item-upgrade-simple-steps-cleanup fix/root-items-api
+git switch --detach a6938863e0b62e73cbc7819446a70aeb9eb2ce18
 ```
 
 Purge Moodle caches and, if PHP opcode caching does not check changed files,
@@ -123,5 +123,5 @@ php vendor/bin/phpunit public/blocks/exaport/tests/externallib_get_all_user_item
 The test validates the declared external response structure, multiple root items,
 categorized/nested/multiple-category items, removing the last relation, empty
 portfolios, and owner restrictions (including a foreign-owned item linked to the
-current user's category). Applied to the unpatched query, the root inclusion and
+current user's category). Applied to the unpatched experimental query, the root inclusion and
 return-to-root assertions fail.

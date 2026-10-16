@@ -970,12 +970,23 @@ class externallib extends external_api {
     }
 
     private static function get_items_for_category($categoryid) {
-        $items = g::$DB->get_records_sql("
-            SELECT i.*
-            FROM {block_exaportitem} i
-            JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
-            WHERE i.userid = ?
-        ", [$categoryid, g::$USER->id]);
+        if ((int)$categoryid === 0) {
+            // Root items have no category relation, rather than a relation to category 0.
+            $items = g::$DB->get_records_sql("
+                SELECT i.*
+                FROM {block_exaportitem} i
+                WHERE i.userid = ? AND NOT EXISTS (
+                    SELECT 1 FROM {block_exaportitemcate} ic WHERE ic.itemid = i.id
+                )
+            ", [g::$USER->id]);
+        } else {
+            $items = g::$DB->get_records_sql("
+                SELECT i.*
+                FROM {block_exaportitem} i
+                JOIN {block_exaportitemcate} ic ON ic.itemid = i.id AND ic.cateid = ?
+                WHERE i.userid = ?
+            ", [$categoryid, g::$USER->id]);
+        }
 
         $result_items = [];
         foreach ($items as $item) {

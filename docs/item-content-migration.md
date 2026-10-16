@@ -2,6 +2,31 @@
 
 ## Storage transition
 
+### Optional Exacomp integration
+
+Exaport can be installed without Exacomp. If Exacomp code is present, installing
+or upgrading this Exaport release requires Exacomp **2026101600** or later.
+The upgrade checks this before any migration or upgrade savepoint. The install
+callback also checks it, including recovery of an interrupted installation.
+Moodle creates the fresh installation's tables before calling that callback;
+keep the site in maintenance mode until installation completes successfully.
+
+Update Exacomp first, then Exaport, or deploy both together. The check reads the
+Exacomp version on disk so it accepts a combined deployment even before Moodle
+has recorded Exacomp's new installed version. New Exacomp rejects content calls
+until Exaport's structured-content migration has completed, so completed updates
+can be hours apart in that order. A failed upgrade does not restore deployed PHP
+files: restore the previous code or finish the compatible deployment before
+reopening the site.
+
+Installing or restoring old Exacomp afterward is unsupported. Its direct database
+writes cannot be intercepted by Exaport's PHP API. Run the **current** audit to
+find legacy URLs, legacy files and orphaned structured content created by such
+writers. Findings include counts and bounded sample IDs, but cannot identify
+which plugin wrote the data. The historical migration report does not change.
+
+### Structured storage
+
 Before the structured-content transition, an item stored its link in
 `block_exaportitem.url`, its historical attachment marker in
 `block_exaportitem.attachment`, and uploaded content in the

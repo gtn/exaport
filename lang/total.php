@@ -3850,4 +3850,8 @@ return [
         'Everyone with an account',
     ],
 
+    'exacompupdaterequired' => [
+        'Exaport kann mit dem vorhandenen Exacomp nicht installiert oder aktualisiert werden. Bitte aktualisieren Sie zuerst den Exacomp-Code auf Version {$a} oder neuer und starten Sie das Moodle-Upgrade erneut. Exaport kann auch ohne Exacomp verwendet werden.',
+        'Exaport cannot be installed or upgraded with the existing Exacomp. Please update the Exacomp code to version {$a} or later first, then retry the Moodle upgrade. Exaport can also be used without Exacomp.',
+    ],
 ];

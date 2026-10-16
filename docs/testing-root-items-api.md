@@ -5,9 +5,18 @@ was empty even when the current user had uncategorized items. Root means an item
 with **no rows in `block_exaportitemcate`**, matching the portfolio UI. The legacy
 `block_exaportitem.categoryid` column is not used to decide membership.
 
-Use a disposable local Moodle installation with Exaport installed. The same data
-and web-service token can be used before and after the fix; no migration or data
-repair is needed.
+Use a disposable local Moodle installation installed from Exaport `main` for the
+branch-switching steps below. Do not switch an already-upgraded experimental
+database back to Main code. The same data and web-service token can be used before
+and after the fix; no migration or data repair is needed.
+
+If your disposable local site already runs the item-content experimental branch,
+keep it on that branch for the before test. After reproducing the empty root,
+fetch `fix/root-items-api` and cherry-pick the implementation commit
+`fc2c9b60619897ea4d076ebc7e7439881ad0c868` onto a local test branch, then repeat the
+same request. Do not use the Main checkout commands in sections 3 and 4 in that
+case. This preserves the experimental plugin version and database schema; the
+reported automated/live validation for this PR was performed on Main.
 
 ## 1. Prepare representative data through the UI
 

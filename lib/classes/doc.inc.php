@@ -567,7 +567,7 @@ class MiniXMLDoc {
 	}
 
 
-	function _fromArray_extractSTRING ($name, $value="", &$parent, &$params)
+	function _fromArray_extractSTRING ($name, $value, &$parent, &$params)
 	{
 
 		$pname = $parent->name();

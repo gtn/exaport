@@ -638,7 +638,7 @@ function block_exaport_get_plural_item_type($type) {
  * @param $sort the sorting in a format like "category.desc"
  * @return Array(sortcolumn, asc|desc)
  */
-function block_exaport_parse_sort($sort, array $allowedsorts, array $defaultsort = null) {
+function block_exaport_parse_sort($sort, array $allowedsorts, ?array $defaultsort = null) {
     if (!is_array($sort)) {
         // Accept both dot and hyphen as separator (e.g. "date.desc" or "date-desc").
         $sort = preg_split('/[.\-]/', $sort, 2);

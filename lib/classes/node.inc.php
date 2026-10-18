@@ -83,6 +83,7 @@ class MiniXMLNode extends MiniXMLTreeComponent {
 	var $xtext;
 	var $xnumeric;
 	var $xisnode;
+	var $isnode;
 
 	/* MiniXMLNode [CONTENTS]
 	** Constructor.  Creates a new MiniXMLNode object.

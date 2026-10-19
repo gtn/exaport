@@ -69,9 +69,9 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
         $reportposition = strpos($upgrade, 'block_exaport_migrate_legacy_item_content_with_report(500');
         // 2026092900 identifies the historical report, not the upgrade savepoint.
-        // Content migration completes at 2026101502; its report must be written before
+        // Content migration completes at 2026101902; its report must be written before
         // Moodle records that savepoint. Keep the finite timeout checks above intact.
-        $savepointposition = strpos($upgrade, "upgrade_block_savepoint(true, 2026101502, 'exaport')");
+        $savepointposition = strpos($upgrade, "upgrade_block_savepoint(true, 2026101902, 'exaport')");
         $this->assertNotFalse($reportposition);
         $this->assertNotFalse($savepointposition);
         $this->assertLessThan($savepointposition, $reportposition);

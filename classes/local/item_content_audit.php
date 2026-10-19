@@ -100,14 +100,16 @@ final class item_content_audit {
         [$where, $params] = $this->item_condition('i');
         $urllength = $this->db->sql_length('i.url');
         $attachmentlength = $this->db->sql_length('i.attachment');
+        // Match migration's exact lower-case sentinel rule regardless of database collation.
+        $issentinel = $this->db->sql_equal('TRIM(i.url)', ':falsevalue', true);
         $this->add_query_finding('legacy_url', 'error',
-            "FROM {block_exaportitem} i WHERE $where AND TRIM(i.url) <> '' AND TRIM(i.url) <> :falsevalue",
+            "FROM {block_exaportitem} i WHERE $where AND TRIM(i.url) <> '' AND NOT ($issentinel)",
             $params + ['falsevalue' => 'false'], 'i.id', 'itemids',
             'Meaningful legacy item URLs remain.',
             'Do not remove compatibility fallbacks. Back up the site and investigate the 2026092900 migration.');
         $this->add_query_finding('legacy_url_sentinel', 'warning',
             "FROM {block_exaportitem} i WHERE $where AND $urllength > 0
-                  AND (TRIM(i.url) = '' OR TRIM(i.url) = :falsevalue)",
+                  AND (TRIM(i.url) = '' OR ($issentinel))",
             $params + ['falsevalue' => 'false'], 'i.id', 'itemids',
             'Historical sentinel or whitespace-only legacy URLs remain.',
             'Inspect the migration history; these values contain no link content and should not be repaired by this audit.');

@@ -314,14 +314,16 @@ function block_exaport_legacy_item_content_counts(): array {
     $fileparams = ['component' => 'block_exaport', 'filearea' => 'item_file', 'directory' => '.'];
     $urllength = $DB->sql_length('url');
     $attachmentlength = $DB->sql_length('attachment');
+    // Match migration's exact lower-case sentinel rule regardless of database collation.
+    $issentinel = $DB->sql_equal('TRIM(url)', ':falsevalue', true);
     return [
         'total_items' => $DB->count_records('block_exaportitem'),
         'meaningful_legacy_urls' => (int)$DB->count_records_sql("SELECT COUNT(1)
               FROM {block_exaportitem}
-             WHERE TRIM(url) <> '' AND TRIM(url) <> :falsevalue", ['falsevalue' => 'false']),
+             WHERE TRIM(url) <> '' AND NOT ($issentinel)", ['falsevalue' => 'false']),
         'sentinel_legacy_urls' => (int)$DB->count_records_sql("SELECT COUNT(1)
               FROM {block_exaportitem}
-             WHERE $urllength > 0 AND (TRIM(url) = '' OR TRIM(url) = :falsevalue)", ['falsevalue' => 'false']),
+             WHERE $urllength > 0 AND (TRIM(url) = '' OR ($issentinel))", ['falsevalue' => 'false']),
         'legacy_attachments' => $DB->count_records_select('block_exaportitem', "$attachmentlength > 0"),
         'legacy_files' => (int)$DB->count_records_select('files', $filewhere, $fileparams),
         'items_with_legacy_files' => (int)$DB->count_records_sql(

@@ -87,6 +87,34 @@ final class item_content_audit_test extends \advanced_testcase {
         $this->assertStringNotContainsString($privateurl, json_encode($result));
     }
 
+    public function test_legacy_url_sentinel_classification_is_case_sensitive_and_read_only(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $meaningful = [];
+        foreach (['False', 'FALSE', ' False ', 'https://example.test/false'] as $url) {
+            $meaningful[] = $this->item($owner->id, $url)->id;
+        }
+        $sentinels = [];
+        foreach (['false', ' false ', '   '] as $url) {
+            $sentinels[] = $this->item($owner->id, $url)->id;
+        }
+        $this->item($owner->id);
+        $before = $DB->get_records('block_exaportitem', null, 'id');
+
+        $result = (new item_content_audit())->run();
+        $this->assertSame(4, $this->finding($result, 'legacy_url', 'error')['count']);
+        $this->assertEqualsCanonicalizing($meaningful, $this->finding($result, 'legacy_url')['sampleids']);
+        $this->assertSame(3, $this->finding($result, 'legacy_url_sentinel', 'warning')['count']);
+        $this->assertEqualsCanonicalizing($sentinels, $this->finding($result, 'legacy_url_sentinel')['sampleids']);
+        $this->assertEquals($before, $DB->get_records('block_exaportitem', null, 'id'));
+
+        $filtered = (new item_content_audit())->run((int)$meaningful[0]);
+        $this->assertSame('error', $filtered['status']);
+        $this->assertSame(1, $this->finding($filtered, 'legacy_url')['count']);
+        $this->assertNull($this->finding($filtered, 'legacy_url_sentinel'));
+    }
+
     public function test_file_findings_cover_legacy_type_and_context_integrity(): void {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();

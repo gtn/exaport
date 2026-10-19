@@ -867,6 +867,36 @@ final class item_content_upgrade_test extends \advanced_testcase {
         }
     }
 
+    public function test_completed_migration_report_counts_only_exact_lowercase_false_as_sentinel(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $meaningful = [];
+        foreach (['False', 'FALSE', ' False ', 'https://example.test/false'] as $url) {
+            $item = $this->create_item($owner->id, 'note', $url);
+            $meaningful[$item->id] = $url;
+        }
+        $sentinels = [];
+        foreach (['false', ' false ', '   ', ''] as $url) {
+            $sentinels[] = $this->create_item($owner->id, 'note', $url)->id;
+        }
+
+        $report = \block_exaport_migrate_legacy_item_content_with_report(2);
+        $summary = json_decode($report->summaryjson, true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(4, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
+        $this->assertSame(3, $summary['source_counts_at_successful_run_start']['sentinel_legacy_urls']);
+        $this->assertSame(4, $summary['operations_in_successful_run']['link_blocks_created']);
+        foreach ($meaningful as $itemid => $url) {
+            $block = $DB->get_record('block_exaportitemblock', ['itemid' => $itemid, 'type' => 'link'], '*', MUST_EXIST);
+            $this->assertSame($url, $block->url);
+        }
+        foreach ($sentinels as $itemid) {
+            $this->assertFalse($DB->record_exists('block_exaportitemblock', ['itemid' => $itemid]));
+        }
+        $this->assertSame(0, $summary['residual_counts_at_successful_run_end']['meaningful_legacy_urls']);
+        $this->assertSame(0, $summary['residual_counts_at_successful_run_end']['sentinel_legacy_urls']);
+    }
+
     public function test_completed_migration_report_reconciles_aggregate_counts(): void {
         global $DB;
         $this->resetAfterTest(true);

@@ -5,7 +5,7 @@
 ### Optional Exacomp integration
 
 Exaport can be installed without Exacomp. If Exacomp code is present, installing
-or upgrading this Exaport release requires Exacomp **2026101600** or later.
+or upgrading this Exaport release requires Exacomp **2026101903** or later.
 The upgrade checks this before any migration or upgrade savepoint. The install
 callback also checks it, including recovery of an interrupted installation.
 Moodle creates the fresh installation's tables before calling that callback;
@@ -35,8 +35,21 @@ ordered set of `block_exaportitemblock` rows of type `text`, `link`, or `file`.
 File blocks use `item_content_file/<block id>` and embedded text-editor files use
 `item_content_text/<block id>`, both in the parent item's owner user context.
 
-Upgrade **2026092900** migrates meaningful legacy URLs and non-directory legacy
-files. Its expected clean postcondition is:
+The relevant versions and identifiers for this release are:
+
+| Purpose | Value |
+| --- | --- |
+| Content-block table creation savepoint | `2026101901` |
+| Completed content-migration savepoint | `2026101902` |
+| Final Exaport plugin version | `2026101903` |
+| Historical migration report identifier (`migrationversion`) | `2026092900` |
+
+The report identifier is a stable lookup key, not a Moodle upgrade savepoint or
+the installed plugin version. Keep it unchanged when release versions or
+savepoints are renumbered so existing completed reports remain discoverable.
+
+The content migration at savepoint **2026101902** migrates meaningful legacy URLs
+and non-directory legacy files. Its expected clean postcondition is:
 
 * the parent `url` and `attachment` columns are empty;
 * no non-directory files remain in `item_file`; and
@@ -54,8 +67,9 @@ owner's context, remain untouched for investigation. Preserve backups and
 review their provenance and ownership before deciding on any manual correction;
 the report does not move, delete, deduplicate, or guess ownership.
 The administration report displays these flags as `1` (true) or `0` (false).
-The unique migration version prevents duplicate completed reports. It contains
-no item IDs, owner IDs, URLs, filenames, titles, user details, or file contents.
+The unique report identifier prevents duplicate completed reports. The report
+contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
+contents.
 
 The upgrade is restart-safe and remains in the historical upgrade code. The
 audit does not re-run it and deliberately does not compare URLs, filenames, or
@@ -72,9 +86,9 @@ batch.
 
 Each item commits in its own delegated transaction. If, for example, a later
 batch fails, items completed in earlier batches remain committed, but the
-2026092900 upgrade savepoint and final migration report remain unapplied. The
-next Moodle upgrade attempt scans again from ID zero. Completed items have empty
-legacy sources and are harmless no-ops; the first incomplete item is retried
+2026101902 content-migration savepoint and final migration report remain unapplied.
+The next Moodle upgrade attempt scans again from ID zero. Completed items have
+empty legacy sources and are harmless no-ops; the first incomplete item is retried
 from its surviving legacy source records.
 
 Before clearing legacy fields or deleting legacy file records, the migration

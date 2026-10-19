@@ -150,7 +150,7 @@ return [
     ],
     'audititemcontentnoreport' => [
         null,
-        'No completed report is stored for migration 2026092900.',
+        'No completed item-content migration report is stored (report identifier 2026092900).',
     ],
     'audititemcontentperformancewarning' => [
         null,
@@ -170,7 +170,7 @@ return [
     ],
     'audititemcontentreportmeta' => [
         null,
-        'Migration {$a->version}, completed {$a->completed}.',
+        'Report identifier {$a->version}, completed {$a->completed}.',
     ],
     'audititemcontentrun' => [
         null,

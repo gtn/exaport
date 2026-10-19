@@ -20,6 +20,7 @@ $PAGE->set_title(get_string('audititemcontent', 'block_exaport'));
 $PAGE->set_heading(get_string('audititemcontent', 'block_exaport'));
 
 $form = new item_content_audit_form($url);
+// Look up the stable historical report identifier, not a Moodle upgrade savepoint.
 $migrationreport = $DB->get_record('block_exaportmigration', ['migrationversion' => 2026092900]);
 $result = null;
 if ($data = $form->get_data()) {

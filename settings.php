@@ -22,14 +22,26 @@ defined('MOODLE_INTERNAL') || die;
 require_once(__DIR__ . '/lib/lib.php');
 require_once __DIR__ . '/lib/settings_helper.php';
 
+// Keep the audit registered for access checks, without a separate navigation/search entry.
 $ADMIN->add('blocksettings', new admin_externalpage(
     'block_exaport_item_content_audit',
     get_string('audititemcontent', 'block_exaport'),
     new moodle_url('/blocks/exaport/item_content_audit.php'),
-    'block/exaport:audititemcontent'
+    'block/exaport:audititemcontent',
+    true
 ));
 
 if ($ADMIN->fulltree) {
+    if (has_capability('block/exaport:audititemcontent', context_system::instance())) {
+        $settings->add(new block_exaport_admin_setting_audit_link(
+            'block_exaport/item_content_audit',
+            get_string('audititemcontent', 'block_exaport'),
+            html_writer::tag('p', get_string('audititemcontentreadonlynotice', 'block_exaport')) .
+                html_writer::link(new moodle_url('/blocks/exaport/item_content_audit.php'),
+                    get_string('audititemcontentopen', 'block_exaport'), ['class' => 'btn btn-secondary'])
+        ));
+    }
+
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas',
         get_string('settings_allow_loginas_head_alternative', 'block_exaport'),
         get_string('settings_allow_loginas_body', 'block_exaport'), 0, 1, 0));

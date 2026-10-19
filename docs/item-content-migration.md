@@ -130,7 +130,12 @@ upgrade, after release validation, and before any future Phase 10B cleanup.
 No shell or Bash access is required. Only Moodle site administrators can access
 the audit page. Navigate to:
 
-**Site administration → Plugins → Blocks → Item-content migration audit**
+**Site administration → Plugins → Blocks → exabis ePortfolio**
+
+On the Exaport settings page
+(`/admin/settings.php?section=blocksettingexaport`), select **Open audit** under
+**Item-content migration audit**. The audit has no separate administration-menu
+or administration-search entry; its existing access checks still apply.
 
 Visiting the page does not run a query. Choose an optional positive item ID, a
 sample limit from 1 to 1000, and whether to show verbose bounded identifiers,

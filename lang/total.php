@@ -152,6 +152,10 @@ return [
         null,
         'No completed item-content migration report is stored (report identifier 2026092900).',
     ],
+    'audititemcontentopen' => [
+        null,
+        'Open audit',
+    ],
     'audititemcontentperformancewarning' => [
         null,
         'A site-wide audit may take time on a large installation. The audit runs only when you submit this form.',

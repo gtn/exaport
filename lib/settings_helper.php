@@ -4,6 +4,19 @@ defined('MOODLE_INTERNAL') || die();
 require_once __DIR__ . '/../inc.php';
 
 
+/** Settings-page audit link that is not included in administration search results. */
+class block_exaport_admin_setting_audit_link extends admin_setting_heading {
+    /**
+     * Keep the audit entry point on the Exaport settings page.
+     *
+     * @param string $query Search query.
+     * @return bool Always false.
+     */
+    public function is_related($query) {
+        return false;
+    }
+}
+
 class block_exaport_layout_configtable extends admin_setting_configtext {
 
     public function get_setting() {

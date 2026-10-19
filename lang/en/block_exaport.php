@@ -52,6 +52,7 @@ $string['audititemcontentitemid'] = 'Item ID';
 $string['audititemcontentitemid_help'] = 'Leave empty for a site-wide audit, or enter a positive item ID to restrict attributable checks.';
 $string['audititemcontentnofindings'] = 'No warning or error findings were reported.';
 $string['audititemcontentnoreport'] = 'No completed item-content migration report is stored (report identifier 2026092900).';
+$string['audititemcontentopen'] = 'Open audit';
 $string['audititemcontentperformancewarning'] = 'A site-wide audit may take time on a large installation. The audit runs only when you submit this form.';
 $string['audititemcontentpositive'] = 'Enter a positive item ID.';
 $string['audititemcontentreadonlynotice'] = 'This audit is read-only. It never migrates, repairs, moves, creates, or deletes content.';

@@ -131,12 +131,15 @@ final class externallib_test extends \advanced_testcase {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
         $this->setUser($owner);
+        // Uncategorized/root items have no block_exaportitemcate row. The normal item form
+        // and legacy category backfill do not create cateid=0 relationships; that anomalous
+        // association would hide the item from the root listing before the URL checks run.
+        // The old parent categoryid column is not used to represent category membership.
         $itemid = (int)$DB->insert_record('block_exaportitem', (object)[
-            'userid' => $owner->id, 'type' => 'file', 'categoryid' => 0, 'name' => 'Download',
+            'userid' => $owner->id, 'type' => 'file', 'name' => 'Download',
             'url' => '', 'intro' => '', 'attachment' => '', 'timecreated' => time(),
             'timemodified' => time(), 'courseid' => 0,
         ]);
-        $DB->insert_record('block_exaportitemcate', ['itemid' => $itemid, 'cateid' => 0]);
         $block = block_exaport_create_file_content_block($itemid, 'Attachment');
         $this->create_file($owner->id, 'item_content_file', $block->id, '/nested/', 'report & notes.txt');
         $storedfile = block_exaport_get_item_content_files($owner->id, $block->id)[0];
@@ -154,6 +157,7 @@ final class externallib_test extends \advanced_testcase {
 
         $this->assertCount(1, $response[0]['items']);
         $item = $response[0]['items'][0];
+        $this->assertSame($itemid, $item['id']);
         $file = $item['files'][0];
         $this->assertSame($file, $item['contentblocks'][0]['files'][0]);
         parse_str(parse_url($file['url'], PHP_URL_QUERY), $query);

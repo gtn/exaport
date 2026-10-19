@@ -8,7 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 /** Optional Exacomp compatibility check before installing or upgrading Exaport. */
 final class exacomp_compatibility {
     /** First Exacomp release that guards structured-content integration calls. */
-    public const MIN_VERSION = 2026101600;
+    public const MIN_VERSION = 2026101903;
 
     /**
      * Reject old Exacomp code before Exaport changes its content storage.

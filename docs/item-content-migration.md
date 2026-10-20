@@ -142,16 +142,22 @@ settings column, with **Open audit** in the right column. The audit has no separ
 administration-menu or administration-search entry; its existing access checks
 still apply.
 
-Visiting the page does not run a query. Choose an optional positive item ID, a
+Visiting the page does not run the live audit. Choose an optional positive item ID, a
 sample limit from 1 to 1000, and whether to show verbose bounded identifiers,
 then select **Run audit**. Select **Run audit and download JSON** to receive the
 same result as a privacy-safe JSON file. Both actions are authenticated Moodle
 form submissions protected by a session key.
 
-The page displays the stored historical report separately from the current
-integrity audit. The JSON download includes both sections. The historical report
-explains what happened during migration; the live audit remains authoritative
-for the installation's current state.
+When a completed report exists for the content-migration savepoint, the page
+displays it separately from the current integrity audit and the JSON download
+includes it. Otherwise the historical report section is hidden; the live audit
+remains available. Fresh installations normally have no migration report, but
+absence alone does not prove a fresh installation: an interrupted upgrade or an
+earlier experimental report stored under a different identifier can also leave
+no matching report. The report table is part of the schema on both fresh and
+upgraded installations; its existence does not indicate migration completion.
+The historical report explains what happened during migration; the live audit
+remains authoritative for the installation's current state.
 
 An item filter restricts attributable
 item, block, and file checks to that parent. Site-wide orphan checks are skipped

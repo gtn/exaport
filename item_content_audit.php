@@ -56,8 +56,10 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('audititemcontent', 'block_exaport'));
 echo $OUTPUT->notification(get_string('audititemcontentreadonlynotice', 'block_exaport'), 'info', false);
 echo html_writer::tag('p', get_string('audititemcontentperformancewarning', 'block_exaport'));
-echo html_writer::tag('h3', get_string('audititemcontenthistoricalreport', 'block_exaport'));
-echo item_content_audit_output::migration_report_html($migrationreport);
+if ($migrationreport) {
+    echo html_writer::tag('h3', get_string('audititemcontenthistoricalreport', 'block_exaport'));
+    echo item_content_audit_output::migration_report_html($migrationreport);
+}
 echo html_writer::tag('h3', get_string('audititemcontentcurrentaudit', 'block_exaport'));
 $form->display();
 

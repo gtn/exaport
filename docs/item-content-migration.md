@@ -137,7 +137,9 @@ the audit page. Navigate to:
 
 On the Exaport settings page
 (`/admin/settings.php?section=blocksettingexaport`), find **Item-content migration
-audit** at the bottom. Its label and read-only explanation appear in the left
+audit** at the bottom. This entire row appears only when a completed report for
+content-migration savepoint `2026101902` exists; it is hidden on fresh installations
+with no migration history. Its label and read-only explanation appear in the left
 settings column, with **Open audit** in the right column. The audit has no separate
 administration-menu or administration-search entry; its existing access checks
 still apply.
@@ -150,8 +152,9 @@ form submissions protected by a session key.
 
 When a completed report exists for the content-migration savepoint, the page
 displays it separately from the current integrity audit and the JSON download
-includes it. Otherwise the historical report section is hidden; the live audit
-remains available. Fresh installations normally have no migration report, but
+includes it. Otherwise both the settings entry and historical report section are
+hidden; administrators can still open the audit page directly to run a live audit.
+Fresh installations normally have no migration report, but
 absence alone does not prove a fresh installation: an interrupted upgrade or an
 earlier experimental report stored under a different identifier can also leave
 no matching report. The report table is part of the schema on both fresh and

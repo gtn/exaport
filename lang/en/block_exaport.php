@@ -65,6 +65,7 @@ $string['audititemcontentsamplerange'] = 'Enter a sample limit from 1 to 1000.';
 $string['audititemcontentsamples'] = 'Bounded sample IDs';
 $string['audititemcontentseverity'] = 'Severity';
 $string['audititemcontentsummary'] = 'Status: {$a->status}. Error findings: {$a->errors}. Warning findings: {$a->warnings}.';
+$string['audititemcontentvalue'] = 'Value';
 $string['audititemcontentverbose'] = 'Show informational and related record IDs';
 $string['audititemcontentverbose_help'] = 'Shows additional bounded identifiers and informational counts. Sensitive values remain hidden.';
 $string['exaport:viewartifactsfromstudents'] = 'Can see portfolio pages of own students';

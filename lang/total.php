@@ -204,6 +204,10 @@ return [
         null,
         'Status: {$a->status}. Error findings: {$a->errors}. Warning findings: {$a->warnings}.',
     ],
+    'audititemcontentvalue' => [
+        null,
+        'Value',
+    ],
     'audititemcontentverbose' => [
         null,
         'Show informational and related record IDs',

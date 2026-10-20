@@ -69,7 +69,9 @@ the read-only audit. Residual files, including orphans or files outside the
 owner's context, remain untouched for investigation. Preserve backups and
 review their provenance and ownership before deciding on any manual correction;
 the report does not move, delete, deduplicate, or guess ownership.
-The administration report displays these flags as `1` (true) or `0` (false).
+The administration report displays these flags as **Yes** (true) or **No** (false)
+under a **Value** heading; numeric migration statistics retain their **Count**
+heading. The stored report and JSON download retain boolean values for the flags.
 The unique report identifier prevents duplicate completed reports. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.

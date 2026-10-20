@@ -32,16 +32,6 @@ $ADMIN->add('blocksettings', new admin_externalpage(
 ));
 
 if ($ADMIN->fulltree) {
-    if (has_capability('block/exaport:audititemcontent', context_system::instance())) {
-        $settings->add(new block_exaport_admin_setting_audit_link(
-            'block_exaport/item_content_audit',
-            get_string('audititemcontent', 'block_exaport'),
-            html_writer::tag('p', get_string('audititemcontentreadonlynotice', 'block_exaport')) .
-                html_writer::link(new moodle_url('/blocks/exaport/item_content_audit.php'),
-                    get_string('audititemcontentopen', 'block_exaport'), ['class' => 'btn btn-secondary'])
-        ));
-    }
-
     $settings->add(new admin_setting_configcheckbox('block_exaport_allow_loginas',
         get_string('settings_allow_loginas_head_alternative', 'block_exaport'),
         get_string('settings_allow_loginas_body', 'block_exaport'), 0, 1, 0));
@@ -278,5 +268,11 @@ if ($ADMIN->fulltree) {
         $default_view_templates,
         PARAM_TEXT, 60, 10));
 
-
+    if (has_capability('block/exaport:audititemcontent', context_system::instance())) {
+        $settings->add(new block_exaport_admin_setting_audit_link(
+            'block_exaport/item_content_audit',
+            get_string('audititemcontent', 'block_exaport'),
+            get_string('audititemcontentreadonlynotice', 'block_exaport')
+        ));
+    }
 }

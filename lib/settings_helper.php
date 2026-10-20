@@ -5,7 +5,27 @@ require_once __DIR__ . '/../inc.php';
 
 
 /** Settings-page audit link that is not included in administration search results. */
-class block_exaport_admin_setting_audit_link extends admin_setting_heading {
+class block_exaport_admin_setting_audit_link extends admin_setting_description {
+    /**
+     * Display the audit text and action using Moodle's standard settings columns.
+     *
+     * @param mixed $data Unused because the audit link is not a stored setting.
+     * @param string $query Search query.
+     * @return string Rendered settings row.
+     */
+    public function output_html($data, $query = '') {
+        global $OUTPUT;
+
+        $title = s($this->visiblename) . html_writer::span(s($this->description), 'd-block small mt-1');
+        $button = html_writer::link(new moodle_url('/blocks/exaport/item_content_audit.php'),
+            get_string('audititemcontentopen', 'block_exaport'), ['class' => 'btn btn-secondary mb-3']);
+
+        return $OUTPUT->render_from_template('core_admin/setting_description', [
+            'title' => $title,
+            'description' => $button,
+        ]);
+    }
+
     /**
      * Keep the audit entry point on the Exaport settings page.
      *

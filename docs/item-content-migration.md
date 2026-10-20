@@ -136,9 +136,11 @@ the audit page. Navigate to:
 **Site administration → Plugins → Blocks → exabis ePortfolio**
 
 On the Exaport settings page
-(`/admin/settings.php?section=blocksettingexaport`), select **Open audit** under
-**Item-content migration audit**. The audit has no separate administration-menu
-or administration-search entry; its existing access checks still apply.
+(`/admin/settings.php?section=blocksettingexaport`), find **Item-content migration
+audit** at the bottom. Its label and read-only explanation appear in the left
+settings column, with **Open audit** in the right column. The audit has no separate
+administration-menu or administration-search entry; its existing access checks
+still apply.
 
 Visiting the page does not run a query. Choose an optional positive item ID, a
 sample limit from 1 to 1000, and whether to show verbose bounded identifiers,

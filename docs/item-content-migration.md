@@ -56,8 +56,10 @@ and non-directory legacy files. Its expected clean postcondition is:
 * each migrated URL/file has a corresponding structured link/file block.
 
 The same upgrade stores one privacy-safe aggregate report in
-`block_exaportmigration`. It records source counts at the start of the successful
-run, operations completed by that run, residual counts at its end, and timing.
+`block_exaportmigration`. The report is available on the audit page and is not
+printed during the upgrade. It records source counts at the start of the
+successful run, operations completed by that run, residual counts at its end,
+and timing.
 Its `status.clean` flag means only that all counted legacy residuals are zero (the
 informational `total_items` count is excluded). `status.requires_review` is true when
 any counted residual remains. Neither flag proves that application flows or

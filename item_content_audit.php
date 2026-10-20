@@ -20,8 +20,8 @@ $PAGE->set_title(get_string('audititemcontent', 'block_exaport'));
 $PAGE->set_heading(get_string('audititemcontent', 'block_exaport'));
 
 $form = new item_content_audit_form($url);
-// Look up the stable historical report identifier, not a Moodle upgrade savepoint.
-$migrationreport = $DB->get_record('block_exaportmigration', ['migrationversion' => 2026092900]);
+// Look up the content-migration report by its savepoint identifier.
+$migrationreport = $DB->get_record('block_exaportmigration', ['migrationversion' => 2026101902]);
 $result = null;
 if ($data = $form->get_data()) {
     // moodleform validates its POST sesskey before returning submitted data.
@@ -56,8 +56,10 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('audititemcontent', 'block_exaport'));
 echo $OUTPUT->notification(get_string('audititemcontentreadonlynotice', 'block_exaport'), 'info', false);
 echo html_writer::tag('p', get_string('audititemcontentperformancewarning', 'block_exaport'));
-echo html_writer::tag('h3', get_string('audititemcontenthistoricalreport', 'block_exaport'));
-echo item_content_audit_output::migration_report_html($migrationreport);
+if ($migrationreport) {
+    echo html_writer::tag('h3', get_string('audititemcontenthistoricalreport', 'block_exaport'));
+    echo item_content_audit_output::migration_report_html($migrationreport);
+}
 echo html_writer::tag('h3', get_string('audititemcontentcurrentaudit', 'block_exaport'));
 $form->display();
 

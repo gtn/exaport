@@ -68,9 +68,9 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertStringNotContainsString('upgrade_set_timeout(1800);', $upgrade);
 
         $reportposition = strpos($upgrade, 'block_exaport_migrate_legacy_item_content_with_report(500');
-        // 2026092900 identifies the historical report, not the upgrade savepoint.
-        // Content migration completes at 2026101902; its report must be written before
-        // Moodle records that savepoint. Keep the finite timeout checks above intact.
+        // The report identifies the content migration at 2026101902 and must be
+        // written before Moodle records that savepoint. Keep the finite timeout
+        // checks above intact.
         $savepointposition = strpos($upgrade, "upgrade_block_savepoint(true, 2026101902, 'exaport')");
         $this->assertNotFalse($reportposition);
         $this->assertNotFalse($savepointposition);
@@ -918,7 +918,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $summary = json_decode($report->summaryjson, true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertSame([2, 3], $progress);
-        $this->assertSame(2026092900, (int)$report->migrationversion);
+        $this->assertSame(2026101902, (int)$report->migrationversion);
         $this->assertSame(3, $summary['source_counts_at_successful_run_start']['total_items']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['sentinel_legacy_urls']);

@@ -209,10 +209,10 @@ final class item_content_audit_test extends \advanced_testcase {
         $this->assertSame($beforecontexts, $DB->count_records('context'));
         $this->assertEquals($beforeconfig, $DB->get_records('config_plugins', ['plugin' => 'block_exaport']));
 
-        $json = json_encode(item_content_audit_output::with_metadata($result, '2026092902', 0));
+        $json = json_encode(item_content_audit_output::with_metadata($result, '2026101903', 0));
         $html = item_content_audit_output::html($result, true);
         $migrationhtml = item_content_audit_output::migration_report_html((object)[
-            'migrationversion' => 2026092900,
+            'migrationversion' => 2026101902,
             'timecompleted' => 123,
             'summaryjson' => json_encode(['before' => ['legacy_files' => 1]]),
         ]);

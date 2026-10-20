@@ -107,7 +107,7 @@ final class item_content_audit {
             $params + ['falsevalue' => 'false'], 'i.id', 'itemids',
             'Meaningful legacy item URLs remain.',
             'Do not remove compatibility fallbacks. Back up the site and investigate the item-content migration ' .
-                'and its historical report (identifier 2026092900).');
+                'and its historical report (identifier 2026101902).');
         $this->add_query_finding('legacy_url_sentinel', 'warning',
             "FROM {block_exaportitem} i WHERE $where AND $urllength > 0
                   AND (TRIM(i.url) = '' OR ($issentinel))",
@@ -178,7 +178,7 @@ final class item_content_audit {
             $this->add_query_finding('legacy_item_file', 'error', $base, $params, 'i.id', 'itemids',
                 'Non-directory files remain in the legacy item file area.',
                 'Do not remove compatibility fallbacks. Back up the site and investigate the item-content migration ' .
-                    'and its historical report (identifier 2026092900).', 'f.id');
+                    'and its historical report (identifier 2026101902).', 'f.id');
             $lastindex = count($this->findings) - 1;
             if ($lastindex >= 0 && $this->findings[$lastindex]['code'] === 'legacy_item_file') {
                 $this->findings[$lastindex]['affecteditemcount'] = (int)$this->db->count_records_sql(

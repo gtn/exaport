@@ -13,7 +13,7 @@ final class item_content_audit_output {
             'generatedat' => gmdate('c', $generatedat ?? time())] + $result;
     }
 
-    /** Render a completed historical migration report containing aggregate counts only. */
+    /** Render a completed historical migration report containing status flags and aggregate counts. */
     public static function migration_report_html(?\stdClass $record): string {
         if (!$record) {
             return \html_writer::tag('p', get_string('audititemcontentnoreport', 'block_exaport'));
@@ -33,10 +33,12 @@ final class item_content_audit_output {
             }
             $table = new \html_table();
             $table->attributes['class'] = 'generaltable';
+            $isstatus = $section === 'status';
             $table->head = [get_string('audititemcontentcode', 'block_exaport'),
-                get_string('audititemcontentcount', 'block_exaport')];
+                get_string($isstatus ? 'audititemcontentvalue' : 'audititemcontentcount', 'block_exaport')];
             foreach ($counts as $code => $count) {
-                $table->data[] = [\html_writer::tag('code', s($code)), (int)$count];
+                $value = $isstatus ? get_string($count ? 'yes' : 'no') : (int)$count;
+                $table->data[] = [\html_writer::tag('code', s($code)), $value];
             }
             $html .= \html_writer::tag('h4', s(str_replace('_', ' ', ucfirst($section))));
             $html .= \html_writer::table($table);

@@ -42,11 +42,12 @@ The relevant versions and identifiers for this release are:
 | Content-block table creation savepoint | `2026101901` |
 | Completed content-migration savepoint | `2026101902` |
 | Final Exaport plugin version | `2026101903` |
-| Historical migration report identifier (`migrationversion`) | `2026092900` |
+| Historical migration report identifier (`migrationversion`) | `2026101902` |
 
-The report identifier is a stable lookup key, not a Moodle upgrade savepoint or
-the installed plugin version. Keep it unchanged when release versions or
-savepoints are renumbered so existing completed reports remain discoverable.
+The report identifier matches the content-migration savepoint and identifies
+that migration rather than the final installed plugin version. Once released,
+keep this migration's identifier fixed when later plugin versions increase so
+its completed reports remain discoverable.
 
 The content migration at savepoint **2026101902** migrates meaningful legacy URLs
 and non-directory legacy files. Its expected clean postcondition is:
@@ -56,8 +57,10 @@ and non-directory legacy files. Its expected clean postcondition is:
 * each migrated URL/file has a corresponding structured link/file block.
 
 The same upgrade stores one privacy-safe aggregate report in
-`block_exaportmigration`. It records source counts at the start of the successful
-run, operations completed by that run, residual counts at its end, and timing.
+`block_exaportmigration`. The report is available on the audit page and is not
+printed during the upgrade. It records source counts at the start of the
+successful run, operations completed by that run, residual counts at its end,
+and timing.
 Its `status.clean` flag means only that all counted legacy residuals are zero (the
 informational `total_items` count is excluded). `status.requires_review` is true when
 any counted residual remains. Neither flag proves that application flows or
@@ -66,7 +69,9 @@ the read-only audit. Residual files, including orphans or files outside the
 owner's context, remain untouched for investigation. Preserve backups and
 review their provenance and ownership before deciding on any manual correction;
 the report does not move, delete, deduplicate, or guess ownership.
-The administration report displays these flags as `1` (true) or `0` (false).
+The administration report displays these flags as **Yes** (true) or **No** (false)
+under a **Value** heading; numeric migration statistics retain their **Count**
+heading. The stored report and JSON download retain boolean values for the flags.
 The unique report identifier prevents duplicate completed reports. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.
@@ -130,18 +135,34 @@ upgrade, after release validation, and before any future Phase 10B cleanup.
 No shell or Bash access is required. Only Moodle site administrators can access
 the audit page. Navigate to:
 
-**Site administration → Plugins → Blocks → Item-content migration audit**
+**Site administration → Plugins → Blocks → exabis ePortfolio**
 
-Visiting the page does not run a query. Choose an optional positive item ID, a
+On the Exaport settings page
+(`/admin/settings.php?section=blocksettingexaport`), find **Item-content migration
+audit** at the bottom. This entire row appears only when a completed report for
+content-migration savepoint `2026101902` exists; it is hidden on fresh installations
+with no migration history. Its label and read-only explanation appear in the left
+settings column, with **Open audit** in the right column. The audit has no separate
+administration-menu or administration-search entry; its existing access checks
+still apply.
+
+Visiting the page does not run the live audit. Choose an optional positive item ID, a
 sample limit from 1 to 1000, and whether to show verbose bounded identifiers,
 then select **Run audit**. Select **Run audit and download JSON** to receive the
 same result as a privacy-safe JSON file. Both actions are authenticated Moodle
 form submissions protected by a session key.
 
-The page displays the stored historical report separately from the current
-integrity audit. The JSON download includes both sections. The historical report
-explains what happened during migration; the live audit remains authoritative
-for the installation's current state.
+When a completed report exists for the content-migration savepoint, the page
+displays it separately from the current integrity audit and the JSON download
+includes it. Otherwise both the settings entry and historical report section are
+hidden; administrators can still open the audit page directly to run a live audit.
+Fresh installations normally have no migration report, but
+absence alone does not prove a fresh installation: an interrupted upgrade or an
+earlier experimental report stored under a different identifier can also leave
+no matching report. The report table is part of the schema on both fresh and
+upgraded installations; its existence does not indicate migration completion.
+The historical report explains what happened during migration; the live audit
+remains authoritative for the installation's current state.
 
 An item filter restricts attributable
 item, block, and file checks to that parent. Site-wide orphan checks are skipped

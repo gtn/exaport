@@ -150,7 +150,11 @@ return [
     ],
     'audititemcontentnoreport' => [
         null,
-        'No completed item-content migration report is stored (report identifier 2026092900).',
+        'No completed item-content migration report is stored (report identifier 2026101902).',
+    ],
+    'audititemcontentopen' => [
+        null,
+        'Open audit',
     ],
     'audititemcontentperformancewarning' => [
         null,
@@ -199,6 +203,10 @@ return [
     'audititemcontentsummary' => [
         null,
         'Status: {$a->status}. Error findings: {$a->errors}. Warning findings: {$a->warnings}.',
+    ],
+    'audititemcontentvalue' => [
+        null,
+        'Value',
     ],
     'audititemcontentverbose' => [
         null,

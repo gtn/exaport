@@ -334,8 +334,8 @@ function block_exaport_legacy_item_content_counts(): array {
 /**
  * Migrate legacy item content and persist its completed aggregate report.
  *
- * The historical report identifier 2026092900 is independent of Moodle's
- * upgrade savepoints and remains stable when those savepoints are renumbered.
+ * The report identifier 2026101902 matches the content-migration savepoint.
+ * It identifies this migration and does not track later plugin versions.
  *
  * No report row is written if migration or post-migration counting fails.
  * Existing completed evidence is never overwritten on an upgrade retry.
@@ -352,8 +352,8 @@ function block_exaport_migrate_legacy_item_content_with_report(
 ): stdClass {
     global $DB;
 
-    // Stable historical report identifier, not the Moodle upgrade savepoint.
-    $migrationversion = 2026092900;
+    // Identify the report by the content-migration savepoint, not the final plugin version.
+    $migrationversion = 2026101902;
     $existing = $DB->get_record('block_exaportmigration', ['migrationversion' => $migrationversion]);
     if ($existing) {
         return $existing;

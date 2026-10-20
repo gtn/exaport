@@ -150,7 +150,7 @@ return [
     ],
     'audititemcontentnoreport' => [
         null,
-        'No completed item-content migration report is stored (report identifier 2026092900).',
+        'No completed item-content migration report is stored (report identifier 2026101902).',
     ],
     'audititemcontentopen' => [
         null,

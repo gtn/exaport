@@ -42,11 +42,12 @@ The relevant versions and identifiers for this release are:
 | Content-block table creation savepoint | `2026101901` |
 | Completed content-migration savepoint | `2026101902` |
 | Final Exaport plugin version | `2026101903` |
-| Historical migration report identifier (`migrationversion`) | `2026092900` |
+| Historical migration report identifier (`migrationversion`) | `2026101902` |
 
-The report identifier is a stable lookup key, not a Moodle upgrade savepoint or
-the installed plugin version. Keep it unchanged when release versions or
-savepoints are renumbered so existing completed reports remain discoverable.
+The report identifier matches the content-migration savepoint and identifies
+that migration rather than the final installed plugin version. Once released,
+keep this migration's identifier fixed when later plugin versions increase so
+its completed reports remain discoverable.
 
 The content migration at savepoint **2026101902** migrates meaningful legacy URLs
 and non-directory legacy files. Its expected clean postcondition is:

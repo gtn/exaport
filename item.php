@@ -91,10 +91,9 @@ if ($action == 'copytoself') {
     $copy->externcomment = 0;
     $copy->shareall = 0;
     $copy->categoryid = 0;
-    // Structured blocks are authoritative. A copy must not propagate or repair
-    // any residual legacy parent content.
+    // Structured blocks are authoritative. Preserve historical attachment metadata
+    // while leaving residual legacy URLs out of the copy's active content.
     $copy->url = '';
-    $copy->attachment = '';
 
     $transaction = $DB->start_delegated_transaction();
     $newitemid = $DB->insert_record('block_exaportitem', $copy);
@@ -639,6 +638,9 @@ function block_exaport_item_parent_record(stdClass $post, ?stdClass $existing = 
     $record->userid = $existing ? $existing->userid : $post->userid;
     $record->type = $existing ? $existing->type : $post->type;
     $record->url = '';
-    $record->attachment = '';
+    // Initialize new items only; existing attachment metadata is not an editable content field.
+    if (!$existing) {
+        $record->attachment = '';
+    }
     return $record;
 }

@@ -171,7 +171,7 @@ final class backup_restore_test extends \advanced_testcase {
         $this->assertSame((int)$ownerone->id, (int)$restoredmixed->userid);
         $this->assertSame((int)$ownertwo->id, (int)$restoredother->userid);
         $this->assertSame('', $restoredmixed->url);
-        $this->assertSame('', $restoredmixed->attachment);
+        $this->assertSame('legacy-attachment.txt', $restoredmixed->attachment);
 
         $mixedblocks = array_values($DB->get_records('block_exaportitemblock',
             ['itemid' => $restoredmixed->id], 'sortorder ASC, id ASC'));

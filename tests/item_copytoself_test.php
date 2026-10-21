@@ -95,7 +95,7 @@ final class item_copytoself_test extends \advanced_testcase {
         $this->assertEquals($sourcebefore, $DB->get_record('block_exaportitem', ['id' => $sourceid], '*', MUST_EXIST));
         $this->assertSame($sourcebefore->intro, $destination->intro);
         $this->assertSame('', $destination->url);
-        $this->assertSame('', $destination->attachment);
+        $this->assertSame($sourcebefore->attachment, $destination->attachment);
         foreach (['categoryid', 'shareall', 'externaccess', 'externcomment'] as $field) {
             $this->assertSame(0, (int)$destination->$field);
         }
@@ -174,7 +174,7 @@ final class item_copytoself_test extends \advanced_testcase {
             'itemid' => $destination->id, 'cateid' => $categorycopy->id,
         ]));
         $this->assertSame('', $destination->url);
-        $this->assertSame('', $destination->attachment);
+        $this->assertSame($sourcebefore->attachment, $destination->attachment);
         $copies = \block_exaport_get_item_content_blocks($destination->id);
         $this->assertCount(2, $copies);
         $this->assertSame($blocks[0]->url, $copies[0]->url);

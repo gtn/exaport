@@ -62,6 +62,38 @@ final class item_legacy_write_removal_test extends \advanced_testcase {
         $this->assertStringNotContainsString('item_file', $addmethod[0] . $updatemethod[0]);
     }
 
+    public function test_parent_updates_preserve_attachment_metadata_and_ignore_submitted_replacements(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        // Load only the actual record builder: including item.php executes its page controller.
+        $source = file_get_contents(__DIR__ . '/../item.php');
+        $function = substr($source, strpos($source, 'function block_exaport_item_parent_record('));
+        $function = str_replace(['function block_exaport_item_parent_record', 'stdClass'],
+            ['return static function', '\\stdClass'], $function);
+        $buildrecord = eval($function . ';');
+
+        foreach (['123456', 'legacy.txt', '  historical marker  '] as $attachment) {
+            $id = $DB->insert_record('block_exaportitem', [
+                'userid' => $user->id, 'name' => 'Original', 'type' => 'note',
+                'intro' => '', 'url' => '', 'attachment' => $attachment,
+            ]);
+            $existing = $DB->get_record('block_exaportitem', ['id' => $id], '*', MUST_EXIST);
+            $post = (object)[
+                'id' => $id, 'userid' => $user->id, 'name' => 'Edited', 'type' => 'note',
+                'attachment' => 'submitted replacement',
+            ];
+            $record = $buildrecord($post, $existing);
+            $this->assertObjectNotHasProperty('attachment', $record);
+            $DB->update_record('block_exaportitem', $record);
+            $this->assertSame($attachment, $DB->get_field('block_exaportitem', 'attachment', ['id' => $id]));
+            $this->assertSame('Edited', $DB->get_field('block_exaportitem', 'name', ['id' => $id]));
+        }
+        unset($post->id);
+        $newrecord = $buildrecord($post);
+        $this->assertSame('', $newrecord->attachment);
+    }
+
     public function test_external_and_report_structured_content_contracts_are_complete(): void {
         $external = file_get_contents(__DIR__ . '/../classes/externallib/externallib.php');
         $contenthelpers = file_get_contents(__DIR__ . '/../lib/item_content_helpers.php');

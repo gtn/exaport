@@ -98,7 +98,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertStringNotContainsString('private:first', json_encode($progress));
         $this->assertSame([
             'items_processed', 'items_already_clean', 'link_blocks_created', 'file_blocks_created',
-            'files_copied', 'urls_cleared', 'attachments_cleared', 'legacy_file_areas_cleared',
+            'files_copied', 'urls_cleared', 'legacy_file_areas_cleared',
         ], array_keys($progress[0][1]));
     }
 
@@ -221,7 +221,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame($second->get_contenthash(), array_values($files)[0]->get_contenthash());
         $this->assertSame([], get_file_storage()->get_area_files(
             $contextid, 'block_exaport', 'item_file', $item->id, 'id', false));
-        $this->assertSame('', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $this->assertSame($item->attachment, $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
         $this->assertSame('note', $DB->get_field('block_exaportitem', 'type', ['id' => $item->id]));
     }
 
@@ -247,7 +247,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame(3, $result['filecount']);
         $this->assertSame([], get_file_storage()->get_area_files(
             $contextid, 'block_exaport', 'item_file', $item->id, 'id', false));
-        $this->assertSame('', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $this->assertSame($item->attachment, $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
     }
 
     /** Backing failures must be isolated and restored even when an assertion fails. */
@@ -417,7 +417,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
             $contextid, 'block_exaport', 'item_iconfile', $item->id, 'id', false));
     }
 
-    public function test_stale_attachment_and_directory_only_area_create_no_file_block(): void {
+    public function test_historical_attachment_is_preserved_and_directory_only_area_creates_no_file_block(): void {
         global $DB;
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
@@ -427,9 +427,44 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
         \block_exaport_migrate_legacy_item_content($item);
         $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]));
-        $this->assertSame('', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $this->assertSame($item->attachment, $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
         $this->assertSame([], get_file_storage()->get_area_files(\context_user::instance($user->id)->id,
             'block_exaport', 'item_file', $item->id, 'id', false));
+    }
+
+    public function test_attachment_only_items_remain_recoverable_and_reports_are_clean_on_retry(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $items = [];
+        foreach (['123456', 'legacy.txt', '  historical marker  ', '0'] as $value) {
+            $item = $this->create_item($user->id, 'file', '', $value);
+            $DB->set_field('block_exaportitem', 'isoez', 1, ['id' => $item->id]);
+            $items[] = $item;
+        }
+        $commentid = $DB->insert_record('block_exaportitemcomm', [
+            'itemid' => $items[0]->id, 'userid' => $user->id,
+            'entry' => 'Historical feedback', 'timemodified' => time(),
+        ]);
+
+        $report = \block_exaport_migrate_legacy_item_content_with_report(2);
+        $summary = json_decode($report->summaryjson, true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($summary['status']['clean']);
+        $this->assertFalse($summary['status']['requires_review']);
+        $this->assertArrayNotHasKey('legacy_attachments', $summary['residual_counts_at_successful_run_end']);
+        $this->assertArrayNotHasKey('attachments_cleared', $summary['operations_in_successful_run']);
+        $this->assertSame(4, $summary['operations_in_successful_run']['items_already_clean']);
+        $this->assertEquals($report, \block_exaport_migrate_legacy_item_content_with_report(1));
+        \block_exaport_migrate_legacy_item_content_batches(1);
+
+        foreach ($items as $item) {
+            $this->assertSame($item->attachment,
+                $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+            $this->assertEquals(1, $DB->get_field('block_exaportitem', 'isoez', ['id' => $item->id]));
+        }
+        $this->assertSame('Historical feedback', $DB->get_field('block_exaportitemcomm', 'entry', ['id' => $commentid]));
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
+        $this->assertSame('clean', (new \block_exaport\local\item_content_audit())->run()['status']);
     }
 
     public function test_parent_type_and_content_matrix_loses_no_content(): void {
@@ -456,7 +491,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
                 $parent = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
                 $this->assertSame($type, $parent->type);
                 $this->assertSame('', $parent->url);
-                $this->assertSame('', $parent->attachment);
+                $this->assertSame($item->attachment, $parent->attachment);
                 $this->assertSame(52, (int)$parent->timemodified);
             }
         }
@@ -635,7 +670,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $block = $DB->get_record('block_exaportitemblock', ['id' => $result['linkblockid']], '*', MUST_EXIST);
         $this->assertSame('private:value', $block->url);
         $this->assertSame('', $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
-        $this->assertSame('', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $this->assertSame($item->attachment, $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
         $this->assertFalse($DB->record_exists('context', [
             'contextlevel' => CONTEXT_USER, 'instanceid' => $user->id,
         ]));
@@ -658,7 +693,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertNotFalse($copy);
         $this->assertSame($source->get_contenthash(), $copy->get_contenthash());
         $this->assertSame('', $DB->get_field('block_exaportitem', 'url', ['id' => $item->id]));
-        $this->assertSame('', $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
+        $this->assertSame($item->attachment, $DB->get_field('block_exaportitem', 'attachment', ['id' => $item->id]));
         $this->assertSame([], get_file_storage()->get_area_files(
             $contextid, 'block_exaport', 'item_file', $item->id, 'id', false));
     }
@@ -765,7 +800,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         foreach ([$urlonly, $fileonly, $combined, $structured] as $item) {
             $parent = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
             $this->assertSame('', $parent->url);
-            $this->assertSame('', $parent->attachment);
+            $this->assertSame($item->attachment, $parent->attachment);
         }
         foreach ($relationships as $table => $record) {
             $this->assertSame($record, $this->record_array($table, (int)$record['id']));
@@ -919,10 +954,10 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
         $this->assertSame([2, 3], $progress);
         $this->assertSame(2026101902, (int)$report->migrationversion);
+        $this->assertSame(2, (int)$report->formatversion);
         $this->assertSame(3, $summary['source_counts_at_successful_run_start']['total_items']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['sentinel_legacy_urls']);
-        $this->assertSame(1, $summary['source_counts_at_successful_run_start']['legacy_attachments']);
         $this->assertSame(2, $summary['source_counts_at_successful_run_start']['legacy_files']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['items_with_legacy_files']);
         $this->assertSame([
@@ -932,7 +967,6 @@ final class item_content_upgrade_test extends \advanced_testcase {
             'file_blocks_created' => 1,
             'files_copied' => 2,
             'urls_cleared' => 2,
-            'attachments_cleared' => 1,
             'legacy_file_areas_cleared' => 1,
         ], $summary['operations_in_successful_run']);
         $this->assertSame(0, $summary['residual_counts_at_successful_run_end']['meaningful_legacy_urls']);
@@ -946,6 +980,23 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame(1, $DB->count_records('block_exaportmigration'));
         $this->assertStringNotContainsString('example.test', $report->summaryjson);
         $this->assertStringNotContainsString('one.txt', $report->summaryjson);
+    }
+
+    public function test_saved_format_one_report_is_reused_without_rewriting_history(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $summary = json_encode(['operations_in_successful_run' => ['attachments_cleared' => 3]]);
+        $id = $DB->insert_record('block_exaportmigration', [
+            'migrationversion' => 2026101902, 'formatversion' => 1,
+            'timestarted' => 100, 'timecompleted' => 200, 'summaryjson' => $summary,
+        ]);
+        $report = \block_exaport_migrate_legacy_item_content_with_report(1, static function(): void {
+            throw new \coding_exception('Completed migration must not run again');
+        });
+        $this->assertEquals($id, $report->id);
+        $this->assertEquals(1, $report->formatversion);
+        $this->assertSame($summary, $report->summaryjson);
+        $this->assertSame(1, $DB->count_records('block_exaportmigration'));
     }
 
     public function test_completed_report_requires_review_and_preserves_unattributable_files(): void {
@@ -974,7 +1025,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertTrue($summary['status']['requires_review']);
         $this->assertSame([
             'total_items' => 1, 'meaningful_legacy_urls' => 0, 'sentinel_legacy_urls' => 0,
-            'legacy_attachments' => 0, 'legacy_files' => 2, 'items_with_legacy_files' => 2,
+            'legacy_files' => 2, 'items_with_legacy_files' => 2,
         ], $summary['residual_counts_at_successful_run_end']);
         $this->assertSame($original, [$this->record_array('files', $orphan->get_id()),
             $this->record_array('files', $misplaced->get_id())]);

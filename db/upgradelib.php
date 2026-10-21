@@ -49,6 +49,7 @@ function block_exaport_verify_migration_file_content(stored_file $file): array {
  * Migrate one item's legacy URL and files to structured content blocks.
  *
  * The legacy File API area, rather than the attachment column, is authoritative.
+ * Historical attachment metadata is preserved verbatim for later investigation.
  * All changes for an item use a delegated transaction. This nests with an upgrade
  * transaction when one exists; it never issues a raw commit which could defeat it.
  * Once the transaction is durable, cleared source fields make a rerun a no-op.
@@ -95,7 +96,7 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
         $current = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
         $fs = get_file_storage();
         // File records are context-bound. If the context was deleted, Moodle deletes its file areas too;
-        // do not recreate the context merely to migrate a URL or clear stale attachment metadata.
+        // do not recreate the context merely to migrate a URL.
         $sourcefiles = $context ? array_values($fs->get_area_files(
             $context->id,
             'block_exaport',
@@ -131,9 +132,8 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
             'fileblockid' => null,
             'filecount' => count($sourcefiles),
             'urlcleared' => $storedurl !== '' ? 1 : 0,
-            'attachmentcleared' => (string)($current->attachment ?? '') !== '' ? 1 : 0,
             'legacyfileareacleared' => $sourcefiles ? 1 : 0,
-            'alreadyclean' => $storedurl === '' && (string)($current->attachment ?? '') === '' && !$sourcefiles ? 1 : 0,
+            'alreadyclean' => $storedurl === '' && !$sourcefiles ? 1 : 0,
         ];
 
         if ($hasurl) {
@@ -204,20 +204,9 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
             }
         }
 
-        $update = (object)['id' => $itemid];
-        $needsupdate = false;
         if ($storedurl !== '') {
             // This clears meaningful URLs only after their block exists, plus whitespace/sentinel values.
-            $update->url = '';
-            $needsupdate = true;
-        }
-        if ((string)($current->attachment ?? '') !== '') {
-            // Attachment is compatibility metadata, never a file ID or evidence that a file exists.
-            $update->attachment = '';
-            $needsupdate = true;
-        }
-        if ($needsupdate) {
-            $DB->update_record('block_exaportitem', $update);
+            $DB->set_field('block_exaportitem', 'url', '', ['id' => $itemid]);
         }
         // Also removes harmless directory placeholders after the (possibly empty) verification set succeeds.
         if ($context) {
@@ -263,7 +252,6 @@ function block_exaport_migrate_legacy_item_content_batches(
         'file_blocks_created' => 0,
         'files_copied' => 0,
         'urls_cleared' => 0,
-        'attachments_cleared' => 0,
         'legacy_file_areas_cleared' => 0,
     ];
     $lastprocessedid = 0;
@@ -291,7 +279,6 @@ function block_exaport_migrate_legacy_item_content_batches(
             $counts['file_blocks_created'] += empty($result['fileblockid']) ? 0 : 1;
             $counts['files_copied'] += (int)($result['filecount'] ?? 0);
             $counts['urls_cleared'] += (int)($result['urlcleared'] ?? 0);
-            $counts['attachments_cleared'] += (int)($result['attachmentcleared'] ?? 0);
             $counts['legacy_file_areas_cleared'] += (int)($result['legacyfileareacleared'] ?? 0);
             $lastprocessedid = (int)$item->id;
         }
@@ -313,7 +300,6 @@ function block_exaport_legacy_item_content_counts(): array {
     $filewhere = "component = :component AND filearea = :filearea AND filename <> :directory";
     $fileparams = ['component' => 'block_exaport', 'filearea' => 'item_file', 'directory' => '.'];
     $urllength = $DB->sql_length('url');
-    $attachmentlength = $DB->sql_length('attachment');
     // Match migration's exact lower-case sentinel rule regardless of database collation.
     $issentinel = $DB->sql_equal('TRIM(url)', ':falsevalue', true);
     return [
@@ -324,7 +310,6 @@ function block_exaport_legacy_item_content_counts(): array {
         'sentinel_legacy_urls' => (int)$DB->count_records_sql("SELECT COUNT(1)
               FROM {block_exaportitem}
              WHERE $urllength > 0 AND (TRIM(url) = '' OR ($issentinel))", ['falsevalue' => 'false']),
-        'legacy_attachments' => $DB->count_records_select('block_exaportitem', "$attachmentlength > 0"),
         'legacy_files' => (int)$DB->count_records_select('files', $filewhere, $fileparams),
         'items_with_legacy_files' => (int)$DB->count_records_sql(
             "SELECT COUNT(DISTINCT itemid) FROM {files} WHERE $filewhere", $fileparams),
@@ -386,7 +371,7 @@ function block_exaport_migrate_legacy_item_content_with_report(
     }
     $record = (object)[
         'migrationversion' => $migrationversion,
-        'formatversion' => 1,
+        'formatversion' => 2,
         'timestarted' => $timestarted,
         'timecompleted' => time(),
         'summaryjson' => $summaryjson,

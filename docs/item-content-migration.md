@@ -35,13 +35,22 @@ ordered set of `block_exaportitemblock` rows of type `text`, `link`, or `file`.
 File blocks use `item_content_file/<block id>` and embedded text-editor files use
 `item_content_text/<block id>`, both in the parent item's owner user context.
 
+The `attachment` column is retained as opaque historical metadata. Its value is
+not moved into a block, interpreted as a File API ID, or used by current content
+readers and visibility filters. Migration and later item edits preserve existing
+values verbatim; item/category copies and Moodle backup/restore preserve them too.
+New items created from scratch initialize the field to an empty string. Keeping
+the metadata permits later investigation without requiring every installation to
+have a pre-upgrade backup. It does not itself restore historical OEZ visibility:
+an item with no introduction or supported structured block can remain hidden.
+
 The relevant versions and identifiers for this release are:
 
 | Purpose | Value |
 | --- | --- |
 | Content-block table creation savepoint | `2026101901` |
 | Completed content-migration savepoint | `2026101902` |
-| Final Exaport plugin version | `2026101903` |
+| Final Exaport plugin version | `2026102100` |
 | Historical migration report identifier (`migrationversion`) | `2026101902` |
 
 The report identifier matches the content-migration savepoint and identifies
@@ -52,9 +61,14 @@ its completed reports remain discoverable.
 The content migration at savepoint **2026101902** migrates meaningful legacy URLs
 and non-directory legacy files. Its expected clean postcondition is:
 
-* the parent `url` and `attachment` columns are empty;
+* the parent `url` column is empty;
 * no non-directory files remain in `item_file`; and
 * each migrated URL/file has a corresponding structured link/file block.
+
+Retained attachment metadata is not a migration residual and does not prevent a
+clean result. Meaningful parent URLs are cleared after copying their exact values
+to link blocks; actual files are independently copied and verified through the
+File API. These operations do not require erasing the attachment marker.
 
 The same upgrade stores one privacy-safe aggregate report in
 `block_exaportmigration`. The report is available on the audit page and is not
@@ -75,6 +89,12 @@ heading. The stored report and JSON download retain boolean values for the flags
 The unique report identifier prevents duplicate completed reports. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.
+
+New reports use format version 2 and omit attachment-cleanup counters. The migration
+identifier remains 2026101902. Existing reports, including their
+historical attachment counts, remain readable and are not rewritten. Values
+already erased by an earlier build cannot be reconstructed from these aggregate
+reports; this change preserves values that still exist.
 
 The upgrade is restart-safe and remains in the historical upgrade code. The
 audit does not re-run it and deliberately does not compare URLs, filenames, or
@@ -182,7 +202,6 @@ only bounded related record/context identifiers.
 |---|---|---|
 | `legacy_url` | error | A meaningful URL remains on the parent item. |
 | `legacy_url_sentinel` | warning | Whitespace or the exact historical `false` sentinel remains. |
-| `legacy_attachment` | warning | Non-empty historical attachment metadata remains; it is not interpreted as a File API ID. |
 | `legacy_item_file` | error | A non-directory `item_file` record remains. |
 | `orphan_legacy_file` | error | A legacy file has no parent item. |
 | `legacy_file_context_mismatch` | error | A legacy file is outside its owner's user context. |

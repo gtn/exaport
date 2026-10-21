@@ -1510,7 +1510,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026101901) {
-        // TODO when merging: change version so it runs
         $table = new xmldb_table('block_exaportitemblock');
 
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
@@ -1538,7 +1537,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026101902) {
-        // TODO when merging: change version so it runs
         require_once(__DIR__ . '/upgradelib.php');
 
         $table = new xmldb_table('block_exaportmigration');

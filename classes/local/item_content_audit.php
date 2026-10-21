@@ -62,7 +62,7 @@ final class item_content_audit {
         $this->samplelimit = $samplelimit;
         $this->findings = [];
 
-        $this->audit_legacy_columns();
+        $this->audit_legacy_urls();
         $this->audit_blocks();
         $this->audit_file_area('item_file');
         $this->audit_file_area('item_content_file');
@@ -95,11 +95,10 @@ final class item_content_audit {
         ];
     }
 
-    /** Audit URL and attachment columns. */
-    private function audit_legacy_columns(): void {
+    /** Audit legacy URLs; attachment metadata is retained without interpretation. */
+    private function audit_legacy_urls(): void {
         [$where, $params] = $this->item_condition('i');
         $urllength = $this->db->sql_length('i.url');
-        $attachmentlength = $this->db->sql_length('i.attachment');
         // Match migration's exact lower-case sentinel rule regardless of database collation.
         $issentinel = $this->db->sql_equal('TRIM(i.url)', ':falsevalue', true);
         $this->add_query_finding('legacy_url', 'error',
@@ -114,10 +113,6 @@ final class item_content_audit {
             $params + ['falsevalue' => 'false'], 'i.id', 'itemids',
             'Historical sentinel or whitespace-only legacy URLs remain.',
             'Inspect the migration history; these values contain no link content and should not be repaired by this audit.');
-        $this->add_query_finding('legacy_attachment', 'warning',
-            "FROM {block_exaportitem} i WHERE $where AND $attachmentlength > 0", $params, 'i.id', 'itemids',
-            'Stale legacy attachment metadata remains.',
-            'Do not treat this value as a File API ID; inspect it together with the item file areas.');
     }
 
     /** Audit content block rows. */

@@ -57,7 +57,7 @@ final class item_content_audit_test extends \advanced_testcase {
     public function test_valid_mixed_structured_content_is_clean(): void {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();
-        $item = $this->item($owner->id);
+        $item = $this->item($owner->id, '', 'historical-submission-id');
         $this->block($item->id, 'text', '', '<p>Body</p>');
         $this->block($item->id, 'link', 'https://example.test/');
         $fileblock = $this->block($item->id, 'file');
@@ -81,8 +81,8 @@ final class item_content_audit_test extends \advanced_testcase {
         $this->assertSame('error', $result['status']);
         $this->assertSame('error', $this->finding($result, 'legacy_url')['severity']);
         $this->assertSame(2, $this->finding($result, 'legacy_url_sentinel')['count']);
-        $this->assertSame('warning', $this->finding($result, 'legacy_attachment')['severity']);
-        $this->assertSame(2, $this->finding($result, 'legacy_attachment')['count']);
+        $this->assertNull($this->finding($result, 'legacy_attachment'));
+        $this->assertStringNotContainsString('not-a-file-id', json_encode($result));
         $this->assertContains($meaningful->id, $this->finding($result, 'legacy_url')['sampleids']);
         $this->assertStringNotContainsString($privateurl, json_encode($result));
     }
@@ -213,13 +213,17 @@ final class item_content_audit_test extends \advanced_testcase {
         $html = item_content_audit_output::html($result, true);
         $migrationhtml = item_content_audit_output::migration_report_html((object)[
             'migrationversion' => 2026101902,
+            'formatversion' => 1,
             'timecompleted' => 123,
-            'summaryjson' => json_encode(['before' => ['legacy_files' => 1]]),
+            'summaryjson' => json_encode(['before' => ['legacy_files' => 1, 'legacy_attachments' => 3],
+                'operations_in_successful_run' => ['attachments_cleared' => 3]]),
         ]);
         $this->assertJson($json);
         $this->assertStringContainsString('"auditformatversion":1', $json);
         $this->assertStringContainsString('legacy_url', $html);
         $this->assertStringContainsString('legacy_files', $migrationhtml);
+        $this->assertStringContainsString('legacy_attachments', $migrationhtml);
+        $this->assertStringContainsString('attachments_cleared', $migrationhtml);
         $this->assertStringNotContainsString('secret:value', $json . $html);
         $this->assertStringNotContainsString('private-name.txt', $json . $html);
     }

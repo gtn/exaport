@@ -1,5 +1,9 @@
 # Course backup ownership
 
+Historical `block_exaportitem.attachment` metadata is included in Moodle backups
+and preserved verbatim on restore, including when legacy files are converted to
+structured blocks. It is not interpreted as a current file or submission ID.
+
 Exaport portfolio items, their structured content, course templates, view templates, and
 distribution settings are scoped to a course rather than to an individual block instance.
 Moodle nevertheless runs a block backup task for every Exaport instance on the course.

@@ -6,6 +6,11 @@ parent `url`, `attachment`, and `item_file` data is not rendered or serialized,
 even when it exists on the same item as structured content. The parent intro
 remains item metadata/description and is exported where the format supports it.
 
+Historical attachment markers are preserved on existing items and item/category
+copies, but remain outside ordinary content serialization. Moodle backup/restore
+also preserves this metadata. A newly imported SCORM package still initializes
+the field empty because the package content format does not carry that marker.
+
 ## Active serializers
 
 * The SCORM/package exporter packages structured text, link, and file blocks.

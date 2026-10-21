@@ -1,3 +1,6 @@
+### v5.2 (2026102100) ###
+* Preserve historical item attachment metadata during migration, edits, copies, and Moodle backup/restore; retained markers do not cause migration or audit warnings.
+
 ### v5.2 (2026092909) ###
 * SCORM ZIP exports include uncategorized root items while retaining the selected collection and owner restrictions.
 * ZIP exports use relative directory entries; imports accept the historical `/categories/` marker while rejecting unsafe paths before extraction.

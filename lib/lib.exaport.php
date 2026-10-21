@@ -66,11 +66,10 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
         $newitem->userid = g::$USER->id;
         $newitem->type = $item->type;
         $newitem->name = $item->name;
-        // Structured blocks are authoritative. Residual legacy parent content
-        // is neither repaired nor propagated by an ordinary copy.
+        // Structured blocks are authoritative; legacy URLs are not copied as active content.
         $newitem->url = '';
         $newitem->intro = $item->intro;
-        $newitem->attachment = '';
+        $newitem->attachment = $item->attachment;
         $newitem->timemodified = $item->timemodified;
         $newitem->courseid = g::$COURSE->id;
         $newitem->sortorder = $item->sortorder;

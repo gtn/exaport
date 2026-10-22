@@ -26,7 +26,11 @@ const open = (trigger, config) => {
     modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, event => {
         const section = document.querySelector('.exaport-item-content-section');
         if (section) {
-            Templates.replaceNode(section, event.detail.content, '').catch(Notification.exception);
+          try {
+            Templates.replaceNode(section, event.detail.content, '');
+          } catch (error) {
+            Notification.exception(error);
+          }
         }
     });
     modalForm.show();

@@ -52,7 +52,11 @@ export const init = config => {
             returnFocus: trigger,
         });
         modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, submitted => {
-            replaceSummary(section, submitted.detail.content).catch(Notification.exception);
+          try {
+            replaceSummary(section, submitted.detail.content);
+          } catch (error) {
+            Notification.exception(error);
+          }
         });
         modalForm.show();
     });

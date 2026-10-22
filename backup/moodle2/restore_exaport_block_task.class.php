@@ -43,7 +43,7 @@ class restore_exaport_block_task extends restore_block_task {
      * Code to prepare file area for restore
      */
     public function get_fileareas() {
-        return array('item_file', 'item_content_file', 'item_content_text');
+        return array(); // Course configuration has no block-context file areas.
     }
 
     /**

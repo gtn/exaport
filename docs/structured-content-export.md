@@ -7,9 +7,9 @@ even when it exists on the same item as structured content. The parent intro
 remains item metadata/description and is exported where the format supports it.
 
 Historical attachment markers are preserved on existing items and item/category
-copies, but remain outside ordinary content serialization. Moodle backup/restore
-also preserves this metadata. A newly imported SCORM package still initializes
-the field empty because the package content format does not carry that marker.
+copies, but remain outside ordinary content serialization. Moodle course backups
+exclude personal items and their metadata. A newly imported SCORM package still
+initializes the field empty because the package content format does not carry that marker.
 
 ## Active serializers
 

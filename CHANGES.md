@@ -1,5 +1,5 @@
 ### v5.2 (2026102100) ###
-* Preserve historical item attachment metadata during migration, edits, copies, and Moodle backup/restore; retained markers do not cause migration or audit warnings.
+* Preserve historical item attachment metadata during migration, edits, and copies; retained markers do not cause migration or audit warnings.
 
 ### v5.2 (2026092909) ###
 * SCORM ZIP exports include uncategorized root items while retaining the selected collection and owner restrictions.
@@ -8,7 +8,6 @@
 * Structured blocks are now the authoritative item-content model for rendering, thumbnails, copying, imports, exports, privacy, and deletion. See [structured content export](docs/structured-content-export.md).
 * Migration moves meaningful parent URLs and real `item_file` files, verifies each copied file before deleting its legacy source, and keeps migrated OEZ/ePOP items visible.
 * Migration is restart-safe, uses one transaction per item, processes up to 500 items per batch, and renews the 1,800-second timeout for every non-empty batch. See [item-content migration](docs/item-content-migration.md).
-* Backup and restore support structured content and convert legacy content on restore. Multi-instance backups are deterministic, Moodle's **Include users** setting is respected, and personal items require owner mappings. See [course backup](docs/course-backup.md).
 * A read-only administrator migration audit is available. Back up the database and Moodledata first; use a supervised CLI upgrade for large sites.
 * Ordinary legacy rendering and legacy copy writes are removed. Schema cleanup and removal of remaining compatibility code are deferred.
 

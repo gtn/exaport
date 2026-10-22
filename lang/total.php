@@ -770,11 +770,6 @@ return [
         'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.',
         'This legacy item write service is disabled. Use the structured content interface.',
     ],
-    'restoremissingusermapping' => [
-        null,
-        'Cannot restore the Exaport item because its owner (source user ID {$a}) has no destination user mapping.',
-    ],
-
     // === Notes.
     'deletenoteconfirm' => [
         'Möchtest du diese Notiz wirklich l&ouml;schen?',

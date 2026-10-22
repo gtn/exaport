@@ -1,25 +1,15 @@
-# Course backup ownership
+# Course backup scope
 
-Historical `block_exaportitem.attachment` metadata is included in Moodle backups
-and preserved verbatim on restore, including when legacy files are converted to
-structured blocks. It is not interpreted as a current file or submission ID.
+Moodle course backup and restore include Exaport's course category templates,
+view templates, and distribution settings. They do not include personal portfolio
+items, their content blocks, or their files, even when **Include users** is enabled.
+Copying or restoring a course therefore does not create additional items in users'
+portfolios. This preserves the course backup scope from before the item-content
+rework; personal portfolio backup is a separate feature.
 
-Exaport portfolio items, their structured content, course templates, view templates, and
-distribution settings are scoped to a course rather than to an individual block instance.
-Moodle nevertheless runs a block backup task for every Exaport instance on the course.
+These course settings belong to the course rather than to a particular Exaport
+block instance. Only the instance with the lowest `block_instances.id` serializes
+them, so a course with multiple Exaport blocks restores each setting/template once.
 
-Only the Exaport instance with the lowest `block_instances.id` in the course emits this shared
-data. Other instances emit an empty Exaport plugin structure while retaining Moodle's ordinary
-block-instance backup. Choosing an owner from persistent instance ids, rather than choosing the
-first task that executes, makes the result independent of backup task processing order. A normal
-course backup includes all of the course's block instances, including the elected owner.
-
-Personal portfolio items, their structured blocks, and their files follow Moodle's standard
-**Include users** backup setting. They are omitted when user data is excluded. Restoring personal
-portfolio content requires Moodle to provide a valid destination mapping for its owner; restore
-fails rather than assigning an item to a guessed user when that mapping is absent.
-
-Restore consequently inserts each personal and course-scoped record once. In particular, restore
-does not insert duplicate portfolio data and then attempt to deduplicate it. Legacy item fields are
-converted only after that item's files and structured blocks have been restored, so one legacy URL
-and attachment produce one link block and one file block.
+The item-content migration and Exaport's own portfolio export/import are separate
+from Moodle course backup and restore.

@@ -51,22 +51,6 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
             'courseid', 'auto_distribute', 'auto_distribute_views', 'timemodified'
         ));
 
-        // Portfolio items belong to a course too. Keep their content blocks below the item so the
-        // restore step can map both block records and the block-keyed file areas without guessing.
-        $items = new backup_nested_element('items');
-        $item = new backup_nested_element('item', array('id'), array(
-            'userid', 'usercontextid', 'type', 'categoryid', 'name', 'url', 'intro', 'attachment', 'timecreated',
-            'timemodified', 'courseid', 'shareall', 'externaccess', 'externcomment', 'sortorder',
-            'isoez', 'fileurl', 'beispiel_url', 'exampid', 'langid', 'beispiel_angabe', 'source',
-            'sourceid', 'iseditable', 'example_url', 'parentid', 'project_description',
-            'project_process', 'project_result'
-        ));
-        $contentblocks = new backup_nested_element('content_blocks');
-        $contentblock = new backup_nested_element('content_block', array('id'), array(
-            'itemid', 'type', 'sortorder', 'title', 'content', 'contentformat', 'url',
-            'timecreated', 'timemodified'
-        ));
-
         // Build the tree structure.
         $exaport->add_child($course_templates);
         $course_templates->add_child($course_template);
@@ -76,11 +60,6 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
 
         $exaport->add_child($dist_settings);
         $dist_settings->add_child($dist_setting);
-
-        $exaport->add_child($items);
-        $items->add_child($item);
-        $item->add_child($contentblocks);
-        $contentblocks->add_child($contentblock);
 
         // Everything in this structure is course-scoped, despite Moodle invoking this step once
         // for every Exaport block instance. Give ownership to the lowest instance id in the course
@@ -99,53 +78,12 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
             return $this->prepare_block_structure($exaport);
         }
 
-        // Portfolio items are personal user data. Follow Moodle's course backup setting rather
-        // than serializing them (or adding their user-context files) to backups without users.
-        $includeusers = (bool)$this->get_setting_value('users');
-
         // Define data sources.
         $course_template->set_source_table('block_exaport_course_templ', array('courseid' => backup::VAR_COURSEID));
         $view_template->set_source_table('block_exaport_view_templ', array('courseid' => backup::VAR_COURSEID));
         $dist_setting->set_source_table('block_exaport_templ_dist', array('courseid' => backup::VAR_COURSEID));
 
-        // The files belonging to portfolio items deliberately live in the owner's user context.
-        // Keep that source context in the XML so restore can direct the explicitly annotated files
-        // to the mapped owner's user context rather than to the restored block context.
-        if ($includeusers) {
-            $item->set_source_sql(
-                'SELECT i.*, ctx.id AS usercontextid
-                   FROM {block_exaportitem} i
-                   JOIN {context} ctx ON ctx.contextlevel = :userlevel AND ctx.instanceid = i.userid
-                  WHERE i.courseid = :courseid',
-                // Positive scalar source parameters are otherwise interpreted as element paths.
-                array('userlevel' => array('sqlparam' => CONTEXT_USER), 'courseid' => backup::VAR_COURSEID)
-            );
-            $contentblock->set_source_table('block_exaportitemblock', array('itemid' => backup::VAR_PARENTID));
-            $item->annotate_ids('user', 'userid');
-        }
-
-        // backup_nested_element::annotate_files() always searches the task (block) context. Exaport
-        // files are intentionally held in user contexts, so explicitly add them to Moodle's normal
-        // backup file pool using their real contexts. This preserves deduplication and avoids either
-        // copying data into a course context or embedding file bytes in exaport.xml.
-        if ($includeusers) {
-            $backupid = $this->get_task()->get_backupid();
-            $items = $DB->get_records('block_exaportitem', array('courseid' => $courseid), '', 'id, userid');
-            foreach ($items as $itemrecord) {
-                $usercontextid = context_user::instance((int)$itemrecord->userid)->id;
-                backup_structure_dbops::annotate_files(
-                    $backupid, $usercontextid, 'block_exaport', 'item_file', (int)$itemrecord->id
-                );
-                $blocks = $DB->get_records('block_exaportitemblock', array('itemid' => $itemrecord->id), '', 'id');
-                foreach ($blocks as $blockrecord) {
-                    foreach (array('item_content_file', 'item_content_text') as $filearea) {
-                        backup_structure_dbops::annotate_files(
-                            $backupid, $usercontextid, 'block_exaport', $filearea, (int)$blockrecord->id
-                        );
-                    }
-                }
-            }
-        }
+        // Personal portfolio items and their user-context files are outside course backups.
 
         // Return the root element.
         return $this->prepare_block_structure($exaport);

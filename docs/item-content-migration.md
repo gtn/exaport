@@ -38,7 +38,8 @@ File blocks use `item_content_file/<block id>` and embedded text-editor files us
 The `attachment` column is retained as opaque historical metadata. Its value is
 not moved into a block, interpreted as a File API ID, or used by current content
 readers and visibility filters. Migration and later item edits preserve existing
-values verbatim; item/category copies and Moodle backup/restore preserve them too.
+values verbatim; item/category copies preserve them too. Moodle course backups
+exclude personal portfolio items, as described in [course backup scope](course-backup.md).
 New items created from scratch initialize the field to an empty string. Keeping
 the metadata permits later investigation without requiring every installation to
 have a pre-upgrade backup. It does not itself restore historical OEZ visibility:
@@ -255,7 +256,7 @@ compliance, and cleanup boundaries. It is not an ordinary-runtime fallback:
 | Compatibility path | Source | Why retained now | Future Phase 10B review |
 |---|---|---|---|
 | Authorized legacy `item_file` pluginfile serving | `lib.php` | Previously issued, permission-checked file URLs can continue resolving while residual storage exists. | Remove the route only with a separately reviewed compatibility policy. |
-| Upgrade and restore conversion | `db/upgradelib.php`, `backup/moodle2/restore_exaport_stepslib.php` | Upgrade converts stored legacy sources; restore converts legacy backup data after restoration. | Keep historical upgrade logic and supported old-backup conversion. |
+| Upgrade conversion | `db/upgradelib.php` | Upgrade converts stored legacy sources. | Keep historical upgrade logic. |
 | Migration audit | `classes/local/item_content_audit.php` | Administrators need privacy-safe evidence of residual data. | Retain until schema and storage cleanup is complete. |
 | Legacy file deletion cleanup | `lib/lib.php` | Deletion must remove both modern and residual storage to avoid orphaned private files. | Retain until legacy serving/storage is conclusively retired. |
 | Privacy export of residual `item_file` | `classes/privacy/provider.php` | Data-subject exports must include retained legacy user data. | Remove only when storage is absent and the privacy impact is reviewed. |

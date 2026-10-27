@@ -416,14 +416,20 @@ final class category_helper_test extends \advanced_testcase {
 
         $this->assertStringContainsString('fa-share-nodes', $icon);
         $this->assertStringContainsString('icon-shared', $icon);
-        $this->assertStringContainsString('data-bs-toggle = "tooltip"', $icon);
-        $this->assertStringContainsString('data-bs-placement = "top"', $icon);
-        $this->assertStringContainsString('data-bs-html = "true"', $icon);
-        $this->assertStringContainsString(
-            'data-bs-title = "' . s(block_exaport_get_share_tooltip($share)) . '"',
-            $icon
-        );
-        $this->assertStringNotContainsString(' title = "', $icon);
+        $document = new \DOMDocument();
+        $document->loadHTML('<?xml encoding="UTF-8">' . $icon);
+        $xpath = new \DOMXPath($document);
+        $targets = $xpath->query('//span[@data-bs-toggle="tooltip"]');
+
+        // Replacing child icons must not remove the tooltip's target or its handlers.
+        $this->assertCount(1, $targets);
+        $target = $targets->item(0);
+        $this->assertSame(1, $xpath->query('.//i', $target)->length);
+        $this->assertSame(0, $xpath->query('.//*[@data-bs-toggle="tooltip"]', $target)->length);
+        $this->assertSame('top', $target->getAttribute('data-bs-placement'));
+        $this->assertSame('true', $target->getAttribute('data-bs-html'));
+        $this->assertSame(block_exaport_get_share_tooltip($share), $target->getAttribute('data-bs-title'));
+        $this->assertFalse($target->hasAttribute('title'));
     }
 
     /**
@@ -444,7 +450,7 @@ final class category_helper_test extends \advanced_testcase {
 
         $this->assertStringContainsString('&amp;lt;Test&amp;gt;', $icon);
         $this->assertStringContainsString('&amp;amp;', $icon);
-        $this->assertStringNotContainsString('data-bs-title = "Alice <Test>', $icon);
+        $this->assertStringNotContainsString('data-bs-title="Alice <Test>', $icon);
     }
 
     /**

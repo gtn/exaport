@@ -885,16 +885,7 @@ if ($type === 'extern_category') {
 }
 
 $PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);
-$PAGE->requires->js_amd_inline('
-    document.addEventListener("DOMContentLoaded", function () {
-        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) {
-            return;
-        }
-        document.querySelectorAll("[data-bs-toggle=\'tooltip\']").forEach(function (el) {
-            bootstrap.Tooltip.getOrCreateInstance(el);
-        });
-    });
-');
+// Boost initializes static tooltips; sharing targets survive Font Awesome's SVG conversion.
 
 if ($layout == 'folder' && !($type === 'extern_category')) {
     echo '<div class="excomdos_cat">';

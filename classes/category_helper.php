@@ -25,7 +25,7 @@ class category_helper {
 
     /**
      * Check thumbnail access using the same shared roots as category navigation.
-     * The upload visibility setting deliberately does not hide existing images.
+     * Display visibility is handled separately; this method checks permission to read a file.
      *
      * @param \stdClass $category Category loaded from the database.
      * @param string $access External category hash, or empty for internal access.

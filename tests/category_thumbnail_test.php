@@ -93,7 +93,7 @@ final class category_thumbnail_test extends \advanced_testcase {
         $this->assertFalse(category_helper::can_access_thumbnail($child, $access));
     }
 
-    public function test_hidden_uploads_preserve_card_preview_and_legacy_merge_value_is_ignored(): void {
+    public function test_setting_hides_existing_previews_without_deleting_them(): void {
         global $DB, $PAGE;
         $category = $this->category();
         $file = get_file_storage()->create_file_from_string([
@@ -101,7 +101,7 @@ final class category_thumbnail_test extends \advanced_testcase {
             'component' => 'block_exaport', 'filearea' => 'category_icon', 'itemid' => $category->id,
             'filepath' => '/', 'filename' => 'picture name.png', 'mimetype' => 'image/png',
         ], base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jWioAAAAASUVORK5CYII='));
-        set_config('hide_category_thumbnail', 1, 'block_exaport');
+        set_config('hide_category_thumbnail', 0, 'block_exaport');
         $category->url = '/category';
         $category->icon = block_exaport_get_category_icon($category);
         $category->iconmerge = 1; // Historical values must not suppress or composite the image.
@@ -110,13 +110,22 @@ final class category_thumbnail_test extends \advanced_testcase {
         $card = new \block_exaport\output\category_card($category, 1, 'shared', $category);
         $html = $output->render($card);
 
-        $this->assertFalse(block_exaport_category_thumbnail_enabled());
+        $this->assertTrue(block_exaport_category_thumbnail_enabled());
         $this->assertStringContainsString('picture%20name.png', $category->icon);
         $this->assertStringContainsString('eportfolio-card-thumbnail-image', $html);
         $this->assertStringContainsString('col-card-folder', $html);
         $this->assertStringNotContainsString('<canvas', $html);
         $this->assertSame(1, (int)$DB->get_field('block_exaportcate', 'iconmerge', ['id' => $category->id]));
         $this->assertTrue($file->is_valid_image());
+
+        set_config('hide_category_thumbnail', 1, 'block_exaport');
+        $this->assertNull(block_exaport_get_category_icon($category));
+        // Rendering must also ignore a URL resolved before the administrator hid thumbnails.
+        $this->assertStringNotContainsString('eportfolio-card-thumbnail-image', $output->render($card));
+        $this->assertTrue(get_file_storage()->file_exists_by_hash($file->get_pathnamehash()));
+        set_config('hide_category_thumbnail', 0, 'block_exaport');
+        $this->assertSame($category->icon, block_exaport_get_category_icon($category));
+        $this->assertStringContainsString('eportfolio-card-thumbnail-image', $output->render($card));
 
         $parenttile = new \block_exaport\output\category_card($category, 1, 'shared', $category, $category);
         $this->assertStringNotContainsString('eportfolio-card-thumbnail-image', $output->render($parenttile));

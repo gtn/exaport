@@ -314,6 +314,10 @@ function block_exaport_get_item_single_file($item) {
 }
 
 function block_exaport_get_category_icon($category, string $access = '') {
+    // Apply the display setting to every layout without touching the stored image.
+    if (!block_exaport_category_thumbnail_enabled()) {
+        return null;
+    }
     $fs = get_file_storage();
 
     $file = current($fs->get_area_files(context_user::instance($category->userid)->id, 'block_exaport', 'category_icon',

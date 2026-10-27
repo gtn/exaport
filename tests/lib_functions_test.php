@@ -62,6 +62,18 @@ final class lib_functions_test extends \advanced_testcase {
         $this->assertTrue(block_exaport_category_thumbnail_enabled());
     }
 
+    public function test_category_thumbnail_visibility_respects_forced_boolean_configuration(): void {
+        global $CFG;
+        foreach ([false, 0, '0'] as $value) {
+            $CFG->forced_plugin_settings['block_exaport']['hide_category_thumbnail'] = $value;
+            $this->assertTrue(block_exaport_category_thumbnail_enabled());
+        }
+        foreach ([true, 1, '1'] as $value) {
+            $CFG->forced_plugin_settings['block_exaport']['hide_category_thumbnail'] = $value;
+            $this->assertFalse(block_exaport_category_thumbnail_enabled());
+        }
+    }
+
     public function test_item_display_defaults_use_safe_fallbacks(): void {
         unset_config('default_layout', 'block_exaport');
         unset_config('default_folderlayout', 'block_exaport');

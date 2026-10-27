@@ -323,7 +323,7 @@ function block_exaport_get_category_icon($category, string $access = '') {
     $file = current($fs->get_area_files(context_user::instance($category->userid)->id, 'block_exaport', 'category_icon',
         $category->id, 'itemid', false));
     if ($file) {
-        // The file endpoint checks category access; the URL alone must never grant it.
+        // File delivery validates the viewer's permission or the supplied external sharing token.
         $url = moodle_url::make_pluginfile_url($file->get_contextid(), 'block_exaport', 'category_icon',
             $file->get_itemid(), $file->get_filepath(), $file->get_filename());
         if ($access !== '') {
@@ -551,8 +551,9 @@ function block_exaport_external_comments_enabled() {
 }
 
 function block_exaport_category_thumbnail_enabled(): bool {
-    // Opt in explicitly: missing configuration must match the admin setting's hidden default.
-    return (string)get_config('block_exaport', 'hide_category_thumbnail') === '0';
+    // Reading the object distinguishes a missing setting from an explicitly forced boolean false.
+    $config = get_config('block_exaport');
+    return isset($config->hide_category_thumbnail) && !$config->hide_category_thumbnail;
 }
 
 /**

@@ -56,6 +56,83 @@ final class category_thumbnail_test extends \advanced_testcase {
         $this->assertTrue(category_helper::can_access_thumbnail($privateparent));
     }
 
+    public function test_shared_parent_never_grants_access_across_owners(): void {
+        global $DB;
+        $shared = $this->category(0, 1);
+        $DB->insert_record('block_exaportcatshar', ['catid' => $shared->id, 'userid' => $this->recipient->id]);
+        $otherowner = $this->getDataGenerator()->create_user();
+        // Simulate inconsistent legacy data that normal category creation would reject.
+        $foreignid = $this->create_category($otherowner, 'Private foreign category', $shared->id);
+        $foreign = $DB->get_record('block_exaportcate', ['id' => $foreignid], '*', MUST_EXIST);
+        $child = $this->category($foreignid);
+
+        $this->assertFalse(category_helper::can_access_thumbnail($foreign));
+        $this->assertFalse(category_helper::can_access_thumbnail($child));
+
+        $DB->set_field('block_exaportcate', 'externaccess', 1, ['id' => $shared->id]);
+        $access = 'hash/' . $shared->userid . '-' . $shared->hash;
+        $this->assertFalse(category_helper::can_access_thumbnail($foreign, $access));
+        $this->assertFalse(category_helper::can_access_thumbnail($child, $access));
+    }
+
+    public function test_private_category_cycle_fails_closed(): void {
+        global $DB;
+        $first = $this->category();
+        $second = $this->category($first->id);
+        $DB->set_field('block_exaportcate', 'pid', $second->id, ['id' => $first->id]);
+        $first->pid = $second->id;
+
+        $this->assertFalse(category_helper::can_access_thumbnail($first));
+    }
+
+    public function test_unrelated_shared_categories_do_not_increase_permission_queries(): void {
+        global $DB;
+        $target = $this->category(0, 1);
+        $DB->insert_record('block_exaportcatshar', ['catid' => $target->id, 'userid' => $this->recipient->id]);
+        set_config('hide_category_thumbnail', 0, 'block_exaport');
+        // Warm Moodle's configuration caches before comparing database reads.
+        $this->assertTrue(category_helper::can_access_thumbnail($target));
+        $reads = $DB->perf_get_reads();
+        $this->assertTrue(category_helper::can_access_thumbnail($target));
+        $before = $DB->perf_get_reads() - $reads;
+
+        for ($i = 0; $i < 30; $i++) {
+            $other = $this->category(0, 1);
+            $DB->insert_record('block_exaportcatshar', ['catid' => $other->id, 'userid' => $this->recipient->id]);
+        }
+        $this->assertTrue(category_helper::can_access_thumbnail($target));
+        $reads = $DB->perf_get_reads();
+        $this->assertTrue(category_helper::can_access_thumbnail($target));
+        $this->assertSame($before, $DB->perf_get_reads() - $reads);
+    }
+
+    public function test_teacher_access_requires_trust_student_relationship_and_setting(): void {
+        global $DB, $CFG;
+        $field = $this->getDataGenerator()->create_custom_profile_field([
+            'datatype' => 'checkbox', 'shortname' => 'blockexaporttrustedteacher', 'name' => 'Trusted teacher',
+        ]);
+        $teacher = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'teacher');
+        $this->getDataGenerator()->enrol_user($this->owner->id, $course->id, 'student');
+        $DB->insert_record('user_info_data', [
+            'userid' => $teacher->id, 'fieldid' => $field->id, 'data' => '1', 'dataformat' => 0,
+        ]);
+        $category = $this->category();
+        $otherid = $this->create_category($this->recipient);
+        $other = $DB->get_record('block_exaportcate', ['id' => $otherid], '*', MUST_EXIST);
+        $this->setUser($teacher);
+        $CFG->block_exaport_teachercanseeartifactsofstudents = 1;
+
+        $this->assertTrue(category_helper::can_access_thumbnail($category));
+        $this->assertFalse(category_helper::can_access_thumbnail($other));
+        $DB->set_field('user_info_data', 'data', '0', ['userid' => $teacher->id, 'fieldid' => $field->id]);
+        $this->assertFalse(category_helper::can_access_thumbnail($category));
+        $DB->set_field('user_info_data', 'data', '1', ['userid' => $teacher->id, 'fieldid' => $field->id]);
+        $CFG->block_exaport_teachercanseeartifactsofstudents = 0;
+        $this->assertFalse(category_helper::can_access_thumbnail($category));
+    }
+
     public function test_cohort_and_shareall_access_follow_existing_sharing_settings(): void {
         global $DB, $CFG;
         $category = $this->category(0, 1);

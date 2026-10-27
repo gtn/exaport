@@ -1,15 +1,24 @@
 ### v5.2 (2026102100) ###
-* Preserve historical item attachment metadata during migration, edits, and copies; retained markers do not cause migration or audit warnings.
-
-### v5.2 (2026092909) ###
-* SCORM ZIP exports include uncategorized root items while retaining the selected collection and owner restrictions.
-* ZIP exports use relative directory entries; imports accept the historical `/categories/` marker while rejecting unsafe paths before extraction.
-* Item attachment delivery sanitises HTML across pluginfile and compatibility routes, enforces shared-view item membership, and versions structured file URLs by content hash.
-* Structured blocks are now the authoritative item-content model for rendering, thumbnails, copying, imports, exports, privacy, and deletion. See [structured content export](docs/structured-content-export.md).
-* Migration moves meaningful parent URLs and real `item_file` files, verifies each copied file before deleting its legacy source, and keeps migrated OEZ/ePOP items visible.
-* Migration is restart-safe, uses one transaction per item, processes up to 500 items per batch, and renews the 1,800-second timeout for every non-empty batch. See [item-content migration](docs/item-content-migration.md).
-* A read-only administrator migration audit is available. Back up the database and Moodledata first; use a supervised CLI upgrade for large sites.
-* Ordinary legacy rendering and legacy copy writes are removed. Schema cleanup and removal of remaining compatibility code are deferred.
+* Requires Moodle 5.2.
+* Reworked portfolio items to support multiple ordered text, link, and file content blocks. Blocks can be added, edited, and deleted through modal forms, including rich text with embedded files.
+* Reorganized item editing into collapsible sections for settings, content, competencies, and sharing.
+* Added immediate saving of competency selections, clearer competency summaries and badges, and improved comment display. Existing competency assignments are preserved when editing.
+* Unified sharing controls for items, categories, and views, with clearer status indicators and consistent saving. Turning off "Enable sharing" makes the view private, overriding all individual sharing options.
+* Structured blocks are now the authoritative item-content model for rendering, thumbnails, copying, imports, exports, integrations, privacy, and deletion. Ordinary legacy rendering and legacy copy writes have been removed; schema cleanup and removal of remaining compatibility code are deferred.
+* Portfolio cards now show image thumbnails again, using custom item icons or attached images and respecting sharing permissions.
+* Automatically migrate existing item links and files to structured blocks. Migration moves meaningful parent URLs and actual legacy `item_file` files, verifies copied file contents before deleting legacy sources, and keeps migrated OEZ/ePOP items visible.
+* Migration is restart-safe, uses one transaction per item, processes up to 500 items per batch, and renews the 1,800-second timeout for every non-empty batch.
+* Preserve historical attachment metadata during migration, edits, and copies without treating it as active content or a migration/audit warning.
+* Added a read-only administrator item-content audit with historical migration results, optional item filtering, and JSON download.
+* Reworked SCORM ZIP export/import to preserve structured content, embedded files, block order, and nested paths. Exports include uncategorized root items and respect collection and owner restrictions.
+* ZIP exports now use relative directory entries. Imports accept the historical `/categories/` marker while rejecting unsafe paths before extraction.
+* Fixed item and category copying to preserve structured content while assigning new item identities. Centralized deletion cleans up content blocks, files, and related records.
+* Strengthened item editing, competency selection, webservice ownership checks, and upload quota enforcement.
+* Item attachment delivery sanitizes HTML across pluginfile and compatibility routes, enforces shared-view item membership, and versions structured file URLs by content hash. Fixed authenticated download URLs.
+* Fixed uncategorized root items missing from the all-items webservice.
+* Fixed privacy export and deletion handling for course data on Moodle 4.2 and later, including structured content and files.
+* Prevent duplicate course template and distribution-setting backups when a course contains multiple Exaport blocks. Course backups continue to exclude personal portfolio items and files.
+* Optional Exacomp integration requires Exacomp 2026101903 or later. Update Exacomp first, then Exaport, or deploy both together.
 
 ### v5.1 (2026090800) ###
 * Unified sharing overhaul for items, views, and categories, including consistent access checks, audience resolution, sharing indicators, notifications, and overview pages.

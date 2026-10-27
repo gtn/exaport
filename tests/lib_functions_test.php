@@ -48,6 +48,20 @@ final class lib_functions_test extends \advanced_testcase {
         $this->assertSame('all', $preferences['block_exaport_entrytype']['default']);
     }
 
+    public function test_category_thumbnail_visibility_follows_admin_configuration(): void {
+        unset_config('hide_category_thumbnail', 'block_exaport');
+        $this->assertTrue(block_exaport_category_thumbnail_enabled());
+
+        set_config('hide_category_thumbnail', 0, 'block_exaport');
+        $this->assertTrue(block_exaport_category_thumbnail_enabled());
+
+        set_config('hide_category_thumbnail', 1, 'block_exaport');
+        $this->assertFalse(block_exaport_category_thumbnail_enabled());
+
+        set_config('hide_category_thumbnail', 0, 'block_exaport');
+        $this->assertTrue(block_exaport_category_thumbnail_enabled());
+    }
+
     public function test_item_display_defaults_use_safe_fallbacks(): void {
         unset_config('default_layout', 'block_exaport');
         unset_config('default_folderlayout', 'block_exaport');

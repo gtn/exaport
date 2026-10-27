@@ -3326,6 +3326,14 @@ return [
         'Hierarchische Ordner',
         'Hierarchical folders',
     ],
+    'settings_hide_category_thumbnail' => [
+        'Vorschaubild im Kategorieformular ausblenden',
+        'Hide thumbnail in category form',
+    ],
+    'settings_hide_category_thumbnail_description' => [
+        'Blendet beim Erstellen oder Bearbeiten von Kategorien das Hochladen eines Vorschaubilds und die Option zum Zusammenführen mit dem Ordnersymbol aus. Bereits hochgeladene Vorschaubilder bleiben erhalten und werden weiterhin angezeigt.',
+        'Hide the thumbnail upload and the icon-merge option when creating or editing categories. Already uploaded thumbnails are kept and continue to be displayed.',
+    ],
     'areaisdisabled' => [
         'Dieser Bereich wurde von der Administration deaktiviert.',
         'This area has been disabled by the administrator.',

@@ -546,6 +546,10 @@ function block_exaport_external_comments_enabled() {
     return empty($CFG->block_exaport_disable_external_comments);
 }
 
+function block_exaport_category_thumbnail_enabled(): bool {
+    return !get_config('block_exaport', 'hide_category_thumbnail');
+}
+
 /**
  * Generate a unique 8-character hex hash for the given table's hash column.
  *

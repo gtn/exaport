@@ -94,11 +94,11 @@ $context = context_system::instance();
 // Fall back to stored user preferences when not provided via URL.
 $layoutfromurl = $layout;
 if (!$layout) {
-    $layout = get_user_preferences('block_exaport_layout', 'folder');
+    $layout = get_user_preferences('block_exaport_layout', block_exaport_get_default_layout());
 }
 $folderlayoutfromurl = $folderlayout;
 if (!$folderlayout) {
-    $folderlayout = get_user_preferences('block_exaport_folderlayout', 'tiles');
+    $folderlayout = get_user_preferences('block_exaport_folderlayout', block_exaport_get_default_folderlayout());
 }
 $sortfromurl = $sort;
 if (!$sort) {
@@ -138,10 +138,10 @@ if (in_array($layout, ['tiles', 'details'])) {
     $layout = 'folder';
 }
 if (!in_array($layout, ['folder', 'flat'])) {
-    $layout = 'folder';
+    $layout = block_exaport_get_default_layout();
 }
-if ($folderlayout != 'details') {
-    $folderlayout = 'tiles';
+if (!in_array($folderlayout, ['tiles', 'details'])) {
+    $folderlayout = block_exaport_get_default_folderlayout();
 }
 // Persist preferences on page load when explicitly provided via URL.
 if ($layoutfromurl !== '') {

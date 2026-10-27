@@ -3286,6 +3286,46 @@ return [
         'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren für eine übersichtlichere Ansicht ohne Kurs-Tabs.',
         'When enabled, the Moodle course navigation bar (Course, Participants, Grades, etc.) is shown on ePortfolio pages. Disable to show a cleaner interface without course tabs.',
     ],
+    'settings_items_display_defaults_heading' => [
+        'Standarddarstellung der Eintragsliste',
+        'Item list display defaults',
+    ],
+    'settings_items_display_defaults_description' => [
+        'Diese Standardwerte gelten nur für Personen, die noch kein Layout gewählt haben. Die Darstellung kann jederzeit geändert werden; die eigene gespeicherte Auswahl hat immer Vorrang.',
+        'These defaults apply only to users who have not yet chosen a layout. Users can always change the display, and their saved choice takes precedence.',
+    ],
+    'settings_default_folderlayout' => [
+        'Standarddarstellung in Ordnern',
+        'Default folder display',
+    ],
+    'settings_default_folderlayout_description' => [
+        'Darstellung der Einträge innerhalb von Ordnern, wenn noch keine persönliche Einstellung vorhanden ist.',
+        'How items are displayed within folders when no user preference exists.',
+    ],
+    'settings_default_folderlayout_details' => [
+        'Details',
+        'Details',
+    ],
+    'settings_default_folderlayout_tiles' => [
+        'Kacheln',
+        'Tiles',
+    ],
+    'settings_default_layout' => [
+        'Standardlayout der Eintragsliste',
+        'Default item list layout',
+    ],
+    'settings_default_layout_description' => [
+        'Legt fest, ob die Einträge in hierarchischen Ordnern oder als flache Liste angezeigt werden, wenn noch keine persönliche Einstellung vorhanden ist.',
+        'Whether the item list uses hierarchical folders or a flat list when no user preference exists.',
+    ],
+    'settings_default_layout_flat' => [
+        'Flach',
+        'Flat',
+    ],
+    'settings_default_layout_folder' => [
+        'Hierarchische Ordner',
+        'Hierarchical folders',
+    ],
     'areaisdisabled' => [
         'Dieser Bereich wurde von der Administration deaktiviert.',
         'This area has been disabled by the administrator.',

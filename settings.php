@@ -211,6 +211,27 @@ if ($ADMIN->fulltree) {
         get_string('settings_show_course_navbar_head', 'block_exaport'),
         get_string('settings_show_course_navbar_body', 'block_exaport'), 1));
 
+    // Default display of the item list.
+    $settings->add(new admin_setting_heading('exaport/items_display_defaults',
+        get_string('settings_items_display_defaults_heading', 'block_exaport'),
+        get_string('settings_items_display_defaults_description', 'block_exaport')));
+    $settings->add(new admin_setting_configselect('block_exaport/default_layout',
+        get_string('settings_default_layout', 'block_exaport'),
+        get_string('settings_default_layout_description', 'block_exaport'),
+        'folder',
+        [
+            'folder' => get_string('settings_default_layout_folder', 'block_exaport'),
+            'flat' => get_string('settings_default_layout_flat', 'block_exaport'),
+        ]));
+    $settings->add(new admin_setting_configselect('block_exaport/default_folderlayout',
+        get_string('settings_default_folderlayout', 'block_exaport'),
+        get_string('settings_default_folderlayout_description', 'block_exaport'),
+        'tiles',
+        [
+            'tiles' => get_string('settings_default_folderlayout_tiles', 'block_exaport'),
+            'details' => get_string('settings_default_folderlayout_details', 'block_exaport'),
+        ]));
+
     // View custom template settings
     $settings->add(new admin_setting_heading('exaport/layout_settings',
         get_string('settings_layout_settings_heading', 'block_exaport'),

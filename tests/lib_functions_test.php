@@ -48,6 +48,58 @@ final class lib_functions_test extends \advanced_testcase {
         $this->assertSame('all', $preferences['block_exaport_entrytype']['default']);
     }
 
+    public function test_item_display_defaults_use_safe_fallbacks(): void {
+        unset_config('default_layout', 'block_exaport');
+        unset_config('default_folderlayout', 'block_exaport');
+        $this->assertSame('folder', block_exaport_get_default_layout());
+        $this->assertSame('tiles', block_exaport_get_default_folderlayout());
+
+        foreach (['', 'invalid', 'FOLDER', '0'] as $value) {
+            set_config('default_layout', $value, 'block_exaport');
+            set_config('default_folderlayout', $value, 'block_exaport');
+            $this->assertSame('folder', block_exaport_get_default_layout());
+            $this->assertSame('tiles', block_exaport_get_default_folderlayout());
+        }
+    }
+
+    public function test_item_display_defaults_follow_admin_configuration(): void {
+        foreach (['folder' => 'tiles', 'flat' => 'details'] as $layout => $folderlayout) {
+            set_config('default_layout', $layout, 'block_exaport');
+            set_config('default_folderlayout', $folderlayout, 'block_exaport');
+            $this->assertSame($layout, block_exaport_get_default_layout());
+            $this->assertSame($folderlayout, block_exaport_get_default_folderlayout());
+
+            $preferences = block_exaport_user_preferences();
+            $this->assertSame($layout, $preferences['block_exaport_layout']['default']);
+            $this->assertSame($folderlayout, $preferences['block_exaport_folderlayout']['default']);
+            $this->assertSame($layout, get_user_preferences('block_exaport_layout', block_exaport_get_default_layout()));
+            $this->assertSame($folderlayout,
+                get_user_preferences('block_exaport_folderlayout', block_exaport_get_default_folderlayout()));
+            $this->assertNull(get_user_preferences('block_exaport_layout'));
+            $this->assertNull(get_user_preferences('block_exaport_folderlayout'));
+        }
+    }
+
+    public function test_saved_item_display_preferences_override_admin_defaults(): void {
+        set_config('default_layout', 'flat', 'block_exaport');
+        set_config('default_folderlayout', 'details', 'block_exaport');
+        set_user_preference('block_exaport_layout', 'folder');
+        set_user_preference('block_exaport_folderlayout', 'tiles');
+
+        $this->assertSame('folder', get_user_preferences('block_exaport_layout', block_exaport_get_default_layout()));
+        $this->assertSame('tiles',
+            get_user_preferences('block_exaport_folderlayout', block_exaport_get_default_folderlayout()));
+
+        set_config('default_layout', 'folder', 'block_exaport');
+        set_config('default_folderlayout', 'tiles', 'block_exaport');
+        set_user_preference('block_exaport_layout', 'flat');
+        set_user_preference('block_exaport_folderlayout', 'details');
+
+        $this->assertSame('flat', get_user_preferences('block_exaport_layout', block_exaport_get_default_layout()));
+        $this->assertSame('details',
+            get_user_preferences('block_exaport_folderlayout', block_exaport_get_default_folderlayout()));
+    }
+
     protected function setUp(): void {
         global $USER;
         $this->resetAfterTest(true);

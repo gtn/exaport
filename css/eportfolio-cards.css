@@ -110,14 +110,20 @@
 #exaport .col-card-folder .card-eportfolio {
     height: calc(100% - 1.2rem) !important;
 }
-.tooltip .tooltip-inner {
+
+#exaport .col-card-folder .card-eportfolio > .card-footer:last-child {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: calc(.75rem - var(--bs-card-border-width, 1px));
+}
+
+#exaport .tooltip .tooltip-inner {
     text-align: left;
 }
-.tooltiplist {
+#exaport .tooltiplist {
     margin: 0;
     padding-left: 1rem;
 }
-.tooltiplist li {
+#exaport .tooltiplist li {
     margin: 0;
     padding: 0;
 }

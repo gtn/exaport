@@ -155,7 +155,7 @@ class simplehtml_form extends block_exaport_moodleform {
 
         $id = optional_param('id', 0, PARAM_INT);
         $category = $DB->get_record_sql('
-            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash, c.externcomment
+            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.externaccess, c.hash, c.externcomment
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
             ', array($USER->id, $id));
@@ -164,7 +164,6 @@ class simplehtml_form extends block_exaport_moodleform {
             $category->shareall = 0;
             $category->id = 0;
             $category->userid = $USER->id;
-            $category->iconmerge = 0;
             $category->externaccess = 0;
             $category->hash = null;
             $category->externcomment = 0;
@@ -199,19 +198,6 @@ class simplehtml_form extends block_exaport_moodleform {
                     'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
                     'accepted_types' => array('image', 'web_image')));
             $mform->add_exaport_help_button('iconfile', 'forms.category.iconfile');
-
-            //        if (extension_loaded('gd') && function_exists('gd_info')) {
-            // changed into Fontawesome and Javascript
-            $mform->addElement('advcheckbox',
-                'iconmerge',
-                get_string('iconfile_merge', 'block_exaport'),
-                get_string('iconfile_merge_description', 'block_exaport'),
-                array('group' => 1),
-                array(0, 1));
-            $mform->add_exaport_help_button('iconmerge', 'forms.category.iconmerge');
-
-
-            //        };
         }
 
         // Sharing.
@@ -397,84 +383,11 @@ if ($mform->is_cancelled()) {
         (bool)get_config('block_exaport', 'alwaysnotifywhenshare')
     );
 
-    // Icon for item.
+    // Hiding the upload controls must not modify previously saved category images.
     if (block_exaport_category_thumbnail_enabled()) {
         $context = context_user::instance($USER->id);
         $uploadfilesizes = block_exaport_get_filessize_by_draftid($newentry->iconfile);
-        // Merge with folder icon.
-        // FontAwesome icons uses icon merge by JS in Frontend. So, this code is redundant now
-        // (also, from now we have new category field 'iconmerge')
-        /*if (isset($newentry->iconmerge) && $newentry->iconmerge == 1 && $uploadfilesizes > 0) {
-        $fs = get_file_storage();
-        $image = $DB->get_record_sql('SELECT * '.
-                'FROM {files} '.
-                'WHERE contextid = ? '.
-                'AND component = "user" '.
-                'AND filearea="draft" '.
-                'AND itemid = ? '.
-                'AND filename<>"."',
-                array($context->id, $newentry->iconfile));
-        if ($image) {
-            $fileimage = $fs->get_file($context->id, 'user', 'draft', $newentry->iconfile, '/', $image->filename);
-            $imagecontent = $fileimage->get_content();
-            // Merge images.
-            $imicon = imagecreatefromstring($imagecontent);
-            $imfolder = imagecreatefrompng($CFG->dirroot.'/blocks/exaport/pix/folder_tile.png');
-
-            imagealphablending($imfolder, false);
-            imagesavealpha($imfolder, true);
-
-            // Max width/height.
-            $maxwidth = 150;
-            $maxheight = 80;
-            $skew = 10;
-            $imicon = skewscaleimage($imicon, $maxwidth, $maxheight, $skew);
-
-            $swidth = imagesx($imfolder);
-            $sheight = imagesy($imfolder);
-            $owidth = imagesx($imicon);
-            $oheight = imagesy($imicon);
-            $x = 0;
-            $y = 0;
-            // Overlay's opacity (in percent).
-            $opacity = 75;
-
-            // Coordinates - only for current folder icon..
-            imagecopymerge($imfolder,
-                    $imicon,
-                    $swidth / 2 - $owidth / 2,
-                    $sheight / 2 - $oheight / 2 + 10,
-                    0,
-                    0,
-                    $owidth,
-                    $oheight,
-                    $opacity);
-
-            ob_start();
-            imagepng($imfolder);
-            $imagedata = ob_get_contents();
-            ob_end_clean();
-
-            // Simple checking to PNG.
-            if (stripos($imagedata, 'png') == 1) {
-                // Delete old file.
-                $fileimage->delete();
-                // Create file containing new image.
-                $fileinfo = array(
-                        'contextid' => $context->id,
-                        'component' => 'user',
-                        'filearea' => 'draft',
-                        'itemid' => $image->itemid,
-                        'filepath' => '/',
-                        'filename' => $image->filename);
-                $fs->create_file_from_string($fileinfo, $imagedata);
-            };
-            imagedestroy($imicon);
-            imagedestroy($imfolder);
-        };
-    };
-        unset($newentry->iconmerge);*/
-        // Checking userquoata.
+        // Check the user quota before saving the uploaded image.
         $userquotecheck = block_exaport_file_userquotecheck($uploadfilesizes, $newentry->id);
         $filesizecheck = block_exaport_get_maxfilesize_by_draftid_check($newentry->iconfile);
         if ($userquotecheck && $filesizecheck) {
@@ -502,7 +415,7 @@ if ($mform->is_cancelled()) {
     $category = null;
     if ($id = optional_param('id', 0, PARAM_INT)) {
         $category = $DB->get_record_sql('
-            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.iconmerge, c.externaccess, c.hash
+            SELECT c.id, c.userid, c.name, c.pid, c.internshare, c.shareall, c.externaccess, c.hash
             FROM {block_exaportcate} c
             WHERE c.userid = ? AND id = ?
         ', array($USER->id, $id));

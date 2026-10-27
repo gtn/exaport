@@ -275,16 +275,24 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             break;
         case 'category_icon':
             $filename = array_pop($args);
-            $categoryid = array_pop($args);
+            $categoryid = (int)array_pop($args);
+            // External previews carry the category page's hash, within Moodle's guest-login rules.
+            $categoryaccess = optional_param('access', '', PARAM_PATH);
+            $category = $DB->get_record('block_exaportcate', ['id' => $categoryid]);
+            if ($args || !$category || $context->contextlevel !== CONTEXT_USER
+                    || (int)$context->instanceid !== (int)$category->userid
+                    || !\block_exaport\category_helper::can_access_thumbnail($category, $categoryaccess)) {
+                return false;
+            }
 
             // Get file.
             $fs = get_file_storage();
-            $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'category_icon', $categoryid, '/',
+            $file = $fs->get_file($context->id, 'block_exaport', 'category_icon', $categoryid, '/',
                 $filename);
 
-            // Serve file.
-            if ($file) {
-                send_stored_file($file);
+            // Recheck sharing on every request; do not serve arbitrary files from this image area.
+            if ($file && !$file->is_directory() && $file->is_valid_image()) {
+                send_stored_file($file, 0, 0, $forcedownload, $options);
             } else {
                 return false;
             }

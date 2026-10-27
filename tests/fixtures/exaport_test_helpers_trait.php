@@ -66,7 +66,6 @@ trait exaport_test_helpers_trait {
             'shareall'           => $shareall,
             'structure_shareall' => 0,
             'structure_share'    => 0,
-            'iconmerge'          => 0,
             'creatorid'          => $user->id,
             'externaccess'       => $externaccess,
             'hash'               => $hash ?: substr(md5(uniqid()), 0, 8),

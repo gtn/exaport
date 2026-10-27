@@ -306,15 +306,6 @@
     display: block;
 }
 
-#exaport .mergedSvgIcon {
-    bottom: 0;
-    left: 0;
-    margin: auto;
-    position: absolute;
-    right: 0;
-    top: 0;
-}
-
 #exaport .exaport-view-section {
     margin-top: 20px;
 }

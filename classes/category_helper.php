@@ -24,6 +24,48 @@ defined('MOODLE_INTERNAL') || die();
 class category_helper {
 
     /**
+     * Check thumbnail access using the same shared roots as category navigation.
+     * The upload visibility setting deliberately does not hide existing images.
+     *
+     * @param \stdClass $category Category loaded from the database.
+     * @param string $access External category hash, or empty for internal access.
+     * @return bool Whether the current viewer may read the image.
+     */
+    public static function can_access_thumbnail(\stdClass $category, string $access = ''): bool {
+        global $DB, $USER;
+
+        if ($access !== '') {
+            $root = block_exaport_get_category_from_access($access);
+            return $root && in_array((int)$category->id,
+                block_exaport_get_owned_category_tree_ids($root->id, $root->userid), true);
+        }
+        if (!isloggedin() || isguestuser()) {
+            return false;
+        }
+        if ((int)$category->userid === (int)$USER->id) {
+            return true;
+        }
+        if (block_exaport_user_can_see_artifacts_of_students()
+                && isset(block_exaport_get_students_for_teacher()[$category->userid])) {
+            return true;
+        }
+
+        $ownerid = (int)$category->userid;
+        $sharedowners = get_categories_shared_to_user($USER->id);
+        $sharedcategories = $sharedowners[$ownerid]->categories ?? [];
+        $visited = [];
+        // Descendants inherit access, but private ancestors and other owners' folders do not.
+        while ($category && !isset($visited[$category->id])) {
+            $visited[$category->id] = true;
+            if (isset($sharedcategories[$category->id])) {
+                return true;
+            }
+            $category = $DB->get_record('block_exaportcate', ['id' => $category->pid, 'userid' => $ownerid]);
+        }
+        return false;
+    }
+
+    /**
      * Build the single-select options used for category parents.
      *
      * @param int $userid Category owner.

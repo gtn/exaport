@@ -370,14 +370,6 @@ return [
         'Miniaturansicht',
         'Thumbnail',
     ],
-    'iconfile_merge' => [
-        'Symbol mit Ordner-Symbol kombinieren',
-        'Merge this icon picture with the folder icon',
-    ],
-    'iconfile_merge_description' => [
-        'Symbolbild verknüpft sich mit dem Ordner-Symbol.',
-        'Icon picture will try (without any guarantee) to merge with standard folder icon. The icon will be replaced with the new image.',
-    ],
     'firstnameshared' => [
         'Familienname',
         'First Name',
@@ -3331,8 +3323,8 @@ return [
         'Hide thumbnail in category form',
     ],
     'settings_hide_category_thumbnail_description' => [
-        'Blendet beim Erstellen oder Bearbeiten von Kategorien das Hochladen eines Vorschaubilds und die Option zum Zusammenführen mit dem Ordnersymbol aus. Bereits hochgeladene Vorschaubilder bleiben erhalten und werden weiterhin angezeigt.',
-        'Hide the thumbnail upload and the icon-merge option when creating or editing categories. Already uploaded thumbnails are kept and continue to be displayed.',
+        'Blendet beim Erstellen oder Bearbeiten von Kategorien das Hochladen eines Vorschaubilds aus. Bereits hochgeladene Vorschaubilder bleiben erhalten und werden weiterhin angezeigt.',
+        'Hide the thumbnail upload when creating or editing categories. Already uploaded thumbnails are kept and continue to be displayed.',
     ],
     'areaisdisabled' => [
         'Dieser Bereich wurde von der Administration deaktiviert.',

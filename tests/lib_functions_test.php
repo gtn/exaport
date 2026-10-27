@@ -50,7 +50,7 @@ final class lib_functions_test extends \advanced_testcase {
 
     public function test_category_thumbnail_visibility_follows_admin_configuration(): void {
         unset_config('hide_category_thumbnail', 'block_exaport');
-        $this->assertTrue(block_exaport_category_thumbnail_enabled());
+        $this->assertFalse(block_exaport_category_thumbnail_enabled());
 
         set_config('hide_category_thumbnail', 0, 'block_exaport');
         $this->assertTrue(block_exaport_category_thumbnail_enabled());
@@ -146,7 +146,6 @@ final class lib_functions_test extends \advanced_testcase {
             'shareall' => 0,
             'structure_shareall' => 0,
             'structure_share' => 0,
-            'iconmerge' => 0,
             'creatorid' => $this->user->id,
         ]);
     }

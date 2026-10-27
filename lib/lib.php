@@ -3299,6 +3299,26 @@ function block_exaport_add_iconpack($limitFaToExaportContent = true) {
     //$PAGE->requires->css('/blocks/exaport/pix/icons/boxicons/css/boxicons.min.css');
 }
 
+/**
+ * Get the default item list layout for users without a saved preference.
+ *
+ * @return string
+ */
+function block_exaport_get_default_layout(): string {
+    $value = get_config('block_exaport', 'default_layout');
+    return in_array($value, ['folder', 'flat'], true) ? $value : 'folder';
+}
+
+/**
+ * Get the default folder presentation for users without a saved preference.
+ *
+ * @return string
+ */
+function block_exaport_get_default_folderlayout(): string {
+    $value = get_config('block_exaport', 'default_folderlayout');
+    return in_array($value, ['tiles', 'details'], true) ? $value : 'tiles';
+}
+
 function block_exaport_use_bootstrap_layout() {
     return (bool)(strpos(block_exaport_used_layout(), 'bootstrap') !== false);
 }

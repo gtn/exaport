@@ -83,13 +83,15 @@ namespace {
             return '';
         }
 
-        return block_exaport_fontawesome_icon('share-nodes', 'solid', 1, ['icon', 'icon-shared'], [], [
+        $icon = block_exaport_fontawesome_icon('share-nodes', 'solid', 1, ['icon', 'icon-shared']);
+
+        // Font Awesome replaces the icon with SVG. Keep Boost's tooltip on a stable wrapper.
+        // html_writer escapes the attribute; the tooltip builder already escapes names inside its HTML.
+        return html_writer::span($icon, '', [
             'data-bs-toggle' => 'tooltip',
             'data-bs-placement' => 'top',
             'data-bs-html' => 'true',
-            // The icon helper writes attributes verbatim. Encode the already HTML-safe tooltip
-            // once more so entities remain text when Bootstrap renders the HTML tooltip.
-            'data-bs-title' => s(block_exaport_get_share_tooltip($share)),
+            'data-bs-title' => block_exaport_get_share_tooltip($share),
         ]);
     }
 

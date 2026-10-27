@@ -292,6 +292,8 @@
     color: #cccccc;
 }
 
+/* Use the same color before and after Font Awesome replaces font icons with SVG. */
+#exaport .exaport-icon i,
 #exaport .exaport-icon svg {
     color: #7a7a7a;
 }

@@ -189,28 +189,30 @@ class simplehtml_form extends block_exaport_moodleform {
         $mform->getElement('pid')->loadArray(\block_exaport\category_helper::build_parent_options(
             $USER->id, block_exaport_get_string('rootcategory')));
 
-        $mform->addElement('filemanager',
-            'iconfile',
-            get_string('iconfile', 'block_exaport'),
-            null,
-            array('subdirs' => false,
-                'maxfiles' => 1,
-                'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
-                'accepted_types' => array('image', 'web_image')));
-        $mform->add_exaport_help_button('iconfile', 'forms.category.iconfile');
+        if (block_exaport_category_thumbnail_enabled()) {
+            $mform->addElement('filemanager',
+                'iconfile',
+                get_string('iconfile', 'block_exaport'),
+                null,
+                array('subdirs' => false,
+                    'maxfiles' => 1,
+                    'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
+                    'accepted_types' => array('image', 'web_image')));
+            $mform->add_exaport_help_button('iconfile', 'forms.category.iconfile');
 
-        //        if (extension_loaded('gd') && function_exists('gd_info')) {
-        // changed into Fontawesome and Javascript
-        $mform->addElement('advcheckbox',
-            'iconmerge',
-            get_string('iconfile_merge', 'block_exaport'),
-            get_string('iconfile_merge_description', 'block_exaport'),
-            array('group' => 1),
-            array(0, 1));
-        $mform->add_exaport_help_button('iconmerge', 'forms.category.iconmerge');
+            //        if (extension_loaded('gd') && function_exists('gd_info')) {
+            // changed into Fontawesome and Javascript
+            $mform->addElement('advcheckbox',
+                'iconmerge',
+                get_string('iconfile_merge', 'block_exaport'),
+                get_string('iconfile_merge_description', 'block_exaport'),
+                array('group' => 1),
+                array(0, 1));
+            $mform->add_exaport_help_button('iconmerge', 'forms.category.iconmerge');
 
 
-        //        };
+            //        };
+        }
 
         // Sharing.
         $canexternaccess = block_exaport_externaccess_enabled()
@@ -396,12 +398,13 @@ if ($mform->is_cancelled()) {
     );
 
     // Icon for item.
-    $context = context_user::instance($USER->id);
-    $uploadfilesizes = block_exaport_get_filessize_by_draftid($newentry->iconfile);
-    // Merge with folder icon.
-    // FontAwesome icons uses icon merge by JS in Frontend. So, this code is redundant now
-    // (also, from now we have new category field 'iconmerge')
-    /*if (isset($newentry->iconmerge) && $newentry->iconmerge == 1 && $uploadfilesizes > 0) {
+    if (block_exaport_category_thumbnail_enabled()) {
+        $context = context_user::instance($USER->id);
+        $uploadfilesizes = block_exaport_get_filessize_by_draftid($newentry->iconfile);
+        // Merge with folder icon.
+        // FontAwesome icons uses icon merge by JS in Frontend. So, this code is redundant now
+        // (also, from now we have new category field 'iconmerge')
+        /*if (isset($newentry->iconmerge) && $newentry->iconmerge == 1 && $uploadfilesizes > 0) {
         $fs = get_file_storage();
         $image = $DB->get_record_sql('SELECT * '.
                 'FROM {files} '.
@@ -470,18 +473,19 @@ if ($mform->is_cancelled()) {
             imagedestroy($imfolder);
         };
     };
-    unset($newentry->iconmerge);*/
-    // Checking userquoata.
-    $userquotecheck = block_exaport_file_userquotecheck($uploadfilesizes, $newentry->id);
-    $filesizecheck = block_exaport_get_maxfilesize_by_draftid_check($newentry->iconfile);
-    if ($userquotecheck && $filesizecheck) {
-        file_save_draft_area_files($newentry->iconfile,
-            $context->id,
-            'block_exaport',
-            'category_icon',
-            $newentry->id,
-            array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-    };
+        unset($newentry->iconmerge);*/
+        // Checking userquoata.
+        $userquotecheck = block_exaport_file_userquotecheck($uploadfilesizes, $newentry->id);
+        $filesizecheck = block_exaport_get_maxfilesize_by_draftid_check($newentry->iconfile);
+        if ($userquotecheck && $filesizecheck) {
+            file_save_draft_area_files($newentry->iconfile,
+                $context->id,
+                'block_exaport',
+                'category_icon',
+                $newentry->id,
+                array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+        };
+    }
 
     if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
         // Search button pressed -> redirect to the shared search form, exactly like views_mod.php does.
@@ -518,15 +522,17 @@ if ($mform->is_cancelled()) {
     }
 
     // Filemanager for editing icon picture.
-    $draftitemid = file_get_submitted_draft_itemid('iconfile');
-    $context = context_user::instance($USER->id);
-    file_prepare_draft_area($draftitemid,
-        $context->id,
-        'block_exaport',
-        'category_icon',
-        $category->id,
-        array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
-    $category->iconfile = $draftitemid;
+    if (block_exaport_category_thumbnail_enabled()) {
+        $draftitemid = file_get_submitted_draft_itemid('iconfile');
+        $context = context_user::instance($USER->id);
+        file_prepare_draft_area($draftitemid,
+            $context->id,
+            'block_exaport',
+            'category_icon',
+            $category->id,
+            array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+        $category->iconfile = $draftitemid;
+    }
 
     $mform->set_data($category);
     $mform->display();

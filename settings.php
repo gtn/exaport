@@ -231,6 +231,9 @@ if ($ADMIN->fulltree) {
             'tiles' => get_string('settings_default_folderlayout_tiles', 'block_exaport'),
             'details' => get_string('settings_default_folderlayout_details', 'block_exaport'),
         ]));
+    $settings->add(new admin_setting_configcheckbox('block_exaport/hide_category_thumbnail',
+        get_string('settings_hide_category_thumbnail', 'block_exaport'),
+        get_string('settings_hide_category_thumbnail_description', 'block_exaport'), 0));
 
     // View custom template settings
     $settings->add(new admin_setting_heading('exaport/layout_settings',

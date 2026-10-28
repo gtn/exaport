@@ -1073,3 +1073,7 @@ $string['settings_disable_sharegroups_body'] = 'Blendet Gruppenfreigaben für Ka
 $string['sharing_groups_disabled'] = 'Gruppenfreigaben sind durch die Administration deaktiviert. Vorhandene Gruppenzuordnungen bleiben erhalten.';
 
 $string['delete_all_sharegroups'] = 'Alle vorhandenen Gruppenfreigaben für Einträge, Kategorien und Sammelmappen entfernen? Die gespeicherten Gruppenzuordnungen werden gelöscht und nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.';
+
+$string['settings_sharing_courses_with_block_only'] = 'Beim Teilen nur Kurse mit hinzugefügtem Exabis-ePortfolio-Block auflisten';
+$string['other_shared_users_course'] = 'Andere Nutzer/innen';
+$string['settings_sharing_courses_with_block_only_description'] = 'Beschränkt die Kursliste zur Empfängerauswahl auf eingeschriebene Kurse, in denen ein Exabis-ePortfolio-Block direkt hinzugefügt wurde (auch ausgeblendete Blöcke). Bestehende Empfänger außerhalb dieser Kurse bleiben unter "Andere Nutzer/innen" bearbeitbar. Die globale Benutzersuche, bestehende Zugriffsrechte und "Alle mit einem Benutzerkonto" bleiben unverändert.';

@@ -946,7 +946,8 @@ namespace {
                 // so those users are listed in an extra pseudo course to keep them removable.
                 // Categories and items historically never did this and their share forms only
                 // process users coming from the owner's own courses, so enabling it there would
-                // change (not just deduplicate) their behaviour - therefore it stays view-only.
+                // change (not just deduplicate) their default behaviour. When course filtering
+                // is enabled, all entity types need this fallback to preserve excluded shares.
                 'extrausers' => true,
             ],
             'category' => (object)[
@@ -1042,9 +1043,21 @@ namespace {
      * @param int $entityid Id of the entity being edited, 0 for a not yet saved one.
      */
     function block_exaport_ajax_sharing_userlist(string $entitytype, int $entityid) {
+        require_sesskey();
+        echo json_encode(block_exaport_get_sharing_userlist($entitytype, $entityid));
+        exit;
+    }
+
+    /**
+     * Build the current owner's sharing picker, including recipients outside its course list.
+     *
+     * @param string $entitytype One of 'view', 'category', 'item'.
+     * @param int $entityid Entity being edited, or 0 for a new entity.
+     * @return array Course headings and the existing "other users" group.
+     */
+    function block_exaport_get_sharing_userlist(string $entitytype, int $entityid): array {
         global $DB;
 
-        require_sesskey();
         require_capability('block/exaport:shareintern', context_system::instance());
 
         $config = block_exaport_get_sharing_entity_config($entitytype);
@@ -1072,8 +1085,9 @@ namespace {
             }
         }
 
-        // Users the entity is shared to but who are not enrolled in any of the owner's courses.
-        if ($config->extrausers && $sharedusers) {
+        // Filtering is only for browsing. Keep excluded recipients editable and submitted on
+        // save for ALL entity types; otherwise the full-selection save would remove their shares.
+        if ($sharedusers && ($config->extrausers || get_config('block_exaport', 'sharing_courses_with_block_only'))) {
             $extrauserids = array_diff(array_keys($sharedusers), array_keys($sharedusercourseids));
             $extrausers = [];
             if ($extrauserids) {
@@ -1089,9 +1103,11 @@ namespace {
 
                     $extrausers[] = (object)[
                         'id' => $user->id,
-                        'name' => fullname($user),
+                        // The existing JavaScript row renderer inserts this value as HTML.
+                        'name' => s(fullname($user)),
                         'rolename' => '',
                         'shared_to' => true,
+                        'notify_user' => (bool)$sharedusers[$userid]->notify,
                     ];
                 }
             }
@@ -1102,14 +1118,14 @@ namespace {
                 // straight away and marks it open, same as before.
                 $courses = ['-1' => (object)[
                     'id' => -1,
-                    'fullname' => get_string('other_users_course', 'block_exaport'),
+                    'fullname' => get_string(get_config('block_exaport', 'sharing_courses_with_block_only')
+                        ? 'other_shared_users_course' : 'other_users_course', 'block_exaport'),
                     'users' => $extrausers,
                 ]] + $courses;
             }
         }
 
-        echo json_encode(array_values($courses));
-        exit;
+        return array_values($courses);
     }
 
     /**
@@ -1122,9 +1138,8 @@ namespace {
      * for why this split exists.
      *
      * Enforces the exact same ownership/sesskey checks as block_exaport_ajax_sharing_userlist(),
-     * via the same helpers, plus an explicit enrol_get_my_courses() membership check for
-     * $courseid so this endpoint can't be used to peek at users of a course the caller has
-     * nothing to do with.
+     * via the same helpers, plus the filtered enrolled-course list so this endpoint can't be
+     * used to browse excluded courses or users of a course the caller has nothing to do with.
      *
      * The entry points dispatch to this for action=userlistcourse. The action value must not
      * contain an underscore, because the entry points read it with PARAM_ALPHA, which strips
@@ -1143,10 +1158,9 @@ namespace {
         $config = block_exaport_get_sharing_entity_config($entitytype);
         $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
 
-        // Only ever resolve users of courses the current user is actually enrolled in - the same
-        // restriction the eager, all-courses code path used to get "for free" by only ever
-        // looping over enrol_get_my_courses().
-        $mycourses = enrol_get_my_courses();
+        // Apply the same browsing filter to direct AJAX requests, while retaining the owner's
+        // enrolment restriction. This does not restrict direct shares or global user search.
+        $mycourses = exaport_get_shareable_courses_list();
         if (!isset($mycourses[$courseid])) {
             echo json_encode([]);
             exit;
@@ -1577,10 +1591,23 @@ namespace {
      *                   always starts out false here, it is filled in by the caller.
      */
     function exaport_get_shareable_courses_list(): array {
-        global $COURSE;
+        global $COURSE, $DB;
+
+        $mycourses = enrol_get_my_courses(null, 'fullname ASC');
+        if ($mycourses && get_config('block_exaport', 'sharing_courses_with_block_only')) {
+            // Only blocks placed directly in a course count, including hidden blocks. Dashboard
+            // or inherited blocks must not make every course qualify. Intersect with enrolments
+            // so a block's presence never grants access to another course's participant list.
+            $courseids = $DB->get_fieldset_sql("SELECT DISTINCT ctx.instanceid
+                  FROM {context} ctx
+                  JOIN {block_instances} bi ON bi.parentcontextid = ctx.id
+                 WHERE ctx.contextlevel = :contextlevel AND bi.blockname = :blockname",
+                ['contextlevel' => CONTEXT_COURSE, 'blockname' => 'exaport']);
+            $mycourses = array_intersect_key($mycourses, array_flip($courseids));
+        }
 
         $courses = array();
-        foreach (enrol_get_my_courses(null, 'fullname ASC') as $dbcourse) {
+        foreach ($mycourses as $dbcourse) {
             $courses[$dbcourse->id] = (object)array(
                 'id' => $dbcourse->id,
                 'fullname' => $dbcourse->fullname,

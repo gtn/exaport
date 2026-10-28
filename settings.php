@@ -59,6 +59,10 @@ if ($ADMIN->fulltree) {
         get_string('settings_disable_sharegroups_body', 'block_exaport',
             (new moodle_url('/blocks/exaport/admin.php', ['action' => 'remove_sharegroups']))->out()), 0));
 
+    $settings->add(new admin_setting_configcheckbox('block_exaport/sharing_courses_with_block_only',
+        get_string('settings_sharing_courses_with_block_only', 'block_exaport'),
+        get_string('settings_sharing_courses_with_block_only_description', 'block_exaport'), 0));
+
     $settings->add(new admin_setting_configcheckbox('block_exaport_disable_externaccess',
         get_string('settings_disable_externaccess_head', 'block_exaport'),
         get_string('settings_disable_externaccess_body', 'block_exaport'), 0));

@@ -3901,6 +3901,18 @@ return [
         'Teilen mit Gruppen deaktivieren',
         'Disable sharing with groups',
     ],
+    'settings_sharing_courses_with_block_only' => [
+        'Beim Teilen nur Kurse mit hinzugefügtem Exabis-ePortfolio-Block auflisten',
+        'Only list courses with an Exabis ePortfolio block when sharing',
+    ],
+    'other_shared_users_course' => [
+        'Andere Nutzer/innen',
+        'Other users',
+    ],
+    'settings_sharing_courses_with_block_only_description' => [
+        'Beschränkt die Kursliste zur Empfängerauswahl auf eingeschriebene Kurse, in denen ein Exabis-ePortfolio-Block direkt hinzugefügt wurde (auch ausgeblendete Blöcke). Bestehende Empfänger außerhalb dieser Kurse bleiben unter "Andere Nutzer/innen" bearbeitbar. Die globale Benutzersuche, bestehende Zugriffsrechte und "Alle mit einem Benutzerkonto" bleiben unverändert.',
+        'Restrict the course list for selecting recipients to enrolled courses where an Exabis ePortfolio block has been added directly (including hidden blocks). Existing recipients outside those courses remain editable under "Other users". Global user search, existing access and "Everyone with an account" are unchanged.',
+    ],
     'settings_disable_sharegroups_body' => [
         'Blendet Gruppenfreigaben für Kategorien, Einträge und Sammelmappen aus und deaktiviert vorhandene Gruppenzugriffe. Gespeicherte Gruppenzuordnungen werden nach erneutem Aktivieren wieder wirksam, sofern sie nicht geändert oder entfernt wurden. <a href="{$a}">Hier klicken, um vorhandene Gruppenfreigaben zu entfernen.</a>',
         'Hide group sharing for categories, items and collections and deactivate existing group access. Saved group assignments become active again when group sharing is re-enabled, unless they have been changed or removed. <a href="{$a}">Click here to remove existing group shares.</a>',

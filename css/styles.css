@@ -218,7 +218,7 @@ div.item-detail-image img {
 }
 
 .exaport-sharing__recipient-list {
-    max-height: 24rem;
+    max-height: 100rem;
     overflow: auto;
     border: 1px solid #dee2e6;
     border-radius: .25rem;

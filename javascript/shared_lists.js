@@ -14,6 +14,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 // (c) 2016 GTN - Global Training Network GmbH <office@gtn-solutions.com>.
 
+// Shared categories and views have the same course selector and user groups.
 jQueryExaport(function ($) {
 
   $('#block-exaport-courses').change(function () {

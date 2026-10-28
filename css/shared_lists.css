@@ -1,0 +1,31 @@
+/* Shared student groups on the categories and views lists. */
+#exaport .view-group {
+    margin-bottom: 25px;
+}
+
+#exaport .view-group .view-group-content {
+    display: none;
+}
+
+#exaport .view-group-open .view-group-content {
+    display: block;
+}
+
+#exaport .view-group-header {
+    text-align: left;
+    padding: 5px;
+    cursor: pointer;
+}
+
+#exaport .view-group-pic img {
+    vertical-align: middle;
+}
+
+#exaport .view-group-title {
+    padding-left: 30px;
+    background: url('../pix/group_closed.png') no-repeat 15px 5px;
+}
+
+#exaport .view-group-open .view-group-title {
+    background-image: url('../pix/group_open.png');
+}

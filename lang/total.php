@@ -1870,32 +1870,32 @@ return [
         'Disable sharing with all users',
     ],
     'settings_disable_shareall_body' => [
-        'Klicke <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen',
-        'Click <a href="{$a}">here</a>, to remove all global shares',
+        'Deaktiviert „Alle mit einem Benutzerkonto“ für Kategorien, Einträge und Sammelmappen. <a href="{$a}">Vorhandene Freigaben an alle aus Sammelmappen entfernen</a>.',
+        'Disable the "Everyone with an account" audience for categories, items and collections. <a href="{$a}">Remove existing everyone shares from collections</a>.',
     ],
     'settings_disable_externaccess_head' => [
-        'Teilen Option "Externer Zugriff" auf Sammelmappen deaktivieren.',
-        'Disable Sharing-Option "External Access" for collections',
+        'Externen Zugriff deaktivieren',
+        'Disable external access',
     ],
     'settings_disable_externaccess_body' => [
-        '',
-        '',
+        'Deaktiviert öffentliche Freigabelinks für Kategorien und Sammelmappen einschließlich der darin enthaltenen Einträge.',
+        'Disable public sharing links for categories and collections, including access to the items they contain.',
     ],
     'settings_disable_shareemails_head' => [
-        'Teilen Option "Per E-Mail teilen" von Sammelmappen deaktivieren.',
-        'Disable Sharing-Option "Share by Email" for collections',
+        'Teilen von Sammelmappen per E-Mail deaktivieren',
+        'Disable sharing collections by email',
     ],
     'settings_disable_shareemails_body' => [
-        '',
-        '',
+        'Deaktiviert individuelle E-Mail-Freigabelinks für Sammelmappen.',
+        'Disable individual email sharing links for collections.',
     ],
     'settings_disable_external_comments_head' => [
-        'Teilen von Kommentaren in externen Sammelmappen deaktivieren',
-        'Disable sharing of comments in external collections',
+        'Kommentare in extern geteilten Inhalten ausblenden',
+        'Hide comments in externally shared content',
     ],
     'settings_disable_external_comments_body' => [
-        '',
-        '',
+        'Blendet Kommentare beim Zugriff auf Kategorien, Sammelmappen und deren Einträge über öffentliche Freigabelinks aus.',
+        'Hide comments when categories or collections and their items are accessed through public sharing links.',
     ],
     // 'block_exaport_app_externaleportfolio_head' => [
     //     'Dateien in Mahara speichern',
@@ -3896,5 +3896,17 @@ return [
     'exacompupdaterequired' => [
         'Exaport kann mit dem vorhandenen Exacomp nicht installiert oder aktualisiert werden. Bitte aktualisieren Sie zuerst den Exacomp-Code auf Version {$a} oder neuer und starten Sie das Moodle-Upgrade erneut. Exaport kann auch ohne Exacomp verwendet werden.',
         'Exaport cannot be installed or upgraded with the existing Exacomp. Please update the Exacomp code to version {$a} or later first, then retry the Moodle upgrade. Exaport can also be used without Exacomp.',
+    ],
+    'settings_disable_sharegroups_head' => [
+        'Teilen mit Gruppen deaktivieren',
+        'Disable sharing with groups',
+    ],
+    'settings_disable_sharegroups_body' => [
+        'Blendet Gruppenfreigaben für Kategorien, Einträge und Sammelmappen aus und deaktiviert vorhandene Gruppenzugriffe. Gespeicherte Gruppenzuordnungen bleiben erhalten und werden nach Deaktivierung dieser Einstellung wieder wirksam.',
+        'Hide group sharing for categories, items and collections and deactivate existing group access. Saved group assignments are kept and become active again when this setting is disabled.',
+    ],
+    'sharing_groups_disabled' => [
+        'Gruppenfreigaben sind durch die Administration deaktiviert. Vorhandene Gruppenzuordnungen bleiben erhalten.',
+        'Group sharing is disabled by the administrator. Existing group assignments are kept.',
     ],
 ];

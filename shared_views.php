@@ -73,7 +73,7 @@ $views = $DB->get_records_sql("
     FROM {user} u
     JOIN {block_exaportview} v ON u.id=v.userid
     LEFT JOIN {block_exaportviewshar} vshar ON v.id=vshar.viewid AND vshar.userid=?
-    LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid
+    LEFT JOIN {block_exaportviewgroupshar} vgshar ON v.id=vgshar.viewid AND ? = 1
     LEFT JOIN {block_exaportviewshar} vshar_total ON v.id=vshar_total.viewid
     WHERE
         (
@@ -86,7 +86,7 @@ $views = $DB->get_records_sql("
         " . ($userid ? "AND v.userid=" . $userid : '') . " -- user filter
     GROUP BY
         {$viewcolumns}, u.firstname, u.lastname, u.picture
-    $sqlsort", [$USER->id, $USER->id]);
+    $sqlsort", [$USER->id, (int)block_exaport_sharegroups_enabled(), $USER->id]);
 $shareinfos = \block_exaport\share_info::resolve_many('view', $views);
 foreach ($views as $view) {
     $view->shareinfo = $shareinfos[(int)$view->id];

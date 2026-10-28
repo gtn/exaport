@@ -487,13 +487,13 @@ $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
 $string['settings_disable_shareall_head'] = '"Mit allen Benutzer:innen teilen" deaktivieren';
-$string['settings_disable_shareall_body'] = 'Klicke <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen';
-$string['settings_disable_externaccess_head'] = 'Teilen Option "Externer Zugriff" auf Sammelmappen deaktivieren.';
-$string['settings_disable_externaccess_body'] = '';
-$string['settings_disable_shareemails_head'] = 'Teilen Option "Per E-Mail teilen" von Sammelmappen deaktivieren.';
-$string['settings_disable_shareemails_body'] = '';
-$string['settings_disable_external_comments_head'] = 'Teilen von Kommentaren in externen Sammelmappen deaktivieren';
-$string['settings_disable_external_comments_body'] = '';
+$string['settings_disable_shareall_body'] = 'Deaktiviert „Alle mit einem Benutzerkonto“ für Kategorien, Einträge und Sammelmappen. <a href="{$a}">Vorhandene Freigaben an alle aus Sammelmappen entfernen</a>.';
+$string['settings_disable_externaccess_head'] = 'Externen Zugriff deaktivieren';
+$string['settings_disable_externaccess_body'] = 'Deaktiviert öffentliche Freigabelinks für Kategorien und Sammelmappen einschließlich der darin enthaltenen Einträge.';
+$string['settings_disable_shareemails_head'] = 'Teilen von Sammelmappen per E-Mail deaktivieren';
+$string['settings_disable_shareemails_body'] = 'Deaktiviert individuelle E-Mail-Freigabelinks für Sammelmappen.';
+$string['settings_disable_external_comments_head'] = 'Kommentare in extern geteilten Inhalten ausblenden';
+$string['settings_disable_external_comments_body'] = 'Blendet Kommentare beim Zugriff auf Kategorien, Sammelmappen und deren Einträge über öffentliche Freigabelinks aus.';
 // 'block_exaport_app_externaleportfolio_head' => [
 //     'Dateien in Mahara speichern',
 //     'Save files to mahara if checked, save to exaport if not checked',
@@ -1065,3 +1065,9 @@ $string['sharing_audience'] = 'Wer kann darauf zugreifen?';
 $string['sharing_everyone'] = 'Alle mit einem Benutzerkonto';
 
 $string['exacompupdaterequired'] = 'Exaport kann mit dem vorhandenen Exacomp nicht installiert oder aktualisiert werden. Bitte aktualisieren Sie zuerst den Exacomp-Code auf Version {$a} oder neuer und starten Sie das Moodle-Upgrade erneut. Exaport kann auch ohne Exacomp verwendet werden.';
+
+$string['settings_disable_sharegroups_head'] = 'Teilen mit Gruppen deaktivieren';
+
+$string['settings_disable_sharegroups_body'] = 'Blendet Gruppenfreigaben für Kategorien, Einträge und Sammelmappen aus und deaktiviert vorhandene Gruppenzugriffe. Gespeicherte Gruppenzuordnungen bleiben erhalten und werden nach Deaktivierung dieser Einstellung wieder wirksam.';
+
+$string['sharing_groups_disabled'] = 'Gruppenfreigaben sind durch die Administration deaktiviert. Vorhandene Gruppenzuordnungen bleiben erhalten.';

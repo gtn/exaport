@@ -54,6 +54,10 @@ if ($ADMIN->fulltree) {
         get_string('settings_disable_shareall_body', 'block_exaport',
             $CFG->wwwroot . '/blocks/exaport/admin.php?action=remove_shareall&sesskey=' . sesskey()), 0));
 
+    $settings->add(new admin_setting_configcheckbox('block_exaport_disable_sharegroups',
+        get_string('settings_disable_sharegroups_head', 'block_exaport'),
+        get_string('settings_disable_sharegroups_body', 'block_exaport'), 0));
+
     $settings->add(new admin_setting_configcheckbox('block_exaport_disable_externaccess',
         get_string('settings_disable_externaccess_head', 'block_exaport'),
         get_string('settings_disable_externaccess_body', 'block_exaport'), 0));
@@ -64,8 +68,7 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configcheckbox('block_exaport_disable_external_comments',
         get_string('settings_disable_external_comments_head', 'block_exaport'),
-        get_string('settings_disable_external_comments_body', 'block_exaport',
-            $CFG->wwwroot . '/blocks/exaport/admin.php?action=remove_shareall&sesskey=' . sesskey()), 0));
+        get_string('settings_disable_external_comments_body', 'block_exaport'), 0));
 
     /*
     $settings->add(new admin_setting_configcheckbox('block_exaport_app_externaleportfolio',

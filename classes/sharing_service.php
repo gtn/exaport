@@ -31,8 +31,13 @@ final class sharing_service {
 
         $state->externaccess = block_exaport_externaccess_enabled() && !empty($state->externaccess) ? 1 : 0;
         $state->internaccess = !empty($state->internaccess) ? 1 : 0;
-        $state->shareall = block_exaport_shareall_enabled() && $state->internaccess && !empty($state->shareall)
-            ? (int)$state->shareall : 0;
+        $mode = (int)($state->shareall ?? 0);
+        $state->shareall = $state->internaccess && in_array($mode, [0, 1, 2], true) ? $mode : 0;
+        // Everyone and groups have separate feature flags. Keep disabled group mode for the
+        // persistence service to preserve an existing audience without accepting new groups.
+        if ($state->shareall === 1 && !block_exaport_shareall_enabled()) {
+            $state->shareall = 0;
+        }
         $state->externcomment = !empty($state->externcomment) ? 1 : 0;
         $state->sharedemails = block_exaport_shareemails_enabled() && !empty($state->sharedemails) ? 1 : 0;
         return $state;
@@ -65,6 +70,15 @@ final class sharing_service {
         }
 
         $mode = in_array($mode, [0, 1, 2], true) ? $mode : 0;
+        $preservegroups = false;
+        if ($enabled && $mode === 2 && !block_exaport_sharegroups_enabled()) {
+            // A policy toggle must not erase saved audiences or let a stale/forged form replace
+            // them. Only an explicit switch to another audience or sharing-off removes them.
+            $preservegroups = $DB->record_exists($config->groupsharetable, [$config->idfield => $entityid]);
+            if (!$preservegroups) {
+                $enabled = false;
+            }
+        }
         if (!$enabled) {
             $mode = 0;
             $userids = [];
@@ -89,8 +103,10 @@ final class sharing_service {
         block_exaport_sharing_save_direct_user_shares($config, $entityid, $userids, $notifyuserids,
             $extrafields, $alwaysnotify);
 
-        $DB->delete_records($config->groupsharetable, [$config->idfield => $entityid]);
-        if ($enabled && $mode === 2) {
+        if (!$preservegroups) {
+            $DB->delete_records($config->groupsharetable, [$config->idfield => $entityid]);
+        }
+        if ($enabled && $mode === 2 && block_exaport_sharegroups_enabled()) {
             $allowedgroups = block_exaport_get_user_cohorts();
             foreach (array_unique(array_map('intval', $groupids)) as $groupid) {
                 if (!isset($allowedgroups[$groupid])) {

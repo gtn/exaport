@@ -135,16 +135,18 @@ class share_info {
                 $resolved[(int)$user->entityid]->users[] = $user->name;
             }
 
-            $groups = $DB->get_records_sql(
-                "SELECT s.id, s.{$idcolumn} AS entityid, c.name
-                   FROM {{$grouptable}} s
-                   JOIN {cohort} c ON c.id = s.groupid
-                  WHERE s.{$idcolumn} {$insql}
-               ORDER BY c.name",
-                $params
-            );
-            foreach ($groups as $group) {
-                $resolved[(int)$group->entityid]->groups[] = $group->name;
+            if (block_exaport_sharegroups_enabled()) {
+                $groups = $DB->get_records_sql(
+                    "SELECT s.id, s.{$idcolumn} AS entityid, c.name
+                       FROM {{$grouptable}} s
+                       JOIN {cohort} c ON c.id = s.groupid
+                      WHERE s.{$idcolumn} {$insql}
+                   ORDER BY c.name",
+                    $params
+                );
+                foreach ($groups as $group) {
+                    $resolved[(int)$group->entityid]->groups[] = $group->name;
+                }
             }
         }
 

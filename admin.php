@@ -32,7 +32,8 @@ switch ($action) {
     case 'remove_shareall':
         if (optional_param('confirm', 0, PARAM_INT)) {
             require_sesskey();
-            $sql = "UPDATE {block_exaportview} SET shareall=0";
+            // Reset only Everyone shares; group audiences use the same column with value 2.
+            $sql = "UPDATE {block_exaportview} SET shareall=0 WHERE shareall=1";
             $DB->execute($sql);
 
             redirect($backurl);

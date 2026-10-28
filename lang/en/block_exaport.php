@@ -521,13 +521,13 @@ $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
 $string['settings_disable_shareall_head'] = 'Disable sharing with all users';
-$string['settings_disable_shareall_body'] = 'Click <a href="{$a}">here</a>, to remove all global shares';
-$string['settings_disable_externaccess_head'] = 'Disable Sharing-Option "External Access" for collections';
-$string['settings_disable_externaccess_body'] = '';
-$string['settings_disable_shareemails_head'] = 'Disable Sharing-Option "Share by Email" for collections';
-$string['settings_disable_shareemails_body'] = '';
-$string['settings_disable_external_comments_head'] = 'Disable sharing of comments in external collections';
-$string['settings_disable_external_comments_body'] = '';
+$string['settings_disable_shareall_body'] = 'Disable the "Everyone with an account" audience for categories, items and collections. <a href="{$a}">Remove existing everyone shares from collections</a>.';
+$string['settings_disable_externaccess_head'] = 'Disable external access';
+$string['settings_disable_externaccess_body'] = 'Disable public sharing links for categories and collections, including access to the items they contain.';
+$string['settings_disable_shareemails_head'] = 'Disable sharing collections by email';
+$string['settings_disable_shareemails_body'] = 'Disable individual email sharing links for collections.';
+$string['settings_disable_external_comments_head'] = 'Hide comments in externally shared content';
+$string['settings_disable_external_comments_body'] = 'Hide comments when categories or collections and their items are accessed through public sharing links.';
 // 'block_exaport_app_externaleportfolio_head' => [
 //     'Dateien in Mahara speichern',
 //     'Save files to mahara if checked, save to exaport if not checked',
@@ -1105,3 +1105,9 @@ $string['sharing_audience'] = 'Who can access this?';
 $string['sharing_everyone'] = 'Everyone with an account';
 
 $string['exacompupdaterequired'] = 'Exaport cannot be installed or upgraded with the existing Exacomp. Please update the Exacomp code to version {$a} or later first, then retry the Moodle upgrade. Exaport can also be used without Exacomp.';
+
+$string['settings_disable_sharegroups_head'] = 'Disable sharing with groups';
+
+$string['settings_disable_sharegroups_body'] = 'Hide group sharing for categories, items and collections and deactivate existing group access. Saved group assignments are kept and become active again when this setting is disabled.';
+
+$string['sharing_groups_disabled'] = 'Group sharing is disabled by the administrator. Existing group assignments are kept.';

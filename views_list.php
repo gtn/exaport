@@ -128,7 +128,7 @@ if (!$views) {
         if ($view->shareall == 1 && block_exaport_shareall_enabled()) {
             $table->data[$viewi]['accessoptions'] .= '<div>' . get_string("internalaccess", "block_exaport") . ':</div>' .
                 '<div style="padding-left: 10px;">' . get_string("internalaccessall", "block_exaport") . '</div>';
-        } else if ($view->shareall == 2 && block_exaport_shareall_enabled()) {
+        } else if ($view->shareall == 2 && block_exaport_sharegroups_enabled()) {
             // Read groups.
             $query = "SELECT name" .
                 " FROM {cohort} g," .

@@ -1117,3 +1117,7 @@ $string['delete_all_sharegroups'] = 'Remove all existing group shares from items
 $string['settings_sharing_courses_with_block_only'] = 'Only list courses with an Exabis ePortfolio block when sharing';
 $string['other_shared_users_course'] = 'Other users';
 $string['settings_sharing_courses_with_block_only_description'] = 'Restrict the course list for selecting recipients to enrolled courses where an Exabis ePortfolio block has been added directly (including hidden blocks). Existing recipients outside those courses remain editable under "Other users". Global user search, existing access and "Everyone with an account" are unchanged.';
+
+$string['sharing_load_more_users'] = 'Load more users …';
+$string['sharing_load_users_error'] = 'The user list could not be loaded. Please try again.';
+$string['sharing_users_not_ready'] = 'The recipient list is incomplete. Please wait for it to load, or reload the page before saving.';

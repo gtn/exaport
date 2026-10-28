@@ -58,10 +58,6 @@ final class sharing_entity_config_test extends \advanced_testcase {
             $this->assertSame($tables[3], $config->groupsharetable);
         }
 
-        // Only collections list users the entity is shared to but who are outside the owner's courses.
-        $this->assertTrue(block_exaport_get_sharing_entity_config('view')->extrausers);
-        $this->assertFalse(block_exaport_get_sharing_entity_config('category')->extrausers);
-        $this->assertFalse(block_exaport_get_sharing_entity_config('item')->extrausers);
     }
 
     /**

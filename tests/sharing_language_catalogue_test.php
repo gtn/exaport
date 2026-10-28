@@ -55,7 +55,10 @@ final class sharing_language_catalogue_test extends \advanced_testcase {
         $javascript = file_get_contents($plugindir . '/amd/src/sharing_form.js');
         preg_match_all("/\{key:\s*'([^']+)',\s*component:\s*'block_exaport'\}/", $javascript, $jsmatches);
 
-        $keys = array_values(array_unique(array_merge($templatematches[1], $jsmatches[1])));
+        $userlist = file_get_contents($plugindir . '/javascript/exaport.js');
+        preg_match_all("/M\.util\.get_string\('([^']+)',\s*'block_exaport'\)/", $userlist, $userlistmatches);
+
+        $keys = array_values(array_unique(array_merge($templatematches[1], $jsmatches[1], $userlistmatches[1])));
         sort($keys);
         return $keys;
     }

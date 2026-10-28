@@ -168,14 +168,16 @@
       this.userlist_loaded = true;
 
       var $userlist = $('#sharing-userlist');
-      $userlist.html('loading userlist...');
+      var $root = $userlist.closest('[data-region="exaport-sharing"]');
+      var $ready = $root.find('[name="exaport_userlist_ready"]');
+      var initialLoaded = false;
 
       var alwaysNotifyBool = this.always_notify_when_share();
 
-      // courseid => true once that course's users have been fetched (or were embedded directly,
-      // like the "other users" pseudo-course), so re-collapsing/re-expanding a course never
-      // re-fetches it.
-      var loadedCourses = {};
+      // Undefined = unopened; partial = selected recipients only; loading/full = roster state.
+      // Reopening a partial course must not fetch everyone: only its load-more button does that.
+      var courseStates = {};
+      var courseUsers = {};
 
       // Direct user shares are entity-wide (one entity/user relation, not one per course - see
       // block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php), so the same Moodle
@@ -240,26 +242,12 @@
       }
 
       // Wires up all the checkbox behaviours (check-all, entity-wide user/notify sync,
-      // alwaysNotifyBool handling, sharedusersarr pre-check) for one already-rendered course's
+      // alwaysNotifyBool handling) for one already-rendered course's
       // user table. Scoped to $content instead of the whole #sharing-userlist, and called once
       // per rendered course (both for courses rendered eagerly and courses rendered lazily on
       // click), because with lazy-loading not every course's table exists yet when the userlist
       // first renders.
       function wireCourseCheckboxes($content) {
-        // Set default checkboxes for category (undefined in view sharing). Scoped to
-        // ".shareusers" specifically (not just "input:checkbox[value=...]"), because the
-        // notifyusers checkbox for the same user id also carries a matching value="..."
-        // attribute - matching it here used to force-check notify regardless of the actual
-        // notify DB value (see block_exaport_ajax_sharing_userlist_course()'s notify_user,
-        // which renderCourseUsers() already applies correctly), causing a shared user with
-        // notify=0 to render (and then re-save) as notify=1.
-        if (typeof sharedusersarr != 'undefined' && sharedusersarr.length > 0) {
-          $.each(sharedusersarr, function (tmp, userid) {
-            $content.find('input.shareusers:checkbox[value=' + userid + ']').prop("checked", true);
-            selectedUsers[String(userid)] = true;
-          });
-        }
-
         // CHECK ALL button.
         $content.find('.shareusers-check-all').on('click', function () {
           var checked = $(this).is(':checked');
@@ -304,10 +292,20 @@
         }
       }
 
-      // Renders one course's user table into its .course-group-content and (re-)wires its
-      // checkbox behaviours. Factored out so it is shared between the "eagerly render an
-      // already-shared course" and "lazily render on first click" code paths below.
-      function renderCourseUsers($content, courseid, users) {
+      // Reuse the same rows and selection maps for the initial selection and full rosters.
+      function renderCourseUsers($content, courseid, users, complete) {
+        if (complete) {
+          var returnedUsers = {};
+          $.each(users, function (index, user) { returnedUsers[String(user.id)] = true; });
+          // Enrolments, filtering or account status may change while the form is open. A full
+          // roster can omit a saved recipient; never let replacing the table revoke that share.
+          $.each(courseUsers[courseid] || [], function (index, user) {
+            if (selectedUsers[String(user.id)] && !returnedUsers[String(user.id)]) {
+              users.push(user);
+            }
+          });
+        }
+        courseUsers[courseid] = users;
         var html = '';
         if (!$.empty(users)) {
           html += "<table width=\"70%\">";
@@ -317,10 +315,13 @@
           }
           html += "<th align=\"left\">" + $E.translate('name') + "</th><th align=\"right\">" + $E.translate('role') + "</th></tr>";
 
-          html += '<tr><td align=\"center\" width="5%">';
-          html += '<input class="shareusers-check-all" courseid="' + courseid + '" type="checkbox" />';
-          html += "<br />" + $E.translate('checkall');
-          html += "</td></tr>";
+          // A selected-only list must not pretend that every course participant is selected.
+          if (complete && courseid != -1) {
+            html += '<tr><td align=\"center\" width="5%">';
+            html += '<input class="shareusers-check-all" courseid="' + courseid + '" type="checkbox" />';
+            html += "<br />" + $E.translate('checkall');
+            html += "</td></tr>";
+          }
 
           $.each(users, function (tmp, user) {
             var uid = String(user.id);
@@ -345,6 +346,7 @@
               notifyChecked = !!user.notify_user;
               selectedNotifications[uid] = notifyChecked;
             }
+            notifyChecked = checked && (alwaysNotifyBool || notifyChecked);
 
             html += '<tr><td align=\"center\" width="5%">';
             html += '<input class="shareusers" type="checkbox" courseid="' + courseid + '" name="shareusers[' + user.id + ']" ';
@@ -378,91 +380,157 @@
         }
         $content.html(html);
         wireCourseCheckboxes($content);
+        if (!complete) {
+          showCourseAction($content, M.util.get_string('sharing_load_more_users', 'block_exaport'));
+        }
       }
 
-      // Lazily fetches and renders exactly one course's users, unless it was already
-      // loaded/is being loaded - see block_exaport_ajax_sharing_userlist_course() in
-      // lib/sharelib.php for why this is a separate request instead of being part of the
-      // initial courses list.
+      function showCourseAction($content, label, error) {
+        $content.find('.exaport-course-actions').remove();
+        var $actions = $('<div class="exaport-course-actions p-2"></div>');
+        if (error) {
+          $('<div class="text-danger" role="alert"></div>').text(M.util.get_string('sharing_load_users_error', 'block_exaport')).appendTo($actions);
+        }
+        $('<button type="button" class="btn btn-link p-0 exaport-load-course-users"></button>')
+          .text(label).appendTo($actions);
+        $content.append($actions);
+      }
+
+      // Keep the selected-recipient inputs while loading or on failure: they must still submit.
       function loadCourseUsers(courseid, $fieldset) {
-        if (loadedCourses[courseid]) {
+        if (!initialLoaded || courseStates[courseid] === 'full' || courseStates[courseid] === 'loading') {
           return;
         }
-        loadedCourses[courseid] = true;
-
+        var previousState = courseStates[courseid];
+        courseStates[courseid] = 'loading';
         var $content = $fieldset.find('.course-group-content');
-        $content.html('loading users...');
+        showCourseAction($content, M.util.get_string('loading', 'moodle'));
+        $content.attr('aria-busy', 'true').find('.exaport-load-course-users').prop('disabled', true);
 
+        function failed() {
+          courseStates[courseid] = previousState;
+          showCourseAction($content, M.util.get_string('retry', 'moodle'), true);
+        }
         var courseparams = {action: 'userlistcourse', sesskey: M.cfg.sesskey, usercourseid: courseid};
         if (type == 'cat_mod') {
           courseparams.id = $('input[name="id"]').val() || 0;
         }
-        $.getJSON(document.location.href, courseparams, function (users) {
-          renderCourseUsers($content, courseid, users);
+        $.getJSON(document.location.href, courseparams).done(function (users) {
+          if (!Array.isArray(users)) {
+            failed();
+            return;
+          }
+          try {
+            renderCourseUsers($content, courseid, users, true);
+            courseStates[courseid] = 'full';
+          } catch (error) {
+            // Unlike a network failure, a rendering error may have removed selected inputs.
+            initialLoaded = false;
+            $ready.val('0');
+            showNotReady();
+          }
+        }).fail(failed).always(function () {
+          $content.attr('aria-busy', 'false');
         });
       }
 
-      // The sesskey is always sent, because all sharing endpoints (view/category/item) require it.
-      var params = {action: 'userlist', sesskey: M.cfg.sesskey};
-      if (type == 'cat_mod') {
-        params.id = $('input[name="id"]').val() || 0;
+      function showNotReady() {
+        $root.find('.exaport-userlist-incomplete').remove();
+        $('<div class="alert alert-warning exaport-userlist-incomplete" role="alert" tabindex="-1"></div>')
+          .text(M.util.get_string('sharing_users_not_ready', 'block_exaport')).insertBefore($userlist).trigger('focus');
       }
-      $.getJSON(document.location.href, params, function (courses) {
+
+      // Prevent an incomplete picker from turning an unchanged Save into "remove all shares".
+      // The server checks the same readiness field before writing any entity changes.
+      $userlist.closest('form').on('submit.exaportSharedUsers', function (event) {
+        // Cancelling must remain possible even when the initial request failed.
+        if (event.originalEvent && event.originalEvent.submitter && event.originalEvent.submitter.name === 'cancel') {
+          return;
+        }
+        var $master = $root.find('[name="shareenabled"]');
+        var $internal = $root.find('[name="internshare"], [name="internaccess"]');
+        var mode = $root.find('[name="shareall"]:checked').val() ||
+          $root.find('[data-region="disabled-group-mode"]').val() || '0';
+        if ((!$master.length || $master.is(':checked')) && (!$internal.length || $internal.is(':checked')) &&
+            mode === '0' && !initialLoaded) {
+          event.preventDefault();
+          showNotReady();
+        }
+      });
+
+      function loadInitialUsers() {
+        $ready.val('0');
+        $userlist.text(M.util.get_string('loading', 'moodle')).attr('aria-busy', 'true');
+        var params = {action: 'userlist', sesskey: M.cfg.sesskey};
+        if (type == 'cat_mod') {
+          params.id = $('input[name="id"]').val() || 0;
+        }
+        function failed() {
+          $userlist.empty();
+          $('<div class="alert alert-danger" role="alert"></div>').text(M.util.get_string('sharing_load_users_error', 'block_exaport')).appendTo($userlist);
+          $('<button type="button" class="btn btn-link"></button>').text(M.util.get_string('retry', 'moodle'))
+            .on('click', loadInitialUsers).appendTo($userlist);
+        }
+        $.getJSON(document.location.href, params).done(function (courses) {
+          if (!Array.isArray(courses)) {
+            failed();
+            return;
+          }
+          try {
+            renderInitialUsers(courses);
+            initialLoaded = true;
+            $ready.val('1');
+            $root.find('.exaport-userlist-incomplete').remove();
+          } catch (error) {
+            failed();
+          }
+        }).fail(failed).always(function () {
+          $userlist.attr('aria-busy', 'false');
+        });
+      }
+
+      function renderInitialUsers(courses) {
         var html = '';
         if (!$.empty(courses)) {
           $.each(courses, function (tmp, course) {
+            // Headings alone are not a complete saved selection (including cached old responses).
+            if (course.has_shared_users && $.empty(course.users)) {
+              throw new Error('Missing selected recipients');
+            }
             html += '<fieldset class="course-group" courseid="' + course.id + '"><legend class="course-group-title">';
             html += ($E.courseid == course.id ? '<b>' : '');
             html += course.fullname;
             html += ($E.courseid == course.id ? '</b>' : '');
-            html += '</legend>';
-
-            // Real courses only carry id/fullname/has_shared_users here - their users are
-            // fetched lazily below. The "other users" pseudo-course (id -1) is the only one with
-            // users embedded directly, since there is no course to lazily fetch them from.
-            html += '<div class="course-group-content">';
-            if ($.empty(course.users)) {
-              html += 'click to load users...';
-            }
-            html += '</div>';
-            html += "</fieldset>";
+            html += '</legend><div class="course-group-content"></div></fieldset>';
           });
         } else {
           html += '<b>' + $E.translate('nousersfound') + '</b>';
         }
-
         $userlist.html(html);
-
         $.each(courses, function (tmp, course) {
           var $fieldset = $userlist.find('.course-group[courseid="' + course.id + '"]');
           if (!$.empty(course.users)) {
-            // Embedded directly (the "other users" pseudo-course), no fetch needed.
-            loadedCourses[course.id] = true;
-            renderCourseUsers($fieldset.find('.course-group-content'), course.id, course.users);
+            courseStates[course.id] = course.users_complete ? 'full' : 'partial';
+            renderCourseUsers($fieldset.find('.course-group-content'), course.id, course.users, !!course.users_complete);
             $fieldset.addClass('course-group-open');
-          } else if (course.has_shared_users) {
-            // Preserve the "auto-expand already-shared courses" behaviour without eagerly
-            // loading every course: only fetch+open the courses flagged by the server as
-            // already having shares.
-            $fieldset.addClass('course-group-open');
-            loadCourseUsers(course.id, $fieldset);
           }
         });
+      }
 
-        // Open/close course group + lazily load its users on first expand.
-        // Scoped to #sharing-userlist (this widget) only: an unscoped $('.course-group-title')
-        // selector here would also match the (hidden but still-in-DOM) grouplist's course
-        // titles once load_grouplist() has run, binding this handler twice on those elements and
-        // making the collapse/expand toggle silently cancel itself out - see load_grouplist().
-        $userlist.find('.course-group-title').on('click', function () {
-          var $fieldset = $(this).closest('.course-group');
-          $fieldset.toggleClass('course-group-open');
-          var courseid = $fieldset.attr('courseid');
-          if (courseid != -1) {
-            loadCourseUsers(courseid, $fieldset);
-          }
-        });
+      // Delegate within this widget only, so user/group pickers never toggle each other's rows.
+      $userlist.on('click', '.course-group-title', function () {
+        var $fieldset = $(this).closest('.course-group');
+        $fieldset.toggleClass('course-group-open');
+        var courseid = $fieldset.attr('courseid');
+        if ($fieldset.hasClass('course-group-open') && courseStates[courseid] === undefined) {
+          loadCourseUsers(courseid, $fieldset);
+        }
       });
+      $userlist.on('click', '.exaport-load-course-users', function () {
+        var $fieldset = $(this).closest('.course-group');
+        loadCourseUsers($fieldset.attr('courseid'), $fieldset);
+      });
+      loadInitialUsers();
     },
 
     grouplist_loaded: false,

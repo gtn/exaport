@@ -260,6 +260,9 @@ if ($editform->is_cancelled()) {
     die("nosubmitbutton");
 } else if (($fromform = $editform->get_data()) && $allowedit) {
     require_sesskey();
+    block_exaport_require_loaded_share_users(
+        (bool)optional_param('shareenabled', 0, PARAM_INT), optional_param('shareall', 0, PARAM_INT)
+    );
 
     $categoryids = block_exaport_normalize_item_categoryids($fromform->categoryids ?? []);
     $fromform->categoryids = $categoryids;

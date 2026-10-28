@@ -22,11 +22,14 @@
         isshared            - Boolean: category is shared (show share icon in footer)
         sharedicon          - Pre-rendered HTML for share icon
         categorylabel       - Localised "Category" tooltip text (regular tile only)
+        thumbnailurl        - Uploaded category image URL (empty when absent or a parent tile)
 }}
 <div class="{{outerclasses}}" data-item-name="{{tilenamelower}}" data-pinned="{{#isparenttile}}true{{/isparenttile}}{{^isparenttile}}false{{/isparenttile}}">
-    <div class="card card-eportfolio h-100 excomdos_tile {{tilefixedclass}}excomdos_tile_category id-{{tiletargetid}}">
+    <div class="card card-eportfolio h-100 excomdos_tile {{tilefixedclass}}excomdos_tile_category id-{{tiletargetid}}{{#thumbnailurl}} has-category-thumbnail{{/thumbnailurl}}">
         {{^isparenttile}}
-        <div class="card-top d-flex justify-content-end">
+        {{! Share the title/menu row on image cards so the fixed-height body has room for a preview. }}
+        <div class="card-top d-flex {{#thumbnailurl}}justify-content-between gap-2{{/thumbnailurl}}{{^thumbnailurl}}justify-content-end{{/thumbnailurl}}">
+            {{#thumbnailurl}}{{> block_exaport/category_card_title}}{{/thumbnailurl}}
             <span class="eportfolio-card-more">
                 <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     {{{ellipsisicon}}}
@@ -45,13 +48,21 @@
         </div>
         {{/isparenttile}}
         <div class="card-body position-relative">
-            <h5 class="card-title">
-                <a href="{{tileurl}}" class="stretched-link">
-                    {{#isparenttile}}{{{folderupicon}}}{{/isparenttile}}
-                    {{^isparenttile}}<i class="icon fa fa-folder fa-fw me-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{categorylabel}}"></i>{{/isparenttile}}
-                    {{tilename}}
-                </a>
-            </h5>
+            {{^thumbnailurl}}{{> block_exaport/category_card_title}}{{/thumbnailurl}}
+            {{#thumbnailurl}}
+            <a href="{{tileurl}}" class="stretched-link" aria-hidden="true" tabindex="-1"></a>
+            {{! Keep the folder tab and title visible; reuse the page thumbnail styling below them. }}
+            <div class="d-flex">
+                <div class="eportfolio-card-thumbnail">
+                    <span class="eportfolio-card-thumbnail-fallback" aria-hidden="true">
+                        <i class="icon fa fa-folder fa-fw"></i>
+                    </span>
+                    <img class="eportfolio-card-thumbnail-image" src="{{thumbnailurl}}" alt="" loading="lazy"
+                         onload="this.closest('.eportfolio-card-thumbnail').classList.add('is-loaded');"
+                         onerror="this.remove();">
+                </div>
+            </div>
+            {{/thumbnailurl}}
         </div>
         <div class="card-footer d-flex justify-content-end align-items-center">
             {{#isshared}}<span class="eportoflio-share">{{{sharedicon}}} <span>{{sharedsummary}}</span></span>{{/isshared}}

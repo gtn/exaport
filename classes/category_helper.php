@@ -24,6 +24,68 @@ defined('MOODLE_INTERNAL') || die();
 class category_helper {
 
     /**
+     * Check thumbnail access using the same shared roots as category navigation.
+     * Display visibility is handled separately; this method checks permission to read a file.
+     *
+     * @param \stdClass $category Category loaded from the database.
+     * @param string $access External category hash, or empty for internal access.
+     * @return bool Whether the current viewer may read the image.
+     */
+    public static function can_access_thumbnail(\stdClass $category, string $access = ''): bool {
+        global $DB, $USER;
+
+        $ownerid = (int)$category->userid;
+        $root = null;
+        if ($access !== '') {
+            $root = block_exaport_get_category_from_access($access);
+            if (!$root || (int)$root->userid !== $ownerid) {
+                return false;
+            }
+        } else {
+            if (!isloggedin() || isguestuser()) {
+                return false;
+            }
+            if ($ownerid === (int)$USER->id) {
+                return true;
+            }
+            if (block_exaport_user_can_see_artifacts_of_students()
+                    && isset(block_exaport_get_students_for_teacher()[$ownerid])) {
+                return true;
+            }
+        }
+
+        $visited = [];
+        // Check only this owner's ancestor chain. Listing builders may contain inconsistent
+        // cross-owner links and also resolve unrelated thumbnails, so they cannot authorize files.
+        while ($category && !isset($visited[$category->id])) {
+            $visited[$category->id] = true;
+            if ($root) {
+                if ((int)$category->id === (int)$root->id) {
+                    return true;
+                }
+            } else if ($DB->record_exists_sql("SELECT c.id
+                      FROM {block_exaportcate} c
+                      JOIN {user} u ON u.id = c.userid AND u.deleted = 0
+                     WHERE c.id = :categoryid AND c.userid = :ownerid AND c.internshare = 1
+                       AND ((c.shareall = 1 AND :shareall = 1)
+                            OR EXISTS (SELECT 1 FROM {block_exaportcatshar} s
+                                        WHERE s.catid = c.id AND s.userid = :userid)
+                            OR EXISTS (SELECT 1 FROM {block_exaportcatgroupshar} s
+                                         JOIN {cohort_members} cm ON cm.cohortid = s.groupid
+                                        WHERE s.catid = c.id AND cm.userid = :cohortuserid))", [
+                    'categoryid' => $category->id, 'ownerid' => $ownerid,
+                    'shareall' => (int)block_exaport_shareall_enabled(),
+                    'userid' => $USER->id, 'cohortuserid' => $USER->id,
+                ])) {
+                return true;
+            }
+            $category = $category->pid
+                ? $DB->get_record('block_exaportcate', ['id' => $category->pid, 'userid' => $ownerid]) : false;
+        }
+        return false;
+    }
+
+    /**
      * Build the single-select options used for category parents.
      *
      * @param int $userid Category owner.

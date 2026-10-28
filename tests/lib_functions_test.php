@@ -50,7 +50,7 @@ final class lib_functions_test extends \advanced_testcase {
 
     public function test_category_thumbnail_visibility_follows_admin_configuration(): void {
         unset_config('hide_category_thumbnail', 'block_exaport');
-        $this->assertTrue(block_exaport_category_thumbnail_enabled());
+        $this->assertFalse(block_exaport_category_thumbnail_enabled());
 
         set_config('hide_category_thumbnail', 0, 'block_exaport');
         $this->assertTrue(block_exaport_category_thumbnail_enabled());
@@ -60,6 +60,18 @@ final class lib_functions_test extends \advanced_testcase {
 
         set_config('hide_category_thumbnail', 0, 'block_exaport');
         $this->assertTrue(block_exaport_category_thumbnail_enabled());
+    }
+
+    public function test_category_thumbnail_visibility_respects_forced_boolean_configuration(): void {
+        global $CFG;
+        foreach ([false, 0, '0'] as $value) {
+            $CFG->forced_plugin_settings['block_exaport']['hide_category_thumbnail'] = $value;
+            $this->assertTrue(block_exaport_category_thumbnail_enabled());
+        }
+        foreach ([true, 1, '1'] as $value) {
+            $CFG->forced_plugin_settings['block_exaport']['hide_category_thumbnail'] = $value;
+            $this->assertFalse(block_exaport_category_thumbnail_enabled());
+        }
     }
 
     public function test_item_display_defaults_use_safe_fallbacks(): void {
@@ -146,7 +158,6 @@ final class lib_functions_test extends \advanced_testcase {
             'shareall' => 0,
             'structure_shareall' => 0,
             'structure_share' => 0,
-            'iconmerge' => 0,
             'creatorid' => $this->user->id,
         ]);
     }

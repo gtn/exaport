@@ -233,7 +233,7 @@ if ($ADMIN->fulltree) {
         ]));
     $settings->add(new admin_setting_configcheckbox('block_exaport/hide_category_thumbnail',
         get_string('settings_hide_category_thumbnail', 'block_exaport'),
-        get_string('settings_hide_category_thumbnail_description', 'block_exaport'), 0));
+        get_string('settings_hide_category_thumbnail_description', 'block_exaport'), 1));
 
     // View custom template settings
     $settings->add(new admin_setting_heading('exaport/layout_settings',

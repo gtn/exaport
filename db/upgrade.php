@@ -23,6 +23,9 @@ function xmldb_block_exaport_upgrade($oldversion) {
     $dbman = $DB->get_manager();
     $result = true;
 
+    // TODO: Clear and drop block_exaportcate.iconmerge in a future version once permanent
+    // removal of icon merging is confirmed. Keep the column and existing values for now.
+
     // Add a new column newcol to the mdl_question_myqtype.
     if ($oldversion < 2012051801) {
 

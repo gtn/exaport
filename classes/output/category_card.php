@@ -106,6 +106,9 @@ class category_card extends card {
             'sharedsummary'  => $this->showsharingstatus && $share->is_shared()
                 ? block_exaport_get_share_summary($share) : '',
             'categorylabel'  => block_exaport_get_string('category'),
+            // Navigation tiles stay plain; uploaded images belong on the category's own card.
+            'thumbnailurl'   => $isparenttile || !block_exaport_category_thumbnail_enabled()
+                ? '' : ($this->category->icon ?? ''),
         ];
     }
 }

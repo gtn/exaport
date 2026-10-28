@@ -313,19 +313,23 @@ function block_exaport_get_item_single_file($item) {
     return block_exaport_get_single_file($item, 'item_file');
 }
 
-function block_exaport_get_category_icon($category) {
+function block_exaport_get_category_icon($category, string $access = '') {
+    // Apply the display setting to every layout without touching the stored image.
+    if (!block_exaport_category_thumbnail_enabled()) {
+        return null;
+    }
     $fs = get_file_storage();
 
     $file = current($fs->get_area_files(context_user::instance($category->userid)->id, 'block_exaport', 'category_icon',
         $category->id, 'itemid', false));
     if ($file) {
-        // Hack, this logic doesn't work for other users for now.
-        if ($category->userid !== g::$USER->id) {
-            return;
+        // File delivery validates the viewer's permission or the supplied external sharing token.
+        $url = moodle_url::make_pluginfile_url($file->get_contextid(), 'block_exaport', 'category_icon',
+            $file->get_itemid(), $file->get_filepath(), $file->get_filename());
+        if ($access !== '') {
+            $url->param('access', $access);
         }
-
-        return g::$CFG->wwwroot . '/pluginfile.php/' . $file->get_contextid() . '/block_exaport/category_icon/' . $file->get_itemid() . '/' .
-            $file->get_filename();
+        return $url->out(false);
     } else {
         return null;
     }
@@ -547,7 +551,9 @@ function block_exaport_external_comments_enabled() {
 }
 
 function block_exaport_category_thumbnail_enabled(): bool {
-    return !get_config('block_exaport', 'hide_category_thumbnail');
+    // Reading the object distinguishes a missing setting from an explicitly forced boolean false.
+    $config = get_config('block_exaport');
+    return isset($config->hide_category_thumbnail) && !$config->hide_category_thumbnail;
 }
 
 /**

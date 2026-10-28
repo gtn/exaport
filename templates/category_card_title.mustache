@@ -1,0 +1,8 @@
+{{! Shared by the plain category body and the thumbnail card header. }}
+<h5 class="card-title">
+    <a href="{{tileurl}}" {{^thumbnailurl}}class="stretched-link"{{/thumbnailurl}} title="{{tilename}}">
+        {{#isparenttile}}{{{folderupicon}}}{{/isparenttile}}
+        {{^isparenttile}}<i class="icon fa fa-folder fa-fw me-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{categorylabel}}"></i>{{/isparenttile}}
+        {{tilename}}
+    </a>
+</h5>

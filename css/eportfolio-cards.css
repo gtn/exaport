@@ -20,6 +20,13 @@
 #exaport .card-eportfolio .card-title {
     line-height: 1.4;
 }
+/* Cards have a fixed height. Keep long names from pushing previews into the footer. */
+#exaport .has-category-thumbnail .card-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 #exaport .card-eportfolio .card-title a:hover,
 #exaport .card-eportfolio .card-title a:focus {
     text-decoration: none;

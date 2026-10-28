@@ -407,7 +407,7 @@ if ($type == 'sharedstudent') {
 
     foreach ($categories as $category) {
         $category->url = $external_category_base_url . '&categoryid=' . $category->id;
-        $category->icon = block_exaport_get_category_icon($category);
+        $category->icon = block_exaport_get_category_icon($category, $canonicalaccess);
     }
 
     // Built from the already-restricted set, so it only ever contains shared categories.
@@ -573,6 +573,8 @@ if (($type === 'extern_category') && $externaccess_category) {
     // $PAGE->set_context(context_system::instance());
 }
 
+// External category pages bypass plugin navigation, but still need card styles and icon helpers.
+block_exaport_init_js_css();
 block_exaport_add_iconpack();
 
 if (($type === 'extern_category') && $externaccess_category) {
@@ -1566,15 +1568,8 @@ function block_exaport_category_template_tile($category, $courseid, $type, $curr
         $categoryThumbUrl = $category->url;
         $categoryName = $category->name;
         if ($category->icon) {
-            if ($category->iconmerge) {
-                // icon merge (also look JS - exaport.js - block_exaport_check_fontawesome_icon_merging()):
-                $categoryIcon = block_exaport_fontawesome_icon('folder-open', 'regular', '6', ['icon-for-merging'], [], ['data-categoryId' => $category->id], '', [], [], [], ['exaport-items-category-big']);
-                $categoryIcon .= '<img id="mergeImageIntoCategory' . $category->id . '" src="' . $category->icon . '?tcacheremove=' . date('dmYhis') . '" style="display:none;">';
-                $categoryIcon .= '<canvas id="mergedCanvas' . $category->id . '" class="category-merged-icon" width="115" height="115" style="display: none;"></canvas>';
-            } else {
-                // just picture instead of folder icon:
-                $categoryIcon = '<img src="' . $category->icon . '">';
-            }
+            // Legacy tiles use the uploaded image directly, including old merged-icon categories.
+            $categoryIcon = html_writer::empty_tag('img', ['src' => $category->icon, 'alt' => '']);
         } else {
             $categoryIcon = block_exaport_fontawesome_icon('folder-open', 'regular', '6', [], [], [], '', [], [], [], ['exaport-items-category-big']);
         }

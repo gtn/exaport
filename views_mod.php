@@ -753,7 +753,7 @@ file_prepare_draft_area($postview->draft_itemid, context_user::instance($USER->i
 copy_personal_information_draft_files($postview->draft_itemid, context_user::instance($USER->id)->id, 'block_exaport',
     'personal_information', $USER->id, array('subdirs' => true), null);
 function copy_personal_information_draft_files($targetdraftitemid, $contextid, $component, $filearea, $itemid,
-    array $options = null, $text = null) {
+    ?array $options = null, $text = null) {
     global $USER;
 
     // Copy from filelib.php.

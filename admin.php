@@ -30,24 +30,25 @@ $action = required_param('action', PARAM_TEXT);
 
 switch ($action) {
     case 'remove_shareall':
-        if (optional_param('confirm', 0, PARAM_INT)) {
+    case 'remove_sharegroups':
+        $groups = $action === 'remove_sharegroups';
+        if (data_submitted() && optional_param('confirm', 0, PARAM_BOOL)) {
             require_sesskey();
-            // Reset only Everyone shares; group audiences use the same column with value 2.
-            $sql = "UPDATE {block_exaportview} SET shareall=0 WHERE shareall=1";
-            $DB->execute($sql);
+            // GET only displays confirmation; deleting a site-wide audience requires a POST.
+            \block_exaport\sharing_service::remove_all_shares($groups ? 'groups' : 'everyone');
 
             redirect($backurl);
             exit;
         }
 
-        block_exaport_print_header("myportfolio");
+        block_exaport_print_header('myportfolio');
 
         echo '<br />';
-        echo $OUTPUT->confirm(block_exaport_get_string("delete_all_shareall"),
-            new moodle_url('admin.php', array('action' => $action, 'confirm' => 1, 'sesskey' => sesskey())),
+        echo $OUTPUT->confirm(block_exaport_get_string($groups ? 'delete_all_sharegroups' : 'delete_all_shareall'),
+            new moodle_url('admin.php', ['action' => $action, 'confirm' => 1, 'sesskey' => sesskey()]),
             $backurl);
         echo block_exaport_wrapperdivend();
-        $OUTPUT->footer();
+        echo $OUTPUT->footer();
 
         exit;
         break;

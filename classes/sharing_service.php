@@ -10,6 +10,31 @@ defined('MOODLE_INTERNAL') || die();
  */
 final class sharing_service {
     /**
+     * Permanently remove one audience without changing other sharing channels or policy flags.
+     *
+     * @param string $audience everyone or groups.
+     */
+    public static function remove_all_shares(string $audience): void {
+        global $DB;
+
+        require_capability('moodle/site:config', \context_system::instance());
+        if (!in_array($audience, ['everyone', 'groups'], true)) {
+            throw new \coding_exception('Unsupported sharing audience');
+        }
+        $transaction = $DB->start_delegated_transaction();
+        foreach (['item', 'category', 'view'] as $type) {
+            $config = block_exaport_get_sharing_entity_config($type);
+            if ($audience === 'groups') {
+                // Remove the relationships too, so re-enabling the policy cannot revive them.
+                $DB->delete_records($config->groupsharetable);
+            }
+            // The same column also stores groups (2) and individual users (0).
+            $DB->set_field($config->entitytable, 'shareall', 0, ['shareall' => $audience === 'groups' ? 2 : 1]);
+        }
+        $transaction->allow_commit();
+    }
+
+    /**
      * Apply the view sharing master switch and feature flags to submitted channel state.
      *
      * The master switch is authoritative: when it is off, subordinate values are ignored even

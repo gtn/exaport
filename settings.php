@@ -52,11 +52,12 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_disable_shareall',
         get_string('settings_disable_shareall_head', 'block_exaport'),
         get_string('settings_disable_shareall_body', 'block_exaport',
-            $CFG->wwwroot . '/blocks/exaport/admin.php?action=remove_shareall&sesskey=' . sesskey()), 0));
+            (new moodle_url('/blocks/exaport/admin.php', ['action' => 'remove_shareall']))->out()), 0));
 
     $settings->add(new admin_setting_configcheckbox('block_exaport_disable_sharegroups',
         get_string('settings_disable_sharegroups_head', 'block_exaport'),
-        get_string('settings_disable_sharegroups_body', 'block_exaport'), 0));
+        get_string('settings_disable_sharegroups_body', 'block_exaport',
+            (new moodle_url('/blocks/exaport/admin.php', ['action' => 'remove_sharegroups']))->out()), 0));
 
     $settings->add(new admin_setting_configcheckbox('block_exaport_disable_externaccess',
         get_string('settings_disable_externaccess_head', 'block_exaport'),

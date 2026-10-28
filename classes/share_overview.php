@@ -78,6 +78,8 @@ class share_overview {
         $rows = [];
         $shareallenabled = block_exaport_shareall_enabled();
         $externalenabled = block_exaport_externaccess_enabled();
+        // Keep other sharing channels in the result when group matches are disabled.
+        $groupsenabled = (int)block_exaport_sharegroups_enabled();
 
         // Items — include the item type so we can show a per-type icon.
         $items = $DB->get_records_sql(
@@ -89,7 +91,7 @@ class share_overview {
                LEFT JOIN {block_exaportitemshar} ishar ON ishar.itemid = i.id
                     AND (ishar.timestart IS NULL OR ishar.timestart = 0 OR ishar.timestart <= ?)
                     AND (ishar.timeend IS NULL OR ishar.timeend = 0 OR ishar.timeend >= ?)
-               LEFT JOIN {block_exaportitemgroupshar} igshar ON igshar.itemid = i.id
+               LEFT JOIN {block_exaportitemgroupshar} igshar ON igshar.itemid = i.id AND ? = 1
                LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
               WHERE i.userid = ?
            GROUP BY i.id, i.name, i.type, i.courseid, i.shareall, i.externaccess
@@ -98,7 +100,7 @@ class share_overview {
                  " . ($shareallenabled ? 'OR i.shareall = 1' : '') . "
                  " . ($externalenabled ? 'OR i.externaccess = 1' : '') . "
            ORDER BY i.name",
-            [time(), time(), $userid]
+            [time(), time(), $groupsenabled, $userid]
         );
         foreach ($items as $item) {
             $item->entity_type = 'item';
@@ -113,7 +115,7 @@ class share_overview {
                     0 AS comment_cnt
                FROM {block_exaportcate} c
                LEFT JOIN {block_exaportcatshar} cshar ON cshar.catid = c.id
-               LEFT JOIN {block_exaportcatgroupshar} cgshar ON cgshar.catid = c.id
+               LEFT JOIN {block_exaportcatgroupshar} cgshar ON cgshar.catid = c.id AND ? = 1
               WHERE c.userid = ?
            GROUP BY c.id, c.name, c.courseid, c.shareall, c.externaccess, c.internshare
              HAVING (c.internshare = 1 AND (
@@ -123,7 +125,7 @@ class share_overview {
                    ))
                    " . ($externalenabled ? 'OR c.externaccess = 1' : '') . "
            ORDER BY c.name",
-            [$userid]
+            [$groupsenabled, $userid]
         );
         foreach ($categories as $category) {
             $category->entity_type = 'category';
@@ -138,7 +140,7 @@ class share_overview {
                     0 AS comment_cnt
                FROM {block_exaportview} v
                LEFT JOIN {block_exaportviewshar} vshar ON vshar.viewid = v.id
-               LEFT JOIN {block_exaportviewgroupshar} vgshar ON vgshar.viewid = v.id
+               LEFT JOIN {block_exaportviewgroupshar} vgshar ON vgshar.viewid = v.id AND ? = 1
               WHERE v.userid = ?
            GROUP BY v.id, v.name, v.shareall, v.externaccess, v.sharedemails
              HAVING COUNT(DISTINCT vshar.userid) > 0
@@ -147,7 +149,7 @@ class share_overview {
                  " . ($externalenabled ? 'OR v.externaccess = 1' : '') . "
                  " . (block_exaport_shareemails_enabled() ? 'OR v.sharedemails = 1' : '') . "
            ORDER BY v.name",
-            [$userid]
+            [$groupsenabled, $userid]
         );
         foreach ($views as $view) {
             $view->entity_type = 'view';
@@ -170,7 +172,8 @@ class share_overview {
         global $DB;
 
         $rows = [];
-        $usergroupids = array_keys(block_exaport_get_user_cohorts($userid));
+        $usergroupids = block_exaport_sharegroups_enabled()
+            ? array_keys(block_exaport_get_user_cohorts($userid)) : [];
         if ($usergroupids) {
             [$groupinsql, $groupparams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_QM);
         } else {

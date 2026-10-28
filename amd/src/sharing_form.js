@@ -55,7 +55,10 @@ const initialiseRoot = (root, loaderType) => {
     const update = () => {
         const enabled = !$master.length || $master.is(':checked');
         const internalEnabled = enabled && (!$root.find(selectors.internal).length || $root.find(selectors.internal).is(':checked'));
-        const mode = String($root.find(`${selectors.mode}:checked`).val() ?? '0');
+        // Keep a saved, inactive group audience until the owner explicitly chooses another one.
+        const mode = String($root.find(`${selectors.mode}:checked`).val() ??
+            $root.find('[data-region="disabled-group-mode"]').val() ?? '0');
+        const groupsAvailable = $root.find(selectors.groups).length > 0;
         const segments = [];
 
         $master.attr('aria-expanded', enabled ? 'true' : 'false');
@@ -75,11 +78,13 @@ const initialiseRoot = (root, loaderType) => {
         $root.find(selectors.users).toggle(internalEnabled && mode === '0');
         $root.find(selectors.groups).toggle(internalEnabled && mode === '2');
         if (internalEnabled) {
-            segments.push(mode === '1' ? strings[1] : (mode === '2' ? strings[3] : strings[2]));
+            if (mode !== '2' || groupsAvailable) {
+                segments.push(mode === '1' ? strings[1] : (mode === '2' ? strings[3] : strings[2]));
+            }
             if (mode === '0' && !usersLoaded) {
                 usersLoaded = true;
                 window.ExabisEportfolio.load_userlist(loaderType);
-            } else if (mode === '2' && !groupsLoaded) {
+            } else if (mode === '2' && groupsAvailable && !groupsLoaded) {
                 groupsLoaded = true;
                 window.ExabisEportfolio.load_grouplist(loaderType);
             }

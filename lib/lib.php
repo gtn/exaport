@@ -532,6 +532,12 @@ function block_exaport_shareall_enabled() {
     return empty($CFG->block_exaport_disable_shareall);
 }
 
+/** Whether cohort-based sharing may grant access or accept new assignments. */
+function block_exaport_sharegroups_enabled(): bool {
+    global $CFG;
+    return empty($CFG->block_exaport_disable_sharegroups);
+}
+
 function block_exaport_externaccess_enabled() {
     global $CFG;
 
@@ -1917,6 +1923,8 @@ function block_exaport_get_portfolio_items($epopwhere = 0, $itemid = null, $with
 function block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlsort) {
     global $DB, $USER;
 
+    $usercats = block_exaport_sharegroups_enabled() ? $usercats : [];
+
     $categories = $DB->get_records_sql("
     SELECT
         {$categorycolumns}, u.firstname, u.lastname, u.picture,
@@ -1925,7 +1933,7 @@ function block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlso
     FROM {user} u
     JOIN {block_exaportcate} c ON (u.id = c.userid AND c.userid != ?)
     LEFT JOIN {block_exaportcatshar} cshar ON c.id=cshar.catid AND cshar.userid=?
-    LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid
+    LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid AND ? = 1
     LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid
     WHERE (
         (" . (block_exaport_shareall_enabled() ? 'c.shareall=1 OR ' : '') . " cshar.userid IS NOT NULL) -- only shared all, if enabled
@@ -1936,7 +1944,7 @@ function block_exaport_get_shared_categories($categorycolumns, $usercats, $sqlso
         AND u.deleted = 0
     GROUP BY
         {$categorycolumns}, u.firstname, u.lastname, u.picture
-    $sqlsort", array($USER->id, $USER->id));
+    $sqlsort", array($USER->id, $USER->id, (int)block_exaport_sharegroups_enabled()));
 
     return $categories;
 }

@@ -487,13 +487,13 @@ $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
 $string['settings_disable_shareall_head'] = '"Mit allen Benutzer:innen teilen" deaktivieren';
-$string['settings_disable_shareall_body'] = 'Klicke <a href="{$a}">hier</a> um alle globalen Freigaben zu löschen';
-$string['settings_disable_externaccess_head'] = 'Teilen Option "Externer Zugriff" auf Sammelmappen deaktivieren.';
-$string['settings_disable_externaccess_body'] = '';
-$string['settings_disable_shareemails_head'] = 'Teilen Option "Per E-Mail teilen" von Sammelmappen deaktivieren.';
-$string['settings_disable_shareemails_body'] = '';
-$string['settings_disable_external_comments_head'] = 'Teilen von Kommentaren in externen Sammelmappen deaktivieren';
-$string['settings_disable_external_comments_body'] = '';
+$string['settings_disable_shareall_body'] = 'Blendet „Alle mit einem Benutzerkonto“ für Kategorien, Einträge und Sammelmappen aus und deaktiviert den Zugriff über diese Zielgruppe. Vorhandene Freigaben bleiben gespeichert und werden nach erneutem Aktivieren wieder wirksam, sofern die Zielgruppe nicht geändert oder entfernt wurde. Das Speichern eines Freigabeformulars bei deaktivierter Freigabe an alle kann die Zielgruppe ändern. <a href="{$a}">Hier klicken, um vorhandene Freigaben an alle zu entfernen.</a>';
+$string['settings_disable_externaccess_head'] = 'Externen Zugriff deaktivieren';
+$string['settings_disable_externaccess_body'] = 'Deaktiviert öffentliche Freigabelinks für Kategorien und Sammelmappen einschließlich der darin enthaltenen Einträge. Vorhandene Links bleiben erhalten, funktionieren aber vorübergehend nicht. Dieselben Links funktionieren nach erneutem Aktivieren wieder, sofern der externe Zugriff für den jeweiligen Inhalt noch aktiviert ist. Das Speichern seiner Freigabeeinstellungen bei global deaktiviertem externem Zugriff kann dessen externe Freigabe ausschalten.';
+$string['settings_disable_shareemails_head'] = 'Teilen von Sammelmappen per E-Mail deaktivieren';
+$string['settings_disable_shareemails_body'] = 'Deaktiviert individuelle E-Mail-Freigabelinks für Sammelmappen.';
+$string['settings_disable_external_comments_head'] = 'Kommentare in extern geteilten Inhalten ausblenden';
+$string['settings_disable_external_comments_body'] = 'Blendet Kommentare beim Zugriff auf Kategorien, Sammelmappen und deren Einträge über öffentliche Freigabelinks aus.';
 // 'block_exaport_app_externaleportfolio_head' => [
 //     'Dateien in Mahara speichern',
 //     'Save files to mahara if checked, save to exaport if not checked',
@@ -513,7 +513,7 @@ $string['block_exaport_copytomyportfolio_body'] = 'Benutzer können Seiten aus e
 $string['block_exaport_app_alloweditdelete_head'] = 'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.';
 $string['block_exaport_app_alloweditdelete_head_alternative'] = 'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
-$string['delete_all_shareall'] = 'Alle globalen Freigaben "shareall" löschen?';
+$string['delete_all_shareall'] = 'Alle vorhandenen Freigaben an „Alle mit einem Benutzerkonto“ für Einträge, Kategorien und Sammelmappen entfernen? Sie werden nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.';
 $string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen';
 $string['block_exaport_teachercanseeartifactsofstudents_head_alternative'] = 'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.';
@@ -1065,3 +1065,11 @@ $string['sharing_audience'] = 'Wer kann darauf zugreifen?';
 $string['sharing_everyone'] = 'Alle mit einem Benutzerkonto';
 
 $string['exacompupdaterequired'] = 'Exaport kann mit dem vorhandenen Exacomp nicht installiert oder aktualisiert werden. Bitte aktualisieren Sie zuerst den Exacomp-Code auf Version {$a} oder neuer und starten Sie das Moodle-Upgrade erneut. Exaport kann auch ohne Exacomp verwendet werden.';
+
+$string['settings_disable_sharegroups_head'] = 'Teilen mit Gruppen deaktivieren';
+
+$string['settings_disable_sharegroups_body'] = 'Blendet Gruppenfreigaben für Kategorien, Einträge und Sammelmappen aus und deaktiviert vorhandene Gruppenzugriffe. Gespeicherte Gruppenzuordnungen werden nach erneutem Aktivieren wieder wirksam, sofern sie nicht geändert oder entfernt wurden. <a href="{$a}">Hier klicken, um vorhandene Gruppenfreigaben zu entfernen.</a>';
+
+$string['sharing_groups_disabled'] = 'Gruppenfreigaben sind durch die Administration deaktiviert. Vorhandene Gruppenzuordnungen bleiben erhalten.';
+
+$string['delete_all_sharegroups'] = 'Alle vorhandenen Gruppenfreigaben für Einträge, Kategorien und Sammelmappen entfernen? Die gespeicherten Gruppenzuordnungen werden gelöscht und nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.';

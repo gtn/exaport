@@ -58,6 +58,11 @@
                 <div data-region="internal-settings">
                     <fieldset>
                         <legend class="sr-only visually-hidden">{{#str}} sharing_audience, block_exaport {{/str}}</legend>
+                        {{#groupsdisabled}}
+                            {{! Before the radios so an explicit users/everyone selection overrides it on submit. }}
+                            <input type="hidden" name="shareall" value="2" data-region="disabled-group-mode">
+                            <p class="form-text text-muted">{{#str}} sharing_groups_disabled, block_exaport {{/str}}</p>
+                        {{/groupsdisabled}}
                         {{#showeveryone}}
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" id="{{componentid}}-all" name="shareall" value="1" {{#modeall}}checked{{/modeall}}>
@@ -68,10 +73,12 @@
                             <input class="form-check-input" type="radio" id="{{componentid}}-users" name="shareall" value="0" {{#modeusers}}checked{{/modeusers}}>
                             <label class="form-check-label" for="{{componentid}}-users">{{#str}} internalaccessusers, block_exaport {{/str}}</label>
                         </div>
+                        {{#showgroups}}
                         <div class="form-check">
                             <input class="form-check-input" type="radio" id="{{componentid}}-groups" name="shareall" value="2" {{#modegroups}}checked{{/modegroups}}>
                             <label class="form-check-label" for="{{componentid}}-groups">{{#str}} internalaccessgroups, block_exaport {{/str}}</label>
                         </div>
+                        {{/showgroups}}
                     </fieldset>
 
                     <div class="exaport-sharing__audience" data-region="users-settings">
@@ -86,9 +93,11 @@
                         {{/showsearch}}
                         <div id="sharing-userlist" class="exaport-sharing__recipient-list" data-region="user-list">{{#str}} loading, core {{/str}}</div>
                     </div>
+                    {{#showgroups}}
                     <div class="exaport-sharing__audience" data-region="groups-settings">
                         <div id="sharing-grouplist" class="exaport-sharing__recipient-list" data-region="group-list">{{#str}} loading, core {{/str}}</div>
                     </div>
+                    {{/showgroups}}
                 </div>
             </fieldset>
         {{/showinternal}}

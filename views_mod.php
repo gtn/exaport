@@ -274,11 +274,10 @@ class block_exaport_view_edit_form extends block_exaport_moodleform {
                 $mform->setType('externcomment', PARAM_INT);
                 $mform->add_exaport_help_button('externcomment', 'forms.view.externcomment');
 
-                if (block_exaport_shareall_enabled()) {
-                    $mform->addElement('text', 'shareall');
-                    $mform->setType('shareall', PARAM_INT);
-                    $mform->add_exaport_help_button('shareall', 'forms.view.shareall');
-                }
+                // The shared audience field also carries users/groups when Everyone is disabled.
+                $mform->addElement('text', 'shareall');
+                $mform->setType('shareall', PARAM_INT);
+                $mform->add_exaport_help_button('shareall', 'forms.view.shareall');
 
                 if (block_exaport_shareemails_enabled()) {
                     $mform->addElement('checkbox', 'sharedemails');

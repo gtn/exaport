@@ -44,6 +44,8 @@ final class sharing_form implements \renderable, \templatable {
             'alwaysnotify' => false,
         ];
         $this->context = array_merge($defaults, $context);
+        $this->context['showgroups'] = block_exaport_sharegroups_enabled();
+        $this->context['groupsdisabled'] = !$this->context['showgroups'] && (int)$this->context['mode'] === 2;
         $this->context['modeall'] = (int)$this->context['mode'] === 1;
         $this->context['modeusers'] = (int)$this->context['mode'] === 0;
         $this->context['modegroups'] = (int)$this->context['mode'] === 2;

@@ -70,11 +70,12 @@ class category_helper {
                        AND ((c.shareall = 1 AND :shareall = 1)
                             OR EXISTS (SELECT 1 FROM {block_exaportcatshar} s
                                         WHERE s.catid = c.id AND s.userid = :userid)
-                            OR EXISTS (SELECT 1 FROM {block_exaportcatgroupshar} s
+                            OR (:sharegroups = 1 AND EXISTS (SELECT 1 FROM {block_exaportcatgroupshar} s
                                          JOIN {cohort_members} cm ON cm.cohortid = s.groupid
-                                        WHERE s.catid = c.id AND cm.userid = :cohortuserid))", [
+                                        WHERE s.catid = c.id AND cm.userid = :cohortuserid)))", [
                     'categoryid' => $category->id, 'ownerid' => $ownerid,
                     'shareall' => (int)block_exaport_shareall_enabled(),
+                    'sharegroups' => (int)block_exaport_sharegroups_enabled(),
                     'userid' => $USER->id, 'cohortuserid' => $USER->id,
                 ])) {
                 return true;

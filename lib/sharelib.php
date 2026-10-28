@@ -242,7 +242,7 @@ namespace {
                 require_capability('block/exaport:use', $context);
             }
             // Groups for user.
-            $usergroups = block_exaport_get_user_cohorts();
+            $usergroups = block_exaport_sharegroups_enabled() ? block_exaport_get_user_cohorts() : [];
 
             $hash = $accesspath[1];
             $hash = explode('-', $hash);
@@ -692,7 +692,7 @@ namespace {
             g::$DB->record_exists('block_exaportcatgroupshar');
          */
         $shared = $DB->record_exists('block_exaportviewshar', array('viewid' => $view->id, 'notify' => 1)) ||
-            $DB->record_exists('block_exaportviewgroupshar', array('viewid' => $view->id)) || // TODO: add notify to group sharing?
+            (block_exaport_sharegroups_enabled() && $DB->record_exists('block_exaportviewgroupshar', array('viewid' => $view->id))) || // TODO: add notify to group sharing?
             (isset($view->sharedemails) && $view->sharedemails && $DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id))); // TODO: check this in general
         return $shared;
     }
@@ -761,7 +761,8 @@ namespace {
         }
 
         // Notify members of shared groups (cohorts).
-        $sharedgroups = $DB->get_records('block_exaportcatgroupshar', array('catid' => $categoryid));
+        $sharedgroups = block_exaport_sharegroups_enabled()
+            ? $DB->get_records('block_exaportcatgroupshar', array('catid' => $categoryid)) : [];
         foreach ($sharedgroups as $groupshare) {
             $members = $DB->get_records('cohort_members', array('cohortid' => $groupshare->groupid));
             foreach ($members as $member) {
@@ -846,6 +847,10 @@ namespace {
     function exaport_get_view_shared_groups($viewid) {
         global $DB;
 
+        if (!block_exaport_sharegroups_enabled()) {
+            return [];
+        }
+
         $sharedgroups = $DB->get_records_menu('block_exaportviewgroupshar',
             array("viewid" => $viewid), null, 'groupid, groupid AS tmp');
 
@@ -871,6 +876,10 @@ namespace {
 
     function exaport_get_category_shared_groups($catid) {
         global $DB;
+
+        if (!block_exaport_sharegroups_enabled()) {
+            return [];
+        }
 
         $sharedgroups = $DB->get_records_menu('block_exaportcatgroupshar',
             array("catid" => $catid), null, 'groupid, groupid AS tmp');
@@ -1185,6 +1194,11 @@ namespace {
         require_sesskey();
         require_capability('block/exaport:shareintern', context_system::instance());
 
+        if (!block_exaport_sharegroups_enabled()) {
+            echo json_encode([]);
+            exit;
+        }
+
         $config = block_exaport_get_sharing_entity_config($entitytype);
         $entityid = block_exaport_sharing_owned_entity_id($config, $entityid);
 
@@ -1229,6 +1243,7 @@ namespace {
             array $notifyusers = [], bool $forcenotify = false) {
         global $DB;
 
+        $transaction = $DB->start_delegated_transaction();
         $sharedusers = $DB->get_records($config->usersharetable, [$config->idfield => $entityid],
             null, 'userid, id, notify');
 
@@ -1270,6 +1285,10 @@ namespace {
             $update[$config->internaccessfield] = 1;
         }
         $DB->update_record($config->entitytable, (object)$update);
+        // This is an explicit users-only choice, including when made through a bookmarked search
+        // page. Retained group assignments must not regain access when group sharing is re-enabled.
+        $DB->delete_records($config->groupsharetable, [$config->idfield => $entityid]);
+        $transaction->allow_commit();
     }
 
     /**
@@ -1754,7 +1773,7 @@ namespace {
             " JOIN {block_exaportcate} c ON u.id = c.userid " .
             " LEFT JOIN {block_exaportcatshar} cshar ON c.id = cshar.catid AND cshar.userid = ?" .
 
-            " LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid " .
+            " LEFT JOIN {block_exaportcatgroupshar} cgshar ON c.id = cgshar.catid AND ? = 1 " .
             " LEFT JOIN {block_exaportcatshar} cshar_total ON c.id = cshar_total.catid " .
             " WHERE (" .
             "(" . (block_exaport_shareall_enabled() ? 'c.shareall = 1 OR ' : '') . " cshar.userid IS NOT NULL) " .
@@ -1767,7 +1786,7 @@ namespace {
             " AND u.deleted = 0 " .
             $itemwhere .
             " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture" .
-            " ORDER BY u.lastname, u.firstname, c.name", array($userid, $userid));
+            " ORDER BY u.lastname, u.firstname, c.name", array($userid, (int)block_exaport_sharegroups_enabled(), $userid));
         // return array();
         // Get users for grouping later.
         $sharedusers = array();
@@ -1942,7 +1961,8 @@ namespace {
             [$userid, $now, $now]
         );
 
-        $usergroupids = array_keys(block_exaport_get_user_cohorts($userid));
+        $usergroupids = block_exaport_sharegroups_enabled()
+            ? array_keys(block_exaport_get_user_cohorts($userid)) : [];
         if ($usergroupids) {
             [$insql, $inparams] = $DB->get_in_or_equal($usergroupids);
             $groupitemids = $DB->get_fieldset_sql(
@@ -2073,7 +2093,8 @@ namespace {
             return $item->userid;
         }
 
-        $usergroupids = array_keys(block_exaport_get_user_cohorts($userid));
+        $usergroupids = block_exaport_sharegroups_enabled()
+            ? array_keys(block_exaport_get_user_cohorts($userid)) : [];
         if ($usergroupids) {
             [$insql, $inparams] = $DB->get_in_or_equal($usergroupids);
             $item = $DB->get_record_sql(
@@ -2093,7 +2114,7 @@ namespace {
     }
 
     function block_exaport_get_group_share_categories($userid) {
-        $usergroups = block_exaport_get_user_cohorts($userid);
+        $usergroups = block_exaport_sharegroups_enabled() ? block_exaport_get_user_cohorts($userid) : [];
         if (!$usergroups) {
             return [];
         }
@@ -2105,7 +2126,7 @@ namespace {
     }
 
     function block_exaport_get_group_share_views($userid) {
-        $usergroups = block_exaport_get_user_cohorts($userid);
+        $usergroups = block_exaport_sharegroups_enabled() ? block_exaport_get_user_cohorts($userid) : [];
         if (!$usergroups) {
             return [];
         }

@@ -730,6 +730,11 @@ function block_exaport_init_js_css() {
     // Moodle sets $SCRIPT reliably based on the actual PHP file being executed
     global $SCRIPT;
     $scriptname = preg_replace('!\.[^\.]+$!', '', basename($SCRIPT));
+    // Both shared lists use the same course selector and collapsible user groups.
+    if (in_array($scriptname, ['shared_categories', 'shared_views'], true)) {
+        $PAGE->requires->css('/blocks/exaport/css/shared_lists.css');
+        $PAGE->requires->js('/blocks/exaport/javascript/shared_lists.js', true);
+    }
     //
     // $scriptname = preg_replace('!\.[^\.]+$!', '', basename($_SERVER['PHP_SELF']));
     if (file_exists($CFG->dirroot . '/blocks/exaport/css/' . $scriptname . '.css')) {

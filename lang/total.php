@@ -1866,20 +1866,20 @@ return [
         '',
     ],
     'settings_disable_shareall_head' => [
-        '"Mit allen Benutzer:innen teilen" deaktivieren',
-        'Disable sharing with all users',
+        'Teilen mit allen deaktivieren',
+        'Disable sharing with everyone',
     ],
     'settings_disable_shareall_body' => [
-        'Blendet „Alle mit einem Benutzerkonto“ für Kategorien, Einträge und Sammelmappen aus und deaktiviert den Zugriff über diese Zielgruppe. Vorhandene Freigaben bleiben gespeichert und werden nach erneutem Aktivieren wieder wirksam, sofern die Zielgruppe nicht geändert oder entfernt wurde. Das Speichern eines Freigabeformulars bei deaktivierter Freigabe an alle kann die Zielgruppe ändern. <a href="{$a}">Hier klicken, um vorhandene Freigaben an alle zu entfernen.</a>',
-        'Hide the "Everyone with an account" audience for categories, items and collections and deactivate access through that audience. Existing everyone shares are kept and become active again when sharing with everyone is re-enabled, unless their audience has been changed or removed. Saving a sharing form while sharing with everyone is disabled may change its audience. <a href="{$a}">Click here to remove existing "everyone shares".</a>',
+        'Blendet die Zielgruppe „Alle mit einem Benutzerkonto“ für Einträge, Kategorien und Sammelmappen aus und deaktiviert vorhandene „Freigaben an alle“. Diese Freigaben bleiben gespeichert und werden nach erneutem Aktivieren des Teilens mit allen wieder wirksam, sofern sie nicht geändert oder entfernt wurden. Das Speichern eines Freigabeformulars bei deaktiviertem Teilen mit allen kann dessen Zielgruppe ändern. <a href="{$a}">Hier klicken, um vorhandene „Freigaben an alle“ zu entfernen.</a>',
+        'Hide the "Everyone with an account" audience for items, categories and collections and deactivate existing "everyone shares". These shares are kept and become active again when sharing with everyone is re-enabled, unless they have been changed or removed. Saving a sharing form while sharing with everyone is disabled may change its audience. <a href="{$a}">Click here to remove existing "everyone shares".</a>',
     ],
     'settings_disable_externaccess_head' => [
         'Externen Zugriff deaktivieren',
         'Disable external access',
     ],
     'settings_disable_externaccess_body' => [
-        'Deaktiviert öffentliche Freigabelinks für Kategorien und Sammelmappen einschließlich der darin enthaltenen Einträge. Vorhandene Links bleiben erhalten, funktionieren aber vorübergehend nicht. Dieselben Links funktionieren nach erneutem Aktivieren wieder, sofern der externe Zugriff für den jeweiligen Inhalt noch aktiviert ist. Das Speichern seiner Freigabeeinstellungen bei global deaktiviertem externem Zugriff kann dessen externe Freigabe ausschalten.',
-        'Disable public sharing links for categories and collections, including access to the items they contain. Existing links are kept but stop working. The same links work again when external access is re-enabled, provided external sharing is still enabled for that content. Saving its sharing settings while external access is disabled can turn off its external sharing.',
+        'Deaktiviert öffentliche Freigabelinks für Kategorien und Sammelmappen einschließlich des Zugriffs auf die darin enthaltenen Einträge. Vorhandene Links bleiben erhalten, funktionieren aber bei deaktiviertem externem Zugriff nicht. Dieselben Links funktionieren nach erneutem Aktivieren des externen Zugriffs wieder, sofern die externe Freigabe für die jeweilige Kategorie oder Sammelmappe noch aktiviert ist. Das Speichern eines Freigabeformulars bei global deaktiviertem externem Zugriff kann die externe Freigabe für die jeweilige Kategorie oder Sammelmappe ausschalten.',
+        'Disable public sharing links for categories and collections, including access to the items they contain. Existing links are kept but stop working while external access is disabled. The same links work again when external access is re-enabled, provided external sharing is still enabled for that category or collection. Saving a sharing form while external access is disabled may turn off external sharing for that category or collection.',
     ],
     'settings_disable_shareemails_head' => [
         'Teilen von Sammelmappen per E-Mail deaktivieren',
@@ -1894,8 +1894,8 @@ return [
         'Hide comments in externally shared content',
     ],
     'settings_disable_external_comments_body' => [
-        'Blendet Kommentare beim Zugriff auf Kategorien, Sammelmappen und deren Einträge über öffentliche Freigabelinks aus.',
-        'Hide comments when categories or collections and their items are accessed through public sharing links.',
+        'Blendet Kommentare beim Zugriff auf Kategorien, Sammelmappen oder deren Einträge über öffentliche Freigabelinks aus.',
+        'Hide comments when categories, collections or their items are accessed through public sharing links.',
     ],
     // 'block_exaport_app_externaleportfolio_head' => [
     //     'Dateien in Mahara speichern',
@@ -1950,8 +1950,8 @@ return [
         'Only useful in combination with Exabis Competence Grid and dakora',
     ],
     'delete_all_shareall' => [
-        'Alle vorhandenen Freigaben an „Alle mit einem Benutzerkonto“ für Einträge, Kategorien und Sammelmappen entfernen? Sie werden nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.',
-        'Remove all existing "Everyone with an account" shares from items, categories and collections? They will not be restored when sharing with everyone is re-enabled. Other sharing methods remain unchanged.',
+        'Alle vorhandenen „Freigaben an alle“ für Einträge, Kategorien und Sammelmappen entfernen? Diese Freigaben werden nicht wiederhergestellt, wenn das Teilen mit allen erneut aktiviert wird. Andere Freigabearten bleiben unverändert.',
+        'Remove all existing "everyone shares" from items, categories and collections? These shares will not return when sharing with everyone is re-enabled. Other sharing methods remain unchanged.',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head' => [
         'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen',
@@ -3902,15 +3902,15 @@ return [
         'Disable sharing with groups',
     ],
     'settings_disable_sharegroups_body' => [
-        'Blendet Gruppenfreigaben für Kategorien, Einträge und Sammelmappen aus und deaktiviert vorhandene Gruppenzugriffe. Gespeicherte Gruppenzuordnungen werden nach erneutem Aktivieren wieder wirksam, sofern sie nicht geändert oder entfernt wurden. <a href="{$a}">Hier klicken, um vorhandene Gruppenfreigaben zu entfernen.</a>',
-        'Hide group sharing for categories, items and collections and deactivate existing group access. Saved group assignments become active again when group sharing is re-enabled, unless they have been changed or removed. <a href="{$a}">Click here to remove existing group shares.</a>',
+        'Blendet Gruppenfreigaben für Einträge, Kategorien und Sammelmappen aus und deaktiviert vorhandene Gruppenzugriffe. Gespeicherte Gruppenzuordnungen bleiben erhalten und werden nach erneutem Aktivieren von Gruppenfreigaben wieder wirksam, sofern sie nicht geändert oder entfernt wurden. <a href="{$a}">Hier klicken, um vorhandene Gruppenfreigaben zu entfernen.</a>',
+        'Hide group sharing for items, categories and collections and deactivate existing group access. Saved group assignments are kept and become active again when group sharing is re-enabled, unless they have been changed or removed. <a href="{$a}">Click here to remove existing group shares.</a>',
     ],
     'sharing_groups_disabled' => [
-        'Gruppenfreigaben sind durch die Administration deaktiviert. Vorhandene Gruppenzuordnungen bleiben erhalten.',
-        'Group sharing is disabled by the administrator. Existing group assignments are kept.',
+        'Gruppenfreigaben sind durch die Administration deaktiviert. Gespeicherte Gruppenzuordnungen bleiben erhalten.',
+        'Group sharing is disabled by the administrator. Saved group assignments are kept.',
     ],
     'delete_all_sharegroups' => [
-        'Alle vorhandenen Gruppenfreigaben für Einträge, Kategorien und Sammelmappen entfernen? Die gespeicherten Gruppenzuordnungen werden gelöscht und nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.',
-        'Remove all existing group shares from items, categories and collections? Saved group assignments will be deleted and will not be restored when group sharing is re-enabled. Other sharing methods remain unchanged.',
+        'Alle vorhandenen Gruppenfreigaben für Einträge, Kategorien und Sammelmappen entfernen? Die gespeicherten Gruppenzuordnungen werden gelöscht und nicht wiederhergestellt, wenn das Teilen mit Gruppen erneut aktiviert wird. Andere Freigabearten bleiben unverändert.',
+        'Remove all existing group shares from items, categories and collections? Saved group assignments will be deleted and will not return when group sharing is re-enabled. Other sharing methods remain unchanged.',
     ],
 ];

@@ -520,14 +520,14 @@ $string['settings_allow_loginas_head_alternative'] = 'Allow "login as"';
 $string['settings_allow_loginas_body'] = '';
 $string['settings_create_desp_categories_head'] = 'Create Desp Categories';
 $string['settings_create_desp_categories_body'] = '';
-$string['settings_disable_shareall_head'] = 'Disable sharing with all users';
-$string['settings_disable_shareall_body'] = 'Hide the "Everyone with an account" audience for categories, items and collections and deactivate access through that audience. Existing everyone shares are kept and become active again when sharing with everyone is re-enabled, unless their audience has been changed or removed. Saving a sharing form while sharing with everyone is disabled may change its audience. <a href="{$a}">Click here to remove existing "everyone shares".</a>';
+$string['settings_disable_shareall_head'] = 'Disable sharing with everyone';
+$string['settings_disable_shareall_body'] = 'Hide the "Everyone with an account" audience for items, categories and collections and deactivate existing "everyone shares". These shares are kept and become active again when sharing with everyone is re-enabled, unless they have been changed or removed. Saving a sharing form while sharing with everyone is disabled may change its audience. <a href="{$a}">Click here to remove existing "everyone shares".</a>';
 $string['settings_disable_externaccess_head'] = 'Disable external access';
-$string['settings_disable_externaccess_body'] = 'Disable public sharing links for categories and collections, including access to the items they contain. Existing links are kept but stop working. The same links work again when external access is re-enabled, provided external sharing is still enabled for that content. Saving its sharing settings while external access is disabled can turn off its external sharing.';
+$string['settings_disable_externaccess_body'] = 'Disable public sharing links for categories and collections, including access to the items they contain. Existing links are kept but stop working while external access is disabled. The same links work again when external access is re-enabled, provided external sharing is still enabled for that category or collection. Saving a sharing form while external access is disabled may turn off external sharing for that category or collection.';
 $string['settings_disable_shareemails_head'] = 'Disable sharing collections by email';
 $string['settings_disable_shareemails_body'] = 'Disable individual email sharing links for collections.';
 $string['settings_disable_external_comments_head'] = 'Hide comments in externally shared content';
-$string['settings_disable_external_comments_body'] = 'Hide comments when categories or collections and their items are accessed through public sharing links.';
+$string['settings_disable_external_comments_body'] = 'Hide comments when categories, collections or their items are accessed through public sharing links.';
 // 'block_exaport_app_externaleportfolio_head' => [
 //     'Dateien in Mahara speichern',
 //     'Save files to mahara if checked, save to exaport if not checked',
@@ -547,7 +547,7 @@ $string['block_exaport_copytomyportfolio_body'] = 'User will be able to copy pag
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_head_alternative'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
-$string['delete_all_shareall'] = 'Remove all existing "Everyone with an account" shares from items, categories and collections? They will not be restored when sharing with everyone is re-enabled. Other sharing methods remain unchanged.';
+$string['delete_all_shareall'] = 'Remove all existing "everyone shares" from items, categories and collections? These shares will not return when sharing with everyone is re-enabled. Other sharing methods remain unchanged.';
 $string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Teacher can see ALL pages of own students';
 $string['block_exaport_teachercanseeartifactsofstudents_head_alternative'] = 'Teacher can see ALL pages of own students';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.';
@@ -1108,8 +1108,8 @@ $string['exacompupdaterequired'] = 'Exaport cannot be installed or upgraded with
 
 $string['settings_disable_sharegroups_head'] = 'Disable sharing with groups';
 
-$string['settings_disable_sharegroups_body'] = 'Hide group sharing for categories, items and collections and deactivate existing group access. Saved group assignments become active again when group sharing is re-enabled, unless they have been changed or removed. <a href="{$a}">Click here to remove existing group shares.</a>';
+$string['settings_disable_sharegroups_body'] = 'Hide group sharing for items, categories and collections and deactivate existing group access. Saved group assignments are kept and become active again when group sharing is re-enabled, unless they have been changed or removed. <a href="{$a}">Click here to remove existing group shares.</a>';
 
-$string['sharing_groups_disabled'] = 'Group sharing is disabled by the administrator. Existing group assignments are kept.';
+$string['sharing_groups_disabled'] = 'Group sharing is disabled by the administrator. Saved group assignments are kept.';
 
-$string['delete_all_sharegroups'] = 'Remove all existing group shares from items, categories and collections? Saved group assignments will be deleted and will not be restored when group sharing is re-enabled. Other sharing methods remain unchanged.';
+$string['delete_all_sharegroups'] = 'Remove all existing group shares from items, categories and collections? Saved group assignments will be deleted and will not return when group sharing is re-enabled. Other sharing methods remain unchanged.';

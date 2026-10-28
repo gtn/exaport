@@ -23,7 +23,7 @@
 
 #exaport .view-group-title {
     padding-left: 30px;
-    background: url('../pix/group_closed.png') no-repeat 15px 5px;
+    background: url('../pix/group_closed.png') no-repeat 15px center;
 }
 
 #exaport .view-group-open .view-group-title {

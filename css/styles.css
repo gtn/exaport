@@ -68,7 +68,7 @@ div.item-detail-image img {
 #exaport .course-group-title {
     cursor: pointer;
     padding-left: 30px;
-    background: url('../pix/group_closed.png') no-repeat 15px 5px;
+    background: url('../pix/group_closed.png') no-repeat 15px center;
 }
 
 #exaport .course-group-open .course-group-title {

@@ -1113,3 +1113,7 @@ $string['settings_disable_sharegroups_body'] = 'Hide group sharing for categorie
 $string['sharing_groups_disabled'] = 'Group sharing is disabled by the administrator. Existing group assignments are kept.';
 
 $string['delete_all_sharegroups'] = 'Remove all existing group shares from items, categories and collections? Saved group assignments will be deleted and will not be restored when group sharing is re-enabled. Other sharing methods remain unchanged.';
+
+$string['settings_sharing_courses_with_block_only'] = 'Only list courses with an Exabis ePortfolio block when sharing';
+$string['other_shared_users_course'] = 'Other users';
+$string['settings_sharing_courses_with_block_only_description'] = 'Restrict the course list for selecting recipients to enrolled courses where an Exabis ePortfolio block has been added directly (including hidden blocks). Existing recipients outside those courses remain editable under "Other users". Global user search, existing access and "Everyone with an account" are unchanged.';

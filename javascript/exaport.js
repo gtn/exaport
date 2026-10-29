@@ -193,7 +193,7 @@
       var selectedNotifications = {};
 
       // Recomputes one course's "check all" checkbox from its currently rendered rows. Needs to
-      // run for every course affected by applyUserSelection(), not only the course the
+      // run for every course affected by applyUserSelections(), not only the course the
       // originating click happened in, because syncing a user across courses can change rows in
       // courses whose own check-all checkbox was not touched directly.
       function updateCourseCheckAllState(courseid) {
@@ -202,16 +202,31 @@
           .prop('checked', $courseCheckboxes.length > 0 && $courseCheckboxes.not(':checked').length === 0);
       }
 
-      // Applies a (un)checked state for one user id to every rendered occurrence of that user,
+      // Applies a (un)checked state for user ids to every rendered occurrence of those users,
       // in every course group - not only the course the change originated in - since the
       // underlying share is entity-wide. Only ever sets DOM state via .prop()/.attr(), never by
       // re-triggering click/change events, so this cannot recurse back into the handlers below.
-      function applyUserSelection(userid, checked) {
-        selectedUsers[userid] = checked;
+      function applyUserSelections(userids, checked) {
+        var changedUsers = {};
+        $.each(userids, function (index, userid) {
+          changedUsers[userid] = true;
+          selectedUsers[userid] = checked;
+        });
 
         var affectedCourseIds = {};
 
-        $userlist.find('.shareusers:checkbox[value="' + userid + '"]').each(function () {
+        // Select-all must not scan every course once per user. Walk the rendered copies once,
+        // then refresh each affected course's select-all state after the whole batch is applied.
+        // Keep the targeted lookup for an ordinary single-user click.
+        var selector = '.shareusers:checkbox';
+        if (userids.length === 1) {
+          selector += '[value="' + userids[0] + '"]';
+        }
+        $userlist.find(selector).each(function () {
+          var userid = String($(this).val());
+          if (!Object.prototype.hasOwnProperty.call(changedUsers, userid)) {
+            return;
+          }
           $(this).prop('checked', checked);
 
           var courseid = $(this).attr('courseid');
@@ -230,7 +245,7 @@
       }
 
 
-      // Same idea as applyUserSelection(), but for the per-user notify checkbox of views/
+      // Same idea as applyUserSelections(), but for the per-user notify checkbox of views/
       // categories: propagates to every rendered occurrence and remembers the choice for courses
       // loaded later.
       function applyNotifySelection(userid, checked) {
@@ -264,19 +279,17 @@
         $content.find('.shareusers-check-all').on('click', function () {
           var checked = $(this).is(':checked');
           var courseid = $(this).attr('courseid');
-          // Check/uncheck all users in this course, propagating each one to its other
-          // occurrences too (applyUserSelection() only ever uses .prop(), so this cannot
-          // recurse).
-          $content.find('.shareusers:checkbox[courseid=' + courseid + ']').each(function () {
-            applyUserSelection(String($(this).val()), checked);
-          });
+          var userids = $content.find('.shareusers:checkbox[courseid=' + courseid + ']').map(function () {
+            return String($(this).val());
+          }).get();
+          applyUserSelections(userids, checked);
         });
 
         // Check/uncheck this user everywhere it is currently rendered - direct user shares are
         // entity-wide, not course-specific, see block_exaport_ajax_sharing_userlist_course() in
         // lib/sharelib.php.
         $content.find('.shareusers:checkbox').on('click', function () {
-          applyUserSelection(String($(this).val()), $(this).prop('checked'));
+          applyUserSelections([String($(this).val())], $(this).prop('checked'));
         });
 
         if (type == 'views_mod' || type == 'cat_mod') {

@@ -379,6 +379,12 @@ if ($editform->is_cancelled()) {
 } else if ($editform->no_submit_button_pressed()) {
     die("nosubmitbutton");
 } else if ($formview = $editform->get_data()) {
+    if ($type === 'share') {
+        block_exaport_require_loaded_share_users(
+            (bool)optional_param('shareenabled', 0, PARAM_INT) && (bool)optional_param('internaccess', 0, PARAM_INT),
+            optional_param('shareall', 0, PARAM_INT)
+        );
+    }
     if ($type == 'title' or $action == 'add') {
         $formview = file_postupdate_standard_editor($formview, 'description', $textfieldoptions, context_user::instance($USER->id),
             'block_exaport', 'view', $view->id);

@@ -211,10 +211,6 @@ class simplehtml_form extends block_exaport_moodleform {
                 $DB->record_exists('block_exaportcatshar', ['catid' => $category->id]) ||
                 $DB->record_exists('block_exaportcatgroupshar', ['catid' => $category->id])
             ));
-            $sharedusers = $category->id > 0 ? $DB->get_records_menu('block_exaportcatshar',
-                ['catid' => $category->id], null, 'userid, userid AS tmp') : [];
-            $mform->addElement('html', '<script>var sharedusersarr = ' . json_encode(array_values($sharedusers)) . ';</script>');
-
             $externhash = !empty($category->hash)
                 ? $category->hash
                 : block_exaport_generate_unique_hash('block_exaportcate');
@@ -283,6 +279,10 @@ if ($mform->is_cancelled()) {
     redirect('view_items.php?courseid=' . $courseid . '&categoryid=' . ($same == 'same' ? $id : $pid));
 } else if ($newentry = $mform->get_data()) {
     require_sesskey();
+    block_exaport_require_loaded_share_users(
+        (bool)optional_param('shareenabled', 0, PARAM_INT) && (bool)optional_param('internshare', 0, PARAM_INT),
+        optional_param('shareall', 0, PARAM_INT)
+    );
     $newentry->userid = $USER->id;
     $newentry->pid = (int)$newentry->pid;
 

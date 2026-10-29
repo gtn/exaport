@@ -942,13 +942,6 @@ namespace {
                 'headeritem' => 'views',
                 'headersubitem' => 'share',
                 'supportsnotify' => true,
-                // Collections may be shared to users the owner is no longer enrolled with,
-                // so those users are listed in an extra pseudo course to keep them removable.
-                // Categories and items historically never did this and their share forms only
-                // process users coming from the owner's own courses, so enabling it there would
-                // change (not just deduplicate) their default behaviour. When course filtering
-                // is enabled, all entity types need this fallback to preserve excluded shares.
-                'extrausers' => true,
             ],
             'category' => (object)[
                 'entitytable' => 'block_exaportcate',
@@ -963,7 +956,6 @@ namespace {
                 'headeritem' => 'myportfolio',
                 'headersubitem' => null,
                 'supportsnotify' => true,
-                'extrausers' => false,
             ],
             'item' => (object)[
                 'entitytable' => 'block_exaportitem',
@@ -983,7 +975,6 @@ namespace {
                 // javascript/exaport.js, which only renders it for views/categories), so the
                 // user search page doesn't render a meaningless one either.
                 'supportsnotify' => false,
-                'extrausers' => false,
             ],
         ];
 
@@ -1031,10 +1022,8 @@ namespace {
      * every enrolled course via exaport_get_shareable_courses_with_users(), which calls
      * get_roles_used_in_context()/get_role_users() once per role per course - an N x M set of
      * calls that made opening this dialog slow on installations with many courses). Instead the
-     * frontend fetches a single course's users lazily via
-     * block_exaport_ajax_sharing_userlist_course(), either on first expand or eagerly for
-     * courses flagged has_shared_users below, so the "already shared courses auto-expand"
-     * behaviour keeps working without eagerly loading everything.
+     * initial response contains only existing recipients. The frontend fetches a full course
+     * roster via block_exaport_ajax_sharing_userlist_course() only when explicitly requested.
      *
      * require_sesskey() is enforced for all entity types. category.php used to be missing this
      * check; enforcing it here is a deliberate security hardening.
@@ -1079,61 +1068,87 @@ namespace {
         $sharedusercourseids = $sharedusers
             ? exaport_get_courseids_for_shared_users(array_keys($sharedusers), array_keys($courses))
             : [];
-        foreach ($sharedusercourseids as $userid => $userscourseids) {
-            foreach ($userscourseids as $courseid) {
-                $courses[$courseid]->has_shared_users = true;
+        $users = $sharedusers ? $DB->get_records_list('user', 'id', array_keys($sharedusers), '',
+            implode(',', exaport_get_picture_fields())) : [];
+        $userroles = [];
+        if ($sharedusercourseids) {
+            // Resolve roles only for selected recipients, in one query. Calling the full roster
+            // helper here would recreate the large-course loading problem before rendering starts.
+            [$usersql, $userparams] = $DB->get_in_or_equal(array_keys($sharedusercourseids), SQL_PARAMS_NAMED, 'recipient');
+            [$coursesql, $courseparams] = $DB->get_in_or_equal(array_keys($courses), SQL_PARAMS_NAMED, 'course');
+            $roles = $DB->get_records_sql("SELECT ra.id, ra.userid, ctx.instanceid AS courseid, r.name, r.shortname
+                  FROM {role_assignments} ra
+                  JOIN {context} ctx ON ctx.id = ra.contextid
+                  JOIN {role} r ON r.id = ra.roleid
+                 WHERE ctx.contextlevel = :contextlevel AND ra.userid $usersql AND ctx.instanceid $coursesql
+              ORDER BY r.sortorder", ['contextlevel' => CONTEXT_COURSE] + $userparams + $courseparams);
+            foreach ($roles as $role) {
+                $userroles[$role->userid][$role->courseid] = s($role->name ?: $role->shortname);
             }
         }
 
-        // Filtering is only for browsing. Keep excluded recipients editable and submitted on
-        // save for ALL entity types; otherwise the full-selection save would remove their shares.
-        if ($sharedusers && ($config->extrausers || get_config('block_exaport', 'sharing_courses_with_block_only'))) {
-            $extrauserids = array_diff(array_keys($sharedusers), array_keys($sharedusercourseids));
-            $extrausers = [];
-            if ($extrauserids) {
-                // Since user_picture::fields() uses a deprecated moodle function, this is the workaround.
-                $fields = implode(',', exaport_get_picture_fields());
-
-                foreach ($extrauserids as $userid) {
-                    $user = $DB->get_record('user', ['id' => $userid], $fields);
-                    if (!$user) {
-                        // Doesn't exist anymore.
-                        continue;
-                    }
-
-                    $extrausers[] = (object)[
-                        'id' => $user->id,
-                        // The existing JavaScript row renderer inserts this value as HTML.
-                        'name' => s(fullname($user)),
-                        'rolename' => '',
-                        'shared_to' => true,
-                        'notify_user' => (bool)$sharedusers[$userid]->notify,
-                    ];
-                }
+        $extrausers = [];
+        foreach ($sharedusers as $userid => $share) {
+            if (!isset($users[$userid])) {
+                continue;
             }
-
-            if ($extrausers) {
-                // Users are embedded directly (unlike the other, real courses) since there is no
-                // course to lazily fetch them from - the frontend renders this pseudo-course
-                // straight away and marks it open, same as before.
-                $courses = ['-1' => (object)[
-                    'id' => -1,
-                    'fullname' => get_string(get_config('block_exaport', 'sharing_courses_with_block_only')
-                        ? 'other_shared_users_course' : 'other_users_course', 'block_exaport'),
-                    'users' => $extrausers,
-                ]] + $courses;
+            $row = (object)[
+                'id' => (int)$userid,
+                // The existing JavaScript row renderer inserts these strings as HTML.
+                'name' => s(fullname($users[$userid])),
+                'rolename' => '',
+                'shared_to' => true,
+                'notify_user' => (bool)$share->notify,
+            ];
+            if (empty($sharedusercourseids[$userid])) {
+                // Always keep recipients outside the displayed courses editable and submitted.
+                // An absent checkbox means removal to the existing full-selection save routine.
+                $extrausers[] = $row;
+                continue;
             }
+            foreach ($sharedusercourseids[$userid] as $courseid) {
+                $courserow = clone $row;
+                $courserow->rolename = $userroles[$userid][$courseid] ?? '';
+                $courses[$courseid]->users[] = $courserow;
+                $courses[$courseid]->has_shared_users = true;
+                $courses[$courseid]->users_complete = false;
+            }
+        }
+        if ($extrausers) {
+            $courses = ['-1' => (object)[
+                'id' => -1,
+                'fullname' => get_string(get_config('block_exaport', 'sharing_courses_with_block_only')
+                    ? 'other_shared_users_course' : 'other_users_course', 'block_exaport'),
+                'users' => $extrausers,
+                'users_complete' => true,
+            ]] + $courses;
         }
 
         return array_values($courses);
     }
 
     /**
+     * Refuse an incomplete individual-recipient form before any entity changes are written.
+     * This is a loading-completeness safeguard, not a replacement for ownership/capability checks.
+     * Everyone/groups and deliberately disabling sharing do not depend on this user picker.
+     *
+     * @param bool $enabled Whether internal sharing is enabled in the submitted form.
+     * @param int $mode Submitted audience (0 = individual users).
+     */
+    function block_exaport_require_loaded_share_users(bool $enabled, int $mode): void {
+        $mode = in_array($mode, [0, 1, 2], true) ? $mode : 0;
+        if ($enabled && $mode === 0 && has_capability('block/exaport:shareintern', context_system::instance())
+                && optional_param('exaport_userlist_ready', 0, PARAM_INT) !== 1) {
+            throw new moodle_exception('sharing_users_not_ready', 'block_exaport');
+        }
+    }
+
+    /**
      * AJAX endpoint: list the shareable users of exactly one course.
      *
      * Split out of block_exaport_ajax_sharing_userlist() so the "share to users" dialog can
-     * lazily fetch a single course's users only when needed (on first expand of that course, or
-     * eagerly for courses flagged has_shared_users by block_exaport_ajax_sharing_userlist()),
+     * lazily fetch a single course's users only when needed (on first expand of an empty course,
+     * or when loading more users in a course that already displays its selected recipients),
      * instead of resolving every enrolled course's users up front. See that function's docblock
      * for why this split exists.
      *

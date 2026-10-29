@@ -6,6 +6,8 @@
 <section id="{{componentid}}" class="exaport-sharing" data-region="exaport-sharing"
          data-configured="{{#configured}}1{{/configured}}{{^configured}}0{{/configured}}">
     <input type="hidden" id="alwaysnotifywhenshare" value="{{#alwaysnotify}}1{{/alwaysnotify}}{{^alwaysnotify}}0{{/alwaysnotify}}">
+    {{! Only the successful initial user-list render marks this complete; it stays outside disabled settings. }}
+    <input type="hidden" name="exaport_userlist_ready" value="0">
 
     {{#showmaster}}
         <div class="exaport-sharing__master custom-control custom-switch">

@@ -746,6 +746,9 @@ function block_exaport_init_js_css() {
 
     // language strings
     $PAGE->requires->string_for_js('close', 'block_exaport');
+    $PAGE->requires->strings_for_js(['sharing_load_more_users', 'sharing_load_users_error', 'sharing_users_not_ready'],
+        'block_exaport');
+    $PAGE->requires->strings_for_js(['retry', 'loading'], 'moodle');
 }
 
 /**

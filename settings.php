@@ -259,6 +259,15 @@ if ($ADMIN->fulltree) {
         get_string('settings_category_distribution_heading', 'block_exaport'),
         get_string('settings_category_distribution_description', 'block_exaport')));
 
+    // Naming policy for the first category of a copied course template.
+    $settings->add(new admin_setting_configcheckbox('block_exaport/enable_copy_root_naming',
+        get_string('settings_enable_copy_root_naming', 'block_exaport'),
+        get_string('settings_enable_copy_root_naming_description', 'block_exaport'), 0));
+    $settings->add(new admin_setting_configtext('block_exaport/copied_template_root_name',
+        get_string('settings_copied_template_root_name', 'block_exaport'),
+        get_string('settings_copied_template_root_name_description', 'block_exaport'),
+        'Ausbildungsdokumente {coursefullname}', PARAM_TEXT));
+
     // Generic starter category templates (JSON).
     $default_templates = json_encode(array(
         array(

@@ -55,7 +55,7 @@ class category_template {
     public static function get_course_template($courseid) {
         global $DB;
 
-        $nodes = $DB->get_records('block_exaport_course_templ', array('courseid' => $courseid), 'sortorder ASC');
+        $nodes = $DB->get_records('block_exaport_course_templ', array('courseid' => $courseid), 'sortorder ASC, id ASC');
         if (empty($nodes)) {
             return array();
         }

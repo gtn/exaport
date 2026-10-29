@@ -1565,5 +1565,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026101902, 'exaport');
     }
 
+    if ($oldversion < 2026102900) {
+        $table = new xmldb_table('block_exaport_templ_dist');
+        $field = new xmldb_field('rename_root_on_copy', XMLDB_TYPE_INTEGER, '1', null,
+            XMLDB_NOTNULL, null, '0', 'auto_distribute_views');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_block_savepoint(true, 2026102900, 'exaport');
+    }
+
     return $result;
 }

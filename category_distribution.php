@@ -75,6 +75,15 @@ if ($action === 'toggle_auto_distribute' && confirm_sesskey()) {
     redirect($url, $message, null, 'success');
 }
 
+if ($action === 'toggle_copy_root_naming') {
+    require_sesskey();
+    if (!get_config('block_exaport', 'enable_copy_root_naming')) {
+        throw new moodle_exception('copy_root_naming_disabled', 'block_exaport');
+    }
+    category_distributor::update_copy_naming($courseid, optional_param('rename_root_on_copy', false, PARAM_BOOL));
+    redirect($url, get_string('changessaved'), null, 'success');
+}
+
 if ($action === 'add_category' && confirm_sesskey()) {
     $name = required_param('name', PARAM_TEXT);
     $pid = optional_param('pid', 0, PARAM_INT);
@@ -355,6 +364,23 @@ if (empty($course_template)) {
     echo '</div>';
     echo '</div>';
 }
+
+// This option is copied with the course. Saving it never renames the current template.
+$copynamingenabled = (bool)get_config('block_exaport', 'enable_copy_root_naming');
+echo html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false)]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'toggle_copy_root_naming']);
+$copyattributes = ['id' => 'rename-root-on-copy', 'onchange' => 'this.form.submit();'];
+if (!$copynamingenabled) {
+    $copyattributes['disabled'] = 'disabled';
+}
+echo html_writer::div(html_writer::checkbox('rename_root_on_copy', 1, !empty($settings->rename_root_on_copy),
+    get_string('rename_root_on_copy', 'block_exaport'), $copyattributes), 'form-group mt-3');
+echo html_writer::tag('p', get_string('rename_root_on_copy_description', 'block_exaport'), ['class' => 'text-muted']);
+if (!$copynamingenabled) {
+    echo html_writer::tag('p', get_string('copy_root_naming_disabled', 'block_exaport'), ['class' => 'text-muted']);
+}
+echo html_writer::end_tag('form');
 
 // Section 3: Distribution Controls.
 echo $OUTPUT->heading(get_string('distribute_categories', 'block_exaport'), 3);

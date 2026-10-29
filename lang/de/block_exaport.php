@@ -1081,3 +1081,11 @@ $string['settings_sharing_courses_with_block_only_description'] = 'Beschränkt d
 $string['sharing_load_more_users'] = 'Weitere Nutzer/innen laden …';
 $string['sharing_load_users_error'] = 'Die Nutzerliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.';
 $string['sharing_users_not_ready'] = 'Die Empfängerliste ist noch nicht vollständig geladen. Bitte warten Sie oder laden Sie die Seite neu, bevor Sie speichern.';
+
+$string['settings_enable_copy_root_naming'] = 'Kursbezogene Benennung kopierter Strukturen erlauben';
+$string['settings_enable_copy_root_naming_description'] = 'Erlaubt die Kursoption, beim Kopieren oder Wiederherstellen die oberste Kategorie der kopierten Struktur nach dem Zielkurs zu benennen. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.';
+$string['settings_copied_template_root_name'] = 'Namensmuster für kopierte Strukturen';
+$string['settings_copied_template_root_name_description'] = 'Verwenden Sie {coursefullname} für den vollständigen Namen des Zielkurses. Ein leeres Muster verwendet Ausbildungsdokumente {coursefullname}. Namen werden auf die bestehende Grenze von 255 Zeichen gekürzt.';
+$string['rename_root_on_copy'] = 'Bei Kurskopie die oberste Template-Kategorie nach dem Zielkurs benennen';
+$string['rename_root_on_copy_description'] = 'Diese Option wird mit dem Kurs kopiert. Sie benennt nur die erste oberste Kategorie der neu kopierten Struktur um. Die aktuelle Struktur und bestehende Portfolio-Kategorien bleiben unverändert. Spätere Änderungen des Kursnamens haben keine automatische Wirkung.';
+$string['copy_root_naming_disabled'] = 'Die automatische Benennung kopierter Strukturen ist durch die Administration deaktiviert.';

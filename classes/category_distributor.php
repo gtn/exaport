@@ -218,4 +218,21 @@ class category_distributor {
 
         return $DB->update_record('block_exaport_templ_dist', $settings);
     }
+
+    /**
+     * Store the course's opt-in for future copies without changing its current template.
+     * The settings page checks the course capability and sesskey before calling this method.
+     *
+     * @param int $courseid Course ID.
+     * @param bool $enabled Whether future copies should rename their first template root.
+     * @return bool Success.
+     */
+    public static function update_copy_naming(int $courseid, bool $enabled): bool {
+        global $DB;
+
+        $settings = self::get_settings($courseid);
+        $settings->rename_root_on_copy = (int)$enabled;
+        $settings->timemodified = time();
+        return $DB->update_record('block_exaport_templ_dist', $settings);
+    }
 }

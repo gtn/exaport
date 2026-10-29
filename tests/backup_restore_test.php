@@ -26,6 +26,8 @@ final class backup_restore_test extends \advanced_testcase {
     public function test_course_backup_restores_only_course_configuration(bool $includeusers, bool $additempayload): void {
         global $DB;
         $this->resetAfterTest();
+        // Exercise the naming feature while user data and personal files exist in the source course.
+        set_config('enable_copy_root_naming', 1, 'block_exaport');
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
         $destination = $generator->create_course();
@@ -49,7 +51,7 @@ final class backup_restore_test extends \advanced_testcase {
         ]);
         $DB->insert_record('block_exaport_templ_dist', (object)[
             'courseid' => $course->id, 'auto_distribute' => 1,
-            'auto_distribute_views' => 1, 'timemodified' => 203,
+            'auto_distribute_views' => 1, 'rename_root_on_copy' => 1, 'timemodified' => 203,
         ]);
 
         // Even an enrolled user's items bearing this courseid remain personal portfolio data.
@@ -148,7 +150,7 @@ final class backup_restore_test extends \advanced_testcase {
         $templates = $DB->get_records('block_exaport_course_templ', ['courseid' => $destination->id]);
         $this->assertCount(2, $templates, 'Multiple block instances must not duplicate templates');
         $restoredroot = $DB->get_record('block_exaport_course_templ',
-            ['courseid' => $destination->id, 'name' => 'Course template'], '*', MUST_EXIST);
+            ['courseid' => $destination->id, 'name' => 'Ausbildungsdokumente ' . $destination->fullname], '*', MUST_EXIST);
         $restoredchild = $DB->get_record('block_exaport_course_templ',
             ['courseid' => $destination->id, 'name' => 'Child template'], '*', MUST_EXIST);
         $this->assertNotEquals($rootid, $restoredroot->id);

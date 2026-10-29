@@ -20,6 +20,15 @@
  */
 class restore_exaport_block_structure_step extends restore_structure_step {
 
+    /** @var stdClass|null First original root inserted by this step, ordered as in the template editor. */
+    private ?stdClass $copiedroot = null;
+
+    /** @var bool Course opt-in from this backup, not from pre-existing destination settings. */
+    private bool $renamerootoncopy = false;
+
+    /** @var int[] Newly inserted child IDs whose original parents have not been restored yet. */
+    private array $pendingparents = [];
+
     /**
      * Define the structure to be restored
      */
@@ -43,6 +52,8 @@ class restore_exaport_block_structure_step extends restore_structure_step {
 
         $data = (object)$data;
         $oldid = $data->id;
+        $isroot = (int)$data->pid === 0;
+        $oldparentid = (int)$data->pid;
 
         // Update the courseid to the new course.
         $data->courseid = $this->get_courseid();
@@ -50,7 +61,7 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         // Handle parent id mapping - if pid > 0, map it to the new parent id.
         if ($data->pid > 0) {
             $data->pid = $this->get_mappingid('course_template', $data->pid);
-            // If parent mapping not found yet, set to 0 (root).
+            // A moved category may precede its newer parent in the backup. Resolve it after parsing.
             if (!$data->pid) {
                 $data->pid = 0;
             }
@@ -58,6 +69,16 @@ class restore_exaport_block_structure_step extends restore_structure_step {
 
         // Insert the record.
         $newid = $DB->insert_record('block_exaport_course_templ', $data);
+        if ($oldparentid > 0 && !$data->pid) {
+            $this->pendingparents[$newid] = $oldparentid;
+        }
+
+        // Track only newly inserted ORIGINAL roots. A child with an unresolved parent mapping
+        // must not become the rename target, nor may an existing destination template be chosen.
+        if ($isroot && ($this->copiedroot === null ||
+                [$data->sortorder, $oldid] < [$this->copiedroot->sortorder, $this->copiedroot->oldid])) {
+            $this->copiedroot = (object)['id' => $newid, 'sortorder' => $data->sortorder, 'oldid' => $oldid];
+        }
 
         // Save the mapping for child categories to reference.
         $this->set_mapping('course_template', $oldid, $newid);
@@ -89,6 +110,9 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         global $DB;
 
         $data = (object)$data;
+        // Older archives have no opt-in. They must retain their original template names.
+        $data->rename_root_on_copy = !empty($data->rename_root_on_copy) ? 1 : 0;
+        $this->renamerootoncopy = (bool)$data->rename_root_on_copy;
 
         // Update the courseid to the new course.
         $data->courseid = $this->get_courseid();
@@ -104,5 +128,42 @@ class restore_exaport_block_structure_step extends restore_structure_step {
             // Insert new record.
             $DB->insert_record('block_exaport_templ_dist', $data);
         }
+    }
+
+    /** Resolve moved children's parents once every source template ID has a destination mapping. */
+    protected function after_execute() {
+        global $DB;
+
+        foreach ($this->pendingparents as $childid => $oldparentid) {
+            $parentid = $this->get_mappingid('course_template', $oldparentid);
+            if ($parentid) {
+                $DB->set_field('block_exaport_course_templ', 'pid', $parentid,
+                    ['id' => $childid, 'courseid' => $this->get_courseid()]);
+            }
+        }
+    }
+
+    /**
+     * Name the newly copied template once, after the destination course name is final.
+     * Personal portfolio categories and the source template are deliberately outside this path.
+     */
+    protected function after_restore() {
+        global $DB;
+
+        if ($this->copiedroot === null || !$this->renamerootoncopy ||
+                !get_config('block_exaport', 'enable_copy_root_naming')) {
+            return;
+        }
+        $courseid = $this->get_courseid();
+        $fullname = $DB->get_field('course', 'fullname', ['id' => $courseid], MUST_EXIST);
+        $pattern = get_config('block_exaport', 'copied_template_root_name');
+        if ($pattern === false || trim($pattern) === '') {
+            $pattern = 'Ausbildungsdokumente {coursefullname}';
+        }
+        $name = str_replace('{coursefullname}', $fullname, $pattern);
+        // Template and personal category names both have an existing 255-character limit.
+        $name = core_text::substr($name, 0, 255);
+        $DB->set_field('block_exaport_course_templ', 'name', $name,
+            ['id' => $this->copiedroot->id, 'courseid' => $courseid]);
     }
 }

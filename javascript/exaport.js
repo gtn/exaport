@@ -406,6 +406,13 @@
         }
         $('<button type="button" class="btn btn-link p-0 exaport-load-course-users"></button>')
           .text(label).appendTo($actions);
+        // Long recipient lists need a loading control at both ends.
+        // An empty course only needs the existing bottom control.
+        if ($content.find('input.shareusers').length) {
+          var $topActions = $('<div class="exaport-course-actions p-2"></div>');
+          $topActions.append($actions.find('button').clone());
+          $content.prepend($topActions);
+        }
         $content.append($actions);
       }
 

@@ -3894,7 +3894,7 @@ return [
     ],
     'sharing_load_more_users' => [
         'Weitere Nutzer/innen laden …',
-        'Load more users …',
+        'Load all users of this course …',
     ],
     'sharing_load_users_error' => [
         'Die Nutzerliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.',

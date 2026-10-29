@@ -75,6 +75,15 @@ if ($action === 'toggle_auto_distribute' && confirm_sesskey()) {
     redirect($url, $message, null, 'success');
 }
 
+if ($action === 'toggle_copy_root_naming') {
+    require_sesskey();
+    if (!get_config('block_exaport', 'enable_copy_root_naming')) {
+        throw new moodle_exception('copy_root_naming_disabled', 'block_exaport');
+    }
+    category_distributor::update_copy_naming($courseid, optional_param('rename_root_on_copy', false, PARAM_BOOL));
+    redirect($url, get_string('changessaved'), null, 'success');
+}
+
 if ($action === 'add_category' && confirm_sesskey()) {
     $name = required_param('name', PARAM_TEXT);
     $pid = optional_param('pid', 0, PARAM_INT);
@@ -302,18 +311,19 @@ $PAGE->requires->js_call_amd('block_exaport/category_distribution', 'init', arra
 ));
 
 block_exaport_print_header("category_distribution");
+echo html_writer::start_div('exaport-distribution');
 
 echo html_writer::tag('p', get_string('category_distribution_description', 'block_exaport'));
 
 // Section 1: Load Starter Template.
-echo $OUTPUT->heading(get_string('starter_template_select', 'block_exaport'), 3);
+echo $OUTPUT->heading(get_string('starter_template_select', 'block_exaport'), 3, 'mb-3');
 
 if (!empty($templates)) {
     echo '<form method="post" action="' . $url->out() . '" id="load-template-form">';
     echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
     echo '<input type="hidden" name="action" value="load_template">';
-    echo '<div class="form-group">';
-    echo '<select name="template_name" class="form-control" style="display: inline-block; width: auto;">';
+    echo '<div class="d-flex flex-wrap align-items-center gap-2 mb-4">';
+    echo '<select name="template_name" class="form-select w-auto mw-100">';
     foreach ($templates as $template) {
         echo '<option value="' . s($template['name']) . '">' . s($template['name']) . '</option>';
     }
@@ -328,7 +338,7 @@ if (!empty($templates)) {
 }
 
 // Section 2: Current Template.
-echo $OUTPUT->heading(get_string('current_template', 'block_exaport'), 3);
+echo $OUTPUT->heading(get_string('current_template', 'block_exaport'), 3, 'mt-4 mb-3');
 
 if (empty($course_template)) {
     echo '<p>' . get_string('template_empty', 'block_exaport') . '</p>';
@@ -336,8 +346,8 @@ if (empty($course_template)) {
     echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
     echo '<input type="hidden" name="action" value="add_category">';
     echo '<input type="hidden" name="pid" value="0">';
-    echo '<div class="form-inline">';
-    echo '<input type="text" name="name" class="form-control" placeholder="' .
+    echo '<div class="d-flex flex-wrap align-items-center gap-2 mb-4">';
+    echo '<input type="text" name="name" class="form-control exaport-template-name" placeholder="' .
         get_string('category_name_required', 'block_exaport') . '" required> ';
     echo '<button type="submit" class="btn btn-primary">' .
         get_string('add_root_category', 'block_exaport') . '</button>';
@@ -345,21 +355,33 @@ if (empty($course_template)) {
     echo '</form>';
 } else {
     // Display tree.
-    echo '<div class="exaport-template-tree">';
+    echo '<div class="exaport-template-tree border rounded bg-light p-3 mb-4">';
     block_exaport_render_template_tree($course_template, $url, $all_template_nodes);
     
     // Add new root category button (similar to views).
-    echo '<div style="margin-top: 15px;">';
+    echo '<div class="mt-3">';
     echo '<button type="button" class="btn btn-sm btn-outline-primary" data-action="add-category">' .
         get_string('add_category', 'block_exaport') . '</button>';
     echo '</div>';
     echo '</div>';
 }
 
-// Section 3: Distribution Controls.
-echo $OUTPUT->heading(get_string('distribute_categories', 'block_exaport'), 3);
+// This option is copied with the course. Saving it never renames the current template.
+if (get_config('block_exaport', 'enable_copy_root_naming')) {
+    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false), 'class' => 'my-4']);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'toggle_copy_root_naming']);
+    $copyattributes = ['id' => 'rename-root-on-copy', 'class' => 'form-check-input', 'onchange' => 'this.form.submit();'];
+    echo html_writer::div(html_writer::checkbox('rename_root_on_copy', 1, !empty($settings->rename_root_on_copy),
+        get_string('rename_root_on_copy', 'block_exaport'), $copyattributes, ['class' => 'form-check-label']) . ' ' .
+        $OUTPUT->help_icon('rename_root_on_copy', 'block_exaport'), 'form-check mb-0');
+    echo html_writer::end_tag('form');
+}
 
-echo '<div style="margin-bottom: 20px;">';
+// Section 3: Distribution Controls.
+echo $OUTPUT->heading(get_string('distribute_categories', 'block_exaport'), 3, 'mt-4 mb-3');
+
+echo '<div class="mb-3">';
 echo '<button type="button" class="btn btn-primary" data-action="distribute-categories"' .
     (empty($course_template) ? ' disabled' : '') . '>' .
     get_string('distribute_categories_now', 'block_exaport') . '</button>';
@@ -378,21 +400,21 @@ echo '</div>';
 echo '</form>';
 
 // Separator.
-echo '<hr style="margin: 40px 0;">';
+echo '<hr class="my-4">';
 
 // VIEW DISTRIBUTION SECTION.
-echo $OUTPUT->heading(get_string('view_distribution', 'block_exaport'), 2);
+echo $OUTPUT->heading(get_string('view_distribution', 'block_exaport'), 2, 'mb-3');
 echo html_writer::tag('p', get_string('view_distribution_description', 'block_exaport'));
 
 // Section 4: Load Starter View Template.
-echo $OUTPUT->heading(get_string('starter_view_template_select', 'block_exaport'), 3);
+echo $OUTPUT->heading(get_string('starter_view_template_select', 'block_exaport'), 3, 'mt-4 mb-3');
 
 if (!empty($view_templates)) {
     echo '<form method="post" action="' . $url->out() . '" id="load-view-template-form">';
     echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
     echo '<input type="hidden" name="action" value="load_view_template">';
-    echo '<div class="form-group">';
-    echo '<select name="template_name" class="form-control" style="display: inline-block; width: auto;">';
+    echo '<div class="d-flex flex-wrap align-items-center gap-2 mb-4">';
+    echo '<select name="template_name" class="form-select w-auto mw-100">';
     foreach ($view_templates as $template) {
         echo '<option value="' . s($template['name']) . '">' . s($template['name']) . '</option>';
     }
@@ -407,15 +429,15 @@ if (!empty($view_templates)) {
 }
 
 // Section 5: Current View Template.
-echo $OUTPUT->heading(get_string('current_view_template', 'block_exaport'), 3);
+echo $OUTPUT->heading(get_string('current_view_template', 'block_exaport'), 3, 'mt-4 mb-3');
 
 if (empty($course_view_template)) {
     echo '<p>' . get_string('view_template_empty', 'block_exaport') . '</p>';
     echo '<form method="post" action="' . $url->out() . '">';
     echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
     echo '<input type="hidden" name="action" value="add_view">';
-    echo '<div class="form-inline">';
-    echo '<input type="text" name="name" class="form-control" placeholder="' .
+    echo '<div class="d-flex flex-wrap align-items-center gap-2 mb-4">';
+    echo '<input type="text" name="name" class="form-control exaport-template-name" placeholder="' .
         get_string('view_name_required', 'block_exaport') . '" required> ';
     echo '<button type="submit" class="btn btn-primary">' .
         get_string('add_view', 'block_exaport') . '</button>';
@@ -423,15 +445,15 @@ if (empty($course_view_template)) {
     echo '</form>';
 } else {
     // Display view list.
-    echo '<div class="exaport-view-template-list">';
+    echo '<div class="exaport-view-template-list border rounded bg-light p-3 mb-4">';
     block_exaport_render_view_template_list($course_view_template, $url);
     echo '</div>';
 }
 
 // Section 6: View Distribution Controls.
-echo $OUTPUT->heading(get_string('distribute_views', 'block_exaport'), 3);
+echo $OUTPUT->heading(get_string('distribute_views', 'block_exaport'), 3, 'mt-4 mb-3');
 
-echo '<div style="margin-bottom: 20px;">';
+echo '<div class="mb-3">';
 echo '<button type="button" class="btn btn-primary" data-action="distribute-views"' .
     (empty($course_view_template) ? ' disabled' : '') . '>' .
     get_string('distribute_views_now', 'block_exaport') . '</button>';
@@ -449,6 +471,7 @@ echo '<label class="form-check-label" for="auto-dist-views">' .
 echo '</div>';
 echo '</form>';
 
+echo html_writer::end_div();
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer();
 
@@ -461,14 +484,15 @@ echo $OUTPUT->footer();
  * @param int $level Nesting level
  */
 function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0) {
-    echo '<ul class="list-unstyled" style="margin-left: ' . ($level * 20) . 'px;">';
+    // Indent each nested list once; multiplying by depth over-indents grandchildren.
+    echo html_writer::start_tag('ul', ['class' => 'list-unstyled mb-0' . ($level > 0 ? ' ms-4 mt-2' : '')]);
     foreach ($tree as $node) {
-        echo '<li style="margin-bottom: 10px;">';
-        echo '<div class="d-flex align-items-center justify-content-between">';
-        echo '<strong>' . s($node['name']) . '</strong>';
+        echo '<li class="mb-2">';
+        echo '<div class="d-flex flex-wrap align-items-center justify-content-between gap-2">';
+        echo '<strong class="text-break">' . s($node['name']) . '</strong>';
 
         // Actions.
-        echo '<div class="btn-group btn-group-sm" role="group">';
+        echo '<div class="d-flex flex-wrap gap-1" role="group">';
 
         // Add subcategory.
         echo '<button type="button" class="btn btn-sm btn-outline-primary" ' .
@@ -522,15 +546,15 @@ function block_exaport_render_view_template_list($views, $url) {
     echo '<ul class="list-group">';
     foreach ($views as $view) {
         echo '<li class="list-group-item">';
-        echo '<div class="d-flex align-items-center justify-content-between">';
-        echo '<div><strong>' . s($view->name) . '</strong>';
+        echo '<div class="d-flex flex-wrap align-items-center justify-content-between gap-2">';
+        echo '<div class="text-break"><strong>' . s($view->name) . '</strong>';
         if (!empty($view->description)) {
             echo '<br><small class="text-muted">' . s($view->description) . '</small>';
         }
         echo '</div>';
 
         // Actions.
-        echo '<div class="btn-group btn-group-sm" role="group">';
+        echo '<div class="d-flex flex-wrap gap-1" role="group">';
 
         // Rename.
         echo '<button type="button" class="btn btn-sm btn-outline-secondary" ' .
@@ -558,7 +582,7 @@ function block_exaport_render_view_template_list($views, $url) {
     echo '</ul>';
 
     // Add new view button.
-    echo '<div style="margin-top: 15px;">';
+    echo '<div class="mt-3">';
     echo '<button type="button" class="btn btn-sm btn-outline-primary" data-action="add-view">' .
         get_string('add_view', 'block_exaport') . '</button>';
     echo '</div>';
@@ -566,22 +590,8 @@ function block_exaport_render_view_template_list($views, $url) {
 ?>
 
 <style>
-.exaport-template-tree {
-    padding: 20px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-.exaport-template-tree ul {
-    list-style: none;
-}
-.exaport-template-tree li {
-    padding: 5px 0;
-}
-.exaport-view-template-list {
-    padding: 20px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.exaport-distribution .exaport-template-name {
+    width: 24rem;
+    max-width: 100%;
 }
 </style>

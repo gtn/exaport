@@ -48,7 +48,7 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
         // Define distribution settings.
         $dist_settings = new backup_nested_element('distribution_settings');
         $dist_setting = new backup_nested_element('distribution_setting', array('id'), array(
-            'courseid', 'auto_distribute', 'auto_distribute_views', 'timemodified'
+            'courseid', 'auto_distribute', 'auto_distribute_views', 'rename_root_on_copy', 'timemodified'
         ));
 
         // Build the tree structure.
@@ -79,7 +79,8 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
         }
 
         // Define data sources.
-        $course_template->set_source_table('block_exaport_course_templ', array('courseid' => backup::VAR_COURSEID));
+        // Stable source order preserves ID tie-breaking for roots with the same display order.
+        $course_template->set_source_table('block_exaport_course_templ', array('courseid' => backup::VAR_COURSEID), 'id ASC');
         $view_template->set_source_table('block_exaport_view_templ', array('courseid' => backup::VAR_COURSEID));
         $dist_setting->set_source_table('block_exaport_templ_dist', array('courseid' => backup::VAR_COURSEID));
 

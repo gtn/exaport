@@ -3937,4 +3937,33 @@ return [
         'Alle vorhandenen Gruppenfreigaben für Einträge, Kategorien und Sammelmappen entfernen? Die gespeicherten Gruppenzuordnungen werden gelöscht und nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.',
         'Remove all existing group shares from items, categories and collections? Saved group assignments will be deleted and will not be restored when group sharing is re-enabled. Other sharing methods remain unchanged.',
     ],
+
+    'settings_enable_copy_root_naming' => [
+        'Kursbezogene Benennung kopierter Strukturen erlauben',
+        'Allow course-based naming of copied templates',
+    ],
+    'settings_enable_copy_root_naming_description' => [
+        'Erlaubt die Kursoption, beim Kopieren oder Wiederherstellen die oberste Kategorie der kopierten Struktur nach dem Zielkurs zu benennen. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.',
+        'Allow courses to rename the first root of their copied category template during course copy or restore. Existing portfolio categories and the source template are never changed.',
+    ],
+    'settings_copied_template_root_name' => [
+        'Namensmuster für kopierte Strukturen',
+        'Copied template root name pattern',
+    ],
+    'settings_copied_template_root_name_description' => [
+        'Verwenden Sie {coursefullname} für den vollständigen Namen des Zielkurses. Ein leeres Muster verwendet Ausbildungsdokumente {coursefullname}. Namen werden auf die bestehende Grenze von 255 Zeichen gekürzt.',
+        'Use {coursefullname} for the destination course’s full name. An empty pattern uses Ausbildungsdokumente {coursefullname}. Names are shortened to the existing limit of 255 characters.',
+    ],
+    'rename_root_on_copy' => [
+        'Bei Kurskopie die oberste Template-Kategorie nach dem Zielkurs benennen',
+        'Name the first template root after the destination course when copying',
+    ],
+    'rename_root_on_copy_help' => [
+        'Diese Option wird mit dem Kurs kopiert. Sie benennt nur die erste oberste Kategorie der neu kopierten Struktur um. Die aktuelle Struktur und bestehende Portfolio-Kategorien bleiben unverändert. Spätere Änderungen des Kursnamens haben keine automatische Wirkung.',
+        'This option is copied with the course. Only the first top-level category of the newly copied template is renamed. The current template and existing portfolio categories remain unchanged. Later course name changes have no automatic effect.',
+    ],
+    'copy_root_naming_disabled' => [
+        'Die automatische Benennung kopierter Strukturen ist durch die Administration deaktiviert.',
+        'Automatic naming of copied templates is disabled by the administrator.',
+    ],
 ];

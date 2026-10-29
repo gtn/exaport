@@ -1121,3 +1121,11 @@ $string['settings_sharing_courses_with_block_only_description'] = 'Restrict the 
 $string['sharing_load_more_users'] = 'Load all users of this course …';
 $string['sharing_load_users_error'] = 'The user list could not be loaded. Please try again.';
 $string['sharing_users_not_ready'] = 'The recipient list is incomplete. Please wait for it to load, or reload the page before saving.';
+
+$string['settings_enable_copy_root_naming'] = 'Allow course-based naming of copied templates';
+$string['settings_enable_copy_root_naming_description'] = 'Allow courses to rename the first root of their copied category template during course copy or restore. Existing portfolio categories and the source template are never changed.';
+$string['settings_copied_template_root_name'] = 'Copied template root name pattern';
+$string['settings_copied_template_root_name_description'] = 'Use {coursefullname} for the destination course’s full name. An empty pattern uses Ausbildungsdokumente {coursefullname}. Names are shortened to the existing limit of 255 characters.';
+$string['rename_root_on_copy'] = 'Name the first template root after the destination course when copying';
+$string['rename_root_on_copy_help'] = 'This option is copied with the course. Only the first top-level category of the newly copied template is renamed. The current template and existing portfolio categories remain unchanged. Later course name changes have no automatic effect.';
+$string['copy_root_naming_disabled'] = 'Automatic naming of copied templates is disabled by the administrator.';

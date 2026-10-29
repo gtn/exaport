@@ -3958,7 +3958,7 @@ return [
         'Bei Kurskopie die oberste Template-Kategorie nach dem Zielkurs benennen',
         'Name the first template root after the destination course when copying',
     ],
-    'rename_root_on_copy_description' => [
+    'rename_root_on_copy_help' => [
         'Diese Option wird mit dem Kurs kopiert. Sie benennt nur die erste oberste Kategorie der neu kopierten Struktur um. Die aktuelle Struktur und bestehende Portfolio-Kategorien bleiben unverändert. Spätere Änderungen des Kursnamens haben keine automatische Wirkung.',
         'This option is copied with the course. Only the first top-level category of the newly copied template is renamed. The current template and existing portfolio categories remain unchanged. Later course name changes have no automatic effect.',
     ],

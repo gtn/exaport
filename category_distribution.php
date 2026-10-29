@@ -366,21 +366,16 @@ if (empty($course_template)) {
 }
 
 // This option is copied with the course. Saving it never renames the current template.
-$copynamingenabled = (bool)get_config('block_exaport', 'enable_copy_root_naming');
-echo html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false)]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'toggle_copy_root_naming']);
-$copyattributes = ['id' => 'rename-root-on-copy', 'onchange' => 'this.form.submit();'];
-if (!$copynamingenabled) {
-    $copyattributes['disabled'] = 'disabled';
+if (get_config('block_exaport', 'enable_copy_root_naming')) {
+    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false)]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'toggle_copy_root_naming']);
+    $copyattributes = ['id' => 'rename-root-on-copy', 'onchange' => 'this.form.submit();'];
+    echo html_writer::div(html_writer::checkbox('rename_root_on_copy', 1, !empty($settings->rename_root_on_copy),
+        get_string('rename_root_on_copy', 'block_exaport'), $copyattributes) .
+        $OUTPUT->help_icon('rename_root_on_copy', 'block_exaport'), 'form-group mt-3');
+    echo html_writer::end_tag('form');
 }
-echo html_writer::div(html_writer::checkbox('rename_root_on_copy', 1, !empty($settings->rename_root_on_copy),
-    get_string('rename_root_on_copy', 'block_exaport'), $copyattributes), 'form-group mt-3');
-echo html_writer::tag('p', get_string('rename_root_on_copy_description', 'block_exaport'), ['class' => 'text-muted']);
-if (!$copynamingenabled) {
-    echo html_writer::tag('p', get_string('copy_root_naming_disabled', 'block_exaport'), ['class' => 'text-muted']);
-}
-echo html_writer::end_tag('form');
 
 // Section 3: Distribution Controls.
 echo $OUTPUT->heading(get_string('distribute_categories', 'block_exaport'), 3);

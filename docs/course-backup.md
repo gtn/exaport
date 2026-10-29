@@ -26,6 +26,7 @@ longer generated names are shortened to fit, including multibyte names.
 A course manager then enables **Name the first template root after the destination
 course when copying** in **Structure distribution**. This opt-in is backed up and
 copied with the course. Saving it does not rename the current template.
+The explanation is available from the standard Moodle help icon next to the checkbox.
 This uses the existing block backup: the source course needs an Exaport block for
 its templates and distribution settings to be included in Moodle's course backup.
 
@@ -40,5 +41,6 @@ by this operation. Distribution to students continues through the existing paths
 Later changes to a course's name do not update the copied template automatically.
 Copying that course again resolves the name for the next destination. Backups
 without the new opt-in retain their original category names. Disabling the global
-feature preserves saved course opt-ins, while preventing automatic naming and
-changes to the course option until the administrator enables it again.
+feature preserves saved course opt-ins and hides the course checkbox and its
+help icon. Automatic naming and changes to the course option remain disabled
+until the administrator enables the feature again.

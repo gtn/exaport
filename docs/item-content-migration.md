@@ -51,7 +51,8 @@ The relevant versions and identifiers for this release are:
 | --- | --- |
 | Content-block table creation savepoint | `2026101901` |
 | Completed content-migration savepoint | `2026101902` |
-| Final Exaport plugin version | `2026102100` |
+| Final Exaport plugin version | `2026102900` |
+| Finding-history schema savepoint | `2026101902` |
 | Historical migration report identifier (`migrationversion`) | `2026101902` |
 
 The report identifier matches the content-migration savepoint and identifies
@@ -76,9 +77,11 @@ The same upgrade stores one privacy-safe aggregate report in
 printed during the upgrade. It records source counts at the start of the
 successful run, operations completed by that run, residual counts at its end,
 and timing.
-Its `status.clean` flag means only that all counted legacy residuals are zero (the
-informational `total_items` count is excluded). `status.requires_review` is true when
-any counted residual remains. Neither flag proves that application flows or
+In format version 3, `status.clean` means that counted legacy residuals and
+recorded content findings are zero (the informational `total_items` count is
+excluded). `status.requires_review` is true when any such evidence exists. It
+remains true in the historical report even if backing storage is repaired later.
+Neither flag proves that application flows or
 all structured-data relationships are correct; continue release validation and
 the read-only audit. Residual files, including orphans or files outside the
 owner's context, remain untouched for investigation. Preserve backups and
@@ -91,11 +94,9 @@ The unique report identifier prevents duplicate completed reports. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.
 
-New reports use format version 2 and omit attachment-cleanup counters. The migration
-identifier remains 2026101902. Existing reports, including their
-historical attachment counts, remain readable and are not rewritten. Values
-already erased by an earlier build cannot be reconstructed from these aggregate
-reports; this change preserves values that still exist.
+Reports use format version 3 and include aggregate finding-history counts across
+all attempts. The migration identifier is 2026101902. A completed report is not
+overwritten if an upgrade attempt is retried before its savepoint is recorded.
 
 The upgrade is restart-safe and remains in the historical upgrade code. The
 audit does not re-run it and deliberately does not compare URLs, filenames, or
@@ -117,23 +118,87 @@ The next Moodle upgrade attempt scans again from ID zero. Completed items have
 empty legacy sources and are harmless no-ops; the first incomplete item is retried
 from its surviving legacy source records.
 
-Before clearing legacy fields or deleting legacy file records, the migration
-opens both source and destination content and reads each in bounded chunks.
-It independently calculates each byte count and SHA-1 digest, compares them to
-each other, and checks them against the stored filesize and File API content
-hash. This also detects damaged shared backing content that matching file
-records alone would miss. Handles are closed even on verification failure.
-These reads occur only during migration; runtime requests and the database
-audit do not read file bodies for verification.
+### Nonblocking file migration and historical findings
 
-An open, read, or verification failure aborts that item's transaction, preserving
-legacy fields and file records and rolling back new blocks and destination
-records. No completed report is stored for a failed run. Missing bytes that
-predate migration cannot be restored by rollback. Administrators should preserve
-the surviving records and logs, investigate storage access and backing content,
-restore missing or damaged bytes from a verified backup where available, and
-retry the Moodle CLI upgrade once the cause is resolved. Do not clear legacy
-records merely to make the upgrade finish.
+Each source file is inspected once before content writes. The migration reads
+its bytes in bounded chunks and compares actual size and SHA-1 against its File
+API metadata. A known open/read failure or mismatch is documented immediately,
+then its **file record is migrated anyway**, retaining the expected content hash,
+filename, nested filepath, size and other source metadata. Backing bytes are
+neither rewritten nor replaced with empty content. Healthy sibling files and
+links migrate normally; there is no whole-item deferral, editing lock, or repair
+queue. Readable corruption is documented just like missing/unreadable content.
+
+Every destination record is checked for the intended context, component, file
+area, block, owner, content hash and size before legacy records are removed.
+The destination references the same backing content hash; no second or third
+full byte read is necessary for this metadata migration. Database errors,
+unexpected backend exceptions and destination-record verification failures still
+abort and roll back the item's content transaction. A missing/unreadable local
+filedir root is treated as a storage outage and stops migration; custom storage
+backends must surface outages as exceptions. Known bad source bytes are never
+mistaken for new destination-record failures.
+
+`block_exaportmigissue` retains administrator-only evidence independently of the
+completed aggregate report. The 2026101902 upgrade step creates it alongside the
+report table, before converting any items. Fresh installations define the same
+table in `install.xml`. Findings are keyed by migration, parent item, original file ID
+and reason. They retain owner ID, expected content hash, first/latest observation
+times and observation count. Repeated observations update the same finding;
+starting another upgrade attempt never clears previously committed evidence.
+
+A finding is committed before content writes. The exact destination file ID and
+copy time are subsequently saved **inside the same transaction as the new file
+record**. Thus a later rollback preserves the finding with no uncommitted target
+ID; a crash after copying preserves both the file record and its mapping. Recovery
+never depends on guessing file identities from matching hashes or names. Attempts
+inside an enclosing transaction are refused when independent finding commits
+cannot be guaranteed. A crash before an observation itself commits may require
+that observation to be rediscovered on the next scan.
+
+The final format-3 report includes both `files_with_content_issues` for its own
+successful attempt and `issue_history_at_successful_run_end` for **all attempts**.
+It cannot report a clean result just because an earlier attempt already migrated
+a broken file and then crashed. Existing completed reports remain immutable.
+
+### Finding an affected file after upgrade
+
+Open **Site administration → Plugins → Blocks → exabis ePortfolio → Migration
+issues**, or `/blocks/exaport/item_content_migration.php`. This read-only page
+also includes findings from interrupted attempts that never saved a final report.
+It shows history in pages of 100 rows: item/owner IDs, original and migrated file
+IDs, expected content hash, reason, observation times/count and file-record copy
+time. It offers no repair or retry actions and makes no claim about current file
+health. Access requires a site administrator and the existing audit capability.
+
+Reasons are `source_unreadable` (could not open the content), `source_read_failed`
+(read failed or stalled), and `source_content_mismatch` (size or SHA-1 differed
+from metadata). A missing destination ID/time means that the file-record copy has not committed,
+for example because the upgrade stopped after recording the finding. The original file
+row normally no longer exists after successful conversion; use the **migrated
+file ID** to inspect its current metadata. For example, replacing the prefix and
+ID as appropriate:
+
+```sql
+SELECT id, contextid, filearea, itemid, filepath, filename, contenthash, filesize
+  FROM mdl_files
+ WHERE component = 'block_exaport' AND id = 123;
+```
+
+If backing bytes were missing or damaged, investigate storage access and restore
+the original bytes for the recorded content hash from a verified backup where
+available. With standard local storage the path is
+`moodledata/filedir/<hash[0:2]>/<hash[2:4]>/<full hash>`; custom/remote backends use
+their own storage locations. **No migration rerun is needed**: restoring those
+bytes or fixing access also repairs the migrated reference. Missing bytes cannot
+be recreated by retrying a migration. If no backup exists, the finding documents
+that loss while the rest of the item remains usable. Do not delete records or
+create empty replacement files just to suppress findings.
+
+Historical findings are retained after restoration, replacement, or normal item
+deletion; they describe what the upgrade observed, not an outstanding work queue.
+Owner-context privacy export includes the findings and approved erasure removes
+them. Findings include no file contents, URLs, filenames or user names.
 
 Renewing Moodle's PHP timeout is only an application-level guardrail. It cannot
 guarantee interruption of every blocked external operation or override limits

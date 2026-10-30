@@ -1556,11 +1556,17 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         // ID-based batches avoid an unbounded result set; upgradelib renews a finite timeout for each batch.
-        block_exaport_migrate_legacy_item_content_with_report(500, null,
+        $migrationreport = block_exaport_migrate_legacy_item_content_with_report(500, null,
             static function(int $processed): void {
                 // Aggregate progress only: never expose item, owner, URL, or file details.
                 mtrace("Exaport item-content migration: {$processed} items processed");
             });
+        $migrationsummary = json_decode($migrationreport->summaryjson, true);
+        $unavailablefiles = (int)($migrationsummary['operations_in_successful_run']['files_with_unavailable_content'] ?? 0);
+        if ($unavailablefiles) {
+            mtrace("Exaport item-content migration: {$unavailablefiles} files had missing or unreadable content " .
+                "before migration. Restore it from backup; see the Exaport item-content migration audit.");
+        }
 
         upgrade_block_savepoint(true, 2026101902, 'exaport');
     }

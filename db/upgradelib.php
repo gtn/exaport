@@ -9,39 +9,20 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Read and verify backing bytes during the upgrade only.
+ * Check whether a legacy file's backing content is readable without reading its bytes.
  *
- * File API copies can share backing storage, so matching record metadata alone
- * does not establish that either file is readable or has its expected content.
+ * Content that was missing or unreadable before the upgrade cannot be repaired by
+ * migration. The migrated record keeps the same content hash, so restoring the
+ * bytes from a backup later repairs the migrated file as well.
  *
- * @param stored_file $file Source or destination file.
- * @return array Actual byte count and independently calculated content digest.
+ * @param stored_file $file Legacy source file.
+ * @return bool True when the storage backend reports readable content.
  */
-function block_exaport_verify_migration_file_content(stored_file $file): array {
-    // File systems may warn and return false rather than throw on I/O failures.
-    $handle = @$file->get_content_file_handle();
-    if (!is_resource($handle)) {
-        throw new coding_exception('Unable to open file content during legacy item migration');
-    }
-
+function block_exaport_legacy_file_content_available(stored_file $file): bool {
     try {
-        $digest = hash_init('sha1');
-        $bytes = 0;
-        while (!feof($handle)) {
-            $chunk = @fread($handle, 1048576);
-            if ($chunk === false || ($chunk === '' && !feof($handle))) {
-                throw new coding_exception('Unable to read file content during legacy item migration');
-            }
-            $bytes += strlen($chunk);
-            hash_update($digest, $chunk);
-        }
-        $contenthash = hash_final($digest);
-        if ($bytes !== (int)$file->get_filesize() || $contenthash !== $file->get_contenthash()) {
-            throw new coding_exception('File bytes do not match stored metadata during legacy item migration');
-        }
-        return ['bytes' => $bytes, 'contenthash' => $contenthash];
-    } finally {
-        fclose($handle);
+        return (bool)@get_file_storage()->get_file_system()->is_file_readable_remotely_by_storedfile($file);
+    } catch (Throwable $exception) {
+        return false;
     }
 }
 
@@ -50,6 +31,7 @@ function block_exaport_verify_migration_file_content(stored_file $file): array {
  *
  * The legacy File API area, rather than the attachment column, is authoritative.
  * Historical attachment metadata is preserved verbatim for later investigation.
+ * Missing or unreadable backing content does not block migration; it is counted for review.
  * All changes for an item use a delegated transaction. This nests with an upgrade
  * transaction when one exists; it never issues a raw commit which could defeat it.
  * Once the transaction is durable, cleared source fields make a rerun a no-op.
@@ -131,6 +113,7 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
             'linkblockid' => null,
             'fileblockid' => null,
             'filecount' => count($sourcefiles),
+            'unavailablefilecount' => 0,
             'urlcleared' => $storedurl !== '' ? 1 : 0,
             'legacyfileareacleared' => $sourcefiles ? 1 : 0,
             'alreadyclean' => $storedurl === '' && !$sourcefiles ? 1 : 0,
@@ -160,6 +143,9 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
             $result['fileblockid'] = $fileblock->id;
 
             foreach ($sourcefiles as $sourcefile) {
+                if (!block_exaport_legacy_file_content_available($sourcefile)) {
+                    $result['unavailablefilecount']++;
+                }
                 $fs->create_file_from_storedfile([
                     'contextid' => $context->id,
                     'component' => 'block_exaport',
@@ -172,7 +158,8 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
                 }
             }
 
-            // Verify identity, placement, and bytes for each file; a count alone can hide collisions.
+            // Verify identity and placement for each file; a count alone can hide collisions.
+            // The copy shares the source content hash, so it has exactly the source bytes.
             if ($progresscallback) {
                 $progresscallback('before_verification', $fileblock->id);
             }
@@ -195,11 +182,6 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
                         $destination->get_contenthash() !== $sourcefile->get_contenthash() ||
                         (int)$destination->get_filesize() !== (int)$sourcefile->get_filesize()) {
                     throw new coding_exception("File verification failed while migrating item {$itemid}");
-                }
-                $sourcecontent = block_exaport_verify_migration_file_content($sourcefile);
-                $destinationcontent = block_exaport_verify_migration_file_content($destination);
-                if ($sourcecontent !== $destinationcontent) {
-                    throw new coding_exception("File byte verification failed while migrating item {$itemid}");
                 }
             }
         }
@@ -253,6 +235,7 @@ function block_exaport_migrate_legacy_item_content_batches(
         'files_copied' => 0,
         'urls_cleared' => 0,
         'legacy_file_areas_cleared' => 0,
+        'files_with_unavailable_content' => 0,
     ];
     $lastprocessedid = 0;
     do {
@@ -280,6 +263,7 @@ function block_exaport_migrate_legacy_item_content_batches(
             $counts['files_copied'] += (int)($result['filecount'] ?? 0);
             $counts['urls_cleared'] += (int)($result['urlcleared'] ?? 0);
             $counts['legacy_file_areas_cleared'] += (int)($result['legacyfileareacleared'] ?? 0);
+            $counts['files_with_unavailable_content'] += (int)($result['unavailablefilecount'] ?? 0);
             $lastprocessedid = (int)$item->id;
         }
         if ($items && $progresscallback) {
@@ -355,7 +339,8 @@ function block_exaport_migrate_legacy_item_content_with_report(
     // Total parent items are informational, not legacy residuals.
     $residuals = $after;
     unset($residuals['total_items']);
-    $clean = !array_filter($residuals);
+    // Unavailable content was migrated as records only; its bytes must be restored from backup.
+    $clean = !array_filter($residuals) && !$operations['files_with_unavailable_content'];
     $summary = [
         'status' => [
             'clean' => $clean,
@@ -371,7 +356,7 @@ function block_exaport_migrate_legacy_item_content_with_report(
     }
     $record = (object)[
         'migrationversion' => $migrationversion,
-        'formatversion' => 2,
+        'formatversion' => 3,
         'timestarted' => $timestarted,
         'timecompleted' => time(),
         'summaryjson' => $summaryjson,

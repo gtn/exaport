@@ -91,7 +91,8 @@ The unique report identifier prevents duplicate completed reports. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.
 
-New reports use format version 2 and omit attachment-cleanup counters. The migration
+New reports use format version 3. Format version 2 omitted attachment-cleanup
+counters; version 3 adds `files_with_unavailable_content`. The migration
 identifier remains 2026101902. Existing reports, including their
 historical attachment counts, remain readable and are not rewritten. Values
 already erased by an earlier build cannot be reconstructed from these aggregate
@@ -118,22 +119,25 @@ empty legacy sources and are harmless no-ops; the first incomplete item is retri
 from its surviving legacy source records.
 
 Before clearing legacy fields or deleting legacy file records, the migration
-opens both source and destination content and reads each in bounded chunks.
-It independently calculates each byte count and SHA-1 digest, compares them to
-each other, and checks them against the stored filesize and File API content
-hash. This also detects damaged shared backing content that matching file
-records alone would miss. Handles are closed even on verification failure.
-These reads occur only during migration; runtime requests and the database
-audit do not read file bodies for verification.
+copies each File API record and verifies the copy's location, owner, size and
+content hash. A copy shares the source content hash, and therefore the same stored
+bytes, so file bodies are not read during the upgrade.
 
-An open, read, or verification failure aborts that item's transaction, preserving
-legacy fields and file records and rolling back new blocks and destination
-records. No completed report is stored for a failed run. Missing bytes that
-predate migration cannot be restored by rollback. Administrators should preserve
-the surviving records and logs, investigate storage access and backing content,
-restore missing or damaged bytes from a verified backup where available, and
-retry the Moodle CLI upgrade once the cause is resolved. Do not clear legacy
-records merely to make the upgrade finish.
+Backing content that was already missing or unreadable before migration does
+not block the upgrade, because migration can neither repair nor worsen it. The
+migration checks readability through Moodle's file-system API, migrates the
+record unchanged, and counts it as `files_with_unavailable_content`. Any such
+file makes the report `status.clean` false and `status.requires_review` true, and
+the CLI upgrade prints an aggregate warning. Restore the content for the recorded
+content hash from a verified Moodledata backup; the migrated record then serves it
+without remigration. Readability checks cannot detect damaged bytes that are
+still readable.
+
+Other copy or record-verification failures abort that item's transaction,
+preserving legacy fields and file records and rolling back new blocks and
+destination records. No completed report is stored for a failed run. Investigate
+the cause and retry the Moodle CLI upgrade. Do not clear legacy records merely to
+make the upgrade finish.
 
 Renewing Moodle's PHP timeout is only an application-level guardrail. It cannot
 guarantee interruption of every blocked external operation or override limits

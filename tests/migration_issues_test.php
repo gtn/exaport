@@ -221,7 +221,7 @@ final class migration_issues_test extends \advanced_testcase {
         }
     }
 
-    public function test_interrupted_upgrade_installs_history_schema_before_migration(): void {
+    public function test_first_upgrade_creates_finding_table_before_migrating_files(): void {
         global $DB, $CFG;
         require_once($CFG->libdir . '/upgradelib.php');
         require_once(__DIR__ . '/../db/upgrade.php');
@@ -237,70 +237,59 @@ final class migration_issues_test extends \advanced_testcase {
             $output = ob_get_clean();
         }
         $this->assertStringContainsString('1 files with recorded content problems', $output);
-        $this->assertSame(2026103001, (int)get_config('block_exaport', 'version'));
+        $this->assertSame(2026102900, (int)get_config('block_exaport', 'version'));
         $this->assertSame(1, migration_issues::counts()['issues_recorded']);
         $this->assertSame(2, $DB->count_records('block_exaportitemblock'));
     }
 
-    public function test_earlier_deferred_build_is_finished_automatically_without_losing_history(): void {
+    public function test_retry_of_the_same_upgrade_keeps_committed_findings(): void {
         global $DB, $CFG;
         require_once($CFG->libdir . '/upgradelib.php');
         require_once(__DIR__ . '/../db/upgrade.php');
         $owner = $this->getDataGenerator()->create_user();
-        $item = $this->item($owner->id);
-        $file = $this->file($item, true);
-        $table = new \xmldb_table(migration_issues::TABLE);
-        $dbman = $DB->get_manager();
-        $dbman->drop_field($table, new \xmldb_field('contenthash'));
-        $dbman->drop_field($table, new \xmldb_field('destinationid'));
-        $dbman->rename_field($table, new \xmldb_field('timecopied', XMLDB_TYPE_INTEGER, '10', null,
-            XMLDB_NOTNULL, null, '0'), 'timeresolved');
-        $dbman->add_index($table, new \xmldb_index('pendingitem', XMLDB_INDEX_NOTUNIQUE, ['itemid', 'timeresolved']));
-        $issueid = $DB->insert_record(migration_issues::TABLE, [
-            'migrationversion' => migration_issues::VERSION, 'itemid' => $item->id, 'ownerid' => $owner->id,
-            'fileid' => $file->get_id(), 'reason' => 'source_unreadable', 'firstseen' => 123,
-            'lastseen' => 456, 'attempts' => 2, 'timeresolved' => 0,
-        ]);
-        $reportid = $DB->insert_record('block_exaportmigration', [
-            'migrationversion' => migration_issues::VERSION, 'formatversion' => 3,
-            'timestarted' => 100, 'timecompleted' => 200, 'summaryjson' => '{"historical":true}',
-        ]);
-        // The original bytes may already have been restored since the earlier build deferred this item.
-        $this->restore($file);
-        set_config('version', 2026103000, 'block_exaport');
-        ob_start();
-        try {
-            \xmldb_block_exaport_upgrade(2026103000);
-        } finally {
-            ob_end_clean();
-        }
-        $issue = $DB->get_record(migration_issues::TABLE, ['id' => $issueid], '*', MUST_EXIST);
-        $this->assertSame(123, (int)$issue->firstseen);
-        $this->assertSame(2, (int)$issue->attempts);
-        $this->assertSame($file->get_contenthash(), $issue->contenthash);
-        $this->assertGreaterThan(0, (int)$issue->destinationid);
-        $this->assertSame(2, $DB->count_records('block_exaportitemblock'));
-        $this->assertSame('{"historical":true}', $DB->get_field('block_exaportmigration', 'summaryjson', ['id' => $reportid]));
-    }
-
-    public function test_completed_sites_receive_schema_without_rewriting_report(): void {
-        global $DB, $CFG;
-        require_once($CFG->libdir . '/upgradelib.php');
-        require_once(__DIR__ . '/../db/upgrade.php');
-        $reportid = $DB->insert_record('block_exaportmigration', [
-            'migrationversion' => migration_issues::VERSION, 'formatversion' => 1,
-            'timestarted' => 100, 'timecompleted' => 200, 'summaryjson' => '{"historical":true}',
-        ]);
+        $first = $this->item($owner->id);
+        $missing = $this->file($first, true);
+        $later = $this->item($owner->id);
+        $this->file($later);
         $DB->get_manager()->drop_table(new \xmldb_table(migration_issues::TABLE));
-        set_config('version', 2026102900, 'block_exaport');
+        set_config('version', 2026101901, 'block_exaport');
+        $fs = get_file_storage();
+        $filesystem = $fs->get_file_system();
+        $property = new \ReflectionProperty(\file_storage::class, 'filesystem');
+        $fake = $this->createPartialMock(\file_system_filedir::class, ['get_content_file_handle']);
+        $fake->method('get_content_file_handle')->willReturnCallback(
+            static function($file) use ($filesystem, $later) {
+                if ($file->get_filearea() === 'item_file' && (int)$file->get_itemid() === (int)$later->id) {
+                    throw new \LogicException('Interrupted upgrade');
+                }
+                return $filesystem->get_content_file_handle($file);
+            });
+        $property->setValue($fs, $fake);
         ob_start();
         try {
-            $this->assertTrue(\xmldb_block_exaport_upgrade(2026102900));
+            \xmldb_block_exaport_upgrade(2026101901);
+            $this->fail('Expected upgrade interruption');
+        } catch (\LogicException $exception) {
+            $this->assertSame('Interrupted upgrade', $exception->getMessage());
+        } finally {
+            $property->setValue($fs, $filesystem);
+            ob_end_clean();
+        }
+        $original = $DB->get_record(migration_issues::TABLE, ['fileid' => $missing->get_id()], '*', MUST_EXIST);
+        $this->assertSame(0, $DB->count_records('block_exaportmigration'));
+        $this->assertSame(2026101901, (int)get_config('block_exaport', 'version'));
+        ob_start();
+        try {
+            $this->assertTrue(\xmldb_block_exaport_upgrade(2026101901));
         } finally {
             ob_end_clean();
         }
-        $this->assertSame(0, migration_issues::counts()['issues_recorded']);
-        $this->assertSame('{"historical":true}', $DB->get_field('block_exaportmigration', 'summaryjson', ['id' => $reportid]));
+        $this->assertEquals($original, $DB->get_record(migration_issues::TABLE, ['id' => $original->id]));
+        $report = $DB->get_record('block_exaportmigration', ['migrationversion' => migration_issues::VERSION], '*', MUST_EXIST);
+        $summary = json_decode($report->summaryjson, true);
+        $this->assertTrue($summary['status']['requires_review']);
+        $this->assertSame(1, $summary['issue_history_at_successful_run_end']['files_affected']);
+        $this->assertSame(2026102900, (int)get_config('block_exaport', 'version'));
     }
 
     public function test_local_storage_outage_remains_fatal(): void {

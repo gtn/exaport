@@ -21,10 +21,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
     global $DB, $CFG;
     \block_exaport\local\exacomp_compatibility::require_compatible_code();
     $dbman = $DB->get_manager();
-    // Available before 2026101902 even when that historical migration was interrupted.
-    if ($oldversion < 2026103001) {
-        \block_exaport\local\migration_issues::ensure_schema();
-    }
     $result = true;
 
     // TODO: Clear and drop block_exaportcate.iconmerge in a future version once permanent
@@ -1546,6 +1542,22 @@ function xmldb_block_exaport_upgrade($oldversion) {
     if ($oldversion < 2026101902) {
         require_once(__DIR__ . '/upgradelib.php');
 
+        // Persist file-content findings before converting the legacy items.
+        $table = new xmldb_table('block_exaportmigissue');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        foreach (['migrationversion', 'itemid', 'ownerid', 'fileid', 'firstseen', 'lastseen', 'attempts',
+                'timecopied', 'destinationid'] as $name) {
+            $table->add_field($name, XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        }
+        $table->add_field('contenthash', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL);
+        $table->add_field('reason', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('identity', XMLDB_INDEX_UNIQUE, ['migrationversion', 'itemid', 'fileid', 'reason']);
+        $table->add_index('ownerid', XMLDB_INDEX_NOTUNIQUE, ['ownerid']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
         $table = new xmldb_table('block_exaportmigration');
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('migrationversion', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
@@ -1566,6 +1578,10 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 mtrace("Exaport item-content migration: {$processed} items processed");
             });
 
+        $issues = \block_exaport\local\migration_issues::counts();
+        mtrace("Exaport migration completed: {$issues['files_affected']} files with recorded content problems. " .
+            'Review Site administration > Plugins > Blocks > exabis ePortfolio > Migration issues. ' .
+            'File records were migrated; findings are retained across upgrade attempts.');
         upgrade_block_savepoint(true, 2026101902, 'exaport');
     }
 
@@ -1578,19 +1594,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         upgrade_block_savepoint(true, 2026102900, 'exaport');
-    }
-
-    if ($oldversion < 2026103001) {
-        if ($oldversion >= 2026101902) {
-            // Finish any items deferred by an earlier development build, without rewriting its report.
-            require_once(__DIR__ . '/upgradelib.php');
-            block_exaport_migrate_legacy_item_content_batches(500, null, null, true);
-        }
-        $issues = \block_exaport\local\migration_issues::counts();
-        mtrace("Exaport migration completed: {$issues['files_affected']} files with recorded content problems. " .
-            'Review Site administration > Plugins > Blocks > exabis ePortfolio > Migration issues. ' .
-            'File records were migrated; findings are retained across upgrade attempts.');
-        upgrade_block_savepoint(true, 2026103001, 'exaport');
     }
 
     return $result;

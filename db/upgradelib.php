@@ -294,14 +294,12 @@ function block_exaport_migrate_legacy_item_records(stdClass $item, ?callable $pr
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional item migrator, used by tests to simulate interruption.
  * @param callable|null $progresscallback Optional callback receiving cumulative count and aggregate counters.
- * @param bool $onlyrecorded Resume items deferred by an earlier development build of this migration.
  * @return array Privacy-safe aggregate operation counts, including content findings.
  */
 function block_exaport_migrate_legacy_item_content_batches(
     int $batchsize = 500,
     ?callable $migrator = null,
-    ?callable $progresscallback = null,
-    bool $onlyrecorded = false
+    ?callable $progresscallback = null
 ): array {
     global $DB;
 
@@ -320,15 +318,10 @@ function block_exaport_migrate_legacy_item_content_batches(
         'legacy_file_areas_cleared' => 0,
     ];
     $lastprocessedid = 0;
-    $where = 'id > ?';
-    if ($onlyrecorded) {
-        $where .= ' AND id IN (SELECT itemid FROM {block_exaportmigissue}
-            WHERE migrationversion = 2026101902 AND timecopied = 0)';
-    }
     do {
         $items = $DB->get_records_select(
             'block_exaportitem',
-            $where,
+            'id > ?',
             [$lastprocessedid],
             'id ASC',
             '*',
@@ -445,7 +438,7 @@ function block_exaport_migrate_legacy_item_content_with_report(
     }
     $record = (object)[
         'migrationversion' => $migrationversion,
-        'formatversion' => 4,
+        'formatversion' => 3,
         'timestarted' => $timestarted,
         'timecompleted' => time(),
         'summaryjson' => $summaryjson,

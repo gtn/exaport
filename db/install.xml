@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/exaport/db" VERSION="20261030" COMMENT="XMLDB file for Exabis ePortfolio"
+<XMLDB PATH="blocks/exaport/db" VERSION="20261029" COMMENT="XMLDB file for Exabis ePortfolio"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -595,7 +595,7 @@
         <FIELD NAME="attempts" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         <FIELD NAME="timecopied" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         <FIELD NAME="destinationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
-        <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="reason" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

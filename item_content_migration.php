@@ -30,7 +30,7 @@ $table->head = array_map(static function($key) {
     'migrationreason', 'migrationfirstseen', 'migrationlastseen', 'migrationattempts', 'migrationtimecopied']);
 foreach ($issues as $issue) {
     $table->data[] = [(int)$issue->itemid, (int)$issue->ownerid, (int)$issue->fileid,
-        $issue->destinationid ? (int)$issue->destinationid : '-', s($issue->contenthash ?? '-'), s($issue->reason),
+        $issue->destinationid ? (int)$issue->destinationid : '-', s($issue->contenthash), s($issue->reason),
         userdate($issue->firstseen), userdate($issue->lastseen), (int)$issue->attempts,
         $issue->timecopied ? userdate($issue->timecopied) : '-'];
 }

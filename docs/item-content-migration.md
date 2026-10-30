@@ -51,8 +51,8 @@ The relevant versions and identifiers for this release are:
 | --- | --- |
 | Content-block table creation savepoint | `2026101901` |
 | Completed content-migration savepoint | `2026101902` |
-| Final Exaport plugin version | `2026103001` |
-| Finding-history schema savepoint | `2026103001` |
+| Final Exaport plugin version | `2026102900` |
+| Finding-history schema savepoint | `2026101902` |
 | Historical migration report identifier (`migrationversion`) | `2026101902` |
 
 The report identifier matches the content-migration savepoint and identifies
@@ -77,10 +77,11 @@ The same upgrade stores one privacy-safe aggregate report in
 printed during the upgrade. It records source counts at the start of the
 successful run, operations completed by that run, residual counts at its end,
 and timing.
-In format version 4, `status.clean` means that counted legacy residuals and
+In format version 3, `status.clean` means that counted legacy residuals and
 recorded content findings are zero (the informational `total_items` count is
 excluded). `status.requires_review` is true when any such evidence exists. It
-remains true in the historical report even if backing storage is repaired later. Neither flag proves that application flows or
+remains true in the historical report even if backing storage is repaired later.
+Neither flag proves that application flows or
 all structured-data relationships are correct; continue release validation and
 the read-only audit. Residual files, including orphans or files outside the
 owner's context, remain untouched for investigation. Preserve backups and
@@ -93,11 +94,9 @@ The unique report identifier prevents duplicate completed reports. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.
 
-New reports use format version 4. They retain the format-2 omission of attachment-cleanup counters and include aggregate finding-history counts across all attempts. The migration
-identifier remains 2026101902. Existing reports, including their
-historical attachment counts, remain readable and are not rewritten. Values
-already erased by an earlier build cannot be reconstructed from these aggregate
-reports; this change preserves values that still exist.
+Reports use format version 3 and include aggregate finding-history counts across
+all attempts. The migration identifier is 2026101902. A completed report is not
+overwritten if an upgrade attempt is retried before its savepoint is recorded.
 
 The upgrade is restart-safe and remains in the historical upgrade code. The
 audit does not re-run it and deliberately does not compare URLs, filenames, or
@@ -141,9 +140,9 @@ backends must surface outages as exceptions. Known bad source bytes are never
 mistaken for new destination-record failures.
 
 `block_exaportmigissue` retains administrator-only evidence independently of the
-completed aggregate report. It is created **before** the historical 2026101902
-migration, including interrupted upgrades. Savepoint 2026103001 also installs it
-on completed sites. Findings are keyed by migration, parent item, original file ID
+completed aggregate report. The 2026101902 upgrade step creates it alongside the
+report table, before converting any items. Fresh installations define the same
+table in `install.xml`. Findings are keyed by migration, parent item, original file ID
 and reason. They retain owner ID, expected content hash, first/latest observation
 times and observation count. Repeated observations update the same finding;
 starting another upgrade attempt never clears previously committed evidence.
@@ -157,7 +156,7 @@ inside an enclosing transaction are refused when independent finding commits
 cannot be guaranteed. A crash before an observation itself commits may require
 that observation to be rediscovered on the next scan.
 
-The final format-4 report includes both `files_with_content_issues` for its own
+The final format-3 report includes both `files_with_content_issues` for its own
 successful attempt and `issue_history_at_successful_run_end` for **all attempts**.
 It cannot report a clean result just because an earlier attempt already migrated
 a broken file and then crashed. Existing completed reports remain immutable.
@@ -174,8 +173,8 @@ health. Access requires a site administrator and the existing audit capability.
 
 Reasons are `source_unreadable` (could not open the content), `source_read_failed`
 (read failed or stalled), and `source_content_mismatch` (size or SHA-1 differed
-from metadata). A missing destination ID/time means that copy did not commit or
-no destination was recorded by an earlier development build. The original file
+from metadata). A missing destination ID/time means that the file-record copy has not committed,
+for example because the upgrade stopped after recording the finding. The original file
 row normally no longer exists after successful conversion; use the **migrated
 file ID** to inspect its current metadata. For example, replacing the prefix and
 ID as appropriate:
@@ -199,10 +198,7 @@ create empty replacement files just to suppress findings.
 Historical findings are retained after restoration, replacement, or normal item
 deletion; they describe what the upgrade observed, not an outstanding work queue.
 Owner-context privacy export includes the findings and approved erasure removes
-them. Findings include no file contents, URLs, filenames or user names. The new
-savepoint automatically finishes recorded items deferred by the earlier
-2026103000 development build, preserves its historical report, and retains its
-finding timestamps/IDs. No manual recovery workflow is required.
+them. Findings include no file contents, URLs, filenames or user names.
 
 Renewing Moodle's PHP timeout is only an application-level guardrail. It cannot
 guarantee interruption of every blocked external operation or override limits

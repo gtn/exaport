@@ -918,7 +918,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
         $this->assertSame([2, 3], $progress);
         $this->assertSame(2026101902, (int)$report->migrationversion);
-        $this->assertSame(4, (int)$report->formatversion);
+        $this->assertSame(3, (int)$report->formatversion);
         $this->assertSame(3, $summary['source_counts_at_successful_run_start']['total_items']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['sentinel_legacy_urls']);

@@ -101,9 +101,6 @@ function block_exaport_print_extern_item($item, $access) {
         echo $categorybadges;
     }
 
-    if (\block_exaport\local\migration_issues::pending((int)$item->id)) {
-        echo $OUTPUT->notification(get_string('migrationpending', 'block_exaport'), 'warning');
-    }
     $boxcontent = '';
     $structuredblocks = block_exaport_get_item_content_blocks((int)$item->id);
     $structuredrenderable = new \block_exaport\output\item_content_blocks(

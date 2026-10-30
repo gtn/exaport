@@ -416,9 +416,6 @@ if (has_capability('block/exaport:shareintern', context_system::instance())) {
     </script>
     <?php
 }
-if ($existing && \block_exaport\local\migration_issues::pending((int)$existing->id)) {
-    echo $OUTPUT->notification(get_string('migrationpending', 'block_exaport'), 'warning');
-}
 $editform->display();
 echo block_exaport_wrapperdivend();
 echo $OUTPUT->footer($course);
@@ -430,7 +427,6 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     global $CFG, $USER, $DB;
 
     $existing = $DB->get_record('block_exaportitem', ['id' => $post->id, 'userid' => $USER->id], '*', MUST_EXIST);
-    \block_exaport\local\migration_issues::require_editable((int)$existing->id);
 
     $post->timemodified = time();
     foreach ($usetextareas as $fieldname => $usetextarea) {
@@ -645,9 +641,6 @@ function block_exaport_item_parent_record(stdClass $post, ?stdClass $existing = 
     $record->userid = $existing ? $existing->userid : $post->userid;
     $record->type = $existing ? $existing->type : $post->type;
     $record->url = '';
-    if ($existing) {
-        $record->url = (string)$existing->url;
-    }
     // Initialize new items only; existing attachment metadata is not an editable content field.
     if (!$existing) {
         $record->attachment = '';

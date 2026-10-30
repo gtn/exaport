@@ -5,7 +5,7 @@ namespace block_exaport\local;
 
 defined('MOODLE_INTERNAL') || die();
 
-/** A positively identified source-byte failure, before migration writes begin. */
+/** A positively identified source-byte finding, documented before metadata migration begins. */
 final class migration_source_exception extends \coding_exception {
     /** @var string Stable administrator-report reason. */
     public $reason;

@@ -1466,8 +1466,7 @@ function block_exaport_get_item_where() {
               FROM {block_exaportitemblock} ib
              WHERE ib.itemid = i.id
                AND ib.type IN ('text', 'link', 'file')
-        ) OR EXISTS (SELECT 1 FROM {block_exaportmigissue} mi
-            WHERE mi.itemid = i.id AND mi.migrationversion = 2026101902 AND mi.timeresolved = 0)
+        )
     )))";
 }
 
@@ -2254,10 +2253,6 @@ function block_exaport_is_valid_media_by_filename($filename) {
 function block_exaport_item_is_editable($itemid) {
     global $CFG, $DB, $USER;
 
-    if ($itemid && \block_exaport\local\migration_issues::pending((int)$itemid)) {
-        return false;
-    }
-
     if ($CFG->block_exaport_app_alloweditdelete) {
         return true;
     }
@@ -2314,7 +2309,6 @@ function block_exaport_get_editable_item(int $itemid): stdClass {
     if (!$item) {
         print_error('bookmarknotfound', 'block_exaport');
     }
-    \block_exaport\local\migration_issues::require_editable((int)$item->id);
     if (!block_exaport_item_is_editable($item->id)) {
         print_error('nopermissions', 'error');
     }

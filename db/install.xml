@@ -583,7 +583,7 @@
         <INDEX NAME="migrationversion" UNIQUE="true" FIELDS="migrationversion"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="block_exaportmigissue" COMMENT="Persistent legacy content recovery issues across upgrade attempts">
+    <TABLE NAME="block_exaportmigissue" COMMENT="Historical file-content findings across upgrade attempts">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="migrationversion" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
@@ -593,7 +593,9 @@
         <FIELD NAME="firstseen" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         <FIELD NAME="lastseen" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
         <FIELD NAME="attempts" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
-        <FIELD NAME="timeresolved" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="timecopied" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="destinationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="reason" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
@@ -601,7 +603,6 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="identity" UNIQUE="true" FIELDS="migrationversion,itemid,fileid,reason"/>
-        <INDEX NAME="pendingitem" UNIQUE="false" FIELDS="itemid,timeresolved"/>
         <INDEX NAME="ownerid" UNIQUE="false" FIELDS="ownerid"/>
       </INDEXES>
     </TABLE>

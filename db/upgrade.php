@@ -22,7 +22,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
     \block_exaport\local\exacomp_compatibility::require_compatible_code();
     $dbman = $DB->get_manager();
     // Available before 2026101902 even when that historical migration was interrupted.
-    if ($oldversion < 2026103000) {
+    if ($oldversion < 2026103001) {
         \block_exaport\local\migration_issues::ensure_schema();
     }
     $result = true;
@@ -1566,9 +1566,6 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 mtrace("Exaport item-content migration: {$processed} items processed");
             });
 
-        $issues = \block_exaport\local\migration_issues::counts();
-        mtrace("Exaport migration completed: {$issues['items_pending']} items awaiting content recovery. " .
-            'Review Site administration > Plugins > Blocks > exabis ePortfolio > Content recovery.');
         upgrade_block_savepoint(true, 2026101902, 'exaport');
     }
 
@@ -1583,8 +1580,17 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026102900, 'exaport');
     }
 
-    if ($oldversion < 2026103000) {
-        upgrade_block_savepoint(true, 2026103000, 'exaport');
+    if ($oldversion < 2026103001) {
+        if ($oldversion >= 2026101902) {
+            // Finish any items deferred by an earlier development build, without rewriting its report.
+            require_once(__DIR__ . '/upgradelib.php');
+            block_exaport_migrate_legacy_item_content_batches(500, null, null, true);
+        }
+        $issues = \block_exaport\local\migration_issues::counts();
+        mtrace("Exaport migration completed: {$issues['files_affected']} files with recorded content problems. " .
+            'Review Site administration > Plugins > Blocks > exabis ePortfolio > Migration issues. ' .
+            'File records were migrated; findings are retained across upgrade attempts.');
+        upgrade_block_savepoint(true, 2026103001, 'exaport');
     }
 
     return $result;

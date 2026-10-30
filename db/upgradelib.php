@@ -9,23 +9,19 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Read and verify backing bytes during the upgrade only.
+ * Inspect source bytes once during upgrade; known damage is recorded before metadata migration.
  *
  * File API copies can share backing storage, so matching record metadata alone
  * does not establish that either file is readable or has its expected content.
  *
- * @param stored_file $file Source or destination file.
- * @param bool $source Whether explicit byte failures may be deferred before content writes.
+ * @param stored_file $file Legacy source file.
  * @return array Actual byte count and independently calculated content digest.
  */
-function block_exaport_verify_migration_file_content(stored_file $file, bool $source = false): array {
+function block_exaport_verify_migration_file_content(stored_file $file): array {
     // File systems may warn and return false rather than throw on I/O failures.
     $handle = @$file->get_content_file_handle();
     if (!is_resource($handle)) {
-        if ($source) {
-            throw new \block_exaport\local\migration_source_exception('source_unreadable');
-        }
-        throw new coding_exception('Unable to open file content during legacy item migration');
+        throw new \block_exaport\local\migration_source_exception('source_unreadable');
     }
 
     try {
@@ -34,20 +30,14 @@ function block_exaport_verify_migration_file_content(stored_file $file, bool $so
         while (!feof($handle)) {
             $chunk = @fread($handle, 1048576);
             if ($chunk === false || ($chunk === '' && !feof($handle))) {
-                if ($source) {
-                    throw new \block_exaport\local\migration_source_exception('source_read_failed');
-                }
-                throw new coding_exception('Unable to read file content during legacy item migration');
+                throw new \block_exaport\local\migration_source_exception('source_read_failed');
             }
             $bytes += strlen($chunk);
             hash_update($digest, $chunk);
         }
         $contenthash = hash_final($digest);
         if ($bytes !== (int)$file->get_filesize() || $contenthash !== $file->get_contenthash()) {
-            if ($source) {
-                throw new \block_exaport\local\migration_source_exception('source_content_mismatch');
-            }
-            throw new coding_exception('File bytes do not match stored metadata during legacy item migration');
+            throw new \block_exaport\local\migration_source_exception('source_content_mismatch');
         }
         return ['bytes' => $bytes, 'contenthash' => $contenthash];
     } finally {
@@ -56,13 +46,13 @@ function block_exaport_verify_migration_file_content(stored_file $file, bool $so
 }
 
 /**
- * Preflight an entire item before writes. Only explicit source-byte failures are deferred.
- * All other errors, including filesystem-backend exceptions and destination failures, remain fatal.
- * A lock covers preflight, migration and issue resolution, including administrator retries.
+ * Inspect sources and record known byte failures durably before moving any file records.
+ * Explicit source damage does not block metadata migration. Unexpected errors remain fatal.
+ * A lock covers inspection and metadata migration. File references retain their content hashes.
  *
  * @param stdClass $item Trusted item record.
  * @param callable|null $progresscallback Optional diagnostic/test stage callback.
- * @return array Operation counts, or a deferred outcome with no content changes.
+ * @return array Operation counts, including files with recorded content issues.
  */
 function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $progresscallback = null): array {
     global $DB, $CFG;
@@ -76,9 +66,6 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
     }
     try {
         $item = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
-        if (\block_exaport\local\migration_issues::pending((int)$item->id)) {
-            \block_exaport\local\migration_issues::require_independent_commits();
-        }
         $contextid = $DB->get_field('context', 'id', ['contextlevel' => CONTEXT_USER, 'instanceid' => $item->userid]);
         if ($contextid && !$DB->record_exists('user', ['id' => $item->userid])) {
             throw new coding_exception('Legacy migration context owner is missing');
@@ -94,24 +81,20 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
                 throw new coding_exception('Legacy migration file storage is unavailable');
             }
         }
-        $deferred = false;
+        $fileissues = 0;
         foreach ($files as $file) {
             try {
-                block_exaport_verify_migration_file_content($file, true);
+                block_exaport_verify_migration_file_content($file);
             } catch (\block_exaport\local\migration_source_exception $exception) {
                 \block_exaport\local\migration_issues::record($item, $file, $exception->reason);
-                $deferred = true;
+                $fileissues++;
             }
         }
-        if ($deferred) {
-            return ['deferred' => 1];
-        }
-        // Re-verification inside the content transaction still protects against changes after preflight.
-        $result = block_exaport_migrate_verified_legacy_item_content($item, $progresscallback);
+        $result = block_exaport_migrate_legacy_item_records($item, $progresscallback);
+        $result['fileissues'] = $fileissues;
         if ($progresscallback) {
             $progresscallback('content_committed', $result);
         }
-        \block_exaport\local\migration_issues::resolve((int)$item->id);
         return $result;
     } finally {
         $lock->release();
@@ -119,9 +102,9 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
 }
 
 /**
- * Migrate one item's verified legacy URL and files to structured content blocks.
+ * Migrate one item's URL and file records to structured content without altering backing bytes.
  *
- * @internal Only the locking, preflighting public migrator may call this helper.
+ * @internal Called after the public migrator has inspected and documented the sources.
  *
  * The legacy File API area, rather than the attachment column, is authoritative.
  * Historical attachment metadata is preserved verbatim for later investigation.
@@ -133,7 +116,7 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
  * @param callable|null $progresscallback Optional test/diagnostic callback receiving the stage and related value.
  * @return array Migration operation counts and created block IDs.
  */
-function block_exaport_migrate_verified_legacy_item_content(stdClass $item, ?callable $progresscallback = null): array {
+function block_exaport_migrate_legacy_item_records(stdClass $item, ?callable $progresscallback = null): array {
     global $DB;
 
     $itemid = (int)($item->id ?? 0);
@@ -247,7 +230,11 @@ function block_exaport_migrate_verified_legacy_item_content(stdClass $item, ?cal
                 }
             }
 
-            // Verify identity, placement, and bytes for each file; a count alone can hide collisions.
+            // Verify every record's identity and placement. Source and destination share a content
+            // hash: backing bytes are not copied or rewritten, even when already damaged.
+            $hasissues = $DB->record_exists(\block_exaport\local\migration_issues::TABLE, [
+                'migrationversion' => \block_exaport\local\migration_issues::VERSION, 'itemid' => $itemid,
+            ]);
             if ($progresscallback) {
                 $progresscallback('before_verification', $fileblock->id);
             }
@@ -271,10 +258,10 @@ function block_exaport_migrate_verified_legacy_item_content(stdClass $item, ?cal
                         (int)$destination->get_filesize() !== (int)$sourcefile->get_filesize()) {
                     throw new coding_exception("File verification failed while migrating item {$itemid}");
                 }
-                $sourcecontent = block_exaport_verify_migration_file_content($sourcefile);
-                $destinationcontent = block_exaport_verify_migration_file_content($destination);
-                if ($sourcecontent !== $destinationcontent) {
-                    throw new coding_exception("File byte verification failed while migrating item {$itemid}");
+                if ($hasissues) {
+                    // The destination mapping commits atomically with the content records. On rollback,
+                    // the independently recorded issue survives without a dangling destination ID.
+                    \block_exaport\local\migration_issues::link_destination($itemid, $sourcefile, $destination);
                 }
             }
         }
@@ -307,12 +294,14 @@ function block_exaport_migrate_verified_legacy_item_content(stdClass $item, ?cal
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional item migrator, used by tests to simulate interruption.
  * @param callable|null $progresscallback Optional callback receiving cumulative count and aggregate counters.
- * @return array Privacy-safe aggregate operation counts, including deferred items.
+ * @param bool $onlyrecorded Resume items deferred by an earlier development build of this migration.
+ * @return array Privacy-safe aggregate operation counts, including content findings.
  */
 function block_exaport_migrate_legacy_item_content_batches(
     int $batchsize = 500,
     ?callable $migrator = null,
-    ?callable $progresscallback = null
+    ?callable $progresscallback = null,
+    bool $onlyrecorded = false
 ): array {
     global $DB;
 
@@ -323,7 +312,7 @@ function block_exaport_migrate_legacy_item_content_batches(
     $counts = [
         'items_processed' => 0,
         'items_already_clean' => 0,
-        'items_deferred' => 0,
+        'files_with_content_issues' => 0,
         'link_blocks_created' => 0,
         'file_blocks_created' => 0,
         'files_copied' => 0,
@@ -331,10 +320,15 @@ function block_exaport_migrate_legacy_item_content_batches(
         'legacy_file_areas_cleared' => 0,
     ];
     $lastprocessedid = 0;
+    $where = 'id > ?';
+    if ($onlyrecorded) {
+        $where .= ' AND id IN (SELECT itemid FROM {block_exaportmigissue}
+            WHERE migrationversion = 2026101902 AND timecopied = 0)';
+    }
     do {
         $items = $DB->get_records_select(
             'block_exaportitem',
-            'id > ?',
+            $where,
             [$lastprocessedid],
             'id ASC',
             '*',
@@ -350,7 +344,7 @@ function block_exaport_migrate_legacy_item_content_batches(
             // Injectable test migrators written before telemetry may return void.
             $result = is_array($result) ? $result : [];
             $counts['items_processed']++;
-            $counts['items_deferred'] += (int)($result['deferred'] ?? 0);
+            $counts['files_with_content_issues'] += (int)($result['fileissues'] ?? 0);
             $counts['items_already_clean'] += (int)($result['alreadyclean'] ?? 0);
             $counts['link_blocks_created'] += empty($result['linkblockid']) ? 0 : 1;
             $counts['file_blocks_created'] += empty($result['fileblockid']) ? 0 : 1;
@@ -395,7 +389,7 @@ function block_exaport_legacy_item_content_counts(): array {
 
 /**
  * Migrate legacy item content and persist its completed aggregate report.
- * Deferred issues are independently committed and survive a failed run; the summary is immutable.
+ * Content findings are independently committed and survive a failed run; the summary is immutable.
  *
  * The report identifier 2026101902 matches the content-migration savepoint.
  * It identifies this migration and does not track later plugin versions.
@@ -434,7 +428,7 @@ function block_exaport_migrate_legacy_item_content_with_report(
     $residuals = $after;
     unset($residuals['total_items']);
     $issuecounts = \block_exaport\local\migration_issues::counts();
-    $clean = !array_filter($residuals) && !$issuecounts['issues_unresolved'];
+    $clean = !array_filter($residuals) && !$issuecounts['issues_recorded'];
     $summary = [
         'status' => [
             'clean' => $clean,
@@ -451,7 +445,7 @@ function block_exaport_migrate_legacy_item_content_with_report(
     }
     $record = (object)[
         'migrationversion' => $migrationversion,
-        'formatversion' => 3,
+        'formatversion' => 4,
         'timestarted' => $timestarted,
         'timecompleted' => time(),
         'summaryjson' => $summaryjson,

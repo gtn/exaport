@@ -148,7 +148,9 @@ class provider implements
             'reason' => 'privacy:metadata:block_exaportmigissue:reason',
             'firstseen' => 'privacy:metadata:block_exaportmigissue:times',
             'lastseen' => 'privacy:metadata:block_exaportmigissue:times',
-            'timeresolved' => 'privacy:metadata:block_exaportmigissue:times',
+            'timecopied' => 'privacy:metadata:block_exaportmigissue:times',
+            'destinationid' => 'privacy:metadata:block_exaportmigissue:destinationid',
+            'contenthash' => 'privacy:metadata:block_exaportmigissue:contenthash',
             'attempts' => 'privacy:metadata:block_exaportmigissue:attempts',
         ], 'privacy:metadata:block_exaportmigissue');
 
@@ -421,7 +423,7 @@ class provider implements
         $user = $contextlist->get_user();
         foreach ($contextlist->get_contexts() as $approvedcontext) {
             if ($approvedcontext->contextlevel == CONTEXT_USER && $approvedcontext->instanceid == $user->id) {
-                writer::with_context($approvedcontext)->export_data(['Content recovery'], (object)[
+                writer::with_context($approvedcontext)->export_data(['Migration issues'], (object)[
                     'issues' => array_values($DB->get_records('block_exaportmigissue', ['ownerid' => $user->id])),
                 ]);
             }

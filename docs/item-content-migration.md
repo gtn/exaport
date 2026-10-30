@@ -51,7 +51,8 @@ The relevant versions and identifiers for this release are:
 | --- | --- |
 | Content-block table creation savepoint | `2026101901` |
 | Completed content-migration savepoint | `2026101902` |
-| Final Exaport plugin version | `2026102100` |
+| Final Exaport plugin version | `2026103000` |
+| Recovery-history schema savepoint | `2026103000` |
 | Historical migration report identifier (`migrationversion`) | `2026101902` |
 
 The report identifier matches the content-migration savepoint and identifies
@@ -76,8 +77,8 @@ The same upgrade stores one privacy-safe aggregate report in
 printed during the upgrade. It records source counts at the start of the
 successful run, operations completed by that run, residual counts at its end,
 and timing.
-Its `status.clean` flag means only that all counted legacy residuals are zero (the
-informational `total_items` count is excluded). `status.requires_review` is true when
+Its `status.clean` flag means that counted legacy residuals and unresolved recovery
+issues are zero (the informational `total_items` count is excluded). `status.requires_review` is true when
 any counted residual remains. Neither flag proves that application flows or
 all structured-data relationships are correct; continue release validation and
 the read-only audit. Residual files, including orphans or files outside the
@@ -87,11 +88,11 @@ the report does not move, delete, deduplicate, or guess ownership.
 The administration report displays these flags as **Yes** (true) or **No** (false)
 under a **Value** heading; numeric migration statistics retain their **Count**
 heading. The stored report and JSON download retain boolean values for the flags.
-The unique report identifier prevents duplicate completed reports. The report
+The unique report identifier prevents duplicate completed aggregate reports. Detailed recovery history is stored separately. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.
 
-New reports use format version 2 and omit attachment-cleanup counters. The migration
+New reports use format version 3, include aggregate issue-history counts across all attempts, and omit attachment-cleanup counters. The migration
 identifier remains 2026101902. Existing reports, including their
 historical attachment counts, remain readable and are not rewritten. Values
 already erased by an earlier build cannot be reconstructed from these aggregate
@@ -126,14 +127,77 @@ records alone would miss. Handles are closed even on verification failure.
 These reads occur only during migration; runtime requests and the database
 audit do not read file bodies for verification.
 
-An open, read, or verification failure aborts that item's transaction, preserving
-legacy fields and file records and rolling back new blocks and destination
-records. No completed report is stored for a failed run. Missing bytes that
-predate migration cannot be restored by rollback. Administrators should preserve
-the surviving records and logs, investigate storage access and backing content,
-restore missing or damaged bytes from a verified backup where available, and
-retry the Moodle CLI upgrade once the cause is resolved. Do not clear legacy
-records merely to make the upgrade finish.
+Before any item writes, a preflight reads **all** of its legacy source files. An
+explicit source open/read failure or size/hash mismatch defers the **whole item**:
+its legacy URL, attachment metadata, file records, healthy sibling files and
+existing structured blocks remain untouched. Later items still migrate. The
+upgrade finishes with a count of items awaiting recovery and a report with
+`requires_review` when residuals remain. No empty replacement files are created.
+
+A database error, destination verification failure, unexpected exception, or a
+source failure arising **after** preflight remains fatal. Its content transaction
+rolls back. A missing/unreadable local `filedir` root is treated as a storage
+outage and stops migration. Custom/remote storage backends must throw on outages;
+a backend returning `false` for an individual read is treated as an unreadable
+source. No generic exception handler converts unknown failures into warnings.
+
+### Persistent recovery history and retries
+
+`block_exaportmigissue` is created before the historical `2026101902` migration
+runs, including when an earlier upgrade stopped at that step. A later
+`2026103000` savepoint also installs it on sites that already finished migration.
+Fresh installs include the same table. Existing completed aggregate reports
+retain their original contents and migration identifier.
+
+Each source problem is saved immediately, keyed by migration, item, file and
+stable reason (`source_unreadable`, `source_read_failed`, or
+`source_content_mismatch`). Repeated observations update the existing row's
+latest timestamp and failed-observation count; the first timestamp and row ID
+survive. No retry clears the table. Successful recovery marks all issues for that
+item resolved, retaining their history and resolution time. A new reason for a
+previously affected file creates another issue rather than overwriting evidence.
+
+Issue writes use independent database commits, outside content transactions.
+Recovery refuses to record or resolve issues within an enclosing delegated
+transaction; it never commits somebody else's transaction or uses a second
+connection to evade rollback. Moodle's normal plugin upgrade calls the migration
+without an enclosing transaction. Already committed issue rows survive later
+content rollback, exceptions, process termination and failed upgrade attempts.
+An observation interrupted before its own database commit is rediscovered on
+the next scan. If content commits just before interruption, the next idempotent
+retry resolves the outstanding issues without recreating blocks.
+
+Administrators can open **Site administration → Plugins → Blocks → exabis
+ePortfolio → Content recovery**, or `/blocks/exaport/item_content_migration.php`.
+The page remains available when a crash prevented the final aggregate report.
+It displays all issue history in pages of 100 rows, including resolved entries,
+with item/owner/file IDs, reason, first/latest timestamps, failed observations and
+resolution time. It contains no filenames, URLs, user names or file contents.
+Access requires a site administrator and the existing audit capability. Retry
+buttons use authenticated POST requests with a session key and retry one pending
+item. The separate read-only audit continues to be read-only.
+
+After repairing storage access or restoring the original bytes from a verified
+backup, select **Retry item**, or run:
+
+```
+php blocks/exaport/cli/retry_legacy_content.php --itemid=10
+php blocks/exaport/cli/retry_legacy_content.php
+```
+
+The CLI retries existing pending items in ascending-ID batches of 50 (or the
+selected item), returns nonzero while unresolved issues remain, and leaves the
+original aggregate report unchanged. Deleted items retain their history and
+cannot be retried. A per-item lock prevents overlapping upgrade/admin/CLI
+migrations from duplicating blocks or overwriting issue observations.
+
+Pending items remain visible even when they have no structured content; item
+cards and detail views show a recovery notice. Item and content editing is
+blocked while pending, and parent updates preserve retained URLs. This is a
+status indication, not a legacy-content fallback. The issues are personal data:
+owner-context privacy exports include them and approved owner-context erasure
+removes them. Ordinary retries and item deletion do not erase issue history.
+Never delete legacy records just to make an upgrade finish.
 
 Renewing Moodle's PHP timeout is only an application-level guardrail. It cannot
 guarantee interruption of every blocked external operation or override limits

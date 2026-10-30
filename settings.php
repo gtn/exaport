@@ -31,6 +31,14 @@ $ADMIN->add('blocksettings', new admin_externalpage(
     true
 ));
 
+$ADMIN->add('blocksettings', new admin_externalpage(
+    'block_exaport_content_recovery',
+    get_string('contentrecovery', 'block_exaport'),
+    new moodle_url('/blocks/exaport/item_content_migration.php'),
+    'block/exaport:audititemcontent',
+    true
+));
+
 if ($ADMIN->fulltree) {
     global $DB;
 
@@ -310,6 +318,14 @@ if ($ADMIN->fulltree) {
         get_string('settings_starter_view_templates_description', 'block_exaport'),
         $default_view_templates,
         PARAM_TEXT, 60, 10));
+
+    if ($DB->get_manager()->table_exists('block_exaportmigissue') &&
+            $DB->record_exists('block_exaportmigissue', ['migrationversion' => 2026101902])) {
+        $settings->add(new admin_setting_heading('block_exaport/contentrecovery',
+            get_string('contentrecovery', 'block_exaport'),
+            html_writer::link(new moodle_url('/blocks/exaport/item_content_migration.php'),
+                get_string('contentrecovery', 'block_exaport'))));
+    }
 
     // Fresh installations have no migration history. Do not advertise the audit there.
     // Settings can also be loaded before the upgrade creates the report table.

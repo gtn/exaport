@@ -275,6 +275,7 @@ function block_exaport_copy_item_content(
         throw new coding_exception('Item content copying requires item and owner IDs');
     }
 
+    \block_exaport\local\migration_issues::require_editable((int)$sourceitem->id);
     $sourcecontext = context_user::instance((int)$sourceitem->userid);
     $destinationcontext = context_user::instance((int)$destinationitem->userid);
     $fs = get_file_storage();
@@ -406,6 +407,7 @@ function block_exaport_new_content_block(
     string $url = '',
     array $fields = []
 ): stdClass {
+    \block_exaport\local\migration_issues::require_editable($itemid);
     if (!in_array($type, ['text', 'link', 'file'], true)) {
         throw new coding_exception('Unsupported Exaport item content block type');
     }

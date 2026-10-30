@@ -60,6 +60,8 @@ if ($migrationreport) {
     echo html_writer::tag('h3', get_string('audititemcontenthistoricalreport', 'block_exaport'));
     echo item_content_audit_output::migration_report_html($migrationreport);
 }
+echo html_writer::tag('p', html_writer::link(new moodle_url('/blocks/exaport/item_content_migration.php'),
+    get_string('contentrecovery', 'block_exaport')));
 echo html_writer::tag('h3', get_string('audititemcontentcurrentaudit', 'block_exaport'));
 $form->display();
 

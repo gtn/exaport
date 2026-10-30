@@ -140,6 +140,18 @@ class provider implements
             'timemodified' => 'privacy:metadata:block_exaportitemblock:timemodified',
         ], 'privacy:metadata:block_exaportitemblock');
 
+        $collection->add_database_table('block_exaportmigissue', [
+            'migrationversion' => 'privacy:metadata:block_exaportmigissue:migrationversion',
+            'itemid' => 'privacy:metadata:block_exaportmigissue:itemid',
+            'ownerid' => 'privacy:metadata:block_exaportmigissue:ownerid',
+            'fileid' => 'privacy:metadata:block_exaportmigissue:fileid',
+            'reason' => 'privacy:metadata:block_exaportmigissue:reason',
+            'firstseen' => 'privacy:metadata:block_exaportmigissue:times',
+            'lastseen' => 'privacy:metadata:block_exaportmigissue:times',
+            'timeresolved' => 'privacy:metadata:block_exaportmigissue:times',
+            'attempts' => 'privacy:metadata:block_exaportmigissue:attempts',
+        ], 'privacy:metadata:block_exaportmigissue');
+
         // block_exaportitemshar
         // block_exaportitemgroupshar
         // Records who an item is shared with (specific users / cohort groups). Not treated as
@@ -254,6 +266,11 @@ class provider implements
     public static function get_users_in_context(userlist $userlist) {
         global $DB;
         $context = $userlist->get_context();
+        if ($context->contextlevel == CONTEXT_USER) {
+            $userlist->add_from_sql('ownerid', 'SELECT ownerid FROM {block_exaportmigissue} WHERE ownerid = ?',
+                [$context->instanceid]);
+            return;
+        }
         if (!($context instanceof \core\context\course)) {
             return;
         }
@@ -402,6 +419,13 @@ class provider implements
             // return;
         }
         $user = $contextlist->get_user();
+        foreach ($contextlist->get_contexts() as $approvedcontext) {
+            if ($approvedcontext->contextlevel == CONTEXT_USER && $approvedcontext->instanceid == $user->id) {
+                writer::with_context($approvedcontext)->export_data(['Content recovery'], (object)[
+                    'issues' => array_values($DB->get_records('block_exaportmigissue', ['ownerid' => $user->id])),
+                ]);
+            }
+        }
         // got only context_cources
         $exaportcoursescontexts = $contextlist->get_contexts();
         foreach ($exaportcoursescontexts as $k => $context) {
@@ -800,6 +824,10 @@ class provider implements
      */
     public static function delete_data_for_all_users_in_context(context $context) {
         global $DB;
+        if ($context->contextlevel == CONTEXT_USER) {
+            $DB->delete_records('block_exaportmigissue', ['ownerid' => $context->instanceid]);
+            return;
+        }
         if (!($context instanceof \core\context\course)) {
             return;
         }
@@ -866,6 +894,11 @@ class provider implements
             return;
         }
         $userid = $contextlist->get_user()->id;
+        foreach ($contextlist->get_contexts() as $approvedcontext) {
+            if ($approvedcontext->contextlevel == CONTEXT_USER && $approvedcontext->instanceid == $userid) {
+                $DB->delete_records('block_exaportmigissue', ['ownerid' => $userid]);
+            }
+        }
 
         $exaportcoursescontexts = $contextlist->get_contexts();
         foreach ($exaportcoursescontexts as $k => $context) {
@@ -931,6 +964,10 @@ class provider implements
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;
         $context = $userlist->get_context();
+        if ($context->contextlevel == CONTEXT_USER && in_array($context->instanceid, $userlist->get_userids())) {
+            $DB->delete_records('block_exaportmigissue', ['ownerid' => $context->instanceid]);
+            return;
+        }
         if (!($context instanceof \core\context\course) || !$userlist->get_userids()) {
             return;
         }

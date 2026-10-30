@@ -21,6 +21,10 @@ function xmldb_block_exaport_upgrade($oldversion) {
     global $DB, $CFG;
     \block_exaport\local\exacomp_compatibility::require_compatible_code();
     $dbman = $DB->get_manager();
+    // Available before 2026101902 even when that historical migration was interrupted.
+    if ($oldversion < 2026103000) {
+        \block_exaport\local\migration_issues::ensure_schema();
+    }
     $result = true;
 
     // TODO: Clear and drop block_exaportcate.iconmerge in a future version once permanent
@@ -1562,6 +1566,9 @@ function xmldb_block_exaport_upgrade($oldversion) {
                 mtrace("Exaport item-content migration: {$processed} items processed");
             });
 
+        $issues = \block_exaport\local\migration_issues::counts();
+        mtrace("Exaport migration completed: {$issues['items_pending']} items awaiting content recovery. " .
+            'Review Site administration > Plugins > Blocks > exabis ePortfolio > Content recovery.');
         upgrade_block_savepoint(true, 2026101902, 'exaport');
     }
 
@@ -1574,6 +1581,10 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         upgrade_block_savepoint(true, 2026102900, 'exaport');
+    }
+
+    if ($oldversion < 2026103000) {
+        upgrade_block_savepoint(true, 2026103000, 'exaport');
     }
 
     return $result;

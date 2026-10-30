@@ -98,6 +98,7 @@ class item_card extends card {
 
         $cattype      = ($type == 'shared') ? '&cattype=shared' : '';
         $isownitem    = ($item->userid == $USER->id);
+        $migrationpending = \block_exaport\local\migration_issues::pending((int)$item->id);
         $commentcount = (int)($item->comments ?? 0);
         $thumbnailaccess = '';
 
@@ -139,6 +140,7 @@ class item_card extends card {
                 ? block_exaport_get_share_summary($share) : '',
             'url'           => $url,
             'itemname'      => $item->name,
+            'migrationpending' => $migrationpending,
             'isownitem'     => $isownitem,
             'editurl'       => $CFG->wwwroot . '/blocks/exaport/item.php?courseid=' . $courseid
                                . '&id=' . $item->id . '&action=edit' . $cattype,
@@ -150,7 +152,7 @@ class item_card extends card {
             'typeicon'      => '<i class="icon fa fa-' . s($iconTypeProps['iconName']) . ' fa-fw me-1"'
                                . ' data-bs-toggle="tooltip" data-bs-placement="top"'
                                . ' data-bs-title="' . s($typelabel) . '"></i>',
-            'canedit'       => $isownitem && $type !== 'extern_category',
+            'canedit'       => $isownitem && $type !== 'extern_category' && !$migrationpending,
             'candelete'     => $isownitem && $type !== 'extern_category' && block_exaport_item_is_editable($item->id),
             'introtext'     => $introtext,
             'compbadge'     => block_exaport_get_item_comp_footer_badge($item),

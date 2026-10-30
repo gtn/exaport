@@ -97,7 +97,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame(2, $progress[0][1]['items_processed']);
         $this->assertStringNotContainsString('private:first', json_encode($progress));
         $this->assertSame([
-            'items_processed', 'items_already_clean', 'link_blocks_created', 'file_blocks_created',
+            'items_processed', 'items_already_clean', 'items_deferred', 'link_blocks_created', 'file_blocks_created',
             'files_copied', 'urls_cleared', 'legacy_file_areas_cleared',
         ], array_keys($progress[0][1]));
     }
@@ -262,9 +262,10 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
     /** @dataProvider backing_failure_provider */
     #[\PHPUnit\Framework\Attributes\DataProvider('backing_failure_provider')]
-    public function test_backing_failure_preserves_legacy_records_and_rolls_back(string $failure): void {
+    public function test_backing_failure_defers_item_and_preserves_legacy_records(string $failure): void {
         global $DB;
         $this->resetAfterTest(true);
+        $this->preventResetByRollback();
         $user = $this->getDataGenerator()->create_user();
         $item = $this->create_item($user->id, 'note', 'https://bytes.example/', 'kept');
         $content = 'isolated migration failure ' . $failure . ' ' . random_string(40);
@@ -284,12 +285,9 @@ final class item_content_upgrade_test extends \advanced_testcase {
                     chmod($path, 0000);
                 }
             }
-            try {
-                \block_exaport_migrate_legacy_item_content($item);
-                $this->fail('Invalid backing content passed migration verification');
-            } catch (\coding_exception $exception) {
-                $this->assertStringContainsString((string)$item->id, $exception->getMessage());
-            }
+            $result = \block_exaport_migrate_legacy_item_content($item);
+            $this->assertSame(1, $result['deferred']);
+            $this->assertTrue(\block_exaport\local\migration_issues::pending((int)$item->id));
             $parent = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
             $this->assertSame($item->url, $parent->url);
             $this->assertSame('kept', $parent->attachment);
@@ -331,7 +329,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $temporary = tempnam(sys_get_temp_dir(), 'exaport-migration-');
         $destinationhandle = null;
         $fake = $this->createPartialMock(\file_system_filedir::class, ['get_content_file_handle']);
-        $fake->expects($this->exactly(2))->method('get_content_file_handle')->willReturnCallback(
+        $fake->expects($this->exactly(3))->method('get_content_file_handle')->willReturnCallback(
             static function(\stored_file $file) use ($filesystem, $failure, $temporary, &$destinationhandle) {
                 if ($file->get_filearea() !== 'item_content_file') {
                     return $filesystem->get_content_file_handle($file);
@@ -954,7 +952,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
         $this->assertSame([2, 3], $progress);
         $this->assertSame(2026101902, (int)$report->migrationversion);
-        $this->assertSame(2, (int)$report->formatversion);
+        $this->assertSame(3, (int)$report->formatversion);
         $this->assertSame(3, $summary['source_counts_at_successful_run_start']['total_items']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['sentinel_legacy_urls']);
@@ -963,6 +961,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame([
             'items_processed' => 3,
             'items_already_clean' => 1,
+            'items_deferred' => 0,
             'link_blocks_created' => 1,
             'file_blocks_created' => 1,
             'files_copied' => 2,

@@ -31,6 +31,14 @@ $ADMIN->add('blocksettings', new admin_externalpage(
     true
 ));
 
+$ADMIN->add('blocksettings', new admin_externalpage(
+    'block_exaport_migration_issues',
+    get_string('migrationissues', 'block_exaport'),
+    new moodle_url('/blocks/exaport/item_content_migration.php'),
+    'block/exaport:audititemcontent',
+    true
+));
+
 if ($ADMIN->fulltree) {
     global $DB;
 
@@ -316,9 +324,11 @@ if ($ADMIN->fulltree) {
     if (has_capability('block/exaport:audititemcontent', context_system::instance()) &&
             $DB->get_manager()->table_exists('block_exaportmigration') &&
             $DB->record_exists('block_exaportmigration', ['migrationversion' => 2026101902])) {
+        $settings->add(new admin_setting_heading('block_exaport/item_content_audit_heading',
+            get_string('audititemcontent', 'block_exaport'), ''));
         $settings->add(new block_exaport_admin_setting_audit_link(
             'block_exaport/item_content_audit',
-            get_string('audititemcontent', 'block_exaport'),
+            '',
             get_string('audititemcontentreadonlynotice', 'block_exaport')
         ));
     }

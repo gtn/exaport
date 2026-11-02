@@ -2333,10 +2333,13 @@ function block_exaport_item_is_resubmitable($itemid) {
         return false;
     }
 
-    if ($itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEM_MM, array("itemid" => $itemid))) {
+    // Only example mappings refer to example reviews.
+    if ($itemexample = $DB->get_record(BLOCK_EXACOMP_DB_ITEM_MM, [
+        'itemid' => $itemid, 'competence_type' => BLOCK_EXACOMP_TYPE_EXAMPLE,
+    ])) {
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
         if ($eval = $DB->get_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL,
-            array('exampleid' => $itemexample->exampleid, 'studentid' => $USER->id, 'courseid' => $item->courseid))
+            array('exampleid' => $itemexample->exacomp_record_id, 'studentid' => $USER->id, 'courseid' => $item->courseid))
         ) {
             if (!$eval->resubmission) {
                 return false;

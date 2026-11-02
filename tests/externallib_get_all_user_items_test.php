@@ -26,6 +26,9 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Tests for root and categorized items returned by the all-items web service.
  *
+ * Keep annotations for Moodle 4.5/PHPUnit 9; newer PHPUnit uses the attributes.
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  * @package    block_exaport
  * @copyright  2026 gtn gmbh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

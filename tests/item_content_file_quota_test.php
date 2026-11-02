@@ -10,6 +10,7 @@ namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
 require_once(__DIR__ . '/../lib/item_content_helpers.php');
 require_once(__DIR__ . '/../lib/item_content_form.php');
 require_once(__DIR__ . '/../db/upgradelib.php');
@@ -153,8 +154,9 @@ final class item_content_file_quota_test extends \advanced_testcase {
             $result = $this->submit_standalone($data);
         } else {
             $data = \block_exaport\form\item_content::mock_ajax_submit($data);
+            // Moodle defaults to HTML separators (&amp;), but AJAX needs a literal &.
             $response = \core_form\external\dynamic_form::execute(
-                \block_exaport\form\item_content::class, http_build_query($data)
+                \block_exaport\form\item_content::class, http_build_query($data, '', '&')
             );
             $result = ['accepted' => $response['submitted'], 'html' => $response['html'] ?? ''];
         }
@@ -190,9 +192,12 @@ final class item_content_file_quota_test extends \advanced_testcase {
 
     /** Execute the actual standalone controller; CLI redirects throw after commit. */
     private function submit_standalone(array $data): array {
-        global $CFG, $DB, $USER, $PAGE, $COURSE, $OUTPUT, $SESSION;
+        global $CFG, $DB, $USER, $PAGE, $COURSE, $OUTPUT, $SESSION, $SCRIPT;
         $oldget = $_GET;
         $oldpost = $_POST;
+        $oldscript = $SCRIPT;
+        // The page header needs the browser script path, which PHPUnit leaves unset.
+        $SCRIPT = '/blocks/exaport/item_content_file.php';
         $_GET = [];
         \block_exaport_item_content_file_form::mock_submit($data);
         $accepted = false;
@@ -206,6 +211,7 @@ final class item_content_file_quota_test extends \advanced_testcase {
             $html = ob_get_clean();
             $_GET = $oldget;
             $_POST = $oldpost;
+            $SCRIPT = $oldscript;
         }
         return ['accepted' => $accepted, 'html' => $html];
     }

@@ -120,6 +120,7 @@ final class sharing_course_filter_test extends \advanced_testcase {
         }
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_excluded_recipients_and_notifications_survive_save_and_can_be_removed(string $type): void {
         global $DB;
@@ -160,6 +161,7 @@ final class sharing_course_filter_test extends \advanced_testcase {
             [$config->idfield => $id, 'userid' => $this->outsideuser->id]));
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_all_filtered_courses_still_show_existing_recipients_once(string $type): void {
         global $DB;
@@ -175,6 +177,7 @@ final class sharing_course_filter_test extends \advanced_testcase {
         $this->assertSame([], block_exaport_get_sharing_userlist($type, 0));
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_filter_does_not_limit_global_search_shares_or_share_all(string $type): void {
         $id = $this->entity_id($type);
@@ -192,6 +195,7 @@ final class sharing_course_filter_test extends \advanced_testcase {
         $this->assertNotEmpty(array_filter($rows, fn($row) => $row->entity_type === $type && (int)$row->id === $id));
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_foreign_entity_does_not_expose_existing_recipients(string $type): void {
         $id = $this->entity_id($type);
@@ -222,6 +226,7 @@ final class sharing_course_filter_test extends \advanced_testcase {
         $this->assertStringNotContainsString('<img', $name);
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_ajax_picker_still_requires_a_valid_sesskey(string $type): void {
         $_GET['sesskey'] = 'invalid';

@@ -88,6 +88,7 @@ final class group_sharing_policy_test extends \advanced_testcase {
         return false;
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_existing_group_access_and_overviews_follow_policy_without_deleting_rows(string $type): void {
         global $DB;
@@ -112,6 +113,7 @@ final class group_sharing_policy_test extends \advanced_testcase {
         $this->assertTrue($this->contains(share_overview::get_shared_with_me($this->recipient->id), $entity));
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_disabled_group_saves_preserve_existing_audience_and_ignore_forged_assignments(string $type): void {
         global $DB;
@@ -151,6 +153,7 @@ final class group_sharing_policy_test extends \advanced_testcase {
         $this->assertEquals(0, $this->record($entity)->shareall);
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_direct_user_and_everyone_access_remain_independent(string $type): void {
         $entity = $this->entity($type);
@@ -166,6 +169,7 @@ final class group_sharing_policy_test extends \advanced_testcase {
         $this->assertFalse($this->can_access($entity));
     }
 
+    /** @dataProvider entity_types */
     #[DataProvider('entity_types')]
     public function test_user_search_replaces_retained_group_audience(string $type): void {
         global $DB;

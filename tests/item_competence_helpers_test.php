@@ -114,6 +114,63 @@ final class item_competence_helpers_test extends \advanced_testcase {
         $this->assertSame((int)$course->id, (int)$item->courseid);
     }
 
+    public static function resubmission_cases(): array {
+        // Keep discovery working when optional Exacomp constants are unavailable.
+        return [
+            'closed example' => [4, 0, 'matching', false],
+            'open example' => [4, 1, 'matching', true],
+            'topic ID collision' => [1, 0, 'matching', true],
+            'descriptor ID collision' => [0, 0, 'matching', true],
+            'other student review' => [4, 0, 'student', true],
+            'other course review' => [4, 0, 'course', true],
+        ];
+    }
+
+    /** @dataProvider resubmission_cases */
+    #[\PHPUnit\Framework\Attributes\DataProvider('resubmission_cases')]
+    public function test_resubmission_uses_the_matching_example_review(
+        int $type, int $resubmission, string $scope, bool $expected
+    ): void {
+        global $CFG, $DB, $PAGE;
+
+        $this->resetAfterTest(true);
+        $CFG->block_exaport_app_alloweditdelete = false;
+        $CFG->block_exaport_enable_interaction_competences = true;
+        if (!block_exaport_check_competence_interaction()) {
+            $this->markTestSkipped('Exacomp is required for example reviews.');
+        }
+        $owner = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $itemid = $this->insert_item($owner->id, $course->id);
+        $exampleid = $DB->insert_record(BLOCK_EXACOMP_DB_EXAMPLES, [
+            'title' => 'Reviewed example', 'creatorid' => $owner->id, 'source' => 0,
+        ]);
+        $this->setUser($owner);
+        $DB->insert_record(BLOCK_EXACOMP_DB_ITEM_MM, [
+            'competence_type' => $type, 'exacomp_record_id' => $exampleid,
+            'itemid' => $itemid, 'timecreated' => time(),
+        ]);
+        $DB->insert_record(BLOCK_EXACOMP_DB_EXAMPLEEVAL, [
+            'exampleid' => $exampleid, 'resubmission' => $resubmission,
+            'studentid' => $scope === 'student' ? $this->getDataGenerator()->create_user()->id : $owner->id,
+            'courseid' => $scope === 'course' ? $this->getDataGenerator()->create_course()->id : $course->id,
+        ]);
+
+        $this->assertSame($expected, block_exaport_item_is_resubmitable($itemid));
+
+        require_once($CFG->dirroot . '/blocks/exaport/lib/item_edit_form.php');
+        $PAGE->set_context(\context_course::instance($course->id));
+        $PAGE->set_url('/blocks/exaport/item.php');
+        $form = new \block_exaport_item_edit_form(null, [
+            'current' => $DB->get_record('block_exaportitem', ['id' => $itemid]),
+            'course' => $course, 'type' => 'note', 'action' => 'edit', 'cattype' => '', 'catid' => 0,
+            'allowedit' => false, 'allowresubmission' => $expected,
+        ]);
+        $html = $form->render();
+        $this->assertStringNotContainsString('name="submitbutton"', $html);
+        $this->assertSame($type === 4 && $expected, str_contains($html, 'name="newsubmission"'));
+    }
+
     public function test_normalize_competenceids_keeps_unique_positive_ids(): void {
         $this->assertSame([4, 8], block_exaport_normalize_competenceids([4, '8', 4, 0, -2]));
     }

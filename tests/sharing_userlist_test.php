@@ -75,6 +75,7 @@ final class sharing_userlist_test extends \advanced_testcase {
         return $cases;
     }
 
+    /** @dataProvider entity_and_filter */
     #[DataProvider('entity_and_filter')]
     public function test_initial_payload_contains_every_selected_user_but_no_full_roster(string $type, bool $filter): void {
         global $DB;
@@ -126,6 +127,7 @@ final class sharing_userlist_test extends \advanced_testcase {
         return ['missing marker' => [null], 'loading or failed' => [0]];
     }
 
+    /** @dataProvider incomplete_forms */
     #[DataProvider('incomplete_forms')]
     public function test_incomplete_individual_picker_is_rejected(?int $ready): void {
         unset($_POST['exaport_userlist_ready'], $_GET['exaport_userlist_ready']);

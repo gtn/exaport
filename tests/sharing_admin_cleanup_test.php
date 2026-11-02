@@ -53,6 +53,7 @@ final class sharing_admin_cleanup_test extends \advanced_testcase {
         return ['everyone' => ['everyone', 1], 'groups' => ['groups', 2]];
     }
 
+    /** @dataProvider audiences */
     #[DataProvider('audiences')]
     public function test_cleanup_covers_all_owners_and_types_but_preserves_other_channels(string $audience, int $mode): void {
         global $DB;
@@ -99,6 +100,7 @@ final class sharing_admin_cleanup_test extends \advanced_testcase {
         $this->assertTrue(block_exaport_externaccess_enabled());
     }
 
+    /** @dataProvider audiences */
     #[DataProvider('audiences')]
     public function test_nonadministrators_cannot_run_global_cleanup(string $audience, int $mode): void {
         global $DB;
@@ -118,6 +120,7 @@ final class sharing_admin_cleanup_test extends \advanced_testcase {
         sharing_service::remove_all_shares('users');
     }
 
+    /** @dataProvider audiences */
     #[DataProvider('audiences')]
     public function test_removed_grants_do_not_return_when_policy_is_reenabled(string $audience, int $mode): void {
         $cohort = $this->getDataGenerator()->create_cohort();

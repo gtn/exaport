@@ -163,8 +163,10 @@ a broken file and then crashed. Existing completed reports remain immutable.
 
 ### Finding an affected file after upgrade
 
-Open **Site administration → Plugins → Blocks → exabis ePortfolio → Migration
-issues**, or `/blocks/exaport/item_content_migration.php`. This read-only page
+Open **Site administration → Plugins → Blocks → exabis ePortfolio**, then
+**Open audit** under **Item-content migration audit**. The **Migration issues**
+button near the top of the audit page opens the read-only history at
+`/blocks/exaport/item_content_migration.php`. This page
 also includes findings from interrupted attempts that never saved a final report.
 It shows history in pages of 100 rows: item/owner IDs, original and migrated file
 IDs, expected content hash, reason, observation times/count and file-record copy
@@ -227,7 +229,7 @@ On the Exaport settings page
 (`/admin/settings.php?section=blocksettingexaport`), find **Item-content migration
 audit** at the bottom. This entire row appears only when a completed report for
 content-migration savepoint `2026101902` exists; it is hidden on fresh installations
-with no migration history. Its label and read-only explanation appear in the left
+with no migration history. Its read-only explanation appears in the left
 settings column, with **Open audit** in the right column. The audit has no separate
 administration-menu or administration-search entry; its existing access checks
 still apply.
@@ -243,12 +245,13 @@ displays it separately from the current integrity audit and the JSON download
 includes it. Otherwise both the settings entry and historical report section are
 hidden; administrators can still open the audit page directly to run a live audit.
 Fresh installations normally have no migration report, but
-absence alone does not prove a fresh installation: an interrupted upgrade or an
-earlier experimental report stored under a different identifier can also leave
-no matching report. The report table is part of the schema on both fresh and
+absence alone does not prove a fresh installation: an interrupted upgrade can
+also leave no matching report. The report table is part of the schema on both fresh and
 upgraded installations; its existence does not indicate migration completion.
 The historical report explains what happened during migration; the live audit
-remains authoritative for the installation's current state.
+checks current database relationships and file references. It does not read
+backing file bytes or prove that attachments can be downloaded. The prominent
+**Migration issues** button opens the historical file findings separately.
 
 An item filter restricts attributable
 item, block, and file checks to that parent. Site-wide orphan checks are skipped

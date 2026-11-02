@@ -18,7 +18,7 @@ final class migration_issues {
         }
     }
 
-    /** Called under the item's migration lock, before any content writes. */
+    /** Record a source problem before the item's content transaction begins. */
     public static function record(\stdClass $item, \stored_file $file, string $reason): void {
         global $DB;
         self::require_independent_commits();

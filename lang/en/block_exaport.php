@@ -1131,9 +1131,11 @@ $string['rename_root_on_copy_help'] = 'This option is copied with the course. On
 $string['copy_root_naming_disabled'] = 'Automatic naming of copied templates is disabled by the administrator.';
 
 // Historical migration findings.
-$string['contentrecovery'] = 'Migration issues';
-$string['contentrecoveryhelp'] = 'This read-only history documents file problems observed during upgrade. File records were migrated with their content hashes preserved; missing or damaged bytes were not repaired. Repair storage access or restore the original bytes from a verified backup. No migration retry is needed. Findings remain as historical evidence and do not describe current file health. A missing destination means its record copy was not completed or no destination was recorded.';
-$string['contentrecoverysummary'] = 'Recorded findings: {$a->issues_recorded}. Affected files: {$a->files_affected}. Affected items: {$a->items_affected}.';
+$string['migrationissues'] = 'Migration issues';
+$string['migrationissuesintro'] = 'Review the file problems recorded during upgrade. This history remains after files are restored and does not describe current file health.';
+$string['audititemcontentscope'] = 'This audit checks database records and file references. It does not read file contents or verify that files can be downloaded.';
+$string['migrationissueshelp'] = 'This read-only history documents file problems observed during upgrade. File records were migrated with their content hashes preserved; missing or damaged bytes were not repaired. Repair storage access or restore the original bytes from a verified backup. No migration retry is needed. Findings remain as historical evidence and do not describe current file health. A missing destination means its record copy was not completed or no destination was recorded.';
+$string['migrationissuessummary'] = 'Recorded findings: {$a->issues_recorded}. Affected files: {$a->files_affected}. Affected items: {$a->items_affected}.';
 $string['migrationitemid'] = 'Item ID';
 $string['migrationownerid'] = 'Owner ID';
 $string['migrationfileid'] = 'Original file ID';

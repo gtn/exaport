@@ -15,9 +15,8 @@ defined('MOODLE_INTERNAL') || die();
  * does not establish that either file is readable or has its expected content.
  *
  * @param stored_file $file Legacy source file.
- * @return array Actual byte count and independently calculated content digest.
  */
-function block_exaport_verify_migration_file_content(stored_file $file): array {
+function block_exaport_verify_migration_file_content(stored_file $file): void {
     // File systems may warn and return false rather than throw on I/O failures.
     $handle = @$file->get_content_file_handle();
     if (!is_resource($handle)) {
@@ -39,89 +38,35 @@ function block_exaport_verify_migration_file_content(stored_file $file): array {
         if ($bytes !== (int)$file->get_filesize() || $contenthash !== $file->get_contenthash()) {
             throw new \block_exaport\local\migration_source_exception('source_content_mismatch');
         }
-        return ['bytes' => $bytes, 'contenthash' => $contenthash];
     } finally {
         fclose($handle);
     }
 }
 
 /**
- * Inspect sources and record known byte failures durably before moving any file records.
- * Explicit source damage does not block metadata migration. Unexpected errors remain fatal.
- * A lock covers inspection and metadata migration. File references retain their content hashes.
- *
- * @param stdClass $item Trusted item record.
- * @param callable|null $progresscallback Optional diagnostic/test stage callback.
- * @return array Operation counts, including files with recorded content issues.
- */
-function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $progresscallback = null): array {
-    global $DB, $CFG;
-    if (empty($item->id) || empty($item->userid)) {
-        throw new coding_exception('Legacy item content migration requires item and owner IDs');
-    }
-    $factory = \core\lock\lock_config::get_lock_factory('block_exaport_migration');
-    $lock = $factory->get_lock('item_' . (int)$item->id, 10);
-    if (!$lock) {
-        throw new coding_exception('Another process is migrating this item');
-    }
-    try {
-        $item = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
-        $contextid = $DB->get_field('context', 'id', ['contextlevel' => CONTEXT_USER, 'instanceid' => $item->userid]);
-        if ($contextid && !$DB->record_exists('user', ['id' => $item->userid])) {
-            throw new coding_exception('Legacy migration context owner is missing');
-        }
-        $fs = get_file_storage();
-        $files = $contextid ? $fs->get_area_files($contextid, 'block_exaport', 'item_file',
-            $item->id, 'filepath ASC, filename ASC, id ASC', false) : [];
-        // A missing/unreadable local storage root is an outage, not individual damaged content.
-        // Remote backends must surface outages as exceptions; these are deliberately not caught.
-        if ($files && get_class($fs->get_file_system()) === file_system_filedir::class) {
-            $filedir = $CFG->filedir ?? $CFG->dataroot . '/filedir';
-            if (!is_dir($filedir) || !is_readable($filedir)) {
-                throw new coding_exception('Legacy migration file storage is unavailable');
-            }
-        }
-        $fileissues = 0;
-        foreach ($files as $file) {
-            try {
-                block_exaport_verify_migration_file_content($file);
-            } catch (\block_exaport\local\migration_source_exception $exception) {
-                \block_exaport\local\migration_issues::record($item, $file, $exception->reason);
-                $fileissues++;
-            }
-        }
-        $result = block_exaport_migrate_legacy_item_records($item, $progresscallback);
-        $result['fileissues'] = $fileissues;
-        if ($progresscallback) {
-            $progresscallback('content_committed', $result);
-        }
-        return $result;
-    } finally {
-        $lock->release();
-    }
-}
-
-/**
  * Migrate one item's URL and file records to structured content without altering backing bytes.
- *
- * @internal Called after the public migrator has inspected and documented the sources.
  *
  * The legacy File API area, rather than the attachment column, is authoritative.
  * Historical attachment metadata is preserved verbatim for later investigation.
- * All changes for an item use a delegated transaction. This nests with an upgrade
- * transaction when one exists; it never issues a raw commit which could defeat it.
- * Once the transaction is durable, cleared source fields make a rerun a no-op.
+ * Known source-byte failures are recorded before the item's content transaction,
+ * so those findings survive rollback. Unexpected errors remain fatal.
+ * Once content commits, cleared source fields make a rerun a no-op.
  *
  * @param stdClass $item Trusted block_exaportitem record.
  * @param callable|null $progresscallback Optional test/diagnostic callback receiving the stage and related value.
  * @return array Migration operation counts and created block IDs.
  */
-function block_exaport_migrate_legacy_item_records(stdClass $item, ?callable $progresscallback = null): array {
-    global $DB;
+function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $progresscallback = null): array {
+    global $DB, $CFG;
 
     $itemid = (int)($item->id ?? 0);
-    $ownerid = (int)($item->userid ?? 0);
-    if (!$itemid || !$ownerid) {
+    if (!$itemid || empty($item->userid)) {
+        throw new coding_exception('Legacy item content migration requires item and owner IDs');
+    }
+    // Use current sources so a stale batch record cannot recreate already migrated content.
+    $current = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+    $ownerid = (int)$current->userid;
+    if (!$ownerid) {
         throw new coding_exception('Legacy item content migration requires item and owner IDs');
     }
 
@@ -148,22 +93,37 @@ function block_exaport_migrate_legacy_item_records(stdClass $item, ?callable $pr
         }
     }
 
+    $fs = get_file_storage();
+    // File records are context-bound. If the context was deleted, Moodle deletes its file areas too;
+    // do not recreate the context merely to migrate a URL.
+    $sourcefiles = $context ? array_values($fs->get_area_files(
+        $context->id,
+        'block_exaport',
+        'item_file',
+        $itemid,
+        'filepath ASC, filename ASC, id ASC',
+        false
+    )) : [];
+    // A missing/unreadable local storage root is an outage, not individual damaged content.
+    // Remote backends must surface outages as exceptions; these are deliberately not caught.
+    if ($sourcefiles && get_class($fs->get_file_system()) === file_system_filedir::class) {
+        $filedir = $CFG->filedir ?? $CFG->dataroot . '/filedir';
+        if (!is_dir($filedir) || !is_readable($filedir)) {
+            throw new coding_exception('Legacy migration file storage is unavailable');
+        }
+    }
+    $fileissues = 0;
+    foreach ($sourcefiles as $file) {
+        try {
+            block_exaport_verify_migration_file_content($file);
+        } catch (\block_exaport\local\migration_source_exception $exception) {
+            \block_exaport\local\migration_issues::record($current, $file, $exception->reason);
+            $fileissues++;
+        }
+    }
+
     $transaction = $DB->start_delegated_transaction();
     try {
-        // Re-read inside the transaction so a stale batch record cannot recreate already migrated content.
-        $current = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
-        $fs = get_file_storage();
-        // File records are context-bound. If the context was deleted, Moodle deletes its file areas too;
-        // do not recreate the context merely to migrate a URL.
-        $sourcefiles = $context ? array_values($fs->get_area_files(
-            $context->id,
-            'block_exaport',
-            'item_file',
-            $itemid,
-            'filepath ASC, filename ASC, id ASC',
-            false
-        )) : [];
-
         $storedurl = (string)($current->url ?? '');
         $testedurl = trim($storedurl);
         // Historically Exaport used the exact lower-case string "false" as the no-URL sentinel.
@@ -186,6 +146,7 @@ function block_exaport_migrate_legacy_item_records(stdClass $item, ?callable $pr
             'timemodified' => $timemodified,
         ];
         $result = [
+            'fileissues' => $fileissues,
             'linkblockid' => null,
             'fileblockid' => null,
             'filecount' => count($sourcefiles),
@@ -276,13 +237,16 @@ function block_exaport_migrate_legacy_item_records(stdClass $item, ?callable $pr
         }
 
         $transaction->allow_commit();
-        return $result;
     } catch (Throwable $exception) {
         $transaction->rollback(new coding_exception(
             "Legacy content migration failed for item {$itemid} (owner {$ownerid})",
             $exception->getMessage()
         ));
     }
+    if ($progresscallback) {
+        $progresscallback('content_committed', $result);
+    }
+    return $result;
 }
 
 /**

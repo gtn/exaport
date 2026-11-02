@@ -1580,7 +1580,8 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
         $issues = \block_exaport\local\migration_issues::counts();
         mtrace("Exaport migration completed: {$issues['files_affected']} files with recorded content problems. " .
-            'Review Site administration > Plugins > Blocks > exabis ePortfolio > Migration issues. ' .
+            'Open Site administration > Plugins > Blocks > exabis ePortfolio > Item-content migration audit, ' .
+            'then Migration issues. ' .
             'File records were migrated; findings are retained across upgrade attempts.');
         upgrade_block_savepoint(true, 2026101902, 'exaport');
     }

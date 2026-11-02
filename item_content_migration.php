@@ -7,11 +7,11 @@ require_once($CFG->libdir . '/adminlib.php');
 use block_exaport\local\migration_issues;
 
 require_admin();
-admin_externalpage_setup('block_exaport_content_recovery');
+admin_externalpage_setup('block_exaport_migration_issues');
 $url = new moodle_url('/blocks/exaport/item_content_migration.php');
 $PAGE->set_url($url);
-$PAGE->set_title(get_string('contentrecovery', 'block_exaport'));
-$PAGE->set_heading(get_string('contentrecovery', 'block_exaport'));
+$PAGE->set_title(get_string('migrationissues', 'block_exaport'));
+$PAGE->set_heading(get_string('migrationissues', 'block_exaport'));
 
 $page = max(0, optional_param('page', 0, PARAM_INT));
 $counts = migration_issues::counts();
@@ -20,9 +20,9 @@ $issues = $DB->get_records(migration_issues::TABLE, [
 ], 'id ASC', '*', $page * 100, 100);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('contentrecovery', 'block_exaport'));
-echo html_writer::tag('p', get_string('contentrecoveryhelp', 'block_exaport'));
-echo html_writer::tag('p', get_string('contentrecoverysummary', 'block_exaport', (object)$counts));
+echo $OUTPUT->heading(get_string('migrationissues', 'block_exaport'));
+echo html_writer::tag('p', get_string('migrationissueshelp', 'block_exaport'));
+echo html_writer::tag('p', get_string('migrationissuessummary', 'block_exaport', (object)$counts));
 $table = new html_table();
 $table->head = array_map(static function($key) {
     return get_string($key, 'block_exaport');

@@ -1091,9 +1091,11 @@ $string['rename_root_on_copy_help'] = 'Diese Option wird mit dem Kurs kopiert. S
 $string['copy_root_naming_disabled'] = 'Die automatische Benennung kopierter Strukturen ist durch die Administration deaktiviert.';
 
 // Historical migration findings.
-$string['contentrecovery'] = 'Migrationsprobleme';
-$string['contentrecoveryhelp'] = 'Dies ist ein schreibgeschützter Verlauf der beim Upgrade festgestellten Dateiprobleme. Die Dateidatensätze wurden mit unverändertem Inhaltshash migriert. Fehlende oder beschädigte Bytes werden dadurch nicht repariert. Speicherzugriff reparieren oder die ursprünglichen Bytes aus einer geprüften Sicherung wiederherstellen; ein erneuter Migrationslauf ist nicht erforderlich. Der Verlauf bleibt erhalten und beschreibt nicht den aktuellen Dateizustand. Ein fehlendes Ziel zeigt an, dass der Kopiervorgang damals nicht abgeschlossen wurde oder kein Ziel aufgezeichnet ist.';
-$string['contentrecoverysummary'] = 'Erfasste Probleme: {$a->issues_recorded}. Betroffene Dateien: {$a->files_affected}. Betroffene Einträge: {$a->items_affected}.';
+$string['migrationissues'] = 'Migrationsprobleme';
+$string['migrationissuesintro'] = 'Die beim Upgrade festgestellten Dateiprobleme können hier eingesehen werden. Der Verlauf bleibt auch nach einer Wiederherstellung erhalten und beschreibt nicht den aktuellen Dateizustand.';
+$string['audititemcontentscope'] = 'Diese Prüfung kontrolliert Datenbankeinträge und Dateiverweise. Sie liest keine Dateiinhalte und prüft nicht, ob Dateien heruntergeladen werden können.';
+$string['migrationissueshelp'] = 'Dies ist ein schreibgeschützter Verlauf der beim Upgrade festgestellten Dateiprobleme. Die Dateidatensätze wurden mit unverändertem Inhaltshash migriert. Fehlende oder beschädigte Bytes werden dadurch nicht repariert. Speicherzugriff reparieren oder die ursprünglichen Bytes aus einer geprüften Sicherung wiederherstellen; ein erneuter Migrationslauf ist nicht erforderlich. Der Verlauf bleibt erhalten und beschreibt nicht den aktuellen Dateizustand. Ein fehlendes Ziel zeigt an, dass der Kopiervorgang damals nicht abgeschlossen wurde oder kein Ziel aufgezeichnet ist.';
+$string['migrationissuessummary'] = 'Erfasste Probleme: {$a->issues_recorded}. Betroffene Dateien: {$a->files_affected}. Betroffene Einträge: {$a->items_affected}.';
 $string['migrationitemid'] = 'Eintrags-ID';
 $string['migrationownerid'] = 'Besitzer-ID';
 $string['migrationfileid'] = 'Ursprüngliche Datei-ID';

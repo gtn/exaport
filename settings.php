@@ -32,8 +32,8 @@ $ADMIN->add('blocksettings', new admin_externalpage(
 ));
 
 $ADMIN->add('blocksettings', new admin_externalpage(
-    'block_exaport_content_recovery',
-    get_string('contentrecovery', 'block_exaport'),
+    'block_exaport_migration_issues',
+    get_string('migrationissues', 'block_exaport'),
     new moodle_url('/blocks/exaport/item_content_migration.php'),
     'block/exaport:audititemcontent',
     true
@@ -319,22 +319,16 @@ if ($ADMIN->fulltree) {
         $default_view_templates,
         PARAM_TEXT, 60, 10));
 
-    if ($DB->get_manager()->table_exists('block_exaportmigissue') &&
-            $DB->record_exists('block_exaportmigissue', ['migrationversion' => 2026101902])) {
-        $settings->add(new admin_setting_heading('block_exaport/contentrecovery',
-            get_string('contentrecovery', 'block_exaport'),
-            html_writer::link(new moodle_url('/blocks/exaport/item_content_migration.php'),
-                get_string('contentrecovery', 'block_exaport'))));
-    }
-
     // Fresh installations have no migration history. Do not advertise the audit there.
     // Settings can also be loaded before the upgrade creates the report table.
     if (has_capability('block/exaport:audititemcontent', context_system::instance()) &&
             $DB->get_manager()->table_exists('block_exaportmigration') &&
             $DB->record_exists('block_exaportmigration', ['migrationversion' => 2026101902])) {
+        $settings->add(new admin_setting_heading('block_exaport/item_content_audit_heading',
+            get_string('audititemcontent', 'block_exaport'), ''));
         $settings->add(new block_exaport_admin_setting_audit_link(
             'block_exaport/item_content_audit',
-            get_string('audititemcontent', 'block_exaport'),
+            '',
             get_string('audititemcontentreadonlynotice', 'block_exaport')
         ));
     }

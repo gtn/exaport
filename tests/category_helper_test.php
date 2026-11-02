@@ -426,9 +426,12 @@ final class category_helper_test extends \advanced_testcase {
         $target = $targets->item(0);
         $this->assertSame(1, $xpath->query('.//i', $target)->length);
         $this->assertSame(0, $xpath->query('.//*[@data-bs-toggle="tooltip"]', $target)->length);
-        $this->assertSame('top', $target->getAttribute('data-bs-placement'));
-        $this->assertSame('true', $target->getAttribute('data-bs-html'));
-        $this->assertSame(block_exaport_get_share_tooltip($share), $target->getAttribute('data-bs-title'));
+        foreach (['data-', 'data-bs-'] as $prefix) {
+            $this->assertSame('tooltip', $target->getAttribute($prefix . 'toggle'));
+            $this->assertSame('top', $target->getAttribute($prefix . 'placement'));
+            $this->assertSame('true', $target->getAttribute($prefix . 'html'));
+            $this->assertSame(block_exaport_get_share_tooltip($share), $target->getAttribute($prefix . 'title'));
+        }
         $this->assertFalse($target->hasAttribute('title'));
     }
 

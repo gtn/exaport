@@ -106,8 +106,33 @@ final class item_comp_footer_badge_test extends \advanced_testcase {
             $this->assertStringContainsString('Editor competence', $projection->compbadge);
             $this->assertStringContainsString('Editor topic', $projection->compbadge);
             $this->assertStringContainsString('>2</span>', $projection->compbadge);
+            $document = new \DOMDocument();
+            $document->loadHTML('<?xml encoding="UTF-8">' . $projection->compbadge);
+            $target = (new \DOMXPath($document))->query('//*[@data-toggle="tooltip"]')->item(0);
+            $this->assertNotNull($target);
+            $this->assertSame('true', $target->getAttribute('data-html'));
+            $this->assertSame($target->getAttribute('data-bs-title'), $target->getAttribute('data-title'));
         } else {
             $this->assertSame('', $projection->compbadge);
         }
+    }
+
+    /** Comment tooltips stay on a wrapper that survives Font Awesome conversion. */
+    public function test_comment_tooltip_supports_both_bootstrap_versions(): void {
+        global $OUTPUT;
+
+        $html = $OUTPUT->render_from_template('block_exaport/item_card', [
+            'hascomments' => true, 'commentcount' => 2, 'commentlabel' => '2 comments & "notes"',
+        ]);
+        $document = new \DOMDocument();
+        $document->loadHTML('<?xml encoding="UTF-8">' . $html);
+        $xpath = new \DOMXPath($document);
+        $target = $xpath->query('//span[@data-toggle="tooltip"]')->item(0);
+        $this->assertNotNull($target);
+        $this->assertSame('tooltip', $target->getAttribute('data-bs-toggle'));
+        $this->assertSame('2 comments & "notes"', $target->getAttribute('data-title'));
+        $this->assertSame($target->getAttribute('data-title'), $target->getAttribute('data-bs-title'));
+        $this->assertSame(0, $xpath->query('.//i[@data-bs-toggle]', $target)->length);
+        $this->assertFalse($target->hasAttribute('title'));
     }
 }

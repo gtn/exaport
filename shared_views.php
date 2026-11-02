@@ -274,8 +274,11 @@ function block_exaport_get_shared_with_text($view) {
         return $summary;
     }
     return html_writer::tag('span', $summary, [
+        'data-toggle' => 'tooltip',
         'data-bs-toggle' => 'tooltip',
+        'data-html' => 'true',
         'data-bs-html' => 'true',
+        'data-title' => block_exaport_get_share_tooltip($view->shareinfo),
         'data-bs-title' => block_exaport_get_share_tooltip($view->shareinfo),
     ]);
 }

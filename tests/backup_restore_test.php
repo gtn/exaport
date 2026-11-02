@@ -22,6 +22,7 @@ final class backup_restore_test extends \advanced_testcase {
         ];
     }
 
+    /** @dataProvider course_backup_cases */
     #[\PHPUnit\Framework\Attributes\DataProvider('course_backup_cases')]
     public function test_course_backup_restores_only_course_configuration(bool $includeusers, bool $additempayload): void {
         global $DB;

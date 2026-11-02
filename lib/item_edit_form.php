@@ -318,10 +318,8 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->closeHeaderBefore('buttonar');
         } else {
             $exampleid = $DB->get_field(BLOCK_EXACOMP_DB_ITEM_MM,
-                'exampleid',
-                array('itemid' => $this->_customdata['current']->id));
-            $url = new moodle_url("/blocks/exacomp/example_submission.php",
-                array("courseid" => $this->_customdata['course']->id, "newsubmission" => true, "exampleid" => $exampleid));
+                'exacomp_record_id',
+                ['itemid' => $this->_customdata['current']->id, 'competence_type' => BLOCK_EXACOMP_TYPE_EXAMPLE]);
 
             $mform->addElement('hidden', 'allowedit');
             $mform->setType('allowedit', PARAM_INT);
@@ -333,7 +331,9 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->disabledIf('intro_editor', 'allowedit', 'neq', 1);
             $mform->disabledIf('iconfile', 'allowedit', 'neq', 1);
 
-            if (!empty($this->_customdata['allowresubmission'])) {
+            if ($exampleid && !empty($this->_customdata['allowresubmission'])) {
+                $url = new moodle_url('/blocks/exacomp/example_submission.php',
+                    ['courseid' => $this->_customdata['course']->id, 'newsubmission' => true, 'exampleid' => $exampleid]);
                 $mform->addElement('button', 'newsubmission', get_string("newsubmission", "block_exacomp"),
                     array('onclick' => 'location.href = " ' . str_replace("&amp;", "&", $url) . '"'));
             } else {

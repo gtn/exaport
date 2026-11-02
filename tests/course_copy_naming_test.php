@@ -88,6 +88,7 @@ final class course_copy_naming_test extends \advanced_testcase {
         return $nodes;
     }
 
+    /** @dataProvider naming_cases */
     #[\PHPUnit\Framework\Attributes\DataProvider('naming_cases')]
     public function test_only_first_new_template_root_is_renamed(bool $global, bool $courseoptin,
             bool $existing, bool $legacy, ?string $pattern, bool $empty): void {

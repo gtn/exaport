@@ -241,8 +241,8 @@ same result as a privacy-safe JSON file. Both actions are authenticated Moodle
 form submissions protected by a session key.
 
 When a completed report exists for the content-migration savepoint, the page
-displays it separately from the current integrity audit and the JSON download
-includes it. Otherwise both the settings entry and historical report section are
+displays it separately from the current database and file-reference checks.
+The JSON download includes it. Otherwise both the settings entry and historical report section are
 hidden; administrators can still open the audit page directly to run a live audit.
 Fresh installations normally have no migration report, but
 absence alone does not prove a fresh installation: an interrupted upgrade can
@@ -252,6 +252,13 @@ The historical report explains what happened during migration; the live audit
 checks current database relationships and file references. It does not read
 backing file bytes or prove that attachments can be downloaded. The prominent
 **Migration issues** button opens the historical file findings separately.
+When retained findings exist, a warning above that button shows how many files
+were affected during upgrade. It remains visible after files are restored.
+The current checks report **Database and file-reference checks passed. File
+contents were not checked.** when no structural findings are found. The JSON
+status `clean` has the same limited scope. Historical file-copy counts describe
+migrated file records and references, including records whose backing bytes were
+already missing; they do not count successfully repaired or downloaded files.
 
 An item filter restricts attributable
 item, block, and file checks to that parent. Site-wide orphan checks are skipped

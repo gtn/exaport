@@ -27,6 +27,7 @@ final class item_content_audit_output {
             'version' => (int)$record->migrationversion,
             'completed' => userdate((int)$record->timecompleted),
         ]));
+        $html .= \html_writer::tag('p', get_string('audititemcontentreportfiles', 'block_exaport'));
         foreach ($summary as $section => $counts) {
             if (!is_array($counts)) {
                 continue;
@@ -50,18 +51,18 @@ final class item_content_audit_output {
     public static function html(array $result, bool $verbose = false): string {
         global $OUTPUT;
 
-        $status = strtoupper($result['status']);
         $notificationtype = $result['status'] === 'error' ? 'error' :
             ($result['status'] === 'warning' ? 'warning' : 'success');
-        $summary = get_string('audititemcontentsummary', 'block_exaport', (object)[
-            'status' => $status,
-            'errors' => $result['errorcount'],
-            'warnings' => $result['warningcount'],
-        ]);
+        $summary = $result['status'] === 'clean' ?
+            get_string('audititemcontentnofindings', 'block_exaport') :
+            get_string('audititemcontentsummary', 'block_exaport', (object)[
+                'errors' => $result['errorcount'],
+                'warnings' => $result['warningcount'],
+            ]);
         $html = $OUTPUT->notification($summary, $notificationtype, false);
 
         if (empty($result['findings'])) {
-            return $html . \html_writer::tag('p', get_string('audititemcontentnofindings', 'block_exaport'));
+            return $html;
         }
 
         $table = new \html_table();

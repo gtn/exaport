@@ -8,6 +8,7 @@ require_once($CFG->libdir . '/formslib.php');
 use block_exaport\form\item_content_audit as item_content_audit_form;
 use block_exaport\local\item_content_audit;
 use block_exaport\local\item_content_audit_output;
+use block_exaport\local\migration_issues;
 
 require_admin();
 admin_externalpage_setup('block_exaport_item_content_audit');
@@ -57,6 +58,11 @@ echo $OUTPUT->heading(get_string('audititemcontent', 'block_exaport'));
 echo $OUTPUT->notification(get_string('audititemcontentreadonlynotice', 'block_exaport'), 'info', false);
 echo html_writer::start_div('card mb-4');
 echo html_writer::start_div('card-body');
+$issuecounts = migration_issues::counts();
+if ($issuecounts['files_affected']) {
+    echo $OUTPUT->notification(get_string('migrationissuesrecorded', 'block_exaport', $issuecounts['files_affected']),
+        'warning', false);
+}
 echo html_writer::tag('p', get_string('migrationissuesintro', 'block_exaport'), ['class' => 'card-text']);
 echo html_writer::link(new moodle_url('/blocks/exaport/item_content_migration.php'),
     get_string('migrationissues', 'block_exaport'), ['class' => 'btn btn-primary']);

@@ -109,8 +109,8 @@ return [
         'Count',
     ],
     'audititemcontentcurrentaudit' => [
-        null,
-        'Current integrity audit',
+        'Aktuelle Prüfung der Datenbank und Dateiverweise',
+        'Current database and file-reference checks',
     ],
     'audititemcontentdownloadjson' => [
         null,
@@ -145,8 +145,8 @@ return [
         'Leave empty for a site-wide audit, or enter a positive item ID to restrict attributable checks.',
     ],
     'audititemcontentnofindings' => [
-        null,
-        'No warning or error findings were reported.',
+        'Die Prüfung der Datenbank und Dateiverweise war erfolgreich. Dateiinhalte wurden nicht geprüft.',
+        'Database and file-reference checks passed. File contents were not checked.',
     ],
     'audititemcontentnoreport' => [
         null,
@@ -171,6 +171,10 @@ return [
     'audititemcontentrelatedids' => [
         null,
         'Related record IDs',
+    ],
+    'audititemcontentreportfiles' => [
+        'Die Anzahl migrierter Dateien bezieht sich auf Dateidatensätze und Dateiverweise. Fehlende oder beschädigte Dateiinhalte wurden nicht repariert.',
+        'File migration counts describe file records and references. Missing or damaged file contents were not repaired.',
     ],
     'audititemcontentreportmeta' => [
         null,
@@ -205,8 +209,8 @@ return [
         'Severity',
     ],
     'audititemcontentsummary' => [
-        null,
-        'Status: {$a->status}. Error findings: {$a->errors}. Warning findings: {$a->warnings}.',
+        'Prüfung der Datenbank und Dateiverweise: {$a->errors} Fehlerbefunde, {$a->warnings} Warnbefunde. Dateiinhalte wurden nicht geprüft.',
+        'Database and file-reference checks: {$a->errors} error findings, {$a->warnings} warning findings. File contents were not checked.',
     ],
     'audititemcontentvalue' => [
         null,
@@ -3974,6 +3978,7 @@ return [
     // Historical migration findings.
     'migrationissues' => ['Migrationsprobleme', 'Migration issues'],
     'migrationissuesintro' => ['Die beim Upgrade festgestellten Dateiprobleme können hier eingesehen werden. Der Verlauf bleibt auch nach einer Wiederherstellung erhalten und beschreibt nicht den aktuellen Dateizustand.', 'Review the file problems recorded during upgrade. This history remains after files are restored and does not describe current file health.'],
+    'migrationissuesrecorded' => ['Dateien mit beim Upgrade festgestellten Problemen: {$a}.', 'Files with problems recorded during upgrade: {$a}.'],
     'migrationissueshelp' => ['Dies ist ein schreibgeschützter Verlauf der beim Upgrade festgestellten Dateiprobleme. Die Dateidatensätze wurden mit unverändertem Inhaltshash migriert. Fehlende oder beschädigte Bytes werden dadurch nicht repariert. Speicherzugriff reparieren oder die ursprünglichen Bytes aus einer geprüften Sicherung wiederherstellen; ein erneuter Migrationslauf ist nicht erforderlich. Der Verlauf bleibt erhalten und beschreibt nicht den aktuellen Dateizustand. Ein fehlendes Ziel zeigt an, dass der Kopiervorgang damals nicht abgeschlossen wurde oder kein Ziel aufgezeichnet ist.', 'This read-only history documents file problems observed during upgrade. File records were migrated with their content hashes preserved; missing or damaged bytes were not repaired. Repair storage access or restore the original bytes from a verified backup. No migration retry is needed. Findings remain as historical evidence and do not describe current file health. A missing destination means its record copy was not completed or no destination was recorded.'],
     'migrationissuessummary' => ['Erfasste Probleme: {$a->issues_recorded}. Betroffene Dateien: {$a->files_affected}. Betroffene Einträge: {$a->items_affected}.', 'Recorded findings: {$a->issues_recorded}. Affected files: {$a->files_affected}. Affected items: {$a->items_affected}.'],
     'migrationitemid' => ['Eintrags-ID', 'Item ID'],

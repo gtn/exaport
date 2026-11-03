@@ -307,6 +307,7 @@
 
       // Reuse the same rows and selection maps for the initial selection and full rosters.
       function renderCourseUsers($content, courseid, users, complete) {
+        $content.closest('.course-group').find('.exaport-course-actions').remove();
         if (complete) {
           var returnedUsers = {};
           $.each(users, function (index, user) { returnedUsers[String(user.id)] = true; });
@@ -399,21 +400,15 @@
       }
 
       function showCourseAction($content, label, error) {
-        $content.find('.exaport-course-actions').remove();
-        var $actions = $('<div class="exaport-course-actions p-2"></div>');
+        var $fieldset = $content.closest('.course-group');
+        $fieldset.find('.exaport-course-actions, .exaport-course-error').remove();
         if (error) {
-          $('<div class="text-danger" role="alert"></div>').text(M.util.get_string('sharing_load_users_error', 'block_exaport')).appendTo($actions);
+          $('<div class="text-danger exaport-course-error p-2" role="alert"></div>')
+            .text(M.util.get_string('sharing_load_users_error', 'block_exaport')).prependTo($content);
         }
-        $('<button type="button" class="btn btn-link p-0 exaport-load-course-users"></button>')
-          .text(label).appendTo($actions);
-        // Long recipient lists need a loading control at both ends.
-        // An empty course only needs the existing bottom control.
-        if ($content.find('input.shareusers').length) {
-          var $topActions = $('<div class="exaport-course-actions p-2"></div>');
-          $topActions.append($actions.find('button').clone());
-          $content.prepend($topActions);
-        }
-        $content.append($actions);
+        var $button = $('<button type="button" class="btn btn-link p-0 exaport-load-course-users"></button>').text(label);
+        $('<div class="exaport-course-actions exaport-course-header-actions"></div>')
+          .append($button).appendTo($fieldset.find('.exaport-course-header'));
       }
 
       // Keep the selected-recipient inputs while loading or on failure: they must still submit.
@@ -425,7 +420,8 @@
         courseStates[courseid] = 'loading';
         var $content = $fieldset.find('.course-group-content');
         showCourseAction($content, M.util.get_string('loading', 'moodle'));
-        $content.attr('aria-busy', 'true').find('.exaport-load-course-users').prop('disabled', true);
+        $content.attr('aria-busy', 'true');
+        $fieldset.find('.exaport-load-course-users').prop('disabled', true);
 
         function failed() {
           courseStates[courseid] = previousState;
@@ -517,11 +513,15 @@
             if (course.has_shared_users && $.empty(course.users)) {
               throw new Error('Missing selected recipients');
             }
-            html += '<fieldset class="course-group" courseid="' + course.id + '"><legend class="course-group-title">';
+            var titleid = 'exaport-course-title-' + course.id;
+            var contentid = 'exaport-course-users-' + course.id;
+            html += '<div class="course-group" courseid="' + course.id + '" role="group" aria-labelledby="' + titleid + '">';
+            html += '<div class="exaport-course-header"><button type="button" class="course-group-title" id="' + titleid + '"';
+            html += ' aria-expanded="false" aria-controls="' + contentid + '">';
             html += ($E.courseid == course.id ? '<b>' : '');
             html += course.fullname;
             html += ($E.courseid == course.id ? '</b>' : '');
-            html += '</legend><div class="course-group-content"></div></fieldset>';
+            html += '</button></div><div class="course-group-content" id="' + contentid + '"></div></div>';
           });
         } else {
           html += '<b>' + $E.translate('nousersfound') + '</b>';
@@ -531,8 +531,9 @@
           var $fieldset = $userlist.find('.course-group[courseid="' + course.id + '"]');
           if (!$.empty(course.users)) {
             courseStates[course.id] = course.users_complete ? 'full' : 'partial';
-            renderCourseUsers($fieldset.find('.course-group-content'), course.id, course.users, !!course.users_complete);
             $fieldset.addClass('course-group-open');
+            $fieldset.find('.course-group-title').attr('aria-expanded', 'true');
+            renderCourseUsers($fieldset.find('.course-group-content'), course.id, course.users, !!course.users_complete);
           }
         });
       }
@@ -541,6 +542,7 @@
       $userlist.on('click', '.course-group-title', function () {
         var $fieldset = $(this).closest('.course-group');
         $fieldset.toggleClass('course-group-open');
+        $(this).attr('aria-expanded', $fieldset.hasClass('course-group-open') ? 'true' : 'false');
         var courseid = $fieldset.attr('courseid');
         if ($fieldset.hasClass('course-group-open') && courseStates[courseid] === undefined) {
           loadCourseUsers(courseid, $fieldset);

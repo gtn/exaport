@@ -83,6 +83,17 @@ div.item-detail-image img {
     display: block;
 }
 
+#exaport .exaport-course-header-actions {
+    display: none;
+    margin-left: .75rem;
+    font-size: 1rem;
+    font-weight: normal;
+}
+
+#exaport .course-group-open .exaport-course-header-actions {
+    display: inline-block;
+}
+
 #exaport .exaport-item-content-section {
     border: 1px solid #d9e2ea;
     border-radius: 0.5rem;

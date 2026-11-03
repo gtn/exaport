@@ -4,4 +4,4 @@
 
 require_once(__DIR__ . '/inc.php');
 $contenttype = 'cv';
-require(__DIR__ . '/item_content_linked.php');
+require(__DIR__ . '/item_content.php');

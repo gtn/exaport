@@ -5,6 +5,11 @@
 defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/lib/item_content_helpers.php');
 
+// Each public entry point fixes the type in server-side code; requests cannot choose a different editor.
+if (!isset($contenttype) || !in_array($contenttype, block_exaport_item_content_types(), true)) {
+    throw new coding_exception('Unsupported Exaport item content block type');
+}
+
 $courseid = required_param('courseid', PARAM_INT);
 $itemid = required_param('itemid', PARAM_INT);
 $blockid = optional_param('blockid', 0, PARAM_INT);

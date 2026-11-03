@@ -219,6 +219,9 @@ class item_content extends dynamic_form {
         if ($block && $block->type !== $data->contenttype) {
             throw new \invalid_parameter_exception('Content block type does not match the form');
         }
+        if (($data->operation ?? '') === 'delete' && !$block) {
+            throw new \invalid_parameter_exception('A content block is required for deletion');
+        }
         $linkedconfiguration = null;
         if (in_array($data->contenttype, item_linked_content::TYPES, true) && ($data->operation ?? '') !== 'delete') {
             $linkedconfiguration = item_linked_content::configuration($data->contenttype, (int)$item->userid,

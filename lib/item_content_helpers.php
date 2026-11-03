@@ -857,54 +857,6 @@ function block_exaport_check_item_content_file_submission(stdClass $item, ?stdCl
     }
 }
 
-/**
- * Create and initialise an add-content form.
- *
- * Keeping this here makes the exact same Moodle form available to both the
- * standalone pages and Fragment API requests.
- *
- * @param string $type text, link or file.
- * @param int $courseid Course ID.
- * @param int $itemid Item ID.
- * @return moodleform
- */
-function block_exaport_create_item_content_form(string $type, int $courseid, int $itemid, int $blockid = 0) {
-    $item = block_exaport_get_editable_content_item($itemid, $courseid);
-    $block = $blockid ? block_exaport_get_item_content_block($item, $blockid) : null;
-    if ($block && $block->type !== $type) {
-        throw new invalid_parameter_exception('Content block type does not match the form');
-    }
-    $usercontext = context_user::instance((int)$item->userid);
-    if ($type === 'text') {
-        require_once(__DIR__ . '/item_content_text_form.php');
-        $options = block_exaport_item_content_editor_options();
-        $form = new block_exaport_item_content_text_form(null, ['editoroptions' => $options]);
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
-            'title' => $block->title ?? '', 'content' => $block->content ?? '',
-            'contentformat' => $block->contentformat ?? FORMAT_HTML];
-        $data = file_prepare_standard_editor($data, 'content', $options, $usercontext,
-            'block_exaport', 'item_content_text', $blockid);
-    } else if ($type === 'file') {
-        require_once(__DIR__ . '/item_content_form.php');
-        $options = block_exaport_item_content_file_options($item, $block);
-        $form = new block_exaport_item_content_file_form(null, ['fileoptions' => $options, 'blockid' => $blockid,
-            'item' => $item, 'block' => $block]);
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
-            'title' => $block->title ?? '', 'files' => ''];
-        $data = file_prepare_standard_filemanager($data, 'files', $options, $usercontext,
-            'block_exaport', 'item_content_file', $blockid);
-    } else if ($type === 'link') {
-        require_once(__DIR__ . '/item_content_form.php');
-        $form = new block_exaport_item_content_link_form();
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
-            'title' => $block->title ?? '', 'url' => $block->url ?? ''];
-    } else {
-        throw new coding_exception('Unsupported Exaport item content block type');
-    }
-    $form->set_data($data);
-    return $form;
-}
-
 /** Render the editable content section after an asynchronous save. */
 function block_exaport_render_item_content_blocks(int $courseid, stdClass $item): string {
     global $PAGE;

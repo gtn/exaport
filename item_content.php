@@ -17,6 +17,8 @@ $operation = optional_param('operation', 'save', PARAM_ALPHA);
 
 require_login($courseid);
 require_capability('block/exaport:use', context_system::instance());
+// Keep the standalone pages' explicit course check, including courseid=0 requests.
+$DB->get_record('course', ['id' => $courseid], 'id', MUST_EXIST);
 $item = block_exaport_get_editable_content_item($itemid, $courseid);
 $block = $blockid ? block_exaport_get_item_content_block($item, $blockid) : null;
 if ($block && $block->type !== $contenttype) {
@@ -35,6 +37,9 @@ if ($form->is_cancelled()) {
     redirect($returnurl);
 } else if ($form->get_data()) {
     $form->process_dynamic_submission();
+    if ($operation !== 'delete') {
+        redirect($returnurl, get_string('contentblockadded', 'block_exaport'), null, \core\output\notification::NOTIFY_SUCCESS);
+    }
     redirect($returnurl);
 }
 $form->set_data_for_dynamic_submission();

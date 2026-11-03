@@ -242,12 +242,16 @@ class item_content extends dynamic_form {
             $transaction->allow_commit();
             return ['content' => block_exaport_render_item_content_blocks((int)$data->courseid, $item)];
         }
-        $DB->update_record('block_exaportitemblock', (object)[
+        $changes = (object)[
             'id' => $block->id,
             'title' => $data->title,
-            'url' => $data->contenttype === 'link' ? $data->url : '',
             'timemodified' => time(),
-        ]);
+        ];
+        // Editing text or files must not overwrite unrelated historical block metadata.
+        if ($data->contenttype === 'link') {
+            $changes->url = $data->url;
+        }
+        $DB->update_record('block_exaportitemblock', $changes);
         $context = context_user::instance((int)$item->userid);
         if ($linkedconfiguration !== null) {
             $DB->update_record('block_exaportitemblock', (object)[

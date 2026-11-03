@@ -116,6 +116,11 @@ final class item_content_page_test extends \advanced_testcase {
         $block = block_exaport_get_item_content_blocks($itemid)[0];
         $this->assertSame($type, $block->type);
         $this->assertSame('Created through the page', $block->title);
+        if (in_array($type, ['text', 'file'], true)) {
+            // Old standalone editors left unrelated legacy fields untouched.
+            $block->url = 'https://legacy.example.com/retained-metadata';
+            $DB->set_field('block_exaportitemblock', 'url', $block->url, ['id' => $block->id]);
+        }
 
         $data['blockid'] = $block->id;
         $data['title'] = 'Edited through the page';
@@ -137,6 +142,7 @@ final class item_content_page_test extends \advanced_testcase {
         $updated = block_exaport_get_item_content_blocks($itemid)[0];
         $this->assertSame((int)$block->id, (int)$updated->id);
         $this->assertSame('Edited through the page', $updated->title);
+        $this->assertSame($block->url, $updated->url);
         $context = \context_user::instance($USER->id);
         if ($type === 'text') {
             $this->assertStringContainsString('@@PLUGINFILE@@/image.png', $updated->content);
@@ -181,6 +187,96 @@ final class item_content_page_test extends \advanced_testcase {
         } catch (\moodle_exception $exception) {
             $this->assertSame('invalidsesskey', $exception->errorcode);
             $this->assertFalse($DB->record_exists('block_exaportitemblock', ['itemid' => $itemid]));
+        }
+    }
+
+    public function test_standalone_rejects_missing_navigation_course(): void {
+        global $DB;
+
+        [$itemid, $data] = $this->fixture('link');
+        try {
+            $this->submit('link', array_replace($data, ['courseid' => 0]));
+            $this->fail('The standalone editor requires an existing navigation course');
+        } catch (\dml_missing_record_exception $exception) {
+            $this->assertFalse($DB->record_exists('block_exaportitemblock', ['itemid' => $itemid]));
+        }
+    }
+
+    public function test_standalone_rejects_another_users_item(): void {
+        global $DB;
+
+        [$itemid, $data] = $this->fixture('link');
+        $owner = $this->getDataGenerator()->create_user();
+        $DB->set_field('block_exaportitem', 'userid', $owner->id, ['id' => $itemid]);
+        try {
+            $this->submit('link', $data);
+            $this->fail('Only the item owner may edit its content');
+        } catch (\moodle_exception $exception) {
+            $this->assertSame('bookmarknotfound', $exception->errorcode);
+            $this->assertFalse($DB->record_exists('block_exaportitemblock', ['itemid' => $itemid]));
+        }
+    }
+
+    public function test_standalone_rejects_a_reviewed_item(): void {
+        global $DB;
+
+        set_config('block_exaport_app_alloweditdelete', 0);
+        set_config('block_exaport_enable_interaction_competences', 1);
+        if (!block_exaport_check_competence_interaction()) {
+            $this->markTestSkipped('Exacomp is required to create an item locked by teacher review.');
+        }
+        [$itemid, $data] = $this->fixture('link');
+        $DB->insert_record(BLOCK_EXACOMP_DB_ITEM_MM, [
+            'competence_type' => BLOCK_EXACOMP_TYPE_EXAMPLE, 'exacomp_record_id' => 1,
+            'itemid' => $itemid, 'timecreated' => time(), 'teachervalue' => 1,
+        ]);
+        try {
+            $this->submit('link', $data);
+            $this->fail('Teacher review prevents editing content');
+        } catch (\moodle_exception $exception) {
+            $this->assertSame('nopermissions', $exception->errorcode);
+            $this->assertFalse($DB->record_exists('block_exaportitemblock', ['itemid' => $itemid]));
+        }
+    }
+
+    public function test_standalone_rejects_a_block_from_another_item(): void {
+        global $DB;
+
+        [$itemid, $data] = $this->fixture('link');
+        [$otheritemid] = $this->fixture('link');
+        $block = block_exaport_create_link_content_block($otheritemid, 'Other block', 'https://example.com/');
+        try {
+            $this->submit('link', array_replace($data, ['blockid' => $block->id]));
+            $this->fail('A block must belong to the authorised parent item');
+        } catch (\invalid_parameter_exception $exception) {
+            $this->assertFalse($DB->record_exists('block_exaportitemblock', ['itemid' => $itemid]));
+            $this->assertEquals($block, $DB->get_record('block_exaportitemblock', ['id' => $block->id]));
+        }
+    }
+
+    public function test_standalone_cancel_does_not_save_uploaded_files(): void {
+        global $DB;
+
+        [$itemid, $data] = $this->fixture('file');
+        $this->submit('file', array_replace($data, ['cancel' => 1]));
+        $this->assertFalse($DB->record_exists('block_exaportitemblock', ['itemid' => $itemid]));
+    }
+
+    public function test_standalone_delete_rejects_invalid_sesskey(): void {
+        global $DB, $USER;
+
+        [$itemid, $data] = $this->fixture('file');
+        $this->submit('file', $data);
+        $block = block_exaport_get_item_content_blocks($itemid)[0];
+        try {
+            $this->submit('file', array_replace($data, ['blockid' => $block->id, 'operation' => 'delete']), false);
+            $this->fail('Deletion requires a valid session key');
+        } catch (\moodle_exception $exception) {
+            $this->assertSame('invalidsesskey', $exception->errorcode);
+            $this->assertTrue($DB->record_exists('block_exaportitemblock', ['id' => $block->id]));
+            $files = block_exaport_get_item_content_files((int)$USER->id, (int)$block->id);
+            $this->assertCount(1, $files);
+            $this->assertSame('uploaded file bytes', $files[0]->get_content());
         }
     }
 

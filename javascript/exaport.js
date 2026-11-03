@@ -178,25 +178,6 @@
       // Reopening a partial course must not fetch everyone: only its load-more button does that.
       var courseStates = {};
       var courseUsers = {};
-      var courseTableObserver = window.ResizeObserver ? new ResizeObserver(function (entries) {
-        $.each(entries, function (index, entry) {
-          updateCourseActions($(entry.target).closest('.course-group-content'));
-        });
-      }) : null;
-
-      function updateCourseActions($content) {
-        var $table = $content.find('table');
-        // Use the rendered rows and available scrolling area, not the total course roster.
-        var viewportHeight = Math.min(window.innerHeight, $userlist[0].clientHeight);
-        var needsBottomAction = $table.length && $table[0].getBoundingClientRect().height > viewportHeight;
-        $content.find('.exaport-course-footer-actions').prop('hidden', !needsBottomAction);
-      }
-
-      $(window).on('resize.exaportCourseActions', function () {
-        $userlist.find('.course-group-open .course-group-content').each(function () {
-          updateCourseActions($(this));
-        });
-      });
 
       // Direct user shares are entity-wide (one entity/user relation, not one per course - see
       // block_exaport_ajax_sharing_userlist_course() in lib/sharelib.php), so the same Moodle
@@ -326,9 +307,6 @@
 
       // Reuse the same rows and selection maps for the initial selection and full rosters.
       function renderCourseUsers($content, courseid, users, complete) {
-        if (courseTableObserver && $content.find('table').length) {
-          courseTableObserver.unobserve($content.find('table')[0]);
-        }
         $content.closest('.course-group').find('.exaport-course-actions').remove();
         if (complete) {
           var returnedUsers = {};
@@ -429,14 +407,8 @@
             .text(M.util.get_string('sharing_load_users_error', 'block_exaport')).prependTo($content);
         }
         var $button = $('<button type="button" class="btn btn-link p-0 exaport-load-course-users"></button>').text(label);
-        $('<span class="exaport-course-actions exaport-course-header-actions"></span>')
-          .append($button).appendTo($fieldset.find('.course-group-title'));
-        $('<div class="exaport-course-actions exaport-course-footer-actions p-2" hidden></div>')
-          .append($button.clone()).appendTo($content);
-        if (courseTableObserver && $content.find('table').length) {
-          courseTableObserver.observe($content.find('table')[0]);
-        }
-        updateCourseActions($content);
+        $('<div class="exaport-course-actions exaport-course-header-actions"></div>')
+          .append($button).appendTo($fieldset.find('.exaport-course-header'));
       }
 
       // Keep the selected-recipient inputs while loading or on failure: they must still submit.
@@ -534,9 +506,6 @@
       }
 
       function renderInitialUsers(courses) {
-        if (courseTableObserver) {
-          courseTableObserver.disconnect();
-        }
         var html = '';
         if (!$.empty(courses)) {
           $.each(courses, function (tmp, course) {
@@ -544,11 +513,15 @@
             if (course.has_shared_users && $.empty(course.users)) {
               throw new Error('Missing selected recipients');
             }
-            html += '<fieldset class="course-group" courseid="' + course.id + '"><legend class="course-group-title">';
+            var titleid = 'exaport-course-title-' + course.id;
+            var contentid = 'exaport-course-users-' + course.id;
+            html += '<div class="course-group" courseid="' + course.id + '" role="group" aria-labelledby="' + titleid + '">';
+            html += '<div class="exaport-course-header"><button type="button" class="course-group-title" id="' + titleid + '"';
+            html += ' aria-expanded="false" aria-controls="' + contentid + '">';
             html += ($E.courseid == course.id ? '<b>' : '');
             html += course.fullname;
             html += ($E.courseid == course.id ? '</b>' : '');
-            html += '</legend><div class="course-group-content"></div></fieldset>';
+            html += '</button></div><div class="course-group-content" id="' + contentid + '"></div></div>';
           });
         } else {
           html += '<b>' + $E.translate('nousersfound') + '</b>';
@@ -559,6 +532,7 @@
           if (!$.empty(course.users)) {
             courseStates[course.id] = course.users_complete ? 'full' : 'partial';
             $fieldset.addClass('course-group-open');
+            $fieldset.find('.course-group-title').attr('aria-expanded', 'true');
             renderCourseUsers($fieldset.find('.course-group-content'), course.id, course.users, !!course.users_complete);
           }
         });
@@ -568,14 +542,13 @@
       $userlist.on('click', '.course-group-title', function () {
         var $fieldset = $(this).closest('.course-group');
         $fieldset.toggleClass('course-group-open');
-        updateCourseActions($fieldset.find('.course-group-content'));
+        $(this).attr('aria-expanded', $fieldset.hasClass('course-group-open') ? 'true' : 'false');
         var courseid = $fieldset.attr('courseid');
         if ($fieldset.hasClass('course-group-open') && courseStates[courseid] === undefined) {
           loadCourseUsers(courseid, $fieldset);
         }
       });
-      $userlist.on('click', '.exaport-load-course-users', function (event) {
-        event.stopPropagation();
+      $userlist.on('click', '.exaport-load-course-users', function () {
         var $fieldset = $(this).closest('.course-group');
         loadCourseUsers($fieldset.attr('courseid'), $fieldset);
       });

@@ -83,15 +83,40 @@ div.item-detail-image img {
     display: block;
 }
 
+#exaport #sharing-userlist {
+    max-height: 70vh;
+    scroll-padding-top: 7rem;
+}
+
+/* Each header stays with its course until the next course reaches the top of the list. */
+#exaport .exaport-course-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--bs-body-bg, #fff);
+    border-bottom: 1px solid #dee2e6;
+}
+
+#exaport .exaport-course-header .course-group-title {
+    display: block;
+    width: 100%;
+    margin: 0;
+    border: 0;
+    padding: .625rem .75rem .625rem 1.875rem;
+    color: inherit;
+    background-color: transparent;
+    font: inherit;
+    font-size: 1.5rem;
+    text-align: left;
+}
+
 #exaport .exaport-course-header-actions {
     display: none;
-    margin-left: .75rem;
-    font-size: 1rem;
-    font-weight: normal;
+    padding: 0 .75rem .625rem 1.875rem;
 }
 
 #exaport .course-group-open .exaport-course-header-actions {
-    display: inline-block;
+    display: block;
 }
 
 #exaport .exaport-item-content-section {

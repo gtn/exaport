@@ -130,8 +130,9 @@
 .tooltip .tooltiplist {
     margin: 0;
     padding: 0;
-    list-style: none;
-    text-align: center;
+    padding-inline-start: 1em;
+    list-style: disc outside;
+    text-align: start;
 }
 .tooltip .tooltiplist li {
     margin: 0;

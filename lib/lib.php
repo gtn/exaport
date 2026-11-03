@@ -3683,7 +3683,7 @@ function block_exaport_render_search_and_sort_controls($selectedsort) {
     ];
     $html .= '<div style="min-width: 180px; max-width: 250px;">';
     $html .= '<label class="sr-only" for="' . s($sortid) . '">' . get_string('sort') . '</label>';
-    $html .= '<select id="' . s($sortid) . '" class="form-control custom-select">';
+    $html .= '<select id="' . s($sortid) . '" class="form-control custom-select w-100">';
     foreach ($opts as $val => $label) {
         $selected = ($selectedsort === $val) ? ' selected="selected"' : '';
         $html .= '<option value="' . s($val) . '"' . $selected . '>' . s($label) . '</option>';

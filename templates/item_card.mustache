@@ -98,12 +98,12 @@
                 {{#isshared}}<span class="eportoflio-share">{{{sharedicon}}} <span>{{sharedsummary}}</span></span>{{/isshared}}
                 {{{compbadge}}}
                 {{#hascomments}}
-                <span class="eportoflio-comment me-2">
+                <span class="eportoflio-comment me-2"
+                      data-toggle="tooltip" data-bs-toggle="tooltip"
+                      data-placement="top" data-bs-placement="top"
+                      data-title="{{commentlabel}}" data-bs-title="{{commentlabel}}">
                     <i class="icon icon-comment fa fa-comment-dots"
-                       aria-hidden="true"
-                       data-bs-toggle="tooltip"
-                       data-bs-placement="top"
-                       data-bs-title="{{commentlabel}}"></i>
+                       aria-hidden="true"></i>
                     <span class="eportfolio-comment-count">{{commentcount}}</span>
                 </span>
                 {{/hascomments}}

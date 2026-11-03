@@ -439,4 +439,29 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertNotEmpty($tooltip);
         $this->assertStringContainsString('Dave', $tooltip);
     }
+
+    /** Both overview templates preserve escaped HTML for Bootstrap 4 and 5. */
+    public function test_overview_tooltips_support_both_bootstrap_versions(): void {
+        global $OUTPUT;
+
+        $share = new share_info();
+        $share->users = ['Alice <Test> & "Co"'];
+        $tooltip = block_exaport_get_share_tooltip($share);
+        foreach (['my_shares_page', 'shared_with_me_page'] as $template) {
+            $html = $OUTPUT->render_from_template('block_exaport/' . $template, [
+                'hasrows' => true,
+                'rows' => [['hastooltip' => true, 'sharetooltip' => $tooltip]],
+            ]);
+            $document = new \DOMDocument();
+            $document->loadHTML('<?xml encoding="UTF-8">' . $html);
+            $target = (new \DOMXPath($document))->query('//span[@data-toggle="tooltip"]')->item(0);
+            $this->assertNotNull($target);
+            foreach (['data-', 'data-bs-'] as $prefix) {
+                $this->assertSame('tooltip', $target->getAttribute($prefix . 'toggle'));
+                $this->assertSame('true', $target->getAttribute($prefix . 'html'));
+                $this->assertSame($tooltip, $target->getAttribute($prefix . 'title'));
+            }
+            $this->assertFalse($target->hasAttribute('title'));
+        }
+    }
 }

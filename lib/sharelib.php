@@ -84,14 +84,20 @@ namespace {
         }
 
         $icon = block_exaport_fontawesome_icon('share-nodes', 'solid', 1, ['icon', 'icon-shared']);
+        $tooltip = block_exaport_get_share_tooltip($share);
 
         // Font Awesome replaces the icon with SVG. Keep Boost's tooltip on a stable wrapper.
         // html_writer escapes the attribute; the tooltip builder already escapes names inside its HTML.
+        // Bootstrap 4 reads data-title; both namespaces avoid needing a native title tooltip.
         return html_writer::span($icon, '', [
+            'data-toggle' => 'tooltip',
             'data-bs-toggle' => 'tooltip',
+            'data-placement' => 'top',
             'data-bs-placement' => 'top',
+            'data-html' => 'true',
             'data-bs-html' => 'true',
-            'data-bs-title' => block_exaport_get_share_tooltip($share),
+            'data-title' => $tooltip,
+            'data-bs-title' => $tooltip,
         ]);
     }
 

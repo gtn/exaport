@@ -136,11 +136,16 @@ function block_exaport_scorm_render_item_content(
         } else if ($block['type'] === 'text') {
             $text = clean_text($block['content'], $block['contentformat']);
             foreach ($block['editorfiles'] as $file) {
+                $directory = 'items/' . $item->id . '/blocks/' . $block['blockid'] . '/editor';
+                if (isset($block['editorfilereferences'][$file->get_id()])) {
+                    $directory .= '/' . dirname($block['editorfilereferences'][$file->get_id()]);
+                }
                 $asset = $packagefile($file,
-                    'items/' . $item->id . '/blocks/' . $block['blockid'] . '/editor');
+                    $directory);
                 $assets[] = $asset;
                 $assetmap[$blockindex]['editorfiles'][] = $asset;
-                $reference = ltrim($file->get_filepath(), '/') . $file->get_filename();
+                $reference = $block['editorfilereferences'][$file->get_id()] ??
+                    ltrim($file->get_filepath(), '/') . $file->get_filename();
                 $replacement = block_exaport_scorm_relative_url($pagepath, $asset);
                 $encodedreference = implode('/', array_map('rawurlencode', explode('/', $reference)));
                 // format_text()/clean_text() may URL-encode a valid placeholder
@@ -199,7 +204,8 @@ function block_exaport_scorm_build_item_package(
         foreach (['files' => 'files', 'editorfiles' => 'textassets'] as $source => $destination) {
             foreach ($block[$source] as $fileindex => $file) {
                 $manifestblock[$destination][] = [
-                    'filepath' => $file->get_filepath(),
+                    'filepath' => isset($block['editorfilereferences'][$file->get_id()]) ?
+                        '/' . dirname($block['editorfilereferences'][$file->get_id()]) . '/' : $file->get_filepath(),
                     'filename' => $file->get_filename(),
                     'archivepath' => $rendered['assetmap'][$index][$source][$fileindex],
                 ];

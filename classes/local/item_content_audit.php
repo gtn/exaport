@@ -125,9 +125,12 @@ final class item_content_audit {
                 'Preserve a database backup and determine the intended parent before any manual repair.');
         }
         $base = "FROM {block_exaportitemblock} b JOIN {block_exaportitem} i ON i.id = b.itemid WHERE $where";
+        [$unsupported, $typeparams] = $this->db->get_in_or_equal(
+            array_merge(['text', 'link', 'file'], item_linked_content::TYPES), SQL_PARAMS_NAMED, 'blocktype', false
+        );
         $this->add_query_finding('unsupported_block_type', 'warning',
-            "$base AND b.type NOT IN (:texttype, :linktype, :filetype)",
-            $params + ['texttype' => 'text', 'linktype' => 'link', 'filetype' => 'file'], 'b.id', 'blockids',
+            "$base AND b.type $unsupported",
+            $params + $typeparams, 'b.id', 'blockids',
             'Blocks use a type not understood by this plugin version.',
             'Preserve the records and check whether they were created by a newer compatible version.');
         $this->add_query_finding('empty_link_block', 'warning', "$base AND b.type = :linktype AND TRIM(b.url) = ''",

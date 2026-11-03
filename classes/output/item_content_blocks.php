@@ -124,6 +124,15 @@ class item_content_blocks implements renderable, templatable {
                 'content' => $type === 'text' ? $this->format_content($block) : '',
                 'preview' => $this->build_preview($block, $type),
             ];
+            if (in_array($type, \block_exaport\local\item_linked_content::TYPES, true)) {
+                $row['content'] = \block_exaport\local\item_linked_content::render(
+                    $block, $this->ownerid, (string)($this->access ?? '')
+                );
+                $row['preview'] = '';
+                if ($row['content'] === '' && $this->showaddbutton && $this->addurl !== null) {
+                    $row['preview'] = get_string('linkedcontentmissing', 'block_exaport');
+                }
+            }
             if ($this->showaddbutton && $this->addurl !== null) {
                 $baseparams = ['courseid' => $this->courseid, 'itemid' => $block->itemid, 'blockid' => $block->id];
                 $row['editurl'] = (new moodle_url('/blocks/exaport/item_content_' . $type . '.php', $baseparams))->out(false);
@@ -173,7 +182,10 @@ class item_content_blocks implements renderable, templatable {
         }
 
         $actions = [];
-        foreach (['text', 'link', 'file'] as $type) {
+        foreach (\block_exaport_item_content_types() as $type) {
+            if ($type === 'badge' && !\block_exaport_badges_enabled()) {
+                continue;
+            }
             if (empty($urls[$type]) || !($urls[$type] instanceof moodle_url)) {
                 continue;
             }
@@ -301,6 +313,12 @@ class item_content_blocks implements renderable, templatable {
                     'icon' => 'e/insert_edit_image',
                     'label' => get_string('view_specialitem_media', 'block_exaport'),
                 ];
+            case 'personal':
+                return ['icon' => 'i/user', 'label' => get_string('personalinformation', 'block_exaport')];
+            case 'cv':
+                return ['icon' => 'i/portfolio', 'label' => get_string('cvinformation', 'block_exaport')];
+            case 'badge':
+                return ['icon' => 'i/badge', 'label' => get_string('badges', 'badges')];
             default:
                 return [
                     'icon' => 'i/info',

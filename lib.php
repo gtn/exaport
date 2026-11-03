@@ -60,6 +60,40 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
     }
 
     switch ($filearea) {
+        case 'item_content_linked':
+            $parsed = block_exaport_parse_item_content_file_args($args);
+            if (!$parsed || !preg_match('~^/(\d+)/$~', $parsed['filepath'], $matches)) {
+                return false;
+            }
+            $block = $DB->get_record('block_exaportitemblock', [
+                'id' => $parsed['blockid'], 'itemid' => $parsed['itemid'],
+            ]);
+            if (!$block || !in_array($block->type, \block_exaport\local\item_linked_content::TYPES, true)) {
+                return false;
+            }
+            if (preg_match('~^webservice/(\d+)$~', $parsed['access'], $ownermatches)) {
+                $item = block_exaport_get_item_for_webservice($parsed['itemid'], (int)$ownermatches[1], (int)$USER->id);
+            } else if ($parsed['access'] !== '') {
+                $item = block_exaport_get_item($parsed['itemid'], $parsed['access'], false, $is_for_pdf, $pdfforuserid);
+            } else {
+                $item = $DB->get_record('block_exaportitem', ['id' => $parsed['itemid']]);
+                if (!$item || ((int)$item->userid !== (int)$USER->id &&
+                        !block_exaport_can_user_access_shared_item($USER->id, $item->id))) {
+                    return false;
+                }
+            }
+            if (!$item || (int)$context->id !== (int)context_user::instance($item->userid)->id) {
+                return false;
+            }
+            // Re-resolve on every request: removing a selection or revoking a badge also
+            // revokes its files. The URL never grants access to the rest of the owner's CV.
+            $linked = \block_exaport\local\item_linked_content::resolve($block, (int)$item->userid);
+            $file = $linked['editorfiles'][(int)$matches[1]] ?? null;
+            if (!$file || $file->get_filename() !== $parsed['filename']) {
+                return false;
+            }
+            block_exaport_send_item_file($file, 0, $forcedownload, $options);
+            break;
         case 'item_content_file':
             $parsed = block_exaport_parse_item_content_file_args($args);
             if (!$parsed) {

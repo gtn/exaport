@@ -126,11 +126,14 @@
 #exaport .tooltip .tooltip-inner {
     text-align: left;
 }
-#exaport .tooltiplist {
+/* Boost appends tooltip popups to body, outside the #exaport wrapper. */
+.tooltip .tooltiplist {
     margin: 0;
-    padding-left: 1rem;
+    padding: 0;
+    list-style: none;
+    text-align: center;
 }
-#exaport .tooltiplist li {
+.tooltip .tooltiplist li {
     margin: 0;
     padding: 0;
 }

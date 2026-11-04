@@ -189,6 +189,113 @@ final class item_linked_content_test extends \advanced_testcase {
         $this->assertStringContainsString('Updated introduction', $resolved['content']);
     }
 
+    /** @return array Filenames must survive URL encoding for both linked file sources. */
+    public static function linked_file_names(): array {
+        $cases = [];
+        foreach (['inline', 'attachment'] as $source) {
+            foreach (['photo.png', 'my photo.png', 'über.png', 'photo#1.png', '100%.png', 'literal%20name.png'] as $name) {
+                $cases[$source . ': ' . $name] = [$source, $name];
+            }
+        }
+        return $cases;
+    }
+
+    /** Extract the only file URL as a browser would, including HTML entity decoding. */
+    private function file_url(string $html): string {
+        $document = new \DOMDocument();
+        $document->loadHTML('<meta charset="UTF-8">' . $html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+        $nodes = (new \DOMXPath($document))->query('//img[@src] | //a[@href]');
+        $this->assertSame(1, $nodes->length);
+        $node = $nodes->item(0);
+        return $node->getAttribute($node->hasAttribute('src') ? 'src' : 'href');
+    }
+
+    /** Check the filename after one URL decode, for both slash arguments and query-based file URLs. */
+    private function assert_url_filename(string $url, string $filename): void {
+        $parts = parse_url($url);
+        $this->assertIsArray($parts);
+        $this->assertArrayNotHasKey('fragment', $parts);
+        $this->assertDoesNotMatchRegularExpression('~%(?![0-9a-fA-F]{2})~', $parts['path']);
+        parse_str($parts['query'] ?? '', $query);
+        // parse_str() already decodes the query value; decoding it again would alter literal %20 filenames.
+        $path = $query['file'] ?? rawurldecode($parts['path']);
+        $this->assertSame($filename, basename($path));
+    }
+
+    /**
+     * Browser, web-service, copied and exported references retain the actual stored filename and bytes.
+     *
+     * @dataProvider linked_file_names
+     */
+    public function test_linked_file_urls_preserve_filenames(string $source, string $filename): void {
+        global $CFG, $DB, $PAGE;
+
+        $owner = $this->getDataGenerator()->create_user();
+        [$resumeid] = $this->cv($owner->id);
+        $inline = $source === 'inline';
+        $field = $inline ? 'cover' : 'goalspersonal';
+        $filepath = $inline ? '/image folder/' : '/';
+        $content = $inline ? '<img src="@@PLUGINFILE@@/image%20folder/' . rawurlencode($filename) . '">' :
+            '<p>Selected goals</p>';
+        $DB->set_field('block_exaportresume', $field, $content, ['id' => $resumeid]);
+        $file = get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($owner->id)->id, 'component' => 'block_exaport',
+            'filearea' => ($inline ? 'resume_editor_' : 'resume_') . $field, 'itemid' => $resumeid,
+            'filepath' => $filepath, 'filename' => $filename,
+        ], 'Selected file bytes');
+        $this->assertSame($filename, $file->get_filename());
+        $item = $this->item($owner->id);
+        $block = $this->block($item, 'cv', [$field], !$inline);
+        $resolved = item_linked_content::resolve($block, (int)$owner->id);
+        $this->assertSame($file->get_id() . '/' . $filename, $resolved['editorfilereferences'][$file->get_id()]);
+        $this->assert_url_filename($this->file_url(item_linked_content::render($block, (int)$owner->id)), $filename);
+
+        $originalslasharguments = $CFG->slasharguments;
+        foreach ([true, false] as $slasharguments) {
+            $CFG->slasharguments = $slasharguments;
+            foreach ([null, 'testtoken'] as $token) {
+                $response = block_exaport_get_item_content_webservice_data($item, $token);
+                $html = $response['contentblocks'][0]->content;
+                $this->assertStringNotContainsString('@@PLUGINFILE@@', $html);
+                $url = $this->file_url($html);
+                $this->assertStringContainsString($token ? '/webservice/pluginfile.php' : '/pluginfile.php', $url);
+                $this->assert_url_filename($url, $filename);
+                parse_str(parse_url($url, PHP_URL_QUERY) ?? '', $query);
+                $this->assertSame($token, $query['token'] ?? null);
+            }
+        }
+        $CFG->slasharguments = $originalslasharguments;
+
+        $other = $this->getDataGenerator()->create_user();
+        $copy = $this->item($other->id);
+        block_exaport_copy_item_content($item, $copy);
+        $copiedblock = block_exaport_get_item_content_blocks($copy->id)[0];
+        $this->assertSame('text', $copiedblock->type);
+        $copiedrenderable = new \block_exaport\output\item_content_blocks([$copiedblock], null, (int)$other->id, false);
+        $copieddata = $copiedrenderable->export_for_template($PAGE->get_renderer('block_exaport'));
+        $this->assert_url_filename($this->file_url($copieddata['blocks'][0]['content']), $filename);
+        $copiedfile = get_file_storage()->get_file(\context_user::instance($other->id)->id,
+            'block_exaport', 'item_content_text', $copiedblock->id, '/' . $file->get_id() . '/', $filename);
+        $this->assertInstanceOf(\stored_file::class, $copiedfile);
+        $this->assertSame('Selected file bytes', $copiedfile->get_content());
+
+        $assets = [];
+        $package = block_exaport_scorm_build_item_package($item, block_exaport_get_item_content_export_data($item),
+            'portfolio/page.html', static function(\stored_file $file, string $directory) use (&$assets): string {
+                $path = block_exaport_scorm_archive_path($file, $directory, array_keys($assets));
+                $assets[$path] = $file->get_content();
+                return $path;
+            });
+        $this->assertStringNotContainsString('@@PLUGINFILE@@', $package['html']);
+        $asseturl = $this->file_url($package['html']);
+        $this->assertStringStartsWith('../', $asseturl);
+        $this->assertNull(parse_url($asseturl, PHP_URL_FRAGMENT));
+        $assetpath = rawurldecode(substr($asseturl, 3));
+        $this->assertArrayHasKey($assetpath, $assets);
+        $this->assertSame('Selected file bytes', $assets[$assetpath]);
+        $this->assertSame($filename, $package['manifest']['blocks'][0]['textassets'][0]['filename']);
+    }
+
     /**
      * File responses send HTTP headers and need an isolated PHP process.
      *

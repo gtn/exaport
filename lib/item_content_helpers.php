@@ -239,16 +239,18 @@ function block_exaport_get_item_content_webservice_data(stdClass $item, ?string 
         if (!empty($contentblock['editorfilereferences'])) {
             // Linked source files use the same parent-item policy as the web-service item itself.
             foreach ($contentblock['editorfiles'] as $file) {
+                $reference = $contentblock['editorfilereferences'][$file->get_id()];
+                $encodedreference = implode('/', array_map('rawurlencode', explode('/', $reference)));
                 $route = 'webservice/' . (int)$item->userid . '/itemid/' . (int)$item->id .
                     '/blockid/' . (int)$contentblock['blockid'];
                 $fileurl = moodle_url::make_file_url($CFG->wwwroot . $script,
                     '/' . context_user::instance((int)$item->userid)->id . '/block_exaport/item_content_linked/' .
-                    $route . '/' . $contentblock['editorfilereferences'][$file->get_id()]);
+                    $route . '/' . $reference);
                 if ($token !== null && $token !== '') {
                     $fileurl->param('token', $token);
                 }
-                $resultblock->content = str_replace('@@PLUGINFILE@@/' .
-                    $contentblock['editorfilereferences'][$file->get_id()], $fileurl->out(false), $resultblock->content);
+                $resultblock->content = str_replace('@@PLUGINFILE@@/' . $encodedreference,
+                    $fileurl->out(), $resultblock->content);
             }
         }
         foreach ($contentblock['files'] as $file) {

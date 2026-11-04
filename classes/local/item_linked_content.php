@@ -294,7 +294,8 @@ final class item_linked_content {
         $reference = $file->get_id() . '/' . $file->get_filename();
         $result['editorfiles'][$file->get_id()] = $file;
         $result['editorfilereferences'][$file->get_id()] = $reference;
-        return '@@PLUGINFILE@@/' . $reference;
+        // Storage/export metadata stays raw; only the filename in the HTML URL is encoded.
+        return '@@PLUGINFILE@@/' . $file->get_id() . '/' . rawurlencode($file->get_filename());
     }
 
     /**

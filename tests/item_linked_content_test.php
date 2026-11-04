@@ -144,8 +144,21 @@ final class item_linked_content_test extends \advanced_testcase {
         $this->assertStringContainsString('evidence.txt', $resolved['content']);
         $this->assertStringNotContainsString('unrelated.txt', $resolved['content']);
 
+        // Removing the text must not hide the section while its attachments still exist.
+        $DB->set_field('block_exaportresume', $field, '', ['id' => $resumeid]);
+        $this->assertArrayHasKey($field, item_linked_content::options('cv', (int)$owner->id));
+        $resolved = item_linked_content::resolve($block, (int)$owner->id);
+        $this->assertSame([(int)$file->get_id()], array_keys($resolved['editorfiles']));
+        $this->assertStringContainsString('evidence.txt', $resolved['content']);
+
         $block->content = item_linked_content::configuration('cv', (int)$owner->id, [$field], false);
-        $this->assertSame([], item_linked_content::resolve($block, (int)$owner->id)['editorfiles']);
+        $resolved = item_linked_content::resolve($block, (int)$owner->id);
+        $this->assertSame([], $resolved['editorfiles']);
+        $this->assertSame('', $resolved['content']);
+
+        $file->delete();
+        // Directory placeholders and files under unrelated itemids do not make a section available.
+        $this->assertArrayNotHasKey($field, item_linked_content::options('cv', (int)$owner->id));
     }
 
     public function test_foreign_cv_selection_is_rejected_and_tampered_storage_is_not_rendered(): void {

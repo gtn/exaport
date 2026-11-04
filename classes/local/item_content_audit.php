@@ -256,7 +256,7 @@ final class item_content_audit {
             "SELECT COUNT(1) FROM {block_exaportitem} i WHERE $where", $params);
         $base = "FROM {block_exaportitemblock} b JOIN {block_exaportitem} i ON i.id = b.itemid WHERE $where";
         $counts['total_structured_blocks'] = (int)$this->db->count_records_sql("SELECT COUNT(1) $base", $params);
-        foreach (['text', 'link', 'file'] as $type) {
+        foreach (array_merge(['text', 'link', 'file'], item_linked_content::TYPES) as $type) {
             $counts['total_' . $type . '_blocks'] = (int)$this->db->count_records_sql(
                 "SELECT COUNT(1) $base AND b.type = :infotype", $params + ['infotype' => $type]);
         }

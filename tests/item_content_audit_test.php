@@ -69,6 +69,29 @@ final class item_content_audit_test extends \advanced_testcase {
         $this->assertSame(1, $result['counts']['total_structured_files']);
     }
 
+    public function test_information_counts_include_each_supported_type_and_respect_the_item_filter(): void {
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $item = $this->item($owner->id);
+        $otheritem = $this->item($owner->id);
+        $types = ['text', 'link', 'file', 'personal', 'cv', 'badge'];
+        foreach ($types as $type) {
+            $this->block($item->id, $type);
+        }
+        $this->block($otheritem->id, 'cv');
+
+        $all = (new item_content_audit())->run();
+        $this->assertSame(7, $all['counts']['total_structured_blocks']);
+        $filtered = (new item_content_audit())->run($item->id);
+        $this->assertSame(6, $filtered['counts']['total_structured_blocks']);
+        foreach ($types as $type) {
+            $key = 'total_' . $type . '_blocks';
+            $this->assertArrayHasKey($key, $all['counts']);
+            $this->assertSame($type === 'cv' ? 2 : 1, $all['counts'][$key]);
+            $this->assertSame(1, $filtered['counts'][$key]);
+        }
+    }
+
     public function test_legacy_columns_have_stable_severities_and_do_not_expose_values(): void {
         $this->resetAfterTest(true);
         $owner = $this->getDataGenerator()->create_user();

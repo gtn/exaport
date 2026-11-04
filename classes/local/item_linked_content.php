@@ -73,9 +73,14 @@ final class item_linked_content {
             return [];
         }
         $sources = [];
+        $context = \context_user::instance($ownerid);
+        $fs = get_file_storage();
         foreach (self::FIELDS as $field) {
-            if (trim((string)$resume->{$field}) !== '') {
-                $sources[$field] = self::cv_field($resume, $field);
+            $source = self::cv_field($resume, $field);
+            // A section can contain attachments even when its text is empty.
+            if (trim($source['html']) !== '' || !$fs->is_area_empty($context->id, 'block_exaport',
+                    $source['attachmentarea'], $source['attachmentid'])) {
+                $sources[$field] = $source;
             }
         }
         foreach (self::RECORDS as $recordtype => [$section, $fields, $description]) {

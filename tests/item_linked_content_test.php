@@ -104,6 +104,50 @@ final class item_linked_content_test extends \advanced_testcase {
         $this->assertTrue($DB->record_exists('block_exaportresume_edu', ['id' => $private]));
     }
 
+    /** @return array CV fields whose attachments belong to the central CV record. */
+    public static function cv_attachment_fields(): array {
+        return [
+            'personal goals' => ['goalspersonal'],
+            'academic goals' => ['goalsacademic'],
+            'career goals' => ['goalscareers'],
+            'personal skills' => ['skillspersonal'],
+            'academic skills' => ['skillsacademic'],
+            'career skills' => ['skillscareers'],
+        ];
+    }
+
+    /**
+     * Linked fields use the same attachment area as the existing CV editor and views.
+     *
+     * @dataProvider cv_attachment_fields
+     */
+    public function test_cv_field_attachments_belong_to_the_selected_cv(string $field): void {
+        global $DB;
+
+        $owner = $this->getDataGenerator()->create_user();
+        [$resumeid] = $this->cv($owner->id);
+        $DB->set_field('block_exaportresume', $field, '<p>Selected CV field</p>', ['id' => $resumeid]);
+        $context = \context_user::instance($owner->id);
+        $fileinfo = [
+            'contextid' => $context->id, 'component' => 'block_exaport', 'filearea' => 'resume_' . $field,
+            'itemid' => $resumeid, 'filepath' => '/', 'filename' => 'evidence.txt', 'userid' => $owner->id,
+        ];
+        $file = get_file_storage()->create_file_from_string($fileinfo, 'CV evidence');
+        // An unrelated itemid must not be used as a fallback for the selected CV's files.
+        get_file_storage()->create_file_from_string(array_replace($fileinfo, [
+            'itemid' => 0, 'filename' => 'unrelated.txt',
+        ]), 'Unrelated bytes');
+
+        $block = $this->block($this->item($owner->id), 'cv', [$field], true);
+        $resolved = item_linked_content::resolve($block, (int)$owner->id);
+        $this->assertSame([(int)$file->get_id()], array_keys($resolved['editorfiles']));
+        $this->assertStringContainsString('evidence.txt', $resolved['content']);
+        $this->assertStringNotContainsString('unrelated.txt', $resolved['content']);
+
+        $block->content = item_linked_content::configuration('cv', (int)$owner->id, [$field], false);
+        $this->assertSame([], item_linked_content::resolve($block, (int)$owner->id)['editorfiles']);
+    }
+
     public function test_foreign_cv_selection_is_rejected_and_tampered_storage_is_not_rendered(): void {
         $owner = $this->getDataGenerator()->create_user();
         $other = $this->getDataGenerator()->create_user();

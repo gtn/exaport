@@ -112,8 +112,7 @@ final class item_linked_content {
             'editorarea' => 'resume_editor_' . $field,
             'editorid' => (int)$resume->id,
             'attachmentarea' => 'resume_' . $field,
-            // The existing CV editor stores these attachments using its submitted id (normally zero).
-            'attachmentid' => 0,
+            'attachmentid' => (int)$resume->id,
         ];
     }
 

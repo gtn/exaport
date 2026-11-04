@@ -12,7 +12,6 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once(__DIR__ . '/../lib/item_content_helpers.php');
-require_once(__DIR__ . '/../lib/item_content_form.php');
 require_once(__DIR__ . '/../db/upgradelib.php');
 
 /**
@@ -199,7 +198,7 @@ final class item_content_file_quota_test extends \advanced_testcase {
         // The page header needs the browser script path, which PHPUnit leaves unset.
         $SCRIPT = '/blocks/exaport/item_content_file.php';
         $_GET = [];
-        \block_exaport_item_content_file_form::mock_submit($data);
+        \block_exaport\form\item_content::mock_submit($data);
         $accepted = false;
         ob_start();
         try {

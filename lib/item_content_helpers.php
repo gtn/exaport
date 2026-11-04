@@ -12,6 +12,11 @@ defined('MOODLE_INTERNAL') || die();
 // through the plugin's inc.php bootstrap used by the standalone pages.
 require_once(__DIR__ . '/lib.php');
 
+/** Return the supported stored content types. */
+function block_exaport_item_content_types(): array {
+    return array_merge(['text', 'link', 'file'], \block_exaport\local\item_linked_content::TYPES);
+}
+
 /**
  * Load an item that the current user may modify through the content editor.
  *
@@ -38,7 +43,7 @@ function block_exaport_get_item_content_blocks(int $itemid): array {
 
     $blocks = $DB->get_records('block_exaportitemblock', ['itemid' => $itemid], 'sortorder ASC, id ASC');
     return array_values(array_filter($blocks, static function(stdClass $block): bool {
-        return in_array($block->type ?? '', ['text', 'link', 'file'], true);
+        return in_array($block->type ?? '', block_exaport_item_content_types(), true);
     }));
 }
 
@@ -56,7 +61,7 @@ function block_exaport_get_item_content_block(stdClass $item, int $blockid): std
         'id' => $blockid,
         'itemid' => $item->id,
     ]);
-    if (!$block || !in_array($block->type ?? '', ['text', 'link', 'file'], true)) {
+    if (!$block || !in_array($block->type ?? '', block_exaport_item_content_types(), true)) {
         throw new invalid_parameter_exception('Content block does not belong to this item');
     }
     return $block;
@@ -172,7 +177,7 @@ function block_exaport_get_item_content_export_data(stdClass $item): array {
                 false
             ));
         }
-        $result[] = [
+        $projection = [
             'itemid' => (int)$item->id,
             'ownerid' => (int)$item->userid,
             'blockid' => (int)$block->id,
@@ -185,6 +190,14 @@ function block_exaport_get_item_content_export_data(stdClass $item): array {
             'files' => $files,
             'editorfiles' => $editorfiles,
         ];
+        if (in_array($block->type, \block_exaport\local\item_linked_content::TYPES, true)) {
+            // Portable exports contain the selected values at export time, never source-user IDs.
+            $linked = \block_exaport\local\item_linked_content::resolve($block, (int)$item->userid);
+            $projection = array_replace($projection, $linked, [
+                'type' => 'text', 'contentformat' => FORMAT_HTML, 'editorfiles' => array_values($linked['editorfiles']),
+            ]);
+        }
+        $result[] = $projection;
     }
     return $result;
 }
@@ -203,6 +216,8 @@ function block_exaport_get_item_content_export_data(stdClass $item): array {
  * @return array{contentblocks: array, url: string, files: array}
  */
 function block_exaport_get_item_content_webservice_data(stdClass $item, ?string $token = null): array {
+    global $CFG;
+
     $result = ['contentblocks' => [], 'url' => '', 'files' => []];
     $script = $token !== null && $token !== '' ? '/webservice/pluginfile.php' : '/pluginfile.php';
 
@@ -220,6 +235,23 @@ function block_exaport_get_item_content_webservice_data(stdClass $item, ?string 
         ];
         if ($contentblock['type'] === 'link' && $result['url'] === '' && trim($contentblock['url']) !== '') {
             $result['url'] = $contentblock['url'];
+        }
+        if (!empty($contentblock['editorfilereferences'])) {
+            // Linked source files use the same parent-item policy as the web-service item itself.
+            foreach ($contentblock['editorfiles'] as $file) {
+                $reference = $contentblock['editorfilereferences'][$file->get_id()];
+                $encodedreference = implode('/', array_map('rawurlencode', explode('/', $reference)));
+                $route = 'webservice/' . (int)$item->userid . '/itemid/' . (int)$item->id .
+                    '/blockid/' . (int)$contentblock['blockid'];
+                $fileurl = moodle_url::make_file_url($CFG->wwwroot . $script,
+                    '/' . context_user::instance((int)$item->userid)->id . '/block_exaport/item_content_linked/' .
+                    $route . '/' . $reference);
+                if ($token !== null && $token !== '') {
+                    $fileurl->param('token', $token);
+                }
+                $resultblock->content = str_replace('@@PLUGINFILE@@/' . $encodedreference,
+                    $fileurl->out(), $resultblock->content);
+            }
         }
         foreach ($contentblock['files'] as $file) {
             // The web-service route deliberately carries the trusted owner ID. pluginfile.php
@@ -285,12 +317,19 @@ function block_exaport_copy_item_content(
     $copytime = time();
 
     foreach (block_exaport_get_item_content_blocks((int)$sourceitem->id) as $sourceblock) {
+        $snapshot = null;
+        if ((int)$sourceitem->userid !== (int)$destinationitem->userid &&
+                in_array($sourceblock->type, \block_exaport\local\item_linked_content::TYPES, true)) {
+            // A copy to another owner freezes only the already-selected data. Keeping a live
+            // reference would either expose future source changes or publish the new owner's data.
+            $snapshot = \block_exaport\local\item_linked_content::resolve($sourceblock, (int)$sourceitem->userid);
+        }
         $destinationblock = (object)[
             'itemid' => (int)$destinationitem->id,
-            'type' => $sourceblock->type,
+            'type' => $snapshot !== null ? 'text' : $sourceblock->type,
             'sortorder' => (int)$sourceblock->sortorder,
             'title' => $sourceblock->title,
-            'content' => $sourceblock->content,
+            'content' => $snapshot !== null ? $snapshot['content'] : $sourceblock->content,
             'contentformat' => (int)$sourceblock->contentformat,
             'url' => $sourceblock->url,
             'timecreated' => (int)$sourceblock->timecreated,
@@ -300,7 +339,18 @@ function block_exaport_copy_item_content(
         $blockmap[(int)$sourceblock->id] = $destinationblock->id;
 
         $fileareas = [];
-        if ($sourceblock->type === 'file') {
+        if ($snapshot !== null) {
+            foreach ($snapshot['editorfiles'] as $file) {
+                $filecopier([
+                    'contextid' => $destinationcontext->id,
+                    'component' => 'block_exaport',
+                    'filearea' => 'item_content_text',
+                    'itemid' => $destinationblock->id,
+                    'userid' => (int)$destinationitem->userid,
+                    'filepath' => '/' . $file->get_id() . '/',
+                ], $file);
+            }
+        } else if ($sourceblock->type === 'file') {
             $fileareas['item_content_file'] = block_exaport_get_item_content_files(
                 (int)$sourceitem->userid,
                 (int)$sourceblock->id
@@ -406,7 +456,7 @@ function block_exaport_new_content_block(
     string $url = '',
     array $fields = []
 ): stdClass {
-    if (!in_array($type, ['text', 'link', 'file'], true)) {
+    if (!in_array($type, block_exaport_item_content_types(), true)) {
         throw new coding_exception('Unsupported Exaport item content block type');
     }
 
@@ -809,61 +859,13 @@ function block_exaport_check_item_content_file_submission(stdClass $item, ?stdCl
     }
 }
 
-/**
- * Create and initialise an add-content form.
- *
- * Keeping this here makes the exact same Moodle form available to both the
- * standalone pages and Fragment API requests.
- *
- * @param string $type text, link or file.
- * @param int $courseid Course ID.
- * @param int $itemid Item ID.
- * @return moodleform
- */
-function block_exaport_create_item_content_form(string $type, int $courseid, int $itemid, int $blockid = 0) {
-    $item = block_exaport_get_editable_content_item($itemid, $courseid);
-    $block = $blockid ? block_exaport_get_item_content_block($item, $blockid) : null;
-    if ($block && $block->type !== $type) {
-        throw new invalid_parameter_exception('Content block type does not match the form');
-    }
-    $usercontext = context_user::instance((int)$item->userid);
-    if ($type === 'text') {
-        require_once(__DIR__ . '/item_content_text_form.php');
-        $options = block_exaport_item_content_editor_options();
-        $form = new block_exaport_item_content_text_form(null, ['editoroptions' => $options]);
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
-            'title' => $block->title ?? '', 'content' => $block->content ?? '',
-            'contentformat' => $block->contentformat ?? FORMAT_HTML];
-        $data = file_prepare_standard_editor($data, 'content', $options, $usercontext,
-            'block_exaport', 'item_content_text', $blockid);
-    } else if ($type === 'file') {
-        require_once(__DIR__ . '/item_content_form.php');
-        $options = block_exaport_item_content_file_options($item, $block);
-        $form = new block_exaport_item_content_file_form(null, ['fileoptions' => $options, 'blockid' => $blockid,
-            'item' => $item, 'block' => $block]);
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
-            'title' => $block->title ?? '', 'files' => ''];
-        $data = file_prepare_standard_filemanager($data, 'files', $options, $usercontext,
-            'block_exaport', 'item_content_file', $blockid);
-    } else if ($type === 'link') {
-        require_once(__DIR__ . '/item_content_form.php');
-        $form = new block_exaport_item_content_link_form();
-        $data = (object)['courseid' => $courseid, 'itemid' => $itemid, 'blockid' => $blockid,
-            'title' => $block->title ?? '', 'url' => $block->url ?? ''];
-    } else {
-        throw new coding_exception('Unsupported Exaport item content block type');
-    }
-    $form->set_data($data);
-    return $form;
-}
-
 /** Render the editable content section after an asynchronous save. */
 function block_exaport_render_item_content_blocks(int $courseid, stdClass $item): string {
     global $PAGE;
 
     $blocks = block_exaport_get_item_content_blocks((int)$item->id);
     $urls = [];
-    foreach (['text', 'link', 'file'] as $type) {
+    foreach (block_exaport_item_content_types() as $type) {
         $urls[$type] = new moodle_url('/blocks/exaport/item_content_' . $type . '.php',
             ['courseid' => $courseid, 'itemid' => $item->id]);
     }

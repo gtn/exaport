@@ -3813,8 +3813,8 @@ return [
         'The optional content block title.',
     ],
     'privacy:metadata:block_exaportitemblock:content' => [
-        'Der Text des Inhaltsblocks.',
-        'The content block text.',
+        'Der Text oder die Auswahl verknüpfter Informationen des Inhaltsblocks.',
+        'The content block text or linked-information selection.',
     ],
     'privacy:metadata:block_exaportitemblock:contentformat' => [
         'Das Format des Inhaltsblocktexts.',
@@ -4001,4 +4001,19 @@ return [
     'privacy:metadata:block_exaportmigissue:times' => ['Zeitpunkte der Beobachtung und Übertragung des Dateidatensatzes.', 'Observation and file-record migration timestamps.'],
     'privacy:metadata:block_exaportmigissue:attempts' => ['Anzahl fehlgeschlagener Beobachtungen.', 'Number of failed observations.'],
     'privacy:metadata:block_exaportmigissue:migrationversion' => ['Kennung der Migration.', 'Migration identifier.'],
+    // Linked item content.
+    'linkedcontentnotice' => [
+        'Wählen Sie die anzuzeigenden Informationen. Änderungen an ausgewählten Informationen erscheinen auch in geteilten Einträgen. Neue Lebenslauf-Einträge und Badges werden nicht automatisch hinzugefügt.',
+        'Choose the information to display. Changes to selected information also appear in shared items. New CV entries and badges are not added automatically.',
+    ],
+    'linkedcontentselectionrequired' => [
+        'Wählen Sie mindestens ein verfügbares Feld, einen Lebenslauf-Eintrag oder ein erworbenes Badge.',
+        'Select at least one available field, CV entry or earned badge.',
+    ],
+    'linkedcontentmissing' => [
+        'Die ausgewählten Informationen sind nicht mehr verfügbar. Bearbeiten Sie diesen Inhaltsblock, um die Auswahl zu aktualisieren.',
+        'The selected information is no longer available. Edit this block to update its selection.',
+    ],
+    'linkedbadgeissued' => ['Verliehen: {$a}', 'Awarded: {$a}'],
+    'linkedbadgeexpires' => ['Gültig bis: {$a}', 'Expires: {$a}'],
 ];

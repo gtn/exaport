@@ -34,7 +34,7 @@ final class item_legacy_write_removal_test extends \advanced_testcase {
         $this->assertStringContainsString("'submissionid' => PARAM_INT", $source);
         $this->assertStringContainsString("if (\$sections['content'])", $source);
 
-        $structuredform = file_get_contents(__DIR__ . '/../lib/item_content_form.php');
+        $structuredform = file_get_contents(__DIR__ . '/../classes/form/item_content.php');
         $this->assertStringContainsString("'files_filemanager'", $structuredform);
     }
 

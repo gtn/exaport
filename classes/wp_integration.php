@@ -974,7 +974,8 @@ class wp_integration {
             }
             foreach ($block['editorfiles'] as $file) {
                 $data['editorfiles'][] = [
-                    'reference' => ltrim($file->get_filepath(), '/') . $file->get_filename(),
+                    'reference' => $block['editorfilereferences'][$file->get_id()] ??
+                        ltrim($file->get_filepath(), '/') . $file->get_filename(),
                     'file' => $this->addFileToPost($file, 'item-' . $item->id . '-block-' . $block['blockid'] . '-'),
                 ];
             }

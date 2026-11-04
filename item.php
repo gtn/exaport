@@ -225,7 +225,7 @@ if ($existing) {
     );
     if ($allowedit) {
         $itemcontentaddurl = [];
-        foreach (['text', 'link', 'file'] as $blocktype) {
+        foreach (block_exaport_item_content_types() as $blocktype) {
             $itemcontentaddurl[$blocktype] = new moodle_url('/blocks/exaport/item_content_' . $blocktype . '.php', [
                 'courseid' => $courseid,
                 'itemid' => $existing->id,

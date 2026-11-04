@@ -17,6 +17,7 @@ use context_system;
 use context_user;
 use core_form\dynamic_form;
 use moodle_url;
+use block_exaport\local\item_linked_content;
 
 /**
  * Moodle dynamic form for adding an item content block.
@@ -24,9 +25,6 @@ use moodle_url;
  * @package block_exaport
  */
 class item_content extends dynamic_form {
-
-    /** @var string[] Supported content block types. */
-    private const TYPES = ['text', 'link', 'file'];
 
     /** Define fields for the selected content type. */
     protected function definition(): void {
@@ -46,6 +44,9 @@ class item_content extends dynamic_form {
 
         if ($this->get_operation() === 'delete') {
             $mform->addElement('static', 'confirmation', '', get_string('deletecontentblockconfirm', 'block_exaport'));
+            if (!empty($this->_customdata['standalone'])) {
+                $this->add_action_buttons(true, get_string('delete'));
+            }
             return;
         }
 
@@ -60,6 +61,33 @@ class item_content extends dynamic_form {
             $mform->addElement('url', 'url', get_string('url', 'block_exaport'), ['size' => 60]);
             $mform->setType('url', PARAM_URL);
             $mform->addRule('url', get_string('required'), 'required', null, 'client');
+        } else if (in_array($type, item_linked_content::TYPES, true)) {
+            $item = block_exaport_get_editable_content_item(
+                $this->optional_param('itemid', 0, PARAM_INT),
+                $this->optional_param('courseid', 0, PARAM_INT)
+            );
+            $mform->addElement('static', 'linkednotice', '', get_string('linkedcontentnotice', 'block_exaport'));
+            if ($type === 'personal') {
+                $sourceurl = new moodle_url('/user/profile.php', ['id' => $item->userid]);
+                $sourcelabel = get_string('viewprofile');
+            } else if ($type === 'badge') {
+                $sourceurl = new moodle_url('/badges/mybadges.php');
+                $sourcelabel = get_string('badges', 'badges');
+            } else {
+                $sourceurl = new moodle_url('/blocks/exaport/resume.php', [
+                    'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
+                ]);
+                $sourcelabel = get_string('resume_my', 'block_exaport');
+            }
+            $mform->addElement('static', 'linkedsource', '', \html_writer::link($sourceurl, $sourcelabel,
+                ['target' => '_blank', 'rel' => 'noopener noreferrer']));
+            $mform->addElement('autocomplete', 'selection', get_string('fieldstoshow', 'block_exaport'),
+                item_linked_content::options($type, (int)$item->userid), ['multiple' => true]);
+            $mform->setType('selection', PARAM_TEXT);
+            if ($type === 'cv') {
+                $mform->addElement('advcheckbox', 'withfiles', get_string('cofigureblock_cvinfo_withfiles', 'block_exaport'));
+                $mform->setDefault('withfiles', 0);
+            }
         } else {
             $options = block_exaport_item_content_file_options();
             if ($this->optional_param('blockid', 0, PARAM_INT)) {
@@ -75,11 +103,24 @@ class item_content extends dynamic_form {
                 $mform->addRule('files_filemanager', get_string('required'), 'required', null, 'client');
             }
         }
+        if (!empty($this->_customdata['standalone'])) {
+            $this->add_action_buttons();
+        }
     }
 
-    /** Validate file-manager submissions against the destination owner's quota. */
+    /** Validate owner-specific selections and file-manager submissions. */
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
+        if (in_array($data['contenttype'] ?? '', item_linked_content::TYPES, true) &&
+                ($data['operation'] ?? '') !== 'delete') {
+            $item = block_exaport_get_editable_content_item((int)$data['itemid'], (int)$data['courseid']);
+            try {
+                item_linked_content::configuration($data['contenttype'], (int)$item->userid,
+                    (array)($data['selection'] ?? []), !empty($data['withfiles']));
+            } catch (\invalid_parameter_exception $e) {
+                $errors['selection'] = get_string('linkedcontentselectionrequired', 'block_exaport');
+            }
+        }
         if (($data['contenttype'] ?? '') !== 'file' ||
                 ($data['operation'] ?? '') === 'delete') {
             return $errors;
@@ -155,6 +196,11 @@ class item_content extends dynamic_form {
             $options = block_exaport_item_content_file_options($item, $block);
             $data = file_prepare_standard_filemanager($data, 'files', $options,
                 $context, 'block_exaport', 'item_content_file', (int)$data->blockid);
+        } else if (in_array($type, item_linked_content::TYPES, true)) {
+            $selection = $block ? item_linked_content::selection($block, (int)$item->userid) : [];
+            $options = item_linked_content::options($type, (int)$item->userid);
+            $data->selection = array_values(array_intersect((array)($selection['selection'] ?? []), array_keys($options)));
+            $data->withfiles = !empty($selection['withfiles']);
         }
         $this->set_data($data);
     }
@@ -165,8 +211,22 @@ class item_content extends dynamic_form {
 
         require_sesskey();
         $data = $this->get_data();
+        if ($data->contenttype !== $this->get_content_type()) {
+            throw new \invalid_parameter_exception('Content block type does not match the form');
+        }
         $item = block_exaport_get_editable_content_item((int)$data->itemid, (int)$data->courseid);
         $block = !empty($data->blockid) ? block_exaport_get_item_content_block($item, (int)$data->blockid) : null;
+        if ($block && $block->type !== $data->contenttype) {
+            throw new \invalid_parameter_exception('Content block type does not match the form');
+        }
+        if (($data->operation ?? '') === 'delete' && !$block) {
+            throw new \invalid_parameter_exception('A content block is required for deletion');
+        }
+        $linkedconfiguration = null;
+        if (in_array($data->contenttype, item_linked_content::TYPES, true) && ($data->operation ?? '') !== 'delete') {
+            $linkedconfiguration = item_linked_content::configuration($data->contenttype, (int)$item->userid,
+                (array)($data->selection ?? []), !empty($data->withfiles));
+        }
         if ($data->contenttype === 'file' && ($data->operation ?? '') !== 'delete') {
             block_exaport_check_item_content_file_submission($item, $block, (int)$data->files_filemanager);
         }
@@ -182,14 +242,22 @@ class item_content extends dynamic_form {
             $transaction->allow_commit();
             return ['content' => block_exaport_render_item_content_blocks((int)$data->courseid, $item)];
         }
-        $DB->update_record('block_exaportitemblock', (object)[
+        $changes = (object)[
             'id' => $block->id,
             'title' => $data->title,
-            'url' => $data->contenttype === 'link' ? $data->url : '',
             'timemodified' => time(),
-        ]);
+        ];
+        // Editing text or files must not overwrite unrelated historical block metadata.
+        if ($data->contenttype === 'link') {
+            $changes->url = $data->url;
+        }
+        $DB->update_record('block_exaportitemblock', $changes);
         $context = context_user::instance((int)$item->userid);
-        if ($data->contenttype === 'text') {
+        if ($linkedconfiguration !== null) {
+            $DB->update_record('block_exaportitemblock', (object)[
+                'id' => $block->id, 'content' => $linkedconfiguration, 'contentformat' => FORMAT_HTML,
+            ]);
+        } else if ($data->contenttype === 'text') {
             $data = file_postupdate_standard_editor($data, 'content', block_exaport_item_content_editor_options(),
                 $context, 'block_exaport', 'item_content_text', $block->id);
             $DB->update_record('block_exaportitemblock', (object)[
@@ -215,8 +283,8 @@ class item_content extends dynamic_form {
 
     /** Return and validate the requested content type. */
     private function get_content_type(): string {
-        $type = $this->optional_param('contenttype', '', PARAM_ALPHA);
-        if (!in_array($type, self::TYPES, true)) {
+        $type = $this->_customdata['contenttype'] ?? $this->optional_param('contenttype', '', PARAM_ALPHA);
+        if (!in_array($type, block_exaport_item_content_types(), true)) {
             throw new \coding_exception('Unsupported Exaport item content block type');
         }
         return $type;

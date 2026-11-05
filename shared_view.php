@@ -275,7 +275,7 @@ $portfoliouser = block_exaport_get_user_preferences($user->id);
 // Read blocks.
 $query = "select b.*" . // , i.*, i.id as itemid".
     " FROM {block_exaportviewblock} b" .
-    " WHERE b.viewid = ? ORDER BY b.positionx, b.positiony";
+    " WHERE b.viewid = ? AND b.templatekey IS NULL ORDER BY b.positionx, b.positiony";
 
 $blocks = $DB->get_records_sql($query, array($view->id));
 
@@ -384,6 +384,12 @@ for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
     $data_for_pdf[$i] = array();
     $data_for_pdf_blocks[$i] = array();
     $general_content .= '<td class="view-column td' . $i . '">';
+    $general_content .= \block_exaport\view_structure::render($view, $access, false, $i);
+    $structuredpdf = \block_exaport\view_structure::render($view, $access, true, $i);
+    if ($structuredpdf !== '') {
+        $data_for_pdf_blocks[$i][] = $structuredpdf;
+        $data_for_pdf[$i][] = $structuredpdf;
+    }
     if (isset($columns[$i])) {
         foreach ($columns[$i] as $block) {
             $body_content_forPdf = '';
@@ -1160,7 +1166,12 @@ function prependHtmlContentToPdf($content, $view) {
         $src = $img->getAttribute('src');
         // Additional check if 'src' contains 'pluginfile.php'
         if (strpos($src, 'pluginfile.php') !== false) {
-            $newSrc = $src . '/forPdf/' . $view->hash . '/' . $view->id . '/' . $USER->id;
+            // Structured file URLs include a content-hash query. PDF authorization
+            // belongs in the path, before that query, so pluginfile can read it.
+            $querypos = strpos($src, '?');
+            $path = $querypos === false ? $src : substr($src, 0, $querypos);
+            $query = $querypos === false ? '' : substr($src, $querypos);
+            $newSrc = $path . '/forPdf/' . $view->hash . '/' . $view->id . '/' . $USER->id . $query;
             $img->setAttribute('src', $newSrc);
         }
     }
@@ -1203,6 +1214,10 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
     $pdf_content .= '<html>' . "\r\n";
     $pdf_content .= '<head>' . "\r\n";
     $pdf_content .= '<style>' . "\r\n";
+    $pdf_content .= '.exaport-template-element { margin-bottom: 14px; overflow-wrap: break-word; }
+        .exaport-template-section { padding: 8px; border: 1px solid #dddddd; }
+        .exaport-template-instructions { color: #555555; margin-bottom: 8px; }
+        .exaport-template-answer { margin-bottom: 10px; }';
     if ($fontfamilyUrl) {
         // Use the same font for different styles|weights (TODO: do we need to have a possibilitu to upload fonts for bold/italic?).
         $pdf_content .= '
@@ -1370,30 +1385,38 @@ function pdf_view($view, $colslayout, $data_for_pdf, $pdf_settings) {
         $pdf_content .= '</div>';
     }
 
-    $pdf_content .= '<table class="view-table" style="width: 100%; border: none; table-layout:fixed;">' . "\r\n";
-    $pdf_content .= '<tr>';
-    $max_rows = 0;
-    foreach ($data_for_pdf as $col => $blocks) {
-        $max_rows = max(count($blocks), $max_rows);
-    }
-    for ($coli = 1; $coli <= $colslayout[$view->layout]; $coli++) {
-        $pdf_content .= '<td width="' . (round(100 / $colslayout[$view->layout]) - 1) . '%" valign="top">';
-        if (array_key_exists($coli, $data_for_pdf)) {
-            foreach ($data_for_pdf[$coli] as $block) {
-                // Every block in own table - to keep width if some block has very big width.
-                $pdf_content .= '<table width="100%" style="word-break:break-all !important; word-wrap: break-word !important; overflow-wrap: break-word !important;">';
-                $pdf_content .= '<tr><td>';
-                $pdf_content .= $block;
-                $pdf_content .= '</td></tr>';
-                $pdf_content .= '</table>';
-            }
-        } else {
-            $pdf_content .= '&nbsp;';
+    // Dompdf cannot split a table cell across pages. Keep long, single-column
+    // guided reflections in normal block flow so later sections stay visible.
+    if (!empty($view->templateid) && $colslayout[$view->layout] === 1) {
+        foreach ($data_for_pdf[1] ?? [] as $block) {
+            $pdf_content .= '<div class="view-block">' . $block . '</div>';
         }
-        $pdf_content .= '</td>';
+    } else {
+        $pdf_content .= '<table class="view-table" style="width: 100%; border: none; table-layout:fixed;">' . "\r\n";
+        $pdf_content .= '<tr>';
+        $max_rows = 0;
+        foreach ($data_for_pdf as $col => $blocks) {
+            $max_rows = max(count($blocks), $max_rows);
+        }
+        for ($coli = 1; $coli <= $colslayout[$view->layout]; $coli++) {
+            $pdf_content .= '<td width="' . (round(100 / $colslayout[$view->layout]) - 1) . '%" valign="top">';
+            if (array_key_exists($coli, $data_for_pdf)) {
+                foreach ($data_for_pdf[$coli] as $block) {
+                    // Every block in own table - to keep width if some block has very big width.
+                    $pdf_content .= '<table width="100%" style="word-break:break-all !important; word-wrap: break-word !important; overflow-wrap: break-word !important;">';
+                    $pdf_content .= '<tr><td>';
+                    $pdf_content .= $block;
+                    $pdf_content .= '</td></tr>';
+                    $pdf_content .= '</table>';
+                }
+            } else {
+                $pdf_content .= '&nbsp;';
+            }
+            $pdf_content .= '</td>';
+        }
+        $pdf_content .= '</tr>';
+        $pdf_content .= '</table>' . "\r\n";
     }
-    $pdf_content .= '</tr>';
-    $pdf_content .= '</table>' . "\r\n";
 
     // footer
     if (@$pdf_settings['showmetadata']) {

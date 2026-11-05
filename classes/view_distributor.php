@@ -28,68 +28,42 @@ require_once(__DIR__ . '/../lib/lib.php');
  */
 class view_distributor {
 
-    /**
-     * Check if a view with the same name exists for a user
-     *
-     * @param int $userid User ID
-     * @param string $name View name
-     * @return int|false View ID if exists, false otherwise
-     */
-    private static function view_exists($userid, $name) {
-        global $DB;
-
-        $existing = $DB->get_record('block_exaportview', array(
-            'userid' => $userid,
-            'name' => $name,
-        ));
-
-        return $existing ? $existing->id : false;
-    }
-
-    /**
-     * Create a view for a user if it doesn't exist
-     *
-     * @param int $userid User ID
-     * @param string $name View name
-     * @param string $description View description
-     * @param int $courseid Course ID (for teacher sharing)
-     * @param bool $share_to_teachers Whether to share to course teachers if newly created
-     * @return array ['created' => bool, 'viewid' => int]
-     */
-    private static function create_view_if_not_exists($userid, $name, $description, $courseid = 0, $share_to_teachers = false) {
+    /** Create an independent snapshot, once per template/course/learner. */
+    private static function create_view_if_not_exists(int $userid, \stdClass $template, int $courseid): array {
         global $DB, $USER;
-
-        // Check if exists.
-        $existing = self::view_exists($userid, $name);
-        if ($existing) {
-            return array('created' => false, 'viewid' => $existing);
+        // Identity is deliberately unrelated to the editable portfolio title.
+        $identity = ['userid' => $userid, 'templateid' => $template->id,
+            'templatecourseid' => (int)$template->courseid];
+        $factory = \core\lock\lock_config::get_lock_factory('block_exaport_view_distribution');
+        $lock = $factory->get_lock($template->id . ':' . $userid, 10);
+        if (!$lock) {
+            throw new \moodle_exception('locktimeout');
         }
-
-        // Create new view.
-        $view = new \stdClass();
-        $view->userid = $userid;
-        $view->name = $name;
-        $view->description = $description;
-        $view->timemodified = time();
-        $view->shareall = 0;
-        $view->externaccess = 0;
-        $view->externcomment = 0;
-        $view->langid = 0;
-        $view->layout = 2;  // Default layout.
-        $view->creatorid = !empty($USER->id) ? $USER->id : 0;
-
-        $viewid = $DB->insert_record('block_exaportview', $view);
-
-        // Generate hash for the view.
-        $DB->set_field('block_exaportview', 'hash', block_exaport_generate_unique_hash('block_exaportview'), ['id' => $viewid]);
-
-        // Share to course teachers if requested (ONLY for newly created views).
-        if ($share_to_teachers && $courseid > 0) {
-            // Use existing function.
-            block_exaport_share_view_to_teachers($viewid);
+        try {
+            if ($existing = $DB->get_record('block_exaportview', $identity)) {
+                return ['created' => false, 'viewid' => $existing->id];
+            }
+            $definition = view_structure::definition($template->structure ?? '');
+            $transaction = $DB->start_delegated_transaction();
+            $view = (object)($identity + [
+                'name' => $template->name, 'description' => $template->description,
+                'templaterevision' => (int)($template->revision ?? 1),
+                'timemodified' => time(), 'shareall' => 0, 'externaccess' => 0,
+                'externcomment' => 0, 'langid' => 0,
+                'layout' => view_structure::LAYOUTS[$definition['columns']],
+                'creatorid' => !empty($USER->id) ? $USER->id : 0,
+                'hash' => block_exaport_generate_unique_hash('block_exaportview'),
+            ]);
+            $viewid = (int)$DB->insert_record('block_exaportview', $view);
+            view_structure::instantiate($viewid, $definition);
+            if ($template->share_to_teachers && $courseid > 0) {
+                block_exaport_share_view_to_teachers($viewid, $courseid);
+            }
+            $transaction->allow_commit();
+            return ['created' => true, 'viewid' => $viewid];
+        } finally {
+            $lock->release();
         }
-
-        return array('created' => true, 'viewid' => $viewid);
     }
 
     /**
@@ -105,13 +79,7 @@ class view_distributor {
         $skipped = 0;
 
         foreach ($views as $view) {
-            $result = self::create_view_if_not_exists(
-                $userid,
-                $view->name,
-                $view->description,
-                $courseid,
-                $view->share_to_teachers
-            );
+            $result = self::create_view_if_not_exists((int)$userid, $view, (int)$courseid);
 
             if ($result['created']) {
                 $created++;

@@ -49,6 +49,9 @@ final class backup_restore_test extends \advanced_testcase {
         $DB->insert_record('block_exaport_view_templ', (object)[
             'courseid' => $course->id, 'name' => 'View template', 'description' => 'Course collection',
             'sortorder' => 6, 'share_to_teachers' => 1, 'timemodified' => 202,
+            'structure' => view_structure::encode(view_structure::definition([
+                'nodes' => [['type' => 'field', 'label' => 'Course-specific question']],
+            ])), 'revision' => 7,
         ]);
         $DB->insert_record('block_exaport_templ_dist', (object)[
             'courseid' => $course->id, 'auto_distribute' => 1,
@@ -161,6 +164,8 @@ final class backup_restore_test extends \advanced_testcase {
         $view = $DB->get_record('block_exaport_view_templ', ['courseid' => $destination->id], '*', MUST_EXIST);
         $this->assertSame('View template', $view->name);
         $this->assertSame('Course collection', $view->description);
+        $this->assertSame('Course-specific question', view_structure::definition($view->structure)['nodes'][0]['label']);
+        $this->assertEquals(7, $view->revision);
         $this->assertEquals(6, $view->sortorder);
         $distribution = $DB->get_record('block_exaport_templ_dist', ['courseid' => $destination->id], '*', MUST_EXIST);
         $this->assertEquals(1, $distribution->auto_distribute);

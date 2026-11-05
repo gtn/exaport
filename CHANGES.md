@@ -1,3 +1,9 @@
+### v5.2 (2026110500) ###
+* View templates can define headings, instructions, response fields, artefact upload slots and repeatable sections.
+* Distribution creates independent learner copies, tracks template identity and revision, and preserves existing responses on repeat distribution.
+* Added template structure and fill-in editors, optional internship examples, course backup support and shared/PDF rendering.
+* Teacher sharing during view distribution now uses the template's course, including when distribution runs on enrolment.
+
 ### v5.2 (2026102100) ###
 * Requires Moodle 5.2.
 * Reworked portfolio items to support multiple ordered text, link, and file content blocks. Blocks can be added, edited, and deleted through modal forms, including rich text with embedded files.
@@ -465,4 +471,3 @@ Version Version 2.2
 ### Version 1.03 ###
 
 * First official release
-

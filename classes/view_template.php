@@ -87,6 +87,13 @@ class view_template {
             return false;
         }
 
+        // Validate the complete import before replacing the current course configuration.
+        foreach ($selected_template['views'] as &$view) {
+            $view['structure'] = view_structure::definition($view['structure'] ?? []);
+        }
+        unset($view);
+        $transaction = $DB->start_delegated_transaction();
+
         // Delete existing course template.
         $DB->delete_records('block_exaport_view_templ', array('courseid' => $courseid));
 
@@ -100,10 +107,13 @@ class view_template {
             $record->share_to_teachers = isset($view['share_to_teachers']) ? $view['share_to_teachers'] : 0;
             $record->sortorder = $sortorder++;
             $record->timemodified = time();
+            $record->structure = view_structure::encode(view_structure::definition($view['structure'] ?? []));
+            $record->revision = 1;
 
             $DB->insert_record('block_exaport_view_templ', $record);
         }
 
+        $transaction->allow_commit();
         return true;
     }
 
@@ -135,6 +145,31 @@ class view_template {
         $record->timemodified = time();
 
         return $DB->insert_record('block_exaport_view_templ', $record);
+    }
+
+    /** Save a validated blueprint. Existing learner views retain their own snapshot. */
+    public static function save_structure(int $id, int $courseid, array $definition, ?int $expectedrevision = null): void {
+        global $DB;
+        $structure = view_structure::encode(view_structure::definition($definition));
+        $factory = \core\lock\lock_config::get_lock_factory('block_exaport_view_template');
+        $lock = $factory->get_lock((string)$id, 10);
+        if (!$lock) {
+            throw new \moodle_exception('locktimeout');
+        }
+        try {
+            $template = $DB->get_record('block_exaport_view_templ', ['id' => $id, 'courseid' => $courseid], '*', MUST_EXIST);
+            if ($expectedrevision !== null && $expectedrevision !== (int)$template->revision) {
+                throw new \moodle_exception('template_changed', 'block_exaport');
+            }
+            if ($structure !== $template->structure) {
+                $DB->update_record('block_exaport_view_templ', (object)[
+                    'id' => $id, 'structure' => $structure, 'revision' => (int)$template->revision + 1,
+                    'timemodified' => time(),
+                ]);
+            }
+        } finally {
+            $lock->release();
+        }
     }
 
     /**

@@ -475,7 +475,12 @@ function block_exaport_delete_item(stdClass $item): void {
     $DB->delete_records('block_exaportitemcate', ['itemid' => $item->id]);
     $DB->delete_records('block_exaportitemshar', ['itemid' => $item->id]);
     $DB->delete_records('block_exaportitemgroupshar', ['itemid' => $item->id]);
-    $DB->delete_records('block_exaportviewblock', ['itemid' => $item->id]);
+    $DB->delete_records_select('block_exaportviewblock', 'itemid = ? AND templatekey IS NULL', [$item->id]);
+    // Keep the assignment slot available when its portfolio artefact is deleted.
+    $DB->set_field_select('block_exaportviewblock', 'type', 'template_artefact',
+        'itemid = ? AND templatekey IS NOT NULL', [$item->id]);
+    $DB->set_field_select('block_exaportviewblock', 'itemid', 0,
+        'itemid = ? AND templatekey IS NOT NULL', [$item->id]);
 
     if (class_exists('core_tag_tag')) {
         core_tag_tag::delete_instances('block_exaport', 'block_exaportitem', $item->id);
@@ -1624,10 +1629,12 @@ function fill_view_with_artefacts($viewid, $existingartefacts = '') {
  * @param integer $viewid
  * @return nothing
  */
-function block_exaport_share_view_to_teachers($viewid) {
+function block_exaport_share_view_to_teachers($viewid, ?int $courseid = null) {
     global $DB, $COURSE, $USER;
     if ($viewid > 0) {
-        $allteachers = block_exaport_get_course_teachers();
+        // Enrolment tasks have no course page, and a distributing trainer must also receive access.
+        $allteachers = $courseid === null ? block_exaport_get_course_teachers() :
+            block_exaport_get_course_teachers_by_courseid($courseid, false);
         $allsharedusers = array_keys(exaport_get_view_shared_users($viewid));
         $diff = array_diff($allteachers, $allsharedusers);
         $view = $DB->get_record_sql('SELECT * FROM {block_exaportview} WHERE id = ?', array('id' => $viewid));
@@ -1697,7 +1704,7 @@ function block_exaport_get_view_blocks($view) {
     $query = "SELECT b.*, i.userid AS itemownerid, i.courseid AS itemcourseid
               FROM {block_exaportviewblock} b
          LEFT JOIN {block_exaportitem} i ON i.id = b.itemid
-              WHERE b.viewid = ?
+              WHERE b.viewid = ? AND b.templatekey IS NULL
               ORDER BY b.positionx, b.positiony";
 
     $allblocks = $DB->get_records_sql($query, array($view->id));

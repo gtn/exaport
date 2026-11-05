@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/exaport/db" VERSION="20261029" COMMENT="XMLDB file for Exabis ePortfolio"
+<XMLDB PATH="blocks/exaport/db" VERSION="20261105" COMMENT="XMLDB file for Exabis ePortfolio"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -248,6 +248,9 @@
         <FIELD NAME="pdf_settings" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="layout_settings" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="creatorid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User ID of the creator of this view"/>
+        <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="templatecourseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="templaterevision" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -257,6 +260,7 @@
         <INDEX NAME="hash" UNIQUE="false" FIELDS="hash"/>
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
         <INDEX NAME="shareall" UNIQUE="false" FIELDS="shareall"/>
+        <INDEX NAME="template_user" UNIQUE="true" FIELDS="templatecourseid, templateid, userid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_exaportviewblock" COMMENT="Blocks on the view">
@@ -278,6 +282,9 @@
         <FIELD NAME="height" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="resume_itemtype" TYPE="char" LENGTH="15" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="resume_withfiles" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="templatekey" TYPE="char" LENGTH="24" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="parentkey" TYPE="char" LENGTH="24" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="templateconfig" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -561,6 +568,8 @@
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="share_to_teachers" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="share newly created views to course teachers"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="structure" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="revision" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

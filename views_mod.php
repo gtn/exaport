@@ -68,6 +68,10 @@ if ($id) {
     if (!$view = $DB->get_record('block_exaportview', $conditions)) {
         print_error("wrongviewid", "block_exaport");
     }
+    if ($action === 'edit' && $type === 'content' && !optional_param('extras', 0, PARAM_BOOL) &&
+            \block_exaport\view_structure::blocks((int)$view->id)) {
+        redirect(new moodle_url('/blocks/exaport/view_template_fill.php', ['id' => $view->id, 'courseid' => $courseid]));
+    }
 } else {
     $view = new stdClass();
     $view->id = null;
@@ -498,6 +502,10 @@ if ($editform->is_cancelled()) {
                 $blocks = json_decode($blocks) ?: [];
 
                 foreach ($blocks as $block) {
+                    if (!empty($block->templatekey) || strpos($block->type ?? '', 'template_') === 0) {
+                        throw new invalid_parameter_exception('Template structure must be edited through its response form');
+                    }
+                    unset($block->templatekey, $block->parentkey, $block->templateconfig);
                     $block->viewid = $dbview->id;
 
                     // clean block title. We need only clean text. Right?
@@ -546,7 +554,8 @@ if ($editform->is_cancelled()) {
             $torewriteblocks = true; // All ok.
             // Rewrite all blocks
             if ($torewriteblocks) {
-                $DB->delete_records('block_exaportviewblock', array('viewid' => $dbview->id));
+                // Structured fields have stable IDs and are saved independently of the free-layout editor.
+                $DB->delete_records_select('block_exaportviewblock', 'viewid = ? AND templatekey IS NULL', [$dbview->id]);
                 foreach ($blocks as $block) {
                     $block->id = $DB->insert_record('block_exaportviewblock', $block);
                 }

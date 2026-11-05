@@ -276,3 +276,11 @@ div.item-detail-image img {
         grid-column: 1 / -1;
     }
 }
+/* Template definitions and learner responses share the portfolio layout. */
+.exaport-template-element { margin-bottom: 1.5rem; overflow-wrap: anywhere; }
+.exaport-template-section { padding: 1rem; border: 1px solid #ddd; border-radius: .35rem; }
+.exaport-template-instructions { color: #555; margin-bottom: .75rem; }
+.exaport-template-answer { white-space: normal; min-height: 1.5rem; }
+.exaport-template-editor-element legend { float: none; }
+.exaport-template-editor .form-control { max-width: 60rem; }
+.exaport-template-fill-section .fitem { margin-bottom: 1.5rem; }

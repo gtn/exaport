@@ -181,10 +181,17 @@ class provider implements
             'layout' => 'privacy:metadata:block_exaportview:layout',
             'sharedemails' => 'privacy:metadata:block_exaportview:sharedemails',
             'autofill_artefacts' => 'privacy:metadata:block_exaportview:autofill_artefacts',
+            'templateid' => 'privacy:metadata:template_provenance',
+            'templatecourseid' => 'privacy:metadata:template_provenance',
+            'templaterevision' => 'privacy:metadata:template_provenance',
         ], 'privacy:metadata:block_exaportview');
 
-        // block_exaportviewblock
-        // does not contains personal information. But needed to delete
+        $collection->add_database_table('block_exaportviewblock', [
+            'text' => 'privacy:metadata:template_response',
+            'templatekey' => 'privacy:metadata:template_response',
+            'parentkey' => 'privacy:metadata:template_response',
+            'templateconfig' => 'privacy:metadata:template_response',
+        ], 'privacy:metadata:template_response');
 
         // block_exaportviewshar
         // block_exaportviewgroupshar
@@ -271,6 +278,8 @@ class provider implements
         if ($context->contextlevel == CONTEXT_USER) {
             $userlist->add_from_sql('ownerid', 'SELECT ownerid FROM {block_exaportmigissue} WHERE ownerid = ?',
                 [$context->instanceid]);
+            $userlist->add_from_sql('userid',
+                'SELECT userid FROM {block_exaportview} WHERE userid = ? AND templateid IS NOT NULL', [$context->instanceid]);
             return;
         }
         if (!($context instanceof \core\context\course)) {
@@ -495,7 +504,7 @@ class provider implements
         // views
         $views = $DB->get_records("block_exaportview", ['userid' => $user->id]);
         $viewsArr = array();
-        $copyProps = ['name', 'description', 'shareall', 'externaccess'];
+        $copyProps = ['name', 'description', 'shareall', 'externaccess', 'templateid', 'templatecourseid', 'templaterevision'];
         foreach ($views as $view) {
             $view_entry = new stdClass();
             foreach ($copyProps as $prop) {
@@ -523,7 +532,21 @@ class provider implements
                 if (@$block->block_title) {
                     $block_entry->block_title = $block->block_title;
                 }
+                if (!empty($block->templatekey)) {
+                    $block_entry->templatekey = $block->templatekey;
+                    $block_entry->parentkey = $block->parentkey;
+                    $block_entry->templateconfig = json_decode($block->templateconfig);
+                    $block_entry->response = $block->text;
+                }
                 switch ($block->type) {
+                    case 'template_field':
+                        $block_entry->content = $block->text;
+                        break;
+                    case 'template_heading':
+                    case 'template_section':
+                    case 'template_artefact':
+                        // Configuration and empty placeholders were exported above.
+                        break;
                     case 'headline': // headline
                         $block_entry->content = $block->text;
                         break;
@@ -828,6 +851,7 @@ class provider implements
         global $DB;
         if ($context->contextlevel == CONTEXT_USER) {
             $DB->delete_records('block_exaportmigissue', ['ownerid' => $context->instanceid]);
+            self::delete_template_responses((int)$context->instanceid);
             return;
         }
         if (!($context instanceof \core\context\course)) {
@@ -890,6 +914,22 @@ class provider implements
         return true;
     }
 
+    /** Guided view responses are personal data even before a learner uploads an artefact. */
+    private static function delete_template_responses(int $userid): void {
+        global $DB;
+        require_once(__DIR__ . '/../../lib/lib.php');
+        foreach ($DB->get_records_select('block_exaportview', 'userid = ? AND templateid IS NOT NULL', [$userid]) as $view) {
+            $items = $DB->get_records_sql('SELECT DISTINCT i.* FROM {block_exaportitem} i
+                JOIN {block_exaportviewblock} b ON b.itemid = i.id
+                WHERE b.viewid = ? AND b.templatekey IS NOT NULL AND i.userid = ?', [$view->id, $userid]);
+            foreach ($items as $item) {
+                block_exaport_delete_item($item);
+            }
+            self::delete_view_data($view->id);
+            $DB->delete_records('block_exaportview', ['id' => $view->id, 'userid' => $userid]);
+        }
+    }
+
     public static function delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
         if (empty($contextlist->count())) {
@@ -899,6 +939,7 @@ class provider implements
         foreach ($contextlist->get_contexts() as $approvedcontext) {
             if ($approvedcontext->contextlevel == CONTEXT_USER && $approvedcontext->instanceid == $userid) {
                 $DB->delete_records('block_exaportmigissue', ['ownerid' => $userid]);
+                self::delete_template_responses((int)$userid);
             }
         }
 
@@ -968,6 +1009,7 @@ class provider implements
         $context = $userlist->get_context();
         if ($context->contextlevel == CONTEXT_USER && in_array($context->instanceid, $userlist->get_userids())) {
             $DB->delete_records('block_exaportmigissue', ['ownerid' => $context->instanceid]);
+            self::delete_template_responses((int)$context->instanceid);
             return;
         }
         if (!($context instanceof \core\context\course) || !$userlist->get_userids()) {

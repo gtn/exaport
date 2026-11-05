@@ -87,10 +87,8 @@ class view_template {
             return false;
         }
 
-        // Delete existing course template.
-        $DB->delete_records('block_exaport_view_templ', array('courseid' => $courseid));
-
-        // Insert new template views.
+        // Validate layouts before replacing the existing course template.
+        $records = array();
         $sortorder = 0;
         foreach ($selected_template['views'] as $view) {
             $record = new \stdClass();
@@ -98,9 +96,14 @@ class view_template {
             $record->name = $view['name'];
             $record->description = isset($view['description']) ? $view['description'] : '';
             $record->share_to_teachers = isset($view['share_to_teachers']) ? $view['share_to_teachers'] : 0;
+            $record->layout = self::normalise_layout($view['layout'] ?? null);
             $record->sortorder = $sortorder++;
             $record->timemodified = time();
+            $records[] = $record;
+        }
 
+        $DB->delete_records('block_exaport_view_templ', array('courseid' => $courseid));
+        foreach ($records as $record) {
             $DB->insert_record('block_exaport_view_templ', $record);
         }
 
@@ -114,9 +117,10 @@ class view_template {
      * @param string $name View name
      * @param string $description View description
      * @param bool $share_to_teachers Whether to share to course teachers
+     * @param int|null $layout Layout ID, or null to use the distribution default
      * @return int View template ID
      */
-    public static function add_view($courseid, $name, $description = '', $share_to_teachers = false) {
+    public static function add_view($courseid, $name, $description = '', $share_to_teachers = false, $layout = null) {
         global $DB;
 
         // Get max sortorder.
@@ -131,10 +135,62 @@ class view_template {
         $record->name = $name;
         $record->description = $description;
         $record->share_to_teachers = $share_to_teachers ? 1 : 0;
+        $record->layout = self::normalise_layout($layout);
         $record->sortorder = $sortorder;
         $record->timemodified = time();
 
         return $DB->insert_record('block_exaport_view_templ', $record);
+    }
+
+    /**
+     * Get the existing view layouts with their column counts and width descriptions.
+     *
+     * @return array Layout ID => label; zero represents the distribution default
+     */
+    public static function get_layout_options() {
+        $options = array();
+        $columns = array(1 => 1, 2 => 2, 3 => 2, 4 => 2, 5 => 3, 6 => 3, 7 => 3, 8 => 4, 9 => 4, 10 => 5);
+        foreach ($columns as $layout => $count) {
+            $options[$layout] = get_string('viewlayoutgroup' . $count, 'block_exaport') . ' – ' .
+                get_string('viewlayout' . $layout, 'block_exaport');
+        }
+        return array(0 => get_string('default') . ' (' . $options[2] . ')') + $options;
+    }
+
+    /**
+     * Validate an optional layout, accepting zero from the default dropdown option.
+     *
+     * @param int|string|null $layout Layout ID
+     * @return int|null Valid layout ID, or null for the distribution default
+     */
+    private static function normalise_layout($layout) {
+        if ($layout === null || $layout === 0 || $layout === '0') {
+            return null;
+        }
+        if (filter_var($layout, FILTER_VALIDATE_INT) === false || $layout < 1 || $layout > 10) {
+            throw new \invalid_parameter_exception('Unknown view layout.');
+        }
+        return (int)$layout;
+    }
+
+    /**
+     * Update the layout used for newly distributed views.
+     *
+     * @param int $viewid View template ID
+     * @param int|null $layout Layout ID, or null to use the distribution default
+     * @return bool Success
+     */
+    public static function update_layout($viewid, $layout) {
+        global $DB;
+
+        $view = $DB->get_record('block_exaport_view_templ', array('id' => $viewid));
+        if (!$view) {
+            return false;
+        }
+
+        $view->layout = self::normalise_layout($layout);
+        $view->timemodified = time();
+        return $DB->update_record('block_exaport_view_templ', $view);
     }
 
     /**

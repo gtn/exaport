@@ -215,6 +215,16 @@ if ($action === 'rename_view' && confirm_sesskey()) {
     redirect($url, $message, null, $messagetype);
 }
 
+if ($action === 'update_view_layout') {
+    require_sesskey();
+    $id = required_param('id', PARAM_INT);
+    if (!view_template::verify_view($id, $courseid)) {
+        throw new invalid_parameter_exception('View template does not belong to this course.');
+    }
+    view_template::update_layout($id, required_param('layout', PARAM_INT));
+    redirect($url, get_string('changessaved'), null, 'success');
+}
+
 if ($action === 'remove_view' && confirm_sesskey()) {
     $id = required_param('id', PARAM_INT);
 
@@ -543,6 +553,7 @@ function block_exaport_render_template_tree($tree, $url, $all_nodes, $level = 0)
  * @param moodle_url $url Base URL
  */
 function block_exaport_render_view_template_list($views, $url) {
+    $layouts = view_template::get_layout_options();
     echo '<ul class="list-group">';
     foreach ($views as $view) {
         echo '<li class="list-group-item">';
@@ -577,6 +588,17 @@ function block_exaport_render_view_template_list($views, $url) {
 
         echo '</div>';
         echo '</div>';
+        echo html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out(false),
+            'class' => 'd-flex flex-wrap align-items-center gap-2 mt-2'));
+        foreach (array('sesskey' => sesskey(), 'action' => 'update_view_layout', 'id' => $view->id) as $name => $value) {
+            echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => $name, 'value' => $value));
+        }
+        $layoutid = 'view-template-layout-' . $view->id;
+        echo html_writer::tag('label', get_string('viewlayout', 'block_exaport'), array('for' => $layoutid));
+        echo html_writer::select($layouts, 'layout', $view->layout ?? 0, false,
+            array('id' => $layoutid, 'class' => 'custom-select w-auto'));
+        echo html_writer::tag('button', get_string('save'), array('type' => 'submit', 'class' => 'btn btn-sm btn-secondary'));
+        echo html_writer::end_tag('form');
         echo '</li>';
     }
     echo '</ul>';

@@ -54,9 +54,11 @@ class view_distributor {
      * @param string $description View description
      * @param int $courseid Course ID (for teacher sharing)
      * @param bool $share_to_teachers Whether to share to course teachers if newly created
+     * @param int|null $layout Layout ID, or null to use the distribution default
      * @return array ['created' => bool, 'viewid' => int]
      */
-    private static function create_view_if_not_exists($userid, $name, $description, $courseid = 0, $share_to_teachers = false) {
+    private static function create_view_if_not_exists($userid, $name, $description, $courseid = 0,
+            $share_to_teachers = false, $layout = null) {
         global $DB, $USER;
 
         // Check if exists.
@@ -75,7 +77,7 @@ class view_distributor {
         $view->externaccess = 0;
         $view->externcomment = 0;
         $view->langid = 0;
-        $view->layout = 2;  // Default layout.
+        $view->layout = $layout ?? 2;
         $view->creatorid = !empty($USER->id) ? $USER->id : 0;
 
         $viewid = $DB->insert_record('block_exaportview', $view);
@@ -110,7 +112,8 @@ class view_distributor {
                 $view->name,
                 $view->description,
                 $courseid,
-                $view->share_to_teachers
+                $view->share_to_teachers,
+                $view->layout ?? null
             );
 
             if ($result['created']) {

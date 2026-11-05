@@ -42,7 +42,7 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
         // Define view templates.
         $view_templates = new backup_nested_element('view_templates');
         $view_template = new backup_nested_element('view_template', array('id'), array(
-            'courseid', 'name', 'description', 'sortorder', 'share_to_teachers', 'timemodified'
+            'courseid', 'name', 'description', 'sortorder', 'share_to_teachers', 'layout', 'timemodified'
         ));
 
         // Define distribution settings.

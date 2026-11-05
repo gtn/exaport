@@ -19,12 +19,14 @@ final class backup_restore_test extends \advanced_testcase {
             'with users' => [true, false],
             'without users' => [false, false],
             'ignore development archive items' => [true, true],
+            'legacy template without layout' => [false, false, true],
         ];
     }
 
     /** @dataProvider course_backup_cases */
     #[\PHPUnit\Framework\Attributes\DataProvider('course_backup_cases')]
-    public function test_course_backup_restores_only_course_configuration(bool $includeusers, bool $additempayload): void {
+    public function test_course_backup_restores_only_course_configuration(bool $includeusers, bool $additempayload,
+            bool $legacylayout = false): void {
         global $DB;
         $this->resetAfterTest();
         // Exercise the naming feature while user data and personal files exist in the source course.
@@ -48,7 +50,7 @@ final class backup_restore_test extends \advanced_testcase {
         ]);
         $DB->insert_record('block_exaport_view_templ', (object)[
             'courseid' => $course->id, 'name' => 'View template', 'description' => 'Course collection',
-            'sortorder' => 6, 'share_to_teachers' => 1, 'timemodified' => 202,
+            'sortorder' => 6, 'share_to_teachers' => 1, 'layout' => 5, 'timemodified' => 202,
         ]);
         $DB->insert_record('block_exaport_templ_dist', (object)[
             'courseid' => $course->id, 'auto_distribute' => 1,
@@ -137,6 +139,11 @@ final class backup_restore_test extends \advanced_testcase {
             file_put_contents($populatedxmlpath, $xml);
         }
 
+        if ($legacylayout) {
+            $xml = file_get_contents($populatedxmlpath);
+            file_put_contents($populatedxmlpath, preg_replace('~<layout>.*?</layout>~s', '', $xml));
+        }
+
         $restore = new \restore_controller($tempname, $destination->id, \backup::INTERACTIVE_NO,
             \backup::MODE_GENERAL, $adminid, \backup::TARGET_EXISTING_ADDING);
         $this->assertTrue($restore->execute_precheck());
@@ -162,6 +169,11 @@ final class backup_restore_test extends \advanced_testcase {
         $this->assertSame('View template', $view->name);
         $this->assertSame('Course collection', $view->description);
         $this->assertEquals(6, $view->sortorder);
+        if ($legacylayout) {
+            $this->assertNull($view->layout);
+        } else {
+            $this->assertEquals(5, $view->layout);
+        }
         $distribution = $DB->get_record('block_exaport_templ_dist', ['courseid' => $destination->id], '*', MUST_EXIST);
         $this->assertEquals(1, $distribution->auto_distribute);
         $this->assertEquals(1, $distribution->auto_distribute_views);

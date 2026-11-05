@@ -1597,5 +1597,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026102900, 'exaport');
     }
 
+    if ($oldversion < 2026110501) {
+        $table = new xmldb_table('block_exaport_view_templ');
+        $field = new xmldb_field('layout', XMLDB_TYPE_INTEGER, '2', null,
+            null, null, null, 'share_to_teachers');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_block_savepoint(true, 2026110501, 'exaport');
+    }
+
     return $result;
 }

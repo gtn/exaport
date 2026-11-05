@@ -21,6 +21,45 @@ require_once(__DIR__ . '/inc.php');
 class block_exaport_renderer extends plugin_renderer_base {
 
     /**
+     * Render the shared layout chooser for views and course view templates.
+     *
+     * @param int $selected Selected layout ID
+     * @return string HTML for the ten existing layouts
+     */
+    public function view_layout_selector(int $selected): string {
+        $groups = [
+            1 => [1 => '100'],
+            2 => [2 => '50-50', 3 => '67-33', 4 => '33-67'],
+            3 => [5 => '33-33-33', 6 => '25-50-25', 7 => '15-70-15'],
+            4 => [8 => '25-25-25-25', 9 => '20-30-30-20'],
+            5 => [10 => '20-20-20-20-20'],
+        ];
+        $html = html_writer::tag('p', get_string('chooselayout', 'block_exaport'));
+        $html .= html_writer::start_div('select_layout clearfix');
+        foreach ($groups as $columns => $layouts) {
+            $groupname = get_string('viewlayoutgroup' . $columns, 'block_exaport');
+            $html .= html_writer::empty_tag('hr', ['class' => 'cb']);
+            $html .= html_writer::div(html_writer::tag('strong', $groupname), 'fl columnoption');
+            foreach ($layouts as $id => $widths) {
+                $description = get_string('viewlayout' . $id, 'block_exaport');
+                $inputid = 'view-layout-' . $id;
+                $attributes = ['type' => 'radio', 'class' => 'radio', 'name' => 'layout', 'value' => $id,
+                    'id' => $inputid, 'aria-label' => $groupname . ' – ' . $description];
+                if ($selected === $id) {
+                    $attributes['checked'] = 'checked';
+                }
+                $html .= html_writer::start_div('fl layoutoptions');
+                $html .= html_writer::div(html_writer::empty_tag('input', $attributes), 'radiobutton');
+                $image = html_writer::empty_tag('img', ['src' => $this->image_url('vl-' . $widths, 'block_exaport'), 'alt' => '']);
+                $html .= html_writer::div(html_writer::label($image, $inputid), 'layoutimg');
+                $html .= html_writer::div(html_writer::label($description, $inputid), 'layoutdescription');
+                $html .= html_writer::end_div();
+            }
+        }
+        return $html . html_writer::end_div();
+    }
+
+    /**
      * in moodle33 pix_url was renamed to image_url
      */
     public function image_url($imagename, $component = 'moodle') {

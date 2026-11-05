@@ -1261,6 +1261,14 @@ return [
         'Layout',
         'Layout',
     ],
+    'edit_view_template' => [
+        'Vorlage bearbeiten',
+        'Edit template',
+    ],
+    'save_view_template' => [
+        'Vorlage speichern',
+        'Save template',
+    ],
     'viewshare' => [
         'Teilen',
         'Share',

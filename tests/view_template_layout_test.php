@@ -9,7 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 final class view_template_layout_test extends \advanced_testcase {
     /** Default and all layouts offered by the existing view editor. */
     public static function layout_cases(): array {
-        $cases = ['unset' => [null, 2], 'default option' => [0, 2]];
+        $cases = ['unset' => [null, 2]];
         foreach (range(1, 10) as $layout) {
             $cases['layout ' . $layout] = [$layout, $layout];
         }
@@ -24,7 +24,10 @@ final class view_template_layout_test extends \advanced_testcase {
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
         $student = $generator->create_user();
-        view_template::add_view($course->id, 'Portfolio', '', false, $layout);
+        $templateid = view_template::add_view($course->id, 'Portfolio');
+        if ($layout !== null) {
+            view_template::update_layout($templateid, $layout);
+        }
 
         $result = view_distributor::distribute_to_user($student->id, view_template::get_course_template($course->id));
 
@@ -67,30 +70,22 @@ final class view_template_layout_test extends \advanced_testcase {
         $this->assertSame(0, $result['created']);
         $this->assertSame(2, $result['skipped']);
         $this->assertEquals($view, $DB->get_record('block_exaportview', ['id' => $view->id]));
-
-        view_template::update_layout($templateid, 0);
-        $this->assertNull($DB->get_field('block_exaport_view_templ', 'layout', ['id' => $templateid]));
     }
 
-    public function test_starter_templates_support_optional_layout_and_reject_invalid_layout_before_replacing(): void {
+    public function test_invalid_layout_does_not_change_the_template(): void {
+        global $DB;
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
-        set_config('starter_view_templates', json_encode([
-            ['name' => 'Example', 'views' => [
-                ['name' => 'Default'], ['name' => 'Three columns', 'layout' => 5],
-            ]],
-            ['name' => 'Invalid', 'views' => [['name' => 'Invalid', 'layout' => 11]]],
-        ]), 'block_exaport');
-        $this->assertTrue(view_template::load_starter_template($course->id, 'Example'));
-        $views = view_template::get_course_template($course->id);
-        $this->assertNull($views[0]->layout);
-        $this->assertEquals(5, $views[1]->layout);
-
-        try {
-            view_template::load_starter_template($course->id, 'Invalid');
-            $this->fail('Invalid layouts must be rejected.');
-        } catch (\invalid_parameter_exception $exception) {
-            $this->assertEquals($views, view_template::get_course_template($course->id));
+        $templateid = view_template::add_view($course->id, 'Portfolio');
+        view_template::update_layout($templateid, 5);
+        $before = $DB->get_record('block_exaport_view_templ', ['id' => $templateid]);
+        foreach ([-1, 0, 11] as $layout) {
+            try {
+                view_template::update_layout($templateid, $layout);
+                $this->fail('Invalid layouts must be rejected.');
+            } catch (\invalid_parameter_exception $exception) {
+                $this->assertEquals($before, $DB->get_record('block_exaport_view_templ', ['id' => $templateid]));
+            }
         }
     }
 

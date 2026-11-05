@@ -48,10 +48,17 @@ final class backup_restore_test extends \advanced_testcase {
             'courseid' => $course->id, 'pid' => $rootid, 'name' => 'Child template',
             'sortorder' => 5, 'share_to_teachers' => 0, 'timemodified' => 201,
         ]);
-        $DB->insert_record('block_exaport_view_templ', (object)[
+        $templateid = $DB->insert_record('block_exaport_view_templ', (object)[
             'courseid' => $course->id, 'name' => 'View template', 'description' => 'Course collection',
             'sortorder' => 6, 'share_to_teachers' => 1, 'layout' => 5, 'timemodified' => 202,
         ]);
+        view_template::save_blocks($templateid, [
+            ['type' => 'headline', 'text' => 'Learning goals', 'positionx' => 1, 'positiony' => 1],
+            ['type' => 'text', 'block_title' => 'Reflection', 'text' => '<p><strong>Describe</strong> your work.</p>',
+                'positionx' => 2, 'positiony' => 1],
+            ['type' => 'headline', 'text' => 'Next steps', 'positionx' => 2, 'positiony' => 2],
+        ]);
+        $templateblocks = view_template::get_blocks($templateid);
         $DB->insert_record('block_exaport_templ_dist', (object)[
             'courseid' => $course->id, 'auto_distribute' => 1,
             'auto_distribute_views' => 1, 'rename_root_on_copy' => 1, 'timemodified' => 203,
@@ -141,7 +148,7 @@ final class backup_restore_test extends \advanced_testcase {
 
         if ($legacylayout) {
             $xml = file_get_contents($populatedxmlpath);
-            file_put_contents($populatedxmlpath, preg_replace('~<layout>.*?</layout>~s', '', $xml));
+            file_put_contents($populatedxmlpath, preg_replace('~<layout>.*?</layout>|<template_blocks>.*?</template_blocks>~s', '', $xml));
         }
 
         $restore = new \restore_controller($tempname, $destination->id, \backup::INTERACTIVE_NO,
@@ -171,8 +178,20 @@ final class backup_restore_test extends \advanced_testcase {
         $this->assertEquals(6, $view->sortorder);
         if ($legacylayout) {
             $this->assertNull($view->layout);
+            $this->assertSame([], view_template::get_blocks($view->id));
         } else {
             $this->assertEquals(5, $view->layout);
+            $restoredblocks = view_template::get_blocks($view->id);
+            $this->assertCount(3, $restoredblocks);
+            $this->assertSame(array_column($templateblocks, 'text'), array_column($restoredblocks, 'text'));
+            $this->assertEquals([1, 2, 2], array_column($restoredblocks, 'positionx'));
+            $this->assertEquals([1, 1, 2], array_column($restoredblocks, 'positiony'));
+            foreach ($restoredblocks as $block) {
+                $this->assertEquals($view->id, $block->templateid);
+            }
+            $restoredblocks[0]->text = 'Changed course copy';
+            view_template::save_blocks($view->id, $restoredblocks);
+            $this->assertEquals($templateblocks, view_template::get_blocks($templateid));
         }
         $distribution = $DB->get_record('block_exaport_templ_dist', ['courseid' => $destination->id], '*', MUST_EXIST);
         $this->assertEquals(1, $distribution->auto_distribute);

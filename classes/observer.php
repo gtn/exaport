@@ -15,6 +15,11 @@ defined('MOODLE_INTERNAL') || die();
  */
 class observer {
 
+    /** Remove course-owned view templates and blocks when their course is deleted. */
+    public static function course_deleted(\core\event\course_deleted $event): void {
+        view_template::clear_course_template((int)$event->objectid);
+    }
+
     /**
      * Queue distribution task when user is enrolled in a course.
      * The task will execute after enrollment is complete.

@@ -1057,35 +1057,11 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         echo '</ul>';
         echo '</div>';
 
-        $colslayout = array(
-            "1" => 1, "2" => 2, "3" => 2, "4" => 2, "5" => 3, "6" => 3, "7" => 3, "8" => 4, "9" => 4, "10" => 5,
-        );
-
         // Default layout.
         if (!isset($view->layout) || $view->layout == 0) {
             $view->layout = 2;
         }
-
-        echo '<div class="view-middle">';
-
-        echo '<div id="view-preview">';
-        echo '<div class="view-group-header"><div>';
-        echo block_exaport_fontawesome_icon('briefcase', 'solid', 1);
-        echo get_string('viewdesign', 'block_exaport');
-        echo '</div></div>';
-        echo '<div>';
-        echo '<table class="table_layout layout' . $view->layout . '"><tr>';
-        for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
-            echo '<td class="td' . $i . '">';
-            echo '<ul class="portfolioDesignBlocks">';
-            echo '</ul>';
-            echo '</td>';
-        }
-        echo '</tr></table>';
-        echo '</div>';
-        echo '</div>';
-        echo '<div class="clear"><span>&nbsp;</span></div>';
-        echo '</div>';
+        echo $PAGE->get_renderer('block_exaport')->view_content_canvas((int)$view->layout);
 
         break;
 

@@ -470,6 +470,39 @@ function block_exaport_user_preferences(): array {
 }
 
 /**
+ * Fragment callback for editing the working copy of a course template block.
+ */
+function block_exaport_output_fragment_view_template_blockedit($args) {
+    global $CFG, $DB;
+    $courseid = clean_param($args['courseid'] ?? 0, PARAM_INT);
+    // core_get_fragment has already authenticated this context and initialised the page theme.
+    block_exaport_require_login(null);
+    $context = $args['context'] ?? null;
+    if (!$context instanceof context_course || (int)$context->instanceid !== $courseid) {
+        throw new invalid_parameter_exception('Mismatched template course context.');
+    }
+    require_capability('block/exaport:distributecategories', $context);
+    if (empty($CFG->block_exaport_enable_category_distribution)) {
+        throw new moodle_exception('areaisdisabled', 'block_exaport');
+    }
+    $template = $DB->get_record('block_exaport_view_templ',
+        ['id' => clean_param($args['templateid'] ?? 0, PARAM_INT), 'courseid' => $courseid], '*', MUST_EXIST);
+    $block = json_decode($args['block'] ?? '{}', true);
+    if (!is_array($block)) {
+        throw new invalid_parameter_exception('Invalid template block.');
+    }
+    $block['type'] = clean_param($args['type_block'] ?? '', PARAM_TEXT);
+    $block = \block_exaport\view_template::normalise_blocks([$block], (int)($template->layout ?? 2))[0];
+    if ($block->type === 'headline') {
+        return blockedit::get_form_headline(0, $block, false);
+    }
+    $html = blockedit::get_form_text(0, $block, false);
+    editors_get_preferred_editor(FORMAT_HTML)->use_editor('id_block_text',
+        ['maxfiles' => 0, 'context' => $context, 'autosave' => false]);
+    return $html;
+}
+
+/**
  * Fragment callback for loading block edit forms via the Fragment API.
  * Moodle automatically captures $PAGE->requires JS (editor init) and delivers it alongside the HTML.
  */

@@ -44,6 +44,9 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
         $view_template = new backup_nested_element('view_template', array('id'), array(
             'courseid', 'name', 'description', 'sortorder', 'share_to_teachers', 'layout', 'timemodified'
         ));
+        $template_blocks = new backup_nested_element('template_blocks');
+        $template_block = new backup_nested_element('template_block', ['id'],
+            ['type', 'text', 'block_title', 'positionx', 'positiony']);
 
         // Define distribution settings.
         $dist_settings = new backup_nested_element('distribution_settings');
@@ -57,6 +60,8 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
 
         $exaport->add_child($view_templates);
         $view_templates->add_child($view_template);
+        $view_template->add_child($template_blocks);
+        $template_blocks->add_child($template_block);
 
         $exaport->add_child($dist_settings);
         $dist_settings->add_child($dist_setting);
@@ -82,6 +87,8 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
         // Stable source order preserves ID tie-breaking for roots with the same display order.
         $course_template->set_source_table('block_exaport_course_templ', array('courseid' => backup::VAR_COURSEID), 'id ASC');
         $view_template->set_source_table('block_exaport_view_templ', array('courseid' => backup::VAR_COURSEID));
+        $template_block->set_source_table('block_exaport_templ_block', ['templateid' => backup::VAR_PARENTID],
+            'positionx, positiony, id');
         $dist_setting->set_source_table('block_exaport_templ_dist', array('courseid' => backup::VAR_COURSEID));
 
         // Personal portfolio items and their user-context files are outside course backups.

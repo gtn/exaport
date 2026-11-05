@@ -39,6 +39,8 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         // Define the paths for the data we want to restore.
         $paths[] = new restore_path_element('course_template', '/block/block_exaport/course_templates/course_template');
         $paths[] = new restore_path_element('view_template', '/block/block_exaport/view_templates/view_template');
+        $paths[] = new restore_path_element('template_block',
+            '/block/block_exaport/view_templates/view_template/template_blocks/template_block');
         $paths[] = new restore_path_element('distribution_setting', '/block/block_exaport/distribution_settings/distribution_setting');
 
         return $paths;
@@ -99,8 +101,21 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         // Insert the record.
         $newid = $DB->insert_record('block_exaport_view_templ', $data);
 
-        // Save the mapping (though not used by other tables currently).
+        // Child template blocks use this mapping when restoring.
         $this->set_mapping('view_template', $oldid, $newid);
+    }
+
+    /** Restore only supported template fields under the newly restored parent. */
+    protected function process_template_block($data) {
+        global $DB;
+        $templateid = $this->get_new_parentid('view_template');
+        $layout = $DB->get_field('block_exaport_view_templ', 'layout', ['id' => $templateid], MUST_EXIST);
+        $blocks = \block_exaport\view_template::normalise_blocks([(object)$data], (int)($layout ?? 2));
+        $block = $blocks[0];
+        // Preserve the source ordering; normalisation of a single block starts its position at one.
+        $block->positiony = (int)$data['positiony'];
+        $block->templateid = $templateid;
+        $DB->insert_record('block_exaport_templ_block', $block);
     }
 
     /**

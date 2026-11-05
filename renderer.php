@@ -27,16 +27,9 @@ class block_exaport_renderer extends plugin_renderer_base {
      * @return string HTML for the ten existing layouts
      */
     public function view_layout_selector(int $selected): string {
-        $groups = [
-            1 => [1 => '100'],
-            2 => [2 => '50-50', 3 => '67-33', 4 => '33-67'],
-            3 => [5 => '33-33-33', 6 => '25-50-25', 7 => '15-70-15'],
-            4 => [8 => '25-25-25-25', 9 => '20-30-30-20'],
-            5 => [10 => '20-20-20-20-20'],
-        ];
         $html = html_writer::tag('p', get_string('chooselayout', 'block_exaport'));
         $html .= html_writer::start_div('select_layout clearfix');
-        foreach ($groups as $columns => $layouts) {
+        foreach (\block_exaport\view_layout::GROUPS as $columns => $layouts) {
             $groupname = get_string('viewlayoutgroup' . $columns, 'block_exaport');
             $html .= html_writer::empty_tag('hr', ['class' => 'cb']);
             $html .= html_writer::div(html_writer::tag('strong', $groupname), 'fl columnoption');
@@ -56,6 +49,26 @@ class block_exaport_renderer extends plugin_renderer_base {
                 $html .= html_writer::end_div();
             }
         }
+        return $html . html_writer::end_div();
+    }
+
+    /** Render the same block canvas for student views and course view templates. */
+    public function view_content_canvas(int $layout): string {
+        $html = html_writer::start_div('view-middle');
+        $html .= html_writer::start_div('', ['id' => 'view-preview']);
+        $html .= html_writer::div(html_writer::div(block_exaport_fontawesome_icon('briefcase', 'solid', 1) .
+            get_string('viewdesign', 'block_exaport')), 'view-group-header');
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('table', ['class' => 'table_layout layout' . $layout]);
+        $html .= html_writer::start_tag('tr');
+        for ($column = 1; $column <= \block_exaport\view_layout::columns($layout); $column++) {
+            $html .= html_writer::tag('td', html_writer::tag('ul', '', ['class' => 'portfolioDesignBlocks']),
+                ['class' => 'td' . $column]);
+        }
+        $html .= html_writer::end_tag('tr') . html_writer::end_tag('table');
+        $html .= html_writer::end_div();
+        $html .= html_writer::end_div();
+        $html .= html_writer::div('<span>&nbsp;</span>', 'clear');
         return $html . html_writer::end_div();
     }
 

@@ -215,7 +215,8 @@ class view_template {
     /** Supply the existing editor's presentation fields without storing them. */
     public static function editor_blocks(array $blocks): array {
         return array_map(static function($block) {
-            $block = clone (object)$block;
+            $block = (object)$block;
+            $block = clone $block;
             $block->print_text = $block->type === 'headline' ? s($block->text) :
                 format_text($block->text, FORMAT_HTML, ['filter' => false]);
             return $block;

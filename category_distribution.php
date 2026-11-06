@@ -556,6 +556,17 @@ function block_exaport_render_view_template_list($views, $url) {
         // Actions.
         echo '<div class="d-flex flex-wrap gap-1" role="group">';
 
+        // Edit template layout and content.
+        $editurl = new moodle_url(
+            '/blocks/exaport/view_template_edit.php',
+            array('courseid' => $url->get_param('courseid'), 'id' => $view->id)
+        );
+        echo html_writer::link(
+            $editurl,
+            get_string('edit_view_template', 'block_exaport'),
+            array('class' => 'btn btn-sm btn-outline-primary')
+        );
+
         // Rename.
         echo '<button type="button" class="btn btn-sm btn-outline-secondary" ' .
             'data-action="rename-view" data-id="' . $view->id . '" data-name="' . s($view->name) . '">' .

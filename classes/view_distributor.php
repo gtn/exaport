@@ -54,9 +54,19 @@ class view_distributor {
      * @param string $description View description
      * @param int $courseid Course ID (for teacher sharing)
      * @param bool $share_to_teachers Whether to share to course teachers if newly created
+     * @param int|null $layout Layout ID, or null to use the distribution default
+     * @param array $blocks Template blocks to copy into the new view
      * @return array ['created' => bool, 'viewid' => int]
      */
-    private static function create_view_if_not_exists($userid, $name, $description, $courseid = 0, $share_to_teachers = false) {
+    private static function create_view_if_not_exists(
+        $userid,
+        $name,
+        $description,
+        $courseid = 0,
+        $share_to_teachers = false,
+        $layout = null,
+        array $blocks = []
+    ) {
         global $DB, $USER;
 
         // Check if exists.
@@ -65,6 +75,9 @@ class view_distributor {
             return array('created' => false, 'viewid' => $existing);
         }
 
+        $blocks = view_template::normalise_blocks($blocks, (int)($layout ?? 2));
+        // Create the view and its independent block copies together, so a retry cannot skip a partial view.
+        $transaction = $DB->start_delegated_transaction();
         // Create new view.
         $view = new \stdClass();
         $view->userid = $userid;
@@ -75,10 +88,14 @@ class view_distributor {
         $view->externaccess = 0;
         $view->externcomment = 0;
         $view->langid = 0;
-        $view->layout = 2;  // Default layout.
+        $view->layout = $layout ?? 2;
         $view->creatorid = !empty($USER->id) ? $USER->id : 0;
 
         $viewid = $DB->insert_record('block_exaportview', $view);
+        foreach ($blocks as $block) {
+            $block->viewid = $viewid;
+            $DB->insert_record('block_exaportviewblock', $block);
+        }
 
         // Generate hash for the view.
         $DB->set_field('block_exaportview', 'hash', block_exaport_generate_unique_hash('block_exaportview'), ['id' => $viewid]);
@@ -89,6 +106,7 @@ class view_distributor {
             block_exaport_share_view_to_teachers($viewid);
         }
 
+        $transaction->allow_commit();
         return array('created' => true, 'viewid' => $viewid);
     }
 
@@ -110,7 +128,9 @@ class view_distributor {
                 $view->name,
                 $view->description,
                 $courseid,
-                $view->share_to_teachers
+                $view->share_to_teachers,
+                $view->layout ?? null,
+                $view->blocks ?? (!empty($view->id) ? view_template::get_blocks((int)$view->id) : [])
             );
 
             if ($result['created']) {
@@ -141,6 +161,11 @@ class view_distributor {
                 'skipped' => 0,
                 'errors' => array(get_string('no_template_to_distribute', 'block_exaport')),
             );
+        }
+
+        // Read each template's blocks once for the whole course distribution.
+        foreach ($views as $view) {
+            $view->blocks = view_template::get_blocks((int)$view->id);
         }
 
         // Get all students in the course.

@@ -996,28 +996,7 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
             <div class="blocktype-description js-hidden">' . block_exaport_get_string('cvinformation') . '</div>
         </a></div>
     </li>';
-        echo '
-    <li class="portfolioElement" title="' . block_exaport_get_string('headertext') . '" block-type="headline"
-        id="headline_adder"
-        data-help="' . block_exaport_get_string('headertext_help') . '" >
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            . block_exaport_fontawesome_icon('heading', 'solid', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-            //            .block_exaport_fontawesome_icon('grip-lines', 'solid', '3', ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-            //            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/header_text.png" />'
-            . '<h4 class="blocktype-title js-hidden">' . block_exaport_get_string('headertext') . '</h4>
-            <div class="blocktype-description js-hidden">' . block_exaport_get_string('headertext') . '</div>
-        </a></div>
-    </li>
-    <li class="portfolioElement" title="' . block_exaport_get_string('view_specialitem_text') . '" block-type="text"
-        id="text_adder"
-        data-help="' . block_exaport_get_string('view_specialitem_text_help') . '" >
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            . block_exaport_fontawesome_icon('file-lines', 'regular', 3, ['fa-border'], [], [], 'edit', [], [], [], ['exaport-view-block-adder-icon'])
-            //            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/text.png" />'
-            . '<h4 class="blocktype-title js-hidden">' . block_exaport_get_string('view_specialitem_text') . '</h4>
-            <div class="blocktype-description js-hidden">' . block_exaport_get_string('view_specialitem_text') . '</div>
-        </a></div>
-    </li>';
+        echo $PAGE->get_renderer('block_exaport')->view_content_text_adders();
         echo '
     <li class="portfolioElement" title="' . block_exaport_get_string('items') . '" block-type="item"
         id="item_adder"
@@ -1057,35 +1036,11 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         echo '</ul>';
         echo '</div>';
 
-        $colslayout = array(
-            "1" => 1, "2" => 2, "3" => 2, "4" => 2, "5" => 3, "6" => 3, "7" => 3, "8" => 4, "9" => 4, "10" => 5,
-        );
-
         // Default layout.
         if (!isset($view->layout) || $view->layout == 0) {
             $view->layout = 2;
         }
-
-        echo '<div class="view-middle">';
-
-        echo '<div id="view-preview">';
-        echo '<div class="view-group-header"><div>';
-        echo block_exaport_fontawesome_icon('briefcase', 'solid', 1);
-        echo get_string('viewdesign', 'block_exaport');
-        echo '</div></div>';
-        echo '<div>';
-        echo '<table class="table_layout layout' . $view->layout . '"><tr>';
-        for ($i = 1; $i <= $colslayout[$view->layout]; $i++) {
-            echo '<td class="td' . $i . '">';
-            echo '<ul class="portfolioDesignBlocks">';
-            echo '</ul>';
-            echo '</td>';
-        }
-        echo '</tr></table>';
-        echo '</div>';
-        echo '</div>';
-        echo '<div class="clear"><span>&nbsp;</span></div>';
-        echo '</div>';
+        echo $PAGE->get_renderer('block_exaport')->view_content_canvas((int)$view->layout);
 
         break;
 
@@ -1122,80 +1077,7 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         if (!isset($view->layout) || $view->layout == 0) {
             $view->layout = 2;
         }
-        echo '
-            <p>' . get_string('chooselayout', 'block_exaport') . '</p>
-            <div class="select_layout">
-            <hr class="cb" />
-                <div class="fl columnoption"><strong>' . get_string("viewlayoutgroup1", "block_exaport") . '</strong></div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="1" type="radio" ' .
-            ($view->layout == 1 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-100.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout1", "block_exaport") . '</div>
-                </div>
-            <hr class="cb" />
-                <div class="fl columnoption"><strong>' . get_string("viewlayoutgroup2", "block_exaport") . '</strong></div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="2" type="radio" ' .
-            ($view->layout == 2 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-50-50.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout2", "block_exaport") . '</div>
-                </div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="3" type="radio" ' .
-            ($view->layout == 3 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-67-33.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout3", "block_exaport") . '</div>
-                </div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="4" type="radio" ' .
-            ($view->layout == 4 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-33-67.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout4", "block_exaport") . '</div>
-                </div>
-            <hr class="cb" />
-                <div class="fl columnoption"><strong>' . get_string("viewlayoutgroup3", "block_exaport") . '</strong></div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="5" type="radio" ' .
-            ($view->layout == 5 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-33-33-33.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout5", "block_exaport") . '</div>
-                </div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="6" type="radio" ' .
-            ($view->layout == 6 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-25-50-25.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout6", "block_exaport") . '</div>
-                </div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="7" type="radio" ' .
-            ($view->layout == 7 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-15-70-15.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout7", "block_exaport") . '</div>
-                </div>
-            <hr class="cb" />
-                <div class="fl columnoption"><strong>' . get_string("viewlayoutgroup4", "block_exaport") . '</strong></div>
-                    <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="8" type="radio" ' .
-            ($view->layout == 8 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-25-25-25-25.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout8", "block_exaport") . '</div>
-                </div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="9" type="radio" ' .
-            ($view->layout == 9 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-20-30-30-20.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout9", "block_exaport") . '</div>
-                </div>
-            <hr class="cb" />
-                <div class="fl columnoption"><strong>' . get_string("viewlayoutgroup5", "block_exaport") . '</strong></div>
-                <div class="fl layoutoptions">
-                    <div class="radiobutton"><input class="radio" name="layout" value="10" type="radio" ' .
-            ($view->layout == 10 ? 'checked="checked"' : '') . ' /></div>
-                    <div class="layoutimg"><img src="' . $CFG->wwwroot . '/blocks/exaport/pix/vl-20-20-20-20-20.png" alt="" /></div>
-                    <div class="layoutdescription">' . get_string("viewlayout10", "block_exaport") . '</div>
-                </div>
-            </div>';
+        echo $PAGE->get_renderer('block_exaport')->view_layout_selector((int)$view->layout);
 
         if (@$CFG->block_exaport_allow_custom_layout) {
             if ($view->layout_settings) {

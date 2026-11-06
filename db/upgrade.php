@@ -1597,5 +1597,38 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026102900, 'exaport');
     }
 
+    if ($oldversion < 2026110502) {
+        $table = new xmldb_table('block_exaport_view_templ');
+        $field = new xmldb_field(
+            'layout',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            null,
+            null,
+            null,
+            'share_to_teachers'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $table = new xmldb_table('block_exaport_templ_block');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('templateid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('type', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL);
+        $table->add_field('text', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('block_title', XMLDB_TYPE_CHAR, '1000', null, XMLDB_NOTNULL);
+        $table->add_field('positionx', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('positiony', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '1');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('templateid', XMLDB_KEY_FOREIGN, ['templateid'], 'block_exaport_view_templ', ['id']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_block_savepoint(true, 2026110502, 'exaport');
+    }
+
     return $result;
 }

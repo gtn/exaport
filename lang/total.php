@@ -1261,6 +1261,26 @@ return [
         'Layout',
         'Layout',
     ],
+    'edit_view_template' => [
+        'Vorlage bearbeiten',
+        'Edit template',
+    ],
+    'save_view_template' => [
+        'Vorlage speichern',
+        'Save template',
+    ],
+    'apply_view_template_block' => [
+        'Baustein übernehmen',
+        'Apply block',
+    ],
+    'view_template_content_instructions' => [
+        'Erstelle den Inhalt mit Überschriften und formatiertem Text. Übernimm die Änderungen an den Bausteinen und speichere dann die Vorlage.',
+        'Create the starting content with headings and formatted text. Apply block changes, then save the template.',
+    ],
+    'view_template_files_unsupported' => [
+        'Hochgeladene Bilder und Dateien werden in Vorlagen noch nicht unterstützt.',
+        'Uploaded images and files are not supported in templates yet.',
+    ],
     'viewshare' => [
         'Teilen',
         'Share',

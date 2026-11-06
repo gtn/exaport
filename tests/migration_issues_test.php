@@ -237,7 +237,7 @@ final class migration_issues_test extends \advanced_testcase {
             $output = ob_get_clean();
         }
         $this->assertStringContainsString('1 files with recorded content problems', $output);
-        $this->assertSame(2026102900, (int)get_config('block_exaport', 'version'));
+        $this->assertSame(2026110502, (int)get_config('block_exaport', 'version'));
         $this->assertSame(1, migration_issues::counts()['issues_recorded']);
         $this->assertSame(2, $DB->count_records('block_exaportitemblock'));
     }
@@ -289,7 +289,7 @@ final class migration_issues_test extends \advanced_testcase {
         $summary = json_decode($report->summaryjson, true);
         $this->assertTrue($summary['status']['requires_review']);
         $this->assertSame(1, $summary['issue_history_at_successful_run_end']['files_affected']);
-        $this->assertSame(2026102900, (int)get_config('block_exaport', 'version'));
+        $this->assertSame(2026110502, (int)get_config('block_exaport', 'version'));
     }
 
     public function test_local_storage_outage_remains_fatal(): void {

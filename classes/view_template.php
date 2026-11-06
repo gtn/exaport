@@ -25,6 +25,12 @@ defined('MOODLE_INTERNAL') || die();
  * Handles view template creation, loading, saving, and manipulation
  */
 class view_template {
+    /**
+     * Table containing course-owned heading and text blocks.
+     *
+     * @var string
+     */
+    public const BLOCKS_TABLE = 'block_exaport_templ_block';
 
     /**
      * Get starter view templates from configuration
@@ -87,8 +93,8 @@ class view_template {
             return false;
         }
 
-        // Delete existing course template.
-        $DB->delete_records('block_exaport_view_templ', array('courseid' => $courseid));
+        $transaction = $DB->start_delegated_transaction();
+        self::clear_course_template($courseid);
 
         // Insert new template views.
         $sortorder = 0;
@@ -104,6 +110,7 @@ class view_template {
             $DB->insert_record('block_exaport_view_templ', $record);
         }
 
+        $transaction->allow_commit();
         return true;
     }
 
@@ -135,6 +142,136 @@ class view_template {
         $record->timemodified = time();
 
         return $DB->insert_record('block_exaport_view_templ', $record);
+    }
+
+    /**
+     * Update the layout used for newly distributed views.
+     *
+     * @param int $viewid View template ID
+     * @param int $layout Layout ID from the existing view editor (1–10)
+     * @return bool Success
+     */
+    public static function update_layout($viewid, int $layout) {
+        global $DB;
+
+        view_layout::columns($layout);
+
+        $view = $DB->get_record('block_exaport_view_templ', array('id' => $viewid));
+        if (!$view) {
+            return false;
+        }
+
+        $transaction = $DB->start_delegated_transaction();
+        $view->layout = $layout;
+        $view->timemodified = time();
+        $DB->update_record('block_exaport_view_templ', $view);
+        // Preserve blocks from columns removed by a layout change by appending them to column one.
+        self::save_blocks($viewid, self::get_blocks($viewid));
+        $transaction->allow_commit();
+        return true;
+    }
+
+    /**
+     * Return the template's blocks in their display order.
+     *
+     * @param int $templateid View template ID
+     * @return \stdClass[] Stored block records
+     */
+    public static function get_blocks(int $templateid): array {
+        global $DB;
+        return array_values($DB->get_records(
+            self::BLOCKS_TABLE,
+            ['templateid' => $templateid],
+            'positionx, positiony, id'
+        ));
+    }
+
+    /**
+     * Validate the editor's block list and keep only fields supported by templates.
+     *
+     * @param array $blocks Block records supplied as arrays or objects
+     * @param int $layout Layout ID
+     * @return \stdClass[] Validated block records with consistent positions
+     */
+    public static function normalise_blocks(array $blocks, int $layout): array {
+        $columns = view_layout::columns($layout);
+        $records = [];
+        foreach ($blocks as $block) {
+            $block = (array)$block;
+            if (
+                !in_array($block['type'] ?? '', ['headline', 'text'], true) ||
+                !is_string($block['text'] ?? '') ||
+                !is_string($block['block_title'] ?? '')
+            ) {
+                throw new \invalid_parameter_exception('Invalid template block.');
+            }
+            $record = (object)[
+                'type' => $block['type'],
+                'text' => $block['type'] === 'headline' ? clean_param($block['text'] ?? '', PARAM_TEXT) :
+                    clean_text($block['text'] ?? '', FORMAT_HTML),
+                'block_title' => clean_param($block['block_title'] ?? '', PARAM_TEXT),
+                'positionx' => filter_var($block['positionx'] ?? 1, FILTER_VALIDATE_INT),
+                'positiony' => filter_var($block['positiony'] ?? 1, FILTER_VALIDATE_INT),
+            ];
+            if (
+                $record->positionx < 1 ||
+                $record->positionx > 5 ||
+                $record->positiony < 1 ||
+                \core_text::strlen($record->block_title) > 1000
+            ) {
+                throw new \invalid_parameter_exception('Invalid template block position or title.');
+            }
+            if (preg_match('~@@PLUGINFILE@@|(?:src|href)\s*=\s*["\'][^"\']*(?:draftfile|pluginfile)\.php~i', $record->text)) {
+                throw new \moodle_exception('view_template_files_unsupported', 'block_exaport');
+            }
+            $records[] = $record;
+        }
+        usort($records, static function ($a, $b) {
+            return [$a->positionx, $a->positiony] <=> [$b->positionx, $b->positiony];
+        });
+        $positions = [];
+        foreach ($records as $record) {
+            $record->positionx = $record->positionx <= $columns ? $record->positionx : 1;
+            $record->positiony = $positions[$record->positionx] = ($positions[$record->positionx] ?? 0) + 1;
+        }
+        return $records;
+    }
+
+    /**
+     * Supply the existing editor's presentation fields without storing them.
+     *
+     * @param array $blocks Block records supplied as arrays or objects
+     * @return \stdClass[] Copies containing the formatted preview text
+     */
+    public static function editor_blocks(array $blocks): array {
+        return array_map(static function ($block) {
+            $block = (object)$block;
+            $block = clone $block;
+            $block->print_text = $block->type === 'headline' ? s($block->text) :
+                format_text($block->text, FORMAT_HTML, ['filter' => false]);
+            return $block;
+        }, $blocks);
+    }
+
+    /**
+     * Save the complete validated block list atomically.
+     *
+     * @param int $templateid View template ID
+     * @param array $blocks Complete block list
+     * @return void
+     */
+    public static function save_blocks(int $templateid, array $blocks): void {
+        global $DB;
+        $template = $DB->get_record('block_exaport_view_templ', ['id' => $templateid], '*', MUST_EXIST);
+        $records = self::normalise_blocks($blocks, (int)($template->layout ?? 2));
+        $transaction = $DB->start_delegated_transaction();
+        $DB->delete_records(self::BLOCKS_TABLE, ['templateid' => $templateid]);
+        foreach ($records as $record) {
+            $record->templateid = $templateid;
+            $DB->insert_record(self::BLOCKS_TABLE, $record);
+        }
+        $DB->set_field('block_exaport_view_templ', 'timemodified', time(), ['id' => $templateid]);
+        $transaction->allow_commit();
     }
 
     /**
@@ -209,7 +346,29 @@ class view_template {
     public static function remove_view($viewid) {
         global $DB;
 
-        return $DB->delete_records('block_exaport_view_templ', array('id' => $viewid));
+        $transaction = $DB->start_delegated_transaction();
+        $DB->delete_records(self::BLOCKS_TABLE, array('templateid' => $viewid));
+        $result = $DB->delete_records('block_exaport_view_templ', array('id' => $viewid));
+        $transaction->allow_commit();
+        return $result;
+    }
+
+    /**
+     * Delete the course's view templates together with their blocks.
+     *
+     * @param int $courseid Course ID
+     * @return void
+     */
+    public static function clear_course_template(int $courseid): void {
+        global $DB;
+        $transaction = $DB->start_delegated_transaction();
+        $DB->delete_records_select(
+            self::BLOCKS_TABLE,
+            'templateid IN (SELECT id FROM {block_exaport_view_templ} WHERE courseid = ?)',
+            [$courseid]
+        );
+        $DB->delete_records('block_exaport_view_templ', ['courseid' => $courseid]);
+        $transaction->allow_commit();
     }
 
     /**

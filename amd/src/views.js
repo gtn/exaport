@@ -13,6 +13,7 @@ define(['jquery',
 
   var helpDialogue;
   var contextId;
+  var templateContext = null;
   var blockEditModal = null;
   var blockEditCtx = null;
 
@@ -992,7 +993,8 @@ define(['jquery',
       tempString += '<div class="header"></div>';
       tempString += '<div class="body"><p class="text" ' + $E.translate('view_specialitem_text_defaulttext') + '"></p></div>';
       $item.html(tempString);
-      $item.find('div.header').append($E.translate('view_specialitem_text') + ($.trim(data.block_title).length ? ': ' + data.block_title : ''));
+      $item.find('div.header').append($E.translate('view_specialitem_text') + ($.trim(data.block_title).length ? ': ' +
+        (templateContext ? escapeHtml(data.block_title) : data.block_title) : ''));
       $item.find('div.body').append(data.print_text);
     }
 
@@ -1064,7 +1066,12 @@ define(['jquery',
       data: data,
       success: function (res) {
         var scrollTop = $(window).scrollTop();
-        var data = JSON.parse(res);
+        var data = typeof res === 'string' ? JSON.parse(res) : res;
+        if (data.error) {
+          hidePreloadinator($('#view-preview'), '');
+          require(['core/notification'], function(Notification) { Notification.alert('', data.error); });
+          return;
+        }
         $('form :input[name=blocks]').val(data.blocks);
         exaportViewEdit.resetViewContent();
         hidePreloadinator($('#view-preview'), '');
@@ -1081,13 +1088,19 @@ define(['jquery',
     var fragmentParams = {
       type_block: blockType,
       item_id: itemId,
-      viewid: $('form :input[name=viewid]').val(),
-      draft_itemid: $('form :input[name=draft_itemid]').val(),
     };
+    if (templateContext) {
+      fragmentParams.templateid = templateContext.templateid;
+      fragmentParams.courseid = templateContext.courseid;
+      fragmentParams.block = JSON.stringify(item.data('portfolio') || {});
+    } else {
+      fragmentParams.viewid = $('form :input[name=viewid]').val();
+      fragmentParams.draft_itemid = $('form :input[name=draft_itemid]').val();
+    }
 
     var fragmentPromise = Fragment.loadFragment(
       'block_exaport',
-      'blockedit',
+      templateContext ? 'view_template_blockedit' : 'blockedit',
       contextId,
       fragmentParams
     );
@@ -1096,7 +1109,7 @@ define(['jquery',
       blockType: blockType,
       itemId: itemId,
       item: item,
-      isNew: !(itemId > 0),
+      isNew: templateContext ? !item.hasClass('item') : !(itemId > 0),
       saved: false,
     };
 
@@ -1263,9 +1276,24 @@ define(['jquery',
 
   // MAIN code of MODULE.
   return {
-    initialise: function (_contextId) {
+    initialise: function (_contextId, _templateContext) {
       contextId = _contextId;
+      templateContext = _templateContext || null;
+      if (templateContext) {
+        window.block_exaport.setTranslations(templateContext.strings);
+      }
       initContentEdit();
+      if (templateContext) {
+        var originalBlocks = $('form :input[name=blocks]').val();
+        var submitting = false;
+        $('#view_edit_form').on('submit', function() { submitting = true; updateBlockData(); });
+        window.addEventListener('beforeunload', function(event) {
+          if (!submitting && $('form :input[name=blocks]').val() !== originalBlocks) {
+            event.preventDefault();
+            event.returnValue = '';
+          }
+        });
+      }
     },
   };
 

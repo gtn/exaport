@@ -21,6 +21,102 @@ require_once(__DIR__ . '/inc.php');
 class block_exaport_renderer extends plugin_renderer_base {
 
     /**
+     * Render the shared layout chooser for views and course view templates.
+     *
+     * @param int $selected Selected layout ID
+     * @return string HTML for the ten existing layouts
+     */
+    public function view_layout_selector(int $selected): string {
+        $html = html_writer::tag('p', get_string('chooselayout', 'block_exaport'));
+        $html .= html_writer::start_div('select_layout clearfix');
+        foreach (\block_exaport\view_layout::GROUPS as $columns => $layouts) {
+            $groupname = get_string('viewlayoutgroup' . $columns, 'block_exaport');
+            $html .= html_writer::empty_tag('hr', ['class' => 'cb']);
+            $html .= html_writer::div(html_writer::tag('strong', $groupname), 'fl columnoption');
+            foreach ($layouts as $id => $widths) {
+                $description = get_string('viewlayout' . $id, 'block_exaport');
+                $inputid = 'view-layout-' . $id;
+                $attributes = ['type' => 'radio', 'class' => 'radio', 'name' => 'layout', 'value' => $id,
+                    'id' => $inputid, 'aria-label' => $groupname . ' – ' . $description];
+                if ($selected === $id) {
+                    $attributes['checked'] = 'checked';
+                }
+                $html .= html_writer::start_div('fl layoutoptions');
+                $html .= html_writer::div(html_writer::empty_tag('input', $attributes), 'radiobutton');
+                $image = html_writer::empty_tag('img', ['src' => $this->image_url('vl-' . $widths, 'block_exaport'), 'alt' => '']);
+                $html .= html_writer::div(html_writer::label($image, $inputid), 'layoutimg');
+                $html .= html_writer::div(html_writer::label($description, $inputid), 'layoutdescription');
+                $html .= html_writer::end_div();
+            }
+        }
+        return $html . html_writer::end_div();
+    }
+
+    /**
+     * Render identical heading and text buttons for views and course view templates.
+     *
+     * @return string Toolbar button HTML
+     */
+    public function view_content_text_adders(): string {
+        $html = '';
+        foreach (
+            ['headline' => ['headertext', 'heading', 'solid', ''],
+                'text' => ['view_specialitem_text', 'file-lines', 'regular', 'edit']] as $type => $options
+        ) {
+            $label = block_exaport_get_string($options[0]);
+            $icon = block_exaport_fontawesome_icon(
+                $options[1],
+                $options[2],
+                3,
+                ['fa-border'],
+                action: $options[3],
+                iconContainerClasses: ['exaport-view-block-adder-icon']
+            );
+            $content = $icon . html_writer::tag('h4', $label, ['class' => 'blocktype-title js-hidden']) .
+                html_writer::div($label, 'blocktype-description js-hidden');
+            $html .= html_writer::tag(
+                'li',
+                html_writer::div(
+                    html_writer::link('#', $content),
+                    'blocktype',
+                    ['style' => 'position: relative;']
+                ),
+                ['class' => 'portfolioElement', 'block-type' => $type, 'id' => $type . '_adder', 'title' => $label,
+                'data-help' => block_exaport_get_string($options[0] . '_help')]
+            );
+        }
+        return $html;
+    }
+
+    /**
+     * Render the same block canvas for student views and course view templates.
+     *
+     * @param int $layout Layout ID
+     * @return string Content canvas HTML
+     */
+    public function view_content_canvas(int $layout): string {
+        $html = html_writer::start_div('view-middle');
+        $html .= html_writer::start_div('', ['id' => 'view-preview']);
+        $html .= html_writer::div(html_writer::div(block_exaport_fontawesome_icon('briefcase', 'solid', 1) .
+            get_string('viewdesign', 'block_exaport')), 'view-group-header');
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('table', ['class' => 'table_layout layout' . $layout]);
+        $html .= html_writer::start_tag('tr');
+        for ($column = 1; $column <= \block_exaport\view_layout::columns($layout); $column++) {
+            $html .= html_writer::tag(
+                'td',
+                html_writer::tag('ul', '', ['class' => 'portfolioDesignBlocks']),
+                ['class' => 'td' . $column]
+            );
+        }
+        $html .= html_writer::end_tag('tr') . html_writer::end_tag('table');
+        $html .= html_writer::end_div();
+        $html .= html_writer::end_div();
+        $html .= html_writer::div('<span>&nbsp;</span>', 'clear');
+        return $html . html_writer::end_div();
+    }
+
+    /**
      * in moodle33 pix_url was renamed to image_url
      */
     public function image_url($imagename, $component = 'moodle') {

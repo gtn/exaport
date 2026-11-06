@@ -559,12 +559,12 @@ function block_exaport_render_view_template_list($views, $url) {
         // Edit template layout and content.
         $editurl = new moodle_url(
             '/blocks/exaport/view_template_edit.php',
-            ['courseid' => $url->get_param('courseid'), 'id' => $view->id]
+            array('courseid' => $url->get_param('courseid'), 'id' => $view->id)
         );
         echo html_writer::link(
             $editurl,
             get_string('edit_view_template', 'block_exaport'),
-            ['class' => 'btn btn-sm btn-outline-primary']
+            array('class' => 'btn btn-sm btn-outline-primary')
         );
 
         // Rename.

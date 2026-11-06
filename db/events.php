@@ -9,10 +9,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $observers = array(
-    [
+    array(
         'eventname' => '\core\event\course_deleted',
         'callback' => '\block_exaport\observer::course_deleted',
-    ],
+    ),
     array(
         'eventname' => '\core\event\user_enrolment_created',
         'callback' => '\block_exaport\observer::user_enrolment_created',

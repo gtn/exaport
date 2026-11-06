@@ -156,7 +156,7 @@ class view_template {
 
         view_layout::columns($layout);
 
-        $view = $DB->get_record('block_exaport_view_templ', ['id' => $viewid]);
+        $view = $DB->get_record('block_exaport_view_templ', array('id' => $viewid));
         if (!$view) {
             return false;
         }
@@ -347,8 +347,8 @@ class view_template {
         global $DB;
 
         $transaction = $DB->start_delegated_transaction();
-        $DB->delete_records(self::BLOCKS_TABLE, ['templateid' => $viewid]);
-        $result = $DB->delete_records('block_exaport_view_templ', ['id' => $viewid]);
+        $DB->delete_records(self::BLOCKS_TABLE, array('templateid' => $viewid));
+        $result = $DB->delete_records('block_exaport_view_templ', array('id' => $viewid));
         $transaction->allow_commit();
         return $result;
     }

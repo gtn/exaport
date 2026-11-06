@@ -76,7 +76,7 @@ class blockedit {
      * @param bool $shownotify Whether to show view save and notification actions
      * @return string Action button HTML
      */
-    public static function action_buttons($add_type = 'add_text', bool $shownotify = true): string {
+    static function action_buttons($add_type = 'add_text', bool $shownotify = true): string {
         static $cssdone = false;
         $out = '';
         if (!$cssdone) {
@@ -297,7 +297,7 @@ class blockedit {
      * @param bool $shownotify Whether to show view save and notification actions
      * @return string Text-block form HTML
      */
-    public static function get_form_text($id, $blockdata = [], bool $shownotify = true) {
+    static function get_form_text($id, $blockdata = [], bool $shownotify = true) {
         global $CFG, $PAGE, $USER;
 
         if (isset($blockdata->text) && $blockdata->text) {
@@ -348,7 +348,7 @@ class blockedit {
      * @param bool $shownotify Whether to show view save and notification actions
      * @return string Heading-block form HTML
      */
-    public static function get_form_headline($id, $blockdata = [], bool $shownotify = true) {
+    static function get_form_headline($id, $blockdata = [], bool $shownotify = true) {
         $content = "";
         $content .= '<form id="blockform">';
         $content .= '<input type="hidden" name="item_id" value="' . $id . '">';

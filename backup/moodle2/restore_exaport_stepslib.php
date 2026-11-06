@@ -39,8 +39,10 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         // Define the paths for the data we want to restore.
         $paths[] = new restore_path_element('course_template', '/block/block_exaport/course_templates/course_template');
         $paths[] = new restore_path_element('view_template', '/block/block_exaport/view_templates/view_template');
-        $paths[] = new restore_path_element('template_block',
-            '/block/block_exaport/view_templates/view_template/template_blocks/template_block');
+        $paths[] = new restore_path_element(
+            'template_block',
+            '/block/block_exaport/view_templates/view_template/template_blocks/template_block'
+        );
         $paths[] = new restore_path_element('distribution_setting', '/block/block_exaport/distribution_settings/distribution_setting');
 
         return $paths;
@@ -105,7 +107,12 @@ class restore_exaport_block_structure_step extends restore_structure_step {
         $this->set_mapping('view_template', $oldid, $newid);
     }
 
-    /** Restore only supported template fields under the newly restored parent. */
+    /**
+     * Restore only supported template fields under the newly restored parent.
+     *
+     * @param array $data Backed-up block fields
+     * @return void
+     */
     protected function process_template_block($data) {
         global $DB;
         $templateid = $this->get_new_parentid('view_template');

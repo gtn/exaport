@@ -8,11 +8,19 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * Edit the starting layout and content of a course view template.
+ *
+ * @package block_exaport
+ * @copyright 2026 GTN - Global Training Network GmbH
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(__DIR__ . '/inc.php');
 
@@ -72,8 +80,10 @@ if ($type === 'content') {
     $PAGE->requires->css('/blocks/exaport/css/blocks.css');
     $PAGE->requires->css('/blocks/exaport/css/preloadinator.css');
     $strings = [];
-    foreach (['view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text',
-            'view_specialitem_text_defaulttext', 'configureblock_headline', 'configureblock_text', 'delete'] as $key) {
+    foreach (
+        ['view_specialitem_headline', 'view_specialitem_headline_defaulttext', 'view_specialitem_text',
+            'view_specialitem_text_defaulttext', 'configureblock_headline', 'configureblock_text', 'delete'] as $key
+    ) {
         $strings[$key] = get_string($key, 'block_exaport');
     }
     $PAGE->requires->js_call_amd('block_exaport/views', 'initialise', [context_course::instance($courseid)->id,
@@ -92,7 +102,8 @@ if ($type === 'layout') {
 } else {
     echo html_writer::tag('p', get_string('view_template_content_instructions', 'block_exaport'));
     echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'blocks', 'value' => json_encode(
-        \block_exaport\view_template::editor_blocks(\block_exaport\view_template::get_blocks($id)))]);
+        \block_exaport\view_template::editor_blocks(\block_exaport\view_template::get_blocks($id))
+    )]);
     echo html_writer::start_div('', ['id' => 'blocktype-list']);
     echo html_writer::start_tag('ul');
     echo $PAGE->get_renderer('block_exaport')->view_content_text_adders();
@@ -100,9 +111,16 @@ if ($type === 'layout') {
     echo $PAGE->get_renderer('block_exaport')->view_content_canvas((int)($template->layout ?? 2));
 }
 echo html_writer::start_div('text-end pt-3');
-echo html_writer::tag('button', get_string('save_view_template', 'block_exaport'), ['type' => 'submit', 'class' => 'btn btn-primary']);
-echo ' ' . html_writer::tag('button', get_string('cancel'),
-    ['type' => 'submit', 'name' => 'cancel', 'value' => 1, 'class' => 'btn btn-secondary']);
+echo html_writer::tag(
+    'button',
+    get_string('save_view_template', 'block_exaport'),
+    ['type' => 'submit', 'class' => 'btn btn-primary']
+);
+echo ' ' . html_writer::tag(
+    'button',
+    get_string('cancel'),
+    ['type' => 'submit', 'name' => 'cancel', 'value' => 1, 'class' => 'btn btn-secondary']
+);
 echo html_writer::end_div();
 echo html_writer::end_tag('form');
 echo block_exaport_wrapperdivend();

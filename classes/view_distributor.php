@@ -58,8 +58,15 @@ class view_distributor {
      * @param array $blocks Template blocks to copy into the new view
      * @return array ['created' => bool, 'viewid' => int]
      */
-    private static function create_view_if_not_exists($userid, $name, $description, $courseid = 0,
-            $share_to_teachers = false, $layout = null, array $blocks = []) {
+    private static function create_view_if_not_exists(
+        $userid,
+        $name,
+        $description,
+        $courseid = 0,
+        $share_to_teachers = false,
+        $layout = null,
+        array $blocks = []
+    ) {
         global $DB, $USER;
 
         // Check if exists.

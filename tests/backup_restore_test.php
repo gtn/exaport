@@ -23,10 +23,20 @@ final class backup_restore_test extends \advanced_testcase {
         ];
     }
 
-    /** @dataProvider course_backup_cases */
+    /**
+     * Preserve course configuration and template blocks through backup and restore.
+     *
+     * @param bool $includeusers Whether to include course users in the backup
+     * @param bool $additempayload Whether to include a historical personal-item payload
+     * @param bool $legacylayout Whether to simulate a backup without template layout and blocks
+     * @dataProvider course_backup_cases
+     */
     #[\PHPUnit\Framework\Attributes\DataProvider('course_backup_cases')]
-    public function test_course_backup_restores_only_course_configuration(bool $includeusers, bool $additempayload,
-            bool $legacylayout = false): void {
+    public function test_course_backup_restores_only_course_configuration(
+        bool $includeusers,
+        bool $additempayload,
+        bool $legacylayout = false
+    ): void {
         global $DB;
         $this->resetAfterTest();
         // Exercise the naming feature while user data and personal files exist in the source course.
@@ -148,7 +158,10 @@ final class backup_restore_test extends \advanced_testcase {
 
         if ($legacylayout) {
             $xml = file_get_contents($populatedxmlpath);
-            file_put_contents($populatedxmlpath, preg_replace('~<layout>.*?</layout>|<template_blocks>.*?</template_blocks>~s', '', $xml));
+            file_put_contents(
+                $populatedxmlpath,
+                preg_replace('~<layout>.*?</layout>|<template_blocks>.*?</template_blocks>~s', '', $xml)
+            );
         }
 
         $restore = new \restore_controller($tempname, $destination->id, \backup::INTERACTIVE_NO,

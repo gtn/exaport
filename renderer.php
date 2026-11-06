@@ -52,25 +52,48 @@ class block_exaport_renderer extends plugin_renderer_base {
         return $html . html_writer::end_div();
     }
 
-    /** Render identical heading and text buttons for views and course view templates. */
+    /**
+     * Render identical heading and text buttons for views and course view templates.
+     *
+     * @return string Toolbar button HTML
+     */
     public function view_content_text_adders(): string {
         $html = '';
-        foreach (['headline' => ['headertext', 'heading', 'solid', ''],
-                'text' => ['view_specialitem_text', 'file-lines', 'regular', 'edit']] as $type => $options) {
+        foreach (
+            ['headline' => ['headertext', 'heading', 'solid', ''],
+                'text' => ['view_specialitem_text', 'file-lines', 'regular', 'edit']] as $type => $options
+        ) {
             $label = block_exaport_get_string($options[0]);
-            $icon = block_exaport_fontawesome_icon($options[1], $options[2], 3, ['fa-border'],
-                action: $options[3], iconContainerClasses: ['exaport-view-block-adder-icon']);
+            $icon = block_exaport_fontawesome_icon(
+                $options[1],
+                $options[2],
+                3,
+                ['fa-border'],
+                action: $options[3],
+                iconContainerClasses: ['exaport-view-block-adder-icon']
+            );
             $content = $icon . html_writer::tag('h4', $label, ['class' => 'blocktype-title js-hidden']) .
                 html_writer::div($label, 'blocktype-description js-hidden');
-            $html .= html_writer::tag('li', html_writer::div(html_writer::link('#', $content), 'blocktype',
-                ['style' => 'position: relative;']),
+            $html .= html_writer::tag(
+                'li',
+                html_writer::div(
+                    html_writer::link('#', $content),
+                    'blocktype',
+                    ['style' => 'position: relative;']
+                ),
                 ['class' => 'portfolioElement', 'block-type' => $type, 'id' => $type . '_adder', 'title' => $label,
-                    'data-help' => block_exaport_get_string($options[0] . '_help')]);
+                'data-help' => block_exaport_get_string($options[0] . '_help')]
+            );
         }
         return $html;
     }
 
-    /** Render the same block canvas for student views and course view templates. */
+    /**
+     * Render the same block canvas for student views and course view templates.
+     *
+     * @param int $layout Layout ID
+     * @return string Content canvas HTML
+     */
     public function view_content_canvas(int $layout): string {
         $html = html_writer::start_div('view-middle');
         $html .= html_writer::start_div('', ['id' => 'view-preview']);
@@ -80,8 +103,11 @@ class block_exaport_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('table', ['class' => 'table_layout layout' . $layout]);
         $html .= html_writer::start_tag('tr');
         for ($column = 1; $column <= \block_exaport\view_layout::columns($layout); $column++) {
-            $html .= html_writer::tag('td', html_writer::tag('ul', '', ['class' => 'portfolioDesignBlocks']),
-                ['class' => 'td' . $column]);
+            $html .= html_writer::tag(
+                'td',
+                html_writer::tag('ul', '', ['class' => 'portfolioDesignBlocks']),
+                ['class' => 'td' . $column]
+            );
         }
         $html .= html_writer::end_tag('tr') . html_writer::end_tag('table');
         $html .= html_writer::end_div();

@@ -1599,8 +1599,16 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
     if ($oldversion < 2026110502) {
         $table = new xmldb_table('block_exaport_view_templ');
-        $field = new xmldb_field('layout', XMLDB_TYPE_INTEGER, '2', null,
-            null, null, null, 'share_to_teachers');
+        $field = new xmldb_field(
+            'layout',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            null,
+            null,
+            null,
+            'share_to_teachers'
+        );
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }

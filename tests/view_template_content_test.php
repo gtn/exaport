@@ -1,23 +1,51 @@
 <?php
 // This file is part of Exabis Eportfolio (extension for Moodle).
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
-/** Course template content becomes independent blocks in ordinary student views. */
+/**
+ * Course template content becomes independent blocks in ordinary student views.
+ *
+ * @package block_exaport
+ * @copyright 2026 GTN - Global Training Network GmbH
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 final class view_template_content_test extends \advanced_testcase {
-    /** Representative content in multiple columns, including a title and rich text. */
+    /**
+     * Build representative content in multiple columns, including a title and rich text.
+     *
+     * @return array Block records
+     */
     private function blocks(): array {
         return [
             (object)['type' => 'headline', 'text' => 'Learning goals', 'positionx' => 1, 'positiony' => 1],
-            (object)['type' => 'text', 'block_title' => 'Tasks & reflection', 'text' => '<p><strong>Describe</strong> your work.</p>',
+            (object)['type' => 'text', 'block_title' => 'Tasks & reflection',
+                'text' => '<p><strong>Describe</strong> your work.</p>',
                 'positionx' => 1, 'positiony' => 2],
             (object)['type' => 'headline', 'text' => 'Evidence', 'positionx' => 3, 'positiony' => 1],
         ];
     }
 
-    /** Build an editable course template, never a teacher-owned personal view. */
+    /**
+     * Build an editable course template.
+     *
+     * @return array Course record and template ID
+     */
     private function template(): array {
         $course = $this->getDataGenerator()->create_course();
         $id = view_template::add_view($course->id, 'Portfolio');
@@ -39,7 +67,10 @@ final class view_template_content_test extends \advanced_testcase {
 
         view_template::update_layout($id, 1);
         $blocks = view_template::get_blocks($id);
-        $this->assertSame(['Learning goals', '<p><strong>Describe</strong> your work.</p>', 'Evidence'], array_column($blocks, 'text'));
+        $this->assertSame(
+            ['Learning goals', '<p><strong>Describe</strong> your work.</p>', 'Evidence'],
+            array_column($blocks, 'text')
+        );
         $this->assertEquals([1, 1, 1], array_column($blocks, 'positionx'));
         $this->assertEquals([1, 2, 3], array_column($blocks, 'positiony'));
     }
@@ -75,8 +106,11 @@ final class view_template_content_test extends \advanced_testcase {
             ob_end_clean();
         }
         $newviewid = $DB->get_field('block_exaportview', 'id', ['userid' => $newstudent->id], MUST_EXIST);
-        $this->assertSame('Updated template', $DB->get_field('block_exaportviewblock', 'text',
-            ['viewid' => $newviewid, 'type' => 'headline', 'positionx' => 1]));
+        $this->assertSame('Updated template', $DB->get_field(
+            'block_exaportviewblock',
+            'text',
+            ['viewid' => $newviewid, 'type' => 'headline', 'positionx' => 1]
+        ));
         $this->assertSame(2, view_distributor::distribute_to_course($course->id)['skipped']);
         $this->assertSame('Student response', $DB->get_field('block_exaportviewblock', 'text', ['id' => $blocks[1]->id]));
 
@@ -89,9 +123,11 @@ final class view_template_content_test extends \advanced_testcase {
         $this->resetAfterTest();
         [$course, $id] = $this->template();
         $before = view_template::get_blocks($id);
-        foreach ([['type' => 'item', 'itemid' => 99], ['type' => 'text', 'positionx' => -1],
+        foreach (
+            [['type' => 'item', 'itemid' => 99], ['type' => 'text', 'positionx' => -1],
                 ['type' => 'text', 'block_title' => str_repeat('x', 1001)],
-                ['type' => 'text', 'text' => '<img src="@@PLUGINFILE@@/private.png">']] as $invalid) {
+                ['type' => 'text', 'text' => '<img src="@@PLUGINFILE@@/private.png">']] as $invalid
+        ) {
             try {
                 view_template::save_blocks($id, array_merge($this->blocks(), [$invalid]));
                 $this->fail('Invalid template content must be rejected before replacing any blocks.');
@@ -164,8 +200,12 @@ final class view_template_content_test extends \advanced_testcase {
             ['name' => 'type_block', 'value' => 'headline'],
             ['name' => 'block', 'value' => json_encode(['text' => 'Draft heading'])],
         ];
-        $fragment = \core_external::get_fragment('block_exaport', 'view_template_blockedit',
-            \context_course::instance($course->id)->id, $args);
+        $fragment = \core_external::get_fragment(
+            'block_exaport',
+            'view_template_blockedit',
+            \context_course::instance($course->id)->id,
+            $args
+        );
         $this->assertStringContainsString('value="Draft heading"', $fragment['html']);
         $this->assertStringNotContainsString('submit_block_and_notify', $fragment['html']);
         $this->assertSame('Learning goals', view_template::get_blocks($id)[0]->text);
@@ -186,11 +226,15 @@ final class view_template_content_test extends \advanced_testcase {
         $this->setUser($student);
         require_once($CFG->libdir . '/external/externallib.php');
         $this->expectException(\required_capability_exception::class);
-        \core_external::get_fragment('block_exaport', 'view_template_blockedit',
-            \context_course::instance($course->id)->id, [
+        \core_external::get_fragment(
+            'block_exaport',
+            'view_template_blockedit',
+            \context_course::instance($course->id)->id,
+            [
                 ['name' => 'courseid', 'value' => (string)$course->id],
                 ['name' => 'templateid', 'value' => (string)$id],
                 ['name' => 'type_block', 'value' => 'headline'],
-            ]);
+            ]
+        );
     }
 }

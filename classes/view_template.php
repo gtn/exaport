@@ -25,7 +25,11 @@ defined('MOODLE_INTERNAL') || die();
  * Handles view template creation, loading, saving, and manipulation
  */
 class view_template {
-    /** Course-owned heading and text blocks, separate from personal view blocks. */
+    /**
+     * Table containing course-owned heading and text blocks.
+     *
+     * @var string
+     */
     public const BLOCKS_TABLE = 'block_exaport_templ_block';
 
     /**
@@ -152,7 +156,7 @@ class view_template {
 
         view_layout::columns($layout);
 
-        $view = $DB->get_record('block_exaport_view_templ', array('id' => $viewid));
+        $view = $DB->get_record('block_exaport_view_templ', ['id' => $viewid]);
         if (!$view) {
             return false;
         }
@@ -167,21 +171,38 @@ class view_template {
         return true;
     }
 
-    /** Return the template's blocks in their display order. */
+    /**
+     * Return the template's blocks in their display order.
+     *
+     * @param int $templateid View template ID
+     * @return \stdClass[] Stored block records
+     */
     public static function get_blocks(int $templateid): array {
         global $DB;
-        return array_values($DB->get_records(self::BLOCKS_TABLE, ['templateid' => $templateid],
-            'positionx, positiony, id'));
+        return array_values($DB->get_records(
+            self::BLOCKS_TABLE,
+            ['templateid' => $templateid],
+            'positionx, positiony, id'
+        ));
     }
 
-    /** Validate the editor's block list and keep only fields supported by templates. */
+    /**
+     * Validate the editor's block list and keep only fields supported by templates.
+     *
+     * @param array $blocks Block records supplied as arrays or objects
+     * @param int $layout Layout ID
+     * @return \stdClass[] Validated block records with consistent positions
+     */
     public static function normalise_blocks(array $blocks, int $layout): array {
         $columns = view_layout::columns($layout);
         $records = [];
         foreach ($blocks as $block) {
             $block = (array)$block;
-            if (!in_array($block['type'] ?? '', ['headline', 'text'], true) ||
-                    !is_string($block['text'] ?? '') || !is_string($block['block_title'] ?? '')) {
+            if (
+                !in_array($block['type'] ?? '', ['headline', 'text'], true) ||
+                !is_string($block['text'] ?? '') ||
+                !is_string($block['block_title'] ?? '')
+            ) {
                 throw new \invalid_parameter_exception('Invalid template block.');
             }
             $record = (object)[
@@ -192,8 +213,12 @@ class view_template {
                 'positionx' => filter_var($block['positionx'] ?? 1, FILTER_VALIDATE_INT),
                 'positiony' => filter_var($block['positiony'] ?? 1, FILTER_VALIDATE_INT),
             ];
-            if ($record->positionx < 1 || $record->positionx > 5 || $record->positiony < 1 ||
-                    \core_text::strlen($record->block_title) > 1000) {
+            if (
+                $record->positionx < 1 ||
+                $record->positionx > 5 ||
+                $record->positiony < 1 ||
+                \core_text::strlen($record->block_title) > 1000
+            ) {
                 throw new \invalid_parameter_exception('Invalid template block position or title.');
             }
             if (preg_match('~@@PLUGINFILE@@|(?:src|href)\s*=\s*["\'][^"\']*(?:draftfile|pluginfile)\.php~i', $record->text)) {
@@ -201,7 +226,7 @@ class view_template {
             }
             $records[] = $record;
         }
-        usort($records, static function($a, $b) {
+        usort($records, static function ($a, $b) {
             return [$a->positionx, $a->positiony] <=> [$b->positionx, $b->positiony];
         });
         $positions = [];
@@ -212,9 +237,14 @@ class view_template {
         return $records;
     }
 
-    /** Supply the existing editor's presentation fields without storing them. */
+    /**
+     * Supply the existing editor's presentation fields without storing them.
+     *
+     * @param array $blocks Block records supplied as arrays or objects
+     * @return \stdClass[] Copies containing the formatted preview text
+     */
     public static function editor_blocks(array $blocks): array {
-        return array_map(static function($block) {
+        return array_map(static function ($block) {
             $block = (object)$block;
             $block = clone $block;
             $block->print_text = $block->type === 'headline' ? s($block->text) :
@@ -223,7 +253,13 @@ class view_template {
         }, $blocks);
     }
 
-    /** Save the complete validated block list atomically. */
+    /**
+     * Save the complete validated block list atomically.
+     *
+     * @param int $templateid View template ID
+     * @param array $blocks Complete block list
+     * @return void
+     */
     public static function save_blocks(int $templateid, array $blocks): void {
         global $DB;
         $template = $DB->get_record('block_exaport_view_templ', ['id' => $templateid], '*', MUST_EXIST);
@@ -312,17 +348,25 @@ class view_template {
 
         $transaction = $DB->start_delegated_transaction();
         $DB->delete_records(self::BLOCKS_TABLE, ['templateid' => $viewid]);
-        $result = $DB->delete_records('block_exaport_view_templ', array('id' => $viewid));
+        $result = $DB->delete_records('block_exaport_view_templ', ['id' => $viewid]);
         $transaction->allow_commit();
         return $result;
     }
 
-    /** Delete the course's view templates together with their blocks. */
+    /**
+     * Delete the course's view templates together with their blocks.
+     *
+     * @param int $courseid Course ID
+     * @return void
+     */
     public static function clear_course_template(int $courseid): void {
         global $DB;
         $transaction = $DB->start_delegated_transaction();
-        $DB->delete_records_select(self::BLOCKS_TABLE,
-            'templateid IN (SELECT id FROM {block_exaport_view_templ} WHERE courseid = ?)', [$courseid]);
+        $DB->delete_records_select(
+            self::BLOCKS_TABLE,
+            'templateid IN (SELECT id FROM {block_exaport_view_templ} WHERE courseid = ?)',
+            [$courseid]
+        );
         $DB->delete_records('block_exaport_view_templ', ['courseid' => $courseid]);
         $transaction->allow_commit();
     }

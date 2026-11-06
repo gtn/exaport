@@ -69,7 +69,14 @@ class blockedit {
         ];
     }
 
-    static function action_buttons($add_type = 'add_text', bool $shownotify = true): string {
+    /**
+     * Render actions for a view block or a template draft block.
+     *
+     * @param string $add_type Submit button ID
+     * @param bool $shownotify Whether to show view save and notification actions
+     * @return string Action button HTML
+     */
+    public static function action_buttons($add_type = 'add_text', bool $shownotify = true): string {
         static $cssdone = false;
         $out = '';
         if (!$cssdone) {
@@ -83,7 +90,9 @@ class blockedit {
             '<div class="btn-toolbar" role="group" aria-label="Actions">' .
             '<button type="submit" id="' . $add_type . '" name="submit_block" class="btn btn-primary">' .
                 get_string($shownotify ? 'saveViewButton' : 'apply_view_template_block', 'block_exaport') . '</button>' .
-            ($shownotify ? '<button type="submit" id="' . $add_type . '_notify" name="submit_block_and_notify" class="btn btn-primary">' . get_string('saveAndNotifyButton', 'block_exaport') . '</button>' : '') .
+            ($shownotify ? '<button type="submit" id="' . $add_type .
+                '_notify" name="submit_block_and_notify" class="btn btn-primary">' .
+                get_string('saveAndNotifyButton', 'block_exaport') . '</button>' : '') .
             '<button type="button" id="cancel_list" name="cancel" class="btn btn-secondary">' . get_string('cancelButton', 'block_exaport') . '</button>' .
             '</div></td></tr>';
         return $out;
@@ -280,7 +289,15 @@ class blockedit {
         return $content;
     }
 
-    static function get_form_text($id, $blockdata = [], bool $shownotify = true) {
+    /**
+     * Render the text-block edit form using saved or draft content.
+     *
+     * @param int $id Block ID, or zero for draft content
+     * @param object|array $blockdata Block content
+     * @param bool $shownotify Whether to show view save and notification actions
+     * @return string Text-block form HTML
+     */
+    public static function get_form_text($id, $blockdata = [], bool $shownotify = true) {
         global $CFG, $PAGE, $USER;
 
         if (isset($blockdata->text) && $blockdata->text) {
@@ -323,7 +340,15 @@ class blockedit {
         return $content;
     }
 
-    static function get_form_headline($id, $blockdata = [], bool $shownotify = true) {
+    /**
+     * Render the heading-block edit form using saved or draft content.
+     *
+     * @param int $id Block ID, or zero for draft content
+     * @param object|array $blockdata Block content
+     * @param bool $shownotify Whether to show view save and notification actions
+     * @return string Heading-block form HTML
+     */
+    public static function get_form_headline($id, $blockdata = [], bool $shownotify = true) {
         $content = "";
         $content .= '<form id="blockform">';
         $content .= '<input type="hidden" name="item_id" value="' . $id . '">';

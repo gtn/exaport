@@ -471,11 +471,14 @@ function block_exaport_user_preferences(): array {
 
 /**
  * Fragment callback for editing the working copy of a course template block.
+ *
+ * @param array $args Fragment arguments including the validated course context
+ * @return string Block edit form HTML
  */
 function block_exaport_output_fragment_view_template_blockedit($args) {
     global $CFG, $DB;
     $courseid = clean_param($args['courseid'] ?? 0, PARAM_INT);
-    // core_get_fragment has already authenticated this context and initialised the page theme.
+    // Moodle's core_get_fragment has already authenticated this context and initialised the page theme.
     block_exaport_require_login(null);
     $context = $args['context'] ?? null;
     if (!$context instanceof context_course || (int)$context->instanceid !== $courseid) {
@@ -485,8 +488,12 @@ function block_exaport_output_fragment_view_template_blockedit($args) {
     if (empty($CFG->block_exaport_enable_category_distribution)) {
         throw new moodle_exception('areaisdisabled', 'block_exaport');
     }
-    $template = $DB->get_record('block_exaport_view_templ',
-        ['id' => clean_param($args['templateid'] ?? 0, PARAM_INT), 'courseid' => $courseid], '*', MUST_EXIST);
+    $template = $DB->get_record(
+        'block_exaport_view_templ',
+        ['id' => clean_param($args['templateid'] ?? 0, PARAM_INT), 'courseid' => $courseid],
+        '*',
+        MUST_EXIST
+    );
     $block = json_decode($args['block'] ?? '{}', true);
     if (!is_array($block)) {
         throw new invalid_parameter_exception('Invalid template block.');
@@ -497,8 +504,10 @@ function block_exaport_output_fragment_view_template_blockedit($args) {
         return blockedit::get_form_headline(0, $block, false);
     }
     $html = blockedit::get_form_text(0, $block, false);
-    editors_get_preferred_editor(FORMAT_HTML)->use_editor('id_block_text',
-        ['maxfiles' => 0, 'context' => $context, 'autosave' => false]);
+    editors_get_preferred_editor(FORMAT_HTML)->use_editor(
+        'id_block_text',
+        ['maxfiles' => 0, 'context' => $context, 'autosave' => false]
+    );
     return $html;
 }
 

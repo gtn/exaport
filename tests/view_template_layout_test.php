@@ -1,13 +1,36 @@
 <?php
 // This file is part of Exabis Eportfolio (extension for Moodle).
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace block_exaport;
 
 defined('MOODLE_INTERNAL') || die();
 
-/** Layout defaults and distribution use the ordinary, editable portfolio views. */
+/**
+ * Layout defaults and distribution use ordinary, editable portfolio views.
+ *
+ * @package block_exaport
+ * @copyright 2026 GTN - Global Training Network GmbH
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 final class view_template_layout_test extends \advanced_testcase {
-    /** Default and all layouts offered by the existing view editor. */
+    /**
+     * Provide the default and all layouts offered by the existing view editor.
+     *
+     * @return array Layout inputs and expected distributed layouts
+     */
     public static function layout_cases(): array {
         $cases = ['unset' => [null, 2]];
         foreach (range(1, 10) as $layout) {
@@ -16,7 +39,13 @@ final class view_template_layout_test extends \advanced_testcase {
         return $cases;
     }
 
-    /** @dataProvider layout_cases */
+    /**
+     * Distribute the default or selected template layout.
+     *
+     * @param int|null $layout Selected layout, or null for the default
+     * @param int $expected Expected distributed layout
+     * @dataProvider layout_cases
+     */
     #[\PHPUnit\Framework\Attributes\DataProvider('layout_cases')]
     public function test_distribution_uses_optional_template_layout(?int $layout, int $expected): void {
         global $DB;

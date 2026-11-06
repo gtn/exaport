@@ -94,18 +94,8 @@ if ($type === 'layout') {
     echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'blocks', 'value' => json_encode(
         \block_exaport\view_template::editor_blocks(\block_exaport\view_template::get_blocks($id)))]);
     echo html_writer::start_div('', ['id' => 'blocktype-list']);
-    echo html_writer::start_tag('ul', ['class' => 'portfolioOptions']);
-    foreach (['headline' => ['headertext', 'heading', 'solid', ''],
-            'text' => ['view_specialitem_text', 'file-lines', 'regular', 'edit']] as $blocktype => $options) {
-        $label = get_string($options[0], 'block_exaport');
-        echo html_writer::tag('li', html_writer::div(html_writer::link('#',
-            block_exaport_fontawesome_icon($options[1], $options[2], 3, ['fa-border'],
-                action: $options[3], iconContainerClasses: ['exaport-view-block-adder-icon']) .
-            html_writer::tag('h4', $label, ['class' => 'blocktype-title js-hidden']) .
-            html_writer::div($label, 'blocktype-description js-hidden')), 'blocktype', ['style' => 'position: relative;']),
-            ['class' => 'portfolioElement', 'block-type' => $blocktype, 'id' => $blocktype . '_adder', 'title' => $label,
-                'data-help' => get_string($options[0] . '_help', 'block_exaport')]);
-    }
+    echo html_writer::start_tag('ul');
+    echo $PAGE->get_renderer('block_exaport')->view_content_text_adders();
     echo html_writer::end_tag('ul') . html_writer::end_div();
     echo $PAGE->get_renderer('block_exaport')->view_content_canvas((int)($template->layout ?? 2));
 }

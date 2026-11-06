@@ -996,28 +996,7 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
             <div class="blocktype-description js-hidden">' . block_exaport_get_string('cvinformation') . '</div>
         </a></div>
     </li>';
-        echo '
-    <li class="portfolioElement" title="' . block_exaport_get_string('headertext') . '" block-type="headline"
-        id="headline_adder"
-        data-help="' . block_exaport_get_string('headertext_help') . '" >
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            . block_exaport_fontawesome_icon('heading', 'solid', 3, ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-            //            .block_exaport_fontawesome_icon('grip-lines', 'solid', '3', ['fa-border'], [], [], '', [], [], [], ['exaport-view-block-adder-icon'])
-            //            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/header_text.png" />'
-            . '<h4 class="blocktype-title js-hidden">' . block_exaport_get_string('headertext') . '</h4>
-            <div class="blocktype-description js-hidden">' . block_exaport_get_string('headertext') . '</div>
-        </a></div>
-    </li>
-    <li class="portfolioElement" title="' . block_exaport_get_string('view_specialitem_text') . '" block-type="text"
-        id="text_adder"
-        data-help="' . block_exaport_get_string('view_specialitem_text_help') . '" >
-        <div class="blocktype" style="position: relative;"><a href="#">'
-            . block_exaport_fontawesome_icon('file-lines', 'regular', 3, ['fa-border'], [], [], 'edit', [], [], [], ['exaport-view-block-adder-icon'])
-            //            .'<img width="73" height="61" alt="Preview" src="'.$CFG->wwwroot.'/blocks/exaport/pix/text.png" />'
-            . '<h4 class="blocktype-title js-hidden">' . block_exaport_get_string('view_specialitem_text') . '</h4>
-            <div class="blocktype-description js-hidden">' . block_exaport_get_string('view_specialitem_text') . '</div>
-        </a></div>
-    </li>';
+        echo $PAGE->get_renderer('block_exaport')->view_content_text_adders();
         echo '
     <li class="portfolioElement" title="' . block_exaport_get_string('items') . '" block-type="item"
         id="item_adder"

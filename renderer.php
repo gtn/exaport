@@ -52,6 +52,24 @@ class block_exaport_renderer extends plugin_renderer_base {
         return $html . html_writer::end_div();
     }
 
+    /** Render identical heading and text buttons for views and course view templates. */
+    public function view_content_text_adders(): string {
+        $html = '';
+        foreach (['headline' => ['headertext', 'heading', 'solid', ''],
+                'text' => ['view_specialitem_text', 'file-lines', 'regular', 'edit']] as $type => $options) {
+            $label = block_exaport_get_string($options[0]);
+            $icon = block_exaport_fontawesome_icon($options[1], $options[2], 3, ['fa-border'],
+                action: $options[3], iconContainerClasses: ['exaport-view-block-adder-icon']);
+            $content = $icon . html_writer::tag('h4', $label, ['class' => 'blocktype-title js-hidden']) .
+                html_writer::div($label, 'blocktype-description js-hidden');
+            $html .= html_writer::tag('li', html_writer::div(html_writer::link('#', $content), 'blocktype',
+                ['style' => 'position: relative;']),
+                ['class' => 'portfolioElement', 'block-type' => $type, 'id' => $type . '_adder', 'title' => $label,
+                    'data-help' => block_exaport_get_string($options[0] . '_help')]);
+        }
+        return $html;
+    }
+
     /** Render the same block canvas for student views and course view templates. */
     public function view_content_canvas(int $layout): string {
         $html = html_writer::start_div('view-middle');

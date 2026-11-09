@@ -114,11 +114,7 @@ if ($itemid) {
 
 
     if ($commentid = optional_param('commentid', 0, PARAM_INT)) {
-        $comment = $DB->get_record("block_exaportitemcomm", ['itemid' => $item->id, 'id' => $commentid]);
-        if (!$comment) {
-            not_found();
-        }
-        $file = block_exaport_get_item_comment_file($comment->id);
+        $file = block_exaport_get_authorized_item_comment_file($item, $commentid);
 
     } else {
         $files = block_exaport_get_item_structured_files($item);

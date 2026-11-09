@@ -354,6 +354,27 @@ function block_exaport_get_item_comment_file($commentid) {
 }
 
 /**
+ * Resolve an attachment belonging to a visible comment on an authorised item.
+ *
+ * @param stdClass $item Already-authorised item, with sharing visibility when applicable.
+ * @param int $commentid Comment whose attachment is requested.
+ * @return stored_file|false Authorised attachment, or false when unavailable.
+ */
+function block_exaport_get_authorized_item_comment_file(stdClass $item, int $commentid) {
+    global $DB;
+
+    // Match the shared page, including legacy null/zero visibility values. Owner and
+    // service-token downloads without sharing decoration retain their authorised access.
+    if (property_exists($item, 'showComments') && !$item->showComments) {
+        return false;
+    }
+    if (!$DB->record_exists('block_exaportitemcomm', ['id' => $commentid, 'itemid' => $item->id])) {
+        return false;
+    }
+    return block_exaport_get_item_comment_file($commentid) ?: false;
+}
+
+/**
  * wrote own function, so eclipse knows which type the output renderer is
  *
  * @return block_exaport_renderer

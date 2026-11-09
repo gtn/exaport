@@ -192,7 +192,7 @@ namespace {
         }
     }
 
-    function block_exaport_get_view_from_access($access, $pdfaccess = false, $pdfforuserid = 0) {
+    function block_exaport_get_view_from_access($access) {
         global $USER, $DB;
 
         if (!block_exaport_feature_enabled('views')) {
@@ -244,9 +244,7 @@ namespace {
             // Guest not allowed.
             // require exaport:use -> guest hasn't this right.
             $context = context_system::instance();
-            if (!$pdfaccess) {
-                require_capability('block/exaport:use', $context);
-            }
+            require_capability('block/exaport:use', $context);
             // Groups for user.
             $usergroups = block_exaport_sharegroups_enabled() ? block_exaport_get_user_cohorts() : [];
 
@@ -257,13 +255,8 @@ namespace {
                 return;
             }
 
-            if ($pdfaccess && $pdfforuserid > 0) {
-                $userid = $pdfforuserid;
-                $myuserid = $pdfforuserid;
-            } else {
-                $userid = clean_param($hash[0], PARAM_INT);
-                $myuserid = $USER->id;
-            }
+            $userid = clean_param($hash[0], PARAM_INT);
+            $myuserid = $USER->id;
             $viewid = clean_param($hash[1], PARAM_INT);
 
             $tempjoin = '';
@@ -524,7 +517,7 @@ namespace {
         }
     }
 
-    function block_exaport_get_item($itemid, $access, $epopaccess = false, $pdfaccess = false, $pdfforuserid = 0) {
+    function block_exaport_get_item($itemid, $access, $epopaccess = false) {
         global $CFG, $USER, $DB;
 
         $itemid = clean_param($itemid, PARAM_INT);
@@ -532,8 +525,8 @@ namespace {
         $item = null;
         if (preg_match('!^view/(.+)$!', $access, $matches)) {
             // In view mode.
-            if (!$view = block_exaport_get_view_from_access($matches[1], $pdfaccess, $pdfforuserid)) {
-                throw new \block_exacomp\permission_exception("viewnotfound", "block_exaport");
+            if (!$view = block_exaport_get_view_from_access($matches[1])) {
+                return false;
             }
             // Parameter richtig?!
             if (strcmp($CFG->dbtype, "sqlsrv") == 0) {

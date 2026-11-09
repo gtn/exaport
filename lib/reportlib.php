@@ -368,13 +368,14 @@ class ExaportVievPdf {
                             '/blockid/' . $contentblock['blockid'];
                         $textcontent = preg_replace_callback(
                             '~@@PLUGINFILE@@(/[^"\'<>\s]+)~',
-                            function($matches) use ($CFG, $textfilebase, $view, $USER) {
+                            function($matches) use ($CFG, $textfilebase) {
+                                require_once(__DIR__ . '/pdf_helpers.php');
                                 $fileurl = file_encode_url(
                                     $CFG->wwwroot . '/pluginfile.php',
                                     $textfilebase . $matches[1],
                                     false
                                 );
-                                return $fileurl . '/forPdf/' . $view->hash . '/' . $view->id . '/' . $USER->id;
+                                return block_exaport_pdf_image_data_url($fileurl) ?: $fileurl;
                             },
                             $contentblock['content']
                         );

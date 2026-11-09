@@ -17,6 +17,8 @@
 
 require_once(__DIR__ . '/inc.php');
 
+require_login(0, true);
+
 /**
  * Sends a static thumbnail fallback file and exits.
  *
@@ -36,23 +38,11 @@ $access = optional_param('access', '', PARAM_TEXT);
 // sometimes for artifacts with multiple images
 $imageindex = optional_param('imindex', '', PARAM_INT);
 
-$ispdf = optional_param('ispdf', 0, PARAM_INT);
-$is_for_pdf = false;
-$pdfuserid = 0;
-if ($ispdf) {
-    $vhash = optional_param('vhash', 0, PARAM_RAW);
-    $vid = optional_param('vid', 0, PARAM_INT);
-    $pdfuserid = optional_param('uid', 0, PARAM_INT);
-    $view = $DB->get_record('block_exaportview', ['id' => $vid]);
-    if ($view && $view->hash == $vhash && $pdfuserid > 0) {
-        $is_for_pdf = true;
-    }
-}
-
 $item = null;
 
 // Thumbnails for BackEnd (editing the view part).
 if ($access == '') {
+    require_capability('block/exaport:use', context_system::instance());
     if ($sharable = block_exaport_can_user_access_shared_item($USER->id, $itemid)) {
         // Get thumbnails if item was shared for current user.
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
@@ -61,19 +51,8 @@ if ($access == '') {
         $item = $DB->get_record('block_exaportitem', array('id' => $itemid, 'userid' => $USER->id));
     }
 } else {
-    // Checking access to item by access to view.
-    if (!$view = block_exaport_get_view_from_access($access, $is_for_pdf, $pdfuserid)) {
-        die("view not found");
-    }
-    $viewownerid = $view->userid;
-    $item = $DB->get_record('block_exaportitem', array('id' => $itemid));
-    if (empty($item)) {
-        throw new moodle_exception('filenotfound', 'error');
-    }
-    $sharable = block_exaport_can_user_access_shared_item($viewownerid, $itemid);
-    if ($viewownerid != $item->userid && !$sharable) {
-        throw new moodle_exception('filenotfound', 'error');
-    }
+    // A collection grant covers its selected items, not all of its owner's images.
+    $item = block_exaport_get_item($itemid, 'view/' . $access);
 }
 if (empty($item)) {
     throw new moodle_exception('filenotfound', 'error');

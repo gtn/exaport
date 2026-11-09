@@ -119,9 +119,9 @@ final class item_legacy_write_removal_test extends \advanced_testcase {
         );
         $this->assertStringContainsString("case 'item_file':", $pluginfile);
         $this->assertStringContainsString(
-            'block_exaport_get_item($id, $access, false, $is_for_pdf, $pdfforuserid)',
+            'block_exaport_get_item($id, $access)',
             $pluginfile
         );
-        $this->assertStringContainsString('send_stored_file($file)', $pluginfile);
+        $this->assertStringContainsString('send_stored_file($file,', $pluginfile);
     }
 }

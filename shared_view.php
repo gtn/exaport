@@ -1123,7 +1123,7 @@ echo $general_content;
  * @return mixed
  */
 function prependHtmlContentToPdf($content, $view) {
-    global $USER;
+    require_once(__DIR__ . '/lib/pdf_helpers.php');
 
     $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
 
@@ -1151,17 +1151,18 @@ function prependHtmlContentToPdf($content, $view) {
         $p->parentNode->replaceChild($span, $p);
     }*/
 
-    // To see moodle images/files we need to have additional parameters in src url
-    // without this parameters Moodle asks to be logged in, but PDF generator is not
+    // Embed protected images while this request still has the viewer's permissions.
+    // Dompdf must not need special URLs that bypass Moodle authentication.
     $xpath = new DOMXPath($doc);
     // Find all <img> tags with 'src' containing 'pluginfile.php' (only our Moodle urls)
     $imgTags = $xpath->query('//img[contains(@src, "pluginfile.php")][contains(@src, "block_exaport")]'); // check these conditions
     foreach ($imgTags as $img) {
         $src = $img->getAttribute('src');
-        // Additional check if 'src' contains 'pluginfile.php'
-        if (strpos($src, 'pluginfile.php') !== false) {
-            $newSrc = $src . '/forPdf/' . $view->hash . '/' . $view->id . '/' . $USER->id;
-            $img->setAttribute('src', $newSrc);
+        $dataurl = block_exaport_pdf_image_data_url($src);
+        if ($dataurl !== '') {
+            $img->setAttribute('src', $dataurl);
+        } else {
+            $img->parentNode->removeChild($img);
         }
     }
 

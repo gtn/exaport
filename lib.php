@@ -34,31 +34,45 @@ use function block_exaport\common\print_error;
 // itemid
 // file name.
 function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
-    global $USER, $CFG, $DB;
-
-    $is_for_pdf = false;
-    $pdfforuserid = 0;
-
-    if ($p = array_search('forPdf', $args)) {
-        // added to link of the file: /forPdf/--hash--/--viewid--/--curruserid--
-        $pdfforuserid = array_pop($args);
-        $viewid = array_pop($args);
-        $pdf_hash = array_pop($args);
-        $view = $DB->get_record('block_exaportview', ['id' => $viewid]);
-        if ($view && $view->hash == $pdf_hash) {
-            $is_for_pdf = true;
-        }
-        unset($args[$p]);
+    $file = block_exaport_get_authorized_file($context, $filearea, $args);
+    if (!$file || $file->is_directory()) {
+        return false;
     }
 
-    if (!$is_for_pdf && $filearea != 'pdf_fontfamily') {
-        // Always require login, at least guest.
-        require_login();
+    $lifetime = in_array($filearea, ['category_icon', 'item_content_linked'], true) ? 0 : null;
+    if (in_array($filearea, [
+            'item_content_linked', 'item_content_file', 'item_content_text', 'item_file', 'item_iconfile',
+    ], true)) {
+        // Keep HTML sanitising and Moodle's download options at the delivery boundary.
+        block_exaport_send_item_file($file, $lifetime, $forcedownload, $options);
     } else {
-        // Login is not required if it is for PDF generation (accessible only from php).
-        // Also if it is for getting custom .ttf font file
+        send_stored_file($file, $lifetime, 0, $forcedownload, $options);
+    }
+}
+
+/**
+ * Resolve a file using the same permissions for HTTP delivery and PDF images.
+ *
+ * Returning the stored file lets PDF exports embed its bytes without creating
+ * URLs that bypass login or accepting a viewer identity from the request.
+ *
+ * @param context $context Context from the pluginfile URL.
+ * @param string $filearea Exaport file area.
+ * @param array $args Decoded URL arguments following the file area.
+ * @return stored_file|false Authorised file, or false when unavailable.
+ */
+function block_exaport_get_authorized_file(context $context, string $filearea, array $args) {
+    global $USER, $DB;
+
+    // Reject obsolete PDF URLs, including those carrying another collection's hash.
+    if (in_array('forPdf', $args, true)) {
+        return false;
+    }
+    if ($filearea !== 'pdf_fontfamily') {
+        require_login();
     }
 
+    $viewuser = 0;
     switch ($filearea) {
         case 'item_content_linked':
             $parsed = block_exaport_parse_item_content_file_args($args);
@@ -74,7 +88,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (preg_match('~^webservice/(\d+)$~', $parsed['access'], $ownermatches)) {
                 $item = block_exaport_get_item_for_webservice($parsed['itemid'], (int)$ownermatches[1], (int)$USER->id);
             } else if ($parsed['access'] !== '') {
-                $item = block_exaport_get_item($parsed['itemid'], $parsed['access'], false, $is_for_pdf, $pdfforuserid);
+                $item = block_exaport_get_item($parsed['itemid'], $parsed['access']);
             } else {
                 $item = $DB->get_record('block_exaportitem', ['id' => $parsed['itemid']]);
                 if (!$item || ((int)$item->userid !== (int)$USER->id &&
@@ -92,8 +106,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (!$file || $file->get_filename() !== $parsed['filename']) {
                 return false;
             }
-            block_exaport_send_item_file($file, 0, $forcedownload, $options);
-            break;
+            return $file;
         case 'item_content_file':
             $parsed = block_exaport_parse_item_content_file_args($args);
             if (!$parsed) {
@@ -110,7 +123,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (preg_match('~^webservice/(\d+)$~', $access, $matches)) {
                 $item = block_exaport_get_item_for_webservice($itemid, (int)$matches[1], (int)$USER->id);
             } else if ($access !== '') {
-                $item = block_exaport_get_item($itemid, $access, false, $is_for_pdf, $pdfforuserid);
+                $item = block_exaport_get_item($itemid, $access);
             } else {
                 $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
                 $sharedownerid = $item ? block_exaport_can_user_access_shared_item($USER->id, $itemid) : false;
@@ -133,8 +146,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (!$file || $file->is_directory()) {
                 return false;
             }
-            block_exaport_send_item_file($file, null, $forcedownload, $options);
-            break;
+            return $file;
         case 'item_content_text':
             $itemmarker = array_search('itemid', $args, true);
             $blockmarker = array_search('blockid', $args, true);
@@ -161,7 +173,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             $filepath = '/' . ($args ? join('/', $args) . '/' : '');
 
             if ($access !== '') {
-                $item = $block ? block_exaport_get_item($itemid, $access, false, $is_for_pdf, $pdfforuserid) : false;
+                $item = $block ? block_exaport_get_item($itemid, $access) : false;
             } else {
                 $item = $block ? $DB->get_record('block_exaportitem', ['id' => $itemid]) : false;
                 $sharedownerid = $item ? block_exaport_can_user_access_shared_item($USER->id, $itemid) : false;
@@ -183,8 +195,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             if (!$file || $file->is_directory()) {
                 return false;
             }
-            block_exaport_send_item_file($file, null, $forcedownload, $options);
-            break;
+            return $file;
         case 'item_file':
         case 'item_iconfile':
             $filename = array_pop($args);
@@ -196,7 +207,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             $access = join('/', $args);
 
             // Item exists?
-            $item = block_exaport_get_item($id, $access, false, $is_for_pdf, $pdfforuserid);
+            $item = block_exaport_get_item($id, $access);
             if (!$item) {
                 print_error('Item not found');
             }
@@ -205,13 +216,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
-            // Serve file.
-            if ($file) {
-                block_exaport_send_item_file($file, null, $forcedownload, $options);
-            } else {
-                return false;
-            }
-            break;
+            return $file;
         case 'item_content':
         case 'item_content_project_description':
         case 'item_content_project_process':
@@ -235,33 +240,21 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($item->userid)->id, 'block_exaport', $filearea, $item->id, '/', $filename);
 
-            // Serve file.
-            if ($file) {
-                send_stored_file($file);
-            } else {
-                return false;
-            }
-            break;
+            return $file;
         case 'view_content':
             $filename = array_pop($args);
 
             // Other params together are the access string.
             $access = join('/', $args);
 
-            if (!$view = block_exaport_get_view_from_access($access, $is_for_pdf, $pdfforuserid)) {
+            if (!$view = block_exaport_get_view_from_access($access)) {
                 print_error("viewnotfound", "block_exaport");
             }
 
             // Get file.
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', $filearea, $view->id, '/', $filename);
-            // Serve file.
-            if ($file) {
-                send_stored_file($file);
-            } else {
-                return false;
-            }
-            break;
+            return $file;
         case 'personal_information_view':
             $filename = array_pop($args);
 
@@ -285,13 +278,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             $file = $fs->get_file(context_user::instance($view->userid)->id, 'block_exaport', 'personal_information', $view->userid,
                 '/', $filename);
 
-            // Serve file.
-            if ($file) {
-                send_stored_file($file);
-            } else {
-                return false;
-            }
-            break;
+            return $file;
         case 'personal_information_self':
             $filename = join('/', $args);
 
@@ -300,13 +287,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             $file = $fs->get_file(context_user::instance($USER->id)->id, 'block_exaport', 'personal_information', $USER->id, '/',
                 $filename);
 
-            // Serve file.
-            if ($file) {
-                send_stored_file($file);
-            } else {
-                return false;
-            }
-            break;
+            return $file;
         case 'category_icon':
             $filename = array_pop($args);
             $categoryid = (int)array_pop($args);
@@ -326,11 +307,9 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
 
             // Recheck sharing on every request; do not serve arbitrary files from this image area.
             if ($file && !$file->is_directory() && $file->is_valid_image()) {
-                send_stored_file($file, 0, 0, $forcedownload, $options);
-            } else {
-                return false;
+                return $file;
             }
-            break;
+            return false;
         case 'resume_editor_cover':
         case 'resume_editor_goalspersonal':
         case 'resume_editor_goalsacademic':
@@ -339,38 +318,24 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
         case 'resume_editor_skillsacademic':
         case 'resume_editor_skillscareers':
         case 'resume_editor_interests':
-            $resumeitemtypes = ['cover', 'interests', 'goalspersonal', 'goalsacademic', 'goalscareers', 'skillspersonal', 'skillsacademic', 'killscareers'];
-            if ($is_for_pdf) {
-                // $view is already defined
-                // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
-                $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
-                    " WHERE b.viewid=? AND" .
-                    " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype IN ('" . implode("', '", $resumeitemtypes) . "')";
-                if (!$DB->record_exists_sql($sql, array($view->id))) {
-                    print_error("viewnotfound", "block_exaport");
+            $access = required_param('access', PARAM_RAW);
+            if (preg_match('~^resume/(\d+)/(\d+)$~', $access, $matches)) {
+                // The editing URL is not a sharing grant: only the CV owner may use it.
+                $resume = $DB->get_record('block_exaportresume', ['id' => $matches[1], 'user_id' => $USER->id]);
+                if (!$resume) {
+                    return false;
+                }
+                $viewuser = $resume->user_id;
+            } else {
+                $view = block_exaport_get_view_from_access($access);
+                // Sharing one CV section must not expose images in other sections.
+                $section = substr($filearea, strlen('resume_editor_'));
+                if (!$view || !$DB->record_exists_select('block_exaportviewblock',
+                        "viewid = ? AND type IN ('cv_information', 'cv_group') AND resume_itemtype = ?",
+                        [$view->id, $section])) {
+                    return false;
                 }
                 $viewuser = $view->userid;
-            } else {
-                $access = required_param('access', PARAM_RAW);
-                if (strpos($access, 'resume') !== false) {
-                    $resumeattrs = explode('/', $access);
-                    $resumeid = $resumeattrs[1];
-                    $resume = $DB->get_record('block_exaportresume', array("id" => $resumeid));
-                    $viewuser = $resume->user_id;
-                } else {
-                    $view = block_exaport_get_view_from_access($access);
-                    if (!$view) {
-                        print_error("viewnotfound", "block_exaport");
-                    }
-                    // Simple checking: the view has a block with 'cover/goals.../skills...' CV?
-                    $sql = "SELECT b.* FROM {block_exaportviewblock} b" .
-                        " WHERE b.viewid=? AND" .
-                        " b.type IN ('cv_information', 'cv_group') AND b.resume_itemtype IN ('" . implode("', '", $resumeitemtypes) . "')";
-                    if (!$DB->record_exists_sql($sql, array($view->id))) {
-                        print_error("viewnotfound", "block_exaport");
-                    }
-                    $viewuser = $view->userid;
-                }
             }
         case 'resume_cover':
         case 'resume_interests':
@@ -394,13 +359,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             // Get file.
             $fs = get_file_storage();
             $file = $fs->get_file(context_user::instance($viewuser)->id, 'block_exaport', $filearea, $id, '/', $filename);
-            // Serve file.
-            if ($file) {
-                send_stored_file($file);
-            } else {
-                return false;
-            }
-            break;
+            return $file;
         case 'pdf_fontfamily':
             $filename = array_pop($args);
             $itemid = array_pop($args); // Always 0.
@@ -409,15 +368,9 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
             $fs = get_file_storage();
             $file = $fs->get_file(context_system::instance()->id, 'block_exaport', 'pdf_fontfamily', $itemid, '/', $filename);
 
-            // Serve file.
-            if ($file) {
-                send_stored_file($file);
-            } else {
-                return false;
-            }
-            break;
+            return $file;
         default:
-            die('wrong file area');
+            return false;
     }
 }
 

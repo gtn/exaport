@@ -3,10 +3,13 @@
 
 namespace block_exaport;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
+require_once($CFG->dirroot . '/blocks/exaport/lib.php');
+require_once(__DIR__ . '/fixtures/exaport_test_helpers_trait.php');
 
 /**
  * Tests item authorization used by web-service file requests.
@@ -16,6 +19,7 @@ require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class item_webservice_access_test extends \advanced_testcase {
+    use \block_exaport\tests\exaport_test_helpers_trait;
 
     protected function setUp(): void {
         $this->resetAfterTest(true);
@@ -44,6 +48,7 @@ final class item_webservice_access_test extends \advanced_testcase {
         $DB->insert_record('block_exaportviewblock', (object) [
             'viewid' => $viewid,
             'itemid' => $item->id,
+            'type' => 'item',
         ]);
         $DB->insert_record('block_exaportviewshar', (object) [
             'viewid' => $viewid,
@@ -135,5 +140,52 @@ final class item_webservice_access_test extends \advanced_testcase {
 
         $this->assertFalse(
             block_exaport_get_item_for_webservice($itemb->id, $studenta->id, $trainer->id));
+    }
+
+    /** @return array Changes that must remove access through a collection. */
+    public static function collection_changes(): array {
+        return ['item selection' => [false], 'borrowed item sharing' => [true]];
+    }
+
+    #[DataProvider('collection_changes')]
+    public function test_collection_file_access_follows_current_permissions(bool $borrowed): void {
+        global $DB;
+        set_config('block_exaport_teachercanseeartifactsofstudents', 0);
+        set_config('block_exaport_enable_interaction_competences', 0);
+        $collectionowner = $this->getDataGenerator()->create_user();
+        $fileowner = $borrowed ? $this->getDataGenerator()->create_user() : $collectionowner;
+        $recipient = $this->getDataGenerator()->create_user();
+        $this->setUser($recipient);
+        $item = $this->create_item($fileowner->id);
+        $viewid = $this->create_view($collectionowner);
+        $DB->insert_record('block_exaportviewblock', ['viewid' => $viewid, 'itemid' => $item->id, 'type' => 'item']);
+        $DB->insert_record('block_exaportviewshar', ['viewid' => $viewid, 'userid' => $recipient->id]);
+        if ($borrowed) {
+            $DB->insert_record('block_exaportitemshar', ['itemid' => $item->id, 'userid' => $collectionowner->id]);
+        }
+        $block = block_exaport_create_content_block($item->id, 'file');
+        $context = \context_user::instance($fileowner->id);
+        $file = get_file_storage()->create_file_from_string([
+            'contextid' => $context->id, 'component' => 'block_exaport', 'filearea' => 'item_content_file',
+            'itemid' => $block->id, 'filepath' => '/', 'filename' => 'attachment.txt',
+        ], 'Attachment content');
+        $access = 'view/id/' . $collectionowner->id . '-' . $viewid;
+        $args = ['webservice', (string)$fileowner->id, 'itemid', $item->id, 'blockid', $block->id, 'attachment.txt'];
+        $this->assertNotEmpty(block_exaport_get_item($item->id, $access));
+        $this->assertSame($file->get_content(),
+            block_exaport_get_authorized_file($context, 'item_content_file', $args)->get_content());
+
+        if ($borrowed) {
+            $DB->delete_records('block_exaportitemshar', ['itemid' => $item->id]);
+        } else {
+            $DB->set_field('block_exaportviewblock', 'type', 'text', ['viewid' => $viewid, 'itemid' => $item->id]);
+        }
+        $this->assertEmpty(block_exaport_get_item($item->id, $access));
+        $this->assertFalse(block_exaport_get_authorized_file($context, 'item_content_file', $args));
+
+        // Another independent, valid collection grant must continue to work.
+        $this->share_item_in_view($item, $recipient->id);
+        $this->assertNotEmpty(block_exaport_get_item_for_webservice($item->id, $fileowner->id, $recipient->id));
+        $this->assertNotFalse(block_exaport_get_authorized_file($context, 'item_content_file', $args));
     }
 }

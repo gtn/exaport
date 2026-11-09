@@ -192,7 +192,7 @@ namespace {
         }
     }
 
-    function block_exaport_get_view_from_access($access, $pdfaccess = false, $pdfforuserid = 0) {
+    function block_exaport_get_view_from_access($access) {
         global $USER, $DB;
 
         if (!block_exaport_feature_enabled('views')) {
@@ -244,9 +244,7 @@ namespace {
             // Guest not allowed.
             // require exaport:use -> guest hasn't this right.
             $context = context_system::instance();
-            if (!$pdfaccess) {
-                require_capability('block/exaport:use', $context);
-            }
+            require_capability('block/exaport:use', $context);
             // Groups for user.
             $usergroups = block_exaport_sharegroups_enabled() ? block_exaport_get_user_cohorts() : [];
 
@@ -257,13 +255,8 @@ namespace {
                 return;
             }
 
-            if ($pdfaccess && $pdfforuserid > 0) {
-                $userid = $pdfforuserid;
-                $myuserid = $pdfforuserid;
-            } else {
-                $userid = clean_param($hash[0], PARAM_INT);
-                $myuserid = $USER->id;
-            }
+            $userid = clean_param($hash[0], PARAM_INT);
+            $myuserid = $USER->id;
             $viewid = clean_param($hash[1], PARAM_INT);
 
             $tempjoin = '';
@@ -459,6 +452,28 @@ namespace {
     }
 
     /**
+     * Resolve an item after the caller has authorised its collection.
+     *
+     * @param int $itemid Item to resolve.
+     * @param stdClass $view Authorised collection record.
+     * @return stdClass|false Selected item whose owner still permits its inclusion.
+     */
+    function block_exaport_get_item_in_view(int $itemid, stdClass $view) {
+        global $DB;
+
+        $blocktype = $DB->sql_compare_text('type');
+        if (!$DB->record_exists_select('block_exaportviewblock',
+                "viewid = :viewid AND itemid = :itemid AND $blocktype = :type",
+                ['viewid' => $view->id, 'itemid' => $itemid, 'type' => 'item'])) {
+            return false;
+        }
+
+        // Collections can include borrowed items; their underlying sharing grant must remain valid.
+        $ownerid = block_exaport_can_user_access_shared_item($view->userid, $itemid) ?: $view->userid;
+        return $DB->get_record('block_exaportitem', ['id' => $itemid, 'userid' => $ownerid]);
+    }
+
+    /**
      * @param $itemid
      * @param $itemOwnerid
      * @param $currentUserid
@@ -491,13 +506,14 @@ namespace {
             }
         }
 
-        // in a view shared with user?
-        $sql = "SELECT * FROM {block_exaportview} v " .
+        // Use the same item selection and ownership checks as browser downloads.
+        $sql = "SELECT DISTINCT v.id, v.userid FROM {block_exaportview} v " .
             " JOIN {block_exaportviewblock} vb ON v.id = vb.viewid AND vb.itemid = ? " .
             " JOIN {block_exaportviewshar} vs ON v.id = vs.viewid AND vs.userid = ? ";
-        $found = $DB->record_exists_sql($sql, array($itemid, $currentUserid));
-        if ($found) {
-            return $item;
+        foreach ($DB->get_records_sql($sql, [$itemid, $currentUserid]) as $view) {
+            if (block_exaport_get_item_in_view((int)$item->id, $view)) {
+                return $item;
+            }
         }
 
         // in an exacomp course (for diggr+ / dakora+)
@@ -524,50 +540,19 @@ namespace {
         }
     }
 
-    function block_exaport_get_item($itemid, $access, $epopaccess = false, $pdfaccess = false, $pdfforuserid = 0) {
-        global $CFG, $USER, $DB;
+    function block_exaport_get_item($itemid, $access, $epopaccess = false) {
+        global $USER, $DB;
 
         $itemid = clean_param($itemid, PARAM_INT);
 
         $item = null;
         if (preg_match('!^view/(.+)$!', $access, $matches)) {
             // In view mode.
-            if (!$view = block_exaport_get_view_from_access($matches[1], $pdfaccess, $pdfforuserid)) {
-                throw new \block_exacomp\permission_exception("viewnotfound", "block_exaport");
-            }
-            // Parameter richtig?!
-            if (strcmp($CFG->dbtype, "sqlsrv") == 0) {
-                $sql = "SELECT b.* FROM {block_exaportviewblock} b
-                        WHERE b.viewid=? AND
-                        b.itemid=? AND
-                        CAST(b.type AS varchar) = 'item'
-                        LIMIT 1";
-            } else {
-                $sql = "SELECT b.* FROM {block_exaportviewblock} b
-                        WHERE b.viewid=? AND
-                        b.itemid=? AND
-                        b.type = 'item'
-                        LIMIT 1";
-            }
-
-            $viewblock = $DB->get_record_sql($sql, array($view->id, $itemid));
-            if (!$viewblock) {
-                // A view grant only authorises the items included in that view.
+            if (!$view = block_exaport_get_view_from_access($matches[1])) {
                 return false;
             }
-
-            // Share artefact can not only owner. So we find did share item to others users.
-            // If shared - take owner and insert into select.
-            $sharable = block_exaport_can_user_access_shared_item($view->userid, $itemid);
-            if ($sharable) {
-                $ownerid = $sharable;
-            } else {
-                $ownerid = $view->userid;
-            }
-            $conditions = array("id" => $itemid, "userid" => $ownerid);
-            if (!$item = $DB->get_record("block_exaportitem", $conditions)) {
-                // Item not found.
-                return;
+            if (!$item = block_exaport_get_item_in_view($itemid, $view)) {
+                return false;
             }
             $item->access = $view->access;
             $item->access->page = 'view';

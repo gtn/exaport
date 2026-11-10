@@ -187,6 +187,23 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 'accepted_types' => array('image', 'web_image')));
         $mform->add_exaport_help_button('iconfile', 'forms.item.iconfile');
 
+        if ($sections['content']) {
+            $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
+            $mform->setExpanded('itemcontent', true);
+
+            $contentblocks = $this->_customdata['itemcontentblocks'];
+            $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
+            $contentownerid = (int)($this->_customdata['itemcontentownerid'] ?? $USER->id);
+            $contentsection = new \block_exaport\output\item_content_blocks(
+                $contentblocks,
+                $contentaddurl,
+                $contentownerid,
+                true,
+                false
+            );
+            $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
+        }
+
         $mform->addElement('header', 'itemmetadata', get_string('metadata', 'block_exaport'));
 
         $textareafields = [
@@ -272,22 +289,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             ];
             $mform->addElement('autocomplete', 'tags', get_string('tags'), $tagstrings, $options);
             $mform->add_exaport_help_button('tags', 'forms.item.tags');
-        }
-
-        if ($sections['content']) {
-            $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
-
-            $contentblocks = $this->_customdata['itemcontentblocks'];
-            $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
-            $contentownerid = (int)($this->_customdata['itemcontentownerid'] ?? $USER->id);
-            $contentsection = new \block_exaport\output\item_content_blocks(
-                $contentblocks,
-                $contentaddurl,
-                $contentownerid,
-                true,
-                false
-            );
-            $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
         }
 
         // The picker saves independently in a Moodle modal, so competence changes are not part of this form submission.

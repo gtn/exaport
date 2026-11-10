@@ -16,16 +16,29 @@
 }
 #exaport .card-eportfolio .card-top {
     padding: 1rem 1rem 0 1rem;
+    flex-shrink: 0;
 }
 #exaport .card-eportfolio .card-title {
     line-height: 1.4;
 }
-/* Cards have a fixed height. Keep long names from pushing previews into the footer. */
+/* Category thumbnails use single-line titles with an ellipsis. */
 #exaport .has-category-thumbnail .card-title {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+/* Reserve two title lines for page and collection tiles. */
+#exaport .exaport-view-tiles .exaport-flat-item .card-title {
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.4;
+    min-height: 2.8em;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    white-space: normal;
 }
 #exaport .card-eportfolio .card-title a:hover,
 #exaport .card-eportfolio .card-title a:focus {
@@ -35,10 +48,18 @@
 }
 #exaport .card-eportfolio .card-title .icon {
     color: #000;
-    color: rgba(0, 0, 0, 0.796);
+    color: rgba(0, 0, 0, .796);
 }
+/* Let the body accommodate thumbnails without shrinking into the footer. */
 #exaport .card-eportfolio .card-body {
     padding: .5rem 1rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    min-height: 0;
+}
+#exaport .card-eportfolio .card-footer {
+    flex-shrink: 0;
 }
 #exaport .card-eportfolio .eportfolio-categories {
     font-size: .8rem;
@@ -59,6 +80,9 @@
 #exaport .card-eportfolio .eportfolio-comment-count {
     font-size: .8rem;
 }
+#exaport .exaport-view-tiles .exaport-flat-item .eportfolio-card-more {
+    flex-shrink: 0;
+}
 #exaport .eportfolio-card-more .dropdown-toggle {
     color: #000;
 }
@@ -76,15 +100,16 @@
     position: relative;
     z-index: 3;
     background: #fff;
-    border: .0625rem solid rgba(0,0,0,.175);
+    border: .0625rem solid rgba(0, 0, 0, .175);
     border-radius: .5rem;
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
 #exaport .col-card-folder .card-eportfolio {
     position: relative;
-    border-radius: 0 0.75rem 0.75rem 0rem;
+    border-radius: 0 .75rem .75rem 0;
     margin-top: 1.2rem;
+    height: calc(100% - 1.2rem) !important;
 }
 #exaport .col-card-folder .card-eportfolio::before {
     content: "";
@@ -94,8 +119,8 @@
     width: 8rem;
     height: 1.2rem;
     background: var(--bs-card-bg, #fff);
-    border: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0,0,0,.175));
-    border-radius: 0.75rem 0.75rem 0 0;
+    border: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0, 0, 0, .175));
+    border-radius: .75rem .75rem 0 0;
     background-color: #efefef;
     border-bottom: 0;
 }
@@ -107,15 +132,12 @@
     width: 2.2rem;
     height: 1.2rem;
     background: var(--bs-card-bg, #fff);
-    border-top: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0,0,0,.175));
-    border-right: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0,0,0,.175));
+    border-top: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0, 0, 0, .175));
+    border-right: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0, 0, 0, .175));
     transform: skewX(35deg);
     transform-origin: left bottom;
-    border-radius: 0 0.45rem 0 0;
+    border-radius: 0 .45rem 0 0;
     background-color: #efefef;
-}
-#exaport .col-card-folder .card-eportfolio {
-    height: calc(100% - 1.2rem) !important;
 }
 
 #exaport .col-card-folder .card-eportfolio > .card-footer:last-child {
@@ -139,38 +161,34 @@
     padding: 0;
 }
 #exaport .exaport-category-view .badge {
-    font-size: 0.70rem;
-    padding: 0.35rem 0.65rem;
-    border-radius: 0.7rem;
+    font-size: .70rem;
+    padding: .35rem .65rem;
+    border-radius: .7rem;
 }
 #exaport .eportfolio-categories .badge {
     font-size: .78rem;
     cursor: default;
 }
-/* Uniform card height for both item and category column wrappers */
+/* Shared minimum height, with room to grow when content requires it. */
 #exaport .exaport-view-tiles .exaport-flat-item,
 #exaport .exaport-view-tiles .exaport-folder-category {
-    height: 13rem;
+    height: auto;
+    min-height: 13rem;
 }
 
 #exaport .exaport-view-details tr.exaport-flat-item {
     height: auto;
 }
-/* Artefact cards (items) fill their column fully */
+
+/* Artefact cards fill their column. */
 #exaport .exaport-flat-item .card-eportfolio {
     height: 100% !important;
 }
-/* card-body stretches between card-top and card-footer, laid out as a column */
-#exaport .card-eportfolio .card-body {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0;
-    min-height: 0;
-}
+
 #exaport .card-eportfolio .card-body-content {
     display: flex;
     gap: .75rem;
-    flex: 1 1 0;
+    flex: 1 0 auto;
     min-height: 0;
 }
 #exaport .card-eportfolio .card-body-main {
@@ -180,7 +198,7 @@
     min-width: 0;
     min-height: 0;
 }
-/* Text zone: grows to fill remaining space, text clamped to 2 lines */
+/* Intro text fills the remaining space and is limited to two lines. */
 #exaport .card-eportfolio .card-body-text {
     flex: 1 1 0;
     min-height: 0;
@@ -222,7 +240,8 @@
 #exaport .card-eportfolio .eportfolio-card-thumbnail.is-loaded .eportfolio-card-thumbnail-fallback {
     display: none;
 }
-/* Chips zone: fixed single-row height, overflowing chips clipped with a right-edge fade */
+
+/* Category badges occupy one row and fade out at the right edge. */
 #exaport .card-eportfolio .card-body-chips {
     flex: 0 0 1.8rem;
     overflow: hidden;
@@ -236,7 +255,7 @@
         width: 4rem;
     }
 }
-/* View (collection) card — stacked-paper effect via explicit sibling divs */
+/* Collection cards use sibling layers for the stacked-paper effect. */
 #exaport .card-view-stack {
     position: relative;
     height: 100%;
@@ -267,7 +286,7 @@
     background: #eeeff0;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, .1);
 }
-/* Give view columns a little extra bottom clearance so shifted layers are not clipped */
+/* Leave room below collection cards for their shifted layers. */
 #exaport .exaport-flat-view {
     overflow: visible;
     padding-bottom: .7rem;

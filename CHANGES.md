@@ -1,3 +1,14 @@
+### v5.2 (2026111000) ###
+* Supports Moodle 4.5 LTS and later.
+* Added linked personal information, CV, and badge content to items.
+* Course view templates now include layouts, headings, and formatted text.
+* Added optional course-based naming of copied category templates.
+* Added configurable default item layouts and optional category thumbnails.
+* Improved sharing performance, recipient filtering, and group-sharing controls.
+* Improved shared category lists and fixed tooltips on Moodle 4 and 5.
+* Improved legacy file migration and administrator issue reporting.
+* Fixed Exacomp resubmission handling and minor display issues.
+
 ### v5.2 (2026102100) ###
 * Requires Moodle 5.2.
 * Reworked portfolio items to support multiple ordered text, link, and file content blocks. Blocks can be added, edited, and deleted through modal forms, including rich text with embedded files.

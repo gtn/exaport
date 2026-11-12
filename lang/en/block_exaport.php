@@ -53,6 +53,7 @@ $string['audititemcontentitemid_help'] = 'Leave empty for a site-wide audit, or 
 $string['audititemcontentnofindings'] = 'Database and file-reference checks passed.';
 $string['audititemcontentnoreport'] = 'No completed item-content migration report is stored (report identifier 2026101902).';
 $string['audititemcontentopen'] = 'Open audit';
+$string['audititemcontentorphanlegacyfile'] = 'Legacy files without a parent item exist. A known cause in earlier versions was category deletion that removed items but left their associated files behind. The migration preserves these orphaned files because their parent items no longer exist.';
 $string['audititemcontentperformancewarning'] = 'A site-wide audit may take time on a large installation. The audit runs only when you submit this form.';
 $string['audititemcontentpositive'] = 'Enter a positive item ID.';
 $string['audititemcontentreadonlynotice'] = 'This audit is read-only. It never migrates, repairs, moves, creates, or deletes content.';
@@ -1143,7 +1144,7 @@ $string['audititemcontentreportfiles'] = 'File migration counts describe file re
 // Describe the verified migration result in the administrator report.
 $string['audititemcontentreportverification'] = 'Migrated file references were verified against their source metadata.';
 $string['itemcontentmigrationpaused'] = 'The item-content migration has reached its time budget for this upgrade attempt. Completed items have been saved. Restart the Moodle upgrade to continue; completed items will not be duplicated. The migration completion savepoint has not been recorded.';
-$string['audititemcontentscope'] = 'This audit checks database records, file references and their relationships.';
+$string['audititemcontentscope'] = 'This audit checks database records, file references and their relationships. It reports the current state, including inconsistencies that may already have existed before migration. A finding does not by itself mean that the migration caused the problem.';
 $string['migrationissueshelp'] = 'This read-only history documents file problems observed during upgrade. File records were migrated with their content hashes preserved; missing or damaged bytes were not repaired. Repair storage access or restore the original bytes from a verified backup. No migration retry is needed. Findings remain as historical evidence and do not describe current file health. A missing destination means its record copy was not completed or no destination was recorded.';
 $string['migrationissuessummary'] = 'Recorded findings: {$a->issues_recorded}. Affected files: {$a->files_affected}. Affected items: {$a->items_affected}.';
 $string['migrationitemid'] = 'Item ID';

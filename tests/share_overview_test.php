@@ -420,6 +420,30 @@ final class share_overview_test extends \advanced_testcase {
         );
     }
 
+    /** Email sharing respects the owner, private flags and the feature setting. */
+    public function test_my_shares_filters_email_shared_views(): void {
+        global $CFG, $DB;
+
+        $CFG->block_exaport_disable_shareemails = 0;
+        $emailview = $this->create_view($this->owner);
+        $DB->set_field('block_exaportview', 'sharedemails', 1, ['id' => $emailview]);
+        $privateview = $this->create_view($this->owner);
+        $DB->set_field('block_exaportview', 'sharedemails', 0, ['id' => $privateview]);
+        $this->create_view($this->owner); // An unset flag is also private.
+        $otherowner = $this->getDataGenerator()->create_user();
+        $otherview = $this->create_view($otherowner);
+        $DB->set_field('block_exaportview', 'sharedemails', 1, ['id' => $otherview]);
+
+        $rows = share_overview::get_my_shares($this->owner->id);
+        $this->assertCount(1, $rows);
+        $this->assertSame('view', $rows[0]->entity_type);
+        $this->assertEquals($emailview, $rows[0]->id);
+        $this->assertTrue($rows[0]->shareinfo->emails);
+
+        $CFG->block_exaport_disable_shareemails = 1;
+        $this->assertSame([], share_overview::get_my_shares($this->owner->id));
+    }
+
     // -------------------------------------------------------------------------
     // Tests: tooltip integration
     // -------------------------------------------------------------------------

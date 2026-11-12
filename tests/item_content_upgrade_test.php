@@ -227,15 +227,62 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $second->id]));
         $this->assertSame('second:value', $DB->get_field('block_exaportitem', 'url', ['id' => $second->id]));
         $this->assertNotFalse(get_file_storage()->get_file_by_id($laterfile->get_id()));
+        $this->assertEquals($first->id, get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
 
         $report = \block_exaport_migrate_legacy_item_content_with_report();
         $this->assertSame(4, (int)$report->formatversion);
+        $summary = json_decode($report->summaryjson, true);
+        $this->assertSame(1, $summary['operations_in_successful_run']['items_processed']);
+        $this->assertFalse(get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
         $this->assertSame(4, $DB->count_records('block_exaportitemblock'));
         $block = $DB->get_record('block_exaportitemblock', ['itemid' => $first->id, 'type' => 'file'], '*', MUST_EXIST);
         $copy = get_file_storage()->get_file(\context_user::instance($owner->id)->id, 'block_exaport',
             'item_content_file', $block->id, '/', 'first.txt');
         $this->assertSame($source->get_contenthash(), $copy->get_contenthash());
         $this->assertSame('preserved bytes', $copy->get_content());
+    }
+
+    public function test_slow_retries_resume_after_committed_items_and_include_newer_items(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->preventResetByRollback();
+        $owner = $this->getDataGenerator()->create_user();
+        for ($i = 0; $i < 14; $i++) {
+            $pending = $this->create_item($owner->id, 'note', "value:{$i}");
+        }
+        $now = 0.0;
+        $visited = [];
+        $timer = new \block_exaport\local\item_content_migration_timer(
+            static function() use (&$now): float { return $now; });
+        $migrator = static function($item) use (&$now, &$visited): array {
+            $visited[] = (int)$item->id;
+            $result = \block_exaport_migrate_legacy_item_content($item);
+            $now += 540; // Slow rechecks must not consume every new attempt's budget on the same prefix.
+            return $result;
+        };
+        try {
+            \block_exaport_migrate_legacy_item_content_with_report(500, $migrator, null, $timer);
+            $this->fail('Fourteen nine-minute items cannot fit in one attempt');
+        } catch (\moodle_exception $exception) {
+            $this->assertSame('itemcontentmigrationpaused', $exception->errorcode);
+        }
+        $this->assertCount(13, $visited);
+        $this->assertSame('value:13', $DB->get_field('block_exaportitem', 'url', ['id' => $pending->id]));
+        $this->assertSame(0, $DB->count_records('block_exaportmigration'));
+
+        // A checkpoint is a lower bound for completed work, not an upper cutoff for newly created items.
+        $new = $this->create_item($owner->id, 'note', 'new:value');
+        $now = 0.0;
+        $visited = [];
+        $timer = new \block_exaport\local\item_content_migration_timer(
+            static function() use (&$now): float { return $now; });
+        $report = \block_exaport_migrate_legacy_item_content_with_report(500, $migrator, null, $timer);
+        $this->assertSame([$pending->id, $new->id], $visited);
+        $this->assertSame(15, $DB->count_records('block_exaportitemblock'));
+        $this->assertSame(0, $DB->count_records_select('block_exaportitem', "url <> ''"));
+        $this->assertFalse(get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
+        $summary = json_decode($report->summaryjson, true);
+        $this->assertSame(2, $summary['operations_in_successful_run']['items_processed']);
     }
 
     public function test_empty_and_false_urls_create_no_blocks_and_clear_compatibility_values(): void {
@@ -1044,6 +1091,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
             'migrationversion' => 2026101902, 'formatversion' => 1,
             'timestarted' => 100, 'timecompleted' => 200, 'summaryjson' => $summary,
         ]);
+        set_config('item_content_migration_2026101902_lastid', 123, 'block_exaport');
         $report = \block_exaport_migrate_legacy_item_content_with_report(1, static function(): void {
             throw new \coding_exception('Completed migration must not run again');
         });
@@ -1051,6 +1099,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertEquals(1, $report->formatversion);
         $this->assertSame($summary, $report->summaryjson);
         $this->assertSame(1, $DB->count_records('block_exaportmigration'));
+        $this->assertFalse(get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
     }
 
     public function test_completed_report_requires_review_and_preserves_unattributable_files(): void {

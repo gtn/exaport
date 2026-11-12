@@ -88,6 +88,7 @@ final class migration_issues_test extends \advanced_testcase {
         $this->assertSame(0, (int)$fatalissue->timecopied);
         $this->assertSame(0, $DB->count_records('block_exaportmigration'));
         $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $fatal->id]));
+        $this->assertEquals($first->id, get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
 
         $third = $this->item($owner->id);
         $this->file($third, true);
@@ -165,6 +166,8 @@ final class migration_issues_test extends \advanced_testcase {
             $this->assertGreaterThan(0, (int)$issue->destinationid);
             $this->assertGreaterThan(0, (int)$issue->timecopied);
         }
+        // A crash after commit but before checkpointing may replay one item; it must never duplicate it.
+        $this->assertFalse(get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
         $report = \block_exaport_migrate_legacy_item_content_with_report(1);
         $summary = json_decode($report->summaryjson, true);
         $this->assertSame(0, $summary['operations_in_successful_run']['files_with_content_issues']);

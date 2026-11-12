@@ -123,9 +123,18 @@ Each item commits in its own delegated transaction. When insufficient time
 remains, a controlled Moodle exception stops the attempt between items and asks
 the administrator to restart the upgrade. Completed items remain committed;
 normal Moodle shutdown cleanup runs, and neither the completed report nor the
-2026101902 migration savepoint is written. A retry scans from ID zero: completed
-items have empty legacy sources and are harmless no-ops. There is no automatic
-continuation or additional plugin-specific locking.
+2026101902 migration savepoint is written. One plugin configuration value records
+the last committed item ID, so a retry starts after it instead of spending its
+budget rescanning a huge completed prefix. This checkpoint advances only after
+an item commits. A crash between commit and checkpointing may replay that one
+item, whose cleared sources make it a harmless no-op. Newly created higher IDs
+remain eligible; there is no upper cutoff. There is no automatic continuation or
+additional plugin-specific locking.
+
+The checkpoint is removed only after the completed report has been saved. If an
+attempt then stops before Moodle records the upgrade savepoint, the existing
+report makes retry a no-op. Report operations and progress counts describe work
+visited in the successful attempt, rather than adding earlier attempts' counts.
 
 Aggregate progress is reported after every completed batch. PHP timeout renewal
 cannot override PHP-FPM, web-server or proxy limits. The budget is checked at

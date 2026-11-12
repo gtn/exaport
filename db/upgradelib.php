@@ -222,13 +222,15 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
  * @param callable|null $migrator Optional item migrator, used by tests to simulate interruption.
  * @param callable|null $progresscallback Optional callback receiving cumulative count and aggregate counters.
  * @param \block_exaport\local\item_content_migration_timer|null $timer Shared attempt budget; injectable for tests.
+ * @param int $lastprocessedid Resume after this committed item; zero starts a full scan.
  * @return array Privacy-safe aggregate operation counts, including content findings.
  */
 function block_exaport_migrate_legacy_item_content_batches(
     int $batchsize = 500,
     ?callable $migrator = null,
     ?callable $progresscallback = null,
-    ?\block_exaport\local\item_content_migration_timer $timer = null
+    ?\block_exaport\local\item_content_migration_timer $timer = null,
+    int $lastprocessedid = 0
 ): array {
     global $DB;
 
@@ -247,7 +249,6 @@ function block_exaport_migrate_legacy_item_content_batches(
         'urls_cleared' => 0,
         'legacy_file_areas_cleared' => 0,
     ];
-    $lastprocessedid = 0;
     do {
         $timer->check_deadline();
         $items = $DB->get_records_select(
@@ -336,8 +337,11 @@ function block_exaport_migrate_legacy_item_content_with_report(
 
     // Identify the report by the content-migration savepoint, not the final plugin version.
     $migrationversion = 2026101902;
+    $checkpoint = 'item_content_migration_' . $migrationversion . '_lastid';
     $existing = $DB->get_record('block_exaportmigration', ['migrationversion' => $migrationversion]);
     if ($existing) {
+        // A crash after saving the report may leave a checkpoint; the report already makes retry a no-op.
+        unset_config($checkpoint, 'block_exaport');
         return $existing;
     }
 
@@ -345,11 +349,21 @@ function block_exaport_migrate_legacy_item_content_with_report(
     $timer = $timer ?? new \block_exaport\local\item_content_migration_timer();
     $timestarted = time();
     $before = block_exaport_legacy_item_content_counts();
+    $lastprocessedid = max(0, (int)get_config('block_exaport', $checkpoint));
+    $migrator = $migrator ?? 'block_exaport_migrate_legacy_item_content';
+    $checkpointedmigrator = static function(stdClass $item) use ($migrator, $checkpoint) {
+        $result = $migrator($item);
+        // Advance only AFTER the item commits. If this write fails, retry safely rechecks that one item.
+        // Persisting one ID prevents every attempt spending its budget rescanning a huge completed prefix.
+        set_config($checkpoint, (int)$item->id, 'block_exaport');
+        return $result;
+    };
     $operations = block_exaport_migrate_legacy_item_content_batches(
         $batchsize,
-        $migrator,
+        $checkpointedmigrator,
         $progresscallback,
-        $timer
+        $timer,
+        $lastprocessedid
     );
     $after = block_exaport_legacy_item_content_counts();
     $timer->check_deadline();
@@ -383,5 +397,7 @@ function block_exaport_migrate_legacy_item_content_with_report(
     ];
     $timer->check_deadline();
     $record->id = (int)$DB->insert_record('block_exaportmigration', $record);
+    // Keep progress until the completed report is saved; a retry can then finish the savepoint using that report.
+    unset_config($checkpoint, 'block_exaport');
     return $record;
 }

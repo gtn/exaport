@@ -22,6 +22,13 @@ defined('MOODLE_INTERNAL') || die;
 require_once(__DIR__ . '/lib/lib.php');
 require_once __DIR__ . '/lib/settings_helper.php';
 
+$ADMIN->add('blocksettings', new admin_externalpage(
+    'block_exaport_item_content_migration_status',
+    get_string('itemcontentmigrationtask', 'block_exaport'),
+    new moodle_url('/blocks/exaport/item_content_migration_status.php'),
+    'moodle/site:config'
+));
+
 // Keep the audit registered for access checks, without a separate navigation/search entry.
 $ADMIN->add('blocksettings', new admin_externalpage(
     'block_exaport_item_content_audit',

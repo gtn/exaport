@@ -24,6 +24,7 @@ class backup_exaport_block_structure_step extends backup_block_structure_step {
      * Define the structure of the backup
      */
     protected function define_structure() {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
 
         // Get the block instance.

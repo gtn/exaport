@@ -238,6 +238,7 @@ class provider implements
      * @return  contextlist   $contextlist  The contextlist containing the list of contexts used in this plugin.
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
+        \block_exaport\local\item_content_migration::require_ready();
         $contextlist = new contextlist();
 
         $contextlist->add_user_context($userid);
@@ -266,6 +267,7 @@ class provider implements
      * @param userlist $userlist The userlist containing the list of users who have data in this context/plugin combination.
      */
     public static function get_users_in_context(userlist $userlist) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
         $context = $userlist->get_context();
         if ($context->contextlevel == CONTEXT_USER) {
@@ -413,6 +415,7 @@ class provider implements
 
 
     public static function export_user_data(approved_contextlist $contextlist) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $CFG;
         require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
         require_once($CFG->dirroot . '/blocks/exaport/lib/resumelib.php');
@@ -825,6 +828,7 @@ class provider implements
      * @param context $context The specific context to delete data for.
      */
     public static function delete_data_for_all_users_in_context(context $context) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
         if ($context->contextlevel == CONTEXT_USER) {
             $DB->delete_records('block_exaportmigissue', ['ownerid' => $context->instanceid]);
@@ -891,6 +895,7 @@ class provider implements
     }
 
     public static function delete_data_for_user(approved_contextlist $contextlist) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
         if (empty($contextlist->count())) {
             return;
@@ -964,6 +969,7 @@ class provider implements
      * @param approved_userlist $userlist The approved context and user information to delete information for.
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
         $context = $userlist->get_context();
         if ($context->contextlevel == CONTEXT_USER && in_array($context->instanceid, $userlist->get_userids())) {

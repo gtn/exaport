@@ -533,6 +533,7 @@ function block_exaport_file_remove($item) {
 /*** GENERAL FUNCTIONS **********************************************************************/
 
 function block_exaport_require_login($courseid) {
+    \block_exaport\local\item_content_migration::require_ready();
     global $CFG;
 
     require_login($courseid);
@@ -2451,6 +2452,9 @@ function block_exaport_get_item_tags($itemid, $orderby = '') {
  * @return \core_tag\output\tagindex
  */
 function block_exaport_get_tagged_items($tag, $exclusivemode = false, $fromctx = 0, $ctx = 0, $rec = 1, $page = 0) {
+    if (\block_exaport\local\item_content_migration::is_pending()) {
+        return null; // Keep Moodle's tag page usable without reading portfolio items.
+    }
     global /*$OUTPUT, */
     $USER;
     $OUTPUT = block_exaport_get_renderer();

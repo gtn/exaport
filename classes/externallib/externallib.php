@@ -58,6 +58,7 @@ class externallib extends external_api {
      * @return array of course subjects
      */
     public static function get_items($level, $type) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER, $COURSE;
@@ -194,6 +195,7 @@ class externallib extends external_api {
      * @return array of course subjects
      */
     public static function get_item($itemid, $owneruserid = null) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -297,6 +299,7 @@ class externallib extends external_api {
      * @return array of course subjects
      */
     public static function add_item($title, $categoryid, $url, $intro, $type, $fileitemid, $filename) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disableditemwriteapi', 'block_exaport');
     }
 
@@ -342,6 +345,7 @@ class externallib extends external_api {
      * @return array of course subjects
      */
     public static function update_item($id, $title, $url, $intro, $type, $fileitemid, $filename) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disableditemwriteapi', 'block_exaport');
     }
 
@@ -373,6 +377,7 @@ class externallib extends external_api {
      * @disabled-ws-type-write
      */
     public static function delete_item(int $id) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         [
@@ -416,6 +421,7 @@ class externallib extends external_api {
      * @disabled-ws-type-read
      */
     public static function add_item_comment($itemid, $entry) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         $params = self::validate_parameters(self::add_item_comment_parameters(), ['itemid' => $itemid, 'entry' => $entry]);
@@ -455,6 +461,7 @@ class externallib extends external_api {
      * @return array of e-Portfolio views
      */
     public static function list_competencies() {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -567,6 +574,7 @@ class externallib extends external_api {
      * @return array of course subjects
      */
     public static function set_item_competence($itemid, $descriptorid, $val) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -624,6 +632,7 @@ class externallib extends external_api {
      * @return array of e-Portfolio views
      */
     public static function view_list() {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         self::validate_parameters(self::view_list_parameters(), []);
@@ -677,6 +686,7 @@ class externallib extends external_api {
      * @ws-type-read
      */
     public static function view_details(int $id) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         [
@@ -803,6 +813,7 @@ class externallib extends external_api {
      * @ws-type-write
      */
     public static function view_add(string $name, string $description) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         [
@@ -872,6 +883,7 @@ class externallib extends external_api {
      * @ws-type-write
      */
     public static function view_update(int $id, string $name, string $description, ?bool $externaccess) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         [
@@ -933,6 +945,7 @@ class externallib extends external_api {
      * @ws-type-write
      */
     public static function view_delete(int $id) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         [
@@ -1011,6 +1024,7 @@ class externallib extends external_api {
      * @ws-type-read
      */
     public static function get_all_user_items() {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         self::validate_parameters(self::get_all_user_items_parameters(), []);
@@ -1092,6 +1106,7 @@ class externallib extends external_api {
      * @ws-type-write
      */
     public static function view_block_add(int $viewid, string $type, int $itemid, string $title, string $text) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         [
@@ -1208,6 +1223,7 @@ class externallib extends external_api {
      * @ws-type-write
      */
     public static function view_block_delete($viewid, $blockid) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         [
@@ -1262,6 +1278,7 @@ class externallib extends external_api {
      * @disabled-ws-type-write
      */
     public static function view_grant_external_access($id, $val) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1314,6 +1331,7 @@ class externallib extends external_api {
      * @return all items available
      */
     public static function view_get_available_users() {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1379,6 +1397,7 @@ class externallib extends external_api {
      * @disabled-ws-type-write
      */
     public static function view_grant_internal_access_all($id, $val) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1434,6 +1453,7 @@ class externallib extends external_api {
      * @disabled-ws-type-write
      */
     public static function view_grant_internal_access($viewid, $userid, $val) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1485,6 +1505,7 @@ class externallib extends external_api {
      * @return array of e-Portfolio views
      */
     public static function get_category($categoryid) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB;
@@ -1529,6 +1550,7 @@ class externallib extends external_api {
      * @disabled-ws-type-write
      */
     public static function delete_category($categoryid) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1573,6 +1595,7 @@ class externallib extends external_api {
      * @return all items available
      */
     public static function get_competencies_by_item($itemid) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1618,6 +1641,7 @@ class externallib extends external_api {
      * @return all items available
      */
     public static function get_users_by_view($viewid) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1703,6 +1727,7 @@ class externallib extends external_api {
      * @return all items available
      */
     public static function export_file_to_externalportfolio($component, $filearea, $filename, $filepath, $itemid) {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1763,6 +1788,7 @@ class externallib extends external_api {
      * @return array
      */
     public static function get_user_information() {
+        \block_exaport\local\item_content_migration::require_ready();
         require_once(g::$CFG->dirroot . "/user/lib.php");
         $data = user_get_user_details(g::$USER);
         unset($data['enrolledcourses']);
@@ -1822,6 +1848,7 @@ class externallib extends external_api {
      * @return array
      */
     public static function login() {
+        \block_exaport\local\item_content_migration::require_ready();
         return [
             'user' => static::get_user_information(),
             'config' => (object)[],
@@ -1839,6 +1866,7 @@ class externallib extends external_api {
      * @return array
      */
     public static function get_shared_categories() {
+        \block_exaport\local\item_content_migration::require_ready();
         throw new \moodle_exception('disabled, old dakora code, needs security check!');
 
         global $CFG, $DB, $USER;
@@ -1883,6 +1911,7 @@ class externallib extends external_api {
      * @ws-type-write
      */
     public static function view_block_add_multiple(int $viewid, array $itemids) {
+        \block_exaport\local\item_content_migration::require_ready();
         [
             'viewid' => $viewid,
             'itemids' => $itemids,
@@ -1964,6 +1993,7 @@ class externallib extends external_api {
      * @ws-type-write
      */
     public static function view_block_sorting(int $viewid, array $blockids) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB, $USER;
 
         [
@@ -2015,6 +2045,7 @@ class externallib extends external_api {
      * @ws-type-read
      */
     public static function wordpress_status() {
+        \block_exaport\local\item_content_migration::require_ready();
         static::validate_parameters(static::wordpress_status_parameters(), []);
 
         return [

@@ -1571,20 +1571,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-        // Fetch bounded ID batches; each item gets ten minutes within a fixed two-hour attempt budget.
-        // A budget interruption throws before the next item, leaving this savepoint for the administrator's retry.
-        block_exaport_migrate_legacy_item_content_with_report(500, null,
-            static function(int $processed): void {
-                // Aggregate progress only: never expose item, owner, URL, or file details.
-                mtrace("Exaport item-content migration: {$processed} items processed");
-            });
-
-        $issues = \block_exaport\local\migration_issues::counts();
-        mtrace("Exaport file-reference migration completed: {$issues['files_affected']} files with historical findings. " .
-            'Open Site administration > Plugins > Blocks > exabis ePortfolio > Item-content migration audit, ' .
-            'then Migration issues. ' .
-            'Migrated file references were verified against their source metadata. ' .
-            'Earlier findings are retained across upgrade attempts.');
+        // Content conversion runs after Moodle's upgrade, with both plugins explicitly paused.
         upgrade_block_savepoint(true, 2026101902, 'exaport');
     }
 
@@ -1630,6 +1617,15 @@ function xmldb_block_exaport_upgrade($oldversion) {
         }
 
         upgrade_block_savepoint(true, 2026110502, 'exaport');
+    }
+
+    if ($oldversion < 2026111203) {
+        // Fresh installs of an already-structured release have no historical report and need no conversion.
+        if ($oldversion < \block_exaport\local\item_content_migration::VERSION &&
+                \block_exaport\local\item_content_migration::schedule()) {
+            mtrace(get_string('itemcontentmigrationqueued', 'block_exaport'));
+        }
+        upgrade_block_savepoint(true, 2026111203, 'exaport');
     }
 
     return $result;

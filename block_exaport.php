@@ -21,6 +21,15 @@ require(__DIR__ . '/inc.php');
 
 class block_exaport extends block_list {
 
+    public function user_can_addto($page) {
+        return !\block_exaport\local\item_content_migration::is_pending() && parent::user_can_addto($page);
+    }
+
+    public function instance_delete() {
+        \block_exaport\local\item_content_migration::require_ready();
+        return parent::instance_delete();
+    }
+
     public function init() {
         $this->title = get_string('blocktitle', 'block_exaport');
     }
@@ -38,6 +47,9 @@ class block_exaport extends block_list {
     }
 
     public function get_content() {
+        if (\block_exaport\local\item_content_migration::is_pending()) {
+            return $this->content = (object)['items' => [get_string('itemcontentmigrationpending', 'block_exaport')], 'icons' => [], 'footer' => ''];
+        }
         global $CFG, $COURSE, $OUTPUT;
 
         $context = context_system::instance();

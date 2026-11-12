@@ -33,6 +33,7 @@ class restore_exaport_block_structure_step extends restore_structure_step {
      * Define the structure to be restored
      */
     protected function define_structure() {
+        \block_exaport\local\item_content_migration::require_ready();
 
         $paths = array();
 
@@ -52,6 +53,7 @@ class restore_exaport_block_structure_step extends restore_structure_step {
      * Process course template category
      */
     protected function process_course_template($data) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
 
         $data = (object)$data;
@@ -92,6 +94,7 @@ class restore_exaport_block_structure_step extends restore_structure_step {
      * Process view template
      */
     protected function process_view_template($data) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
 
         $data = (object)$data;
@@ -114,6 +117,7 @@ class restore_exaport_block_structure_step extends restore_structure_step {
      * @return void
      */
     protected function process_template_block($data) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
         $templateid = $this->get_new_parentid('view_template');
         $layout = $DB->get_field('block_exaport_view_templ', 'layout', ['id' => $templateid], MUST_EXIST);
@@ -129,6 +133,7 @@ class restore_exaport_block_structure_step extends restore_structure_step {
      * Process distribution settings
      */
     protected function process_distribution_setting($data) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
 
         $data = (object)$data;

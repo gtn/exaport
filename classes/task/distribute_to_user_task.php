@@ -22,6 +22,7 @@ class distribute_to_user_task extends \core\task\adhoc_task {
      * Execute the task.
      */
     public function execute() {
+        \block_exaport\local\item_content_migration::require_ready();
         $data = $this->get_custom_data();
         
         // Validate required data.

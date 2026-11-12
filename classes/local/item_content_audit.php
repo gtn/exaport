@@ -163,9 +163,10 @@ final class item_content_audit {
 
         if ($filearea === 'item_file') {
             if ($this->itemid === null) {
+                // The audit has no deletion history, so describe the old category bug as a possible cause.
                 $this->add_query_finding('orphan_legacy_file', 'error',
                     "FROM {files} f LEFT JOIN {block_exaportitem} i ON i.id = f.itemid WHERE $nonfile AND i.id IS NULL",
-                    $params, 'f.id', 'fileids', 'Legacy files without a parent item exist.',
+                    $params, 'f.id', 'fileids', get_string('audititemcontentorphanlegacyfile', 'block_exaport'),
                     'Preserve Moodledata and database backups and identify ownership before any manual repair.', 'f.itemid');
             }
             $filter = $this->itemid === null ? '1 = 1' : 'i.id = :filteritemid';

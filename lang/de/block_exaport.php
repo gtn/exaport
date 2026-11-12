@@ -1101,12 +1101,13 @@ $string['migrationissuesintro'] = 'Die beim Upgrade festgestellten Dateiprobleme
 $string['migrationissuesrecorded'] = 'Dateien mit beim Upgrade festgestellten Problemen: {$a}.';
 $string['audititemcontentcurrentaudit'] = 'Aktuelle Prüfung der Datenbank und Dateiverweise';
 $string['audititemcontentnofindings'] = 'Die Prüfung der Datenbank und Dateiverweise war erfolgreich.';
+$string['audititemcontentorphanlegacyfile'] = 'Es existieren alte Dateien ohne zugehörigen Eintrag. Eine bekannte Ursache in früheren Versionen war das Löschen einer Kategorie, bei dem Einträge entfernt wurden, ihre Dateien jedoch erhalten blieben. Die Migration behält diese verwaisten Dateien bei, da die zugehörigen Einträge nicht mehr existieren.';
 $string['audititemcontentreportfiles'] = 'Die Anzahl migrierter Dateien bezieht sich auf Dateidatensätze und Dateiverweise.';
 // Das geprüfte Migrationsergebnis im Administrationsbericht beschreiben.
 $string['audititemcontentreportverification'] = 'Die migrierten Dateiverweise wurden mit den ursprünglichen Metadaten verglichen.';
 $string['itemcontentmigrationpaused'] = 'Das Zeitbudget der Migration von Eintragsinhalten für diesen Upgrade-Versuch wurde erreicht. Abgeschlossene Einträge wurden gespeichert. Starten Sie das Moodle-Upgrade erneut, um fortzufahren; abgeschlossene Einträge werden nicht dupliziert. Der abschließende Migrations-Speicherpunkt wurde noch nicht gesetzt.';
 $string['audititemcontentsummary'] = 'Prüfung der Datenbank und Dateiverweise: {$a->errors} Fehlerbefunde, {$a->warnings} Warnbefunde.';
-$string['audititemcontentscope'] = 'Diese Prüfung kontrolliert Datenbankeinträge, Dateiverweise und deren Zuordnung.';
+$string['audititemcontentscope'] = 'Diese Prüfung kontrolliert Datenbankeinträge, Dateiverweise und deren Zuordnung. Sie zeigt den aktuellen Zustand, einschließlich Unstimmigkeiten, die möglicherweise schon vor der Migration bestanden. Ein Befund bedeutet für sich allein nicht, dass die Migration das Problem verursacht hat.';
 $string['migrationissueshelp'] = 'Dies ist ein schreibgeschützter Verlauf der beim Upgrade festgestellten Dateiprobleme. Die Dateidatensätze wurden mit unverändertem Inhaltshash migriert. Fehlende oder beschädigte Bytes werden dadurch nicht repariert. Speicherzugriff reparieren oder die ursprünglichen Bytes aus einer geprüften Sicherung wiederherstellen; ein erneuter Migrationslauf ist nicht erforderlich. Der Verlauf bleibt erhalten und beschreibt nicht den aktuellen Dateizustand. Ein fehlendes Ziel zeigt an, dass der Kopiervorgang damals nicht abgeschlossen wurde oder kein Ziel aufgezeichnet ist.';
 $string['migrationissuessummary'] = 'Erfasste Probleme: {$a->issues_recorded}. Betroffene Dateien: {$a->files_affected}. Betroffene Einträge: {$a->items_affected}.';
 $string['migrationitemid'] = 'Eintrags-ID';

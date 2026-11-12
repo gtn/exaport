@@ -156,6 +156,10 @@ return [
         null,
         'Open audit',
     ],
+    'audititemcontentorphanlegacyfile' => [
+        'Es existieren alte Dateien ohne zugehörigen Eintrag. Eine bekannte Ursache in früheren Versionen war das Löschen einer Kategorie, bei dem Einträge entfernt wurden, ihre Dateien jedoch erhalten blieben. Die Migration behält diese verwaisten Dateien bei, da die zugehörigen Einträge nicht mehr existieren.',
+        'Legacy files without a parent item exist. A known cause in earlier versions was category deletion that removed items but left their associated files behind. The migration preserves these orphaned files because their parent items no longer exist.',
+    ],
     'audititemcontentperformancewarning' => [
         null,
         'A site-wide audit may take time on a large installation. The audit runs only when you submit this form.',
@@ -190,8 +194,8 @@ return [
         'Report identifier {$a->version}, completed {$a->completed}.',
     ],
     'audititemcontentscope' => [
-        'Diese Prüfung kontrolliert Datenbankeinträge, Dateiverweise und deren Zuordnung.',
-        'This audit checks database records, file references and their relationships.',
+        'Diese Prüfung kontrolliert Datenbankeinträge, Dateiverweise und deren Zuordnung. Sie zeigt den aktuellen Zustand, einschließlich Unstimmigkeiten, die möglicherweise schon vor der Migration bestanden. Ein Befund bedeutet für sich allein nicht, dass die Migration das Problem verursacht hat.',
+        'This audit checks database records, file references and their relationships. It reports the current state, including inconsistencies that may already have existed before migration. A finding does not by itself mean that the migration caused the problem.',
     ],
     'audititemcontentrun' => [
         null,

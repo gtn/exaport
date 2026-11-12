@@ -10,7 +10,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../db/upgradelib.php');
 require_once(__DIR__ . '/../lib/item_content_helpers.php');
 
-/** Bad source bytes must not block conversion or disappear from the historical evidence. */
+/** Findings from earlier scanning attempts remain durable during metadata-only retries. */
 final class migration_issues_test extends \advanced_testcase {
     private array $backups = [];
 
@@ -49,6 +49,8 @@ final class migration_issues_test extends \advanced_testcase {
             $backup = $path . '.migration-test-backup';
             $this->assertTrue(rename($path, $backup));
             $this->backups[$file->get_id()] = [$path, $backup];
+            // Seed evidence from an older attempt; the current migration must not rediscover or erase it.
+            migration_issues::record($item, $file, 'source_unreadable');
         }
         return $file;
     }
@@ -86,6 +88,7 @@ final class migration_issues_test extends \advanced_testcase {
         $this->assertSame(0, (int)$fatalissue->timecopied);
         $this->assertSame(0, $DB->count_records('block_exaportmigration'));
         $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $fatal->id]));
+        $this->assertEquals($first->id, get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
 
         $third = $this->item($owner->id);
         $this->file($third, true);
@@ -95,7 +98,7 @@ final class migration_issues_test extends \advanced_testcase {
         $this->assertFalse($summary['status']['clean']);
         $this->assertSame(3, $summary['issue_history_at_successful_run_end']['files_affected']);
         // First item's warning survives even though that item is a clean no-op on this attempt.
-        $this->assertSame(2, $summary['operations_in_successful_run']['files_with_content_issues']);
+        $this->assertArrayNotHasKey('files_with_content_issues', $summary['operations_in_successful_run']);
         foreach ([$firstissue, $fatalissue] as $old) {
             $now = $DB->get_record(migration_issues::TABLE, ['id' => $old->id], '*', MUST_EXIST);
             $this->assertSame((int)$old->firstseen, (int)$now->firstseen);
@@ -103,7 +106,7 @@ final class migration_issues_test extends \advanced_testcase {
             $this->assertGreaterThan(0, (int)$now->destinationid);
         }
         $this->assertSame(1, (int)$DB->get_field(migration_issues::TABLE, 'attempts', ['id' => $firstissue->id]));
-        $this->assertSame(2, (int)$DB->get_field(migration_issues::TABLE, 'attempts', ['id' => $fatalissue->id]));
+        $this->assertSame(1, (int)$DB->get_field(migration_issues::TABLE, 'attempts', ['id' => $fatalissue->id]));
         $this->assertSame(1, $DB->count_records('block_exaportitemblock', ['itemid' => $later->id]));
         $this->assertSame(2, $DB->count_records('block_exaportitemblock', ['itemid' => $first->id]));
     }
@@ -163,9 +166,11 @@ final class migration_issues_test extends \advanced_testcase {
             $this->assertGreaterThan(0, (int)$issue->destinationid);
             $this->assertGreaterThan(0, (int)$issue->timecopied);
         }
+        // A crash after commit but before checkpointing may replay one item; it must never duplicate it.
+        $this->assertFalse(get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
         $report = \block_exaport_migrate_legacy_item_content_with_report(1);
         $summary = json_decode($report->summaryjson, true);
-        $this->assertSame(0, $summary['operations_in_successful_run']['files_with_content_issues']);
+        $this->assertArrayNotHasKey('files_with_content_issues', $summary['operations_in_successful_run']);
         $this->assertSame(1, $summary['issue_history_at_successful_run_end']['files_affected']);
         $this->assertTrue($summary['status']['requires_review']);
         $this->assertSame(2, $DB->count_records('block_exaportitemblock'));
@@ -175,10 +180,10 @@ final class migration_issues_test extends \advanced_testcase {
         global $DB;
         $owner = $this->getDataGenerator()->create_user();
         $item = $this->item($owner->id);
-        $this->file($item, true);
+        $file = $this->file($item, true);
         $transaction = $DB->start_delegated_transaction();
         try {
-            \block_exaport_migrate_legacy_item_content($item);
+            migration_issues::record($item, $file, 'source_unreadable');
             $this->fail('Cannot promise durable findings inside another transaction');
         } catch (\coding_exception $exception) {
             $this->assertStringContainsString('outside an enclosing transaction', $exception->getMessage());
@@ -189,7 +194,8 @@ final class migration_issues_test extends \advanced_testcase {
         $this->assertSame(1, migration_issues::counts()['issues_recorded']);
     }
 
-    public function test_source_bytes_are_read_once_and_backend_exceptions_remain_fatal(): void {
+    public function test_source_content_is_not_opened_and_backend_mutation_errors_remain_fatal(): void {
+        global $DB;
         $owner = $this->getDataGenerator()->create_user();
         $item = $this->item($owner->id);
         $this->file($item);
@@ -197,8 +203,7 @@ final class migration_issues_test extends \advanced_testcase {
         $property = new \ReflectionProperty(\file_storage::class, 'filesystem');
         $filesystem = $fs->get_file_system();
         $fake = $this->createPartialMock(\file_system_filedir::class, ['get_content_file_handle']);
-        $fake->expects($this->once())->method('get_content_file_handle')->willReturnCallback(
-            static function($file) use ($filesystem) { return $filesystem->get_content_file_handle($file); });
+        $fake->expects($this->never())->method('get_content_file_handle');
         $property->setValue($fs, $fake);
         try {
             \block_exaport_migrate_legacy_item_content($item);
@@ -206,16 +211,18 @@ final class migration_issues_test extends \advanced_testcase {
             $property->setValue($fs, $filesystem);
         }
         $item = $this->item($owner->id);
-        $this->file($item);
-        $fake = $this->createPartialMock(\file_system_filedir::class, ['get_content_file_handle']);
-        $fake->method('get_content_file_handle')->willThrowException(new \LogicException('Backend bug'));
+        $source = $this->file($item);
+        $fake = $this->createPartialMock(\file_system_filedir::class, ['remove_file']);
+        $fake->method('remove_file')->willThrowException(new \LogicException('Backend write failure'));
         $property->setValue($fs, $fake);
         try {
             \block_exaport_migrate_legacy_item_content($item);
-            $this->fail('Unexpected backend error was swallowed');
-        } catch (\LogicException $exception) {
-            $this->assertSame('Backend bug', $exception->getMessage());
+            $this->fail('Unexpected backend mutation error was swallowed');
+        } catch (\coding_exception $exception) {
+            $this->assertStringContainsString('Backend write failure', $exception->debuginfo);
             $this->assertSame(0, migration_issues::counts()['issues_recorded']);
+            $this->assertNotFalse($fs->get_file_by_id($source->get_id()));
+            $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $item->id]));
         } finally {
             $property->setValue($fs, $filesystem);
         }
@@ -236,9 +243,9 @@ final class migration_issues_test extends \advanced_testcase {
         } finally {
             $output = ob_get_clean();
         }
-        $this->assertStringContainsString('1 files with recorded content problems', $output);
+        $this->assertStringContainsString('0 files with historical findings', $output);
         $this->assertSame(2026110502, (int)get_config('block_exaport', 'version'));
-        $this->assertSame(1, migration_issues::counts()['issues_recorded']);
+        $this->assertSame(0, migration_issues::counts()['issues_recorded']);
         $this->assertSame(2, $DB->count_records('block_exaportitemblock'));
     }
 
@@ -250,27 +257,26 @@ final class migration_issues_test extends \advanced_testcase {
         $first = $this->item($owner->id);
         $missing = $this->file($first, true);
         $later = $this->item($owner->id);
-        $this->file($later);
-        $DB->get_manager()->drop_table(new \xmldb_table(migration_issues::TABLE));
+        $laterfile = $this->file($later);
         set_config('version', 2026101901, 'block_exaport');
         $fs = get_file_storage();
         $filesystem = $fs->get_file_system();
         $property = new \ReflectionProperty(\file_storage::class, 'filesystem');
-        $fake = $this->createPartialMock(\file_system_filedir::class, ['get_content_file_handle']);
-        $fake->method('get_content_file_handle')->willReturnCallback(
-            static function($file) use ($filesystem, $later) {
-                if ($file->get_filearea() === 'item_file' && (int)$file->get_itemid() === (int)$later->id) {
+        $fake = $this->createPartialMock(\file_system_filedir::class, ['remove_file']);
+        $fake->method('remove_file')->willReturnCallback(
+            static function($hash) use ($filesystem, $laterfile) {
+                if ($hash === $laterfile->get_contenthash()) {
                     throw new \LogicException('Interrupted upgrade');
                 }
-                return $filesystem->get_content_file_handle($file);
+                return $filesystem->remove_file($hash);
             });
         $property->setValue($fs, $fake);
         ob_start();
         try {
             \xmldb_block_exaport_upgrade(2026101901);
             $this->fail('Expected upgrade interruption');
-        } catch (\LogicException $exception) {
-            $this->assertSame('Interrupted upgrade', $exception->getMessage());
+        } catch (\coding_exception $exception) {
+            $this->assertStringContainsString('Interrupted upgrade', $exception->debuginfo);
         } finally {
             $property->setValue($fs, $filesystem);
             ob_end_clean();

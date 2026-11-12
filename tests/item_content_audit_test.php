@@ -251,6 +251,28 @@ final class item_content_audit_test extends \advanced_testcase {
         $this->assertStringNotContainsString('private-name.txt', $json . $html);
     }
 
+    public function test_report_focuses_on_migration_results_without_rewriting_stored_flags(): void {
+        $this->resetAfterTest(true);
+        $record = (object)[
+            'migrationversion' => 2026101902, 'formatversion' => 4, 'timecompleted' => 123,
+            'summaryjson' => json_encode([
+                'verification' => ['file_reference_metadata_checked' => true, 'file_contents_checked' => false],
+                'operations_in_successful_run' => ['files_copied' => 2, 'files_with_content_issues' => 0],
+                'status' => ['clean' => true, 'requires_review' => false],
+            ]),
+        ];
+        $storedsummary = $record->summaryjson;
+        $html = item_content_audit_output::migration_report_html($record);
+        $this->assertStringContainsString(get_string('audititemcontentreportverification', 'block_exaport'), $html);
+        $this->assertStringContainsString('files_copied', $html);
+        $this->assertStringNotContainsString('file_contents_checked', $html);
+        $this->assertStringNotContainsString('file_reference_metadata_checked', $html);
+        $this->assertStringNotContainsString('files_with_content_issues', $html);
+        $this->assertStringContainsString(get_string('audititemcontentvalue', 'block_exaport'), $html);
+        $this->assertStringContainsString(get_string('no'), $html);
+        $this->assertSame($storedsummary, $record->summaryjson);
+    }
+
     public function test_admin_page_is_explicitly_submitted_and_capability_protected(): void {
         $page = file_get_contents(__DIR__ . '/../item_content_audit.php');
         $settings = file_get_contents(__DIR__ . '/../settings.php');

@@ -251,6 +251,21 @@ final class item_content_audit_test extends \advanced_testcase {
         $this->assertStringNotContainsString('private-name.txt', $json . $html);
     }
 
+    public function test_format_four_report_distinguishes_reference_checks_from_content_health(): void {
+        $this->resetAfterTest(true);
+        $html = item_content_audit_output::migration_report_html((object)[
+            'migrationversion' => 2026101902, 'formatversion' => 4, 'timecompleted' => 123,
+            'summaryjson' => json_encode([
+                'verification' => ['file_reference_metadata_checked' => true, 'file_contents_checked' => false],
+                'status' => ['clean' => true, 'requires_review' => false],
+            ]),
+        ]);
+        $this->assertStringContainsString(get_string('audititemcontentreportverification', 'block_exaport'), $html);
+        $this->assertStringContainsString('file_contents_checked', $html);
+        $this->assertStringContainsString(get_string('audititemcontentvalue', 'block_exaport'), $html);
+        $this->assertStringContainsString(get_string('no'), $html);
+    }
+
     public function test_admin_page_is_explicitly_submitted_and_capability_protected(): void {
         $page = file_get_contents(__DIR__ . '/../item_content_audit.php');
         $settings = file_get_contents(__DIR__ . '/../settings.php');

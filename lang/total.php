@@ -176,6 +176,15 @@ return [
         'Die Anzahl migrierter Dateien bezieht sich auf Dateidatensätze und Dateiverweise. Fehlende oder beschädigte Dateiinhalte wurden nicht repariert.',
         'File migration counts describe file records and references. Missing or damaged file contents were not repaired.',
     ],
+    // Metadata-only migrations retain older reports without claiming a new backing-file scan.
+    'audititemcontentreportverification' => [
+        'Die migrierten Dateiverweise wurden mit den ursprünglichen Metadaten verglichen. Dateiinhalte wurden weder untersucht noch durch Prüfsummen geprüft; dieser Bericht bestätigt nicht die Unversehrtheit der Dateiinhalte.',
+        'Migrated file references were verified against their source metadata. Backing file contents were not inspected or checksummed; this report does not establish file-content health.',
+    ],
+    'itemcontentmigrationpaused' => [
+        'Das Zeitbudget der Migration von Eintragsinhalten für diesen Upgrade-Versuch wurde erreicht. Abgeschlossene Einträge wurden gespeichert. Starten Sie das Moodle-Upgrade erneut, um fortzufahren; abgeschlossene Einträge werden nicht dupliziert. Der abschließende Migrations-Speicherpunkt wurde noch nicht gesetzt.',
+        'The item-content migration has reached its time budget for this upgrade attempt. Completed items have been saved. Restart the Moodle upgrade to continue; completed items will not be duplicated. The migration completion savepoint has not been recorded.',
+    ],
     'audititemcontentreportmeta' => [
         null,
         'Report identifier {$a->version}, completed {$a->completed}.',

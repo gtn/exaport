@@ -60,17 +60,14 @@ final class item_content_upgrade_test extends \advanced_testcase {
         return (array)$DB->get_record($table, ['id' => $id], '*', MUST_EXIST);
     }
 
-    public function test_upgrade_renews_a_finite_timeout_inside_the_batch_loop(): void {
+    public function test_report_must_complete_before_the_upgrade_savepoint(): void {
         $upgradelib = file_get_contents(__DIR__ . '/../db/upgradelib.php');
         $upgrade = file_get_contents(__DIR__ . '/../db/upgrade.php');
-        $this->assertStringContainsString('upgrade_set_timeout(1800);', $upgradelib);
         $this->assertStringNotContainsString('upgrade_set_timeout(0);', $upgradelib . $upgrade);
-        $this->assertStringNotContainsString('upgrade_set_timeout(1800);', $upgrade);
 
         $reportposition = strpos($upgrade, 'block_exaport_migrate_legacy_item_content_with_report(500');
         // The report identifies the content migration at 2026101902 and must be
-        // written before Moodle records that savepoint. Keep the finite timeout
-        // checks above intact.
+        // written before Moodle records that savepoint; a pause must unwind both callers.
         $savepointposition = strpos($upgrade, "upgrade_block_savepoint(true, 2026101902, 'exaport')");
         $this->assertNotFalse($reportposition);
         $this->assertNotFalse($savepointposition);
@@ -159,6 +156,86 @@ final class item_content_upgrade_test extends \advanced_testcase {
             });
 
         $this->assertSame([2, 4, 6, 8, 10, 11], $progress);
+    }
+
+    public function test_large_descriptions_are_preserved_without_loading_them_in_batches(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $item = $this->create_item($owner->id, 'note', 'large:description', '', 123, 456);
+        $text = str_repeat('large description ', 16384);
+        foreach (['intro', 'project_description', 'project_process', 'project_result'] as $field) {
+            $DB->set_field('block_exaportitem', $field, $text, ['id' => $item->id]);
+        }
+        $counts = \block_exaport_migrate_legacy_item_content_batches(500, function($identity): array {
+            $this->assertSame(['id', 'userid'], array_keys((array)$identity));
+            return \block_exaport_migrate_legacy_item_content($identity);
+        });
+        $this->assertSame(1, $counts['link_blocks_created']);
+        foreach (['intro', 'project_description', 'project_process', 'project_result'] as $field) {
+            $this->assertSame($text, $DB->get_field('block_exaportitem', $field, ['id' => $item->id]));
+        }
+        $block = $DB->get_record('block_exaportitemblock', ['itemid' => $item->id], '*', MUST_EXIST);
+        $this->assertSame('large:description', $block->url);
+        $this->assertEquals(123, $block->timecreated);
+        $this->assertEquals(456, $block->timemodified);
+    }
+
+    public function test_items_added_after_migration_starts_are_not_excluded_by_an_id_cutoff(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $first = $this->create_item($owner->id, 'note', 'first:value');
+        $added = null;
+        $counts = \block_exaport_migrate_legacy_item_content_batches(1, function($item) use ($first, $owner, &$added): array {
+            if ((int)$item->id === $first->id) {
+                $added = $this->create_item($owner->id, 'note', 'later:value');
+            }
+            return \block_exaport_migrate_legacy_item_content($item);
+        });
+        $this->assertSame(2, $counts['items_processed']);
+        $this->assertSame('later:value', $DB->get_field('block_exaportitemblock', 'url', ['itemid' => $added->id]));
+    }
+
+    public function test_time_budget_pauses_between_items_and_retry_preserves_committed_files(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->preventResetByRollback();
+        $owner = $this->getDataGenerator()->create_user();
+        $first = $this->create_item($owner->id, 'note', 'first:value');
+        $source = $this->create_legacy_file($first, 'first.txt', 'preserved bytes');
+        $second = $this->create_item($owner->id, 'note', 'second:value');
+        $laterfile = $this->create_legacy_file($second, 'second.txt', 'unprocessed bytes');
+        $now = 0.0;
+        $timer = new \block_exaport\local\item_content_migration_timer(
+            static function() use (&$now): float { return $now; });
+        try {
+            \block_exaport_migrate_legacy_item_content_with_report(500, function($item) use (&$now, $DB): array {
+                $this->assertFalse($DB->is_transaction_started());
+                $result = \block_exaport_migrate_legacy_item_content($item);
+                $this->assertFalse($DB->is_transaction_started());
+                $now = 6541; // Leave less than ten minutes plus the one-minute cleanup reserve.
+                return $result;
+            }, null, $timer);
+            $this->fail('The next item must not start without a complete time window');
+        } catch (\moodle_exception $exception) {
+            $this->assertSame('itemcontentmigrationpaused', $exception->errorcode);
+        }
+        $this->assertFalse($DB->is_transaction_started());
+        $this->assertSame(0, $DB->count_records('block_exaportmigration'));
+        $this->assertSame(2, $DB->count_records('block_exaportitemblock', ['itemid' => $first->id]));
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $second->id]));
+        $this->assertSame('second:value', $DB->get_field('block_exaportitem', 'url', ['id' => $second->id]));
+        $this->assertNotFalse(get_file_storage()->get_file_by_id($laterfile->get_id()));
+
+        $report = \block_exaport_migrate_legacy_item_content_with_report();
+        $this->assertSame(4, (int)$report->formatversion);
+        $this->assertSame(4, $DB->count_records('block_exaportitemblock'));
+        $block = $DB->get_record('block_exaportitemblock', ['itemid' => $first->id, 'type' => 'file'], '*', MUST_EXIST);
+        $copy = get_file_storage()->get_file(\context_user::instance($owner->id)->id, 'block_exaport',
+            'item_content_file', $block->id, '/', 'first.txt');
+        $this->assertSame($source->get_contenthash(), $copy->get_contenthash());
+        $this->assertSame('preserved bytes', $copy->get_content());
     }
 
     public function test_empty_and_false_urls_create_no_blocks_and_clear_compatibility_values(): void {
@@ -262,7 +339,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
     /** @dataProvider backing_failure_provider */
     #[\PHPUnit\Framework\Attributes\DataProvider('backing_failure_provider')]
-    public function test_backing_failure_is_documented_and_file_records_are_migrated(string $failure): void {
+    public function test_backing_failure_is_not_scanned_and_original_file_metadata_is_preserved(string $failure): void {
         global $DB;
         $this->resetAfterTest(true);
         $this->preventResetByRollback();
@@ -286,8 +363,12 @@ final class item_content_upgrade_test extends \advanced_testcase {
                 }
             }
             $result = \block_exaport_migrate_legacy_item_content($item);
-            $this->assertSame(1, $result['fileissues']);
-            $this->assertSame(1, \block_exaport\local\migration_issues::counts()['files_affected']);
+            $this->assertSame(0, $result['fileissues']);
+            $this->assertSame(0, \block_exaport\local\migration_issues::counts()['files_affected']);
+            $destination = $fs->get_file(\context_user::instance($user->id)->id, 'block_exaport',
+                'item_content_file', $result['fileblockid'], $source->get_filepath(), $source->get_filename());
+            $this->assertSame($source->get_contenthash(), $destination->get_contenthash());
+            $this->assertEquals($source->get_filesize(), $destination->get_filesize());
             $parent = $DB->get_record('block_exaportitem', ['id' => $item->id], '*', MUST_EXIST);
             $this->assertSame('', $parent->url);
             $this->assertSame('kept', $parent->attachment);
@@ -308,7 +389,8 @@ final class item_content_upgrade_test extends \advanced_testcase {
     }
 
     public static function destination_failure_provider(): array {
-        return ['wrong hash' => ['contenthash'], 'wrong size' => ['filesize'], 'wrong owner' => ['userid']];
+        return ['wrong hash' => ['contenthash'], 'wrong size' => ['filesize'], 'wrong owner' => ['userid'],
+            'wrong path' => ['filepath'], 'wrong name' => ['filename']];
     }
 
     /** @dataProvider destination_failure_provider */
@@ -324,7 +406,12 @@ final class item_content_upgrade_test extends \advanced_testcase {
                 if ($stage === 'before_verification') {
                     $file = $DB->get_record('files', ['component' => 'block_exaport',
                         'filearea' => 'item_content_file', 'itemid' => $value, 'filename' => 'readable.txt'], '*', MUST_EXIST);
-                    $changed = $field === 'contenthash' ? sha1('incorrect') : (int)$file->{$field} + 1;
+                    $changed = match ($field) {
+                        'contenthash' => sha1('incorrect'),
+                        'filepath' => '/wrong/',
+                        'filename' => 'wrong.txt',
+                        default => (int)$file->{$field} + 1,
+                    };
                     $DB->set_field('files', $field, $changed, ['id' => $file->id]);
                 }
             });
@@ -918,7 +1005,9 @@ final class item_content_upgrade_test extends \advanced_testcase {
 
         $this->assertSame([2, 3], $progress);
         $this->assertSame(2026101902, (int)$report->migrationversion);
-        $this->assertSame(3, (int)$report->formatversion);
+        $this->assertSame(4, (int)$report->formatversion);
+        $this->assertSame(['file_reference_metadata_checked' => true, 'file_contents_checked' => false],
+            $summary['verification']);
         $this->assertSame(3, $summary['source_counts_at_successful_run_start']['total_items']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['sentinel_legacy_urls']);

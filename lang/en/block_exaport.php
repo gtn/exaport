@@ -1140,6 +1140,9 @@ $string['migrationissues'] = 'Migration issues';
 $string['migrationissuesintro'] = 'Review the file problems recorded during upgrade. This history remains after files are restored and does not describe current file health.';
 $string['migrationissuesrecorded'] = 'Files with problems recorded during upgrade: {$a}.';
 $string['audititemcontentreportfiles'] = 'File migration counts describe file records and references. Missing or damaged file contents were not repaired.';
+// New reports distinguish migration checks from historical backing-file findings.
+$string['audititemcontentreportverification'] = 'Migrated file references were verified against their source metadata. Backing file contents were not inspected or checksummed; this report does not establish file-content health.';
+$string['itemcontentmigrationpaused'] = 'The item-content migration has reached its time budget for this upgrade attempt. Completed items have been saved. Restart the Moodle upgrade to continue; completed items will not be duplicated. The migration completion savepoint has not been recorded.';
 $string['audititemcontentscope'] = 'This audit checks database records and file references. It does not read file contents or verify that files can be downloaded.';
 $string['migrationissueshelp'] = 'This read-only history documents file problems observed during upgrade. File records were migrated with their content hashes preserved; missing or damaged bytes were not repaired. Repair storage access or restore the original bytes from a verified backup. No migration retry is needed. Findings remain as historical evidence and do not describe current file health. A missing destination means its record copy was not completed or no destination was recorded.';
 $string['migrationissuessummary'] = 'Recorded findings: {$a->issues_recorded}. Affected files: {$a->files_affected}. Affected items: {$a->items_affected}.';

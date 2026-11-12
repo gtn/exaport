@@ -77,7 +77,7 @@ The same upgrade stores one privacy-safe aggregate report in
 printed during the upgrade. It records source counts at the start of the
 successful run, operations completed by that run, residual counts at its end,
 and timing.
-In format version 3, `status.clean` means that counted legacy residuals and
+In format version 4, `status.clean` means that counted legacy residuals and
 recorded content findings are zero (the informational `total_items` count is
 excluded). `status.requires_review` is true when any such evidence exists. It
 remains true in the historical report even if backing storage is repaired later.
@@ -94,72 +94,71 @@ The unique report identifier prevents duplicate completed reports. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.
 
-Reports use format version 3 and include aggregate finding-history counts across
-all attempts. The migration identifier is 2026101902. A completed report is not
-overwritten if an upgrade attempt is retried before its savepoint is recorded.
+New reports use format version 4 and include aggregate finding-history counts across
+all attempts. Their `verification` section records `file_reference_metadata_checked: true`
+and `file_contents_checked: false`. A clean result establishes the counted migration
+postconditions; it does not establish backing-file health. The retained
+`files_with_content_issues` operation counter is zero for new attempts because no
+content scan runs. Older completed reports retain their original format and evidence.
+The migration identifier is 2026101902. A completed report is not overwritten if an upgrade attempt is retried before its savepoint is recorded.
 
 The upgrade is restart-safe and remains in the historical upgrade code. The
 audit does not re-run it and deliberately does not compare URLs, filenames, or
 content hashes to guess whether content is duplicated. See also
 [structured content export](structured-content-export.md).
 
-The migration fetches at most 500 items at a time using ascending-ID keyset
-pagination. Immediately before processing each non-empty batch it gives that
-batch a fresh 30-minute (1,800-second) Moodle timeout. There is no fixed
-batch-count limit or total duration limit, so a healthy migration may continue
-for many hours while still retaining a finite application-level guardrail for
-each batch. Aggregate, privacy-safe progress is reported after every completed
-batch.
+The migration fetches at most 500 item identities at a time using ascending-ID
+keyset pagination. It continues until no more items remain, with no upper item-ID
+cutoff. The per-item reload selects only ID, owner, URL and timestamps; rich-text
+descriptions are never loaded into a migration batch.
 
-Each item commits in its own delegated transaction. If, for example, a later
-batch fails, items completed in earlier batches remain committed, but the
-2026101902 content-migration savepoint and final migration report remain unapplied.
-The next Moodle upgrade attempt scans again from ID zero. Completed items have
-empty legacy sources and are harmless no-ops; the first incomplete item is retried
-from its surviving legacy source records.
+Immediately before each item, Moodle's timeout is renewed to ten minutes (600
+seconds). The fetch size does not determine this renewal interval: several slow
+items in one batch each receive their own window. Each attempt also has a fixed
+two-hour elapsed-time budget, measured with a monotonic clock. A new item is only
+started when a full ten-minute window plus one minute for reporting/cleanup
+remains. Renewal never resets this overall budget.
 
-### Nonblocking file migration and historical findings
+Each item commits in its own delegated transaction. When insufficient time
+remains, a controlled Moodle exception stops the attempt between items and asks
+the administrator to restart the upgrade. Completed items remain committed;
+normal Moodle shutdown cleanup runs, and neither the completed report nor the
+2026101902 migration savepoint is written. A retry scans from ID zero: completed
+items have empty legacy sources and are harmless no-ops. There is no automatic
+continuation or additional plugin-specific locking.
 
-Each source file is inspected once before content writes. The migration reads
-its bytes in bounded chunks and compares actual size and SHA-1 against its File
-API metadata. A known open/read failure or mismatch is documented immediately,
-then its **file record is migrated anyway**, retaining the expected content hash,
-filename, nested filepath, size and other source metadata. Backing bytes are
-neither rewritten nor replaced with empty content. Healthy sibling files and
-links migrate normally; there is no whole-item deferral, editing lock, or repair
-queue. Readable corruption is documented just like missing/unreadable content.
+Aggregate progress is reported after every completed batch. PHP timeout renewal
+cannot override PHP-FPM, web-server or proxy limits. The budget is checked at
+application checkpoints; it cannot interrupt a blocked database or storage call.
+Use a supervised CLI upgrade for large sites where possible.
 
-Every destination record is checked for the intended context, component, file
-area, block, owner, content hash and size before legacy records are removed.
-The destination references the same backing content hash; no second or third
-full byte read is necessary for this metadata migration. Database errors,
-unexpected backend exceptions and destination-record verification failures still
-abort and roll back the item's content transaction. A missing/unreadable local
-filedir root is treated as a storage outage and stops migration; custom storage
-backends must surface outages as exceptions. Known bad source bytes are never
-mistaken for new destination-record failures.
+### File-reference verification and historical findings
 
-`block_exaportmigissue` retains administrator-only evidence independently of the
-completed aggregate report. The 2026101902 upgrade step creates it alongside the
-report table, before converting any items. Fresh installations define the same
-table in `install.xml`. Findings are keyed by migration, parent item, original file ID
-and reason. They retain owner ID, expected content hash, first/latest observation
-times and observation count. Repeated observations update the same finding;
-starting another upgrade attempt never clears previously committed evidence.
+The migration does not open backing files to calculate their size or checksum.
+Moodle's File API creates destination records referencing the same stored content
+hash. Every destination's context, component, file area, block, owner, filepath,
+filename, repository-reference ID, content hash and recorded size are verified
+before legacy records are removed. Database errors, unexpected backend errors
+and destination verification failures abort and roll back the item's transaction.
+A missing/unreadable local filedir root still stops migration as a storage outage.
 
-A finding is committed before content writes. The exact destination file ID and
-copy time are subsequently saved **inside the same transaction as the new file
-record**. Thus a later rollback preserves the finding with no uncommitted target
-ID; a crash after copying preserves both the file record and its mapping. Recovery
-never depends on guessing file identities from matching hashes or names. Attempts
-inside an enclosing transaction are refused when independent finding commits
-cannot be guaranteed. A crash before an observation itself commits may require
-that observation to be rediscovered on the next scan.
+This verifies preservation and placement of file references. It does not detect
+missing bytes, read failures or corruption already present in backing storage,
+and does not date any such damage discovered later. Known incorrect hashes or
+sizes in source metadata are preserved rather than recalculated or repaired.
+File API hooks and repository handling remain in place.
 
-The final format-3 report includes both `files_with_content_issues` for its own
-successful attempt and `issue_history_at_successful_run_end` for **all attempts**.
-It cannot report a clean result just because an earlier attempt already migrated
-a broken file and then crashed. Existing completed reports remain immutable.
+`block_exaportmigissue` retains administrator-only findings recorded by earlier
+upgrade attempts that inspected source bytes. New attempts do not create these
+storage-health findings. Existing rows are never cleared: original owner, item,
+file ID, expected hash, reason, observation times and count remain historical
+evidence. If a previously recorded source is migrated on retry, its exact
+destination ID and copy time are still saved inside the item's transaction.
+Rollback cannot leave a mapping to an uncommitted destination.
+
+Format-4 reports include `issue_history_at_successful_run_end` across all attempts.
+They cannot report a clean result just because a new attempt did not scan bytes.
+Existing completed reports, including formats 1–3, are reused without modification.
 
 ### Finding an affected file after upgrade
 

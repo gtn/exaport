@@ -27,18 +27,20 @@ final class item_content_audit_output {
             'version' => (int)$record->migrationversion,
             'completed' => userdate((int)$record->timecompleted),
         ]));
-        $html .= \html_writer::tag('p', get_string('audititemcontentreportfiles', 'block_exaport'));
+        // Keep historical reports' wording; format 4 explicitly records the narrower verification scope.
+        $html .= \html_writer::tag('p', get_string((int)$record->formatversion >= 4 ?
+            'audititemcontentreportverification' : 'audititemcontentreportfiles', 'block_exaport'));
         foreach ($summary as $section => $counts) {
             if (!is_array($counts)) {
                 continue;
             }
             $table = new \html_table();
             $table->attributes['class'] = 'generaltable';
-            $isstatus = $section === 'status';
+            $isflags = in_array($section, ['status', 'verification'], true);
             $table->head = [get_string('audititemcontentcode', 'block_exaport'),
-                get_string($isstatus ? 'audititemcontentvalue' : 'audititemcontentcount', 'block_exaport')];
+                get_string($isflags ? 'audititemcontentvalue' : 'audititemcontentcount', 'block_exaport')];
             foreach ($counts as $code => $count) {
-                $value = $isstatus ? get_string($count ? 'yes' : 'no') : (int)$count;
+                $value = $isflags ? get_string($count ? 'yes' : 'no') : (int)$count;
                 $table->data[] = [\html_writer::tag('code', s($code)), $value];
             }
             $html .= \html_writer::tag('h4', s(str_replace('_', ' ', ucfirst($section))));

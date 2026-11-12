@@ -58,7 +58,12 @@ $string['audititemcontentperformancewarning'] = 'A site-wide audit may take time
 $string['audititemcontentpositive'] = 'Enter a positive item ID.';
 $string['audititemcontentreadonlynotice'] = 'This audit is read-only. It never migrates, repairs, moves, creates, or deletes content.';
 $string['audititemcontentrelatedids'] = 'Related record IDs';
+$string['audititemcontentreportfiles'] = 'File migration counts describe file records and references.';
+// Describe the verified migration result in the administrator report.
+$string['audititemcontentreportverification'] = 'Migrated file references were verified against their source metadata.';
+$string['itemcontentmigrationpaused'] = 'The item-content migration has reached its time budget for this upgrade attempt. Completed items have been saved. Restart the Moodle upgrade to continue; completed items will not be duplicated. The migration completion savepoint has not been recorded.';
 $string['audititemcontentreportmeta'] = 'Report identifier {$a->version}, completed {$a->completed}.';
+$string['audititemcontentscope'] = 'This audit checks database records, file references and their relationships. It reports the current state, including inconsistencies that may already have existed before migration. A finding does not by itself mean that the migration caused the problem.';
 $string['audititemcontentrun'] = 'Run audit';
 $string['audititemcontentsamplelimit'] = 'Sample limit';
 $string['audititemcontentsamplelimit_help'] = 'Maximum diagnostic IDs shown for each finding, from 1 to 1000.';
@@ -213,7 +218,6 @@ $string['saveitem'] = 'Save and close';
 $string['saveandkeepediting'] = 'Save and keep editing';
 $string['contentaftersave'] = 'Save and keep editing to add text, links, and files in the structured content section.';
 $string['disableditemwriteapi'] = 'This legacy item write service is disabled. Use the structured content interface.';
-
 // === Notes.
 $string['deletenoteconfirm'] = 'Do you really want to delete this note?';
 $string['deletelinkconfirm'] = 'Do you really want to delete this link?';
@@ -1109,25 +1113,17 @@ $string['sharing_internal_heading'] = 'People and groups';
 $string['sharing_email_heading'] = 'Email invitations';
 $string['sharing_audience'] = 'Who can access this?';
 $string['sharing_everyone'] = 'Everyone with an account';
-
-$string['exacompupdaterequired'] = 'Exaport cannot be installed or upgraded with the existing Exacomp. Please update the Exacomp code to version {$a} or later first, then retry the Moodle upgrade. Exaport can also be used without Exacomp.';
-
-$string['settings_disable_sharegroups_head'] = 'Disable sharing with groups';
-
-$string['settings_disable_sharegroups_body'] = 'Hide group sharing for categories, items and collections and deactivate existing group access. Saved group assignments become active again when group sharing is re-enabled, unless they have been changed or removed. <a href="{$a}">Click here to remove existing group shares.</a>';
-
-$string['sharing_groups_disabled'] = 'Group sharing is disabled by the administrator. Existing group assignments are kept.';
-
-$string['delete_all_sharegroups'] = 'Remove all existing group shares from items, categories and collections? Saved group assignments will be deleted and will not be restored when group sharing is re-enabled. Other sharing methods remain unchanged.';
-
-$string['settings_sharing_courses_with_block_only'] = 'Only list courses with an Exabis ePortfolio block when sharing';
-$string['other_shared_users_course'] = 'Other users';
-$string['settings_sharing_courses_with_block_only_description'] = 'Restrict the course list for selecting recipients to enrolled courses where an Exabis ePortfolio block has been added directly (including hidden blocks). Existing recipients outside those courses remain editable under "Other users". Global user search, existing access and "Everyone with an account" are unchanged.';
-
 $string['sharing_load_more_users'] = 'Load all users of this course …';
 $string['sharing_load_users_error'] = 'The user list could not be loaded. Please try again.';
 $string['sharing_users_not_ready'] = 'The recipient list is incomplete. Please wait for it to load, or reload the page before saving.';
-
+$string['exacompupdaterequired'] = 'Exaport cannot be installed or upgraded with the existing Exacomp. Please update the Exacomp code to version {$a} or later first, then retry the Moodle upgrade. Exaport can also be used without Exacomp.';
+$string['settings_disable_sharegroups_head'] = 'Disable sharing with groups';
+$string['settings_sharing_courses_with_block_only'] = 'Only list courses with an Exabis ePortfolio block when sharing';
+$string['other_shared_users_course'] = 'Other users';
+$string['settings_sharing_courses_with_block_only_description'] = 'Restrict the course list for selecting recipients to enrolled courses where an Exabis ePortfolio block has been added directly (including hidden blocks). Existing recipients outside those courses remain editable under "Other users". Global user search, existing access and "Everyone with an account" are unchanged.';
+$string['settings_disable_sharegroups_body'] = 'Hide group sharing for categories, items and collections and deactivate existing group access. Saved group assignments become active again when group sharing is re-enabled, unless they have been changed or removed. <a href="{$a}">Click here to remove existing group shares.</a>';
+$string['sharing_groups_disabled'] = 'Group sharing is disabled by the administrator. Existing group assignments are kept.';
+$string['delete_all_sharegroups'] = 'Remove all existing group shares from items, categories and collections? Saved group assignments will be deleted and will not be restored when group sharing is re-enabled. Other sharing methods remain unchanged.';
 $string['settings_enable_copy_root_naming'] = 'Allow course-based naming of copied templates';
 $string['settings_enable_copy_root_naming_description'] = 'Allow courses to rename the first root of their copied category template during course copy or restore. Existing portfolio categories and the source template are never changed.';
 $string['settings_copied_template_root_name'] = 'Copied template root name pattern';
@@ -1140,11 +1136,6 @@ $string['copy_root_naming_disabled'] = 'Automatic naming of copied templates is 
 $string['migrationissues'] = 'Migration issues';
 $string['migrationissuesintro'] = 'Review the file problems recorded during upgrade. This history remains after files are restored and does not describe current file health.';
 $string['migrationissuesrecorded'] = 'Files with problems recorded during upgrade: {$a}.';
-$string['audititemcontentreportfiles'] = 'File migration counts describe file records and references.';
-// Describe the verified migration result in the administrator report.
-$string['audititemcontentreportverification'] = 'Migrated file references were verified against their source metadata.';
-$string['itemcontentmigrationpaused'] = 'The item-content migration has reached its time budget for this upgrade attempt. Completed items have been saved. Restart the Moodle upgrade to continue; completed items will not be duplicated. The migration completion savepoint has not been recorded.';
-$string['audititemcontentscope'] = 'This audit checks database records, file references and their relationships. It reports the current state, including inconsistencies that may already have existed before migration. A finding does not by itself mean that the migration caused the problem.';
 $string['migrationissueshelp'] = 'This read-only history documents file problems observed during upgrade. File records were migrated with their content hashes preserved; missing or damaged bytes were not repaired. Repair storage access or restore the original bytes from a verified backup. No migration retry is needed. Findings remain as historical evidence and do not describe current file health. A missing destination means its record copy was not completed or no destination was recorded.';
 $string['migrationissuessummary'] = 'Recorded findings: {$a->issues_recorded}. Affected files: {$a->files_affected}. Affected items: {$a->items_affected}.';
 $string['migrationitemid'] = 'Item ID';
@@ -1167,9 +1158,22 @@ $string['privacy:metadata:block_exaportmigissue:reason'] = 'Observed file-conten
 $string['privacy:metadata:block_exaportmigissue:times'] = 'Observation and file-record migration timestamps.';
 $string['privacy:metadata:block_exaportmigissue:attempts'] = 'Number of failed observations.';
 $string['privacy:metadata:block_exaportmigissue:migrationversion'] = 'Migration identifier.';
-
+// Linked item content.
 $string['linkedcontentnotice'] = 'Choose the information to display. Changes to selected information also appear in shared items. New CV entries and badges are not added automatically.';
 $string['linkedcontentselectionrequired'] = 'Select at least one available field, CV entry or earned badge.';
 $string['linkedcontentmissing'] = 'The selected information is no longer available. Edit this block to update its selection.';
 $string['linkedbadgeissued'] = 'Awarded: {$a}';
 $string['linkedbadgeexpires'] = 'Expires: {$a}';
+$string['itemcontentmigrationtask'] = 'Portfolio content migration';
+$string['itemcontentmigrationpending'] = 'Exabis ePortfolio and Exabis Competencies are temporarily unavailable while portfolio content is migrated. Please try again later.';
+$string['itemcontentmigrationpendingadmin'] = 'Portfolio migration is pending. Exaport and Exacomp remain unavailable until the background task completes; the rest of Moodle remains available. Cron must be running. Check the ad hoc task queue and its logs. After correcting a failure, request a retry here or run the task using Moodle’s normal task runner. User and course deletion are temporarily paused to protect their contexts and files.';
+$string['itemcontentmigrationready'] = 'Portfolio content is ready. Exaport and Exacomp are available.';
+$string['itemcontentmigrationwaitingupgrade'] = 'Waiting for the ordinary Moodle upgrade of both plugins to finish. The migration will retry automatically.';
+$string['itemcontentmigrationbusy'] = 'Another portfolio migration worker is running. This task will retry.';
+$string['itemcontentmigrationprogress'] = 'Migration progress';
+$string['itemcontentmigrationphase'] = 'Phase';
+$string['itemcontentmigrationprocessed'] = 'Items committed in this background job';
+$string['itemcontentmigrationlastitem'] = 'Last committed item ID';
+$string['itemcontentmigrationtasks'] = 'Open Moodle ad hoc tasks and logs';
+$string['itemcontentmigrationretry'] = 'Request a retry';
+$string['itemcontentmigrationqueued'] = 'Portfolio conversion is queued for background processing. Exaport and Exacomp remain paused until it completes. Keep cron running; progress and retry are available under Site administration > Plugins > Blocks > Portfolio content migration.';

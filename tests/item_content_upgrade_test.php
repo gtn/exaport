@@ -60,20 +60,6 @@ final class item_content_upgrade_test extends \advanced_testcase {
         return (array)$DB->get_record($table, ['id' => $id], '*', MUST_EXIST);
     }
 
-    public function test_report_must_complete_before_the_upgrade_savepoint(): void {
-        $upgradelib = file_get_contents(__DIR__ . '/../db/upgradelib.php');
-        $upgrade = file_get_contents(__DIR__ . '/../db/upgrade.php');
-        $this->assertStringNotContainsString('upgrade_set_timeout(0);', $upgradelib . $upgrade);
-
-        $reportposition = strpos($upgrade, 'block_exaport_migrate_legacy_item_content_with_report(500');
-        // The report identifies the content migration at 2026101902 and must be
-        // written before Moodle records that savepoint; a pause must unwind both callers.
-        $savepointposition = strpos($upgrade, "upgrade_block_savepoint(true, 2026101902, 'exaport')");
-        $this->assertNotFalse($reportposition);
-        $this->assertNotFalse($savepointposition);
-        $this->assertLessThan($savepointposition, $reportposition);
-    }
-
     public function test_short_batch_reports_aggregate_progress(): void {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();

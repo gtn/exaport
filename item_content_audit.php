@@ -56,6 +56,12 @@ if ($data = $form->get_data()) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('audititemcontent', 'block_exaport'));
 echo $OUTPUT->notification(get_string('audititemcontentreadonlynotice', 'block_exaport'), 'info', false);
+if (\block_exaport\local\item_content_migration::is_pending()) {
+    echo $OUTPUT->notification(get_string('itemcontentmigrationpendingadmin', 'block_exaport'), 'warning', false);
+    echo html_writer::link(new moodle_url('/blocks/exaport/item_content_migration_status.php'),
+        get_string('itemcontentmigrationtask', 'block_exaport'), ['class' => 'btn btn-primary mb-3']);
+}
+
 echo html_writer::start_div('card mb-4');
 echo html_writer::start_div('card-body');
 $issuecounts = migration_issues::counts();

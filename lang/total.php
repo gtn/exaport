@@ -4049,4 +4049,56 @@ return [
     ],
     'linkedbadgeissued' => ['Verliehen: {$a}', 'Awarded: {$a}'],
     'linkedbadgeexpires' => ['Gültig bis: {$a}', 'Expires: {$a}'],
+    'itemcontentmigrationtask' => [
+        'Migration der Portfolio-Inhalte',
+        'Portfolio content migration',
+    ],
+    'itemcontentmigrationpending' => [
+        'Exabis ePortfolio und Exabis Competencies sind während der Migration der Portfolio-Inhalte vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.',
+        'Exabis ePortfolio and Exabis Competencies are temporarily unavailable while portfolio content is migrated. Please try again later.',
+    ],
+    'itemcontentmigrationpendingadmin' => [
+        'Die Portfolio-Migration steht noch aus. Exaport und Exacomp bleiben bis zum Abschluss der Hintergrundaufgabe gesperrt; das übrige Moodle bleibt verfügbar. Cron muss laufen. Prüfen Sie die Ad-hoc-Aufgaben und deren Protokolle. Nach Behebung eines Fehlers können Sie hier einen erneuten Versuch anfordern oder die Aufgabe mit Moodles Aufgabenverwaltung ausführen. Das Löschen von Nutzern und Kursen ist zum Schutz ihrer Kontexte und Dateien vorübergehend gesperrt.',
+        'Portfolio migration is pending. Exaport and Exacomp remain unavailable until the background task completes; the rest of Moodle remains available. Cron must be running. Check the ad hoc task queue and its logs. After correcting a failure, request a retry here or run the task using Moodle’s normal task runner. User and course deletion are temporarily paused to protect their contexts and files.',
+    ],
+    'itemcontentmigrationready' => [
+        'Die Portfolio-Inhalte sind bereit. Exaport und Exacomp sind verfügbar.',
+        'Portfolio content is ready. Exaport and Exacomp are available.',
+    ],
+    'itemcontentmigrationwaitingupgrade' => [
+        'Das normale Moodle-Upgrade beider Plugins muss zunächst abgeschlossen werden. Die Migration wird automatisch erneut versucht.',
+        'Waiting for the ordinary Moodle upgrade of both plugins to finish. The migration will retry automatically.',
+    ],
+    'itemcontentmigrationbusy' => [
+        'Eine andere Portfolio-Migration läuft bereits. Diese Aufgabe wird erneut versucht.',
+        'Another portfolio migration worker is running. This task will retry.',
+    ],
+    'itemcontentmigrationprogress' => [
+        'Migrationsfortschritt',
+        'Migration progress',
+    ],
+    'itemcontentmigrationphase' => [
+        'Phase',
+        'Phase',
+    ],
+    'itemcontentmigrationprocessed' => [
+        'In dieser Hintergrundmigration abgeschlossene Einträge',
+        'Items committed in this background job',
+    ],
+    'itemcontentmigrationlastitem' => [
+        'ID des zuletzt abgeschlossenen Eintrags',
+        'Last committed item ID',
+    ],
+    'itemcontentmigrationtasks' => [
+        'Moodle-Ad-hoc-Aufgaben und Protokolle öffnen',
+        'Open Moodle ad hoc tasks and logs',
+    ],
+    'itemcontentmigrationretry' => [
+        'Erneuten Versuch anfordern',
+        'Request a retry',
+    ],
+    'itemcontentmigrationqueued' => [
+        'Die Portfolio-Konvertierung wurde als Hintergrundaufgabe eingereiht. Exaport und Exacomp bleiben bis zum Abschluss gesperrt. Cron muss laufen; Fortschritt und Wiederholung finden Sie unter Website-Administration > Plugins > Blöcke > Migration der Portfolio-Inhalte.',
+        'Portfolio conversion is queued for background processing. Exaport and Exacomp remain paused until it completes. Keep cron running; progress and retry are available under Site administration > Plugins > Blocks > Portfolio content migration.',
+    ],
 ];

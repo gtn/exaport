@@ -7,6 +7,8 @@ use block_exaport\local\migration_issues;
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once($CFG->libdir . '/upgradelib.php');
 require_once(__DIR__ . '/../db/upgradelib.php');
 require_once(__DIR__ . '/../lib/item_content_helpers.php');
 
@@ -228,7 +230,7 @@ final class migration_issues_test extends \advanced_testcase {
         }
     }
 
-    public function test_first_upgrade_creates_finding_table_before_migrating_files(): void {
+    public function test_upgrade_prepares_finding_table_before_background_migration(): void {
         global $DB, $CFG;
         require_once($CFG->libdir . '/upgradelib.php');
         require_once(__DIR__ . '/../db/upgrade.php');
@@ -243,13 +245,24 @@ final class migration_issues_test extends \advanced_testcase {
         } finally {
             $output = ob_get_clean();
         }
-        $this->assertStringContainsString('0 files with historical findings', $output);
-        $this->assertSame(2026110502, (int)get_config('block_exaport', 'version'));
+        $this->assertStringContainsString('queued for background processing', $output);
+        $this->assertSame(\block_exaport\local\item_content_migration::SCHEMA_VERSION,
+            (int)get_config('block_exaport', 'version'));
         $this->assertSame(0, migration_issues::counts()['issues_recorded']);
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
+        $this->assertTrue(\block_exaport\local\item_content_migration::is_pending());
+        // The outer Moodle upgrade runner clears this lock before starting cron.
+        unset_config('upgraderunning');
+        ob_start();
+        try {
+            $this->assertFalse(\block_exaport\local\item_content_migration::run_batch());
+        } finally {
+            ob_end_clean();
+        }
         $this->assertSame(2, $DB->count_records('block_exaportitemblock'));
     }
 
-    public function test_retry_of_the_same_upgrade_keeps_committed_findings(): void {
+    public function test_background_retry_keeps_committed_findings(): void {
         global $DB, $CFG;
         require_once($CFG->libdir . '/upgradelib.php');
         require_once(__DIR__ . '/../db/upgrade.php');
@@ -259,6 +272,14 @@ final class migration_issues_test extends \advanced_testcase {
         $later = $this->item($owner->id);
         $laterfile = $this->file($later);
         set_config('version', 2026101901, 'block_exaport');
+        ob_start();
+        try {
+            $this->assertTrue(\xmldb_block_exaport_upgrade(2026101901));
+        } finally {
+            ob_end_clean();
+        }
+        // Only the plugin callback is called here; emulate the outer runner's normal cleanup.
+        unset_config('upgraderunning');
         $fs = get_file_storage();
         $filesystem = $fs->get_file_system();
         $property = new \ReflectionProperty(\file_storage::class, 'filesystem');
@@ -273,8 +294,8 @@ final class migration_issues_test extends \advanced_testcase {
         $property->setValue($fs, $fake);
         ob_start();
         try {
-            \xmldb_block_exaport_upgrade(2026101901);
-            $this->fail('Expected upgrade interruption');
+            \block_exaport\local\item_content_migration::run_batch();
+            $this->fail('Expected background migration interruption');
         } catch (\coding_exception $exception) {
             $this->assertStringContainsString('Interrupted upgrade', $exception->debuginfo);
         } finally {
@@ -283,10 +304,11 @@ final class migration_issues_test extends \advanced_testcase {
         }
         $original = $DB->get_record(migration_issues::TABLE, ['fileid' => $missing->get_id()], '*', MUST_EXIST);
         $this->assertSame(0, $DB->count_records('block_exaportmigration'));
-        $this->assertSame(2026101901, (int)get_config('block_exaport', 'version'));
+        $this->assertSame(\block_exaport\local\item_content_migration::SCHEMA_VERSION, (int)get_config('block_exaport', 'version'));
+        $this->assertTrue(\block_exaport\local\item_content_migration::is_pending());
         ob_start();
         try {
-            $this->assertTrue(\xmldb_block_exaport_upgrade(2026101901));
+            $this->assertFalse(\block_exaport\local\item_content_migration::run_batch());
         } finally {
             ob_end_clean();
         }
@@ -294,8 +316,8 @@ final class migration_issues_test extends \advanced_testcase {
         $report = $DB->get_record('block_exaportmigration', ['migrationversion' => migration_issues::VERSION], '*', MUST_EXIST);
         $summary = json_decode($report->summaryjson, true);
         $this->assertTrue($summary['status']['requires_review']);
-        $this->assertSame(1, $summary['issue_history_at_successful_run_end']['files_affected']);
-        $this->assertSame(2026110502, (int)get_config('block_exaport', 'version'));
+        $this->assertSame(1, $summary['issue_history_at_background_job_end']['files_affected']);
+        $this->assertSame(\block_exaport\local\item_content_migration::SCHEMA_VERSION, (int)get_config('block_exaport', 'version'));
     }
 
     public function test_local_storage_outage_remains_fatal(): void {

@@ -35,6 +35,15 @@ $string['exaport:shareintern'] = 'Internes Teilen von Sammelmappen';
 $string['exaport:shareextern'] = 'Externes Teilen von Sammelmappen';
 $string['exaport:allowposts'] = 'Kommentare erlauben';
 $string['exaport:competences'] = 'Kompetenzen erlauben';
+$string['audititemcontentcurrentaudit'] = 'Aktuelle Prüfung der Datenbank und Dateiverweise';
+$string['audititemcontentnofindings'] = 'Die Prüfung der Datenbank und Dateiverweise war erfolgreich.';
+$string['audititemcontentorphanlegacyfile'] = 'Es existieren alte Dateien ohne zugehörigen Eintrag. Eine bekannte Ursache in früheren Versionen war das Löschen einer Kategorie, bei dem Einträge entfernt wurden, ihre Dateien jedoch erhalten blieben. Die Migration behält diese verwaisten Dateien bei, da die zugehörigen Einträge nicht mehr existieren.';
+$string['audititemcontentreportfiles'] = 'Die Anzahl migrierter Dateien bezieht sich auf Dateidatensätze und Dateiverweise.';
+// Describe the verified migration result in the administrator report.
+$string['audititemcontentreportverification'] = 'Die migrierten Dateiverweise wurden mit den ursprünglichen Metadaten verglichen.';
+$string['itemcontentmigrationpaused'] = 'Das Zeitbudget der Migration von Eintragsinhalten für diesen Upgrade-Versuch wurde erreicht. Abgeschlossene Einträge wurden gespeichert. Starten Sie das Moodle-Upgrade erneut, um fortzufahren; abgeschlossene Einträge werden nicht dupliziert. Der abschließende Migrations-Speicherpunkt wurde noch nicht gesetzt.';
+$string['audititemcontentscope'] = 'Diese Prüfung kontrolliert Datenbankeinträge, Dateiverweise und deren Zuordnung. Sie zeigt den aktuellen Zustand, einschließlich Unstimmigkeiten, die möglicherweise schon vor der Migration bestanden. Ein Befund bedeutet für sich allein nicht, dass die Migration das Problem verursacht hat.';
+$string['audititemcontentsummary'] = 'Prüfung der Datenbank und Dateiverweise: {$a->errors} Fehlerbefunde, {$a->warnings} Warnbefunde.';
 $string['exaport:viewartifactsfromstudents'] = 'Portfolio Seiten der eigenen SuS sehen';
 $string['new'] = 'Neu';
 $string['addbookmark'] = 'Bookmark hinzufügen';
@@ -179,7 +188,6 @@ $string['saveitem'] = 'Speichern und schließen';
 $string['saveandkeepediting'] = 'Speichern und weiter bearbeiten';
 $string['contentaftersave'] = 'Speichern Sie und bearbeiten Sie weiter, um Text, Links und Dateien im Inhaltsbereich hinzuzufügen.';
 $string['disableditemwriteapi'] = 'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.';
-
 // === Notes.
 $string['deletenoteconfirm'] = 'Möchtest du diese Notiz wirklich l&ouml;schen?';
 $string['deletelinkconfirm'] = 'Möchtest du diesen Link wirklich l&ouml;schen?';
@@ -1068,25 +1076,17 @@ $string['sharing_internal_heading'] = 'Personen und Gruppen';
 $string['sharing_email_heading'] = 'E-Mail-Einladungen';
 $string['sharing_audience'] = 'Wer kann darauf zugreifen?';
 $string['sharing_everyone'] = 'Alle mit einem Benutzerkonto';
-
-$string['exacompupdaterequired'] = 'Exaport kann mit dem vorhandenen Exacomp nicht installiert oder aktualisiert werden. Bitte aktualisieren Sie zuerst den Exacomp-Code auf Version {$a} oder neuer und starten Sie das Moodle-Upgrade erneut. Exaport kann auch ohne Exacomp verwendet werden.';
-
-$string['settings_disable_sharegroups_head'] = 'Teilen mit Gruppen deaktivieren';
-
-$string['settings_disable_sharegroups_body'] = 'Blendet Gruppenfreigaben für Kategorien, Einträge und Sammelmappen aus und deaktiviert vorhandene Gruppenzugriffe. Gespeicherte Gruppenzuordnungen werden nach erneutem Aktivieren wieder wirksam, sofern sie nicht geändert oder entfernt wurden. <a href="{$a}">Hier klicken, um vorhandene Gruppenfreigaben zu entfernen.</a>';
-
-$string['sharing_groups_disabled'] = 'Gruppenfreigaben sind durch die Administration deaktiviert. Vorhandene Gruppenzuordnungen bleiben erhalten.';
-
-$string['delete_all_sharegroups'] = 'Alle vorhandenen Gruppenfreigaben für Einträge, Kategorien und Sammelmappen entfernen? Die gespeicherten Gruppenzuordnungen werden gelöscht und nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.';
-
-$string['settings_sharing_courses_with_block_only'] = 'Beim Teilen nur Kurse mit hinzugefügtem Exabis-ePortfolio-Block auflisten';
-$string['other_shared_users_course'] = 'Andere Nutzer/innen';
-$string['settings_sharing_courses_with_block_only_description'] = 'Beschränkt die Kursliste zur Empfängerauswahl auf eingeschriebene Kurse, in denen ein Exabis-ePortfolio-Block direkt hinzugefügt wurde (auch ausgeblendete Blöcke). Bestehende Empfänger außerhalb dieser Kurse bleiben unter "Andere Nutzer/innen" bearbeitbar. Die globale Benutzersuche, bestehende Zugriffsrechte und "Alle mit einem Benutzerkonto" bleiben unverändert.';
-
 $string['sharing_load_more_users'] = 'Weitere Nutzer/innen laden …';
 $string['sharing_load_users_error'] = 'Die Nutzerliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.';
 $string['sharing_users_not_ready'] = 'Die Empfängerliste ist noch nicht vollständig geladen. Bitte warten Sie oder laden Sie die Seite neu, bevor Sie speichern.';
-
+$string['exacompupdaterequired'] = 'Exaport kann mit dem vorhandenen Exacomp nicht installiert oder aktualisiert werden. Bitte aktualisieren Sie zuerst den Exacomp-Code auf Version {$a} oder neuer und starten Sie das Moodle-Upgrade erneut. Exaport kann auch ohne Exacomp verwendet werden.';
+$string['settings_disable_sharegroups_head'] = 'Teilen mit Gruppen deaktivieren';
+$string['settings_sharing_courses_with_block_only'] = 'Beim Teilen nur Kurse mit hinzugefügtem Exabis-ePortfolio-Block auflisten';
+$string['other_shared_users_course'] = 'Andere Nutzer/innen';
+$string['settings_sharing_courses_with_block_only_description'] = 'Beschränkt die Kursliste zur Empfängerauswahl auf eingeschriebene Kurse, in denen ein Exabis-ePortfolio-Block direkt hinzugefügt wurde (auch ausgeblendete Blöcke). Bestehende Empfänger außerhalb dieser Kurse bleiben unter "Andere Nutzer/innen" bearbeitbar. Die globale Benutzersuche, bestehende Zugriffsrechte und "Alle mit einem Benutzerkonto" bleiben unverändert.';
+$string['settings_disable_sharegroups_body'] = 'Blendet Gruppenfreigaben für Kategorien, Einträge und Sammelmappen aus und deaktiviert vorhandene Gruppenzugriffe. Gespeicherte Gruppenzuordnungen werden nach erneutem Aktivieren wieder wirksam, sofern sie nicht geändert oder entfernt wurden. <a href="{$a}">Hier klicken, um vorhandene Gruppenfreigaben zu entfernen.</a>';
+$string['sharing_groups_disabled'] = 'Gruppenfreigaben sind durch die Administration deaktiviert. Vorhandene Gruppenzuordnungen bleiben erhalten.';
+$string['delete_all_sharegroups'] = 'Alle vorhandenen Gruppenfreigaben für Einträge, Kategorien und Sammelmappen entfernen? Die gespeicherten Gruppenzuordnungen werden gelöscht und nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.';
 $string['settings_enable_copy_root_naming'] = 'Kursbezogene Benennung kopierter Strukturen erlauben';
 $string['settings_enable_copy_root_naming_description'] = 'Erlaubt die Kursoption, beim Kopieren oder Wiederherstellen die oberste Kategorie der kopierten Struktur nach dem Zielkurs zu benennen. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.';
 $string['settings_copied_template_root_name'] = 'Namensmuster für kopierte Strukturen';
@@ -1099,15 +1099,6 @@ $string['copy_root_naming_disabled'] = 'Die automatische Benennung kopierter Str
 $string['migrationissues'] = 'Migrationsprobleme';
 $string['migrationissuesintro'] = 'Die beim Upgrade festgestellten Dateiprobleme können hier eingesehen werden. Der Verlauf bleibt auch nach einer Wiederherstellung erhalten und beschreibt nicht den aktuellen Dateizustand.';
 $string['migrationissuesrecorded'] = 'Dateien mit beim Upgrade festgestellten Problemen: {$a}.';
-$string['audititemcontentcurrentaudit'] = 'Aktuelle Prüfung der Datenbank und Dateiverweise';
-$string['audititemcontentnofindings'] = 'Die Prüfung der Datenbank und Dateiverweise war erfolgreich.';
-$string['audititemcontentorphanlegacyfile'] = 'Es existieren alte Dateien ohne zugehörigen Eintrag. Eine bekannte Ursache in früheren Versionen war das Löschen einer Kategorie, bei dem Einträge entfernt wurden, ihre Dateien jedoch erhalten blieben. Die Migration behält diese verwaisten Dateien bei, da die zugehörigen Einträge nicht mehr existieren.';
-$string['audititemcontentreportfiles'] = 'Die Anzahl migrierter Dateien bezieht sich auf Dateidatensätze und Dateiverweise.';
-// Das geprüfte Migrationsergebnis im Administrationsbericht beschreiben.
-$string['audititemcontentreportverification'] = 'Die migrierten Dateiverweise wurden mit den ursprünglichen Metadaten verglichen.';
-$string['itemcontentmigrationpaused'] = 'Das Zeitbudget der Migration von Eintragsinhalten für diesen Upgrade-Versuch wurde erreicht. Abgeschlossene Einträge wurden gespeichert. Starten Sie das Moodle-Upgrade erneut, um fortzufahren; abgeschlossene Einträge werden nicht dupliziert. Der abschließende Migrations-Speicherpunkt wurde noch nicht gesetzt.';
-$string['audititemcontentsummary'] = 'Prüfung der Datenbank und Dateiverweise: {$a->errors} Fehlerbefunde, {$a->warnings} Warnbefunde.';
-$string['audititemcontentscope'] = 'Diese Prüfung kontrolliert Datenbankeinträge, Dateiverweise und deren Zuordnung. Sie zeigt den aktuellen Zustand, einschließlich Unstimmigkeiten, die möglicherweise schon vor der Migration bestanden. Ein Befund bedeutet für sich allein nicht, dass die Migration das Problem verursacht hat.';
 $string['migrationissueshelp'] = 'Dies ist ein schreibgeschützter Verlauf der beim Upgrade festgestellten Dateiprobleme. Die Dateidatensätze wurden mit unverändertem Inhaltshash migriert. Fehlende oder beschädigte Bytes werden dadurch nicht repariert. Speicherzugriff reparieren oder die ursprünglichen Bytes aus einer geprüften Sicherung wiederherstellen; ein erneuter Migrationslauf ist nicht erforderlich. Der Verlauf bleibt erhalten und beschreibt nicht den aktuellen Dateizustand. Ein fehlendes Ziel zeigt an, dass der Kopiervorgang damals nicht abgeschlossen wurde oder kein Ziel aufgezeichnet ist.';
 $string['migrationissuessummary'] = 'Erfasste Probleme: {$a->issues_recorded}. Betroffene Dateien: {$a->files_affected}. Betroffene Einträge: {$a->items_affected}.';
 $string['migrationitemid'] = 'Eintrags-ID';
@@ -1130,9 +1121,22 @@ $string['privacy:metadata:block_exaportmigissue:reason'] = 'Festgestelltes Probl
 $string['privacy:metadata:block_exaportmigissue:times'] = 'Zeitpunkte der Beobachtung und Übertragung des Dateidatensatzes.';
 $string['privacy:metadata:block_exaportmigissue:attempts'] = 'Anzahl fehlgeschlagener Beobachtungen.';
 $string['privacy:metadata:block_exaportmigissue:migrationversion'] = 'Kennung der Migration.';
-
+// Linked item content.
 $string['linkedcontentnotice'] = 'Wählen Sie die anzuzeigenden Informationen. Änderungen an ausgewählten Informationen erscheinen auch in geteilten Einträgen. Neue Lebenslauf-Einträge und Badges werden nicht automatisch hinzugefügt.';
 $string['linkedcontentselectionrequired'] = 'Wählen Sie mindestens ein verfügbares Feld, einen Lebenslauf-Eintrag oder ein erworbenes Badge.';
 $string['linkedcontentmissing'] = 'Die ausgewählten Informationen sind nicht mehr verfügbar. Bearbeiten Sie diesen Inhaltsblock, um die Auswahl zu aktualisieren.';
 $string['linkedbadgeissued'] = 'Verliehen: {$a}';
 $string['linkedbadgeexpires'] = 'Gültig bis: {$a}';
+$string['itemcontentmigrationtask'] = 'Migration der Portfolio-Inhalte';
+$string['itemcontentmigrationpending'] = 'Exabis ePortfolio und Exabis Competencies sind während der Migration der Portfolio-Inhalte vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.';
+$string['itemcontentmigrationpendingadmin'] = 'Die Portfolio-Migration steht noch aus. Exaport und Exacomp bleiben bis zum Abschluss der Hintergrundaufgabe gesperrt; das übrige Moodle bleibt verfügbar. Cron muss laufen. Prüfen Sie die Ad-hoc-Aufgaben und deren Protokolle. Nach Behebung eines Fehlers können Sie hier einen erneuten Versuch anfordern oder die Aufgabe mit Moodles Aufgabenverwaltung ausführen. Das Löschen von Nutzern und Kursen ist zum Schutz ihrer Kontexte und Dateien vorübergehend gesperrt.';
+$string['itemcontentmigrationready'] = 'Die Portfolio-Inhalte sind bereit. Exaport und Exacomp sind verfügbar.';
+$string['itemcontentmigrationwaitingupgrade'] = 'Das normale Moodle-Upgrade beider Plugins muss zunächst abgeschlossen werden. Die Migration wird automatisch erneut versucht.';
+$string['itemcontentmigrationbusy'] = 'Eine andere Portfolio-Migration läuft bereits. Diese Aufgabe wird erneut versucht.';
+$string['itemcontentmigrationprogress'] = 'Migrationsfortschritt';
+$string['itemcontentmigrationphase'] = 'Phase';
+$string['itemcontentmigrationprocessed'] = 'In dieser Hintergrundmigration abgeschlossene Einträge';
+$string['itemcontentmigrationlastitem'] = 'ID des zuletzt abgeschlossenen Eintrags';
+$string['itemcontentmigrationtasks'] = 'Moodle-Ad-hoc-Aufgaben und Protokolle öffnen';
+$string['itemcontentmigrationretry'] = 'Erneuten Versuch anfordern';
+$string['itemcontentmigrationqueued'] = 'Die Portfolio-Konvertierung wurde als Hintergrundaufgabe eingereiht. Exaport und Exacomp bleiben bis zum Abschluss gesperrt. Cron muss laufen; Fortschritt und Wiederholung finden Sie unter Website-Administration > Plugins > Blöcke > Migration der Portfolio-Inhalte.';

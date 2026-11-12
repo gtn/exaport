@@ -25,6 +25,9 @@ use block_exaport\globals as g;
 
 class api {
     public static function active() {
+        if (\block_exaport\local\item_content_migration::is_pending()) {
+            return false;
+        }
         // Sheck if block is active.
         if (!g::$DB->get_record('block', array('name' => 'exaport', 'visible' => 1))) {
             return false;
@@ -34,6 +37,7 @@ class api {
     }
 
     public static function delete_user_data($userid) {
+        \block_exaport\local\item_content_migration::require_ready();
         global $DB;
 
         $items = $DB->get_recordset('block_exaportitem', ['userid' => $userid]);
@@ -63,6 +67,7 @@ class api {
     }
 
     public static function get_item_comments($itemid) {
+        \block_exaport\local\item_content_migration::require_ready();
         $itemcomments = g::$DB->get_records('block_exaportitemcomm',
             ['itemid' => $itemid],
             'timemodified ASC', 'id, entry, userid, timemodified');

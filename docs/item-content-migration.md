@@ -5,7 +5,7 @@
 ### Optional Exacomp integration
 
 Exaport can be installed without Exacomp. If Exacomp code is present, installing
-or upgrading this Exaport release requires Exacomp **2026101903** or later.
+or upgrading this Exaport release requires Exacomp **2026111200** or later.
 The upgrade checks this before any migration or upgrade savepoint. The install
 callback also checks it, including recovery of an interrupted installation.
 Moodle creates the fresh installation's tables before calling that callback;
@@ -13,9 +13,9 @@ keep the site in maintenance mode until installation completes successfully.
 
 Update Exacomp first, then Exaport, or deploy both together. The check reads the
 Exacomp version on disk so it accepts a combined deployment even before Moodle
-has recorded Exacomp's new installed version. New Exacomp rejects content calls
-until Exaport's structured-content migration has completed, so completed updates
-can be hours apart in that order. A failed upgrade does not restore deployed PHP
+has recorded Exacomp's new installed version. The matching Exacomp release pauses all plugin operations until Exaport's content
+conversion and deferred event replay have completed. Moodle's installed version
+alone no longer means that portfolio content is ready. A failed upgrade does not restore deployed PHP
 files: restore the previous code or finish the compatible deployment before
 reopening the site.
 
@@ -50,18 +50,20 @@ The relevant versions and identifiers for this release are:
 | Purpose | Value |
 | --- | --- |
 | Content-block table creation savepoint | `2026101901` |
-| Completed content-migration savepoint | `2026101902` |
-| Final Exaport plugin version | `2026102900` |
+| Migration schema/report identifier (historical savepoint) | `2026101902` |
+| Background-migration scheduling savepoint and final Exaport version | `2026111203` |
 | Finding-history schema savepoint | `2026101902` |
 | Historical migration report identifier (`migrationversion`) | `2026101902` |
 
-The report identifier matches the content-migration savepoint and identifies
-that migration rather than the final installed plugin version. Once released,
-keep this migration's identifier fixed when later plugin versions increase so
-its completed reports remain discoverable.
+The report identifier remains fixed at `2026101902`; it is not the installed
+plugin version. The ordinary upgrade creates the schema and queues
+`\block_exaport\task\migrate_item_content`. It does not convert portfolio items
+inside the administrator's upgrade request. Fresh installations and upgrades of an already-structured release need no legacy
+conversion, including fresh older installations without a historical report. An
+existing completed report is preserved and does not queue a new conversion.
 
-The content migration at savepoint **2026101902** migrates meaningful legacy URLs
-and non-directory legacy files. Its expected clean postcondition is:
+The background task converts meaningful legacy URLs and non-directory legacy
+files. Its expected clean postcondition is:
 
 * the parent `url` column is empty;
 * no non-directory files remain in `item_file`; and
@@ -72,72 +74,95 @@ clean result. Meaningful parent URLs are cleared after copying their exact value
 to link blocks; actual files are independently copied and verified through the
 File API. These operations do not require erasing the attachment marker.
 
-The same upgrade stores one privacy-safe aggregate report in
-`block_exaportmigration`. The report is available on the audit page and is not
-printed during the upgrade. It records source counts at the start of the
-successful run, operations completed by that run, residual counts at its end,
-and timing.
-In format version 4, `status.clean` means that counted legacy residuals and
-recorded content findings are zero (the informational `total_items` count is
-excluded). `status.requires_review` is true when any such evidence exists. It
-remains true in the historical report even if backing storage is repaired later.
-Neither flag proves that application flows or
-all structured-data relationships are correct; continue release validation and
-the read-only audit. Residual files, including orphans or files outside the
-owner's context, remain untouched for investigation. Preserve backups and
-review their provenance and ownership before deciding on any manual correction;
-the report does not move, delete, deduplicate, or guess ownership.
-The administration report displays these flags as **Yes** (true) or **No** (false)
-under a **Value** heading; numeric migration statistics retain their **Count**
-heading. The stored report and JSON download retain boolean values for the flags.
-The unique report identifier prevents duplicate completed reports. The report
-contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
-contents.
+### Background execution and plugin pause
 
-New reports use format version 4 and summarize migrated references, residuals
-and aggregate finding-history counts across all attempts. They omit low-level
-verification flags and the obsolete current-run content-finding counter. Older
-completed reports retain their original format and evidence.
-The migration identifier is 2026101902. A completed report is not overwritten if an upgrade attempt is retried before its savepoint is recorded.
+After the normal Moodle upgrade finishes, ordinary Moodle pages remain usable.
+**Exaport and Exacomp stay paused** until conversion and deferred event replay
+finish. Plugin pages, external functions (including Diggr-plus), file callbacks,
+public integration APIs, distribution/import tasks, privacy requests and plugin
+backup/restore steps reject operations before their normal work. Course blocks
+show a temporary-unavailability notice. The audit, migration issues and migration
+status pages remain available to authorised administrators.
 
-The upgrade is restart-safe and remains in the historical upgrade code. The
-audit does not re-run it and deliberately does not compare URLs, filenames, or
-content hashes to guess whether content is duplicated. See also
-[structured content export](structured-content-export.md).
+User and course deletion are temporarily rejected as well: Moodle would otherwise
+delete contexts and files belonging to the paused plugins. Normal course activity
+can continue. The companion Exacomp release journals its course/activity/quiz
+observers, including required snapshots, actor identity and quiz-grade inputs;
+replay happens in order while both plugins are still paused. Each observer's
+writes and journal deletion commit together. A short event lock protects the
+final queue-empty check and reopening, without holding that lock during the
+potentially slow file-table counts.
 
-The migration fetches at most 500 item identities at a time using ascending-ID
-keyset pagination. It continues until no more items remain, with no upper item-ID
-cutoff. The per-item reload selects only ID, owner, URL and timestamps; rich-text
-descriptions are never loaded into a migration batch.
+Deploy complete matching code packages in the normal maintenance window and stop
+old plugin requests/workers before replacing PHP files. The pause cannot stop
+arbitrary third-party code or direct database writes that bypass these entry
+points. Do not downgrade, uninstall the plugins or change their configuration
+while migration is pending.
 
-Immediately before each item, Moodle's timeout is renewed to ten minutes (600
-seconds). The fetch size does not determine this renewal interval: several slow
-items in one batch each receive their own window. Each attempt also has a fixed
-two-hour elapsed-time budget, measured with a monotonic clock. A new item is only
-started when a full ten-minute window plus one minute for reporting/cleanup
-remains. Renewal never resets this overall budget.
+### Progress, failure and retry
 
-Each item commits in its own delegated transaction. When insufficient time
-remains, a controlled Moodle exception stops the attempt between items and asks
-the administrator to restart the upgrade. Completed items remain committed;
-normal Moodle shutdown cleanup runs, and neither the completed report nor the
-2026101902 migration savepoint is written. One plugin configuration value records
-the last committed item ID, so a retry starts after it instead of spending its
-budget rescanning a huge completed prefix. This checkpoint advances only after
-an item commits. A crash between commit and checkpointing may replay that one
-item, whose cleared sources make it a harmless no-op. Newly created higher IDs
-remain eligible; there is no upper cutoff. There is no automatic continuation or
-additional plugin-specific locking.
+The task fetches up to 500 ascending item identities at a time and yields after
+60 seconds between items, or at the batch boundary. Each item's conversion,
+committed cursor and operation counts share one database transaction. A failed
+item cannot advance the cursor; retries do not rescan the completed prefix. An
+interrupted older synchronous migration's existing checkpoint is honoured. A
+singleton Moodle lock prevents concurrent workers from migrating the same data.
 
-The checkpoint is removed only after the completed report has been saved. If an
-attempt then stops before Moodle records the upgrade savepoint, the existing
-report makes retry a no-op. Report operations and progress counts describe work
-visited in the successful attempt, rather than adding earlier attempts' counts.
+No background task calls `upgrade_set_timeout()` or renews Moodle's global
+`upgraderunning` lock. The normal task runner manages execution and retry; an
+individual item is not given the former ten-minute upgrade lock. The 60-second
+batch target is checked between transactions and cannot interrupt blocked
+storage/database operations. Use supervised cron/CLI workers for large sites.
 
-Aggregate progress is reported after every completed batch. PHP timeout renewal
-cannot override PHP-FPM, web-server or proxy limits. The budget is checked at
-application checkpoints; it cannot interrupt a blocked database or storage call.
-Use a supervised CLI upgrade for large sites where possible.
+Keep Moodle cron enabled and running. A stopped cron leaves both plugins safely
+paused, not half available. Progress, the last committed item, the last error and
+a retry button are available under **Site administration > Plugins > Blocks >
+Portfolio content migration**. The same page links to Moodle's native ad hoc task
+queue and logs. After fixing only the cause, request a retry there or use the
+normal task runner:
+
+```sh
+php admin/cli/adhoc_task.php --execute --classname='\block_exaport\task\migrate_item_content'
+```
+
+Use the CLI path from your Moodle release (on releases with a public document
+root, the task entry point is still provided under the installation's CLI
+administration directory). Native **Run all** / **Run again** can also be used by
+administrators where Moodle's PHP CLI path is configured. These web-triggered
+runs still depend on hosting request/process limits; recurring cron is the normal
+continuation route. Continuations can be picked up by a subsequent cron run.
+
+On an exception or killed worker, earlier items remain committed, the failed
+item rolls back, and both plugins stay paused. Moodle retains the task for retry.
+Do not reset versions, clear a live worker's lock or delete historical reports.
+After confirming a process is dead, use Moodle's task recovery route; distributed
+lock expiry/recovery follows the configured Moodle lock backend. Full rollback
+requires the matched old database, complete Moodledata and old plugin code.
+Replacing PHP alone is not rollback.
+
+### Historical report
+
+One aggregate report in `block_exaportmigration` describes **content conversion**.
+The audit page and JSON download expose it read-only. New reports use format 5:
+source counts at background-job start, cumulative committed operations across its
+batches/retries, residuals and retained historical issue counts. The `resume`
+section records an initial older synchronous checkpoint; operations before that
+checkpoint are not invented or added to the background counters. Older completed
+reports retain their original format and evidence, including format 4's
+successful-attempt counters.
+
+`status.clean` means counted legacy residuals and retained findings are zero,
+excluding informational parent totals. Neither status flag proves readable file
+bytes, correct relationships or application behaviour. Orphaned/wrong-context
+legacy files remain for investigation; preserved attachment metadata is not a
+residual. Reports remain immutable even if later repairs change the current
+audit. A completed content report can precede the last deferred event: the
+explicit pending state, rather than the report or installed version, determines
+plugin readiness. The pause is cleared only after report commit and an empty
+deferred-event queue.
+
+The read-only audit never reruns migration or guesses duplicate content from
+names, URLs or hashes. See also [structured content export](structured-content-export.md).
 
 ### File-reference verification and historical findings
 
@@ -208,12 +233,9 @@ deletion; they describe what the upgrade observed, not an outstanding work queue
 Owner-context privacy export includes the findings and approved erasure removes
 them. Findings include no file contents, URLs, filenames or user names.
 
-Renewing Moodle's PHP timeout is only an application-level guardrail. It cannot
-guarantee interruption of every blocked external operation or override limits
-from PHP-FPM, Apache or another web server, reverse proxies, process supervisors,
-containers, database servers, network or remote/object storage, or operating-
-system process limits. Administrators should run large upgrades through a
-supervised CLI upgrade where possible.
+Task boundaries cannot override PHP-FPM, web-server, proxy, process-supervisor,
+database or remote-storage limits. Regular cron or a supervised CLI task runner
+is preferable to repeatedly starting the upgrade through a browser.
 
 Legacy and imported File API paths are preserved, including nested directories.
 Structured file links, thumbnails, shared views, and integration URLs include

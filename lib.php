@@ -34,6 +34,7 @@ use function block_exaport\common\print_error;
 // itemid
 // file name.
 function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+    \block_exaport\local\item_content_migration::require_ready();
     $file = block_exaport_get_authorized_file($context, $filearea, $args);
     if (!$file || $file->is_directory()) {
         return false;
@@ -62,6 +63,7 @@ function block_exaport_pluginfile($course, $cm, $context, $filearea, $args, $for
  * @return stored_file|false Authorised file, or false when unavailable.
  */
 function block_exaport_get_authorized_file(context $context, string $filearea, array $args) {
+    \block_exaport\local\item_content_migration::require_ready();
     global $USER, $DB;
 
     // Reject obsolete PDF URLs, including those carrying another collection's hash.
@@ -429,6 +431,7 @@ function block_exaport_user_preferences(): array {
  * @return string Block edit form HTML
  */
 function block_exaport_output_fragment_view_template_blockedit($args) {
+    \block_exaport\local\item_content_migration::require_ready();
     global $CFG, $DB;
     $courseid = clean_param($args['courseid'] ?? 0, PARAM_INT);
     // Moodle's core_get_fragment has already authenticated this context and initialised the page theme.
@@ -469,6 +472,7 @@ function block_exaport_output_fragment_view_template_blockedit($args) {
  * Moodle automatically captures $PAGE->requires JS (editor init) and delivers it alongside the HTML.
  */
 function block_exaport_output_fragment_blockedit($args) {
+    \block_exaport\local\item_content_migration::require_ready();
     global $CFG;
 
     require_login();
@@ -494,4 +498,13 @@ function block_exaport_output_fragment_blockedit($args) {
     }
 
     return $formdata->html;
+}
+
+/** Deleting users or courses also deletes contexts/files used by the paused plugins. */
+function block_exaport_pre_user_delete($user) {
+    \block_exaport\local\item_content_migration::require_ready();
+}
+
+function block_exaport_pre_course_delete($course) {
+    \block_exaport\local\item_content_migration::require_ready();
 }

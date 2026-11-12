@@ -133,6 +133,7 @@ class share_overview {
         }
 
         // Views.
+        // sharedemails is TEXT on fresh installs; quote its flag for PostgreSQL.
         $views = $DB->get_records_sql(
             "SELECT v.id, v.name AS title, 0 AS courseid, v.shareall, v.externaccess, v.sharedemails,
                     COUNT(DISTINCT vshar.userid) AS cnt_shared_users,
@@ -147,7 +148,7 @@ class share_overview {
                  OR COUNT(DISTINCT vgshar.groupid) > 0
                  " . ($shareallenabled ? 'OR v.shareall = 1' : '') . "
                  " . ($externalenabled ? 'OR v.externaccess = 1' : '') . "
-                 " . (block_exaport_shareemails_enabled() ? 'OR v.sharedemails = 1' : '') . "
+                 " . (block_exaport_shareemails_enabled() ? "OR v.sharedemails = '1'" : '') . "
            ORDER BY v.name",
             [$groupsenabled, $userid]
         );

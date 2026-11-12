@@ -1053,8 +1053,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame([2, 3], $progress);
         $this->assertSame(2026101902, (int)$report->migrationversion);
         $this->assertSame(4, (int)$report->formatversion);
-        $this->assertSame(['file_reference_metadata_checked' => true, 'file_contents_checked' => false],
-            $summary['verification']);
+        $this->assertArrayNotHasKey('verification', $summary);
         $this->assertSame(3, $summary['source_counts_at_successful_run_start']['total_items']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['meaningful_legacy_urls']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['sentinel_legacy_urls']);
@@ -1063,7 +1062,6 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame([
             'items_processed' => 3,
             'items_already_clean' => 1,
-            'files_with_content_issues' => 0,
             'link_blocks_created' => 1,
             'file_blocks_created' => 1,
             'files_copied' => 2,

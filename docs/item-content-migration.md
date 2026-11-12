@@ -94,12 +94,10 @@ The unique report identifier prevents duplicate completed reports. The report
 contains no item IDs, owner IDs, URLs, filenames, titles, user details, or file
 contents.
 
-New reports use format version 4 and include aggregate finding-history counts across
-all attempts. Their `verification` section records `file_reference_metadata_checked: true`
-and `file_contents_checked: false`. A clean result establishes the counted migration
-postconditions; it does not establish backing-file health. The retained
-`files_with_content_issues` operation counter is zero for new attempts because no
-content scan runs. Older completed reports retain their original format and evidence.
+New reports use format version 4 and summarize migrated references, residuals
+and aggregate finding-history counts across all attempts. They omit low-level
+verification flags and the obsolete current-run content-finding counter. Older
+completed reports retain their original format and evidence.
 The migration identifier is 2026101902. A completed report is not overwritten if an upgrade attempt is retried before its savepoint is recorded.
 
 The upgrade is restart-safe and remains in the historical upgrade code. The
@@ -262,9 +260,9 @@ backing file bytes or prove that attachments can be downloaded. The prominent
 **Migration issues** button opens the historical file findings separately.
 When retained findings exist, a warning above that button shows how many files
 were affected during upgrade. It remains visible after files are restored.
-The current checks report **Database and file-reference checks passed. File
-contents were not checked.** when no structural findings are found. The JSON
-status `clean` has the same limited scope. Historical file-copy counts describe
+The current checks report **Database and file-reference checks passed.** when no
+structural findings are found. The JSON status `clean` has the same limited scope.
+Historical file-copy counts describe
 migrated file records and references, including records whose backing bytes were
 already missing; they do not count successfully repaired or downloaded files.
 

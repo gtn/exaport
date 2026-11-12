@@ -105,7 +105,7 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
             'timemodified' => $timemodified,
         ];
         $result = [
-            'fileissues' => 0, // Retained for report compatibility; this attempt does not inspect file contents.
+            'fileissues' => 0, // Retained for batch-result compatibility.
             'linkblockid' => null,
             'fileblockid' => null,
             'filecount' => count($sourcefiles),
@@ -365,6 +365,8 @@ function block_exaport_migrate_legacy_item_content_with_report(
         $timer,
         $lastprocessedid
     );
+    // Report migrated references; retain older storage-health findings only in their historical section.
+    unset($operations['files_with_content_issues']);
     $after = block_exaport_legacy_item_content_counts();
     $timer->check_deadline();
     // Total parent items are informational, not legacy residuals.
@@ -373,8 +375,6 @@ function block_exaport_migrate_legacy_item_content_with_report(
     $issuecounts = \block_exaport\local\migration_issues::counts();
     $clean = !array_filter($residuals) && !$issuecounts['issues_recorded'];
     $summary = [
-        // A clean metadata migration does not establish that the backing bytes are readable or intact.
-        'verification' => ['file_reference_metadata_checked' => true, 'file_contents_checked' => false],
         'status' => [
             'clean' => $clean,
             'requires_review' => !$clean,

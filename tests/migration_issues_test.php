@@ -98,7 +98,7 @@ final class migration_issues_test extends \advanced_testcase {
         $this->assertFalse($summary['status']['clean']);
         $this->assertSame(3, $summary['issue_history_at_successful_run_end']['files_affected']);
         // First item's warning survives even though that item is a clean no-op on this attempt.
-        $this->assertSame(0, $summary['operations_in_successful_run']['files_with_content_issues']);
+        $this->assertArrayNotHasKey('files_with_content_issues', $summary['operations_in_successful_run']);
         foreach ([$firstissue, $fatalissue] as $old) {
             $now = $DB->get_record(migration_issues::TABLE, ['id' => $old->id], '*', MUST_EXIST);
             $this->assertSame((int)$old->firstseen, (int)$now->firstseen);
@@ -170,7 +170,7 @@ final class migration_issues_test extends \advanced_testcase {
         $this->assertFalse(get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
         $report = \block_exaport_migrate_legacy_item_content_with_report(1);
         $summary = json_decode($report->summaryjson, true);
-        $this->assertSame(0, $summary['operations_in_successful_run']['files_with_content_issues']);
+        $this->assertArrayNotHasKey('files_with_content_issues', $summary['operations_in_successful_run']);
         $this->assertSame(1, $summary['issue_history_at_successful_run_end']['files_affected']);
         $this->assertTrue($summary['status']['requires_review']);
         $this->assertSame(2, $DB->count_records('block_exaportitemblock'));

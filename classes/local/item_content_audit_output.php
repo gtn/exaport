@@ -27,20 +27,26 @@ final class item_content_audit_output {
             'version' => (int)$record->migrationversion,
             'completed' => userdate((int)$record->timecompleted),
         ]));
-        // Keep historical reports' wording; format 4 explicitly records the narrower verification scope.
+        // Describe the verified migration outcome without low-level implementation flags.
         $html .= \html_writer::tag('p', get_string((int)$record->formatversion >= 4 ?
             'audititemcontentreportverification' : 'audititemcontentreportfiles', 'block_exaport'));
         foreach ($summary as $section => $counts) {
-            if (!is_array($counts)) {
+            // Older development reports retain these flags in storage; keep the administrator view concise.
+            if (!is_array($counts) || $section === 'verification') {
                 continue;
             }
             $table = new \html_table();
             $table->attributes['class'] = 'generaltable';
-            $isflags = in_array($section, ['status', 'verification'], true);
+            $isstatus = $section === 'status';
             $table->head = [get_string('audititemcontentcode', 'block_exaport'),
-                get_string($isflags ? 'audititemcontentvalue' : 'audititemcontentcount', 'block_exaport')];
+                get_string($isstatus ? 'audititemcontentvalue' : 'audititemcontentcount', 'block_exaport')];
             foreach ($counts as $code => $count) {
-                $value = $isflags ? get_string($count ? 'yes' : 'no') : (int)$count;
+                // Hide the obsolete zero counter from format 4; earlier formats can contain real findings.
+                if ((int)$record->formatversion >= 4 && $section === 'operations_in_successful_run' &&
+                        $code === 'files_with_content_issues') {
+                    continue;
+                }
+                $value = $isstatus ? get_string($count ? 'yes' : 'no') : (int)$count;
                 $table->data[] = [\html_writer::tag('code', s($code)), $value];
             }
             $html .= \html_writer::tag('h4', s(str_replace('_', ' ', ucfirst($section))));

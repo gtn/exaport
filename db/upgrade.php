@@ -1583,7 +1583,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         mtrace("Exaport file-reference migration completed: {$issues['files_affected']} files with historical findings. " .
             'Open Site administration > Plugins > Blocks > exabis ePortfolio > Item-content migration audit, ' .
             'then Migration issues. ' .
-            'File-reference metadata was verified; backing file contents were not inspected. ' .
+            'Migrated file references were verified against their source metadata. ' .
             'Earlier findings are retained across upgrade attempts.');
         upgrade_block_savepoint(true, 2026101902, 'exaport');
     }

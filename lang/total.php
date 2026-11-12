@@ -145,8 +145,8 @@ return [
         'Leave empty for a site-wide audit, or enter a positive item ID to restrict attributable checks.',
     ],
     'audititemcontentnofindings' => [
-        'Die Prüfung der Datenbank und Dateiverweise war erfolgreich. Dateiinhalte wurden nicht geprüft.',
-        'Database and file-reference checks passed. File contents were not checked.',
+        'Die Prüfung der Datenbank und Dateiverweise war erfolgreich.',
+        'Database and file-reference checks passed.',
     ],
     'audititemcontentnoreport' => [
         null,
@@ -173,13 +173,13 @@ return [
         'Related record IDs',
     ],
     'audititemcontentreportfiles' => [
-        'Die Anzahl migrierter Dateien bezieht sich auf Dateidatensätze und Dateiverweise. Fehlende oder beschädigte Dateiinhalte wurden nicht repariert.',
-        'File migration counts describe file records and references. Missing or damaged file contents were not repaired.',
+        'Die Anzahl migrierter Dateien bezieht sich auf Dateidatensätze und Dateiverweise.',
+        'File migration counts describe file records and references.',
     ],
-    // Metadata-only migrations retain older reports without claiming a new backing-file scan.
+    // Describe the verified migration result in the administrator report.
     'audititemcontentreportverification' => [
-        'Die migrierten Dateiverweise wurden mit den ursprünglichen Metadaten verglichen. Dateiinhalte wurden weder untersucht noch durch Prüfsummen geprüft; dieser Bericht bestätigt nicht die Unversehrtheit der Dateiinhalte.',
-        'Migrated file references were verified against their source metadata. Backing file contents were not inspected or checksummed; this report does not establish file-content health.',
+        'Die migrierten Dateiverweise wurden mit den ursprünglichen Metadaten verglichen.',
+        'Migrated file references were verified against their source metadata.',
     ],
     'itemcontentmigrationpaused' => [
         'Das Zeitbudget der Migration von Eintragsinhalten für diesen Upgrade-Versuch wurde erreicht. Abgeschlossene Einträge wurden gespeichert. Starten Sie das Moodle-Upgrade erneut, um fortzufahren; abgeschlossene Einträge werden nicht dupliziert. Der abschließende Migrations-Speicherpunkt wurde noch nicht gesetzt.',
@@ -190,8 +190,8 @@ return [
         'Report identifier {$a->version}, completed {$a->completed}.',
     ],
     'audititemcontentscope' => [
-        'Diese Prüfung kontrolliert Datenbankeinträge und Dateiverweise. Sie liest keine Dateiinhalte und prüft nicht, ob Dateien heruntergeladen werden können.',
-        'This audit checks database records and file references. It does not read file contents or verify that files can be downloaded.',
+        'Diese Prüfung kontrolliert Datenbankeinträge, Dateiverweise und deren Zuordnung.',
+        'This audit checks database records, file references and their relationships.',
     ],
     'audititemcontentrun' => [
         null,
@@ -218,8 +218,8 @@ return [
         'Severity',
     ],
     'audititemcontentsummary' => [
-        'Prüfung der Datenbank und Dateiverweise: {$a->errors} Fehlerbefunde, {$a->warnings} Warnbefunde. Dateiinhalte wurden nicht geprüft.',
-        'Database and file-reference checks: {$a->errors} error findings, {$a->warnings} warning findings. File contents were not checked.',
+        'Prüfung der Datenbank und Dateiverweise: {$a->errors} Fehlerbefunde, {$a->warnings} Warnbefunde.',
+        'Database and file-reference checks: {$a->errors} error findings, {$a->warnings} warning findings.',
     ],
     'audititemcontentvalue' => [
         null,

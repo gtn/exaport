@@ -213,7 +213,7 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
 }
 
 /**
- * Migrate all legacy items in bounded ascending-ID batches.
+ * Migrate items with legacy sources in bounded ascending-ID batches.
  *
  * The injectable migrator keeps interruption/restart behavior testable without
  * making the production upgrade depend on PHPUnit or request state.
@@ -249,14 +249,23 @@ function block_exaport_migrate_legacy_item_content_batches(
         'urls_cleared' => 0,
         'legacy_file_areas_cleared' => 0,
     ];
+    $lastoutput = hrtime(true);
+    $lastreported = -1;
     do {
         $timer->check_deadline();
-        $items = $DB->get_records_select(
-            'block_exaportitem',
-            'id > ?',
-            [$lastprocessedid],
-            'id ASC',
-            'id, userid', // Only identities are needed; the migrator reloads the current source fields.
+        // Empty items need no owner/context checks. Keep raw URLs and directory records for cleanup.
+        // Appending a marker makes length count whitespace even on SQL Server.
+        $urllength = $DB->sql_length($DB->sql_concat('i.url', "'x'"));
+        $items = $DB->get_records_sql(
+            "SELECT i.id, i.userid
+               FROM {block_exaportitem} i
+              WHERE i.id > :lastid
+                AND ($urllength > 1 OR EXISTS (
+                    SELECT 1 FROM {files} f
+                     WHERE f.component = :component AND f.filearea = :filearea AND f.itemid = i.id
+                ))
+           ORDER BY i.id ASC",
+            ['lastid' => $lastprocessedid, 'component' => 'block_exaport', 'filearea' => 'item_file'],
             0,
             $batchsize
         );
@@ -275,12 +284,18 @@ function block_exaport_migrate_legacy_item_content_batches(
             $counts['urls_cleared'] += (int)($result['urlcleared'] ?? 0);
             $counts['legacy_file_areas_cleared'] += (int)($result['legacyfileareacleared'] ?? 0);
             $lastprocessedid = (int)$item->id;
-        }
-        if ($items && $progresscallback) {
-            $progresscallback($counts['items_processed'], $counts);
+            // Report committed progress by elapsed time, independently of the database fetch size.
+            if ($progresscallback && hrtime(true) - $lastoutput >= 5 * 1e9) {
+                $progresscallback($counts['items_processed'], $counts);
+                $lastoutput = hrtime(true);
+                $lastreported = $counts['items_processed'];
+            }
         }
     } while (count($items) === $batchsize);
     $timer->check_deadline();
+    if ($progresscallback && $lastreported !== $counts['items_processed']) {
+        $progresscallback($counts['items_processed'], $counts);
+    }
     return $counts;
 }
 
@@ -323,7 +338,7 @@ function block_exaport_legacy_item_content_counts(): array {
  *
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional migrator for tests.
- * @param callable|null $progresscallback Optional aggregate batch progress callback.
+ * @param callable|null $progresscallback Optional aggregate progress callback.
  * @param \block_exaport\local\item_content_migration_timer|null $timer Injectable attempt budget for tests.
  * @return stdClass Completed report record.
  */

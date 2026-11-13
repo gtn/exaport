@@ -77,6 +77,14 @@ The same upgrade stores one privacy-safe aggregate report in
 printed during the upgrade. It records source counts at the start of the
 successful run, operations completed by that run, residual counts at its end,
 and timing.
+`items_processed` counts selected migration candidates in the successful attempt,
+not every portfolio item. Items with neither a raw legacy URL nor legacy file
+records are skipped, including their owner/context checks. Nonempty sentinel or
+whitespace URLs and directory-only file areas are still selected for cleanup.
+`items_already_clean` only describes selected items found clean when reloaded;
+it does not count skipped items. Whole-site source/residual counts, issue history
+and the clean/requires-review decision remain unchanged. Previously completed
+reports retain their original counts.
 In format version 4, `status.clean` means that counted legacy residuals and
 recorded content findings are zero (the informational `total_items` count is
 excluded). `status.requires_review` is true when any such evidence exists. It
@@ -106,7 +114,7 @@ content hashes to guess whether content is duplicated. See also
 [structured content export](structured-content-export.md).
 
 The migration fetches at most 500 item identities at a time using ascending-ID
-keyset pagination. It continues until no more items remain, with no upper item-ID
+keyset pagination. It continues until no more candidates remain, with no upper item-ID
 cutoff. The per-item reload selects only ID, owner, URL and timestamps; rich-text
 descriptions are never loaded into a migration batch.
 
@@ -134,9 +142,15 @@ attempt then stops before Moodle records the upgrade savepoint, the existing
 report makes retry a no-op. Report operations and progress counts describe work
 visited in the successful attempt, rather than adding earlier attempts' counts.
 
-Aggregate progress is reported after every completed batch. PHP timeout renewal
-cannot override PHP-FPM, web-server or proxy limits. The budget is checked at
-application checkpoints; it cannot interrupt a blocked database or storage call.
+The upgrade prints a starting message immediately. Aggregate progress is checked
+after each committed item and printed approximately every five seconds, regardless
+of the 500-item fetch boundaries. The final candidate count is printed even for a
+quick or empty run, without repeating an identical last periodic update. These
+messages count migration candidates processed in this attempt, not all portfolio
+items. Progress output does not renew or extend the fixed attempt budget.
+PHP timeout renewal cannot override PHP-FPM, web-server or proxy limits. Output
+and the budget are checked at application checkpoints; neither can interrupt a
+blocked database or storage call.
 Use a supervised CLI upgrade for large sites where possible.
 
 ### File-reference verification and historical findings

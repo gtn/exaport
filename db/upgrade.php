@@ -1577,7 +1577,7 @@ function xmldb_block_exaport_upgrade($oldversion) {
         block_exaport_migrate_legacy_item_content_with_report(500, null,
             static function(int $processed): void {
                 // Aggregate progress only: never expose item, owner, URL, or file details.
-                mtrace("Exaport item-content migration: {$processed} migration candidates processed in this attempt");
+                mtrace("Exaport item-content migration: {$processed} migration candidates processed in this attempt.");
             });
 
         $issues = \block_exaport\local\migration_issues::counts();

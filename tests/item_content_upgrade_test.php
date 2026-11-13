@@ -103,7 +103,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         for ($index = 0; $index < 500; $index++) {
-            $this->create_item($user->id);
+            $this->create_item($user->id, 'note', "legacy:{$index}");
         }
         $progress = 0;
 
@@ -123,7 +123,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         for ($index = 0; $index < 501; $index++) {
-            $this->create_item($user->id);
+            $this->create_item($user->id, 'note', "legacy:{$index}");
         }
         $progress = [];
 
@@ -143,7 +143,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         for ($index = 0; $index < 11; $index++) {
-            $this->create_item($user->id);
+            $this->create_item($user->id, 'note', "legacy:{$index}");
         }
         $progress = [];
 
@@ -156,6 +156,91 @@ final class item_content_upgrade_test extends \advanced_testcase {
             });
 
         $this->assertSame([2, 4, 6, 8, 10, 11], $progress);
+    }
+
+    public function test_empty_items_are_untouched_without_validating_their_owners(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        // A malformed owner must not block an item that needs no migration or cleanup.
+        $empty = $this->create_item(0, 'note', '', 'historical marker');
+        $structured = $this->create_item($owner->id);
+        $blockid = $this->create_block($structured, 'text', 0);
+        $icononly = $this->create_item($owner->id);
+        $icon = get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($owner->id)->id, 'component' => 'block_exaport',
+            'filearea' => 'item_iconfile', 'itemid' => $icononly->id,
+            'filepath' => '/', 'filename' => 'icon.txt', 'userid' => $owner->id,
+        ], 'not legacy content');
+        $originals = [];
+        foreach ([$empty, $structured, $icononly] as $item) {
+            $originals[$item->id] = $this->record_array('block_exaportitem', $item->id);
+        }
+        $pending = $this->create_item($owner->id, 'link', 'https://migration.example/');
+        $visited = [];
+
+        $report = \block_exaport_migrate_legacy_item_content_with_report(1,
+            static function($item) use (&$visited): array {
+                $visited[] = (int)$item->id;
+                return \block_exaport_migrate_legacy_item_content($item);
+            });
+
+        $this->assertSame([$pending->id], $visited);
+        foreach ($originals as $id => $original) {
+            $this->assertSame($original, $this->record_array('block_exaportitem', $id));
+        }
+        $this->assertSame('Existing body', $DB->get_field('block_exaportitemblock', 'content', ['id' => $blockid]));
+        $this->assertSame('not legacy content', get_file_storage()->get_file_by_id($icon->get_id())->get_content());
+        $summary = json_decode($report->summaryjson, true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(4, $summary['source_counts_at_successful_run_start']['total_items']);
+        $this->assertSame(1, $summary['operations_in_successful_run']['items_processed']);
+        $this->assertTrue($summary['status']['clean']);
+    }
+
+    public function test_file_only_candidates_are_not_duplicated_and_directory_only_areas_are_cleaned(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $item = $this->create_item($owner->id);
+        $this->create_legacy_file($item, 'same.txt', 'root bytes');
+        $this->create_legacy_file($item, 'same.txt', 'nested bytes', '/nested/');
+        $directoryonly = $this->create_item($owner->id);
+        $contextid = \context_user::instance($owner->id)->id;
+        get_file_storage()->create_directory($contextid, 'block_exaport', 'item_file', $directoryonly->id, '/empty/');
+
+        $counts = \block_exaport_migrate_legacy_item_content_batches(1);
+
+        $this->assertSame(2, $counts['items_processed']);
+        $this->assertSame(1, $counts['file_blocks_created']);
+        $this->assertSame(2, $counts['files_copied']);
+        $block = $DB->get_record('block_exaportitemblock', ['itemid' => $item->id], '*', MUST_EXIST);
+        foreach (['/' => 'root bytes', '/nested/' => 'nested bytes'] as $path => $bytes) {
+            $copy = get_file_storage()->get_file($contextid, 'block_exaport', 'item_content_file',
+                $block->id, $path, 'same.txt');
+            $this->assertSame($bytes, $copy->get_content());
+        }
+        foreach ([$item, $directoryonly] as $parent) {
+            $this->assertSame([], get_file_storage()->get_area_files(
+                $contextid, 'block_exaport', 'item_file', $parent->id, 'id', true));
+        }
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock', ['itemid' => $directoryonly->id]));
+    }
+
+    public function test_invalid_owner_with_legacy_content_still_blocks_migration(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->create_item(0);
+        $pending = $this->create_item(0, 'link', 'https://migration.example/preserved');
+
+        try {
+            \block_exaport_migrate_legacy_item_content_with_report();
+            $this->fail('Legacy content must still undergo owner validation');
+        } catch (\coding_exception $exception) {
+            $this->assertStringContainsString('owner IDs', $exception->getMessage());
+        }
+        $this->assertSame($pending->url, $DB->get_field('block_exaportitem', 'url', ['id' => $pending->id]));
+        $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
+        $this->assertSame(0, $DB->count_records('block_exaportmigration'));
     }
 
     public function test_large_descriptions_are_preserved_without_loading_them_in_batches(): void {
@@ -551,7 +636,8 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertFalse($summary['status']['requires_review']);
         $this->assertArrayNotHasKey('legacy_attachments', $summary['residual_counts_at_successful_run_end']);
         $this->assertArrayNotHasKey('attachments_cleared', $summary['operations_in_successful_run']);
-        $this->assertSame(4, $summary['operations_in_successful_run']['items_already_clean']);
+        $this->assertSame(0, $summary['operations_in_successful_run']['items_processed']);
+        $this->assertSame(0, $summary['operations_in_successful_run']['items_already_clean']);
         $this->assertEquals($report, \block_exaport_migrate_legacy_item_content_with_report(1));
         \block_exaport_migrate_legacy_item_content_batches(1);
 
@@ -1050,7 +1136,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
             });
         $summary = json_decode($report->summaryjson, true, 512, JSON_THROW_ON_ERROR);
 
-        $this->assertSame([2, 3], $progress);
+        $this->assertSame([2], $progress);
         $this->assertSame(2026101902, (int)$report->migrationversion);
         $this->assertSame(4, (int)$report->formatversion);
         $this->assertArrayNotHasKey('verification', $summary);
@@ -1060,8 +1146,8 @@ final class item_content_upgrade_test extends \advanced_testcase {
         $this->assertSame(2, $summary['source_counts_at_successful_run_start']['legacy_files']);
         $this->assertSame(1, $summary['source_counts_at_successful_run_start']['items_with_legacy_files']);
         $this->assertSame([
-            'items_processed' => 3,
-            'items_already_clean' => 1,
+            'items_processed' => 2,
+            'items_already_clean' => 0,
             'link_blocks_created' => 1,
             'file_blocks_created' => 1,
             'files_copied' => 2,

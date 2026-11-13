@@ -213,7 +213,7 @@ function block_exaport_migrate_legacy_item_content(stdClass $item, ?callable $pr
 }
 
 /**
- * Migrate all legacy items in bounded ascending-ID batches.
+ * Migrate items with legacy sources in bounded ascending-ID batches.
  *
  * The injectable migrator keeps interruption/restart behavior testable without
  * making the production upgrade depend on PHPUnit or request state.
@@ -251,12 +251,19 @@ function block_exaport_migrate_legacy_item_content_batches(
     ];
     do {
         $timer->check_deadline();
-        $items = $DB->get_records_select(
-            'block_exaportitem',
-            'id > ?',
-            [$lastprocessedid],
-            'id ASC',
-            'id, userid', // Only identities are needed; the migrator reloads the current source fields.
+        // Empty items need no owner/context checks. Keep raw URLs and directory records for cleanup.
+        // Appending a marker makes length count whitespace even on SQL Server.
+        $urllength = $DB->sql_length($DB->sql_concat('i.url', "'x'"));
+        $items = $DB->get_records_sql(
+            "SELECT i.id, i.userid
+               FROM {block_exaportitem} i
+              WHERE i.id > :lastid
+                AND ($urllength > 1 OR EXISTS (
+                    SELECT 1 FROM {files} f
+                     WHERE f.component = :component AND f.filearea = :filearea AND f.itemid = i.id
+                ))
+           ORDER BY i.id ASC",
+            ['lastid' => $lastprocessedid, 'component' => 'block_exaport', 'filearea' => 'item_file'],
             0,
             $batchsize
         );

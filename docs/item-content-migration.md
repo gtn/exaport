@@ -142,9 +142,15 @@ attempt then stops before Moodle records the upgrade savepoint, the existing
 report makes retry a no-op. Report operations and progress counts describe work
 visited in the successful attempt, rather than adding earlier attempts' counts.
 
-Aggregate progress is reported after every completed batch. PHP timeout renewal
-cannot override PHP-FPM, web-server or proxy limits. The budget is checked at
-application checkpoints; it cannot interrupt a blocked database or storage call.
+The upgrade prints a starting message immediately. Aggregate progress is checked
+after each committed item and printed approximately every five seconds, regardless
+of the 500-item fetch boundaries. The final candidate count is printed even for a
+quick or empty run, without repeating an identical last periodic update. These
+messages count migration candidates processed in this attempt, not all portfolio
+items. Progress output does not renew or extend the fixed attempt budget.
+PHP timeout renewal cannot override PHP-FPM, web-server or proxy limits. Output
+and the budget are checked at application checkpoints; neither can interrupt a
+blocked database or storage call.
 Use a supervised CLI upgrade for large sites where possible.
 
 ### File-reference verification and historical findings

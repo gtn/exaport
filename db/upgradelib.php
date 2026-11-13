@@ -249,6 +249,8 @@ function block_exaport_migrate_legacy_item_content_batches(
         'urls_cleared' => 0,
         'legacy_file_areas_cleared' => 0,
     ];
+    $lastoutput = hrtime(true);
+    $lastreported = -1;
     do {
         $timer->check_deadline();
         // Empty items need no owner/context checks. Keep raw URLs and directory records for cleanup.
@@ -282,12 +284,18 @@ function block_exaport_migrate_legacy_item_content_batches(
             $counts['urls_cleared'] += (int)($result['urlcleared'] ?? 0);
             $counts['legacy_file_areas_cleared'] += (int)($result['legacyfileareacleared'] ?? 0);
             $lastprocessedid = (int)$item->id;
-        }
-        if ($items && $progresscallback) {
-            $progresscallback($counts['items_processed'], $counts);
+            // Report committed progress by elapsed time, independently of the database fetch size.
+            if ($progresscallback && hrtime(true) - $lastoutput >= 5 * 1e9) {
+                $progresscallback($counts['items_processed'], $counts);
+                $lastoutput = hrtime(true);
+                $lastreported = $counts['items_processed'];
+            }
         }
     } while (count($items) === $batchsize);
     $timer->check_deadline();
+    if ($progresscallback && $lastreported !== $counts['items_processed']) {
+        $progresscallback($counts['items_processed'], $counts);
+    }
     return $counts;
 }
 
@@ -330,7 +338,7 @@ function block_exaport_legacy_item_content_counts(): array {
  *
  * @param int $batchsize Maximum items fetched at once.
  * @param callable|null $migrator Optional migrator for tests.
- * @param callable|null $progresscallback Optional aggregate batch progress callback.
+ * @param callable|null $progresscallback Optional aggregate progress callback.
  * @param \block_exaport\local\item_content_migration_timer|null $timer Injectable attempt budget for tests.
  * @return stdClass Completed report record.
  */

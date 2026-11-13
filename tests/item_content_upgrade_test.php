@@ -136,10 +136,10 @@ final class item_content_upgrade_test extends \advanced_testcase {
             });
 
         $this->assertSame(501, $counts['items_processed']);
-        $this->assertSame([500, 501], $progress);
+        $this->assertSame([501], $progress);
     }
 
-    public function test_many_batches_report_cumulative_progress(): void {
+    public function test_fast_batches_report_only_the_final_count(): void {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         for ($index = 0; $index < 11; $index++) {
@@ -155,7 +155,68 @@ final class item_content_upgrade_test extends \advanced_testcase {
                 $progress[] = $processed;
             });
 
-        $this->assertSame([2, 4, 6, 8, 10, 11], $progress);
+        $this->assertSame([11], $progress);
+    }
+
+    public function test_progress_reports_elapsed_time_across_batches_after_checkpointing(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $ids = [];
+        for ($index = 0; $index < 6; $index++) {
+            $ids[] = $this->create_item($owner->id, 'note', "private:{$index}")->id;
+        }
+        $started = hrtime(true);
+        $progress = [];
+
+        \block_exaport_migrate_legacy_item_content_with_report(1,
+            static function($item): array {
+                $result = \block_exaport_migrate_legacy_item_content($item);
+                // Real elapsed time catches clocks accidentally reset at each one-item fetch.
+                usleep(1100000);
+                return $result;
+            },
+            function(int $processed) use (&$progress, $ids, $started, $DB): void {
+                $this->assertSame($ids[$processed - 1],
+                    (int)get_config('block_exaport', 'item_content_migration_2026101902_lastid'));
+                $this->assertSame($processed, $DB->count_records('block_exaportitemblock'));
+                $progress[] = [$processed, (hrtime(true) - $started) / 1e9];
+            });
+
+        $this->assertGreaterThanOrEqual(5, $progress[0][1]);
+        $this->assertLessThan(6, $progress[0][0]);
+        $this->assertSame(6, $progress[count($progress) - 1][0]);
+        $counts = array_column($progress, 0);
+        $this->assertSame($counts, array_values(array_unique($counts)));
+    }
+
+    public function test_final_count_does_not_repeat_the_last_timed_update(): void {
+        $this->resetAfterTest();
+        $owner = $this->getDataGenerator()->create_user();
+        $this->create_item($owner->id, 'note', 'private:slow');
+        $progress = [];
+
+        \block_exaport_migrate_legacy_item_content_batches(500,
+            static function($item): array {
+                $result = \block_exaport_migrate_legacy_item_content($item);
+                usleep(5100000);
+                return $result;
+            },
+            static function(int $processed) use (&$progress): void {
+                $progress[] = $processed;
+            });
+
+        $this->assertSame([1], $progress);
+    }
+
+    public function test_empty_migration_reports_zero(): void {
+        $this->resetAfterTest();
+        $progress = [];
+        \block_exaport_migrate_legacy_item_content_batches(500, null,
+            static function(int $processed) use (&$progress): void {
+                $progress[] = $processed;
+            });
+        $this->assertSame([0], $progress);
     }
 
     public function test_empty_items_are_untouched_without_validating_their_owners(): void {
@@ -1246,6 +1307,7 @@ final class item_content_upgrade_test extends \advanced_testcase {
         }
 
         $this->assertSame(0, $DB->count_records('block_exaportmigration'));
-        $this->assertSame([1], $progress);
+        // A quick failure may precede any timed update; the failed item must never be counted.
+        $this->assertNotContains(2, $progress);
     }
 }

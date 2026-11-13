@@ -1573,10 +1573,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
 
         // Fetch bounded ID batches; each item gets ten minutes within a fixed two-hour attempt budget.
         // A budget interruption throws before the next item, leaving this savepoint for the administrator's retry.
+        mtrace('Exaport item-content migration: starting; items without legacy sources are skipped.');
         block_exaport_migrate_legacy_item_content_with_report(500, null,
             static function(int $processed): void {
                 // Aggregate progress only: never expose item, owner, URL, or file details.
-                mtrace("Exaport item-content migration: {$processed} items processed");
+                mtrace("Exaport item-content migration: {$processed} migration candidates processed in this attempt");
             });
 
         $issues = \block_exaport\local\migration_issues::counts();

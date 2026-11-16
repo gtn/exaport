@@ -1,5 +1,6 @@
 ### v5.2 (2026111600) ###
 * Added native Moodle User tours explaining how to create an object and upload documents through Content. Tours are registered on installation and upgrade, with English, German and Dutch text and administrator controls.
+* Each Exaport tour has its own revision. Adding a guide preserves existing completion; deliberately increasing a guide's revision replaces and replays only that guide.
 * Clarified the permanent upload hint on the new-object form.
 
 ### v5.2 (2026111000) ###

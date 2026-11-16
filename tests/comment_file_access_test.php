@@ -99,6 +99,7 @@ final class comment_file_access_test extends \advanced_testcase {
         return [[null], [0], ['0'], [false]];
     }
 
+    /** @dataProvider hidden_values */
     #[DataProvider('hidden_values')]
     public function test_legacy_hidden_comment_values_deny_downloads($visibility): void {
         global $DB;

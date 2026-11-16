@@ -177,7 +177,7 @@ $string['gradeitem'] = 'Abgabe beurteilen';
 $string['submititem'] = 'Abgeben';
 $string['saveitem'] = 'Speichern und schließen';
 $string['saveandkeepediting'] = 'Speichern und weiter bearbeiten';
-$string['contentaftersave'] = 'Speichern Sie und bearbeiten Sie weiter, um Text, Links und Dateien im Inhaltsbereich hinzuzufügen.';
+$string['contentaftersave'] = 'Um Dokumente hochzuladen, wählen Sie "Speichern und weiter bearbeiten". Wählen Sie dann unter Inhalt zuerst + und anschließend Datei.';
 $string['disableditemwriteapi'] = 'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.';
 
 // === Notes.
@@ -1136,3 +1136,17 @@ $string['linkedcontentselectionrequired'] = 'Wählen Sie mindestens ein verfügb
 $string['linkedcontentmissing'] = 'Die ausgewählten Informationen sind nicht mehr verfügbar. Bearbeiten Sie diesen Inhaltsblock, um die Auswahl zu aktualisieren.';
 $string['linkedbadgeissued'] = 'Verliehen: {$a}';
 $string['linkedbadgeexpires'] = 'Gültig bis: {$a}';
+
+// Document-upload User tours.
+$string['uploadtour_create_name'] = 'Exaport: Ein Objekt zum Hochladen eines Dokuments erstellen';
+$string['uploadtour_create_description'] = 'Erklärt, warum Dokumente erst nach dem Speichern eines neuen Portfolio-Objekts hinzugefügt werden.';
+$string['uploadtour_title_title'] = 'Mit einem Titel beginnen';
+$string['uploadtour_title_content'] = 'Geben Sie Ihrem Objekt einen Titel und wählen Sie die Kategorie. Ihr Dokument fügen Sie nach dem Speichern des Objekts hinzu.';
+$string['uploadtour_save_title'] = 'Zuerst speichern, dann hochladen';
+$string['uploadtour_save_content'] = 'Wählen Sie "Speichern und weiter bearbeiten", um das Objekt zu erstellen und den Abschnitt Inhalt zu öffnen. Das Symbolbild dient als Vorschaubild; Dokumente fügen Sie unter Inhalt hinzu.';
+$string['uploadtour_content_name'] = 'Exaport: Dokumente unter Inhalt hinzufügen';
+$string['uploadtour_content_description'] = 'Zeigt, wo Dokumente in einem gespeicherten, bearbeitbaren Portfolio-Objekt hochgeladen werden.';
+$string['uploadtour_content_title'] = 'Hier werden Dokumente hinzugefügt';
+$string['uploadtour_content_content'] = 'Unter Inhalt fügen Sie diesem Objekt Dokumente, Texte und Links hinzu. Weitere Inhalte können Sie später beim Bearbeiten des Objekts ergänzen.';
+$string['uploadtour_file_title'] = 'Datei zum Hochladen eines Dokuments wählen';
+$string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und speichern Sie den Dateidialog. Inhalte werden sofort gespeichert; wählen Sie "Speichern und schließen", wenn Sie das Objekt fertig bearbeitet haben.';

@@ -19,6 +19,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_exaport';
 $plugin->release = '5.2';
-$plugin->version = 2026111301;
+$plugin->version = 2026111600;
 $plugin->requires = 2024100700; // moodle 4.5
 $plugin->maturity = MATURITY_STABLE;

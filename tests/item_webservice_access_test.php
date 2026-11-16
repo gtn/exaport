@@ -147,6 +147,7 @@ final class item_webservice_access_test extends \advanced_testcase {
         return ['item selection' => [false], 'borrowed item sharing' => [true]];
     }
 
+    /** @dataProvider collection_changes */
     #[DataProvider('collection_changes')]
     public function test_collection_file_access_follows_current_permissions(bool $borrowed): void {
         global $DB;

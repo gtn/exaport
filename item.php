@@ -38,8 +38,6 @@ $context = context_system::instance();
 require_login($courseid);
 require_capability('block/exaport:use', $context);
 
-// Finish pending registration before the header selects native tours, without waiting for cron.
-\block_exaport\local\user_tours::register();
 
 $url = '/blocks/exaport/item.php';
 $PAGE->set_url($url, ['courseid' => $courseid, 'id' => $id, 'action' => $action]);

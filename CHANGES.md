@@ -1,5 +1,5 @@
 ### v5.2 (2026111600) ###
-* Added native Moodle User tours explaining how to create an object and upload documents through Content. Tours are registered on installation and upgrade, with English and German text and administrator controls.
+* Added native Moodle User tours explaining how to create an object and upload documents through Content. Tours are registered on installation and upgrade, with English, German and Dutch text and administrator controls.
 * Clarified the permanent upload hint on the new-object form.
 
 ### v5.2 (2026111000) ###

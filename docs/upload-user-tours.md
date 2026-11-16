@@ -28,7 +28,7 @@ Moodle records completion separately for each guide and user. Completing the
 creation guide does not complete the content guide. Users can replay a guide
 with Moodle's **Reset user tour on this page** link. Administrators can reset a
 guide for all users when they want to explain a significant change again.
-English and German text is supplied through Exaport's language strings.
+English, German and Dutch text is supplied through Exaport's language strings.
 
 ## Registration and lifecycle
 

@@ -272,7 +272,7 @@ $string['steckbrief'] = 'Profile';
 $string['view_specialitem_personal'] = 'Personal information';
 $string['createpage'] = 'Drag and drop content blocks from the tabs below to create your page.';
 $string['chooselayout'] = 'Select how you would like the columns in your page to be laid out.';
-$string['viewcontent'] = "Content";
+$string['viewcontent'] = 'Inhoud';
 $string['viewlayout'] = "Layout";
 $string['viewshare'] = "Share";
 $string['viewlayoutgroup1'] = "1 column";
@@ -401,3 +401,22 @@ $string['views_skipped'] = 'Weergaven overgeslagen (bestaan al): {$a}';
 
 $string['settings_starter_view_templates'] = 'Starter View Templates';
 $string['settings_starter_view_templates_description'] = 'JSON array of starter collection templates. Each template must have "name" and the technical key "views" (array of collection objects with name, description, and share_to_teachers).';
+
+// Document-upload workflow.
+$string['saveitem'] = 'Opslaan en sluiten';
+$string['saveandkeepediting'] = 'Opslaan en verder bewerken';
+$string['contentaftersave'] = 'Om documenten te uploaden, kies je "Opslaan en verder bewerken". Kies vervolgens onder Inhoud eerst + en daarna Bestand.';
+
+// Document-upload User tours.
+$string['uploadtour_create_name'] = 'Exaport: Een object aanmaken om een document te uploaden';
+$string['uploadtour_create_description'] = 'Legt uit waarom documenten pas na het opslaan van een nieuw portfolio-object worden toegevoegd.';
+$string['uploadtour_title_title'] = 'Begin met een titel';
+$string['uploadtour_title_content'] = 'Geef je object een titel en kies de categorie. Je voegt je document toe nadat je het object hebt opgeslagen.';
+$string['uploadtour_save_title'] = 'Eerst opslaan, dan uploaden';
+$string['uploadtour_save_content'] = 'Kies "Opslaan en verder bewerken" om het object aan te maken en de sectie Inhoud te openen. Het afbeeldingsveld is bedoeld voor een miniatuur; documenten voeg je toe via Inhoud.';
+$string['uploadtour_content_name'] = 'Exaport: Documenten toevoegen via Inhoud';
+$string['uploadtour_content_description'] = 'Laat zien waar je documenten kunt uploaden in een opgeslagen portfolio-object dat je kunt bewerken.';
+$string['uploadtour_content_title'] = 'Hier voeg je je documenten toe';
+$string['uploadtour_content_content'] = 'Gebruik Inhoud om documenten, tekst en links aan dit object toe te voegen. Je kunt later meer inhoud toevoegen door het object te bewerken.';
+$string['uploadtour_file_title'] = 'Kies Bestand om een document te uploaden';
+$string['uploadtour_file_content'] = 'Kies + en vervolgens Bestand. Upload je document en sla de wijzigingen in het bestandsvenster op. De inhoud wordt direct opgeslagen; kies "Opslaan en sluiten" wanneer je klaar bent met het bewerken van het object.';

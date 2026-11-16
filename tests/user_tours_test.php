@@ -58,7 +58,7 @@ final class user_tours_test extends \advanced_testcase {
             $this->assertTrue($guide->is_enabled());
             $this->assertCount(2, $guide->get_steps());
             $this->assertSame(1, $guide->get_config('showtourwhen', 1));
-            $this->assertSame(1, $guide->get_config('block_exaport_tour_version'));
+            $this->assertSame(2, $guide->get_config('block_exaport_tour_version'));
         }
 
         $registered = $DB->get_records('tool_usertours_tours');
@@ -99,7 +99,7 @@ final class user_tours_test extends \advanced_testcase {
         // Model an earlier release containing just the creation guide at its current revision.
         $json = file_get_contents(__DIR__ . '/../db/usertours/create_item.json');
         $existing = \tool_usertours\manager::import_tour_from_json($json);
-        $existing->set_config('block_exaport_tour_version', 1);
+        $existing->set_config('block_exaport_tour_version', 2);
         $existing->set_config('majorupdatetime', time() - 60)->persist();
         $existing->mark_user_completed();
         set_config('usertourssignature', 'earlier-release', 'block_exaport');
@@ -117,7 +117,7 @@ final class user_tours_test extends \advanced_testcase {
             get_user_preferences(\tool_usertours\tour::TOUR_LAST_COMPLETED_BY_USER . $existing->get_id()));
         $this->assertFalse($guides['upload-create']->should_show_for_user());
         $this->assertTrue($guides['upload-content']->should_show_for_user());
-        $this->assertSame(1, $guides['upload-content']->get_config('block_exaport_tour_version'));
+        $this->assertSame(2, $guides['upload-content']->get_config('block_exaport_tour_version'));
     }
 
     public function test_revision_change_replaces_only_the_outdated_guide_and_resets_its_users(): void {
@@ -140,7 +140,7 @@ final class user_tours_test extends \advanced_testcase {
             }
         }
         $outdated = $original['upload-content'];
-        $outdated->set_config('block_exaport_tour_version', 0);
+        $outdated->set_config('block_exaport_tour_version', 1);
         $outdated->set_pathmatch('/outdated/page.php')->set_enabled(false)->persist();
         $steps = $outdated->get_steps();
         reset($steps)->set_content('Outdated instructions')->persist();
@@ -164,7 +164,7 @@ final class user_tours_test extends \advanced_testcase {
         $definition = json_decode(file_get_contents(__DIR__ . '/../db/usertours/add_file.json'));
         $this->assertSame($definition->pathmatch, $replacement->get_pathmatch());
         $this->assertTrue($replacement->is_enabled());
-        $this->assertSame(1, $replacement->get_config('block_exaport_tour_version'));
+        $this->assertSame(2, $replacement->get_config('block_exaport_tour_version'));
         $steps = $replacement->get_steps();
         $this->assertSame($definition->steps[0]->content, reset($steps)->get_content());
         $this->assertSame($unchanged->get_id(), $updated['upload-create']->get_id());
@@ -185,12 +185,79 @@ final class user_tours_test extends \advanced_testcase {
 
         user_tours::register();
         $guide = $this->guides()['upload-create'];
-        $guide->set_config('block_exaport_tour_version', 2)->persist();
+        $guide->set_config('block_exaport_tour_version', 3)->persist();
         $record = $DB->get_record('tool_usertours_tours', ['id' => $guide->get_id()]);
         unset_config('usertourssignature', 'block_exaport');
         user_tours::register();
         $this->assertEquals($record, $DB->get_record('tool_usertours_tours', ['id' => $guide->get_id()]));
         $this->assertCount(2, $this->guides());
+    }
+
+    public function test_completed_original_workflow_guides_are_replaced_for_every_user(): void {
+        global $CFG, $DB;
+
+        $custom = $this->custom_guide();
+        $custom->set_config('majorupdatetime', time() - 60)->persist();
+        $old = [];
+        foreach (['upload-create' => 'create_item.json', 'upload-content' => 'add_file.json'] as $identity => $file) {
+            $guide = \tool_usertours\manager::import_tour_from_json(
+                file_get_contents(__DIR__ . '/../db/usertours/' . $file));
+            $guide->set_config('block_exaport_tour', $identity);
+            $guide->set_config('block_exaport_tour_version', 1);
+            $guide->set_config('majorupdatetime', time() - 60)->persist();
+            $old[$identity] = $guide;
+        }
+        $users = [$this->getDataGenerator()->create_user(), $this->getDataGenerator()->create_user()];
+        foreach ($users as $user) {
+            $this->setUser($user);
+            foreach (array_merge([$custom], array_values($old)) as $guide) {
+                $guide->mark_user_completed();
+                $this->assertFalse($guide->should_show_for_user());
+            }
+        }
+        $customkey = \tool_usertours\tour::TOUR_LAST_COMPLETED_BY_USER . $custom->get_id();
+        $customcompletions = $DB->get_records('user_preferences', ['name' => $customkey]);
+        set_config('usertourssignature', 'original-upload-workflow', 'block_exaport');
+        set_config('version', 2026111600, 'block_exaport');
+        require_once(__DIR__ . '/../db/upgrade.php');
+        require_once($CFG->libdir . '/upgradelib.php');
+        $this->assertTrue(xmldb_block_exaport_upgrade(2026111600));
+        $this->assertCount(1, \core\task\manager::get_adhoc_tasks(task\register_user_tours::class));
+        $this->assertTrue($DB->record_exists('tool_usertours_tours', ['id' => $old['upload-create']->get_id()]),
+            'The upgrade step must leave tour APIs to the deferred task.');
+        $this->runAdhocTasks(task\register_user_tours::class);
+        $updated = $this->guides();
+        foreach ($updated as $identity => $guide) {
+            $this->assertNotSame($old[$identity]->get_id(), $guide->get_id());
+            $this->assertSame(2, $guide->get_config('block_exaport_tour_version'));
+            $this->assertFalse($DB->record_exists('tool_usertours_tours', ['id' => $old[$identity]->get_id()]));
+            $this->assertFalse($DB->record_exists('user_preferences', [
+                'name' => \tool_usertours\tour::TOUR_LAST_COMPLETED_BY_USER . $old[$identity]->get_id(),
+            ]));
+        }
+        foreach ($users as $user) {
+            $this->setUser($user);
+            foreach ($updated as $guide) {
+                $this->assertTrue($guide->should_show_for_user());
+                // Completion occurs after the introduction has been displayed to the user.
+                $guide->set_config('majorupdatetime', time() - 60)->persist();
+                $guide->mark_user_completed();
+                $this->assertFalse($guide->should_show_for_user());
+            }
+            $this->assertFalse($custom->should_show_for_user());
+        }
+        $this->assertEquals($customcompletions, $DB->get_records('user_preferences', ['name' => $customkey]));
+        $ids = array_map(static fn($guide) => $guide->get_id(), $updated);
+        user_tours::register();
+        $this->assertSame($ids, array_map(static fn($guide) => $guide->get_id(), $this->guides()));
+    }
+
+    public function test_creation_guide_points_to_uploads_before_the_main_save(): void {
+        $definition = json_decode(file_get_contents(__DIR__ . '/../db/usertours/create_item.json'));
+        $this->assertSame('#exaport #id_itemcontent', $definition->steps[0]->targetvalue);
+        $this->assertSame('#exaport [name="submitbutton"]', $definition->steps[1]->targetvalue);
+        $this->assertSame(['#exaport button.exaport-item-content-add-button'],
+            json_decode($definition->configdata, true)['filtervalues']['cssselector']);
     }
 
     public function test_registration_waits_for_native_tool_installation(): void {
@@ -232,7 +299,7 @@ final class user_tours_test extends \advanced_testcase {
         $this->assertCount(1, \core\task\manager::get_adhoc_tasks(task\register_user_tours::class));
         $this->runAdhocTasks(task\register_user_tours::class);
         $this->assertCount(2, $this->guides());
-        $this->assertSame('2026111600', get_config('block_exaport', 'version'));
+        $this->assertSame('2026111601', get_config('block_exaport', 'version'));
     }
 
     public function test_queued_registration_task_is_idempotent(): void {
@@ -485,7 +552,7 @@ final class user_tours_test extends \advanced_testcase {
         $this->assertNotSame('earlier-release', get_config('block_exaport', 'usertourssignature'));
         $this->assertCount(2, $this->guides());
         foreach ($this->guides() as $guide) {
-            $this->assertSame(1, $guide->get_config('block_exaport_tour_version'));
+            $this->assertSame(2, $guide->get_config('block_exaport_tour_version'));
         }
     }
 

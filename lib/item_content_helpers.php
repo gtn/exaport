@@ -791,15 +791,17 @@ function block_exaport_item_content_file_options(?stdClass $item = null, ?stdCla
  * Owners already over quota may retain or reduce their usage, but not increase it.
  * This is an upload-form boundary; migration and copy helpers do not call it.
  *
- * @param stdClass $item Trusted destination item.
+ * @param stdClass|null $item Trusted destination item, or null while creating an item.
  * @param stdClass|null $block Trusted existing file block, or null for an addition.
  * @param int $draftitemid Submitted file-manager draft ID.
+ * @param bool $checkquota Check this one block against saved usage; pending forms defer to the aggregate check.
  * @return array|null Error code, component and string arguments, or null when valid.
  */
-function block_exaport_item_content_file_submission_error(stdClass $item, ?stdClass $block, int $draftitemid): ?array {
+function block_exaport_item_content_file_submission_error(?stdClass $item, ?stdClass $block, int $draftitemid,
+        bool $checkquota = true): ?array {
     global $CFG, $DB, $USER;
 
-    if ($block && ((int)$block->itemid !== (int)$item->id || $block->type !== 'file')) {
+    if ($block && (!$item || (int)$block->itemid !== (int)$item->id || $block->type !== 'file')) {
         throw new invalid_parameter_exception('File block does not belong to this item');
     }
     $draftfiles = $draftitemid ? get_file_storage()->get_area_files(
@@ -812,7 +814,13 @@ function block_exaport_item_content_file_submission_error(stdClass $item, ?stdCl
         // file_postupdate_standard_filemanager() leaves the existing area unchanged for draft ID zero.
         return null;
     }
-    $existingfiles = $block ? block_exaport_get_item_content_files((int)$item->userid, (int)$block->id) : [];
+    $ownerid = (int)($item->userid ?? $USER->id);
+    $existingfiles = $block ? block_exaport_get_item_content_files($ownerid, (int)$block->id) : [];
+    if ($existingfiles && !$draftfiles && !get_file_storage()->get_file(
+            context_user::instance((int)$USER->id)->id, 'user', 'draft', $draftitemid, '/', '.')) {
+        // An expired or foreign draft is not an intentional removal of every saved file.
+        return ['invaliddata', 'error', null];
+    }
     $existingbytes = 0;
     $retained = [];
     foreach ($existingfiles as $file) {
@@ -820,23 +828,33 @@ function block_exaport_item_content_file_submission_error(stdClass $item, ?stdCl
         $hash = $file->get_contenthash();
         $retained[$hash] = ($retained[$hash] ?? 0) + 1;
     }
-    $draftbytes = array_sum(array_map(static function(stored_file $file): int {
-        return (int)$file->get_filesize();
-    }, $draftfiles));
-    $ownercontext = context_user::instance((int)$item->userid);
-    $currentbytes = (int)$DB->get_field_sql(
-        'SELECT COALESCE(SUM(filesize), 0) FROM {files} WHERE contextid = ? AND component = ? AND filename <> ?',
-        [$ownercontext->id, 'block_exaport', '.']
-    );
-    $quota = (int)($CFG->block_exaport_userquota ?? 104857600);
-    if ($currentbytes - $existingbytes + $draftbytes > max($quota, $currentbytes)) {
-        return ['userquotalimit', 'error', null];
+    $ownercontext = context_user::instance($ownerid);
+    // A pending modal cannot know which other blocks the main form will replace or remove.
+    // Its caller validates the complete final collection before committing the item.
+    if ($checkquota) {
+        $draftbytes = array_sum(array_map(static function(stored_file $file): int {
+            return (int)$file->get_filesize();
+        }, $draftfiles));
+        $currentbytes = (int)$DB->get_field_sql(
+            'SELECT COALESCE(SUM(filesize), 0) FROM {files} WHERE contextid = ? AND component = ? AND filename <> ?',
+            [$ownercontext->id, 'block_exaport', '.']
+        );
+        $quota = (int)($CFG->block_exaport_userquota ?? 104857600);
+        if ($currentbytes - $existingbytes + $draftbytes > max($quota, $currentbytes)) {
+            return ['userquotalimit', 'error', null];
+        }
     }
 
     // Core's draft saver silently drops oversized files, including grandfathered files.
     // Validate new/replaced bytes here so saving can retain old bytes without that filter.
-    $options = block_exaport_item_content_file_options();
+    $options = block_exaport_item_content_file_options($item, $block);
+    if (count($draftfiles) > $options['maxfiles']) {
+        return ['maxfilesreached', 'moodle', $options['maxfiles']];
+    }
     foreach ($draftfiles as $file) {
+        if (!$options['subdirs'] && $file->get_filepath() !== '/') {
+            return ['invaliddata', 'error', null];
+        }
         $hash = $file->get_contenthash();
         if (!empty($retained[$hash])) {
             $retained[$hash]--;
@@ -853,8 +871,9 @@ function block_exaport_item_content_file_submission_error(stdClass $item, ?stdCl
 }
 
 /** Recheck upload validation immediately before any block or file persistence. */
-function block_exaport_check_item_content_file_submission(stdClass $item, ?stdClass $block, int $draftitemid): void {
-    if ($error = block_exaport_item_content_file_submission_error($item, $block, $draftitemid)) {
+function block_exaport_check_item_content_file_submission(?stdClass $item, ?stdClass $block, int $draftitemid,
+        bool $checkquota = true): void {
+    if ($error = block_exaport_item_content_file_submission_error($item, $block, $draftitemid, $checkquota)) {
         throw new moodle_exception($error[0], $error[1], '', $error[2]);
     }
 }

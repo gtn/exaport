@@ -1,3 +1,7 @@
+### v5.2 (2026111601) ###
+* Content and competency changes now remain pending until the main item Save, including when creating an item.
+* Revised upload tours explain the new workflow and are shown again to users who completed the original guides.
+
 ### v5.2 (2026111600) ###
 * Added native Moodle User tours explaining how to create an item and upload documents through Content.
 

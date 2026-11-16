@@ -92,13 +92,13 @@ function block_exaport_validate_competenceids(array $competenceids, array $avail
  * Keep the local allow-list check for older Exacomp versions, then apply
  * Exacomp's access policy when its descriptor check is available.
  *
- * @param stdClass $item Authorized item.
+ * @param stdClass|null $item Authorized saved item, or null for a new item.
  * @param int[] $competenceids Parsed descriptor ids.
  * @param array|null $tree Current user's competence tree when already loaded.
  * @return int[] Validated descriptor ids.
  */
 function block_exaport_validate_item_competenceids(
-    stdClass $item,
+    ?stdClass $item,
     array $competenceids,
     ?array $tree = null
 ): array {
@@ -107,11 +107,11 @@ function block_exaport_validate_item_competenceids(
     $tree = $tree ?? \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
     $availableids = array_merge(
         block_exaport_competence_tree_descriptorids($tree),
-        $DB->get_fieldset_select(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, 'compid',
-            'activityid = ? AND eportfolioitem = 1', [(int)$item->id])
+        $item ? $DB->get_fieldset_select(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, 'compid',
+            'activityid = ? AND eportfolioitem = 1', [(int)$item->id]) : []
     );
     $competenceids = block_exaport_validate_competenceids($competenceids, $availableids);
-    \block_exaport\exacomp_helper::require_can_access_descriptors($competenceids, (int)$item->id);
+    \block_exaport\exacomp_helper::require_can_access_descriptors($competenceids, (int)($item->id ?? 0));
 
     return $competenceids;
 }

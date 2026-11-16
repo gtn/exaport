@@ -5,14 +5,14 @@
   "enabled": 1,
   "endtourlabel": "",
   "displaystepnumbers": true,
-  "configdata": "{\"placement\":\"bottom\",\"orphan\":false,\"backdrop\":true,\"reflex\":false,\"filtervalues\":{\"cssselector\":[\"#exaport [name=\\\"saveandkeepediting\\\"]\"]},\"block_exaport_tour\":\"upload-create\"}",
+  "configdata": "{\"placement\":\"bottom\",\"orphan\":false,\"backdrop\":true,\"reflex\":false,\"filtervalues\":{\"cssselector\":[\"#exaport button.exaport-item-content-add-button\"]},\"block_exaport_tour\":\"upload-create\"}",
   "steps": [
     {
       "title": "uploadtour_title_title,block_exaport",
       "content": "uploadtour_title_content,block_exaport",
       "contentformat": 1,
       "targettype": 0,
-      "targetvalue": "#exaport [name=\"name\"]",
+      "targetvalue": "#exaport #id_itemcontent",
       "sortorder": 0,
       "configdata": "{}"
     },
@@ -21,7 +21,7 @@
       "content": "uploadtour_save_content,block_exaport",
       "contentformat": 1,
       "targettype": 0,
-      "targetvalue": "#exaport [name=\"saveandkeepediting\"]",
+      "targetvalue": "#exaport [name=\"submitbutton\"]",
       "sortorder": 1,
       "configdata": "{}"
     }

@@ -4,12 +4,16 @@ Exaport uses Moodle's native User tours tool to explain the document-upload
 workflow. Both guides have two steps and use Moodle's native tour navigation and
 End tour controls. They do not submit forms or upload files for the user.
 
-* **Create an object to upload a document** appears on the add-object page. It
-  points to the title and **Save and keep editing**, explaining that documents
-  are added after the object has been saved.
+* **Add content before saving** appears on the add-object page. It announces the
+  changed upload workflow, points to **Content** and **Save and close**, and explains
+  that documents can now be uploaded before the first save.
 * **Add documents through Content** appears on the edit-object page when the
   Content add button is available. It points to Content and the **+** button,
-  explaining how to choose **File** and save the upload dialog.
+  explaining how to choose **File**, apply the upload dialog, then save the item.
+
+Both guides explain that **Apply** updates the form while the main **Save** saves
+the item, content and competencies together. Cancelling the main form discards
+its pending changes. The icon image field remains a thumbnail field.
 
 The guides apply across courses, including creation in Shared Categories. The
 second guide is excluded when an object cannot be edited. Assignment imports,
@@ -56,7 +60,9 @@ and independent revision. Exaport imports definitions through the public
 Each installed guide stores `block_exaport_tour` and
 `block_exaport_tour_version` in its existing `tool_usertours_tours.configdata`
 field. There are no per-tour entries in `config_plugins` and no custom completion
-table. Moodle owns the per-user completion and replay preferences.
+table. Moodle owns the per-user completion and replay preferences. Both guides
+are at revision 2 because users who completed the original two-step or
+immediate-save workflow must see the new instructions again.
 
 Synchronisation follows Moodle's own shipped-tour pattern:
 
@@ -91,8 +97,8 @@ increase only that guide's `version`. For example:
 
 ```php
 private const TOURS = [
-    'upload-create' => ['file' => 'create_item.json', 'version' => 1],
-    'upload-content' => ['file' => 'add_file.json', 'version' => 2],
+    'upload-create' => ['file' => 'create_item.json', 'version' => 2],
+    'upload-content' => ['file' => 'add_file.json', 'version' => 3],
 ];
 ```
 

@@ -16,6 +16,7 @@ use context;
 use context_system;
 use core_form\dynamic_form;
 use moodle_url;
+use block_exaport\local\item_editor;
 
 /** Moodle dynamic form for replacing an item's competence selection. */
 class item_competences extends dynamic_form {
@@ -31,11 +32,23 @@ class item_competences extends dynamic_form {
         $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'itemid', $itemid);
         $mform->setType('itemid', PARAM_INT);
+        $mform->addElement('hidden', 'pending', $this->is_pending() ? 1 : 0);
+        $mform->setType('pending', PARAM_BOOL);
+        $mform->addElement('hidden', 'editorbaseline', $this->optional_param('editorbaseline', '', PARAM_RAW));
+        $mform->setType('editorbaseline', PARAM_RAW);
+        if ($this->is_pending()) {
+            $mform->addElement('hidden', 'selectedids', $this->optional_param('selectedids', '', PARAM_RAW_TRIMMED));
+            $mform->setType('selectedids', PARAM_RAW_TRIMMED);
+        }
         // One registered field bridges the custom checkboxes into the dynamic-form submission.
         $mform->addElement('hidden', 'competenceids', '');
         $mform->setType('competenceids', PARAM_RAW_TRIMMED);
 
-        $item = (object)['id' => $itemid, 'compids_array' => $this->get_selected_ids($itemid)];
+        $item = (object)['id' => $itemid, 'compids_array' => $this->selection_for_picker($itemid)];
+        if ($this->is_pending()) {
+            // Former assignments remain available to reselect until the main form saves.
+            $item->availablecompids_array = $this->get_selected_ids($itemid);
+        }
         $renderable = new \block_exaport\output\item_competences($item, true);
         $data = $renderable->export_for_template($OUTPUT);
         $mform->addElement('static', 'competencepicker', '', $OUTPUT->render_from_template(
@@ -46,8 +59,12 @@ class item_competences extends dynamic_form {
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
         try {
-            $item = block_exaport_get_editable_competence_item(
-                (int)$data['itemid'], (int)$data['courseid']);
+            $item = $this->is_pending()
+                ? item_editor::context((int)$data['itemid'], (int)$data['courseid'])
+                : block_exaport_get_editable_competence_item((int)$data['itemid'], (int)$data['courseid']);
+            if ($this->is_pending()) {
+                item_editor::read_baseline($data['editorbaseline'] ?? '', (int)$data['itemid'], (int)$data['courseid']);
+            }
             $ids = block_exaport_parse_competenceids($data['competenceids'] ?? '');
             block_exaport_validate_item_competenceids($item, $ids);
         } catch (\invalid_parameter_exception | \block_exacomp_permission_exception $exception) {
@@ -70,6 +87,12 @@ class item_competences extends dynamic_form {
         if (!block_exaport_check_competence_interaction()) {
             throw new \moodle_exception('nopermissions', 'error');
         }
+        if ($this->is_pending()) {
+            $itemid = $this->optional_param('itemid', 0, PARAM_INT);
+            item_editor::context($itemid, $courseid);
+            item_editor::read_baseline($this->optional_param('editorbaseline', '', PARAM_RAW), $itemid, $courseid);
+            return;
+        }
         block_exaport_get_editable_competence_item(
             $this->optional_param('itemid', 0, PARAM_INT), $courseid);
     }
@@ -78,7 +101,7 @@ class item_competences extends dynamic_form {
         return new moodle_url('/blocks/exaport/item.php', [
             'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
             'id' => $this->optional_param('itemid', 0, PARAM_INT),
-            'action' => 'edit',
+            'action' => $this->optional_param('itemid', 0, PARAM_INT) ? 'edit' : 'add',
         ]);
     }
 
@@ -88,28 +111,73 @@ class item_competences extends dynamic_form {
         $this->set_data((object)[
             'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
             'itemid' => $itemid,
-            'competenceids' => implode(',', $this->get_selected_ids($itemid)),
+            'competenceids' => implode(',', $this->selection_for_picker($itemid)),
+            'editorbaseline' => $this->optional_param('editorbaseline', '', PARAM_RAW),
+            'selectedids' => $this->optional_param('selectedids', '', PARAM_RAW_TRIMMED),
         ]);
     }
 
-    /** Persist the complete selection and return the server-rendered refreshed summary. */
+    /** Apply the selection to its main form, or save an independent picker submission. */
     public function process_dynamic_submission(): array {
-        global $OUTPUT, $USER;
+        global $DB, $OUTPUT, $USER;
 
         require_sesskey();
         $data = $this->get_data();
-        $item = block_exaport_get_editable_competence_item((int)$data->itemid, (int)$data->courseid);
+        $item = $this->is_pending()
+            ? item_editor::context((int)$data->itemid, (int)$data->courseid)
+            : block_exaport_get_editable_competence_item((int)$data->itemid, (int)$data->courseid);
+        if ($this->is_pending()) {
+            item_editor::read_baseline($data->editorbaseline ?? '', (int)$data->itemid, (int)$data->courseid);
+        }
         $ids = block_exaport_parse_competenceids($data->competenceids ?? '');
         $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
         $ids = block_exaport_validate_item_competenceids($item, $ids, $tree);
-        block_exaport_sync_item_competences($item, $ids);
-        $item->compids_array = $this->get_selected_ids((int)$item->id);
+        if (!$this->is_pending()) {
+            $transaction = $DB->start_delegated_transaction();
+            try {
+                item_editor::lock_item((int)$item->id);
+                $item = block_exaport_get_editable_competence_item((int)$data->itemid, (int)$data->courseid);
+                $ids = block_exaport_validate_item_competenceids($item, $ids, $tree);
+                block_exaport_sync_item_competences($item, $ids);
+                $transaction->allow_commit();
+            } catch (\Throwable $exception) {
+                $transaction->rollback($exception);
+            }
+        }
+        // An unsaved selection can use the existing renderable without a placeholder DB item.
+        $item = $item ? clone $item : (object)['id' => 0];
+        $item->compids_array = $ids;
 
         $renderable = new \block_exaport\output\item_competences($item, true);
-        return ['content' => $OUTPUT->render_from_template(
+        return ['competenceids' => $ids, 'content' => $OUTPUT->render_from_template(
             'block_exaport/item_competence_summary',
             $renderable->export_summary_for_template($tree)
         )];
+    }
+
+    /** A missing baseline on a pending Apply must never demote it to an independent Save. */
+    private function is_pending(): bool {
+        return (bool)$this->optional_param('pending', 0, PARAM_BOOL) ||
+            $this->optional_param('editorbaseline', '', PARAM_RAW) !== '' ||
+            $this->optional_param('selectedids', null, PARAM_RAW_TRIMMED) !== null;
+    }
+
+    /** Read accepted pending values on opening, and actual submitted values on validation errors. */
+    private function selection_for_picker(int $itemid): array {
+        if (!$this->is_pending()) {
+            return $this->get_selected_ids($itemid);
+        }
+        // definition() runs before Moodle marks the form as submitted. The registered
+        // field's presence distinguishes submitted values from initial launcher arguments.
+        $submitted = $this->optional_param('competenceids', null, PARAM_RAW_TRIMMED);
+        $raw = $submitted !== null ? $submitted : $this->optional_param('selectedids', '', PARAM_RAW_TRIMMED);
+        try {
+            return block_exaport_parse_competenceids($raw);
+        } catch (\invalid_parameter_exception $exception) {
+            // Keep the submitted field intact so validation reports the error without exposing
+            // arbitrary descriptor labels in the custom picker.
+            return [];
+        }
     }
 
     /** @return int[] */

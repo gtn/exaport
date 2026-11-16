@@ -776,8 +776,8 @@ return [
         'Save and keep editing',
     ],
     'contentaftersave' => [
-        'Um Dokumente hochzuladen, wählen Sie "Speichern und weiter bearbeiten". Wählen Sie dann unter Inhalt zuerst + und anschließend Datei.',
-        'To upload documents, choose "Save and keep editing". Then, in Content, choose + and File.',
+        'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie das Objekt, um alle Änderungen gemeinsam zu speichern.',
+        'Add documents through Content: choose +, then File. Apply updates the form; save the item to save all changes together.',
     ],
     'disableditemwriteapi' => [
         'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.',
@@ -3825,6 +3825,10 @@ return [
         null,
         'Delete this content block? Its files will also be permanently deleted.',
     ],
+    'deletecontentblockpendingconfirm' => [
+        'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern des Objekts wirksam. Abbrechen im Objektformular verwirft die Entfernung.',
+        'Remove this content block? The removal takes effect when you save the item. Cancel on the item form discards the removal.',
+    ],
     'privacy:metadata:block_exaportitemblock' => [
         'Geordnete Inhalte eines Portfolioeintrags.',
         'Ordered content stored in a portfolio item.',
@@ -4051,36 +4055,67 @@ return [
     'linkedbadgeexpires' => ['Gültig bis: {$a}', 'Expires: {$a}'],
     // Document-upload User tours.
     'uploadtour_create_name' => [
-        'Exaport: Ein Objekt zum Hochladen eines Dokuments erstellen',
-        'Exaport: Create an object to upload a document',
+        'Exaport: Inhalte vor dem Speichern hinzufügen',
+        'Exaport: Add content before saving',
     ],
     'uploadtour_create_description' => [
-        'Erklärt, warum Dokumente erst nach dem Speichern eines neuen Portfolio-Objekts hinzugefügt werden.',
-        'Explains why documents are added after saving a new portfolio object.',
+        'Erklärt, wie Inhalte vor dem Speichern eines neuen Portfolio-Objekts hochgeladen werden.',
+        'Explains how to upload content before saving a new portfolio item.',
     ],
-    'uploadtour_title_title' => ['Mit einem Titel beginnen', 'Start with a title'],
+    'uploadtour_title_title' => [
+        'Das Hochladen hat sich geändert',
+        'Uploading has changed',
+    ],
     'uploadtour_title_content' => [
-        'Geben Sie Ihrem Objekt einen Titel und wählen Sie die Kategorie. Ihr Dokument fügen Sie nach dem Speichern des Objekts hinzu.',
-        'Give your object a title and select its category. You will add your document after saving the object.',
+        'Sie können Dokumente jetzt vor dem Speichern des Objekts hinzufügen. Wählen Sie unter Inhalt zuerst + und anschließend Datei. Das Symbolbild dient nur als Vorschaubild.',
+        'You can now add documents before saving the item. In Content, choose + and File. The icon image field is only for a thumbnail.',
     ],
-    'uploadtour_save_title' => ['Zuerst speichern, dann hochladen', 'Save first, then upload'],
+    'uploadtour_save_title' => [
+        'Das gesamte Objekt speichern',
+        'Save the whole item',
+    ],
     'uploadtour_save_content' => [
-        'Wählen Sie "Speichern und weiter bearbeiten", um das Objekt zu erstellen und den Abschnitt Inhalt zu öffnen. Das Symbolbild dient als Vorschaubild; Dokumente fügen Sie unter Inhalt hinzu.',
-        'Choose "Save and keep editing" to create the object and open its Content section. The icon image field is for a thumbnail; add documents through Content.',
+        'Wählen Sie in jedem Dialog Übernehmen, um dieses Formular zu aktualisieren. Speichern und schließen speichert das Objekt mit allen Inhalten und Kompetenzen gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
+        'Choose Apply in each dialog to update this form. Save and close saves the item and all its content and competencies together. Cancel discards pending changes.',
     ],
-    'uploadtour_content_name' => ['Exaport: Dokumente unter Inhalt hinzufügen', 'Exaport: Add documents through Content'],
+    'uploadtour_content_name' => [
+        'Exaport: Dokumente unter Inhalt hinzufügen',
+        'Exaport: Add documents through Content',
+    ],
     'uploadtour_content_description' => [
-        'Zeigt, wo Dokumente in einem gespeicherten, bearbeitbaren Portfolio-Objekt hochgeladen werden.',
-        'Shows where to upload documents in a saved, editable portfolio object.',
+        'Zeigt, wo Dokumente hochgeladen und noch nicht gespeicherte Inhaltsänderungen gespeichert werden.',
+        'Shows where to upload documents and how to save pending content changes.',
     ],
-    'uploadtour_content_title' => ['Hier werden Dokumente hinzugefügt', 'Your documents go here'],
+    'uploadtour_content_title' => [
+        'Inhalt wird mit dem Objekt gespeichert',
+        'Content is saved with the item',
+    ],
     'uploadtour_content_content' => [
-        'Unter Inhalt fügen Sie diesem Objekt Dokumente, Texte und Links hinzu. Weitere Inhalte können Sie später beim Bearbeiten des Objekts ergänzen.',
-        'Use Content to add documents, text and links to this object. You can add more content later by editing the object.',
+        'Verwenden Sie Inhalt für Dokumente, Texte und Links. Änderungen werden erst mit dem Objekt gespeichert; Abbrechen verwirft daher auch Inhaltsänderungen.',
+        'Use Content for documents, text and links. Changes stay pending until you save the item, so Cancel also discards content changes.',
     ],
-    'uploadtour_file_title' => ['Datei zum Hochladen eines Dokuments wählen', 'Choose File to upload a document'],
+    'uploadtour_file_title' => [
+        'Datei zum Hochladen eines Dokuments wählen',
+        'Choose File to upload a document',
+    ],
     'uploadtour_file_content' => [
-        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und speichern Sie den Dateidialog. Inhalte werden sofort gespeichert; wählen Sie "Speichern und schließen", wenn Sie das Objekt fertig bearbeitet haben.',
-        'Choose +, then File. Upload your document and save the file dialog. Content is saved immediately; use "Save and close" when you have finished editing the object.',
+        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen. Sie können den Block erneut öffnen und bearbeiten. Speichern und schließen speichert alle Änderungen gemeinsam.',
+        'Choose +, then File. Upload your document and choose Apply. You can reopen the block to edit it. Save and close saves all your changes together.',
+    ],
+    'itemeditorinvalid' => [
+        'Einige Änderungen am Objekt fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.',
+        'Some item changes are missing or invalid. Your changes have not been saved.',
+    ],
+    'itemeditorconflict' => [
+        'Dieses Objekt wurde während Ihrer Bearbeitung geändert. Ihre noch nicht gespeicherten Änderungen bleiben erhalten. Prüfen Sie das aktuelle Objekt in einem anderen Tab, bevor Sie diesen Editor neu laden.',
+        'This item changed while you were editing it. Your pending changes have been kept. Review the current item in another tab before reloading this editor.',
+    ],
+    'itemeditorpendinghint' => [
+        'Änderungen an Inhalt und Kompetenzen werden mit diesem Objekt gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
+        'Content and competency changes are saved with this item. Apply updates the form; Save saves everything together. Cancel discards pending changes.',
+    ],
+    'itemeditorlocked' => [
+        'Dieses Objekt kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.',
+        'This item can no longer be edited. Your pending changes are shown below, but nothing has been saved.',
     ],
 ];

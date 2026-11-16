@@ -125,9 +125,7 @@ class item_content_blocks implements renderable, templatable {
                 'preview' => $this->build_preview($block, $type),
             ];
             if (in_array($type, \block_exaport\local\item_linked_content::TYPES, true)) {
-                $row['content'] = \block_exaport\local\item_linked_content::render(
-                    $block, $this->ownerid, (string)($this->access ?? '')
-                );
+                $row['content'] = $this->format_linked_content($block);
                 $row['preview'] = '';
                 if ($row['content'] === '' && $this->showaddbutton && $this->addurl !== null) {
                     $row['preview'] = get_string('linkedcontentmissing', 'block_exaport');
@@ -208,7 +206,7 @@ class item_content_blocks implements renderable, templatable {
      * @return array
      */
     private function get_block_files(\stdClass $block, $output): array {
-        $storedfiles = \block_exaport_get_item_content_files($this->ownerid, (int)$block->id);
+        $storedfiles = $this->load_block_files($block);
         $files = [];
         foreach ($storedfiles as $file) {
             $url = $this->get_file_url($block, $file);
@@ -228,6 +226,18 @@ class item_content_blocks implements renderable, templatable {
             ];
         }
         return $files;
+    }
+
+    /** Load saved files; the pending editor supplies its owned draft area instead. */
+    protected function load_block_files(\stdClass $block): array {
+        return \block_exaport_get_item_content_files($this->ownerid, (int)$block->id);
+    }
+
+    /** Resolve linked values at display time, preserving their live-source behavior. */
+    protected function format_linked_content(\stdClass $block): string {
+        return \block_exaport\local\item_linked_content::render(
+            $block, $this->ownerid, (string)($this->access ?? '')
+        );
     }
 
     /**
@@ -278,7 +288,7 @@ class item_content_blocks implements renderable, templatable {
      * @param \stored_file $file Stored file.
      * @return string
      */
-    private function get_file_url(\stdClass $block, \stored_file $file): string {
+    protected function get_file_url(\stdClass $block, \stored_file $file): string {
         return \block_exaport_get_item_content_file_url(
             (int)$block->itemid,
             (int)$block->id,
@@ -388,7 +398,7 @@ class item_content_blocks implements renderable, templatable {
      * @param \stdClass $block
      * @return string
      */
-    private function format_content(\stdClass $block): string {
+    protected function format_content(\stdClass $block): string {
         $content = trim((string)($block->content ?? ''));
         if ($content === '') {
             return '';

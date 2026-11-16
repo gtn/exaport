@@ -6,6 +6,7 @@ defined('MOODLE_INTERNAL') || die();
 /** Exaport is standalone, but an existing Exacomp must understand structured content. */
 function xmldb_block_exaport_install() {
     \block_exaport\local\exacomp_compatibility::require_compatible_code();
+    \block_exaport\local\upload_tours::register();
 }
 
 /** Recheck after an installation was interrupted by the compatibility guard. */

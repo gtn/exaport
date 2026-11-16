@@ -38,6 +38,10 @@ $context = context_system::instance();
 require_login($courseid);
 require_capability('block/exaport:use', $context);
 
+// On a fresh Moodle install, the User tours tool is installed after blocks.
+// Finish deferred registration before this page's header bootstraps native tours.
+\block_exaport\local\upload_tours::register();
+
 $url = '/blocks/exaport/item.php';
 $PAGE->set_url($url, ['courseid' => $courseid, 'id' => $id, 'action' => $action]);
 

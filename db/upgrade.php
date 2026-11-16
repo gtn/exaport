@@ -1633,5 +1633,10 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026110502, 'exaport');
     }
 
+    if ($oldversion < 2026111600) {
+        \block_exaport\local\upload_tours::register();
+        upgrade_block_savepoint(true, 2026111600, 'exaport');
+    }
+
     return $result;
 }
